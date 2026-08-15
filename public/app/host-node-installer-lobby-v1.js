@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'host-node-installer-lobby-v4-citizen-patron-capacity';
+const REVISION = 'host-node-installer-lobby-v5-guild-terminology';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const HOST_SELECTION_KEY = 'civweave.host-node.selection.v1';
 const STEWARD_KEY = 'civweave.host-steward.v1';
@@ -32,18 +32,18 @@ function queryHost() {
 }
 
 function normalizedHost() {
-  return activeHost || queryHost() || selectedHub().origin;
+  return activeHost || queryHost() || selectedGuild().origin;
 }
 
-function selectedHub() {
+function selectedGuild() {
   try {
     const saved = JSON.parse(localStorage.getItem(HOST_SELECTION_KEY) || '{}');
     const origin = new URL(saved?.origin || localStorage.getItem(HOST_ENDPOINT_KEY) || '').origin;
     return { origin, nodeId: /^[a-z0-9-]{1,120}$/.test(String(saved?.nodeId || '')) ? String(saved.nodeId) : '' };
   } catch { return { origin: '', nodeId: '' }; }
 }
-function selectedOrigin() { return selectedHub().origin; }
-function normalizedNodeId() { return activeNodeId || new URLSearchParams(location.search).get('node') || selectedHub().nodeId || ''; }
+function selectedOrigin() { return selectedGuild().origin; }
+function normalizedNodeId() { return activeNodeId || new URLSearchParams(location.search).get('node') || selectedGuild().nodeId || ''; }
 
 function isLocalAddress(origin = location.origin) {
   try {
@@ -155,25 +155,25 @@ function buildLobby() {
   section.setAttribute('aria-labelledby', 'cw-host-node-title');
   section.innerHTML = `
     <div class="cw-host-node-head">
-      <div><small class="cw-host-node-kicker">${localFederated ? 'LOCAL HUB NODE' : 'HUB NODE'}</small><h2 class="cw-host-node-title" id="cw-host-node-title">${host ? 'Checking this Hub Node…' : 'Join a Civweave Hub Node'}</h2><p class="cw-host-node-meta" id="cw-host-node-meta">${host || 'Hub login unlocks capacity-backed Cloudflare AI.'}</p></div>
-      <span class="cw-host-node-live" id="cw-host-node-live" data-state="checking">${host ? 'Checking status' : 'Choose a Hub'}</span>
+      <div><small class="cw-host-node-kicker">${localFederated ? 'LOCAL GUILD' : 'GUILD'}</small><h2 class="cw-host-node-title" id="cw-host-node-title">${host ? 'Checking this Guild…' : 'Join a Civweave Guild'}</h2><p class="cw-host-node-meta" id="cw-host-node-meta">${host || 'Guild login unlocks capacity-backed Cloudflare AI.'}</p></div>
+      <span class="cw-host-node-live" id="cw-host-node-live" data-state="checking">${host ? 'Checking status' : 'Choose a Guild'}</span>
     </div>
-    <div class="cw-host-node-slots" aria-label="Host Node membership capacity">
+    <div class="cw-host-node-slots" aria-label="Guild membership capacity">
       <article class="cw-host-slot"><small>Citizen slots</small><strong id="cw-host-free-slots">—</strong><span>Citizen residency available on this host.</span></article>
       <article class="cw-host-slot"><small>Patron slots</small><strong id="cw-host-paid-slots">—</strong><span>Additional Patron residency available on this host.</span></article>
     </div>
-    <p class="cw-host-node-note" id="cw-host-node-note">${host ? 'Reading the Hub’s live capacity before you join.' : 'Find the nearest Hub with Citizen or Patron capacity. Your exact location is never sent; Civweave rounds it before searching.'}</p>
+    <p class="cw-host-node-note" id="cw-host-node-note">${host ? 'Reading the Guild’s live capacity before you join.' : 'Find the nearest Guild with Citizen or Patron capacity. Your exact location is never sent; Civweave rounds it before searching.'}</p>
     <div class="cw-host-node-actions">
-      <button class="cw-host-node-join" id="cw-host-node-join" type="button" ${host ? 'disabled' : ''} data-mode="${host ? 'join' : 'search'}">${host ? (localFederated ? 'Use this Hub Node' : 'Join & log in') : 'Find an open Hub'}</button>
-      ${localFederated && stewardBrowser() ? '<a class="cw-host-node-steward" id="cw-host-node-steward" href="/app/node-ai-operator-v1.html">Hub steward tools</a>' : ''}
+      <button class="cw-host-node-join" id="cw-host-node-join" type="button" ${host ? 'disabled' : ''} data-mode="${host ? 'join' : 'search'}">${host ? (localFederated ? 'Use this Guild' : 'Join & log in') : 'Find an open Guild'}</button>
+      ${localFederated && stewardBrowser() ? '<a class="cw-host-node-steward" id="cw-host-node-steward" href="/app/node-ai-operator-v1.html">Guildkeeper tools</a>' : ''}
       <button class="cw-host-node-refresh" id="cw-host-node-refresh" type="button" ${host ? '' : 'hidden'}>Refresh status</button>
     </div>
-    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a Civweave federated Hub Node. Steward controls stay local to this node.' : 'A Hub login is device-bound and stored locally. Joining never silently starts a Patron membership.'}</p>
+    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a local Civweave Guild. Guildkeeper controls stay local to this node.' : 'A Guild login is device-bound and stored locally. Joining never silently starts a Patron membership.'}</p>
     <section class="cw-host-node-search" id="cw-host-node-search" ${host ? 'hidden' : ''} aria-labelledby="cw-host-node-search-title">
-      <h3 id="cw-host-node-search-title">Nearest Hubs with open slots</h3>
+      <h3 id="cw-host-node-search-title">Nearest Guilds with open slots</h3>
       <p>Choose which capacity counts as open. Patron capacity still requires an active Civweave membership.</p>
       <div class="cw-host-node-search-controls"><label>Show slots<select id="cw-host-node-search-mode"><option value="both">Citizen or Patron</option><option value="free">Citizen only</option><option value="paid">Patron only</option></select></label><button type="button" id="cw-host-node-search-run">Use my approximate location</button></div>
-      <p class="cw-host-node-search-status" id="cw-host-node-search-status" role="status">Location is requested only when you start a nearest-Hub search.</p>
+      <p class="cw-host-node-search-status" id="cw-host-node-search-status" role="status">Location is requested only when you start a nearest-Guild search.</p>
       <div class="cw-host-node-results" id="cw-host-node-results"></div>
     </section>
   `;
@@ -186,15 +186,15 @@ function buildLobby() {
   el('cw-host-node-refresh')?.addEventListener('click', () => loadStatus(true));
   el('cw-host-node-search-run')?.addEventListener('click', () => void searchNearest());
   el('cw-host-node-results')?.addEventListener('click', event => {
-    const button = event.target.closest?.('[data-hub-origin]');
+    const button = event.target.closest?.('[data-guild-origin]');
     if (!button) return;
-    activeHost = button.dataset.hubOrigin || '';
-    activeNodeId = button.dataset.hubNodeId || '';
+    activeHost = button.dataset.guildOrigin || '';
+    activeNodeId = button.dataset.guildNodeId || '';
     localFederated = false;
     latestStatus = null;
     section.dataset.localFederated = 'false';
     const refresh = el('cw-host-node-refresh'); if (refresh) refresh.hidden = false;
-    const title = el('cw-host-node-title'); if (title) title.textContent = 'Checking this Hub Node…';
+    const title = el('cw-host-node-title'); if (title) title.textContent = 'Checking this Guild…';
     const live = el('cw-host-node-live'); if (live) { live.dataset.state = 'checking'; live.textContent = 'Checking status'; }
     revealSearch(false);
     loadStatus(true);
@@ -227,12 +227,12 @@ function renderSearchResults(packet) {
   const status = el('cw-host-node-search-status');
   const rows = Array.isArray(packet?.nodes) ? packet.nodes : [];
   if (status) status.textContent = rows.length
-    ? `${rows.length} nearby Hub${rows.length === 1 ? '' : 's'} currently match this slot search.`
-    : 'No nearby registered Hubs currently match those open-slot filters.';
+    ? `${rows.length} nearby Guild${rows.length === 1 ? '' : 's'} currently match this slot search.`
+    : 'No nearby registered Guilds currently match those open-slot filters.';
   if (!results) return;
   results.innerHTML = rows.map(node => {
     const distance = Number.isFinite(Number(node.distanceKm)) ? `${Number(node.distanceKm).toFixed(Number(node.distanceKm) < 10 ? 1 : 0)} km away` : 'distance unavailable';
-    return `<button type="button" class="cw-host-node-result" data-hub-origin="${esc(node.hostOrigin)}" data-hub-node-id="${esc(node.nodeId || '')}"><span><strong>${esc(node.displayName || node.nodeId || 'Civweave Hub')}</strong><span>${esc(distance)} · ${esc(node.nodeId || '')}</span></span><em>${numberText(node?.slots?.free)} Citizen · ${numberText(node?.slots?.paid)} Patron</em></button>`;
+    return `<button type="button" class="cw-host-node-result" data-guild-origin="${esc(node.hostOrigin)}" data-guild-node-id="${esc(node.nodeId || '')}"><span><strong>${esc(node.displayName || node.nodeId || 'Civweave Guild')}</strong><span>${esc(distance)} · ${esc(node.nodeId || '')}</span></span><em>${numberText(node?.slots?.free)} Citizen · ${numberText(node?.slots?.paid)} Patron</em></button>`;
   }).join('');
 }
 
@@ -243,12 +243,12 @@ async function searchNearest() {
   const button = el('cw-host-node-search-run');
   const status = el('cw-host-node-search-status');
   const results = el('cw-host-node-results');
-  if (button) { button.disabled = true; button.textContent = 'Finding nearby Hubs…'; }
+  if (button) { button.disabled = true; button.textContent = 'Finding nearby Guilds…'; }
   if (status) status.textContent = 'Getting an approximate location for this search…';
   if (results) results.innerHTML = '';
   try {
     const locationPacket = await approximateLocation();
-    if (status) status.textContent = 'Checking nearby Hub capacity…';
+    if (status) status.textContent = 'Checking nearby Guild capacity…';
     const response = await fetch(SEARCH_ENDPOINT, {
       method: 'POST',
       cache: 'no-store',
@@ -256,11 +256,11 @@ async function searchNearest() {
       body: JSON.stringify({ ...locationPacket, mode: el('cw-host-node-search-mode')?.value || 'both' }),
     });
     const packet = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(packet.error || `Nearest-Hub search returned HTTP ${response.status}.`);
+    if (!response.ok) throw new Error(packet.error || `Nearest-Guild search returned HTTP ${response.status}.`);
     renderSearchResults(packet);
     return packet;
   } catch (error) {
-    if (status) status.textContent = `Nearest-Hub search could not complete: ${error?.message || error}`;
+    if (status) status.textContent = `Nearest-Guild search could not complete: ${error?.message || error}`;
     return null;
   } finally {
     searching = false;
@@ -272,17 +272,17 @@ function renderSelectedState() {
   const host = normalizedHost();
   const button = el('cw-host-node-join');
   if (!button) return;
-  if (!host) { button.dataset.mode = 'search'; button.dataset.selected = 'false'; button.textContent = 'Find an open Hub'; return; }
+  if (!host) { button.dataset.mode = 'search'; button.dataset.selected = 'false'; button.textContent = 'Find an open Guild'; return; }
   const nodeId = normalizedNodeId();
   const loggedIn = Boolean(access()?.sessionFor?.(nodeId || host));
   const selected = selectedOrigin() === host;
   button.dataset.selected = String(loggedIn || selected);
-  if (loggedIn) { button.dataset.mode = 'join'; button.textContent = 'Logged in to this Hub'; return; }
+  if (loggedIn) { button.dataset.mode = 'join'; button.textContent = 'Logged in to this Guild'; return; }
   if (latestStatus?.capacityAvailable && slotCount('free') < 1 && !access()?.hasCredential?.(host,nodeId)) {
-    button.dataset.mode = 'search'; button.textContent = 'Find nearest open Hub'; return;
+    button.dataset.mode = 'search'; button.textContent = 'Find nearest open Guild'; return;
   }
   button.dataset.mode = 'join';
-  button.textContent = access()?.hasCredential?.(host,nodeId) ? 'Log back in' : (localFederated ? 'Use this Hub Node' : 'Join & log in');
+  button.textContent = access()?.hasCredential?.(host,nodeId) ? 'Log back in' : (localFederated ? 'Use this Guild' : 'Join & log in');
 }
 
 function renderStatus(packet) {
@@ -298,17 +298,17 @@ function renderStatus(packet) {
   const help = el('cw-host-node-help');
   if (!packet?.ok) {
     if (live) { live.dataset.state = 'error'; live.textContent = 'Status unavailable'; }
-    if (title) title.textContent = 'Host Node status unavailable';
+    if (title) title.textContent = 'Guild status unavailable';
     if (meta) meta.textContent = normalizedHost();
     if (free) free.textContent = '—';
     if (paid) paid.textContent = '—';
-    if (join) { join.disabled = false; join.dataset.mode = 'search'; join.textContent = 'Find another Hub'; }
-    if (note) note.textContent = 'Civweave could not verify this host or its current capacity.';
-    if (help) help.textContent = 'Refresh to try again. The Host button stays locked until this node answers successfully.';
+    if (join) { join.disabled = false; join.dataset.mode = 'search'; join.textContent = 'Find another Guild'; }
+    if (note) note.textContent = 'Civweave could not verify this Guild or its current capacity.';
+    if (help) help.textContent = 'Refresh to try again. Joining stays locked until this Guild answers successfully.';
     return;
   }
-  if (live) { live.dataset.state = packet.status === 'degraded' ? 'error' : 'online'; live.textContent = packet.status === 'degraded' ? 'Hub online · app unavailable' : 'Online'; }
-  if (title) title.textContent = packet.displayName || (localFederated ? 'Local Civweave Host Node' : 'Civweave Host Node');
+  if (live) { live.dataset.state = packet.status === 'degraded' ? 'error' : 'online'; live.textContent = packet.status === 'degraded' ? 'Guild online · app unavailable' : 'Online'; }
+  if (title) title.textContent = packet.displayName || (localFederated ? 'Local Civweave Guild' : 'Civweave Guild');
   if (meta) meta.textContent = [packet.nodeId, packet.runtime, packet.hostOrigin].filter(Boolean).join(' · ');
   if (packet.capacityAvailable && packet.slots) {
     if (free) free.textContent = numberText(packet.slots.free);
@@ -317,11 +317,11 @@ function renderStatus(packet) {
   } else if (localFederated) {
     if (free) free.textContent = 'Not published';
     if (paid) paid.textContent = 'Not published';
-    if (note) note.textContent = packet.capacityMessage || 'This local Docker Host Node is online, but the federated runtime does not publish membership-seat accounting yet.';
+    if (note) note.textContent = packet.capacityMessage || 'This local Guild is online, but the federated runtime does not publish membership-seat accounting yet.';
   } else {
     if (free) free.textContent = '—';
     if (paid) paid.textContent = '—';
-    if (note) note.textContent = packet.capacityMessage || 'This host is online but does not publish membership capacity yet.';
+    if (note) note.textContent = packet.capacityMessage || 'This Guild is online but does not publish membership capacity yet.';
   }
   if (join) {
     const canReconnect = Boolean(access()?.hasCredential?.(normalizedHost(),normalizedNodeId()));
@@ -332,8 +332,8 @@ function renderStatus(packet) {
   }
   if (help && selectedOrigin() !== normalizedHost()) {
     help.textContent = localFederated
-      ? 'Use this Host Node makes this Docker node the selected Host for this device. Open Host steward tools for local operator controls.'
-      : 'Joining sets this as your device’s Host Node. It does not silently start a Patron membership.';
+      ? 'Use this Guild makes this local node the selected Guild for this device. Open Guildkeeper tools for local operator controls.'
+      : 'Joining sets this as your device’s Guild. It does not silently start a Patron membership.';
   }
   renderSelectedState();
 }
@@ -355,12 +355,12 @@ async function loadLocalStatus() {
       kind: 'local-federated-host',
       hostOrigin: location.origin,
       nodeId: health.nodeId || profile.nodeId || null,
-      displayName: profile.name || 'Civweave Local Host Node',
+      displayName: profile.name || 'Civweave Local Guild',
       runtime: health.build || profile.software?.build || 'federated-docker',
       status: health.appAvailable === false ? 'degraded' : 'online',
       slots: null,
       capacityAvailable: false,
-      capacityMessage: 'This Docker Host Node is live. Citizen/Patron seat accounting is not exposed by the local federated runtime yet, so Civweave will not invent capacity numbers.',
+      capacityMessage: 'This local Guild is live. Citizen/Patron seat accounting is not exposed by the local federated runtime yet, so Civweave will not invent capacity numbers.',
       appAvailable: health.appAvailable !== false,
     };
   } catch (error) {
@@ -405,12 +405,12 @@ async function joinHostNode() {
   let login = null;
   if (!localFederated) {
     try {
-      if (!access()?.join) throw new Error('The Hub login runtime is not ready. Refresh this screen and try again.');
+      if (!access()?.join) throw new Error('The Guild login runtime is not ready. Refresh this screen and try again.');
       login = await access().join(host,{nodeId:normalizedNodeId()});
     } catch (error) {
       if (help) help.textContent = Number(error?.status) === 409
-        ? 'This Hub filled before the seat could be reserved. Find the nearest Hub with an open slot.'
-        : `Civweave could not log in to this Hub: ${error?.message || error}`;
+        ? 'This Guild filled before the seat could be reserved. Find the nearest Guild with an open slot.'
+        : `Civweave could not log in to this Guild: ${error?.message || error}`;
       if (Number(error?.status) === 409) revealSearch(true);
       if (button) { button.disabled = false; renderSelectedState(); }
       return false;
@@ -428,15 +428,15 @@ async function joinHostNode() {
     localStorage.setItem(HOST_ENDPOINT_KEY, host);
     localStorage.setItem(HOST_SELECTION_KEY, JSON.stringify(selection));
   } catch {
-    if (help) help.textContent = 'This browser blocked local Host Node storage, so Civweave could not save the selection.';
+    if (help) help.textContent = 'This browser blocked local Guild selection storage, so Civweave could not save the selection.';
     if (button) button.disabled = false;
     return false;
   }
   renderSelectedState();
   if (button) button.disabled = false;
   if (help) help.textContent = localFederated
-    ? `${latestStatus.displayName || 'This Hub'} is now your device’s Hub Node.`
-    : `Logged in to ${latestStatus.displayName || 'this Hub'}. Capacity-backed Cloudflare AI is now available in this tab.`;
+    ? `${latestStatus.displayName || 'This Guild'} is now your device’s Guild.`
+    : `Logged in to ${latestStatus.displayName || 'this Guild'}. Capacity-backed Cloudflare AI is now available in this tab.`;
   dispatchEvent(new CustomEvent('civweave:host-node-selected', { detail: selection }));
   return true;
 }
