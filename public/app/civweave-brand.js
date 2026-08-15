@@ -1,8 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.29-brand-source-truth-v1';
-const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';
+const VERSION='1.0.30-current-logo-clock-v1';
+const DAY_LOGO='/app/logos/civweave-day-logo.jpg';
+const NIGHT_LOGO='/app/logos/civweave-night-logo.jpg';
+const CANONICAL_LOGO=DAY_LOGO;
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
 const LANGUAGE_KEY='civweave.language.v1';
@@ -61,8 +63,24 @@ function installInstallerDeliveryBridge(){
   return true;
 }
 
+function logoForLocalClock(date=new Date()){
+  const hour=Number(date?.getHours?.());
+  return Number.isFinite(hour)&&hour>=6&&hour<18?DAY_LOGO:NIGHT_LOGO;
+}
+
+function syncBrowserIcon(){
+  let icon=document.querySelector('link[rel~="icon"]');
+  if(!icon){icon=document.createElement('link');icon.rel='icon';document.head?.append(icon)}
+  if(!icon)return false;
+  icon.type='image/jpeg';
+  icon.href=logoForLocalClock();
+  icon.dataset.civweaveClockLogo=icon.href.includes('night')?'night':'day';
+  return true;
+}
+
 function apply(){
   document.documentElement.dataset.publicBrand='civweave';
+  syncBrowserIcon();
   installLanguageRuntime();
   bindEnglishLanguageControl();
   installInstallerDeliveryBridge();
@@ -83,6 +101,10 @@ globalThis.CivweaveBrand=Object.freeze({
   runtimeBrandRewrite:false,
   installLanguageRuntime,
   ensureEnglishLanguageControl:bindEnglishLanguageControl,
-  installInstallerDeliveryBridge
+  installInstallerDeliveryBridge,
+  logoForLocalClock,
+  syncBrowserIcon,
+  dayLogo:DAY_LOGO,
+  nightLogo:NIGHT_LOGO
 });
 })();
