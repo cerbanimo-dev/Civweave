@@ -29,6 +29,11 @@ function v211FailureEntry(entry, fallbackAttempts = 1) {
   };
 }
 
+function v211FailureIsObsolete(entry) {
+  const status = Number(entry?.status || 0);
+  return status === 404 || status === 410 || (status >= 200 && status < 400);
+}
+
 function v211SkippedEntry(entry) {
   const source = entry && typeof entry === 'object' ? entry : {};
   return {
@@ -36,9 +41,13 @@ function v211SkippedEntry(entry) {
     message: String(source.message || 'Unavailable discovered reference.'),
     status: Number(source.status || 0),
     attempts: Math.max(1, Number(source.attempts || 1) || 1),
-    reason: String(source.reason || 'repeated-unavailable'),
+    reason: String(source.reason || 'unavailable-discovered-reference'),
     retryAfter: source.retryAfter || new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
   };
+}
+
+function v211RequiredSeeds(manifest = {}) {
+  return new Set((Array.isArray(manifest.seeds) ? manifest.seeds : []).filter(Boolean));
 }
 
 function v211Packet(meta = {}) {
@@ -106,13 +115,16 @@ async function v211MigrateMeta(meta, manifest) {
     return packet;
   }
 
-  const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
+  const requiredSeeds = v211RequiredSeeds(manifest);
   const failed = (Array.isArray(meta.failed) ? meta.failed : []).map(entry => v211FailureEntry(entry));
   const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
   const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
+  const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete);
+  const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry));
+  const blockingFailed = [...requiredFailed, ...retryableOptionalFailed];
   const obsoletePaths = new Set([
     ...(Array.isArray(meta.skipped) ? meta.skipped.map(entry => String(entry?.pathname || '')) : []),
-    ...optionalFailed.map(entry => entry.pathname)
+    ...obsoleteFailed.map(entry => entry.pathname)
   ].filter(Boolean));
   const previousAssets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(pathname => pathname && !obsoletePaths.has(pathname)))];
   const legacyDownloaded = Math.max(0, Number(meta.downloaded ?? meta.successful ?? meta.completed ?? 0) || 0);
@@ -126,7 +138,7 @@ async function v211MigrateMeta(meta, manifest) {
     downloaded: Math.min(previousAssets.length, legacyDownloaded),
     total: previousAssets.length,
     assets: previousAssets,
-    failed: requiredFailed,
+    failed: blockingFailed,
     skipped: [],
     updatedAt: new Date().toISOString()
   });
@@ -136,13 +148,16 @@ async function v211MigrateMeta(meta, manifest) {
 
 async function v211SanitizeRetryMeta(meta, manifest) {
   if (!meta) return null;
-  const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
+  const requiredSeeds = v211RequiredSeeds(manifest);
   const failed = (meta.failed || []).map(entry => v211FailureEntry(entry));
   const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
   const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
+  const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete);
+  const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry));
+  const blockingFailed = [...requiredFailed, ...retryableOptionalFailed];
   const obsoletePaths = new Set([
     ...(meta.skipped || []).map(entry => String(entry?.pathname || '')),
-    ...optionalFailed.map(entry => entry.pathname)
+    ...obsoleteFailed.map(entry => entry.pathname)
   ].filter(Boolean));
   if (!obsoletePaths.size) return v211Packet(meta);
   const assets = (meta.assets || []).filter(pathname => !obsoletePaths.has(pathname));
@@ -150,8 +165,8 @@ async function v211SanitizeRetryMeta(meta, manifest) {
   const packet = v211Packet({
     ...meta,
     running: false,
-    ready: requiredFailed.length === 0,
-    failed: requiredFailed,
+    ready: blockingFailed.length === 0,
+    failed: blockingFailed,
     skipped: [],
     assets,
     downloadedAssets,
@@ -165,7 +180,7 @@ async function v211SanitizeRetryMeta(meta, manifest) {
 offlinePacket = v211Packet;
 
 offlineStatus = async function offlineStatusV211() {
-  const manifest = await loadOfflineManifest().catch(() => ({ seeds: [] }));
+  const manifest = await loadOfflineManifest().catch(() => ({ seeds: [], assets: [] }));
   const current = await readOfflineMeta();
   if (current) {
     const migrated = await v211MigrateMeta(current, manifest);
@@ -205,7 +220,7 @@ async function v211DownloadOfflinePackage(event) {
   const previous = migrated ? await v211SanitizeRetryMeta(migrated, manifest) : null;
   const maxAssets = Math.max(50, Math.min(1500, Number(manifest.maxAssets || 700)));
   const maxDepth = Math.max(1, Math.min(12, Number(manifest.maxDepth || 8)));
-  const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
+  const requiredSeeds = v211RequiredSeeds(manifest);
   const skipped = new Map();
   const previousFailures = new Map((previous?.failed || []).map(entry => [entry.pathname, v211FailureEntry(entry)]));
   const sameRelease = previous?.version === VERSION && previous?.revision === V211_REVISION;
@@ -288,12 +303,19 @@ async function v211DownloadOfflinePackage(event) {
         const prior = previousFailures.get(item.pathname);
         const attempts = Math.max(1, Number(prior?.attempts || 0) + 1);
         const entry = v211FailureEntry({ pathname: item.pathname, message: error?.message || String(error), status, attempts, required: item.required }, attempts);
-        const permanent = status === 404 || status === 410;
-        if (!item.required && (permanent || attempts >= 2)) {
+        if (!item.required && v211FailureIsObsolete(entry)) {
+          const structural = status >= 200 && status < 400;
+          const notFound = status === 404 || status === 410;
           queued.delete(item.pathname);
           failed.delete(item.pathname);
-          skipped.set(item.pathname, v211SkippedEntry({ ...entry, reason: permanent ? 'not-found' : 'repeated-unavailable', retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString() }));
-        } else failed.set(item.pathname, entry);
+          skipped.set(item.pathname, v211SkippedEntry({
+            ...entry,
+            reason: notFound ? 'not-found' : structural ? 'invalid-static-response' : 'unavailable-discovered-reference',
+            retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
+          }));
+        } else {
+          failed.set(item.pathname, entry);
+        }
         return { item, references: [] };
       }
     }));
@@ -371,6 +393,9 @@ self.CivweaveOfflineCampusV211 = {
   pauseSupported: true,
   resumeSupported: true,
   packet: v211Packet,
+  requiredPaths: v211RequiredSeeds,
+  requiredSeeds: v211RequiredSeeds,
+  failureIsObsolete: v211FailureIsObsolete,
   migrateMeta: v211MigrateMeta,
   sanitizeRetryMeta: v211SanitizeRetryMeta,
   pause() { v211PauseRequested = true; },
