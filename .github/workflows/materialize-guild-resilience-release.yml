@@ -1,9 +1,9 @@
 name: Materialize Guild resilience release
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/guild-pocket-node-resilience
+      - staging
     paths:
       - '.github/workflows/materialize-guild-resilience-release.yml'
 
@@ -12,10 +12,12 @@ permissions:
 
 jobs:
   materialize:
+    if: github.event.pull_request.head.ref == 'agent/guild-pocket-node-resilience'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: agent/guild-pocket-node-resilience
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
