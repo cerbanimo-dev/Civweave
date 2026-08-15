@@ -18,23 +18,26 @@ I will NEVER AGAIN write a realtime code hotswapping system to bugfix.
 
 Production bug fixes must never be implemented by reading application source at runtime, rewriting source strings, generating replacement modules, injecting corrective scripts, swapping runtime implementations, restoring historical snapshots, choosing code by stored hashes, or making a service worker decide which implementation should run. Git history is the archive. The checked-out tree is the program.
 
+## Current interface direction
+
+Civweave is **not in the retired Visual/Spatial mode**. Do not reconstruct a world-map, image-background, polygon-hotspot, cabinet-scene, spatial-room, or full-screen visual-mode architecture from historical files, memories, screenshots, or old commits.
+
+The current product direction is ordinary responsive HTML/application UI enhanced with intentional images, illustration, game-like character, and selective immersive moments where they genuinely help. Images support the interface; they do not define a separate spatial renderer.
+
+When auditing the active product surface, prefer the newest currently exercised HTML/application screens and the most recent commit history over ancestral visual-mode structures. If an old file name contains cabinet, room, visual, world, spatial, working-campus, or similar historical language, that is not evidence that the architecture should be preserved.
+
 ## Canonical source map
 
-Start from the current files, not from a historical map or roadmap:
+Do not infer the screen map from this file. Derive the current sitemap from the newest actively exercised production files and recent commits, then record it in `docs/architecture/production-inventory.md`.
 
-- browser entry: `public/app/campus.html`
-- screen registry: `public/app/routes.js`
-- shared browser styles: `public/app/common.css`
-- guide chat: `public/app/chat.html`, `public/app/chat.js`, `public/app/chat.css`
-- AI settings: `public/app/settings.html`, `public/app/settings.js`, `public/app/settings.css`
-- downloads and optional model package: `public/app/downloads.html`, `public/app/downloads.js`, `public/app/downloads.css`
-- realm shells: `public/app/living-school.html`, `public/app/cerbanimo.html`, `public/app/fellowfare.html`, `public/app/anarchadia.html`
-- shared realm behavior: `public/app/realm.js`, `public/app/realm.css`
-- user customization: `public/app/customization-loader.js`, `public/app/merlin-customization.js`
-- isolated crash recovery: `public/app/recovery/`
-- current PWA delivery: `public/service-worker.js`
-- current host runtime: `server/runtime.mjs`
-- production inventory: `docs/architecture/production-inventory.md`
+Current stable boundaries that should survive the cleanup:
+
+- user customization: dedicated Merlin customization code only;
+- isolated crash recovery: dedicated recovery surface only;
+- current PWA delivery: one service worker only;
+- current host runtime: one direct server runtime only;
+- production inventory: `docs/architecture/production-inventory.md`;
+- AI/model runtime files only when they are directly required by the active application or explicitly installed model packages.
 
 If a file is not reachable from the current production surface, build/deployment tooling, active server/cloud infrastructure, or a documented operational/legal record, do not preserve it merely because an older implementation referenced it.
 
@@ -46,7 +49,7 @@ Merlin may hot-swap **user-authored customization code** because live creation i
 - a candidate is staged before activation;
 - activation keeps exactly one last-known-good customization;
 - a failed boot or customization crash restores that one fallback;
-- `/app/recovery/` is dependency-light and can inspect, disable, edit, stage, and revert customization without booting the main application runtime;
+- the recovery surface is dependency-light and can inspect, disable, edit, stage, and revert customization without booting the main application runtime;
 - the recovery path cannot read, rewrite, or replace Civweave production source;
 - agents may never route a production bug fix through user customization;
 - no historical production builds, source archives, release mirrors, code snapshots, or source hashes are retained for this feature.
@@ -72,10 +75,10 @@ Service-worker caches may contain current static assets for offline use. A servi
 - HTML owns document structure.
 - CSS owns presentation and responsive layout.
 - JavaScript owns behavior and state transitions.
-- `public/service-worker.js` owns offline delivery of the current static surface only.
-- `server/runtime.mjs` owns direct static serving, node relay APIs, persistence, and explicitly declared AI/server endpoints.
-- MiniLM is a separate lightweight semantic runtime. The Campus may keep it warm when the user has installed its package.
-- Opening Chat or Settings must not start or warm MiniLM or a generative model.
+- the service worker owns offline delivery of the current static surface only.
+- the direct host runtime owns static serving, node relay APIs, persistence, and explicitly declared AI/server endpoints.
+- MiniLM is a separate lightweight semantic runtime and may remain available independently when installed.
+- Opening Chat or Settings must not start or warm a larger generative model.
 - Generative inference starts only from an explicit submit, test, or other user action that requires generation.
 
 Do not patch browser prototypes, install document-wide mutation repair loops, repeatedly rewrite layout inline, add viewport feedback loops, or create competing owners for the same control.
@@ -98,15 +101,16 @@ Also report the complete sitemap and every tracked browser image. A production f
 
 Before merging a runtime change:
 
-1. Run `npm run check`.
-2. Verify the sitemap directly against `public/app/routes.js` and reachable pages.
+1. Run the repository's canonical checks.
+2. Derive the sitemap from the newest active application files and recent commit history, not from retired visual/spatial architecture.
 3. Verify every referenced local browser asset exists.
 4. Verify no retired repair/injection implementation is referenced by production HTML, CSS, JavaScript, the service worker, package scripts, or deployment tooling.
 5. Verify no source rewriting, runtime source materialization, historical-code selection, or bug-fix injection exists in the production path.
-6. Open Chat and Settings and verify they do not warm MiniLM or a generative model.
-7. Verify `/app/recovery/` loads without the main application runtime or customization loader.
+6. Open Chat and Settings and verify they do not start a larger generative model merely by opening/focusing/typing.
+7. Verify the recovery surface loads without the main application runtime or customization loader.
 8. Verify Merlin can stage a user customization, activate it, retain one last-known-good customization, and roll back after a failed boot.
 9. Review the newest twenty commits before destructive cleanup so recently active systems are not confused with ancestral leftovers.
+10. Explicitly reject accidental resurrection of retired Visual/Spatial mode unless a new product decision reintroduces it.
 
 ## Change discipline
 
