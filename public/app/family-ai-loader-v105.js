@@ -195,7 +195,7 @@ function workspaceSnapshot(system=detect(),query=''){
   const snapshot={schema:'civweave.inline-workspace-context.v4-fast',contextSystem:system,page:{path:location.pathname,room:new URLSearchParams(location.search).get('room')},memory,intentions:compact(arr('civweave.intentions.v127'),8)};
   if(system==='living-school')snapshot.livingSchool=living.school?{school:living.school,activeModuleId:living.activeModuleId,progress:living.progress,practicum:living.practicum,projectGate:living.projectGate}:null;
   if(system==='cerbanimo')snapshot.cerbanimo={quests:compact(arr('civweave.cerbanimo.quest-queue.v1'),10),actions:compact(arr('civweave.realm-actions.v141').filter(item=>item?.system==='cerbanimo'),10)};
-  if(system==='fellowfare')snapshot.fellowfare={resources:compact(arr('civweave.fellowfare.resource-queue-v152'),10),threads:compact(fellow.threads,8),listings:compact(fellow.listings||fellow.offers||fellow.posts,8)};
+  if(system==='fellowfare')snapshot.fellowfare={resources:compact(arr('civweave.fellowfare.resource-queue.v152'),10),threads:compact(fellow.threads,8),listings:compact(fellow.listings||fellow.offers||fellow.posts,8)};
   if(system==='anarchadia')snapshot.anarchadia={proposals:compact(anarchadia.proposals,8),passport:obj('civweave.anarchadia.passport.v152')};
   return clean(JSON.stringify(snapshot),7000);
 }
