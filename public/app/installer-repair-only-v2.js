@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const REVISION='installer-repair-only-v2-cache-distinct-lazy-hub-tools';
+const REVISION='installer-repair-only-v2-cache-distinct-lazy-hub-tools-quest-threshold-v1';
 const CANONICAL_NEXT_PATHS=new Set([
   '/app/working-campus-v156.html',
   '/app/cabinets/living-school/index.html',
@@ -103,7 +103,7 @@ function setHubGateStatus(message,{busy=false}={}){
   if(status)status.textContent=message;
   if(button){
     button.disabled=busy;
-    button.textContent=busy?'Loading Hub & account tools…':'Load Hub & account tools';
+    button.textContent=busy?'Opening Guild & Passport tools…':'Find a Guild or recover a Passport';
   }
 }
 function finishHubGateWhenReady(){
@@ -120,7 +120,7 @@ function finishHubGateWhenReady(){
     if(checks>=40){
       clearInterval(timer);
       hubToolsStarted=false;
-      setHubGateStatus('Hub tools did not finish loading. The installer is still usable; retry when you need Hub or recovery features.');
+      setHubGateStatus('The Guild and Passport tools did not finish opening. The threshold still works; retry this path when you need it.');
     }
   },200);
   addEventListener('pagehide',()=>clearInterval(timer),{once:true});
@@ -128,7 +128,7 @@ function finishHubGateWhenReady(){
 function loadHubTools(){
   if(hubToolsStarted)return false;
   hubToolsStarted=true;
-  setHubGateStatus('Loading Hub login and account-recovery tools because you requested them.',{busy:true});
+  setHubGateStatus('Opening Guild search, capacity, account, and Passport recovery tools because you chose this path.',{busy:true});
   installHostNodeLobby();
   installHubRecovery();
   finishHubGateWhenReady();
@@ -140,7 +140,7 @@ function installHubToolsGate(){
   gate.className='status-card';
   gate.dataset.civweaveHubToolsGate=REVISION;
   gate.setAttribute('aria-labelledby','cw-hub-tools-gate-title');
-  gate.innerHTML=`<small>OPTIONAL HUB & ACCOUNT TOOLS</small><h3 id="cw-hub-tools-gate-title">Connect to a Hub only when you need it</h3><p>Hub login, capacity search, Passport recovery, and recovery-mail tools stay dormant during installer startup.</p><div class="gateway-actions card-actions"><button type="button" data-civweave-load-hub-tools>Load Hub & account tools</button></div><p class="install-help" role="status" data-civweave-hub-tools-status>Nothing from the Hub/account stack runs until you choose this.</p>`;
+  gate.innerHTML=`<small>OPTIONAL PATH · GUILD & PASSPORT</small><h3 id="cw-hub-tools-gate-title">Find a Guild when you are ready for company</h3><p>You do not need a Guild to install Civweave or begin exploring. Open this path when you want Guild capacity, account tools, Passport recovery, or a way back into an existing community.</p><div class="gateway-actions card-actions"><button type="button" data-civweave-load-hub-tools>Find a Guild or recover a Passport</button></div><p class="install-help" role="status" data-civweave-hub-tools-status>This path stays dormant until you choose it.</p>`;
   const knowledge=document.querySelector('.knowledge-card');
   const installCard=document.querySelector('.install-card');
   if(knowledge?.parentNode)knowledge.parentNode.insertBefore(gate,knowledge);
@@ -170,7 +170,7 @@ async function requestRepair(){
       try{channel.port1.close()}catch{}
       resolve(event.data||null);
     };
-    try{worker.postMessage({type:'REPAIR_DEVICE_PACKAGE'},[channel.port2])}
+    try{worker.postMessage({type:'REPAIR_DEVICE_PACKAGE'},[channel.port2])
     catch(error){clearTimeout(timer);reject(error)}
   });
 }
