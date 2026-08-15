@@ -9,15 +9,19 @@ const [gateway,delegation,campus,boundary]=await Promise.all([
   read('public/app/install-boundary-v146.js')
 ]);
 new Function(gateway);new Function(delegation);new Function(boundary);
-assert.match(gateway,/inputOwner:true/);
+assert.match(gateway,/globalThis\.CivweaveSettingsV320=api/);
+assert.match(gateway,/inputOwner:true,presentationOwner:true,credentialOwner:true/);
+assert.match(gateway,/singleLauncherListener:true/);
 assert.match(gateway,/launchWork:'none'/);
-assert.match(gateway,/civweave:model-settings-open-failed/,'Gateway must surface failures for diagnostics without delegating input ownership.');
+assert.match(gateway,/civweave:model-settings-opened/,'Canonical Settings must expose an opened event for diagnostics subscribers.');
+assert.match(gateway,/civweave:settings-ready/,'Canonical Settings must expose a ready event for diagnostics subscribers.');
 assert.match(delegation,/retired:true/);
 assert.match(delegation,/listenerCount:0/);
 assert.match(delegation,/inputOwnership:false/);
+assert.match(delegation,/presentationOwnership:false/);
 assert.doesNotMatch(delegation,/document\.addEventListener\('click'|stopImmediatePropagation\(\)/,'Diagnostics/delegation compatibility code may not intercept Settings input.');
 assert.match(campus,/data-open-log-diagnostics/,'Working Campus lost its explicit diagnostics control.');
 assert.match(campus,/data-settings-diagnostics="cwlog"/,'Working Campus lost its diagnostics marker.');
 assert.match(campus,/data-open-unified-ai-settings/,'Working Campus lost its canonical Settings marker.');
-assert.match(boundary,/settingsGatewayRevision:'v317-single-owner-first-click-only'/);
-console.log(JSON.stringify({ok:true,revision:'settings-diagnostics-v317-subscriber-only',settingsInputOwner:'settings-gateway-v317',diagnosticsInputOwnership:false,settingsFailureEvent:true,diagnosticsControl:true,settingsOpenBlocking:false},null,2));
+assert.match(boundary,/SETTINGS_GATEWAY/,'Install boundary no longer loads the Settings gateway.');
+console.log(JSON.stringify({ok:true,revision:'settings-diagnostics-v320-subscriber-only',settingsAuthority:'CivweaveSettingsV320',diagnosticsInputOwnership:false,diagnosticsControl:true,settingsOpenBlocking:false},null,2));
