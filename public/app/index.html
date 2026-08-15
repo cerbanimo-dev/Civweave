@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="/install-v130.css?v=1.0.162-lightweight-shell-v208">
   <link rel="stylesheet" href="/app/knowledge-school-installer-v1.css?v=knowledge-schools-v2">
   <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
+  <link rel="stylesheet" href="/app/installer-quest-threshold-v1.css?v=quest-first-v1">
   <style>
     .campus-install-progress{max-width:760px;margin:22px 0 12px;display:grid;gap:7px}.campus-progress-heading,.campus-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:12px}.campus-progress-heading span{color:#8de5ef;font-size:.72rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.campus-progress-heading strong{font-size:.84rem;color:#fff}.campus-progress-track{position:relative;height:8px;overflow:hidden;border:1px solid #7ee5ff44;border-radius:999px;background:#001018aa;box-shadow:inset 0 1px 4px #0008}.campus-progress-fill{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#72d9e7,#f3d77d);box-shadow:0 0 14px #7ee5ff77;transition:width .24s ease}.campus-progress-meta{color:var(--muted);font-size:.76rem}.campus-progress-meta strong{color:#f8e5a2;font:900 .76rem ui-monospace,monospace}.campus-install-progress[data-state="ready"] .campus-progress-fill{box-shadow:0 0 18px #8df0c688}.campus-install-progress[data-state="failed"] .campus-progress-heading strong{color:#ffd08a}.campus-retry{justify-self:start;min-height:32px;padding:5px 9px;border:1px solid #ffd08a77;border-radius:9px;background:#3b2a13;color:#fff;font-weight:800;cursor:pointer}.campus-retry[hidden]{display:none!important}.cw-language-control{min-width:42px;min-height:34px;padding:5px 9px;border:1px solid #8de5ef77;border-radius:999px;background:#13223dcc;color:#dffcff;font:900 .76rem/1 system-ui,sans-serif;letter-spacing:.06em;cursor:pointer}.cw-language-control:focus-visible{outline:2px solid #8de5ef;outline-offset:2px}@media(max-width:820px){.campus-progress-heading,.campus-progress-meta{align-items:flex-start}.campus-progress-meta{font-size:.72rem}}
   </style>
@@ -19,43 +20,81 @@
 <body class="cw-frontdoor cw-installer">
 <main class="gateway">
   <div class="gateway-shade"></div>
+
   <header class="cw-brand-lockup" aria-label="Civweave platform and Cerbanimo stewardship">
     <div class="cw-platform-brand">
       <img class="cw-platform-logo" src="/app/logos/civweave-prismatic-wordmark-v1.png" alt="Civweave">
-      <div class="cw-platform-copy"><small>INSTALLER · UPDATER · RECOVERY</small><h1>Your doorway into Civweave</h1><p>Enter as a Hero, turn an intention into a Quest, find a Party when the road is better shared, and join a Guild that can keep your local world connected.</p></div>
+      <div class="cw-platform-copy">
+        <small>THE THRESHOLD · STEP ONE</small>
+        <h1>Every Quest begins by crossing the threshold.</h1>
+        <p>Take Civweave with you, then enter as a Hero. Your intention can become a Quest, your Quest can gather a Party, and a Guild can keep the road open when the work belongs to a community.</p>
+      </div>
     </div>
     <div class="cw-steward-seal" aria-label="Stewarded by Cerbanimo">
       <img class="cw-steward-logo" src="/app/logos/cerbanimo-steward-mark-v1.png" alt="Cerbanimo">
       <div class="cw-steward-copy"><small>Stewarded by</small><strong>Cerbanimo</strong><span>Platform craft &amp; continuity</span></div>
     </div>
   </header>
+
   <header class="gateway-header">
     <img src="/app/logos/civweave-day-logo.jpg" alt="Civweave">
-    <div><small>INSTALLER · UPDATER · RECOVERY</small><h1>Civweave</h1></div>
+    <div><small>THE THRESHOLD</small><h1>Civweave</h1></div>
     <span class="version">v1.0.162</span>
     <button class="cw-language-control" type="button" data-cw-en-language-control aria-label="日本語 / Japanese">JP</button>
   </header>
-  <section class="install-card" aria-labelledby="install-title">
-    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install the shell. Launch Civweave from your device app launcher. Download offline files only when you choose.</h2><p>The installer does no large background work on arrival. Install prepares the small PWA shell. The offline campus is a separate resumable code download, while large pictures, media, knowledge packs, and local AI models arrive on demand.</p></div>
-    <div class="topology" aria-label="Civweave topology"><article><b>1</b><strong>Install shell</strong><span>Small browser-native PWA shell.</span></article><i>→</i><article><b>2</b><strong>Launch installed app</strong><span>Open Civweave from your device app launcher.</span></article><i>→</i><article><b>3</b><strong>Go offline when useful</strong><span>Download the code-first campus separately.</span></article></div>
 
-    <div id="campus-install-progress" class="campus-install-progress" data-state="idle" aria-live="polite">
-      <div class="campus-progress-heading"><span>Offline campus</span><strong id="offline-package-state">not downloaded</strong></div>
-      <div id="offline-campus-progress-track" class="campus-progress-track" role="progressbar" aria-label="Offline campus download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="offline-campus-progress-fill" class="campus-progress-fill"></span></div>
-      <div class="campus-progress-meta"><span id="offline-package-assets">not started</span><strong id="offline-campus-progress-percent">0%</strong></div>
-      <button id="download-offline-package" class="campus-retry" type="button">Download offline campus</button>
+  <section class="install-card quest-threshold" aria-labelledby="install-title">
+    <div class="quest-opening">
+      <div class="quest-guide" aria-hidden="true">
+        <div class="quest-guide-sprite"></div>
+        <span class="quest-guide-label">Weaveling · Civweave Commons</span>
+      </div>
+      <div class="install-copy quest-copy">
+        <small>WEAVELING · YOUR FIRST GUIDE</small>
+        <h2 id="install-title">Ready, Hero? Take Civweave with you.</h2>
+        <p><strong>You do not need to prepare the whole world before you enter it.</strong> Start with the small Civweave app. Once inside, bring along the offline campus, knowledge, visuals, and local AI only when your road actually needs them.</p>
+        <span class="quest-no-commit">Installing does not join a Guild, create a Quest, or commit you to a Party.</span>
+      </div>
     </div>
 
-    <div class="gateway-actions"><button id="install-app" class="primary" type="button">Install Civweave</button><button id="check-update" class="secondary" type="button">Check release</button></div>
-    <p id="install-help" class="install-help" role="status">Ready when you are. Nothing large downloads until you ask for it.</p>
-    <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">not prepared</dd></div><div><dt>Shell files</dt><dd id="package-assets">starts on install</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">small shell · optional code-first campus · visuals and models on demand</dd></div></dl>
+    <div class="topology quest-route" aria-label="Your first three Civweave steps">
+      <article><b>1</b><strong>Carry Civweave</strong><span>Install the small app shell so the doorway lives on your device.</span></article>
+      <i>→</i>
+      <article><b>2</b><strong>Cross the threshold</strong><span>Open Civweave from your app launcher and enter the Commons as a Hero.</span></article>
+      <i>→</i>
+      <article><b>3</b><strong>Pack for the road</strong><span>Add the offline campus when you want Civweave to travel beyond a dependable connection.</span></article>
+    </div>
+
+    <div class="quest-install-controls">
+      <div id="campus-install-progress" class="campus-install-progress" data-state="idle" aria-live="polite">
+        <div class="campus-progress-heading"><span>Offline road pack</span><strong id="offline-package-state">not downloaded</strong></div>
+        <div id="offline-campus-progress-track" class="campus-progress-track" role="progressbar" aria-label="Offline campus download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="offline-campus-progress-fill" class="campus-progress-fill"></span></div>
+        <div class="campus-progress-meta"><span id="offline-package-assets">not started</span><strong id="offline-campus-progress-percent">0%</strong></div>
+        <button id="download-offline-package" class="campus-retry" type="button">Download offline campus</button>
+      </div>
+
+      <div class="gateway-actions">
+        <button id="install-app" class="primary" type="button">Install Civweave</button>
+        <button id="check-update" class="secondary" type="button">Check release</button>
+      </div>
+      <p id="install-help" class="install-help" role="status">The threshold is light by design. Nothing large downloads until you ask for it.</p>
+
+      <details class="quest-technical">
+        <summary>Traveler's pack · technical details</summary>
+        <dl class="package-state" aria-label="App shell state">
+          <div><dt>App shell</dt><dd id="package-state">not prepared</dd></div>
+          <div><dt>Shell files</dt><dd id="package-assets">starts on install</dd></div>
+          <div><dt>Storage lanes</dt><dd id="local-mode">small shell · optional code-first campus · visuals and models on demand</dd></div>
+        </dl>
+      </details>
+    </div>
   </section>
 
-  <section class="knowledge-card" aria-labelledby="knowledge-school-title" data-lazy-offline-tools>
+  <section class="knowledge-card quest-sidepath" aria-labelledby="knowledge-school-title" data-lazy-offline-tools>
     <div class="knowledge-school-copy">
-      <small>OPTIONAL OFFLINE KNOWLEDGE</small>
-      <h2 id="knowledge-school-title">Knowledge packs wait until you use this section.</h2>
-      <p>School catalogs, video-atlas tools, and open-media installers are no longer loaded during the first installer paint. Interact with this section when you actually want those offline libraries.</p>
+      <small>OPTIONAL SIDE PATH · OFFLINE KNOWLEDGE</small>
+      <h2 id="knowledge-school-title">Pack a library only when the Quest calls for one.</h2>
+      <p>School catalogs, video-atlas tools, and open-media packs stay asleep at the threshold. Open this path when you want durable offline references for learning, making, research, or field work.</p>
     </div>
     <div id="knowledge-school-presets" class="knowledge-school-presets" aria-label="Knowledge school presets">
       <button type="button" data-school-preset="human-worlds">Human worlds</button>
@@ -63,19 +102,37 @@
       <button type="button" data-school-preset="all">All schools</button>
       <button type="button" data-school-preset="none">None</button>
     </div>
-    <div id="knowledge-school-list" class="knowledge-school-list" aria-live="polite"><p>Tap this section to load the optional knowledge catalog.</p></div>
-    <div class="knowledge-school-summary"><strong id="knowledge-school-total">Not loaded</strong><span>Saved schools survive app-shell cleanup and updates.</span></div>
-    <div class="gateway-actions knowledge-school-actions"><button id="stage-knowledge-schools" class="primary" type="button" disabled>Load optional catalog first</button><button id="remove-knowledge-schools" class="secondary" type="button" disabled>Remove selected saved schools</button><a href="/downloads/knowledge-schools/README.md">Manual and node install</a></div>
-    <p id="knowledge-school-help" class="install-help" role="status">Optional tools are dormant until this section is used.</p>
+    <div id="knowledge-school-list" class="knowledge-school-list" aria-live="polite"><p>Open this side path to see the optional knowledge catalog.</p></div>
+    <div class="knowledge-school-summary"><strong id="knowledge-school-total">Not loaded</strong><span>Saved schools stay with you through app-shell cleanup and updates.</span></div>
+    <div class="gateway-actions knowledge-school-actions"><button id="stage-knowledge-schools" class="primary" type="button" disabled>Load optional catalog first</button><button id="remove-knowledge-schools" class="secondary" type="button" disabled>Remove selected saved schools</button><a href="/downloads/knowledge-schools/README.md">Manual and Guild install</a></div>
+    <p id="knowledge-school-help" class="install-help" role="status">This path remains dormant until you choose it.</p>
   </section>
 
-  <section class="gateway-grid">
-    <article class="status-card"><small>HERO · QUEST · PARTY</small><h3>Your path can become a shared adventure</h3><p>You are a Hero. State an intention and Civweave shapes it into a Quest. You can work solo whenever that fits, but Civweave will help you find other Heroes and form a Party when the Quest is better tackled together.</p></article>
-    <article class="status-card"><small>GUILD · GUILDKEEPER</small><h3>Find a community that can hold the road open</h3><p>Civweave host nodes are Guilds in the story-world. Their Guildkeepers keep the infrastructure dependable and look for Heroes to join, meet one another, form Parties, and take on Quests together.</p></article>
-    <article class="status-card"><small>FAST FRONT DOOR</small><h3>No campus crawl before your first click</h3><p>The page paints first. Shell setup begins only when you install, check the release, or explicitly request the offline campus.</p></article>
-    <article class="status-card"><small>LAZY VISUALS</small><h3>Pictures can arrive room by room</h3><p>Large visual assets and fonts no longer belong to offline-campus completion. Normal runtime caching keeps them as the device actually visits those spaces.</p></article>
-    <article class="status-card"><small>PORTABLE RECOVERY</small><h3>Carry the package another way</h3><div class="card-actions"><a href="/downloads/Civweave-Mobile-Install-Kit.zip">Mobile install kit</a><a href="/downloads/civweave-pocket-campus.cwseed">Pocket Campus seed</a><a href="/downloads/knowledge-schools/catalog.json">Knowledge school catalog</a></div></article>
+  <section class="gateway-grid quest-road-grid" aria-label="What waits beyond the threshold">
+    <article class="status-card">
+      <small>NEXT · NAME THE QUEST</small>
+      <h3>Bring an intention. It does not need to be polished.</h3>
+      <p>Inside Civweave, Weaveling helps turn what you want to make possible into an editable Quest: a path through whatever learning, work, resources, and agreements the intention actually requires.</p>
+    </article>
+    <article class="status-card">
+      <small>PARTY · WHEN THE ROAD IS SHARED</small>
+      <h3>Travel solo, or gather Heroes around the same Quest.</h3>
+      <p>Solo work remains fully valid. When different strengths belong together, Civweave helps Heroes find one another and form a Party without forcing every Quest into a committee meeting with snacks.</p>
+    </article>
+    <article class="status-card">
+      <small>GUILD · A LOCAL HEARTH</small>
+      <h3>Find a Guild that can keep your local world connected.</h3>
+      <p>Guilds are Civweave host nodes. Their Guildkeepers keep infrastructure dependable and welcome Heroes into a community that can share capacity, find collaborators, and keep working when the wider network gets unreliable.</p>
+    </article>
+    <article class="status-card">
+      <small>RECOVERY · ANOTHER ROAD HOME</small>
+      <h3>Carry Civweave another way when you need to.</h3>
+      <p>The ordinary doorway is only one route. Portable install and seed files can move the essentials between devices or communities when the network is inconvenient, unavailable, or simply being dramatic.</p>
+      <div class="card-actions"><a href="/downloads/Civweave-Mobile-Install-Kit.zip">Mobile install kit</a><a href="/downloads/civweave-pocket-campus.cwseed">Pocket Campus seed</a><a href="/downloads/knowledge-schools/catalog.json">Knowledge catalog</a></div>
+    </article>
   </section>
+
+  <p class="quest-footer-note">The installer stays deliberately small. Civweave grows on your device as your Quest asks for more of it.</p>
 </main>
 <script src="/app/civweave-brand.js?v=1.0.162"></script>
 <script src="/install-v130.js?v=1.0.162-lightweight-shell-v208"></script>
@@ -153,7 +210,7 @@
     if(started)return;
     started=true;
     const help=document.querySelector('#knowledge-school-help');
-    if(help)help.textContent='Loading optional offline knowledge tools…';
+    if(help)help.textContent='Opening the optional knowledge path…';
     for(const src of classic)await appendClassic(src);
     const module=document.createElement('script');
     module.type='module';
