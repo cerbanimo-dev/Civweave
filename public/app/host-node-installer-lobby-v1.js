@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'host-node-installer-lobby-v3-hub-login-nearest-search';
+const REVISION = 'host-node-installer-lobby-v4-citizen-patron-capacity';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const HOST_SELECTION_KEY = 'civweave.host-node.selection.v1';
 const STEWARD_KEY = 'civweave.host-steward.v1';
@@ -159,20 +159,20 @@ function buildLobby() {
       <span class="cw-host-node-live" id="cw-host-node-live" data-state="checking">${host ? 'Checking status' : 'Choose a Hub'}</span>
     </div>
     <div class="cw-host-node-slots" aria-label="Host Node membership capacity">
-      <article class="cw-host-slot"><small>Free slots</small><strong id="cw-host-free-slots">—</strong><span>Community residency available on this host.</span></article>
-      <article class="cw-host-slot"><small>Paid slots</small><strong id="cw-host-paid-slots">—</strong><span>Additional paid-expansion residency available.</span></article>
+      <article class="cw-host-slot"><small>Citizen slots</small><strong id="cw-host-free-slots">—</strong><span>Citizen residency available on this host.</span></article>
+      <article class="cw-host-slot"><small>Patron slots</small><strong id="cw-host-paid-slots">—</strong><span>Additional Patron residency available on this host.</span></article>
     </div>
-    <p class="cw-host-node-note" id="cw-host-node-note">${host ? 'Reading the Hub’s live capacity before you join.' : 'Find the nearest Hub with community or paid-expansion capacity. Your exact location is never sent; Civweave rounds it before searching.'}</p>
+    <p class="cw-host-node-note" id="cw-host-node-note">${host ? 'Reading the Hub’s live capacity before you join.' : 'Find the nearest Hub with Citizen or Patron capacity. Your exact location is never sent; Civweave rounds it before searching.'}</p>
     <div class="cw-host-node-actions">
       <button class="cw-host-node-join" id="cw-host-node-join" type="button" ${host ? 'disabled' : ''} data-mode="${host ? 'join' : 'search'}">${host ? (localFederated ? 'Use this Hub Node' : 'Join & log in') : 'Find an open Hub'}</button>
       ${localFederated && stewardBrowser() ? '<a class="cw-host-node-steward" id="cw-host-node-steward" href="/app/node-ai-operator-v1.html">Hub steward tools</a>' : ''}
       <button class="cw-host-node-refresh" id="cw-host-node-refresh" type="button" ${host ? '' : 'hidden'}>Refresh status</button>
     </div>
-    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a Civweave federated Hub Node. Steward controls stay local to this node.' : 'A Hub login is device-bound and stored locally. Joining never silently starts a paid membership.'}</p>
+    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a Civweave federated Hub Node. Steward controls stay local to this node.' : 'A Hub login is device-bound and stored locally. Joining never silently starts a Patron membership.'}</p>
     <section class="cw-host-node-search" id="cw-host-node-search" ${host ? 'hidden' : ''} aria-labelledby="cw-host-node-search-title">
       <h3 id="cw-host-node-search-title">Nearest Hubs with open slots</h3>
-      <p>Choose which capacity counts as open. Paid-expansion access still requires an active Civweave membership.</p>
-      <div class="cw-host-node-search-controls"><label>Show slots<select id="cw-host-node-search-mode"><option value="both">Free or paid</option><option value="free">Free only</option><option value="paid">Paid only</option></select></label><button type="button" id="cw-host-node-search-run">Use my approximate location</button></div>
+      <p>Choose which capacity counts as open. Patron capacity still requires an active Civweave membership.</p>
+      <div class="cw-host-node-search-controls"><label>Show slots<select id="cw-host-node-search-mode"><option value="both">Citizen or Patron</option><option value="free">Citizen only</option><option value="paid">Patron only</option></select></label><button type="button" id="cw-host-node-search-run">Use my approximate location</button></div>
       <p class="cw-host-node-search-status" id="cw-host-node-search-status" role="status">Location is requested only when you start a nearest-Hub search.</p>
       <div class="cw-host-node-results" id="cw-host-node-results"></div>
     </section>
@@ -232,7 +232,7 @@ function renderSearchResults(packet) {
   if (!results) return;
   results.innerHTML = rows.map(node => {
     const distance = Number.isFinite(Number(node.distanceKm)) ? `${Number(node.distanceKm).toFixed(Number(node.distanceKm) < 10 ? 1 : 0)} km away` : 'distance unavailable';
-    return `<button type="button" class="cw-host-node-result" data-hub-origin="${esc(node.hostOrigin)}" data-hub-node-id="${esc(node.nodeId || '')}"><span><strong>${esc(node.displayName || node.nodeId || 'Civweave Hub')}</strong><span>${esc(distance)} · ${esc(node.nodeId || '')}</span></span><em>${numberText(node?.slots?.free)} free · ${numberText(node?.slots?.paid)} paid</em></button>`;
+    return `<button type="button" class="cw-host-node-result" data-hub-origin="${esc(node.hostOrigin)}" data-hub-node-id="${esc(node.nodeId || '')}"><span><strong>${esc(node.displayName || node.nodeId || 'Civweave Hub')}</strong><span>${esc(distance)} · ${esc(node.nodeId || '')}</span></span><em>${numberText(node?.slots?.free)} Citizen · ${numberText(node?.slots?.paid)} Patron</em></button>`;
   }).join('');
 }
 
@@ -313,7 +313,7 @@ function renderStatus(packet) {
   if (packet.capacityAvailable && packet.slots) {
     if (free) free.textContent = numberText(packet.slots.free);
     if (paid) paid.textContent = numberText(packet.slots.paid);
-    if (note) note.textContent = 'Free slots are community seats. A community resident may later become paid without consuming one of the paid-expansion slots.';
+    if (note) note.textContent = 'Citizen slots are community seats. A Citizen may later become a Patron without consuming a Patron slot reserved for additional capacity.';
   } else if (localFederated) {
     if (free) free.textContent = 'Not published';
     if (paid) paid.textContent = 'Not published';
@@ -333,7 +333,7 @@ function renderStatus(packet) {
   if (help && selectedOrigin() !== normalizedHost()) {
     help.textContent = localFederated
       ? 'Use this Host Node makes this Docker node the selected Host for this device. Open Host steward tools for local operator controls.'
-      : 'Joining sets this as your device’s Host Node. It does not silently start a paid membership.';
+      : 'Joining sets this as your device’s Host Node. It does not silently start a Patron membership.';
   }
   renderSelectedState();
 }
@@ -360,7 +360,7 @@ async function loadLocalStatus() {
       status: health.appAvailable === false ? 'degraded' : 'online',
       slots: null,
       capacityAvailable: false,
-      capacityMessage: 'This Docker Host Node is live. Free/paid seat accounting is not exposed by the local federated runtime yet, so Civweave will not invent capacity numbers.',
+      capacityMessage: 'This Docker Host Node is live. Citizen/Patron seat accounting is not exposed by the local federated runtime yet, so Civweave will not invent capacity numbers.',
       appAvailable: health.appAvailable !== false,
     };
   } catch (error) {
