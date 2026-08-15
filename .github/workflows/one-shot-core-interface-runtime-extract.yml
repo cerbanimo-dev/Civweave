@@ -24,7 +24,9 @@ jobs:
       - name: Fetch architecture source
         run: git fetch origin agent/core-interface-runtime-v1:refs/remotes/origin/agent/core-interface-runtime-v1
       - name: Extract onto current main
-        run: python .github/scripts/one-shot-core-interface-runtime-extract.py
+        run: |
+          python .github/scripts/one-shot-core-interface-runtime-extract.py
+          python .github/scripts/one-shot-migrate-cleanroom-to-core-runtime.py
       - name: Verify syntax and ownership
         run: |
           node --check public/app/core-interface-runtime-v1.js
@@ -68,9 +70,9 @@ jobs:
           node scripts/verify-civweave-systems-mesh-v251.mjs
       - name: Commit extracted architecture and remove helpers
         run: |
-          git rm .github/workflows/one-shot-core-interface-runtime-extract.yml .github/scripts/one-shot-core-interface-runtime-extract.py
+          git rm .github/workflows/one-shot-core-interface-runtime-extract.yml .github/scripts/one-shot-core-interface-runtime-extract.py .github/scripts/one-shot-migrate-cleanroom-to-core-runtime.py
           git config user.name 'cerbanimo-dev'
           git config user.email 'cerbanimo@gmail.com'
-          git add .github/workflows/verify-core-interface-runtime-v1.yml config/system-ownership.json docs/architecture/core-interface-runtime-v1.md public/app/core-interface-runtime-v1.js public/app/install-boundary-v146.js public/service-worker-critical-v199.js scripts/sync-release-coherence-v220.mjs scripts/verify-system-ownership-v317.mjs
+          git add .github/workflows/verify-core-interface-runtime-v1.yml config/system-ownership.json docs/architecture/core-interface-runtime-v1.md public/app/core-interface-runtime-v1.js public/app/install-boundary-v146.js public/service-worker-critical-v199.js scripts/sync-release-coherence-v220.mjs scripts/verify-system-ownership-v317.mjs scripts/verify-ai-settings-cleanroom-v188.mjs
           git commit -m 'Extract five-system core interface runtime onto current main'
           git push origin HEAD:helper/core-interface-runtime-current
