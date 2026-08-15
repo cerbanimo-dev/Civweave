@@ -2,13 +2,15 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 
-const runtime=fs.readFileSync(new URL('../public/app/realm-session-integrity-v237.js',import.meta.url),'utf8');
-const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
-const workspace=fs.readFileSync(new URL('../public/app/guide-workspace-v242.js',import.meta.url),'utf8');
-const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
-const version=fs.readFileSync(new URL('../VERSION',import.meta.url),'utf8').trim();
-
-new Function(runtime);new Function(boundary);new Function(workspace);
+const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const runtime=read('public/app/realm-session-integrity-v237.js');
+const boundary=read('public/app/install-boundary-v146.js');
+const chat=read('public/app/guide-chat-surface-v350.js');
+const compat=read('public/app/guide-workspace-v242.js');
+const ownership=JSON.parse(read('config/system-ownership.json'));
+const pkg=JSON.parse(read('package.json'));
+const version=read('VERSION').trim();
+for(const source of [runtime,boundary,chat,compat])new Function(source);
 
 const checks=[
   ['realm-local ledgers are data-only and migrate old storage once',()=>{
@@ -17,7 +19,6 @@ const checks=[
     assert.match(runtime,/localStorage\.removeItem\(legacyThreadKey\(system\)\)/);
     assert.match(runtime,/localStorage\.removeItem\(OLD_SHARED_KEY\)/);
     assert.match(runtime,/dataOnly:true/);
-    assert.match(runtime,/canonicalChatOwner:'guide-workspace-v242'/);
     for(const forbidden of ['function mountChat','function openChat','function onSubmit','function onTrigger','data-persistent-form','cwp215-launcher','MutationObserver'])assert.ok(!runtime.includes(forbidden),`realm session still owns retired chat UI: ${forbidden}`);
   }],
   ['handover packets remain data operations only',()=>{
@@ -34,15 +35,17 @@ const checks=[
   }],
   ['utility repairs are bounded and event-driven',()=>{
     for(const label of ['GitHub repository','GitHub automation dispatch','AI task validator automation endpoint'])assert.ok(runtime.includes(`'${label}'`),label);
-    assert.match(runtime,/cw237-setup-tutorial/);assert.match(runtime,/FOUNDATION_SCHOOLS/);assert.match(runtime,/evaluate-assessment/);assert.match(runtime,/\/app\/logos\/civweave-app-icon\.png/);assert.match(runtime,/--cw-top-safe-height/);
+    assert.match(runtime,/cw237-setup-tutorial/);assert.match(runtime,/FOUNDATION_SCHOOLS/);assert.match(runtime,/evaluate-assessment/);assert.match(runtime,/--cw-top-safe-height/);
     assert.doesNotMatch(runtime,/setInterval\(/);assert.doesNotMatch(runtime,/new MutationObserver/);
   }],
-  ['canonical boundary loads data layer then one v242 chat owner',()=>{
-    assert.match(boundary,/REALM_SESSION_INTEGRITY='\/app\/realm-session-integrity-v237\.js'/);assert.match(boundary,/GUIDE_WORKSPACE='\/app\/guide-workspace-v242\.js'/);
+  ['canonical boundary loads data layer then one V350 chat owner',()=>{
+    assert.equal(ownership.systems?.['guide-chat']?.owner,'public/app/guide-chat-surface-v350.js');
+    assert.match(boundary,/REALM_SESSION_INTEGRITY='\/app\/realm-session-integrity-v237\.js'/);assert.match(boundary,/GUIDE_WORKSPACE='\/app\/guide-chat-surface-v350\.js'/);
     const start=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=boundary.indexOf('];',start),experience=boundary.slice(start,end);
     assert.ok(experience.indexOf('REALM_SESSION_INTEGRITY,')<experience.indexOf('GUIDE_WORKSPACE,'));
     assert.doesNotMatch(boundary,/PERSISTENT_GUIDE_CHAT_SCRIPT|PERSISTENT_GUIDE_VIEWPORT_SCRIPT/);
-    assert.match(workspace,/canonicalOwner:true/);
+    assert.match(chat,/presentationOwner:'guide-chat-surface-v350'/);assert.match(chat,/canonicalOwner:true/);
+    assert.match(compat,/const TARGET='\/app\/guide-chat-surface-v350\.js'/);assert.doesNotMatch(compat,/data-persistent-form|new MutationObserver/);
   }],
   ['release metadata agrees and syntax gate includes the data layer',()=>{
     assert.match(version,/^\d+\.\d+\.\d+$/);assert.equal(pkg.version,version);assert.match(pkg.scripts['check:syntax'],/public\/app\/realm-session-integrity-v237\.js/);
@@ -57,8 +60,7 @@ const sandbox={console,Date,Math,JSON,Promise,URL,URLSearchParams,structuredClon
 sandbox.globalThis=sandbox;
 vm.runInNewContext(runtime,sandbox,{filename:'realm-session-integrity-v237.js'});
 const api=sandbox.CivweaveRealmSessionIntegrityV237;
-assert.equal(api.dataOnly,true);assert.equal(api.canonicalChatOwner,'guide-workspace-v242');assert.equal(api.foundationSchools.length,11);assert.equal(api.foundationSchools.reduce((sum,row)=>sum+row.articles,0),1001);assert.ok(api.recommendedSchools('beginner meditation and attention').includes('philosophy-and-religion'));
+assert.equal(api.dataOnly,true);assert.equal(api.foundationSchools.length,11);assert.equal(api.foundationSchools.reduce((sum,row)=>sum+row.articles,0),1001);assert.ok(api.recommendedSchools('beginner meditation and attention').includes('philosophy-and-religion'));
 const action={id:'rook-1',system:'fellowfare',state:'clarifying',fields:{needOrOffer:'Need'},missingRequired:['maximum budget or exchange method'],approval:{required:true,label:'Submit request'}};
 store.set('civweave.realm-actions.v141',JSON.stringify([action]));api.repairFellowFareAction(action,'maximum budget is unlimited and exchange method is buttons finalize_exchange_parameters');assert.equal(action.fields.exchangeMethod,'Buttons');assert.equal(action.fields.budgetPolicy,'Unlimited');assert.deepEqual(action.missingRequired,[]);assert.equal(action.state,'review');assert.equal(action.approval.label,'Finalize & publish request');
-
-console.log(`Realm session integrity v237 verified data-only: ${checks.length}/${checks.length} static contracts plus behavioral state checks passed.`);
+console.log(`Realm session integrity v237 verified beneath V350: ${checks.length}/${checks.length} static contracts plus behavioral state checks passed.`);
