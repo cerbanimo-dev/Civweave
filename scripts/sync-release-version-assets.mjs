@@ -36,6 +36,7 @@ await patch('public/app/index.html',source=>{
   source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
   source=source.replace(/\d+\.\d+\.\d+-offline-retry-loop-v211/g,`${version}-offline-retry-loop-v211`);
   source=source.replace(/\d+\.\d+\.\d+-required-campus-v1/g,`${version}-required-campus-v1`);
+  if(source.includes('/app/installer-repair-only-v1.js')||source.includes('/app/installer-online-fallback-v225.js'))throw new Error('Installer release sync must not resurrect retired repair sidecars.');
   return source;
 });
 
@@ -78,7 +79,8 @@ await patch('public/service-worker-core-v208.js',source=>{
 await patch('public/service-worker-v203.js',source=>{
   source=replaceRequired(source,/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'worker route contract revision');
   source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`,'service-worker wrapper revision');
-  source=source.replace(/service-worker-shell-repair-v225\.js\?v=[^'\n]+/,`service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1`);
+  if(source.includes('service-worker-shell-repair-v225.js'))throw new Error('Release sync must not resurrect retired shell repair v225.');
+  if(!source.includes("service-worker-shell-repair-v293.js?v=installed-shell-repair-v293"))throw new Error('Installed shell repair v293 must remain the sole repair responder.');
   return source;
 });
 await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+(?:-code-coherence-v288)?-lightweight-shell-v208-legacy-v156-bridge-v209(?:-working-campus-return-v425)?/,`service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425`,'legacy worker bridge revision'));
@@ -127,4 +129,4 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
 
 await patch('scripts/verify-device-package-self-heal-v184.mjs',source=>source.replace(/v1\.0\.7/g,`v${version}`).replace(/1\.0\.7/g,version));
 
-console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',installOnlyPwa:'v1',changed},null,2));
+console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',installOnlyPwa:'v1',installedShellRepair:'v293-sole-owner',changed},null,2));

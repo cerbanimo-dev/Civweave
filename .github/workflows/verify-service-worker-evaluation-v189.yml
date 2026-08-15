@@ -26,7 +26,6 @@ on:
       - 'scripts/verify-release-version-sync.mjs'
       - 'scripts/verify-release-coherence-v220.mjs'
       - 'scripts/verify-navigation-redirect-safety-v224.mjs'
-      - 'scripts/verify-shell-self-repair-v225.mjs'
       - 'scripts/verify-installed-shell-repair-v293.mjs'
       - 'scripts/verify-document-lifecycle-v221.mjs'
       - 'scripts/verify-canonical-core-only-v226.mjs'
@@ -64,7 +63,6 @@ on:
       - 'scripts/verify-release-version-sync.mjs'
       - 'scripts/verify-release-coherence-v220.mjs'
       - 'scripts/verify-navigation-redirect-safety-v224.mjs'
-      - 'scripts/verify-shell-self-repair-v225.mjs'
       - 'scripts/verify-installed-shell-repair-v293.mjs'
       - 'scripts/verify-document-lifecycle-v221.mjs'
       - 'scripts/verify-canonical-core-only-v226.mjs'
@@ -119,10 +117,8 @@ jobs:
           node --check public/service-worker-campus-completion-v246.js
           node --check public/service-worker-release-coherence-v220.js
           node --check public/service-worker-navigation-safety-v224.js
-          node --check public/service-worker-shell-repair-v225.js
           node --check public/service-worker-canonical-navigation-v227.js
           node --check public/app/document-lifecycle-v221.js
-          node --check public/app/installer-online-fallback-v225.js
           node --check scripts/build-service-worker-v211.mjs
           node --check scripts/sync-release-version-assets.mjs
           node --check scripts/sync-release-coherence-v220.mjs
@@ -134,7 +130,6 @@ jobs:
           node --check scripts/verify-release-version-sync.mjs
           node --check scripts/verify-release-coherence-v220.mjs
           node --check scripts/verify-navigation-redirect-safety-v224.mjs
-          node --check scripts/verify-shell-self-repair-v225.mjs
           node --check scripts/verify-document-lifecycle-v221.mjs
           node --check scripts/verify-canonical-core-only-v226.mjs
           node --check scripts/verify-rook-assistant-package-v197.mjs
@@ -157,8 +152,6 @@ jobs:
         run: node scripts/verify-release-coherence-v220.mjs
       - name: Verify redirected navigation response safety
         run: node scripts/verify-navigation-redirect-safety-v224.mjs
-      - name: Verify empty shell self-repair and online fallback
-        run: node scripts/verify-shell-self-repair-v225.mjs
       - name: Verify installed shell in-place repair
         run: node scripts/verify-installed-shell-repair-v293.mjs
       - name: Verify all five canonical boundary surfaces

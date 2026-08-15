@@ -13,7 +13,7 @@ on:
       - 'docs/operations/cloudflare-setup.md'
       - 'public/index.html'
       - 'public/app/manifest.webmanifest'
-      - 'public/app/pwa-install-prompt-v246.js'
+      - 'public/app/pwa-install-prompt-v249.js'
       - 'public/app/host-deployment-v1.json'
       - 'public/app/host-steward-reminder-v1.js'
       - 'public/host-local-anchor.html'
@@ -82,10 +82,10 @@ jobs:
         env:
           CIVWEAVE_EXPECTED_VERSION: ${{ steps.expected.outputs.version }}
           CIVWEAVE_ALLOW_NEWER_VERSION: ${{ steps.expected.outputs.allow_newer }}
-          CIVWEAVE_PRODUCTION_URLS: https://civweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com
+          CIVWEAVE_PRODUCTION_URLS: https://civweave.cc,https://civweave.pages.dev
           CIVWEAVE_PROBE_ATTEMPTS: ${{ steps.expected.outputs.attempts }}
           CIVWEAVE_PROBE_DELAY_MS: ${{ steps.expected.outputs.delay }}
         run: node scripts/verify-production-boot-canary-v251.mjs
-      - name: Explain origin migration on pull requests
+      - name: Explain production probing on pull requests
         if: github.event_name == 'pull_request'
-        run: echo "PR checks validate the new civweave.pages.dev contract statically; live production probing begins after the canonical Pages project is deployed."
+        run: echo "PR checks validate the civweave.cc + civweave.pages.dev production topology statically; live probing begins after main deploys."
