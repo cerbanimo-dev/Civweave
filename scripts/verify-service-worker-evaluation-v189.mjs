@@ -4,7 +4,6 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 
-await import('./sync-release-version-assets.mjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
 const [legacy,wrapper,routes,cleanup,localAI,coherence,core,installedLaunch,installerState,integrity,offline,campusCompletion,release,navigation,shellRepair,canonical,chatRepair,localModel]=await Promise.all([
