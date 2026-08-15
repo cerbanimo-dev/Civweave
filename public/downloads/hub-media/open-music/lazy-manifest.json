@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-08-14T12:29:25Z",
-  "entry_count": 38,
+  "built_at": "2026-08-15T07:17:31Z",
+  "entry_count": 37,
   "entries": [
     {
       "candidate_id": "openmusic:569ec9ac3677c7bc12286dbb",
@@ -468,98 +468,6 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:f85a4448f10370dbf3ce3807",
-      "title": "Weeping Icon - Weeping Icon vinyl rip",
-      "artist": "Weeping Icon",
-      "source_url": "https://archive.org/details/weeping-icon-raw-wav",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Weeping Icon",
-        "source_title": "Weeping Icon - Weeping Icon vinyl rip",
-        "source_url": "https://archive.org/details/weeping-icon-raw-wav",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20WAV.wav",
-          "bytes": 828196962,
-          "provider_sha1": "3c52fe7971736d3e20c5fdf188f0ca348226c163",
-          "provider_md5": "7992337931b1d32a2e451f5105cee9bc",
-          "format": "WAVE",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20FLAC.flac",
-          "bytes": 417207231,
-          "provider_sha1": "850c6ff47b12471900efbb2d7fa67de68276ee29",
-          "provider_md5": "c01d0d1bb55d127dbf81c8e3b11de67c",
-          "format": "24bit Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B6%20Control.mp3",
-          "bytes": 14566230,
-          "provider_sha1": "70e5fa4fa5858d94ff5d08b2d01a39cca9980f3b",
-          "provider_md5": "4c8c895d6b2af5793ba8a7f01cba1cbd",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A8%20Natural%20Selection.mp3",
-          "bytes": 10444959,
-          "provider_sha1": "6ad5a2d5d64548431b06f0b82306011d53800776",
-          "provider_md5": "0c21830fa9090d23b563b46af628b835",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B4%20Live%20Envy.mp3",
-          "bytes": 10010072,
-          "provider_sha1": "00eb8852a7a77859320bd3ef6bc23abe092e6c45",
-          "provider_md5": "2cc6b69f473b51947c4ef8ccb67a8462",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B2%20Power%20Trip.mp3",
-          "bytes": 9670233,
-          "provider_sha1": "67aca8a202fdef8145f8de4dd1cd5b3a6eb99e40",
-          "provider_md5": "1bb1a9b79383651bfa4e295622929430",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A6%20Ripe%20for%20Consumption.mp3",
-          "bytes": 8510562,
-          "provider_sha1": "f1710c5d2a180800e94bb70c3b22b5fa50fb9e89",
-          "provider_md5": "723769e5d611043c33a836a2e62406ff",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A2%20Ankles.mp3",
-          "bytes": 8414548,
-          "provider_sha1": "9e49867a806a328517d4f07a5523a185fe17a340",
-          "provider_md5": "43c5a70b3ed8a87b0b04f6ae44729566",
-          "format": "VBR MP3",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
       "candidate_id": "openmusic:435e2b8b9211db3298be31f6",
       "title": "Machinination Podcast - May 2012 (IA MachininationMachininationPodcast-May2012)",
       "artist": "Machinination",
@@ -875,6 +783,66 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
+      "candidate_id": "openmusic:d1053bd3fca384b4be63cf2e",
+      "title": "Experimental Tides",
+      "artist": "Dusty Grimm",
+      "source_url": "https://archive.org/details/ExperimentalTides",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/3.0/us/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/us/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Dusty Grimm",
+        "source_title": "Experimental Tides",
+        "source_url": "https://archive.org/details/ExperimentalTides",
+        "license": "CC-BY",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/us/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/ExperimentalTides/1.mp3",
+          "bytes": 3473241,
+          "provider_sha1": "7950c614a4b5dc84b148ac85e67cd0f93c1f6354",
+          "provider_md5": "85c832f1a9dabe3b834abdd8f96fed77",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/ExperimentalTides/2.mp3",
+          "bytes": 3448477,
+          "provider_sha1": "8c1ea67fd5b1822767c6f381b80efcb3d6813887",
+          "provider_md5": "ad387332196895362f6977164af15098",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/ExperimentalTides/2.ogg",
+          "bytes": 2964525,
+          "provider_sha1": "5267ceb3d21832aad5af38cc3efc8716b5af7591",
+          "provider_md5": "fa58eb0a0fd4da0f0eb1de20aa24d550",
+          "format": "Ogg Vorbis",
+          "role": "derivative"
+        },
+        {
+          "url": "https://archive.org/download/ExperimentalTides/1.ogg",
+          "bytes": 2744723,
+          "provider_sha1": "a3a513879bb1bc6d6cb44edd7fbf69c9719c9f53",
+          "provider_md5": "6edaf26e2b839dab0d44ccbb025762c3",
+          "format": "Ogg Vorbis",
+          "role": "derivative"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
       "candidate_id": "openmusic:f7ee36f3919da8a5156a7579",
       "title": "Hit the Shop",
       "artist": "JML",
@@ -919,50 +887,6 @@
           "provider_sha1": "b2c1b2f430b8f1da93bd2a47836ce57a3581a681",
           "provider_md5": "297fd2882689d2fbc39bf1ff631429c7",
           "format": "64Kbps MP3",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
-      "candidate_id": "openmusic:6e3591aaedeab371a92e877e",
-      "title": "Music Manumit Music Only Podcast - Happy New Year!",
-      "artist": "tom@lorenzosmusic.com",
-      "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-HappyNewYear_",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC-BY-SA",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "attribution": {
-        "creator": "tom@lorenzosmusic.com",
-        "source_title": "Music Manumit Music Only Podcast - Happy New Year!",
-        "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-HappyNewYear_",
-        "license": "CC-BY-SA",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-HappyNewYear_/110101musicmanumitmusiconly.ogg",
-          "bytes": 44008204,
-          "provider_sha1": "162a15f151c9dac67cefc7f94aa68f0d30ac186e",
-          "provider_md5": "bc2e340a8fb01157b16d7e0f0c050f44",
-          "format": "Ogg Vorbis",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-HappyNewYear_/110101musicmanumitmusiconly.mp3",
-          "bytes": 47504070,
-          "provider_sha1": "969e8616640467978e585067990bcc3dbf2816da",
-          "provider_md5": "ba1c087f43528f29392cb58657eb75dc",
-          "format": "VBR MP3",
           "role": "derivative"
         }
       ],

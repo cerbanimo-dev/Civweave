@@ -1,11 +1,11 @@
 {
   "schema": "civweave.open-music-harvest-summary.v1",
-  "built_at": "2026-08-14T12:29:25Z",
-  "records": 38,
-  "daily_candidates": 38,
+  "built_at": "2026-08-15T07:17:31Z",
+  "records": 37,
+  "daily_candidates": 37,
   "providers": {
     "wikimedia-commons": 17,
-    "internet-archive": 6,
+    "internet-archive": 5,
     "ccmixter": 15
   },
   "failures": 2
