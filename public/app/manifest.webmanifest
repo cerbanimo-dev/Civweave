@@ -1,7 +1,7 @@
 {
   "name": "Civweave v1.0.160",
   "short_name": "Civweave",
-  "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
+  "description": "Five connected, offline-capable Civweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/civweave-local",
   "start_url": "/app/installed-entry-v146.html?installed=1",
   "scope": "/",
@@ -22,28 +22,6 @@
     "social"
   ],
   "prefer_related_applications": false,
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://civweave.cc/app/manifest.webmanifest",
-      "id": "https://civweave.cc/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://civweave.pages.dev/app/manifest.webmanifest",
-      "id": "https://civweave.pages.dev/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://commonweave.pages.dev/app/manifest.webmanifest",
-      "id": "https://commonweave.pages.dev/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://civweave-host-node.onrender.com/app/manifest.webmanifest",
-      "id": "https://civweave-host-node.onrender.com/civweave-local"
-    }
-  ],
   "icons": [
     {
       "src": "/app/logos/civweave-pwa-192-v247.png",
@@ -68,57 +46,27 @@
     {
       "name": "Civweave",
       "url": "/app/installed-entry-v146.html?installed=1&system=civweave",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "/app/logos/civweave-pwa-512-v247.png", "sizes": "512x512", "type": "image/png"}]
     },
     {
       "name": "Living School",
       "url": "/app/installed-entry-v146.html?installed=1&system=living-school",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "/app/logos/civweave-pwa-512-v247.png", "sizes": "512x512", "type": "image/png"}]
     },
     {
       "name": "Cerbanimo",
       "url": "/app/installed-entry-v146.html?installed=1&system=cerbanimo",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "/app/logos/civweave-pwa-512-v247.png", "sizes": "512x512", "type": "image/png"}]
     },
     {
       "name": "FellowFare",
       "url": "/app/installed-entry-v146.html?installed=1&system=fellowfare",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "/app/logos/civweave-pwa-512-v247.png", "sizes": "512x512", "type": "image/png"}]
     },
     {
       "name": "Anarchadia",
       "url": "/app/installed-entry-v146.html?installed=1&system=anarchadia",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{"src": "/app/logos/civweave-pwa-512-v247.png", "sizes": "512x512", "type": "image/png"}]
     }
   ]
 }

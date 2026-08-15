@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='canonical-five-system-navigation-v227';
+const REVISION='canonical-five-system-navigation-v227-local-first';
 const TIMEOUT_MS=9000;
 const ROUTE_SCRIPT='/app/system-routes-v227.js';
 const routes=self.CivweaveSystemRoutesV227;
@@ -19,7 +19,7 @@ async function normalize(response,request){
   const headers=new Headers(response.headers);
   headers.delete('content-length');headers.delete('content-encoding');headers.delete('location');
   headers.set('content-type',headers.get('content-type')||(request.mode==='navigate'?'text/html; charset=utf-8':'application/javascript; charset=utf-8'));
-  headers.set('x-civweave-canonical-navigation',REVISION);headers.set('cache-control','no-cache');
+  headers.set('x-civweave-canonical-navigation',REVISION);headers.set('x-civweave-local-first','cache-only-runtime');headers.set('cache-control','no-store');
   const body=request.method==='HEAD'?null:await response.clone().arrayBuffer();
   return new Response(body,{status:response.status,statusText:response.statusText,headers});
 }
@@ -40,21 +40,16 @@ async function precacheCanonicalRoutes(){
 function recoveryPage(pathname){
   const system=routes?.identify?.(pathname)||'civweave';
   const home=routes?.urlFor?.('civweave',{origin:self.location.origin}).href||'/app/working-campus-v156.html?installed=1';
-  const retry=new URL(pathname,self.location.origin);retry.searchParams.set('installed','1');retry.searchParams.set('navigation',REVISION);
-  return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave navigation recovery</title><style>html,body{margin:0;min-height:100%;background:#07131e;color:#f5f7ff;font:16px/1.5 system-ui}main{max-width:42rem;margin:auto;padding:12vh 1.25rem}a{display:inline-block;margin:.5rem .5rem 0 0;padding:.8rem 1rem;border-radius:.8rem;background:#1c3559;color:#fff;text-decoration:none}</style></head><body><main><h1>${system} could not open yet</h1><p>The requested system was not available from the network or this device package. Civweave did not substitute the installer or another system.</p><a href="${retry.pathname}${retry.search}">Retry this system</a><a href="${home}">Open Civweave</a></main></body></html>`,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-canonical-navigation':REVISION}});
+  const installer='/app/index.html?install=required&source=canonical-route-local-package-required';
+  return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave navigation recovery</title><style>html,body{margin:0;min-height:100%;background:#07131e;color:#f5f7ff;font:16px/1.5 system-ui}main{max-width:42rem;margin:auto;padding:12vh 1.25rem}a{display:inline-block;margin:.5rem .5rem 0 0;padding:.8rem 1rem;border-radius:.8rem;background:#1c3559;color:#fff;text-decoration:none}</style></head><body><main><h1>${system} is not installed locally yet</h1><p>The requested system is missing from this device package. Civweave did not fetch it from the network or substitute another system.</p><a href="${installer}">Open local package installer</a><a href="${home}">Open Civweave</a></main></body></html>`,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-canonical-navigation':REVISION,'x-civweave-local-first':'package-required'}});
 }
 self.addEventListener('install',event=>{event.waitUntil(precacheCanonicalRoutes().catch(()=>[]))});
-networkFirst=async function canonicalFiveSystemNetworkFirst(request,fallbackPath='/offline.html'){
+networkFirst=async function canonicalFiveSystemLocalFirst(request,fallbackPath='/offline.html'){
   if(!canonical(request))return originalNetworkFirst(request,fallbackPath);
   const pathname=new URL(request.url).pathname;
-  try{
-    const response=await withTimeout(fetch(packageRequest(request)),TIMEOUT_MS);
-    const normalized=await normalize(response,request);
-    if(normalized?.ok){if(request.method==='GET')await(await caches.open(RUNTIME_CACHE)).put(cacheKey(pathname),normalized.clone());return normalized}
-  }catch{}
   const cached=await findCached(pathname),normalized=await normalize(cached,request);
   if(normalized)return normalized;
   return recoveryPage(pathname);
 };
-self.CivweaveCanonicalNavigationV227=Object.freeze({revision:REVISION,timeoutMs:TIMEOUT_MS,routeScript:ROUTE_SCRIPT,routes:routes?.routes?.().map(route=>route.pathname)||[],policy:'exact-route-network-first-exact-route-cache-never-launcher-fallback',packageHeader:true,precache:true,precacheCount:6});
+self.CivweaveCanonicalNavigationV227=Object.freeze({revision:REVISION,timeoutMs:TIMEOUT_MS,routeScript:ROUTE_SCRIPT,routes:routes?.routes?.().map(route=>route.pathname)||[],policy:'exact-route-cache-only-never-runtime-network-fallback',packageHeader:true,precache:true,precacheCount:6,runtimeNetworkFallback:false});
 })();

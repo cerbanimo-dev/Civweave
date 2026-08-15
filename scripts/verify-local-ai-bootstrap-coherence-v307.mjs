@@ -10,20 +10,24 @@ const bootstrap=await readFile('public/app/local-ai/bootstrap-v266.js','utf8');
 const registry=await readFile('public/app/local-ai/model-registry-v266.js','utf8');
 const packageGuard=await readFile('public/app/local-ai/package-revision-guard-v307.js','utf8');
 
-assert.match(localAIGate,/CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307'/,'dedicated local AI code gate must advertise v307');
+assert.match(localAIGate,/CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307-local-first'/,'dedicated local AI code gate must advertise the local-first v307 revision');
 assert.match(localAIGate,/url\.pathname\.startsWith\('\/app\/local-ai\/'\)/,'all local AI modules must be owned by the dedicated gate');
 assert.match(localAIGate,/event\.stopImmediatePropagation\(\)/,'local AI gate must stop later generic cache handlers from owning the request');
-assert.match(localAIGate,/new Request\(pathnameOrRequest, \{ cache: 'no-store' \}\)/,'local AI gate must request current network bytes');
-assert.match(localAIGate,/cache\.match\(key, \{ ignoreSearch: true \}\).*caches\.match\(key, \{ ignoreSearch: true \}\)/s,'local AI gate must retain cached offline fallback');
-assert.match(localAIGate,/package-revision-guard-v307\.js/,'new package revision guard must be prefetched for offline recovery');
+assert.match(localAIGate,/headers: \{ 'x-civweave-package': 'local-ai-code-install' \}/,'local AI network acquisition must be marked as explicit package installation');
+assert.match(localAIGate,/const cached = await cache\.match\(key, \{ ignoreSearch: true \}\) \|\| await caches\.match\(key, \{ ignoreSearch: true \}\)/,'local AI runtime must resolve from device caches');
+assert.match(localAIGate,/policy: 'explicit-package-install-cache-only-runtime'/,'local AI gate must advertise cache-only runtime policy');
+assert.match(localAIGate,/runtimeNetworkFallback: false/,'local AI gate must forbid runtime network fallback');
+const fetchHandler=localAIGate.slice(localAIGate.indexOf("self.addEventListener('fetch'"),localAIGate.indexOf('self.CivweaveLocalAICodeCoherenceV307'));
+assert.doesNotMatch(fetchHandler,/\bfetch\s*\(/,'local AI runtime fetch handler must not contact the network');
+assert.match(localAIGate,/package-revision-guard-v307\.js/,'new package revision guard must be prefetched during package installation');
 
 const localGateImport="importScripts('/service-worker-local-ai-coherence-v307.js";
 const genericCodeImport="importScripts('/service-worker-code-coherence-v288.js";
 const coreImport="importScripts('/service-worker-core-v208.js";
-assert.ok(generated.includes(`${localGateImport}?v=${releaseVersion}-local-ai-code-coherence-v307`),'generated service worker must rotate the local AI coherence epoch with the release');
+assert.ok(generated.includes(`${localGateImport}?v=${releaseVersion}-local-ai-code-coherence-v307-local-first`),'generated service worker must rotate the local-first local AI coherence epoch with the release');
 assert.ok(generated.indexOf(localGateImport)>=0&&generated.indexOf(localGateImport)<generated.indexOf(genericCodeImport)&&generated.indexOf(genericCodeImport)<generated.indexOf(coreImport),'local AI code gate must register before generic code coherence and the shell core');
-assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=\$\{version\}-local-ai-code-coherence-v307/,'service worker generator must preserve the local AI v307 epoch');
-assert.match(builder,/localAICodeCoherence:'v307-network-first-pre-core'/,'service worker diagnostics must expose the dedicated local AI code policy');
+assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=\$\{version\}-local-ai-code-coherence-v307-local-first/,'service worker generator must preserve the local-first local AI v307 epoch');
+assert.match(builder,/localAICodeCoherence:'v307-explicit-package-install-cache-only-runtime'/,'service worker diagnostics must expose the local-first local AI code policy');
 assert.match(generated,/working-campus-return-v425/,'local AI worker changes must preserve the current Working Campus return epoch');
 assert.match(generated,/chat-convergence-v250/,'local AI worker changes must preserve the current chat convergence epoch');
 
@@ -59,9 +63,9 @@ assert.match(packageGuard,/preservesCachedWeights:true/,'migration must preserve
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-bootstrap-coherence-v307',
+  revision:'local-ai-bootstrap-coherence-v307-local-first',
   releaseVersion,
-  localAICodeDelivery:'dedicated-network-first-pre-core-offline-cache-fallback',
+  localAICodeDelivery:'explicit-package-install-then-cache-only-runtime',
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
   incompatibleGlobals:'evicted-before-reload',
   gemma3Profile:'transformers-js-v4-q4-optimized',

@@ -2,7 +2,6 @@ import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-await import('./sync-release-version-assets.mjs');
 await import('./verify-release-version-sync.mjs');
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');

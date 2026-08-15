@@ -30,7 +30,8 @@ await patch('public/index.html',source=>{
 await patch('public/app/index.html',source=>{
   source=replaceRequired(source,/<title>Install Civweave v\d+\.\d+\.\d+<\/title>/,`<title>Install Civweave v${version}</title>`,'installer title');
   source=replaceRequired(source,/<span class="version">v\d+\.\d+\.\d+<\/span>/,`<span class="version">v${version}</span>`,'installer version badge');
-  source=replaceRequired(source,/(?:Install Civweave v\d+\.\d+\.\d+\. The campus downloads automatically\.|Install the shell\. Open Civweave immediately\. Download offline files only when you choose\.|Install the shell\. Launch Civweave from your device app launcher\. Download offline files only when you choose\.)/,`Install the shell. Launch Civweave from your device app launcher. Download offline files only when you choose.`,'installer headline');
+  const installerHeadline='Civweave installs in two local stages. The campus is required; models, media, and knowledge packs are not.';
+  source=replaceRequired(source,/(?:Install Civweave v\d+\.\d+\.\d+\. The campus downloads automatically\.|Install the shell\. Open Civweave immediately\. Download offline files only when you choose\.|Install the shell\. Launch Civweave from your device app launcher\. Download offline files only when you choose\.|Civweave installs in two local stages\. The campus is required; models, media, and knowledge packs are not\.)/,installerHeadline,'installer headline');
   source=source.replace(/manifest\.webmanifest\?v=\d+\.\d+\.\d+/g,`manifest.webmanifest?v=${version}`);
   source=source.replace(/civweave-brand\.js\?v=\d+\.\d+\.\d+/g,`civweave-brand.js?v=${version}`);
   source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
@@ -54,7 +55,7 @@ await patch('public/app/manifest.webmanifest',source=>{
   return `${JSON.stringify(manifest,null,2)}\n`;
 });
 
-await patch('public/install-v130.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'installer runtime version'));
+await patch('public/install-v130.js',source=>replaceRequired(source,/const VERSION\s*=\s*'\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'installer runtime version'));
 await patch('public/app/installed-entry-v146.html',source=>replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'installed entry revision'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed-entry fallback version');
@@ -78,7 +79,7 @@ await patch('public/service-worker-core-v208.js',source=>{
 await patch('public/service-worker-v203.js',source=>{
   source=replaceRequired(source,/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'worker route contract revision');
   source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`,'service-worker wrapper revision');
-  source=source.replace(/service-worker-shell-repair-v225\.js\?v=[^'\n]+/,`service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1`);
+  source=source.replace(/service-worker-shell-repair-v225\.js\?v=[^'\n]+/,`service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1-local-first`);
   return source;
 });
 await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+(?:-code-coherence-v288)?-lightweight-shell-v208-legacy-v156-bridge-v209(?:-working-campus-return-v425)?/,`service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425`,'legacy worker bridge revision'));
@@ -127,4 +128,4 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
 
 await patch('scripts/verify-device-package-self-heal-v184.mjs',source=>source.replace(/v1\.0\.7/g,`v${version}`).replace(/1\.0\.7/g,version));
 
-console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',installOnlyPwa:'v1',changed},null,2));
+console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',installOnlyPwa:'v1',localFirstInstaller:true,changed},null,2));

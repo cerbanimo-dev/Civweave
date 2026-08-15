@@ -1,21 +1,12 @@
 ;(()=>{
 'use strict';
 
-// Installed launches are an app-shell boundary, never an installer fallback.
-const V282_REVISION='installed-pwa-launch-v294-campus-recovery';
+const V282_REVISION='installed-pwa-launch-v294-campus-recovery-local-first';
 const V282_ENTRY_PATH='/app/installed-entry-v146.html';
 const V282_CAMPUS_PATH='/app/working-campus-v156.html';
 
-async function v282Resolve(pathname,purpose,cacheName){
-  let response=await findCached(pathname);
-  if(response)return response;
-  try{
-    const fetched=await fetchFresh(pathname,purpose);
-    if(!responseLooksValid(fetched,pathname))return null;
-    response=fetched;
-    await (await caches.open(cacheName)).put(cacheKey(pathname),response.clone());
-    return response;
-  }catch{return null}
+async function v282Resolve(pathname){
+  return findCached(pathname);
 }
 
 function v282CampusRecoveryLauncher(request){
@@ -29,23 +20,25 @@ function v282CampusRecoveryLauncher(request){
     'content-type':'text/html; charset=utf-8',
     'cache-control':'no-store',
     'x-civweave-installed-launch':V282_REVISION,
-    'x-civweave-installed-recovery':'working-campus'
+    'x-civweave-installed-recovery':'working-campus',
+    'x-civweave-local-first':'cache-only-runtime'
   };
   if(request.method==='HEAD')return new Response(null,{status:200,headers});
   return new Response(body,{status:200,headers});
 }
 
 async function v282InstalledAppEntry(request){
-  const response=await v282Resolve(V282_ENTRY_PATH,'installed-app-entry',SHELL_CACHE);
+  const response=await v282Resolve(V282_ENTRY_PATH);
   if(!response){
-    const campus=await v282Resolve(V282_CAMPUS_PATH,'installed-campus-recovery',RUNTIME_CACHE);
+    const campus=await v282Resolve(V282_CAMPUS_PATH);
     if(campus&&responseLooksValid(campus,V282_CAMPUS_PATH))return v282CampusRecoveryLauncher(request);
-    return new Response('Civweave is installed, but its local launch entry and Working Campus are unavailable. Repair the app shell when you are back online.',{
+    return new Response('Civweave is installed, but its local launch entry and Working Campus are unavailable. Open the local package installer to repair this device package.',{
       status:503,
       headers:{
         'content-type':'text/plain; charset=utf-8',
         'cache-control':'no-store',
-        'x-civweave-installed-launch':V282_REVISION
+        'x-civweave-installed-launch':V282_REVISION,
+        'x-civweave-local-first':'package-required'
       }
     });
   }
@@ -54,6 +47,7 @@ async function v282InstalledAppEntry(request){
   const headers=new Headers(normalized.headers);
   headers.set('x-civweave-installed-launch',V282_REVISION);
   headers.set('x-civweave-installed-recovery','not-needed');
+  headers.set('x-civweave-local-first','cache-only-runtime');
   if(request.method==='HEAD')return new Response(null,{status:normalized.status,statusText:normalized.statusText,headers});
   const body=await normalized.clone().arrayBuffer();
   return new Response(body,{status:normalized.status,statusText:normalized.statusText,headers});
@@ -64,6 +58,7 @@ self.CivweaveInstalledLaunchV282=Object.freeze({
   revision:V282_REVISION,
   entryPath:V282_ENTRY_PATH,
   campusRecoveryPath:V282_CAMPUS_PATH,
-  policy:'installed-entry-then-working-campus-never-installer-substitution'
+  policy:'installed-entry-then-local-working-campus-never-network-fallback',
+  runtimeNetworkFallback:false
 });
 })();

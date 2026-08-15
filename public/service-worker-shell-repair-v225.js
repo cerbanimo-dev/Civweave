@@ -1,7 +1,7 @@
 ;(() => {
 'use strict';
 
-const V225_REVISION = 'shell-self-repair-v225-install-only-pwa-v1';
+const V225_REVISION = 'shell-self-repair-v225-install-only-pwa-v1-local-first';
 const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js'];
 const v225OriginalCacheShell = cacheShell;
 const v225OriginalShellStatus = shellStatus;
@@ -47,7 +47,8 @@ async function v225RepairShell() {
       ...status,
       failures: v225LastFailures,
       repairable: true,
-      repairRevision: V225_REVISION
+      repairRevision: V225_REVISION,
+      repairRequiresExplicitAction: true
     };
   })();
   try {
@@ -57,14 +58,14 @@ async function v225RepairShell() {
   }
 }
 
-shellStatus = async function selfRepairingShellStatus() {
-  let status = await v225OriginalShellStatus();
-  if (!status.ready) status = await v225RepairShell();
+shellStatus = async function reportShellStatusWithoutRepair() {
+  const status = await v225OriginalShellStatus();
   return {
     ...status,
     failures: v225LastFailures,
     repairable: true,
-    repairRevision: V225_REVISION
+    repairRevision: V225_REVISION,
+    repairRequiresExplicitAction: true
   };
 };
 
@@ -77,7 +78,8 @@ self.CivweaveShellRepairV225 = Object.freeze({
   revision: V225_REVISION,
   optionalAssets: [...V225_OPTIONAL_ASSETS],
   repair: v225RepairShell,
-  policy: 'activate-incomplete-retry-required-shell-and-report-paths-no-browser-runtime'
+  runtimeAutoRepair: false,
+  policy: 'explicit-repair-only-report-missing-without-runtime-fetch'
 });
 
 })();

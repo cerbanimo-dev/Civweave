@@ -17,13 +17,6 @@
     "relation": ["delegate_permission/common.query_webapk"],
     "target": {
       "namespace": "web",
-      "site": "https://commonweave.pages.dev/app/manifest.webmanifest"
-    }
-  },
-  {
-    "relation": ["delegate_permission/common.query_webapk"],
-    "target": {
-      "namespace": "web",
       "site": "https://civweave-host-node.onrender.com/app/manifest.webmanifest"
     }
   }

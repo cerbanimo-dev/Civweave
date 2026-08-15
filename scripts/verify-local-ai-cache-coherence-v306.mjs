@@ -5,6 +5,7 @@ const repair=await readFile('public/service-worker-chat-repair-v245.js','utf8');
 const generated=await readFile('public/service-worker-v203.js','utf8');
 const builder=await readFile('scripts/build-service-worker-v211.mjs','utf8');
 const installedEntry=await readFile('public/app/installed-entry-v146.js','utf8');
+const localAIGate=await readFile('public/service-worker-local-ai-coherence-v307.js','utf8');
 
 const requiredLocalAIPaths=[
   '/app/ai-capability-broker-v268.js',
@@ -34,18 +35,19 @@ for(const pathname of requiredLocalAIPaths){
 const canonicalImport="importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343');";
 assert.ok(generated.includes(canonicalImport),'generated service worker must preserve the canonical chat repair import identity');
 assert.ok(builder.includes(canonicalImport),'service worker generator must preserve the canonical chat repair import identity');
-assert.match(generated,/local-ai-code-coherence-v307/,'generated parent worker must carry the active local AI code-coherence epoch');
-assert.match(builder,/localAICodeCoherence:'v307-network-first-pre-core'/,'service worker generator must report the active local AI code-coherence epoch');
-assert.match(installedEntry,/updateViaCache:'none'/,'installed worker registration must bypass HTTP cache so the changed parent worker fetches current imported repair code');
-assert.ok(installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'),'installed entry must explicitly perform a bounded update check for the changed parent worker');
+assert.match(generated,/local-ai-code-coherence-v307-local-first/,'generated parent worker must carry the active local-first local AI code-coherence epoch');
+assert.match(builder,/localAICodeCoherence:'v307-explicit-package-install-cache-only-runtime'/,'service worker generator must report the active local-first local AI code-coherence epoch');
+assert.match(localAIGate,/runtimeNetworkFallback: false/,'local AI code runtime must not fall through to the network');
+assert.match(installedEntry,/allowProvision:localDeveloper\(\)/,'installed production launch must not provision a worker implicitly');
+assert.match(installedEntry,/browserRuntimePolicy:'installed-display-cache-only'/,'installed runtime must advertise cache-only policy');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-cache-coherence-v306',
-  localAICodeCoherence:'v307-network-first-pre-core',
+  revision:'local-ai-cache-coherence-v306-local-first',
+  localAICodeCoherence:'v307-explicit-package-install-cache-only-runtime',
   chatContract:'chat-css-contract-v343',
   protectedPaths:requiredLocalAIPaths.length,
   ignoreSearchEviction:true,
   parentWorkerBytesRotated:true,
-  importedRepairFetchedWithoutHttpCache:true
+  runtimeNetworkFallback:false
 },null,2));

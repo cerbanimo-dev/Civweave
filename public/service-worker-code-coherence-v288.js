@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_CODE_COHERENCE_VERSION = '1.0.92-code-coherence-v288-language-v2';
+const CW_CODE_COHERENCE_VERSION = '1.0.92-code-coherence-v288-language-v2-local-first';
 const CW_CODE_COHERENCE_CACHE = `civweave-code-coherence-${CW_CODE_COHERENCE_VERSION}`;
 const CW_CODE_COHERENCE_PREFIX = 'civweave-code-coherence-';
 const CW_CODE_EXTENSIONS = /\.(?:m?js|css|txt)$/i;
@@ -45,12 +45,14 @@ function cwCodeValid(response, pathname) {
   return true;
 }
 
-async function cwCodeFetch(pathnameOrRequest) {
-  const request = typeof pathnameOrRequest === 'string'
-    ? new Request(new URL(pathnameOrRequest, self.location.origin).href, { method: 'GET', cache: 'no-store', credentials: 'same-origin' })
-    : new Request(pathnameOrRequest, { cache: 'no-store' });
+async function cwCodePackageFetch(pathname) {
+  const request = new Request(new URL(pathname, self.location.origin).href, {
+    method: 'GET',
+    cache: 'no-store',
+    credentials: 'same-origin',
+    headers: { 'x-civweave-package': 'code-coherence-install' }
+  });
   const response = await fetch(request);
-  const pathname = new URL(request.url).pathname;
   if (!cwCodeValid(response, pathname)) throw new Error(`${pathname} returned an invalid code response.`);
   return response;
 }
@@ -58,8 +60,14 @@ async function cwCodeFetch(pathnameOrRequest) {
 async function cwCodeInstall() {
   const cache = await caches.open(CW_CODE_COHERENCE_CACHE);
   const results = await Promise.allSettled(CW_CODE_CRITICAL.map(async pathname => {
-    const response = await cwCodeFetch(pathname);
-    await cache.put(cwCodeKey(pathname), response.clone());
+    const key = cwCodeKey(pathname);
+    const existing = await caches.match(key, { ignoreSearch: true });
+    if (cwCodeValid(existing, pathname)) {
+      await cache.put(key, existing.clone());
+      return pathname;
+    }
+    const response = await cwCodePackageFetch(pathname);
+    await cache.put(key, response.clone());
     return pathname;
   }));
   const loaded = results.filter(result => result.status === 'fulfilled').length;
@@ -85,29 +93,22 @@ self.addEventListener('fetch', event => {
   if (!cwCodeEligible(request, url)) return;
   event.stopImmediatePropagation();
   event.respondWith((async () => {
-    const cache = await caches.open(CW_CODE_COHERENCE_CACHE);
     const key = cwCodeKey(url.pathname);
-    try {
-      const response = await cwCodeFetch(request);
-      if (request.method === 'GET') await cache.put(key, response.clone());
+    const cache = await caches.open(CW_CODE_COHERENCE_CACHE);
+    const current = await cache.match(key, { ignoreSearch: true }) || await caches.match(key, { ignoreSearch: true });
+    if (cwCodeValid(current, url.pathname)) {
       return request.method === 'HEAD'
-        ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers })
-        : response;
-    } catch {
-      const current = await cache.match(key, { ignoreSearch: true });
-      if (cwCodeValid(current, url.pathname)) {
-        return request.method === 'HEAD'
-          ? new Response(null, { status: current.status, statusText: current.statusText, headers: current.headers })
-          : current;
-      }
-      const fallback = await caches.match(key, { ignoreSearch: true });
-      if (cwCodeValid(fallback, url.pathname)) {
-        return request.method === 'HEAD'
-          ? new Response(null, { status: fallback.status, statusText: fallback.statusText, headers: fallback.headers })
-          : fallback;
-      }
-      return new Response(`Civweave code asset unavailable: ${url.pathname}`, { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+        ? new Response(null, { status: current.status, statusText: current.statusText, headers: current.headers })
+        : current;
     }
+    return new Response(`Civweave code asset is not installed locally: ${url.pathname}`, {
+      status: 503,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        'cache-control': 'no-store',
+        'x-civweave-local-first': 'package-required'
+      }
+    });
   })());
 });
 
@@ -115,5 +116,6 @@ self.CivweaveCodeCoherenceV288 = Object.freeze({
   version: CW_CODE_COHERENCE_VERSION,
   cache: CW_CODE_COHERENCE_CACHE,
   critical: CW_CODE_CRITICAL.slice(),
-  policy: 'network-first-current-version-cache-legacy-offline-fallback'
+  policy: 'explicit-package-install-cache-only-runtime',
+  runtimeNetworkFallback: false
 });

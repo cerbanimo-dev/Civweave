@@ -55,7 +55,7 @@ async function inspect(spec){
 }
 async function fetchAndCache(spec){
   const existing=await inspect(spec);if(existing.ok)return existing;
-  const response=await fetch(spec.url,{cache:'no-store'});
+  const response=await fetch(spec.url,{cache:'no-store',headers:{'x-civweave-package':'minilm-model-install'}});
   if(!response.ok)throw new Error(`${spec.url} returned ${response.status}`);
   const type=String(response.headers.get('content-type')||'');
   if(/text\/html/i.test(type))throw new Error(`${spec.url} returned HTML instead of a model asset.`);

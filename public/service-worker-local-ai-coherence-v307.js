@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307-local-first';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -55,19 +55,27 @@ function cwLocalAIValid(response) {
   return !/text\/html/i.test(String(response.headers.get('content-type') || ''));
 }
 
-async function cwLocalAIFetch(pathnameOrRequest) {
-  const request = typeof pathnameOrRequest === 'string'
-    ? new Request(new URL(pathnameOrRequest, self.location.origin).href, { method: 'GET', cache: 'no-store', credentials: 'same-origin' })
-    : new Request(pathnameOrRequest, { cache: 'no-store' });
+async function cwLocalAIPackageFetch(pathname) {
+  const request = new Request(new URL(pathname, self.location.origin).href, {
+    method: 'GET',
+    cache: 'no-store',
+    credentials: 'same-origin',
+    headers: { 'x-civweave-package': 'local-ai-code-install' }
+  });
   const response = await fetch(request);
-  if (!cwLocalAIValid(response)) throw new Error(`${new URL(request.url).pathname} returned an invalid local-AI code response.`);
+  if (!cwLocalAIValid(response)) throw new Error(`${pathname} returned an invalid local-AI code response.`);
   return response;
 }
 
 async function cwLocalAIInstall() {
   const cache = await caches.open(CW_LOCAL_AI_COHERENCE_CACHE);
   const results = await Promise.allSettled(CW_LOCAL_AI_CRITICAL.map(async pathname => {
-    const response = await cwLocalAIFetch(pathname);
+    const existing = await caches.match(cwLocalAIKey(pathname), { ignoreSearch: true });
+    if (cwLocalAIValid(existing)) {
+      await cache.put(cwLocalAIKey(pathname), existing.clone());
+      return pathname;
+    }
+    const response = await cwLocalAIPackageFetch(pathname);
     await cache.put(cwLocalAIKey(pathname), response.clone());
     return pathname;
   }));
@@ -99,31 +107,24 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (!cwLocalAIEligible(request, url)) return;
 
-  // This gate is imported before the generic code and shell handlers. Owning the
-  // request here prevents query-string cache busters from being shadowed later
-  // by pathname-keyed cache-first fallbacks while preserving offline startup.
   event.stopImmediatePropagation();
   event.respondWith((async () => {
     const cache = await caches.open(CW_LOCAL_AI_COHERENCE_CACHE);
     const key = cwLocalAIKey(url.pathname);
-    try {
-      const response = await cwLocalAIFetch(request);
-      if (request.method === 'GET') await cache.put(key, response.clone());
+    const cached = await cache.match(key, { ignoreSearch: true }) || await caches.match(key, { ignoreSearch: true });
+    if (cwLocalAIValid(cached)) {
       return request.method === 'HEAD'
-        ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers })
-        : response;
-    } catch {
-      const cached = await cache.match(key, { ignoreSearch: true }) || await caches.match(key, { ignoreSearch: true });
-      if (cwLocalAIValid(cached)) {
-        return request.method === 'HEAD'
-          ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers })
-          : cached;
-      }
-      return new Response(`Civweave local-AI code unavailable: ${url.pathname}`, {
-        status: 503,
-        headers: { 'content-type': 'text/plain; charset=utf-8' }
-      });
+        ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers })
+        : cached;
     }
+    return new Response(`Civweave local-AI code is not installed locally: ${url.pathname}`, {
+      status: 503,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        'cache-control': 'no-store',
+        'x-civweave-local-first': 'package-required'
+      }
+    });
   })());
 });
 
@@ -131,7 +132,8 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   version: CW_LOCAL_AI_COHERENCE_VERSION,
   cache: CW_LOCAL_AI_COHERENCE_CACHE,
   critical: CW_LOCAL_AI_CRITICAL.slice(),
-  policy: 'network-first-current-bytes-offline-cache-fallback',
+  policy: 'explicit-package-install-cache-only-runtime',
+  runtimeNetworkFallback: false,
   smoothFitOrchestrator: true,
   ownsBeforeGenericCodeCoherence: true
 });

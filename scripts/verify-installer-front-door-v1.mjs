@@ -3,10 +3,10 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const readBytes=path=>readFile(new URL(`../${path}`,import.meta.url));
-const [installerHtml,bridge,offlineStatus,brand,logoSvg,hostSetup,anchor,setup,frontDoor]=await Promise.all([
+const [installerHtml,installerRuntime,bootstrap,brand,logoSvg,hostSetup,anchor,setup,frontDoor]=await Promise.all([
   read('public/app/index.html'),
-  read('public/app/pwa-install-prompt-v249.js'),
-  read('public/app/offline-campus-status-v211.js'),
+  read('public/install-v130.js'),
+  read('public/service-worker-install-v1.js'),
   read('public/app/civweave-brand.js'),
   read('public/app/logos/civweave.svg'),
   read('public/host-setup.html'),
@@ -15,8 +15,8 @@ const [installerHtml,bridge,offlineStatus,brand,logoSvg,hostSetup,anchor,setup,f
   read('public/app/front-door-prismatic-v301.css')
 ]);
 
-const entry="/app/installed-entry-v146?installed=1&system=civweave";
-const exactEntry="/app/installed-entry-v146.html?installed=1&system=civweave";
+const entry='/app/installed-entry-v146?installed=1&system=civweave';
+const exactEntry='/app/installed-entry-v146.html?installed=1&system=civweave';
 const civweavePrismatic='/app/logos/civweave-prismatic-wordmark-v1.png';
 const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
@@ -37,21 +37,23 @@ assert.equal(cerbanimoBytes.readUInt32BE(16),48,'Cerbanimo steward mark width mu
 assert.equal(cerbanimoBytes.readUInt32BE(20),72,'Cerbanimo steward mark height must stay at the verified uncropped display size');
 assert.equal(cerbanimoBytes.readUInt8(25),2,'Cerbanimo steward mark must stay truecolor RGB, never indexed/paletted');
 
-assert.ok(bridge.includes(`const ENTRY='${exactEntry}'`),'installed Open Civweave button must use the exact updater-first installed entry');
-assert.ok(!bridge.includes("const ENTRY='/app/?system=civweave&installed=1'"),'PWA bridge must not route Open Civweave back into the installer');
-assert.ok(bridge.includes("const HOST_SETUP_PATH='/host-setup.html'"),'PWA bridge must have a dedicated steward setup destination');
-assert.ok(bridge.includes("current.searchParams.get('host_setup')!=='1'"),'legacy /app/?host_setup=1 links must redirect out of the app boundary');
-assert.ok(installerHtml.includes('/app/pwa-install-prompt-v249.js'),'installer must load the cache-distinct first-input-safe PWA front-door bridge');
-assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v248.js'),'installer must not load the cache-first stale v248 bridge');
-assert.ok(installerHtml.includes('/app/offline-campus-status-v211.js'),'installer must load the cache-distinct lazy offline status bridge');
+assert.ok(installerRuntime.includes(`const ENTRY='${exactEntry}';`),'installer must launch through the exact updater-first installed entry');
+assert.ok(!installerRuntime.includes("const ENTRY='/app/?system=civweave&installed=1'"),'installer must not route installed launch back into the installer');
+assert.ok(installerRuntime.includes("BOOTSTRAP_BUILD='installer-bootstrap-v1-local-first'"),'installer must use the local-first bootstrap revision');
+assert.ok(installerRuntime.includes('ensureLocalPackage'),'installer must complete the local campus before browser installation');
+assert.ok(installerRuntime.includes("'x-civweave-package':'campus-preflight'"),'campus acquisition must be explicitly package-scoped');
+assert.ok(bootstrap.includes('runtimeNetworkFallback: false'),'bootstrap runtime must never use network fallback');
+assert.ok(bootstrap.includes('localCampusRequiredForLaunch: true'),'bootstrap must require the local campus before launch');
 assert.ok(!installerHtml.includes('setInterval(renderProgress,1000)'),'installer must not churn progress DOM every second before input');
-assert.ok(bridge.includes('eagerRelatedAppDiscovery:false')&&bridge.includes('firstInputSafe:true'),'PWA bridge must keep native related-app discovery off the first-paint path');
-assert.ok(offlineStatus.includes('eagerStatusLookup:false')&&offlineStatus.includes('firstInputSafe:true'),'offline status must stay dormant until download intent');
-assert.ok(!offlineStatus.includes("addEventListener('load',askCurrentStatus"),'offline status must not touch service-worker campus state at page load');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v247.js?v=front-door-v3-install-only-runtime'),'installer must not boot the deadlocking v247 bridge');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v246.js?v=pwa-install-v246'),'installer must not boot the cache-colliding legacy bridge');
+assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v249.js'),'lean installer must not load a second install-button owner');
+assert.ok(!installerHtml.includes('/app/offline-campus-status-v211.js'),'lean installer must not load a second campus-status owner');
 assert.ok(installerHtml.includes('<img src="/app/logos/civweave-pwa-192-v247.png" alt="Civweave">'),'installer header must keep the verified PNG compatibility mark directly');
 assert.ok(installerHtml.includes('<link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">'),'installer favicon must use the verified PNG directly');
+assert.ok(installerHtml.includes('Required local campus'),'installer must visibly identify the required local campus phase');
+assert.ok(installerHtml.includes('/app/images/install/anarchadia-01-arrival.webp')&&installerHtml.includes('/app/images/install/anarchadia-05-commons.webp'),'installer must retain all Anarchadia story endpoints');
+
 assert.ok(hostSetup.includes(`${entry}&source=host-setup`),'host setup must enter Civweave through installed entry');
 assert.ok(hostSetup.includes('/host-local-anchor.html'),'host setup must expose local Anchor setup');
 assert.ok(hostSetup.includes('CONNECT STEWARD PAYOUTS'),'host setup must include connected payout onboarding for the steward');
@@ -61,11 +63,11 @@ assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'host setu
 assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated steward setup');
 assert.ok(setup.includes('Steward setup: ${pagesOrigin}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL on the durable Pages underlay');
 assert.ok(brand.includes("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png'"),'brand layer must use the verified Civweave PNG');
-assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
+assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must reference the verified canonical display PNG');
 
 for(const [name,source] of [['installer',installerHtml],['host steward',hostSetup],['local Anchor',anchor]]){
-  assert.ok(source.includes(civweavePrismatic),`${name} must retain the legacy Civweave compatibility path`);
-  assert.ok(source.includes(cerbanimoMark),`${name} must retain the legacy Cerbanimo compatibility path`);
+  assert.ok(source.includes(civweavePrismatic),`${name} must retain the Civweave prismatic brand asset path`);
+  assert.ok(source.includes(cerbanimoMark),`${name} must retain the Cerbanimo steward mark path`);
   assert.ok(source.includes(frontDoorCss),`${name} must load the shared prismatic front-door design`);
   assert.ok(source.includes('cw-frontdoor'),`${name} must opt into the shared front-door surface`);
 }
@@ -81,20 +83,18 @@ assert.ok(frontDoor.includes('body.cw-installer'),'front-door design must cover 
 assert.ok(frontDoor.includes('body.cw-steward'),'front-door design must cover host stewardship');
 assert.ok(frontDoor.includes('body.cw-anchor'),'front-door design must cover local Anchor setup');
 assert.ok(frontDoor.includes('@media(prefers-reduced-motion:reduce)'),'front-door ambient motion must respect reduced-motion preferences');
-assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must bypass the damaged v1 Civweave raster and use the verified canonical logo');
-assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must use the verified white-background truecolor Cerbanimo steward mark');
-assert.ok(frontDoor.includes('.cw-platform-logo,.cw-steward-logo{display:none!important}'),'damaged compatibility rasters must not be rendered directly');
-assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2')"),'Cerbanimo steward mark must render its verified RGB asset on an opaque white field');
+assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must use the verified canonical Civweave logo');
+assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must use the verified Cerbanimo steward mark');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v9-first-input-safe',
+  revision:'installer-front-door-v10-local-package-first',
   installedEntry:exactEntry,
   hostSetup:'/host-setup.html',
-  launcher:'/app/pwa-install-prompt-v249.js',
-  offlineStatus:'/app/offline-campus-status-v211.js',
-  firstInputSafe:true,
-  compatibilityLogo:'/app/logos/civweave-pwa-512-v247.png',
+  bootstrap:'/service-worker-install-v1.js',
+  localCampusRequired:true,
+  runtimeNetworkFallback:false,
+  duplicateInstallOwner:false,
   civweavePrismatic,
   cerbanimoMark,
   canonicalCivweave,
