@@ -24,7 +24,7 @@ const paths = [
   '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml',
   'scripts/resolve-cloudflare-recovery-zone-v1.mjs',
   'config/launch-topology-v1.json',
-  'public/app/installer-repair-only-v1.js',
+  'public/app/installer-repair-only-v2.js',
   'public/app/installer-online-fallback-v225.js',
   'public/app/civweave-brand.js',
   'public/app/hub-recovery-api-v1.js',
@@ -108,8 +108,11 @@ for (const path of activeDomainSurfaces) assert.doesNotMatch(source[path], /(?:^
 assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
-assert.match(source['public/app/installer-repair-only-v1.js'], /hub-recovery-api-v1\.js/);
-assert.match(source['public/app/installer-repair-only-v1.js'], /browserRuntimePolicy:'installer-only-until-installed-display'/);
+assert.match(source['public/app/installer-repair-only-v2.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/installer-repair-only-v2.js'], /browserRuntimePolicy:'installer-only-until-installed-display'/);
+assert.match(source['public/app/installer-repair-only-v2.js'], /hubToolsPolicy:'explicit-user-load-only'/);
+assert.match(source['public/app/installer-repair-only-v2.js'], /firstPaintHubWork:false/);
+assert.match(source['public/app/installer-repair-only-v2.js'], /cacheDistinctPath:true/);
 assert.match(source['public/app/installer-online-fallback-v225.js'], /retired:true/);
 assert.match(source['public/app/installer-online-fallback-v225.js'], /browserRuntime:false/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
@@ -129,4 +132,4 @@ for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {const resu
 
 const recoveryNoStripeSurfaces = ['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs','cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs','cloudflare/account-edge/src/recovery-entry-v10.mjs','cloudflare/account-edge/src/recovery-entry-v11.mjs','cloudflare/account-edge/src/hub-passport-account-v1.mjs','cloudflare/account-edge/wrangler.jsonc','cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs','cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs','cloudflare/node-cloud/src/account-directory-v1.mjs','cloudflare/recovery-relay/src/index.mjs','cloudflare/recovery-relay/wrangler.jsonc','scripts/resolve-cloudflare-recovery-zone-v1.mjs','public/app/hub-recovery-api-v1.js','public/app/hub-recovery-ui-v1.js','public/app/hub-passport-account-v1.js','public/app/hub-delivery-intent-v1.js'];
 for (const path of recoveryNoStripeSurfaces) assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
-console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v10-passport-passkeys',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,cloudFabricRecovery:true,passportPasskeys:true,optionalRecoveryEmail:true,emailLinkRequiresExistingPasskey:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false}));
+console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v11-cache-distinct-lazy-installer',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,cloudFabricRecovery:true,passportPasskeys:true,optionalRecoveryEmail:true,emailLinkRequiresExistingPasskey:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false,hubToolsExplicit:true,firstPaintHubWork:false,cacheDistinctRepair:true}));
