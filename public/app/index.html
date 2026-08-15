@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
   <link rel="stylesheet" href="/app/installer-quest-threshold-v1.css?v=quest-first-v2">
   <style>
-    .campus-install-progress{max-width:760px;margin:22px 0 12px;display:grid;gap:7px}.campus-progress-heading,.campus-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:12px}.campus-progress-heading span{color:#8de5ef;font-size:.72rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.campus-progress-heading strong{font-size:.84rem;color:#fff}.campus-progress-track{position:relative;height:8px;overflow:hidden;border:1px solid #7ee5ff44;border-radius:999px;background:#001018aa;box-shadow:inset 0 1px 4px #0008}.campus-progress-fill{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#72d9e7,#f3d77d);box-shadow:0 0 14px #7ee5ff77;transition:width .24s ease}.campus-progress-meta{color:var(--muted);font-size:.76rem}.campus-progress-meta strong{color:#f8e5a2;font:900 .76rem ui-monospace,monospace}.campus-install-progress[data-state="ready"] .campus-progress-fill{box-shadow:0 0 18px #8df0c688}.campus-install-progress[data-state="failed"] .campus-progress-heading strong{color:#ffd08a}.campus-retry{justify-self:start;min-height:32px;padding:5px 9px;border:1px solid #ffd08a77;border-radius:9px;background:#3b2a13;color:#fff;font-weight:800;cursor:pointer}.campus-retry[hidden]{display:none!important}.cw-language-control{min-width:42px;min-height:34px;padding:5px 9px;border:1px solid #8de5ef77;border-radius:999px;background:#13223dcc;color:#dffcff;font:900 .76rem/1 system-ui,sans-serif;letter-spacing:.06em;cursor:pointer}.cw-language-control:focus-visible{outline:2px solid #8de5ef;outline-offset:2px}@media(max-width:820px){.campus-progress-heading,.campus-progress-meta{align-items:flex-start}.campus-progress-meta{font-size:.72rem}}
+    .campus-install-progress{max-width:760px;margin:22px 0 12px;display:grid;gap:7px}.campus-progress-heading,.campus-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:12px}.campus-progress-heading span{color:#8de5ef;font-size:.72rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.campus-progress-heading strong{font-size:.84rem;color:#fff}.campus-progress-track{position:relative;height:8px;overflow:hidden;border:1px solid #7ee5ff44;border-radius:999px;background:#001018aa;box-shadow:inset 0 1px 4px #0008}.campus-progress-fill{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#72d9e7,#f3d77d);box-shadow:0 0 14px #7ee5ff77;transition:width .24s ease}.campus-progress-meta{color:var(--muted);font-size:.76rem}.campus-progress-meta strong{color:#f8e5a2;font:900 .76rem ui-monospace,monospace}.campus-install-progress[data-state="ready"] .campus-progress-fill{box-shadow:0 0 18px #8df0c688}.campus-install-progress[data-state="failed"] .campus-progress-heading strong{color:#ffd08a}.campus-retry{justify-self:start;min-height:32px;padding:5px 9px;border:1px solid #ffd08a77;border-radius:9px;background:#3b2a13;color:#fff;font-weight:800;cursor:pointer}.campus-retry[hidden]{display:none!important}.cw-language-control{min-width:42px;min-height:34px;padding:5px 9px;border:1px solid #8de5ef77;border-radius:999px;background:#13223dcc;color:#dffcff;font:900 .76rem/1 system-ui,sans-serif;letter-spacing:.06em;cursor:pointer}.cw-language-control:focus-visible{outline:2px solid #8de5ef;outline-offset:2px}.luddite-download-lane{padding:15px;border:1px solid #d7c46d66;border-radius:15px;background:#171b12aa}.luddite-download-lane .campus-progress-heading span{color:#eadb8a}.luddite-download-lane .campus-progress-fill{background:linear-gradient(90deg,#789a72,#d7c46d)}.luddite-help{max-width:760px;margin:3px 0 18px;color:var(--muted);font-size:.82rem;line-height:1.45}.luddite-open{justify-self:start;color:#f3e6a2;font-weight:850}@media(max-width:820px){.campus-progress-heading,.campus-progress-meta{align-items:flex-start}.campus-progress-meta{font-size:.72rem}}
   </style>
 </head>
 <body class="cw-frontdoor cw-installer">
@@ -72,6 +72,15 @@
         <div class="campus-progress-meta"><span id="offline-package-assets">not started</span><strong id="offline-campus-progress-percent">0%</strong></div>
         <button id="download-offline-package" class="campus-retry" type="button">Download offline campus</button>
       </div>
+
+      <div id="luddite-install-progress" class="campus-install-progress luddite-download-lane" data-state="idle" aria-live="polite">
+        <div class="campus-progress-heading"><span>Luddite Mode · human-operated pack</span><strong id="luddite-package-state">not downloaded</strong></div>
+        <div id="luddite-progress-track" class="campus-progress-track" role="progressbar" aria-label="Luddite Mode download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="luddite-progress-fill" class="campus-progress-fill"></span></div>
+        <div class="campus-progress-meta"><span id="luddite-package-assets">explicit allowlist · no model assets</span><strong id="luddite-progress-percent">0%</strong></div>
+        <button id="download-luddite-mode" class="campus-retry" type="button">Download Luddite Mode</button>
+        <a id="open-luddite-mode" class="luddite-open" href="/app/luddite-campus-v1.html" hidden>Open Luddite Mode</a>
+      </div>
+      <p id="luddite-help" class="luddite-help" role="status">A separate no-AI lane: manual Quests, learning programs, tasks, resource and skill manifests, human validation for rewards, and a FellowFare feed that admits only explicitly human-authored content.</p>
 
       <div class="gateway-actions">
         <button id="install-app" class="primary" type="button">Install Civweave</button>
@@ -138,6 +147,8 @@
 <script src="/install-v130.js?v=1.0.162-lightweight-shell-v208"></script>
 <script src="/app/installer-repair-only-v2.js?v=cache-distinct-freeze-recovery"></script>
 <script src="/app/offline-campus-status-v211.js?v=first-input-safe"></script>
+<script src="/app/luddite-mode-v1.js?v=luddite-mode-v1"></script>
+<script src="/app/luddite-installer-v1.js?v=luddite-package-v1"></script>
 <script>
 (()=>{
   'use strict';
