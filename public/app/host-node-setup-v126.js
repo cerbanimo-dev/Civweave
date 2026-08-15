@@ -42,5 +42,5 @@ function exposeFallback(error){
   await installWorker();
   try{await load(`host-node-v126-safe.js?v=${VERSION}&hotfix=2`);log('v126-runtime-ready',{universalAI:Boolean(window.CivweaveUniversalAI),build:BUILD})}catch(error){console.error('Civweave v1.0.26 shell failed to load',error);exposeFallback(error)}
 })();
-setTimeout(()=>{if(!window.CivweaveUniversalAI&&!document.querySelector('.cw-v125-home-nav'))exposeFallback(new Error('The visual hub timed out before its controls became available.'))},9000);
+setTimeout(()=>{if(!window.CivweaveUniversalAI&&!document.querySelector('.cw-v125-home-nav'))exposeFallback(new Error('The visual Guild timed out before its controls became available.'))},9000);
 })();
