@@ -23,18 +23,22 @@ const required=[
   [launcherHtml,`/app/installed-entry-v146.js?v=${version}`,'root launcher installed-entry revision'],
   [installerHtml,`<title>Install Civweave v${version}</title>`,'installer title'],
   [installerHtml,'Launch Civweave from your device app launcher','installer install-only headline'],
-  [installerHtml,'/app/pwa-install-prompt-v250.js','installer cache-distinct install bridge'],
+  [installerHtml,'/app/pwa-install-prompt-v250.js','installer current install bridge'],
   [installerHtml,'/app/installer-repair-only-v2.js','installer cache-distinct repair bridge'],
   [installRuntime,`const VERSION = '${version}';`,'installer runtime'],
   [installedEntryHtml,`/app/installed-entry-v146.js?v=${version}`,'installed entry HTML'],
-  [installedEntryHtml,'installed-entry-browser-gate-v1','installed entry pre-paint gate'],
+  [installedEntryHtml,'installed-entry-browser-gate-v2','installed entry capability-aware pre-paint gate'],
+  [installedEntryHtml,"const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'",'installed entry capability key'],
   [installedEntryRuntime,`const FALLBACK_VERSION='${version}';`,'installed entry runtime'],
-  [installedEntryRuntime,"browserRuntimePolicy:'installed-display-only'",'installed entry browser boundary'],
+  [installedEntryRuntime,"browserRuntimePolicy:'installed-display-or-verified-installed-capability'",'installed entry browser boundary'],
+  [installedEntryRuntime,'async function installedLaunchAuthorized()','installed entry authorization boundary'],
   [routes,`const VERSION='${version}';`,'route contract'],
   [nav,`const VERSION='${version}-five-system-navigation-v227';`,'themed navigation'],
   [boundary,`const VERSION='${version}';`,'install boundary'],
   [boundary,"const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';",'install-only boundary revision'],
-  [boundary,"browserRuntimePolicy:'installed-display-only'",'install-only boundary policy'],
+  [boundary,"const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'",'install boundary capability key'],
+  [boundary,"browserRuntimePolicy:'installed-display-or-verified-installed-capability'",'install boundary policy'],
+  [boundary,'installedQueryIsAuthorization:false','query must not authorize installed runtime'],
   [campusHtml,`Civweave Working Campus · v${version}`,'Working Campus title'],
   [campusHtml,`<b class="version-chip">v${version}</b>`,'Working Campus chip'],
   [campusLoader,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'Working Campus route loader'],
@@ -48,7 +52,7 @@ for(const [source,token,label] of required)check(source.includes(token),`${label
 
 check(!installerHtml.includes('/app/pwa-install-prompt-v249.js'),'Installer still loads the stale-cache-prone v249 install bridge.');
 check(!installerHtml.includes('/app/installer-repair-only-v1.js'),'Installer still loads the stale shell-cached v1 repair bridge.');
-check(!installerHtml.includes('open-online-campus-v225'),'Installer still exposes the retired browser fallback.');
+check(!installerHtml.includes('open-online-campus-v225'),'Installer still exposes the retired anonymous browser fallback.');
 check(!installerHtml.includes('/app/installer-online-fallback-v225.js'),'Installer still loads the retired browser fallback runtime.');
 check(workerCore.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';"),'Service-worker core cache epoch lost the Working Campus return repair.');
 check(workerCore.includes("'/app/working-campus-return-guard-v425.js'"),'Service-worker shell no longer precaches the Working Campus return guard.');
@@ -69,4 +73,4 @@ for(const token of [
   'installOnlyPwa'
 ])check(syncSource.includes(token),`Release synchronizer would erase the install-only/cache-distinct repair: missing ${token}`);
 
-console.log(JSON.stringify({ok:true,version,committedTreeVerified:true,verifierMutation:false,shellIntegrityCoherent:true,workingCampusReturnGuard:'v425',browserRuntime:'installed-display-only',installOnlyPwa:'v1',cacheDistinctInstallerPaths:true,installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',securityScriptsRevalidate:true},null,2));
+console.log(JSON.stringify({ok:true,version,committedTreeVerified:true,verifierMutation:false,shellIntegrityCoherent:true,workingCampusReturnGuard:'v425',browserRuntime:'installed-display-or-verified-installed-capability',queryAuthorization:false,installOnlyPwa:'v1',installedCapability:'v1',cacheDistinctInstallerPaths:true,installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',securityScriptsRevalidate:true},null,2));
