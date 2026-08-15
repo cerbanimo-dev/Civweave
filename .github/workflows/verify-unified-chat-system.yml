@@ -105,7 +105,11 @@ jobs:
           const start=surface.slice(surface.indexOf('function start(){'),surface.indexOf('\n\nconst api='));
           if(start.includes('ensureRoot()')||start.includes('render()'))throw new Error('Chat surface is materializing at application launch');
           if(!shared.includes('switchGuide?.(currentSystem,{open:false})'))throw new Error('Shared guide ownership can reopen chat during launch');
-          if(!faces.includes('idleUntilChatOpen:true')||!faces.includes("addEventListener('civweave:guide-chat-opened',activate)"))throw new Error('Avatar/semantic runtime is not deferred until chat opens');
+          if(!faces.includes('idleUntilChatOpen:true')||!faces.includes("addEventListener('civweave:guide-chat-opened',activate)"))throw new Error('Avatar presentation is not deferred until chat opens');
+          if(!faces.includes('heavyRuntimeOnOpen:false')||!faces.includes("expressionRuntimeTrigger:'first-chat-submit'")||!faces.includes('miniLmPolling:false'))throw new Error('Chat-open heavy-runtime guard is missing');
+          const activateStart=faces.indexOf('function activate(){'),activateEnd=faces.indexOf('\nfunction start(){',activateStart),activateBody=faces.slice(activateStart,activateEnd);
+          if(activateBody.includes('ensureExpressionDirector')||activateBody.includes('setInterval('))throw new Error('Opening chat is starting expression/MiniLM work');
+          if(faces.includes('miniLmLampTimer=setInterval')||faces.includes('setInterval(refreshMiniLmLamp'))throw new Error('Face runtime reintroduced MiniLM polling');
           if(!compat.includes('Compatibility loader only')||!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('V242 compatibility path is no longer a loader-only shim');
           for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-chat-face-icons-v255.js']){
             if(!repair.includes(`'${path}'`))throw new Error(`PWA cache repair is missing ${path}`);
