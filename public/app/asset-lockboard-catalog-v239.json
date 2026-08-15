@@ -1,6 +1,6 @@
 {
   "schema": "civweave.asset-lockboard.catalog.v239",
-  "generatedAt": "2026-08-15T18:16:06.336Z",
+  "generatedAt": "2026-08-15T19:16:44.600Z",
   "publicRoot": "/",
   "assetCount": 426,
   "slotCount": 432,
@@ -6562,7 +6562,7 @@
       "kind": "string",
       "raw": "/app/logos/civweave-icon-192.png",
       "assetPath": "/app/logos/civweave-icon-192.png",
-      "context": "\"/app/logos/civweave-icon-192.png\": \"7f56100fcaa4b6096bc031df735ee74b124cb0f7884f6b392ff5bf2816a71958\",",
+      "context": "\"/app/logos/civweave-icon-192.png\": \"aeeadf425762d8b3a7bc575429212a949e3ec50a1f0e5eda2e44211998a8a133\",",
       "exists": true
     },
     {
@@ -6573,7 +6573,7 @@
       "kind": "string",
       "raw": "/app/logos/civweave-icon-512.png",
       "assetPath": "/app/logos/civweave-icon-512.png",
-      "context": "\"/app/logos/civweave-icon-512.png\": \"83c649211fb9fad53c2d44ab774ba5ab153e3f635d0864a84596b45b33c70b4d\",",
+      "context": "\"/app/logos/civweave-icon-512.png\": \"37332ddd7c73731583268c57911b1e1b3af9a50e66e1d14dc04e25e1c5e77de9\",",
       "exists": true
     },
     {
@@ -6584,7 +6584,7 @@
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-192-v247.png",
       "assetPath": "/app/logos/civweave-pwa-192-v247.png",
-      "context": "\"/app/logos/civweave-pwa-192-v247.png\": \"7f56100fcaa4b6096bc031df735ee74b124cb0f7884f6b392ff5bf2816a71958\",",
+      "context": "\"/app/logos/civweave-pwa-192-v247.png\": \"aeeadf425762d8b3a7bc575429212a949e3ec50a1f0e5eda2e44211998a8a133\",",
       "exists": true
     },
     {

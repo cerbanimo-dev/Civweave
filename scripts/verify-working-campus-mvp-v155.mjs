@@ -13,7 +13,7 @@ const [host,html,css,loader,entry,settings,routes,onboarding,onboardingCss,offli
   read('public/app/working-campus-v156.css'),
   read('public/app/working-campus-v156.js'),
   read('public/app/installed-entry-v146.js'),
-  read('public/app/model-settings-controller-v173.js'),
+  read('public/app/settings-gateway-v317.js'),
   read('public/app/system-routes-v227.js'),
   read('public/app/new-user-onboarding-v1.js'),
   read('public/app/new-user-onboarding-v1.css'),
@@ -36,13 +36,13 @@ for(const token of [
 ])assert(surface.toLowerCase().includes(token.toLowerCase()),`Working Campus is missing ${token}`);
 
 for(const token of [
-  "activation:'settings-gateway-v317'",
+  "const DEFAULTS=Object.freeze({route:'deterministic'",
   "route:'deterministic'",
   'civweave-model-profiles-v1',
   'Credential lifetime',
   'Remember on this device',
   'S.A.F.E. mode',
-  'Nothing probes, starts, or tests a model merely because this panel opened.'
+  'Opening or saving Settings never probes or starts a model.'
 ])assert(settings.includes(token),`Canonical AI settings are missing ${token}`);
 assert(settings.includes('gemini-3.5-flash-lite')&&settings.includes('https://generativelanguage.googleapis.com/v1beta'),'Canonical settings must retain the explicit Gemini option without making it the startup default.');
 assert(!surface.includes('Test Gemini')&&!surface.includes('Test Antigravity'),'Working Campus should not own retired provider-test controls.');

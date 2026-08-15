@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2-guide-identity-integrity-v216-v242-only';
+const VERSION='1.0.162-guide-identity-integrity-v216-v350';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE={
   civweave:{name:'Weaveling',role:'central mirror and orchestrator'},
@@ -83,7 +83,7 @@ function installAssistantBoundary(){
 function onResponseIdentity(event){
   const detail=event?.detail||{},system=cleanSystem(detail.respondingSystem);
   if(!detail.handedOff||!system)return;
-  queueMicrotask(()=>globalThis.CivweaveGuideWorkspaceV242?.switchWindow?.(system,{open:false}));
+  queueMicrotask(()=>globalThis.CivweaveGuideChatSurfaceV350?.switchGuide?.(system,{open:false}));
 }
 
 const trapped=installAssistantBoundary();
@@ -97,7 +97,7 @@ globalThis.CivweaveGuideIdentityIntegrityV216=Object.freeze({
   effectiveResponder,
   wrapAssistant,
   identityPolicy:'selected-guide-or-receiving-guide-after-handoff',
-  canonicalChatOwner:'guide-workspace-v242',
+  canonicalChatOwner:'guide-chat-surface-v350',
   destroy(){removeEventListener('civweave:guide-response-identity',onResponseIdentity)}
 });
 })();

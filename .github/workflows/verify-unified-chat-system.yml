@@ -7,6 +7,7 @@ on:
       - 'package.json'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/guide-stream-thinking-v249.js'
@@ -43,6 +44,7 @@ on:
       - 'package.json'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/guide-stream-thinking-v249.js'
@@ -94,6 +96,7 @@ jobs:
         run: |
           node --check public/app/unified-chat-system-v1.js
           node --check public/app/shared-guide-surface-v236.js
+          node --check public/app/guide-chat-surface-v350.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
           node --check public/app/guide-stream-thinking-v249.js
@@ -126,7 +129,10 @@ jobs:
           const fs=require('node:fs');
           const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
           const loader=fs.readFileSync('public/app/shared-guide-surface-v236.js','utf8');
-          const workspace=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
+          const ownership=JSON.parse(fs.readFileSync('config/system-ownership.json','utf8'));
+          const chatPath=ownership.systems?.['guide-chat']?.owner;
+          if(chatPath!=='public/app/guide-chat-surface-v350.js')throw new Error('System ownership does not point at V350 chat');
+          const chat=fs.readFileSync(chatPath,'utf8');
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
           for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
             if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
@@ -134,7 +140,7 @@ jobs:
           if(!sessions.includes('threadKey=system=>`civweave.guide-thread.${system}.v237`'))throw new Error('Five-folder realm memory contract is missing');
           if(!core.includes("architecture:'one-core-five-themes-five-memory-folders'"))throw new Error('Unified architecture marker missing');
           if(core.includes('setInterval('))throw new Error('Unified chat must not poll the DOM/runtime');
-          if(!workspace.includes("const ROOT_ID='cw-persistent-guide-chat-v215'"))throw new Error('Shared workspace root missing');
+          if(!chat.includes("const ROOT_ID='cw-persistent-guide-chat-v215'")||!chat.includes("presentationOwner:'guide-chat-surface-v350'"))throw new Error('Canonical V350 chat surface contract missing');
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
           if(loader.includes('living-school-chat-workbench-v255.js'))throw new Error('Legacy Living School chat owner is still loaded');
           NODE

@@ -53,8 +53,8 @@ assert.ok(offlineStatus.includes('eagerStatusLookup:false')&&offlineStatus.inclu
 assert.ok(!offlineStatus.includes("addEventListener('load',askCurrentStatus"),'offline status must not touch service-worker campus state at page load');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v247.js?v=front-door-v3-install-only-runtime'),'installer must not boot the deadlocking v247 bridge');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v246.js?v=pwa-install-v246'),'installer must not boot the cache-colliding legacy bridge');
-assert.ok(installerHtml.includes('<img src="/app/logos/civweave-pwa-192-v247.png" alt="Civweave">'),'installer header must keep the verified PNG compatibility mark directly');
-assert.ok(installerHtml.includes('<link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">'),'installer favicon must use the verified PNG directly');
+assert.ok(installerHtml.includes('<img src="/app/logos/civweave-day-logo.jpg" alt="Civweave">'),'installer header must use the current Civweave day logo directly');
+assert.ok(installerHtml.includes('<link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">'),'installer favicon must start from the current Civweave day logo');
 assert.ok(hostSetup.includes(`${entry}&source=host-setup`),'host setup must enter Civweave through installed entry');
 assert.ok(hostSetup.includes('/host-local-anchor.html'),'host setup must expose local Anchor setup');
 assert.ok(hostSetup.includes('CONNECT STEWARD PAYOUTS'),'host setup must include connected payout onboarding for the steward');
@@ -63,7 +63,7 @@ assert.ok(anchor.includes('5. Connect steward payouts'),'local Anchor setup must
 assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'host setup must mark the current browser as steward');
 assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated steward setup');
 assert.ok(setup.includes('Steward setup: ${pagesOrigin}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL on the durable Pages underlay');
-assert.ok(brand.includes("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png'"),'brand layer must use the verified Civweave PNG');
+assert.ok(brand.includes("const DAY_LOGO='/app/logos/civweave-day-logo.jpg'")&&brand.includes("const NIGHT_LOGO='/app/logos/civweave-night-logo.jpg'")&&brand.includes('logoForLocalClock'),'brand layer must own the current local-clock day/night Civweave logo');
 assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
 
 for(const [name,source] of [['installer',installerHtml],['host steward',hostSetup],['local Anchor',anchor]]){

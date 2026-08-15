@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/app/weaveling-hub-v233.js'
       - 'public/app/working-campus-v156.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'scripts/verify-weaveling-hub-v233.mjs'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'public/app/weaveling-hub-v233.js'
       - 'public/app/working-campus-v156.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'scripts/verify-weaveling-hub-v233.mjs'
@@ -34,6 +36,7 @@ jobs:
         run: |
           node --check public/app/weaveling-hub-v233.js
           node --check public/app/working-campus-v156.js
+          node --check public/app/guide-chat-surface-v350.js
           node --check public/app/guide-workspace-v242.js
           node --check scripts/verify-weaveling-hub-v233.mjs
       - name: Contract

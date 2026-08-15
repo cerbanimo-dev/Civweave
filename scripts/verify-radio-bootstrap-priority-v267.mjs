@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 const ROOT=new URL('../',import.meta.url);
 const boundary=fs.readFileSync(new URL('public/app/install-boundary-v146.js',ROOT),'utf8');
 
-const match=boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/);
+const match=boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\];/);
 assert.ok(match,'shared system experience script registry must exist');
 
-const entries=[...match[1].matchAll(/^\s{2}([A-Z][A-Z0-9_]+),?\s*$/gm)].map(item=>item[1]);
+const entries=match[1].split(',').map(item=>item.trim()).filter(item=>/^[A-Z][A-Z0-9_]+$/.test(item));
 const orchestratorIndex=entries.indexOf('EXPERIENCE_ORCHESTRATOR');
 const radioIndex=entries.indexOf('SYSTEM_RADIO_AGENT');
 const trackIndex=entries.indexOf('RADIO_TRACK_SUGGESTIONS');

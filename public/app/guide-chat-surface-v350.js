@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.161-guide-chat-surface-v350';
+const VERSION='1.0.162-guide-chat-surface-v350';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -81,7 +81,7 @@ function installStyle(){
 #${ROOT_ID}{--guide-accent:#d8dde7;--guide-panel:#111827;position:fixed;z-index:2147483612;right:max(12px,env(safe-area-inset-right));bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px);width:min(520px,calc(100vw - 24px));height:min(72dvh,720px);display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;overflow:hidden;border:1px solid color-mix(in srgb,var(--guide-accent) 46%,transparent);border-radius:20px;background:var(--guide-panel);color:#f8fbff;box-shadow:0 24px 80px #000b;font:15px/1.45 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;isolation:isolate;contain:layout paint style}
 #${ROOT_ID}[hidden]{display:none!important}#${ROOT_ID} *{box-sizing:border-box}
 #${ROOT_ID}>header{display:grid;grid-template-columns:48px minmax(0,1fr) auto 40px;align-items:center;gap:9px;padding:10px 11px calc(10px + env(safe-area-inset-top));border-bottom:1px solid color-mix(in srgb,var(--guide-accent) 34%,transparent);background:color-mix(in srgb,var(--guide-panel) 88%,#fff 4%)}
-#${ROOT_ID}>header img{width:48px;height:48px;border:2px solid var(--guide-accent);border-radius:14px;object-fit:cover}#${ROOT_ID}>header div{min-width:0}#${ROOT_ID}>header strong,#${ROOT_ID}>header span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${ROOT_ID}>header strong{font-size:1rem}#${ROOT_ID}>header span{margin-top:2px;color:#b9c6d8;font-size:.72rem}
+#${ROOT_ID}>header img{width:48px;height:48px;border:2px solid var(--guide-accent);border-radius:14px;object-fit:cover}#${ROOT_ID}>header div{min-width:0}#${ROOT_ID}>header strong,#${ROOT_ID}>header span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${ROOT_ID}>header strong{font-size:1rem}#${ROOT_ID}>header span{margin-top:2px;color:#b9c6d8;font-size:.72rem}#${ROOT_ID}>header [data-neuron-status]{margin-top:3px;color:#8df0c6;font-size:.68rem;font-weight:800}#${ROOT_ID}>header [data-neuron-status][hidden]{display:none!important}
 #${ROOT_ID} [data-guide-select]{max-width:142px;min-height:38px;border:1px solid color-mix(in srgb,var(--guide-accent) 40%,transparent);border-radius:10px;padding:0 8px;background:#09121f;color:#fff;font:800 12px/1 system-ui}#${ROOT_ID} [data-close]{width:40px;height:40px;border:1px solid color-mix(in srgb,var(--guide-accent) 40%,transparent);border-radius:10px;background:#ffffff0c;color:#fff;font-size:20px;font-weight:900}
 #${ROOT_ID} .cw350-context{padding:7px 11px;border-bottom:1px solid #ffffff12;color:#9fb0c3;font-size:11px;background:#0002}#${ROOT_ID} [data-log]{min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}#${ROOT_ID} [data-log]:empty::before{content:'Start a conversation';margin:auto;color:#71839a;font-weight:750}
 #${ROOT_ID} article{display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;align-items:start}#${ROOT_ID} article.is-user{display:flex;justify-content:flex-end;padding-left:42px}#${ROOT_ID} article>img{width:32px;height:32px;border:1px solid var(--guide-accent);border-radius:10px;object-fit:cover}#${ROOT_ID} .cw350-bubble{max-width:88%;padding:9px 11px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff0b;white-space:pre-wrap;overflow-wrap:anywhere}#${ROOT_ID} .is-user .cw350-bubble{background:color-mix(in srgb,var(--guide-accent) 16%,#ffffff08);border-color:color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} .cw350-meta{margin-top:5px;color:#8394aa;font-size:10px}
@@ -101,7 +101,7 @@ function ensureLauncher(){
 function ensureRoot(){
   if(root?.isConnected)return root;
   root=document.getElementById(ROOT_ID)||document.createElement('section');root.id=ROOT_ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Civweave guide chat');
-  root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><select data-guide-select aria-label="Choose guide">${SYSTEMS.map(system=>`<option value="${system}">${GUIDE[system].name}</option>`).join('')}</select><button data-close type="button" aria-label="Close chat">×</button></header><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-send type="submit">Send</button></form>`;
+  root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span><span data-neuron-status hidden></span></div><select data-guide-select aria-label="Choose guide">${SYSTEMS.map(system=>`<option value="${system}">${GUIDE[system].name}</option>`).join('')}</select><button data-close type="button" aria-label="Close chat">×</button></header><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-send type="submit">Send</button></form>`;
   root.querySelector('[data-close]').addEventListener('click',close);
   root.querySelector('[data-guide-select]').addEventListener('change',event=>switchGuide(event.target.value,{open:true,focus:true}));
   root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitActive(text)});
@@ -121,14 +121,17 @@ function syncChrome(){
   const select=root.querySelector('[data-guide-select]');if(select)select.value=activeSystem;
   const input=root.querySelector('textarea');if(input)input.placeholder=current.placeholder;
   const context=root.querySelector('[data-context]');if(context)context.textContent=activeSystem===pageSystem?current.label:`${current.label} conversation · opened from ${guide(pageSystem).label}`;
+  const telemetry=globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.(),neuron=root.querySelector('[data-neuron-status]');
+  if(neuron){const charged=Number(telemetry?.chargedNeurons),remaining=Number(telemetry?.remainingNeurons),turns=Number(telemetry?.approximateTurnsLeft),parts=[];if(Number.isFinite(charged)&&charged>0)parts.push(`${Math.floor(charged)} neurons last turn`);else if(Number.isFinite(remaining))parts.push(`${Math.floor(remaining)} neurons left`);if(Number.isFinite(turns))parts.push(`≈${Math.max(0,Math.floor(turns))} chats left`);neuron.textContent=parts.join(' · ');neuron.hidden=!parts.length}
 }
 function render(){
   if(!root)return false;syncChrome();const log=root.querySelector('[data-log]');if(!log)return false;
   const messages=Array.isArray(readThread(activeSystem).messages)?readThread(activeSystem).messages:[];
   log.innerHTML=messages.map(row=>{
-    const user=row?.role==='user',who=GUIDE[row?.guide||row?.responderSystem||activeSystem]||guide(activeSystem),meta=[row?.provider,row?.model].filter(Boolean).join(' · ');
+    const user=row?.role==='user',who=GUIDE[row?.guide||row?.responderSystem||activeSystem]||guide(activeSystem),meta=[row?.provider,row?.model].filter(Boolean),neurons=Number(row?.chargedNeurons),turns=row?.approximateTurnsLeft==null?NaN:Number(row.approximateTurnsLeft);
     if(user)return`<article class="is-user"><div class="cw350-bubble">${esc(row.text||'')}</div></article>`;
-    return`<article><img src="${esc(who.avatar)}" alt="${esc(who.name)}"><div><div class="cw350-bubble">${esc(row.text||'')}</div>${meta?`<div class="cw350-meta">${esc(meta)}</div>`:''}</div></article>`;
+    if(Number.isFinite(neurons)&&neurons>0)meta.push(`${Math.floor(neurons)} neurons`);if(Number.isFinite(turns))meta.push(`≈${Math.max(0,Math.floor(turns))} chats left`);const metaText=meta.join(' · ');
+    return`<article><img src="${esc(who.avatar)}" alt="${esc(who.name)}"><div><div class="cw350-bubble">${esc(row.text||'')}</div>${metaText?`<div class="cw350-meta">${esc(metaText)}</div>`:''}</div></article>`;
   }).join('');
   requestAnimationFrame(()=>{try{log.scrollTop=log.scrollHeight}catch{}});
   globalThis.CivweaveSavedChatUIV295?.render?.(activeSystem);
@@ -167,6 +170,11 @@ async function submitActive(text){
   }finally{busy=false;if(button)button.disabled=false;render();emitState()}
   return true;
 }
+function notify(system,text,options={}){
+  const value=clean(text,6000);if(!SYSTEMS.includes(system)||!value)return false;
+  const thread=readThread(system);thread.messages=Array.isArray(thread.messages)?thread.messages:[];thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:system,responderSystem:system,text:value,notification:true});if(system!==activeSystem||!openState)thread.unread=Math.min(99,Number(thread.unread||0)+1);writeThread(system,thread);
+  if(options.open)return open({guide:system,focus:false});if(root&&activeSystem===system)render();emitState();return true
+}
 function switchGuide(system,options={}){if(!SYSTEMS.includes(system))return false;activeSystem=system;ensureRoot();syncChrome();render();if(options.open!==false){openState=true;root.hidden=false}if(options.focus)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));saveState();emitState();return true}
 function open(options={}){const target=SYSTEMS.includes(options.guide)?options.guide:activeSystem;ensureRoot();activeSystem=target;openState=true;minimized=false;root.hidden=false;if(options.prefill){const input=root.querySelector('textarea');if(input)input.value=clean(options.prefill)}syncChrome();render();if(options.focus!==false)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));saveState();emitState();return true}
 function close(){if(!root)return false;openState=false;minimized=false;root.hidden=true;saveState();emitState();return true}
@@ -177,7 +185,7 @@ function activeWindow(){return activeSystem}
 async function submitText(text,system=activeSystem){if(SYSTEMS.includes(system)&&system!==activeSystem)switchGuide(system,{open:false});return submitActive(text)}
 function start(){pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();ensureRoot();root.hidden=true;openState=false;syncChrome();render();document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}}
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',hubTelemetryVisible:true,retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,notify,submitText,render,ensureRoot,ensureLauncher});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
