@@ -34,6 +34,9 @@ for(const token of [
   "const INTENTIONS_KEY='civweave.intentions.v127'"
 ])assert(js.includes(token),`Landscape runtime missing ${token}`);
 
+for(const forbidden of ["createElement('script')",'new Function','eval(','document.write','insertAdjacentHTML'])
+  assert(!js.includes(forbidden),`Landscape runtime contains forbidden dynamic-code path: ${forbidden}`);
+
 for(const token of [
   '.cil-carousel',
   'perspective:1050px',
@@ -48,5 +51,7 @@ for(const token of [
 
 assert(html.includes('/app/cerbanimo-intention-landscape-v1.css'),'Realm console must load landscape CSS.');
 assert(html.includes('/app/cerbanimo-intention-landscape-v1.js'),'Realm console must load landscape runtime.');
+assert(!html.includes('/app/cerbanimo-ai-validator-v156.js'),'Retired Cerbanimo validator returned to the live console.');
+assert(html.includes('/app/cerbanimo-ai-validator-v159.js'),'Current Cerbanimo validator is missing.');
 
-console.log(JSON.stringify({ok:true,feature:'cerbanimo-intention-landscape-v1',screens:3,houses:5,pathways:3,governanceVoteBadges:true},null,2));
+console.log(JSON.stringify({ok:true,feature:'cerbanimo-intention-landscape',screens:3,houses:5,pathways:3,governanceVoteBadges:true,runtimeInjection:false,retiredValidator:false},null,2));
