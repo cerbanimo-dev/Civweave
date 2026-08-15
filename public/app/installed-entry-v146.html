@@ -7,54 +7,55 @@
   <script>
   (()=>{
     'use strict';
-    const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1';
+    const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
     const params=new URLSearchParams(location.search);
     const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
     const developer=['localhost','127.0.0.1','::1'].includes(location.hostname)&&params.get('developer')==='1';
-    const readCapability=()=>{
-      try{
-        const packet=JSON.parse(localStorage.getItem(INSTALL_CAPABILITY_KEY)||'null');
-        return Boolean(packet&&packet.origin===location.origin&&packet.manifestId==='/civweave-local');
-      }catch{return false}
-    };
-    const rememberCapability=source=>{
-      try{
-        localStorage.setItem(INSTALL_CAPABILITY_KEY,JSON.stringify({origin:location.origin,manifestId:'/civweave-local',source,installedAt:new Date().toISOString()}));
-      }catch{}
-      document.documentElement.dataset.civweaveInstalledCapability='present';
+    const launchSession=()=>{try{return sessionStorage.getItem(LAUNCH_SESSION_KEY)==='1'}catch{return false}};
+    const rememberLaunchSession=source=>{
+      try{sessionStorage.setItem(LAUNCH_SESSION_KEY,'1')}catch{}
+      document.documentElement.dataset.civweavePwaLaunch='authorized';
+      document.documentElement.dataset.civweavePwaLaunchSource=source;
       return true;
     };
     const redirectInstaller=()=>{
       const installer=new URL('/app/index.html',location.origin);
       installer.searchParams.set('install','required');
-      installer.searchParams.set('source','installed-entry-browser-gate-v2');
+      installer.searchParams.set('source','installed-entry-browser-gate-v3-launch-session');
       installer.searchParams.set('next','/app/working-campus-v156.html');
       if(params.get('lang'))installer.searchParams.set('lang',params.get('lang'));
       location.replace(installer.href);
       return false;
     };
-    const discoverInstalledSelf=async()=>{
-      if(typeof navigator.getInstalledRelatedApps!=='function')return false;
-      let apps=[];
-      try{apps=await navigator.getInstalledRelatedApps()||[]}catch{return false}
-      const manifest=`${location.origin}/app/manifest.webmanifest`;
-      return apps.some(app=>String(app?.url||'')===manifest);
-    };
+    const waitForPwaLaunch=()=>new Promise(resolve=>{
+      if(launchSession())return resolve(true);
+      if(!globalThis.launchQueue?.setConsumer)return resolve(false);
+      let settled=false;
+      const finish=value=>{if(settled)return;settled=true;clearTimeout(timer);resolve(Boolean(value))};
+      const timer=setTimeout(()=>finish(false),2200);
+      try{
+        globalThis.launchQueue.setConsumer(launchParams=>{
+          const target=String(launchParams?.targetURL||'');
+          if(target){
+            try{if(new URL(target,location.href).origin!==location.origin)return finish(false)}catch{return finish(false)}
+          }
+          finish(rememberLaunchSession('launch-queue'));
+        });
+      }catch{finish(false)}
+    });
     const authorization=(async()=>{
-      if(installedDisplay()||developer)return true;
+      if(installedDisplay()||developer||launchSession())return true;
       if(params.get('installed')!=='1')return false;
-      if(readCapability())return true;
-      if(await discoverInstalledSelf())return rememberCapability('installed-entry-related-app-discovery');
-      return false;
+      return waitForPwaLaunch();
     })();
     globalThis.CivweaveInstalledLaunchGateV1=Object.freeze({
-      version:'installed-launch-gate-v2-capability',
+      version:'installed-launch-gate-v3-launch-session',
       authorization,
       installedDisplay,
-      readCapability,
-      rememberCapability,
-      installCapabilityKey:INSTALL_CAPABILITY_KEY,
-      policy:'installed-display-or-verified-installed-capability'
+      launchSession,
+      rememberLaunchSession,
+      launchSessionKey:LAUNCH_SESSION_KEY,
+      policy:'installed-display-or-pwa-launch-session'
     });
     authorization.then(authorized=>{if(!authorized)redirectInstaller()}).catch(redirectInstaller);
   })();
@@ -107,7 +108,7 @@
   })();
   </script>
   <script src="/app/legal-consent-v1.js?v=1.0.137-legal-consent-v1" defer></script>
-  <script src="/app/installed-entry-v146.js?v=1.0.162-boot-recovery-v427-installed-capability-v1" defer></script>
+  <script src="/app/installed-entry-v146.js?v=1.0.162-boot-recovery-v428-launch-session-v1" defer></script>
   <noscript><p style="position:fixed;left:16px;right:16px;bottom:16px;text-align:center"><a href="/app/recovery-v426.html" style="color:#8de5ef">Open Civweave recovery</a></p></noscript>
 </body>
 </html>
