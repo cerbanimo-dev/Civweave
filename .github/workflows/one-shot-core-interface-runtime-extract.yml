@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  EXTRACTION_REVISION: five-system-verifier-v3
+  EXTRACTION_REVISION: radio-verifier-v4
 
 jobs:
   extract:
@@ -31,12 +31,14 @@ jobs:
           python .github/scripts/one-shot-core-interface-runtime-extract.py
           python .github/scripts/one-shot-migrate-cleanroom-to-core-runtime.py
           python .github/scripts/one-shot-migrate-five-system-to-core-runtime.py
+          python .github/scripts/one-shot-migrate-radio-to-core-runtime.py
       - name: Verify syntax and ownership
         run: |
           node --check public/app/core-interface-runtime-v1.js
           node --check public/app/install-boundary-v146.js
           node --check scripts/sync-release-coherence-v220.mjs
           node --check scripts/verify-five-system-navigation-v227.mjs
+          node --check scripts/verify-system-radio-v233.mjs
           node scripts/verify-system-ownership-v317.mjs
           node scripts/verify-ai-settings-cleanroom-v188.mjs
       - name: Prove required shared dependency failure fails closed
@@ -75,9 +77,9 @@ jobs:
           node scripts/verify-civweave-systems-mesh-v251.mjs
       - name: Commit extracted architecture and remove helpers
         run: |
-          git rm .github/workflows/one-shot-core-interface-runtime-extract.yml .github/scripts/one-shot-core-interface-runtime-extract.py .github/scripts/one-shot-migrate-cleanroom-to-core-runtime.py .github/scripts/one-shot-migrate-five-system-to-core-runtime.py
+          git rm .github/workflows/one-shot-core-interface-runtime-extract.yml .github/scripts/one-shot-core-interface-runtime-extract.py .github/scripts/one-shot-migrate-cleanroom-to-core-runtime.py .github/scripts/one-shot-migrate-five-system-to-core-runtime.py .github/scripts/one-shot-migrate-radio-to-core-runtime.py
           git config user.name 'cerbanimo-dev'
           git config user.email 'cerbanimo@gmail.com'
-          git add .github/workflows/verify-core-interface-runtime-v1.yml config/system-ownership.json docs/architecture/core-interface-runtime-v1.md public/app/core-interface-runtime-v1.js public/app/install-boundary-v146.js public/service-worker-critical-v199.js scripts/sync-release-coherence-v220.mjs scripts/verify-system-ownership-v317.mjs scripts/verify-ai-settings-cleanroom-v188.mjs scripts/verify-five-system-navigation-v227.mjs
+          git add .github/workflows/verify-core-interface-runtime-v1.yml config/system-ownership.json docs/architecture/core-interface-runtime-v1.md public/app/core-interface-runtime-v1.js public/app/install-boundary-v146.js public/service-worker-critical-v199.js scripts/sync-release-coherence-v220.mjs scripts/verify-system-ownership-v317.mjs scripts/verify-ai-settings-cleanroom-v188.mjs scripts/verify-five-system-navigation-v227.mjs scripts/verify-system-radio-v233.mjs
           git commit -m 'Extract five-system core interface runtime onto current main'
           git push origin HEAD:helper/core-interface-runtime-current
