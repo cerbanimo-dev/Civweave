@@ -33,7 +33,10 @@
         "public/app/visual-model-settings-v132.js",
         "public/app/unified-ai-settings-v175.js",
         "public/app/language-settings-v1.js",
-        "public/app/settings-parity-v295.js"
+        "public/app/settings-parity-v295.js",
+        "public/app/settings-delegation-v175.js",
+        "public/app/ai-settings-bind-guard-v230.js",
+        "public/app/ai-settings-device-repair-v229.js"
       ],
       "forbiddenInputOwnerFiles": [
         "public/app/working-campus-v156.part5.txt",
@@ -58,6 +61,9 @@
         "public/app/unified-ai-settings-v175.js",
         "public/app/language-settings-v1.js",
         "public/app/settings-parity-v295.js",
+        "public/app/settings-delegation-v175.js",
+        "public/app/ai-settings-bind-guard-v230.js",
+        "public/app/ai-settings-device-repair-v229.js",
         "public/app/document-lifecycle-v221.js"
       ],
       "forbiddenEagerImplementations": [
