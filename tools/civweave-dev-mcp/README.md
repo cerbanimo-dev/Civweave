@@ -7,7 +7,7 @@ Local, source-first development bridge for inspecting Civweave PWAs through Chro
 Use the local staging lane for normal browser debugging instead of the legacy local host-node runtime or production URLs:
 
 ```bash
-node scripts/start-local-staging.mjs
+node tools/civweave-dev-mcp/start-local-staging.mjs
 ```
 
 The stable local staging origin is `http://127.0.0.1:8788`. It serves `public/` with the repository's Cloudflare Pages Functions through Wrangler, so localhost exercises the same staging fixtures and production-isolation branches as `https://civweave-staging.pages.dev` without waiting for a deployment.
@@ -68,7 +68,7 @@ There is intentionally no arbitrary browser JavaScript evaluation tool, runtime 
 
 ```bash
 node scripts/verify-local-staging-isolation.mjs
-node --check scripts/start-local-staging.mjs
+node --check tools/civweave-dev-mcp/start-local-staging.mjs
 node --check tools/civweave-dev-mcp/server.mjs
 node --check tools/civweave-dev-mcp/lib/cdp-client.mjs
 node --check tools/civweave-dev-mcp/lib/repo-tools.mjs
