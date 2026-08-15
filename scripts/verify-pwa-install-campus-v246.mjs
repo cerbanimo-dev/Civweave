@@ -90,7 +90,7 @@ assert.ok(workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-r
 assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'future shell installs must not seed the stale v1 repair bridge');
 assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'shell repair must not resurrect the retired browser fallback');
 assert.ok(workerWrapper.includes('working-campus-return-v425-install-only-pwa-v1'),'worker core cache identity must carry install-only boundary');
-assert.ok(workerWrapper.includes('shell-self-repair-v225-cache-distinct-installer-v2'),'worker wrapper must cache-bust the repair-layer import for v2');
+assert.ok(workerWrapper.includes('shell-self-repair-v225-install-only-pwa-v1'),'worker wrapper must preserve the stable V225 repair module epoch');
 
 const meta=JSON.parse(hostMeta);
 assert.equal(meta.schema,'civweave.host-deployment.v1');
@@ -123,6 +123,6 @@ console.log(JSON.stringify({
   firstPaintShellWork:false,
   firstPaintHubWork:false,
   cacheDistinctInstallerPaths:true,
-  workerCacheBusted:true,
+  stableWorkerEpoch:true,
   relatedOrigins:manifests.length
 },null,2));
