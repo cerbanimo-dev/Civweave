@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'public/app/regression-fixes-v243.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/assets/ai/kamiya-welcoming-v243.png'
@@ -17,6 +18,7 @@ on:
     branches: [main]
     paths:
       - 'public/app/regression-fixes-v243.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/assets/ai/kamiya-welcoming-v243.png'
@@ -41,6 +43,7 @@ jobs:
       - name: Parse changed runtimes
         run: |
           node --check public/app/regression-fixes-v243.js
+          node --check public/app/guide-chat-surface-v350.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/knowledge-school-runtime-v243.mjs
