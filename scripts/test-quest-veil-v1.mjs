@@ -6,6 +6,7 @@ const finale=fs.readFileSync(new URL('../public/app/quest-veil-v1.js',import.met
 const gate=fs.readFileSync(new URL('../public/app/quest-veil-ledger-gate-v1.js',import.meta.url),'utf8');
 const mesh=fs.readFileSync(new URL('../public/app/quest-veil-mesh-v1.js',import.meta.url),'utf8');
 const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
+const coreRuntime=fs.readFileSync(new URL('../public/app/core-interface-runtime-v1.js',import.meta.url),'utf8');
 
 assert.match(gate,/civweave\.chronicle-ledger\.v1\.1/,'Mandatory veil gate must project from the canonical chronicle ledger.');
 assert.match(gate,/weaveling-task-veil-writer-v1/,'Mandatory veil gate must identify the dedicated Weaveling task writer prompt.');
@@ -20,9 +21,14 @@ assert.match(mesh,/rawSourceIncluded:false/,'Mesh veil batches must exclude raw 
 assert.match(mesh,/sourceTitlesIncluded:false/,'Mesh veil batches must exclude source titles.');
 assert.match(mesh,/evidenceContentIncluded:false/,'Mesh veil batches must exclude evidence content.');
 assert.match(mesh,/currencyPolicy:'acorns-and-buttons-only'/,'Quest Veil work must not introduce a separate credit currency.');
-assert.match(boundary,/const QUEST_VEIL_MESH='\/app\/quest-veil-mesh-v1\.js';/,'Canonical loader must name the Quest Veil mesh runtime.');
-assert.match(boundary,/const QUEST_VEIL_LEDGER_GATE='\/app\/quest-veil-ledger-gate-v1\.js';/,'Canonical loader must name the mandatory human-ledger veil gate.');
-assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[[\s\S]*?QUEST_VEIL_MESH,[\s\S]*?QUEST_VEIL_LEDGER_GATE,/,'Mesh and mandatory gate must load on canonical system surfaces.');
+const meshIndex=coreRuntime.indexOf("'/app/quest-veil-mesh-v1.js'");
+const gateIndex=coreRuntime.indexOf("'/app/quest-veil-ledger-gate-v1.js'");
+const finaleIndex=coreRuntime.indexOf("'/app/quest-veil-v1.js'");
+assert.ok(meshIndex>=0,'Core interface runtime must assemble the Quest Veil mesh runtime.');
+assert.ok(gateIndex>meshIndex,'Mandatory human-ledger veil gate must load after the Quest Veil mesh runtime.');
+assert.ok(finaleIndex>gateIndex,'Quest Veil finale renderer must remain downstream of the mandatory gate.');
+assert.match(boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/,'Canonical boundary must bootstrap the shared interface runtime.');
+assert.doesNotMatch(boundary,/SYSTEM_EXPERIENCE_SCRIPTS|QUEST_VEIL_MESH='\/app\/quest-veil-mesh-v1\.js'/,'Install boundary must not retain a second Quest Veil loader manifest.');
 assert.match(finale,/civweave\.chronicle-ledger\.v1\.1/,'Questline finale remains a derived canonical chronicle projection.');
 
 const SECRET_TITLE='Project Nightjar private prototype for North Ridge Clinic';
@@ -122,4 +128,4 @@ assert.equal(reward.buttons,3,'Veiled labor, material, and exchange items must e
 assert.equal(reward.items,4);
 assert.equal(reward.currencyPolicy,'acorns-and-buttons-only');
 
-console.log('Quest Veil mandatory human gate, stripped mesh payload, stage classification, and per-item Acorn/Button reward checks passed.');
+console.log('Quest Veil mandatory human gate, stripped mesh payload, stage classification, per-item Acorn/Button rewards, and core-interface assembly checks passed.');
