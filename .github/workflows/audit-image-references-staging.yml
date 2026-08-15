@@ -8,6 +8,7 @@ on:
     paths:
       - 'public/app/assets/**'
       - 'public/app/services/anarchadia/**'
+      - 'public/app/services/fellowfare/**'
       - 'scripts/generate-asset-lockboard-catalog-v239.mjs'
       - 'scripts/report-image-reference-audit-v1.mjs'
       - '.github/workflows/audit-image-references-staging.yml'
