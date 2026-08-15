@@ -68,6 +68,13 @@ assert.ok(repairOnly.includes('function installedDisplay()'),'repair bridge must
 assert.ok(repairOnly.includes("if(!required||!rawNext||!installedDisplay())return false"),'stale required-next state must not open runtime in a browser tab');
 assert.ok(!repairOnly.includes("launch','online"),'repair bridge must not synthesize an online campus launch');
 assert.ok(repairOnly.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'repair bridge must declare installer-only browser policy');
+assert.ok(repairOnly.includes("hubToolsPolicy:'explicit-user-load-only'"),'Hub and account tools must be explicit opt-in work');
+assert.ok(repairOnly.includes('firstPaintHubWork:false'),'repair bridge must explicitly forbid Hub/account work on first paint');
+assert.ok(repairOnly.includes('installHubToolsGate();'),'installer startup must install only the lightweight Hub tools gate');
+assert.ok(repairOnly.includes("addEventListener('click',loadHubTools)"),'Hub/account scripts must start from an explicit user click');
+const startupTail=repairOnly.slice(repairOnly.indexOf('if(resumeRequiredNext())return;'),repairOnly.indexOf('globalThis.CivweaveInstallerRepairOnlyV1'));
+assert.ok(!startupTail.includes('installHostNodeLobby();'),'installer startup must not boot Host Node scripts before user intent');
+assert.ok(!startupTail.includes('installHubRecovery();'),'installer startup must not boot recovery scripts before user intent');
 
 assert.ok(installedEntryHtml.indexOf('installed-entry-browser-gate-v1')<installedEntryHtml.indexOf('<title>Civweave</title>'),'installed-entry browser gate must execute before boot UI paint');
 assert.ok(installedEntryHtml.includes("location.replace(installer.href)"),'ordinary browser display must redirect to installer before boot UI');
@@ -102,13 +109,14 @@ assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v249-no-load-prewarm',
+  revision:'pwa-install-campus-v249-no-load-prewarm-lazy-hub-tools',
   canonicalOrigin,
   previousCanonicalOrigin,
   browserRuntime:'installed-display-only',
   onlineFallback:false,
   repairOnly:true,
   firstPaintShellWork:false,
+  firstPaintHubWork:false,
   workerCacheBusted:true,
   relatedOrigins:manifests.length
 },null,2));
