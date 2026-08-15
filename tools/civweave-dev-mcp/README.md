@@ -12,7 +12,7 @@ node tools/civweave-dev-mcp/start-local-staging.mjs
 
 The stable local staging origin is `http://127.0.0.1:8788`. It serves `public/` with the repository's Cloudflare Pages Functions through Wrangler, so localhost exercises the same staging fixtures and production-isolation branches as `https://civweave-staging.pages.dev` without waiting for a deployment.
 
-The launcher runs `scripts/verify-local-staging-isolation.mjs` before starting. That verifier requires localhost to remain a staging request, refuses the production Pages project name in the local config, and rejects new production service targets inside Pages Functions unless they are explicitly routed through the staging boundary.
+The launcher runs `scripts/verify-local-staging-isolation.mjs` before starting. Local Pages development deliberately does not load a Wrangler project config: compatibility settings and the three non-secret staging variables are passed explicitly to `wrangler pages dev`, while the verifier rejects custom config paths and new unguarded production service targets inside Pages Functions.
 
 `127.0.0.1:8788` is intentionally distinct from the older local host-node/debug ports. Use it as the MCP browser target for application work.
 
@@ -73,6 +73,7 @@ node --check tools/civweave-dev-mcp/server.mjs
 node --check tools/civweave-dev-mcp/lib/cdp-client.mjs
 node --check tools/civweave-dev-mcp/lib/repo-tools.mjs
 node --check tools/civweave-dev-mcp/lib/tool-registry.mjs
+node --test tools/civweave-dev-mcp/test/local-staging-spawn.test.mjs
 node --test tools/civweave-dev-mcp/test/dev-tools-mcp.test.mjs
 ```
 
