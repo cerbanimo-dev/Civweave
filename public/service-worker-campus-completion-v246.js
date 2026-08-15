@@ -1,8 +1,8 @@
 ;(()=>{
 'use strict';
 
-const REVISION='campus-retired-completion-v246';
-const INSTALL_BRIDGE='/app/pwa-install-prompt-v246.js';
+const REVISION='campus-retired-completion-v249';
+const INSTALL_BRIDGE='/app/pwa-install-prompt-v249.js';
 const previousOfflineStatus=offlineStatus;
 const previousDownloadOfflinePackage=downloadOfflinePackage;
 
@@ -44,7 +44,7 @@ function canonicalize(packet={}){
   };
 }
 
-offlineStatus=async function offlineStatusV246(){
+offlineStatus=async function offlineStatusV249(){
   const packet=canonicalize(await previousOfflineStatus());
   try{
     const current=await readOfflineMeta();
@@ -55,7 +55,7 @@ offlineStatus=async function offlineStatusV246(){
   return packet;
 };
 
-downloadOfflinePackage=function downloadOfflinePackageV246(event){
+downloadOfflinePackage=function downloadOfflinePackageV249(event){
   return Promise.resolve(previousDownloadOfflinePackage(event)).then(async packet=>{
     const canonical=canonicalize(packet||{});
     try{
