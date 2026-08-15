@@ -30,6 +30,7 @@ test('Luddite package is an explicit no-AI allowlist',async()=>{
   assert.equal(manifest.policy.localModels,false);
   assert.equal(manifest.policy.remoteModels,false);
   assert.ok(Array.isArray(manifest.assets)&&manifest.assets.length>0);
+  assert.ok(manifest.assets.includes('/app/shared/civweave-identity-sync.js'),'human validation signer must be packaged');
   for(const asset of manifest.assets){
     const lower=String(asset).toLowerCase();
     for(const fragment of forbidden)assert.equal(lower.includes(fragment),false,`${asset} contains forbidden ${fragment}`);
@@ -40,9 +41,17 @@ test('Luddite campus does not import AI or model assets',async()=>{
   const html=(await read('public/app/luddite-campus-v1.html')).toLowerCase();
   const scriptSources=[...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match=>match[1]);
   assert.ok(scriptSources.length>0);
+  assert.ok(scriptSources.includes('/app/shared/civweave-identity-sync.js'));
   for(const source of scriptSources)for(const fragment of forbidden)assert.equal(source.includes(fragment),false,`${source} contains forbidden ${fragment}`);
   assert.match(html,/ai generation off/);
   assert.match(html,/human-authored provenance/);
+});
+
+test('identity signer is WebCrypto-only and exposes no AI runtime dependency',async()=>{
+  const source=(await read('public/app/shared/civweave-identity-sync.js')).toLowerCase();
+  assert.match(source,/crypto\.subtle/);
+  assert.match(source,/civweaveidentitysync/);
+  for(const fragment of forbidden)assert.equal(source.includes(fragment),false,`identity signer contains forbidden ${fragment}`);
 });
 
 test('generation runtime stamps both result and structured output provenance',async()=>{
