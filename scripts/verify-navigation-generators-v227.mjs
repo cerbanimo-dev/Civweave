@@ -10,16 +10,17 @@ const version=versionText.trim();
 const manifest=JSON.parse(manifestText);
 new Function(installedEntry);new Function(installedLaunch);new Function(pwa);new Function(boundary);
 for(const retired of ['public/app/installer-repair-only-v1.js','public/app/installer-online-fallback-v225.js','public/service-worker-shell-repair-v225.js'])assert.equal(existsSync(new URL(`../${retired}`,import.meta.url)),false,`${retired} must remain retired`);
-for(const token of[
-  `importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227')`,
-  `importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1')`,
-  `importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery')`,
-  `importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280')`,
-  `importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281')`,
-  `importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293')`,
-  `importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227')`,
+const builderTokens=[
+  "importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227')",
+  "importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1')",
+  "importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery')",
+  "importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280')",
+  "importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281')",
+  "importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293')",
+  "importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227')",
   'working-campus-return-v425','install-only-pwa-v1','canonicalNavigationFinalPolicy:true','routeContractFirst:true'
-])assert(builder.includes(token),`Worker builder is missing ${token}.`);
+];
+for(const token of builderTokens)assert(builder.includes(token),`Worker builder is missing source template ${token}.`);
 assert(!builder.includes('service-worker-shell-repair-v225.js'),'Worker builder must not resurrect v225.');
 assert(builder.indexOf('/app/system-routes-v227.js')<builder.indexOf('/service-worker-core-v208.js'),'Worker builder must place route contract first.');
 assert(builder.indexOf('/service-worker-core-v208.js')<builder.indexOf('/service-worker-installed-launch-v282.js'),'Installed launch must follow retained core.');
@@ -33,7 +34,7 @@ assert(installedEntry.includes("if(!installedDisplay()&&!localDeveloper())"),'In
 assert(installedEntry.includes("browserRuntimePolicy:'installed-display-only'"),'Installed entry must declare installed-only runtime policy.');
 assert.equal(new URL(manifest.start_url,'https://civweave.invalid').pathname,'/app/installed-entry-v146.html','PWA manifest must launch through installed bootstrap.');
 assert(installedLaunch.includes("policy:'installed-entry-then-working-campus-never-installer-substitution'"),'Worker installed launch boundary regressed.');
-assert(installedRepair.includes("event.data?.type !== 'REPAIR_DEVICE_PACKAGE'"),'v293 must retain explicit repair message ownership.');
+assert(/event\.data\?\.type\s*!==\s*['"]REPAIR_DEVICE_PACKAGE['"]/.test(installedRepair),'v293 must retain explicit repair message ownership.');
 assert(pwa.includes("requiredNextOwner:'pwa-install-prompt-v249'"),'Required-next recovery must belong to the PWA controller.');
 assert(pwa.includes("if(!required||!rawNext||!standalone())return false"),'Required-next recovery must require installed display mode.');
 assert(!pwa.includes('REPAIR_DEVICE_PACKAGE'),'PWA install controller must not invoke installed-shell repair.');
