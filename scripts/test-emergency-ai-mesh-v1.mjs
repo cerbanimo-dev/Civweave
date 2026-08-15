@@ -8,14 +8,14 @@ class WebStorage{
 }
 
 globalThis.localStorage=new WebStorage();
-globalThis.navigator={onLine:false};
+try{Object.defineProperty(globalThis,'navigator',{value:{onLine:false},configurable:true})}catch{}
 globalThis.CivweaveResponseRouterV347={tiers:{
   fast:{id:'fast',maxTokens:1400,preferredModelIds:['gemma4-fast','gemma4-smart']},
   smart:{id:'smart',maxTokens:3072,preferredModelIds:['gemma4-smart','gemma4-fast']},
 }};
 localStorage.setItem('civweave.local-ai.health.v286',JSON.stringify({
   fast:{modelId:'gemma4-fast',passed:true},
-  smart:{modelId:'gemma4-smart',passed:true},
+  smart:{modelId:'gemma4-smart',passed:false},
 }));
 
 let currentDeviceId='provider-1';
@@ -37,6 +37,15 @@ const {CivweaveEmergencyAiHostV1}=await import('../public/app/emergency-ai-host-
 const {CivweaveEmergencyAiMeshV1,EMERGENCY_AI_CAPABILITY_KIND,EMERGENCY_AI_REQUEST_KIND,EMERGENCY_AI_RESULT_KIND}=await import('../public/app/emergency-ai-mesh-v1.mjs');
 
 assert.equal(CivweaveEmergencyAiHostV1.status().eligible,false);
+assert.equal(CivweaveEmergencyAiHostV1.readiness().eligible,false);
+assert.throws(()=>CivweaveEmergencyAiHostV1.setOptIn(true),error=>error?.code==='EMERGENCY_AI_BENCHMARK_REQUIRED');
+assert.equal(CivweaveEmergencyAiHostV1.optedIn(),false);
+
+localStorage.setItem('civweave.local-ai.health.v286',JSON.stringify({
+  fast:{modelId:'gemma4-fast',passed:true},
+  smart:{modelId:'gemma4-smart',passed:true},
+}));
+assert.equal(CivweaveEmergencyAiHostV1.readiness().eligible,true);
 CivweaveEmergencyAiHostV1.setOptIn(true);
 assert.equal(CivweaveEmergencyAiHostV1.status().eligible,true);
 assert.equal(CivweaveEmergencyAiHostV1.tierExecution({tierId:'fast'}).modelId,'gemma4-fast');
@@ -74,4 +83,4 @@ assert.equal(results[0].payload.actual.model,'gemma4-fast');
 
 CivweaveEmergencyAiHostV1.setOptIn(false);
 assert.equal(CivweaveEmergencyAiHostV1.status().eligible,false);
-console.log(JSON.stringify({ok:true,schema:'civweave.emergency-ai-mesh.test.v1',provider:'provider-1',requester:'requester-1',scheduler:'fifo',requiredTiers:['fast','smart'],executedModel:'gemma4-fast'}));
+console.log(JSON.stringify({ok:true,schema:'civweave.emergency-ai-mesh.test.v1',provider:'provider-1',requester:'requester-1',scheduler:'fifo',requiredTiers:['fast','smart'],benchmarkGate:true,executedModel:'gemma4-fast'}));
