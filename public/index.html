@@ -7,7 +7,7 @@
   <title>Civweave</title>
   <link rel="icon" href="/app/logos/civweave-canonical.png" type="image/png">
   <style>html,body{width:100%;height:100%;margin:0;background:#061019}</style>
-  <script src="/app/civweave-brand.js?v=1.0.160"></script>
+  <script src="/app/civweave-brand.js?v=1.0.161"></script>
   <script>
   (() => {
     'use strict';
@@ -31,7 +31,7 @@
       location.replace(target.href);
       return;
     }
-    const LEGACY_ENTRY='/app/installed-entry-v146.js?v=1.0.160';
+    const LEGACY_ENTRY='/app/installed-entry-v146.js?v=1.0.161';
     const VERSION=new URL(LEGACY_ENTRY,location.origin).searchParams.get('v')||'';
     const params=new URLSearchParams(location.search);
     const installRequired=params.get('install')==='required'||params.has('installrequired');
