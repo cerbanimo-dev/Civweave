@@ -23,7 +23,7 @@ on:
       - 'scripts/verify-fresh-install-paths-v1.mjs'
       - '.github/workflows/verify-pwa-install-campus-v246.yml'
   push:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'public/app/index.html'
       - 'public/app/pwa-install-prompt-v246.js'
