@@ -55,6 +55,16 @@ function generationMetadata(result,request={}){
     generatedAt:String(result?.timing?.completedAt||new Date().toISOString()).slice(0,80)
   });
 }
+function structuredOutputWithProvenance(output,generation){
+  if(!output||typeof output!=='object'||Array.isArray(output))return output;
+  const metadata=output.metadata&&typeof output.metadata==='object'&&!Array.isArray(output.metadata)?output.metadata:{};
+  const existing=metadata.civweaveProvenance&&typeof metadata.civweaveProvenance==='object'&&!Array.isArray(metadata.civweaveProvenance)?metadata.civweaveProvenance:null;
+  const origin=generation.aiGenerated?'ai-generated':generation.kind==='manual'?'human-authored':'deterministic-generated';
+  const provenance=existing&&existing.origin&&existing.origin!=='unknown'?existing:{
+    schema:'civweave.content-provenance.v1',origin,aiGenerated:generation.aiGenerated,createdAt:generation.generatedAt,sourceSystem:'civweave-generation-runtime',artifactType:'structured-model-output',generation,humanValidations:[]
+  };
+  return{...output,metadata:{...metadata,civweaveProvenance:provenance}};
+}
 async function generate(input={}){
   if(ludditeEnabled())throw ludditeError();
   if(!base?.generate)throw new Error('Civweave model runtime spine has no base generator.');
@@ -88,7 +98,10 @@ async function generate(input={}){
   for(const item of [...stack].reverse()){if(!item.after)continue;const started=clock();const out=await item.after(result,request,context(request,trace,states));if(out!==undefined)result=out;trace.push({id:item.id,phase:'after',ms:Math.max(0,Math.round(clock()-started))});}
   state.lastTrace=trace.slice(-40);
   state.lastRequest={purpose:String(request.purpose||''),executionProfile:String(request.executionProfile||'interactive'),handledBy,capabilityNormalization:request.capabilityNormalization||null,serverAuto:serverAuto(request),at:new Date().toISOString()};
-  if(result&&typeof result==='object')return{...result,metadata:{...(result.metadata||{}),generation:generationMetadata(result,request)},runtimeSpine:{schema:'civweave.ai-runtime-spine.v1',version:VERSION,handledBy,middleware:stack.map(item=>item.id),trace:state.lastTrace,serverAutoFailover:true}};
+  if(result&&typeof result==='object'){
+    const generation=generationMetadata(result,request),outputJson=structuredOutputWithProvenance(result.outputJson,generation);
+    return{...result,outputJson,metadata:{...(result.metadata||{}),generation},runtimeSpine:{schema:'civweave.ai-runtime-spine.v1',version:VERSION,handledBy,middleware:stack.map(item=>item.id),trace:state.lastTrace,serverAutoFailover:true}};
+  }
   return result;
 }
 function legacyBase(runtime){if(!runtime?.generate)return runtime;const prior=runtime.generate.__prior;if(prior&&(runtime.generate.__civweaveFastInteractiveV192||runtime.generate.__civweaveFastMemoryV192))return Object.freeze({...runtime,generate:prior});return runtime;}
@@ -106,7 +119,7 @@ function install(){
 function stabilize(){return install();}
 function diagnostics(){return Object.freeze({version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,baseVersion:state.baseVersion,calls:state.calls,middleware:ordered().map(item=>item.id),lastTrace:[...state.lastTrace],lastRequest:state.lastRequest,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{}),serverAutoFailover:true,ludditeBlocked:ludditeEnabled()});}
 function status(){return diagnostics();}
-const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy,serverAuto,localResultNeedsFailover,generationMetadata,aiAllowed:()=>!ludditeEnabled()});
+const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy,serverAuto,localResultNeedsFailover,generationMetadata,structuredOutputWithProvenance,aiAllowed:()=>!ludditeEnabled()});
 root.CivweaveFastInteractiveV192=api;
 register('fast-interactive',{before(request){const next=optimizedRequest(request);return next===request?request:{request:next,state:{started:clock()}};},after(result,_request,ctx){const started=ctx.states['fast-interactive']?.started;if(started==null||!result||typeof result!=='object')return result;return{...result,latency:{...(result.latency||{}),interactiveMs:Math.max(0,Math.round(clock()-started)),revision:VERSION}};}},20);
 root.addEventListener?.('civweave:model-runtime-ready',install);root.addEventListener?.('pageshow',install);install();
