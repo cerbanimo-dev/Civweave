@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='japanese-shell-copy-v2';
+const VERSION='japanese-shell-copy-v3-citizen-patron';
 const LANGUAGE_KEY='civweave.language.v1';
 const supported=new Set(['/app/index.html','/app/index','/app/installed-entry-v146.html','/app/installed-entry-v146']);
 if(globalThis.CivweaveJapaneseShellCopyV1?.version===VERSION)return;
@@ -80,8 +80,7 @@ const translations=new Map([
   ['Open Civweave','Civweave を開く'],
   ['Civweave installed','Civweave インストール済み'],
   ['Opening app install…','アプリのインストールを開いています…'],
-  ['Reload to install','再読み込みしてインストール']
-,
+  ['Reload to install','再読み込みしてインストール'],
   ["LOCAL HUB NODE","ローカル・ハブノード"],
   ["HUB NODE","ハブノード"],
   ["Checking this Hub Node…","このハブノードを確認しています…"],
@@ -95,8 +94,13 @@ const translations=new Map([
   ["Community residency available on this host.","このホストにはコミュニティ向けの無料参加枠があります。"],
   ["Paid slots","有料枠"],
   ["Additional paid-expansion residency available.","追加の有料拡張参加枠があります。"],
+  ["Citizen slots","市民枠"],
+  ["Citizen residency available on this host.","このホストには市民枠があります。"],
+  ["Patron slots","パトロン枠"],
+  ["Additional Patron residency available on this host.","このホストには追加のパトロン枠があります。"],
   ["Reading the Hub’s live capacity before you join.","参加前にハブの現在の空き枠を確認しています。"],
   ["Find the nearest Hub with community or paid-expansion capacity. Your exact location is never sent; Civweave rounds it before searching.","無料または有料拡張の空きがある最寄りのハブを探します。正確な位置情報は送信せず、民織が概略化してから検索します。"],
+  ["Find the nearest Hub with Citizen or Patron capacity. Your exact location is never sent; Civweave rounds it before searching.","市民枠またはパトロン枠の空きがある最寄りのハブを探します。正確な位置情報は送信せず、民織が概略化してから検索します。"],
   ["Use this Hub Node","このハブノードを使用"],
   ["Join & log in","参加してログイン"],
   ["Find an open Hub","空きのあるハブを探す"],
@@ -104,12 +108,17 @@ const translations=new Map([
   ["Refresh status","状態を更新"],
   ["This installer is being served by a Civweave federated Hub Node. Steward controls stay local to this node.","このインストーラーは民織の連合ハブノードから配信されています。スチュワード操作はこのノード内に留まります。"],
   ["A Hub login is device-bound and stored locally. Joining never silently starts a paid membership.","ハブログインはこの端末に結び付けてローカル保存されます。参加しただけで有料メンバーシップが勝手に始まることはありません。"],
+  ["A Hub login is device-bound and stored locally. Joining never silently starts a Patron membership.","ハブログインはこの端末に結び付けてローカル保存されます。参加しただけでパトロン・メンバーシップが勝手に始まることはありません。"],
   ["Nearest Hubs with open slots","空き枠のある最寄りのハブ"],
   ["Choose which capacity counts as open. Paid-expansion access still requires an active Civweave membership.","検索対象にする空き枠の種類を選んでください。有料拡張枠の利用には有効な民織メンバーシップが必要です。"],
+  ["Choose which capacity counts as open. Patron capacity still requires an active Civweave membership.","検索対象にする空き枠の種類を選んでください。パトロン枠の利用には有効な民織メンバーシップが必要です。"],
   ["Show slots","表示する枠"],
   ["Free or paid","無料または有料"],
   ["Free only","無料枠のみ"],
   ["Paid only","有料枠のみ"],
+  ["Citizen or Patron","市民またはパトロン"],
+  ["Citizen only","市民枠のみ"],
+  ["Patron only","パトロン枠のみ"],
   ["Use my approximate location","おおよその位置情報を使う"],
   ["Location is requested only when you start a nearest-Hub search.","位置情報は最寄りハブの検索を開始したときだけ要求されます。"],
   ["small shell · optional code-first campus · visuals and models on demand","小さなシェル · 任意のコード中心キャンパス · 画像とモデルは必要時に取得"],
