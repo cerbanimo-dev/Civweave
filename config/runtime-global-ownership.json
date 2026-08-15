@@ -1,0 +1,43 @@
+{
+  "schema": "civweave.runtime-global-ownership.v1",
+  "policy": "no-undeclared-global-interception",
+  "rules": [
+    "Shipped runtime code may not intercept another runtime global unless the boundary is declared here.",
+    "Repair, hotfix, appearance, stability, and presentation layers may never intercept another subsystem global.",
+    "A declared boundary must be narrowly scoped to the named global and must not poll or repeatedly reinstall itself.",
+    "Deleting a declared boundary requires first moving its behavior into the canonical owner or proving the behavior obsolete."
+  ],
+  "boundaries": [
+    {
+      "file": "public/app/guide-identity-integrity-v216.js",
+      "global": "CivweaveAssistantV141",
+      "capability": "Selected-guide identity, explicit handoff, and explicit action routing before generation",
+      "canonicalOwner": "public/app/assistant-runtime-v141.js",
+      "loadBoundary": "public/app/install-boundary-v146.js",
+      "restrictions": ["no polling", "no DOM mutation observer", "no model-provider behavior", "no action-contract persistence"]
+    },
+    {
+      "file": "public/app/quest-veil-ledger-gate-v1.js",
+      "global": "CivweaveRewardWeave",
+      "capability": "Human-readable chronicle projection that hides raw task details behind the mandatory Quest Veil",
+      "canonicalOwner": "public/app/cw-reward-ledger-v2.js",
+      "loadBoundary": "public/app/install-boundary-v146.js",
+      "restrictions": ["summary projection only", "no reward issuance mutation", "no polling"]
+    },
+    {
+      "file": "public/extensions/civweave-gemini-interactions-v159.js",
+      "global": "CivweaveModelRuntime",
+      "capability": "Provider-gated Gemini transport adapter",
+      "canonicalOwner": "public/app/shared/civweave-model-runtime.js",
+      "loadBoundary": "public/app/family-ai-loader-v105.js",
+      "restrictions": ["Gemini provider only", "no UI ownership", "no Settings input ownership", "no polling reinstall"]
+    }
+  ],
+  "forbiddenFormerInterceptors": [
+    "public/app/cw-reward-legacy-bridge-v2.js",
+    "public/app/platform-experience-v160.js",
+    "public/app/ai-settings-bind-guard-v230.js",
+    "public/app/ai-settings-device-repair-v229.js",
+    "public/app/v129-route-hotfix.js"
+  ]
+}
