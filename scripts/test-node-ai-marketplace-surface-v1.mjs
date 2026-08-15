@@ -4,6 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
+const version=(await read('VERSION')).trim();
 const [finderHtml,finderRuntime,marketplace,operatorHtml,operatorRuntime,offlineManifest,offlineWorker,gateway,inferenceHttp]=await Promise.all([
   read('public/app/federation-finder-local-v269.html'),
   read('public/app/federation-finder-local-v269.js'),
@@ -12,7 +13,7 @@ const [finderHtml,finderRuntime,marketplace,operatorHtml,operatorRuntime,offline
   read('public/app/node-ai-operator-v1.js'),
   read('public/app/offline-package-v208.json'),
   read('public/service-worker-offline-v211-override.js'),
-  read('releases/1.0.81/server/server-gateway-v131.mjs'),
+  read(`releases/${version}/server/server-gateway-v131.mjs`),
   read('lib/node-ai-inference-http-v1.mjs')
 ]);
 const manifest=JSON.parse(offlineManifest);
@@ -56,4 +57,4 @@ assert.ok(offlineWorker.includes('required: requiredSeeds.has(pathname)'),'Optio
 assert.ok(gateway.includes("pathname === '/api/finder-status'"),'Gateway does not expose sanitized Finder topology.');
 assert.ok(gateway.includes('sanitizeLocation'),'Finder status does not sanitize public locations.');
 assert.ok(inferenceHttp.includes("pathname === '/api/ai/node/inference/status'"),'Public inference readiness endpoint is missing.');
-console.log(JSON.stringify({ok:true,revision:'node-ai-marketplace-surface-v1',canonicalRoots:manifest.seeds.length,optionalAssets:manifest.assets.length,sessionScoped:true,noLivePaymentMutation:true,sandboxTrialCredit:true,finderIntegrated:true,operatorStatus:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'node-ai-marketplace-surface-v1',version,canonicalRoots:manifest.seeds.length,optionalAssets:manifest.assets.length,sessionScoped:true,noLivePaymentMutation:true,sandboxTrialCredit:true,finderIntegrated:true,operatorStatus:true},null,2));
