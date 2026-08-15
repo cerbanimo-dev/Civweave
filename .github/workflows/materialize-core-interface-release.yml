@@ -1,0 +1,50 @@
+name: Materialize Core Interface Release 1.0.161
+
+on:
+  push:
+    branches:
+      - agent/core-interface-runtime-v1
+    paths:
+      - VERSION
+      - .github/workflows/materialize-core-interface-release.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v5
+        with:
+          ref: agent/core-interface-runtime-v1
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Materialize canonical release
+        run: |
+          set -euo pipefail
+          npm version 1.0.161 --no-git-tag-version
+          npm run release:materialize
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/sync-canonical-release-hashes.mjs
+
+      - name: Commit generated release artifacts
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No materialization changes."
+            exit 0
+          fi
+          git commit -m "Materialize canonical release 1.0.161"
+          git push origin HEAD:agent/core-interface-runtime-v1
+
+# One-shot release materializer; remove after the generated commit lands.
