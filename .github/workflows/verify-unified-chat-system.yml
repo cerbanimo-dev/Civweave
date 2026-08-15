@@ -7,6 +7,9 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/living-school-chat-workbench-v255.js'
+      - 'scripts/verify-moss-curriculum-workbench-v255.mjs'
+      - '.github/workflows/verify-moss-curriculum-workbench-v255.yml'
       - '.github/workflows/verify-unified-chat-system.yml'
   push:
     branches: [main]
@@ -15,6 +18,9 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/living-school-chat-workbench-v255.js'
+      - 'scripts/verify-moss-curriculum-workbench-v255.mjs'
+      - '.github/workflows/verify-moss-curriculum-workbench-v255.yml'
       - '.github/workflows/verify-unified-chat-system.yml'
 
 jobs:
@@ -36,6 +42,7 @@ jobs:
         run: |
           test ! -e public/app/living-school-chat-workbench-v255.js
           test ! -e scripts/verify-moss-curriculum-workbench-v255.mjs
+          test ! -e .github/workflows/verify-moss-curriculum-workbench-v255.yml
           node <<'NODE'
           const fs=require('node:fs');
           const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
@@ -44,8 +51,8 @@ jobs:
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
           for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
             if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
-            if(!sessions.includes(`civweave.guide-thread.${system}.v237`)&&!sessions.includes('threadKey=system=>`civweave.guide-thread.${system}.v237`'))throw new Error(`Realm memory contract is missing ${system}`);
           }
+          if(!sessions.includes('threadKey=system=>`civweave.guide-thread.${system}.v237`'))throw new Error('Five-folder realm memory contract is missing');
           if(!core.includes("architecture:'one-core-five-themes-five-memory-folders'"))throw new Error('Unified architecture marker missing');
           if(core.includes('setInterval('))throw new Error('Unified chat must not poll the DOM/runtime');
           if(!workspace.includes("const ROOT_ID='cw-persistent-guide-chat-v215'"))throw new Error('Shared workspace root missing');
