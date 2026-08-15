@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 
 const root=process.cwd();
 const version=(await fsp.readFile(path.join(root,'VERSION'),'utf8')).trim();
+const launchVersion='1.0.79';
 const releasesRoot=path.join(root,'releases');
 const currentRoot=path.join(releasesRoot,version);
 const contractPath=path.join(root,'config','release-contract.json');
@@ -17,9 +18,18 @@ async function advanceCanonicalIndex(){
   await fsp.writeFile(contractPath,`${JSON.stringify(contract,null,2)}\n`,'utf8');
 }
 
+async function pruneEmbeddedReleases(){
+  const keep=new Set([launchVersion,version]);
+  const entries=await fsp.readdir(releasesRoot,{withFileTypes:true});
+  const remove=entries.filter(entry=>entry.isDirectory()&&/^\d+\.\d+\.\d+$/.test(entry.name)&&!keep.has(entry.name)).map(entry=>entry.name);
+  await Promise.all(remove.map(name=>fsp.rm(path.join(releasesRoot,name),{recursive:true,force:true})));
+  return remove;
+}
+
 if(await exists(path.join(currentRoot,'release.json'))){
   await advanceCanonicalIndex();
-  console.log(JSON.stringify({ok:true,version,path:`releases/${version}`,alreadyMaterialized:true,canonicalIndexAdvanced:true},null,2));
+  const pruned=await pruneEmbeddedReleases();
+  console.log(JSON.stringify({ok:true,version,path:`releases/${version}`,alreadyMaterialized:true,canonicalIndexAdvanced:true,prunedEmbeddedReleases:pruned},null,2));
   process.exit(0);
 }
 
@@ -70,4 +80,5 @@ const manifest={
 };
 await fsp.writeFile(path.join(currentRoot,'release.json'),`${JSON.stringify(manifest,null,2)}\n`);
 await advanceCanonicalIndex();
-console.log(JSON.stringify({ok:true,version,path:`releases/${version}`,basedOn:previous,hashes:Object.keys(sha256).length,shellMetadata:'generated-prelive-v281',canonicalIndexAdvanced:true},null,2));
+const pruned=await pruneEmbeddedReleases();
+console.log(JSON.stringify({ok:true,version,path:`releases/${version}`,basedOn:previous,hashes:Object.keys(sha256).length,shellMetadata:'generated-prelive-v281',canonicalIndexAdvanced:true,prunedEmbeddedReleases:pruned},null,2));
