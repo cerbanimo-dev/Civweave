@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueModelV1)return;
-const VERSION='1.3.0';
+const VERSION='1.4.0';
 const clean=value=>String(value??'').trim();
 const copy=value=>JSON.parse(JSON.stringify(value));
 const CONTRACT=`CIVWEAVE BASIC VALUE GUIDE civweave.basic-value-guide.v1
@@ -10,7 +10,7 @@ Use the shared uniform starting wage before market evaluation. The wage is 5 �
 - Uniform starting wage: 1 human-equivalent labor hour = 5 🔘 Buttons for everybody. Product/service labor wage = the sum of their component laborWorthHours × 5 🔘 Buttons. Live FellowFare comparables are a separate market layer applied afterward and must never alter the worker wage rate.
 - Automation may make work faster in practice, but it must not discount the human-equivalent hours or the wage. The economic model deliberately flattens labor-rate hierarchy by holding the Button wage rate constant across people and roles.
 - Every Living School module/curriculum item that exposes educationalHours: estimate ordinary learner/instructor educational time. For marketed curriculum, also suggest curriculumAcorns within 50–500 🌰 based on length and quality, using 100 🌰 Acorns/hour as the time reference.
-- Learning module completion grant: 2 🌰 Acorns. Successful external confidence validation bonus: +2 🌰 Acorns. A qualified model/neuron contribution validating somebody else's learning: 1 🌰 Acorn. These grants are deterministic ledger rules; do not fabricate extra rewards.
+- Learning module completion grant: 10 🌰 Acorns. Successful external confidence validation bonus: +20 🌰 Acorns. A qualified model/neuron contribution validating somebody else's learning: 5 🌰 Acorns. These grants are deterministic ledger rules; do not fabricate extra rewards.
 - Marketed curriculum/tutoring time: 100 🌰 Acorns per hour. Curriculum packages should be suggested within 50–500 🌰 Acorns based on length and quality.
 - Mentorship: balanced learning+doing = 5 🔘 Buttons + 50 🌰 Acorns; doing-heavy = 15 🔘 Buttons; learning-heavy = 200 🌰 Acorns.
 - Acorn-denominated prices intentionally use a more granular numeric scale than Button wages. Never infer a fixed exchange rate from the numeric sizes.
@@ -59,7 +59,7 @@ function patch(runtime){
   const original=rewardPatched.generate.bind(rewardPatched);
   const generate=async request=>{
     let next=request&&typeof request==='object'?{...request}:request;
-    if(next&&relevant(next))next={...next,schema:augmentSchema(next.schema),context:{...(next.context||{}),basicValueGuide:{schema:'civweave.basic-value-guide.v1',laborWageButtonsPerHour:5,laborButtonsPerHour:5,laborWagePolicy:'uniform-starting-wage',modelChoosesLaborHoursNotRate:true,educationAcornsPerHour:100,curriculumAcorns:[50,500],moduleCompletionAcorns:2,externalValidationBonusAcorns:2,validatorContributionAcorns:1,mentorship:['5 🔘 + 50 🌰 balanced','15 🔘 doing-heavy','200 🌰 learning-heavy'],valuationReview:'civweave.basic-value-review.v1'}},messages:[...(next.messages||[]),{role:'system',content:CONTRACT}]};
+    if(next&&relevant(next))next={...next,schema:augmentSchema(next.schema),context:{...(next.context||{}),basicValueGuide:{schema:'civweave.basic-value-guide.v1',laborWageButtonsPerHour:5,laborButtonsPerHour:5,laborWagePolicy:'uniform-starting-wage',modelChoosesLaborHoursNotRate:true,educationAcornsPerHour:100,curriculumAcorns:[50,500],moduleCompletionAcorns:10,externalValidationBonusAcorns:20,validatorContributionAcorns:5,mentorship:['5 🔘 + 50 🌰 balanced','15 🔘 doing-heavy','200 🌰 learning-heavy'],valuationReview:'civweave.basic-value-review.v1'}},messages:[...(next.messages||[]),{role:'system',content:CONTRACT}]};
     return original(next);
   };
   Object.defineProperty(generate,'__cwBasicValueV1',{value:true});
