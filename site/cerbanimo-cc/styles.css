@@ -104,11 +104,11 @@ nav { min-height: 76px; display: flex; align-items: center; justify-content: spa
 .section h2, .closing h2 { margin: 0 0 24px; max-width: 900px; font: 700 clamp(42px, 5.6vw, 74px)/.98 var(--serif); letter-spacing: -.045em; }
 .section .intro { margin: 0 0 44px; }
 .story-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 22px; }
-.card, .money, .steward-lead, .press > *, .cast article, .realm, .duties article { border: 1px solid var(--line); background: linear-gradient(145deg, rgba(35,17,66,.76), rgba(10,5,22,.82)); box-shadow: var(--shadow); }
+.card, .money, .guildkeeper-lead, .press > *, .cast article, .realm, .duties article { border: 1px solid var(--line); background: linear-gradient(145deg, rgba(35,17,66,.76), rgba(10,5,22,.82)); box-shadow: var(--shadow); }
 .card { padding: 34px; border-radius: var(--radius); }
 .card.plain { background: rgba(255,255,255,.045); }
-.card h3, .money h3, .steward-lead h3, .press h3 { margin: 0 0 12px; font: 700 28px/1.05 var(--serif); }
-.card p, .money p, .steward-lead p, .press p { color: #cdc4dc; }
+.card h3, .money h3, .guildkeeper-lead h3, .press h3 { margin: 0 0 12px; font: 700 28px/1.05 var(--serif); }
+.card p, .money p, .guildkeeper-lead p, .press p { color: #cdc4dc; }
 
 .cast { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 22px; }
 .cast article { min-height: 280px; padding: 22px; border-radius: 22px; position: relative; overflow: hidden; }
@@ -117,7 +117,6 @@ nav { min-height: 76px; display: flex; align-items: center; justify-content: spa
 .cast h3 { margin: 0 0 3px; font: 700 25px/1.05 var(--serif); }
 .cast b { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
 .cast p { margin-top: 14px; color: #cfc6dc; font-size: 14px; }
-
 .realms { display: grid; gap: 24px; }
 .realm { display: grid; grid-template-columns: minmax(240px, .75fr) 1.25fr; min-height: 420px; border-radius: 30px; overflow: hidden; position: relative; }
 .realm::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 23%, transparent); border-radius: inherit; }
@@ -136,9 +135,9 @@ nav { min-height: 76px; display: flex; align-items: center; justify-content: spa
 .split b { min-width: 64px; color: var(--gold); font: 700 23px/1 var(--serif); }
 .fineprint { color: #958aa8; font-size: 12px; margin-top: 18px; }
 
-.stewards { display: grid; grid-template-columns: .8fr 1.2fr; gap: 22px; align-items: start; }
-.steward-lead { padding: 34px; border-radius: 26px; position: sticky; top: 105px; }
-.steward-lead .btn { margin-top: 16px; }
+.guildkeepers { display: grid; grid-template-columns: .8fr 1.2fr; gap: 22px; align-items: start; }
+.guildkeeper-lead { padding: 34px; border-radius: 26px; position: sticky; top: 105px; }
+.guildkeeper-lead .btn { margin-top: 16px; }
 .duties { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .duties article { min-height: 170px; padding: 24px; border-radius: 20px; }
 .duties b, .duties span { display: block; }
@@ -168,8 +167,8 @@ footer a { color: #cfc6d9; }
   .portal { width: min(580px, 86vw); }
   .cast { grid-template-columns: repeat(2, 1fr); }
   .cast article:last-child { grid-column: 1 / -1; }
-  .story-grid, .press, .stewards { grid-template-columns: 1fr; }
-  .steward-lead { position: static; }
+  .story-grid, .press, .guildkeepers { grid-template-columns: 1fr; }
+  .guildkeeper-lead { position: static; }
 }
 
 @media (max-width: 720px) {
@@ -192,7 +191,7 @@ footer a { color: #cfc6d9; }
   .realm { grid-template-columns: 1fr; }
   .realm img { height: 300px; }
   .realm > div { padding: 30px 24px 34px; }
-  .card, .money, .steward-lead, .press > * { padding: 25px; }
+  .card, .money, .guildkeeper-lead, .press > * { padding: 25px; }
   .closing { min-height: 440px; padding: 38px 22px; border-radius: 28px; }
   footer { flex-direction: column; }
 }
