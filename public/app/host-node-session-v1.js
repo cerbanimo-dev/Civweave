@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.133-host-node-session-v4-citizen-patron-copy';
+const VERSION='1.0.133-host-node-session-v5-guild-copy';
 const SESSION_KEY='civweave.host-capacity.sessions.v1';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
@@ -36,7 +36,7 @@ function credentialFor(origin,{create=false,nodeId=''}={}){
   if(saved?.userId&&saved?.credential)return saved;
   if(!create)return null;
   const next={schema:'civweave.host-node-device-login.v1',userId:`cwres:${randomToken(18)}`,credential:randomToken(32),createdAt:new Date().toISOString()};
-  all[key]=next;if(!saveCredentials(all))throw new Error('This browser blocked persistent Hub login storage.');
+  all[key]=next;if(!saveCredentials(all))throw new Error('This browser blocked persistent Guild login storage.');
   return next
 }
 function sessions(){return storageObject(sessionStorage,SESSION_KEY)}
@@ -52,13 +52,13 @@ function telemetryFor(selector=''){
 function setSession(envelope,{quota=null,emit=true}={}){
   const source=envelope?.capacitySession||envelope;
   const nodeId=clean(source?.nodeId,180),token=clean(source?.token,20000),origin=normalizedOrigin(source?.origin),userId=clean(source?.userId,180);
-  if(!nodeId||!token||!origin||!userId)throw new TypeError('Hub capacity session must include nodeId, userId, HTTPS origin, and token.');
+  if(!nodeId||!token||!origin||!userId)throw new TypeError('Guild capacity session must include nodeId, userId, HTTPS origin, and token.');
   const all=sessions(),prior=all[nodeId]||{},remaining=finite(quota?.includedRemainingNeurons);
   all[nodeId]={
     nodeId,userId,origin,token,seatClass:clean(source?.seatClass,40)||prior.seatClass||null,expiresAt:source.expiresAt||null,
     telemetry:{...prior.telemetry,...(remaining==null?{}:{remainingNeurons:remaining,approximateTurnsLeft:Math.floor(remaining/Math.max(1,Number(prior?.telemetry?.averageNeuronsPerTurn)||DEFAULT_NEURONS_PER_CHAT))}),updatedAt:new Date().toISOString()}
   };
-  if(!saveSessions(all))throw new Error('This browser blocked the temporary Hub session.');
+  if(!saveSessions(all))throw new Error('This browser blocked the temporary Guild session.');
   if(emit)dispatchEvent(new CustomEvent('civweave:capacity-session-ready',{detail:{nodeId,userId,origin,expiresAt:source.expiresAt||null,quota:clone(quota)}}));
   return clone(all[nodeId])
 }
@@ -86,12 +86,12 @@ async function ensureGuildHostOnboarding(session){
 async function jsonRequest(url,options={}){
   const response=await fetch(url,{cache:'no-store',...options,headers:{accept:'application/json',...(options.headers||{})}});
   const payload=await response.json().catch(()=>({}));
-  if(!response.ok){const error=new Error(clean(payload?.error||`Hub returned HTTP ${response.status}.`,1200));error.status=response.status;error.payload=payload;throw error}
+  if(!response.ok){const error=new Error(clean(payload?.error||`Guild returned HTTP ${response.status}.`,1200));error.status=response.status;error.payload=payload;throw error}
   return payload
 }
 async function join(origin,{createCredential=true,nodeId=''}={}){
-  const host=normalizedOrigin(origin);if(!host)throw new TypeError('A valid HTTPS Hub Node origin is required.');
-  const requestedNodeId=clean(nodeId,180),identity=credentialFor(host,{create:createCredential,nodeId:requestedNodeId});if(!identity)throw new Error('This device has no saved login for that Hub Node.');
+  const host=normalizedOrigin(origin);if(!host)throw new TypeError('A valid HTTPS Guild origin is required.');
+  const requestedNodeId=clean(nodeId,180),identity=credentialFor(host,{create:createCredential,nodeId:requestedNodeId});if(!identity)throw new Error('This device has no saved login for that Guild.');
   const endpoint=new URL('/api/ai/node/session',host);if(requestedNodeId)endpoint.searchParams.set('nodeId',requestedNodeId);
   const packet=await jsonRequest(endpoint,{method:'POST',headers:{'content-type':'application/json',...(requestedNodeId?{'x-civweave-node-id':requestedNodeId}:{})},body:JSON.stringify({userId:identity.userId,credential:identity.credential})});
   const session=setSession(packet,{quota:packet.quota||null});
@@ -100,7 +100,7 @@ async function join(origin,{createCredential=true,nodeId=''}={}){
   return{...packet,session}
 }
 async function status(selector=''){
-  const session=sessionFor(selector);if(!session)throw new Error('This device is not logged in to a Hub Node.');
+  const session=sessionFor(selector);if(!session)throw new Error('This device is not logged in to a Guild.');
   try{
     const endpoint=new URL('/api/ai/node/session',session.origin);endpoint.searchParams.set('nodeId',session.nodeId);
     const packet=await jsonRequest(endpoint,{headers:{authorization:`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId}});
