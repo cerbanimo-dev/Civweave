@@ -1,0 +1,45 @@
+name: Materialize Guild resilience release
+
+on:
+  push:
+    branches:
+      - agent/guild-pocket-node-resilience
+    paths:
+      - '.github/workflows/materialize-guild-resilience-release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Set release version
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const version='1.0.162';
+          await writeFile('VERSION',`${version}\n`,'utf8');
+          const pkg=JSON.parse(await readFile('package.json','utf8'));
+          pkg.version=version;
+          await writeFile('package.json',`${JSON.stringify(pkg,null,2)}\n`,'utf8');
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Commit generated release
+        run: |
+          git config user.name 'civweave-release-bot'
+          git config user.email 'cerbanimo@gmail.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No release changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Materialize Civweave 1.0.162 Guild resilience release'
+          git push origin HEAD:agent/guild-pocket-node-resilience
