@@ -145,3 +145,8 @@ const catalog = {
 
 writeFileSync(outputPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
 console.log(`Asset lockboard catalog: ${assets.length} image files, ${slots.length} image slots, ${catalog.missingReferenceCount} missing references.`);
+
+// Cloudflare's Pages build runs release synchronizers immediately before this
+// catalog step. Those synchronizers can change required shell files, so refresh
+// integrity/storage metadata here from the exact bytes that will be published.
+await import('./generate-prelive-metadata-v281.mjs');
