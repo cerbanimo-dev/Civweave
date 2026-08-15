@@ -1,17 +1,21 @@
 name: Materialize MiniLM release v348
 
 on:
-  push:
-    branches:
-      - agent/minilm-first-clarification-v348
+  pull_request:
+    types: [opened, synchronize, reopened]
     paths:
       - '.github/workflows/materialize-minilm-release-v348.yml'
+      - 'VERSION'
+      - 'public/app/minilm-message-classifier-v348.js'
+      - 'public/app/deterministic-mode-v175.js'
+      - 'public/app/shared-guide-surface-v236.js'
 
 permissions:
   contents: write
 
 jobs:
   materialize:
+    if: github.head_ref == 'agent/minilm-first-clarification-v348'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
