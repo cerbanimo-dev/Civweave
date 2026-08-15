@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.113-shared-chat-face-icons-v255-open-ui-only-v2';
+const VERSION='1.0.114-shared-chat-face-icons-v255-open-ui-only-v2-avatar-contain-v1';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SHARED_ROOT_ID='cw-shared-guide-surface-v236';
 const LAUNCHER_ID='cwp215-launcher';
@@ -36,11 +36,11 @@ function installStyle(){
 #${ROOT_ID} .cw242-window[aria-pressed="true"] img{transform:scale(1.035);box-shadow:0 0 16px color-mix(in srgb,var(--window-accent) 58%,transparent),0 3px 12px #0009!important}
 #${ROOT_ID}[data-cw-minilm-active="true"] .cw242-window[aria-pressed="true"]::after{content:"";position:absolute!important;right:5px!important;top:3px!important;width:9px!important;height:9px!important;border-radius:50%!important;background:#35e36f!important;border:2px solid #08150d!important;box-shadow:0 0 7px #35e36f,0 0 0 1px #ffffff66!important;pointer-events:none!important;z-index:3!important}
 #${ROOT_ID} .cw242-window span{font-size:10px!important}
-#${ROOT_ID} header [data-guide-avatar]{width:76px!important;height:76px!important;min-width:76px!important;border-radius:16px!important;object-fit:cover!important}
+#${ROOT_ID} header [data-guide-avatar]{width:76px!important;height:76px!important;min-width:76px!important;border-radius:16px!important;object-fit:contain!important;object-position:center!important;background:transparent!important}
 #${ROOT_ID} [data-log] article>img{border-radius:11px!important;object-fit:cover!important}
 #${LAUNCHER_ID}{position:fixed!important;right:max(12px,env(safe-area-inset-right))!important;bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px)!important;width:52px!important;height:52px!important;min-width:52px!important;max-width:52px!important;min-height:52px!important;max-height:52px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;border:2px solid var(--guide-accent,#d8dde7)!important;border-radius:50%!important;background:var(--guide-panel,#111827)!important;box-shadow:0 6px 18px #0009,0 0 0 1px #ffffff24!important;overflow:hidden!important;appearance:none!important;-webkit-appearance:none!important;line-height:0!important;z-index:2147483643!important;pointer-events:auto!important;touch-action:manipulation!important}
 #${LAUNCHER_ID} img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:50%!important;object-fit:cover!important}
-#${SHARED_ROOT_ID} img[data-cwsg-avatar],#${SHARED_ROOT_ID} .cwsg236-avatar img{border-radius:14px!important;object-fit:cover!important}
+#${SHARED_ROOT_ID} img[data-cwsg-avatar],#${SHARED_ROOT_ID} .cwsg236-avatar img{border-radius:14px!important;object-fit:contain!important;object-position:center!important;background:transparent!important}
 #${ROOT_ID} img[data-cw-expression-sprite="v343"],#${SHARED_ROOT_ID} img[data-cw-expression-sprite="v343"],#${LAUNCHER_ID} img[data-cw-expression-sprite="v343"]{object-fit:contain!important;background:transparent!important}
 @media(max-width:620px){
   #${ROOT_ID} .cw242-window-switcher{gap:4px!important;padding:7px 5px 8px!important}
@@ -97,8 +97,8 @@ function start(){
   addEventListener('civweave:avatar-expression',event=>applyExpression(event.detail||{}));
   ['civweave:guide-workspace-ready','civweave:guide-workspace-state','civweave:realm-guide-thread-changed','civweave:chat-single-owner-ready','civweave:minilm-context-ready','civweave:minilm-context-fallback','civweave:minilm-package-needed'].forEach(name=>addEventListener(name,event=>{if(name==='civweave:guide-workspace-state'&&event.detail?.open)activate();if(activated)queueMicrotask(refreshMiniLmLamp)}));
   addEventListener('civweave:guide-chat-opened',activate);
-  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,activate,armExpressionRuntime,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>{activated=false;expressionArmed=false},switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,launcherNarrowPx:46,launcherContainsOnlyImage:true,sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true,idleUntilChatOpen:true,heavyRuntimeOnOpen:false,expressionRuntimeTrigger:'first-chat-submit',miniLmPolling:false})
-  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSourceRewrite:false,idleUntilChatOpen:true,heavyRuntimeOnOpen:false,expressionRuntimeTrigger:'first-chat-submit',miniLmPolling:false}}))}catch{}
+  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,activate,armExpressionRuntime,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>{activated=false;expressionArmed=false},switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,launcherNarrowPx:46,launcherContainsOnlyImage:true,sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true,idleUntilChatOpen:true,heavyRuntimeOnOpen:false,expressionRuntimeTrigger:'first-chat-submit',miniLmPolling:false,fullAvatarFit:'contain'})
+  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSourceRewrite:false,idleUntilChatOpen:true,heavyRuntimeOnOpen:false,expressionRuntimeTrigger:'first-chat-submit',miniLmPolling:false,fullAvatarFit:'contain'}}))}catch{}
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
