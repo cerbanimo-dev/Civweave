@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueSystemsV1)return;
-const VERSION='1.1.0';
+const VERSION='1.1.1-idle-safe-event-driven';
 const KEYS=Object.freeze({civweave:'civweave.working-campus.v1',living:'civweave.living-school.cabinet.v151',cerbanimo:'cerbanimo.quest-engine.v144'});
 const clean=(value,max=5000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const now=()=>new Date().toISOString();
 const REVIEW=()=>globalThis.CivweaveBasicValueReviewV1;
-const attempts=new Map();let running=false,timer=0,observer=null;
+const attempts=new Map();let running=false,timer=0;
 function hash(value){let h=2166136261;for(const ch of clean(value,24000)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
 function textFor(row){return clean([row?.title,row?.name,row?.description,row?.summary,row?.objective,row?.prompt,row?.deliverable,row?.artifact,Array.isArray(row?.acceptanceCriteria)?row.acceptanceCriteria.join(' '):'',Array.isArray(row?.completionCriteria)?row.completionCriteria.join(' '):'',row?.estimatedEffort].filter(Boolean).join('\n'),7000)}
 function kindFor(system,row){
@@ -93,15 +93,12 @@ function decorate(){decorateCerbanimo();decorateLiving()}
 async function run(){if(running)return;running=true;try{for(const key of Object.values(KEYS))await processKey(key);decorate()}finally{running=false}}
 function schedule(delay=350){clearTimeout(timer);timer=setTimeout(()=>run().catch(error=>console.warn('[Civweave value systems]',error)),delay)}
 function start(){
-  addEventListener('civweave:assistant-runtime-ready',()=>schedule(0));
   addEventListener('civweave:working-campus-plan-built',()=>schedule(200));
   addEventListener('cerbanimo:quest-engine-changed',()=>schedule(200));
-  for(const name of ['living-school:module-completed','living-school:assessment-completed','civweave:basic-value-review-ready'])addEventListener(name,()=>schedule(200));
+  for(const name of ['living-school:module-completed','living-school:assessment-completed','civweave:economic-review-requested'])addEventListener(name,()=>schedule(200));
   addEventListener('storage',event=>{if(Object.values(KEYS).includes(event.key))schedule(250)});
-  const root=document.querySelector?.('#living-school-root')||document.querySelector?.('#rc-app');if(root&&typeof MutationObserver!=='undefined'){observer=new MutationObserver(()=>schedule(180));observer.observe(root,{childList:true,subtree:true})}
-  setInterval(()=>schedule(0),60000);schedule(1000);
 }
-const api=Object.freeze({version:VERSION,keys:KEYS,run,schedule,kindFor,needs,valuationText});
+const api=Object.freeze({version:VERSION,keys:KEYS,run,schedule,kindFor,needs,valuationText,eventDriven:true,polling:false,initialRun:false,domObserver:false});
 globalThis.CivweaveBasicValueSystemsV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
