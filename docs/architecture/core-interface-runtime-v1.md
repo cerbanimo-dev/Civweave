@@ -2,9 +2,11 @@
 
 The five core systems use one interface lifecycle. Civweave, Living School, Cerbanimo, FellowFare, and Anarchadia may present different worlds and features, but they do not get separate boot architectures.
 
+This design sits under the canonical rules in `docs/contracts/mobile-interface-contract.md`. It is the normal application runtime, not a repair injector, replacement shell, or compatibility overlay.
+
 ## Ownership
 
-`public/app/core-interface-runtime-v1.js` owns the shared interface lifecycle and adapter contract.
+`public/app/core-interface-runtime-v1.js` owns shared interface assembly, lifecycle, structural slots, and the adapter contract.
 
 It does **not** absorb the owners around it:
 
@@ -88,17 +90,25 @@ The core does not dictate each realm's art direction or feature layout. Standard
 
 ## Shared loading
 
-The runtime owns the ordered shared boot manifest for the five core systems. It loads the route/version contracts and the existing shared capability owners once per document, de-duplicating scripts that a realm already declared statically. The capability modules remain authoritative for their own behavior; the core runtime owns only their assembly and lifecycle.
+The runtime is the only canonical ordered shared-boot manifest for the five core systems. It loads the route/version contracts and the existing shared capability owners once per document, de-duplicating scripts that a realm already declared statically. The capability modules remain authoritative for their own behavior; the core runtime owns their assembly and lifecycle.
 
-FellowFare's shared-guide bridge is selected by the system manifest instead of by a separate FellowFare boot path. Asset customization is likewise selected by the core runtime only when local customization is configured.
+FellowFare's shared-guide bridge is selected by the runtime instead of by a separate FellowFare boot path. Asset customization is likewise selected by the core runtime only when local customization is configured.
 
 Cross-system features can also register a lazy loader with `registerFeature(name, loader)` and be requested with `requestFeature(name)`. The runtime memoizes the feature promise so optional future capabilities do not grow new realm-specific loaders.
 
+There is intentionally no compatibility copy of the canonical shared manifest in the install boundary. When the old boundary-owned manifest became obsolete, it was removed and existing CI checks were moved to the runtime owner.
+
 ## Boot boundary
 
-`install-boundary-v146.js` requests the core runtime once for every canonical system. It remains responsible for deciding whether the installed application may run. It does not iterate the shared dependency manifest and is not the realm UI lifecycle or shared-loading owner.
+`install-boundary-v146.js` requests exactly one core runtime for every canonical system. It remains responsible for deciding whether the installed application may run. It does not iterate the shared dependency manifest and is not the realm UI lifecycle or shared-loading owner.
 
 The core runtime is part of the critical offline cache. A user who can open a canonical system offline therefore has the same interface spine available regardless of which system was opened last.
+
+## Verification
+
+Static architecture assertions live in `.github/workflows/verify-core-interface-runtime-v1.yml` and in the existing ownership/feature checks that protect the affected behavior. The branch does not add a permanent standalone static verifier merely to preserve the old architecture in another form.
+
+The checks enforce one runtime boot from the boundary, one shared manifest in the runtime, preserved Settings and family-navigation ownership, the five canonical routes, load-order invariants, adapter/lifecycle contracts, and critical offline availability.
 
 ## Change rule
 
