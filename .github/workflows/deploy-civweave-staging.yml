@@ -1,0 +1,258 @@
+name: Deploy Civweave Staging
+
+on:
+  push:
+    branches:
+      - staging
+  pull_request:
+    branches:
+      - staging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-staging-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'deploy' }}
+  cancel-in-progress: true
+
+env:
+  STAGING_BRANCH: staging
+  STAGING_PAGES_PROJECT: civweave-staging
+
+jobs:
+  build:
+    name: Build staging package
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install build dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build Cloudflare Pages package
+        run: node scripts/build-cloudflare-pages.mjs
+
+      - name: Record staging build identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .cloudflare-pages/app
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          const marker = {
+            schema: 'civweave.staging-deployment.v1',
+            environment: 'staging',
+            pagesProject: 'civweave-staging',
+            branch: process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME,
+            sourceCommit: process.env.GITHUB_SHA,
+            generatedAt: new Date().toISOString(),
+            productionIsolation: true,
+          };
+          writeFileSync('.cloudflare-pages/app/staging-deployment-v1.json', `${JSON.stringify(marker, null, 2)}\n`, 'utf8');
+          NODE
+
+      - name: Verify staging artifact exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .cloudflare-pages/index.html
+          test -f .cloudflare-pages/app/staging-deployment-v1.json
+
+      - name: Upload staging build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: civweave-staging-pages-${{ github.sha }}
+          path: .cloudflare-pages
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    name: Deploy isolated staging project
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: https://civweave-staging.pages.dev
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install build dependencies
+        run: npm install --ignore-scripts
+
+      - name: Refuse production targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$STAGING_BRANCH" = 'staging'
+          test "$STAGING_PAGES_PROJECT" = 'civweave-staging'
+          test "$STAGING_PAGES_PROJECT" != 'civweave'
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+
+      - name: Verify Cloudflare authentication
+        run: npx --yes wrangler@4 whoami
+
+      - name: Ensure isolated Pages project exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 pages project list --json > /tmp/civweave-pages-projects.json
+          if node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const packet = JSON.parse(readFileSync('/tmp/civweave-pages-projects.json', 'utf8'));
+          const projects = Array.isArray(packet) ? packet : (Array.isArray(packet?.result) ? packet.result : []);
+          process.exit(projects.some((project) => project?.name === 'civweave-staging') ? 0 : 1);
+          NODE
+          then
+            echo 'Cloudflare Pages project civweave-staging already exists.'
+          else
+            npx --yes wrangler@4 pages project create "$STAGING_PAGES_PROJECT" --production-branch "$STAGING_BRANCH"
+          fi
+
+      - name: Enforce staging as the project production branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const project = encodeURIComponent(process.env.STAGING_PAGES_PROJECT);
+          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`;
+          const headers = {
+            Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json',
+          };
+          const currentResponse = await fetch(endpoint, { headers });
+          const current = await currentResponse.json().catch(() => ({}));
+          if (!currentResponse.ok || current.success !== true) {
+            throw new Error(`Could not read staging Pages project: ${JSON.stringify(current.errors || current)}`);
+          }
+          if (current.result?.production_branch !== 'staging') {
+            const updateResponse = await fetch(endpoint, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify({ production_branch: 'staging' }),
+            });
+            const updated = await updateResponse.json().catch(() => ({}));
+            if (!updateResponse.ok || updated.success !== true || updated.result?.production_branch !== 'staging') {
+              throw new Error(`Could not set staging production branch: ${JSON.stringify(updated.errors || updated)}`);
+            }
+          }
+          if (current.result?.name === 'civweave') {
+            throw new Error('Refusing to operate on canonical production Pages project.');
+          }
+          console.log('Verified isolated project civweave-staging with production branch staging.');
+          NODE
+
+      - name: Build staging package
+        run: node scripts/build-cloudflare-pages.mjs
+
+      - name: Record staging deployment identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .cloudflare-pages/app
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          const marker = {
+            schema: 'civweave.staging-deployment.v1',
+            environment: 'staging',
+            pagesProject: process.env.STAGING_PAGES_PROJECT,
+            branch: process.env.STAGING_BRANCH,
+            sourceCommit: process.env.GITHUB_SHA,
+            generatedAt: new Date().toISOString(),
+            productionIsolation: true,
+          };
+          writeFileSync('.cloudflare-pages/app/staging-deployment-v1.json', `${JSON.stringify(marker, null, 2)}\n`, 'utf8');
+          NODE
+
+      - name: Deploy staging only
+        shell: bash
+        run: |
+          set -euo pipefail
+          commit_message="$(git log -1 --pretty=%s)"
+          npx --yes wrangler@4 pages deploy .cloudflare-pages \
+            --project-name "$STAGING_PAGES_PROJECT" \
+            --branch "$STAGING_BRANCH" \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-message "$commit_message" \
+            --commit-dirty=true 2>&1 | tee /tmp/civweave-staging-deploy.log
+          grep -Eqi 'civweave-staging\.pages\.dev' /tmp/civweave-staging-deploy.log || {
+            echo 'Cloudflare did not report the isolated staging Pages project. Refusing a false-green deployment.'
+            cat /tmp/civweave-staging-deploy.log
+            exit 3
+          }
+
+      - name: Verify live staging origin
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const origin = 'https://civweave-staging.pages.dev';
+          const expectedCommit = process.env.GITHUB_SHA;
+          let lastFailure = 'staging marker did not become current';
+          for (let attempt = 1; attempt <= 12; attempt += 1) {
+            try {
+              const bust = `${encodeURIComponent(expectedCommit)}-${attempt}`;
+              const [rootResponse, markerResponse] = await Promise.all([
+                fetch(`${origin}/?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+                fetch(`${origin}/app/staging-deployment-v1.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+              ]);
+              if (!rootResponse.ok) throw new Error(`root HTTP ${rootResponse.status}`);
+              if (!markerResponse.ok) throw new Error(`marker HTTP ${markerResponse.status}`);
+              const marker = await markerResponse.json();
+              if (
+                marker.environment === 'staging' &&
+                marker.pagesProject === 'civweave-staging' &&
+                marker.branch === 'staging' &&
+                marker.sourceCommit === expectedCommit &&
+                marker.productionIsolation === true
+              ) {
+                console.log(`Verified isolated staging deployment ${origin} at ${expectedCommit}.`);
+                process.exit(0);
+              }
+              lastFailure = `attempt ${attempt}: sourceCommit=${marker.sourceCommit || 'missing'} branch=${marker.branch || 'missing'}`;
+            } catch (error) {
+              lastFailure = `attempt ${attempt}: ${error.message}`;
+            }
+            if (attempt < 12) await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
+          console.error(`Staging verification failed: ${lastFailure}`);
+          process.exit(4);
+          NODE
+
+      - name: Write deployment summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Civweave staging'
+            echo
+            echo '- Branch: `staging`'
+            echo '- Cloudflare Pages project: `civweave-staging`'
+            echo '- Origin: https://civweave-staging.pages.dev'
+            echo '- Production project/domain mutations: **none**'
+            echo "- Source commit: \`$GITHUB_SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"
