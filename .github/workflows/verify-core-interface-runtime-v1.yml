@@ -1,0 +1,37 @@
+name: Verify core interface runtime
+
+on:
+  push:
+    paths:
+      - 'public/app/core-interface-runtime-v1.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/family-shell-v104.js'
+      - 'public/app/system-routes-v227.js'
+      - 'public/service-worker-critical-v199.js'
+      - 'config/system-ownership.json'
+      - 'scripts/verify-core-interface-runtime-v1.mjs'
+      - 'docs/architecture/core-interface-runtime-v1.md'
+      - '.github/workflows/verify-core-interface-runtime-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/core-interface-runtime-v1.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/family-shell-v104.js'
+      - 'public/app/system-routes-v227.js'
+      - 'public/service-worker-critical-v199.js'
+      - 'config/system-ownership.json'
+      - 'scripts/verify-core-interface-runtime-v1.mjs'
+      - 'docs/architecture/core-interface-runtime-v1.md'
+      - '.github/workflows/verify-core-interface-runtime-v1.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/app/core-interface-runtime-v1.js
+      - run: node --check scripts/verify-core-interface-runtime-v1.mjs
+      - run: node scripts/verify-core-interface-runtime-v1.mjs
