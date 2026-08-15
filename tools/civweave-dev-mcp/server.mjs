@@ -19,7 +19,7 @@ export function createMcpHttpServer({
   token = process.env.CIVWEAVE_DEV_TOKEN || '',
   allowedOrigins = parseList(process.env.CIVWEAVE_DEV_ALLOWED_ORIGINS),
   localStagingOrigin = process.env.CIVWEAVE_LOCAL_STAGING_ORIGIN || DEFAULT_LOCAL_STAGING_ORIGIN,
-  registry = createToolRegistry({repoRoot}),
+  registry = createToolRegistry({repoRoot, localStagingOrigin}),
 } = {}) {
   if (!isLoopback(host) && !token) throw new Error('CIVWEAVE_DEV_TOKEN is required when binding outside localhost');
 
