@@ -119,18 +119,36 @@ jobs:
       - name: Ensure isolated Pages project exists
         shell: bash
         run: |
-          set -euo pipefail
-          npx --yes wrangler@4 pages project list --json > /tmp/civweave-pages-projects.json
+          set -uo pipefail
           if node --input-type=module <<'NODE'
-          import { readFileSync } from 'node:fs';
-          const packet = JSON.parse(readFileSync('/tmp/civweave-pages-projects.json', 'utf8'));
-          const projects = Array.isArray(packet) ? packet : (Array.isArray(packet?.result) ? packet.result : []);
-          process.exit(projects.some((project) => project?.name === 'civweave-staging') ? 0 : 1);
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const projectName = process.env.STAGING_PAGES_PROJECT;
+          const project = encodeURIComponent(projectName);
+          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`;
+          const response = await fetch(endpoint, {
+            headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` },
+          });
+          if (response.status === 404) process.exit(10);
+          const packet = await response.json().catch(() => ({}));
+          if (!response.ok || packet.success !== true) {
+            console.error(`Could not read staging Pages project: ${JSON.stringify(packet.errors || packet)}`);
+            process.exit(11);
+          }
+          if (packet.result?.name !== projectName) {
+            console.error(`Cloudflare returned the wrong Pages project: ${packet.result?.name || 'missing'}`);
+            process.exit(12);
+          }
+          console.log(`Cloudflare Pages project ${projectName} already exists.`);
           NODE
           then
-            echo 'Cloudflare Pages project civweave-staging already exists.'
+            :
           else
-            npx --yes wrangler@4 pages project create "$STAGING_PAGES_PROJECT" --production-branch "$STAGING_BRANCH"
+            status=$?
+            if [ "$status" -eq 10 ]; then
+              npx --yes wrangler@4 pages project create "$STAGING_PAGES_PROJECT" --production-branch "$STAGING_BRANCH"
+            else
+              exit "$status"
+            fi
           fi
 
       - name: Enforce staging as the project production branch
