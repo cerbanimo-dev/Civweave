@@ -14,8 +14,8 @@ globalThis.CivweaveResponseRouterV347={tiers:{
   smart:{id:'smart',maxTokens:3072,preferredModelIds:['gemma4-smart','gemma4-fast']},
 }};
 localStorage.setItem('civweave.local-ai.health.v286',JSON.stringify({
-  fast:{modelId:'gemma4-fast',passed:true},
-  smart:{modelId:'gemma4-smart',passed:false},
+  'gemma4-fast':{ok:true,metrics:{tokensPerSecond:8,ttftMs:2500,coldStartMs:30000},fallbackUsed:false},
+  'gemma4-smart':{ok:false,metrics:{tokensPerSecond:2,ttftMs:8000,coldStartMs:60000},fallbackUsed:false},
 }));
 
 let currentDeviceId='provider-1';
@@ -42,8 +42,8 @@ assert.throws(()=>CivweaveEmergencyAiHostV1.setOptIn(true),error=>error?.code===
 assert.equal(CivweaveEmergencyAiHostV1.optedIn(),false);
 
 localStorage.setItem('civweave.local-ai.health.v286',JSON.stringify({
-  fast:{modelId:'gemma4-fast',passed:true},
-  smart:{modelId:'gemma4-smart',passed:true},
+  'gemma4-fast':{ok:true,metrics:{tokensPerSecond:8,ttftMs:2500,coldStartMs:30000},fallbackUsed:false},
+  'gemma4-smart':{ok:true,metrics:{tokensPerSecond:5,ttftMs:5000,coldStartMs:70000},fallbackUsed:false},
 }));
 assert.equal(CivweaveEmergencyAiHostV1.readiness().eligible,true);
 CivweaveEmergencyAiHostV1.setOptIn(true);
@@ -83,4 +83,4 @@ assert.equal(results[0].payload.actual.model,'gemma4-fast');
 
 CivweaveEmergencyAiHostV1.setOptIn(false);
 assert.equal(CivweaveEmergencyAiHostV1.status().eligible,false);
-console.log(JSON.stringify({ok:true,schema:'civweave.emergency-ai-mesh.test.v1',provider:'provider-1',requester:'requester-1',scheduler:'fifo',requiredTiers:['fast','smart'],benchmarkGate:true,executedModel:'gemma4-fast'}));
+console.log(JSON.stringify({ok:true,schema:'civweave.emergency-ai-mesh.test.v1',provider:'provider-1',requester:'requester-1',scheduler:'fifo',requiredTiers:['fast','smart'],healthStorage:'model-id-keyed',benchmarkGate:true,executedModel:'gemma4-fast'}));
