@@ -7,33 +7,33 @@ on:
       - 'public/app/japanese-shell-copy-v1.js'
       - 'public/app/language-settings-v1.js'
       - 'public/app/settings-gateway-v317.js'
+      - 'public/app/working-campus-v156.html'
+      - 'public/app/working-campus-v156.js'
       - 'public/app/civweave-brand.js'
       - 'public/app/installed-entry-v146.html'
-      - 'public/app/working-campus-return-guard-v425.js'
       - 'public/app/services/**/index.html'
       - 'public/app/cabinets/living-school/index.html'
-      - 'public/service-worker-code-coherence-v288.js'
+      - 'public/service-worker-core-v208.js'
       - 'public/service-worker-v203.js'
       - 'public/ja/index.html'
-      - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/verify-japanese-mode-v1.mjs'
       - '.github/workflows/verify-japanese-mode-v1.yml'
   push:
-    branches: [main]
+    branches: [main, 'agent/interface-runtime-full-rebase']
     paths:
       - 'public/app/japanese-mode-v1.js'
       - 'public/app/japanese-shell-copy-v1.js'
       - 'public/app/language-settings-v1.js'
       - 'public/app/settings-gateway-v317.js'
+      - 'public/app/working-campus-v156.html'
+      - 'public/app/working-campus-v156.js'
       - 'public/app/civweave-brand.js'
       - 'public/app/installed-entry-v146.html'
-      - 'public/app/working-campus-return-guard-v425.js'
       - 'public/app/services/**/index.html'
       - 'public/app/cabinets/living-school/index.html'
-      - 'public/service-worker-code-coherence-v288.js'
+      - 'public/service-worker-core-v208.js'
       - 'public/service-worker-v203.js'
       - 'public/ja/index.html'
-      - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/verify-japanese-mode-v1.mjs'
       - '.github/workflows/verify-japanese-mode-v1.yml'
 
@@ -44,14 +44,14 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - run: node --check public/app/japanese-mode-v1.js
       - run: node --check public/app/japanese-shell-copy-v1.js
       - run: node --check public/app/language-settings-v1.js
       - run: node --check public/app/settings-gateway-v317.js
+      - run: node --check public/app/working-campus-v156.js
       - run: node --check public/app/civweave-brand.js
-      - run: node --check public/app/working-campus-return-guard-v425.js
       - run: node scripts/verify-japanese-mode-v1.mjs
