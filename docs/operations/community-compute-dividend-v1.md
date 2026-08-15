@@ -28,14 +28,16 @@ Each active contribution unit adds two things to the community target:
 1. **+2 potential community/free seats**, until the instance reaches 16 free residents.
 2. **+200 neurons/day to every resident's community allowance target.**
 
-The effect scales linearly with membership price:
+The effect scales linearly with membership price. The canonical user-facing tier names are:
 
-| Membership service price | Contribution units | Potential free-seat boost | Community daily target boost |
-| --- | ---: | ---: | ---: |
-| $5 | 1 | +2 | +200/resident |
-| $10 | 2 | +4 | +400/resident |
-| $20 | 4 | +8 | +800/resident |
-| $40 | 8 | +16 | +1,600/resident |
+| Membership tier | Service price | Contribution units | Potential free-seat boost | Community daily target boost |
+| --- | ---: | ---: | ---: | ---: |
+| **Wayfarer** | $5 | 1 | +2 | +200/resident |
+| **Artisan** | $10 | 2 | +4 | +400/resident |
+| **Weaver** | $20 | 4 | +8 | +800/resident |
+| **Beacon** | $40 | 8 | +16 | +1,600/resident |
+
+The compatibility tier IDs remain `member`, `maker`, `builder`, and `steward` respectively. They are billing and protocol identifiers, not user-facing names.
 
 The free-seat boost still stops at 16 total community seats and the instance still stops at 28 total residents. Extra contribution units after the free-seat cap continue to strengthen the compute target.
 
@@ -90,7 +92,7 @@ Shared top-up funds enter a dedicated community top-up reserve and are amortized
 
 ## User-facing behavior
 
-The Membership & Compute surface must explain the communal effect before checkout. Cloudflare top-ups expose the 1%-5% selector and the node-equal option. Membership tiers explain that every $5/month contributes +2 potential free seats and +200 neurons/day to the community target, subject to the instance caps and actual funded reserves.
+The Membership & Compute surface must explain the communal effect before checkout. Cloudflare top-ups expose the 1%-5% selector and the node-equal option. Membership tiers use the names **Wayfarer**, **Artisan**, **Weaver**, and **Beacon** and explain that every $5/month contributes +2 potential free seats and +200 neurons/day to the community target, subject to the instance caps and actual funded reserves.
 
 Capacity responses expose both target and funded values so UI can distinguish aspiration from current backing:
 
