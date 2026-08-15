@@ -6,12 +6,11 @@ import { CivweaveCapacityAccount } from '../cloudflare/node-cloud/src/capacity.m
 import nodeWorker from '../cloudflare/node-cloud/src/entry.mjs';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [access, lobby, router, topbar, workspace, assistant, nodeEntry, serverEntry, coreEntry, locationMigration, searchFunction, statusFunction, boundary, ownership, offline] = await Promise.all([
+const [access, lobby, router, topbar, assistant, nodeEntry, serverEntry, coreEntry, locationMigration, searchFunction, statusFunction, boundary, ownership, offline] = await Promise.all([
   'public/app/host-node-session-v1.js',
   'public/app/host-node-installer-lobby-v1.js',
   'public/app/server-ai-router-v301.js',
   'public/app/working-campus-topbar-v243.js',
-  'public/app/guide-workspace-v242.js',
   'public/app/assistant-runtime-v141.js',
   'cloudflare/node-cloud/src/entry.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v1.mjs',
@@ -24,8 +23,11 @@ const [access, lobby, router, topbar, workspace, assistant, nodeEntry, serverEnt
   'public/app/offline-package-v208.json',
 ].map(read));
 
-for (const source of [access, lobby, router, topbar, workspace, assistant]) new Function(source);
 const registry = JSON.parse(ownership), offlinePackage = JSON.parse(offline);
+const guideChatOwner = registry.systems?.['guide-chat']?.owner;
+assert.equal(guideChatOwner, 'public/app/guide-chat-surface-v350.js', 'Hub telemetry must be verified on the canonical V350 chat owner.');
+const chatSurface = await read(guideChatOwner);
+for (const source of [access, lobby, router, topbar, chatSurface, assistant]) new Function(source);
 
 class WebStorage {
   constructor() { this.map = new Map(); }
@@ -143,9 +145,11 @@ assert.match(locationMigration, /ALTER TABLE nodes ADD COLUMN location_json TEXT
 assert.match(statusFunction, /\/api\/node\/health/);
 assert.match(topbar, /NODE_STATUS_ID='cw-working-campus-node-v243'/);
 assert.match(topbar, /neurons left today/);
-assert.match(workspace, /data-neuron-status/);
-assert.match(workspace, /neurons last turn/);
-assert.match(workspace, /chats left/);
+assert.match(chatSurface, /data-neuron-status/);
+assert.match(chatSurface, /CivweaveHostNodeSessionV1\?\.telemetryFor/);
+assert.match(chatSurface, /neurons last turn/);
+assert.match(chatSurface, /chargedNeurons/);
+assert.match(chatSurface, /chats left/);
 assert.match(assistant, /usage:result\.usage\|\|null/);
 assert.match(boundary, /HOST_NODE_SESSION/);
 assert.equal(registry.systems['host-node-access'].owner, 'public/app/host-node-session-v1.js');
@@ -158,5 +162,6 @@ console.log(JSON.stringify({
   capacitySessionRequired: true,
   nearestSearchModes: ['free', 'paid', 'both'],
   topbarHealth: true,
+  canonicalChatOwner: guideChatOwner,
   chatNeuronTelemetry: true,
 }, null, 2));
