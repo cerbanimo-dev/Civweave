@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION='host-node-paid-join-v2-citizen-patron-copy';
+const REVISION='host-node-paid-join-v3-guild-copy';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -39,8 +39,8 @@ function ensureUi(){
   let box=document.getElementById('cw-paid-join');
   if(!box){box=document.createElement('section');box.id='cw-paid-join';box.className='cw-paid-join';box.dataset.visible='false';box.innerHTML=`
     <label>Membership<select id="cw-paid-tier"><option value="member">Member · $5/month</option><option value="maker">Maker · $10/month</option><option value="builder">Builder · $20/month</option><option value="steward">Steward · $40/month</option></select></label>
-    <button id="cw-paid-join-button" type="button">Join this Hub</button>
-    <p id="cw-paid-join-note">This Hub has Patron slots available but no Citizen slots. Checkout does not consume a Citizen slot.</p>`;actions.insertAdjacentElement('afterend',box);box.querySelector('#cw-paid-join-button')?.addEventListener('click',()=>void beginCheckout());}
+    <button id="cw-paid-join-button" type="button">Join this Guild</button>
+    <p id="cw-paid-join-note">This Guild has Patron slots available but no Citizen slots. Checkout does not consume a Citizen slot.</p>`;actions.insertAdjacentElement('afterend',box);box.querySelector('#cw-paid-join-button')?.addEventListener('click',()=>void beginCheckout());}
   return box;
 }
 function apply(){
@@ -53,23 +53,23 @@ function apply(){
 }
 async function beginCheckout(){
   const{origin,nodeId}=selected(),button=document.getElementById('cw-paid-join-button'),note=document.getElementById('cw-paid-join-note');
-  if(!origin.startsWith('https://')||!nodeId){if(note)note.textContent='Choose a Cloudflare Hub before starting membership checkout.';return;}
+  if(!origin.startsWith('https://')||!nodeId){if(note)note.textContent='Choose a Cloudflare Guild before starting membership checkout.';return;}
   const identity=ensureIdentity(origin,nodeId),tierId=document.getElementById('cw-paid-tier')?.value||'member';if(button){button.disabled=true;button.textContent='Opening checkout…';}
   try{
     const endpoint=new URL('/api/commerce/membership/prejoin',origin);endpoint.searchParams.set('nodeId',nodeId);
     const response=await fetch(endpoint,{method:'POST',cache:'no-store',headers:{accept:'application/json','content-type':'application/json','x-civweave-node-id':nodeId},body:JSON.stringify({userId:identity.userId,credential:identity.credential,tierId})}),packet=await response.json().catch(()=>({}));
-    if(!response.ok)throw Object.assign(new Error(packet.error||`Hub returned HTTP ${response.status}.`),{status:response.status});
-    const checkoutUrl=packet?.checkout?.checkoutUrl||packet?.membership?.checkoutUrl;if(!checkoutUrl)throw new Error('The Hub did not return a membership checkout URL.');location.assign(checkoutUrl);
-  }catch(error){if(note)note.textContent=Number(error?.status)===409?'That Patron capacity just filled. Find another Hub or a Citizen slot.':`Could not start membership checkout: ${error?.message||error}`;if(button){button.disabled=false;button.textContent='Join this Hub';}}
+    if(!response.ok)throw Object.assign(new Error(packet.error||`Guild returned HTTP ${response.status}.`),{status:response.status});
+    const checkoutUrl=packet?.checkout?.checkoutUrl||packet?.membership?.checkoutUrl;if(!checkoutUrl)throw new Error('The Guild did not return a membership checkout URL.');location.assign(checkoutUrl);
+  }catch(error){if(note)note.textContent=Number(error?.status)===409?'That Patron capacity just filled. Find another Guild or a Citizen slot.':`Could not start membership checkout: ${error?.message||error}`;if(button){button.disabled=false;button.textContent='Join this Guild';}}
 }
 async function finishReturn(){
   const params=new URLSearchParams(location.search),result=params.get('membership');if(!result)return;
   const{origin,nodeId}=selected(),help=document.getElementById('cw-host-node-help');
   if(result==='cancelled'){if(help)help.textContent='Membership checkout was canceled. No Patron slot was activated.';apply();return;}
   if(!origin||!nodeId||!globalThis.CivweaveHostNodeSessionV1?.join)return;
-  if(help)help.textContent='Membership confirmed. Finishing your Hub login…';let lastError=null;
-  for(let attempt=0;attempt<8;attempt+=1){try{await globalThis.CivweaveHostNodeSessionV1.join(origin,{nodeId,createCredential:false});if(help)help.textContent='Membership active. You are logged in to this Hub.';document.getElementById('cw-host-node-refresh')?.click();apply();return;}catch(error){lastError=error;await new Promise(resolve=>setTimeout(resolve,800+attempt*350));}}
-  if(help)help.textContent=`Membership checkout completed, but the Hub is still confirming admission: ${lastError?.message||lastError}. Your device login is saved; use Log back in to retry.`;
+  if(help)help.textContent='Membership confirmed. Finishing your Guild login…';let lastError=null;
+  for(let attempt=0;attempt<8;attempt+=1){try{await globalThis.CivweaveHostNodeSessionV1.join(origin,{nodeId,createCredential:false});if(help)help.textContent='Membership active. You are logged in to this Guild.';document.getElementById('cw-host-node-refresh')?.click();apply();return;}catch(error){lastError=error;await new Promise(resolve=>setTimeout(resolve,800+attempt*350));}}
+  if(help)help.textContent=`Membership checkout completed, but the Guild is still confirming admission: ${lastError?.message||lastError}. Your device login is saved; use Log back in to retry.`;
 }
 const observer=new MutationObserver(()=>apply());observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});addEventListener('pagehide',()=>observer.disconnect(),{once:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{apply();void finishReturn();},{once:true});else{apply();void finishReturn();}
