@@ -56,6 +56,8 @@ const CHAT_PATHS=new Set([
   '/app/working-campus-topbar-v243.js',
   '/app/working-campus-v156.css',
   '/app/working-campus-v156.html',
+  '/app/new-user-onboarding-v1.js',
+  '/app/new-user-onboarding-v1.css',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
   '/app/ai-capability-broker-v268.js',
