@@ -1,41 +1,26 @@
 import assert from 'node:assert/strict';
-import vm from 'node:vm';
-import {readFile} from 'node:fs/promises';
+import {access,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const [source,wrapper,indexHtml,repairOnly,canonicalNavigation,versionText,packageText]=await Promise.all([
-  readFile(path.join(root,'public/service-worker-shell-repair-v225.js'),'utf8'),
-  readFile(path.join(root,'public/service-worker-v203.js'),'utf8'),
-  readFile(path.join(root,'public/app/index.html'),'utf8'),
-  readFile(path.join(root,'public/app/installer-repair-only-v1.js'),'utf8'),
-  readFile(path.join(root,'public/service-worker-canonical-navigation-v227.js'),'utf8'),
-  readFile(path.join(root,'VERSION'),'utf8'),
-  readFile(path.join(root,'package.json'),'utf8')
+const read=file=>readFile(path.join(root,file),'utf8');
+const exists=file=>access(path.join(root,file)).then(()=>true,()=>false);
+const [wrapper,core,repair,repairOnly,indexHtml]=await Promise.all([
+  read('public/service-worker-v203.js'),
+  read('public/service-worker-core-v208.js'),
+  read('public/service-worker-shell-repair-v293.js'),
+  read('public/app/installer-repair-only-v1.js'),
+  read('public/app/index.html')
 ]);
-const version=versionText.trim(),pkg=JSON.parse(packageText),revision='shell-self-repair-v225-install-only-pwa-v1';
-assert.equal(pkg.version,version);
-assert(wrapper.includes(`/service-worker-shell-repair-v225.js?v=${revision}`),'Worker wrapper does not import install-only shell repair.');
-assert(wrapper.indexOf('/service-worker-shell-repair-v225.js')>wrapper.indexOf('/service-worker-navigation-safety-v224.js'),'Shell repair must follow generic redirect safety.');
-assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation must remain final after shell repair.');
-assert(indexHtml.includes('/app/installer-repair-only-v1.js?v=install-only-pwa-v1'),'Installer does not load repair-only bridge.');
-assert(!indexHtml.includes('open-online-campus-v225'),'Installer still exposes browser campus fallback.');
-assert(!indexHtml.includes('/app/installer-online-fallback-v225.js'),'Installer still loads retired online fallback.');
-assert(indexHtml.includes('Launch Civweave from your device app launcher'),'Installer copy no longer preserves installed-only launch policy.');
-for(const token of ['REPAIR_DEVICE_PACKAGE','repairableCacheShell','selfRepairingShellStatus','no-browser-runtime'])assert(source.includes(token),`Shell repair is missing ${token}.`);
-assert(source.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'Shell repair must cache repair-only bridge.');
-assert(repairOnly.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'Repair bridge must keep browser runtime disabled.');
-assert(repairOnly.includes("if(!required||!rawNext||!installedDisplay())return false"),'Required-next recovery must require installed display.');
-assert(canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical navigation can be replaced by shell fallback.');
-assert.doesNotThrow(()=>new vm.Script(source));assert.doesNotThrow(()=>new vm.Script(repairOnly));
-const listeners=[],replies=[];let attempts=0,cached=false;
-const missing=Array.from({length:12},(_,index)=>({pathname:`/required-${index+1}`,message:'network unavailable'}));
-const context=vm.createContext({console,cacheShell:async()=>{attempts+=1;if(attempts===1){const error=new Error('App shell incomplete');error.failures=missing;throw error}cached=true;return{optionalFailures:[]}},shellStatus:async()=>({type:'CIVWEAVE_DEVICE_PACKAGE',mode:'lightweight-shell',version,ready:cached,assetCount:12,presentCount:cached?12:0,missing:cached?[]:missing.map(entry=>entry.pathname)}),OPTIONAL_SHELL_ASSETS:[],SHELL_ASSETS:[],post:(_event,packet)=>replies.push(packet),self:{addEventListener:(type,handler)=>listeners.push({type,handler})}});
-vm.runInContext(source,context,{filename:'service-worker-shell-repair-v225.js'});
-const installResult=await context.cacheShell();assert.equal(attempts,1);assert.equal(installResult.repaired,false);assert.equal(installResult.requiredFailures.length,12);
-const status=await context.shellStatus();assert.equal(attempts,2);assert.equal(status.ready,true);assert.equal(status.repairRevision,revision);
-assert(context.OPTIONAL_SHELL_ASSETS.includes('/app/installer-repair-only-v1.js'));assert(context.SHELL_ASSETS.includes('/app/installer-repair-only-v1.js'));
-assert(!context.OPTIONAL_SHELL_ASSETS.includes('/app/installer-online-fallback-v225.js'));
-const handler=listeners.find(row=>row.type==='message')?.handler;assert(handler);let promise=null;handler({data:{type:'REPAIR_DEVICE_PACKAGE'},waitUntil:value=>{promise=value},ports:[],source:null});await promise;assert.equal(replies.at(-1)?.type,'CIVWEAVE_DEVICE_PACKAGE');assert.equal(replies.at(-1)?.ready,true);
-console.log(JSON.stringify({ok:true,version,revision,activatedIncomplete:true,retryAttempts:attempts,repaired:true,onlineFallback:false,repairOnly:true,canonicalNavigationFinal:true,manualFirst:true},null,2));
+const retired='public/service-worker-shell-repair-v225.js';
+assert.equal(await exists(retired),false,'Superseded v225 shell repair worker must remain physically absent.');
+assert.ok(!wrapper.includes('/service-worker-shell-repair-v225.js'),'Generated worker resurrected the v225 shell repair owner.');
+assert.equal((wrapper.match(/service-worker-shell-repair-v293\.js/g)||[]).length,1,'Generated worker must import exactly one installed shell repair owner.');
+assert.ok(core.includes("'/app/installer-repair-only-v1.js'"),'Core optional shell assets must cache the repair-only installer UI directly.');
+assert.ok(repair.includes("const REVISION='installed-shell-repair-v293'"),'v293 is not the canonical installed shell repair owner.');
+assert.equal((repair.match(/event\.data\?\.type!=='REPAIR_DEVICE_PACKAGE'/g)||[]).length,1,'Canonical repair owner must have exactly one REPAIR_DEVICE_PACKAGE message boundary.');
+assert.ok(repairOnly.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'Repair UI must keep browser runtime disabled.');
+assert.ok(indexHtml.includes('/app/installer-repair-only-v1.js?v=install-only-pwa-v1'),'Installer must continue loading the repair-only UI.');
+assert.ok(!indexHtml.includes('/app/installer-online-fallback-v225.js'),'Retired online fallback must not return to the installer.');
+console.log(JSON.stringify({ok:true,revision:'shell-repair-single-owner-v293',retiredV225Absent:true,repairOwner:'service-worker-shell-repair-v293.js',repairMessages:1,repairUiCachedBy:'service-worker-core-v208.js',browserRuntime:false},null,2));
