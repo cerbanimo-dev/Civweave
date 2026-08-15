@@ -53,6 +53,14 @@ const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const arr=key=>{const value=parse(localStorage.getItem(key),[]);return Array.isArray(value)?value:[]};
 const obj=key=>{const value=parse(localStorage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}};
+function ludditeEnabled(){
+  if(globalThis.CivweaveLudditeModeV1?.isEnabled)return globalThis.CivweaveLudditeModeV1.isEnabled();
+  try{return parse(localStorage.getItem('civweave.operating-mode.v1'),{})?.mode==='luddite'}catch{return false}
+}
+function assertAIAllowed(capability='AI generation'){
+  if(!ludditeEnabled())return true;
+  const error=new Error(`${capability} is unavailable in Luddite Mode.`);error.code='CIVWEAVE_LUDDITE_AI_DISABLED';error.mode='luddite';throw error;
+}
 
 function detect(){
   const query=new URLSearchParams(location.search).get('system');
@@ -89,12 +97,13 @@ function loadScript(src,ready){
 }
 function loadSequence(rows){return rows.reduce((chain,pair)=>chain.then(()=>loadScript(...pair)),Promise.resolve())}
 function loadValueCore(){if(valueCorePromise)return valueCorePromise;valueCorePromise=loadSequence(VALUE_CORE).catch(error=>{valueCorePromise=null;throw error});return valueCorePromise}
-function loadValueModel(){if(valueModelPromise)return valueModelPromise;valueModelPromise=loadValueCore().then(()=>loadSequence(VALUE_MODEL)).catch(error=>{valueModelPromise=null;throw error});return valueModelPromise}
+function loadValueModel(){assertAIAllowed('Model-assisted economic review');if(valueModelPromise)return valueModelPromise;valueModelPromise=loadValueCore().then(()=>loadSequence(VALUE_MODEL)).catch(error=>{valueModelPromise=null;throw error});return valueModelPromise}
 function reset(reason='manual reset'){generation++;promise=null;optionalPromise=null;valueModelPromise=null;try{dispatchEvent(new CustomEvent('civweave:guide-loader-reset',{detail:{reason,at:new Date().toISOString()}}))}catch{}}
-function loadOptional(){if(optionalPromise)return optionalPromise;optionalPromise=Promise.allSettled(OPTIONAL.map(([src,ready])=>loadScript(src,ready))).then(()=>true);return optionalPromise}
+function loadOptional(){assertAIAllowed('AI-adjacent optional runtime loading');if(optionalPromise)return optionalPromise;optionalPromise=Promise.allSettled(OPTIONAL.map(([src,ready])=>loadScript(src,ready))).then(()=>true);return optionalPromise}
 function emitAssistantReady(){try{dispatchEvent(new CustomEvent('civweave:assistant-runtime-ready',{detail:{version:VERSION,system:detect(),at:new Date().toISOString()}}))}catch{}}
 
 async function ensure(){
+  assertAIAllowed('Guide and model generation');
   if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191&&globalThis.CivweaveKnowledgeEncyclopediaBridgeV271){
     await loadValueCore();
     await loadValueModel();
@@ -125,6 +134,7 @@ async function ensure(){
   return promise;
 }
 function requestEconomicReview(reason='realm-work-created'){
+  if(ludditeEnabled())return false;
   if(economicReviewQueued)return;
   economicReviewQueued=true;
   queueMicrotask(async()=>{
@@ -136,14 +146,16 @@ function requestEconomicReview(reason='realm-work-created'){
       console.info('[Civweave economic review deferred]',error.message);
     }finally{economicReviewQueued=false}
   });
+  return true;
 }
 
 function patchHeader(){
   const button=document.querySelector('#cwf104-head [data-cwf-chat]');
   if(!button)return;
   const system=detect(),guide=guideFor(system);
-  button.setAttribute('aria-label',`Talk to ${guide.name} in ${LABEL[system]}`);
-  button.title=`Talk to ${guide.name}`;
+  button.setAttribute('aria-label',ludditeEnabled()?'AI guide chat unavailable in Luddite Mode':`Talk to ${guide.name} in ${LABEL[system]}`);
+  button.title=ludditeEnabled()?'Luddite Mode · AI guide chat unavailable':`Talk to ${guide.name}`;
+  button.toggleAttribute('disabled',ludditeEnabled());
 }
 function canonicalChatApi(){
   if(globalThis.CivweaveGuideWorkspaceV242?.openWindow)return{kind:'workspace',api:globalThis.CivweaveGuideWorkspaceV242};
@@ -167,6 +179,7 @@ function waitForCanonicalChat(timeout=1600){
   });
 }
 async function openChat(system=detect(),{prefill='',contextSystem=system}={}){
+  assertAIAllowed('Guide chat');
   const target=LABEL[contextSystem]?contextSystem:LABEL[system]?system:detect();
   patchHeader();
   const immediate=openCanonical(target,prefill);
@@ -182,7 +195,7 @@ function workspaceSnapshot(system=detect(),query=''){
   const snapshot={schema:'civweave.inline-workspace-context.v4-fast',contextSystem:system,page:{path:location.pathname,room:new URLSearchParams(location.search).get('room')},memory,intentions:compact(arr('civweave.intentions.v127'),8)};
   if(system==='living-school')snapshot.livingSchool=living.school?{school:living.school,activeModuleId:living.activeModuleId,progress:living.progress,practicum:living.practicum,projectGate:living.projectGate}:null;
   if(system==='cerbanimo')snapshot.cerbanimo={quests:compact(arr('civweave.cerbanimo.quest-queue.v1'),10),actions:compact(arr('civweave.realm-actions.v141').filter(item=>item?.system==='cerbanimo'),10)};
-  if(system==='fellowfare')snapshot.fellowfare={resources:compact(arr('civweave.fellowfare.resource-queue.v152'),10),threads:compact(fellow.threads,8),listings:compact(fellow.listings||fellow.offers||fellow.posts,8)};
+  if(system==='fellowfare')snapshot.fellowfare={resources:compact(arr('civweave.fellowfare.resource-queue-v152'),10),threads:compact(fellow.threads,8),listings:compact(fellow.listings||fellow.offers||fellow.posts,8)};
   if(system==='anarchadia')snapshot.anarchadia={proposals:compact(anarchadia.proposals,8),passport:obj('civweave.anarchadia.passport.v152')};
   return clean(JSON.stringify(snapshot),7000);
 }
@@ -196,12 +209,13 @@ async function openSettings(launcher){
   }
   return gateway.open(launcher);
 }
-function warm(){return ensure()}
+function warm(){assertAIAllowed('AI runtime warmup');return ensure()}
 function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message))}
 
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 addEventListener('pageshow',boot);
 addEventListener('civweave:guide-workspace-ready',patchHeader);
+addEventListener('civweave:operating-mode-changed',patchHeader);
 addEventListener('civweave:working-campus-plan-built',()=>requestEconomicReview('working-campus-plan-built'));
 addEventListener('cerbanimo:quest-engine-changed',()=>requestEconomicReview('cerbanimo-quest-changed'));
 
@@ -226,6 +240,8 @@ globalThis.CivweaveFamilyAILoaderV105={
   canonicalChatOwner:'guide-workspace-v242',
   validationCloudOptIn:'v1',
   economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',
+  ludditeGuard:true,
+  aiAllowed:()=>!ludditeEnabled(),
   eagerWarm:false
 };
 })();
