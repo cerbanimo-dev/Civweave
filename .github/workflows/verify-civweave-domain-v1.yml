@@ -23,8 +23,7 @@ on:
       - 'config/launch-topology-v1.json'
       - 'public/index.html'
       - 'public/app/manifest.webmanifest'
-      - 'public/app/pwa-install-prompt-v246.js'
-      - 'public/app/pwa-install-prompt-v247.js'
+      - 'public/app/pwa-install-prompt-v249.js'
       - '.github/workflows/deploy-civweave-pages.yml'
       - '.github/workflows/deploy-civweave-host-pages.yml'
       - '.github/workflows/deploy-civweave-shared-domain-v1.yml'
@@ -53,8 +52,7 @@ on:
       - 'config/launch-topology-v1.json'
       - 'public/index.html'
       - 'public/app/manifest.webmanifest'
-      - 'public/app/pwa-install-prompt-v246.js'
-      - 'public/app/pwa-install-prompt-v247.js'
+      - 'public/app/pwa-install-prompt-v249.js'
       - '.github/workflows/deploy-civweave-pages.yml'
       - '.github/workflows/deploy-civweave-host-pages.yml'
       - '.github/workflows/deploy-civweave-shared-domain-v1.yml'
@@ -90,8 +88,7 @@ jobs:
           node --check scripts/ensure-cloudflare-shared-domain-dns-v1.mjs
           node --check scripts/prepare-cloudflare-launch-kit-v1.mjs
           node --check scripts/setup-cloudflare-node.mjs
-          node --check public/app/pwa-install-prompt-v246.js
-          node --check public/app/pwa-install-prompt-v247.js
+          node --check public/app/pwa-install-prompt-v249.js
           node --check scripts/verify-civweave-hosting-capacity-v1.mjs
           node --check scripts/verify-civweave-shared-domain-policy-v1.mjs
           node --check scripts/verify-civweave-shared-domain-router-v1.mjs
