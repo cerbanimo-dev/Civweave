@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION='host-node-paid-join-v4-guild-membership-copy';
+const REVISION='host-node-paid-join-v5-fantasy-membership-tiers';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -38,7 +38,7 @@ function ensureUi(){
   const actions=document.querySelector('.cw-host-node-actions');if(!actions)return null;installStyles();
   let box=document.getElementById('cw-paid-join');
   if(!box){box=document.createElement('section');box.id='cw-paid-join';box.className='cw-paid-join';box.dataset.visible='false';box.innerHTML=`
-    <label>Membership<select id="cw-paid-tier"><option value="member">Member · $5/month</option><option value="maker">Maker · $10/month</option><option value="builder">Builder · $20/month</option><option value="steward">Sustainer · $40/month</option></select></label>
+    <label>Membership<select id="cw-paid-tier"><option value="member">Wayfarer · $5/month</option><option value="maker">Artisan · $10/month</option><option value="builder">Weaver · $20/month</option><option value="steward">Beacon · $40/month</option></select></label>
     <button id="cw-paid-join-button" type="button">Join this Guild</button>
     <p id="cw-paid-join-note">This Guild has Patron slots available but no Citizen slots. Checkout does not consume a Citizen slot.</p>`;actions.insertAdjacentElement('afterend',box);box.querySelector('#cw-paid-join-button')?.addEventListener('click',()=>void beginCheckout());}
   return box;
