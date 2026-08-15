@@ -15,7 +15,7 @@ const [mailConfigText, mailBase, mailPm, mailFeedback, mailTrafficPolicy, mailUi
   read('cloudflare/account-edge/wrangler.jsonc'),
   read('cloudflare/account-edge/src/recovery-entry-v11.mjs'),
   read('public/app/hub-mail-claim-v1.js'),
-  read('public/app/installer-repair-only-v1.js'),
+  read('public/app/installer-repair-only-v2.js'),
 ]);
 const mailConfig = JSON.parse(mailConfigText);
 const mailPackage = JSON.parse(mailPackageText);
@@ -59,7 +59,9 @@ must(accountConfig.main === 'src/recovery-entry-v11.mjs', 'Account edge is not d
 for (const token of ['/api/account/mail/claim/request', '/api/account/mail/claim/consume', 'verifyMemberLogin', 'MAIL_CLAIM_TTL_MS', "this.state.storage.delete(key)"]) must(claimSource.includes(token), `Hub identity claim service is missing ${token}.`);
 for (const token of ['Private messaging', 'Claim username', 'setupPrivateMessaging', '/api/account/mail/claim/request', 'CivweaveHostNodeSessionExportV1', 'CivweavePrivateMessagingV1', 'not an email address']) must(claimUi.includes(token), `Hub PM setup UI is missing ${token}.`);
 must(!claimUi.includes('Claim @civweave.cc address'), 'Free Hub UI still advertises a public email claim.');
-must(installer.includes("'/app/hub-mail-claim-v1.js'"), 'Installer does not load the private-messaging setup companion.');
+must(installer.includes("'/app/hub-mail-claim-v1.js'"), 'Current installer Hub/account tools do not retain the private-messaging setup companion.');
+must(installer.includes("hubToolsPolicy:'explicit-user-load-only'"), 'Mail/account companion can boot on installer first paint.');
+must(installer.includes('firstPaintHubWork:false'), 'Installer no longer declares Hub/account first-paint work disabled.');
 
 console.log(JSON.stringify({
   ok: true,
@@ -75,4 +77,5 @@ console.log(JSON.stringify({
   feedbackBatchFeed: 'github-oidc-authenticated-redacted-sender',
   feedbackStaticToken: 'optional-emergency-fallback',
   lowTraffic: 'event-driven-inbound-plus-adaptive-background-backoff',
+  installerHubTools: 'explicit-user-load-only',
 }, null, 2));
