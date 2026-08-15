@@ -1,0 +1,35 @@
+name: Verify MiniLM message classifier v348
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/minilm-message-classifier-v348.js'
+      - 'public/app/deterministic-mode-v175.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'scripts/verify-minilm-message-classifier-v348.mjs'
+      - '.github/workflows/verify-minilm-message-classifier-v348.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/minilm-message-classifier-v348.js'
+      - 'public/app/deterministic-mode-v175.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'scripts/verify-minilm-message-classifier-v348.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check classifier
+        run: node --check public/app/minilm-message-classifier-v348.js
+      - name: Syntax check deterministic bridge
+        run: node --check public/app/deterministic-mode-v175.js
+      - name: Verify semantic-first contract
+        run: node scripts/verify-minilm-message-classifier-v348.mjs
