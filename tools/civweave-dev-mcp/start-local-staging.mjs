@@ -3,6 +3,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { localStagingSpawnSpec } from './lib/local-staging-spawn.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '../..');
@@ -64,8 +65,7 @@ if (existing) {
   throw new Error(`Port ${port} is already serving something that is not isolated Civweave staging.`);
 }
 
-const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-const args = [
+const npxArgs = [
   '--yes',
   'wrangler@4',
   'pages',
@@ -78,11 +78,12 @@ const args = [
   '--port',
   String(port),
 ];
+const launch = localStagingSpawnSpec({ npxArgs });
 
 console.log(`[civweave-local-staging] starting ${origin}`);
 console.log('[civweave-local-staging] static source: public/; Functions: functions/; production service bindings: none');
 
-const child = spawn(npx, args, {
+const child = spawn(launch.command, launch.args, {
   cwd: repoRoot,
   env: {
     ...process.env,
