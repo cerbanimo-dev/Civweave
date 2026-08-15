@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const boundary=read('public/app/install-boundary-v146.js');
+const coreRuntime=read('public/app/core-interface-runtime-v1.js');
 const guideLoader=read('public/app/shared-guide-surface-v236.js');
 const guideCore=read('public/app/shared-guide-surface-v236-core-v244.js');
 const guide=`${guideLoader}\n${guideCore}`;
@@ -18,11 +19,12 @@ const release=read('VERSION').trim();
 
 const checks=[
   ['all canonical systems load realm isolation followed by the one five-window workspace',()=>{
-    for(const token of ["REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js'","GUIDE_WORKSPACE='/app/guide-workspace-v242.js'","THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js'","SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js'"])assert.ok(boundary.includes(token),`missing boundary token ${token}`);
+    assert.match(boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+    assert.doesNotMatch(boundary,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS/,'deleted canonical loader manifests must not remain in boundary');
+    for(const path of ['/app/realm-session-integrity-v237.js','/app/guide-workspace-v242.js','/app/themed-system-nav-v178.js','/app/shared-guide-surface-v236.js'])assert.ok(coreRuntime.includes(`'${path}'`),`missing core runtime dependency ${path}`);
+    const realmIndex=coreRuntime.indexOf("'/app/realm-session-integrity-v237.js'"),workspaceIndex=coreRuntime.indexOf("'/app/guide-workspace-v242.js'");
+    assert.ok(realmIndex>=0&&workspaceIndex>realmIndex,'workspace must load after local-ledger ownership');
     assert.doesNotMatch(boundary,/PERSISTENT_GUIDE_CHAT_SCRIPT|PERSISTENT_GUIDE_VIEWPORT_SCRIPT/,'deleted chat runtimes must not remain in boundary');
-    const start=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=boundary.indexOf('];',start),experience=boundary.slice(start,end);
-    assert.match(experience,/REALM_SESSION_INTEGRITY/);assert.match(experience,/GUIDE_WORKSPACE/);
-    assert.ok(experience.indexOf('REALM_SESSION_INTEGRITY,')<experience.indexOf('GUIDE_WORKSPACE,'),'workspace must load after local-ledger ownership');
   }],
   ['five guide identities remain explicit and switchable without merging ledgers',()=>{
     for(const pair of [['civweave','Weaveling'],['living-school','Moss'],['cerbanimo','Kamiya'],['fellowfare','Rook'],['anarchadia','Merlin']])assert.ok(workspace.includes(pair[0])&&workspace.includes(`name:'${pair[1]}'`),`missing ${pair[1]} workspace contract`);
@@ -46,7 +48,7 @@ const checks=[
   }],
   ['FellowFare uses the floating Rook bubble without a duplicate top-level exchange desk',()=>{
     assert.doesNotMatch(fellowfare,/class="ffc144-rook"|data-ffc-rook-form|Chat with Rook/,'FellowFare must not reserve page space for a second Rook chat');
-    assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);assert.match(rookBridge,/mode:'bubble-only'/);assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
+    assert.match(coreRuntime,/const FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);assert.match(coreRuntime,/if\(currentSystem==='fellowfare'\)scripts\.push\(FELLOWFARE_GUIDE_BRIDGE\)/);assert.match(rookBridge,/mode:'bubble-only'/);assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
   }],
   ['radio launcher and expressive avatar nav keep their floating-layer contract',()=>{
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);
