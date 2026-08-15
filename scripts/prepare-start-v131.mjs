@@ -6,6 +6,7 @@ try{
 }
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
+await import('./generate-civweave-icons.mjs');
 await import('./stage-maplibre-v275.mjs');
 await import('./stage-federation-finder-data-v274.mjs');
 await import('./generate-prelive-metadata-v281.mjs');
@@ -16,6 +17,7 @@ if(isRender){
 }else{
   console.log('[Civweave] Local campus mode: deterministic fast start.');
 }
+console.log('[Civweave] Civweave launcher and compatibility icon pixels were regenerated from the approved daytime artwork.');
 console.log('[Civweave] Civweave Map v1 renderer, PMTiles runtime, and pinned Federation Finder atlas are staged for offline use.');
 console.log('[Civweave] Deterministic local mode is the default AI route.');
 console.log('[Civweave] Fixed ONNX Runtime Web WASM assets and the local MiniLM package are materialized for explicit semantic-lab use. The semantic worker remains dormant until the user starts a test.');

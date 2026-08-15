@@ -14,6 +14,18 @@ const SOURCE_EXTENSIONS = new Set(['.html','.htm','.css','.js','.mjs','.json','.
 const SKIP_PREFIXES = ['downloads/knowledge-schools/'];
 const SKIP_FILES = new Set(['app/asset-lockboard-catalog-v239.json']);
 
+// Production Pages builds install dependencies before this catalog is generated,
+// so launcher art is materialized from the approved daytime source before the
+// publish tree is copied. Dependency-free verification jobs may intentionally
+// skip the raster refresh and inspect source contracts only.
+try {
+  await import('./generate-civweave-icons.mjs');
+} catch (error) {
+  const missingSharp=error?.code==='ERR_MODULE_NOT_FOUND'&&String(error?.message||'').includes("package 'sharp'");
+  if (!missingSharp) throw error;
+  console.warn('[Civweave] sharp is unavailable in this dependency-free verifier; launcher raster regeneration is deferred to the build/package path.');
+}
+
 function walk(directory) {
   const files = [];
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
