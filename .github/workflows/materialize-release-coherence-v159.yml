@@ -1,0 +1,61 @@
+name: Materialize release coherence v159
+
+on:
+  push:
+    branches:
+      - agent/release-coherence-v159
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.repository == 'cerbanimo-dev/Civweave'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/release-coherence-v159
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Wire generated release metadata into the normal check path
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs/promises';
+          const file='package.json';
+          const pkg=JSON.parse(await fs.readFile(file,'utf8'));
+          const needle='node scripts/sync-release-coherence-v220.mjs && npm run check:release-discipline';
+          const replacement='node scripts/sync-release-coherence-v220.mjs && node scripts/generate-prelive-metadata-v281.mjs && node scripts/sync-canonical-release-hashes.mjs && npm run check:release-discipline';
+          if(!pkg.scripts?.check?.includes(replacement)){
+            if(!pkg.scripts?.check?.includes(needle))throw new Error('Could not find the release-coherence insertion point in package.json.');
+            pkg.scripts.check=pkg.scripts.check.replace(needle,replacement);
+            await fs.writeFile(file,`${JSON.stringify(pkg,null,2)}\n`,'utf8');
+          }
+          NODE
+      - name: Materialize the committed 1.0.159 release graph
+        run: |
+          node scripts/sync-release-version-assets.mjs
+          node scripts/build-service-worker-v211.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          node scripts/sync-canonical-release-hashes.mjs
+      - name: Verify the repaired release graph
+        run: |
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-pwa-cold-launch-recovery-v426.mjs
+          node --check scripts/sync-canonical-release-hashes.mjs
+      - name: Commit materialized release state
+        run: |
+          git rm .github/workflows/materialize-release-coherence-v159.yml
+          git config user.name 'civweave-release-coherence'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No release coherence changes were needed.'
+            exit 0
+          fi
+          git commit -m 'Materialize Civweave 1.0.159 release coherence'
+          git push origin HEAD:agent/release-coherence-v159
