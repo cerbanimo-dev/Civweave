@@ -11,6 +11,7 @@ const commands = [
   ['node',['scripts/verify-legal-consent-v1.mjs']],
   ['node',['scripts/verify-pwa-cold-launch-recovery-v426.mjs']],
   ['node',['scripts/verify-local-ai-smooth-fit-v314.mjs']],
+  ['node',['scripts/verify-anarchadia-review-freeze-v1.mjs']],
   ['python3',['scripts/civweave_d1_backup.py','--help']],
   ['npm',['run','check:release-discipline']],
 ];
