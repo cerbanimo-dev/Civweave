@@ -7,8 +7,11 @@ on:
       - 'public/app/luddite-*.js'
       - 'public/app/luddite-*.html'
       - 'public/app/luddite-*.json'
+      - 'public/app/shared/civweave-identity-sync.js'
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-luddite-package-v1.js'
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
@@ -23,8 +26,11 @@ on:
       - 'public/app/luddite-*.js'
       - 'public/app/luddite-*.html'
       - 'public/app/luddite-*.json'
+      - 'public/app/shared/civweave-identity-sync.js'
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-luddite-package-v1.js'
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
@@ -49,8 +55,10 @@ jobs:
           node --check public/app/luddite-mode-v1.js
           node --check public/app/luddite-manual-authoring-v1.js
           node --check public/app/luddite-installer-v1.js
+          node --check public/app/shared/civweave-identity-sync.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check public/app/family-ai-loader-v105.js
           node --check public/service-worker-luddite-package-v1.js
+          node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
       - name: Verify no-AI package and provenance contracts
         run: node --test scripts/test-luddite-mode-v1.mjs
