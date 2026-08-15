@@ -170,6 +170,11 @@ async function submitActive(text){
   }finally{busy=false;if(button)button.disabled=false;render();emitState()}
   return true;
 }
+function notify(system,text,options={}){
+  const value=clean(text,6000);if(!SYSTEMS.includes(system)||!value)return false;
+  const thread=readThread(system);thread.messages=Array.isArray(thread.messages)?thread.messages:[];thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:system,responderSystem:system,text:value,notification:true});if(system!==activeSystem||!openState)thread.unread=Math.min(99,Number(thread.unread||0)+1);writeThread(system,thread);
+  if(options.open)return open({guide:system,focus:false});if(root&&activeSystem===system)render();emitState();return true
+}
 function switchGuide(system,options={}){if(!SYSTEMS.includes(system))return false;activeSystem=system;ensureRoot();syncChrome();render();if(options.open!==false){openState=true;root.hidden=false}if(options.focus)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));saveState();emitState();return true}
 function open(options={}){const target=SYSTEMS.includes(options.guide)?options.guide:activeSystem;ensureRoot();activeSystem=target;openState=true;minimized=false;root.hidden=false;if(options.prefill){const input=root.querySelector('textarea');if(input)input.value=clean(options.prefill)}syncChrome();render();if(options.focus!==false)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));saveState();emitState();return true}
 function close(){if(!root)return false;openState=false;minimized=false;root.hidden=true;saveState();emitState();return true}
@@ -180,7 +185,7 @@ function activeWindow(){return activeSystem}
 async function submitText(text,system=activeSystem){if(SYSTEMS.includes(system)&&system!==activeSystem)switchGuide(system,{open:false});return submitActive(text)}
 function start(){pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();ensureRoot();root.hidden=true;openState=false;syncChrome();render();document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}}
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',hubTelemetryVisible:true,retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',hubTelemetryVisible:true,retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,notify,submitText,render,ensureRoot,ensureLauncher});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

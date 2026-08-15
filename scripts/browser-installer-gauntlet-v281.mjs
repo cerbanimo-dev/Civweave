@@ -184,9 +184,9 @@ try{
   });
   const installedLaunch=await context.newPage();
   await installedLaunch.goto(`${base}/app/installed-entry-v146.html?installed=1`,{waitUntil:'domcontentloaded'});
-  await installedLaunch.waitForURL(url=>url.pathname==='/app/working-campus-v156.html',{timeout:20000});
+  await installedLaunch.waitForURL(url=>url.pathname==='/app/working-campus-v156.html',{timeout:20000,waitUntil:'domcontentloaded'});
   await installedLaunch.waitForSelector('#weaveling-chat-form',{state:'attached',timeout:15000});
-  await installedLaunch.waitForSelector('.campus [data-realm="living-school"]',{state:'attached',timeout:15000});
+  assert.equal(await installedLaunch.locator('.campus [data-realm="living-school"]').count()>0,true,'Working Campus realm nodes were not present after installed launch');
   const routedUrl=new URL(installedLaunch.url());
   assert.equal(routedUrl.pathname,'/app/working-campus-v156.html','installed start entry did not route to Working Campus');
   assert.equal(routedUrl.searchParams.get('installed'),'1','installed launch lost installed authorization at the campus boundary');

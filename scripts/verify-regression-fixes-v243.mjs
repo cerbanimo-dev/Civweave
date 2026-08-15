@@ -8,7 +8,7 @@ const read=relative=>readFile(path.join(root,relative),'utf8');
 const exists=relative=>access(path.join(root,relative)).then(()=>true,()=>false);
 const [repairs,workspace,sharedLoader,sharedCore,entry,core,generationGuard,localResearch,localActions,knowledge,pkg]=await Promise.all([
   read('public/app/regression-fixes-v243.js'),
-  read('public/app/guide-workspace-v242.js'),
+  read('public/app/guide-chat-surface-v350.js'),
   read('public/app/shared-guide-surface-v236.js'),
   read('public/app/shared-guide-surface-v236-core-v244.js'),
   read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
@@ -30,17 +30,15 @@ assert(!repairs.includes("document.addEventListener('pointerup',onPointerUp,true
 assert(!repairs.includes('queueMicrotask(()=>control.click())'),'Synthetic chat click relay is still present.');
 assert(!repairs.includes('/app/assets/ai/kamiya-welcoming-v243.png')&&!repairs.includes('/app/assets/ai/kamiya.png'),'Regression compatibility must not substitute Kamiya artwork.');
 
-assert(workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"),'Canonical workspace does not own pointer-down gestures.');
-assert(workspace.includes('suppressClickUntil=performance.now()+500'),'Workspace does not suppress the targeted compatibility click after a handled pointer gesture.');
-assert(workspace.includes('suppressedControl=switchControl||closeControl||minimizeControl'),'Compatibility click suppression is not scoped to the control that owned pointerdown.');
-assert(workspace.includes('if(closeControl)closeWorkspace();else toggleMinimize()'),'Close/minimize gestures do not invoke canonical workspace state directly.');
-assert(workspace.includes("if(switchControl){switchWindow(switchControl.dataset.cw242Window,{open:true});return}"),'Persona pointer gesture does not invoke canonical workspace switching directly.');
-assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"),'Workspace does not publish canonical workspace state.');
-assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical direct text submission API is missing.');
-assert(workspace.includes('canonicalOwner:true'),'Workspace does not advertise canonical ownership.');
-assert(workspace.includes('globalThis.visualViewport?.addEventListener'),'Canonical workspace does not own mobile viewport resize.');
-assert(workspace.includes('height:min(62dvh,560px)!important'),'Canonical workspace lost mobile dynamic-height sizing.');
-assert(!workspace.includes('CHAT_OWNER_REPAIR')&&!workspace.includes('chat-single-owner-v245.js'),'Canonical workspace resurrects a second owner.');
+assert(workspace.includes("presentationOwner:'guide-chat-surface-v350'"),'V350 does not advertise canonical presentation ownership.');
+assert(workspace.includes("root.querySelector('[data-persistent-form]').addEventListener('submit'"),'V350 form does not own local submission.');
+assert(workspace.includes('function switchGuide(')&&workspace.includes('submitText'),'V350 direct guide switch/submission APIs are missing.');
+assert(workspace.includes('canonicalOwner:true'),'V350 does not advertise canonical ownership.');
+assert(workspace.includes('height:100dvh'),'V350 lost mobile full-height layout.');
+assert(!workspace.includes('new MutationObserver'),'V350 must not install a DOM repair observer.');
+assert(!workspace.includes("document.addEventListener('pointerdown'")&&!workspace.includes("document.addEventListener('pointerup'"),'V350 must not install document gesture relays.');
+assert(!workspace.includes('visualViewport?.addEventListener'),'V350 must not own visualViewport event repair.');
+assert(!workspace.includes('CHAT_OWNER_REPAIR')&&!workspace.includes('chat-single-owner-v245.js'),'V350 resurrects a second owner.');
 
 assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical bubble-only implementation.');
 assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Shared guide submission helper does not submit directly through the canonical chat API.');

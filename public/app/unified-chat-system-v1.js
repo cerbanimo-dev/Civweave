@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-unified-chat-system-v1';
+const VERSION='1.0.162-unified-chat-system-v1-v350';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -26,10 +26,7 @@ let lifecycleBound=false;
 let pendingRun=null;
 
 function activeTheme(){
-  const candidate=globalThis.CivweavePersistentGuideChatV215?.activeWindow?.()
-    ||globalThis.CivweaveGuideWorkspaceV242?.state?.().activeWindow
-    ||document.documentElement?.dataset?.civweaveSystemRoute
-    ||'civweave';
+  const candidate=globalThis.CivweaveGuideChatSurfaceV350?.activeWindow?.()||document.documentElement?.dataset?.civweaveSystemRoute||'civweave';
   return SYSTEMS.includes(candidate)?candidate:'civweave';
 }
 
@@ -38,20 +35,7 @@ function memoryFolder(system=activeTheme()){
 }
 
 function normalizeSurface(){
-  const root=document.getElementById(ROOT_ID);
-  if(!root)return false;
-  root.dataset.chatArchitecture='one-core-five-themes';
-  root.dataset.memoryIsolation='five-folders';
-  const nav=root.querySelector('.cw242-window-switcher');
-  if(nav)nav.setAttribute('aria-label','Chat themes');
-  root.querySelectorAll('[data-cw242-window]').forEach(button=>{
-    const system=clean(button.dataset.cw242Window,80);
-    const theme=THEMES[system];
-    if(theme)button.setAttribute('aria-label',`Switch to ${theme.name} · ${theme.label}`);
-  });
-  const label=root.querySelector('[data-window-label]');
-  if(label&&/WINDOW/i.test(label.textContent||''))label.textContent=(label.textContent||'').replace(/WINDOW/gi,'THEME');
-  return true;
+  const root=document.getElementById(ROOT_ID);if(!root)return false;root.dataset.chatArchitecture='one-core-five-themes';root.dataset.memoryIsolation='five-folders';const select=root.querySelector('[data-guide-select]');if(select)select.setAttribute('aria-label','Chat themes');return true
 }
 
 function stateForLivingSchool(){
@@ -163,14 +147,14 @@ async function consumePending(){
   if(pendingRun||typeof globalThis.LivingSchoolCleanroomV218?.generateCurriculumFromChat!=='function')return pendingRun;
   const key=`${PENDING_PREFIX}.living-school.curriculum.v1`,request=parse(localStorage.getItem(key),null);
   if(!request?.autoRun||!clean(request.capability))return null;
-  pendingRun=globalThis.LivingSchoolCleanroomV218.generateCurriculumFromChat(request).then(result=>{localStorage.removeItem(key);try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school',`Your queued learning path “${clean(result?.school?.title||request.title,180)}” is ready.`,{open:false})}catch{};return result}).catch(error=>{try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school',`The queued learning-path build stopped: ${clean(error?.message||error,800)} Nothing was marked generated.`,{open:false})}catch{};return null}).finally(()=>{pendingRun=null});
+  pendingRun=globalThis.LivingSchoolCleanroomV218.generateCurriculumFromChat(request).then(result=>{localStorage.removeItem(key);try{globalThis.CivweaveGuideChatSurfaceV350?.notify?.('living-school',`Your queued learning path “${clean(result?.school?.title||request.title,180)}” is ready.`,{open:false})}catch{};return result}).catch(error=>{try{globalThis.CivweaveGuideChatSurfaceV350?.notify?.('living-school',`The queued learning-path build stopped: ${clean(error?.message||error,800)} Nothing was marked generated.`,{open:false})}catch{};return null}).finally(()=>{pendingRun=null});
   return pendingRun;
 }
 function synchronize(){normalizeSurface();patchLoader();patchAssistant();consumePending();return true}
 function bindLifecycle(){
   if(lifecycleBound)return;
   lifecycleBound=true;
-  for(const name of ['civweave:guide-workspace-ready','civweave:guide-loader-reset','civweave:living-school-workbench-ready','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
+  for(const name of ['civweave:guide-chat-ready','civweave:guide-loader-reset','civweave:living-school-workbench-ready','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
 }
 function start(){bindLifecycle();synchronize();document.documentElement.dataset.civweaveChatSystem='unified-v1'}
 

@@ -7,7 +7,7 @@ const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [topbar,boundary,workspace,campus,release,manifest,pkg,workflow]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
   read('public/app/install-boundary-v146.js'),
-  read('public/app/guide-workspace-v242.js'),
+  read('public/app/guide-chat-surface-v350.js'),
   read('public/app/working-campus-v156.js'),
   read('VERSION'),
   read('public/app/manifest.webmanifest'),
@@ -27,7 +27,7 @@ check('topbar runtime is syntax checked',workflow.includes('node --check public/
 check('v243 is approved experience support',boundary.includes("const WORKING_CAMPUS_TOPBAR='/app/working-campus-topbar-v243.js'")&&boundary.includes('WORKING_CAMPUS_TOPBAR,')&&boundary.includes("workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract'"));
 check('old hit safety remains lower-specificity compatibility only',campus.includes("main.app>.top{position:relative!important")&&topbar.includes('main.app>header.top{position:sticky!important'));
 check('topbar is sticky to safe top edge',topbar.includes('position:sticky!important;top:max(6px,env(safe-area-inset-top))!important'));
-check('topbar stays above chat without sharing its paint layer',topbar.includes('z-index:2147483646!important')&&workspace.includes('z-index:2147483644!important'));
+check('topbar stays above chat without sharing its paint layer',topbar.includes('z-index:2147483646!important')&&workspace.includes('z-index:2147483612'));
 check('chat workspace reserves measured topbar height',topbar.includes('--cw-working-campus-topbar-height')&&topbar.includes('#cw-persistent-guide-chat-v215{top:calc(var(--cw-working-campus-topbar-height'));
 check('topbar height uses targeted ResizeObserver',topbar.includes("'ResizeObserver'in globalThis")&&topbar.includes('resizeObserver.observe(header)')&&!topbar.includes('MutationObserver'));
 check('map button is a first-class header grid area',topbar.includes("MAP_BUTTON_ID='cw-working-campus-map-v243'")&&topbar.includes('grid-area:map')&&topbar.includes('<span>Map</span>'));

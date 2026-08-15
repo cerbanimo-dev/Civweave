@@ -81,8 +81,10 @@ const checks=[
     assert.match(campus,/z-index:2147483620!important/);
     assert.match(campus,/pointer-events:auto!important/);
   }],
-  ['Working Campus brand uses direct app icon fallback',()=>{
-    assert.match(campus,/\/app\/logos\/civweave-app-icon\.png/);
+  ['Working Campus brand uses the current day/night Civweave source',()=>{
+    assert.match(campus,/BRAND_CYCLE_REVISION='day-night-clock-v236'/);
+    assert.match(campus,/BRAND_DAY='\/app\/logos\/civweave-day-logo\.jpg'/);
+    assert.match(campus,/BRAND_NIGHT='\/app\/logos\/civweave-night-logo\.jpg'/);
   }],
   ['asset lockboard supports canonical locks and personal replacements',()=>{
     assert.match(lockboard,/civweave\.asset-lockboard\.export\.v239/);

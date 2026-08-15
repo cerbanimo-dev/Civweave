@@ -26,7 +26,7 @@ globalThis.CivweavePlatformStabilityV159=Object.freeze({
   patch,
   destroy,
   domReadySafe:true,
-  canonicalChatOwner:'guide-workspace-v242',
+  canonicalChatOwner:'guide-chat-surface-v350',
   sourceTruth:true,
   injectedDialogControls:false
 });
