@@ -179,8 +179,15 @@ function close(status='completed'){
 }
 function reset({openNow=false}={}){clearRecord();if(openNow)open({force:true});return true}
 function status(){return{version:VERSION,record:readRecord(),open:Boolean(root&&!root.hidden),step:index,autoEligible:shouldAutoOpen()}}
-function boot(){createRoot();if(shouldAutoOpen())requestAnimationFrame(()=>requestAnimationFrame(()=>open({force:true})))}
+function bindReplay(){
+  const button=document.querySelector('[data-cw-onboarding-replay]');
+  if(!button||button.dataset.cwOnboardingReplayBound==='true')return false;
+  button.dataset.cwOnboardingReplayBound='true';
+  button.addEventListener('click',()=>open({force:true}));
+  return true;
+}
+function boot(){createRoot();bindReplay();if(shouldAutoOpen())requestAnimationFrame(()=>requestAnimationFrame(()=>open({force:true})))}
 
-globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Quartermaster',runtimeInjection:false});
+globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,bindReplay,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Quartermaster',runtimeInjection:false,replayControl:true});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
