@@ -1,9 +1,10 @@
 {
-  "schema": "civweave.icon-generation.v2",
-  "source": "civweave-canonical.png",
-  "release": "1.0.26",
-  "treatment": "canonical-artwork-resize-only",
-  "targetFill": "100% source canvas; no crop, no dark tile, no substitute mark",
+  "schema": "civweave.icon-generation.v3",
+  "source": "civweave-day-logo.jpg",
+  "nightCompanion": "civweave-night-logo.jpg",
+  "treatment": "current-approved-artwork-resize-only",
+  "targetFill": "100% source canvas; no crop, no substitute mark",
+  "generatedAt": "2026-08-15T18:16:06.039Z",
   "files": [
     "civweave-icon-16.png",
     "civweave-icon-32.png",
@@ -21,6 +22,9 @@
     "civweave-app-icon.png",
     "civweave-icon-maskable-192.png",
     "civweave-icon-maskable-512.png",
-    "civweave-adaptive-foreground-512.png"
+    "civweave-adaptive-foreground-512.png",
+    "civweave-pwa-192-v247.png",
+    "civweave-pwa-512-v247.png",
+    "civweave-pwa-maskable-512-v247.png"
   ]
 }
