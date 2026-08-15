@@ -95,9 +95,11 @@
       "routeContract": "public/app/system-routes-v227.js"
     },
     "guide-chat": {
-      "capability": "Five guide windows and canonical conversation workspace",
-      "owner": "public/app/guide-workspace-v242.js",
-      "loader": "public/app/family-ai-loader-v105.js"
+      "capability": "Five private guide threads on one current conversation surface",
+      "owner": "public/app/guide-chat-surface-v350.js",
+      "compatibilityLoader": "public/app/guide-workspace-v242.js",
+      "loader": "public/app/family-ai-loader-v105.js",
+      "presentationPolicy": "one-current-surface-no-retired-workspace-views"
     },
     "local-ai-inference": {
       "capability": "Downloaded local model inference",
@@ -114,7 +116,7 @@
         "public/app/server-ai-router-v301.js",
         "public/app/cloud-validation-executor-v1.js",
         "public/app/working-campus-topbar-v243.js",
-        "public/app/guide-workspace-v242.js"
+        "public/app/guide-chat-surface-v350.js"
       ],
       "rules": [
         "Only the owner writes browser Hub capacity sessions and device login credentials.",
