@@ -27,6 +27,7 @@ jobs:
         run: |
           python3 scripts/repair-v350-contracts-once.py
           python3 scripts/repair-v350-chat-convergence-once.py
+          python3 scripts/repair-v350-browser-gauntlet-once.py
       - name: Refresh 1.0.162 canonical materialization
         run: |
           npm run release:materialize
@@ -62,7 +63,7 @@ jobs:
         shell: bash
         run: |
           git checkout -- .civweave-gateway-v132.loader.mjs .civweave-canonical-gateway.entry.mjs .civweave-gateway-v131.runtime.mjs
-          git rm .github/workflows/repair-v350-contracts-once.yml scripts/repair-v350-contracts-once.py scripts/repair-v350-chat-convergence-once.py
+          git rm .github/workflows/repair-v350-contracts-once.yml scripts/repair-v350-contracts-once.py scripts/repair-v350-chat-convergence-once.py scripts/repair-v350-browser-gauntlet-once.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
