@@ -89,11 +89,9 @@ function installAssistantHarness(){
   };
   globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,safeModeRevision:REVISION});return true;
 }
-let settingsBound=false;
-function installSettingsBinding(){if(settingsBound||typeof document==='undefined')return;settingsBound=true;const sync=()=>{const input=document.querySelector('#cw-ai-settings-cleanroom-v188 [name="safeMode"]');if(input)input.checked=readSafeMode().enabled};document.addEventListener('submit',event=>{const form=event.target;if(!form?.matches?.('[data-cw-cleanroom-form]'))return;const input=form.elements?.namedItem?.('safeMode');if(input)setSafeMode(Boolean(input.checked));},true);addEventListener('civweave:model-settings-opened',()=>queueMicrotask(sync));addEventListener('civweave:safe-mode-changed',sync);queueMicrotask(sync)}
 let lifecycleBound=false;
 function installLifecycleBinding(){if(lifecycleBound||typeof globalThis.addEventListener!=='function')return;lifecycleBound=true;const patch=()=>queueMicrotask(()=>{installRuntimeHarness();installAssistantHarness()});for(const name of ['civweave:model-runtime-ready','civweave:assistant-runtime-ready','civweave:guide-loader-reset','civweave:local-model-bridge-installed','pageshow'])addEventListener(name,patch)}
-export function installSafeModeHarness(){installSettingsBinding();installLifecycleBinding();installRuntimeHarness();installAssistantHarness();let attempts=0;const timer=setInterval(()=>{installRuntimeHarness();installAssistantHarness();if(++attempts>40||(globalThis.CivweaveModelRuntime?.safeModeRevision===REVISION&&globalThis.CivweaveAssistantV141?.safeModeRevision===REVISION))clearInterval(timer)},250);return api}
-const api=Object.freeze({revision:REVISION,storageKey:STORAGE_KEY,read:readSafeMode,set:setSafeMode,deterministicSafetyCheck,validateAdmission,validateAdmissions,install:installSafeModeHarness});
+export function installSafeModeHarness(){installLifecycleBinding();installRuntimeHarness();installAssistantHarness();let attempts=0;const timer=setInterval(()=>{installRuntimeHarness();installAssistantHarness();if(++attempts>40||(globalThis.CivweaveModelRuntime?.safeModeRevision===REVISION&&globalThis.CivweaveAssistantV141?.safeModeRevision===REVISION))clearInterval(timer)},250);return api}
+const api=Object.freeze({revision:REVISION,storageKey:STORAGE_KEY,read:readSafeMode,set:setSafeMode,deterministicSafetyCheck,validateAdmission,validateAdmissions,install:installSafeModeHarness,settingsOwnership:false,settingsBinding:false});
 globalThis.CivweaveSafeModeV1=api;
 export default api;

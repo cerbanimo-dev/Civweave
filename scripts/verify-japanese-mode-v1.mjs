@@ -23,7 +23,7 @@ const anarchadia=read('public/app/services/anarchadia/index.html');
 const livingSchool=read('public/app/cabinets/living-school/index.html');
 const japaneseEntry=read('public/ja/index.html');
 
-for(const [name,source] of [['Japanese runtime',runtime],['Japanese shell copy',shellCopy],['Language settings',languageSettings],['Settings gateway',settingsGateway],['Brand runtime',brand],['Release/version realm locale bootstrap',releaseVersion]]){
+for(const [name,source] of [['Japanese runtime',runtime],['Japanese shell copy',shellCopy],['Language settings facade',languageSettings],['Settings gateway',settingsGateway],['Brand runtime',brand],['Release/version realm locale bootstrap',releaseVersion]]){
   try{new Function(source)}catch(error){throw new Error(`${name} does not compile: ${error.message}`)}
 }
 
@@ -68,7 +68,6 @@ for(const [english,japanese,label] of [
 assert(runtime.includes('Add \\$([0-9]+(?:\\.[0-9]{1,2})?) live credit'),'Japanese v3 does not translate dynamic live-credit amounts.');
 assert(runtime.includes('Map v1 check failed'),'Japanese v3 does not translate dynamic map-check failures.');
 assert(runtime.includes('Hub returned HTTP'),'Japanese v3 does not translate dynamic Hub HTTP status copy.');
-
 assert(runtime.includes("const SKIP_TEXT_SELECTOR='script,style,noscript,textarea,input,pre,code"),'Japanese mode no longer protects entered textarea/input text.');
 assert(runtime.includes("const SKIP_ELEMENT_SELECTOR='script,style,noscript,pre,code")&&!runtime.includes("const SKIP_ELEMENT_SELECTOR='script,style,noscript,textarea,input,select,option"),'Japanese mode still skips form labels/options and cannot localize them.');
 assert(runtime.includes("['aria-label','title','placeholder']"),'Japanese mode does not localize accessible labels/placeholders.');
@@ -82,7 +81,6 @@ assert(japaneseEntry.includes("localStorage.setItem('civweave.language.v1','ja')
 assert(japaneseEntry.includes("installed?'/app/installed-entry-v146.html':'/app/index.html'"),'Japanese share route does not respect the install-only PWA boundary.');
 assert(japaneseEntry.includes("target.searchParams.set('lang','ja')"),'Shareable Japanese entrypoint does not activate lang=ja.');
 assert(!japaneseEntry.includes("new URL('/app/working-campus-v156.html'"),'Japanese browser share route still falls into the Working Campus install redirect.');
-
 assert(brand.includes("JAPANESE_RUNTIME='/app/japanese-mode-v1.js"),'Installer branding does not load Japanese mode from the persisted preference.');
 assert(brand.includes("JAPANESE_SHELL_COPY='/app/japanese-shell-copy-v1.js"),'Installer branding does not load Japanese installer copy.');
 assert(brand.includes("localStorage.getItem(LANGUAGE_KEY)==='ja'"),'Installer locale bootstrap does not honor the saved language.');
@@ -93,28 +91,30 @@ assert(shellCopy.includes("['Installed campus','インストール済みキャ�
 assert(shellCopy.includes("['Install Civweave','Civweave をインストール']"),'Japanese installer install action is missing.');
 assert(shellCopy.includes("jp.textContent='神織 · セルバニモ'"),'Japanese installer does not place Cerbanimo Japanese branding beside the steward mark.');
 
-assert(languageSettings.includes("LANGUAGE_KEY='civweave.language.v1'"),'Language setting does not use the canonical language preference.');
-assert(languageSettings.includes('Language / 言語'),'Settings language row is missing.');
-assert(languageSettings.includes('data-cw-language-option="en"')&&languageSettings.includes('data-cw-language-option="ja"'),'Settings does not expose both English and Japanese.');
-assert(languageSettings.includes("inputOwnership:false")&&languageSettings.includes("settingsLauncherOwnership:false"),'Language controls incorrectly claim Settings input ownership.');
-assert(languageSettings.includes("inferenceWork:'none'"),'Language controls do not explicitly preserve inference dormancy.');
+// Language state helpers are a facade. The one visible language row belongs to the canonical Settings menu.
+assert(languageSettings.includes("LANGUAGE_KEY='civweave.language.v1'"),'Language settings facade does not use the canonical language preference.');
+assert(languageSettings.includes("canonical:'CivweaveSettingsV320'"),'Language settings facade does not identify the canonical Settings owner.');
+assert(languageSettings.includes("inputOwnership:false")&&languageSettings.includes("presentationOwnership:false")&&languageSettings.includes("settingsLauncherOwnership:false"),'Language compatibility facade incorrectly claims Settings ownership.');
+assert(languageSettings.includes("inferenceWork:'none'"),'Language compatibility facade does not explicitly preserve inference dormancy.');
 assert(!languageSettings.includes("document.addEventListener('click'"),'Language settings added a parallel document click owner.');
 assert(!/prototype\s*[.\[]/.test(languageSettings),'Language settings patch a browser prototype.');
 assert(!languageSettings.includes('MutationObserver'),'Language settings add a global observer to the freeze-sensitive Settings path.');
-assert(settingsGateway.includes("const LANGUAGE_SETTINGS='/app/language-settings-v1.js'"),'Canonical Settings gateway does not lazy-load language controls.');
-assert(settingsGateway.includes('afterPaint(()=>void ensureLanguageSettings(layer))'),'Language controls are not mounted after Settings paints.');
+assert(!languageSettings.includes('document.createElement'),'Language compatibility facade regained presentation DOM creation.');
+assert(settingsGateway.includes('Language / 言語'),'Canonical Settings language row is missing.');
+assert(settingsGateway.includes('data-cw-language-option="en"')&&settingsGateway.includes('data-cw-language-option="ja"'),'Canonical Settings does not expose both English and Japanese.');
+assert(settingsGateway.includes('data-cw-language-settings="v320"'),'Canonical Settings language section marker is missing.');
+assert(settingsGateway.includes('languageBuiltIn:true'),'Canonical Settings no longer declares built-in language ownership.');
+assert(!settingsGateway.includes("const LANGUAGE_SETTINGS='/app/language-settings-v1.js'"),'Canonical Settings reintroduced language as an after-the-fact panel module.');
 assert(settingsGateway.includes('afterPaint(()=>void ensureManagement(layer))'),'Settings management lost its existing after-paint boundary.');
-assert(settingsGateway.includes("launchWork:'none'")&&settingsGateway.includes('inputOwner:true'),'Canonical Settings gateway ownership changed.');
+assert(settingsGateway.includes("launchWork:'none'")&&settingsGateway.includes('inputOwner:true,presentationOwner:true,credentialOwner:true'),'Canonical Settings ownership changed.');
 
 assert(releaseVersion.includes("const JAPANESE_RUNTIME='/app/japanese-mode-v1.js'"),'Canonical realm bootstrap does not know the Japanese runtime.');
 assert(releaseVersion.includes('function wantsJapanese()'),'Canonical realm bootstrap does not honor the language preference.');
 assert(releaseVersion.includes('void ensureLanguageRuntime();'),'Canonical realm bootstrap does not activate Japanese before skipping realm release mutation.');
 assert(releaseVersion.includes("japaneseBootstrap:'preference-only'"),'Canonical realm Japanese bootstrap contract is missing.');
-
 for(const asset of ['/app/language-settings-v1.js','/app/japanese-mode-v1.js','/app/japanese-shell-copy-v1.js'])assert(codeCache.includes(`'${asset}'`),`${asset} is not pinned for offline first-launch use.`);
 assert(codeCache.includes('code-coherence-v288-language-v2'),'Code-coherence cache no longer includes the established Japanese localization cache boundary.');
 assert(worker.includes('code-coherence-v288-language-v2'),'Top-level service worker no longer includes the established Japanese localization cache boundary.');
-
 assert(guard.includes('/app/japanese-mode-v1.js'),'Working Campus does not load Japanese mode.');
 assert(guard.includes("target.searchParams.set('lang','ja')"),'Working Campus recovery does not preserve Japanese mode.');
 assert(guard.includes('activateLanguageMode()'),'Working Campus does not activate language mode at boot.');
@@ -126,4 +126,4 @@ console.log('Branding: 民織 / シヴウィーヴ; 生学舎 / リビング・�
 console.log('Coverage: Working Campus + realms + Hub installer + Passport/passkeys + maps + AI settings + legal/permission surfaces.');
 console.log('Dynamic copy: exact + pattern + safe static phrase translation; user-authored text remains untouched.');
 console.log('Share route: /ja/ -> Japanese installer in browser -> Japanese installed PWA');
-console.log('Settings: one canonical launcher owner; language controls mount after paint with no inference work.');
+console.log('Settings: one canonical menu owns language controls directly; compatibility facade has no presentation/input ownership.');

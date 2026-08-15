@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
-const VERSION='document-lifecycle-v317-management-only';
-const REVISION='document-lifecycle-v317-explicit-activation';
+const VERSION='document-lifecycle-v320-settings-service';
+const REVISION='document-lifecycle-v320-single-menu';
 const ACTIVATED=(()=>{try{return new URL(document.currentScript?.src||'',location.href).searchParams.get('activate')==='1'}catch{return false}})();
-if(!ACTIVATED){globalThis.CivweaveDocumentLifecycleBootstrapV221=Object.freeze({version:VERSION,dormant:true,activation:'settings-gateway-v317'});return}
+if(!ACTIVATED){globalThis.CivweaveDocumentLifecycleBootstrapV221=Object.freeze({version:VERSION,dormant:true,activation:'settings-v320'});return}
 if(globalThis.CivweaveDocumentLifecycleV221?.revision===REVISION)return;
 let active=true,managementPromise=null;
 const LOCAL_AI_MANAGEMENT_FILES=[
@@ -16,23 +16,14 @@ const LOCAL_AI_MANAGEMENT_FILES=[
   ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278-settings-stability-v318',()=>Boolean(globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations&&globalThis.CivweaveLocalModelHardwareTierUIV278?.observerFeedbackBounded)]
 ];
 function afterPaint(task){const run=()=>setTimeout(task,0);if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(task,0)}
-function ensureScript(src,ready){if(ready?.())return Promise.resolve(true);return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsManagement='v317';const timer=setTimeout(()=>reject(new Error(`${src} did not become ready.`)),8000);script.onload=()=>{clearTimeout(timer);ready?.()?resolve(true):reject(new Error(`${src} loaded without becoming ready.`))};script.onerror=()=>{clearTimeout(timer);reject(new Error(`${src} could not load.`))};if(!active||!document.head?.isConnected){clearTimeout(timer);reject(new Error('Document is leaving.'));return}document.head.append(script)})}
-function managementReady(){return Boolean(
-  globalThis.CivweaveLocalAISettingsV266?.enhance&&
-  globalThis.CivweaveLocalModelDownloadV266?.status&&
-  globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&
-  globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&
-  globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true&&
-  globalThis.CivweaveLocalModelRegistryV266?.installable&&
-  globalThis.CivweaveLocalAIPrimaryRouteV283&&
-  globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true&&
-  globalThis.CivweaveLocalModelHardwareTierUIV278?.observerFeedbackBounded===true
-)}
-function enhance(layer=document.getElementById('cw-ai-settings-cleanroom-v188')){if(!active||!layer?.isConnected||layer.hidden)return null;const panel=globalThis.CivweaveLocalAISettingsV266?.enhance?.()||null;globalThis.CivweaveLocalModelHardwareTierUIV278?.decorate?.();return panel}
-function ensureLocalAISettingsManagement(){if(!active)return Promise.resolve(false);if(managementReady()){enhance();return Promise.resolve(true)}if(managementPromise)return managementPromise;managementPromise=(async()=>{for(const [src,ready] of LOCAL_AI_MANAGEMENT_FILES)await ensureScript(src,ready);if(!managementReady())throw new Error('Downloaded local AI management did not become ready.');enhance();return true})().catch(error=>{try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-unavailable',{detail:{version:VERSION,revision:REVISION,message:String(error?.message||error)}}))}catch{}return false}).finally(()=>{managementPromise=null});return managementPromise}
-function scheduleSettingsManagement(layer=document.getElementById('cw-ai-settings-cleanroom-v188')){if(!active||!layer?.isConnected||layer.hidden)return false;const epoch=String(layer.dataset.openedAt||'visible');if(layer.dataset.civweaveLifecycleManagementEpoch===epoch)return true;layer.dataset.civweaveLifecycleManagementEpoch=epoch;afterPaint(()=>{if(active&&layer.isConnected&&!layer.hidden)void ensureLocalAISettingsManagement()});return true}
+function ensureScript(src,ready){if(ready?.())return Promise.resolve(true);return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsService='v320';const timer=setTimeout(()=>reject(new Error(`${src} did not become ready.`)),8000);script.onload=()=>{clearTimeout(timer);ready?.()?resolve(true):reject(new Error(`${src} loaded without becoming ready.`))};script.onerror=()=>{clearTimeout(timer);reject(new Error(`${src} could not load.`))};if(!active||!document.head?.isConnected){clearTimeout(timer);reject(new Error('Document is leaving.'));return}document.head.append(script)})}
+function managementReady(){return Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true&&globalThis.CivweaveLocalModelRegistryV266?.installable&&globalThis.CivweaveLocalAIPrimaryRouteV283&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true&&globalThis.CivweaveLocalModelHardwareTierUIV278?.observerFeedbackBounded===true)}
+function canonicalLayer(layer){return layer?.id==='cw-settings-v320'?layer:document.getElementById('cw-settings-v320')}
+function enhance(layer){const root=canonicalLayer(layer);if(!active||!root?.isConnected||root.hidden)return null;const placeholder=root.querySelector('[data-local-model-slot-placeholder]');placeholder?.remove();const panel=globalThis.CivweaveLocalAISettingsV266?.enhance?.()||null;globalThis.CivweaveLocalModelHardwareTierUIV278?.decorate?.();return panel}
+function ensureLocalAISettingsManagement(layer){const root=canonicalLayer(layer);if(!active||!root?.isConnected||root.hidden)return Promise.resolve(false);if(managementReady()){enhance(root);return Promise.resolve(true)}if(managementPromise)return managementPromise;managementPromise=(async()=>{for(const [src,ready] of LOCAL_AI_MANAGEMENT_FILES)await ensureScript(src,ready);if(!managementReady())throw new Error('Downloaded local AI management did not become ready.');enhance(root);return true})().catch(error=>{try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-unavailable',{detail:{version:VERSION,revision:REVISION,message:String(error?.message||error)}}))}catch{}return false}).finally(()=>{managementPromise=null});return managementPromise}
+function scheduleSettingsManagement(layer=canonicalLayer()){const root=canonicalLayer(layer);if(!active||!root?.isConnected||root.hidden)return false;const epoch=String(root.dataset.openedAt||'visible');if(root.dataset.civweaveLifecycleManagementEpoch===epoch)return true;root.dataset.civweaveLifecycleManagementEpoch=epoch;afterPaint(()=>{if(active&&root.isConnected&&!root.hidden)void ensureLocalAISettingsManagement(root)});return true}
 function stopOnPageHide(event){if(!event?.persisted)active=false}
-function revive(){active=true;const layer=document.getElementById('cw-ai-settings-cleanroom-v188');if(layer&&!layer.hidden)scheduleSettingsManagement(layer);return true}
+function revive(){active=true;const layer=canonicalLayer();if(layer&&!layer.hidden)scheduleSettingsManagement(layer);return true}
 addEventListener('pagehide',stopOnPageHide);addEventListener('pageshow',revive);addEventListener('beforeunload',()=>{active=false},{once:true});
-globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,revision:REVISION,active:()=>active,ensureLocalAISettingsManagement,scheduleSettingsManagement,managementReady,enhance,settingsEntryOwner:'settings-gateway-v317',inputOwnership:false,managementAfterPaint:true,globalObserverPatch:false,activationRequired:true,launchWork:'none',deviceFitManagement:true,completeManagementReadiness:true});
+globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,revision:REVISION,active:()=>active,ensureLocalAISettingsManagement,scheduleSettingsManagement,managementReady,enhance,settingsEntryOwner:'settings-v320',settingsOwner:'settings-v320',serviceRole:'downloaded-model-settings-content',inputOwnership:false,presentationOwnership:false,settingsRootCreation:false,managementAfterPaint:true,globalObserverPatch:false,activationRequired:true,launchWork:'none',deviceFitManagement:true,completeManagementReadiness:true});
 })();

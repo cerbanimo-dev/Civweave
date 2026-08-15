@@ -1,39 +1,45 @@
+import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+await import('./verify-system-ownership-v317.mjs');
 
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const read=relative=>readFile(path.join(root,relative),'utf8');
-const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [surface,delegation,controller,settings,worker,additiveWorker,pwa,installer,boundary,indexHtml]=await Promise.all([
-  read('public/app/cabinet-surfaces-v143.js'),
-  read('public/app/settings-delegation-v175.js'),
-  read('public/app/model-settings-controller-v173.js'),
-  read('public/app/unified-ai-settings-v175.js'),
-  read('public/service-worker.js'),
-  read('public/service-worker-v156.js'),
-  read('public/app/pwa-v130.js'),
-  read('public/install-v130.js'),
-  read('public/app/install-boundary-v146.js'),
-  read('public/index.html')
-]);
-for(const source of [surface,delegation,controller,settings,worker,additiveWorker,pwa,installer,boundary])new Function(source);
+const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
+const sources=Object.fromEntries(await Promise.all(Object.entries({
+  gateway:'public/app/settings-gateway-v317.js',
+  controller:'public/app/model-settings-controller-v173.js',
+  unified:'public/app/unified-ai-settings-v175.js',
+  model:'public/app/model-settings-v133.js',
+  visual:'public/app/visual-model-settings-v132.js',
+  language:'public/app/language-settings-v1.js',
+  parity:'public/app/settings-parity-v295.js',
+  delegation:'public/app/settings-delegation-v175.js',
+  bindGuard:'public/app/ai-settings-bind-guard-v230.js',
+  deviceRepair:'public/app/ai-settings-device-repair-v229.js',
+  lifecycle:'public/app/document-lifecycle-v221.js',
+  codeCache:'public/service-worker-code-coherence-v288.js',
+  localAICache:'public/service-worker-local-ai-coherence-v307.js',
+  criticalCache:'public/service-worker-critical-v199.js'
+}).map(async([key,path])=>[key,await read(path)])));
 
-for(const token of ['PLATFORM CONFIGURATION','Civweave platform settings','Save platform settings','data-open-ai-settings','Open Civweave AI settings','Deterministic local mode is the default','function openAISettings()'])assert(surface.includes(token),`Cabinet surface missing ${token}`);
-for(const forbidden of ["const AI_KEY=","provider:'bundled'",'Xenova/all-MiniLM-L6-v2','Save platform and AI settings','name="provider"','name="model"','name="externalConsent"',"localStorage.setItem(AI_KEY"] )assert(!surface.includes(forbidden),`Cabinet surface can still resurrect ${forbidden}`);
-assert((surface.match(/data-open-ai-settings/g)||[]).length===2,'Platform surface should declare one AI handoff button and one click route.');
+for(const source of Object.values(sources))new Function(source);
+assert.match(sources.gateway,/globalThis\.CivweaveSettingsV320=api/);
+assert.match(sources.gateway,/inputOwner:true,presentationOwner:true,credentialOwner:true/);
+assert.match(sources.gateway,/singleMenu:true/);
+assert.match(sources.gateway,/singleLauncherListener:true/);
+assert.equal((sources.gateway.match(/document\.addEventListener\('click'/g)||[]).length,1,'Canonical Settings must have exactly one document click owner.');
+assert.match(sources.gateway,/data-cw-language-settings="v320"/);
+assert.match(sources.gateway,/data-settings-tab-panel="local-models"/);
 
-for(const token of ["VERSION='177.1-final-legacy-ai-retirement'",'form[data-cw143-settings]','migrateLegacyAI','savePlatform','PLATFORM CONFIGURATION','data-open-unified-ai-settings','data-open-ai-settings',"provider:'deterministic'",'civweave-deterministic-v175','const hasHandoff='])assert(delegation.includes(token),`Settings retirement guard missing ${token}`);
-assert(delegation.includes("document.addEventListener('submit'")&&delegation.includes('stopImmediatePropagation'),'Legacy full-page submit is not intercepted before its retired handler.');
+for(const key of ['controller','unified','model','visual','language','parity','delegation','bindGuard','deviceRepair']){
+  assert.match(sources[key],/(compatibilityFacade:true|retired:true)/,`${key} is not visibly retired/facade-only.`);
+  assert.doesNotMatch(sources[key],/document\.addEventListener\('click'/,`${key} can still become a Settings click owner.`);
+  assert.doesNotMatch(sources[key],/showModal\(|document\.createElement\(['"]dialog['"]\)/,`${key} can still create a competing Settings dialog.`);
+}
+assert.doesNotMatch(sources.controller,/globalThis\.CivweaveUnifiedAISettingsV175\s*=/,'Retired controller still republishes the old unified Settings authority.');
+assert.doesNotMatch(sources.unified,/globalThis\.CivweaveUnifiedAISettingsV175\s*=/,'Retired unified settings module still publishes itself as authority.');
+assert.match(sources.lifecycle,/serviceRole:'downloaded-model-settings-content'/);
+assert.match(sources.lifecycle,/inputOwnership:false/);
+assert.match(sources.lifecycle,/presentationOwnership:false/);
+assert.match(sources.lifecycle,/settingsRootCreation:false/);
+for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(sources[key].includes("'/app/settings-gateway-v317.js'"),`${key} does not pin the one Settings owner for offline use.`);
 
-for(const token of ["authority:'CivweaveUnifiedAISettingsV175'","defaultRoute:'deterministic'",'transformerActive:false'])assert(controller.includes(token),`Controller missing ${token}`);
-for(const token of ['Gemini API key','Deterministic local mode','Save Civweave AI settings','data-paste-key','data-import-key','data-forget-key'])assert(settings.includes(token),`Single AI settings surface missing ${token}`);
-
-for(const token of ["CACHE_REVISION='direct-family-r39-final-settings-retirement'","DEVICE_REVISION='device-package-r39-no-legacy-ai'","AI_REVISION='deterministic-single-authority-v177'"])assert(worker.includes(token),`Base package did not rotate through ${token}`);
-for(const token of ["EXTENSION_VERSION='working-campus-additions-v177-final-settings-retirement'","EXTENSION_CACHE='cwext-working-campus-additions-v177-final-settings-retirement'",'base-r39-clean-settings'])assert(additiveWorker.includes(token),`Additive package did not rotate through ${token}`);
-assert(pwa.includes('device-package-r39-no-legacy-ai-working-campus-additions-v177-final-settings-retirement'),'Installed PWA still registers the stale r38 worker.');
-for(const token of ["WORKER_REVISION='device-package-r39-no-legacy-ai'","ADDITIONS_REVISION='working-campus-additions-v177-final-settings-retirement'",'one AI settings surface'])assert(installer.includes(token),`Installer missing ${token}`);
-for(const token of ["ADDITIONS_VERSION='v177-final-settings-retirement'","SETTINGS_STABILITY_REVISION='v177-no-legacy-ai-surfaces'"])assert(boundary.includes(token),`Install boundary missing ${token}`);
-assert(indexHtml.includes('clean-settings-r39')&&indexHtml.includes('one AI settings surface'),'Public installer does not publish the clean settings revision.');
-
-console.log(JSON.stringify({ok:true,visiblePlatformSurface:'platform-only',platformAIHandoffs:1,settingsAuthority:'CivweaveUnifiedAISettingsV175',legacyBundledRoute:false,legacyMiniLMModel:false,legacyAISubmit:false,devicePackage:'r39-no-legacy-ai',additivePackage:'v177-final-settings-retirement'},null,2));
+console.log(JSON.stringify({ok:true,revision:'final-settings-retirement-v320',settingsAuthority:'CivweaveSettingsV320',oneInputOwner:true,onePresentationOwner:true,oneCredentialOwner:true,legacySettingsAuthorities:false,lazyLocalModelContentOnly:true},null,2));

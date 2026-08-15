@@ -71,10 +71,7 @@ const summaryStart=hardware.indexOf('function summary('),summaryEnd=hardware.ind
 assert.ok(summaryStart>=0&&summaryEnd>summaryStart,'device-fit summary decorator is missing');
 const summary=vm.runInNewContext(`(${hardware.slice(summaryStart,summaryEnd)})`,{NOTE:'cw-local-ai-device-fit-v314'});
 let summaryText='',summaryWrites=0,observerCallbacks=0;
-const summaryNode={
-  get textContent(){return summaryText},
-  set textContent(value){summaryText=String(value);summaryWrites++;observerCallbacks++}
-};
+const summaryNode={get textContent(){return summaryText},set textContent(value){summaryText=String(value);summaryWrites++;observerCallbacks++}};
 const summaryPanel={querySelector(){return summaryNode}};
 const summaryDevice={webgpu:true,cores:8,memoryGB:8,isolated:true};
 const decorateSummary=()=>summary(summaryPanel,summaryDevice,{label:'Qwen 3 0.6B'},1);
@@ -82,7 +79,7 @@ decorateSummary();
 while(observerCallbacks){observerCallbacks--;assert.ok(summaryWrites<20,'device-fit summary entered a recursive observer feedback loop');decorateSummary()}
 assert.equal(summaryWrites,1,'unchanged device-fit summary text must not retrigger its MutationObserver');
 assert.match(settings,/HEALTH='civweave\.local-ai\.health\.v286'/);
-const managementBody=lifecycle.match(/function managementReady\(\)\{([\s\S]*?)\}\nfunction enhance/)?.[1]||'';
+const managementBody=lifecycle.match(/function managementReady\(\)\{([\s\S]*?)\}\nfunction canonicalLayer/)?.[1]||'';
 assert.match(managementBody,/largeExternalDataForeground===true/);
 assert.match(managementBody,/metadataOnlyRepair===true/);
 assert.match(managementBody,/metadataRepairRaceSafe===true/);
@@ -92,8 +89,11 @@ assert.match(managementBody,/observerFeedbackBounded===true/);
 assert.match(lifecycle,/hardware-tier-ui-v278\.js\?v=1\.0\.81-v278-settings-stability-v318/);
 assert.match(lifecycle,/deviceFitManagement:true/);
 assert.match(lifecycle,/completeManagementReadiness:true/);
-assert.match(lifecycle,/settingsEntryOwner:'settings-gateway-v317'/);
+assert.match(lifecycle,/settingsEntryOwner:'settings-v320'/);
+assert.match(lifecycle,/settingsOwner:'settings-v320'/);
+assert.match(lifecycle,/serviceRole:'downloaded-model-settings-content'/);
 assert.match(lifecycle,/inputOwnership:false/);
+assert.match(lifecycle,/presentationOwnership:false/);
 assert.match(bootstrap,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?intentPrewarm===true.*?compatibilityPromptCap===true/s,'low-level runtime capability may remain; UI callers are separately forbidden');
 assert.match(bootstrap,/deviceFitRecommendations===true/);
 assert.match(bootstrap,/smoothFitRuntime:true/);
@@ -102,4 +102,4 @@ assert.match(wrapper,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?in
 assert.match(coherence,/CW_LOCAL_AI_EXTRA_PATHS[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/CW_LOCAL_AI_CRITICAL[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/smoothFitOrchestrator: true/);
-console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v319-submit-only-ui',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'forbidden-from-chat-and-settings',generativeStart:'submit-only',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v317',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v320-submit-only-ui',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'forbidden-from-chat-and-settings',generativeStart:'submit-only',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v320-content-service',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));

@@ -1,57 +1,82 @@
-// Compatibility transforms below preserve credential/security behavior across newer settings ownership; user-facing warning checks intentionally target semantics, not sentence casing.
-import {readFile,writeFile,unlink} from 'node:fs/promises';
-import path from 'node:path';
-import {fileURLToPath,pathToFileURL} from 'node:url';
+import vm from 'node:vm';
+import {readFile} from 'node:fs/promises';
 
-const dir=path.dirname(fileURLToPath(import.meta.url));
-const sourcePath=path.join(dir,'verify-memory-credential-v191-legacy.mjs');
-const runtimePath=path.join(dir,'.verify-memory-credential-v191.runtime.mjs');
-let source=await readFile(sourcePath,'utf8');
+const files=await Promise.all([
+  readFile('public/app/weaveling-memory-v191.js','utf8'),
+  readFile('public/app/weaveling-memory-bridge-v191.js','utf8'),
+  readFile('public/app/settings-gateway-v317.js','utf8'),
+  readFile('public/extensions/civweave-device-credentials-v160.js','utf8'),
+  readFile('public/service-worker.js','utf8'),
+  readFile('public/service-worker-v156.js','utf8'),
+  readFile('public/app/install-boundary-v146.js','utf8'),
+  readFile('public/app/family-ai-loader-v105.js','utf8'),
+  readFile('public/app/working-campus-v156.part5.txt','utf8'),
+]);
+const [memorySource,bridgeSource,settingsSource,deviceSource,baseWorker,additiveWorker,boundarySource,loaderSource,campusSource]=files;
+const assert=(condition,message)=>{if(!condition)throw new Error(message)};
+class MemoryStorage{constructor(seed={}){this.values=new Map(Object.entries(seed))}getItem(key){return this.values.has(key)?this.values.get(key):null}setItem(key,value){this.values.set(key,String(value))}removeItem(key){this.values.delete(key)}clear(){this.values.clear()}}
+class CustomEvent{constructor(type,{detail}={}){this.type=type;this.detail=detail}}
 
-function replaceRequired(before,after,label){
-  if(!source.includes(before))throw new Error(`Memory verifier compatibility patch could not find ${label}.`);
-  source=source.replace(before,after);
+const localStorage=new MemoryStorage(),sessionStorage=new MemoryStorage(),events=[];
+const sandbox={console,Date,Math,Set,Map,Promise,structuredClone,localStorage,sessionStorage,CustomEvent,dispatchEvent:event=>{events.push(event);return true},globalThis:null};
+sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(memorySource,sandbox,{filename:'weaveling-memory-v191.js'});
+const memory=sandbox.CivweaveWeavelingMemoryV191;
+assert(memory?.version.includes('v191'),'Memory runtime did not initialize.');
+let command=memory.handleCommand('remember that the infinite loop is intentionally unresolved');
+assert(command?.ok&&memory.readLong().length===1,'Explicit long-term memory command did not persist.');
+assert(memory.snapshot('infinite loop').longTerm.some(item=>/intentionally unresolved/i.test(item.text)),'Relevant long-term memory was not retrieved.');
+const beforeSecret=memory.readLong().length;
+memory.remember({kind:'fact',text:'api key: AIza123456789012345678901234567890123456'});
+assert(memory.readLong().length===beforeSecret,'A credential-like value entered Weaveling memory.');
+const plan={id:'weave-memory-test',title:'Write the infinite-loop book',wish:'Write a book about a time looper meeting a time traveler in an uncertain infinite loop',outcome:'Draft a coherent manuscript while preserving the unresolved loop premise.',assumptions:['Whether the loop is literally infinite remains unresolved.'],paths:[{realm:'living-school',type:'learning',title:'Study loop structures',purpose:'Clarify options',completionCriteria:'Rules are reviewable'}]};
+memory.applyPlan(plan);
+assert(memory.readWorking().activeWeaveId===plan.id&&memory.readWorking().objective===plan.outcome,'Plan did not populate working memory.');
+assert(memory.readLong().some(item=>item.scope===`weave:${plan.id}`&&item.kind==='project'),'Plan did not populate durable project memory.');
+let captured=null;
+sandbox.CivweaveAssistantV141={respond:async args=>{captured=args;return{response:{answer:'Memory-aware answer'},provider:'gemini',model:'gemini-test',plan}}};
+vm.runInContext(bridgeSource,sandbox,{filename:'weaveling-memory-bridge-v191.js'});
+const bridged=await sandbox.CivweaveAssistantV141.respond({text:'Continue the book plan',systemId:'civweave',history:[{role:'user',text:'Earlier turn'}]});
+assert(bridged.response.answer==='Memory-aware answer','Memory bridge changed the underlying assistant result.');
+assert(captured.history.some(item=>item.role==='system'&&/Local Weaveling memory follows/.test(item.text)),'Memory bridge did not inject working and long-term memory.');
+command=await sandbox.CivweaveAssistantV141.respond({text:'what do you remember',systemId:'civweave',history:[]});
+assert(command.provider==='civweave-memory'&&/durable memory/i.test(command.response.answer),'Memory status command did not stay local.');
+
+const persisted={schema:'civweave.device-model-secret.v191',apiKey:'AIza-device-test-key-not-real',provider:'gemini',savedAt:'2026-08-05T00:00:00.000Z'};
+const settingsLocal=new MemoryStorage({'civweave-model-persistent-secrets-v191':JSON.stringify(persisted)}),settingsSession=new MemoryStorage(),settingsEvents=[];
+const document={documentElement:{dataset:{},lang:'en'},getElementById(){return null},querySelector(){return null},head:{isConnected:true,append(){}},body:{append(){}},addEventListener(){},removeEventListener(){}};
+class Element{} class HTMLElement extends Element{}
+const settingsSandbox={console,Date,Math,JSON,Promise,URL,Element,HTMLElement,location:{href:'https://civweave.test/app/working-campus-v156.html'},localStorage:settingsLocal,sessionStorage:settingsSession,CustomEvent,document,dispatchEvent:event=>{settingsEvents.push(event);return true},addEventListener(){},requestAnimationFrame:null,setTimeout,clearTimeout,globalThis:null};
+settingsSandbox.globalThis=settingsSandbox;vm.createContext(settingsSandbox);vm.runInContext(settingsSource,settingsSandbox,{filename:'settings-gateway-v317.js'});
+const settings=settingsSandbox.CivweaveSettingsV320;
+assert(settings?.credentialStatus?.().remembered===true,'Canonical Settings did not detect the remembered device credential.');
+assert(settings.credentialStatus().session===false,'Credential restored merely because Settings code loaded.');
+assert(!settingsSession.getItem('civweave-model-session'),'Canonical Settings mutated the runtime session at module load.');
+assert(settings.restoreRememberedCredential()===true,'Explicit remembered-credential restore failed.');
+assert(settings.credentialStatus().session===true,'Explicit restore did not populate the runtime session.');
+assert(JSON.parse(settingsSession.getItem('civweave-model-session')).apiKey===persisted.apiKey,'Explicitly restored Gemini key did not reach the runtime session.');
+settings.forgetCredential();
+assert(!settings.credentialStatus().remembered&&!settings.credentialStatus().session,'Forget saved key did not clear durable and session copies.');
+for(const token of ['name="credentialMode"','Remember on this device','This app session only','browser profile','credentialPersistence'])assert(settingsSource.includes(token),`Settings teaching flow is missing ${token}.`);
+assert(settingsSource.includes("globalThis.CivweaveSettingsV320=api"),'Credential test is not exercising the canonical Settings owner.');
+assert(settingsSource.includes('credentialOwner:true'),'Canonical Settings no longer declares credential ownership.');
+assert(!settingsSource.includes('MutationObserver'),'Canonical Settings reintroduced a document observer.');
+assert(!settingsSource.includes('setInterval('),'Canonical Settings reintroduced a repeating timer.');
+
+assert(!deviceSource.includes('MutationObserver'),'Credential compatibility shim still observes the document.');
+assert(deviceSource.includes("addEventListener('civweave:model-settings-saved'"),'Credential bridge does not canonicalize an explicitly saved credential.');
+assert(deviceSource.includes("detail.credentialPersistence==='device'"),'Credential bridge does not preserve the explicit device-only persistence choice.');
+assert(deviceSource.includes('automaticPersistence:false'),'Credential shim does not declare indiscriminate automatic persistence retired.');
+assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');
+const lightweightBridge=additiveWorker.includes("importScripts('/service-worker-v203.js?v=");
+for(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){
+  assert(baseWorker.includes(token),`Base device package is missing ${token}.`);
+  if(!lightweightBridge)assert(additiveWorker.includes(token),`Layered additive package is missing ${token}.`);
+  assert(boundarySource.includes(token),`Install boundary is missing ${token}.`);
+  assert(loaderSource.includes(token),`Family loader is missing ${token}.`);
 }
-
-replaceRequired(
-  "const document={documentElement:{dataset:{}},getElementById(){return null},querySelector(){return null},head:{append(){}},body:{append(){}}};",
-  "const settingsUrl='https://civweave.test/app/model-settings-controller-v173.js?activate=1';\nconst document={currentScript:{src:settingsUrl},documentElement:{dataset:{}},getElementById(){return null},querySelector(){return null},head:{append(){}},body:{append(){}}};",
-  'explicit settings controller activation fixture'
-);
-replaceRequired(
-  "const settingsSandbox={console,Date,Math,JSON,localStorage:settingsLocal,sessionStorage:settingsSession,CustomEvent,HTMLElement,document,dispatchEvent:event=>{settingsEvents.push(event);return true},globalThis:null};",
-  "const settingsSandbox={console,Date,Math,JSON,URL,location:{href:settingsUrl},localStorage:settingsLocal,sessionStorage:settingsSession,CustomEvent,HTMLElement,document,dispatchEvent:event=>{settingsEvents.push(event);return true},globalThis:null};",
-  'settings URL context'
-);
-replaceRequired(
-  "assert(controller?.credentialStatus?.().remembered===true,'Remembered device credential was not detected.');\nassert(controller.credentialStatus().session===true,'Remembered device credential was not restored into the runtime session.');\nassert(JSON.parse(settingsSession.getItem('civweave-model-session')).apiKey===persisted.apiKey,'Restored Gemini key did not reach the session key used by the model runtime.');",
-  "assert(controller?.credentialStatus?.().remembered===true,'Remembered device credential was not detected.');\nassert(controller.credentialStatus().session===false,'Remembered device credential must not restore merely because Settings code loaded.');\nassert(!settingsSession.getItem('civweave-model-session'),'Settings controller mutated the runtime session at module load.');\nassert(controller.restoreRememberedCredential()===true,'Explicit remembered-credential restore failed.');\nassert(controller.credentialStatus().session===true,'Explicit restore did not populate the runtime session.');\nassert(JSON.parse(settingsSession.getItem('civweave-model-session')).apiKey===persisted.apiKey,'Explicitly restored Gemini key did not reach the session key used by the model runtime.');",
-  'explicit remembered credential restore contract'
-);
-replaceRequired(
-  "for(const forbidden of ['MutationObserver','setInterval(','setTimeout('])assert(!settingsSource.includes(forbidden),`Clean-room settings reintroduced ${forbidden}.`);",
-  "const timerAuditedSettings=settingsSource.replace(\"function afterPaint(task){const run=()=>setTimeout(task,0);if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(task,0)}\",'');\nfor(const forbidden of ['MutationObserver','setInterval(','setTimeout('])assert(!timerAuditedSettings.includes(forbidden),`Clean-room settings reintroduced ${forbidden}.`);\nassert(settingsSource.includes('quiescenceAfterPaint:true'),'Settings controller no longer declares post-paint inference quiescence.');",
-  'post-paint settings timer audit'
-);
-replaceRequired(
-  "assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');\nfor(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){",
-  "assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');\nconst lightweightBridge=additiveWorker.includes(\"importScripts('/service-worker-v203.js?v=\");\nfor(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){",
-  'lightweight bridge detection'
-);
-replaceRequired(
-  "  assert(additiveWorker.includes(token),`Additive package is missing ${token}.`);",
-  "  if(!lightweightBridge)assert(additiveWorker.includes(token),`Layered additive package is missing ${token}.`);",
-  'layered additive memory assertion'
-);
-replaceRequired(
-  "assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');",
-  "if(lightweightBridge){\n  assert(additiveWorker.includes('legacy-v156-bridge-v209'),'Legacy v156 registration no longer identifies the direct lightweight bridge.');\n  assert(/service-worker-v203\\.js\\?v=1\\.0\\.\\d+-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209/.test(additiveWorker),'Legacy v156 registration does not rotate through the active v288 code-coherent lightweight shell.');\n}else{\n  assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');\n}",
-  'additive package revision assertion'
-);
-
-await writeFile(runtimePath,source,'utf8');
-try{
-  await import(pathToFileURL(runtimePath).href+`?run=${Date.now()}`);
-}finally{
-  await unlink(runtimePath).catch(()=>{});
-}
+assert(campusSource.includes('hasResponseLayer')&&campusSource.includes('__weavelingMemoryV191'),'Working Campus does not protect against wrapper stacking.');
+if(lightweightBridge){
+  assert(additiveWorker.includes('legacy-v156-bridge-v209'),'Legacy v156 registration no longer identifies the direct lightweight bridge.');
+  assert(/service-worker-v203\.js\?v=1\.0\.\d+-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209/.test(additiveWorker),'Legacy v156 registration does not rotate through the active code-coherent lightweight shell.');
+}else assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');
+console.log(JSON.stringify({ok:true,revision:'v191-memory-credential-v320-settings-owner',memory:{working:true,longTerm:true,explicitCommands:true,secretsExcluded:true,planPersistence:true},credential:{canonicalOwner:'CivweaveSettingsV320',sessionChoice:true,deviceChoice:true,explicitRestore:true,forget:true,automaticPersistence:false,explicitCanonicalization:true},packaged:true},null,2));
