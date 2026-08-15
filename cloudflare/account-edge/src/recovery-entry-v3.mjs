@@ -31,7 +31,7 @@ export class CivweaveAccountNode extends BaseAccountNode {
   async recoveryVaultSecret() {
     const identity = await this.identity();
     const secret = clean(identity?.privateJwk?.d, 4000);
-    if (!secret) throw Object.assign(new Error('Hub node recovery identity is unavailable.'), { status: 503 });
+    if (!secret) throw Object.assign(new Error('Guild recovery identity is unavailable.'), { status: 503 });
     return secret;
   }
 
@@ -44,7 +44,7 @@ export class CivweaveAccountNode extends BaseAccountNode {
     });
     if (!statusResponse.ok) {
       const statusPacket = await statusResponse.json().catch(() => ({}));
-      throw Object.assign(new Error(statusPacket.error || 'Recovery enrollment requires an existing Hub member login.'), { status: statusResponse.status });
+      throw Object.assign(new Error(statusPacket.error || 'Recovery enrollment requires an existing Guild member login.'), { status: statusResponse.status });
     }
     const response = await capacity.fetch('https://capacity.internal/members/admit', {
       method: 'POST',
@@ -58,8 +58,8 @@ export class CivweaveAccountNode extends BaseAccountNode {
       }),
     });
     const packet = await response.json().catch(() => ({}));
-    if (!response.ok) throw Object.assign(new Error(packet.error || 'Hub login verification failed.'), { status: response.status });
-    if (!packet.idempotent) throw Object.assign(new Error('Recovery enrollment requires an existing Hub member login.'), { status: 409 });
+    if (!response.ok) throw Object.assign(new Error(packet.error || 'Guild login verification failed.'), { status: response.status });
+    if (!packet.idempotent) throw Object.assign(new Error('Recovery enrollment requires an existing Guild member login.'), { status: 409 });
     return true;
   }
 
