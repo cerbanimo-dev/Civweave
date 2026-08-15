@@ -1,0 +1,301 @@
+/* Civweave installer Quest threshold v1
+   Presentation only: preserves the lightweight installer and lazy-loading contracts. */
+
+body.cw-installer{
+  --quest-parchment:#f7edcf;
+  --quest-ink:#fffaf0;
+  --quest-muted:#c9ccdd;
+  --quest-thread:#8be6ff;
+  --quest-gold:#ffd58a;
+  --quest-pink:#ff7cd5;
+}
+
+body.cw-installer .cw-brand-lockup{
+  margin-bottom:14px;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at 11% 18%,rgba(255,124,213,.12),transparent 30%),
+    radial-gradient(circle at 82% 10%,rgba(139,230,255,.11),transparent 34%),
+    linear-gradient(145deg,rgba(11,14,34,.82),rgba(22,14,40,.86));
+}
+body.cw-installer .cw-platform-copy small{color:var(--quest-gold)!important}
+body.cw-installer .cw-platform-copy h1{
+  max-width:680px;
+  margin-top:7px;
+  font-size:clamp(1.8rem,4.5vw,3.45rem);
+  line-height:.98;
+  color:#fff;
+}
+body.cw-installer .cw-platform-copy p{
+  max-width:720px;
+  margin-top:10px;
+  font-size:clamp(.95rem,1.8vw,1.08rem);
+  line-height:1.55;
+}
+
+body.cw-installer .install-card.quest-threshold{
+  padding:0!important;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 14% 2%,rgba(255,124,213,.13),transparent 30%),
+    radial-gradient(circle at 88% 26%,rgba(139,230,255,.11),transparent 32%),
+    linear-gradient(150deg,rgba(20,19,47,.94),rgba(10,16,34,.94))!important;
+}
+body.cw-installer .install-card.quest-threshold::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.36;
+  background:
+    linear-gradient(115deg,transparent 0 49.3%,rgba(255,255,255,.045) 49.6%,transparent 50% 100%),
+    repeating-linear-gradient(90deg,transparent 0 74px,rgba(139,230,255,.03) 75px 76px);
+  mask-image:linear-gradient(180deg,#000,transparent 88%);
+}
+body.cw-installer .quest-opening{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:minmax(160px,230px) minmax(0,1fr);
+  gap:clamp(14px,4vw,38px);
+  align-items:center;
+  padding:clamp(20px,4vw,42px) clamp(18px,4vw,42px) clamp(14px,3vw,26px);
+}
+body.cw-installer .quest-guide{
+  position:relative;
+  min-height:210px;
+  display:grid;
+  place-items:center;
+}
+body.cw-installer .quest-guide::before{
+  content:"";
+  position:absolute;
+  width:min(90%,210px);
+  aspect-ratio:1;
+  border:1px solid rgba(255,213,138,.24);
+  border-radius:50%;
+  background:
+    radial-gradient(circle,rgba(139,230,255,.14),rgba(255,124,213,.07) 48%,transparent 72%);
+  box-shadow:0 0 54px rgba(139,230,255,.12),inset 0 0 36px rgba(255,255,255,.035);
+}
+body.cw-installer .quest-guide-sprite{
+  position:relative;
+  z-index:1;
+  width:min(100%,205px);
+  aspect-ratio:1;
+  background-image:url('/Civweave-weaveling-sprites.png');
+  background-repeat:no-repeat;
+  background-size:500% 400%;
+  background-position:50% 100%;
+  filter:drop-shadow(0 14px 22px rgba(0,0,0,.35)) drop-shadow(0 0 18px rgba(139,230,255,.18));
+}
+body.cw-installer .quest-guide-label{
+  position:absolute;
+  z-index:2;
+  left:50%;
+  bottom:2px;
+  transform:translateX(-50%);
+  white-space:nowrap;
+  padding:5px 9px;
+  border:1px solid rgba(139,230,255,.25);
+  border-radius:999px;
+  background:rgba(5,10,26,.82);
+  color:#dffaff;
+  font-size:.72rem;
+  font-weight:900;
+  letter-spacing:.07em;
+}
+body.cw-installer .quest-copy small{
+  display:block;
+  color:var(--quest-gold);
+  font-size:.74rem;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+body.cw-installer .quest-copy h2{
+  max-width:800px!important;
+  margin:7px 0 12px!important;
+  font:650 clamp(2.25rem,6vw,4.8rem)/.95 Georgia,serif!important;
+  text-wrap:balance;
+}
+body.cw-installer .quest-copy p{
+  max-width:760px!important;
+  margin:0!important;
+  color:var(--quest-muted)!important;
+  font-size:clamp(1rem,2vw,1.18rem)!important;
+  line-height:1.58!important;
+}
+body.cw-installer .quest-copy strong{color:#fff}
+body.cw-installer .quest-no-commit{
+  display:inline-block;
+  margin-top:14px;
+  padding:7px 10px;
+  border:1px solid rgba(255,213,138,.22);
+  border-radius:999px;
+  background:rgba(255,213,138,.06);
+  color:#f6e9c8;
+  font-size:.78rem;
+  font-weight:750;
+}
+
+body.cw-installer .quest-route{
+  position:relative;
+  z-index:1;
+  margin:0!important;
+  padding:0 clamp(18px,4vw,42px) clamp(18px,3vw,28px);
+}
+body.cw-installer .quest-route::before{
+  content:"YOUR FIRST THREE STEPS";
+  display:block;
+  margin:0 0 9px;
+  color:#bdefff;
+  font-size:.7rem;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+body.cw-installer .quest-route article{
+  min-height:118px;
+  padding:16px 42px 15px 16px!important;
+  background:
+    radial-gradient(circle at 100% 0,rgba(139,230,255,.08),transparent 50%),
+    linear-gradient(145deg,rgba(255,255,255,.055),rgba(86,81,152,.05))!important;
+}
+body.cw-installer .quest-route article strong{font-size:1.24rem!important;color:#fff}
+body.cw-installer .quest-route article span{color:#c9ccdd!important;line-height:1.45}
+body.cw-installer .quest-route i{font-size:1.15rem}
+
+body.cw-installer .quest-install-controls{
+  position:relative;
+  z-index:1;
+  padding:0 clamp(18px,4vw,42px) clamp(20px,4vw,38px);
+}
+body.cw-installer .quest-install-controls::before{
+  content:"";
+  display:block;
+  height:1px;
+  margin-bottom:20px;
+  background:linear-gradient(90deg,transparent,rgba(139,230,255,.28),rgba(255,213,138,.22),transparent);
+}
+body.cw-installer .quest-install-controls .campus-install-progress{
+  max-width:none;
+  padding:14px;
+  border:1px solid rgba(216,229,255,.13);
+  border-radius:17px;
+  background:rgba(2,7,22,.32);
+}
+body.cw-installer .quest-install-controls .campus-progress-heading span::before{content:"OPTIONAL · "}
+body.cw-installer .quest-install-controls .gateway-actions{margin-top:16px}
+body.cw-installer .quest-install-controls .gateway-actions .primary{
+  min-height:54px;
+  padding-inline:22px;
+  font-size:1rem;
+}
+body.cw-installer .quest-install-controls .install-help{
+  max-width:830px;
+  color:#d9e5ec!important;
+  font-size:.86rem;
+}
+
+body.cw-installer details.quest-technical{
+  margin-top:14px;
+  border-top:1px solid rgba(216,229,255,.10);
+}
+body.cw-installer details.quest-technical summary{
+  padding:13px 2px 4px;
+  color:#b8c8d7;
+  cursor:pointer;
+  font-size:.78rem;
+  font-weight:850;
+  letter-spacing:.06em;
+}
+body.cw-installer details.quest-technical[open] summary{color:#dffaff}
+body.cw-installer details.quest-technical .package-state{margin-top:10px}
+
+body.cw-installer [data-civweave-hub-tools-gate]{
+  max-width:1120px;
+  min-height:0!important;
+  margin:0 auto 18px;
+  padding:clamp(18px,4vw,30px);
+  border-radius:24px!important;
+  background:
+    radial-gradient(circle at 94% 15%,rgba(139,230,255,.11),transparent 32%),
+    linear-gradient(145deg,rgba(16,24,45,.91),rgba(18,15,39,.91))!important;
+}
+body.cw-installer [data-civweave-hub-tools-gate] h3{font-size:clamp(1.45rem,3vw,2rem)}
+body.cw-installer [data-civweave-hub-tools-gate] .gateway-actions{margin-top:12px}
+
+body.cw-installer .knowledge-card.quest-sidepath{
+  position:relative;
+  overflow:hidden;
+  padding:clamp(20px,4vw,34px);
+}
+body.cw-installer .knowledge-card.quest-sidepath::before{
+  content:"SIDE PATH";
+  position:absolute;
+  right:18px;
+  top:16px;
+  color:rgba(255,213,138,.42);
+  font-size:.66rem;
+  font-weight:900;
+  letter-spacing:.18em;
+}
+body.cw-installer .knowledge-card.quest-sidepath h2{
+  max-width:760px;
+  margin:6px 0 8px;
+  font:600 clamp(1.8rem,4vw,2.7rem)/1.05 Georgia,serif;
+  color:#fff;
+}
+body.cw-installer .knowledge-card.quest-sidepath .knowledge-school-copy p{max-width:800px}
+
+body.cw-installer .gateway-grid.quest-road-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+body.cw-installer .quest-road-grid .status-card{
+  position:relative;
+  min-height:210px;
+  overflow:hidden;
+  padding:22px;
+}
+body.cw-installer .quest-road-grid .status-card::after{
+  content:"";
+  position:absolute;
+  width:150px;
+  height:150px;
+  right:-52px;
+  bottom:-62px;
+  border:1px solid rgba(139,230,255,.10);
+  border-radius:50%;
+  box-shadow:0 0 0 24px rgba(255,124,213,.025),0 0 0 48px rgba(255,213,138,.018);
+}
+body.cw-installer .quest-road-grid .status-card h3{
+  max-width:500px;
+  font-size:clamp(1.5rem,3.2vw,2.15rem);
+  line-height:1.08;
+}
+body.cw-installer .quest-road-grid .status-card p{max-width:580px}
+body.cw-installer .quest-road-grid .card-actions{position:relative;z-index:1}
+
+body.cw-installer .quest-footer-note{
+  max-width:1120px;
+  margin:18px auto 0;
+  color:#9eabbc;
+  text-align:center;
+  font-size:.76rem;
+}
+
+@media(max-width:820px){
+  body.cw-installer .cw-brand-lockup{grid-template-columns:1fr}
+  body.cw-installer .cw-steward-seal{justify-self:start}
+  body.cw-installer .quest-opening{grid-template-columns:1fr;text-align:left}
+  body.cw-installer .quest-guide{min-height:158px;justify-items:start;place-items:center start;padding-left:8px}
+  body.cw-installer .quest-guide::before{width:152px}
+  body.cw-installer .quest-guide-sprite{width:150px}
+  body.cw-installer .quest-guide-label{left:76px}
+  body.cw-installer .quest-copy h2{font-size:clamp(2.2rem,11vw,3.6rem)!important}
+  body.cw-installer .gateway-grid.quest-road-grid{grid-template-columns:1fr}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.cw-installer .quest-guide-sprite{filter:drop-shadow(0 10px 18px rgba(0,0,0,.32))}
+}
