@@ -33,7 +33,7 @@ function parseArgs(argv) {
     else if (arg === '--canonical-origin') options.canonicalOrigin = argv[++i] || options.canonicalOrigin;
     else if (arg === '--pages-origin') options.pagesOrigin = argv[++i] || '';
     else if (arg === '--help' || arg === '-h') {
-      console.log('Build the Cerbanimo public site for the flagship origin or a community-host subpath.\n\nUsage:\n  node site/cerbanimo-cc/build.mjs --output .cerbanimo-pages --base / --role flagship\n  node site/cerbanimo-cc/build.mjs --output .cloudflare-pages/cerbanimo --base /cerbanimo/ --role community --host-id garden --public-origin https://civweave-garden.pages.dev');
+      console.log('Build the Cerbanimo public site for the flagship origin or a community-Guild subpath.\n\nUsage:\n  node site/cerbanimo-cc/build.mjs --output .cerbanimo-pages --base / --role flagship\n  node site/cerbanimo-cc/build.mjs --output .cloudflare-pages/cerbanimo --base /cerbanimo/ --role community --host-id garden --public-origin https://civweave-garden.pages.dev');
       process.exit(0);
     } else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -108,13 +108,13 @@ if (options.role === 'community') {
   const hostId = escapeHtml(options.hostId);
   const localRoot = escapeHtml(`${options.publicOrigin}/`);
   const localJapaneseRoot = escapeHtml(`${options.publicOrigin}/ja/`);
-  const stewardSetup = escapeHtml(`${options.publicOrigin}/host-setup.html`);
-  html = html.replace('href="https://civweave.cc">Open Civweave</a>', `href="${localRoot}">Open this node</a>`);
-  html = html.replace('href="https://civweave.cc/host-setup.html">Explore host setup</a>', `href="${stewardSetup}">Explore host setup</a>`);
-  htmlJa = htmlJa.replaceAll('href="https://civweave.cc/ja/">民織を開く</a>', `href="${localJapaneseRoot}">この民織ノードを開く</a>`);
-  htmlJa = htmlJa.replace('href="https://civweave.cc/host-setup.html">ホスト設定を見る</a>', `href="${stewardSetup}">ホスト設定を見る</a>`);
-  const banner = `<aside class="host-surface" aria-label="Community host page"><span>Community Cerbanimo</span><strong>${hostId}</strong><a href="${localRoot}">Open this Civweave node ↗</a></aside>`;
-  const bannerJa = `<aside class="host-surface" aria-label="コミュニティ・ホストページ"><span>コミュニティ 神織</span><strong>${hostId}</strong><a href="${localJapaneseRoot}">この民織ノードを開く ↗</a></aside>`;
+  const guildSetup = escapeHtml(`${options.publicOrigin}/host-setup.html`);
+  html = html.replace('href="https://civweave.cc">Open Civweave</a>', `href="${localRoot}">Open this Guild</a>`);
+  html = html.replace('href="https://civweave.cc/host-setup.html">Set up your Guild</a>', `href="${guildSetup}">Set up your Guild</a>`);
+  htmlJa = htmlJa.replaceAll('href="https://civweave.cc/ja/">民織を開く</a>', `href="${localJapaneseRoot}">このギルドを開く</a>`);
+  htmlJa = htmlJa.replace('href="https://civweave.cc/host-setup.html">ギルドを設立する</a>', `href="${guildSetup}">ギルドを設立する</a>`);
+  const banner = `<aside class="host-surface" aria-label="Community Guild page"><span>Community Guild</span><strong>${hostId}</strong><a href="${localRoot}">Open this Civweave Guild ↗</a></aside>`;
+  const bannerJa = `<aside class="host-surface" aria-label="コミュニティ・ギルドページ"><span>コミュニティ・ギルド</span><strong>${hostId}</strong><a href="${localJapaneseRoot}">このギルドを開く ↗</a></aside>`;
   html = html.replace('<body>', `<body>\n  ${banner}`);
   htmlJa = htmlJa.replace('<body>', `<body>\n  ${bannerJa}`);
   css += `\n.host-surface{position:relative;z-index:30;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:9px 18px;background:linear-gradient(90deg,rgba(255,49,210,.16),rgba(32,215,255,.12));border-bottom:1px solid rgba(255,255,255,.14);font-size:.82rem;letter-spacing:.02em}.host-surface span{color:var(--muted)}.host-surface strong{color:#fff}.host-surface a{color:#8fe8ff;font-weight:750;text-decoration:none}.host-surface a:hover,.host-surface a:focus-visible{text-decoration:underline}@media(max-width:640px){.host-surface{justify-content:flex-start;padding:9px 14px}}\n`;
