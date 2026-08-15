@@ -68,7 +68,8 @@ async function status() {
     optionalAssetCount: 0,
     optionalPresentCount: 0,
     missing,
-    offlinePackageOptional: true,
+    offlinePackageOptional: false,
+    localCampusRequiredForLaunch: true,
     modelOnDemand: true,
     knowledgeLibrarySeparate: true
   };
@@ -138,7 +139,8 @@ self.addEventListener('message', event => {
       failedCount: 0,
       bytes: 0,
       bootstrap: true,
-      localFirst: true
+      localFirst: true,
+      requiredForLaunch: true
     });
   }
 });
