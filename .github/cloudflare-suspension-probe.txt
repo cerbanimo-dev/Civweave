@@ -1,0 +1,2 @@
+Cloudflare GitHub App suspension probe.
+Created 2026-08-14 to verify that the suspended Cloudflare Workers and Pages GitHub App no longer receives Civweave push events.
