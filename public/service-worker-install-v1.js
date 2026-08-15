@@ -14,7 +14,9 @@ const SHELL = [
   '/legal/civweave-legal-release-v1.json',
   '/app/japanese-mode-v1.js',
   '/app/japanese-shell-copy-v1.js',
-  '/app/logos/civweave-pwa-192-v247.png'
+  '/app/logos/civweave-pwa-192-v247.png',
+  '/app/logos/civweave-pwa-512-v247.png',
+  '/app/logos/civweave-pwa-maskable-512-v247.png'
 ];
 
 const keyFor = pathname => new Request(new URL(pathname, self.location.origin).href, { method: 'GET' });
