@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='hub-passport-account-v1.0.0';
+const VERSION='hub-passport-account-v1.0.1-guild-copy';
 const PASSPORT_KEY='civweave.anarchadia.citizen-console.v139';
 const STATE_KEY='civweave.passport-account.client.v1';
 if(globalThis.CivweaveHubPassportAccountV1?.version===VERSION)return;
@@ -21,16 +21,16 @@ function state(){try{return parse(localStorage.getItem(STATE_KEY),{})||{}}catch{
 function saveAccount(account,h=host(),n=nodeId()){if(!account||!h||!n)return account;const all=state();all[key(h,n)]={account,updatedAt:new Date().toISOString()};localStorage.setItem(STATE_KEY,JSON.stringify(all));dispatchEvent(new CustomEvent('civweave:passport-account',{detail:{host:h,nodeId:n,account}}));return account}
 function current(){return state()?.[key()]?.account||null}
 function endpoint(path,h=host(),n=nodeId()){
- if(!h||!n)throw new Error('Hub identity is not ready yet.');
+ if(!h||!n)throw new Error('Guild identity is not ready yet.');
  const base=new URL(h),route=clean(path,140).replace(/^\/+/,''),cloud=/^civweave-node-cloud\./i.test(base.hostname);
  return new URL(cloud?`/n/${encodeURIComponent(n)}/api/account/${route}`:`/nodes/${encodeURIComponent(n)}/api/account/${route}`,h)
 }
 async function post(path,body,h=host(),n=nodeId()){
  const response=await fetch(endpoint(path,h,n),{method:'POST',cache:'no-store',headers:{accept:'application/json','content-type':'application/json','x-civweave-node-id':n},body:JSON.stringify(body||{})});
- const packet=await response.json().catch(()=>({}));if(!response.ok||packet?.ok===false){const error=new Error(clean(packet?.error||`Hub returned HTTP ${response.status}.`,1200));error.status=response.status;throw error}return packet
+ const packet=await response.json().catch(()=>({}));if(!response.ok||packet?.ok===false){const error=new Error(clean(packet?.error||`Guild returned HTTP ${response.status}.`,1200));error.status=response.status;throw error}return packet
 }
 function authPayload(h=host(),n=nodeId()){
- const login=identity(h,n),passportId=passport();if(!login?.userId||!login?.credential)throw new Error('Join this Hub before setting up the account.');if(!passportId)throw new Error('Create or load a Passport first.');return{userId:clean(login.userId,180),credential:clean(login.credential,400),passportId}
+ const login=identity(h,n),passportId=passport();if(!login?.userId||!login?.credential)throw new Error('Join this Guild before setting up the account.');if(!passportId)throw new Error('Create or load a Passport first.');return{userId:clean(login.userId,180),credential:clean(login.credential,400),passportId}
 }
 function rp(){return{rpId:location.hostname.toLowerCase(),origin:location.origin}}
 function creationOptions(packet){const options=structuredClone(packet.publicKey||{});options.challenge=unb64u(options.challenge);if(options.user?.id)options.user.id=unb64u(options.user.id);if(Array.isArray(options.excludeCredentials))for(const item of options.excludeCredentials)item.id=unb64u(item.id);return options}
@@ -50,13 +50,13 @@ async function login(accountName,h=host(),n=nodeId()){
 }
 let recoveryChallenge=null;
 async function beginRecoveryEmail(email){const base={...authPayload(),email:clean(email,320)};const packet=await post('recovery-email/begin',base);recoveryChallenge={challengeToken:packet.challengeToken,email:clean(email,320)};return packet}
-async function finishLink(link,currentHub,currentNode){
+async function finishLink(link,currentGuild,currentNode){
  const targetOrigin=origin(link?.locator?.origin),targetNode=clean(link?.locator?.nodeId,180);if(!targetOrigin||!targetNode)throw new Error('Existing account location is unavailable.');
  const passportId=passport();let begin=await post('passport-link/begin',{proofToken:link.proofToken,passportId,...rp()},targetOrigin,targetNode);
  const assertion=await navigator.credentials.get({publicKey:requestOptions(begin)});let authenticated=await post('passport-link/authenticate',assertionBody(assertion,begin.token,{...rp()}),targetOrigin,targetNode);
  const newCredential=await navigator.credentials.create({publicKey:creationOptions(authenticated)});const packet=await post('passport-link/finish',registrationBody(newCredential,authenticated.token),targetOrigin,targetNode);
  globalThis.CivweaveHostNodeSessionImportV1?.install?.(targetOrigin,targetNode,packet.userId,packet.credential,packet.recoveredAt);saveAccount(packet.account,targetOrigin,targetNode);
- dispatchEvent(new CustomEvent('civweave:passport-account-linked',{detail:{from:{origin:currentHub,nodeId:currentNode},to:{origin:targetOrigin,nodeId:targetNode},account:packet.account}}));return packet
+ dispatchEvent(new CustomEvent('civweave:passport-account-linked',{detail:{from:{origin:currentGuild,nodeId:currentNode},to:{origin:targetOrigin,nodeId:targetNode},account:packet.account}}));return packet
 }
 async function verifyRecoveryEmail(code){
  if(!recoveryChallenge?.challengeToken)throw new Error('Request a verification code first.');const h=host(),n=nodeId();const packet=await post('recovery-email/verify',{...authPayload(h,n),challengeToken:recoveryChallenge.challengeToken,code:clean(code,40),hubOrigin:h},h,n);recoveryChallenge=null;
