@@ -21,40 +21,37 @@ try{
 
   const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
   for(const token of [
-    "VERSION='1.0.9-ai-settings-cleanroom-v188-v318'",
-    "authority:'ai-settings-cleanroom-v188-v317'",
-    "eventOwnership:'none-input-owned-by-settings-gateway-v317'",
-    "presentation:'cleanroom-v188-v317'",
+    "VERSION='1.0.10-model-settings-controller-v173-compat-v320'",
+    "compatibilityFacade:true",
+    "canonical:'CivweaveSettingsV320'",
+    "authority:'settings-v320'",
+    'inputOwnership:false',
+    'presentationOwnership:false',
+    'credentialOwnership:false',
+    'domCreation:false',
+    'activationRequired:false',
+    'legacySettingsCapture:false',
     'providerRuntimeOnOpen:false',
-    'providerRuntimeAvailable:false',
-    'providerTestsAvailable:false',
-    'modelDiscoveryAvailable:false',
-    'singlePassOpen:true',
     'quiescenceAfterPaint:true',
-    'function afterPaint(task)',
-    'function requestInferenceQuiescence()',
-    'function build()',
+    'const canonical=()=>globalThis.CivweaveSettingsV320||null',
     'function open(launcher)',
-    'function close(reason=',
-    'globalThis.CivweaveAISettingsCleanroomV188=api',
-  ])assert(controller.includes(token),`clean-room settings controller missing ${token}`);
+    'function close(reason)',
+    'function ensure()',
+    'globalThis.CivweaveModelSettingsControllerV173=api',
+  ])assert(controller.includes(token),`Settings V320 compatibility controller missing ${token}`);
   for(const forbidden of [
     'MutationObserver','PerformanceObserver','setInterval(','requestIdleCallback(',
     'civweave-model-runtime','ensureRuntime','detectCapabilities','.generate(','new Worker(','navigator.gpu','showModal(',
     "createElement('dialog')","createElement('script')",'document.body.style.overflow',
-  ])assert(!controller.includes(forbidden),`clean-room settings controller contains ${forbidden}`);
-  const openBlock=controller.slice(controller.indexOf('function open(launcher)'),controller.indexOf('function ensure()'));
-  for(const forbidden of ['await ','Promise','fetch(','.focus('])assert(!openBlock.includes(forbidden),`settings open path still performs ${forbidden}`);
-  for(const token of ['if(existing&&!existing.hidden)return existing','const layer=existing||build()','layer.hidden=false','afterPaint(requestInferenceQuiescence)'])assert(openBlock.includes(token),`settings open path missing ${token}`);
-  const visibleIndex=openBlock.indexOf('layer.hidden=false'),cancelIndex=openBlock.indexOf('afterPaint(requestInferenceQuiescence)');
-  assert(visibleIndex>=0,'settings open path does not make the layer visible');
-  assert(cancelIndex>visibleIndex,'settings inference cancellation is no longer scheduled after first paint');
-  assert(!openBlock.slice(0,visibleIndex).includes('requestInferenceQuiescence()'),'settings open path regained synchronous pre-paint inference cancellation');
+  ])assert(!controller.includes(forbidden),`Settings V320 compatibility controller contains ${forbidden}`);
+  const openBlock=controller.slice(controller.indexOf('function open(launcher)'),controller.indexOf('function close(reason)'));
+  for(const forbidden of ['await ','fetch(','new Worker(','document.','createElement'])assert(!openBlock.includes(forbidden),`Settings V320 compatibility open path performs ${forbidden}`);
+  assert(openBlock.includes('canonical()?.open?.(launcher)'),'Settings compatibility controller no longer delegates open to CivweaveSettingsV320');
 
   const settings=await fetch(`${origin}/app/unified-ai-settings-v175.js`,{headers:packageHeaders}).then(response=>response.text());
-  assert(settings.includes("VERSION='1.0.7-unified-settings-compat-v188'")&&settings.includes('retiredRuntime:true')&&settings.includes("authority:'ai-settings-cleanroom-v188'")&&!settings.includes('MutationObserver')&&!settings.includes('ensureRuntime')&&!settings.includes('detectCapabilities')&&!settings.includes('.generate('),'unified settings compatibility file is not inert');
+  assert(settings.includes("VERSION='1.0.8-unified-settings-compat-v320'")&&settings.includes('compatibilityFacade:true')&&settings.includes('retiredRuntime:true')&&settings.includes("canonical:'CivweaveSettingsV320'")&&settings.includes("authority:'settings-v320'")&&settings.includes('presentationOwnership:false')&&!settings.includes('MutationObserver')&&!settings.includes('ensureRuntime')&&!settings.includes('detectCapabilities')&&!settings.includes('.generate(')&&!settings.includes('globalThis.CivweaveUnifiedAISettingsV175='),'unified settings compatibility file is not an inert V320 facade');
   const delegation=await fetch(`${origin}/app/settings-delegation-v175.js`,{headers:packageHeaders}).then(response=>response.text());
-  assert(delegation.includes("VERSION='188.1-retired-settings-gateway-v317'")&&delegation.includes("REVISION='317.0-single-settings-gateway'")&&delegation.includes('retired:true')&&delegation.includes('listenerCount:0')&&delegation.includes('inputOwnership:false')&&delegation.includes('mutationObserver:false')&&delegation.includes('polling:false')&&delegation.includes('timers:false')&&delegation.includes('CivweaveSettingsGatewayV317?.open?.(launcher)')&&!delegation.includes('MutationObserver')&&!delegation.includes('PerformanceObserver')&&!delegation.includes('setInterval(')&&!delegation.includes("document.addEventListener('click'"),'settings delegation is not retired behind the v317 single gateway');
+  assert(delegation.includes("VERSION='188.2-retired-settings-v320'")&&delegation.includes("REVISION='320.0-single-settings-owner'")&&delegation.includes('retired:true')&&delegation.includes('compatibilityFacade:true')&&delegation.includes("canonical:'CivweaveSettingsV320'")&&delegation.includes('listenerCount:0')&&delegation.includes('inputOwnership:false')&&delegation.includes('presentationOwnership:false')&&delegation.includes('credentialOwnership:false')&&delegation.includes('mutationObserver:false')&&delegation.includes('polling:false')&&delegation.includes('timers:false')&&delegation.includes('CivweaveSettingsV320?.open?.(launcher)')&&!delegation.includes('MutationObserver')&&!delegation.includes('PerformanceObserver')&&!delegation.includes('setInterval(')&&!delegation.includes("document.addEventListener('click'"),'settings delegation is not retired behind the V320 single owner');
 
   const campus=await fetch(`${origin}/app/working-campus-v156.html`,{headers:packageHeaders}).then(response=>response.text());assert(campus.includes('/app/logos/civweave-symbol.svg')&&campus.includes(VERSION)&&!campus.includes('/app/logos/civweave.webp'),'Working Campus header is stale');
   const campusCss=await fetch(`${origin}/app/working-campus-v156.css`,{headers:packageHeaders}).then(response=>response.text());assert(campusCss.includes('#brand-home.brand{grid-template-columns:64px')&&campusCss.includes('.app .campus .realm-node{min-height:96px!important')&&campusCss.includes('--cw-themed-nav-height:58px'),'Working Campus compact shell contract is stale');
@@ -62,5 +59,5 @@ try{
   const sharedTools=await fetch(`${origin}/extensions/civweave-additions-v156.js`,{headers:packageHeaders}).then(response=>response.text());assert(sharedTools.includes('Node & friends')&&sharedTools.includes('aiVault:false'),'Shared Tools regressed');
   const packageLedger=await fetch(`${origin}/app/shared/civweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});assert(packageLedger.ok,`marked parity ledger returned ${packageLedger.status}`);const ledger=await packageLedger.json();assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'parity ledger is missing systems');
   const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsControllerRevision:'v318',settingsPresentation:'cleanroom-v188-v317',settingsDelegation:'retired-v317-single-gateway',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,settingsPaintBeforeInferenceCancellation:true,settingsCancellationScheduling:'after-paint-only',campusIconPixels:64,campusShell:'compact-v235',manualFirstInstaller:true},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsControllerRevision:'compat-v320',settingsCanonicalOwner:'CivweaveSettingsV320',settingsDelegation:'retired-v320-single-owner',settingsControllerFacade:true,settingsPresentationOwnership:false,nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,captureListener:false,mutationObserver:false,polling:false,campusIconPixels:64,campusShell:'compact-v235',manualFirstInstaller:true},null,2));
 }catch(error){console.error(output.join(''));throw error}finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
