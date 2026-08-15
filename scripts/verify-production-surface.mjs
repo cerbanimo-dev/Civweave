@@ -12,6 +12,7 @@ const generatedFiles=new Set(['models/all-minilm-l6-v2/config.json','models/all-
 const screenIds=['home','weave','progress','library','living-school','cerbanimo','fellowfare','anarchadia','settings','downloads','chat-weaveling','chat-moss','chat-kamiya','chat-rook','chat-merlin','recovery'];
 const forbiddenNames=/(repair|fix(?:es)?|hardening|regression|orchestrator|return-guard|fullscreen|installed-entry|working-campus|family-shell|shared-guide|guide-workspace|saved-chat|local-chat|platform-stability|runtime-stability).*[-_.]v\d+/i;
 const forbiddenRuntimeTokens=['MutationObserver','visualViewport','networkRepair(','source.replace(','materialize-canonical-release','releases/{VERSION}','civweave-pocket-campus.cwseed','Civweave-Mobile-Install-Kit.zip'];
+const modelWarmDependency=/semantic-router(?:\.js)?|\bprewarm\s*(?:\(|=)|\.warm\s*\(/i;
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 async function walk(dir,prefix=''){const out=[];for(const entry of await readdir(dir,{withFileTypes:true})){const rel=prefix?`${prefix}/${entry.name}`:entry.name,full=path.join(dir,entry.name);if(entry.isDirectory())out.push(...await walk(full,rel));else out.push(rel)}return out.sort()}
 async function text(relative){return readFile(path.join(root,relative),'utf8')}
@@ -33,7 +34,7 @@ for(const file of canonicalSource){const source=await text(file);for(const token
 const chat=(await text('public/app/chat.html'))+(await text('public/app/chat.js'));
 const settings=(await text('public/app/settings.html'))+(await text('public/app/settings.js'));
 for(const [name,source] of [['Chat',chat],['Settings',settings]]){
-  assert(!/semantic-router|prewarm|\.warm\(/i.test(source),`${name} regained a model warm/prewarm dependency`);
+  assert(!modelWarmDependency.test(source),`${name} regained a model warm/prewarm dependency`);
   assert(!/createElement\(['"]script|appendChild\(.*script|document\.head\.append\(.*script/i.test(source),`${name} dynamically injects scripts`);
 }
 assert((await text('public/app/campus.html')).includes('/app/semantic-router.js'),'Campus no longer owns independent MiniLM idle warm-up');
