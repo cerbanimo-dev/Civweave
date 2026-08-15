@@ -17,6 +17,7 @@
     "/app/content-provenance-v1.js",
     "/app/luddite-mode-v1.js",
     "/app/luddite-manual-authoring-v1.js",
+    "/app/shared/civweave-identity-sync.js",
     "/app/shared/civweave-reward-weave.js",
     "/app/logos/civweave-symbol.svg"
   ],
