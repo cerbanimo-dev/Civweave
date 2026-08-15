@@ -1,5 +1,6 @@
 import {POCKET_NODE_POLICY} from './shared/guild-host-resilience-v1.mjs';
 import {CivweavePocketGuildNodeV1} from './pocket-guild-node-v1.mjs';
+import {CivweaveEmergencyAiMeshV1} from './emergency-ai-mesh-v1.mjs';
 
 export const GUILD_HOST_ONBOARDING_SCHEMA='civweave.guild-host-onboarding.v1';
 const STATE_KEY='civweave.guild-host-onboarding.v1';
@@ -34,10 +35,14 @@ export async function completeGuildHostOnboarding({guildId,primaryOrigin=globalT
   const capabilities=deviceCapabilities();
   const selectedRoute=route==='auto'?capabilities.recommendedRoute:clean(route,80);
   const shouldEnrollPocket=enablePocketNode!==false&&selectedRoute==='pocket-node'&&capabilities.localMeshAvailable;
-  let pocketNode=null,pocketNodeError=null;
+  let pocketNode=null,pocketNodeError=null,emergencyAiMesh=null,emergencyAiMeshError=null;
   if(shouldEnrollPocket){
     try{pocketNode=await CivweavePocketGuildNodeV1.enroll({guildId:id,primaryOrigin:origin})}
     catch(error){pocketNodeError=String(error?.message||error)}
+  }
+  if(capabilities.localMeshAvailable){
+    try{emergencyAiMesh=await CivweaveEmergencyAiMeshV1.start({guildId:id,baseUrl:origin})}
+    catch(error){emergencyAiMeshError=String(error?.message||error)}
   }
   const state=Object.freeze({
     schema:GUILD_HOST_ONBOARDING_SCHEMA,
@@ -49,12 +54,14 @@ export async function completeGuildHostOnboarding({guildId,primaryOrigin=globalT
     pocketNodeRequested:shouldEnrollPocket,
     pocketNodeEnrolled:Boolean(pocketNode?.enrolled),
     pocketNodeError,
+    emergencyAiMeshStarted:Boolean(emergencyAiMesh?.started),
+    emergencyAiMeshError,
     persistentAlternatives:POCKET_NODE_POLICY.persistentAlternatives,
     completedAt:now(),
   });
   write(state);
   if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(new CustomEvent('civweave:guild-host-onboarding-complete',{detail:state}));
-  return Object.freeze({...state,pocketNode});
+  return Object.freeze({...state,pocketNode,emergencyAiMesh});
 }
 
 export function onboardingStatus(){return read()}
