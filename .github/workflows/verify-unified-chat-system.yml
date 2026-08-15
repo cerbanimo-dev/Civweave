@@ -9,6 +9,7 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/guide-stream-thinking-v249.js'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/fellowfare-shared-guide-bridge-v236.js'
       - 'public/app/themed-system-nav-v178.js'
@@ -33,6 +34,7 @@ on:
       - 'scripts/verify-realm-session-integrity-v237.mjs'
       - 'scripts/verify-guide-workspace-v242.mjs'
       - 'scripts/verify-shared-guide-floating-v236.mjs'
+      - 'scripts/verify-guide-stream-thinking-v249.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   push:
     branches: ['**']
@@ -43,6 +45,7 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/guide-stream-thinking-v249.js'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/fellowfare-shared-guide-bridge-v236.js'
       - 'public/app/themed-system-nav-v178.js'
@@ -67,6 +70,7 @@ on:
       - 'scripts/verify-realm-session-integrity-v237.mjs'
       - 'scripts/verify-guide-workspace-v242.mjs'
       - 'scripts/verify-shared-guide-floating-v236.mjs'
+      - 'scripts/verify-guide-stream-thinking-v249.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   workflow_dispatch:
 
@@ -92,6 +96,7 @@ jobs:
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
+          node --check public/app/guide-stream-thinking-v249.js
           node --check public/app/install-boundary-v146.js
           node --check public/app/fellowfare-shared-guide-bridge-v236.js
           node --check public/app/themed-system-nav-v178.js
@@ -110,6 +115,7 @@ jobs:
           node --check scripts/verify-realm-session-integrity-v237.mjs
           node --check scripts/verify-guide-workspace-v242.mjs
           node --check scripts/verify-shared-guide-floating-v236.mjs
+          node --check scripts/verify-guide-stream-thinking-v249.mjs
       - name: Enforce one-core five-theme contract
         shell: bash
         run: |
@@ -141,3 +147,4 @@ jobs:
           node scripts/verify-realm-session-integrity-v237.mjs
           node scripts/verify-guide-workspace-v242.mjs
           node scripts/verify-shared-guide-floating-v236.mjs
+          node scripts/verify-guide-stream-thinking-v249.mjs

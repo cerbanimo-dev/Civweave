@@ -3,8 +3,30 @@ name: Verify Canonical Rewards v2
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'public/app/cw-reward-*.js'
+      - 'public/app/civweave-basic-value*.js'
+      - 'public/app/civweave-economic-policy-v1.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/verify-canonical-rewards-v2.mjs'
+      - 'scripts/verify-reward-model-contract-v2.mjs'
+      - 'scripts/verify-basic-value-guide-v1.mjs'
+      - 'scripts/verify-economic-valuation-review-v1.mjs'
+      - '.github/workflows/verify-canonical-rewards-v2.yml'
   push:
     branches: [main]
+    paths:
+      - 'public/app/cw-reward-*.js'
+      - 'public/app/civweave-basic-value*.js'
+      - 'public/app/civweave-economic-policy-v1.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/verify-canonical-rewards-v2.mjs'
+      - 'scripts/verify-reward-model-contract-v2.mjs'
+      - 'scripts/verify-basic-value-guide-v1.mjs'
+      - 'scripts/verify-economic-valuation-review-v1.mjs'
+      - '.github/workflows/verify-canonical-rewards-v2.yml'
   workflow_dispatch:
 
 permissions:

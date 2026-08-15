@@ -3,7 +3,24 @@ name: Verify Living School boot v195
 on:
   push:
     branches: [main]
+    paths:
+      - 'public/app/cabinets/living-school/**'
+      - 'public/app/services/living-school/**'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/service-worker-v156.js'
+      - 'public/app/pwa-v130.js'
+      - 'scripts/verify-living-school-boot-v195.mjs'
+      - '.github/workflows/verify-living-school-boot-v195.yml'
   pull_request:
+    paths:
+      - 'public/app/cabinets/living-school/**'
+      - 'public/app/services/living-school/**'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/service-worker-v156.js'
+      - 'public/app/pwa-v130.js'
+      - 'scripts/verify-living-school-boot-v195.mjs'
+      - '.github/workflows/verify-living-school-boot-v195.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
