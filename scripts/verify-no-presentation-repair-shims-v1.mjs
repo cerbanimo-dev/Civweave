@@ -57,6 +57,19 @@ const rules = [
     ],
   },
   {
+    path: 'public/app/installer-repair-only-v2.js',
+    forbid: [
+      [/removeBrowserLaunchers|open-online-campus-v225|launch=online/, 'current shell repair must not delete retired launchers after paint'],
+    ],
+    require: [
+      [/sourceTruth:true/, 'current shell repair declares source truth'],
+      [/staticLauncherCleanup:false/, 'current shell repair declares static launcher cleanup disabled'],
+      [/hubToolsPolicy:'explicit-user-load-only'/, 'Hub tools remain behind explicit user intent'],
+      [/firstPaintHubWork:false/, 'Hub work remains off installer first paint'],
+      [/cacheDistinctPath:true/, 'current repair bridge declares the stale-cache escape'],
+    ],
+  },
+  {
     path: 'public/app/services/fellowfare/marketplace-v2-symbols.js',
     forbid: [
       [/decorateTextNode|\bcreateTreeWalker\s*\(/, 'currency symbols must be emitted by renderers, not text crawlers'],
@@ -142,11 +155,13 @@ const reviewedDynamic = new Map([
   ['public/app/host-node-v124.js', 'Host-node connection/status UI changes with actual network and node state.'],
   ['public/app/hub-mail-claim-v1.js', 'Mail-claim UI is created/updated from asynchronous account recovery state.'],
   ['public/app/hub-recovery-ui-v1.js', 'Recovery UI reflects genuine recovery workflow state and dynamically discovered account data.'],
-  ['public/app/installer-repair-only-v1.js', 'The remaining observer tracks real shell failure/repair state; static launcher cleanup is separately forbidden.'],
+  ['public/app/installer-repair-only-v1.js', 'Legacy repair bridge observer tracks real shell failure/repair state; static launcher cleanup is separately forbidden.'],
+  ['public/app/installer-repair-only-v2.js', 'Current cache-distinct repair bridge observer tracks real shell failure/repair state; Hub/account loading is explicit and static launcher cleanup is forbidden.'],
   ['public/app/pwa-install-prompt-v246.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
   ['public/app/pwa-install-prompt-v247.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
   ['public/app/pwa-install-prompt-v248.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
-  ['public/app/pwa-install-prompt-v249.js', 'Current install-prompt runtime updates controls from real browser install availability and install completion.'],
+  ['public/app/pwa-install-prompt-v249.js', 'Previous install-prompt runtime updates controls from real browser install availability and install completion.'],
+  ['public/app/pwa-install-prompt-v250.js', 'Current cache-distinct install-prompt runtime updates controls from real browser install availability and install completion.'],
   ['public/app/shared-intention-party-chat-v1.js', 'Party chat renders newly arriving messages and participant state.'],
   ['public/app/shared-review-surface-v234.js', 'Review surface renders live pending/approved/rejected action state.'],
   ['public/app/shared/visual-shell-cleanup.js', 'Realm visual-shell renderer mounts the actual illustrated shell into intentionally empty render hosts; source pages do not contain fake classic UI to replace.'],
