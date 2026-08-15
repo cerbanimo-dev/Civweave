@@ -35,7 +35,7 @@ export function deployedVersionFromManifest(manifest){
 async function main(){
   const expected=String(process.env.CIVWEAVE_EXPECTED_VERSION||'').trim();
   const allowNewer=/^(?:1|true|yes)$/i.test(String(process.env.CIVWEAVE_ALLOW_NEWER_VERSION||''));
-  const rawTargets=String(process.env.CIVWEAVE_PRODUCTION_URLS||'https://commonweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com');
+  const rawTargets=String(process.env.CIVWEAVE_PRODUCTION_URLS||'https://civweave.cc,https://civweave.pages.dev');
   const attempts=Math.max(1,Number.parseInt(process.env.CIVWEAVE_PROBE_ATTEMPTS||'1',10)||1);
   const delayMs=Math.max(0,Number.parseInt(process.env.CIVWEAVE_PROBE_DELAY_MS||'15000',10)||0);
 
@@ -104,8 +104,10 @@ async function main(){
     const worker=workerResponse.text;
     requireToken(worker,`/app/system-routes-v227.js?v=${deployed}-five-system-route-contract-v227`,'service worker');
     requireToken(worker,`/service-worker-core-v208.js?v=${deployed}-chat-convergence-v250`,'service worker');
+    requireToken(worker,"/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293",'service worker');
     requireToken(worker,"/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343",'service worker');
     requireToken(worker,"self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})",'service worker');
+    if(worker.includes('/service-worker-shell-repair-v225.js'))throw new Error('service worker resurrected retired shell repair v225');
 
     const settings=settingsResponse.text;
     requireToken(settings,"cacheIntegrityOnDemand:true",'local AI settings');
@@ -123,6 +125,7 @@ async function main(){
       localAISettings:new URL(settingsResponse.url).pathname,
       launchRevision:'boot-recovery-v426',
       boundedUpdate:true,
+      installedShellRepair:'v293-sole-owner',
       activeChatRepairRevision:'chat-css-contract-v343',
       mobileAISettingsRevision:'snapshot-first-v287'
     };

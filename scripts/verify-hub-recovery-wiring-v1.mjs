@@ -24,8 +24,8 @@ const paths = [
   '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml',
   'scripts/resolve-cloudflare-recovery-zone-v1.mjs',
   'config/launch-topology-v1.json',
-  'public/app/installer-repair-only-v1.js',
-  'public/app/installer-online-fallback-v225.js',
+  'public/app/index.html',
+  'public/app/pwa-install-prompt-v249.js',
   'public/app/civweave-brand.js',
   'public/app/hub-recovery-api-v1.js',
   'public/app/hub-recovery-ui-v1.js',
@@ -108,10 +108,11 @@ for (const path of activeDomainSurfaces) assert.doesNotMatch(source[path], /(?:^
 assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
-assert.match(source['public/app/installer-repair-only-v1.js'], /hub-recovery-api-v1\.js/);
-assert.match(source['public/app/installer-repair-only-v1.js'], /browserRuntimePolicy:'installer-only-until-installed-display'/);
-assert.match(source['public/app/installer-online-fallback-v225.js'], /retired:true/);
-assert.match(source['public/app/installer-online-fallback-v225.js'], /browserRuntime:false/);
+const installer=source['public/app/index.html'];
+for(const token of ['/app/host-node-session-v1.js','/app/host-node-installer-lobby-v1.js','/app/host-node-session-export-v1.js','/app/host-node-session-import-v1.js','/app/hub-recovery-api-v1.js','/app/hub-recovery-ui-v1.js','/app/hub-mail-claim-v1.js'])assert.match(installer,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')),`installer source must wire ${token} directly`);
+assert.doesNotMatch(installer,/installer-repair-only-v1|installer-online-fallback-v225/,'installer must not depend on repair sidecars');
+assert.match(source['public/app/pwa-install-prompt-v249.js'], /requiredNextOwner:'pwa-install-prompt-v249'/);
+assert.doesNotMatch(source['public/app/pwa-install-prompt-v249.js'], /REPAIR_DEVICE_PACKAGE/,'ordinary installer controller must not own installed-shell repair');
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryMethod/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /cloudFabric=\/\^civweave-node-cloud\\\./);
@@ -129,4 +130,4 @@ for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {const resu
 
 const recoveryNoStripeSurfaces = ['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs','cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs','cloudflare/account-edge/src/recovery-entry-v10.mjs','cloudflare/account-edge/src/recovery-entry-v11.mjs','cloudflare/account-edge/src/hub-passport-account-v1.mjs','cloudflare/account-edge/wrangler.jsonc','cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs','cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs','cloudflare/node-cloud/src/account-directory-v1.mjs','cloudflare/recovery-relay/src/index.mjs','cloudflare/recovery-relay/wrangler.jsonc','scripts/resolve-cloudflare-recovery-zone-v1.mjs','public/app/hub-recovery-api-v1.js','public/app/hub-recovery-ui-v1.js','public/app/hub-passport-account-v1.js','public/app/hub-delivery-intent-v1.js'];
 for (const path of recoveryNoStripeSurfaces) assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
-console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v10-passport-passkeys',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,cloudFabricRecovery:true,passportPasskeys:true,optionalRecoveryEmail:true,emailLinkRequiresExistingPasskey:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false}));
+console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v11-source-truth',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,cloudFabricRecovery:true,passportPasskeys:true,optionalRecoveryEmail:true,emailLinkRequiresExistingPasskey:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false,installerRecoveryOwner:'static-source',requiredNextOwner:'pwa-install-prompt-v249'}));
