@@ -140,7 +140,7 @@ function installHubToolsGate(){
   gate.className='status-card';
   gate.dataset.civweaveHubToolsGate=REVISION;
   gate.setAttribute('aria-labelledby','cw-hub-tools-gate-title');
-  gate.innerHTML=`<small>OPTIONAL HUB & ACCOUNT TOOLS</small><h3 id="cw-hub-tools-gate-title">Connect to a Hub only when you need it</h3><p>Hub login, capacity search, Passport recovery, and recovery-mail tools stay dormant during installer startup.</p><div class="card-actions"><button type="button" data-civweave-load-hub-tools>Load Hub & account tools</button></div><p class="install-help" role="status" data-civweave-hub-tools-status>Nothing from the Hub/account stack runs until you choose this.</p>`;
+  gate.innerHTML=`<small>OPTIONAL HUB & ACCOUNT TOOLS</small><h3 id="cw-hub-tools-gate-title">Connect to a Hub only when you need it</h3><p>Hub login, capacity search, Passport recovery, and recovery-mail tools stay dormant during installer startup.</p><div class="gateway-actions card-actions"><button type="button" data-civweave-load-hub-tools>Load Hub & account tools</button></div><p class="install-help" role="status" data-civweave-hub-tools-status>Nothing from the Hub/account stack runs until you choose this.</p>`;
   const knowledge=document.querySelector('.knowledge-card');
   const installCard=document.querySelector('.install-card');
   if(knowledge?.parentNode)knowledge.parentNode.insertBefore(gate,knowledge);
