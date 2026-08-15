@@ -23,7 +23,7 @@ export class CivweaveCapacityAccount extends HostingCapacityAccount {
     const nodeId=clean(input.nodeId,180),userId=clean(input.userId,180);if(!nodeId||!userId)throw Object.assign(new TypeError('nodeId and userId are required.'),{status:400});
     const config=await this.config();if(!config.hostNodeIds.includes(nodeId))throw Object.assign(new RangeError('Node is not registered to this capacity account.'),{status:404});
     const member=await this.member(nodeId,userId);if(!member)throw Object.assign(new RangeError('Guildkeeper must already be a Guild member.'),{status:409});
-    const storageKey=key(nodeId,userId),prior=await this.state.storage.get(storageKey);if(prior?.active!==false)return{guildkeeper:prior,governance:await this.guildkeeperGovernance(nodeId),idempotent:true};
+    const storageKey=key(nodeId,userId),prior=await this.state.storage.get(storageKey);if(prior&&prior.active!==false)return{guildkeeper:prior,governance:await this.guildkeeperGovernance(nodeId),idempotent:true};
     const row=Object.freeze({schema:'civweave.guildkeeper.v1',nodeId,userId,label:clean(input.label,180)||null,active:true,appointedAt:new Date().toISOString()});await this.state.storage.put(storageKey,row);
     return{guildkeeper:row,governance:await this.guildkeeperGovernance(nodeId),idempotent:false};
   }
