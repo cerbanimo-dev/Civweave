@@ -7,6 +7,8 @@ on:
       - 'public/app/guild-host-onboarding-v1.mjs'
       - 'public/app/emergency-ai-host-v1.mjs'
       - 'public/app/emergency-ai-mesh-v1.mjs'
+      - 'public/app/emergency-ai-host-control-v1.mjs'
+      - 'public/app/node-ai-operator-v1.html'
       - 'public/app/host-node-session-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/emergency-ai-share-v1.mjs'
@@ -25,6 +27,8 @@ on:
       - 'public/app/guild-host-onboarding-v1.mjs'
       - 'public/app/emergency-ai-host-v1.mjs'
       - 'public/app/emergency-ai-mesh-v1.mjs'
+      - 'public/app/emergency-ai-host-control-v1.mjs'
+      - 'public/app/node-ai-operator-v1.html'
       - 'public/app/host-node-session-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/emergency-ai-share-v1.mjs'
@@ -48,6 +52,7 @@ jobs:
       - run: node --check public/app/guild-host-onboarding-v1.mjs
       - run: node --check public/app/emergency-ai-host-v1.mjs
       - run: node --check public/app/emergency-ai-mesh-v1.mjs
+      - run: node --check public/app/emergency-ai-host-control-v1.mjs
       - run: node --check public/app/host-node-session-v1.js
       - run: node --check lib/emergency-ai-share-v1.mjs
       - run: node --check cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs
