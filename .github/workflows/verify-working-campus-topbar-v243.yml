@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'public/app/working-campus-topbar-v243.js'
+      - 'public/app/core-interface-runtime-v1.js'
+      - 'public/app/install-boundary-v146.js'
       - 'public/app/working-campus-v156.css'
       - 'public/app/working-campus-v156.html'
       - 'scripts/verify-working-campus-topbar-v243.mjs'
@@ -12,6 +14,8 @@ on:
     branches: [main]
     paths:
       - 'public/app/working-campus-topbar-v243.js'
+      - 'public/app/core-interface-runtime-v1.js'
+      - 'public/app/install-boundary-v146.js'
       - 'public/app/working-campus-v156.css'
       - 'public/app/working-campus-v156.html'
       - 'scripts/verify-working-campus-topbar-v243.mjs'
