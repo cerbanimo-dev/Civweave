@@ -9,6 +9,9 @@ on:
 permissions:
   contents: write
 
+env:
+  EXTRACTION_REVISION: scoped-settings-v2
+
 jobs:
   extract:
     runs-on: ubuntu-latest
