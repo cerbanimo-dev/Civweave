@@ -22,6 +22,8 @@ const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
 const canonicalCivweave='/app/logos/civweave-pwa-512-v247.png';
 const canonicalCerbanimo='/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2';
+const dayLogo='/app/logos/civweave-day-logo.jpg';
+const nightLogo='/app/logos/civweave-night-logo.jpg';
 const pngSignature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
 
 for(const path of ['public/app/logos/civweave-prismatic-wordmark-v1.png']){
@@ -53,8 +55,8 @@ assert.ok(offlineStatus.includes('eagerStatusLookup:false')&&offlineStatus.inclu
 assert.ok(!offlineStatus.includes("addEventListener('load',askCurrentStatus"),'offline status must not touch service-worker campus state at page load');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v247.js?v=front-door-v3-install-only-runtime'),'installer must not boot the deadlocking v247 bridge');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v246.js?v=pwa-install-v246'),'installer must not boot the cache-colliding legacy bridge');
-assert.ok(installerHtml.includes('<img src="/app/logos/civweave-pwa-192-v247.png" alt="Civweave">'),'installer header must keep the verified PNG compatibility mark directly');
-assert.ok(installerHtml.includes('<link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">'),'installer favicon must use the verified PNG directly');
+assert.ok(installerHtml.includes(`<img src="${dayLogo}" alt="Civweave">`),'installer header must use the current Civweave day logo');
+assert.ok(installerHtml.includes(`<link rel="icon" href="${dayLogo}" type="image/jpeg">`),'installer favicon must start from the current Civweave day logo');
 assert.ok(hostSetup.includes(`${entry}&source=host-setup`),'Guildkeeper setup must enter Civweave through installed entry');
 assert.ok(hostSetup.includes('/host-local-anchor.html'),'Guildkeeper setup must expose local Anchor setup');
 assert.ok(hostSetup.includes('CONNECT GUILDKEEPER PAYOUTS'),'Guildkeeper setup must include connected payout onboarding');
@@ -63,8 +65,11 @@ assert.ok(anchor.includes('5. Connect Guildkeeper payouts'),'local Anchor setup 
 assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'Guildkeeper setup must retain the compatibility browser marker');
 assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated Guildkeeper setup');
 assert.ok(setup.includes('Guildkeeper setup: ${pagesOrigin}/host-setup.html'),'Cloudflare Guild provisioning must print the dedicated Guildkeeper setup URL on the durable Pages underlay');
-assert.ok(brand.includes("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png'"),'brand layer must use the verified Civweave PNG');
-assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
+assert.ok(brand.includes(`const DAY_LOGO='${dayLogo}'`),'brand layer must preserve the current Civweave day logo source');
+assert.ok(brand.includes(`const NIGHT_LOGO='${nightLogo}'`),'brand layer must preserve the current Civweave night logo source');
+assert.ok(brand.includes('const CANONICAL_LOGO=DAY_LOGO'),'brand layer must use the day logo as its canonical static fallback');
+assert.ok(brand.includes('function logoForLocalClock('),'brand layer must retain the day/night clock switch');
+assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must retain its legacy compatibility asset');
 
 for(const [name,source] of [['installer',installerHtml],['Guildkeeper setup',hostSetup],['local Anchor',anchor]]){
   assert.ok(source.includes(civweavePrismatic),`${name} must retain the legacy Civweave compatibility path`);
@@ -84,21 +89,22 @@ assert.ok(frontDoor.includes('body.cw-installer'),'front-door design must cover 
 assert.ok(frontDoor.includes('body.cw-steward'),'front-door design must retain the legacy Guildkeeper layout selector');
 assert.ok(frontDoor.includes('body.cw-anchor'),'front-door design must cover local Anchor setup');
 assert.ok(frontDoor.includes('@media(prefers-reduced-motion:reduce)'),'front-door ambient motion must respect reduced-motion preferences');
-assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must bypass the damaged v1 Civweave raster and use the verified canonical logo');
+assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must retain the verified compatibility logo fallback');
 assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must use the verified white-background truecolor Cerbanimo compatibility mark');
-assert.ok(frontDoor.includes('.cw-platform-logo,.cw-steward-logo{display:none!important}'),'damaged compatibility rasters must not be rendered directly');
+assert.ok(frontDoor.includes('.cw-platform-logo,.cw-steward-logo{display:none!important}'),'compatibility rasters must not be rendered directly');
 assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2')"),'Cerbanimo compatibility mark must render its verified RGB asset on an opaque white field');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v11-guildkeeper-terminology',
+  revision:'installer-front-door-v12-current-logo-clock',
   installedEntry:exactEntry,
   hostSetup:'/host-setup.html',
   launcher:'/app/pwa-install-prompt-v250.js',
   repairBridge:'/app/installer-repair-only-v2.js',
   offlineStatus:'/app/offline-campus-status-v211.js',
   firstInputSafe:true,
-  compatibilityLogo:'/app/logos/civweave-pwa-512-v247.png',
+  dayLogo,
+  nightLogo,
   civweavePrismatic,
   cerbanimoMark,
   canonicalCivweave,
