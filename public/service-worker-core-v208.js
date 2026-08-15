@@ -32,6 +32,7 @@ const REQUIRED_SHELL_ASSETS = [
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
+  '/app/installer-repair-only-v1.js',
   '/app/low-end-device-lab-v1.html',
   '/app/low-end-device-lab-v1.js',
   '/app/local-ai/model-registry-v266.js',
@@ -259,279 +260,125 @@ function discoverReferences(text, baseUrl, manifest) {
   for (const pattern of patterns) {
     let match;
     while ((match = pattern.exec(text))) {
-      const candidate = normalizeCandidate(match[1], baseUrl, manifest);
-      if (candidate) found.add(candidate);
+      const pathname = normalizeCandidate(match[1], baseUrl, manifest);
+      if (pathname) found.add(pathname);
     }
   }
   return [...found];
 }
 
-async function findCached(pathname) {
-  const key = cacheKey(pathname);
-  const preferred = [SHELL_CACHE, RUNTIME_CACHE, OFFLINE_CACHE];
-  for (const name of preferred) {
-    const response = await (await caches.open(name)).match(key, { ignoreSearch: true });
-    if (responseLooksValid(response, pathname)) return response;
-  }
-  const response = await caches.match(key, { ignoreSearch: true });
-  return responseLooksValid(response, pathname) ? response : null;
-}
+async function discoverOfflineAssets(manifest) {
+  const queue = [...new Set(manifest.seeds)];
+  const seen = new Set();
+  const assets = new Set(queue);
+  const maxAssets = Math.max(32, Math.min(1500, Number(manifest.maxAssets || 900)));
+  const maxDepth = Math.max(1, Math.min(12, Number(manifest.maxDepth || 8)));
+  const depth = new Map(queue.map(item => [item, 0]));
 
-async function cacheOfflineAsset(pathname, options = {}) {
-  const cache = await caches.open(OFFLINE_CACHE);
-  const key = cacheKey(pathname);
-  let response = await cache.match(key, { ignoreSearch: true });
-  let fromNetwork = false;
-  if (options.preferNetwork) {
-    try {
-      response = await fetchFresh(pathname, 'offline-campus-refresh', FETCH_TIMEOUT_MS);
-      fromNetwork = true;
-      await cache.put(key, response.clone());
-    } catch {
-      if (!responseLooksValid(response, pathname)) response = await findCached(pathname);
-    }
-  } else if (!responseLooksValid(response, pathname)) {
-    response = await findCached(pathname);
-    if (!responseLooksValid(response, pathname)) {
-      response = await fetchFresh(pathname, 'offline-campus', FETCH_TIMEOUT_MS);
-      fromNetwork = true;
-    }
-    await cache.put(key, response.clone());
-  }
-  if (!responseLooksValid(response, pathname)) throw new Error(`${pathname} is unavailable.`);
-  const contentLength = Number(response.headers.get('content-length') || 0);
-  return { response, contentLength: Number.isFinite(contentLength) ? contentLength : 0, fromNetwork };
-}
+  while (queue.length && assets.size < maxAssets) {
+    const pathname = queue.shift();
+    if (seen.has(pathname)) continue;
+    seen.add(pathname);
+    const currentDepth = depth.get(pathname) || 0;
+    if (currentDepth >= maxDepth) continue;
+    if (!TEXT_CONTENT.test(pathname) && !/\.(?:html?|css|m?js|json|webmanifest|md|txt)$/i.test(pathname)) continue;
 
-function offlinePacket(meta = {}) {
-  const assets = Array.isArray(meta.assets) ? meta.assets : [];
-  const failed = Array.isArray(meta.failed) ? meta.failed : [];
-  const completed = Number(meta.completed || Math.max(0, assets.length - failed.length));
-  return {
-    type: 'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
-    mode: 'resumable-discovered-campus',
-    version: VERSION,
-    revision: BUILD,
-    cache: OFFLINE_CACHE,
-    ready: Boolean(meta.ready),
-    running: Boolean(meta.running),
-    completed,
-    total: Number(meta.total || assets.length),
-    discovered: assets.length,
-    failed,
-    failedCount: failed.length,
-    bytes: Number(meta.bytes || 0),
-    updatedAt: meta.updatedAt || null,
-    assets
-  };
+    let response = null;
+    try { response = await fetchFresh(pathname, 'offline-discovery', 8000); } catch {
+      try { response = await caches.match(cacheKey(pathname), { ignoreSearch: true }); } catch {}
+    }
+    if (!responseLooksValid(response, pathname)) continue;
+    const type = String(response.headers.get('content-type') || '');
+    if (!TEXT_CONTENT.test(type) && !/\.(?:html?|css|m?js|json|webmanifest|md|txt)$/i.test(pathname)) continue;
+    let text = '';
+    try { text = await response.clone().text(); } catch { continue; }
+    const baseUrl = new URL(pathname, self.location.origin).href;
+    for (const child of discoverReferences(text, baseUrl, manifest)) {
+      if (assets.size >= maxAssets) break;
+      if (!assets.has(child)) {
+        assets.add(child);
+        queue.push(child);
+        depth.set(child, currentDepth + 1);
+      }
+    }
+  }
+  return [...assets];
 }
 
 async function offlineStatus() {
   const meta = await readOfflineMeta();
-  if (meta) return offlinePacket(meta);
-  const manifest = await loadOfflineManifest().catch(() => ({ seeds: [] }));
-  return offlinePacket({
+  return meta || {
+    type: 'CIVWEAVE_OFFLINE_PACKAGE',
+    version: VERSION,
+    revision: BUILD,
     ready: false,
     running: false,
+    total: 0,
     completed: 0,
-    total: manifest.seeds?.length || 0,
-    assets: manifest.seeds || [],
-    failed: [],
-    bytes: 0,
-    updatedAt: null
-  });
+    failed: []
+  };
 }
 
 async function downloadOfflinePackage(event) {
   const manifest = await loadOfflineManifest();
-  const previous = await readOfflineMeta();
-  const maxAssets = Math.max(50, Math.min(1500, Number(manifest.maxAssets || 700)));
-  const maxDepth = Math.max(1, Math.min(12, Number(manifest.maxDepth || 8)));
-  const seedAssets = [...new Set([...(manifest.seeds || []), ...((previous?.assets || []).filter(Boolean))])];
-  const queue = seedAssets.map(pathname => ({ pathname, depth: 0 }));
-  const queued = new Set(seedAssets);
-  const processed = new Set();
-  const failed = new Map();
-  const refreshExisting = previous?.ready === true;
-  let bytes = 0;
-  let completed = 0;
-
-  const progress = async (running = true, ready = false) => {
-    const assets = [...queued];
-    const packet = offlinePacket({
-      ready,
-      running,
-      completed,
-      total: assets.length,
-      assets,
-      failed: [...failed.entries()].map(([pathname, message]) => ({ pathname, message })),
-      bytes,
-      updatedAt: new Date().toISOString()
-    });
-    await writeOfflineMeta(packet);
-    post(event, { ...packet, type: running ? 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS' : packet.type });
-    return packet;
+  const assets = await discoverOfflineAssets(manifest);
+  const cache = await caches.open(OFFLINE_CACHE);
+  const initial = {
+    type: 'CIVWEAVE_OFFLINE_PACKAGE',
+    version: VERSION,
+    revision: BUILD,
+    ready: false,
+    running: true,
+    total: assets.length,
+    completed: 0,
+    failed: [],
+    startedAt: new Date().toISOString()
   };
+  await writeOfflineMeta(initial);
+  post(event, initial);
 
-  await progress(true, false);
-
-  while (queue.length && processed.size < maxAssets) {
-    const batch = queue.splice(0, 4).filter(item => !processed.has(item.pathname));
-    if (!batch.length) continue;
-    const results = await Promise.all(batch.map(async item => {
-      processed.add(item.pathname);
-      try {
-        const { response, contentLength } = await cacheOfflineAsset(item.pathname, { preferNetwork: refreshExisting });
-        bytes += contentLength;
-        failed.delete(item.pathname);
-        const type = String(response.headers.get('content-type') || '');
-        let references = [];
-        if (item.depth < maxDepth && TEXT_CONTENT.test(type)) {
-          const text = await response.clone().text();
-          if (text.length <= 4_000_000) references = discoverReferences(text, new URL(item.pathname, self.location.origin), manifest);
-        }
-        return { item, references };
-      } catch (error) {
-        failed.set(item.pathname, error?.message || String(error));
-        return { item, references: [] };
-      } finally {
-        completed += 1;
-      }
+  const failed = [];
+  let completed = 0;
+  for (let index = 0; index < assets.length; index += 4) {
+    const batch = assets.slice(index, index + 4);
+    const results = await Promise.allSettled(batch.map(async pathname => {
+      const response = await fetchFresh(pathname, 'offline-package', 10000);
+      await cache.put(cacheKey(pathname), response.clone());
+      return pathname;
     }));
-
-    for (const result of results) {
-      for (const pathname of result.references) {
-        if (queued.size >= maxAssets || queued.has(pathname)) continue;
-        queued.add(pathname);
-        queue.push({ pathname, depth: result.item.depth + 1 });
-      }
-    }
-    await progress(true, false);
-  }
-
-  const ready = queue.length === 0 && failed.size === 0;
-  return progress(false, ready);
-}
-
-async function migrateOfflineCaches() {
-  const names = await caches.keys();
-  const legacy = names.filter(name => name.startsWith('civweave-offline-') && name !== OFFLINE_CACHE);
-  if (!legacy.length) return;
-  const target = await caches.open(OFFLINE_CACHE);
-  for (const name of legacy) {
-    const source = await caches.open(name);
-    for (const request of await source.keys()) {
-      if (await target.match(request, { ignoreSearch: true })) continue;
-      const response = await source.match(request, { ignoreSearch: true });
-      if (response) await target.put(request, response.clone());
-    }
-    await caches.delete(name);
-  }
-}
-
-function preserveCache(name) {
-  return PRESERVED_CACHE_PREFIXES.some(prefix => name.startsWith(prefix));
-}
-
-async function cleanLegacyCaches() {
-  await migrateOfflineCaches();
-  const keep = new Set([SHELL_CACHE, RUNTIME_CACHE, OFFLINE_CACHE]);
-  const names = await caches.keys();
-  await Promise.all(names.map(name => {
-    if (keep.has(name) || preserveCache(name)) return Promise.resolve(false);
-    if (APP_CACHE_PREFIXES.some(prefix => name.startsWith(prefix))) return caches.delete(name);
-    if (/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(name)) return caches.delete(name);
-    return Promise.resolve(false);
-  }));
-}
-
-async function networkFirst(request, fallbackPath = '/offline.html') {
-  const url = new URL(request.url);
-  try {
-    const response = await withTimeout(fetch(new Request(request, { cache: 'no-store' })), 7000);
-    if (response?.ok) {
-      const cache = await caches.open(RUNTIME_CACHE);
-      await cache.put(cacheKey(url.pathname), response.clone());
-      return request.method === 'HEAD' ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers }) : response;
-    }
-  } catch {}
-  const cached = await findCached(url.pathname);
-  if (cached) return request.method === 'HEAD' ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers }) : cached;
-  const fallback = await findCached(fallbackPath);
-  if (fallback) return request.method === 'HEAD' ? new Response(null, { status: fallback.status, statusText: fallback.statusText, headers: fallback.headers }) : fallback;
-  return new Response('Civweave is offline and this room has not been downloaded yet.', { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
-}
-
-async function cacheFirst(request) {
-  const url = new URL(request.url);
-  const cached = await findCached(url.pathname);
-  if (cached) {
-    if (request.method === 'GET') {
-      fetch(new Request(request, { cache: 'no-store' })).then(async response => {
-        if (responseLooksValid(response, url.pathname)) await (await caches.open(RUNTIME_CACHE)).put(cacheKey(url.pathname), response.clone());
-      }).catch(() => {});
-    }
-    return request.method === 'HEAD' ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers }) : cached;
-  }
-  try {
-    const response = await fetch(new Request(request, { cache: 'no-store' }));
-    if (responseLooksValid(response, url.pathname) && request.method === 'GET') await (await caches.open(RUNTIME_CACHE)).put(cacheKey(url.pathname), response.clone());
-    return request.method === 'HEAD' ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers }) : response;
-  } catch {
-    return new Response(`Civweave asset unavailable: ${url.pathname}`, { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
-  }
-}
-
-async function normalizeStableAppEntryResponse(response) {
-  const headers = new Headers(response.headers);
-  headers.delete('content-length');
-  headers.delete('content-encoding');
-  headers.delete('location');
-  if (!headers.get('content-type')) headers.set('content-type', 'text/html; charset=utf-8');
-  headers.set('cache-control', 'no-store');
-  headers.set('x-civweave-stable-entry', 'v219');
-  const body = await response.clone().arrayBuffer();
-  return new Response(body, { status: 200, statusText: 'OK', headers });
-}
-
-async function stableAppEntry(request) {
-  let response = await findCached('/app/index.html');
-  if (!response) {
-    try {
-      const fetched = await fetchFresh('/app/', 'stable-app-entry');
-      response = await normalizeStableAppEntryResponse(fetched);
-      await (await caches.open(SHELL_CACHE)).put(cacheKey('/app/index.html'), response.clone());
-    } catch {}
-  }
-  if (!response) {
-    return new Response('Civweave launcher is unavailable.', {
-      status: 503,
-      headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }
+    results.forEach((result, offset) => {
+      completed += 1;
+      if (result.status === 'rejected') failed.push({ pathname: batch[offset], message: result.reason?.message || String(result.reason) });
     });
+    const progress = {
+      type: 'CIVWEAVE_OFFLINE_PACKAGE',
+      version: VERSION,
+      revision: BUILD,
+      ready: false,
+      running: true,
+      total: assets.length,
+      completed,
+      failed,
+      updatedAt: new Date().toISOString()
+    };
+    await writeOfflineMeta(progress);
+    post(event, progress);
   }
-  const normalized = await normalizeStableAppEntryResponse(response);
-  return request.method === 'HEAD'
-    ? new Response(null, { status: normalized.status, statusText: normalized.statusText, headers: normalized.headers })
-    : normalized;
-}
 
-async function modelOnDemand(request) {
-  const cacheName = `civweave-model-${VERSION}-on-demand-v208`;
-  const cache = await caches.open(cacheName);
-  const url = new URL(request.url);
-  const cached = await cache.match(cacheKey(url.pathname), { ignoreSearch: true });
-  if (cached) return cached;
-  try {
-    const response = await fetch(new Request(request, { cache: 'no-store' }));
-    if (!responseLooksValid(response, url.pathname)) throw new Error(`Model asset returned ${response.status}`);
-    if (request.method === 'GET') await cache.put(cacheKey(url.pathname), response.clone());
-    return response;
-  } catch (error) {
-    return new Response(`Local model asset unavailable: ${error?.message || error}`, {
-      status: 503,
-      headers: { 'content-type': 'text/plain; charset=utf-8', 'x-civweave-model-package': 'not-installed' }
-    });
-  }
+  const final = {
+    type: 'CIVWEAVE_OFFLINE_PACKAGE',
+    version: VERSION,
+    revision: BUILD,
+    ready: failed.length === 0,
+    running: false,
+    total: assets.length,
+    completed,
+    failed,
+    finishedAt: new Date().toISOString()
+  };
+  await writeOfflineMeta(final);
+  post(event, final);
+  return final;
 }
 
 self.addEventListener('install', event => {
@@ -540,119 +387,63 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    await cleanLegacyCaches();
+    const keys = await caches.keys();
+    await Promise.all(keys.map(key => {
+      if (PRESERVED_CACHE_PREFIXES.some(prefix => key.startsWith(prefix))) return null;
+      if (!APP_CACHE_PREFIXES.some(prefix => key.startsWith(prefix))) return null;
+      if (key === SHELL_CACHE || key === RUNTIME_CACHE || key === OFFLINE_CACHE) return null;
+      return caches.delete(key);
+    }));
     await self.clients.claim();
   })());
 });
 
 self.addEventListener('message', event => {
-  const type = event.data?.type;
-  if (type === 'SKIP_WAITING') {
-    event.waitUntil(self.skipWaiting());
+  if (event.data?.type === 'GET_DEVICE_PACKAGE_STATUS') {
+    event.waitUntil(shellStatus().then(status => post(event, status)));
     return;
   }
-  if (type === 'GET_VERSION') {
-    post(event, { type: 'CIVWEAVE_VERSION', version: VERSION, revision: BUILD, installMode: 'lightweight-shell', offlinePackageOptional: true });
+  if (event.data?.type === 'GET_OFFLINE_PACKAGE_STATUS') {
+    event.waitUntil(offlineStatus().then(status => post(event, status)));
     return;
   }
-  if (type === 'GET_DEVICE_PACKAGE_STATUS') {
-    event.waitUntil(shellStatus().then(packet => post(event, packet)));
-    return;
-  }
-  if (type === 'GET_OFFLINE_PACKAGE_STATUS') {
-    event.waitUntil(offlineStatus().then(packet => post(event, packet)));
-    return;
-  }
-  if (type === 'DOWNLOAD_OFFLINE_PACKAGE') {
-    event.waitUntil(downloadOfflinePackage(event).catch(async error => {
-      const current = await readOfflineMeta() || {};
-      const packet = offlinePacket({ ...current, running: false, ready: false, failed: [...(current.failed || []), { pathname: 'package', message: error?.message || String(error) }], updatedAt: new Date().toISOString() });
-      await writeOfflineMeta(packet);
-      post(event, packet);
-    }));
-    return;
-  }
-  if (type === 'CLEAR_OFFLINE_PACKAGE') {
-    event.waitUntil(caches.delete(OFFLINE_CACHE).then(() => offlineStatus()).then(packet => post(event, packet)));
-    return;
-  }
-  // Compatibility replies for older installer/status panels. These layers are now on-demand.
-  if (type === 'GET_SHARED_IMAGE_STATUS') {
-    post(event, { type: 'CIVWEAVE_SHARED_IMAGE_STATUS', version: BUILD, mode: 'on-demand', ready: true, present: 0, total: 0, missing: [] });
-    return;
-  }
-  if (type === 'GET_CRITICAL_BOOT_STATUS') {
-    post(event, { type: 'CIVWEAVE_CRITICAL_BOOT_STATUS', version: BUILD, mode: 'on-demand', ready: true, present: 0, total: 0, missing: [], fullPackage: { ready: true, deferred: true } });
-    return;
-  }
-  if (type === 'GET_ADDITIONS_STATUS') {
-    post(event, { type: 'CIVWEAVE_ADDITIONS_STATUS', version: BUILD, mode: 'on-demand', ready: true, assetCount: 0, presentCount: 0, missing: [] });
+  if (event.data?.type === 'DOWNLOAD_OFFLINE_PACKAGE') {
+    event.waitUntil(downloadOfflinePackage(event));
   }
 });
 
 self.addEventListener('fetch', event => {
   const request = event.request;
-  if (!['GET', 'HEAD'].includes(request.method)) return;
+  if (request.method !== 'GET') return;
   const url = new URL(request.url);
-  if (url.origin === self.location.origin && url.pathname.startsWith(OPEN_MEDIA_ROUTE_PREFIX)) {
+  if (url.origin !== self.location.origin) return;
+  if (WORKER_PATHS.has(url.pathname)) {
     event.respondWith((async () => {
-      const cache = await caches.open(OPEN_MEDIA_CACHE);
-      const cached = await cache.match(new Request(url.href, { method: 'GET' }));
-      if (!cached) return new Response('Open learning media is not cached on this device.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
-      const baseHeaders = new Headers(cached.headers);
-      baseHeaders.set('accept-ranges', 'bytes');
-      const range = request.headers.get('range');
-      if (request.method === 'HEAD') return new Response(null, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
-      if (!range) return new Response(cached.body, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
-      const blob = await cached.blob();
-      const total = blob.size;
-      const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
-      const invalid = () => {
-        const headers = new Headers(baseHeaders);
-        headers.set('content-range', `bytes */${total}`);
-        headers.set('content-length', '0');
-        return new Response(null, { status: 416, headers });
-      };
-      if (!match || !total || (!match[1] && !match[2])) return invalid();
-      let start;
-      let end;
-      if (!match[1]) {
-        const suffix = Number(match[2]);
-        if (!Number.isSafeInteger(suffix) || suffix <= 0) return invalid();
-        start = Math.max(0, total - suffix);
-        end = total - 1;
-      } else {
-        start = Number(match[1]);
-        end = match[2] ? Number(match[2]) : total - 1;
+      try { return await fetchFresh(url.pathname, 'worker-refresh'); }
+      catch {
+        const cached = await caches.match(request, { ignoreSearch: true });
+        return cached || new Response('Civweave worker unavailable.', { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
       }
-      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start || start >= total) return invalid();
-      end = Math.min(end, total - 1);
-      const partial = blob.slice(start, end + 1, cached.headers.get('content-type') || 'application/octet-stream');
-      const headers = new Headers(baseHeaders);
-      headers.set('content-range', `bytes ${start}-${end}/${total}`);
-      headers.set('content-length', String(partial.size));
-      return new Response(partial, { status: 206, headers });
     })());
     return;
   }
-  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
-  if (WORKER_PATHS.has(url.pathname)) {
-    event.respondWith(fetch(request, { cache: 'no-store' }));
+  if (COMPAT_ENTRY_PATHS.has(url.pathname)) {
+    event.respondWith((async () => {
+      const exactPath = url.pathname === '/app/fullscreen-family-v104' ? '/app/fullscreen-family-v104.html' : url.pathname === '/app/installed-entry-v146' ? '/app/installed-entry-v146.html' : url.pathname;
+      try { return await fetchFresh(exactPath, 'entry-refresh'); }
+      catch {
+        const cached = await caches.match(cacheKey(exactPath), { ignoreSearch: true });
+        return cached || new Response('<!doctype html><meta charset="utf-8"><title>Civweave unavailable</title><main><h1>Civweave is unavailable.</h1><p>Reconnect and reload to repair the app shell.</p></main>', { status: 503, headers: { 'content-type': 'text/html; charset=utf-8' } });
+      }
+    })());
     return;
   }
-  if (MODEL_PREFIXES.some(prefix => url.pathname.startsWith(prefix))) {
-    event.respondWith(modelOnDemand(request));
-    return;
-  }
-  if (request.mode === 'navigate' && COMPAT_ENTRY_PATHS.has(url.pathname)) {
-    event.respondWith(stableAppEntry(request));
-    return;
-  }
-  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
-    event.respondWith(networkFirst(request, url.pathname === '/' ? '/index.html' : '/offline.html'));
-    return;
-  }
-  if (url.pathname.startsWith('/app/') || url.pathname.startsWith('/extensions/') || url.pathname === '/offline.html' || url.pathname.startsWith('/install-')) {
-    event.respondWith(cacheFirst(request));
+  if (url.pathname.startsWith(OPEN_MEDIA_ROUTE_PREFIX)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(OPEN_MEDIA_CACHE);
+      const cached = await cache.match(request, { ignoreSearch: false });
+      if (cached) return cached;
+      return new Response('Open learning media is not cached on this device.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    })());
   }
 });
