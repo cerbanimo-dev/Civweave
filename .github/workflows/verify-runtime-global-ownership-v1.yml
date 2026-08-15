@@ -1,0 +1,34 @@
+name: Verify runtime global ownership v1
+
+on:
+  pull_request:
+    paths:
+      - 'config/runtime-global-ownership.json'
+      - 'public/app/**'
+      - 'public/extensions/**'
+      - 'scripts/verify-runtime-global-ownership-v1.mjs'
+      - '.github/workflows/verify-runtime-global-ownership-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'config/runtime-global-ownership.json'
+      - 'public/app/**'
+      - 'public/extensions/**'
+      - 'scripts/verify-runtime-global-ownership-v1.mjs'
+      - '.github/workflows/verify-runtime-global-ownership-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check scripts/verify-runtime-global-ownership-v1.mjs
+      - run: node scripts/verify-runtime-global-ownership-v1.mjs
