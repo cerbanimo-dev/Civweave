@@ -2,60 +2,47 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,cloudflare,campus,pulse,v4Stage]=await Promise.all([
-read('public/app/local-ai/download-manager-v267.js'),read('public/app/local-ai/settings-panel-v267.js'),read('public/app/ai-capability-broker-v268.js'),read('public/app/fast-interactive-runtime-v192.js'),read('public/app/local-ai/model-registry-v266.js'),read('public/app/local-ai/runtime-v266.js'),read('public/app/local-ai/runtime-bridge-v266.js'),read('public/app/local-ai/bootstrap-v266.js'),read('public/app/local-ai/worker-v266.js'),read('public/service-worker-local-model-download-v267.js'),read('public/service-worker-v203.js'),read('scripts/build-cloudflare-pages.mjs'),read('public/app/working-campus-v156.part5.txt'),read('public/app/local-ai/test-pulse-v269.js'),read('scripts/stage-transformers-v4-assets.mjs')]);
-for(const source of [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,pulse])new Function(source);new Function(campus.replace(/\}\)\(\);\s*$/,''));
-const checks=[];const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
-check('download manager retains byte progress and targeted repair',manager.includes('bytesDownloaded')&&manager.includes('ReadableStream')&&manager.includes('async function repair('));
-check('download manager rejects poisoned metadata',manager.includes("reason:'invalid-json'")&&manager.includes("reason:'html'"));
-check('background cache validates before copy',backgroundWorker.includes('validateRecord(record,response)')&&backgroundWorker.indexOf('validateRecord(record,response)')<backgroundWorker.indexOf('cache.put(record.request,response)'));
-check('service worker retains local model background worker',sw.includes('/service-worker-local-model-download-v267.js'));
-check('registry declares exact installed context contracts',registry.includes('contextWindowTokens:40_960')&&registry.includes('contextWindowTokens:32_768')&&registry.includes('contextWindowTokens:65_536')&&registry.includes('contextWindowTokens:128_000')&&registry.includes('workingContextTokens'));
-check('registry pins Smol template metadata separately from weights',registry.includes("SMOL_TEMPLATE_REVISION='a91ed44aac643515ffe38aae1e49c7213bb4ddc0'")&&registry.includes('artifactRevision'));
-check('registry keeps current ladder plus Gemma 4 E2B E4B and CPU compatibility',registry.includes("id:'gemma4-e2b-it-q2f16-mobile'")&&registry.includes("id:'gemma4-e4b-it-q2f16-mobile'")&&registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes("id:'qwen3-4b-q4f16'"));
-check('registry pins exact optimized Gemma 3 q4 artifact lengths',registry.includes('sizeBytes')&&registry.includes('347_363')&&registry.includes('859_106_816'));
-check('Gemma 3 uses the upstream-required Transformers.js v4 browser lane',/id:'gemma3-1b-it-q4f16'[\s\S]*?runtime:'transformers-js-v4'[\s\S]*?runtimeAsset:'\/app\/vendor\/transformers-v4\/transformers\.min\.js'/.test(registry));
-check('Gemma 4 models use isolated v4 text-only q2f16 runtime',registry.includes("runtime:'transformers-js-v4'")&&registry.includes("runtimeAsset:'/app/vendor/transformers-v4/transformers.min.js'")&&registry.includes("dtype:'q2f16'")&&registry.includes('textOnly:true')&&registry.includes('requiresShaderF16:true'));
-check('Gemma 4 models declare split Pages-safe WASM runtime',registry.includes('GEMMA4_WASM_CHUNKS')&&registry.includes('ort-wasm-simd-threaded.jsep.wasm.part0')&&registry.includes('ort-wasm-simd-threaded.jsep.wasm.part1')&&registry.includes('wasmChunks:GEMMA4_WASM_CHUNKS'));
-check('Gemma 4 fallback ladder is explicit',registry.includes("fallbackIds:['gemma4-e2b-it-q2f16-mobile','qwen3-0.6b-q8-wasm']")&&registry.includes("fallbackIds:['qwen3-0.6b-q8-wasm']")&&registry.includes('function fallbacks('));
-check('Gemma 4 artifacts omit unused audio and vision graphs for chat',registry.includes("artifact('onnx/decoder_model_merged_q2f16.onnx'")&&registry.includes("artifact('onnx/embed_tokens_q2f16.onnx'")&&!registry.includes("artifact('onnx/audio_encoder")&&!registry.includes("artifact('onnx/vision_encoder"));
-check('worker is direct causal LM rather than generic pipeline',worker.includes('AutoTokenizer.from_pretrained')&&worker.includes('AutoModelForCausalLM.from_pretrained')&&!worker.includes('hf.pipeline('));
-check('worker manually applies chat template with thinking control',worker.includes('apply_chat_template')&&worker.includes('enable_thinking:Boolean(message.thinking)'));
-check('worker verifies a real adapter and preserves WASM',worker.includes('navigator.gpu.requestAdapter')&&worker.includes("backend:'wasm'"));
-check('worker supports dual Transformers runtimes without replacing v3',worker.includes("TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js'")&&worker.includes('runtimeModules=new Map()')&&worker.includes('runtimeAsset=spec=>spec?.runtimeAsset||TRANSFORMERS_V3'));
-check('worker uses Gemma text-only session graphs',worker.includes('if(spec.textOnly)modelOptions.textOnly=true')&&worker.includes('requiresShaderF16')&&worker.includes('shader-f16'));
-check('worker reassembles and persistently caches split Gemma WASM',worker.includes("RUNTIME_CACHE='civweave-local-runtime-v287'")&&worker.includes('async function splitWasmBinary(spec)')&&worker.includes('wasm.wasmBinary=binary')&&worker.includes("cache.put(path,response.clone())"));
-check('worker unloads prior model before large tier switch',worker.includes('async function unload()')&&worker.includes('loaded?.key&&loaded.key!==key')&&worker.includes('await unload()'));
-check('ordinary inference skips preflight generation while health can opt into benchmarking',worker.includes('benchmark?await warmBenchmark')&&!worker.includes("max_new_tokens:1,")&&pulse.includes('benchmark:true'));
-check('worker measures prompt, TTFT and decode speed',worker.includes('promptTokenCount')&&worker.includes('token_callback_function')&&worker.includes('ttftMs')&&worker.includes('tokensPerSecond'));
-check('worker enables diagnosable threaded SIMD WASM',worker.includes('wasm.numThreads=wasmThreads')&&worker.includes('wasm.simd=true')&&worker.includes('crossOriginIsolated')&&worker.includes('hardwareConcurrency')&&worker.includes('threadedWasmEligible'));
-check('worker keeps KV cache and runs warm decode benchmark',worker.includes('use_cache:true')&&worker.includes('benchmarkTokensPerSecond')&&worker.includes("phase(id,'benchmarking-model'"));
-check('worker guards architecture context and enforces chat memory budget before generation',worker.includes('LOCAL_MODEL_CONTEXT_EXCEEDED')&&worker.includes('promptTokens+maxNewTokens>window')&&worker.includes('prepareInputs(message')&&worker.includes("phase(id,'trimming-context'"));
-check('worker cache adapter honors artifact-specific revisions',worker.includes('revisionFor=(spec,path)=>artifactFor(spec,path)?.revision||spec.revision'));
-check('worker restores exact cached optimized Gemma q4 lengths without teeing giant response bodies',registry.includes('sizeBytes')&&registry.includes('859_106_816')&&worker.includes('withKnownLength')&&worker.includes("headers.set('content-length'")&&!worker.includes('response.clone().body'));
-check('runtime cache-busts tuned v302 worker and passes dual-runtime contracts',runtime.includes("VERSION='1.0.115-local-ai-runtime-v302-session-handoff'")&&runtime.includes("worker-v266.js?v=1.0.125-v314-smooth-fit")&&runtime.includes('runtimeAsset:spec.runtimeAsset')&&runtime.includes('wasmRoot:spec.wasmRoot')&&runtime.includes('wasmChunks:spec.wasmChunks||[]')&&runtime.includes('textOnly:Boolean(spec.textOnly)')&&runtime.includes('requiresShaderF16:Boolean(spec.requiresShaderF16)'));
-check('runtime terminates failed sessions before fallback and adapts compatibility threading',runtime.includes('freshFallbackWorker')&&!runtime.includes("forceSingleThread:spec.device==='wasm'")&&runtime.includes("spec.device==='wasm'&&(!globalThis.crossOriginIsolated||mobileLike()||hardwareConcurrency()<4)")&&worker.includes('forceSingleThread?1:'));
-check('runtime caps compatibility prompt/output work for interactive CPU fallback',runtime.includes('compatibility?Math.min(512')&&runtime.includes('compatibility?Math.min(48')&&runtime.includes('compatibilityPromptCap:true'));
-check('runtime serializes local inference requests and makes cold-start benchmarking opt-in',runtime.includes('requestQueue=Promise.resolve()')&&runtime.includes('requestQueue.then(execute,execute)')&&runtime.includes('coldStartBenchmarkOptIn:true'));
-check('runtime preserves CPU fallback and capability-safe downgrade',runtime.includes('backend-fallback-download')&&runtime.includes('LOCAL_BACKEND_CAPABILITY_UNAVAILABLE')&&runtime.includes('fallbackAllowed'));
-check('runtime tries installed E2B tier before CPU compatibility',runtime.includes('installedTierFallbacks')&&runtime.includes("phase:'tier-fallback'")&&runtime.includes('registry()?.fallbacks?.(selected)'));
-check('runtime treats Gemma v4 device/runtime failures as recoverable but not bad metadata',runtime.includes('recoverableTierFailure')&&runtime.includes("spec?.runtime!=='transformers-js-v4'")&&runtime.includes('cache miss|metadata is missing'));
-check('runtime advertises WASM performance diagnostics and Gemma tier fallback',runtime.includes('wasmPerformanceDiagnostics:true')&&runtime.includes('tierFallback:true')&&runtime.includes('gemma4Mobile:true')&&runtime.includes('dualRuntime:true')&&runtime.includes('splitWasmRuntime:true')&&runtime.includes('adaptiveWasmThreads:true'));
-check('bridge registers v282 runtime spine middleware',bridge.includes("MIDDLEWARE_ID='downloaded-local-v282'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
-check('bridge defaults interactive thinking off and agentic thinking on',bridge.includes('function thinkingFor(request,spec)')&&bridge.includes("==='agentic'"));
-check('bridge reports measured token usage and TTFT',bridge.includes('inputTokens:Number(m.promptTokens||0)')&&bridge.includes('ttftMs:m.ttftMs')&&bridge.includes("code:'LOCAL_CONTEXT'"));
-check('health pulse is short, direct and non-thinking',pulse.includes('maxNewTokens:Number(safety.maxNewTokens||32)')&&pulse.includes('thinking:false')&&pulse.includes("provider:'downloaded-local-direct'"));
-check('health pulse reports staged failure and measured performance',pulse.includes('failed at')&&pulse.includes('TTFT')&&pulse.includes('tok/s')&&pulse.includes('first-token-received'));
-check('health pulse reports WASM performance profile',pulse.includes('Warm benchmark')&&pulse.includes('WASM threads')&&pulse.includes('Isolation')&&pulse.includes('SIMD')&&pulse.includes('KV cache'));
-check('health pulse retains race-safe repair and explicit compatibility fallback',pulse.includes('repair-waiting')&&pulse.includes('metadataOnly:true')&&pulse.includes('compatibility fallback'));
-check('settings exposes model/working contexts and measured device health',settings.includes('Model window')&&settings.includes('Civweave working default')&&settings.includes('Last health PASS')&&settings.includes('TTFT'));
-check('download dock stays above the desktop navbar at bottom left and moves to the mobile safe-area top',settings.includes('left:max(10px,calc(env(safe-area-inset-left) + 8px));right:auto;bottom:max(80px,calc(env(safe-area-inset-bottom) + 70px))')&&settings.includes('@media(max-width:700px),(hover:none) and (pointer:coarse)')&&settings.includes('top:max(10px,calc(env(safe-area-inset-top) + 8px));right:max(10px,calc(env(safe-area-inset-right) + 8px));bottom:auto'));
-check('bootstrap preserves v278 download/hardware features and v282 inference',bootstrap.includes('largeExternalDataForeground:true')&&bootstrap.includes('hardwareTierUI:true')&&bootstrap.includes('canonicalCausalLM:true')&&bootstrap.includes('timingDiagnostics:true'));
-check('Working Campus requests v282 bootstrap and requires causal runtime',campus.includes("bootstrap-v266.js?v=1.0.83-v282")&&campus.includes('CivweaveLocalModelRuntimeV266?.canonicalCausalLM===true'));
-check('Working Campus still refuses deterministic substitution',campus.includes("result?.provider==='local-contract'")&&campus.includes('did not substitute deterministic chat'));
-check('Cloudflare build stages split Gemma runtime without the oversized monolith',cloudflare.includes('stage-transformers-v4-assets.mjs')&&cloudflare.includes('app/vendor/transformers-v4/transformers.min.js')&&cloudflare.includes('ort-wasm-simd-threaded.jsep.wasm.part0')&&cloudflare.includes('ort-wasm-simd-threaded.jsep.wasm.part1')&&!cloudflare.includes("resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm'),"));
-check('v4 staging pins matching ORT and splits only the JSEP WASM',v4Stage.includes("VERSION='4.2.0'")&&v4Stage.includes("ORT_VERSION='1.26.0-dev.20260416-b7804b056c'")&&v4Stage.includes('CHUNK_BYTES=16*1024*1024')&&v4Stage.includes('splitWasm')&&v4Stage.includes('wasmChunks:split.names'));
-check('capability broker retains semantic local authority split',broker.includes("return'semantic-local'")&&broker.includes("authority:'deterministic-contracts'"));
-check('runtime spine retains pre-base middleware handling',spine.includes('if(out?.handled)')&&spine.includes("handledBy='base-runtime'"));
-const context={console,globalThis:null,localStorage:{getItem:()=>null,setItem:()=>{}},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}}};context.globalThis=context;vm.createContext(context);vm.runInContext(registry,context,{filename:'model-registry-v266.js'});const R=context.CivweaveLocalModelRegistryV266;assert.equal(R.byId('qwen3-0.6b-q4f16').contextWindowTokens,40960);assert.equal(R.byId('gemma3-1b-it-q4f16').contextWindowTokens,32768);assert.equal(R.byId('gemma3-1b-it-q4f16').runtime,'transformers-js-v4');assert.equal(R.byId('gemma3-1b-it-q4f16').wasmChunks.length,2);assert.equal(R.byId('smollm3-3b-q4f16').contextWindowTokens,65536);assert.equal(R.byId('gemma4-e2b-it-q2f16-mobile').contextWindowTokens,128000);assert.equal(R.byId('gemma4-e2b-it-q2f16-mobile').workingContextTokens,8192);assert.equal(R.byId('gemma4-e4b-it-q2f16-mobile').workingContextTokens,16384);assert.equal(R.byId('gemma4-e4b-it-q2f16-mobile').runtime,'transformers-js-v4');assert.equal(R.byId('gemma4-e4b-it-q2f16-mobile').textOnly,true);assert.equal(R.byId('gemma4-e4b-it-q2f16-mobile').wasmChunks.length,2);assert.deepEqual(JSON.parse(JSON.stringify(R.byId('gemma4-e4b-it-q2f16-mobile').fallbackIds)),['gemma4-e2b-it-q2f16-mobile','qwen3-0.6b-q8-wasm']);assert.match(R.directUrl('smollm3-3b-q4f16','tokenizer_config.json'),/a91ed44aac643515ffe38aae1e49c7213bb4ddc0/);assert.match(R.directUrl('smollm3-3b-q4f16','onnx\/model_q4f16.onnx_data'),/161c5e4dbaf4167f022f9c4dbd283ffef5f7bc51/);assert.match(R.directUrl('gemma4-e2b-it-q2f16-mobile','onnx\/decoder_model_merged_q2f16.onnx_data'),/5cd5514efd375abf2801c856a3936b259cc00133/);assert.match(R.directUrl('gemma4-e4b-it-q2f16-mobile','onnx\/decoder_model_merged_q2f16.onnx_data_1'),/4d18aa8b54e354bec4705e4a4894f5bbf8956c3d/);checks.push('registry context, fallback, split runtime, Gemma 3 v4 q4, pinned Gemma mobile URLs and targeted Smol metadata repair executable');
-console.log(JSON.stringify({ok:true,revision:'local-inference-health-v314-smooth-fit',checks:checks.length,features:{canonicalCausalLM:true,contextAware:true,artifactRevisionRepair:true,webgpuAdapterProbe:true,wasmCompatibilityFallback:true,adaptiveWasmThreads:true,compatibilityPromptCap:true,gemma3OptimizedQ4:true,gemma4Mobile:true,gemmaE2B:true,gemmaE4B:true,dualRuntime:true,textOnlyGemmaGraphs:true,splitWasmRuntime:true,tierFallback:true,thinkingProfiles:true,ttft:true,tokensPerSecond:true,wasmThreads:true,simd:true,kvCache:true,warmBenchmark:true,stagedHealth:true,noSilentCapabilityDowngrade:true}},null,2));
+const [manager,settings,registry,runtime,worker,background,sw,campus,gateway]=await Promise.all([
+  'public/app/local-ai/download-manager-v267.js',
+  'public/app/local-ai/settings-panel-v267.js',
+  'public/app/local-ai/model-registry-v266.js',
+  'public/app/local-ai/runtime-v266.js',
+  'public/app/local-ai/worker-v266.js',
+  'public/service-worker-local-model-download-v267.js',
+  'public/service-worker-v203.js',
+  'public/app/working-campus-v156.js',
+  'public/app/settings-gateway-v317.js'
+].map(read));
+for(const source of [manager,settings,registry,runtime,worker,background,sw,campus,gateway])new Function(source);
+
+assert.match(manager,/bytesDownloaded/);
+assert.match(manager,/async function repair\(/);
+assert.match(background,/validateRecord\(record,response\)/);
+assert.ok(background.indexOf('validateRecord(record,response)')<background.indexOf('cache.put(record.request,response)'));
+assert.match(sw,/service-worker-local-model-download-v267\.js/);
+assert.match(registry,/contextWindowTokens/);
+assert.match(registry,/function fallbacks\(/);
+assert.match(worker,/AutoModelForCausalLM\.from_pretrained/);
+assert.match(worker,/apply_chat_template/);
+assert.match(worker,/backend:'wasm'/);
+assert.match(runtime,/serializedInference:true/);
+assert.match(runtime,/tierFallback:true/);
+assert.match(settings,/Downloaded local AI/);
+assert.match(settings,/Model window/);
+
+assert.match(gateway,/managementActivation:'explicit-secondary-action'/);
+assert.match(gateway,/generativeRuntimeOnOpen:false/);
+assert.doesNotMatch(gateway,/bootstrap-v266|runtime-v266|runtime-bridge-v266|test-pulse-v269/);
+assert.match(campus,/async function send\(/);
+const submit=campus.indexOf('async function send(');
+const bootstrap=campus.indexOf('/app/local-ai/bootstrap-v266.js',submit);
+assert.ok(bootstrap>submit,'Downloaded local AI bootstrap must remain inside explicit chat submission.');
+assert.doesNotMatch(campus,/working-campus-v156\.part|Function\s*\(|repairPersistedCampusState/);
+
+const context={console,globalThis:null,localStorage:{getItem:()=>null,setItem:()=>{}},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}}};
+context.globalThis=context;vm.createContext(context);vm.runInContext(registry,context,{filename:'model-registry-v266.js'});
+const R=context.CivweaveLocalModelRegistryV266;
+assert.ok(R?.byId?.('gemma3-1b-it-q4f16'));
+assert.ok(Array.isArray(R?.fallbacks?.('gemma4-e4b-it-q2f16-mobile')));
+
+console.log(JSON.stringify({ok:true,revision:'local-model-download-static-interface-v1',backgroundDownloadIntegrity:true,causalLM:true,settingsOpenInference:false,managementExplicit:true,generativeStart:'submit-only'},null,2));
