@@ -3,10 +3,11 @@ import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const registry=JSON.parse(await read('config/system-ownership.json'));
 const settings=registry.systems.settings;
-const paths={gateway:'public/app/settings-gateway-v317.js',controller:'public/app/model-settings-controller-v173.js',model:'public/app/model-settings-v133.js',visual:'public/app/visual-model-settings-v132.js',unified:'public/app/unified-ai-settings-v175.js',language:'public/app/language-settings-v1.js',lifecycle:'public/app/document-lifecycle-v221.js',parity:'public/app/settings-parity-v295.js',delegation:'public/app/settings-delegation-v175.js',bindGuard:'public/app/ai-settings-bind-guard-v230.js',deviceRepair:'public/app/ai-settings-device-repair-v229.js',shell:'public/app/family-shell-v104.js',campusRuntime:'public/app/working-campus-v156.part5.txt',living:'public/app/cabinets/living-school/index.html',campus:'public/app/working-campus-v156.html',codeCache:'public/service-worker-code-coherence-v288.js',localAICache:'public/service-worker-local-ai-coherence-v307.js',criticalCache:'public/service-worker-critical-v199.js'};
+const interfaceRuntime=registry.systems['interface-runtime'];
+const paths={gateway:'public/app/settings-gateway-v317.js',controller:'public/app/model-settings-controller-v173.js',model:'public/app/model-settings-v133.js',visual:'public/app/visual-model-settings-v132.js',unified:'public/app/unified-ai-settings-v175.js',language:'public/app/language-settings-v1.js',lifecycle:'public/app/document-lifecycle-v221.js',parity:'public/app/settings-parity-v295.js',delegation:'public/app/settings-delegation-v175.js',bindGuard:'public/app/ai-settings-bind-guard-v230.js',deviceRepair:'public/app/ai-settings-device-repair-v229.js',boundary:'public/app/install-boundary-v146.js',coreRuntime:'public/app/core-interface-runtime-v1.js',shell:'public/app/family-shell-v104.js',campusRuntime:'public/app/working-campus-v156.part5.txt',living:'public/app/cabinets/living-school/index.html',campus:'public/app/working-campus-v156.html',cerbanimo:'public/app/realm-console-v140.html',fellowfare:'public/app/fellowfare-cabinet-v144.html',anarchadia:'public/app/anarchadia-console-v139.html',codeCache:'public/service-worker-code-coherence-v288.js',localAICache:'public/service-worker-local-ai-coherence-v307.js',criticalCache:'public/service-worker-critical-v199.js'};
 const src=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([key,path])=>[key,await read(path)])));
 const facadeKeys=['controller','model','visual','unified','language','parity','delegation','bindGuard','deviceRepair'];
-for(const key of ['gateway','lifecycle',...facadeKeys])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
+for(const key of ['gateway','lifecycle','boundary','coreRuntime',...facadeKeys])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
 assert.equal(registry.policy,'extend-existing-owner-never-add-parallel-owner');
 assert.equal(settings.owner,paths.gateway);
 assert.equal(settings.inputOwner,paths.gateway);
@@ -16,6 +17,15 @@ assert.equal(settings.canonicalApi,'globalThis.CivweaveSettingsV320');
 assert.equal(settings.canonicalControl,'[data-open-unified-ai-settings]');
 assert.deepEqual(settings.allowedInputListenerFiles,[paths.gateway]);
 assert.deepEqual(new Set(settings.compatibilityFacades),new Set(facadeKeys.map(key=>paths[key])),'Settings compatibility facade registry drifted.');
+
+assert.ok(interfaceRuntime,'Five-system interface runtime must be registered.');
+assert.equal(interfaceRuntime.owner,paths.coreRuntime);
+assert.equal(interfaceRuntime.bootstrapCaller,paths.boundary);
+assert.equal(interfaceRuntime.routeContract,'public/app/system-routes-v227.js');
+assert.equal(interfaceRuntime.navigationSubscriber,paths.shell);
+assert.equal(interfaceRuntime.canonicalApi,'globalThis.CivweaveCoreInterfaceRuntimeV1');
+assert.deepEqual(interfaceRuntime.activeEntryRoutes,[paths.campus,paths.living,paths.cerbanimo,paths.fellowfare,paths.anarchadia]);
+
 assert.match(src.gateway,/const SELECTOR='\[data-open-unified-ai-settings\]'/);
 assert.equal((src.gateway.match(/document\.addEventListener\('click'/g)||[]).length,1,'Canonical Settings must have exactly one document click listener.');
 assert.match(src.gateway,/document\.addEventListener\('click',onClick,true\)/);
@@ -57,5 +67,20 @@ assert.match(src.campusRuntime,/setAttribute\('data-open-unified-ai-settings',''
 assert.doesNotMatch(src.living,/>Settings<\/button>/i);
 assert.match(src.living,/family-shell-v104\.js/);
 assert.match(src.campus,/data-open-unified-ai-settings/);
+
+assert.match(src.boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+assert.doesNotMatch(src.boundary,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS/,'Install boundary retained a superseded shared-loader manifest.');
+const boundaryBoot=src.boundary.match(/function installSystemExperienceSupport\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+assert.match(boundaryBoot,/addScript\(CORE_INTERFACE_RUNTIME\)/);
+assert.doesNotMatch(boundaryBoot,/SETTINGS_GATEWAY|model-settings-controller-v173|document-lifecycle-v221/,'Install boundary regained Settings/shared loading ownership.');
+assert.match(src.boundary,/sharedLoadingOwner:'core-interface-runtime-v1'/);
+assert.match(src.coreRuntime,/const SHARED_BOOT_SCRIPTS=Object\.freeze\(\[/);
+assert.match(src.coreRuntime,/['"]\/app\/settings-gateway-v317\.js['"]/);
+assert.doesNotMatch(src.coreRuntime,/model-settings-controller-v173\.js\?activate=1|document-lifecycle-v221\.js\?activate=1/,'Core runtime must not eagerly activate Settings implementation or management.');
+assert.doesNotMatch(src.coreRuntime,/data-open-unified-ai-settings|addEventListener[^\n]*\('click'/,'Core runtime may assemble Settings but may not own Settings input.');
+assert.match(src.coreRuntime,/settingsInputOwner:'settings-gateway-v317'/);
+assert.match(src.coreRuntime,/familyNavigationOwner:'family-shell-v104'/);
+
 for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(src[key].includes("'/app/settings-gateway-v317.js'"),`${paths[key]} does not pin the canonical Settings owner for offline first-click use.`);
-console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{owner:settings.owner,canonicalApi:settings.canonicalApi,oneInputListener:true,onePresentationOwner:true,oneCredentialOwner:true,languageBuiltIn:true,localModelServiceOnly:true,legacyFacadesOnly:true,compatibilityFacadeCount:facadeKeys.length,offlineFirstClick:true}},null,2));
+assert.ok(src.criticalCache.includes("'/app/core-interface-runtime-v1.js'"),'Critical cache must pin the shared five-system runtime.');
+console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,interfaceRuntime:{owner:interfaceRuntime.owner,bootstrapCaller:interfaceRuntime.bootstrapCaller,oneSharedLoader:true,systems:5},settings:{owner:settings.owner,canonicalApi:settings.canonicalApi,oneInputListener:true,onePresentationOwner:true,oneCredentialOwner:true,languageBuiltIn:true,localModelServiceOnly:true,legacyFacadesOnly:true,compatibilityFacadeCount:facadeKeys.length,offlineFirstClick:true}},null,2));

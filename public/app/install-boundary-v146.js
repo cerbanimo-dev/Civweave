@@ -17,28 +17,15 @@ const MOBILE_AI_HARDENING='/app/mobile-ai-hardening-v302.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js';
 const GUIDE_WORKSPACE='/app/guide-workspace-v242.js';
-const WORKING_CAMPUS_TOPBAR='/app/working-campus-topbar-v243.js';
 const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
-const CAMPUS_BACKGROUND_DOWNLOAD='/app/campus-background-download-v241.js';
 const SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js';
-const FELLOWFARE_GUIDE_BRIDGE='/app/fellowfare-shared-guide-bridge-v236.js';
 const ASSET_CUSTOMIZATION='/app/asset-customization-v239.js';
 const ASSET_CUSTOMIZATION_STORAGE='civweave.asset-lockboard.v239';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
-const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
-const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
+const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js';
 const HOST_NODE_SESSION='/app/host-node-session-v1.js';
-const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js';
-const QUEST_VEIL='/app/quest-veil-v1.js';
-const QUEST_VEIL_MESH='/app/quest-veil-mesh-v1.js';
-const QUEST_VEIL_LEDGER_GATE='/app/quest-veil-ledger-gate-v1.js';
-const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
-const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
-const CANONICAL_PLAYLISTS='/app/canonical-playlists-v1.js';
-const RADIO_PLAYLIST_GOVERNANCE='/app/radio-playlist-governance-v1.js';
-const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
@@ -46,30 +33,6 @@ const FALLBACK_PATHS=new Map([
   ['/app/fellowfare-cabinet-v144.html','fellowfare'],
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
-const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION];
-const SYSTEM_EXPERIENCE_SCRIPTS=[
-  SETTINGS_GATEWAY,
-  MOBILE_AI_HARDENING,
-  EXPERIENCE_ORCHESTRATOR,
-  SYSTEM_RADIO_AGENT,
-  RADIO_TRACK_SUGGESTIONS,
-  CANONICAL_PLAYLISTS,
-  RADIO_PLAYLIST_GOVERNANCE,
-  SYSTEMS_MESH_RUNTIME,
-  HOST_NODE_SESSION,
-  NODE_AI_MESH_RUNTIME,
-  QUEST_VEIL_MESH,
-  QUEST_VEIL_LEDGER_GATE,
-  QUEST_VEIL,
-  GUIDE_IDENTITY_SCRIPT,
-  REALM_SESSION_INTEGRITY,
-  GUIDE_WORKSPACE,
-  WORKING_CAMPUS_TOPBAR,
-  THEMED_SYSTEM_NAV,
-  CAMPUS_BACKGROUND_DOWNLOAD,
-  SHARED_REVIEW_SURFACE,
-  SHARED_GUIDE_SURFACE
-];
 const COMPATIBILITY_SCRIPTS=[
   ROUTE_CONTRACT,
   RELEASE_VERSION,
@@ -159,21 +122,10 @@ function installEarlyGuards(){addScript(MOBILE_AI_HARDENING);addScript(PLATFORM_
 function installSystemExperienceSupport(){
   const system=systemSurface();
   if(!system||!liveHead())return false;
-  SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);
-  if(system==='fellowfare')addScript(FELLOWFARE_GUIDE_BRIDGE);
-  installAssetCustomizationIfConfigured();
-  return true;
+  return addScript(CORE_INTERFACE_RUNTIME);
 }
-function installCanonicalSystemSupport(){
-  if(canonicalAppSurface()||!systemSurface()||!liveHead())return false;
-  CANONICAL_SYSTEM_SCRIPTS.forEach(addScript);
-  return true;
-}
-function installCanonicalSystemSupportWhenReady(){
-  if(document.body)return installCanonicalSystemSupport();
-  addEventListener('DOMContentLoaded',installCanonicalSystemSupport,{once:true});
-  return true;
-}
+function installCanonicalSystemSupport(){return installSystemExperienceSupport()}
+function installCanonicalSystemSupportWhenReady(){return installSystemExperienceSupport()}
 function installAdditions(){
   const head=document.head;
   if(systemSurface()||!liveHead(head))return false;
@@ -201,7 +153,6 @@ function resumeFromPageShow(){
   const system=systemSurface();
   if(system){
     installSystemExperienceSupport();
-    if(system!=='civweave')installCanonicalSystemSupportWhenReady();
     return true;
   }
   installEarlyGuards();
@@ -230,7 +181,6 @@ function start(){
   }
   if(system){
     root.dataset.civweaveCanonicalRealm='self-contained';
-    installCanonicalSystemSupportWhenReady();
     return;
   }
   installEarlyGuards();
@@ -248,9 +198,10 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
-  canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
-  canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
-  canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
+  canonicalRuntimeScripts:1,
+  canonicalSubsystemCompatibility:'core-interface-runtime-owned-shared-loading',
+  coreInterfaceRuntimeRevision:'v1-five-system-shared-loader-adapter-lifecycle',
+  sharedLoadingOwner:'core-interface-runtime-v1',
   settingsGatewayRevision:'v317-single-owner-first-click-only',
   settingsLaunchPolicy:'gateway-only-no-controller-lifecycle-repair-or-delegation',
   realmLocalAISettingsRevision:'v307-lazy-management-via-document-lifecycle',

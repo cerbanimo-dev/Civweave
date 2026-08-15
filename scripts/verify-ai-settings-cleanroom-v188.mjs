@@ -3,8 +3,8 @@ import {readFile} from 'node:fs/promises';
 await import('./verify-system-ownership-v317.mjs');
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const releaseVersion=(await read('VERSION')).trim();
-const sources=Object.fromEntries(await Promise.all(Object.entries({gateway:'public/app/settings-gateway-v317.js',controller:'public/app/model-settings-controller-v173.js',lifecycle:'public/app/document-lifecycle-v221.js',boundary:'public/app/install-boundary-v146.js',brand:'public/app/civweave-brand.js',credential:'public/app/device-credential-persistence-v211.js',codeCache:'public/service-worker-code-coherence-v288.js',localAICache:'public/service-worker-local-ai-coherence-v307.js',criticalCache:'public/service-worker-critical-v199.js',routes:'public/app/system-routes-v227.js',campusRuntime:'public/app/working-campus-v156.part5.txt'}).map(async([name,path])=>[name,await read(path)])));
-for(const key of ['gateway','controller','lifecycle','boundary','brand','credential'])assert.doesNotThrow(()=>new Function(sources[key]),`${key} does not compile.`);
+const sources=Object.fromEntries(await Promise.all(Object.entries({gateway:'public/app/settings-gateway-v317.js',controller:'public/app/model-settings-controller-v173.js',lifecycle:'public/app/document-lifecycle-v221.js',boundary:'public/app/install-boundary-v146.js',coreRuntime:'public/app/core-interface-runtime-v1.js',brand:'public/app/civweave-brand.js',credential:'public/app/device-credential-persistence-v211.js',codeCache:'public/service-worker-code-coherence-v288.js',localAICache:'public/service-worker-local-ai-coherence-v307.js',criticalCache:'public/service-worker-critical-v199.js',routes:'public/app/system-routes-v227.js',campusRuntime:'public/app/working-campus-v156.part5.txt'}).map(async([name,path])=>[name,await read(path)])));
+for(const key of ['gateway','controller','lifecycle','boundary','coreRuntime','brand','credential'])assert.doesNotThrow(()=>new Function(sources[key]),`${key} does not compile.`);
 
 assert.match(sources.gateway,/inputOwner:true,presentationOwner:true,credentialOwner:true/);
 assert.match(sources.gateway,/singleMenu:true/);
@@ -40,10 +40,15 @@ assert.doesNotMatch(sources.credential,/document\.addEventListener\('click'|SETT
 for(const forbidden of ['openSharedSettings','ensureSettingsRepairs','settingsRepairPromise','ai-settings-bind-guard-v230','ai-settings-device-repair-v229'])assert.ok(!sources.campusRuntime.includes(forbidden),`Campus retained old Settings preflight ${forbidden}.`);
 assert.match(sources.campusRuntime,/setAttribute\('data-open-unified-ai-settings',''\)/);
 
-assert.match(sources.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
-const experience=sources.boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
-assert.match(experience,/SETTINGS_GATEWAY/);
-for(const forbidden of ['AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','DOCUMENT_LIFECYCLE','model-settings-controller-v173','settings-delegation-v175'])assert.ok(!experience.includes(forbidden),`Boundary eagerly includes ${forbidden}.`);
+assert.match(sources.boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+assert.doesNotMatch(sources.boundary,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS/,'Install boundary must not retain system shared dependency manifests.');
+const systemBoot=sources.boundary.match(/function installSystemExperienceSupport\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+assert.match(systemBoot,/addScript\(CORE_INTERFACE_RUNTIME\)/,'Five-system boot must load the core runtime.');
+assert.doesNotMatch(systemBoot,/SETTINGS_GATEWAY|GUIDE_WORKSPACE|SYSTEM_RADIO_AGENT|\.forEach\(/,'Five-system boundary boot must not directly assemble shared owners.');
+const shared=sources.coreRuntime.match(/const SHARED_BOOT_SCRIPTS=Object\.freeze\(\[([\s\S]*?)\n\]\);/)?.[1]||'';
+assert.match(shared,/['"]\/app\/settings-gateway-v317\.js['"]/,'Core runtime must assemble the canonical Settings gateway.');
+for(const forbidden of ['AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','DOCUMENT_LIFECYCLE','model-settings-controller-v173','settings-delegation-v175'])assert.ok(!shared.includes(forbidden),`Core runtime eagerly includes ${forbidden}.`);
+assert.doesNotMatch(sources.coreRuntime,/data-open-unified-ai-settings|addEventListener[^\n]*\('click'/,'Core runtime may load Settings but may not own Settings input.');
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert.ok(sources.routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
 for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(sources[key].includes("'/app/settings-gateway-v317.js'"),`${key} does not cache the Settings gateway.`);
 console.log(JSON.stringify({ok:true,releaseVersion,revision:'settings-v320-single-owner',canonicalApi:'CivweaveSettingsV320',systems:5,synchronousPanelOpen:true,managementAfterPaint:true,providerRuntimeOnOpen:false,inferenceBootstrapOnOpen:false,prototypePatching:false,settingsApiPatching:false,brandingDependency:false,campusPreflight:false,offlineFirstClick:true},null,2));
