@@ -65,6 +65,7 @@
         "civweave:interface-runtime-phase",
         "civweave:interface-runtime-ready",
         "civweave:interface-system-ready",
+        "civweave:interface-shared-support-ready",
         "civweave:interface-system-changed",
         "civweave:interface-adapter-registered",
         "civweave:interface-adapter-unmounted",
@@ -82,6 +83,7 @@
       "rules": [
         "The install boundary may decide whether a canonical surface can boot and may request the runtime, but it does not own realm UI lifecycle.",
         "All five systems boot the same interface runtime before realm-specific shared capabilities.",
+        "The install boundary boots the runtime but never iterates or executes the shared system dependency manifest; shared loading belongs to core-interface-runtime-v1.js.",
         "Realm-specific features register adapters or subscribe to lifecycle events; they do not fork the core loader.",
         "Family navigation remains owned by family-shell-v104.js and Settings input remains owned by settings-gateway-v317.js.",
         "The runtime must be idempotent and safe across pageshow/BFCache resume."
