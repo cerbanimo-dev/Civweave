@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.112-shared-chat-face-icons-v255-source-truth-v1';
+const VERSION='1.0.113-shared-chat-face-icons-v255-idle-until-open-v1';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SHARED_ROOT_ID='cw-shared-guide-surface-v236';
 const LAUNCHER_ID='cwp215-launcher';
@@ -16,7 +16,7 @@ const ICONS=Object.freeze({
 });
 if(globalThis.CivweaveSharedChatFaceIconsV255?.version===VERSION)return;
 
-let directorPromise=null,miniLmLampTimer=0,avatarPrimed=false;
+let directorPromise=null,miniLmLampTimer=0,avatarPrimed=false,activated=false;
 function ensureExpressionDirector(){
   if(globalThis.CivweaveAvatarExpressionDirectorV343)return Promise.resolve(globalThis.CivweaveAvatarExpressionDirectorV343);
   if(directorPromise)return directorPromise;
@@ -79,13 +79,19 @@ function refreshMiniLmLamp(){
 }
 function primeAvatars(api){if(avatarPrimed||!api?.classify)return false;avatarPrimed=true;for(const system of Object.keys(ICONS))api.classify('',{system,phase:'response'});return true}
 function refresh(){installStyle();refreshMiniLmLamp();void ensureExpressionDirector().then(api=>{api?.refresh?.();primeAvatars(api);refreshMiniLmLamp()})}
+function activate(){
+  if(activated)return true;activated=true;refresh();
+  if(!miniLmLampTimer)miniLmLampTimer=setInterval(refreshMiniLmLamp,1500);
+  return true;
+}
 function start(){
-  refresh();
+  installStyle();
   addEventListener('civweave:avatar-expression',event=>applyExpression(event.detail||{}));
-  ['civweave:guide-workspace-ready','civweave:guide-workspace-state','civweave:realm-guide-thread-changed','civweave:chat-single-owner-ready','civweave:minilm-context-ready','civweave:minilm-context-fallback','civweave:minilm-package-needed'].forEach(name=>addEventListener(name,()=>queueMicrotask(refreshMiniLmLamp)));
-  miniLmLampTimer=setInterval(refreshMiniLmLamp,1500);addEventListener('pagehide',()=>clearInterval(miniLmLampTimer),{once:true});
-  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>clearInterval(miniLmLampTimer),switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,launcherNarrowPx:46,launcherContainsOnlyImage:true,sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true})
-  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSourceRewrite:false}}))}catch{}
+  ['civweave:guide-workspace-ready','civweave:guide-workspace-state','civweave:realm-guide-thread-changed','civweave:chat-single-owner-ready','civweave:minilm-context-ready','civweave:minilm-context-fallback','civweave:minilm-package-needed'].forEach(name=>addEventListener(name,event=>{if(name==='civweave:guide-workspace-state'&&event.detail?.open)activate();if(activated)queueMicrotask(refreshMiniLmLamp)}));
+  addEventListener('civweave:guide-chat-opened',activate);
+  addEventListener('pagehide',()=>{if(miniLmLampTimer)clearInterval(miniLmLampTimer);miniLmLampTimer=0},{once:true});
+  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,activate,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>{if(miniLmLampTimer)clearInterval(miniLmLampTimer);miniLmLampTimer=0},switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,launcherNarrowPx:46,launcherContainsOnlyImage:true,sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true,idleUntilChatOpen:true})
+  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSourceRewrite:false,idleUntilChatOpen:true}}))}catch{}
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
