@@ -6,9 +6,11 @@ const ROOT=new URL('../',import.meta.url);
 const radioPath=new URL('public/app/system-radio-agent-v232.js',ROOT);
 const orchestratorPath=new URL('public/app/experience-orchestrator-v232.js',ROOT);
 const boundaryPath=new URL('public/app/install-boundary-v146.js',ROOT);
+const coreRuntimePath=new URL('public/app/core-interface-runtime-v1.js',ROOT);
 const radioSource=fs.readFileSync(radioPath,'utf8');
 const orchestratorSource=fs.readFileSync(orchestratorPath,'utf8');
 const boundarySource=fs.readFileSync(boundaryPath,'utf8');
+const coreRuntimeSource=fs.readFileSync(coreRuntimePath,'utf8');
 
 class Store {
   constructor(){this.map=new Map()}
@@ -92,8 +94,10 @@ assert.match(radioSource,/@keyframes cw-radio-out-v232/,'radio surface should sl
 assert.match(radioSource,/scheduleAutoDismiss\(card\)/,'rendered radio cards should schedule their own timeout');
 assert.doesNotMatch(radioSource,/\[data-placement="transition-card"\]\s*\{[^}]*bottom:50%/,'agent placement must not pull the radio surface away from bottom-right');
 
-assert.match(boundarySource,/const SYSTEM_RADIO_AGENT='\/app\/system-radio-agent-v233\.js'/,'Active shared boundary must retain a system radio runtime.');
-assert.match(boundarySource,/SYSTEM_EXPERIENCE_SCRIPTS=\[[^\]]*EXPERIENCE_ORCHESTRATOR[^\]]*SYSTEM_RADIO_AGENT[^\]]*\]/,'Radio must remain a first-class shared experience script even when other extensions are added.');
+assert.match(coreRuntimeSource,/['"]\/app\/system-radio-agent-v233\.js['"]/,'Core interface runtime must assemble the active system radio runtime.');
+assert.match(coreRuntimeSource,/['"]\/app\/radio-track-suggestions-v240\.js['"]/,'Core interface runtime must assemble radio track suggestions.');
+assert.match(boundarySource,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+assert.doesNotMatch(boundarySource,/SYSTEM_EXPERIENCE_SCRIPTS|SYSTEM_RADIO_AGENT='\/app\/system-radio-agent-v233\.js'/,'Install boundary must not retain a second radio loader.');
 assert.match(boundarySource,/installSystemExperienceSupport\(\)/);
 
 console.log('Civweave system radio v232 compatibility contract verified.');
