@@ -54,6 +54,22 @@ test('generation runtime stamps both result and structured output provenance',as
   assert.match(source,/CIVWEAVE_LUDDITE_AI_DISABLED/);
 });
 
+test('cloud generation API labels AI provenance before returning artifacts',async()=>{
+  const source=await read('cloudflare/node-cloud/src/server-ai-entry-v2.mjs');
+  assert.match(source,/kind: 'ai-generated'/);
+  assert.match(source,/aiGenerated: true/);
+  assert.match(source,/origin: 'ai-generated'/);
+  assert.match(source,/stampStructuredOutput\(parsedOutputJson, provenance\.artifact\)/);
+  assert.match(source,/metadata: \{ generation: provenance\.generation \}/);
+});
+
+test('staging synthetic generation is explicitly non-AI provenance',async()=>{
+  const source=await read('functions/api/ai/node/generate.ts');
+  assert.match(source,/kind: "deterministic-generated"/);
+  assert.match(source,/aiGenerated: false/);
+  assert.match(source,/origin: "deterministic-generated"/);
+});
+
 test('provenance keeps AI origin immutable while human validation is additive',async()=>{
   const source=await read('public/app/content-provenance-v1.js');
   assert.match(source,/const lockedOrigin=existing\?\.origin&&existing\.origin!=='unknown'\?existing\.origin:incomingOrigin/);
