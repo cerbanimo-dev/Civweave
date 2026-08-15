@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const VERSION = 'host-node-local-capacity-v1';
+const VERSION = 'host-node-local-capacity-v2-citizen-patron-copy';
 const CAPACITY_ENDPOINT = '/api/federation/capacity';
 const ADMIT_ENDPOINT = '/api/federation/residents/admit';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
@@ -66,7 +66,7 @@ function renderCapacity(packet) {
   if (note) {
     const counts = capacity.counts || {};
     const limits = capacity.limits || {};
-    note.textContent = `${Number(counts.communityMembers || 0).toLocaleString()} / ${Number(limits.community || 0).toLocaleString()} community seats used · ${Number(counts.paidExpansionMembers || 0).toLocaleString()} / ${Number(limits.paidExpansion || 0).toLocaleString()} paid-expansion seats used · ${Number(counts.activePaidMembers || 0).toLocaleString()} paid member${Number(counts.activePaidMembers || 0) === 1 ? '' : 's'} total. A paid community resident keeps the community seat and leaves paid-expansion capacity open.`;
+    note.textContent = `${Number(counts.communityMembers || 0).toLocaleString()} / ${Number(limits.community || 0).toLocaleString()} Citizen slots used · ${Number(counts.paidExpansionMembers || 0).toLocaleString()} / ${Number(limits.paidExpansion || 0).toLocaleString()} Patron slots used · ${Number(counts.activePaidMembers || 0).toLocaleString()} active Patron${Number(counts.activePaidMembers || 0) === 1 ? '' : 's'} total. A Citizen who becomes a Patron keeps the Citizen slot and leaves Patron capacity open.`;
   }
   const join = el('cw-host-node-join');
   if (join && Number(capacity.slots.free || 0) < 1 && !selectedLocalHost()) {
@@ -109,8 +109,8 @@ async function admitResident({ quiet = false } = {}) {
   } catch (error) {
     if (help) {
       help.textContent = error.status === 409
-        ? 'This Host Node has no free community seats right now. A steward can expand capacity or you can choose another Host Node.'
-        : `Civweave could not reserve a community seat on this local Host Node: ${error.message}`;
+        ? 'This Host Node has no Citizen slots right now. A Guildkeeper can expand capacity or you can choose another Host Node.'
+        : `Civweave could not reserve a Citizen slot on this local Host Node: ${error.message}`;
     }
     throw error;
   } finally {
