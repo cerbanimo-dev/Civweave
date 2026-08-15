@@ -9,7 +9,7 @@ const enc = new TextEncoder();
 const clean = (value, max = 1200) => String(value ?? '').trim().slice(0, max);
 const nowIso = now => new Date(now).toISOString();
 const INBOUND_SCHEMA = 'civweave.hub-inbound-email-proof.v2';
-const GENERIC_RECOVERY_MESSAGE = 'If that email is a verified recovery method for this Hub, follow the email-proof instructions to continue.';
+const GENERIC_RECOVERY_MESSAGE = 'If that email is a verified recovery method for this Guild, follow the email-proof instructions to continue.';
 
 function b64url(bytes) {
   const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -33,7 +33,7 @@ async function normalizedEmailHash(email) {
 function proofKey(hash) { return `hub-inbound-proof:${clean(hash, 128)}`; }
 function validNodeId(value) {
   const nodeId = clean(value, 180).toLowerCase();
-  if (!/^[a-z0-9-]{1,120}$/.test(nodeId)) throw Object.assign(new TypeError('Hub node id is invalid.'), { status: 400 });
+  if (!/^[a-z0-9-]{1,120}$/.test(nodeId)) throw Object.assign(new TypeError('Guild node id is invalid.'), { status: 400 });
   return nodeId;
 }
 function validPurpose(value) {
@@ -46,7 +46,7 @@ function hasOutbound(env) {
 }
 
 export function parseInboundProofSubject(value) {
-  const match = clean(value, 500).match(/^Civweave Hub (verify-email|recover-account) ([A-Za-z0-9_-]{40,200})$/);
+  const match = clean(value, 500).match(/^Civweave (?:Guild|Hub) (verify-email|recover-account) ([A-Za-z0-9_-]{40,200})$/);
   return match ? Object.freeze({ purpose: match[1], token: match[2] }) : null;
 }
 
@@ -63,7 +63,7 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
       if (url.protocol !== 'https:' || url.username || url.password) throw new Error('invalid');
       return url.origin;
     } catch {
-      throw Object.assign(new Error('Hub recovery proof relay is unavailable.'), { status: 503 });
+      throw Object.assign(new Error('Guild recovery proof relay is unavailable.'), { status: 503 });
     }
   }
 
@@ -105,7 +105,7 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     const mailbox = this.mailbox();
     if (!mailbox) return Object.freeze({ sent: false, transport: 'unconfigured' });
     const code = clean(token, 400);
-    const subject = `Civweave Hub ${validPurpose(purpose)} ${code}`;
+    const subject = `Civweave Guild ${validPurpose(purpose)} ${code}`;
     const body = `Send this message from the recovery address you are proving.\n\nAfter sending, return to Civweave and paste this one-time code:\n\n${code}\n\nDo not forward this message or code.`;
     return Object.freeze({
       sent: true,
@@ -136,7 +136,7 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     return Object.freeze({
       ok: true,
       accepted: true,
-      message: this.mailbox() ? GENERIC_RECOVERY_MESSAGE : 'If that email is a verified recovery method for this Hub, a one-time recovery code has been sent.',
+      message: this.mailbox() ? GENERIC_RECOVERY_MESSAGE : 'If that email is a verified recovery method for this Guild, a one-time recovery code has been sent.',
       delivery: inbound?.delivery || Object.freeze({ sent: false, transport: 'unconfigured' }),
     });
   }
@@ -156,7 +156,7 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     const relay = await this.relay('status', token);
     if (!relay?.approved) throw Object.assign(new Error('Send the prefilled recovery email before using this code.'), { status: 409 });
     if (relay.purpose !== found.proof.purpose || relay.emailHash !== found.proof.expectedEmailHash) {
-      throw Object.assign(new Error('The authenticated email sender does not match this Hub recovery request.'), { status: 403 });
+      throw Object.assign(new Error('The authenticated email sender does not match this Guild recovery request.'), { status: 403 });
     }
     return relay;
   }
@@ -170,9 +170,9 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     const found = await this.proof(token, nodeId, 'verify-email');
     if (!found) return null;
     await this.authenticatedProof(found, token);
-    if (!found.proof.userId) throw Object.assign(new Error('Hub recovery account is unavailable.'), { status: 404 });
+    if (!found.proof.userId) throw Object.assign(new Error('Guild recovery account is unavailable.'), { status: 404 });
     const account = await this.accountForResident(found.proof.userId);
-    if (!account) throw Object.assign(new Error('Hub recovery account is unavailable.'), { status: 404 });
+    if (!account) throw Object.assign(new Error('Guild recovery account is unavailable.'), { status: 404 });
     if (!account.emailVerifiedAt) {
       const challenge = await this.issueChallenge(account, 'verify-email');
       await this.verifyEmail(challenge.token);
@@ -187,10 +187,10 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     await this.authenticatedProof(found, token);
     if (!found.proof.userId) {
       await this.consume(found, token);
-      throw Object.assign(new Error('No recoverable Hub account was confirmed for that address.'), { status: 404 });
+      throw Object.assign(new Error('No recoverable Guild account was confirmed for that address.'), { status: 404 });
     }
     const account = await this.accountForResident(found.proof.userId);
-    if (!account?.emailVerifiedAt) throw Object.assign(new Error('This Hub account does not have a verified recovery email.'), { status: 409 });
+    if (!account?.emailVerifiedAt) throw Object.assign(new Error('This Guild account does not have a verified recovery email.'), { status: 409 });
     const challenge = await this.issueChallenge(account, 'recover-account');
     const recovered = await super.completeRecovery(challenge.token);
     await this.consume(found, token);
