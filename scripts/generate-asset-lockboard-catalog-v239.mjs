@@ -13,6 +13,9 @@ const IMAGE_EXTENSIONS = new Set(['.png','.jpg','.jpeg','.webp','.gif','.svg','.
 const SOURCE_EXTENSIONS = new Set(['.html','.htm','.css','.js','.mjs','.json','.txt','.md','.webmanifest']);
 const SKIP_PREFIXES = ['downloads/knowledge-schools/'];
 const SKIP_FILES = new Set(['app/asset-lockboard-catalog-v239.json']);
+const RUNTIME_BASE_OVERRIDES = Object.freeze([
+  Object.freeze({ prefix:'/app/services/anarchadia/src/', base:'/app/services/anarchadia/workbench.html' })
+]);
 
 function walk(directory) {
   const files = [];
@@ -37,11 +40,15 @@ function skipped(absolute) {
   return SKIP_FILES.has(rel) || SKIP_PREFIXES.some(prefix => rel.startsWith(prefix));
 }
 
+function runtimeBase(sourceWebPath) {
+  return RUNTIME_BASE_OVERRIDES.find(rule => sourceWebPath.startsWith(rule.prefix))?.base || sourceWebPath;
+}
+
 function normalizeReference(raw, sourceWebPath) {
   const value = String(raw || '').trim().replace(/&amp;/g, '&');
-  if (!value || /^(?:data:|blob:|https?:|mailto:|tel:|javascript:|#)/i.test(value)) return null;
+  if (!value || value.includes('${') || /^(?:data:|blob:|https?:|mailto:|tel:|javascript:|#)/i.test(value)) return null;
   let url;
-  try { url = new URL(value, `https://civweave.local${sourceWebPath}`); } catch { return null; }
+  try { url = new URL(value, `https://civweave.local${runtimeBase(sourceWebPath)}`); } catch { return null; }
   const extension = extname(url.pathname).toLowerCase();
   if (!IMAGE_EXTENSIONS.has(extension)) return null;
   return decodeURI(url.pathname);
