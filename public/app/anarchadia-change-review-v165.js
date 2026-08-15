@@ -109,7 +109,7 @@ function decorateCards(){
   });
 }
 function decorateMerlin(){
-  const log=document.querySelector?.('#ac-merlin-log'),item=latestReview();if(!log||!item)return;let controls=log.querySelector('.ac165-merlin-actions');if(!controls){controls=document.createElement('div');controls.className='ac165-merlin-actions';log.append(controls)}controls.innerHTML=`<button type="button" data-ac165-review="${esc(item.id)}">REVIEW REQUEST</button><button type="button" data-ac165-approve="${esc(item.id)}">APPROVE & GENERATE PREVIEW</button>`;
+  const log=document.querySelector?.('#ac-merlin-log'),item=latestReview();if(!log||!item)return;let controls=log.querySelector('.ac165-merlin-actions');if(!controls){controls=document.createElement('div');controls.className='ac165-merlin-actions';log.append(controls)}const markup=`<button type="button" data-ac165-review="${esc(item.id)}">REVIEW REQUEST</button><button type="button" data-ac165-approve="${esc(item.id)}">APPROVE & GENERATE PREVIEW</button>`;if(controls.innerHTML!==markup)controls.innerHTML=markup;
 }
 function decoratePreview(){
   const dialog=document.querySelector?.('#ac-preview-dialog'),item=proposal(currentPreviewId);if(!dialog||!item?.preview?.srcdoc)return;const actions=dialog.querySelector('.ac-dialog-actions');if(!actions)return;
@@ -144,7 +144,7 @@ function captureClick(event){
   if(target.dataset.preview){currentPreviewId=target.dataset.preview;setTimeout(decoratePreview,0);return}
   if(target.dataset.rerun){const item=proposal(target.dataset.rerun);if(item&&item.approval?.state!=='approved'&&!item.preview?.srcdoc){event.preventDefault();event.stopImmediatePropagation();openReview(item.id)}}
 }
-function boot(){injectStyles();ensureReviewDialog();document.addEventListener('submit',captureSubmit,true);document.addEventListener('click',captureClick,true);const observer=new MutationObserver(scheduleDecorate);observer.observe(document.documentElement,{childList:true,subtree:true});patchAvailable();importPendingActions();scheduleDecorate();addEventListener('civweave:actions-changed',()=>{importPendingActions();scheduleDecorate()});addEventListener('storage',event=>{if([CONSOLE_KEY,ACTION_KEY].includes(event.key))scheduleDecorate()})}
+function boot(){injectStyles();ensureReviewDialog();document.addEventListener('submit',captureSubmit,true);document.addEventListener('click',captureClick,true);const observer=new MutationObserver(scheduleDecorate);document.querySelectorAll('#ac-proposal-list,#ac-pipeline-list').forEach(list=>observer.observe(list,{childList:true}));patchAvailable();importPendingActions();scheduleDecorate();addEventListener('civweave:actions-changed',()=>{importPendingActions();scheduleDecorate()});addEventListener('storage',event=>{if([CONSOLE_KEY,ACTION_KEY].includes(event.key))scheduleDecorate()})}
 if(hasDOM){document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot()}
 globalThis.AnarchadiaChangeReviewV165={version:VERSION,importAction,importPendingActions,latestReview,openReview,approveAndRun,selectPreview,revertPreview,manualSubmit,patchAvailable,explicitApproval};
 })();
