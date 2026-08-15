@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,7 +9,7 @@ const repoRoot = resolve(scriptDir, '..');
 const functionsRoot = resolve(repoRoot, 'functions');
 const stagingRuntimePath = resolve(functionsRoot, '_shared', 'staging-runtime.ts');
 const localToolsRoot = resolve(repoRoot, 'tools', 'civweave-dev-mcp');
-const localConfigPath = resolve(localToolsRoot, 'wrangler.local-staging.jsonc');
+const retiredLocalConfigPath = resolve(localToolsRoot, 'wrangler.local-staging.jsonc');
 const localLauncherPath = resolve(localToolsRoot, 'start-local-staging.mjs');
 const localSpawnPath = resolve(localToolsRoot, 'lib', 'local-staging-spawn.mjs');
 
@@ -62,32 +62,21 @@ for (const marker of [
   if (!stagingRuntime.includes(marker)) fail(`staging runtime no longer recognizes loopback: ${marker}`);
 }
 
-const config = readFileSync(localConfigPath, 'utf8');
-for (const marker of [
-  '"name": "civweave-local-staging"',
-  '"CIVWEAVE_ENVIRONMENT": "staging"',
-  '"CIVWEAVE_PRODUCTION_ISOLATION": "true"',
-]) {
-  if (!config.includes(marker)) fail(`local staging config is missing safety marker: ${marker}`);
-}
-if (config.includes('"pages_build_output_dir"')) {
-  fail('local staging Wrangler config must remain local-development-only; static assets are passed explicitly by the launcher.');
-}
-if (/"name"\s*:\s*"civweave"(?:\s|,)/.test(config)) {
-  fail('local staging config must never target the production Pages project name.');
+if (existsSync(retiredLocalConfigPath)) {
+  fail('local staging must not use a custom Pages Wrangler config; Pages dev rejects nonstandard config paths.');
 }
 
 const launcher = readFileSync(localLauncherPath, 'utf8');
 for (const marker of [
-  "'pages'",
-  "'dev'",
-  "'public'",
   "'127.0.0.1'",
   '8788',
-  'wrangler.local-staging.jsonc',
   'localStagingSpawnSpec',
+  'localStagingWranglerArgs',
 ]) {
   if (!launcher.includes(marker)) fail(`local staging launcher is missing expected contract marker: ${marker}`);
+}
+if (launcher.includes('wrangler.local-staging.jsonc')) {
+  fail('local staging launcher must not reference a custom Wrangler config path.');
 }
 if (!launcher.includes("const loopbackHosts = new Set(['127.0.0.1', 'localhost', '::1'])")) {
   fail('local staging launcher must remain loopback-only.');
@@ -99,8 +88,22 @@ for (const marker of [
   'env.ComSpec || env.COMSPEC',
   "['/d', '/s', '/c', 'npx'",
   "command: 'npx'",
+  "'pages'",
+  "'dev'",
+  "'public'",
+  "'--compatibility-date'",
+  "'2026-08-04'",
+  "'--compatibility-flag'",
+  "'nodejs_compat'",
+  "'--binding'",
+  "'CIVWEAVE_ENVIRONMENT=staging'",
+  "'CIVWEAVE_LOCAL_STAGING=1'",
+  "'CIVWEAVE_PRODUCTION_ISOLATION=true'",
 ]) {
-  if (!spawnContract.includes(marker)) fail(`local staging spawn contract is missing Windows compatibility marker: ${marker}`);
+  if (!spawnContract.includes(marker)) fail(`local staging spawn contract is missing safety marker: ${marker}`);
+}
+if (/['"](?:-c|--config)['"]/.test(spawnContract)) {
+  fail('local staging Pages args must not pass -c/--config; Pages rejects custom configuration paths.');
 }
 
 for (const file of walk(functionsRoot)) {
@@ -120,5 +123,5 @@ for (const file of walk(functionsRoot)) {
 }
 
 if (!process.exitCode) {
-  process.stdout.write('[local-staging] isolation verified: dev-tool-owned loopback staging uses staging fixtures, Windows launches through ComSpec, and known production service targets are guarded.\n');
+  process.stdout.write('[local-staging] isolation verified: config-free Pages dev uses explicit staging bindings, Windows launches through ComSpec, and known production service targets are guarded.\n');
 }
