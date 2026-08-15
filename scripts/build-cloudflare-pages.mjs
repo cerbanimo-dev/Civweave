@@ -31,15 +31,10 @@ const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
 const federationDataStage = resolve(scriptDir, "stage-federation-finder-data-v274.mjs");
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
 const mobileInstallBuilder = resolve(scriptDir, "build-mobile-install-kit.mjs");
-const validationSafe = resolve(scriptDir, "apply-confidence-weighted-validation-v1-safe.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 const githubRepo = process.env.GITHUB_REPOSITORY || 'cerbanimo-dev/Civweave';
 
-// Keep only cheap deterministic synchronizers in the deploy path. Expensive
-// verification belongs in CI before merge, not in the CDN publish job.
-await import('./sync-release-version-assets.mjs');
-await import('./sync-release-coherence-v220.mjs');
 await import('./generate-asset-lockboard-catalog-v239.mjs');
 
 function walkFiles(directory) {
@@ -149,12 +144,8 @@ if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) {
   throw new Error(`Static source directory not found: ${sourceDir}`);
 }
 
-if (existsSync(validationSafe)) {
-  runNodeScript(validationSafe, "Confidence-weighted validation transform failed.");
-}
-
-// These generated runtime/data lanes are independent. Build them concurrently
-// instead of serially blocking production on each network/package operation.
+// Generated runtime/data lanes are independent. They stage assets, but they do
+// not rewrite committed application source during deployment.
 await Promise.all([
   runNodeScriptAsync(transformerStage, "Transformers.js staging failed."),
   runNodeScriptAsync(transformerV4Stage, "Transformers.js 4.2 Gemma 4 staging failed."),
@@ -163,9 +154,6 @@ await Promise.all([
   runNodeScriptAsync(parityMaterializer, "Civweave parity ledger materialization failed."),
 ]);
 
-// Map packaging consumes the staged renderer/atlas. Pocket Campus packaging is
-// tiny but still owns the uncommitted public seed, so retain it with the portable
-// ZIP shim while keeping the expensive verification suite out of deployment.
 runNodeScript(mapPackageBuilder, "Civweave Map v1 package build failed.");
 withPortableZipFallback(() => runNodeScript(mobileInstallBuilder, "Civweave mobile/Pocket Campus package build failed."));
 
@@ -209,8 +197,6 @@ cpSync(sourceDir, outputDir, {
 });
 externalizeKnowledgeSchoolZips();
 
-// Audit the actual publish tree once. The old deploy recursively scanned both
-// source and output, doubling filesystem I/O after already rebuilding artifacts.
 const outputOversized = oversizedFiles(outputDir);
 if (outputOversized.length) {
   throw new Error(`Cloudflare Pages output contains ${outputOversized.length} file(s) above 24 MiB:\n- ${formatOversized(outputDir, outputOversized)}\n`);
