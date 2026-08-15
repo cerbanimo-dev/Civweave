@@ -26,7 +26,9 @@ assert.match(headers,/Cross-Origin-Embedder-Policy: credentialless/);
 assert.match(runtime,/compatibility\?Math\.min\(512,Math\.max\(192,/);
 assert.match(runtime,/compatibility\?Math\.min\(48,Math\.max\(8,/);
 assert.match(runtime,/compatibilityPromptCap:true/);
-assert.match(runtime,/function residencyMs\(\).*?hidden.*?30000.*?mobileLike\(\).*?90000.*?300000/s);
+assert.match(runtime,/function residencyMs\(\).*?hidden.*?return 0.*?mobileLike\(\).*?15000.*?30000/s);
+assert.match(runtime,/visibilitychange.*?hidden.*?shutdown\(\{reason:'tab-hidden'\}\)/s,'hidden tabs must release local model memory immediately');
+assert.match(runtime,/idleResidencyStopShip:true/,'resource-safe idle residency contract must be exported');
 assert.match(runtime,/function prewarm\(/,'explicit low-level prewarm remains available to non-UI callers');
 assert.match(runtime,/selected\.device!=='webgpu'.*?compatibility-model-not-prewarmed/s);
 assert.match(runtime,/addEventListener\('pagehide'.*?shutdown/s);
@@ -102,4 +104,4 @@ assert.match(wrapper,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?in
 assert.match(coherence,/CW_LOCAL_AI_EXTRA_PATHS[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/CW_LOCAL_AI_CRITICAL[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/smoothFitOrchestrator: true/);
-console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v320-submit-only-ui',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'forbidden-from-chat-and-settings',generativeStart:'submit-only',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v320-content-service',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v321-idle-resource-safe',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:30000,mobileMs:15000,hiddenMs:0},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'forbidden-from-chat-and-settings',generativeStart:'submit-only',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v320-content-service',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));

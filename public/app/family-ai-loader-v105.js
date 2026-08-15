@@ -1,8 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.124-headless-canonical-chat-r52-economic-value-v1-settings-gateway-v317';
-const LOCAL_AI_BOOTSTRAP_REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
+const VERSION='1.0.125-headless-canonical-chat-r53-idle-safe';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -20,7 +19,7 @@ const VALUE_CORE=[
 const VALUE_MODEL=[
   ['/app/civweave-basic-value-model-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueModelV1],
   ['/app/civweave-basic-value-review-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueReviewV1],
-  ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueSystemsV1]
+  ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1-idle-safe-v1',()=>globalThis.CivweaveBasicValueSystemsV1?.eventDriven===true]
 ];
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.7-v192',()=>globalThis.CivweaveFastInteractiveV192];
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.4',()=>globalThis.CivweaveAssistantV141];
@@ -33,7 +32,6 @@ const OPTIONAL=[
   ['/app/intention-ui-v138.js?v=1.0.4',()=>globalThis.CivweaveIntentionUI],
   ['/app/local-object-mesh-v146.js?v=1.0.4',()=>globalThis.CivweaveLocalMeshV146],
   ['/app/core-loop-v152.js?v=1.0.4',()=>globalThis.CivweaveCoreLoopV152],
-  ['/app/local-ai/bootstrap-v266.js?v=1.0.121-local-ai-coherence-v307',()=>globalThis.CivweaveLocalAIBootstrapV266?.revision===LOCAL_AI_BOOTSTRAP_REVISION],
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
 ];
 const LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
@@ -222,11 +220,12 @@ globalThis.CivweaveFamilyAILoaderV105={
   transformerActive:false,
   memoryRevision:'v192-fast-relevant-memory',
   latencyRevision:'v250-headless-explicit-demand-only',
-  localModelPathway:'optional-v307-coherent-bootstrap',
+  localModelPathway:'explicit-demand-only-v315',
+  localAIOptionalSideEffects:false,
   knowledgeRevision:'v271-local-encyclopedia',
   canonicalChatOwner:'guide-workspace-v242',
   validationCloudOptIn:'v1',
-  economicValueRevision:'v1-model-estimate-plus-rubric-review',
+  economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',
   eagerWarm:false
 };
 })();
