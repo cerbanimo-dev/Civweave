@@ -1,12 +1,13 @@
 services:
-  civweave-host-node:
+  civweave:
     build: .
     ports:
       - "8787:8787"
     environment:
-      HUB_NAME: Local Civweave Host Node
+      HOST: 0.0.0.0
+      PORT: 8787
       DATA_DIR: /app/data
-      # HUB_TOKEN: replace-with-a-private-token
     volumes:
-      - ./data:/app/data
-    restart: unless-stopped
+      - civweave-data:/app/data
+volumes:
+  civweave-data:

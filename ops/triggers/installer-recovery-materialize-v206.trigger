@@ -1,8 +1,0 @@
-Civweave installer recovery v206
-source_main: eb3e7bb47ef28ab58c77352b1ed37bca2e931cfd
-reported: 2026-08-05T14:19:00-04:00
-retry: current-worker-build-aligned
-alignment: isolated-recovery-verifiers
-matrix: human-triggered-final
-finalize: explicit-collision-fixture-and-v206-wrapper
-verification: final-human-matrix

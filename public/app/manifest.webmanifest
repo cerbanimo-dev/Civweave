@@ -1,124 +1,25 @@
 {
-  "name": "Civweave v1.0.160",
-  "short_name": "Civweave",
-  "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
-  "id": "/civweave-local",
-  "start_url": "/app/installed-entry-v146.html?installed=1",
-  "scope": "/",
-  "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
+  "name":"Civweave",
+  "short_name":"Civweave",
+  "description":"Local-first Civweave campus with learning, work, exchange, governance, and optional AI.",
+  "id":"/civweave",
+  "start_url":"/app/campus.html",
+  "scope":"/",
+  "display":"standalone",
+  "background_color":"#07131f",
+  "theme_color":"#07131f",
+  "orientation":"any",
+  "categories":["productivity","education","social"],
+  "icons":[
+    {"src":"/app/logos/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/app/logos/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/app/logos/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
-  "launch_handler": {
-    "client_mode": "navigate-new"
-  },
-  "background_color": "#061019",
-  "theme_color": "#061019",
-  "orientation": "any",
-  "categories": [
-    "productivity",
-    "education",
-    "social"
-  ],
-  "prefer_related_applications": false,
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://civweave.cc/app/manifest.webmanifest",
-      "id": "https://civweave.cc/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://civweave.pages.dev/app/manifest.webmanifest",
-      "id": "https://civweave.pages.dev/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://commonweave.pages.dev/app/manifest.webmanifest",
-      "id": "https://commonweave.pages.dev/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://civweave-host-node.onrender.com/app/manifest.webmanifest",
-      "id": "https://civweave-host-node.onrender.com/civweave-local"
-    }
-  ],
-  "icons": [
-    {
-      "src": "/app/logos/civweave-pwa-192-v247.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/app/logos/civweave-pwa-512-v247.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/app/logos/civweave-pwa-maskable-512-v247.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Civweave",
-      "url": "/app/installed-entry-v146.html?installed=1&system=civweave",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Living School",
-      "url": "/app/installed-entry-v146.html?installed=1&system=living-school",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Cerbanimo",
-      "url": "/app/installed-entry-v146.html?installed=1&system=cerbanimo",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "FellowFare",
-      "url": "/app/installed-entry-v146.html?installed=1&system=fellowfare",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Anarchadia",
-      "url": "/app/installed-entry-v146.html?installed=1&system=anarchadia",
-      "icons": [
-        {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
-    }
+  "shortcuts":[
+    {"name":"Civweave","url":"/app/campus.html"},
+    {"name":"Living School","url":"/app/living-school.html"},
+    {"name":"Cerbanimo","url":"/app/cerbanimo.html"},
+    {"name":"FellowFare","url":"/app/fellowfare.html"},
+    {"name":"Anarchadia","url":"/app/anarchadia.html"}
   ]
 }

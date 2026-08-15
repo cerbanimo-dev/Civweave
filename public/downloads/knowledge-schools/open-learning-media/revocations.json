@@ -1,7 +1,0 @@
-{
-  "schema": "civweave.open-learning-media-revocations.v1",
-  "updated_at": "2026-08-10T03:15:00Z",
-  "record_keys": [],
-  "content_hashes": [],
-  "notes": "Emergency fail-closed denylist for media whose redistribution rights or provenance become disputed after harvest. Add a provider:provider_id record key or SHA-256 content hash to block new caching, playback, advertisement, serving, and mesh receipt."
-}

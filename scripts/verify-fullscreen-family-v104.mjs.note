@@ -1,1 +1,0 @@
-This verifier is intentionally paired with scripts/verify-cabinet-mode-v142.mjs during the v1.0.4 transition. The existing cabinet-mode verification entry remains in npm check so CI validates the new software-first delivery boundary without weakening the rest of the suite.
