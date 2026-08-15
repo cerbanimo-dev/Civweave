@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [review,boundary,installer,status,versionText,packageSource]=await Promise.all([
+const [review,boundary,coreRuntime,installer,status,versionText,packageSource]=await Promise.all([
   read('public/app/shared-review-surface-v234.js'),
   read('public/app/install-boundary-v146.js'),
+  read('public/app/core-interface-runtime-v1.js'),
   read('public/app/index.html'),
   read('public/app/offline-campus-status-v210.js'),
   read('VERSION'),
@@ -34,9 +35,10 @@ assert.match(review,/write\(WORKING_KEY/,'Weave activation must synchronize Work
 assert.match(review,/civweave:review-plan-activated/,'Weave activation must emit a review lifecycle event.');
 assert.match(review,/civweave:review-action-approved/,'Realm approval must emit a review lifecycle event.');
 
-assert.match(boundary,/SHARED_REVIEW_SURFACE='\/app\/shared-review-surface-v234\.js'/,'Shared boundary must load the review extension.');
-const experienceBlock=boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\];/)?.[1]||'';
-assert.ok(experienceBlock.includes('SHARED_REVIEW_SURFACE'),'Review extension must remain first-class in the approved experience stack on all five system surfaces.');
+assert.match(coreRuntime,/['"]\/app\/shared-review-surface-v234\.js['"]/,'Core interface runtime must assemble the shared review owner.');
+assert.match(coreRuntime,/const SHARED_BOOT_SCRIPTS=Object\.freeze\(\[/);
+assert.match(boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+assert.doesNotMatch(boundary,/SYSTEM_EXPERIENCE_SCRIPTS|SHARED_REVIEW_SURFACE='\/app\/shared-review-surface-v234\.js'/,'Install boundary must not retain a second review-loading manifest.');
 assert.match(boundary,/sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review'/);
 
 assert.doesNotMatch(installer,/new MutationObserver\(renderProgress\)/,'Installer progress must not observe and rewrite its own hidden/disabled attributes.');
@@ -54,6 +56,7 @@ console.log(JSON.stringify({
   version,
   revision:'shared-review-surface-v234',
   reviewKinds:['weave','realm-action'],
+  interfaceRuntime:'core-interface-runtime-v1',
   chatGateFormats:2,
   reviewWeavesCollapsedByDefault:true,
   installerMutationFeedbackLoop:false,
