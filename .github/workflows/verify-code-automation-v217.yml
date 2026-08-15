@@ -3,8 +3,28 @@ name: Verify Civweave Code Automation
 on:
   push:
     branches: [main, brand/civweave-total-rename]
+    paths:
+      - 'public/app/code-automation-orchestrator-v217.js'
+      - 'public/app/weaveling-memory-bridge-v191.js'
+      - 'scripts/lib/code-automation-core.mjs'
+      - 'scripts/code-automation-jules-dispatch.mjs'
+      - 'scripts/code-automation-monitor.mjs'
+      - 'scripts/verify-code-automation-v217.mjs'
+      - 'scripts/test-code-automation-core-v217.mjs'
+      - 'scripts/test-code-automation-browser-v217.mjs'
+      - '.github/workflows/verify-code-automation-v217.yml'
   pull_request:
     branches: [main, brand/civweave-total-rename]
+    paths:
+      - 'public/app/code-automation-orchestrator-v217.js'
+      - 'public/app/weaveling-memory-bridge-v191.js'
+      - 'scripts/lib/code-automation-core.mjs'
+      - 'scripts/code-automation-jules-dispatch.mjs'
+      - 'scripts/code-automation-monitor.mjs'
+      - 'scripts/verify-code-automation-v217.mjs'
+      - 'scripts/test-code-automation-core-v217.mjs'
+      - 'scripts/test-code-automation-browser-v217.mjs'
+      - '.github/workflows/verify-code-automation-v217.yml'
   workflow_dispatch:
 
 permissions:
