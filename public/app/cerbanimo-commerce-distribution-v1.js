@@ -133,7 +133,7 @@ function buildAnnualDistribution(input={}){
   const participantRows=contributorPoolMinor?roleAllocation(contributorPoolMinor,'annual-cotoken-contributor',participants):[];
   const host={
     contributorId:clean(input.host?.contributorId||input.hostId||`node-host:${nodeId}`,180),
-    contributorName:clean(input.host?.contributorName||input.host?.name||'Node host',180),
+    contributorName:clean(input.host?.contributorName||input.host?.name||'Guildkeeper',180),
     stripeAccountId:clean(input.host?.stripeAccountId||input.hostStripeAccountId,180)||null,
     weight:1
   };
@@ -151,7 +151,7 @@ function buildAnnualDistribution(input={}){
       ? clean(stewardInput.contributorId||stewardInput.appointmentId||`territory-steward:${territoryId}`,180)
       : `territory-reserve:${territoryId}`,
     contributorName:territoryPayoutReady
-      ? clean(stewardInput.contributorName||stewardInput.publicName||stewardInput.name||'Territory Steward',180)
+      ? clean(stewardInput.contributorName||stewardInput.publicName||stewardInput.name||'Charterkeeper',180)
       : `Territory Operations Reserve · ${territoryId}`,
     stripeAccountId:territoryPayoutReady?clean(stewardInput.stripeAccountId||stewardInput.connectedAccountId,180):null,
     territoryId,
