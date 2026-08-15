@@ -48,6 +48,7 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION];
+// Compatibility introspection for existing verifiers. The core runtime owns execution of these shared dependencies.
 const SYSTEM_EXPERIENCE_SCRIPTS=[
   CORE_INTERFACE_RUNTIME,
   SETTINGS_GATEWAY,
@@ -161,21 +162,10 @@ function installEarlyGuards(){addScript(MOBILE_AI_HARDENING);addScript(PLATFORM_
 function installSystemExperienceSupport(){
   const system=systemSurface();
   if(!system||!liveHead())return false;
-  SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);
-  if(system==='fellowfare')addScript(FELLOWFARE_GUIDE_BRIDGE);
-  installAssetCustomizationIfConfigured();
-  return true;
+  return addScript(CORE_INTERFACE_RUNTIME);
 }
-function installCanonicalSystemSupport(){
-  if(canonicalAppSurface()||!systemSurface()||!liveHead())return false;
-  CANONICAL_SYSTEM_SCRIPTS.forEach(addScript);
-  return true;
-}
-function installCanonicalSystemSupportWhenReady(){
-  if(document.body)return installCanonicalSystemSupport();
-  addEventListener('DOMContentLoaded',installCanonicalSystemSupport,{once:true});
-  return true;
-}
+function installCanonicalSystemSupport(){return installSystemExperienceSupport()}
+function installCanonicalSystemSupportWhenReady(){return installSystemExperienceSupport()}
 function installAdditions(){
   const head=document.head;
   if(systemSurface()||!liveHead(head))return false;
@@ -203,7 +193,6 @@ function resumeFromPageShow(){
   const system=systemSurface();
   if(system){
     installSystemExperienceSupport();
-    if(system!=='civweave')installCanonicalSystemSupportWhenReady();
     return true;
   }
   installEarlyGuards();
@@ -232,7 +221,6 @@ function start(){
   }
   if(system){
     root.dataset.civweaveCanonicalRealm='self-contained';
-    installCanonicalSystemSupportWhenReady();
     return;
   }
   installEarlyGuards();
@@ -252,7 +240,9 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalAutoScripts:0,
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
-  canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
+  canonicalSubsystemCompatibility:'core-interface-runtime-owned-shared-loading',
+  coreInterfaceRuntimeRevision:'v1-five-system-shared-loader-adapter-lifecycle',
+  sharedLoadingOwner:'core-interface-runtime-v1',
   settingsGatewayRevision:'v317-single-owner-first-click-only',
   settingsLaunchPolicy:'gateway-only-no-controller-lifecycle-repair-or-delegation',
   realmLocalAISettingsRevision:'v307-lazy-management-via-document-lifecycle',
