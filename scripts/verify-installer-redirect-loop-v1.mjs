@@ -3,26 +3,30 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const version=(await read('VERSION')).trim();
-const [repairOnly,boundary,installedEntryHtml,returnGuard,localServer]=await Promise.all([
+const [repairOnly,boundary,installedEntryHtml,installedEntryRuntime,returnGuard,localServer]=await Promise.all([
   read('public/app/installer-repair-only-v2.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/installed-entry-v146.html'),
+  read('public/app/installed-entry-v146.js'),
   read('public/app/working-campus-return-guard-v425.js'),
   read(`releases/${version}/server/server-local-v131.mjs`)
 ]);
-new Function(repairOnly);new Function(boundary);new Function(returnGuard);
+new Function(repairOnly);new Function(boundary);new Function(installedEntryRuntime);new Function(returnGuard);
 assert.match(repairOnly,/function resumeRequiredNext\(\)/,'Installer lost required-next recovery.');
 assert.match(repairOnly,/params\.get\('install'\)===['"]required['"]/,'Installer no longer recognizes install=required.');
 assert.match(repairOnly,/CANONICAL_NEXT_PATHS/,'Installer required-next recovery is not allowlisted.');
-assert.match(repairOnly,/if\(!required\|\|!rawNext\|\|!installedDisplay\(\)\)return false/,'Required-next recovery can run outside installed display mode.');
+assert.match(repairOnly,/if\(!required\|\|!rawNext\|\|!installedDisplay\(\)\)return false/,'Repair-only required-next recovery must remain conservative outside installed display mode.');
 assert.match(repairOnly,/target\.searchParams\.set\('installed','1'\)/,'Installed recovery target is not marked installed.');
-assert.match(repairOnly,/browserRuntimePolicy:'installer-only-until-installed-display'/,'Installer repair bridge lost install-only policy.');
+assert.match(repairOnly,/browserRuntimePolicy:'installer-only-until-installed-display'/,'Installer repair bridge lost its conservative repair-only policy.');
 assert.match(repairOnly,/cacheDistinctPath:true/,'Installer repair bridge lost the stale-cache escape path.');
-assert.match(boundary,/function allowed\(\)\{return installedDisplay\(\)\|\|developer\(\)\}/,'Shared boundary can still authorize ordinary browser runtime.');
+assert.match(boundary,/const INSTALL_CAPABILITY_KEY=['"]civweave\.pwa\.installed-capability\.v1['"]/,'Shared boundary lost the durable installed capability key.');
+assert.match(boundary,/function allowed\(\)\{return installedDisplay\(\)\|\|installedCapability\(\)\|\|developer\(\)\}/,'Shared boundary must authorize only installed display, verified installed capability, or local developer mode.');
 assert.match(boundary,/installedQueryIsAuthorization:false/,'installed=1 can become authorization again.');
-assert.match(installedEntryHtml,/installed-entry-browser-gate-v1/,'Installed entry lost its pre-paint browser gate.');
-assert.match(installedEntryHtml,/location\.replace\(installer\.href\)/,'Installed entry no longer redirects ordinary browser display to installer.');
+assert.match(installedEntryHtml,/installed-entry-browser-gate-v2/,'Installed entry lost its capability-aware pre-paint gate.');
+assert.match(installedEntryHtml,/navigator\.getInstalledRelatedApps\(\)/,'Installed entry cannot recover an existing install when display mode is misreported.');
+assert.match(installedEntryRuntime,/async function installedLaunchAuthorized\(\)/,'Installed runtime lost its capability-aware authorization boundary.');
+assert.match(installedEntryRuntime,/browserRuntimePolicy:'installed-display-or-verified-installed-capability'/,'Installed runtime policy drifted from capability-aware install authorization.');
 assert.match(returnGuard,/function preauthorizeCanonicalCampus\(\)/,'Working Campus lost its installed-return recovery marker.');
 assert.match(localServer,/const isInstallerSurface = originalPathname === '\/app\/index\.html'/,'Local host no longer exempts the installer document from legacy /app redirects.');
 assert.match(localServer,/if \(!isAsset && !isInstallerSurface\)/,'Legacy route redirect can catch the installer document again.');
-console.log(JSON.stringify({ok:true,revision:'installer-redirect-loop-install-only-v3-cache-distinct',installerRequiredNext:'allowlisted-and-installed-display-only',browserRuntime:false,installedQueryAuthorization:false,prePaintGate:true,workingCampusReturnGuardRetained:true,installerServerException:true,cacheDistinctRepair:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'installer-redirect-loop-installed-capability-v1',installerRequiredNext:'repair-display-only',browserRuntime:'installed-display-or-verified-installed-capability',installedQueryAuthorization:false,prePaintGate:true,existingInstallRecovery:true,workingCampusReturnGuardRetained:true,installerServerException:true,cacheDistinctRepair:true},null,2));
