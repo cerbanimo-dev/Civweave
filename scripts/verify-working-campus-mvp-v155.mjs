@@ -13,7 +13,7 @@ const [host,html,css,loader,entry,settings,routes,...sources]=await Promise.all(
   read('public/app/working-campus-v156.css'),
   read('public/app/working-campus-v156.js'),
   read('public/app/installed-entry-v146.js'),
-  read('public/app/model-settings-controller-v173.js'),
+  read('public/app/settings-gateway-v317.js'),
   read('public/app/system-routes-v227.js'),
   ...parts.map(read)
 ]);
@@ -29,15 +29,19 @@ for(const token of [
 ])assert(surface.toLowerCase().includes(token.toLowerCase()),`Working Campus is missing ${token}`);
 
 for(const token of [
-  "activation:'settings-gateway-v317'",
+  "const LAYER_ID='cw-settings-v320'",
   "route:'deterministic'",
   'civweave-model-profiles-v1',
   'Credential lifetime',
   'Remember on this device',
   'S.A.F.E. mode',
-  'Nothing probes, starts, or tests a model merely because this panel opened.'
-])assert(settings.includes(token),`Canonical AI settings are missing ${token}`);
+  'Opening or saving Settings never probes or starts a model.',
+  'singleMenu:true',
+  'presentationOwner:true',
+  'credentialOwner:true'
+])assert(settings.includes(token),`Canonical Settings are missing ${token}`);
 assert(settings.includes('gemini-3.5-flash-lite')&&settings.includes('https://generativelanguage.googleapis.com/v1beta'),'Canonical settings must retain the explicit Gemini option without making it the startup default.');
+assert(!settings.includes('model-settings-controller-v173.js?activate=1'),'Canonical Settings must not activate a second presentation owner.');
 assert(!surface.includes('Test Gemini')&&!surface.includes('Test Antigravity'),'Working Campus should not own retired provider-test controls.');
 
 const expectedRoutes={
@@ -59,6 +63,6 @@ assert(entry.includes("const requested=params.get('system')||params.get('target'
 assert(entry.includes("bounded(registration.update(),WORKER_STEP_TIMEOUT_MS,'service worker update')"),'Installed entry must bound service-worker update so startup cannot hang indefinitely.');
 new vm.Script(source,{filename:'working-campus-v156.js'});
 new vm.Script(loader,{filename:'working-campus-v156-loader.js'});
-new vm.Script(settings,{filename:'model-settings-controller-v173.js'});
+new vm.Script(settings,{filename:'settings-gateway-v317.js'});
 new vm.Script(routes,{filename:'system-routes-v227.js'});
-console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',aiSettings:'gateway-activated deterministic-default clean-room controller with explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical'},null,2));
+console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',settings:'single v320 gateway with deterministic default and explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical'},null,2));

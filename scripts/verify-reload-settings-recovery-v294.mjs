@@ -15,22 +15,25 @@ assert.match(bootstrap,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/,'boot
 assert.doesNotMatch(bootstrap,/1\.0\.83-local-model-test-pulse-v282-health/,'stale v282 test-pulse compatibility gate must stay retired');
 assert.doesNotMatch(bootstrap,/1\.0\.86-local-model-test-pulse-v286-wasm-performance/,'stale v286 test-pulse compatibility gate must stay retired');
 
-assert.match(lifecycle,/document-lifecycle-v317-management-only/,'settings lifecycle must use the v317 management-only contract');
-assert.match(lifecycle,/document-lifecycle-v317-explicit-activation/,'settings lifecycle must require explicit v317 activation');
+assert.match(lifecycle,/document-lifecycle-v320-settings-service/,'settings lifecycle must use the v320 content-service contract');
+assert.match(lifecycle,/document-lifecycle-v320-single-menu/,'settings lifecycle must remain subordinate to the one v320 Settings menu');
 assert.match(lifecycle,/searchParams\.get\('activate'\)==='1'/,'settings lifecycle must stay dormant until the canonical gateway activates it');
-assert.match(lifecycle,/activation:'settings-gateway-v317'/,'dormant lifecycle must identify the canonical Settings owner');
+assert.match(lifecycle,/activation:'settings-v320'/,'dormant lifecycle must identify the canonical Settings service activation');
 assert.doesNotMatch(lifecycle,/captureSettingsOpen|document\.addEventListener\('click'/,'document lifecycle must not compete with the gateway for Settings taps');
 assert.doesNotMatch(lifecycle,/globalThis\.MutationObserver\s*=/,'document lifecycle must never replace MutationObserver globally');
 assert.match(lifecycle,/function scheduleSettingsManagement\(/,'settings management must be independently schedulable');
 assert.match(lifecycle,/managementAfterPaint:true/,'settings management must yield a browser paint before enhancement work');
 assert.match(lifecycle,/civweave:local-ai-settings-unavailable/,'local-AI enhancement failure must be reported without adding another Settings owner');
-assert.match(lifecycle,/settingsEntryOwner:'settings-gateway-v317'/,'document lifecycle must delegate Settings entry ownership to the gateway');
+assert.match(lifecycle,/settingsOwner:'settings-v320'/,'document lifecycle must identify its canonical Settings content-service root');
+assert.match(lifecycle,/serviceRole:'downloaded-model-settings-content'/,'document lifecycle must remain a content service rather than a presentation owner');
 assert.match(lifecycle,/inputOwnership:false/,'document lifecycle must not own Settings input');
+assert.match(lifecycle,/presentationOwnership:false/,'document lifecycle must not own Settings presentation');
+assert.match(lifecycle,/settingsRootCreation:false/,'document lifecycle must not create a second Settings root');
 assert.match(lifecycle,/globalObserverPatch:false/,'document lifecycle must preserve browser observer primitives');
 assert.match(lifecycle,/activationRequired:true/,'document lifecycle must remain lazy');
 assert.match(lifecycle,/launchWork:'none'/,'document lifecycle must not perform startup inference work');
 
-const managementBody=lifecycle.match(/function managementReady\(\)\{([\s\S]*?)\}\nfunction enhance/)?.[1]||'';
+const managementBody=lifecycle.match(/function managementReady\(\)\{([\s\S]*?)\}\nfunction canonicalLayer/)?.[1]||'';
 assert.ok(managementBody,'management readiness function must be inspectable');
 assert.doesNotMatch(managementBody,/LocalModelRuntime|LocalModelBridge/,'opening/model-management readiness must not require the inference runtime or bridge');
 assert.match(managementBody,/LocalAISettingsV266/,'management readiness must require the local-AI settings surface');
@@ -101,10 +104,10 @@ function makeContext(){
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'reload-settings-recovery-v317-explicit-management',
+  revision:'reload-settings-recovery-v320-single-menu',
   assertions:{
     localAICompatibility:'v303-test-pulse-mobile-safe-current',
-    settingsOpen:'gateway-owner-then-post-paint-management',
+    settingsOpen:'single-gateway-then-post-paint-content-service',
     managementGate:'settings-only-no-inference-runtime',
     observerFeedback:'bounded-idempotent-decorator-required',
     globalBrowserPrimitives:'untouched',

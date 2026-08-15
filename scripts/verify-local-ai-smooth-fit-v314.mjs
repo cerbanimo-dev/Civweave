@@ -92,8 +92,11 @@ assert.match(managementBody,/observerFeedbackBounded===true/);
 assert.match(lifecycle,/hardware-tier-ui-v278\.js\?v=1\.0\.81-v278-settings-stability-v318/);
 assert.match(lifecycle,/deviceFitManagement:true/);
 assert.match(lifecycle,/completeManagementReadiness:true/);
-assert.match(lifecycle,/settingsEntryOwner:'settings-gateway-v317'/);
+assert.match(lifecycle,/settingsOwner:'settings-v320'/);
+assert.match(lifecycle,/serviceRole:'downloaded-model-settings-content'/);
 assert.match(lifecycle,/inputOwnership:false/);
+assert.match(lifecycle,/presentationOwnership:false/);
+assert.match(lifecycle,/settingsRootCreation:false/);
 assert.match(bootstrap,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?intentPrewarm===true.*?compatibilityPromptCap===true/s,'low-level runtime capability may remain; UI callers are separately forbidden');
 assert.match(bootstrap,/deviceFitRecommendations===true/);
 assert.match(bootstrap,/smoothFitRuntime:true/);
@@ -102,4 +105,4 @@ assert.match(wrapper,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?in
 assert.match(coherence,/CW_LOCAL_AI_EXTRA_PATHS[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/CW_LOCAL_AI_CRITICAL[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/smoothFitOrchestrator: true/);
-console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v319-submit-only-ui',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'forbidden-from-chat-and-settings',generativeStart:'submit-only',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v317',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v320-submit-only-ui',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'forbidden-from-chat-and-settings',generativeStart:'submit-only',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v320',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));

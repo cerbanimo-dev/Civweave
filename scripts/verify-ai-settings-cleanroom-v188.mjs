@@ -19,26 +19,37 @@ const sources=Object.fromEntries(await Promise.all(Object.entries({
 }).map(async([name,path])=>[name,await read(path)])));
 for(const key of ['gateway','controller','lifecycle','boundary','brand','credential'])assert.doesNotThrow(()=>new Function(sources[key]),`${key} does not compile.`);
 
-// Opening Settings is a tiny input-to-DOM path. It cannot depend on model startup.
+// Opening Settings is one synchronous input-to-DOM path. It cannot depend on model startup.
 assert.match(sources.gateway,/inputOwner:true/);
-assert.match(sources.gateway,/lazyController:true/);
-assert.match(sources.gateway,/lazyManagement:true/);
+assert.match(sources.gateway,/presentationOwner:true/);
+assert.match(sources.gateway,/credentialOwner:true/);
+assert.match(sources.gateway,/singleMenu:true/);
+assert.match(sources.gateway,/const LAYER_ID='cw-settings-v320'/);
 assert.match(sources.gateway,/launchWork:'none'/);
 assert.match(sources.gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
 assert.doesNotMatch(sources.gateway,/bootstrap-v266|runtime-v266|runtime-bridge-v266|test-pulse-v269|navigator\.gpu|new Worker\(/);
+const openBlock=sources.gateway.slice(sources.gateway.indexOf('function open(launcher)'),sources.gateway.indexOf('function ensure()'));
+assert.match(openBlock,/layer\.hidden=false/);
+assert.match(openBlock,/afterPaint\(requestInferenceQuiescence\)/);
+assert.match(openBlock,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
+for(const forbidden of ['await ','fetch(','.generate(','new Worker(','navigator.gpu','showModal('])assert.ok(!openBlock.includes(forbidden),`Gateway open path regained ${forbidden}.`);
 
-assert.match(sources.controller,/const LAYER_ID='cw-ai-settings-cleanroom-v188'/);
-assert.match(sources.controller,/searchParams\.get\('activate'\)==='1'/);
-assert.match(sources.controller,/providerRuntimeOnOpen:false/);
-assert.match(sources.controller,/providerTestsAvailable:false/);
-assert.match(sources.controller,/modelDiscoveryAvailable:false/);
-assert.match(sources.controller,/singlePassOpen:true/);
-assert.match(sources.controller,/layer\.querySelector\('\[data-close\]'\)\.addEventListener/);
-const openBlock=sources.controller.slice(sources.controller.indexOf('function open(launcher)'),sources.controller.indexOf('function ensure()'));
-for(const forbidden of ['await ','fetch(','.generate(','new Worker(','navigator.gpu','showModal('])assert.ok(!openBlock.includes(forbidden),`Controller open path regained ${forbidden}.`);
+// The former controller is only an API facade, never a presentation owner.
+assert.match(sources.controller,/compatibilityFacade:true/);
+assert.match(sources.controller,/canonical:'CivweaveSettingsV320'/);
+assert.match(sources.controller,/inputOwnership:false/);
+assert.match(sources.controller,/presentationOwnership:false/);
+assert.match(sources.controller,/credentialOwnership:false/);
+assert.match(sources.controller,/domCreation:false/);
+assert.doesNotMatch(sources.controller,/document\.addEventListener\('click'/);
 
-// Management is allowed only after the panel is painted and contains no inference startup lane.
+// Management is allowed only after the canonical panel is painted and contains no inference startup lane.
 assert.match(sources.lifecycle,/activationRequired:true/);
+assert.match(sources.lifecycle,/settingsOwner:'settings-v320'/);
+assert.match(sources.lifecycle,/serviceRole:'downloaded-model-settings-content'/);
+assert.match(sources.lifecycle,/inputOwnership:false/);
+assert.match(sources.lifecycle,/presentationOwnership:false/);
+assert.match(sources.lifecycle,/settingsRootCreation:false/);
 assert.match(sources.lifecycle,/managementAfterPaint:true/);
 assert.match(sources.lifecycle,/globalObserverPatch:false/);
 for(const forbidden of ['runtime-v266','runtime-bridge-v266','bootstrap-v266','test-pulse-v269','new Worker(','navigator.gpu'])assert.ok(!sources.lifecycle.includes(forbidden),`Settings management regained inference dependency ${forbidden}.`);
@@ -64,6 +75,6 @@ for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-sch
 
 // Offline first click is a release invariant, not an online-only convenience.
 for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(sources[key].includes("'/app/settings-gateway-v317.js'"),`${key} does not cache the Settings gateway.`);
-assert.ok(sources.codeCache.includes("'/app/model-settings-controller-v173.js'")&&sources.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code cache cannot activate Settings offline.');
+assert.ok(sources.codeCache.includes("'/app/model-settings-controller-v173.js'")&&sources.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code cache cannot provide compatibility and downloaded-model management offline.');
 
-console.log(JSON.stringify({ok:true,releaseVersion,revision:'settings-cleanroom-single-gateway-v317',inputOwner:'settings-gateway-v317',systems:5,synchronousPanelOpen:true,firstClickControllerActivation:true,managementAfterPaint:true,providerRuntimeOnOpen:false,inferenceBootstrapOnOpen:false,prototypePatching:false,settingsApiPatching:false,brandingDependency:false,campusPreflight:false,offlineFirstClick:true},null,2));
+console.log(JSON.stringify({ok:true,releaseVersion,revision:'settings-cleanroom-single-gateway-v320',inputOwner:'settings-gateway-v317',presentationOwner:'settings-gateway-v317',credentialOwner:'settings-gateway-v317',systems:5,synchronousPanelOpen:true,singleMenu:true,managementAfterPaint:true,providerRuntimeOnOpen:false,inferenceBootstrapOnOpen:false,prototypePatching:false,settingsApiPatching:false,brandingDependency:false,campusPreflight:false,offlineFirstClick:true},null,2));
