@@ -32,16 +32,6 @@
       "platform": "webapp",
       "url": "https://civweave.pages.dev/app/manifest.webmanifest",
       "id": "https://civweave.pages.dev/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://commonweave.pages.dev/app/manifest.webmanifest",
-      "id": "https://commonweave.pages.dev/civweave-local"
-    },
-    {
-      "platform": "webapp",
-      "url": "https://civweave-host-node.onrender.com/app/manifest.webmanifest",
-      "id": "https://civweave-host-node.onrender.com/civweave-local"
     }
   ],
   "icons": [

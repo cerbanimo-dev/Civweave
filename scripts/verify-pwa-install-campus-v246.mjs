@@ -26,32 +26,34 @@ assert.match(manifest.start_url,/^\/app\/installed-entry-v146(?:\.html)?\?instal
 assert.ok((manifest.shortcuts||[]).every(shortcut=>/^\/app\/installed-entry-v146(?:\.html)?\?/.test(String(shortcut.url||''))),'all installed shortcuts must pass through updater entry');
 
 const canonicalOrigin='https://civweave.cc';
-const previousCanonicalOrigin='https://civweave.pages.dev';
-const legacyCanonicalOrigin='https://commonweave.pages.dev';
-const hostNodeOrigin='https://civweave-host-node.onrender.com';
-const manifests=[canonicalOrigin,previousCanonicalOrigin,legacyCanonicalOrigin,hostNodeOrigin].map(origin=>`${origin}/app/manifest.webmanifest`);
+const pagesUnderlayOrigin='https://civweave.pages.dev';
+const manifests=[canonicalOrigin,pagesUnderlayOrigin].map(origin=>`${origin}/app/manifest.webmanifest`);
 const related=new Set((manifest.related_applications||[]).filter(app=>app.platform==='webapp').map(app=>app.url));
+assert.equal(related.size,manifests.length,'manifest must list only current root install relationships');
 for(const url of manifests)assert.ok(related.has(url),`manifest must retain installed-app discovery for ${url}`);
 
 const assetlinks=JSON.parse(assetlinksText);
 const querySites=new Set(assetlinks.filter(entry=>(entry.relation||[]).includes('delegate_permission/common.query_webapk')).map(entry=>entry.target?.site));
+assert.equal(querySites.size,manifests.length,'asset links must list only current root install relationships');
 for(const url of manifests)assert.ok(querySites.has(url),`asset links must allow installed-app discovery for ${url}`);
 
 assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'root entry must know civweave.cc as the canonical PWA origin');
-assert.ok(rootHtml.includes(`const PREVIOUS_CANONICAL_ORIGIN='${previousCanonicalOrigin}'`),'root entry must retain the previous Pages origin during migration');
-assert.ok(rootHtml.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'root entry must retain the legacy Commonweave origin during migration');
+assert.ok(rootHtml.includes(`const PAGES_UNDERLAY_ORIGIN='${pagesUnderlayOrigin}'`),'root entry must retain the active Pages underlay');
 assert.ok(rootHtml.includes("location.hostname.endsWith('.pages.dev')&&labels.length>3"),'root entry must recognize Pages preview aliases');
 assert.ok(rootHtml.includes("labels.slice(1).join('.')"),'preview root must resolve its parent production host');
-assert.ok(rootHtml.includes("target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical')"),'root handoff must distinguish host-production recovery from canonical migration');
+assert.ok(rootHtml.includes("communityPages=hostname=>/^civweave-[a-z0-9-]+\\.pages\\.dev$/i.test(hostname)"),'root entry must recognize stable community Pages origins without origin-specific migration aliases');
+assert.ok(rootHtml.includes("target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical')"),'root handoff must distinguish host-production routing from canonical routing');
+assert.ok(!rootHtml.includes('LEGACY_CANONICAL_ORIGIN')&&!rootHtml.includes('HOST_NODE_ORIGIN'),'root entry must not retain retired origin-specific routing owners');
 
 assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'native install bridge must name civweave.cc as canonical');
-assert.ok(bridge.includes(`const PREVIOUS_CANONICAL_ORIGIN='${previousCanonicalOrigin}'`),'native install bridge must retain the Pages migration origin');
-assert.ok(bridge.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'native install bridge must retain the Commonweave migration origin');
+assert.ok(bridge.includes(`const PAGES_UNDERLAY_ORIGIN='${pagesUnderlayOrigin}'`),'native install bridge must retain the active Pages underlay');
 assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related installs when supported');
 assert.ok(bridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'installer bridge must declare installer-only browser policy');
 assert.ok(bridge.includes("installSequencingPolicy:'prepare-shell-before-user-install-gesture'"),'installer must prepare the shell before the fresh install gesture');
 assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-click'"),'installer must invoke the captured native prompt synchronously from the fresh install gesture');
 assert.ok(bridge.includes('eagerShellPreparation:true'),'installer bridge must expose that lightweight shell preparation is completed ahead of the install gesture');
+assert.ok(bridge.includes("function rerouteUnsafeInstall(){\n  if(standalone()||localDevelopment()||installOrigin())return false"),'unsupported install origins must route through the current stable installer generically');
+assert.ok(!bridge.includes('LEGACY_CANONICAL_ORIGIN')&&!bridge.includes('HOST_NODE_ORIGIN'),'install bridge must not retain retired origin-specific runtime branches');
 assert.ok(bridge.includes("if(standalone())")&&bridge.includes("if(installed){"),'installer must distinguish installed display from merely accepted installation');
 assert.ok(bridge.includes('Open Civweave from your device app launcher')||bridge.includes('device app launcher'),'accepted browser installation must direct launch through the device app launcher');
 
@@ -59,7 +61,7 @@ assert.ok(!html.includes('id="open-online-campus-v225"'),'installer must not exp
 assert.ok(!html.includes('Browser fallback'),'installer must not advertise browser runtime fallback');
 assert.ok(!html.includes('/app/installer-online-fallback-v225.js'),'installer must not load the retired online fallback bridge');
 assert.ok(html.includes('/app/pwa-install-prompt-v249.js'),'installer must load the current cache-distinct v249 install bridge');
-assert.ok(html.includes('/app/installer-repair-only-v1.js?v=install-only-pwa-v1'),'installer must load the repair-only bridge');
+assert.ok(html.includes('/app/installer-repair-only-v1.js?v=install-only-pwa-v1'),'installer must load the repair-only bridge until its recovery duties are transferred to canonical owners');
 assert.ok(html.includes('Launch Civweave from your device app launcher'),'installer headline must describe installed-app launch');
 
 assert.ok(repairOnly.includes('function installedDisplay()'),'repair bridge must prove installed display before resuming runtime');
@@ -73,7 +75,7 @@ assert.ok(installedEntry.includes("if(!installedDisplay()&&!localDeveloper())"),
 assert.ok(installedEntry.includes("browserRuntimePolicy:'installed-display-only'"),'installed bootstrap must declare installed-display-only runtime policy');
 assert.ok(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('bounded(registration.update()'),'installed entry must perform a bounded no-cache worker refresh');
 
-assert.ok(workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'shell repair must cache the repair-only bridge');
+assert.ok(workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'shell repair must cache the repair-only bridge until the installer repair sidecar is retired');
 assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'shell repair must not resurrect the retired browser fallback');
 assert.ok(workerWrapper.includes('working-campus-return-v425-install-only-pwa-v1'),'worker core cache identity must carry install-only boundary');
 assert.ok(workerWrapper.includes('shell-self-repair-v225-install-only-pwa-v1'),'worker repair import must carry install-only boundary');
@@ -100,9 +102,9 @@ assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v249-user-gesture-safe',
+  revision:'pwa-install-campus-v249-origin-source-truth',
   canonicalOrigin,
-  previousCanonicalOrigin,
+  pagesUnderlayOrigin,
   browserRuntime:'installed-display-only',
   onlineFallback:false,
   repairOnly:true,

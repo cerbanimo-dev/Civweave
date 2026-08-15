@@ -12,27 +12,27 @@
   (() => {
     'use strict';
     const CANONICAL_ORIGIN='https://civweave.cc';
-    const PREVIOUS_CANONICAL_ORIGIN='https://civweave.pages.dev';
-    const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
-    const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
+    const PAGES_UNDERLAY_ORIGIN='https://civweave.pages.dev';
     const localDevelopment=['localhost','127.0.0.1','::1'].includes(location.hostname);
     const labels=location.hostname.split('.');
     const cloudflarePreview=location.hostname.endsWith('.pages.dev')&&labels.length>3;
-    const previewParent=cloudflarePreview?`https://${labels.slice(1).join('.')}`:null;
-    const previousCanonical=location.origin===PREVIOUS_CANONICAL_ORIGIN;
-    const legacyCanonical=location.origin===LEGACY_CANONICAL_ORIGIN;
-    if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||previousCanonical||legacyCanonical||cloudflarePreview)){
-      const destination=cloudflarePreview&&previewParent&&previewParent!==PREVIOUS_CANONICAL_ORIGIN&&previewParent!==LEGACY_CANONICAL_ORIGIN?previewParent:CANONICAL_ORIGIN;
+    const communityPages=hostname=>/^civweave-[a-z0-9-]+\.pages\.dev$/i.test(hostname);
+    const contributorHost=hostname=>hostname.endsWith('.civweave.cc');
+    const stableHost=location.origin===CANONICAL_ORIGIN||communityPages(location.hostname)||contributorHost(location.hostname);
+    const pagesUnderlay=location.origin===PAGES_UNDERLAY_ORIGIN;
+    const previewParentHost=cloudflarePreview?labels.slice(1).join('.'):'';
+    const previewParent=previewParentHost&&communityPages(previewParentHost)?`https://${previewParentHost}`:CANONICAL_ORIGIN;
+    if(!localDevelopment&&(pagesUnderlay||cloudflarePreview||!stableHost)){
+      const destination=cloudflarePreview?previewParent:CANONICAL_ORIGIN;
       const target=new URL('/app/index.html',destination);
       for(const [key,value] of new URL(location.href).searchParams){if(key!=='install_origin')target.searchParams.append(key,value)}
-      if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
       target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');
       target.hash=location.hash;
       location.replace(target.href);
       return;
     }
-    const LEGACY_ENTRY='/app/installed-entry-v146.js?v=1.0.160';
-    const VERSION=new URL(LEGACY_ENTRY,location.origin).searchParams.get('v')||'';
+    const INSTALLED_ENTRY='/app/installed-entry-v146.js?v=1.0.160';
+    const VERSION=new URL(INSTALLED_ENTRY,location.origin).searchParams.get('v')||'';
     const params=new URLSearchParams(location.search);
     const installRequired=params.get('install')==='required'||params.has('installrequired');
     if(installRequired){
@@ -56,4 +56,3 @@
 </head>
 <body></body>
 </html>
-
