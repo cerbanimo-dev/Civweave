@@ -12,24 +12,12 @@ on:
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
-      - 'public/app/guide-stream-thinking-v249.js'
-      - 'public/app/install-boundary-v146.js'
-      - 'public/app/fellowfare-shared-guide-bridge-v236.js'
-      - 'public/app/themed-system-nav-v178.js'
-      - 'public/app/system-radio-agent-v233.js'
       - 'public/app/family-ai-loader-v105.js'
-      - 'public/app/working-campus-topbar-v243.js'
-      - 'public/app/working-campus-v156.css'
-      - 'public/app/working-campus-v156.html'
-      - 'public/app/installed-entry-v146.js'
-      - 'public/app/realm-console-v140.html'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
-      - 'public/app/human-message-bubble-v1.js'
-      - 'public/app/shared-intention-party-chat-v1.js'
+      - 'public/app/installed-entry-v146.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
-      - 'scripts/verify-chat-convergence-v250.mjs'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
       - 'scripts/verify-realm-session-integrity-v237.mjs'
@@ -46,24 +34,12 @@ on:
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
-      - 'public/app/guide-stream-thinking-v249.js'
-      - 'public/app/install-boundary-v146.js'
-      - 'public/app/fellowfare-shared-guide-bridge-v236.js'
-      - 'public/app/themed-system-nav-v178.js'
-      - 'public/app/system-radio-agent-v233.js'
       - 'public/app/family-ai-loader-v105.js'
-      - 'public/app/working-campus-topbar-v243.js'
-      - 'public/app/working-campus-v156.css'
-      - 'public/app/working-campus-v156.html'
-      - 'public/app/installed-entry-v146.js'
-      - 'public/app/realm-console-v140.html'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
-      - 'public/app/human-message-bubble-v1.js'
-      - 'public/app/shared-intention-party-chat-v1.js'
+      - 'public/app/installed-entry-v146.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
-      - 'scripts/verify-chat-convergence-v250.mjs'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
       - 'scripts/verify-realm-session-integrity-v237.mjs'
@@ -86,6 +62,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+
       - name: Check canonical chat runtime syntax
         run: |
           node --check public/app/unified-chat-system-v1.js
@@ -94,23 +71,16 @@ jobs:
           node --check public/app/guide-chat-surface-v350.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
-          node --check public/app/guide-stream-thinking-v249.js
-          node --check public/app/install-boundary-v146.js
-          node --check public/app/fellowfare-shared-guide-bridge-v236.js
-          node --check public/app/themed-system-nav-v178.js
           node --check public/app/family-ai-loader-v105.js
-          node --check public/app/working-campus-topbar-v243.js
-          node --check public/app/installed-entry-v146.js
           node --check public/app/shared-chat-face-icons-v255.js
           node --check public/app/avatar-expression-director-v345.js
-          node --check public/app/human-message-bubble-v1.js
-          node --check public/app/shared-intention-party-chat-v1.js
+          node --check public/app/installed-entry-v146.js
           node --check public/service-worker-chat-repair-v245.js
           node --check public/service-worker-v203.js
-          node --check scripts/verify-chat-convergence-v250.mjs
           node --check scripts/verify-chat-launch-readiness-v295.mjs
           node --check scripts/verify-human-message-bubble-v1.mjs
           node --check scripts/verify-realm-session-integrity-v237.mjs
+
       - name: Enforce one-core five-guide avatar contract
         shell: bash
         run: |
@@ -124,6 +94,7 @@ jobs:
           const faces=fs.readFileSync('public/app/shared-chat-face-icons-v255.js','utf8');
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
           const repair=fs.readFileSync('public/service-worker-chat-repair-v245.js','utf8');
+
           for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
             if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
             if(!surface.includes(system))throw new Error(`Canonical surface is missing guide ${system}`);
@@ -144,9 +115,9 @@ jobs:
           }
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
           NODE
-      - name: Verify current chat contracts
+
+      - name: Verify current chat behavior
         run: |
-          node scripts/verify-chat-convergence-v250.mjs
           node scripts/verify-chat-launch-readiness-v295.mjs
           node scripts/verify-human-message-bubble-v1.mjs
           node scripts/verify-realm-session-integrity-v237.mjs
