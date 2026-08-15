@@ -27,6 +27,7 @@ const ASSET_CUSTOMIZATION_STORAGE='civweave.asset-lockboard.v239';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
+const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
 const HOST_NODE_SESSION='/app/host-node-session-v1.js';
@@ -48,6 +49,7 @@ const FALLBACK_PATHS=new Map([
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
+  CORE_INTERFACE_RUNTIME,
   SETTINGS_GATEWAY,
   MOBILE_AI_HARDENING,
   EXPERIENCE_ORCHESTRATOR,
