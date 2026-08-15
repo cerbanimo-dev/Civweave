@@ -10,6 +10,7 @@ on:
       - 'public/app/asset-lockboard-v239.*'
       - 'public/app/asset-customization-v239.js'
       - 'public/app/install-boundary-v146.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'scripts/generate-asset-lockboard-catalog-v239.mjs'
       - 'scripts/verify-recovery-asset-lockboard-v239.mjs'
       - '.github/workflows/verify-recovery-asset-lockboard-v239.yml'
