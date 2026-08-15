@@ -2,8 +2,10 @@
 'use strict';
 const VERSION='document-lifecycle-v320-settings-service';
 const REVISION='document-lifecycle-v320-single-menu';
+const LEGACY_VERSION_TAG='document-lifecycle-v317-management-only';
+const LEGACY_REVISION_TAG='document-lifecycle-v317-explicit-activation';
 const ACTIVATED=(()=>{try{return new URL(document.currentScript?.src||'',location.href).searchParams.get('activate')==='1'}catch{return false}})();
-if(!ACTIVATED){globalThis.CivweaveDocumentLifecycleBootstrapV221=Object.freeze({version:VERSION,dormant:true,activation:'settings-v320'});return}
+if(!ACTIVATED){globalThis.CivweaveDocumentLifecycleBootstrapV221=Object.freeze({version:VERSION,dormant:true,activation:'settings-gateway-v317',canonical:'settings-v320'});return}
 if(globalThis.CivweaveDocumentLifecycleV221?.revision===REVISION)return;
 let active=true,managementPromise=null;
 const LOCAL_AI_MANAGEMENT_FILES=[
@@ -25,5 +27,5 @@ function scheduleSettingsManagement(layer=canonicalLayer()){const root=canonical
 function stopOnPageHide(event){if(!event?.persisted)active=false}
 function revive(){active=true;const layer=canonicalLayer();if(layer&&!layer.hidden)scheduleSettingsManagement(layer);return true}
 addEventListener('pagehide',stopOnPageHide);addEventListener('pageshow',revive);addEventListener('beforeunload',()=>{active=false},{once:true});
-globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,revision:REVISION,active:()=>active,ensureLocalAISettingsManagement,scheduleSettingsManagement,managementReady,enhance,settingsOwner:'settings-v320',serviceRole:'downloaded-model-settings-content',inputOwnership:false,presentationOwnership:false,settingsRootCreation:false,managementAfterPaint:true,globalObserverPatch:false,activationRequired:true,launchWork:'none',deviceFitManagement:true,completeManagementReadiness:true});
+globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,revision:REVISION,legacyVersionTag:LEGACY_VERSION_TAG,legacyRevisionTag:LEGACY_REVISION_TAG,active:()=>active,ensureLocalAISettingsManagement,scheduleSettingsManagement,managementReady,enhance,settingsEntryOwner:'settings-gateway-v317',settingsOwner:'settings-v320',serviceRole:'downloaded-model-settings-content',inputOwnership:false,presentationOwnership:false,settingsRootCreation:false,managementAfterPaint:true,globalObserverPatch:false,activationRequired:true,launchWork:'none',deviceFitManagement:true,completeManagementReadiness:true});
 })();
