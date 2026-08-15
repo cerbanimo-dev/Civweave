@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'host-node-installer-lobby-v5-guild-terminology';
+const REVISION = 'host-node-installer-lobby-v6-guild-terminology';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const HOST_SELECTION_KEY = 'civweave.host-node.selection.v1';
 const STEWARD_KEY = 'civweave.host-steward.v1';
@@ -159,8 +159,8 @@ function buildLobby() {
       <span class="cw-host-node-live" id="cw-host-node-live" data-state="checking">${host ? 'Checking status' : 'Choose a Guild'}</span>
     </div>
     <div class="cw-host-node-slots" aria-label="Guild membership capacity">
-      <article class="cw-host-slot"><small>Citizen slots</small><strong id="cw-host-free-slots">—</strong><span>Citizen residency available on this host.</span></article>
-      <article class="cw-host-slot"><small>Patron slots</small><strong id="cw-host-paid-slots">—</strong><span>Additional Patron residency available on this host.</span></article>
+      <article class="cw-host-slot"><small>Citizen slots</small><strong id="cw-host-free-slots">—</strong><span>Citizen residency available in this Guild.</span></article>
+      <article class="cw-host-slot"><small>Patron slots</small><strong id="cw-host-paid-slots">—</strong><span>Additional Patron residency available in this Guild.</span></article>
     </div>
     <p class="cw-host-node-note" id="cw-host-node-note">${host ? 'Reading the Guild’s live capacity before you join.' : 'Find the nearest Guild with Citizen or Patron capacity. Your exact location is never sent; Civweave rounds it before searching.'}</p>
     <div class="cw-host-node-actions">
@@ -168,7 +168,7 @@ function buildLobby() {
       ${localFederated && stewardBrowser() ? '<a class="cw-host-node-steward" id="cw-host-node-steward" href="/app/node-ai-operator-v1.html">Guildkeeper tools</a>' : ''}
       <button class="cw-host-node-refresh" id="cw-host-node-refresh" type="button" ${host ? '' : 'hidden'}>Refresh status</button>
     </div>
-    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a local Civweave Guild. Guildkeeper controls stay local to this node.' : 'A Guild login is device-bound and stored locally. Joining never silently starts a Patron membership.'}</p>
+    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a local Civweave Guild. Guildkeeper controls stay local to this Guild.' : 'A Guild login is device-bound and stored locally. Joining never silently starts a Patron membership.'}</p>
     <section class="cw-host-node-search" id="cw-host-node-search" ${host ? 'hidden' : ''} aria-labelledby="cw-host-node-search-title">
       <h3 id="cw-host-node-search-title">Nearest Guilds with open slots</h3>
       <p>Choose which capacity counts as open. Patron capacity still requires an active Civweave membership.</p>
@@ -332,7 +332,7 @@ function renderStatus(packet) {
   }
   if (help && selectedOrigin() !== normalizedHost()) {
     help.textContent = localFederated
-      ? 'Use this Guild makes this local node the selected Guild for this device. Open Guildkeeper tools for local operator controls.'
+      ? 'Use this Guild makes this local Guild the selected Guild for this device. Open Guildkeeper tools for local operator controls.'
       : 'Joining sets this as your device’s Guild. It does not silently start a Patron membership.';
   }
   renderSelectedState();
