@@ -1,0 +1,44 @@
+{
+  "schema": "civweave.lud-package.v1",
+  "mode": "lud",
+  "label": "Lud Mode",
+  "entry": "/app/lud/campus.html",
+  "policy": {
+    "recursiveDiscovery": false,
+    "aiGeneration": false,
+    "localModels": false,
+    "remoteModels": false,
+    "humanAuthoredOnlyFeed": true,
+    "unknownProvenanceFailsClosed": true,
+    "humanValidation": true,
+    "generatedVisualAssets": false
+  },
+  "assets": [
+    "/app/lud/campus.html",
+    "/app/content-provenance-v1.js",
+    "/app/lud-mode-v1.js",
+    "/app/lud-manual-authoring-v1.js",
+    "/app/shared/civweave-identity-sync.js",
+    "/app/shared/civweave-reward-weave.js"
+  ],
+  "forbiddenPathFragments": [
+    "/assets/ai/",
+    "/local-ai/",
+    "/models/",
+    "/vendor/onnxruntime/",
+    "/images/",
+    "/logos/",
+    "family-ai-loader",
+    "guide-chat",
+    "assistant-runtime",
+    "server-ai",
+    "node-ai",
+    "emergency-ai",
+    "browser-agent",
+    "minilm",
+    "smollm",
+    "gemini",
+    "model-settings",
+    "ai-settings"
+  ]
+}
