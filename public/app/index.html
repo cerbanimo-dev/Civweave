@@ -22,7 +22,7 @@
   <header class="cw-brand-lockup" aria-label="Civweave platform and Cerbanimo stewardship">
     <div class="cw-platform-brand">
       <img class="cw-platform-logo" src="/app/logos/civweave-prismatic-wordmark-v1.png" alt="Civweave">
-      <div class="cw-platform-copy"><small>INSTALLER · UPDATER · RECOVERY</small><h1>Your doorway into Civweave</h1><p>Install the small shell first. Everything heavier waits for an actual reason to exist.</p></div>
+      <div class="cw-platform-copy"><small>INSTALLER · UPDATER · RECOVERY</small><h1>Your doorway into Civweave</h1><p>Build the small shell, then store the local campus before installation. Models, media, and knowledge stay separate until you choose them.</p></div>
     </div>
     <div class="cw-steward-seal" aria-label="Stewarded by Cerbanimo">
       <img class="cw-steward-logo" src="/app/logos/cerbanimo-steward-mark-v1.png" alt="Cerbanimo">
@@ -39,29 +39,29 @@
 
   <section class="install-card" aria-labelledby="install-title">
     <div class="install-copy">
-      <small>LIGHTWEIGHT APP SHELL</small>
-      <h2 id="install-title">Install Civweave first. Campus files, media, knowledge packs, and local models stay separate.</h2>
-      <p>The first install is deliberately small. A local model or offline campus download should never masquerade as “installing the app.”</p>
+      <small>LOCAL-FIRST INSTALL</small>
+      <h2 id="install-title">Civweave installs in two local stages. The campus is required; models, media, and knowledge packs are not.</h2>
+      <p>The tiny bootstrap gets this installer responsive quickly. The working campus then downloads visibly and stays on your device, so opening Civweave later does not depend on the release server.</p>
     </div>
-    <div class="topology" aria-label="Civweave install topology"><article><b>1</b><strong>Install shell</strong><span>Eleven bootstrap files.</span></article><i>→</i><article><b>2</b><strong>Launch Civweave</strong><span>The working campus loads what it needs.</span></article><i>→</i><article><b>3</b><strong>Choose offline depth</strong><span>Campus, knowledge, media, and models are opt-in.</span></article></div>
+    <div class="topology" aria-label="Civweave install topology"><article><b>1</b><strong>Bootstrap shell</strong><span>Eleven small doorway files.</span></article><i>→</i><article><b>2</b><strong>Store local campus</strong><span>Required application code, with visible progress.</span></article><i>→</i><article><b>3</b><strong>Install &amp; extend</strong><span>Browser install, then optional models, media, and knowledge.</span></article></div>
 
     <div id="shell-download-progress" class="download-progress" hidden aria-live="polite">
-      <div class="download-progress-head"><span>App shell</span><strong id="shell-download-state">preparing</strong></div>
+      <div class="download-progress-head"><span>Bootstrap shell</span><strong id="shell-download-state">preparing</strong></div>
       <div id="shell-download-track" class="download-progress-track" role="progressbar" aria-label="Civweave shell download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="shell-download-fill" class="download-progress-fill"></span></div>
       <div class="download-progress-meta"><span id="shell-download-assets">0/11 files</span><strong id="shell-download-percent">0%</strong></div>
     </div>
 
     <div id="campus-install-progress" class="download-progress" aria-live="polite">
-      <div class="download-progress-head"><span>Optional offline campus</span><strong id="offline-package-state">not downloaded</strong></div>
-      <div id="offline-campus-progress-track" class="download-progress-track" role="progressbar" aria-label="Offline campus download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="offline-campus-progress-fill" class="download-progress-fill"></span></div>
+      <div class="download-progress-head"><span>Required local campus</span><strong id="offline-package-state">required before install</strong></div>
+      <div id="offline-campus-progress-track" class="download-progress-track" role="progressbar" aria-label="Local campus download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="offline-campus-progress-fill" class="download-progress-fill"></span></div>
       <div class="download-progress-meta"><span id="offline-package-assets">not started</span><strong id="offline-campus-progress-percent">0%</strong></div>
-      <button id="download-offline-package" class="campus-retry" type="button">Download offline campus</button>
+      <button id="download-offline-package" class="campus-retry" type="button">Download local campus</button>
     </div>
 
     <div class="gateway-actions"><button id="install-app" class="primary" type="button">Install Civweave</button><button id="check-update" class="secondary" type="button">Check release</button></div>
-    <p id="install-help" class="install-help" role="status">Ready when you are. Nothing large downloads until you ask for it.</p>
-    <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">not prepared</dd></div><div><dt>Shell files</dt><dd id="package-assets">starts on install</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">bootstrap shell · optional campus · media and models on demand</dd></div></dl>
-    <p class="model-note"><strong>Local prompt routing:</strong> MiniLM is a separate roughly 22 MB model payload. It is not part of this bootstrap shell and should only be fetched when local routing actually needs it.</p>
+    <p id="install-help" class="install-help" role="status">Ready when you are. Civweave will assemble its local package visibly before the browser install prompt.</p>
+    <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">not prepared</dd></div><div><dt>Shell files</dt><dd id="package-assets">starts on install</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">bootstrap shell · required local campus · optional models, media, and knowledge</dd></div></dl>
+    <p class="model-note"><strong>Local prompt routing:</strong> MiniLM is a separate roughly 22 MB model payload. It is not part of the required campus and is fetched only through its explicit local-model installation path.</p>
   </section>
 
   <section class="anarchadia-story" aria-labelledby="anarchadia-story-title">
@@ -102,13 +102,13 @@
   </section>
 
   <section class="gateway-grid">
-    <article class="status-card"><small>FAST FRONT DOOR</small><h3>No campus crawl before your first click</h3><p>The install shell is a bootstrap, not a disguised offline mirror.</p></article>
-    <article class="status-card"><small>LAZY BY DEFAULT</small><h3>Unused things remain undownloaded</h3><p>Visuals, knowledge packs, media, and models have their own explicit storage lanes.</p></article>
+    <article class="status-card"><small>FAST FRONT DOOR</small><h3>Progress appears before the campus crawl</h3><p>The 11-file bootstrap gets the installer alive quickly, then the required local campus assembles visibly.</p></article>
+    <article class="status-card"><small>OPTIONAL MEANS OPTIONAL</small><h3>Unused heavy things remain undownloaded</h3><p>Models, visuals, knowledge packs, and media keep their own explicit storage lanes.</p></article>
     <article class="status-card"><small>PORTABLE RECOVERY</small><h3>Carry the package another way</h3><div class="card-actions"><a href="/downloads/Civweave-Mobile-Install-Kit.zip">Mobile install kit</a><a href="/downloads/civweave-pocket-campus.cwseed">Pocket Campus seed</a></div></article>
   </section>
 </main>
 <script src="/app/civweave-brand.js?v=1.0.160"></script>
-<script src="/install-v130.js?v=1.0.160-lean-installer-v1"></script>
+<script src="/install-v130.js?v=1.0.160-local-first-installer-v2"></script>
 <script>
 (()=>{
   'use strict';
@@ -149,7 +149,7 @@
   function renderOffline(){
     const text=($('#offline-package-assets')?.textContent||'');
     const match=text.match(/(\d+)\s*\/\s*(\d+)\s+(?:current\s+)?files/i);
-    const total=Number(match?.[2]||0),complete=Number(match?.[1]||0),ready=/^ready offline\b/i.test($('#offline-package-state')?.textContent||'');
+    const total=Number(match?.[2]||0),complete=Number(match?.[1]||0),ready=/^ready (?:offline|locally)\b/i.test($('#offline-package-state')?.textContent||'');
     let percent=ready?100:(total?Math.floor(Math.min(complete,total)/total*100):0);if(!ready&&percent>=100)percent=99;
     const fill=$('#offline-campus-progress-fill'),track=$('#offline-campus-progress-track'),node=$('#offline-campus-progress-percent');
     if(fill)fill.style.width=`${percent}%`;if(track)track.setAttribute('aria-valuenow',String(percent));if(node)node.textContent=`${percent}%`;
