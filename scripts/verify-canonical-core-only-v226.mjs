@@ -7,15 +7,18 @@ import {fileURLToPath} from 'node:url';
 await import('./sync-release-version-assets.mjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
-const [routesSource,boundarySource,versionText]=await Promise.all([
+const [routesSource,boundarySource,coreRuntimeSource,versionText]=await Promise.all([
   read('public/app/system-routes-v227.js'),
   read('public/app/install-boundary-v146.js'),
+  read('public/app/core-interface-runtime-v1.js'),
   read('VERSION')
 ]);
 const version=versionText.trim();
 const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/cabinets/living-school/index.html',cerbanimo:'/app/realm-console-v140.html',fellowfare:'/app/fellowfare-cabinet-v144.html',anarchadia:'/app/anarchadia-console-v139.html'};
-const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js'];
-const allowedExperienceSupport=[
+const coreRuntimePath='/app/core-interface-runtime-v1.js';
+const allowedSharedBoot=[
+  '/app/system-routes-v227.js',
+  '/app/release-version-v1.js',
   '/app/settings-gateway-v317.js',
   '/app/mobile-ai-hardening-v302.js',
   '/app/experience-orchestrator-v232.js',
@@ -61,26 +64,23 @@ for(const [system,pathname] of Object.entries(systems)){
   assert.equal(result.api.allowed(),true);
   assert.equal(result.documentElement.dataset.civweaveSystemRoute,system);
   const scriptPaths=result.appended.map(node=>{try{return new URL(String(node.src||''),'https://civweave.invalid').pathname}catch{return''}}).filter(Boolean);
+  assert.deepEqual(scriptPaths,[coreRuntimePath],`${system} startup must inject only the shared core interface runtime.`);
   for(const retired of retiredCanonicalChat)assert.ok(!scriptPaths.includes(retired),`${system} booted retired canonical chat owner ${retired}.`);
   if(system==='civweave'){
-    assert.deepEqual(scriptPaths,allowedExperienceSupport,'Civweave startup drifted beyond the approved experience subsystem.');
     assert.equal(result.documentElement.dataset.installBoundary,'canonical');
     assert.equal(result.documentElement.dataset.civweaveCanonicalCore,'only');
   }else{
     assert.equal(result.documentElement.dataset.installBoundary,'canonical-system');
     assert.equal(result.documentElement.dataset.civweaveCanonicalRealm,'self-contained');
-    const realmBridge=system==='fellowfare'?[fellowfareBridge]:[];
-    assert.deepEqual(scriptPaths,[...allowedExperienceSupport,...realmBridge,...allowedCanonicalSupport],`${system} canonical support drifted into the legacy compatibility bundle.`);
-    assert(!scriptPaths.includes('/extensions/civweave-additions-v156.js'),`${system} reintroduced the post-paint shared-additions injector.`);
-    assert(!scriptPaths.includes('/app/pwa-update-controller-v204.js'),`${system} reintroduced the update overlay during canonical startup.`);
   }
 }
 const api=runBoundary(systems.civweave,{installed:true}).api;
 assert.equal(api.canonicalSystemCount,5);
 assert.equal(api.canonicalAutoScripts,0);
-assert.equal(api.canonicalSubsystemSupportScripts,allowedCanonicalSupport.length);
-assert.equal(api.canonicalExperienceScripts,allowedExperienceSupport.length);
-assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no-legacy-additions');
+assert.equal(api.canonicalRuntimeScripts,1);
+assert.equal(api.canonicalSubsystemCompatibility,'core-interface-runtime-owned-shared-loading');
+assert.equal(api.coreInterfaceRuntimeRevision,'v1-five-system-shared-loader-adapter-lifecycle');
+assert.equal(api.sharedLoadingOwner,'core-interface-runtime-v1');
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-v242-canonical-chat-owner');
 assert.equal(api.settingsGatewayRevision,'v317-single-owner-first-click-only');
 assert.equal(api.settingsLaunchPolicy,'gateway-only-no-controller-lifecycle-repair-or-delegation');
@@ -105,13 +105,23 @@ assert.equal(api.pwaUpdateRevision,'v250-installed-entry-every-launch');
 assert.equal(api.browserBoundaryRevision,'v228-installed-only-stale-session-chat-escape-install-only-pwa-v1');
 assert.equal(api.browserRuntimePolicy,'installed-display-only');
 assert.equal(api.installedQueryIsAuthorization,false);
-const radioIndex=allowedExperienceSupport.indexOf('/app/system-radio-agent-v233.js');
-const trackIndex=allowedExperienceSupport.indexOf('/app/radio-track-suggestions-v240.js');
-const playlistsIndex=allowedExperienceSupport.indexOf('/app/canonical-playlists-v1.js');
-const governanceIndex=allowedExperienceSupport.indexOf('/app/radio-playlist-governance-v1.js');
-const meshIndex=allowedExperienceSupport.indexOf('/app/civweave-systems-mesh-v251.js');
+assert.doesNotMatch(boundarySource,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS/,'Superseded boundary loader manifests must remain deleted.');
+
+const manifestMatch=coreRuntimeSource.match(/const SHARED_BOOT_SCRIPTS=Object\.freeze\(\[([\s\S]*?)\n\]\);/);
+assert.ok(manifestMatch,'Core interface runtime shared boot manifest is missing.');
+const parsedSharedBoot=[...manifestMatch[1].matchAll(/^\s{2}'([^']+)',?\s*$/gm)].map(item=>item[1]);
+assert.deepEqual(parsedSharedBoot,allowedSharedBoot,'Core interface runtime shared dependency set or order drifted.');
+for(const retired of retiredCanonicalChat)assert.ok(!coreRuntimeSource.includes(`'${retired}'`),`Core interface runtime resurrected retired chat runtime ${retired}.`);
+assert.match(coreRuntimeSource,/const FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);
+assert.match(coreRuntimeSource,/if\(currentSystem==='fellowfare'\)scripts\.push\(FELLOWFARE_GUIDE_BRIDGE\)/);
+assert.ok(!allowedSharedBoot.includes(fellowfareBridge),'FellowFare bridge must remain a conditional realm addition, not universal shared boot.');
+const radioIndex=allowedSharedBoot.indexOf('/app/system-radio-agent-v233.js');
+const trackIndex=allowedSharedBoot.indexOf('/app/radio-track-suggestions-v240.js');
+const playlistsIndex=allowedSharedBoot.indexOf('/app/canonical-playlists-v1.js');
+const governanceIndex=allowedSharedBoot.indexOf('/app/radio-playlist-governance-v1.js');
+const meshIndex=allowedSharedBoot.indexOf('/app/civweave-systems-mesh-v251.js');
 assert.equal(trackIndex,radioIndex+1,'Track suggestions must immediately follow radio.');
 assert.equal(playlistsIndex,trackIndex+1,'Canonical playlists must immediately follow track suggestions.');
 assert.equal(governanceIndex,playlistsIndex+1,'Playlist governance must immediately follow canonical playlists.');
 assert.equal(meshIndex,governanceIndex+1,'Systems mesh must immediately follow playlist governance.');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,canonicalPlaylists:true,playlistGovernance:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,boundaryRuntimeScripts:api.canonicalRuntimeScripts,sharedBootScripts:allowedSharedBoot.length,settingsOwner:'settings-gateway-v317',interfaceRuntime:'core-interface-runtime-v1',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,canonicalPlaylists:true,playlistGovernance:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
