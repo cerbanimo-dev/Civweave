@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const REVISION='installer-repair-only-v2-cache-distinct-lazy-hub-tools-quest-threshold-v1';
+const REVISION='installer-repair-only-v2-cache-distinct-lazy-hub-tools-quest-threshold-v2';
 const CANONICAL_NEXT_PATHS=new Set([
   '/app/working-campus-v156.html',
   '/app/cabinets/living-school/index.html',
@@ -58,9 +58,9 @@ function installHostNodeLobby(){
   const appendLobby=()=>{
     if(document.querySelector('script[data-civweave-host-node-lobby]'))return false;
     const lobby=document.createElement('script');
-    lobby.src=`/app/host-node-installer-lobby-v1.js?v=${releaseVersion()}-hub-login-v1`;
+    lobby.src=`/app/host-node-installer-lobby-v1.js?v=${releaseVersion()}-hub-login-v2-citizen-patron`;
     lobby.async=true;
-    lobby.dataset.civweaveHostNodeLobby='v3';
+    lobby.dataset.civweaveHostNodeLobby='v4';
     document.head.append(lobby);
     return true;
   };
@@ -68,9 +68,9 @@ function installHostNodeLobby(){
   const existing=document.querySelector('script[data-civweave-host-node-session]');
   if(existing){existing.addEventListener('load',appendLobby,{once:true});return true}
   const script=document.createElement('script');
-  script.src=`/app/host-node-session-v1.js?v=${releaseVersion()}-hub-login-v1`;
+  script.src=`/app/host-node-session-v1.js?v=${releaseVersion()}-hub-login-v2-citizen-patron`;
   script.async=true;
-  script.dataset.civweaveHostNodeSession='v1';
+  script.dataset.civweaveHostNodeSession='v2';
   script.addEventListener('load',appendLobby,{once:true});
   document.head.append(script);
   return true;
