@@ -39,7 +39,6 @@ assert.deepEqual(manifest.seeds,[
   '/app/civweave-basic-value-review-v1.js',
   '/app/civweave-basic-value-systems-v1.js',
   '/app/cw-reward-receivers-v2.js',
-  '/app/cw-reward-legacy-bridge-v2.js',
   '/app/cw-reward-surfaces-v2.js',
   '/app/cerbanimo-commerce-distribution-v1.js',
   '/app/civweave-systems-mesh-v251.js',
