@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v249-first-input-safe';
+const VERSION='pwa-install-prompt-v249-user-gesture-safe';
 const ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave';
 const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.cc';
@@ -16,6 +16,8 @@ const PROMPT_WAIT_MS=6000;
 let promptEvent=null;
 let installed=false;
 let prompting=false;
+let priming=false;
+let primed=false;
 let buttonObserver=null;
 let relatedApps=[];
 
@@ -62,6 +64,7 @@ function help(message){
   if(node&&node.textContent!==message)node.textContent=message;
 }
 function installButton(){return document.querySelector('#install-app')}
+function installer(){return globalThis.CivweaveInstallerV130||null}
 function publish(type,detail={}){
   try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,standalone:standalone(),installed,canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,...detail}}))}catch{}
 }
@@ -101,16 +104,25 @@ function refreshButton(){
     help('Installation is complete. Open Civweave from your device app launcher; the campus does not run in this browser tab.');
     return;
   }
-  if(button.disabled)return;
+  if(prompting)return;
+  const shell=installer();
+  if(priming||shell&&!shell.shellReady){
+    button.disabled=true;
+    button.textContent='Preparing app shell…';
+    help('Preparing the small installable shell so the browser can offer Civweave before your install click. Offline campus files remain separate.');
+    return;
+  }
   if(promptEvent){
-    if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
+    button.disabled=false;
+    button.textContent='Install Civweave';
     help('Civweave is ready for a browser-native app install from this host. Tap Install Civweave.');
     return;
   }
-  if(!prompting){
-    if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
-    help('Install prepares the lightweight shell first, then opens the browser-native app prompt as soon as Chromium offers it.');
-  }
+  button.disabled=false;
+  button.textContent='Install Civweave';
+  help(primed
+    ? 'The lightweight shell is ready. Waiting for Chromium to expose its native install prompt; the browser menu can also install the app.'
+    : 'Preparing installability now. The offline campus, media, knowledge packs, and local models stay opt-in.');
 }
 function observeButton(){
   const button=installButton();
@@ -157,6 +169,26 @@ function waitForPrompt(timeoutMs=PROMPT_WAIT_MS){
     addEventListener('beforeinstallprompt',onPrompt);
   });
 }
+async function primeInstallability(){
+  if(standalone()||installed||priming||primed||!installOrigin())return;
+  const shell=installer();
+  if(!shell?.prepareShell)return;
+  priming=true;
+  publish('civweave:pwa-installability-preparing',{eager:true});
+  queueMicrotask(refreshButton);
+  try{
+    if(!shell.shellReady)await shell.prepareShell({eager:true});
+    primed=Boolean(shell.shellReady);
+    publish('civweave:pwa-installability-ready',{ready:primed});
+    if(!primed)help('The lightweight app shell could not finish preparing. Use Reset app shell and retry if the installer reports an error.');
+  }catch(error){
+    primed=false;
+    publish('civweave:pwa-installability-error',{message:error?.message||String(error)});
+  }finally{
+    priming=false;
+    queueMicrotask(refreshButton);
+  }
+}
 async function ownInstallClick(event){
   const button=event.target?.closest?.('#install-app');
   if(!button||button.disabled||prompting)return;
@@ -179,35 +211,36 @@ async function ownInstallClick(event){
     help('Civweave is already installed. Open it from your device app launcher; browser-tab runtime is disabled.');
     return;
   }
-  const installer=globalThis.CivweaveInstallerV130;
+  const shell=installer();
   event.preventDefault();
   event.stopImmediatePropagation();
-  if(!installer?.prepareShell){
-    help('The lightweight shell controller is still loading. Wait a moment, then tap Install Civweave again.');
+  if(!shell?.prepareShell){
+    help('The lightweight shell controller is still loading. Installability will prepare automatically as soon as it is available.');
     return;
   }
+  if(!shell.shellReady){
+    button.disabled=true;
+    button.textContent='Preparing app shell…';
+    help('Finishing the small app shell first. The Install button will re-enable when a fresh browser install gesture can open the native prompt.');
+    void primeInstallability();
+    return;
+  }
+  const prompt=promptEvent;
+  if(!prompt){
+    primed=true;
+    button.disabled=false;
+    button.textContent='Install Civweave';
+    help('The app shell is ready, but Chromium has not exposed its native install prompt yet. Wait a moment and tap Install again, or use the browser Install app command.');
+    return;
+  }
+
+  promptEvent=null;
   prompting=true;
   button.disabled=true;
-  button.textContent='Preparing app shell…';
+  button.textContent='Opening app install…';
   try{
-    await installer.prepareShell({manual:true});
-    if(!installer.shellReady){
-      help('Civweave was not installed because the lightweight app shell is not ready. Repair or retry the shell, then install again.');
-      return;
-    }
-    button.textContent='Waiting for browser install…';
-    help('The app shell is ready. Waiting briefly for Chromium to publish the native Civweave install prompt…');
-    const prompt=promptEvent||await waitForPrompt();
-    if(!prompt){
-      button.disabled=false;
-      button.textContent='Install Civweave';
-      help('The Civweave shell is ready, but this browser has not exposed its native app prompt yet. Reload this installer once, then tap Install Civweave again; do not use Create shortcut.');
-      return;
-    }
-    promptEvent=null;
-    button.disabled=true;
-    button.textContent='Opening app install…';
-    await prompt.prompt();
+    // prompt() must be invoked synchronously from this click. Do not await shell work here.
+    prompt.prompt();
     const choice=await prompt.userChoice.catch(()=>null);
     if(choice?.outcome==='accepted'){
       installed=true;
@@ -220,10 +253,14 @@ async function ownInstallClick(event){
       button.textContent='Reload to install';
     }
   }catch(error){
-    help(`Civweave was not installed because the lightweight shell or native install prompt could not finish: ${error?.message||error}. Retry from this installer.`);
+    help(`Civweave could not open the native install prompt: ${error?.message||error}. Reload the installer and retry.`);
     button.disabled=false;
     button.textContent='Retry install';
   }finally{prompting=false}
+}
+function start(){
+  observeButton();
+  queueMicrotask(()=>void primeInstallability());
 }
 
 if(hostSetupRedirect())return;
@@ -232,7 +269,7 @@ if(rerouteUnsafeInstall())return;
 addEventListener('beforeinstallprompt',capture);
 addEventListener('appinstalled',onInstalled);
 document.addEventListener('click',ownInstallClick,true);
-if(document.readyState==='loading')addEventListener('DOMContentLoaded',observeButton,{once:true});else observeButton();
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 addEventListener('pagehide',()=>buttonObserver?.disconnect(),{once:true});
 
 const reminder=document.createElement('script');
@@ -259,12 +296,14 @@ const api=Object.freeze({
   standalone,
   refresh:refreshButton,
   waitForPrompt,
+  prepareInstallability:primeInstallability,
   browserRuntimePolicy:'installer-only-until-installed-display',
-  installSequencingPolicy:'prepare-shell-before-native-prompt',
-  promptAvailabilityPolicy:'prepare-shell-then-wait-for-beforeinstallprompt',
+  installSequencingPolicy:'prepare-shell-before-user-install-gesture',
+  promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-click',
   eagerRelatedAppDiscovery:false,
+  eagerShellPreparation:true,
   firstInputSafe:true,
-  state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
+  state:()=>({available:Boolean(promptEvent),installed,prompting,priming,primed,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
 });
 
 globalThis.CivweavePWAInstallV249=api;
