@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.160-interface-rebase-v1';
+const VERSION='1.0.160-interface-runtime-v1';
 const STATE='civweave.working-campus.v1',LANG='civweave.language.v1',LOCAL='civweave.local-ai.selection.v266';
 const ROUTE={civweave:'/app/working-campus-v156.html','living-school':'/app/cabinets/living-school/index.html?cabinet=1',cerbanimo:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1',fellowfare:'/app/fellowfare-cabinet-v144.html?cabinet=1',anarchadia:'/app/anarchadia-console-v139.html?cabinet=1'};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
