@@ -1,4 +1,3 @@
-import './apply-confidence-weighted-validation-v1-safe.mjs';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
