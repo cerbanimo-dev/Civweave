@@ -53,7 +53,7 @@ assert(workerWrapper.includes(`service-worker-core-v208.js?v=${version}-chat-con
 assert(topbar.includes("target.searchParams.set('manage','downloads')")&&topbar.includes('location.assign(downloadsUrl())'),'Downloads navigation contract drifted; update the return test with any intentional navigation change.');
 assert(lifecycle.includes('function stopOnPageHide(event){if(!event?.persisted)active=false}'),'Document lifecycle once again tears down BFCache pages.');
 assert(lifecycle.includes("addEventListener('pageshow',revive)"),'Document lifecycle no longer revives on pageshow.');
-assert(lifecycle.includes("settingsEntryOwner:'settings-gateway-v317'")&&lifecycle.includes('inputOwnership:false'),'Document lifecycle regained Settings input ownership.');
+assert(lifecycle.includes("settingsOwner:'settings-v320'")&&lifecycle.includes("serviceRole:'downloaded-model-settings-content'")&&lifecycle.includes('inputOwnership:false')&&lifecycle.includes('presentationOwnership:false'),'Document lifecycle must remain a non-owning Settings content service.');
 
 assert(!releaseVerifier.includes("await import('./sync-release-version-assets.mjs')"),'Release verifier self-heals the tree before verifying it.');
 assert(!releaseVerifier.includes("await import('./sync-release-coherence-v220.mjs')"),'Release verifier still mutates coherence before verifying it.');
@@ -95,4 +95,4 @@ pagehide({persisted:false,stopImmediatePropagation(){stopped+=1}});
 assert.equal(stopped,1,'Non-persisted navigation was incorrectly quarantined.');
 assert.equal(replaceCalls,0,'Healthy guard simulation unexpectedly reloaded the campus.');
 
-console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425-v317-lifecycle',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true,settingsOwner:'settings-gateway-v317'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425-v320-lifecycle',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true,settingsOwner:'settings-gateway-v317',settingsManagementOwner:'settings-v320'},null,2));
