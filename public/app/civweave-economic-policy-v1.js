@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveEconomicPolicyV1)return;
-const VERSION='1.1.0';
+const VERSION='1.2.0';
 const SCHEMA='civweave.economic-policy.v1';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const num=value=>value===null||value===undefined||value===''?null:Number.isFinite(Number(value))?Number(value):null;
@@ -44,13 +44,13 @@ function rows(){
     ['learning.moduleCompletionAcorns','acorn/module',value('learning.moduleCompletionAcorns',2),'Completion grant.'],
     ['learning.externalValidationBonusAcorns','acorn/module',value('learning.externalValidationBonusAcorns',2),'External successful validation bonus.'],
     ['learning.validatorContributionAcorns','acorn/validation',value('learning.validatorContributionAcorns',1),'Qualified learning-validation contribution.'],
-    ['education.acornsPerHour','acorn/hour',value('education.acornsPerHour',10),'Marketed educational time baseline.'],
-    ['education.curriculumMinAcorns','acorn/curriculum',value('education.curriculumMinAcorns',5),'Lower curriculum suggestion bound.'],
-    ['education.curriculumMaxAcorns','acorn/curriculum',value('education.curriculumMaxAcorns',50),'Upper curriculum suggestion bound.'],
+    ['education.acornsPerHour','acorn/hour',value('education.acornsPerHour',100),'Marketed educational time baseline on the higher-granularity Acorn price scale.'],
+    ['education.curriculumMinAcorns','acorn/curriculum',value('education.curriculumMinAcorns',50),'Lower curriculum suggestion bound on the Acorn price scale.'],
+    ['education.curriculumMaxAcorns','acorn/curriculum',value('education.curriculumMaxAcorns',500),'Upper curriculum suggestion bound on the Acorn price scale.'],
     ['mentorship.balanced.buttons','button/session',value('mentorship.balanced.buttons',5),'Balanced learning + doing mentorship.'],
-    ['mentorship.balanced.acorns','acorn/session',value('mentorship.balanced.acorns',5),'Balanced learning + doing mentorship.'],
+    ['mentorship.balanced.acorns','acorn/session',value('mentorship.balanced.acorns',50),'Balanced learning + doing mentorship.'],
     ['mentorship.doingHeavy.buttons','button/session',value('mentorship.doingHeavy.buttons',15),'Doing-heavy mentorship.'],
-    ['mentorship.learningHeavy.acorns','acorn/session',value('mentorship.learningHeavy.acorns',20),'Learning-heavy mentorship.'],
+    ['mentorship.learningHeavy.acorns','acorn/session',value('mentorship.learningHeavy.acorns',200),'Learning-heavy mentorship.'],
     ['stability.buttons.transactionSinkBps','basis-points/transfer',null,'Optional future Button transaction sink. Disabled until a governed rate and destination/destruction policy exist.'],
     ['stability.acorns.transactionSinkBps','basis-points/transfer',null,'Optional future Acorn transaction sink. Disabled until a governed rate and destination/destruction policy exist.'],
     ['stability.buttons.demurrageBpsPerYear','basis-points/year',null,'Optional future Button demurrage/idle-decay lever. Disabled.'],

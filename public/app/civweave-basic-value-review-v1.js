@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueReviewV1)return;
-const VERSION='1.0.1';
+const VERSION='1.1.0';
 const SCHEMA='civweave.basic-value-review.v1';
 const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 const num=value=>Number.isFinite(Number(value))?Number(value):0;
@@ -17,7 +17,7 @@ const RUBRIC=Object.freeze([
   {id:'market-separation',text:'Market scarcity, prestige, urgency, and live comparables may affect a later asking price but do not rewrite this baseline.'},
   {id:'currency-separation',text:'Buttons and Acorns are distinct value channels and are never treated as exchange-rate equivalents.'},
   {id:'no-automatic-mint',text:'A baseline valuation is a price reference only and never mints, grants, or transfers currency by itself.'},
-  {id:'education-baseline',text:'Marketed curriculum/tutoring uses 10 Acorns per educational hour; curriculum package suggestions remain 5–50 Acorns based on length and quality.'},
+  {id:'education-baseline',text:'Marketed curriculum/tutoring uses 100 Acorns per educational hour; curriculum package suggestions remain 50–500 Acorns based on length and quality. Acorn prices intentionally use a more granular numeric scale than Button wages.'},
   {id:'mentorship-mix',text:'Mentorship uses the configured balanced, doing-heavy, or learning-heavy package rather than inventing a Button/Acorn conversion.'},
   {id:'stability-awareness',text:'Flag likely supply-pressure or stability concerns, but do not invent a sink, burn, demurrage, issuance cap, or deflationary rate.'}
 ]);
