@@ -1,3 +1,9 @@
+import {
+  isStagingRequest,
+  requestOrigin,
+  STAGING_GUILDS,
+} from "../_shared/staging-runtime";
+
 const CORE_DIRECTORY = "https://civweave-core.cerbanimo.workers.dev/api/nodes?limit=100";
 const FABRIC_ORIGIN = "https://civweave-node-cloud.cerbanimo.workers.dev";
 const COMMUNITY_SEATS_PER_FREE_NODE = 6;
@@ -65,6 +71,39 @@ function matches(mode: string, slots: { free: number; paid: number }) {
   return slots.free > 0 || slots.paid > 0;
 }
 
+function stagingSearch(request: Request, latitude: number, longitude: number, mode: string) {
+  const roundedLatitude = Number(latitude.toFixed(3));
+  const roundedLongitude = Number(longitude.toFixed(3));
+  const origin = requestOrigin(request);
+  const nodes = STAGING_GUILDS
+    .map(guild => ({
+      schema: "civweave.nearby-hub.v1",
+      nodeId: guild.nodeId,
+      displayName: guild.displayName,
+      hostOrigin: origin,
+      runtime: "civweave-staging-pages-fixture",
+      status: "active",
+      distanceKm: Number(distanceKm(roundedLatitude, roundedLongitude, guild.latitude, guild.longitude).toFixed(2)),
+      slots: { free: guild.freeSlots, paid: guild.paidSlots },
+      stagingSynthetic: true,
+    }))
+    .filter(node => matches(mode, node.slots))
+    .sort((left, right) => left.distanceKm - right.distanceKm)
+    .slice(0, MAX_RESULTS);
+
+  return reply({
+    schema: "civweave.nearby-hub-search.v1",
+    ok: true,
+    environment: "staging",
+    stagingSynthetic: true,
+    productionIsolation: true,
+    mode,
+    nodes,
+    source: "staging-fixture",
+    privacy: { coordinateDecimals: 3, exactLocationStored: false, exactLocationReturned: false },
+  });
+}
+
 export const onRequestPost: PagesFunction = async (context) => {
   const contentLength = Number(context.request.headers.get("content-length") || 0);
   if (contentLength > 4_096) return reply({ ok: false, error: "search-request-too-large" }, 413);
@@ -74,6 +113,11 @@ export const onRequestPost: PagesFunction = async (context) => {
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
     return reply({ ok: false, error: "approximate-location-required" }, 400);
   }
+
+  if (isStagingRequest(context.request)) {
+    return stagingSearch(context.request, latitude, longitude, mode);
+  }
+
   const roundedLatitude = Number(latitude.toFixed(3)), roundedLongitude = Number(longitude.toFixed(3));
   try {
     const [directory, fabric] = await Promise.all([

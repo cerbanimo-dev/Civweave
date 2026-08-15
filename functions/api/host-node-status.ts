@@ -1,3 +1,11 @@
+import {
+  isStagingRequest,
+  requestOrigin,
+  stagingGuild,
+  stagingGuildStatus,
+  stagingProductionTargetBlocked,
+} from "../_shared/staging-runtime";
+
 const NODE_DOMAIN = "nodes.commonweave.earth";
 const CENTRAL_FABRIC_HOST = "civweave-node-cloud.cerbanimo.workers.dev";
 const LEGACY_HOSTS = new Set(["civweave-host-node.onrender.com"]);
@@ -87,7 +95,27 @@ function reply(value: unknown, status = 200) {
   });
 }
 
+function stagingStatus(request: Request) {
+  const requestUrl = new URL(request.url);
+  const target = hostOrigin(requestUrl.searchParams.get("host"));
+  if (!target) return reply({ ok: false, error: "host-node-not-allowed" }, 400);
+  const origin = requestOrigin(request);
+  if (target.origin !== origin) return stagingProductionTargetBlocked(request, target.origin);
+  const nodeId = requestedNodeId(requestUrl.searchParams.get("node"));
+  const guild = stagingGuild(nodeId);
+  if (!guild) return reply({
+    ok: false,
+    error: "staging-guild-not-found",
+    environment: "staging",
+    productionIsolation: true,
+    nodeId,
+  }, 404);
+  return reply(stagingGuildStatus(guild, origin));
+}
+
 export const onRequestGet: PagesFunction = async (context) => {
+  if (isStagingRequest(context.request)) return stagingStatus(context.request);
+
   const requestUrl = new URL(context.request.url);
   const origin = hostOrigin(requestUrl.searchParams.get("host"));
   if (!origin || !allowedHost(origin)) {
