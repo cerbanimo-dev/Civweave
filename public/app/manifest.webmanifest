@@ -30,6 +30,11 @@
     },
     {
       "platform": "webapp",
+      "url": "https://civweave-staging.pages.dev/app/manifest.webmanifest",
+      "id": "https://civweave-staging.pages.dev/civweave-local"
+    },
+    {
+      "platform": "webapp",
       "url": "https://civweave.pages.dev/app/manifest.webmanifest",
       "id": "https://civweave.pages.dev/civweave-local"
     },
