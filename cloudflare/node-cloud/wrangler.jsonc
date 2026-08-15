@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-node-cloud",
-  "main": "src/server-ai-entry-v5.mjs",
+  "main": "src/server-ai-entry-v8.mjs",
   "compatibility_date": "2026-08-14",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
@@ -44,6 +44,12 @@
   // NODE_FABRIC_SESSION_SECRET
   // NODE_FABRIC_OPERATOR_TOKEN
   // NODE_FABRIC_BINDING_TOKEN
+  //
+  // Passport account security is established before Hub admission. Capacity sessions
+  // are bound to an active paired device so device deactivation revokes live access.
+  // Member Stripe connection is proxied through the authenticated account surface and
+  // reuses FellowFare's Accounts v2 direct-commerce merchant rail. Host Stewards may
+  // manage membership only with the browser claim already paired to the Hub.
   //
   // The ACCOUNT_DIRECTORY Durable Object stores only hashed recovery-email keys
   // and verified account locators. It never returns account existence before the

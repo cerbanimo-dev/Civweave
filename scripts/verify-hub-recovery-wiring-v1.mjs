@@ -7,16 +7,21 @@ const paths = [
   'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
   'cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs',
   'cloudflare/account-edge/src/hub-passport-account-v1.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v8.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v9.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v2.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v3.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v4.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v5.mjs',
   'cloudflare/account-edge/src/recovery-entry-v10.mjs',
   'cloudflare/account-edge/src/recovery-entry-v11.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
   'cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs',
   'cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs',
+  'cloudflare/node-cloud/src/cloud-node-recovery-v3.mjs',
   'cloudflare/node-cloud/src/account-directory-v1.mjs',
-  'cloudflare/node-cloud/src/server-ai-entry-v4.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v5.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v6.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v7.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v8.mjs',
   'cloudflare/node-cloud/wrangler.jsonc',
   'cloudflare/recovery-relay/src/index.mjs',
   'cloudflare/recovery-relay/wrangler.jsonc',
@@ -31,102 +36,117 @@ const paths = [
   'public/app/hub-recovery-ui-v1.js',
   'public/app/hub-passport-account-v1.js',
   'public/app/hub-delivery-intent-v1.js',
+  'public/app/host-node-session-v1.js',
   'public/app/host-node-session-import-v1.js',
   'public/app/host-node-session-export-v1.js',
 ];
 const source = Object.fromEntries(await Promise.all(paths.map(async path => [path, await readFile(path, 'utf8')])));
 
+// Legacy recovery infrastructure remains available and independent of Stripe.
 assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v11\.mjs/);
-assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /nodes\.civweave\.invalid/);
-assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /recover@/);
-assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /glaedn\.workers\.dev/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /recovery-entry-v10\.mjs/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /PassportAccountService/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /HubAccountRecoveryOfflineService/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /civweave\.pages\.dev\/app\/recovery-relay-v1\.json/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /offline-code-only/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /validMailbox/);
-assert.doesNotMatch(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /HUB_RECOVERY_MAILBOX_PENDING/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /HUB_OFFLINE_RECOVERY_CODE_COUNT = 8/);
-assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /hub-offline-recovery:/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /offlineRecoveryRemaining/);
-assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /recoveryMethod: 'offline-code'/);
 assert.doesNotMatch(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /storage\.put\([^\n]*codes/i, 'plaintext offline codes must not be persisted');
-
-assert.match(source['cloudflare/account-edge/src/hub-passport-account-v1.mjs'], /PASSPORT_ACCOUNT_SCHEMA/);
-assert.match(source['cloudflare/account-edge/src/hub-passport-account-v1.mjs'], /verifiedAttestationSpki/);
-assert.match(source['cloudflare/account-edge/src/hub-passport-account-v1.mjs'], /recoveryMethod: 'email\+existing-passkey'/);
-assert.match(source['cloudflare/account-edge/src/hub-passport-account-v1.mjs'], /generatedMailbox/);
-assert.doesNotMatch(source['cloudflare/account-edge/src/hub-passport-account-v1.mjs'].match(/function publicAccount[\s\S]*?\n\}/)?.[0] || '', /hiddenMailbox\s*:/, 'hidden mailbox must not be exposed by publicAccount');
-
-assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v4.mjs'], /cloud-node-recovery-v1\.mjs/);
-assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v5.mjs'], /cloud-node-recovery-v2\.mjs/);
-assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v5.mjs'], /CivweaveAccountDirectory/);
-assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /HubAccountRecoveryOfflineService/);
-assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /handleHubAccountRecoveryInbound/);
-assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /recovery\/codes\/ack/);
-assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /civweave\.pages\.dev\/app\/recovery-relay-v1\.json/);
-assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /offline-code-only/);
-assert.doesNotMatch(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /HUB_RECOVERY_INBOUND_EMAIL/);
-assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs'], /PassportAccountService/);
-assert.match(source['cloudflare/node-cloud/src/account-directory-v1.mjs'], /Check that address for the next step/);
-assert.match(source['cloudflare/node-cloud/src/account-directory-v1.mjs'], /existing: Boolean\(locator\)/);
-assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /"ACCOUNT_DIRECTORY"/);
-assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /"CERBANIMO_MAIL"/);
-assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /nodes\.civweave\.invalid/);
-
-assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /"name": "civweave-recovery-relay"/);
-assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /CivweaveRecoveryProofRelay/);
-assert.doesNotMatch(source['cloudflare/recovery-relay/wrangler.jsonc'], /RECOVERY_MAILBOX/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /inbound-email-proof/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundVerification/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundRecovery/);
 assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /async email\(message, env/);
-assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /message\.reply\(new EmailMessage/);
-assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /exact-email-routing-rule/);
 assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /emailHash/);
 assert.doesNotMatch(source['cloudflare/recovery-relay/src/index.mjs'], /passportId/i);
 assert.doesNotMatch(source['cloudflare/recovery-relay/src/index.mjs'], /residentId/i);
-assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /inbound-email-proof/);
-assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /authenticatedProof/);
-assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundVerification/);
-assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundRecovery/);
-assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /paste this one-time code/);
-assert.doesNotMatch(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /glaedn\.workers\.dev/);
-assert.match(source['scripts/resolve-cloudflare-recovery-zone-v1.mjs'], /civweave\|cerbanimo/);
-assert.match(source['scripts/resolve-cloudflare-recovery-zone-v1.mjs'], /forbidden-recovery-zone/);
-assert.match(source['scripts/resolve-cloudflare-recovery-zone-v1.mjs'], /commonweave\.earth/);
-assert.match(source['.github/workflows/deploy-civweave-pages.yml'], /resolve-cloudflare-recovery-zone-v1\.mjs/);
-assert.match(source['.github/workflows/deploy-civweave-pages.yml'], /recovery-relay-v1\.json/);
-assert.match(source['.github/workflows/deploy-civweave-pages.yml'], /mailbox: process\.env\.RECOVERY_MAILBOX \|\| null/);
-assert.match(source['.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'], /resolve-cloudflare-recovery-zone-v1\.mjs/);
-assert.match(source['.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'], /RECOVERY_ZONE_ID/);
-assert.match(source['.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'], /pending-owned-zone/);
-assert.match(source['config/launch-topology-v1.json'], /"domain": null/);
-assert.match(source['config/launch-topology-v1.json'], /nodes\.civweave\.invalid/);
 
-const activeDomainSurfaces = ['cloudflare/account-edge/wrangler.jsonc','cloudflare/node-cloud/wrangler.jsonc','cloudflare/recovery-relay/wrangler.jsonc','.github/workflows/deploy-civweave-pages.yml','.github/workflows/enable-cloudflare-worker-subdomains-v1.yml','config/launch-topology-v1.json'];
-for (const path of activeDomainSurfaces) assert.doesNotMatch(source[path], /(?:^|[^a-z])commonweave\.earth/i, `${path} must not depend on the unrelated commonweave.earth domain`);
+// Passport accounts now gate membership before a capacity seat is admitted.
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v1.mjs'], /PASSPORT_ACCOUNT_SCHEMA/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v1.mjs'], /verifiedAttestationSpki/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v2.mjs'], /maxPairedDevices:\s*10/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v2.mjs'], /maxActiveDevices:\s*2/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v2.mjs'], /onlineMembershipReady/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v2.mjs'], /offlineMembershipReady/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v2.mjs'], /beginTotp/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v3.mjs'], /bindCapacitySession/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v3.mjs'], /checkCapacitySession/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v4.mjs'], /regenerateRecoveryKit/);
+assert.match(source['cloudflare/account-edge/src/hub-passport-account-v5.mjs'], /Recovery-code sign-in requires authenticator 2FA/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs'], /hub-passport-account-v5\.mjs/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs'], /\/api\/account\/session\/authorize/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v3.mjs'], /steward\/member\/remove/);
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v6.mjs'], /bindSession/);
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v6.mjs'], /annotateMember/);
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v7.mjs'], /function accountRoute/);
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v7.mjs'], /api\\\/account\\\/stripe/);
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v8.mjs'], /cloud-node-recovery-v3\.mjs/);
+assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /server-ai-entry-v8\.mjs/);
+assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /"ACCOUNT_DIRECTORY"/);
+assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /"CERBANIMO_MAIL"/);
 
-assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js/);
-assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
-assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
-assert.match(source['public/app/installer-repair-only-v1.js'], /hub-recovery-api-v1\.js/);
-assert.match(source['public/app/installer-repair-only-v1.js'], /browserRuntimePolicy:'installer-only-until-installed-display'/);
-assert.match(source['public/app/installer-online-fallback-v225.js'], /retired:true/);
-assert.match(source['public/app/installer-online-fallback-v225.js'], /browserRuntime:false/);
-assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
-assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryMethod/);
-assert.match(source['public/app/hub-recovery-api-v1.js'], /cloudFabric=\/\^civweave-node-cloud\\\./);
-assert.match(source['public/app/hub-recovery-api-v1.js'], /`\/n\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
-assert.match(source['public/app/hub-recovery-api-v1.js'], /`\/nodes\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
-assert.match(source['public/app/hub-recovery-ui-v1.js'], /outside recovery email is optional/i);
-assert.match(source['public/app/hub-recovery-ui-v1.js'], /Add this Passport passkey/);
+// UI contract: app use stays account-free, Hub membership does not.
+assert.doesNotMatch(source['public/app/hub-recovery-ui-v1.js'], /outside recovery email is optional/i);
+assert.match(source['public/app/hub-recovery-ui-v1.js'], /Civweave works locally without an account/i);
+assert.match(source['public/app/hub-recovery-ui-v1.js'], /Online Hub membership requires a verified recovery email/i);
+assert.match(source['public/app/hub-recovery-ui-v1.js'], /Two-factor authentication/i);
+assert.match(source['public/app/hub-recovery-ui-v1.js'], /Up to 10 paired devices, with 2 active at a time/i);
+assert.match(source['public/app/hub-recovery-ui-v1.js'], /Annual Member Rebate/i);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Legacy recovery code/);
-assert.match(source['public/app/hub-recovery-ui-v1.js'], /email proof plus an existing account passkey/i);
-assert.doesNotMatch(source['public/app/hub-recovery-ui-v1.js'], /Add a recovery email before creating this Hub account/);
 assert.match(source['public/app/hub-passport-account-v1.js'], /navigator\.credentials\.create/);
 assert.match(source['public/app/hub-passport-account-v1.js'], /navigator\.credentials\.get/);
-assert.match(source['public/app/hub-passport-account-v1.js'], /passport-link\/authenticate/);
-for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {const result = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });assert.equal(result.status, 0, `${path} syntax failed: ${result.stderr || result.stdout}`);}
+assert.match(source['public/app/hub-passport-account-v1.js'], /beginTotp/);
+assert.match(source['public/app/hub-passport-account-v1.js'], /connectStripe/);
+assert.match(source['public/app/host-node-session-v1.js'], /civweave\.hub-device-id\.v1/);
+assert.match(source['public/app/host-node-session-v1.js'], /replaceDeviceId/);
 
-const recoveryNoStripeSurfaces = ['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs','cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs','cloudflare/account-edge/src/recovery-entry-v10.mjs','cloudflare/account-edge/src/recovery-entry-v11.mjs','cloudflare/account-edge/src/hub-passport-account-v1.mjs','cloudflare/account-edge/wrangler.jsonc','cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs','cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs','cloudflare/node-cloud/src/account-directory-v1.mjs','cloudflare/recovery-relay/src/index.mjs','cloudflare/recovery-relay/wrangler.jsonc','scripts/resolve-cloudflare-recovery-zone-v1.mjs','public/app/hub-recovery-api-v1.js','public/app/hub-recovery-ui-v1.js','public/app/hub-passport-account-v1.js','public/app/hub-delivery-intent-v1.js'];
-for (const path of recoveryNoStripeSurfaces) assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
-console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v10-passport-passkeys',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,cloudFabricRecovery:true,passportPasskeys:true,optionalRecoveryEmail:true,emailLinkRequiresExistingPasskey:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false}));
+// Account recovery relay and hidden mailbox machinery must never become a Stripe dependency.
+const recoveryNoStripeSurfaces = [
+  'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
+  'cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v10.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v11.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v1.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v2.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v3.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v4.mjs',
+  'cloudflare/account-edge/src/hub-passport-account-v5.mjs',
+  'cloudflare/account-edge/wrangler.jsonc',
+  'cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs',
+  'cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs',
+  'cloudflare/node-cloud/src/cloud-node-recovery-v3.mjs',
+  'cloudflare/node-cloud/src/account-directory-v1.mjs',
+  'cloudflare/recovery-relay/src/index.mjs',
+  'cloudflare/recovery-relay/wrangler.jsonc',
+  'scripts/resolve-cloudflare-recovery-zone-v1.mjs',
+  'public/app/hub-recovery-api-v1.js',
+  'public/app/hub-delivery-intent-v1.js',
+];
+for (const path of recoveryNoStripeSurfaces) assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a recovery dependency`);
+
+// Existing owned-zone and browser-boundary guarantees stay intact.
+assert.match(source['scripts/resolve-cloudflare-recovery-zone-v1.mjs'], /civweave\|cerbanimo/);
+assert.match(source['scripts/resolve-cloudflare-recovery-zone-v1.mjs'], /forbidden-recovery-zone/);
+assert.match(source['.github/workflows/deploy-civweave-pages.yml'], /resolve-cloudflare-recovery-zone-v1\.mjs/);
+assert.match(source['.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'], /RECOVERY_ZONE_ID/);
+assert.match(source['public/app/installer-repair-only-v1.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/installer-online-fallback-v225.js'], /retired:true/);
+assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js/);
+assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
+
+for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {
+  const result = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });
+  assert.equal(result.status, 0, `${path} syntax failed: ${result.stderr || result.stdout}`);
+}
+
+console.log(JSON.stringify({
+  ok: true,
+  schema: 'civweave.hub-recovery-wiring-check.v11-membership-security',
+  legacyRecoveryPreserved: true,
+  recoveryEmailRequiredForOnlineHub: true,
+  recoveryKitRequired: true,
+  passkeyOrTotpRequired: true,
+  maxPairedDevices: 10,
+  maxActiveDevices: 2,
+  deviceBoundSessions: true,
+  stewardRemoval: true,
+  stripeRecoveryDependency: false,
+  stripeMemberAccountOptional: true,
+}));

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNode,hostedEntry,deployedEntry,accountEdge,legacyAccountEdge,wrangler] = await Promise.all([
+const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNode,hostedEntry,deployedEntryV5,deployedEntryV6,deployedEntryV7,deployedEntryV8,accountEdge,legacyAccountEdge,wrangler] = await Promise.all([
   'cloudflare/node-cloud/src/server-ai-entry-v2.mjs',
   'cloudflare/node-cloud/src/user-ai-pool-router-v2.mjs',
   'cloudflare/node-cloud/src/capacity-user-pools-v2.mjs',
@@ -11,6 +11,9 @@ const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNo
   'cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v4.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v5.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v6.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v7.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v8.mjs',
   'cloudflare/account-edge/src/index.mjs',
   'cloudflare/account-edge/src/index-legacy-v1.mjs',
   'cloudflare/node-cloud/wrangler.jsonc',
@@ -56,9 +59,16 @@ assert.match(recoveryNode,/cloud-node-hosting-v1\.mjs/,'Recovery-aware Cloud Nod
 assert.match(recoveryNode,/extends BaseCloudNode/,'Recovery-aware Cloud Nodes must preserve the hosting node inheritance chain.');
 assert.match(hostedEntry,/capacity-hosting-plan-v1\.mjs/);
 assert.match(hostedEntry,/cloud-node-recovery-v1\.mjs/,'The v4 composition layer must expose the recovery-aware Cloud Node wrapper.');
-assert.match(deployedEntry,/server-ai-entry-v4\.mjs/,'The deployed v5 entry must preserve the v4 hosting and user-pool composition.');
-assert.match(deployedEntry,/cloud-node-recovery-v2\.mjs/,'The deployed v5 entry must add the current recovery wrapper.');
-assert.match(deployedEntry,/account-directory-v1\.mjs/,'The deployed v5 entry must retain account-directory composition.');
+assert.match(deployedEntryV5,/server-ai-entry-v4\.mjs/,'The v5 entry must preserve hosting and user-pool composition.');
+assert.match(deployedEntryV5,/cloud-node-recovery-v2\.mjs/,'The v5 entry must add the Passport/recovery wrapper.');
+assert.match(deployedEntryV5,/account-directory-v1\.mjs/,'The v5 entry must retain account-directory composition.');
+assert.match(deployedEntryV6,/server-ai-entry-v5\.mjs/,'The v6 account gate must extend v5 instead of replacing user-pool routing.');
+assert.match(deployedEntryV6,/capacity-membership-admin-v1\.mjs/,'The v6 account gate must preserve capacity accounting while adding Steward controls.');
+assert.match(deployedEntryV6,/bindSession/,'The v6 account gate must device-bind capacity sessions.');
+assert.match(deployedEntryV7,/server-ai-entry-v6\.mjs/,'The v7 member Stripe surface must extend the account-gated runtime.');
+assert.match(deployedEntryV7,/accountRoute/,'The v7 member Stripe surface must remain isolated above the compute pool router.');
+assert.match(deployedEntryV8,/server-ai-entry-v7\.mjs/,'The v8 deployed entry must preserve every lower composition layer.');
+assert.match(deployedEntryV8,/cloud-node-recovery-v3\.mjs/,'The v8 deployed entry must expose the Steward-capable Cloud Node wrapper.');
 
 assert.match(accountEdge,/index-legacy-v1\.mjs/);
 assert.match(accountEdge,/server-ai-entry-v2\.mjs/);
@@ -66,9 +76,25 @@ assert.match(accountEdge,/capacity-user-pools-v2\.mjs/);
 assert.match(accountEdge,/legacyAccountEdge\.fetch/);
 assert.match(legacyAccountEdge,/central-money-edge-required/,'Legacy account-edge money authority guard must remain intact.');
 
-assert.match(wrangler,/"main": "src\/server-ai-entry-v5\.mjs"/);
+assert.match(wrangler,/"main": "src\/server-ai-entry-v8\.mjs"/);
 assert.match(wrangler,/"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-flash-lite"/);
 assert.match(wrangler,/"CIVWEAVE_AI_GATEWAY_ID": "default"/);
 assert.match(wrangler,/"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave\.cc"/);
 
-console.log(JSON.stringify({ok:true,revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-v6',personalIncludedPoolGuard:true,sharedFreePoolSeparated:true,unifiedBillingFallback:true,paidMembershipPreserved:true,hostedCapacity:true,recoveryAwareHosting:true,deployedEntry:'v5',freeHostMaxMembers:28,hostedMaxMembers:400,accountEdgeDelegated:true},null,2));
+console.log(JSON.stringify({
+  ok:true,
+  revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-account-lifecycle-v8',
+  personalIncludedPoolGuard:true,
+  sharedFreePoolSeparated:true,
+  unifiedBillingFallback:true,
+  paidMembershipPreserved:true,
+  hostedCapacity:true,
+  recoveryAwareHosting:true,
+  accountLifecyclePreserved:true,
+  deviceBoundSessions:true,
+  memberStripeSurface:true,
+  deployedEntry:'v8',
+  freeHostMaxMembers:28,
+  hostedMaxMembers:400,
+  accountEdgeDelegated:true,
+},null,2));

@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.132-host-node-session-v2-paid-join';
+const VERSION='1.0.156-host-node-session-v3-account-gated';
 const SESSION_KEY='civweave.host-capacity.sessions.v1';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
+const DEVICE_KEY='civweave.hub-device-id.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
 const DEFAULT_NEURONS_PER_CHAT=12;
@@ -26,6 +27,17 @@ function randomToken(bytes=32){
   let binary='';for(const byte of data)binary+=String.fromCharCode(byte);
   return btoa(binary).replaceAll('+','-').replaceAll('/','_').replace(/=+$/g,'')
 }
+function deviceId(){
+  try{
+    const saved=clean(localStorage.getItem(DEVICE_KEY),180);if(/^[A-Za-z0-9:._-]{12,180}$/.test(saved))return saved;
+    const created=`cwdev:${randomToken(18)}`;localStorage.setItem(DEVICE_KEY,created);return created
+  }catch{return `cwdev:${randomToken(18)}`}
+}
+function deviceLabel(){
+  const platform=clean(navigator.userAgentData?.platform||navigator.platform,60);
+  const mode=globalThis.matchMedia?.('(display-mode: standalone)')?.matches?'Civweave app':'browser';
+  return clean(`${platform||'Device'} · ${mode}`,100)
+}
 function credentials(){return storageObject(localStorage,CREDENTIAL_KEY)}
 function saveCredentials(value){try{localStorage.setItem(CREDENTIAL_KEY,JSON.stringify(value));return true}catch{return false}}
 function credentialFor(origin,{create=false,nodeId=''}={}){
@@ -37,6 +49,7 @@ function credentialFor(origin,{create=false,nodeId=''}={}){
   all[key]=next;if(!saveCredentials(all))throw new Error('This browser blocked persistent Hub login storage.');
   return next
 }
+function prepareIdentity(origin,nodeId=''){return clone(credentialFor(origin,{create:true,nodeId:clean(nodeId,180)}))}
 function sessions(){return storageObject(sessionStorage,SESSION_KEY)}
 function saveSessions(value){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(value));return true}catch{return false}}
 function sessionFor(selector=''){
@@ -53,11 +66,11 @@ function setSession(envelope,{quota=null,emit=true}={}){
   if(!nodeId||!token||!origin||!userId)throw new TypeError('Hub capacity session must include nodeId, userId, HTTPS origin, and token.');
   const all=sessions(),prior=all[nodeId]||{},remaining=finite(quota?.includedRemainingNeurons);
   all[nodeId]={
-    nodeId,userId,origin,token,seatClass:clean(source?.seatClass,40)||prior.seatClass||null,expiresAt:source.expiresAt||null,
+    nodeId,userId,origin,token,deviceId:deviceId(),seatClass:clean(source?.seatClass,40)||prior.seatClass||null,expiresAt:source.expiresAt||null,
     telemetry:{...prior.telemetry,...(remaining==null?{}:{remainingNeurons:remaining,approximateTurnsLeft:Math.floor(remaining/Math.max(1,Number(prior?.telemetry?.averageNeuronsPerTurn)||DEFAULT_NEURONS_PER_CHAT))}),updatedAt:new Date().toISOString()}
   };
   if(!saveSessions(all))throw new Error('This browser blocked the temporary Hub session.');
-  if(emit)dispatchEvent(new CustomEvent('civweave:capacity-session-ready',{detail:{nodeId,userId,origin,expiresAt:source.expiresAt||null,quota:clone(quota)}}));
+  if(emit)dispatchEvent(new CustomEvent('civweave:capacity-session-ready',{detail:{nodeId,userId,origin,deviceId:all[nodeId].deviceId,expiresAt:source.expiresAt||null,quota:clone(quota)}}));
   return clone(all[nodeId])
 }
 function clearSession(selector=''){
@@ -68,16 +81,23 @@ function clearSession(selector=''){
 async function jsonRequest(url,options={}){
   const response=await fetch(url,{cache:'no-store',...options,headers:{accept:'application/json',...(options.headers||{})}});
   const payload=await response.json().catch(()=>({}));
-  if(!response.ok){const error=new Error(clean(payload?.error||`Hub returned HTTP ${response.status}.`,1200));error.status=response.status;error.payload=payload;throw error}
+  if(!response.ok){const error=new Error(clean(payload?.error||`Hub returned HTTP ${response.status}.`,1200));error.status=response.status;error.code=clean(payload?.code,120);error.payload=payload;throw error}
   return payload
 }
-async function join(origin,{createCredential=true,nodeId=''}={}){
+async function join(origin,{createCredential=true,nodeId='',replaceDeviceId='',totpCode=''}={}){
   const host=normalizedOrigin(origin);if(!host)throw new TypeError('A valid HTTPS Hub Node origin is required.');
   const requestedNodeId=clean(nodeId,180),identity=credentialFor(host,{create:createCredential,nodeId:requestedNodeId});if(!identity)throw new Error('This device has no saved login for that Hub Node.');
   const endpoint=new URL('/api/ai/node/session',host);if(requestedNodeId)endpoint.searchParams.set('nodeId',requestedNodeId);
-  const packet=await jsonRequest(endpoint,{method:'POST',headers:{'content-type':'application/json',...(requestedNodeId?{'x-civweave-node-id':requestedNodeId}:{})},body:JSON.stringify({userId:identity.userId,credential:identity.credential})});
+  let packet;
+  try{
+    packet=await jsonRequest(endpoint,{method:'POST',headers:{'content-type':'application/json',...(requestedNodeId?{'x-civweave-node-id':requestedNodeId}:{})},body:JSON.stringify({userId:identity.userId,credential:identity.credential,deviceId:deviceId(),deviceLabel:deviceLabel(),replaceDeviceId:clean(replaceDeviceId,180)||undefined,totpCode:clean(totpCode,20)||undefined})});
+  }catch(error){
+    if(error.status===404||error.status===428||error.code==='hub-account-security-required')dispatchEvent(new CustomEvent('civweave:hub-account-security-required',{detail:{origin:host,nodeId:requestedNodeId,account:error.payload?.account||null,error:error.message}}));
+    if(error.code==='active-device-limit')dispatchEvent(new CustomEvent('civweave:hub-active-device-limit',{detail:{origin:host,nodeId:requestedNodeId,activeDevices:error.payload?.activeDevices||[]}}));
+    throw error
+  }
   const session=setSession(packet,{quota:packet.quota||null});
-  dispatchEvent(new CustomEvent('civweave:host-node-logged-in',{detail:{nodeId:session.nodeId,userId:session.userId,origin:session.origin,quota:clone(packet.quota||null),idempotent:Boolean(packet.idempotent)}}));
+  dispatchEvent(new CustomEvent('civweave:host-node-logged-in',{detail:{nodeId:session.nodeId,userId:session.userId,origin:session.origin,deviceId:session.deviceId,quota:clone(packet.quota||null),idempotent:Boolean(packet.idempotent)}}));
   return{...packet,session}
 }
 async function status(selector=''){
@@ -111,7 +131,7 @@ function recordUsage({nodeId='',chargedNeurons=0,quota=null}={}){
   return clone(telemetry)
 }
 function forgetCredential(origin,nodeId=''){const host=normalizedOrigin(origin);if(!host)return false;const all=credentials();delete all[nodeId?`${host}#${clean(nodeId,180)}`:host];return saveCredentials(all)}
-function publicStatus(){return{version:VERSION,selectedOrigin:selectedOrigin(),sessions:Object.values(sessions()).map(item=>({nodeId:item.nodeId,userId:item.userId,origin:item.origin,seatClass:item.seatClass||null,expiresAt:item.expiresAt||null,active:!item.expiresAt||Date.parse(item.expiresAt)>Date.now(),telemetry:clone(item.telemetry||null)}))}}
+function publicStatus(){return{version:VERSION,deviceId:deviceId(),selectedOrigin:selectedOrigin(),sessions:Object.values(sessions()).map(item=>({nodeId:item.nodeId,userId:item.userId,origin:item.origin,deviceId:item.deviceId||deviceId(),seatClass:item.seatClass||null,expiresAt:item.expiresAt||null,active:!item.expiresAt||Date.parse(item.expiresAt)>Date.now(),telemetry:clone(item.telemetry||null)}))}}
 function loadPaidJoinExtension(){
   if(typeof document==='undefined')return false;
   const assets=[
@@ -123,7 +143,7 @@ function loadPaidJoinExtension(){
   return loaded
 }
 
-globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})),forgetCredential,publicStatus});
-dispatchEvent(new CustomEvent('civweave:host-node-session-ready',{detail:{version:VERSION,sessionCount:publicStatus().sessions.length}}));
+globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,deviceKey:DEVICE_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,deviceId,deviceLabel,prepareIdentity,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})),forgetCredential,publicStatus});
+dispatchEvent(new CustomEvent('civweave:host-node-session-ready',{detail:{version:VERSION,deviceId:deviceId(),sessionCount:publicStatus().sessions.length}}));
 loadPaidJoinExtension();
 })();

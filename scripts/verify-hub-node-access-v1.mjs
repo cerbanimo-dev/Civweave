@@ -37,6 +37,8 @@ const localStorage = new WebStorage(), sessionStorage = new WebStorage(), browse
 const browser = {
   URL, Date, Math, JSON, Object, Number, String, Boolean, Array, Promise, Error, TypeError, RangeError,
   localStorage, sessionStorage, crypto: webcrypto, structuredClone,
+  navigator: { platform: 'TestOS', userAgentData: { platform: 'TestOS' } },
+  matchMedia: () => ({ matches: false }),
   btoa: value => Buffer.from(value, 'binary').toString('base64'),
   atob: value => Buffer.from(value, 'base64').toString('binary'),
   CustomEvent: class { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } },
@@ -64,6 +66,7 @@ assert.match(browserRequests[0].url, /\/api\/ai\/node\/session\?nodeId=seed-near
 assert.ok(JSON.parse(localStorage.getItem('civweave.host-node.credentials.v1'))['https://civweave-node-cloud.cerbanimo.workers.dev#seed-nearby'].credential.length >= 40);
 assert.equal(JSON.parse(sessionStorage.getItem('civweave.host-capacity.sessions.v1'))['seed-nearby'].token, 'signed.capacity.token');
 assert.ok(!JSON.stringify(browserEvents).includes('credential'), 'Hub events must never publish the reusable device credential');
+assert.ok(JSON.parse(browserRequests[0].init.body).deviceId, 'Hub login should include the stable device id');
 
 class MemoryStorage {
   constructor() { this.map = new Map(); }
@@ -153,8 +156,9 @@ assert.ok(offlinePackage.assets.includes('/app/host-node-session-v1.js'));
 
 console.log(JSON.stringify({
   ok: true,
-  schema: 'civweave.hub-node-access-verification.v1',
+  schema: 'civweave.hub-node-access-verification.v2',
   credentialBoundLogin: true,
+  stableDeviceId: true,
   capacitySessionRequired: true,
   nearestSearchModes: ['free', 'paid', 'both'],
   topbarHealth: true,
