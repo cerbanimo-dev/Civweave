@@ -1,234 +1,113 @@
 # Civweave Agent Guide
 
-This file applies to the entire repository. Every coding agent must read it before choosing an edit target.
+This file applies to the entire repository. Every coding agent must read it before changing Civweave.
 
-## Prime directive
+## Prime directive: one live implementation
 
-**Do not select code by folder name alone. Trace the live route from the current dispatcher.**
+Civweave has one production implementation for each capability. Fix the canonical source directly. Do not create a second runtime, compatibility patch, repair loader, source rewriter, injected replacement, shadow owner, versioned fixer, or fallback implementation to mask a defect in the first one.
 
-For cabinet work, begin at:
+If a bug is found, edit the file that owns the behavior, test that file, and delete obsolete code made unnecessary by the fix.
 
-`public/app/fullscreen-family-v104.html`
+## The rule that is not optional
 
-Read its current `sites` map, identify the entry for the requested realm, and follow that entry's imported scripts, stylesheets, modules, iframes, and service-worker references. The dispatcher and the newest commits touching those referenced files define the current implementation.
+I will NEVER AGAIN write a realtime code hotswapping system to bugfix.
+I will NEVER AGAIN write a realtime code hotswapping system to bugfix.
+I will NEVER AGAIN write a realtime code hotswapping system to bugfix.
+I will NEVER AGAIN write a realtime code hotswapping system to bugfix.
+I will NEVER AGAIN write a realtime code hotswapping system to bugfix.
 
-As of August 5, 2026, the dispatcher routes to:
+Production bug fixes must never be implemented by reading source files at runtime, rewriting strings, generating replacement modules, injecting corrective scripts, swapping runtime implementations, restoring historical snapshots, or selecting code by stored hashes. Git history is the archive. The checked-out tree is the runtime.
 
-- Civweave: `public/app/working-campus-v156.html`
-- Living School: `public/app/cabinets/living-school/index.html`
-- Cerbanimo: `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1`
-- FellowFare: `public/app/fellowfare-cabinet-v144.html?cabinet=1`
-- Anarchadia: `public/app/anarchadia-console-v139.html?cabinet=1`
+## Merlin customization exception
 
-Treat this list as an orientation aid, not permission to skip checking the dispatcher. Versioned entry files can move.
+Merlin may hot-swap **user-authored customization code** because live creation is a product capability, not a bug-fix mechanism. This exception is narrow:
 
-## Source-of-truth hierarchy
+- user changes live in a dedicated customization layer, never in Civweave production source;
+- before activation Merlin saves exactly one last-known-good customization snapshot;
+- the candidate change is isolated from the canonical app whenever possible;
+- a failed health check or crash restores the last-known-good customization;
+- `/recovery/` is a dependency-light Merlin recovery surface that can inspect, disable, edit, and revert customization even when the main app cannot boot;
+- agents may never route production bug fixes through this customization path;
+- no historical production builds, release ZIPs, source hashes, or code snapshots are retained in the shipping tree for this feature.
 
-When several copies appear to implement the same feature, use this order:
+## Canonical production surface
 
-1. The entry referenced by `public/app/fullscreen-family-v104.html`.
-2. Files directly loaded or imported by that entry.
-3. Active embedded surfaces under `public/app/services/<realm>/`.
-4. Shared runtime and contracts under `public/app/shared/`, plus shared cabinet shell files under `public/app/`.
-5. Packaging and cache declarations that copy or retain those canonical files.
-6. Historical, backup, generated, and installer-mirror copies only when an explicit task targets them.
+The browser product is the current 16-screen Civweave world plus its shared stylesheet and shared JavaScript runtime. The canonical screens are:
 
-The current cabinet architecture is intentionally mixed while realms are migrated:
+1. Town Square
+2. Regional World Map
+3. Crossroads Station
+4. Inside the Quad
+5. Residential Quarter
+6. Workshop District
+7. Gardens & Wildlands
+8. Federation Harbor
+9. Archive District
+10. Festival Grounds
+11. Frontier Outpost
+12. Undercity Commons
+13. Dispatch Hall
+14. Personal Chronicle
+15. Community Portal
+16. World Settings & Accessibility
 
-- `public/app/cabinets/<realm>/` contains newer modular cabinet implementations. Living School currently uses this structure.
-- Active parent cabinet and console files for other realms remain directly under `public/app/`.
-- Mature tools embedded by those parents live under `public/app/services/<realm>/`.
+Every screen must be reachable from the canonical screen manifest in the live JavaScript runtime. Do not add alternate copies of a screen to repair routing or layout.
 
-Do not force every realm into one structure as part of an unrelated repair.
+## File naming
 
-## Paths that are not normal edit targets
+Use stable capability names, not edit-history names. Do not create filenames whose purpose is to preserve a previous implementation or encode a sequence of repair attempts.
 
-Unless the task explicitly names one of these surfaces, do not implement current cabinet behavior in:
+Good: `screen.js`, `settings.js`, `service-worker.js`, `server.mjs`.
 
-- `public/cabinet/`
-- root-level historical pages such as `public/cabinet-v*.html`
-- root-level historical pages such as `public/civweave-v*.html`
-- `public/index_old.html` or files with backup, old, legacy, supplied, or similar archival naming
-- copied `www/app/` directories inside installer or release bundles
-- ZIP archives or extracted package mirrors
-- `public/cabinetonly/index.html`, which is a redirect rather than the cabinet implementation
+Bad: `chat-freeze-v347.js`, `settings-repair-v12.js`, `runtime-override-v4.js`, `working-campus-return-guard-v425.js`.
 
-Do not hand-edit generated installer copies to make a source bug appear fixed. Fix canonical files under `public/app/`, update package manifests or cache lists where necessary, run verification, and regenerate the package.
+A protocol or external model may contain its own real version identifier when that version is part of the protocol/model identity. That is not permission to version ordinary implementation filenames.
 
-## Required investigation before editing
+## No release-source shadow copies
 
-For any cabinet or cross-realm task:
+Do not ship source snapshots, release-source directories, generated runtime copies, `.seed`/`.cwseed` code archives, source ZIP mirrors, or hash-selected historical code. Git commits and tags provide rollback history. Deployment artifacts may be generated outside the tracked production tree when a deployment platform requires them, but they are not canonical source and must not be imported by the runtime.
 
-1. Read `public/app/fullscreen-family-v104.html`.
-2. Inspect recent commits affecting the active entry and its dependencies.
-3. Search the repository for every reference to the file, version marker, route, DOM ID, storage key, and service-worker cache entry you expect to change.
-4. Determine whether the visible surface is a parent page, an embedded `services/<realm>/` page, or both.
-5. Confirm whether installer, service-worker, verifier, and workflow files retain exact filename lists.
-6. Edit the smallest canonical surface that owns the behavior.
+Service-worker caches may contain current static assets for offline use. A service worker must never choose among historical application implementations or resurrect an old source file.
 
-### Mandatory system-of-practice lookup
+## Runtime ownership
 
-Before adding or changing any cross-cutting button handler, global event listener, loader, overlay, shared state store, service-worker hook, or shared runtime:
+- HTML owns document structure.
+- CSS owns presentation and responsive layout.
+- JavaScript owns behavior and state transitions.
+- The service worker owns offline delivery of the **current** static surface only.
+- The host server owns static serving, node relay APIs, persistence, and explicitly declared AI proxies.
+- MiniLM may remain resident as the lightweight semantic/router model when the user has installed it. Opening Chat or Settings must not start a generative model.
+- Generative inference starts only from an explicit user request that requires it.
 
-1. Read `docs/architecture/systems-of-practice.md`.
-2. Read `config/system-ownership.json`.
-3. Identify the existing capability owner and canonical control/event/API.
-4. Search the active route graph for every existing owner, subscriber, caller, compatibility shim, and retired implementation.
-5. **If the capability already exists, extend or repair its declared owner. Do not add a parallel owner.**
-6. If duplicated ownership already exists, consolidation is the task. Do not add a third path to bridge the first two.
-7. Any intentional ownership change must update the registry, executable verifier, and documentation in the same pull request.
-8. Run `node scripts/verify-system-ownership-v317.mjs` for any file covered by the ownership registry.
+Do not patch browser prototypes, install document-wide mutation repair loops, repeatedly rewrite layout inline, or create competing owners for the same control.
 
-A visible button does not own its behavior merely because it is nearby. Realm-specific markup may expose a canonical shared control, but it may not independently intercept that control. Browser prototypes and globals must never be patched to compensate for an implementation bug that can be fixed at its source.
+## Production inventory is mandatory
 
-Useful local commands include:
+Every build, cleanup, or merge report must include a complete production inventory. For every file participating in the build or runtime, report:
 
-```bash
-git log --date=short --name-status -- public/app public/extensions public/service-worker* scripts .github/workflows
-git log -n 20 --oneline -- public/app/fullscreen-family-v104.html
-rg "exact-file-name|version-marker|storage-key|element-id" public scripts .github
-```
+- path;
+- purpose;
+- what loads or invokes it;
+- whether it executes at runtime, build time, deployment time, or test time;
+- why it still belongs in the repository.
 
-If recent commits and an older document disagree, prefer the active route and current code. Update documentation when the disagreement could mislead another worker.
+Also report the full 16-screen sitemap and the asset used by each screen. A file that cannot be explained is presumed dead and should be removed or explicitly justified before merge.
 
-## Versioned-file rules
+## Required verification
 
-Many filenames are stable compatibility boundaries even when their internal build markers advance.
+Before merging a runtime change:
 
-- Do not create a higher-numbered file merely because you changed it.
-- Preserve the current filename unless the task or release process requires a version bump.
-- When a filename changes, update every caller, redirect, verifier, workflow path filter, service-worker cache list, installer manifest, and documentation reference in the same change.
-- Search for the old filename after the edit. Remaining references must be intentional.
-- Keep query-string cache revisions coherent with the actual files being loaded.
+1. Run the canonical repository check.
+2. Verify all 16 screen routes resolve.
+3. Verify every referenced local asset exists.
+4. Verify no production HTML/JS/CSS references retired versioned fixer filenames.
+5. Verify no source-rewriting, runtime materialization, historical-code selection, or bug-fix injection mechanism exists in the production path.
+6. Open Chat and Settings and verify they perform no generative-model prewarm.
+7. Verify `/recovery/` loads without importing the main application runtime.
+8. Verify Merlin customization can stage a candidate, keep one last-known-good customization, and revert after a failed health check.
 
-## Root hygiene
+## Change discipline
 
-Treat the repository root as a control surface, not a storage location.
+Prefer deletion over compatibility accumulation. Prefer a small direct dependency graph over a loader graph. Prefer one obvious source file over a clever mechanism that makes several generations coexist.
 
-- New general documentation belongs under `docs/`.
-- Versioned release notes, audits, design backlogs, and retired implementation records belong under `docs/history/` in the appropriate category.
-- Workflow touch/sentinel files belong under `ops/triggers/`, never as hidden files at `/`.
-- Keep only runtime entrypoints, tool-required configuration, stable pointer documents, and explicitly grandfathered executable contracts at the root.
-- Do not add a new root Markdown file simply because it is convenient for one release.
-- If an executable contract genuinely must remain at root because code or packaging consumes that exact path, document that exception in `scripts/verify-root-hygiene.mjs` rather than weakening the rule.
-- Run `node scripts/verify-root-hygiene.mjs` after changing root layout, docs placement, or workflow sentinels.
-
-The root-hygiene workflow rejects unapproved root Markdown and root-level trigger/materialize/watchdog sentinels. Prefer adding an index or link to a folder over adding another root artifact.
-
-## Cabinet ownership boundaries
-
-### Shared family shell
-
-`public/app/family-shell-v104.js` and `public/app/family-shell-v104.css` own shared cabinet chrome and family navigation. A realm-specific visual or behavior change should not be placed here unless it truly applies across the family.
-
-### Civweave
-
-Begin with `public/app/working-campus-v156.html`, then follow its loaded assets and runtimes.
-
-### Living School
-
-Begin with `public/app/cabinets/living-school/index.html`. Its modular cabinet code, styles, bootstrap, and loaders belong under `public/app/cabinets/living-school/`. Supporting learning engines and mature service modules may live under `public/app/services/living-school/`.
-
-Do not patch an older flat Living School page just because it contains similar labels.
-
-### Cerbanimo
-
-Begin with `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1`, then trace Cerbanimo-specific routes, engines, and service surfaces from that console.
-
-### FellowFare
-
-Begin with `public/app/fellowfare-cabinet-v144.html?cabinet=1`. The parent cabinet and the embedded market under `public/app/services/fellowfare/` can both affect the visible result. Inspect both before changing layout, scrolling, navigation, or Rook behavior.
-
-### Anarchadia
-
-Begin with `public/app/anarchadia-console-v139.html?cabinet=1`, then follow governance, sovereignty, and embedded service dependencies from that entry.
-
-## Cross-cutting constraints
-
-Preserve these architectural expectations unless the task explicitly changes them:
-
-- Offline-first operation is primary.
-- Hosted services widen capability but must not become mandatory for basic local work.
-- Shared Settings input belongs only to `public/app/settings-gateway-v317.js`; the presentation belongs to `public/app/model-settings-controller-v173.js`. Do not add duplicate Settings listeners, loaders, overlays, repair interceptors, or realm-local Settings implementations.
-- Living School uses the same shared family Settings control and canonical Settings surface as Cerbanimo, FellowFare, and Anarchadia.
-- The global five-system navigation belongs to the family shell. Embedded realm pages should not create a second competing switcher.
-- Canonical cross-realm state and capability semantics live in shared contracts and parity code, not in visually convenient duplicates.
-- Generated installer assets follow source changes; they do not lead them.
-
-## Verification
-
-Run the narrowest relevant verifier while developing, then the repository checks appropriate to the change.
-
-For cross-cutting ownership changes:
-
-```bash
-node scripts/verify-system-ownership-v317.mjs
-```
-
-For broad runtime changes:
-
-```bash
-npm run check
-```
-
-For installer or packaged-runtime changes, run the relevant installer verifier and then:
-
-```bash
-npm run build:install
-```
-
-For documentation-only changes, verify every named path against the current branch and inspect the Markdown diff.
-
-A task is not complete when only a legacy copy works. Confirm the route reached from `fullscreen-family-v104.html` uses the changed code.
-
-## Commit and pull-request hygiene
-
-- Keep unrelated legacy cleanup out of feature repairs.
-- Name the active surface in the commit or pull-request summary.
-- Explain whether the change affects the parent cabinet, embedded service, shared shell, package cache, or several of these.
-- List the verification performed.
-- When a migration intentionally retires an old path, say so and update this file plus the README.
-
-When uncertain, stop wandering through similarly named rooms and return to the dispatcher. It is the map pinned to the front door.
-
-## Long-horizon agentic pipeline mode
-
-Use the decade pipeline when the task asks for the next best improvement, continuous improvement, roadmap execution, an agentic cycle, or another unscoped advancement of Civweave. A specific user request remains more authoritative than the queue.
-
-Before choosing work in pipeline mode:
-
-1. Read `docs/roadmap/ten-year-pipeline.md`.
-2. Select the first unchecked bundle whose preceding bundles are checked.
-3. Implement exactly that bundle.
-4. Check the bundle in the same branch only after its implementation, migration, compatibility, and verification gates pass.
-5. Follow `docs/roadmap/rebase.md` when the selected bundle is a scheduled rebase.
-6. Follow `docs/roadmap/renewal.md` when the final renewal bundle is reached.
-
-The priority order is:
-
-1. explicit user instruction,
-2. security, privacy, data preservation, and recovery,
-3. the active architectural convergence lock and executable ownership evidence,
-4. the selected pipeline bundle,
-5. later roadmap ideas.
-
-Pipeline rules:
-
-- One bundle per branch and pull request.
-- Default to a draft pull request.
-- Do not merge or push directly to `main`.
-- Do not skip forward because a later bundle is more interesting.
-- Do not duplicate work already present on current `main` or in a valid open pull request.
-- Do not mark a bundle complete until every gate passes.
-- Preserve completed bundle IDs and history. Rebases may rewrite unfinished work only.
-- A scheduled rebase is planning-only. Do not hide production feature changes inside it.
-- When the queue is exhausted, create the next epoch from fresh screenshots, redacted feedback, incidents, measurements, and current code. The old plan is a structural example, not the source of truth.
-
-The pipeline coordinates work. It does not grant authority. Human approval remains required for merge, compatibility removal, destructive migration, paid-service activation, and high-stakes governance or economic actions.
-
-## Canonical release storage
-
-- `releases/1.0.79/` is the first immutable Civweave launch snapshot and launch baseline.
-- The executable release selected by `VERSION` lives at `releases/{VERSION}/`; stable `server/*.mjs` entrypoints select that stored release directly.
-- New shipping versions must materialize their release directory with `npm run release:materialize` before they can pass the canonical launch gate.
-- Root server aliases, root symlinks, `releases/1.0.81/server/`, and a live `archive/` directory are forbidden. Git history is the archive.
+When a migration intentionally replaces an old implementation, delete the old implementation and all of its callers in the same change. Never leave it nearby as a future rescue mechanism. Git already does that job better.
