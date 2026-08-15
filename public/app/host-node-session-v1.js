@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.133-host-node-session-v3-guild-host-onboarding';
+const VERSION='1.0.133-host-node-session-v4-citizen-patron-copy';
 const SESSION_KEY='civweave.host-capacity.sessions.v1';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
@@ -134,7 +134,7 @@ function publicStatus(){return{version:VERSION,selectedOrigin:selectedOrigin(),s
 function loadPaidJoinExtension(){
   if(typeof document==='undefined')return false;
   const assets=[
-    ['/app/host-node-paid-join-v1.js?v=paid-only-hub-join-v1','civweavePaidHubJoin','v1'],
+    ['/app/host-node-paid-join-v1.js?v=paid-only-hub-join-v2-citizen-patron','civweavePaidHubJoin','v2'],
     ['/app/host-node-status-selection-v1.js?v=paid-only-hub-join-v1','civweaveHostStatusSelection','v1']
   ];
   let loaded=false;
