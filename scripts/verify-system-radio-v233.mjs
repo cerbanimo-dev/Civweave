@@ -6,6 +6,7 @@ const ROOT=new URL('../',import.meta.url);
 const radioSource=fs.readFileSync(new URL('public/app/system-radio-agent-v233.js',ROOT),'utf8');
 const trackSource=fs.readFileSync(new URL('public/app/radio-track-suggestions-v240.js',ROOT),'utf8');
 const boundarySource=fs.readFileSync(new URL('public/app/install-boundary-v146.js',ROOT),'utf8');
+const runtimeSource=fs.readFileSync(new URL('public/app/core-interface-runtime-v1.js',ROOT),'utf8');
 const trackMap=JSON.parse(fs.readFileSync(new URL('public/app/radio-track-map-v241.json',ROOT),'utf8'));
 const stationFiles={
   anarchadia:'public/app/radio-directory-v240/anarchadia.txt',
@@ -182,8 +183,11 @@ assert.match(trackSource,/THE SYLLABUS HAS UNIONIZED/,'snarky station labels mus
 assert.match(trackSource,/NO KPI SURVIVED THE CHORUS/,'Cerbanimo label voice must remain distinct');
 assert.match(trackSource,/SURPLUS VALUE RETURNED TO SENDER/,'FellowFare label voice must remain distinct');
 
-assert.match(boundarySource,/RADIO_TRACK_SUGGESTIONS='\/app\/radio-track-suggestions-v240\.js'/,'install boundary must keep the stable v240 script path');
-assert.ok(boundarySource.indexOf('SYSTEM_RADIO_AGENT,')<boundarySource.indexOf('RADIO_TRACK_SUGGESTIONS,'),'track decorator must load after the station card runtime');
+assert.match(runtimeSource,/'\/app\/system-radio-agent-v233\.js'/,'core interface runtime must carry the station recommendation agent');
+assert.match(runtimeSource,/'\/app\/radio-track-suggestions-v240\.js'/,'core interface runtime must keep the stable v240 track-decorator path');
+assert.ok(runtimeSource.indexOf("'/app/system-radio-agent-v233.js'")<runtimeSource.indexOf("'/app/radio-track-suggestions-v240.js'"),'track decorator must load after the station card runtime');
+assert.doesNotMatch(boundarySource,/SYSTEM_RADIO_AGENT\s*=/,'install boundary must not regain radio loading ownership');
+assert.doesNotMatch(boundarySource,/RADIO_TRACK_SUGGESTIONS\s*=/,'install boundary must not regain track-decorator loading ownership');
 assert.match(boundarySource,/radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left'/,'boundary metadata must describe the active station policy');
 assert.match(boundarySource,/radioTrackSuggestionRevision:'v241-playlist-context-track-links'/,'stable boundary metadata must continue identifying the playlist-context compatibility family');
 
