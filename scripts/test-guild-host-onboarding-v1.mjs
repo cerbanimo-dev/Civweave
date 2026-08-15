@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {classifyHostDevice,recommendedHostRoute,GUILD_HOST_ONBOARDING_SCHEMA} from '../public/app/guild-host-onboarding-v1.mjs';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [hostSession,offlineText]=await Promise.all([read('public/app/host-node-session-v1.js'),read('public/app/offline-package-v208.json')]);
+const [hostSession,onboardingSource,offlineText]=await Promise.all([read('public/app/host-node-session-v1.js'),read('public/app/guild-host-onboarding-v1.mjs'),read('public/app/offline-package-v208.json')]);
 const offline=JSON.parse(offlineText);
 
 assert.equal(GUILD_HOST_ONBOARDING_SCHEMA,'civweave.guild-host-onboarding.v1');
@@ -17,5 +17,6 @@ assert.match(hostSession,/const STEWARD_KEY='civweave\.host-steward\.v1'/);
 assert.match(hostSession,/import\('\/app\/guild-host-onboarding-v1\.mjs'\)/);
 assert.match(hostSession,/void ensureGuildHostOnboarding\(session\)/);
 assert.match(hostSession,/if\(active\)\{void ensureGuildHostOnboarding\(active\);return active\}/);
-for(const asset of ['/app/shared/guild-host-resilience-v1.mjs','/app/pocket-guild-node-v1.mjs','/app/guild-host-onboarding-v1.mjs','/app/emergency-ai-host-v1.mjs'])assert.ok(offline.assets.includes(asset),`${asset} must remain in the offline core.`);
-console.log(JSON.stringify({ok:true,schema:GUILD_HOST_ONBOARDING_SCHEMA,mobilePremierRoute:'pocket-node',mobileFallback:'cloudflare-host-node',desktopRoute:'persistent-local-node',stewardSessionHook:true,offlineCore:true}));
+assert.match(onboardingSource,/CivweaveEmergencyAiMeshV1\.start\(\{guildId:id,baseUrl:origin\}\)/);
+for(const asset of ['/app/shared/guild-host-resilience-v1.mjs','/app/pocket-guild-node-v1.mjs','/app/guild-host-onboarding-v1.mjs','/app/emergency-ai-host-v1.mjs','/app/emergency-ai-mesh-v1.mjs'])assert.ok(offline.assets.includes(asset),`${asset} must remain in the offline core.`);
+console.log(JSON.stringify({ok:true,schema:GUILD_HOST_ONBOARDING_SCHEMA,mobilePremierRoute:'pocket-node',mobileFallback:'cloudflare-host-node',desktopRoute:'persistent-local-node',stewardSessionHook:true,emergencyAiMesh:true,offlineCore:true}));
