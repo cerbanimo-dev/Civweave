@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='229.1-retired-settings-gateway-v317';
+const VERSION='229.2-retired-settings-v320';
 if(globalThis.CivweaveAISettingsRepairV229?.version===VERSION)return;
 function migrateOnDemand(){return false}
-globalThis.CivweaveAISettingsRepairV229=Object.freeze({version:VERSION,retired:true,inputOwnership:false,startupWork:false,automaticListeners:false,migrateOnDemand,reason:'Credential persistence is owned by the canonical Settings controller and invoked only after Settings is opened.'});
+globalThis.CivweaveAISettingsRepairV229=Object.freeze({version:VERSION,retired:true,compatibilityFacade:true,canonical:'CivweaveSettingsV320',inputOwnership:false,presentationOwnership:false,credentialOwnership:false,startupWork:false,automaticListeners:false,migrateOnDemand,reason:'Credential persistence is owned by CivweaveSettingsV320; this retired repair module performs no automatic work.'});
 })();
