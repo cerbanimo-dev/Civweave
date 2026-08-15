@@ -13,7 +13,7 @@ on:
       - 'docs/operations/cloudflare-setup.md'
       - 'public/index.html'
       - 'public/app/manifest.webmanifest'
-      - 'public/app/pwa-install-prompt-v246.js'
+      - 'public/app/pwa-install-prompt-v249.js'
       - 'public/app/host-deployment-v1.json'
       - 'public/app/host-steward-reminder-v1.js'
       - 'public/host-local-anchor.html'
@@ -50,6 +50,7 @@ jobs:
           node --check scripts/verify-cloudflare-production-origin-v251.mjs
           node --check scripts/verify-production-boot-canary-v251.mjs
           node --check scripts/test-production-version-policy-v251.mjs
+          node --check public/app/pwa-install-prompt-v249.js
           node --check public/app/host-steward-reminder-v1.js
       - name: Verify production version policy
         run: node --test scripts/test-production-version-policy-v251.mjs
