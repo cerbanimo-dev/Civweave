@@ -8,6 +8,7 @@ const CANONICAL_ORIGIN='https://civweave.cc';
 const PAGES_UNDERLAY_ORIGIN='https://civweave.pages.dev';
 const CANONICAL_MANIFEST=`${CANONICAL_ORIGIN}/app/manifest.webmanifest`;
 const PAGES_UNDERLAY_MANIFEST=`${PAGES_UNDERLAY_ORIGIN}/app/manifest.webmanifest`;
+const CANONICAL_NEXT_PATHS=new Set(['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html','/app/installed-entry-v146.html','/app/installed-entry-v146']);
 const PROMPT_WAIT_MS=6000;
 let promptEvent=null;
 let installed=false;
@@ -36,6 +37,22 @@ function hostSetupRedirect(){
   const target=new URL(HOST_SETUP_PATH,current.origin);
   for(const [key,value] of current.searchParams)target.searchParams.append(key,value);
   target.hash=current.hash;
+  location.replace(target.href);
+  return true;
+}
+function resumeRequiredNext(){
+  const params=new URLSearchParams(location.search);
+  const required=params.get('install')==='required'||params.has('installrequired');
+  const rawNext=params.get('next');
+  if(!required||!rawNext||!standalone())return false;
+  let target;
+  try{target=new URL(rawNext,location.origin)}catch{return false}
+  if(target.origin!==location.origin||!CANONICAL_NEXT_PATHS.has(target.pathname))return false;
+  target.searchParams.delete('install');
+  target.searchParams.delete('installrequired');
+  target.searchParams.delete('next');
+  target.searchParams.set('installed','1');
+  target.searchParams.set('source','installer-required-next-installed-only-v1');
   location.replace(target.href);
   return true;
 }
@@ -76,7 +93,7 @@ async function discoverRelatedInstalls(){
 }
 function refreshButton(){
   const button=installButton();
-  if(!button||/reset app shell|repair shell/i.test(button.textContent||''))return;
+  if(!button||/reset app shell/i.test(button.textContent||''))return;
   if(!installOrigin()&&!standalone()){
     button.disabled=false;
     button.textContent='Open stable Civweave installer';
@@ -183,7 +200,7 @@ async function primeInstallability(){
 async function ownInstallClick(event){
   const button=event.target?.closest?.('#install-app');
   if(!button||button.disabled||prompting)return;
-  if(/reset app shell|repair shell/i.test(button.textContent||''))return;
+  if(/reset app shell/i.test(button.textContent||''))return;
   if(!installOrigin()&&!standalone()){
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -255,6 +272,7 @@ function start(){
 }
 
 if(hostSetupRedirect())return;
+if(resumeRequiredNext())return;
 if(rerouteUnsafeInstall())return;
 
 addEventListener('beforeinstallprompt',capture);
@@ -284,12 +302,14 @@ const api=Object.freeze({
   consume(){const value=promptEvent;promptEvent=null;return value},
   restore(event){if(event)promptEvent=event;return Boolean(promptEvent)},
   standalone,
+  resumeRequiredNext,
   refresh:refreshButton,
   waitForPrompt,
   prepareInstallability:primeInstallability,
   browserRuntimePolicy:'installer-only-until-installed-display',
   installSequencingPolicy:'prepare-shell-before-user-install-gesture',
   promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-click',
+  requiredNextOwner:'pwa-install-prompt-v249',
   eagerRelatedAppDiscovery:false,
   eagerShellPreparation:true,
   firstInputSafe:true,
