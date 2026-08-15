@@ -18,7 +18,16 @@
 /app/pwa-install-prompt-v247.js
   Cache-Control: no-cache
 
+/app/pwa-install-prompt-v249.js
+  Cache-Control: no-cache
+
+/app/pwa-install-prompt-v250.js
+  Cache-Control: no-cache
+
 /app/installer-repair-only-v1.js
+  Cache-Control: no-cache
+
+/app/installer-repair-only-v2.js
   Cache-Control: no-cache
 
 /app/installer-online-fallback-v225.js
