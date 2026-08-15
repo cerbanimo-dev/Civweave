@@ -42,9 +42,20 @@ for(const token of [
   "event.tag !== V211_SYNC_TAG",
   'pauseSupported: true',
   'resumablePerFile: true',
-  'backgroundSafe: true'
+  'backgroundSafe: true',
+  'function v211RequiredSeeds(manifest = {})',
+  '(Array.isArray(manifest.seeds) ? manifest.seeds : []).filter(Boolean)',
+  'function v211FailureIsObsolete(entry)',
+  'const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete)',
+  'const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry))',
+  'const requiredSeeds = v211RequiredSeeds(manifest)',
+  'required: requiredSeeds.has(pathname)',
+  'if (!item.required && v211FailureIsObsolete(entry)) {',
+  "reason: notFound ? 'not-found' : structural ? 'invalid-static-response' : 'unavailable-discovered-reference'"
 ])assert(overrideSource.includes(token),`Resumable campus worker is missing ${token}.`);
 
+assert(!overrideSource.includes('if (!item.required && (permanent || attempts >= 2))'),'Structural stale references still require a second failed pass before retirement.');
+assert(overrideSource.includes('} else {\n          failed.set(item.pathname, entry);'),'Transient or required failures are no longer retained for retry.');
 assert(backgroundSource.includes("const OPT_IN_KEY='civweave.offline-campus.explicit-opt-in.v304'"),'In-app background downloader lost the explicit campus opt-in boundary.');
 assert(backgroundSource.includes("if(status?.ready||status?.paused)return true"),'In-app background downloader does not stop auto-resume for a deliberate pause.');
 assert(backgroundSource.includes("if(optedIn()&&navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry')"),'Scheduled retry is not gated by both explicit opt-in and pause state.');
@@ -67,6 +78,7 @@ const requiredSeeds=[
   '/app/anarchadia-console-v139.html'
 ];
 assert(Array.isArray(manifest.seeds),'Offline manifest seeds must be an array.');
+assert(Array.isArray(manifest.assets)&&manifest.assets.length>0,'Offline manifest explicit assets must be present.');
 assert(new Set(manifest.seeds).size===manifest.seeds.length,'Offline manifest contains duplicate seed roots.');
 for(const seed of requiredSeeds)assert(manifest.seeds.includes(seed),`Offline manifest lost required seed ${seed}.`);
 assert(manifest.seeds.length>=requiredSeeds.length,`Offline manifest unexpectedly shrank below the required campus seed set; got ${manifest.seeds.length} seeds.`);
@@ -79,7 +91,9 @@ console.log(JSON.stringify({
   policy:'resumable-pause-v280',
   referencePolicy:'current-manifest-only-v282',
   canonicalSeeds:manifest.seeds.length,
+  optionalAssets:manifest.assets.length,
   requiredSeeds:requiredSeeds.length,
+  discoveredReferencePolicy:'structural-retirement-transient-retry',
   cerbanimoCommerceSeed:true,
   perFileCheckpointing:true,
   duplicateRequestsJoin:true,
