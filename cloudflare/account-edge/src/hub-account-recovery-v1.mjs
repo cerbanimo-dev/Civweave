@@ -55,7 +55,7 @@ export function normalizeEmail(value) {
 export function normalizeResidentId(value) {
   const userId = clean(value, 180);
   if (!/^[A-Za-z0-9:_-]{12,180}$/.test(userId)) {
-    throw Object.assign(new TypeError('A valid Hub resident id is required.'), { status: 400 });
+    throw Object.assign(new TypeError('A valid Guild resident id is required.'), { status: 400 });
   }
   return userId;
 }
@@ -83,7 +83,7 @@ export function maskedEmail(value) {
 
 async function vaultKey(secret) {
   const source = clean(secret, 20000);
-  if (source.length < 20) throw Object.assign(new Error('Hub recovery vault identity is unavailable.'), { status: 503 });
+  if (source.length < 20) throw Object.assign(new Error('Guild recovery vault identity is unavailable.'), { status: 503 });
   const digest = await crypto.subtle.digest('SHA-256', enc.encode(`civweave.hub-account-vault.v1\n${source}`));
   return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
@@ -93,12 +93,12 @@ async function encryptCredential(credential, secret) {
   return Object.freeze({ algorithm: 'AES-GCM', iv: b64url(iv), ciphertext: b64url(ciphertext) });
 }
 async function decryptCredential(record, secret) {
-  if (record?.algorithm !== 'AES-GCM' || !record.iv || !record.ciphertext) throw Object.assign(new Error('Hub recovery vault record is invalid.'), { status: 500 });
+  if (record?.algorithm !== 'AES-GCM' || !record.iv || !record.ciphertext) throw Object.assign(new Error('Guild recovery vault record is invalid.'), { status: 500 });
   try {
     const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64url(record.iv) }, await vaultKey(secret), fromB64url(record.ciphertext));
     return normalizeDeviceCredential(dec.decode(plaintext));
   } catch {
-    throw Object.assign(new Error('Hub recovery vault could not unlock this account.'), { status: 503 });
+    throw Object.assign(new Error('Guild recovery vault could not unlock this account.'), { status: 503 });
   }
 }
 
@@ -142,7 +142,7 @@ async function defaultDeliver(env, message) {
         purpose: message.purpose,
       }),
     });
-    if (!response.ok) throw Object.assign(new Error(`Hub recovery mailer returned HTTP ${response.status}.`), { status: 502 });
+    if (!response.ok) throw Object.assign(new Error(`Guild recovery mailer returned HTTP ${response.status}.`), { status: 502 });
     return Object.freeze({ sent: true, transport: 'webhook' });
   }
 
@@ -151,7 +151,7 @@ async function defaultDeliver(env, message) {
     if (!from) throw Object.assign(new Error('HUB_RECOVERY_FROM_EMAIL is required for the Cloudflare email binding.'), { status: 503 });
     await env.HUB_RECOVERY_EMAIL.send({
       to: [message.to],
-      from: { email: from, name: 'Civweave Hub' },
+      from: { email: from, name: 'Civweave Guild' },
       subject: message.subject,
       text: message.text,
       html: message.html,
@@ -207,21 +207,21 @@ export class HubAccountRecoveryService {
 
   async deliverChallenge(account, purpose, token) {
     const verification = purpose === 'verify-email';
-    const subject = verification ? 'Verify your Civweave Hub recovery email' : 'Recover your Civweave Hub account';
+    const subject = verification ? 'Verify your Civweave Guild recovery email' : 'Recover your Civweave Guild account';
     const action = verification ? 'verification' : 'recovery';
     const text = [
-      `Your Civweave Hub ${action} code is:`,
+      `Your Civweave Guild ${action} code is:`,
       '',
       token,
       '',
       verification
-        ? 'Enter this code in Civweave to finish establishing email recovery for this Hub account.'
+        ? 'Enter this code in Civweave to finish establishing email recovery for this Guild account.'
         : 'Enter this code in Civweave on the device where you want to recover access. This code can be used once and expires quickly.',
       '',
-      `Hub: ${account.nodeId}`,
+      `Guild: ${account.nodeId}`,
       'This message contains no Passport history, activity, purchases, or Stripe information.',
     ].join('\n');
-    const html = `<p>Your Civweave Hub ${action} code is:</p><p><code style="font-size:18px;word-break:break-all">${token}</code></p><p>${verification ? 'Enter this code in Civweave to finish establishing email recovery for this Hub account.' : 'Enter this code in Civweave on the device where you want to recover access. This code can be used once and expires quickly.'}</p><p>Hub: ${account.nodeId}</p><p>This message contains no Passport history, activity, purchases, or Stripe information.</p>`;
+    const html = `<p>Your Civweave Guild ${action} code is:</p><p><code style="font-size:18px;word-break:break-all">${token}</code></p><p>${verification ? 'Enter this code in Civweave to finish establishing email recovery for this Guild account.' : 'Enter this code in Civweave on the device where you want to recover access. This code can be used once and expires quickly.'}</p><p>Guild: ${account.nodeId}</p><p>This message contains no Passport history, activity, purchases, or Stripe information.</p>`;
     return this.deliver(this.env, { to: account.email, subject, text, html, nodeId: account.nodeId, purpose });
   }
 
@@ -235,10 +235,10 @@ export class HubAccountRecoveryService {
     const emailOwner = await this.accountForEmail(email);
 
     if (emailOwner && emailOwner.userId !== userId) {
-      throw Object.assign(new Error('That recovery email cannot be attached to this Hub account.'), { status: 409 });
+      throw Object.assign(new Error('That recovery email cannot be attached to this Guild account.'), { status: 409 });
     }
     if (account && account.email !== email) {
-      throw Object.assign(new Error('Changing a Hub recovery email requires an authenticated account-recovery settings flow.'), { status: 409 });
+      throw Object.assign(new Error('Changing a Guild recovery email requires an authenticated account-recovery settings flow.'), { status: 409 });
     }
 
     if (!account) {
@@ -294,7 +294,7 @@ export class HubAccountRecoveryService {
       throw Object.assign(new Error('Recovery code is invalid, expired, or already used.'), { status: 400 });
     }
     const account = await this.state.storage.get(accountKey(challenge.accountId));
-    if (!account) throw Object.assign(new Error('Hub account is unavailable.'), { status: 404 });
+    if (!account) throw Object.assign(new Error('Guild account is unavailable.'), { status: 404 });
     await this.state.storage.put(key, Object.freeze({ ...challenge, consumedAt: nowIso(now) }));
     return { account, now };
   }
@@ -323,13 +323,13 @@ export class HubAccountRecoveryService {
     return Object.freeze({
       ok: true,
       accepted: true,
-      message: 'If that email is a verified recovery method for this Hub, a one-time recovery code has been sent.',
+      message: 'If that email is a verified recovery method for this Guild, a one-time recovery code has been sent.',
     });
   }
 
   async completeRecovery(token) {
     const { account, now } = await this.consumeChallenge(token, 'recover-account');
-    if (!account.emailVerifiedAt) throw Object.assign(new Error('This Hub account does not have a verified recovery email.'), { status: 409 });
+    if (!account.emailVerifiedAt) throw Object.assign(new Error('This Guild account does not have a verified recovery email.'), { status: 409 });
     const credential = await decryptCredential(account.credentialVault, await this.secret());
     const next = Object.freeze({ ...account, recoveryRequestedAt: null, lastRecoveredAt: nowIso(now), updatedAt: nowIso(now) });
     await this.state.storage.put(accountKey(account.accountId), next);
@@ -349,9 +349,9 @@ export class HubAccountRecoveryService {
     const userId = normalizeResidentId(input.userId);
     const credential = normalizeDeviceCredential(input.credential);
     const account = await this.accountForResident(userId);
-    if (!account) throw Object.assign(new Error('Hub account is not enrolled for recovery.'), { status: 404 });
+    if (!account) throw Object.assign(new Error('Guild account is not enrolled for recovery.'), { status: 404 });
     const stored = await decryptCredential(account.credentialVault, await this.secret());
-    if (stored !== credential) throw Object.assign(new Error('Hub account credential is invalid.'), { status: 401 });
+    if (stored !== credential) throw Object.assign(new Error('Guild account credential is invalid.'), { status: 401 });
     return Object.freeze({ ok: true, account: publicAccount(account) });
   }
 }
