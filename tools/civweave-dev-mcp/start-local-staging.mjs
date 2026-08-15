@@ -3,11 +3,10 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { localStagingSpawnSpec } from './lib/local-staging-spawn.mjs';
+import { localStagingSpawnSpec, localStagingWranglerArgs } from './lib/local-staging-spawn.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '../..');
-const configPath = resolve(scriptDir, 'wrangler.local-staging.jsonc');
 const verifierPath = resolve(repoRoot, 'scripts', 'verify-local-staging-isolation.mjs');
 const host = String(process.env.CIVWEAVE_LOCAL_STAGING_HOST || '127.0.0.1').trim();
 const port = Number(process.env.CIVWEAVE_LOCAL_STAGING_PORT || 8788);
@@ -65,32 +64,16 @@ if (existing) {
   throw new Error(`Port ${port} is already serving something that is not isolated Civweave staging.`);
 }
 
-const npxArgs = [
-  '--yes',
-  'wrangler@4',
-  'pages',
-  'dev',
-  'public',
-  '-c',
-  configPath,
-  '--ip',
-  host,
-  '--port',
-  String(port),
-];
+const npxArgs = localStagingWranglerArgs({ host, port });
 const launch = localStagingSpawnSpec({ npxArgs });
 
 console.log(`[civweave-local-staging] starting ${origin}`);
 console.log('[civweave-local-staging] static source: public/; Functions: functions/; production service bindings: none');
+console.log('[civweave-local-staging] staging vars are explicit local --binding values; no Wrangler project config is loaded');
 
 const child = spawn(launch.command, launch.args, {
   cwd: repoRoot,
-  env: {
-    ...process.env,
-    CIVWEAVE_ENVIRONMENT: 'staging',
-    CIVWEAVE_LOCAL_STAGING: '1',
-    CIVWEAVE_PRODUCTION_ISOLATION: 'true',
-  },
+  env: { ...process.env },
   stdio: 'inherit',
 });
 
