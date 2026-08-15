@@ -16,7 +16,7 @@ const guideChatOwnershipPolicy=`${guideChatRevision}-single-current-surface-five
 const revision='release-coherence-v226';
 const chatRevision='chat-convergence-v250';
 const chatCachePurgeRevision='chat-convergence-v251-legacy-purge';
-const installedEntryRevision='boot-recovery-v426-install-only-pwa-v1';
+const installedEntryRevision='boot-recovery-v427-installed-capability-v1';
 const activeChatRepairRevision='chat-avatar-visible-v346';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
@@ -62,8 +62,8 @@ function replaceRequired(source,pattern,replacement,label){
 
 await patch('public/app/index.html',source=>{
   if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns installer registration.');
-  if(source.includes('open-online-campus-v225')||source.includes('Browser fallback'))throw new Error('Installer must not expose browser runtime fallback.');
-  if(!source.includes('/app/pwa-install-prompt-v250.js'))throw new Error('Installer must retain the cache-distinct v250 install bridge.');
+  if(source.includes('open-online-campus-v225')||source.includes('Browser fallback'))throw new Error('Installer must not expose anonymous browser runtime fallback.');
+  if(!source.includes('/app/pwa-install-prompt-v250.js'))throw new Error('Installer must retain the current install bridge.');
   if(source.includes('/app/pwa-install-prompt-v249.js'))throw new Error('Installer must not restore the stale-cache-prone v249 install bridge.');
   if(!source.includes('/app/installer-repair-only-v2.js'))throw new Error('Installer must retain the cache-distinct repair-only bridge v2.');
   if(source.includes('/app/installer-repair-only-v1.js'))throw new Error('Installer must not restore the stale shell-cached v1 repair bridge.');
@@ -76,8 +76,9 @@ await patch('public/app/installed-entry-v146.js',source=>{
   if(!source.includes("updateViaCache:'none'"))throw new Error('Installed entry must bypass HTTP cache when checking the active worker.');
   if(!/await\s+(?:bounded\()?registration\.update\(\)/.test(source))throw new Error('Installed entry must explicitly request a worker update before routing.');
   if(!source.includes("candidate.postMessage({type:'SKIP_WAITING'})"))throw new Error('Installed entry must activate a waiting worker before routing.');
-  if(!source.includes(`revision=${installedEntryRevision}`))throw new Error('Installed entry does not register the current install-only boot-recovery worker revision.');
-  if(!source.includes("browserRuntimePolicy:'installed-display-only'"))throw new Error('Installed entry must keep browser runtime disabled.');
+  if(!source.includes(`revision=${installedEntryRevision}`))throw new Error('Installed entry does not register the current installed-capability boot-recovery worker revision.');
+  if(!source.includes("browserRuntimePolicy:'installed-display-or-verified-installed-capability'"))throw new Error('Installed entry must require installed display or a verified installed capability.');
+  if(!source.includes('async function installedLaunchAuthorized()'))throw new Error('Installed entry must await installed launch authorization.');
   return source;
 });
 
@@ -97,7 +98,9 @@ await patch('public/app/install-boundary-v146.js',source=>{
     `guideWorkspaceRevision:'${guideChatWorkspaceRevision}'`,
     `guideSurfaceOwnershipPolicy:'${guideChatOwnershipPolicy}'`,
     "navigationLifecycleRevision:'v424-head-capture-bfcache-resume'",
-    "browserRuntimePolicy:'installed-display-only'",
+    "const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'",
+    "function allowed(){return installedDisplay()||installedCapability()||developer()}",
+    "browserRuntimePolicy:'installed-display-or-verified-installed-capability'",
     'installedQueryIsAuthorization:false',
     'canonicalSystemCount:5',
     'canonicalAutoScripts:0'
@@ -167,4 +170,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:guideChatOwner,navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installedCapability:'v1',installerRegistrationOwner:'install-v130.js',installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:guideChatOwner,navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
