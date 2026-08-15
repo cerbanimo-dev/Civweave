@@ -170,7 +170,7 @@ async function requestRepair(){
       try{channel.port1.close()}catch{}
       resolve(event.data||null);
     };
-    try{worker.postMessage({type:'REPAIR_DEVICE_PACKAGE'},[channel.port2])
+    try{worker.postMessage({type:'REPAIR_DEVICE_PACKAGE'},[channel.port2])}
     catch(error){clearTimeout(timer);reject(error)}
   });
 }
