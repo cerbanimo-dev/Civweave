@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-await import('./sync-release-version-assets.mjs');
-
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [topbar,boundary,workspace,campus,release,manifest,pkg,workflow]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
