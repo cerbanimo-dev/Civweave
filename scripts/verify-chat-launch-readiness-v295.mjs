@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=p=>readFile(new URL(`../${p}`,import.meta.url),'utf8');
-const [orchestrator,fullscreen,mobile,store,ui,localRuntime,localOwner,settings,workspace,runtime266,bootstrap,gateway,repair,minilm]=await Promise.all([
+const [orchestrator,fullscreen,mobile,store,ui,localRuntime,localOwner,settings,chatSurface,runtime266,bootstrap,gateway,repair,minilm]=await Promise.all([
   'public/app/experience-orchestrator-v232.js',
   'public/app/chat-fullscreen-v295.js',
   'public/app/mobile-ai-hardening-v302.js',
@@ -10,14 +10,14 @@ const [orchestrator,fullscreen,mobile,store,ui,localRuntime,localOwner,settings,
   'public/app/local-chat-runtime-v295.js',
   'public/app/local-chat-owner-v295.js',
   'public/app/settings-parity-v295.js',
-  'public/app/guide-workspace-v242.js',
+  'public/app/guide-chat-surface-v350.js',
   'public/app/local-ai/runtime-v266.js',
   'public/app/local-ai/bootstrap-v266.js',
   'public/app/settings-gateway-v317.js',
   'public/service-worker-chat-repair-v245.js',
   'public/app/minilm-context-router-v344.js'
 ].map(read));
-for(const source of [orchestrator,fullscreen,mobile,store,ui,localRuntime,localOwner,settings,workspace,runtime266,bootstrap,gateway,minilm])new Function(source);
+for(const source of [orchestrator,fullscreen,mobile,store,ui,localRuntime,localOwner,settings,chatSurface,runtime266,bootstrap,gateway,minilm])new Function(source);
 new Function('self','caches','fetch',repair)({addEventListener(){},CivweaveChatCacheRepairV245:null},{keys:async()=>[]},async()=>({ok:true,clone(){return this}}));
 
 // One canonical chat owner. Settings and inference stay separate from opening chat.
@@ -40,7 +40,9 @@ assert.match(orchestrator,/CivweaveChatFullscreenV295\?\.settleViewport/);
 assert.match(orchestrator,/generativePrewarm:false/);
 assert.match(orchestrator,/generativeStartsOnSubmit:true/);
 assert.doesNotMatch(orchestrator,/chatOpenPrewarm:true|intentPrewarm===true/);
-assert.match(workspace,/document\.addEventListener\('submit',onSubmitCapture,true\)/);
+assert.match(chatSurface,/presentationOwner:'guide-chat-surface-v350'/);
+assert.match(chatSurface,/root\.querySelector\('\[data-persistent-form\]'\)\.addEventListener\('submit'/);
+assert.doesNotMatch(chatSurface,/document\.addEventListener\('submit'/,'canonical chat surface must not own document-wide submit capture');
 
 // v349 invariant: opening chat must be a CSS state change, not a JS repair workload.
 assert.match(fullscreen,/1\.0\.106-chat-fullscreen-v299/);
@@ -132,4 +134,4 @@ assert.match(minilm,/idleWarm\(\)/);
 assert.match(minilm,/settingsAutostart:false/);
 assert.doesNotMatch(minilm,/civweave:guide-workspace-state/,'MiniLM must remain independent of chat-open events');
 
-console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v349-main-thread-quiescence',features:{fiveChats:true,settingsOwner:'settings-gateway-v317',settingsIndependentOfChat:true,cssOnlyMobileFullscreen:true,visualViewportOwnership:false,chatMutationObservers:false,chatSettlingTimers:false,mainThreadQuiescentOnOpen:true,localFifoQueue:true,generativePrewarm:false,generativeStartsOnSubmit:true,minilmIndependent:true,fullChatRepairCoverage:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v350-v349-main-thread-quiescence',features:{fiveChats:true,canonicalChatOwner:'guide-chat-surface-v350',settingsOwner:'settings-gateway-v317',settingsIndependentOfChat:true,cssOnlyMobileFullscreen:true,visualViewportOwnership:false,chatMutationObservers:false,chatSettlingTimers:false,mainThreadQuiescentOnOpen:true,localFifoQueue:true,generativePrewarm:false,generativeStartsOnSubmit:true,minilmIndependent:true,fullChatRepairCoverage:true}},null,2));
