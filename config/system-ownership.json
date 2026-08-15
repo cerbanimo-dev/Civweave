@@ -10,49 +10,12 @@
       "managementSubscriber": "public/app/document-lifecycle-v221.js",
       "credentialOwner": "public/app/model-settings-controller-v173.js",
       "canonicalControl": "[data-open-unified-ai-settings]",
-      "activeEntryRoutes": [
-        "public/app/working-campus-v156.html",
-        "public/app/cabinets/living-school/index.html",
-        "public/app/realm-console-v140.html",
-        "public/app/fellowfare-cabinet-v144.html",
-        "public/app/anarchadia-console-v139.html"
-      ],
-      "activeRouteDependencies": [
-        "public/app/working-campus-v156.part5.txt",
-        "public/app/family-shell-v104.js",
-        "public/app/anarchadia-runtime-stability-v159.js"
-      ],
+      "activeEntryRoutes": ["public/app/working-campus-v156.html","public/app/cabinets/living-school/index.html","public/app/realm-console-v140.html","public/app/fellowfare-cabinet-v144.html","public/app/anarchadia-console-v139.html"],
+      "activeRouteDependencies": ["public/app/working-campus-v156.part5.txt","public/app/family-shell-v104.js","public/app/anarchadia-runtime-stability-v159.js"],
       "allowedInputListenerFiles": ["public/app/settings-gateway-v317.js"],
-      "forbiddenInputOwnerFiles": [
-        "public/app/working-campus-v156.part5.txt",
-        "public/app/experience-orchestrator-v232.js",
-        "public/app/family-shell-v104.js",
-        "public/app/settings-parity-v295.js",
-        "public/app/settings-delegation-v175.js",
-        "public/app/ai-settings-bind-guard-v230.js",
-        "public/app/ai-settings-device-repair-v229.js",
-        "public/app/anarchadia-runtime-stability-v159.js",
-        "public/app/document-lifecycle-v221.js"
-      ],
-      "forbiddenEagerImplementations": [
-        "/app/model-settings-controller-v173.js?activate=1",
-        "/app/document-lifecycle-v221.js?activate=1",
-        "/app/settings-parity-v295.js",
-        "/app/settings-delegation-v175.js",
-        "/app/ai-settings-bind-guard-v230.js",
-        "/app/ai-settings-device-repair-v229.js"
-      ],
-      "rules": [
-        "One DOM input owner per document.",
-        "Settings controller and local-model management activate only from the first explicit Settings request.",
-        "Realm pages may style the shared control but may not create a second Settings implementation or listener.",
-        "Living School uses the family-shell Settings control and has no realm-local Settings button.",
-        "The Civweave campus may mark Settings controls but may not preload Settings repairs, local-model bootstrap, or attach direct Settings listeners.",
-        "Browser prototypes, DOM prototypes, and Settings API methods may not be monkey-patched to repair Settings behavior.",
-        "Credential helpers may expose explicit compatibility methods but may not intercept Settings input, patch Settings open(), or mutate credential state at module load.",
-        "Realm stability/recovery layers may call the gateway programmatically but may not intercept Settings controls or carry dormant fallback listeners.",
-        "Subscribers may listen to civweave:model-settings-opened but may not intercept the Settings control."
-      ]
+      "forbiddenInputOwnerFiles": ["public/app/working-campus-v156.part5.txt","public/app/experience-orchestrator-v232.js","public/app/family-shell-v104.js","public/app/settings-parity-v295.js","public/app/settings-delegation-v175.js","public/app/ai-settings-bind-guard-v230.js","public/app/ai-settings-device-repair-v229.js","public/app/anarchadia-runtime-stability-v159.js","public/app/document-lifecycle-v221.js"],
+      "forbiddenEagerImplementations": ["/app/model-settings-controller-v173.js?activate=1","/app/document-lifecycle-v221.js?activate=1","/app/settings-parity-v295.js","/app/settings-delegation-v175.js","/app/ai-settings-bind-guard-v230.js","/app/ai-settings-device-repair-v229.js"],
+      "rules": ["One DOM input owner per document.","Settings controller and local-model management activate only from the first explicit Settings request.","Realm pages may style the shared control but may not create a second Settings implementation or listener.","Living School uses the family-shell Settings control and has no realm-local Settings button.","The Civweave campus may mark Settings controls but may not preload Settings repairs, local-model bootstrap, or attach direct Settings listeners.","Browser prototypes, DOM prototypes, and Settings API methods may not be monkey-patched to repair Settings behavior.","Credential helpers may expose explicit compatibility methods but may not intercept Settings input, patch Settings open(), or mutate credential state at module load.","Realm stability/recovery layers may call the gateway programmatically but may not intercept Settings controls or carry dormant fallback listeners.","Subscribers may listen to civweave:model-settings-opened but may not intercept the Settings control."]
     },
     "interface-runtime": {
       "capability": "Five-system interface boot lifecycle, shared structural slots, and realm adapter contract",
@@ -61,81 +24,15 @@
       "routeContract": "public/app/system-routes-v227.js",
       "navigationSubscriber": "public/app/family-shell-v104.js",
       "canonicalApi": "globalThis.CivweaveCoreInterfaceRuntimeV1",
-      "canonicalEvents": [
-        "civweave:interface-runtime-phase",
-        "civweave:interface-runtime-ready",
-        "civweave:interface-system-ready",
-        "civweave:interface-shared-support-ready",
-        "civweave:interface-system-changed",
-        "civweave:interface-adapter-registered",
-        "civweave:interface-adapter-unmounted",
-        "civweave:interface-feature-ready",
-        "civweave:interface-feature-error",
-        "civweave:interface-runtime-error"
-      ],
-      "activeEntryRoutes": [
-        "public/app/working-campus-v156.html",
-        "public/app/cabinets/living-school/index.html",
-        "public/app/realm-console-v140.html",
-        "public/app/fellowfare-cabinet-v144.html",
-        "public/app/anarchadia-console-v139.html"
-      ],
-      "rules": [
-        "The install boundary may decide whether a canonical surface can boot and may request the runtime, but it does not own realm UI lifecycle.",
-        "All five systems boot the same interface runtime before realm-specific shared capabilities.",
-        "The install boundary boots the runtime but never iterates or executes the shared system dependency manifest; shared loading belongs to core-interface-runtime-v1.js.",
-        "Realm-specific features register adapters or subscribe to lifecycle events; they do not fork the core loader.",
-        "Family navigation remains owned by family-shell-v104.js and Settings input remains owned by settings-gateway-v317.js.",
-        "The runtime must be idempotent and safe across pageshow/BFCache resume."
-      ]
+      "canonicalEvents": ["civweave:interface-runtime-phase","civweave:interface-runtime-ready","civweave:interface-system-ready","civweave:interface-shared-support-ready","civweave:interface-system-changed","civweave:interface-adapter-registered","civweave:interface-adapter-unmounted","civweave:interface-feature-ready","civweave:interface-feature-error","civweave:interface-runtime-error"],
+      "activeEntryRoutes": ["public/app/working-campus-v156.html","public/app/cabinets/living-school/index.html","public/app/realm-console-v140.html","public/app/fellowfare-cabinet-v144.html","public/app/anarchadia-console-v139.html"],
+      "rules": ["The install boundary may decide whether a canonical surface can boot and may request the runtime, but it does not own realm UI lifecycle.","All five systems boot the same interface runtime before realm-specific shared capabilities.","The install boundary boots the runtime but never iterates or executes the shared system dependency manifest; shared loading belongs to core-interface-runtime-v1.js.","Realm-specific features register adapters or subscribe to lifecycle events; they do not fork the core loader.","Family navigation remains owned by family-shell-v104.js and Settings input remains owned by settings-gateway-v317.js.","The runtime must be idempotent and safe across pageshow/BFCache resume."]
     },
-    "family-navigation": {
-      "capability": "Five-system navigation and realm status chrome",
-      "owner": "public/app/family-shell-v104.js",
-      "routeContract": "public/app/system-routes-v227.js"
-    },
-    "guide-chat": {
-      "capability": "Five guide windows and canonical conversation workspace",
-      "owner": "public/app/guide-workspace-v242.js",
-      "loader": "public/app/family-ai-loader-v105.js"
-    },
-    "local-ai-inference": {
-      "capability": "Downloaded local model inference",
-      "owner": "public/app/local-ai/runtime-v266.js",
-      "bootstrap": "public/app/local-ai/bootstrap-v266.js",
-      "rule": "Settings may manage downloaded models but must never start inference on open."
-    },
-    "host-node-access": {
-      "capability": "Device-bound Hub Node login, capacity sessions, and neuron quota telemetry",
-      "owner": "public/app/host-node-session-v1.js",
-      "admissionSurface": "public/app/host-node-installer-lobby-v1.js",
-      "cloudAuthority": "cloudflare/node-cloud/src/entry.mjs",
-      "subscribers": [
-        "public/app/server-ai-router-v301.js",
-        "public/app/cloud-validation-executor-v1.js",
-        "public/app/working-campus-topbar-v243.js",
-        "public/app/guide-workspace-v242.js"
-      ],
-      "rules": [
-        "Only the owner writes browser Hub capacity sessions and device login credentials.",
-        "Capacity bearer tokens remain tab-scoped in sessionStorage; device login credentials remain local and are never dispatched in events.",
-        "Cloudflare AI generation and validation require a verified Hub capacity session.",
-        "Paid-expansion availability may be discovered, but a new paid-expansion resident is never admitted without active membership authority."
-      ]
-    },
-    "node-reconstruction-backup": {
-      "capability": "Encrypted whole-node reconstruction checkpoints, retention, and replica storage",
-      "owner": "lib/node-reconstruction-backup-v1.mjs",
-      "operator": "scripts/node-reconstruction-backup-v1.mjs",
-      "architecture": "docs/architecture/node-reconstruction-backups-v1.md",
-      "rules": [
-        "Source systems remain canonical owners and export only explicitly portable records.",
-        "ABBA is an exact reconstruction/addressing codec and never replaces cryptographic commitments or authenticated encryption.",
-        "API keys, session bearer tokens, browser-bound signing keys, private authority keys, recovery secrets, and refresh tokens are never portable backup payloads.",
-        "Restore verifies the complete checkpoint before returning records and never silently mutates a source system.",
-        "Federated replica transport must retain application-level signatures and CMLP key separation."
-      ]
-    },
+    "family-navigation": {"capability":"Five-system navigation and realm status chrome","owner":"public/app/family-shell-v104.js","routeContract":"public/app/system-routes-v227.js"},
+    "guide-chat": {"capability":"Five guide windows and canonical conversation workspace","owner":"public/app/guide-workspace-v242.js","loader":"public/app/family-ai-loader-v105.js"},
+    "local-ai-inference": {"capability":"Downloaded local model inference","owner":"public/app/local-ai/runtime-v266.js","bootstrap":"public/app/local-ai/bootstrap-v266.js","rule":"Settings may manage downloaded models but must never start inference on open."},
+    "host-node-access": {"capability":"Device-bound Hub Node login, capacity sessions, and neuron quota telemetry","owner":"public/app/host-node-session-v1.js","admissionSurface":"public/app/host-node-installer-lobby-v1.js","cloudAuthority":"cloudflare/node-cloud/src/entry.mjs","subscribers":["public/app/server-ai-router-v301.js","public/app/cloud-validation-executor-v1.js","public/app/working-campus-topbar-v243.js","public/app/guide-workspace-v242.js"],"rules":["Only the owner writes browser Hub capacity sessions and device login credentials.","Capacity bearer tokens remain tab-scoped in sessionStorage; device login credentials remain local and are never dispatched in events.","Cloudflare AI generation and validation require a verified Hub capacity session.","Paid-expansion availability may be discovered, but a new paid-expansion resident is never admitted without active membership authority."]},
+    "node-reconstruction-backup": {"capability":"Encrypted whole-node reconstruction checkpoints, retention, and replica storage","owner":"lib/node-reconstruction-backup-v1.mjs","operator":"scripts/node-reconstruction-backup-v1.mjs","architecture":"docs/architecture/node-reconstruction-backups-v1.md","rules":["Source systems remain canonical owners and export only explicitly portable records.","ABBA is an exact reconstruction/addressing codec and never replaces cryptographic commitments or authenticated encryption.","API keys, session bearer tokens, browser-bound signing keys, private authority keys, recovery secrets, and refresh tokens are never portable backup payloads.","Restore verifies the complete checkpoint before returning records and never silently mutates a source system.","Federated replica transport must retain application-level signatures and CMLP key separation."]},
     "private-messaging": {
       "capability": "Offline-first encrypted member private messaging with opportunistic mesh and hidden online relay transport",
       "owner": "public/app/civweave-private-messaging-v1.js",
@@ -143,33 +40,12 @@
       "meshDependency": "public/app/local-object-mesh-v146.js",
       "onlineAuthority": "cloudflare/mail/src/index-v4.mjs",
       "canonicalApi": "globalThis.CivweavePrivateMessagingV1",
-      "canonicalEvents": [
-        "civweave:private-messaging-ready",
-        "civweave:private-messaging-identity",
-        "civweave:private-message"
-      ],
+      "canonicalEvents": ["civweave:private-messaging-ready","civweave:private-messaging-identity","civweave:private-message"],
       "offlinePackage": "public/app/offline-package-v208.json",
-      "allowedCallers": [
-        "public/app/hub-mail-claim-v1.js",
-        "future shared private-messaging presentation surface"
-      ],
-      "rules": [
-        "The user-facing member identity is @username; the derived username_pm@civweave.cc address is transport-only and must never be presented as the member's email address.",
-        "Private message plaintext is encrypted on the sending device before mesh, Hub, Worker, R2, or hidden-mail relay transport sees it.",
-        "The same encrypted envelope and UUID travel over local mesh and online relay so duplicate paths converge locally.",
-        "Inbound internet SMTP to _pm transport identities is rejected before message storage.",
-        "Paid human-visible email uses a separate entitlement-gated account and claim path.",
-        "Realm pages may call or present the canonical PM API but may not create realm-local messaging stores, encryption owners, relay protocols, or username registries."
-      ]
+      "allowedCallers": ["public/app/hub-mail-claim-v1.js","future shared private-messaging presentation surface"],
+      "rules": ["The user-facing member identity is @username; the derived username_pm@civweave.cc address is transport-only and must never be presented as the member's email address.","Private message plaintext is encrypted on the sending device before mesh, Hub, Worker, R2, or hidden-mail relay transport sees it.","The same encrypted envelope and UUID travel over local mesh and online relay so duplicate paths converge locally.","Inbound internet SMTP to _pm transport identities is rejected before message storage.","Paid human-visible email uses a separate entitlement-gated account and claim path.","Realm pages may call or present the canonical PM API but may not create realm-local messaging stores, encryption owners, relay protocols, or username registries."]
     },
-    "radio": {
-      "capability": "Shared radio station and track suggestions",
-      "owner": "public/app/system-radio-agent-v233.js",
-      "suggestions": "public/app/radio-track-suggestions-v240.js"
-    },
-    "review": {
-      "capability": "Shared review surface and review handoffs",
-      "owner": "public/app/shared-review-surface-v234.js"
-    }
+    "radio": {"capability":"Shared radio station and track suggestions","owner":"public/app/system-radio-agent-v233.js","suggestions":"public/app/radio-track-suggestions-v240.js"},
+    "review": {"capability":"Shared review surface and review handoffs","owner":"public/app/shared-review-surface-v234.js"}
   }
 }
