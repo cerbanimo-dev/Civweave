@@ -1,10 +1,10 @@
 export const MEMBERSHIP_ECONOMY = Object.freeze({ systemBps: 5000, hostBps: 2500, cerbanimoBps: 2500 });
 export const MEMBERSHIP_NEURON_COST_MICROCENTS = 1100;
 export const MEMBERSHIP_TIERS = Object.freeze({
-  member: Object.freeze({ id: 'member', serviceAmountCents: 500, monthlyLifetimeCredits: 100_000 }),
-  maker: Object.freeze({ id: 'maker', serviceAmountCents: 1_000, monthlyLifetimeCredits: 250_000 }),
-  builder: Object.freeze({ id: 'builder', serviceAmountCents: 2_000, monthlyLifetimeCredits: 600_000 }),
-  steward: Object.freeze({ id: 'steward', serviceAmountCents: 4_000, monthlyLifetimeCredits: 1_500_000 })
+  member: Object.freeze({ id: 'member', displayName: 'Wayfarer', serviceAmountCents: 500, monthlyLifetimeCredits: 100_000 }),
+  maker: Object.freeze({ id: 'maker', displayName: 'Artisan', serviceAmountCents: 1_000, monthlyLifetimeCredits: 250_000 }),
+  builder: Object.freeze({ id: 'builder', displayName: 'Weaver', serviceAmountCents: 2_000, monthlyLifetimeCredits: 600_000 }),
+  steward: Object.freeze({ id: 'steward', displayName: 'Beacon', serviceAmountCents: 4_000, monthlyLifetimeCredits: 1_500_000 })
 });
 
 const enc = new TextEncoder();
@@ -49,6 +49,7 @@ function publicMembership(row) {
     nodeId: row.node_id,
     userId: row.user_id,
     tierId: row.tier_id,
+    tierName: tierById(row.tier_id)?.displayName || row.tier_id,
     status: row.status,
     monthlyLifetimeCredits: Number(row.monthly_lifetime_credits),
     checkoutUrl: row.checkout_url || null,
@@ -66,6 +67,7 @@ function publicCycle(row) {
     nodeId: row.node_id,
     userId: row.user_id,
     tierId: row.tier_id,
+    tierName: tierById(row.tier_id)?.displayName || row.tier_id,
     subscriptionId: row.stripe_subscription_id,
     grossCents: Number(row.gross_cents),
     processorFeeCents: Number(row.processor_fee_cents),
@@ -165,7 +167,7 @@ export async function createMembershipCheckout(edge, input, raw, signatureHeader
     successUrl,
     cancelUrl,
     idempotencyKey: `civweave-membership-${stable}`,
-    displayName: `Civweave ${tier.id} membership`
+    displayName: `Civweave ${tier.displayName} membership`
   });
   const at = iso(edge.now());
   await edge.db.prepare(`INSERT INTO money_edge_memberships
