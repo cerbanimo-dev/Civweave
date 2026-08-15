@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='hub-mail-claim-v2-private-messaging';
+const VERSION='hub-mail-claim-v3-guild-copy';
 if(globalThis.CivweaveHubMailClaimV1?.version===VERSION)return;
 const clean=(v,m=1200)=>String(v??'').trim().slice(0,m);
 const api=()=>globalThis.CivweaveHubRecoveryApiV1||null;
@@ -17,11 +17,11 @@ function identity(){
 function endpoint(host,nodeId){return new URL(`/nodes/${encodeURIComponent(nodeId)}/api/account/mail/claim/request`,host)}
 async function requestClaimGrant(){
  if(busy)throw new Error('A private-messaging username claim is already being prepared.');
- const current=identity();if(!current)throw new Error('Join this Hub before choosing a private-messaging username.');
+ const current=identity();if(!current)throw new Error('Join this Guild before choosing a private-messaging username.');
  const response=await fetch(endpoint(current.host,current.nodeId),{method:'POST',cache:'no-store',headers:{accept:'application/json','content-type':'application/json','x-civweave-node-id':current.nodeId},body:JSON.stringify({userId:current.userId,credential:current.credential})});
  const packet=await response.json().catch(()=>({}));
- if(!response.ok||packet?.ok!==true){const error=new Error(clean(packet?.error||`Hub returned HTTP ${response.status}.`,1200));error.status=response.status;throw error}
- if(!clean(packet.claimToken,500))throw new Error('Hub returned an invalid one-use identity claim grant.');
+ if(!response.ok||packet?.ok!==true){const error=new Error(clean(packet?.error||`Guild returned HTTP ${response.status}.`,1200));error.status=response.status;throw error}
+ if(!clean(packet.claimToken,500))throw new Error('Guild returned an invalid one-use identity claim grant.');
  dispatchEvent(new CustomEvent('civweave:pm-claim-ready',{detail:{nodeId:current.nodeId,expiresAt:packet.expiresAt||null}}));
  return packet;
 }
