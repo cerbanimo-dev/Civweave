@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueV1)return;
-const VERSION='1.2.0';
+const VERSION='1.3.0';
 const SCHEMA='civweave.basic-value-guide.v1';
 const LIVING_STATE_KEY='civweave.living-school.cabinet.v151';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
@@ -12,7 +12,7 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const copy=value=>JSON.parse(JSON.stringify(value));
 const GUIDE=Object.freeze({
   schema:SCHEMA,
-  version:3,
+  version:4,
   symbols:Object.freeze({button:'🔘',acorn:'🌰'}),
   labor:Object.freeze({
     wageButtonsPerHour:5,
@@ -20,7 +20,7 @@ const GUIDE=Object.freeze({
     wagePolicy:'uniform-starting-wage',
     basis:'uniform starting wage for human-equivalent labor at an ordinary competent pace; every worker receives the same Button wage rate, while models estimate only the hours represented by the work; automation does not reduce the wage or hours baseline'
   }),
-  learning:Object.freeze({moduleCompletionAcorns:2,externalValidationBonusAcorns:2,validatorContributionAcorns:1}),
+  learning:Object.freeze({moduleCompletionAcorns:10,externalValidationBonusAcorns:20,validatorContributionAcorns:5}),
   education:Object.freeze({acornsPerHour:100,curriculumMinAcorns:50,curriculumMaxAcorns:500,curriculumBasis:'length and quality'}),
   mentorship:Object.freeze({
     balanced:Object.freeze({id:'balanced',label:'Learning + doing',buttons:5,acorns:50}),
@@ -73,9 +73,9 @@ function formatButtons(value){return`${round(value)} 🔘 Buttons`}
 function formatAcorns(value){return`${round(value)} 🌰 Acorns`}
 function chartRows(){return[
   {id:'labor-hour',label:'Starting wage',value:`${formatButtons(5)} / hour`,note:'Uniform labor wage for everyone. Models estimate human-equivalent hours, never a higher or lower rate for rank, prestige, or automation.'},
-  {id:'module-complete',label:'Learning module completed',value:formatAcorns(2),note:'Completion grant.'},
-  {id:'module-validated',label:'External successful validation',value:`+${formatAcorns(2)}`,note:'Bonus after successful external confidence validation.'},
-  {id:'validation-help',label:'Validate someone’s learning',value:formatAcorns(1),note:'For a qualified model/neuron validation contribution.'},
+  {id:'module-complete',label:'Learning module completed',value:formatAcorns(10),note:'Completion grant.'},
+  {id:'module-validated',label:'External successful validation',value:`+${formatAcorns(20)}`,note:'Bonus after successful external confidence validation.'},
+  {id:'validation-help',label:'Validate someone’s learning',value:formatAcorns(5),note:'For a qualified model/neuron validation contribution.'},
   {id:'education-hour',label:'Curriculum / tutoring time',value:`${formatAcorns(100)} / hour`,note:'Marketed educational time. Acorn prices intentionally use a more granular numeric scale than Button wages.'},
   {id:'curriculum',label:'Curriculum package',value:`${formatAcorns(50)}–${formatAcorns(500)}`,note:'Length and quality set the final suggestion on the Acorn price scale.'},
   {id:'mentor-balanced',label:'Mentorship: learning + doing',value:`${formatButtons(5)} + ${formatAcorns(50)}`,note:'Balanced on-the-job learning and productive work.'},
