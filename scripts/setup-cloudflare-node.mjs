@@ -38,7 +38,7 @@ function parseArgs(argv) {
     else if (arg === "--project-name" || arg === "--project") projectName = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--expect-account-email") expectAccountEmail = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--help" || arg === "-h") {
-      console.log(`Civweave Cloudflare host setup\n\nCanonical root:\n  CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL=you@example.com node scripts/setup-cloudflare-node.mjs --canonical\n\nCommunity host:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity host with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nProvisioning contract:\n  Pages + civweave-host-edge Worker + 3 starter Durable Object nodes\n\nDefaults:\n  canonical public address: ${canonicalOrigin}\n  canonical Pages underlay: ${canonicalPagesOrigin}\n  free community: https://civweave-<host-id>.pages.dev\n  contributing community alias: https://<label>.civweave.cc`);
+      console.log(`Civweave Cloudflare Guild setup\n\nCanonical root:\n  CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL=you@example.com node scripts/setup-cloudflare-node.mjs --canonical\n\nCommunity Guild:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity Guild with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nProvisioning contract:\n  Pages + civweave-host-edge Worker + 3 starter Durable Object nodes\n\nDefaults:\n  canonical public address: ${canonicalOrigin}\n  canonical Pages underlay: ${canonicalPagesOrigin}\n  Citizen-hosted Guild: https://civweave-<host-id>.pages.dev\n  contributing Guild alias: https://<label>.civweave.cc`);
       process.exit(0);
     } else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -50,8 +50,8 @@ function parseArgs(argv) {
     return { canonical: true, hostId: "civweave", projectName: canonicalProjectName, expectAccountEmail };
   }
 
-  if (!hostId) throw new Error("Choose a host ID with --host-id <name>. Use --canonical only for the reserved civweave.cc root.");
-  if (projectName === canonicalProjectName) throw new Error("The civweave Pages project is reserved for the canonical civweave.cc root. Choose another project name for a community host.");
+  if (!hostId) throw new Error("Choose a Guild ID with --host-id <name>. Use --canonical only for the reserved civweave.cc root.");
+  if (projectName === canonicalProjectName) throw new Error("The civweave Pages project is reserved for the canonical civweave.cc root. Choose another project name for a community Guild.");
   projectName ||= `civweave-${hostId}`;
   return { canonical: false, hostId, projectName, expectAccountEmail };
 }
@@ -131,17 +131,17 @@ function pagesDeploymentMatchesProject(output, projectName) {
 const options = parseArgs(process.argv.slice(2));
 const wrangler = detectWrangler();
 
-console.log("Civweave Cloudflare host setup");
-console.log(`Role: ${options.canonical ? "canonical root" : "community host"}`);
-console.log(`Host ID: ${options.hostId}`);
+console.log("Civweave Cloudflare Guild setup");
+console.log(`Role: ${options.canonical ? "canonical root" : "community Guild"}`);
+console.log(`Guild ID: ${options.hostId}`);
 console.log(`Pages project: ${options.projectName}`);
 if (options.expectAccountEmail) console.log(`Required Cloudflare account: ${options.expectAccountEmail}`);
 console.log("\nCloudflare deployment contract:");
-console.log("  Pages host: Account > Cloudflare Pages > Edit");
+console.log("  Guild Pages surface: Account > Cloudflare Pages > Edit");
 console.log("  Worker + 3 starter nodes: Account > Workers Scripts > Edit");
-console.log("  Account resources: Include the account that will own this host");
+console.log("  Account resources: Include the account that will own this Guild");
 console.log("  Durable Objects use Workers Scripts permission; there is no separate Durable Objects token row.");
-console.log("  The helper attempts both layers automatically and records any incomplete layer for the steward page.");
+console.log("  The helper attempts both layers automatically and records any incomplete layer for the Guildkeeper page.");
 
 console.log("\n1/5 Checking Cloudflare authentication...");
 const whoami = runWrangler(wrangler, ["whoami"], { capture: true });
@@ -186,7 +186,7 @@ try {
   accountEdge = JSON.parse(readFileSync(accountEdgeSummaryPath, "utf8"));
 } catch {}
 
-console.log("\n4/5 Building the host package...");
+console.log("\n4/5 Building the Guild package...");
 run(process.execPath, [buildScript]);
 const pagesOrigin = `https://${options.projectName}.pages.dev`;
 const publicOrigin = options.canonical ? canonicalOrigin : pagesOrigin;
@@ -218,25 +218,25 @@ if (!pagesDeploymentMatchesProject(deployed.output, options.projectName)) {
   throw new Error(`Cloudflare reported a deployment outside ${options.projectName}.pages.dev. Refusing to call this setup complete because Wrangler appears to be authenticated to a different account/project.`);
 }
 
-console.log("\nCivweave Cloudflare host setup complete.");
+console.log("\nCivweave Cloudflare Guild setup complete.");
 console.log(`Pages origin: ${pagesOrigin}`);
 console.log(`Public URL: ${publicOrigin}`);
 console.log(`Health: ${pagesOrigin}/api/health`);
-console.log(`Steward setup: ${pagesOrigin}/host-setup.html`);
+console.log(`Guildkeeper setup: ${pagesOrigin}/host-setup.html`);
 if (options.canonical) {
   console.log(`Canonical Civweave root: ${canonicalOrigin}`);
   console.log(`Canonical Pages underlay: ${canonicalPagesOrigin}`);
 } else {
-  console.log(`Free hub address: ${pagesOrigin}`);
+  console.log(`Guild Pages address: ${pagesOrigin}`);
   console.log(`Shared-domain option: https://${options.hostId}.civweave.cc after an active hosting-cost contribution and label claim.`);
 }
 if (accountEdge.status === "ready") {
   console.log(`Account Worker: ${accountEdge.workerOrigin}`);
   for (const node of accountEdge.starterNodes || []) console.log(`Starter node: ${node.publicOrigin}`);
 } else {
-  console.warn("\nACTION REQUIRED: the Pages host is live, but the Worker + 3 starter nodes are pending.");
+  console.warn("\nACTION REQUIRED: the Guild Pages surface is live, but the Worker + 3 starter nodes are pending.");
   console.warn("Cloudflare token permission: Account > Workers Scripts > Edit");
-  console.warn("Account resources: Include the Cloudflare account that owns this host");
+  console.warn("Account resources: Include the Cloudflare account that owns this Guild");
   console.warn(`Retry: node scripts/provision-cloudflare-account-edge-v1.mjs --host-id ${options.hostId} --strict`);
   console.warn(`Visible status: ${pagesOrigin}/host-setup.html`);
 }
@@ -245,12 +245,12 @@ console.log("\nAutomatic updates:");
 if (options.canonical) {
   console.log("  The canonical GitHub workflow deploys Pages and the account Worker on every push to main when CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID point to this same Cloudflare account.");
 } else {
-  console.log("  Initial hosting is complete; GitHub authorization is intentionally not a launch-time requirement.");
-  console.log("  To receive future main-branch releases automatically in the steward's repository, configure:");
+  console.log("  Initial Guild hosting is complete; GitHub authorization is intentionally not a launch-time requirement.");
+  console.log("  To receive future main-branch releases automatically in the Guildkeeper's repository, configure:");
   console.log(`    repository variable CIVWEAVE_PAGES_PROJECT=${options.projectName}`);
   console.log(`    repository variable CIVWEAVE_HOST_ID=${options.hostId}`);
   console.log("    repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID for this same Cloudflare account");
   console.log("  Then enable .github/workflows/deploy-civweave-host-pages.yml. The first direct deployment remains live until automation is ready.");
   console.log("  A civweave.cc alias is managed separately by Civweave and never replaces this Pages origin.");
 }
-console.log("Open the steward setup URL once. Civweave will then keep reminding this steward browser to add and pair a local Anchor/companion until it is recorded as complete.");
+console.log("Open the Guildkeeper setup URL once. Civweave will then keep reminding this Guildkeeper browser to add and pair a local Anchor/companion until it is recorded as complete.");
