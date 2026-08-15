@@ -9,6 +9,7 @@ on:
       - 'public/app/radio-directory-v240/**'
       - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'public/app/experience-orchestrator-v232.js'
       - 'public/service-worker-radio-core-v305.js'
       - 'public/service-worker-v203.js'
@@ -29,6 +30,7 @@ on:
       - 'public/app/radio-directory-v240/**'
       - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'public/app/experience-orchestrator-v232.js'
       - 'public/service-worker-radio-core-v305.js'
       - 'public/service-worker-v203.js'
@@ -59,6 +61,7 @@ jobs:
           node --check public/app/system-radio-agent-v233.js
           node --check public/app/radio-track-suggestions-v240.js
           node --check public/app/install-boundary-v146.js
+          node --check public/app/core-interface-runtime-v1.js
           node --check public/service-worker-radio-core-v305.js
           node --check scripts/build-service-worker-v211.mjs
           node --check scripts/verify-system-radio-v233.mjs
