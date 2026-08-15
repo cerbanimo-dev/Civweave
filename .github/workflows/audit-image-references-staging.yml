@@ -1,0 +1,30 @@
+name: Audit Image References (Staging)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - staging
+    paths:
+      - 'public/app/assets/**'
+      - 'public/app/services/anarchadia/**'
+      - 'scripts/generate-asset-lockboard-catalog-v239.mjs'
+      - 'scripts/report-image-reference-audit-v1.mjs'
+      - '.github/workflows/audit-image-references-staging.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Rebuild image-reference catalog
+        run: node scripts/generate-asset-lockboard-catalog-v239.mjs
+      - name: Report reference state
+        run: node scripts/report-image-reference-audit-v1.mjs --strict
