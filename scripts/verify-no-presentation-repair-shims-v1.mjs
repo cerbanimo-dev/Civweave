@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 
 const root = resolve(process.cwd());
 const read = path => readFileSync(resolve(root, path), 'utf8');
+const retiredRepairPaths = [
+  'public/app/installer-repair-only-v1.js',
+  'public/app/installer-online-fallback-v225.js',
+  'public/service-worker-shell-repair-v225.js',
+];
 
 const rules = [
   {
@@ -20,9 +25,14 @@ const rules = [
   },
   {
     path: 'public/app/index.html',
+    forbid: [
+      [/installer-repair-only-v1|installer-online-fallback-v225/, 'installer source must not load retired repair sidecars'],
+    ],
     require: [
       [/data-cw-en-language-control/, 'English installer owns its Japanese language control in source markup'],
       [/>JP<\/button>/, 'English installer source labels the Japanese control before paint'],
+      [/host-node-installer-lobby-v1\.js/, 'installer source owns the Hub lobby directly'],
+      [/hub-recovery-ui-v1\.js/, 'installer source owns Hub recovery UI directly'],
     ],
   },
   {
@@ -33,28 +43,6 @@ const rules = [
       [/\bimage\.src\s*=/, 'regression compatibility must not replace canonical images'],
     ],
     require: [[/runtimeImageRepair:false/, 'image-repair compatibility explicitly disabled']],
-  },
-  {
-    path: 'public/app/installer-online-fallback-v225.js',
-    forbid: [
-      [/\bnew\s+MutationObserver\s*\(/, 'retired online fallback must not clean up rendered UI'],
-      [/removeLegacyBrowserLaunchers|open-online-campus-v225|launch=online/, 'retired online fallback must not delete browser controls after paint'],
-      [/\.remove\s*\(/, 'retired online fallback must remain a loader alias only'],
-    ],
-    require: [
-      [/sourceTruth:true/, 'retired online fallback declares source truth'],
-      [/domCleanup:false/, 'retired online fallback declares DOM cleanup disabled'],
-    ],
-  },
-  {
-    path: 'public/app/installer-repair-only-v1.js',
-    forbid: [
-      [/removeBrowserLaunchers|open-online-campus-v225|launch=online/, 'shell repair must not delete retired launchers after paint'],
-    ],
-    require: [
-      [/sourceTruth:true/, 'shell repair declares source truth'],
-      [/staticLauncherCleanup:false/, 'shell repair declares static launcher cleanup disabled'],
-    ],
   },
   {
     path: 'public/app/services/fellowfare/marketplace-v2-symbols.js',
@@ -142,7 +130,6 @@ const reviewedDynamic = new Map([
   ['public/app/host-node-v124.js', 'Host-node connection/status UI changes with actual network and node state.'],
   ['public/app/hub-mail-claim-v1.js', 'Mail-claim UI is created/updated from asynchronous account recovery state.'],
   ['public/app/hub-recovery-ui-v1.js', 'Recovery UI reflects genuine recovery workflow state and dynamically discovered account data.'],
-  ['public/app/installer-repair-only-v1.js', 'The remaining observer tracks real shell failure/repair state; static launcher cleanup is separately forbidden.'],
   ['public/app/pwa-install-prompt-v246.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
   ['public/app/pwa-install-prompt-v247.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
   ['public/app/pwa-install-prompt-v248.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
@@ -153,6 +140,7 @@ const reviewedDynamic = new Map([
 ]);
 
 const failures = [];
+for (const path of retiredRepairPaths) if (existsSync(resolve(root, path))) failures.push(`${path}: retired runtime repair/tombstone file must be absent`);
 for (const rule of rules) {
   const source = read(rule.path);
   for (const [pattern, message] of rule.forbid || []) if (pattern.test(source)) failures.push(`${rule.path}: ${message}`);
@@ -188,8 +176,9 @@ for (const path of unclassified) failures.push(`${path}: observer+rewrite runtim
 const classifiedDynamic = candidates.map(path => ({ path, rationale: reviewedDynamic.get(path) || null }));
 
 console.log(JSON.stringify({
-  schema: 'civweave.presentation-source-truth.v4',
+  schema: 'civweave.presentation-source-truth.v5',
   enforcedFiles: rules.map(rule => rule.path),
+  retiredRepairPaths,
   classifiedDynamic,
   unclassifiedCandidates: unclassified,
   failures,

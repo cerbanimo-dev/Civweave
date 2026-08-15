@@ -1,17 +1,17 @@
 import assert from 'node:assert/strict';
+import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,workerRepair,workerWrapper,installedEntryHtml,installedEntry,hostMeta]=await Promise.all([
+const [html,rootHtml,manifestText,assetlinksText,bridge,workerRepair,workerWrapper,installedEntryHtml,installedEntry,hostMeta]=await Promise.all([
   read('public/app/index.html'),
   read('public/index.html'),
   read('public/app/manifest.webmanifest'),
   read('public/.well-known/assetlinks.json'),
   read('public/app/pwa-install-prompt-v249.js'),
-  read('public/app/installer-repair-only-v1.js'),
-  read('public/service-worker-shell-repair-v225.js'),
+  read('public/service-worker-shell-repair-v293.js'),
   read('public/service-worker-v203.js'),
   read('public/app/installed-entry-v146.html'),
   read('public/app/installed-entry-v146.js'),
@@ -37,48 +37,37 @@ const querySites=new Set(assetlinks.filter(entry=>(entry.relation||[]).includes(
 assert.equal(querySites.size,manifests.length,'asset links must list only current root install relationships');
 for(const url of manifests)assert.ok(querySites.has(url),`asset links must allow installed-app discovery for ${url}`);
 
-assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'root entry must know civweave.cc as the canonical PWA origin');
-assert.ok(rootHtml.includes(`const PAGES_UNDERLAY_ORIGIN='${pagesUnderlayOrigin}'`),'root entry must retain the active Pages underlay');
-assert.ok(rootHtml.includes("location.hostname.endsWith('.pages.dev')&&labels.length>3"),'root entry must recognize Pages preview aliases');
-assert.ok(rootHtml.includes("labels.slice(1).join('.')"),'preview root must resolve its parent production host');
-assert.ok(rootHtml.includes("communityPages=hostname=>/^civweave-[a-z0-9-]+\\.pages\\.dev$/i.test(hostname)"),'root entry must recognize stable community Pages origins without origin-specific migration aliases');
-assert.ok(rootHtml.includes("target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical')"),'root handoff must distinguish host-production routing from canonical routing');
-assert.ok(!rootHtml.includes('LEGACY_CANONICAL_ORIGIN')&&!rootHtml.includes('HOST_NODE_ORIGIN'),'root entry must not retain retired origin-specific routing owners');
+assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`));
+assert.ok(rootHtml.includes(`const PAGES_UNDERLAY_ORIGIN='${pagesUnderlayOrigin}'`));
+assert.ok(!rootHtml.includes('LEGACY_CANONICAL_ORIGIN')&&!rootHtml.includes('HOST_NODE_ORIGIN'));
+assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`));
+assert.ok(bridge.includes(`const PAGES_UNDERLAY_ORIGIN='${pagesUnderlayOrigin}'`));
+assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'));
+assert.ok(bridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"));
+assert.ok(bridge.includes("installSequencingPolicy:'prepare-shell-before-user-install-gesture'"));
+assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-click'"));
+assert.ok(bridge.includes('eagerShellPreparation:true'));
+assert.ok(bridge.includes('function resumeRequiredNext()'));
+assert.ok(bridge.includes("requiredNextOwner:'pwa-install-prompt-v249'"));
+assert.ok(bridge.includes("if(!required||!rawNext||!standalone())return false"),'required-next recovery must require installed display mode');
+assert.ok(!bridge.includes('REPAIR_DEVICE_PACKAGE'),'ordinary installer owner must not invoke installed-shell repair');
 
-assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'native install bridge must name civweave.cc as canonical');
-assert.ok(bridge.includes(`const PAGES_UNDERLAY_ORIGIN='${pagesUnderlayOrigin}'`),'native install bridge must retain the active Pages underlay');
-assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related installs when supported');
-assert.ok(bridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'installer bridge must declare installer-only browser policy');
-assert.ok(bridge.includes("installSequencingPolicy:'prepare-shell-before-user-install-gesture'"),'installer must prepare the shell before the fresh install gesture');
-assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-click'"),'installer must invoke the captured native prompt synchronously from the fresh install gesture');
-assert.ok(bridge.includes('eagerShellPreparation:true'),'installer bridge must expose that lightweight shell preparation is completed ahead of the install gesture');
-assert.ok(bridge.includes("function rerouteUnsafeInstall(){\n  if(standalone()||localDevelopment()||installOrigin())return false"),'unsupported install origins must route through the current stable installer generically');
-assert.ok(!bridge.includes('LEGACY_CANONICAL_ORIGIN')&&!bridge.includes('HOST_NODE_ORIGIN'),'install bridge must not retain retired origin-specific runtime branches');
-assert.ok(bridge.includes("if(standalone())")&&bridge.includes("if(installed){"),'installer must distinguish installed display from merely accepted installation');
-assert.ok(bridge.includes('Open Civweave from your device app launcher')||bridge.includes('device app launcher'),'accepted browser installation must direct launch through the device app launcher');
+for(const retired of ['public/app/installer-repair-only-v1.js','public/app/installer-online-fallback-v225.js','public/service-worker-shell-repair-v225.js'])assert.equal(existsSync(new URL(retired,root)),false,`${retired} must be physically retired`);
+assert.ok(!html.includes('installer-repair-only-v1.js')&&!html.includes('installer-online-fallback-v225.js'),'installer must not load post-paint repair sidecars');
+for(const script of ['/app/host-node-session-v1.js','/app/host-node-installer-lobby-v1.js','/app/host-node-session-export-v1.js','/app/host-node-session-import-v1.js','/app/hub-recovery-api-v1.js','/app/hub-recovery-ui-v1.js','/app/hub-mail-claim-v1.js'])assert.ok(html.includes(script),`installer source must directly own ${script}`);
+assert.ok(html.includes('/app/pwa-install-prompt-v249.js'));
+assert.ok(html.includes('Launch Civweave from your device app launcher'));
 
-assert.ok(!html.includes('id="open-online-campus-v225"'),'installer must not expose an online-campus fallback button');
-assert.ok(!html.includes('Browser fallback'),'installer must not advertise browser runtime fallback');
-assert.ok(!html.includes('/app/installer-online-fallback-v225.js'),'installer must not load the retired online fallback bridge');
-assert.ok(html.includes('/app/pwa-install-prompt-v249.js'),'installer must load the current cache-distinct v249 install bridge');
-assert.ok(html.includes('/app/installer-repair-only-v1.js?v=install-only-pwa-v1'),'installer must load the repair-only bridge until its recovery duties are transferred to canonical owners');
-assert.ok(html.includes('Launch Civweave from your device app launcher'),'installer headline must describe installed-app launch');
+assert.ok(installedEntryHtml.indexOf('installed-entry-browser-gate-v1')<installedEntryHtml.indexOf('<title>Civweave</title>'));
+assert.ok(installedEntryHtml.includes("location.replace(installer.href)"));
+assert.ok(installedEntry.includes("if(!installedDisplay()&&!localDeveloper())"));
+assert.ok(installedEntry.includes("browserRuntimePolicy:'installed-display-only'"));
+assert.ok(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('bounded(registration.update()'));
 
-assert.ok(repairOnly.includes('function installedDisplay()'),'repair bridge must prove installed display before resuming runtime');
-assert.ok(repairOnly.includes("if(!required||!rawNext||!installedDisplay())return false"),'stale required-next state must not open runtime in a browser tab');
-assert.ok(!repairOnly.includes("launch','online"),'repair bridge must not synthesize an online campus launch');
-assert.ok(repairOnly.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'repair bridge must declare installer-only browser policy');
-
-assert.ok(installedEntryHtml.indexOf('installed-entry-browser-gate-v1')<installedEntryHtml.indexOf('<title>Civweave</title>'),'installed-entry browser gate must execute before boot UI paint');
-assert.ok(installedEntryHtml.includes("location.replace(installer.href)"),'ordinary browser display must redirect to installer before boot UI');
-assert.ok(installedEntry.includes("if(!installedDisplay()&&!localDeveloper())"),'installed bootstrap must enforce display mode again at runtime');
-assert.ok(installedEntry.includes("browserRuntimePolicy:'installed-display-only'"),'installed bootstrap must declare installed-display-only runtime policy');
-assert.ok(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('bounded(registration.update()'),'installed entry must perform a bounded no-cache worker refresh');
-
-assert.ok(workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'shell repair must cache the repair-only bridge until the installer repair sidecar is retired');
-assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'shell repair must not resurrect the retired browser fallback');
-assert.ok(workerWrapper.includes('working-campus-return-v425-install-only-pwa-v1'),'worker core cache identity must carry install-only boundary');
-assert.ok(workerWrapper.includes('shell-self-repair-v225-install-only-pwa-v1'),'worker repair import must carry install-only boundary');
+assert.ok(workerRepair.includes("if (event.data?.type !== 'REPAIR_DEVICE_PACKAGE') return"),'v293 must own explicit installed-shell repair messaging');
+assert.ok(workerRepair.includes("policy: 'verified-shell-only-preserve-campus-model-school-storage'"),'v293 repair must preserve protected storage');
+assert.ok(workerWrapper.includes('service-worker-shell-repair-v293.js?v=installed-shell-repair-v293'));
+assert.ok(!workerWrapper.includes('service-worker-shell-repair-v225.js'),'worker wrapper must not resurrect v225 repair owner');
 
 const meta=JSON.parse(hostMeta);
 assert.equal(meta.schema,'civweave.host-deployment.v1');
@@ -100,14 +89,4 @@ assert.deepEqual(pngDimensions(bytes192,'192 icon'),[192,192]);
 assert.deepEqual(pngDimensions(bytes512,'512 icon'),[512,512]);
 assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
-console.log(JSON.stringify({
-  ok:true,
-  revision:'pwa-install-campus-v249-origin-source-truth',
-  canonicalOrigin,
-  pagesUnderlayOrigin,
-  browserRuntime:'installed-display-only',
-  onlineFallback:false,
-  repairOnly:true,
-  workerCacheBusted:true,
-  relatedOrigins:manifests.length
-},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v249-source-truth-no-repair-sidecar',canonicalOrigin,pagesUnderlayOrigin,browserRuntime:'installed-display-only',requiredNextOwner:'pwa-install-prompt-v249',installedShellRepair:'v293-sole-owner',onlineFallback:false,repairSidecar:false,relatedOrigins:manifests.length},null,2));

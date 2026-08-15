@@ -54,7 +54,8 @@ function replaceRequired(source,pattern,replacement,label){
 await patch('public/app/index.html',source=>{
   if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns installer registration.');
   if(source.includes('open-online-campus-v225')||source.includes('Browser fallback'))throw new Error('Installer must not expose browser runtime fallback.');
-  if(!source.includes('/app/installer-repair-only-v1.js'))throw new Error('Installer must retain the repair-only bridge.');
+  if(source.includes('/app/installer-repair-only-v1.js')||source.includes('/app/installer-online-fallback-v225.js'))throw new Error('Installer must not load retired repair sidecars.');
+  for(const required of ['/app/host-node-session-v1.js','/app/host-node-installer-lobby-v1.js','/app/host-node-session-export-v1.js','/app/host-node-session-import-v1.js','/app/hub-recovery-api-v1.js','/app/hub-recovery-ui-v1.js','/app/hub-mail-claim-v1.js'])if(!source.includes(required))throw new Error(`Installer source must own ${required} directly.`);
   return source;
 });
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
@@ -139,13 +140,14 @@ for(const token of [
   `/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`,
   `/service-worker-offline-v211-override.js?v=${offlineRevision}&policy=${offlinePolicy}`,
   '/service-worker-shell-integrity-v281.js?v=shell-integrity-v281',
+  '/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
-  '/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1',
   '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',
   `/service-worker-chat-repair-v245.js?v=${activeChatRepairRevision}&purge=${activeChatRepairRevision}`,
   "self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"
 ])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
-if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v225.js'))throw new Error('Canonical navigation must remain the final navigation policy.');
+if(wrapper.includes('/service-worker-shell-repair-v225.js'))throw new Error('The active worker wrapper resurrected retired shell repair v225.');
+if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v293.js'))throw new Error('Canonical navigation must remain after the installed shell repair responder.');
 const chatRepair=await readFile(path.join(root,'public/service-worker-chat-repair-v245.js'),'utf8');
 if(!chatRepair.includes(`const REVISION='${activeChatRepairRevision}';`))throw new Error('Chat cache repair revision drifted.');
 for(const retired of retiredChatPaths)if(!chatRepair.includes(`'${retired}'`))throw new Error(`Chat cache repair does not purge retired runtime ${retired}.`);
@@ -154,4 +156,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',installedShellRepair:'v293-sole-owner',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
