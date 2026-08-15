@@ -4,24 +4,30 @@ on:
     paths:
       - 'public/app/shared/guild-host-resilience-v1.mjs'
       - 'public/app/pocket-guild-node-v1.mjs'
+      - 'public/app/guild-host-onboarding-v1.mjs'
       - 'public/app/emergency-ai-host-v1.mjs'
+      - 'public/app/offline-package-v208.json'
       - 'lib/emergency-ai-share-v1.mjs'
       - 'cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/test-guild-host-resilience-v1.mjs'
+      - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
   push:
     branches: [staging]
     paths:
       - 'public/app/shared/guild-host-resilience-v1.mjs'
       - 'public/app/pocket-guild-node-v1.mjs'
+      - 'public/app/guild-host-onboarding-v1.mjs'
       - 'public/app/emergency-ai-host-v1.mjs'
+      - 'public/app/offline-package-v208.json'
       - 'lib/emergency-ai-share-v1.mjs'
       - 'cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/test-guild-host-resilience-v1.mjs'
+      - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
 jobs:
   verify:
@@ -33,9 +39,11 @@ jobs:
           node-version: 22
       - run: node --check public/app/shared/guild-host-resilience-v1.mjs
       - run: node --check public/app/pocket-guild-node-v1.mjs
+      - run: node --check public/app/guild-host-onboarding-v1.mjs
       - run: node --check public/app/emergency-ai-host-v1.mjs
       - run: node --check lib/emergency-ai-share-v1.mjs
       - run: node --check cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs
       - run: node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
       - run: node scripts/test-guild-host-resilience-v1.mjs
+      - run: node scripts/test-guild-host-onboarding-v1.mjs
       - run: node scripts/test-guildkeeper-capacity-v1.mjs
