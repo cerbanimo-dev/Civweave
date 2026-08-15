@@ -49,6 +49,7 @@
     "/app/guild-host-onboarding-v1.mjs",
     "/app/emergency-ai-host-v1.mjs",
     "/app/emergency-ai-mesh-v1.mjs",
+    "/app/emergency-ai-host-control-v1.mjs",
     "/app/civweave-private-messaging-v1.js",
     "/app/node-ai-mesh-v1.js",
     "/app/host-node-session-v1.js",
