@@ -11,6 +11,7 @@ on:
       - 'public/app/document-lifecycle-v221.js'
       - 'public/app/experience-orchestrator-v232.js'
       - 'public/app/install-boundary-v146.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'public/app/family-shell-v104.js'
       - 'public/app/family-ai-loader-v105.js'
       - 'public/app/settings-parity-v295.js'
