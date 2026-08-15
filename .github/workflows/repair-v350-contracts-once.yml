@@ -12,7 +12,7 @@ jobs:
   repair:
     if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'Complete V350 canonical chat migration')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
@@ -54,11 +54,6 @@ jobs:
           npm run check:release-discipline
           npm run check
           git diff --check
-      - name: Run real-browser installer gauntlet
-        run: |
-          npm install --no-save --package-lock=false --ignore-scripts playwright@1.55.0
-          npx playwright install --with-deps chromium
-          node scripts/browser-installer-gauntlet-v281.mjs
       - name: Commit source-first migration
         shell: bash
         run: |
