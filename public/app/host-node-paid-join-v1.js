@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION='host-node-paid-join-v1';
+const REVISION='host-node-paid-join-v2-citizen-patron-copy';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -40,7 +40,7 @@ function ensureUi(){
   if(!box){box=document.createElement('section');box.id='cw-paid-join';box.className='cw-paid-join';box.dataset.visible='false';box.innerHTML=`
     <label>Membership<select id="cw-paid-tier"><option value="member">Member · $5/month</option><option value="maker">Maker · $10/month</option><option value="builder">Builder · $20/month</option><option value="steward">Steward · $40/month</option></select></label>
     <button id="cw-paid-join-button" type="button">Join this Hub</button>
-    <p id="cw-paid-join-note">This Hub has paid-expansion room but no free community seats. Checkout does not consume a free seat.</p>`;actions.insertAdjacentElement('afterend',box);box.querySelector('#cw-paid-join-button')?.addEventListener('click',()=>void beginCheckout());}
+    <p id="cw-paid-join-note">This Hub has Patron slots available but no Citizen slots. Checkout does not consume a Citizen slot.</p>`;actions.insertAdjacentElement('afterend',box);box.querySelector('#cw-paid-join-button')?.addEventListener('click',()=>void beginCheckout());}
   return box;
 }
 function apply(){
@@ -48,7 +48,7 @@ function apply(){
   const free=slots('cw-host-free-slots'),paid=slots('cw-host-paid-slots'),{origin,nodeId}=selected();
   if(free==null||paid==null)return false;
   const show=Boolean(origin.startsWith('https://')&&nodeId&&free<1&&paid>0&&!activeSession(nodeId,origin));box.dataset.visible=String(show);
-  const join=document.getElementById('cw-host-node-join');if(show&&join){join.dataset.mode='search';join.textContent='Find a free Hub';}
+  const join=document.getElementById('cw-host-node-join');if(show&&join){join.dataset.mode='search';join.textContent='Find a Citizen slot';}
   return true;
 }
 async function beginCheckout(){
@@ -60,12 +60,12 @@ async function beginCheckout(){
     const response=await fetch(endpoint,{method:'POST',cache:'no-store',headers:{accept:'application/json','content-type':'application/json','x-civweave-node-id':nodeId},body:JSON.stringify({userId:identity.userId,credential:identity.credential,tierId})}),packet=await response.json().catch(()=>({}));
     if(!response.ok)throw Object.assign(new Error(packet.error||`Hub returned HTTP ${response.status}.`),{status:response.status});
     const checkoutUrl=packet?.checkout?.checkoutUrl||packet?.membership?.checkoutUrl;if(!checkoutUrl)throw new Error('The Hub did not return a membership checkout URL.');location.assign(checkoutUrl);
-  }catch(error){if(note)note.textContent=Number(error?.status)===409?'That paid-expansion capacity just filled. Find another Hub or a free community slot.':`Could not start membership checkout: ${error?.message||error}`;if(button){button.disabled=false;button.textContent='Join this Hub';}}
+  }catch(error){if(note)note.textContent=Number(error?.status)===409?'That Patron capacity just filled. Find another Hub or a Citizen slot.':`Could not start membership checkout: ${error?.message||error}`;if(button){button.disabled=false;button.textContent='Join this Hub';}}
 }
 async function finishReturn(){
   const params=new URLSearchParams(location.search),result=params.get('membership');if(!result)return;
   const{origin,nodeId}=selected(),help=document.getElementById('cw-host-node-help');
-  if(result==='cancelled'){if(help)help.textContent='Membership checkout was canceled. No paid seat was activated.';apply();return;}
+  if(result==='cancelled'){if(help)help.textContent='Membership checkout was canceled. No Patron slot was activated.';apply();return;}
   if(!origin||!nodeId||!globalThis.CivweaveHostNodeSessionV1?.join)return;
   if(help)help.textContent='Membership confirmed. Finishing your Hub login…';let lastError=null;
   for(let attempt=0;attempt<8;attempt+=1){try{await globalThis.CivweaveHostNodeSessionV1.join(origin,{nodeId,createCredential:false});if(help)help.textContent='Membership active. You are logged in to this Hub.';document.getElementById('cw-host-node-refresh')?.click();apply();return;}catch(error){lastError=error;await new Promise(resolve=>setTimeout(resolve,800+attempt*350));}}
