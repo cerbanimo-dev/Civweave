@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>Download Lud Mode · Civweave</title>
+<style>
+:root{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;color-scheme:dark;--bg:#111;--panel:#171717;--line:#555;--text:#f3f3e7;--muted:#b9b9ae;--accent:#e3d37b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);min-height:100vh}button{font:inherit;cursor:pointer}a{color:var(--accent)}main{width:min(780px,100%);margin:auto;padding:42px 18px 64px}header{padding-bottom:22px;border-bottom:1px solid var(--line)}small,.eyebrow{display:block;color:var(--accent);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.72rem}h1{font-size:clamp(2.4rem,10vw,5rem);margin:.25rem 0 .7rem;line-height:1}p{line-height:1.65}.lede{color:var(--muted);max-width:700px}.panel{margin-top:22px;border:1px solid var(--line);background:var(--panel);padding:18px}.panel h2{margin:.25rem 0 .6rem}.rules{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.rules div{border:1px solid #444;padding:12px}.rules strong{display:block;margin-bottom:5px}.progress{margin-top:18px}.progress-head,.progress-meta{display:flex;justify-content:space-between;gap:12px}.track{height:10px;border:1px solid #777;background:#0a0a0a;margin:9px 0}.fill{display:block;height:100%;width:0;background:#d7c46d;transition:width .2s ease}.progress-meta{color:var(--muted);font-size:.82rem}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.actions button,.actions a.button{display:inline-block;border:1px solid #8c8350;background:#252313;color:#fff6be;padding:10px 14px;font-weight:800;text-decoration:none}.actions button:disabled{opacity:.55;cursor:not-allowed}.note{color:var(--muted);font-size:.88rem;margin-top:14px}.footer{border-top:1px solid var(--line);margin-top:24px;padding-top:18px;color:var(--muted)}@media(max-width:620px){.rules{grid-template-columns:1fr}.progress-head,.progress-meta{align-items:flex-start;flex-direction:column}}
+</style>
+<script src="/app/lud-mode-v1.js"></script>
+</head>
+<body>
+<main>
+<header><small>Civweave · alternate operating lane</small><h1>Lud Mode</h1><p class="lede">A deliberately plain Civweave package for people who want the system without AI generation. This download page contains no generated visual assets. There are no illustrations, mascots, model-made backgrounds, image assets, or decorative media here.</p></header>
+<section class="panel"><span class="eyebrow">What it contains</span><h2>Human-operated Civweave</h2><div class="rules"><div><strong>Manual creation</strong><span>Write Quests, learning programs, tasks, resource manifests, and skill manifests yourself.</span></div><div><strong>Human validation</strong><span>Review evidence manually and use the existing signed validator reward rules.</span></div><div><strong>Human-only discovery</strong><span>Lud Mode admits only content carrying explicit human-authored provenance.</span></div><div><strong>No AI payload</strong><span>No model weights, model runtimes, guide generation, browser agents, or AI settings are in the package.</span></div></div></section>
+<section class="panel"><span class="eyebrow">Offline package</span><h2>Download Lud Mode</h2><p>Only an explicit allowlist of human-operated runtime files is downloaded. Unknown future dependencies do not get pulled in automatically.</p><div class="progress" aria-live="polite"><div class="progress-head"><span>Package state</span><strong id="lud-package-state">not downloaded</strong></div><div id="lud-progress-track" class="track" role="progressbar" aria-label="Lud Mode download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="lud-progress-fill" class="fill"></span></div><div class="progress-meta"><span id="lud-package-assets">explicit human-operated allowlist</span><strong id="lud-progress-percent">0%</strong></div></div><div class="actions"><button id="download-lud-mode" type="button">Download Lud Mode</button><a id="open-lud-mode" class="button" href="/app/lud/campus.html" hidden>Open Lud Mode</a></div><p id="lud-help" class="note" role="status">Nothing large or model-related downloads unless you leave Lud Mode and choose the standard Civweave paths yourself.</p></section>
+<p class="footer"><a href="/app/">Back to the standard Civweave installer</a></p>
+</main>
+<script src="/app/lud-installer-v1.js"></script>
+</body>
+</html>
