@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.161-guide-chat-surface-v350';
+const VERSION='1.0.162-guide-chat-surface-v350-avatar-strip-idle-v1';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -28,6 +28,7 @@ let activeSystem='civweave';
 let openState=false;
 let minimized=false;
 let busy=false;
+let seen={};
 let root=null;
 let launcher=null;
 
@@ -59,18 +60,26 @@ function append(system,row){
   return writeThread(system,thread);
 }
 function state(){return Object.freeze({version:VERSION,pageSystem,activeWindow:activeSystem,activeSystem,open:openState,minimized,busy,canonicalOwner:true,presentation:'single-current-chat-surface'})}
-function saveState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({...state(),updatedAt:now()}))}catch{}}
+function saveState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({...state(),seen:{...seen},updatedAt:now()}))}catch{}}
 function restoreState(){
   let value={};try{value=parse(localStorage.getItem(STATE_KEY),{})}catch{}
-  if(!Object.keys(value).length){try{const old=parse(localStorage.getItem(RETIRED_STATE_KEY),{});value={activeSystem:old.activeWindow,open:false,minimized:false};localStorage.removeItem(RETIRED_STATE_KEY)}catch{}}
+  if(!Object.keys(value).length){try{const old=parse(localStorage.getItem(RETIRED_STATE_KEY),{});value={activeSystem:old.activeWindow,seen:old.seen||{},open:false,minimized:false};localStorage.removeItem(RETIRED_STATE_KEY)}catch{}}
   activeSystem=SYSTEMS.includes(value.activeSystem)?value.activeSystem:pageSystem;
+  seen=value.seen&&typeof value.seen==='object'?{...value.seen}:{};
   openState=false;minimized=false;
+}
+function markSeen(system){if(!SYSTEMS.includes(system))return;const thread=readThread(system);seen[system]=thread.updatedAt||now();saveState()}
+function hasUnread(system){
+  if(!SYSTEMS.includes(system)||(openState&&activeSystem===system))return false;
+  const thread=readThread(system),lastSeen=clean(seen[system],80);
+  return Boolean(Number(thread.unread||0)>0||(thread.updatedAt&&(!lastSeen||thread.updatedAt>lastSeen)));
 }
 function emitState(){
   const detail=state();
   try{dispatchEvent(new CustomEvent('civweave:guide-chat-state',{detail}))}catch{}
   try{dispatchEvent(new CustomEvent('civweave:guide-workspace-state',{detail}))}catch{}
 }
+function emitOpened(){try{dispatchEvent(new CustomEvent('civweave:guide-chat-opened',{detail:state()}))}catch{}}
 function guide(system=activeSystem){return GUIDE[system]||GUIDE.civweave}
 
 function installStyle(){
@@ -78,15 +87,24 @@ function installStyle(){
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
 #${LAUNCHER_ID}{position:fixed;z-index:2147483611;right:max(12px,env(safe-area-inset-right));bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px);width:60px;height:60px;padding:0;border:1px solid color-mix(in srgb,var(--guide-accent,#d8dde7) 64%,transparent);border-radius:50%;overflow:hidden;background:#07111f;box-shadow:0 10px 30px #0009,0 0 20px color-mix(in srgb,var(--guide-accent,#d8dde7) 34%,transparent);cursor:pointer;appearance:none;-webkit-appearance:none}
 #${LAUNCHER_ID} img{display:block;width:100%;height:100%;object-fit:cover}
-#${ROOT_ID}{--guide-accent:#d8dde7;--guide-panel:#111827;position:fixed;z-index:2147483612;right:max(12px,env(safe-area-inset-right));bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px);width:min(520px,calc(100vw - 24px));height:min(72dvh,720px);display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;overflow:hidden;border:1px solid color-mix(in srgb,var(--guide-accent) 46%,transparent);border-radius:20px;background:var(--guide-panel);color:#f8fbff;box-shadow:0 24px 80px #000b;font:15px/1.45 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;isolation:isolate;contain:layout paint style}
+#${ROOT_ID}{--guide-accent:#d8dde7;--guide-panel:#111827;position:fixed;z-index:2147483612;right:max(12px,env(safe-area-inset-right));bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px);width:min(520px,calc(100vw - 24px));height:min(72dvh,720px);display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto;overflow:hidden;border:1px solid color-mix(in srgb,var(--guide-accent) 46%,transparent);border-radius:20px;background:var(--guide-panel);color:#f8fbff;box-shadow:0 24px 80px #000b;font:15px/1.45 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;isolation:isolate;contain:layout paint style}
 #${ROOT_ID}[hidden]{display:none!important}#${ROOT_ID} *{box-sizing:border-box}
-#${ROOT_ID}>header{display:grid;grid-template-columns:48px minmax(0,1fr) auto 40px;align-items:center;gap:9px;padding:10px 11px calc(10px + env(safe-area-inset-top));border-bottom:1px solid color-mix(in srgb,var(--guide-accent) 34%,transparent);background:color-mix(in srgb,var(--guide-panel) 88%,#fff 4%)}
+#${ROOT_ID}>header{display:grid;grid-template-columns:48px minmax(0,1fr) 40px;align-items:center;gap:9px;padding:10px 11px calc(10px + env(safe-area-inset-top));border-bottom:1px solid color-mix(in srgb,var(--guide-accent) 34%,transparent);background:color-mix(in srgb,var(--guide-panel) 88%,#fff 4%)}
 #${ROOT_ID}>header img{width:48px;height:48px;border:2px solid var(--guide-accent);border-radius:14px;object-fit:cover}#${ROOT_ID}>header div{min-width:0}#${ROOT_ID}>header strong,#${ROOT_ID}>header span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${ROOT_ID}>header strong{font-size:1rem}#${ROOT_ID}>header span{margin-top:2px;color:#b9c6d8;font-size:.72rem}
-#${ROOT_ID} [data-guide-select]{max-width:142px;min-height:38px;border:1px solid color-mix(in srgb,var(--guide-accent) 40%,transparent);border-radius:10px;padding:0 8px;background:#09121f;color:#fff;font:800 12px/1 system-ui}#${ROOT_ID} [data-close]{width:40px;height:40px;border:1px solid color-mix(in srgb,var(--guide-accent) 40%,transparent);border-radius:10px;background:#ffffff0c;color:#fff;font-size:20px;font-weight:900}
+#${ROOT_ID} [data-close]{width:40px;height:40px;border:1px solid color-mix(in srgb,var(--guide-accent) 40%,transparent);border-radius:10px;background:#ffffff0c;color:#fff;font-size:20px;font-weight:900}
+#${ROOT_ID} .cw242-window-switcher{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 9px 9px;border-bottom:1px solid #ffffff18;background:#0003}
+#${ROOT_ID} .cw242-window{position:relative;min-width:0;display:grid;justify-items:center;gap:3px;padding:5px 2px;border:1px solid transparent;border-radius:12px;background:transparent;color:#aebbc9;cursor:pointer}
+#${ROOT_ID} .cw242-window img{width:52px;height:52px;border-radius:14px;object-fit:cover;border:2px solid var(--window-accent);filter:saturate(.72) brightness(.8);box-shadow:0 3px 12px #0007}
+#${ROOT_ID} .cw242-window span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;font-weight:850}
+#${ROOT_ID} .cw242-window[aria-pressed="true"]{border-color:color-mix(in srgb,var(--window-accent) 58%,transparent);background:color-mix(in srgb,var(--window-accent) 12%,transparent);color:#fff}
+#${ROOT_ID} .cw242-window[aria-pressed="true"] img{filter:none;box-shadow:0 0 16px color-mix(in srgb,var(--window-accent) 58%,transparent),0 3px 12px #0009}
+#${ROOT_ID} .cw242-window[data-here="true"]::before{content:"";position:absolute;left:6px;top:6px;width:7px;height:7px;border-radius:50%;background:var(--window-accent);box-shadow:0 0 8px var(--window-accent)}
+#${ROOT_ID} .cw242-unread{position:absolute;right:7px;top:6px;width:10px;height:10px;border:2px solid #08111d;border-radius:50%;background:var(--window-accent);box-shadow:0 0 9px var(--window-accent)}#${ROOT_ID} .cw242-unread[hidden]{display:none!important}
 #${ROOT_ID} .cw350-context{padding:7px 11px;border-bottom:1px solid #ffffff12;color:#9fb0c3;font-size:11px;background:#0002}#${ROOT_ID} [data-log]{min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}#${ROOT_ID} [data-log]:empty::before{content:'Start a conversation';margin:auto;color:#71839a;font-weight:750}
 #${ROOT_ID} article{display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;align-items:start}#${ROOT_ID} article.is-user{display:flex;justify-content:flex-end;padding-left:42px}#${ROOT_ID} article>img{width:32px;height:32px;border:1px solid var(--guide-accent);border-radius:10px;object-fit:cover}#${ROOT_ID} .cw350-bubble{max-width:88%;padding:9px 11px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff0b;white-space:pre-wrap;overflow-wrap:anywhere}#${ROOT_ID} .is-user .cw350-bubble{background:color-mix(in srgb,var(--guide-accent) 16%,#ffffff08);border-color:color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} .cw350-meta{margin-top:5px;color:#8394aa;font-size:10px}
-#${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit}#${ROOT_ID} [data-send]{min-width:76px;border:1px solid var(--guide-accent);border-radius:12px;padding:0 14px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} button,#${ROOT_ID} select{cursor:pointer}
-@media(max-width:720px){#${ROOT_ID}{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:100dvh;border:0;border-radius:0;grid-template-rows:auto auto minmax(0,1fr) auto}#${ROOT_ID}>header{grid-template-columns:44px minmax(0,1fr) 112px 40px;padding-top:calc(7px + env(safe-area-inset-top))}#${ROOT_ID}>header img{width:44px;height:44px}#${ROOT_ID} [data-guide-select]{width:112px}#${LAUNCHER_ID}{width:56px;height:56px}}
+#${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit}#${ROOT_ID} [data-send]{min-width:76px;border:1px solid var(--guide-accent);border-radius:12px;padding:0 14px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} button{cursor:pointer}
+@media(max-width:720px){#${ROOT_ID}{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:100dvh;border:0;border-radius:0;grid-template-rows:auto auto auto minmax(0,1fr) auto}#${ROOT_ID}>header{grid-template-columns:44px minmax(0,1fr) 40px;padding-top:calc(7px + env(safe-area-inset-top))}#${ROOT_ID}>header img{width:44px;height:44px}#${ROOT_ID} .cw242-window-switcher{gap:4px;padding:7px 5px 8px}#${ROOT_ID} .cw242-window img{width:48px;height:48px;border-radius:12px}#${LAUNCHER_ID}{width:56px;height:56px}}
+@media(max-width:390px){#${ROOT_ID} .cw242-window-switcher{gap:2px;padding-left:3px;padding-right:3px}#${ROOT_ID} .cw242-window img{width:44px;height:44px}}
 `;
   document.head.append(style);
 }
@@ -98,29 +116,38 @@ function ensureLauncher(){
   if(!launcher.isConnected)document.body.append(launcher);
   syncChrome();return launcher;
 }
+function switcherMarkup(){return SYSTEMS.map(system=>{const item=GUIDE[system];return`<button class="cw242-window" type="button" data-cw242-window="${system}" style="--window-accent:${item.accent}" aria-label="${esc(item.name)} · ${esc(item.label)}" aria-pressed="false"><img src="${esc(item.avatar)}" alt="${esc(item.name)}"><span>${esc(item.name)}</span><i class="cw242-unread" data-unread hidden aria-hidden="true"></i></button>`}).join('')}
 function ensureRoot(){
   if(root?.isConnected)return root;
   root=document.getElementById(ROOT_ID)||document.createElement('section');root.id=ROOT_ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Civweave guide chat');
-  root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><select data-guide-select aria-label="Choose guide">${SYSTEMS.map(system=>`<option value="${system}">${GUIDE[system].name}</option>`).join('')}</select><button data-close type="button" aria-label="Close chat">×</button></header><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-send type="submit">Send</button></form>`;
+  root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><button data-close type="button" aria-label="Close chat">×</button></header><nav class="cw242-window-switcher" aria-label="Guide chats">${switcherMarkup()}</nav><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-send type="submit">Send</button></form>`;
   root.querySelector('[data-close]').addEventListener('click',close);
-  root.querySelector('[data-guide-select]').addEventListener('change',event=>switchGuide(event.target.value,{open:true,focus:true}));
+  root.querySelector('.cw242-window-switcher').addEventListener('click',event=>{const button=event.target.closest?.('[data-cw242-window]');if(button)switchGuide(button.dataset.cw242Window,{open:true,focus:true})});
   root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitActive(text)});
   root.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close()}});
   if(!root.isConnected)document.body.append(root);
   syncChrome();render();return root;
+}
+function syncSwitcher(){
+  if(!root)return;
+  root.querySelectorAll('[data-cw242-window]').forEach(button=>{
+    const system=button.dataset.cw242Window,current=system===activeSystem;
+    button.setAttribute('aria-pressed',current?'true':'false');button.dataset.here=system===pageSystem?'true':'false';
+    const unread=button.querySelector('[data-unread]');if(unread)unread.hidden=!hasUnread(system);
+  });
 }
 function syncChrome(){
   const current=guide(activeSystem),page=guide(pageSystem);
   document.documentElement.style.setProperty('--guide-accent',current.accent);
   if(launcher){launcher.style.setProperty('--guide-accent',page.accent);const image=launcher.querySelector('img');if(image){image.src=page.avatar;image.alt=page.name}}
   if(!root)return;
-  root.style.setProperty('--guide-accent',current.accent);root.style.setProperty('--guide-panel',current.panel);root.dataset.guide=activeSystem;
+  root.style.setProperty('--guide-accent',current.accent);root.style.setProperty('--guide-panel',current.panel);root.dataset.guide=activeSystem;root.dataset.pageSystem=pageSystem;
   const avatar=root.querySelector('[data-guide-avatar]');if(avatar){avatar.src=current.avatar;avatar.alt=current.name}
   const name=root.querySelector('[data-guide-name]');if(name)name.textContent=current.name;
   const role=root.querySelector('[data-guide-role]');if(role)role.textContent=current.role;
-  const select=root.querySelector('[data-guide-select]');if(select)select.value=activeSystem;
   const input=root.querySelector('textarea');if(input)input.placeholder=current.placeholder;
   const context=root.querySelector('[data-context]');if(context)context.textContent=activeSystem===pageSystem?current.label:`${current.label} conversation · opened from ${guide(pageSystem).label}`;
+  syncSwitcher();
 }
 function render(){
   if(!root)return false;syncChrome();const log=root.querySelector('[data-log]');if(!log)return false;
@@ -130,6 +157,7 @@ function render(){
     if(user)return`<article class="is-user"><div class="cw350-bubble">${esc(row.text||'')}</div></article>`;
     return`<article><img src="${esc(who.avatar)}" alt="${esc(who.name)}"><div><div class="cw350-bubble">${esc(row.text||'')}</div>${meta?`<div class="cw350-meta">${esc(meta)}</div>`:''}</div></article>`;
   }).join('');
+  if(openState)markSeen(activeSystem);syncSwitcher();
   requestAnimationFrame(()=>{try{log.scrollTop=log.scrollHeight}catch{}});
   globalThis.CivweaveSavedChatUIV295?.render?.(activeSystem);
   return true;
@@ -167,17 +195,31 @@ async function submitActive(text){
   }finally{busy=false;if(button)button.disabled=false;render();emitState()}
   return true;
 }
-function switchGuide(system,options={}){if(!SYSTEMS.includes(system))return false;activeSystem=system;ensureRoot();syncChrome();render();if(options.open!==false){openState=true;root.hidden=false}if(options.focus)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));saveState();emitState();return true}
-function open(options={}){const target=SYSTEMS.includes(options.guide)?options.guide:activeSystem;ensureRoot();activeSystem=target;openState=true;minimized=false;root.hidden=false;if(options.prefill){const input=root.querySelector('textarea');if(input)input.value=clean(options.prefill)}syncChrome();render();if(options.focus!==false)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));saveState();emitState();return true}
-function close(){if(!root)return false;openState=false;minimized=false;root.hidden=true;saveState();emitState();return true}
+function switchGuide(system,options={}){
+  if(!SYSTEMS.includes(system))return false;activeSystem=system;
+  const shouldOpen=options.open===true||(openState&&options.open!==false);
+  if(shouldOpen){ensureRoot();openState=true;minimized=false;root.hidden=false;markSeen(system);syncChrome();render();if(options.focus)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));emitOpened()}
+  else if(root){syncChrome();render()}
+  saveState();emitState();return true;
+}
+function open(options={}){
+  const target=SYSTEMS.includes(options.guide)?options.guide:activeSystem;activeSystem=target;ensureRoot();openState=true;minimized=false;root.hidden=false;
+  if(options.prefill){const input=root.querySelector('textarea');if(input)input.value=clean(options.prefill)}markSeen(target);syncChrome();render();if(options.focus!==false)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));saveState();emitState();emitOpened();return true;
+}
+function close(){if(!root)return false;markSeen(activeSystem);openState=false;minimized=false;root.hidden=true;saveState();emitState();return true}
 function minimize(){return close()}
 function openWindow(system,options={}){return open({guide:system,...options})}
 function closeWorkspace(){return close()}
 function activeWindow(){return activeSystem}
 async function submitText(text,system=activeSystem){if(SYSTEMS.includes(system)&&system!==activeSystem)switchGuide(system,{open:false});return submitActive(text)}
-function start(){pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();ensureRoot();root.hidden=true;openState=false;syncChrome();render();document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}}
+function start(){
+  pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
+  addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
+  document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';
+  try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}
+}
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher,hasUnread});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
