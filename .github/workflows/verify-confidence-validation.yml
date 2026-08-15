@@ -1,0 +1,44 @@
+name: Verify confidence validation
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/shared/civweave-validation-confidence-v1.js'
+      - 'public/app/shared/civweave-reward-weave.js'
+      - 'public/app/services/living-school/shared/civweave-reward-weave.js'
+      - 'public/extensions/civweave-domain-bridge-v156.js'
+      - 'public/extensions/civweave-proof-progress-v158.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
+      - 'scripts/test-confidence-weighted-validation-v1.mjs'
+      - 'scripts/test-tiered-cerbanimo-rewards-v157.mjs'
+      - '.github/workflows/verify-confidence-validation.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax
+        run: |
+          node --check public/app/shared/civweave-validation-confidence-v1.js
+          node --check scripts/test-confidence-weighted-validation-v1.mjs
+          node --check scripts/test-tiered-cerbanimo-rewards-v157.mjs
+          node --check public/app/shared/civweave-reward-weave.js
+          node --check public/app/services/living-school/shared/civweave-reward-weave.js
+          node --check public/extensions/civweave-domain-bridge-v156.js
+          node --check public/extensions/civweave-proof-progress-v158.js
+          node --check public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs
+      - name: Behavior
+        run: |
+          node scripts/test-confidence-weighted-validation-v1.mjs
+          node scripts/test-tiered-cerbanimo-rewards-v157.mjs
+      - name: Integrated-source guard
+        run: |
+          grep -q 'thresholdMode: "weighted-confidence"' public/app/shared/civweave-reward-weave.js
+          grep -q "crossDevicePayout:true" public/extensions/civweave-domain-bridge-v156.js
+          grep -q 'validationConfidence:validation' public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs
+          ! grep -q 'accepted.length < packet.threshold' public/app/shared/civweave-reward-weave.js
