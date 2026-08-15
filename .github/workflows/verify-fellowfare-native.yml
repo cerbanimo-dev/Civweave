@@ -1,0 +1,81 @@
+name: Verify FellowFare
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/fellowfare-cabinet-v144.html'
+      - 'public/app/fellowfare-cabinet-v144.js'
+      - 'public/app/fellowfare-cabinet-v144.css'
+      - 'public/app/fellowfare-native-v208.css'
+      - 'public/app/fellowfare-native-scroll-v208.js'
+      - 'public/app/fellowfare-parent-theme-v205.css'
+      - 'public/app/fellowfare-mobile-flow-v205.js'
+      - 'public/app/services/fellowfare/**'
+      - 'public/app/civweave-basic-value-v1.js'
+      - 'public/app/civweave-basic-value-model-v1.js'
+      - 'public/app/civweave-live-data.js'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/service-worker-v156.js'
+      - 'public/service-worker-critical-v199.js'
+      - 'scripts/verify-fellowfare-native-v208.mjs'
+      - 'scripts/verify-fellowfare-active-v203.mjs'
+      - 'scripts/verify-fellowfare-marketplace-v2.mjs'
+      - 'scripts/verify-fellowfare-symbols-contrast-r2.mjs'
+      - 'scripts/verify-basic-value-guide-v1.mjs'
+      - '.github/workflows/verify-fellowfare-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/fellowfare-cabinet-v144.html'
+      - 'public/app/fellowfare-cabinet-v144.js'
+      - 'public/app/fellowfare-cabinet-v144.css'
+      - 'public/app/fellowfare-native-v208.css'
+      - 'public/app/fellowfare-native-scroll-v208.js'
+      - 'public/app/fellowfare-parent-theme-v205.css'
+      - 'public/app/fellowfare-mobile-flow-v205.js'
+      - 'public/app/services/fellowfare/**'
+      - 'public/app/civweave-basic-value-v1.js'
+      - 'public/app/civweave-basic-value-model-v1.js'
+      - 'public/app/civweave-live-data.js'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/service-worker-v156.js'
+      - 'public/service-worker-critical-v199.js'
+      - 'scripts/verify-fellowfare-native-v208.mjs'
+      - 'scripts/verify-fellowfare-active-v203.mjs'
+      - 'scripts/verify-fellowfare-marketplace-v2.mjs'
+      - 'scripts/verify-fellowfare-symbols-contrast-r2.mjs'
+      - 'scripts/verify-basic-value-guide-v1.mjs'
+      - '.github/workflows/verify-fellowfare-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-fellowfare-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check FellowFare verifier syntax
+        run: |
+          node --check public/app/fellowfare-native-scroll-v208.js
+          node --check scripts/verify-fellowfare-native-v208.mjs
+          node --check scripts/verify-fellowfare-active-v203.mjs
+          node --check scripts/verify-fellowfare-marketplace-v2.mjs
+          node --check scripts/verify-fellowfare-symbols-contrast-r2.mjs
+          node --check scripts/verify-basic-value-guide-v1.mjs
+      - name: Verify FellowFare contracts
+        run: |
+          node scripts/verify-fellowfare-native-v208.mjs
+          node scripts/verify-fellowfare-active-v203.mjs
+          node scripts/verify-fellowfare-marketplace-v2.mjs
+          node scripts/verify-fellowfare-symbols-contrast-r2.mjs
+          node scripts/verify-basic-value-guide-v1.mjs

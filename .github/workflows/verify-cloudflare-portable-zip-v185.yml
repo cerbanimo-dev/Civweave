@@ -3,8 +3,26 @@ name: Verify Cloudflare Portable ZIP
 on:
   push:
     branches: [main]
+    paths:
+      - 'public/**'
+      - 'scripts/portable-zip.mjs'
+      - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/verify-cloudflare-portable-zip-v185.mjs'
+      - 'wrangler.jsonc'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/verify-cloudflare-portable-zip-v185.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'public/**'
+      - 'scripts/portable-zip.mjs'
+      - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/verify-cloudflare-portable-zip-v185.mjs'
+      - 'wrangler.jsonc'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/verify-cloudflare-portable-zip-v185.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,9 +1,9 @@
-name: Verify Civweave Clean-Room Settings
+name: Verify Settings
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
   workflow_dispatch:
 
@@ -11,30 +11,61 @@ permissions:
   contents: read
 
 concurrency:
-  group: verify-v126-${{ github.event.pull_request.number || github.ref }}
+  group: verify-settings-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  local-first:
+  contracts:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Syntax check settings surfaces and verifiers
+        run: |
+          node --check public/app/experience-orchestrator-v232.js
+          node --check public/app/settings-parity-v295.js
+          node --check public/app/document-lifecycle-v221.js
+          node --check public/app/model-settings-controller-v173.js
+          node --check public/app/mobile-ai-hardening-v302.js
+          node --check public/app/local-ai/settings-panel-v267.js
+          node --check public/app/local-ai/runtime-v266.js
+          node --check public/app/local-chat-owner-v295.js
+          node --check public/app/install-boundary-v146.js
+          node --check scripts/verify-settings-freeze-recovery-v296.mjs
+          node --check scripts/verify-mobile-local-settings-v315.mjs
+          node --check scripts/verify-reload-settings-recovery-v294.mjs
+          node --check scripts/verify-chat-launch-readiness-v295.mjs
+          node --check scripts/verify-local-model-settings-mount-v273.mjs
+          node --check scripts/verify-living-school-settings-owner-v310.mjs
+          node --check scripts/verify-realm-local-ai-visible-v308.mjs
+          node --check scripts/verify-realm-local-ai-settings-v307.mjs
+          node --check scripts/verify-ai-settings-entry-runtime-spine-v269.mjs
+          node --check scripts/verify-working-campus-return-v425.mjs
+      - name: Verify settings contracts
+        run: |
+          node scripts/verify-settings-freeze-recovery-v296.mjs
+          node scripts/verify-mobile-local-settings-v315.mjs
+          node scripts/verify-living-school-settings-owner-v310.mjs
+          node scripts/verify-realm-local-ai-settings-v307.mjs
+          node scripts/verify-realm-local-ai-visible-v308.mjs
+          node scripts/verify-ai-settings-entry-runtime-spine-v269.mjs
+          node scripts/verify-working-campus-return-v425.mjs
+          node scripts/verify-reload-settings-recovery-v294.mjs
+          node scripts/verify-chat-launch-readiness-v295.mjs
+          node scripts/verify-local-model-settings-mount-v273.mjs
+
+  packaged-cleanroom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-      - name: Verify Jules evergreen control plane when present
-        run: |
-          if [ -f scripts/verify-jules-evergreen.mjs ]; then
-            node --check scripts/lib/jules-evergreen-core.mjs
-            node --check scripts/lib/jules-api-client.mjs
-            node --check scripts/lib/github-evergreen-client.mjs
-            node --check scripts/jules-evergreen-daemon.mjs
-            node --check scripts/verify-jules-evergreen.mjs
-            node --test scripts/test-jules-evergreen-core.mjs
-            node scripts/verify-jules-evergreen.mjs
-          fi
       - name: Install locked Render-equivalent production dependencies
         run: npm ci --omit=dev --no-audit --no-fund
       - name: Verify clean-room AI settings

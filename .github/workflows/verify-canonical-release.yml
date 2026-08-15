@@ -4,29 +4,54 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: verify-canonical-release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   canonical-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci --ignore-scripts
-      - run: node scripts/verify-root-hygiene.mjs
-      - run: node scripts/verify-cloudflare-deploy-discipline.mjs
-      - run: node scripts/verify-canonical-launch-release.mjs
-      - run: node scripts/verify-release-contract.mjs
-      - run: node scripts/verify-release-version-sync.mjs
-      - run: node scripts/verify-working-campus-return-v425.mjs
-      - run: npm run test:anarchadia-governance
-      - name: Assert verifiers did not self-heal the checkout
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Verify release discipline
+        run: npm run check:release-discipline
+      - name: Verify stale release identities
+        run: node scripts/verify-stale-release-identities.mjs
+      - name: Verify Cloudflare deploy discipline
+        run: node scripts/verify-cloudflare-deploy-discipline.mjs
+      - name: Verify release version sync
+        run: node scripts/verify-release-version-sync.mjs
+      - name: Verify pull request version policy
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          base_version="$(git show "origin/${{ github.base_ref }}:VERSION" | tr -d '[:space:]')"
+          proposed_version="$(tr -d '[:space:]' < VERSION)"
+          export CHANGED_FILES="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")"
+          node scripts/verify-version-policy.mjs "$base_version" "$proposed_version"
+      - name: Verify working campus return contract
+        run: node scripts/verify-working-campus-return-v425.mjs
+      - name: Test Anarchadia governance
+        run: npm run test:anarchadia-governance
+      - name: Verify generators leave the tree clean
         run: git diff --exit-code -- .
-      - run: node scripts/check-canonical-server-syntax.mjs
-      - run: npm audit --omit=dev --audit-level=high
+      - name: Check canonical server syntax
+        run: node scripts/check-canonical-server-syntax.mjs
+      - name: Audit production dependencies
+        run: npm run audit:production

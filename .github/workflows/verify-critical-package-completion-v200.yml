@@ -3,8 +3,26 @@ name: Verify Critical Package Completion
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'VERSION'
+      - 'package.json'
+      - 'public/install-v130.js'
+      - 'public/app/pwa-v130.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/service-worker*.js'
+      - 'scripts/verify-critical-package-completion-v200.mjs'
+      - '.github/workflows/verify-critical-package-completion-v200.yml'
   push:
     branches: [main]
+    paths:
+      - 'VERSION'
+      - 'package.json'
+      - 'public/install-v130.js'
+      - 'public/app/pwa-v130.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/service-worker*.js'
+      - 'scripts/verify-critical-package-completion-v200.mjs'
+      - '.github/workflows/verify-critical-package-completion-v200.yml'
   workflow_dispatch:
 
 permissions:

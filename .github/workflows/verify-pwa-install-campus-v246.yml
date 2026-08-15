@@ -2,15 +2,44 @@ name: Verify PWA Install + Campus Completion v246
 
 on:
   pull_request:
+    paths:
+      - 'public/app/pwa-install-prompt-v246.js'
+      - 'public/app/pwa-install-prompt-v247.js'
+      - 'public/install-v130.js'
+      - 'public/app/host-steward-reminder-v1.js'
+      - 'public/app/offline-campus-status-v210.js'
+      - 'public/app/required-campus-autostart-v1.js'
+      - 'public/service-worker-campus-completion-v246.js'
+      - 'scripts/verify-installer-front-door-v1.mjs'
+      - 'scripts/verify-pwa-install-campus-v246.mjs'
+      - 'scripts/verify-fresh-install-paths-v1.mjs'
+      - '.github/workflows/verify-pwa-install-campus-v246.yml'
   push:
     branches: [main]
+    paths:
+      - 'public/app/pwa-install-prompt-v246.js'
+      - 'public/app/pwa-install-prompt-v247.js'
+      - 'public/install-v130.js'
+      - 'public/app/host-steward-reminder-v1.js'
+      - 'public/app/offline-campus-status-v210.js'
+      - 'public/app/required-campus-autostart-v1.js'
+      - 'public/service-worker-campus-completion-v246.js'
+      - 'scripts/verify-installer-front-door-v1.mjs'
+      - 'scripts/verify-pwa-install-campus-v246.mjs'
+      - 'scripts/verify-fresh-install-paths-v1.mjs'
+      - '.github/workflows/verify-pwa-install-campus-v246.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - run: node --check public/app/pwa-install-prompt-v246.js

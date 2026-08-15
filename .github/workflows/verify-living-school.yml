@@ -1,0 +1,85 @@
+name: Verify Living School
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/cabinets/living-school/**'
+      - 'public/app/services/living-school/**'
+      - 'public/app/living-school-quiz-contract-guard-v263.mjs'
+      - 'public/app/living-school-cleanroom-actions-v243.mjs'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/service-worker-v156.js'
+      - 'public/app/pwa-v130.js'
+      - 'scripts/verify-living-school-boot-v195.mjs'
+      - 'scripts/verify-living-school-freeze-v196.mjs'
+      - 'scripts/verify-living-school-cleanroom-v218.mjs'
+      - 'scripts/verify-living-school-tap-integrity-v217.mjs'
+      - 'scripts/verify-living-school-quiz-contract-v263.mjs'
+      - '.github/workflows/verify-living-school.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/cabinets/living-school/**'
+      - 'public/app/services/living-school/**'
+      - 'public/app/living-school-quiz-contract-guard-v263.mjs'
+      - 'public/app/living-school-cleanroom-actions-v243.mjs'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/service-worker-v156.js'
+      - 'public/app/pwa-v130.js'
+      - 'scripts/verify-living-school-boot-v195.mjs'
+      - 'scripts/verify-living-school-freeze-v196.mjs'
+      - 'scripts/verify-living-school-cleanroom-v218.mjs'
+      - 'scripts/verify-living-school-tap-integrity-v217.mjs'
+      - 'scripts/verify-living-school-quiz-contract-v263.mjs'
+      - '.github/workflows/verify-living-school.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-living-school-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check Living School runtime syntax
+        run: |
+          node --check public/app/cabinets/living-school/living-school-bootstrap-v194.js
+          node --check public/app/cabinets/living-school/living-school-cabinet-v151.mjs
+          node --check public/app/cabinets/living-school/living-school-mutation-guard-v196.js
+          node --check public/app/cabinets/living-school/living-school-two-agent-relay-v165.js
+          node --check public/app/cabinets/living-school/living-school-paths-v213.js
+          node --check public/app/cabinets/living-school/living-school-interactions-v213.js
+          node --check public/app/cabinets/living-school/living-school-flat-loader-v213.js
+          node --check public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+          node --check public/app/services/living-school/modules/rubric-engine.mjs
+          node --check public/app/services/living-school/modules/project-gate.mjs
+          node --check public/app/services/living-school/modules/cerbanimo-bridge.mjs
+          node --check public/app/living-school-quiz-contract-guard-v263.mjs
+          node --check public/app/living-school-cleanroom-actions-v243.mjs
+          node --check public/app/themed-system-nav-v178.js
+          node --check public/service-worker-v156.js
+          node --check public/app/pwa-v130.js
+          node --check scripts/verify-living-school-boot-v195.mjs
+          node --check scripts/verify-living-school-freeze-v196.mjs
+          node --check scripts/verify-living-school-cleanroom-v218.mjs
+          node --check scripts/verify-living-school-tap-integrity-v217.mjs
+          node --check scripts/verify-living-school-quiz-contract-v263.mjs
+      - name: Verify Living School contracts
+        run: |
+          node scripts/verify-living-school-boot-v195.mjs
+          node scripts/verify-living-school-freeze-v196.mjs
+          node scripts/verify-living-school-cleanroom-v218.mjs
+          node scripts/verify-living-school-tap-integrity-v217.mjs
+          node scripts/verify-living-school-quiz-contract-v263.mjs

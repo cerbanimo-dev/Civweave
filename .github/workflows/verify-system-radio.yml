@@ -1,4 +1,4 @@
-name: Verify System Radio v233
+name: Verify System Radio
 
 on:
   pull_request:
@@ -17,12 +17,11 @@ on:
       - 'scripts/verify-living-school-radio-v252.mjs'
       - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - 'scripts/verify-radio-shell-guarantee-v305.mjs'
-      - '.github/workflows/verify-system-radio-v233.yml'
+      - '.github/workflows/verify-system-radio.yml'
       - 'VERSION'
       - 'package.json'
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'public/app/system-radio-agent-v233.js'
       - 'public/app/radio-track-suggestions-v240.js'
@@ -38,16 +37,21 @@ on:
       - 'scripts/verify-living-school-radio-v252.mjs'
       - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - 'scripts/verify-radio-shell-guarantee-v305.mjs'
-      - '.github/workflows/verify-system-radio-v233.yml'
+      - '.github/workflows/verify-system-radio.yml'
       - 'VERSION'
       - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Check runtime syntax
