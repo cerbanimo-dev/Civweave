@@ -1,0 +1,113 @@
+name: Regenerate Civweave icons once
+
+on:
+  push:
+    branches:
+      - fix/canonical-civweave-icons-day-night
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: ${{ !contains(github.event.head_commit.message, '[generated-icons]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/canonical-civweave-icons-day-night
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install image tooling
+        run: npm install --no-save sharp@0.35.3
+
+      - name: Regenerate icons from the preserved current logo
+        run: node scripts/generate-civweave-icons.mjs
+
+      - name: Remove old logo source and point browser chrome at the clock-aware logo
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          function replace(path, from, to) {
+            const before=fs.readFileSync(path,'utf8');
+            if(!before.includes(from)) throw new Error(`${path}: expected text not found: ${from}`);
+            fs.writeFileSync(path,before.replaceAll(from,to));
+          }
+
+          replace(
+            'public/app/working-campus-v156.js',
+            "icon.href='/app/logos/civweave-app-icon.png';",
+            "icon.type='image/jpeg';icon.href=syncBrandPresentation();"
+          );
+
+          replace(
+            'public/index.html',
+            '<link rel="icon" href="/app/logos/civweave-canonical.png" type="image/png">',
+            '<link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">'
+          );
+
+          for (const path of [
+            'public/app/index.html',
+            'public/host-setup.html',
+            'public/host-local-anchor.html',
+            'public/app/installed-entry-v146.html'
+          ]) {
+            if(!fs.existsSync(path)) continue;
+            let text=fs.readFileSync(path,'utf8');
+            text=text.replaceAll('/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-day-logo.jpg');
+            text=text.replaceAll('href="/app/logos/civweave-day-logo.jpg" type="image/png"','href="/app/logos/civweave-day-logo.jpg" type="image/jpeg"');
+            fs.writeFileSync(path,text);
+          }
+
+          {
+            const path='public/app/civweave-brand.js';
+            let text=fs.readFileSync(path,'utf8');
+            text=text.replace("const VERSION='1.0.29-brand-source-truth-v1';","const VERSION='1.0.30-current-logo-clock-v1';");
+            text=text.replace("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';\nconst FULL_LOGO=CANONICAL_LOGO;\nconst SYMBOL_LOGO=CANONICAL_LOGO;", "const DAY_LOGO='/app/logos/civweave-day-logo.jpg';\nconst NIGHT_LOGO='/app/logos/civweave-night-logo.jpg';\nconst CANONICAL_LOGO=DAY_LOGO;\nconst FULL_LOGO=CANONICAL_LOGO;\nconst SYMBOL_LOGO=CANONICAL_LOGO;");
+            const anchor='function apply(){\n  document.documentElement.dataset.publicBrand=\'civweave\';';
+            if(!text.includes(anchor)) throw new Error('civweave-brand.js apply anchor not found');
+            const helper=`function logoForLocalClock(date=new Date()){\n  const hour=Number(date?.getHours?.());\n  return Number.isFinite(hour)&&hour>=6&&hour<18?DAY_LOGO:NIGHT_LOGO;\n}\n\nfunction syncBrowserIcon(){\n  let icon=document.querySelector('link[rel~="icon"]');\n  if(!icon){icon=document.createElement('link');icon.rel='icon';document.head?.append(icon)}\n  if(!icon)return false;\n  icon.type='image/jpeg';\n  icon.href=logoForLocalClock();\n  icon.dataset.civweaveClockLogo=icon.href.includes('night')?'night':'day';\n  return true;\n}\n\n`;
+            text=text.replace(anchor,helper+"function apply(){\n  document.documentElement.dataset.publicBrand='civweave';\n  syncBrowserIcon();");
+            text=text.replace('  installInstallerDeliveryBridge\n});','  installInstallerDeliveryBridge,\n  logoForLocalClock,\n  syncBrowserIcon,\n  dayLogo:DAY_LOGO,\n  nightLogo:NIGHT_LOGO\n});');
+            fs.writeFileSync(path,text);
+          }
+
+          fs.rmSync('public/app/logos/civweave-canonical.png',{force:true});
+          NODE
+
+      - name: Refresh asset catalog after deleting the retired logo
+        run: node scripts/generate-asset-lockboard-catalog-v239.mjs
+
+      - name: Verify icon outputs and JavaScript syntax
+        run: |
+          node --check scripts/generate-civweave-icons.mjs
+          node --check public/app/working-campus-v156.js
+          node --check public/app/civweave-brand.js
+          node --input-type=module <<'NODE'
+          import sharp from 'sharp';
+          const checks=[
+            ['public/app/logos/civweave-pwa-192-v247.png',192],
+            ['public/app/logos/civweave-pwa-512-v247.png',512],
+            ['public/app/logos/civweave-app-icon.png',1024]
+          ];
+          for(const [path,size] of checks){
+            const meta=await sharp(path).metadata();
+            if(meta.width!==size||meta.height!==size)throw new Error(`${path}: expected ${size}x${size}, got ${meta.width}x${meta.height}`);
+          }
+          NODE
+
+      - name: Commit generated icon migration
+        run: |
+          git checkout -- package.json package-lock.json || true
+          rm -f .github/workflows/regenerate-civweave-icons-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Use current Civweave logo for web and PWA icons [generated-icons]"
+          git push origin HEAD:fix/canonical-civweave-icons-day-night
