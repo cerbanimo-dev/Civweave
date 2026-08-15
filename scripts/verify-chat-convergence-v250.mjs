@@ -16,7 +16,7 @@ const retiredPaths=[
   'public/app/persistent-guide-viewport-v216.js',
   'public/app/chat-single-owner-v245.js'
 ];
-const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,routesSource,navSource,boundary,workspace,sharedLoader,sharedCore,guideStream,realmHtml,familyLoader,platformStability,workingPart5,workerRepair,workerEntry,releaseSync,coherenceSync,release,pkgText]=await Promise.all([
+const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,routesSource,navSource,boundary,coreRuntime,workspace,sharedLoader,sharedCore,guideStream,realmHtml,familyLoader,platformStability,workingPart5,workerRepair,workerEntry,releaseSync,coherenceSync,release,pkgText]=await Promise.all([
   read('public/app/manifest.webmanifest'),
   read('public/index.html'),
   read('public/app/installed-entry-v146.html'),
@@ -25,6 +25,7 @@ const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,rout
   read('public/app/system-routes-v227.js'),
   read('public/app/themed-system-nav-v178.js'),
   read('public/app/install-boundary-v146.js'),
+  read('public/app/core-interface-runtime-v1.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/shared-guide-surface-v236.js'),
   read('public/app/shared-guide-surface-v236-core-v244.js'),
@@ -41,7 +42,7 @@ const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,rout
   read('package.json')
 ]);
 const shared=`${sharedLoader}\n${sharedCore}`;
-for(const source of [installedEntry,routesSource,navSource,boundary,workspace,sharedLoader,sharedCore,guideStream,familyLoader,platformStability,workerRepair,workerEntry])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
+for(const source of [installedEntry,routesSource,navSource,boundary,coreRuntime,workspace,sharedLoader,sharedCore,guideStream,familyLoader,platformStability,workerRepair,workerEntry])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
@@ -57,8 +58,8 @@ check('installed entry resolves release with bounded no-store manifest fetch',in
 check('installed entry forces bounded worker update checks',installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'));
 check('installed entry activates waiting worker before route',installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='));
 
-const expStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),expEnd=boundary.indexOf('];',expStart),experience=boundary.slice(expStart,expEnd);
-check('canonical experience includes v242 workspace',experience.includes('GUIDE_WORKSPACE'));
+check('core interface runtime assembles v242 workspace',coreRuntime.includes("'/app/guide-workspace-v242.js'"));
+check('install boundary boots one core interface runtime',boundary.includes("const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js'")&&!boundary.includes('SYSTEM_EXPERIENCE_SCRIPTS')&&!boundary.includes('CANONICAL_SYSTEM_SCRIPTS'));
 check('install boundary has no v215/v216 runtime constants',!boundary.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!boundary.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'));
 check('install boundary cannot load retired guide runtimes',!boundary.includes('/app/persistent-guide-chat-v215.js')&&!boundary.includes('/app/persistent-guide-viewport-v216.js'));
 check('boundary reports v242 as the sole guide workspace',boundary.includes("guideWorkspaceSubmissionPipelines:1")&&boundary.includes("guideWorkspaceRevision:'v250-v242-canonical-owner'")&&boundary.includes('v250-single-v242-runtime'));
@@ -97,4 +98,4 @@ check('release version sync preserves updater-first clean manifest',releaseSync.
 check('release coherence generator preserves canonical chat, legacy worker rotation, and current avatar cache repair',coherenceSync.includes("const chatRevision='chat-convergence-v250'")&&coherenceSync.includes("const chatCachePurgeRevision='chat-convergence-v251-legacy-purge'")&&coherenceSync.includes("const activeChatRepairRevision='chat-avatar-visible-v346'")&&coherenceSync.includes('retiredChatPaths'));
 check('release coherence generator no longer patches deleted v215/v216 files',!coherenceSync.includes("await patch('public/app/persistent-guide-chat-v215.js'")&&!coherenceSync.includes("await patch('public/app/persistent-guide-viewport-v216.js'"));
 
-console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250-with-chat-avatar-visible-v346-main-thread-quiescence-v349-navigation-lifecycle-v424',checks:checks.length,installedLaunch:'updater-first-clean-url',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,retiredChatRuntimeCount:retiredPaths.length,embeddedSurfaceDelegates:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveRetirement:true,navigationLifecycle:'v424',mobileFreezeGuard:'v349-main-thread-quiescence'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250-with-chat-avatar-visible-v346-main-thread-quiescence-v349-navigation-lifecycle-v424',checks:checks.length,installedLaunch:'updater-first-clean-url',interfaceRuntime:'core-interface-runtime-v1',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,retiredChatRuntimeCount:retiredPaths.length,embeddedSurfaceDelegates:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveRetirement:true,navigationLifecycle:'v424',mobileFreezeGuard:'v349-main-thread-quiescence'},null,2));
