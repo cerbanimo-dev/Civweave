@@ -5,7 +5,8 @@ services:
     plan: free
     buildCommand: |
       npm install --omit=dev --no-audit --no-fund
-      npm run build:release
+      npm run onnxruntime:stage
+      npm run check
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
@@ -14,8 +15,6 @@ services:
         value: production
       - key: HUB_NAME
         value: Civweave Host Node
-      - key: CIVWEAVE_INSTALL_ORIGIN
-        value: https://civweave.cc
       - key: DATA_DIR
         value: ./data
       - key: MAX_ENVELOPES

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" data-civweave-screen="home">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<title>Civweave</title>
+<link rel="manifest" href="/app/manifest.webmanifest">
+<link rel="icon" href="/app/logos/civweave-app-icon.png">
+<link rel="stylesheet" href="/app/common.css">
+<link rel="stylesheet" href="/app/campus.css">
+<script src="/app/shared/civweave-model-runtime.js" defer></script>
+<script type="module" src="/app/customization-loader.js"></script>
+<script type="module" src="/app/semantic-router.js"></script>
+<script type="module" src="/app/campus.js"></script>
+</head>
+<body>
+<div class="cw-shell">
+<header class="cw-top">
+  <a class="cw-brand" href="/app/campus.html#home"><img id="campus-logo" src="/app/logos/civweave-day-logo.jpg" alt="Civweave"><span><small>LOCAL-FIRST CAMPUS</small><strong>Civweave</strong></span></a>
+  <div class="campus-mode" role="group" aria-label="Campus mode"><button type="button" data-mode="guided" aria-pressed="true">Guided rails</button><button type="button" data-mode="roam" aria-pressed="false">Free roam</button></div>
+  <nav class="cw-top-actions"><a href="/app/downloads.html">Downloads</a><a href="/app/settings.html">Settings</a></nav>
+</header>
+<main class="cw-main">
+  <section class="realm-grid" aria-label="Civweave systems">
+    <a class="realm living" href="/app/living-school.html"><img src="/app/assets/ai/moss.png" alt=""><span><small>Moss</small><strong>Living School</strong><em>Learn what the intention requires.</em></span></a>
+    <a class="realm cerbanimo" href="/app/cerbanimo.html"><img src="/app/assets/ai/kamiya.png" alt=""><span><small>Kamiya</small><strong>Cerbanimo</strong><em>Turn the route into skilled work.</em></span></a>
+    <a class="realm fellowfare" href="/app/fellowfare.html"><img src="/app/assets/ai/rook.png" alt=""><span><small>Rook</small><strong>FellowFare</strong><em>Find materials, services, and help.</em></span></a>
+    <a class="realm anarchadia" href="/app/anarchadia.html"><img src="/app/assets/ai/merlin.png" alt=""><span><small>Merlin</small><strong>Anarchadia</strong><em>Consent, governance, review, and customization.</em></span></a>
+  </section>
+  <section class="campus-main">
+    <aside class="cw-card guide-card"><header><img src="/app/assets/ai/weaveling.png" alt="Weaveling"><div><small class="cw-kicker">CENTRAL MIRROR</small><h1>Weaveling</h1><span class="cw-muted">Wish → weave → realms</span></div></header><div id="campus-chat-log" class="campus-chat-log" role="log" aria-live="polite"></div><form id="campus-chat-form" class="campus-chat-form"><label for="campus-chat-input">Message Weaveling</label><textarea id="campus-chat-input" rows="3" maxlength="8000" required placeholder="Tell Weaveling your wish or ask what to do next."></textarea><button class="cw-button primary" type="submit">Send</button><small id="campus-chat-status" class="cw-status">No generative model starts until you press Send. MiniLM may idle independently.</small></form><footer><a class="cw-button" href="/app/chat.html?guide=weaveling">Open full Weaveling chat</a></footer></aside>
+    <section class="cw-card workspace-card"><header class="workspace-head"><div><small class="cw-kicker" id="view-kicker">YOUR WEAVE</small><h2 id="view-title">Current intention</h2></div><span id="state-label" class="cw-status">Local draft</span></header><div id="workspace"></div></section>
+  </section>
+</main>
+<nav class="cw-nav" aria-label="Civweave views"><a href="#weave" data-view="weave">Weave</a><a href="#progress" data-view="progress">Progress</a><a href="#library" data-view="library">Library</a><a href="#home" data-view="home">Campus</a></nav>
+</div>
+</body>
+</html>

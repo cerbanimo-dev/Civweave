@@ -1,4 +1,0 @@
-:root{--screen-clip:inset(0 round var(--screen-radius));--screen-content-top:0%}
-.cabinet-screen{clip-path:var(--screen-clip);padding-top:var(--screen-content-top);transform:translateZ(0)}
-.cabinet-controls{inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;height:auto!important}
-.cabinet-controls button{left:var(--control-x)!important;top:var(--control-y)!important;width:var(--control-size)!important;transform:translate(-50%,-50%)}

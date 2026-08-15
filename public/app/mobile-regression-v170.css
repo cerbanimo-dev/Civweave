@@ -1,8 +1,0 @@
-/* Mobile regression safeguards loaded after all realm styles. */
-.cwf104-chat{font-size:0!important;line-height:0!important;overflow:hidden!important;position:relative!important}
-.cwf104-chat:before{content:"";position:absolute;inset:4px;background:url('/app/assets/ai/weaveling-compass.png') center/contain no-repeat;filter:drop-shadow(0 0 6px #8ee9ff99);pointer-events:none}
-.cwf104-chat>img{opacity:0}
-#gc153-launcher,.gc153-launcher,.cwf104-weaveling,[data-civweave-bottom-launcher],[data-weaveling-launcher]{display:none!important}
-#cwf104-head>[data-cw160-review],#cwf104-head>[data-cw160-theme]{display:none!important}
-.cw-ai-fallback-contract[data-cw170-local-boundary]{margin-top:10px;border-color:#79ead255;background:#79ead20b}
-@media(max-width:560px){.cwf104-chat,.cwf104-settings{min-width:34px!important;max-width:34px!important;width:34px!important;height:34px!important}.cwf104-head-state span{display:none!important}}

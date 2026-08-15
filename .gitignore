@@ -1,19 +1,8 @@
 node_modules/
-# Local source-model checkout. The app-owned runtime lives under public/app/models/.
-/all-MiniLM-L6-v2/
-public/app/vendor/transformers/
-public/app/models/all-minilm-l6-v2/config.json
-public/app/models/all-minilm-l6-v2/special_tokens_map.json
-public/app/models/all-minilm-l6-v2/tokenizer.json
-public/app/models/all-minilm-l6-v2/tokenizer_config.json
-public/app/models/all-minilm-l6-v2/vocab.txt
-public/app/models/all-minilm-l6-v2/onnx/
-# Generated from the four compressed parity-ledger source parts during release builds.
-/public/app/shared/civweave-parity-ledger.json
-data/*.json
-data/*.tmp
+data/
 .cloudflare-pages/
-.wrangler/
-.dev.vars
-.dev.vars.*
+.env
+.env.*
+!.env.example
+*.log
 .DS_Store
