@@ -12,6 +12,7 @@ const outputPath = resolve(publicRoot, 'app/asset-lockboard-catalog-v239.json');
 const IMAGE_EXTENSIONS = new Set(['.png','.jpg','.jpeg','.webp','.gif','.svg','.avif','.ico']);
 const SOURCE_EXTENSIONS = new Set(['.html','.htm','.css','.js','.mjs','.json','.txt','.md','.webmanifest']);
 const SKIP_PREFIXES = ['downloads/knowledge-schools/'];
+const SKIP_REFERENCE_PREFIXES = ['app/services/fellowfare/tests/'];
 const SKIP_FILES = new Set(['app/asset-lockboard-catalog-v239.json']);
 const RUNTIME_BASE_OVERRIDES = Object.freeze([
   Object.freeze({ prefix:'/app/services/anarchadia/src/', base:'/app/services/anarchadia/workbench.html' })
@@ -40,6 +41,11 @@ function skipped(absolute) {
   return SKIP_FILES.has(rel) || SKIP_PREFIXES.some(prefix => rel.startsWith(prefix));
 }
 
+function skippedReferenceSource(absolute) {
+  const rel = relPath(absolute);
+  return SKIP_REFERENCE_PREFIXES.some(prefix => rel.startsWith(prefix));
+}
+
 function runtimeBase(sourceWebPath) {
   return RUNTIME_BASE_OVERRIDES.find(rule => sourceWebPath.startsWith(rule.prefix))?.base || sourceWebPath;
 }
@@ -66,7 +72,7 @@ function slotId(sourcePath, line, column, raw) {
 }
 
 function scanReferences(absolute) {
-  if (skipped(absolute) || !SOURCE_EXTENSIONS.has(extname(absolute).toLowerCase())) return [];
+  if (skipped(absolute) || skippedReferenceSource(absolute) || !SOURCE_EXTENSIONS.has(extname(absolute).toLowerCase())) return [];
   const sourcePath = webPath(absolute);
   let text;
   try { text = readFileSync(absolute, 'utf8'); } catch { return []; }
