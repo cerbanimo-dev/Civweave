@@ -7,7 +7,7 @@ const GUIDE={
   civweave:{name:'Weaveling',role:'central mirror and orchestrator'},
   'living-school':{name:'Moss',role:'learning guide'},
   cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide'},
-  fellowfare:{name:'Rook',role:'quartermaster and exchange guide'},
+  fellowfare:{name:'Rook',role:'trade steward and exchange guide'},
   anarchadia:{name:'Merlin',role:'civic, feature-request, and automation guide'}
 };
 
