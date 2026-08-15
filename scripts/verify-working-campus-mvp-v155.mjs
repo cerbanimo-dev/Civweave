@@ -7,7 +7,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const parts=['public/app/working-campus-v156.part1.txt','public/app/working-campus-v156.part2.txt','public/app/working-campus-v156.part3.txt','public/app/working-campus-v156.part4.txt','public/app/working-campus-v156.part5.txt'];
-const [host,html,css,loader,entry,settings,routes,onboarding,onboardingCss,offlineManifest,serviceWorker,...sources]=await Promise.all([
+const [host,html,css,loader,entry,settings,routes,onboarding,onboardingCss,offlineManifest,serviceWorker,familyLoader,identityGuide,sharedGuide,...sources]=await Promise.all([
   read('public/app/fullscreen-family-v104.html'),
   read('public/app/working-campus-v156.html'),
   read('public/app/working-campus-v156.css'),
@@ -19,6 +19,9 @@ const [host,html,css,loader,entry,settings,routes,onboarding,onboardingCss,offli
   read('public/app/new-user-onboarding-v1.css'),
   read('public/app/offline-package-v208.json'),
   read('public/service-worker-core-v208.js'),
+  read('public/app/family-ai-loader-v105.js'),
+  read('public/app/guide-identity-integrity-v216.js'),
+  read('public/app/shared-guide-surface-v236-core-v244.js'),
   ...parts.map(read)
 ]);
 const source=sources.join(''),surface=`${html}\n${css}\n${source}`;
@@ -51,12 +54,17 @@ const stepSource=onboarding.slice(onboarding.indexOf('const STEPS='),onboarding.
 let prior=-1;
 for(const system of ["system:'civweave'","system:'living-school'","system:'cerbanimo'","system:'fellowfare'","system:'anarchadia'"]){const at=stepSource.indexOf(system);assert(at>prior,`Hero onboarding handoff order is wrong at ${system}.`);prior=at}
 assert(onboarding.includes("get('onboarding')")&&onboarding.includes("value==='replay'"),'Hero onboarding must support an explicit replay URL without making replay automatic.');
+assert(html.includes('data-cw-onboarding-replay')&&html.includes('>Tour</button>')&&onboarding.includes('function bindReplay()')&&onboarding.includes("button.addEventListener('click',()=>open({force:true}))"),'Skipped onboarding must remain deliberately replayable from Weaveling without re-enabling automatic nagging.');
 assert(onboarding.includes("record?.status==='completed'||record?.status==='skipped'"),'Hero onboarding must remember both completion and skip choices.');
 assert(onboarding.includes("hasRows('civweave.intentions.v127')")&&onboarding.includes("hasRows('civweave.cerbanimo.quest-queue.v1')"),'Hero onboarding must avoid auto-opening over established Quest activity.');
 assert(!onboarding.includes("document.createElement('script')")&&!onboarding.includes('MutationObserver')&&!onboarding.includes('setInterval(')&&!onboarding.includes('fetch('),'Hero onboarding must remain a static presentation owner and must not start models, inject runtimes, poll, or fetch its own dependencies.');
 assert(onboardingCss.includes('.cw-onboarding-rail')&&onboardingCss.includes('grid-template-columns:repeat(5'),'Hero onboarding must visibly preserve the five-guide left-to-right rail.');
 assert(offlineManifest.includes('"/app/working-campus-v156.html"'),'Offline campus must retain Working Campus as a seed for recursive onboarding dependency discovery.');
 assert(serviceWorker.includes('discoverReferences')&&serviceWorker.includes("'/app/'")&&serviceWorker.includes("'/extensions/'"),'Offline campus worker must continue recursively discovering same-origin Working Campus CSS/JS dependencies.');
+for(const [name,guideSource] of [['family loader',familyLoader],['identity boundary',identityGuide],['shared guide surface',sharedGuide]]){
+  assert(guideSource.includes("name:'Rook'")&&/role:'(?:Trade|trade) steward and exchange guide'/.test(guideSource),`${name} must describe Rook as the trade steward and exchange guide.`);
+  assert(!/Rook[^\n]{0,120}Quartermaster/i.test(guideSource),`${name} must reserve Quartermaster for Guild Stewards instead of Rook.`);
+}
 
 const expectedRoutes={
   civweave:'/app/working-campus-v156.html',
@@ -80,4 +88,7 @@ new vm.Script(loader,{filename:'working-campus-v156-loader.js'});
 new vm.Script(settings,{filename:'model-settings-controller-v173.js'});
 new vm.Script(routes,{filename:'system-routes-v227.js'});
 new vm.Script(onboarding,{filename:'new-user-onboarding-v1.js'});
-console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',onboarding:'optional Hero -> Weaveling -> Moss -> Kamiya -> Rook -> Merlin sprite-led tour',onboardingPolicy:'skippable, replayable, solo-valid, Party/Guild encouraged, no model startup',aiSettings:'gateway-activated deterministic-default clean-room controller with explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical with recursive onboarding JS/CSS discovery and lazy visual sprites'},null,2));
+new vm.Script(familyLoader,{filename:'family-ai-loader-v105.js'});
+new vm.Script(identityGuide,{filename:'guide-identity-integrity-v216.js'});
+new vm.Script(sharedGuide,{filename:'shared-guide-surface-v236-core-v244.js'});
+console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',onboarding:'optional Hero -> Weaveling -> Moss -> Kamiya -> Rook -> Merlin sprite-led tour',onboardingPolicy:'skippable, replayable from Weaveling, solo-valid, Party/Guild encouraged, no model startup',guideLore:'Rook is trade steward; Quartermaster is reserved for Guild Steward',aiSettings:'gateway-activated deterministic-default clean-room controller with explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical with recursive onboarding JS/CSS discovery and lazy visual sprites'},null,2));
