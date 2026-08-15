@@ -1,0 +1,92 @@
+name: One-shot optional offline failure reducer
+
+on:
+  push:
+    branches: [agent/offline-campus-structural-reference-fix]
+    paths:
+      - '.github/workflows/one-shot-optional-offline-failure-reducer.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  correct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/offline-campus-structural-reference-fix
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Make optional failures non-blocking at the worker reducer
+        shell: python
+        run: |
+          from pathlib import Path
+
+          worker=Path('public/service-worker-offline-v211-override.js')
+          source=worker.read_text()
+          old="""  const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete);
+          const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry));
+          const blockingFailed = [...requiredFailed, ...retryableOptionalFailed];
+          const obsoletePaths = new Set([
+            ...(Array.isArray(meta.skipped) ? meta.skipped.map(entry => String(entry?.pathname || '')) : []),
+            ...obsoleteFailed.map(entry => entry.pathname)
+          ].filter(Boolean));"""
+          new="""  const blockingFailed = requiredFailed;
+          const obsoletePaths = new Set([
+            ...(Array.isArray(meta.skipped) ? meta.skipped.map(entry => String(entry?.pathname || '')) : []),
+            ...optionalFailed.map(entry => entry.pathname)
+          ].filter(Boolean));"""
+          if old not in source:
+              raise SystemExit('migration optional-failure reducer no longer matches expected source')
+          source=source.replace(old,new,1)
+
+          old="""  const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete);
+          const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry));
+          const blockingFailed = [...requiredFailed, ...retryableOptionalFailed];
+          const obsoletePaths = new Set([
+            ...(meta.skipped || []).map(entry => String(entry?.pathname || '')),
+            ...obsoleteFailed.map(entry => entry.pathname)
+          ].filter(Boolean));"""
+          new="""  const blockingFailed = requiredFailed;
+          const obsoletePaths = new Set([
+            ...(meta.skipped || []).map(entry => String(entry?.pathname || '')),
+            ...optionalFailed.map(entry => entry.pathname)
+          ].filter(Boolean));"""
+          if old not in source:
+              raise SystemExit('retry metadata reducer no longer matches expected source')
+          source=source.replace(old,new,1)
+
+          old="if (!item.required && v211FailureIsObsolete(entry)) {"
+          new="if (!item.required) {"
+          if old not in source:
+              raise SystemExit('download catch optional-failure gate no longer matches expected source')
+          source=source.replace(old,new,1)
+          worker.write_text(source)
+
+          verifier=Path('scripts/verify-offline-campus-retry-loop-v211.mjs')
+          check=verifier.read_text()
+          check=check.replace("  'const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete)',\n",'')
+          check=check.replace("  'const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry))',\n",'')
+          check=check.replace("  'if (!item.required && v211FailureIsObsolete(entry)) {',", "  'const blockingFailed = requiredFailed',\n  '...optionalFailed.map(entry => entry.pathname)',\n  'if (!item.required) {',")
+          check=check.replace("assert(overrideSource.includes('} else {\\n          failed.set(item.pathname, entry);'),'Transient or required failures are no longer retained for retry.');", "assert(overrideSource.includes('} else {\\n          failed.set(item.pathname, entry);'),'Required seed failures are no longer retained for retry.');\nassert(!overrideSource.includes('retryableOptionalFailed'),'Optional failures must never remain in the blocking failed set.');")
+          check=check.replace("discoveredReferencePolicy:'structural-retirement-transient-retry'", "discoveredReferencePolicy:'optional-failures-nonblocking-required-seeds-retry'")
+          verifier.write_text(check)
+      - name: Verify reducer contracts
+        run: |
+          node --check public/service-worker-offline-v211-override.js
+          node --check scripts/verify-offline-campus-retry-loop-v211.mjs
+          node scripts/verify-offline-campus-retry-loop-v211.mjs
+          node --test scripts/test-node-ai-marketplace-surface-v1.mjs
+      - name: Commit root fix and remove this workflow
+        run: |
+          git restore public/app/shell-integrity-v281.json public/app/offline-package-v208.json 2>/dev/null || true
+          git rm .github/workflows/one-shot-optional-offline-failure-reducer.yml
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add public/service-worker-offline-v211-override.js scripts/verify-offline-campus-retry-loop-v211.mjs
+          git commit -m 'Keep optional offline failures out of campus readiness'
+          git push origin HEAD:agent/offline-campus-structural-reference-fix
