@@ -38,8 +38,8 @@ function renderGuide(){
  const rows=GUIDE()?.chartRows?.()||[];
  const html=`<section id="ffv2BasicValueGuide" class="ffv2-value-guide" aria-labelledby="ffv2ValueGuideTitle"><div class="ffv2-section-head"><div><p class="ffv2-eyebrow">SHARED BASIC VALUE GUIDE</p><h2 id="ffv2ValueGuideTitle">Starting wage first. Market second.</h2></div></div><p class="ffv2-value-intro">Civweave uses one starting Button wage for everybody: 5 🔘 per human-equivalent labor hour. Models estimate hours, not rank-based rates. Learning and education keep their separate, more granular Acorn price scale. Live comparables may inform an asking price, but they never rewrite the worker wage rate or imply a Button/Acorn exchange rate.</p><div class="ffv2-value-table" role="table" aria-label="Civweave basic value guide">${rows.map(row=>`<article role="row"><strong role="cell">${esc(row.label)}</strong><b role="cell">${esc(row.value)}</b><small role="cell">${esc(row.note)}</small></article>`).join('')}</div></section>`;
  priceDesk.insertAdjacentHTML('beforebegin',html);
- const heading=priceDesk.querySelector('h2');if(heading)heading.textContent='Compare non-wage market terms with the live market.';
- const copy=priceDesk.querySelector('#ffv2PriceAdvice')||priceDesk.querySelector('p:not(.ffv2-eyebrow)');if(copy&&/only calculate|invent a market/i.test(copy.textContent))copy.textContent='Live comparables are the market layer. They can inform an asking price but never change the shared labor wage, and Rook still will not invent market evidence.';
+ const heading=priceDesk.querySelector('h2'),headingText='Compare non-wage market terms with the live market.';if(heading&&heading.textContent!==headingText)heading.textContent=headingText;
+ const copy=priceDesk.querySelector('#ffv2PriceAdvice')||priceDesk.querySelector('p:not(.ffv2-eyebrow)'),copyText='Live comparables are the market layer. They can inform an asking price but never change the shared labor wage, and Rook still will not invent market evidence.';if(copy&&/only calculate|invent a market/i.test(copy.textContent)&&copy.textContent!==copyText)copy.textContent=copyText;
 }
 function ensureComposerLabor(){
  const form=document.querySelector('#ffv2ComposerForm');if(!form||form.querySelector('[name="laborWorthHours"]'))return;
@@ -55,7 +55,9 @@ function updateComposer(form){
  if(!form)return;const field=form.elements.laborWorthHours;if(!field)return;
  if(!num(field.value)){const hours=draftHours(form);if(hours>0)field.value=String(hours)}
  const kind=clean(form.elements.kind?.value,40),hours=Math.max(0,num(field.value));
- const box=form.querySelector('#ffv2ValueComposerBaseline');if(box)box.innerHTML=`<strong>Shared wage/value:</strong> ${esc(baselineText(kind,{hours,recommendedAcorns:candidate(clean(form.elements.draftId?.value,220))?.curriculumAcorns}))}<small>${hours?'Automation speed, title, seniority, prestige, and bargaining power do not alter the 5 🔘/h labor wage.':'Cerbanimo/Living School model-generated tasks carry the hours estimate automatically; you can also enter or revise it here.'}</small>`;
+ const box=form.querySelector('#ffv2ValueComposerBaseline');if(!box)return;
+ const markup=`<strong>Shared wage/value:</strong> ${esc(baselineText(kind,{hours,recommendedAcorns:candidate(clean(form.elements.draftId?.value,220))?.curriculumAcorns}))}<small>${hours?'Automation speed, title, seniority, prestige, and bargaining power do not alter the 5 🔘/h labor wage.':'Cerbanimo/Living School model-generated tasks carry the hours estimate automatically; you can also enter or revise it here.'}</small>`;
+ if(box.innerHTML!==markup)box.innerHTML=markup;
 }
 function applyBaseline(form){
  const kind=clean(form.elements.kind?.value,40),hours=Math.max(0,num(form.elements.laborWorthHours?.value)),raw=candidate(clean(form.elements.draftId?.value,220)),b=baseline(kind,{hours,recommendedAcorns:raw?.curriculumAcorns||raw?.valuation?.curriculumAcorns});
@@ -83,7 +85,7 @@ function savePublishedValuation(){
  const matches=!pendingValuation.title||clean(listing.title,180)===pendingValuation.title;if(!matches)return;
  const b=baseline(listing.kind,{hours:pendingValuation.laborWorthHours,recommendedAcorns:pendingValuation.curriculumAcorns});listing.valuation={schema:'civweave.basic-value-estimate.v1',laborWorthHours:pendingValuation.laborWorthHours||0,curriculumAcorns:pendingValuation.curriculumAcorns||0,baseline:b,source:pendingValuation.source||'composer',updatedAt:new Date().toISOString()};market.updatedAt=new Date().toISOString();const serialized=JSON.stringify(market);localStorage.setItem(MARKET_KEY,serialized);notifyMarketplaceStorage(serialized);pendingValuation=null;requestAnimationFrame(()=>globalThis.CivweaveFellowFareMarketplaceV2?.render?.(currentRoute()));
 }
-function enhance(){if(enhancing)return;enhancing=true;requestAnimationFrame(()=>{try{renderGuide();ensureComposerLabor();decorateDrafts();decorateListings();const form=document.querySelector('#ffv2ComposerForm');if(form?.open||form?.closest('dialog')?.open)updateComposer(form)}finally{enhancing=false}})}
+function enhance(){if(enhancing)return;enhancing=true;requestAnimationFrame(()=>{try{renderGuide();ensureComposerLabor();decorateDrafts();decorateListings();const form=document.querySelector('#ffv2ComposerForm');if(form?.closest('dialog')?.open)updateComposer(form)}finally{enhancing=false}})}
 function clicks(event){
  const draft=event.target.closest?.('[data-use-draft]');if(draft)setTimeout(()=>{ensureComposerLabor();const form=document.querySelector('#ffv2ComposerForm'),row=candidate(draft.dataset.useDraft),hours=GUIDE()?.sumLaborHours?.(row)||0;if(form&&hours>0){form.elements.laborWorthHours.value=String(hours);updateComposer(form)}},0);
  const use=event.target.closest?.('[data-use-basic-value]');if(use){event.preventDefault();applyBaseline(use.closest('form'));}
@@ -92,7 +94,7 @@ function changes(event){if(event.target?.closest?.('#ffv2ComposerForm')&&['kind'
 function submits(event){
  if(event.target.id!=='ffv2ComposerForm')return;const form=event.target,hours=Math.max(0,num(form.elements.laborWorthHours?.value)),raw=candidate(clean(form.elements.draftId?.value,220));pendingValuation={title:clean(form.elements.title?.value,180),laborWorthHours:hours,curriculumAcorns:num(raw?.curriculumAcorns||raw?.valuation?.curriculumAcorns),source:raw?'cross-realm-model':'composer'};
 }
-function start(){document.addEventListener('click',clicks);document.addEventListener('input',changes);document.addEventListener('change',changes);document.addEventListener('submit',submits,true);addEventListener('hashchange',enhance);addEventListener('fellowfare:marketplace-changed',event=>{if(event.detail?.reason==='listing-published')savePublishedValuation();enhance()});new MutationObserver(enhance).observe(document.querySelector('#main')||document.body,{childList:true,subtree:true});enhance()}
-const api=Object.freeze({version:'1.2.0',enhance,baselineText});globalThis.CivweaveFellowFareValueGuideV1=api;
+function start(){document.addEventListener('click',clicks);document.addEventListener('input',changes);document.addEventListener('change',changes);document.addEventListener('submit',submits,true);addEventListener('hashchange',enhance);addEventListener('fellowfare:marketplace-changed',event=>{if(event.detail?.reason==='listing-published')savePublishedValuation();enhance()});const renderRoot=document.querySelector('#main')||document.body;new MutationObserver(enhance).observe(renderRoot,{childList:true});enhance()}
+const api=Object.freeze({version:'1.2.1',enhance,baselineText});globalThis.CivweaveFellowFareValueGuideV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

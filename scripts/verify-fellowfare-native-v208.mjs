@@ -1,12 +1,13 @@
 import fs from 'node:fs/promises';
 const read=file=>fs.readFile(file,'utf8');
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const [html,css,scroll,parent,fulfillment]=await Promise.all([
+const [html,css,scroll,parent,fulfillment,valueGuide]=await Promise.all([
   read('public/app/fellowfare-cabinet-v144.html'),
   read('public/app/fellowfare-native-v208.css'),
   read('public/app/fellowfare-native-scroll-v208.js'),
   read('public/app/fellowfare-cabinet-v144.js'),
-  read('public/app/services/fellowfare/fulfillment-economy-v2.js')
+  read('public/app/services/fellowfare/fulfillment-economy-v2.js'),
+  read('public/app/services/fellowfare/marketplace-v2-value-guide.js')
 ]);
 assert(html.includes('data-build="fellowfare-native-market-v208"'),'native FellowFare v208 build marker missing');
 assert(!html.includes('<iframe id="ffc144-workbench"'),'nested marketplace iframe is active again');
@@ -20,4 +21,8 @@ assert(scroll.includes("type==='fellowfare:cabinet-ready'"),'native scroll corre
 assert(scroll.includes("body.classList.remove('ffc144-mobile-flow')"),'legacy mobile frame mode can still reactivate');
 assert(parent.includes('function enableNestedScroll()'),'test no longer covers the compatibility regression source');
 assert(fulfillment.includes("SELF_MUTATION_SELECTOR='#ffFulfillmentDaily,#ffDirectMerchant,.ffv2-money-panel,.ffv2-policy-note'"),'fulfillment self-mutation guard missing');
-console.log('FellowFare native v208 verification passed: one root owns scroll, legacy nested-scroll writes are corrected, native contrast is explicit, and the marketplace remains iframe-free.');
+new Function(valueGuide);
+assert(!/new MutationObserver\(enhance\)\.observe\([^;]+\{childList:true,subtree:true\}\)/.test(valueGuide),'value guide must not watch the entire marketplace subtree; its own decoration writes can create a main-thread feedback loop');
+assert(valueGuide.includes("const renderRoot=document.querySelector('#main')||document.body;new MutationObserver(enhance).observe(renderRoot,{childList:true})"),'value guide must observe only route-level child replacement on the canonical render root');
+assert(valueGuide.includes('if(box.innerHTML!==markup)box.innerHTML=markup'),'value-guide composer decoration must be idempotent');
+console.log('FellowFare native v208 verification passed: one root owns scroll, value-guide decoration cannot feed its own observer, legacy nested-scroll writes are corrected, native contrast is explicit, and the marketplace remains iframe-free.');
