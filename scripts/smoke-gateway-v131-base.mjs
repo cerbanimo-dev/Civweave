@@ -19,42 +19,46 @@ try{
   for(const forbidden of ['all-minilm-l6-v2','transformers.min.js','ort-wasm','minilm-reflex','minilm-model-settings','civweave-settings-safe-open'])assert(!requiredAssets.some(route=>route.includes(forbidden)),`v1.0.17 package still includes ${forbidden}`);
   for(const route of requiredAssets){const response=await fetch(origin+route,{cache:'no-store',headers:packageHeaders});assert(response.ok,`required core package asset ${route} returned ${response.status}`);await response.arrayBuffer()}
 
-  const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
-  for(const token of [
-    "VERSION='1.0.9-ai-settings-cleanroom-v188-v318'",
-    "authority:'ai-settings-cleanroom-v188-v317'",
-    "eventOwnership:'none-input-owned-by-settings-gateway-v317'",
-    "presentation:'cleanroom-v188-v317'",
-    'providerRuntimeOnOpen:false',
-    'providerRuntimeAvailable:false',
-    'providerTestsAvailable:false',
-    'modelDiscoveryAvailable:false',
-    'singlePassOpen:true',
-    'quiescenceAfterPaint:true',
-    'function afterPaint(task)',
-    'function requestInferenceQuiescence()',
-    'function build()',
-    'function open(launcher)',
-    'function close(reason=',
-    'globalThis.CivweaveAISettingsCleanroomV188=api',
-  ])assert(controller.includes(token),`clean-room settings controller missing ${token}`);
-  for(const forbidden of [
-    'MutationObserver','PerformanceObserver','setInterval(','requestIdleCallback(',
-    'civweave-model-runtime','ensureRuntime','detectCapabilities','.generate(','new Worker(','navigator.gpu','showModal(',
-    "createElement('dialog')","createElement('script')",'document.body.style.overflow',
-  ])assert(!controller.includes(forbidden),`clean-room settings controller contains ${forbidden}`);
-  const openBlock=controller.slice(controller.indexOf('function open(launcher)'),controller.indexOf('function ensure()'));
-  for(const forbidden of ['await ','Promise','fetch(','.focus('])assert(!openBlock.includes(forbidden),`settings open path still performs ${forbidden}`);
-  for(const token of ['if(existing&&!existing.hidden)return existing','const layer=existing||build()','layer.hidden=false','afterPaint(requestInferenceQuiescence)'])assert(openBlock.includes(token),`settings open path missing ${token}`);
-  const visibleIndex=openBlock.indexOf('layer.hidden=false'),cancelIndex=openBlock.indexOf('afterPaint(requestInferenceQuiescence)');
-  assert(visibleIndex>=0,'settings open path does not make the layer visible');
-  assert(cancelIndex>visibleIndex,'settings inference cancellation is no longer scheduled after first paint');
-  assert(!openBlock.slice(0,visibleIndex).includes('requestInferenceQuiescence()'),'settings open path regained synchronous pre-paint inference cancellation');
+  const gateway=await fetch(`${origin}/app/settings-gateway-v317.js`,{headers:packageHeaders}).then(response=>response.text());
+for(const token of [
+  "VERSION='1.0.130-settings-v320-single-owner'",
+  "const LAYER_ID='cw-settings-v320'",
+  "const INPUT_SLOT='__civweaveSettingsV320Capture'",
+  'inputOwner:true,presentationOwner:true,credentialOwner:true',
+  'singleMenu:true',
+  'singleLauncherListener:true',
+  "launchWork:'none'",
+  'afterPaint(()=>void ensureManagement(layer))',
+  'data-cw-language-settings="v320"',
+  'data-settings-tab-panel="local-models"',
+  'globalThis.CivweaveSettingsV320=api',
+])assert(gateway.includes(token),`canonical V320 settings gateway missing ${token}`);
+const gatewayOpen=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
+for(const forbidden of ['await ','fetch(','.generate(','new Worker(','navigator.gpu','showModal('])assert(!gatewayOpen.includes(forbidden),`canonical Settings open path performs ${forbidden}`);
+for(const forbidden of ['MutationObserver','PerformanceObserver','setInterval(','requestIdleCallback(','bootstrap-v266','runtime-v266','runtime-bridge-v266','test-pulse-v269'])assert(!gateway.includes(forbidden),`canonical V320 settings gateway contains ${forbidden}`);
 
+const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
+for(const token of [
+  "VERSION='1.0.10-model-settings-controller-v173-compat-v320'",
+  'compatibilityFacade:true',
+  "canonical:'CivweaveSettingsV320'",
+  "authority:'settings-v320'",
+  'inputOwnership:false',
+  'presentationOwnership:false',
+  'credentialOwnership:false',
+  'domCreation:false',
+  'activationRequired:false',
+  'providerRuntimeOnOpen:false',
+])assert(controller.includes(token),`model-settings compatibility facade missing ${token}`);
+for(const forbidden of ['document.createElement',"addEventListener('click'",'showModal(','MutationObserver','PerformanceObserver','setInterval(','requestIdleCallback(','new Worker(','navigator.gpu'])assert(!controller.includes(forbidden),`model-settings compatibility facade contains ${forbidden}`);
   const settings=await fetch(`${origin}/app/unified-ai-settings-v175.js`,{headers:packageHeaders}).then(response=>response.text());
-  assert(settings.includes("VERSION='1.0.7-unified-settings-compat-v188'")&&settings.includes('retiredRuntime:true')&&settings.includes("authority:'ai-settings-cleanroom-v188'")&&!settings.includes('MutationObserver')&&!settings.includes('ensureRuntime')&&!settings.includes('detectCapabilities')&&!settings.includes('.generate('),'unified settings compatibility file is not inert');
+  for(const token of ["VERSION='1.0.8-unified-settings-compat-v320'",'compatibilityFacade:true','retiredRuntime:true',"canonical:'CivweaveSettingsV320'","authority:'settings-v320'",'inputOwnership:false','presentationOwnership:false','domCreation:false'])assert(settings.includes(token),`unified Settings facade missing ${token}`);
+  for(const forbidden of ['MutationObserver','PerformanceObserver','setInterval(','requestIdleCallback(','document.createElement',"addEventListener('click'",'ensureRuntime','detectCapabilities','.generate(','new Worker(','navigator.gpu'])assert(!settings.includes(forbidden),`unified Settings facade contains ${forbidden}`);
+  assert(settings.includes('canonical()?.open?.(launcher)')&&settings.includes('canonical()?.close?.(reason)')&&settings.includes('canonical()?.ensure?.()'),'unified Settings facade must delegate through V320 rather than own presentation');
   const delegation=await fetch(`${origin}/app/settings-delegation-v175.js`,{headers:packageHeaders}).then(response=>response.text());
-  assert(delegation.includes("VERSION='188.1-retired-settings-gateway-v317'")&&delegation.includes("REVISION='317.0-single-settings-gateway'")&&delegation.includes('retired:true')&&delegation.includes('listenerCount:0')&&delegation.includes('inputOwnership:false')&&delegation.includes('mutationObserver:false')&&delegation.includes('polling:false')&&delegation.includes('timers:false')&&delegation.includes('CivweaveSettingsGatewayV317?.open?.(launcher)')&&!delegation.includes('MutationObserver')&&!delegation.includes('PerformanceObserver')&&!delegation.includes('setInterval(')&&!delegation.includes("document.addEventListener('click'"),'settings delegation is not retired behind the v317 single gateway');
+  for(const token of ["VERSION='188.2-retired-settings-v320'","REVISION='320.0-single-settings-owner'",'retired:true','compatibilityFacade:true',"canonical:'CivweaveSettingsV320'",'listenerCount:0','inputOwnership:false','presentationOwnership:false','credentialOwnership:false','mutationObserver:false','polling:false','timers:false'])assert(delegation.includes(token),`Settings delegation facade missing ${token}`);
+  for(const forbidden of ['MutationObserver','PerformanceObserver','setInterval(',"document.addEventListener('click'",'document.createElement','new Worker(','navigator.gpu'])assert(!delegation.includes(forbidden),`Settings delegation facade contains ${forbidden}`);
+  assert(delegation.includes('globalThis.CivweaveSettingsV320?.open?.(launcher)'),'Settings delegation facade must forward only to V320');
 
   const campus=await fetch(`${origin}/app/working-campus-v156.html`,{headers:packageHeaders}).then(response=>response.text());assert(campus.includes('/app/logos/civweave-symbol.svg')&&campus.includes(VERSION)&&!campus.includes('/app/logos/civweave.webp'),'Working Campus header is stale');
   const campusCss=await fetch(`${origin}/app/working-campus-v156.css`,{headers:packageHeaders}).then(response=>response.text());assert(campusCss.includes('#brand-home.brand{grid-template-columns:64px')&&campusCss.includes('.app .campus .realm-node{min-height:96px!important')&&campusCss.includes('--cw-themed-nav-height:58px'),'Working Campus compact shell contract is stale');
