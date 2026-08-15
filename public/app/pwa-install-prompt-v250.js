@@ -17,6 +17,7 @@ let promptEvent=null;
 let installed=false;
 let prompting=false;
 let buttonObserver=null;
+let refreshQueued=false;
 let relatedApps=[];
 
 function standalone(){
@@ -63,6 +64,19 @@ function help(message){
 }
 function installButton(){return document.querySelector('#install-app')}
 function installer(){return globalThis.CivweaveInstallerV130||null}
+function setButton(button,{disabled,text}={}){
+  if(!button)return;
+  if(typeof disabled==='boolean'&&button.disabled!==disabled)button.disabled=disabled;
+  if(typeof text==='string'&&button.textContent!==text)button.textContent=text;
+}
+function queueRefresh(){
+  if(refreshQueued)return;
+  refreshQueued=true;
+  queueMicrotask(()=>{
+    refreshQueued=false;
+    refreshButton();
+  });
+}
 function publish(type,detail={}){
   try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,standalone:standalone(),installed,canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,...detail}}))}catch{}
 }
@@ -85,27 +99,23 @@ function refreshButton(){
   const button=installButton();
   if(!button||/reset app shell|repair shell/i.test(button.textContent||''))return;
   if(!installOrigin()&&!standalone()){
-    button.disabled=false;
-    button.textContent='Open stable Civweave installer';
+    setButton(button,{disabled:false,text:'Open stable Civweave installer'});
     help('This address is not a stable Civweave install origin. Opening its production host instead.');
     return;
   }
   if(standalone()){
-    button.disabled=false;
-    if(button.textContent!=='Open Civweave')button.textContent='Open Civweave';
+    setButton(button,{disabled:false,text:'Open Civweave'});
     help('Civweave is installed as an app from this host origin.');
     return;
   }
   if(installed){
-    button.disabled=true;
-    if(button.textContent!=='Civweave installed')button.textContent='Civweave installed';
+    setButton(button,{disabled:true,text:'Civweave installed'});
     help('Installation is complete. Open Civweave from your device app launcher; the campus does not run in this browser tab.');
     return;
   }
   if(prompting)return;
   const shell=installer();
-  button.disabled=false;
-  button.textContent='Install Civweave';
+  setButton(button,{disabled:false,text:'Install Civweave'});
   if(promptEvent){
     help('Civweave is ready for a browser-native app install from this host. Tap Install Civweave.');
     return;
@@ -120,8 +130,8 @@ function observeButton(){
   const button=installButton();
   if(!button)return;
   buttonObserver?.disconnect();
-  buttonObserver=new MutationObserver(()=>queueMicrotask(refreshButton));
-  buttonObserver.observe(button,{attributes:true,attributeFilter:['disabled'],childList:true,subtree:true});
+  buttonObserver=new MutationObserver(queueRefresh);
+  buttonObserver.observe(button,{attributes:true,attributeFilter:['disabled'],childList:true});
   refreshButton();
 }
 function capture(event){
@@ -132,14 +142,14 @@ function capture(event){
   }
   promptEvent=event;
   publish('civweave:pwa-install-prompt-ready',{available:true});
-  queueMicrotask(refreshButton);
+  queueRefresh();
 }
 function onInstalled(){
   installed=true;
   promptEvent=null;
   prompting=false;
   publish('civweave:pwa-installed',{available:false});
-  queueMicrotask(refreshButton);
+  queueRefresh();
   void discoverRelatedInstalls();
 }
 function waitForPrompt(timeoutMs=PROMPT_WAIT_MS){
@@ -163,8 +173,7 @@ function waitForPrompt(timeoutMs=PROMPT_WAIT_MS){
 }
 async function prepareAfterInteraction(shell,button){
   prompting=true;
-  button.disabled=true;
-  button.textContent='Preparing app shell…';
+  setButton(button,{disabled:true,text:'Preparing app shell…'});
   help('Preparing the small app shell because you asked to install. No offline campus, media, knowledge packs, or local models are being downloaded.');
   publish('civweave:pwa-installability-preparing',{eager:false,userInitiated:true});
   try{
@@ -174,8 +183,8 @@ async function prepareAfterInteraction(shell,button){
     publish('civweave:pwa-installability-error',{message:error?.message||String(error),userInitiated:true});
   }finally{
     prompting=false;
-    button.disabled=false;
-    queueMicrotask(refreshButton);
+    setButton(button,{disabled:false});
+    queueRefresh();
   }
 }
 async function ownInstallClick(event){
@@ -213,16 +222,14 @@ async function ownInstallClick(event){
   }
   const prompt=promptEvent;
   if(!prompt){
-    button.disabled=false;
-    button.textContent='Install Civweave';
+    setButton(button,{disabled:false,text:'Install Civweave'});
     help('The app shell is ready, but Chromium has not exposed its native install prompt yet. Wait a moment and tap Install again, or use the browser Install app command.');
     return;
   }
 
   promptEvent=null;
   prompting=true;
-  button.disabled=true;
-  button.textContent='Opening app install…';
+  setButton(button,{disabled:true,text:'Opening app install…'});
   try{
     // This must remain synchronous with the fresh click. Never await shell work before prompt().
     prompt.prompt();
@@ -230,18 +237,17 @@ async function ownInstallClick(event){
     if(choice?.outcome==='accepted'){
       installed=true;
       help('Civweave app installation accepted. Open the installed app from your device launcher; this browser tab remains installer-only.');
-      button.disabled=true;
-      button.textContent='Civweave installed';
+      setButton(button,{disabled:true,text:'Civweave installed'});
     }else{
       help('Civweave app installation was dismissed. Reload this installer when you want the native install prompt again.');
-      button.disabled=false;
-      button.textContent='Reload to install';
+      setButton(button,{disabled:false,text:'Reload to install'});
     }
   }catch(error){
     help(`Civweave could not open the native install prompt: ${error?.message||error}. Reload the installer and retry.`);
-    button.disabled=false;
-    button.textContent='Retry install';
-  }finally{prompting=false}
+    setButton(button,{disabled:false,text:'Retry install'});
+  }finally{
+    prompting=false;
+  }
 }
 
 if(hostSetupRedirect())return;
@@ -280,6 +286,7 @@ const api=Object.freeze({
   browserRuntimePolicy:'installer-only-until-installed-display',
   installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture',
   promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click',
+  observerPolicy:'idempotent-writes-coalesced-refresh',
   eagerRelatedAppDiscovery:false,
   eagerShellPreparation:false,
   firstPaintShellWork:false,
