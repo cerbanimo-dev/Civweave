@@ -30,28 +30,20 @@ Merlin may hot-swap **user-authored customization code** because live creation i
 - agents may never route production bug fixes through this customization path;
 - no historical production builds, release ZIPs, source hashes, or code snapshots are retained in the shipping tree for this feature.
 
-## Canonical production surface
+## Canonical production surface must be traced, never guessed
 
-The browser product is the current 16-screen Civweave world plus its shared stylesheet and shared JavaScript runtime. The canonical screens are:
+Do not derive the active product from roadmap files, screen plans, asset reports, historical `loom-*` pages, placeholder world assets, release notes, seed files, smoke fixtures, or similarly named legacy pages.
 
-1. Town Square
-2. Regional World Map
-3. Crossroads Station
-4. Inside the Quad
-5. Residential Quarter
-6. Workshop District
-7. Gardens & Wildlands
-8. Federation Harbor
-9. Archive District
-10. Festival Grounds
-11. Frontier Outpost
-12. Undercity Commons
-13. Dispatch Hall
-14. Personal Chronicle
-15. Community Portal
-16. World Settings & Accessibility
+The canonical screen inventory must be generated from the **current live route graph**:
 
-Every screen must be reachable from the canonical screen manifest in the live JavaScript runtime. Do not add alternate copies of a screen to repair routing or layout.
+1. start at the current root entry actually served by production;
+2. follow its redirect/dispatcher to the active application entry;
+3. follow only HTML, CSS, JavaScript, modules, workers, manifests, and assets actually referenced by that active entry or by code it invokes;
+4. confirm every visible screen by a reachable runtime route/state in the current implementation;
+5. if a document disagrees with the live route graph, the document is stale and must not be used to select production code;
+6. do not write a screen list into this file unless it has been regenerated from the current route graph in the same change.
+
+Historical planning documents may describe useful design intent, but they are not evidence that a page is live.
 
 ## File naming
 
@@ -91,14 +83,14 @@ Every build, cleanup, or merge report must include a complete production invento
 - whether it executes at runtime, build time, deployment time, or test time;
 - why it still belongs in the repository.
 
-Also report the full 16-screen sitemap and the asset used by each screen. A file that cannot be explained is presumed dead and should be removed or explicitly justified before merge.
+Also report the full current sitemap and the asset used by each active visual screen. A file that cannot be explained is presumed dead and should be removed or explicitly justified before merge.
 
 ## Required verification
 
 Before merging a runtime change:
 
 1. Run the canonical repository check.
-2. Verify all 16 screen routes resolve.
+2. Rebuild the sitemap from the current live route graph and verify every active route resolves.
 3. Verify every referenced local asset exists.
 4. Verify no production HTML/JS/CSS references retired versioned fixer filenames.
 5. Verify no source-rewriting, runtime materialization, historical-code selection, or bug-fix injection mechanism exists in the production path.
