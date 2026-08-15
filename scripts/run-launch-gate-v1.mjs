@@ -16,6 +16,9 @@ const commands = [
 ];
 if (!quick) {
   commands.push(['npm',['run','check']]);
+  commands.push(['npm',['run','test:anarchadia-sovereignty']]);
+  commands.push(['node',['scripts/test-proof-driven-checkpoints-v158.mjs']]);
+  commands.push(['node',['scripts/test-tiered-cerbanimo-rewards-v157.mjs']]);
   commands.push(['npm',['run','audit:production']]);
 }
 commands.push(['node',['scripts/verify-public-launch-readiness-v1.mjs',...(strictPublic?['--public']:[])]]);

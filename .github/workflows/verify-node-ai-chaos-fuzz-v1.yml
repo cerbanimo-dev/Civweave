@@ -3,6 +3,15 @@ name: Verify Node AI Chaos Fuzz v1
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'lib/node-ai-*.mjs'
+      - 'lib/ai-wallet-*.mjs'
+      - 'scripts/test-node-ai-*.mjs'
+      - 'scripts/node-ai-process-chaos-worker-v1.mjs'
+      - 'examples/node-ai-*.mjs'
+      - '.env.ai-wallet.example'
+      - 'package.json'
+      - '.github/workflows/verify-node-ai-chaos-fuzz-v1.yml'
   workflow_dispatch:
   schedule:
     - cron: '17 5 * * *'

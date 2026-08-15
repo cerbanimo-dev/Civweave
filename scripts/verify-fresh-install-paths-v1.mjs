@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [bridge,installer,manifestText,installedEntryHtml,installedEntryRuntime]=await Promise.all([
-  read('public/app/pwa-install-prompt-v248.js'),
+  read('public/app/pwa-install-prompt-v249.js'),
   read('public/install-v130.js'),
   read('public/app/manifest.webmanifest'),
   read('public/app/installed-entry-v146.html'),
@@ -20,21 +20,26 @@ assert.ok(installer.includes(`const ENTRY = '${exactEntry}';`),'fallback install
 assert.ok(!bridge.includes(`const ENTRY='${staleInstallerEntry}'`),'front-door bridge must never point installed launch back at /app/');
 assert.ok(!installer.includes(`const ENTRY = '${staleInstallerEntry}'`),'fallback installer must never point installed launch back at /app/');
 
-const bridgePrepare=bridge.indexOf('await installer.prepareShell({manual:true})');
-const bridgeReadyGate=bridge.indexOf('if(!installer.shellReady)',bridgePrepare);
-const bridgePromptWait=bridge.indexOf('const prompt=promptEvent||await waitForPrompt()',bridgeReadyGate);
-const bridgePrompt=bridge.indexOf('await prompt.prompt()',bridgePromptWait);
-assert.ok(bridgePrepare>=0,'native install bridge must prepare the lightweight shell');
-assert.ok(bridgeReadyGate>bridgePrepare,'native prompt must be gated on confirmed shell readiness');
-assert.ok(bridgePromptWait>bridgeReadyGate,'bridge must wait for beforeinstallprompt only after the shell is ready');
-assert.ok(bridgePrompt>bridgePromptWait,'native prompt must open only after shell preparation and prompt availability');
-assert.ok(!bridge.slice(0,bridgePrepare).includes('if(!prompt)'),'front-door bridge must never require a prompt before preparing the shell');
-assert.ok(bridge.includes("installSequencingPolicy:'prepare-shell-before-native-prompt'"),'bridge must publish its shell-first sequencing contract');
-assert.ok(bridge.includes("promptAvailabilityPolicy:'prepare-shell-then-wait-for-beforeinstallprompt'"),'bridge must publish the no-deadlock prompt availability contract');
+const prepareStart=bridge.indexOf('async function prepareAfterInteraction');
+const prepareCall=bridge.indexOf('await shell.prepareShell({manual:true})',prepareStart);
+const installClickStart=bridge.indexOf('async function ownInstallClick(event)');
+const installClickEnd=bridge.indexOf("if(hostSetupRedirect())return;",installClickStart);
+const installClick=bridge.slice(installClickStart,installClickEnd);
+const promptCall=installClick.indexOf('prompt.prompt();');
+const choiceAwait=installClick.indexOf('await prompt.userChoice',promptCall);
+const shellAwait=installClick.indexOf('await shell.prepareShell');
 
-const fallbackPrepare=installer.indexOf('await prepareShell({ manual: true });');
-const fallbackPrompt=installer.indexOf('await prompt.prompt();',fallbackPrepare);
-assert.ok(fallbackPrepare>=0&&fallbackPrompt>fallbackPrepare,'fallback installer must also prepare the shell before prompting');
+assert.ok(prepareStart>=0&&prepareCall>prepareStart,'front door must prepare the lightweight shell only after explicit install interaction');
+assert.ok(!bridge.includes('queueMicrotask(()=>void primeInstallability())'),'front door must never prewarm the app shell during first paint');
+assert.ok(!bridge.includes('async function primeInstallability()'),'front door must not retain a load-time shell-preparation path');
+assert.ok(promptCall>=0,'native install bridge must invoke the saved browser prompt');
+assert.ok(choiceAwait>promptCall,'native prompt must be invoked synchronously in the fresh click handler before awaiting the browser choice');
+assert.equal(shellAwait,-1,'fresh install click must never wait for service-worker preparation before prompting');
+assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture'"),'bridge must publish its two-phase user-gesture-safe install contract');
+assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'bridge must publish its native prompt user-gesture contract');
+assert.ok(bridge.includes('eagerShellPreparation:false'),'bridge must explicitly forbid eager shell preparation');
+assert.ok(bridge.includes('firstPaintShellWork:false'),'bridge must explicitly forbid first-paint shell work');
+
 assert.equal((installer.match(/location\.assign\(ENTRY\)/g)||[]).length,1,'fallback installer may navigate to ENTRY only from installed display, never after browser install acceptance');
 assert.ok(installer.includes('this browser tab remains installer-only'),'accepted browser install must remain on the installer');
 assert.ok(!installer.includes('Civweave installed. Opening the campus now'),'browser install acceptance must not jump directly into campus runtime');
@@ -46,10 +51,11 @@ assert.ok(installedEntryRuntime.includes("if(!installedDisplay()&&!localDevelope
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fresh-install-paths-v2-shell-first-prompt-wait',
+  revision:'fresh-install-paths-v4-no-load-prewarm',
   exactEntry,
-  shellFirst:true,
-  waitsForPromptAfterShell:true,
+  shellPrimedBeforeClick:false,
+  shellPreparationUserInitiated:true,
+  promptSynchronousOnFreshClick:true,
   browserInstallStaysInstallerOnly:true,
   staleAppInstallerEntry:false
 },null,2));

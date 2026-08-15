@@ -1,0 +1,101 @@
+name: Verify Local AI
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/runtime-v266.js'
+      - 'public/app/local-ai/worker-v266.js'
+      - 'public/app/local-ai/hardware-tier-ui-v278.js'
+      - 'public/app/local-ai/settings-panel-v267.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/package-revision-guard-v307.js'
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/local-chat-owner-v295.js'
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/document-lifecycle-v221.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/service-worker-local-ai-coherence-v307.js'
+      - 'public/service-worker-v203.js'
+      - 'public/_headers'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
+      - 'scripts/verify-local-ai-bootstrap-retry-v312.mjs'
+      - 'scripts/verify-local-ai-lifecycle-v313.mjs'
+      - 'scripts/verify-local-ai-smooth-fit-v314.mjs'
+      - 'scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs'
+      - '.github/workflows/verify-local-ai.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/local-ai/runtime-v266.js'
+      - 'public/app/local-ai/worker-v266.js'
+      - 'public/app/local-ai/hardware-tier-ui-v278.js'
+      - 'public/app/local-ai/settings-panel-v267.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/package-revision-guard-v307.js'
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/local-chat-owner-v295.js'
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/document-lifecycle-v221.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/service-worker-local-ai-coherence-v307.js'
+      - 'public/service-worker-v203.js'
+      - 'public/_headers'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
+      - 'scripts/verify-local-ai-bootstrap-retry-v312.mjs'
+      - 'scripts/verify-local-ai-lifecycle-v313.mjs'
+      - 'scripts/verify-local-ai-smooth-fit-v314.mjs'
+      - 'scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs'
+      - '.github/workflows/verify-local-ai.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-local-ai-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check local AI runtime syntax
+        run: |
+          node --check public/app/local-ai/runtime-v266.js
+          node --check public/app/local-ai/worker-v266.js
+          node --check public/app/local-ai/hardware-tier-ui-v278.js
+          node --check public/app/local-ai/settings-panel-v267.js
+          node --check public/app/local-ai/bootstrap-v266.js
+          node --check public/app/local-ai/model-registry-v266.js
+          node --check public/app/local-ai/package-revision-guard-v307.js
+          node --check public/app/local-chat-runtime-v295.js
+          node --check public/app/local-chat-owner-v295.js
+          node --check public/app/experience-orchestrator-v232.js
+          node --check public/app/document-lifecycle-v221.js
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/service-worker-local-ai-coherence-v307.js
+          node --check public/service-worker-v203.js
+          node --check scripts/build-service-worker-v211.mjs
+          node --check scripts/verify-local-ai-bootstrap-coherence-v307.mjs
+          node --check scripts/verify-local-ai-bootstrap-retry-v312.mjs
+          node --check scripts/verify-local-ai-lifecycle-v313.mjs
+          node --check scripts/verify-local-ai-smooth-fit-v314.mjs
+          node --check scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs
+      - name: Verify local AI contracts
+        run: |
+          node scripts/verify-local-ai-bootstrap-coherence-v307.mjs
+          node scripts/verify-local-ai-bootstrap-retry-v312.mjs
+          node scripts/verify-local-ai-lifecycle-v313.mjs
+          node scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs
+          node scripts/verify-local-ai-smooth-fit-v314.mjs

@@ -3,8 +3,24 @@ name: Verify MiniLM Template Planning and Rewards
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'public/app/reward-policy-v198.js'
+      - 'public/app/context-plan-composer-v198.js'
+      - 'public/app/deterministic-mode-v175.js'
+      - 'public/app/working-campus-v156*'
+      - 'scripts/verify-context-planning-rewards-v198.mjs'
+      - 'scripts/verify-working-campus-planner-v199.mjs'
+      - '.github/workflows/verify-context-planning-v198.yml'
   push:
     branches: [main]
+    paths:
+      - 'public/app/reward-policy-v198.js'
+      - 'public/app/context-plan-composer-v198.js'
+      - 'public/app/deterministic-mode-v175.js'
+      - 'public/app/working-campus-v156*'
+      - 'scripts/verify-context-planning-rewards-v198.mjs'
+      - 'scripts/verify-working-campus-planner-v199.mjs'
+      - '.github/workflows/verify-context-planning-v198.yml'
   workflow_dispatch:
 
 permissions:

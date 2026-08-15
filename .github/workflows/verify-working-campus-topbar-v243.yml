@@ -2,15 +2,32 @@ name: Verify Working Campus Topbar v243
 
 on:
   pull_request:
+    paths:
+      - 'public/app/working-campus-topbar-v243.js'
+      - 'public/app/working-campus-v156.css'
+      - 'public/app/working-campus-v156.html'
+      - 'scripts/verify-working-campus-topbar-v243.mjs'
+      - '.github/workflows/verify-working-campus-topbar-v243.yml'
   push:
     branches: [main]
+    paths:
+      - 'public/app/working-campus-topbar-v243.js'
+      - 'public/app/working-campus-v156.css'
+      - 'public/app/working-campus-v156.html'
+      - 'scripts/verify-working-campus-topbar-v243.mjs'
+      - '.github/workflows/verify-working-campus-topbar-v243.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Check topbar runtime syntax

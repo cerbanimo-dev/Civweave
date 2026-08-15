@@ -7,13 +7,19 @@ const [boundary,gateway,lifecycle,settings,routes,cerbanimo,livingSchool,fellowf
 ].map(read));
 for(const source of [boundary,gateway,lifecycle,settings])new Function(source);
 assert.match(boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
+assert.match(gateway,/globalThis\.CivweaveSettingsV320=api/);
+assert.match(gateway,/singleMenu:true/);
+assert.match(gateway,/data-settings-tab-panel="local-models"/);
 assert.match(gateway,/document-lifecycle-v221\.js\?activate=1/);
 assert.match(gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
-assert.match(lifecycle,/document-lifecycle-v317-explicit-activation/);
+assert.match(lifecycle,/document-lifecycle-v320-single-menu/);
 assert.match(lifecycle,/function ensureLocalAISettingsManagement\(/);
 assert.match(lifecycle,/function scheduleSettingsManagement\(/);
 assert.match(lifecycle,/settings-panel-v267\.js/);
+assert.match(lifecycle,/serviceRole:'downloaded-model-settings-content'/);
 assert.match(lifecycle,/managementAfterPaint:true/);
+assert.match(lifecycle,/inputOwnership:false/);
+assert.match(lifecycle,/presentationOwnership:false/);
 assert.match(lifecycle,/globalObserverPatch:false/);
 assert.doesNotMatch(lifecycle,/runtime-v266|runtime-bridge-v266|bootstrap-v266|test-pulse-v269/,'Settings management must not include inference startup.');
 for(const token of ['Downloaded local AI','Download','Resume','Use locally','Remove','Model window','Civweave working default'])assert.ok(settings.includes(token),`Local AI settings lost ${token}.`);
@@ -22,4 +28,4 @@ const realms=new Map([['cerbanimo',cerbanimo],['living-school',livingSchool],['f
 for(const [name,html] of realms)assert.ok(html.includes('/app/install-boundary-v146.js'),`${name} must enter the canonical install boundary.`);
 for(const pathname of ['/app/realm-console-v140.html','/app/cabinets/living-school/index.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert.ok(routes.includes(`pathname:'${pathname}'`),`Missing canonical route ${pathname}.`);
 assert.doesNotMatch(livingSchool,/model-settings-controller-v173\.js|ai-settings-bind-guard-v230\.js|ai-settings-device-repair-v229\.js/);
-console.log(JSON.stringify({ok:true,revision:'realm-local-ai-settings-v317',realms:[...realms.keys()],settingsOwner:'settings-gateway-v317',managementOnly:true,managementAfterPaint:true,inferenceDormantOnOpen:true,globalObserverPatch:false},null,2));
+console.log(JSON.stringify({ok:true,revision:'realm-local-ai-settings-v320',realms:[...realms.keys()],settingsAuthority:'CivweaveSettingsV320',managementServiceOnly:true,managementAfterPaint:true,inferenceDormantOnOpen:true,globalObserverPatch:false},null,2));

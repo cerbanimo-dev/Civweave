@@ -49,7 +49,11 @@ assert.ok(bridge.includes(`const PREVIOUS_CANONICAL_ORIGIN='${previousCanonicalO
 assert.ok(bridge.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'native install bridge must retain the Commonweave migration origin');
 assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related installs when supported');
 assert.ok(bridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'installer bridge must declare installer-only browser policy');
-assert.ok(bridge.includes("promptAvailabilityPolicy:'prepare-shell-then-wait-for-beforeinstallprompt'"),'installer must prepare the shell before waiting for a native prompt');
+assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture'"),'installer must prepare the shell only after explicit install interaction, then require a fresh install gesture');
+assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'installer must invoke the captured native prompt synchronously from the fresh install gesture');
+assert.ok(bridge.includes('eagerShellPreparation:false'),'installer bridge must explicitly forbid eager shell preparation');
+assert.ok(bridge.includes('firstPaintShellWork:false'),'installer bridge must explicitly forbid first-paint shell work');
+assert.ok(!bridge.includes('queueMicrotask(()=>void primeInstallability())'),'installer bridge must not queue shell preparation from page startup');
 assert.ok(bridge.includes("if(standalone())")&&bridge.includes("if(installed){"),'installer must distinguish installed display from merely accepted installation');
 assert.ok(bridge.includes('Open Civweave from your device app launcher')||bridge.includes('device app launcher'),'accepted browser installation must direct launch through the device app launcher');
 
@@ -98,12 +102,13 @@ assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v249-first-input-safe',
+  revision:'pwa-install-campus-v249-no-load-prewarm',
   canonicalOrigin,
   previousCanonicalOrigin,
   browserRuntime:'installed-display-only',
   onlineFallback:false,
   repairOnly:true,
+  firstPaintShellWork:false,
   workerCacheBusted:true,
   relatedOrigins:manifests.length
 },null,2));

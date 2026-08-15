@@ -3,40 +3,119 @@ name: Verify Unified Chat System
 on:
   pull_request:
     paths:
+      - 'VERSION'
+      - 'package.json'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/guide-stream-thinking-v249.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/fellowfare-shared-guide-bridge-v236.js'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/working-campus-topbar-v243.js'
+      - 'public/app/working-campus-v156.css'
+      - 'public/app/working-campus-v156.html'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/app/realm-console-v140.html'
+      - 'public/app/shared-chat-face-icons-v255.js'
+      - 'public/app/human-message-bubble-v1.js'
+      - 'public/app/shared-intention-party-chat-v1.js'
       - 'public/app/living-school-chat-workbench-v255.js'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
       - 'scripts/verify-moss-curriculum-workbench-v255.mjs'
-      - '.github/workflows/verify-moss-curriculum-workbench-v255.yml'
+      - 'scripts/verify-chat-controls-v253.mjs'
+      - 'scripts/verify-mobile-chat-layout-v248.mjs'
+      - 'scripts/verify-mobile-chat-bubble-anchor-v342.mjs'
+      - 'scripts/verify-human-message-bubble-v1.mjs'
+      - 'scripts/verify-realm-session-integrity-v237.mjs'
+      - 'scripts/verify-guide-workspace-v242.mjs'
+      - 'scripts/verify-shared-guide-floating-v236.mjs'
+      - 'scripts/verify-guide-stream-thinking-v249.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   push:
-    branches: [main]
+    branches: ['**']
     paths:
+      - 'VERSION'
+      - 'package.json'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/guide-stream-thinking-v249.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/fellowfare-shared-guide-bridge-v236.js'
+      - 'public/app/themed-system-nav-v178.js'
+      - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/working-campus-topbar-v243.js'
+      - 'public/app/working-campus-v156.css'
+      - 'public/app/working-campus-v156.html'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/app/realm-console-v140.html'
+      - 'public/app/shared-chat-face-icons-v255.js'
+      - 'public/app/human-message-bubble-v1.js'
+      - 'public/app/shared-intention-party-chat-v1.js'
       - 'public/app/living-school-chat-workbench-v255.js'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
       - 'scripts/verify-moss-curriculum-workbench-v255.mjs'
-      - '.github/workflows/verify-moss-curriculum-workbench-v255.yml'
+      - 'scripts/verify-chat-controls-v253.mjs'
+      - 'scripts/verify-mobile-chat-layout-v248.mjs'
+      - 'scripts/verify-mobile-chat-bubble-anchor-v342.mjs'
+      - 'scripts/verify-human-message-bubble-v1.mjs'
+      - 'scripts/verify-realm-session-integrity-v237.mjs'
+      - 'scripts/verify-guide-workspace-v242.mjs'
+      - 'scripts/verify-shared-guide-floating-v236.mjs'
+      - 'scripts/verify-guide-stream-thinking-v249.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-unified-chat-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: '22'
-      - name: Check shared chat syntax
+          node-version: 22
+      - name: Check chat runtime syntax
         run: |
           node --check public/app/unified-chat-system-v1.js
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
+          node --check public/app/guide-stream-thinking-v249.js
+          node --check public/app/install-boundary-v146.js
+          node --check public/app/fellowfare-shared-guide-bridge-v236.js
+          node --check public/app/themed-system-nav-v178.js
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/app/working-campus-topbar-v243.js
+          node --check public/app/installed-entry-v146.js
+          node --check public/app/shared-chat-face-icons-v255.js
+          node --check public/app/human-message-bubble-v1.js
+          node --check public/app/shared-intention-party-chat-v1.js
+          node --check public/service-worker-chat-repair-v245.js
+          node --check public/service-worker-v203.js
+          node --check scripts/verify-chat-controls-v253.mjs
+          node --check scripts/verify-mobile-chat-layout-v248.mjs
+          node --check scripts/verify-mobile-chat-bubble-anchor-v342.mjs
+          node --check scripts/verify-human-message-bubble-v1.mjs
+          node --check scripts/verify-realm-session-integrity-v237.mjs
+          node --check scripts/verify-guide-workspace-v242.mjs
+          node --check scripts/verify-shared-guide-floating-v236.mjs
+          node --check scripts/verify-guide-stream-thinking-v249.mjs
       - name: Enforce one-core five-theme contract
         shell: bash
         run: |
@@ -59,3 +138,13 @@ jobs:
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
           if(loader.includes('living-school-chat-workbench-v255.js'))throw new Error('Legacy Living School chat owner is still loaded');
           NODE
+      - name: Verify chat contracts
+        run: |
+          node scripts/verify-chat-controls-v253.mjs
+          node scripts/verify-mobile-chat-layout-v248.mjs
+          node scripts/verify-mobile-chat-bubble-anchor-v342.mjs
+          node scripts/verify-human-message-bubble-v1.mjs
+          node scripts/verify-realm-session-integrity-v237.mjs
+          node scripts/verify-guide-workspace-v242.mjs
+          node scripts/verify-shared-guide-floating-v236.mjs
+          node scripts/verify-guide-stream-thinking-v249.mjs

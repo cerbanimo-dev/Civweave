@@ -3,8 +3,20 @@ name: Verify Cerbanimo Deterministic Boundary v203
 on:
   push:
     branches: [main]
+    paths:
+      - 'public/app/cerbanimo-deterministic-boundary-v203.js'
+      - 'public/service-worker-critical-v199.js'
+      - 'public/service-worker-v156.js'
+      - 'scripts/verify-cerbanimo-deterministic-boundary-v203.mjs'
+      - '.github/workflows/verify-cerbanimo-deterministic-boundary-v203.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'public/app/cerbanimo-deterministic-boundary-v203.js'
+      - 'public/service-worker-critical-v199.js'
+      - 'public/service-worker-v156.js'
+      - 'scripts/verify-cerbanimo-deterministic-boundary-v203.mjs'
+      - '.github/workflows/verify-cerbanimo-deterministic-boundary-v203.yml'
   workflow_dispatch:
 
 permissions:
@@ -15,8 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Syntax check boundary and package workers
