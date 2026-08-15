@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.119-shared-guide-surface-v236-source-truth-v1';
+const VERSION='1.0.120-shared-guide-surface-v236-idle-chat-v1';
 const STYLE_ID='cw-shared-guide-surface-v236-style';
 const LAUNCHER_ID='cwp215-launcher';
 const CHAT_ROOT_ID='cw-persistent-guide-chat-v215';
@@ -66,7 +66,7 @@ function removeEmbeddedGuideCards(){return false}
 function ownPageGuide(){
   const api=globalThis.CivweavePersistentGuideChatV215;
   if(!api||!currentSystem)return false;
-  try{api.switchGuide?.(currentSystem);return true}catch{return false}
+  try{api.switchGuide?.(currentSystem,{open:false});return true}catch{return false}
 }
 async function submitInline(text){
   const value=clean(text,8000),api=globalThis.CivweavePersistentGuideChatV215;
