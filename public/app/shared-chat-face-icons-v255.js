@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.113-shared-chat-face-icons-v255-idle-until-open-v1';
+const VERSION='1.0.113-shared-chat-face-icons-v255-open-ui-only-v2';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SHARED_ROOT_ID='cw-shared-guide-surface-v236';
 const LAUNCHER_ID='cwp215-launcher';
@@ -16,7 +16,7 @@ const ICONS=Object.freeze({
 });
 if(globalThis.CivweaveSharedChatFaceIconsV255?.version===VERSION)return;
 
-let directorPromise=null,miniLmLampTimer=0,avatarPrimed=false,activated=false;
+let directorPromise=null,activated=false,expressionArmed=false;
 function ensureExpressionDirector(){
   if(globalThis.CivweaveAvatarExpressionDirectorV343)return Promise.resolve(globalThis.CivweaveAvatarExpressionDirectorV343);
   if(directorPromise)return directorPromise;
@@ -77,11 +77,19 @@ function refreshMiniLmLamp(){
   const selected=root.querySelector('.cw242-window[aria-pressed="true"]');if(selected){selected.dataset.cwMinilmActive=active?'true':'false';selected.setAttribute('aria-description',active?'MiniLM active for selected AI avatar':'MiniLM inactive for selected AI avatar')}
   return active
 }
-function primeAvatars(api){if(avatarPrimed||!api?.classify)return false;avatarPrimed=true;for(const system of Object.keys(ICONS))api.classify('',{system,phase:'response'});return true}
-function refresh(){installStyle();refreshMiniLmLamp();void ensureExpressionDirector().then(api=>{api?.refresh?.();primeAvatars(api);refreshMiniLmLamp()})}
+function primeAvatars(api){if(!api?.classify)return false;for(const system of Object.keys(ICONS))api.classify('',{system,phase:'response'});return true}
+function refresh(){installStyle();refreshMiniLmLamp();return true}
+function armExpressionRuntime(){
+  if(expressionArmed)return true;
+  const root=document.getElementById(ROOT_ID),form=root?.querySelector?.('[data-persistent-form]');
+  if(!form)return false;
+  expressionArmed=true;
+  form.addEventListener('submit',()=>{void ensureExpressionDirector().then(api=>{api?.refresh?.();refreshMiniLmLamp()})},{once:true});
+  return true;
+}
 function activate(){
-  if(activated)return true;activated=true;refresh();
-  if(!miniLmLampTimer)miniLmLampTimer=setInterval(refreshMiniLmLamp,1500);
+  if(!activated)activated=true;
+  refresh();armExpressionRuntime();
   return true;
 }
 function start(){
@@ -89,9 +97,8 @@ function start(){
   addEventListener('civweave:avatar-expression',event=>applyExpression(event.detail||{}));
   ['civweave:guide-workspace-ready','civweave:guide-workspace-state','civweave:realm-guide-thread-changed','civweave:chat-single-owner-ready','civweave:minilm-context-ready','civweave:minilm-context-fallback','civweave:minilm-package-needed'].forEach(name=>addEventListener(name,event=>{if(name==='civweave:guide-workspace-state'&&event.detail?.open)activate();if(activated)queueMicrotask(refreshMiniLmLamp)}));
   addEventListener('civweave:guide-chat-opened',activate);
-  addEventListener('pagehide',()=>{if(miniLmLampTimer)clearInterval(miniLmLampTimer);miniLmLampTimer=0},{once:true});
-  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,activate,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>{if(miniLmLampTimer)clearInterval(miniLmLampTimer);miniLmLampTimer=0},switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,launcherNarrowPx:46,launcherContainsOnlyImage:true,sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true,idleUntilChatOpen:true})
-  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSourceRewrite:false,idleUntilChatOpen:true}}))}catch{}
+  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,activate,armExpressionRuntime,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>{activated=false;expressionArmed=false},switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,launcherNarrowPx:46,launcherContainsOnlyImage:true,sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true,idleUntilChatOpen:true,heavyRuntimeOnOpen:false,expressionRuntimeTrigger:'first-chat-submit',miniLmPolling:false})
+  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSourceRewrite:false,idleUntilChatOpen:true,heavyRuntimeOnOpen:false,expressionRuntimeTrigger:'first-chat-submit',miniLmPolling:false}}))}catch{}
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
