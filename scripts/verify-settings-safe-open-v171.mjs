@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 await import('./verify-system-ownership-v317.mjs');
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,controller,lifecycle,boundary,shell,loader,campusRuntime,living,realm,fellowfare,anarchadia]=await Promise.all([
-  'public/app/settings-gateway-v317.js','public/app/model-settings-controller-v173.js','public/app/document-lifecycle-v221.js','public/app/install-boundary-v146.js','public/app/family-shell-v104.js','public/app/family-ai-loader-v105.js','public/app/working-campus-v156.part5.txt','public/app/cabinets/living-school/index.html','public/app/realm-console-v140.html','public/app/fellowfare-cabinet-v144.html','public/app/anarchadia-console-v139.html'
+const [gateway,controller,lifecycle,boundary,coreRuntime,shell,loader,campusRuntime,living,realm,fellowfare,anarchadia]=await Promise.all([
+  'public/app/settings-gateway-v317.js','public/app/model-settings-controller-v173.js','public/app/document-lifecycle-v221.js','public/app/install-boundary-v146.js','public/app/core-interface-runtime-v1.js','public/app/family-shell-v104.js','public/app/family-ai-loader-v105.js','public/app/working-campus-v156.part5.txt','public/app/cabinets/living-school/index.html','public/app/realm-console-v140.html','public/app/fellowfare-cabinet-v144.html','public/app/anarchadia-console-v139.html'
 ].map(read));
-for(const source of [gateway,controller,lifecycle,boundary,shell,loader])new Function(source);
+for(const source of [gateway,controller,lifecycle,boundary,coreRuntime,shell,loader])new Function(source);
 assert.match(gateway,/inputOwner:true/);
 assert.equal((gateway.match(/addEventListener\('click'/g)||[]).length,1);
 assert.match(gateway,/lazyController:true/);
@@ -17,9 +17,13 @@ assert.match(controller,/singlePassOpen:true/);
 assert.match(lifecycle,/activationRequired:true/);
 assert.match(lifecycle,/managementAfterPaint:true/);
 assert.match(lifecycle,/inputOwnership:false/);
-assert.match(boundary,/SETTINGS_GATEWAY/);
-const experience=boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
-for(const forbidden of ['DOCUMENT_LIFECYCLE','AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','model-settings-controller-v173'])assert.ok(!experience.includes(forbidden),`Boundary eagerly contains ${forbidden}.`);
+assert.match(boundary,/CORE_INTERFACE_RUNTIME/);
+assert.doesNotMatch(boundary,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS/);
+const boot=boundary.match(/function installSystemExperienceSupport\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+assert.match(boot,/addScript\(CORE_INTERFACE_RUNTIME\)/);
+assert.doesNotMatch(boot,/SETTINGS_GATEWAY|DOCUMENT_LIFECYCLE|model-settings-controller-v173/);
+assert.match(coreRuntime,/['"]\/app\/settings-gateway-v317\.js['"]/);
+for(const forbidden of ['DOCUMENT_LIFECYCLE','AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','model-settings-controller-v173.js?activate=1'])assert.ok(!coreRuntime.includes(forbidden),`Core runtime eagerly contains ${forbidden}.`);
 assert.match(shell,/data-open-unified-ai-settings/);
 assert.match(shell,/settingsInputOwnership:false/);
 assert.match(loader,/settingsOwner:'settings-gateway-v317'/);
@@ -29,4 +33,4 @@ assert.match(campusRuntime,/data-open-unified-ai-settings/);
 assert.doesNotMatch(living,/>Settings<\/button>/i);
 assert.doesNotMatch(living,/model-settings-controller-v173\.js|ai-settings-bind-guard-v230\.js|ai-settings-device-repair-v229\.js/);
 for(const [name,html] of [['living-school',living],['cerbanimo',realm],['fellowfare',fellowfare],['anarchadia',anarchadia]])assert.ok(html.includes('/app/install-boundary-v146.js'),`${name} does not enter the canonical boundary.`);
-console.log(JSON.stringify({ok:true,revision:'settings-safe-open-v317',settingsOwner:'settings-gateway-v317',entryPoints:5,oneInputListener:true,controllerFirstClickOnly:true,managementAfterPaint:true,providerRuntimeOnOpen:false,livingSchoolShared:true,campusPreflight:false},null,2));
+console.log(JSON.stringify({ok:true,revision:'settings-safe-open-v317',settingsOwner:'settings-gateway-v317',interfaceRuntime:'core-interface-runtime-v1',entryPoints:5,oneInputListener:true,controllerFirstClickOnly:true,managementAfterPaint:true,providerRuntimeOnOpen:false,livingSchoolShared:true,campusPreflight:false},null,2));
