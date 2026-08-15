@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const [versionText,integrityText,wrapper,repairWorker,repairOnly,legacyAlias,builder,materializer,generator,coreWorker,installerWorker]=await Promise.all([
-  read('VERSION'),read('public/app/shell-integrity-v281.json'),read('public/service-worker-v203.js'),read('public/service-worker-shell-repair-v293.js'),read('public/app/installer-repair-only-v1.js'),read('public/app/installer-online-fallback-v225.js'),read('scripts/build-service-worker-v211.mjs'),read('scripts/materialize-canonical-release.mjs'),read('scripts/generate-prelive-metadata-v281.mjs'),read('public/service-worker-core-v208.js'),read('public/service-worker-installer-state-v280.js')
+  read('VERSION'),read('public/app/shell-integrity-v281.json'),read('public/service-worker-v203.js'),read('public/service-worker-shell-repair-v293.js'),read('public/app/installer-repair-only-v2.js'),read('public/app/installer-online-fallback-v225.js'),read('scripts/build-service-worker-v211.mjs'),read('scripts/materialize-canonical-release.mjs'),read('scripts/generate-prelive-metadata-v281.mjs'),read('public/service-worker-core-v208.js'),read('public/service-worker-installer-state-v280.js')
 ]);
 const version=versionText.trim(),integrity=JSON.parse(integrityText);
 function extractStringArray(source,name,label){
@@ -42,6 +42,8 @@ assert.ok(repairOnly.includes("if(installButton.dataset.civweaveRepairOnly!==REV
 assert.match(repairOnly,/new MessageChannel\(\)/,'Repair UI no longer uses a reply channel.');
 assert.match(repairOnly,/\[channel\.port2\]/,'Repair UI no longer transfers the reply port.');
 assert.match(repairOnly,/browserRuntimePolicy:'installer-only-until-installed-display'/,'Repair UI can reopen browser runtime.');
+assert.match(repairOnly,/cacheDistinctPath:true/,'Current repair UI lost the stale-cache escape.');
+assert.match(repairOnly,/hubToolsPolicy:'explicit-user-load-only'/,'Current repair UI can boot Hub tools on first paint.');
 assert.match(legacyAlias,/retired:true/,'Legacy online fallback alias is not marked retired.');
 assert.match(legacyAlias,/browserRuntime:false/,'Legacy online fallback alias can still authorize browser runtime.');
 assert.doesNotMatch(legacyAlias,/function openCampus\(/,'Legacy alias still contains campus launcher.');
@@ -52,4 +54,4 @@ function repairHarness({fail=false}={}){
 }
 const success=await repairHarness();assert.equal(success?.type,'CIVWEAVE_DEVICE_PACKAGE_REPAIR');assert.equal(success?.ready,true);assert.equal(success?.repaired,true);assert.equal(success?.integrity,'verified');
 const failure=await repairHarness({fail:true});assert.equal(failure?.type,'CIVWEAVE_DEVICE_PACKAGE_REPAIR');assert.equal(failure?.ready,false);assert.equal(failure?.repaired,false);
-console.log(JSON.stringify({ok:true,revision:'installed-shell-repair-v293-install-only-v1',version,shellIntegrityAssets:integrity.requiredAssetCount,repairMessage:'REPAIR_DEVICE_PACKAGE',repairScope:'verified-small-shell-only',browserRuntime:false,legacyAliasRetired:true,preservedStorage:['offline-campus','models','open-learning-media','knowledge-schools'],workerGeneratorLocked:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'installed-shell-repair-v293-install-only-v2-cache-distinct',version,shellIntegrityAssets:integrity.requiredAssetCount,repairMessage:'REPAIR_DEVICE_PACKAGE',repairScope:'verified-small-shell-only',browserRuntime:false,cacheDistinctRepair:true,hubToolsExplicit:true,legacyAliasRetired:true,preservedStorage:['offline-campus','models','open-learning-media','knowledge-schools'],workerGeneratorLocked:true},null,2));
