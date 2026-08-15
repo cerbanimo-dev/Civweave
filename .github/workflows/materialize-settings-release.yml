@@ -29,6 +29,7 @@ jobs:
       - name: Materialize canonical release
         run: |
           set -euo pipefail
+          npm version 1.0.161 --no-git-tag-version
           npm run release:materialize
           node scripts/sync-release-coherence-v220.mjs
           node scripts/sync-canonical-release-hashes.mjs
