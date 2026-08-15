@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveEconomicPolicyV1)return;
-const VERSION='1.2.0';
+const VERSION='1.3.0';
 const SCHEMA='civweave.economic-policy.v1';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const num=value=>value===null||value===undefined||value===''?null:Number.isFinite(Number(value))?Number(value):null;
@@ -41,9 +41,9 @@ function rows(){
   const value=(path,fallback=null)=>{let node=g;for(const key of path.split('.'))node=node?.[key];const n=num(node);return n===null?fallback:n};
   const defs=[
     ['labor.wageButtonsPerHour','button/hour',value('labor.wageButtonsPerHour',value('labor.buttonsPerHour',5)),'Uniform starting wage for validated human-equivalent labor. The same Button rate applies to every worker.'],
-    ['learning.moduleCompletionAcorns','acorn/module',value('learning.moduleCompletionAcorns',2),'Completion grant.'],
-    ['learning.externalValidationBonusAcorns','acorn/module',value('learning.externalValidationBonusAcorns',2),'External successful validation bonus.'],
-    ['learning.validatorContributionAcorns','acorn/validation',value('learning.validatorContributionAcorns',1),'Qualified learning-validation contribution.'],
+    ['learning.moduleCompletionAcorns','acorn/module',value('learning.moduleCompletionAcorns',10),'Completion grant.'],
+    ['learning.externalValidationBonusAcorns','acorn/module',value('learning.externalValidationBonusAcorns',20),'External successful validation bonus.'],
+    ['learning.validatorContributionAcorns','acorn/validation',value('learning.validatorContributionAcorns',5),'Qualified learning-validation contribution.'],
     ['education.acornsPerHour','acorn/hour',value('education.acornsPerHour',100),'Marketed educational time baseline on the higher-granularity Acorn price scale.'],
     ['education.curriculumMinAcorns','acorn/curriculum',value('education.curriculumMinAcorns',50),'Lower curriculum suggestion bound on the Acorn price scale.'],
     ['education.curriculumMaxAcorns','acorn/curriculum',value('education.curriculumMaxAcorns',500),'Upper curriculum suggestion bound on the Acorn price scale.'],
