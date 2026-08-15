@@ -1,0 +1,45 @@
+name: One-shot materialize offline v1.0.161 r2
+
+on:
+  push:
+    branches: [release-helper/offline-campus-v161-r2]
+    paths:
+      - '.github/workflows/one-shot-materialize-offline-v161-r2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: release-helper/offline-campus-v161-r2
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Advance canonical release
+        run: |
+          printf '1.0.161\n' > VERSION
+          npm version 1.0.161 --no-git-tag-version
+          npm run release:materialize
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          node scripts/sync-canonical-release-hashes.mjs
+      - name: Verify materialized release
+        run: |
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          node scripts/sync-canonical-release-hashes.mjs
+      - name: Commit generated release and remove helper workflow
+        run: |
+          git rm .github/workflows/one-shot-materialize-offline-v161-r2.yml
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add -A
+          git commit -m 'Materialize release 1.0.161'
+          git push origin HEAD:release-helper/offline-campus-v161-r2
