@@ -54,7 +54,8 @@ async function getJson(url: string | URL) {
 }
 
 function locationFor(node: JsonRecord) {
-  const latitude = Number(node?.location?.latitude), longitude = Number(node?.location?.longitude);
+  const value = node?.location || node?.publicLocation || node?.metadata?.publicLocation || {};
+  const latitude = Number(value.latitude ?? value.lat), longitude = Number(value.longitude ?? value.lon);
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) return null;
   return { latitude, longitude };
 }
@@ -63,6 +64,10 @@ function matches(mode: string, slots: { free: number; paid: number }) {
   if (mode === "free") return slots.free > 0;
   if (mode === "paid") return slots.paid > 0;
   return slots.free > 0 || slots.paid > 0;
+}
+
+function synthetic(node: JsonRecord) {
+  return node?.stagingSynthetic === true || node?.synthetic === true;
 }
 
 export const onRequestPost: PagesFunction = async (context) => {
@@ -74,59 +79,76 @@ export const onRequestPost: PagesFunction = async (context) => {
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
     return reply({ ok: false, error: "approximate-location-required" }, 400);
   }
+
   const roundedLatitude = Number(latitude.toFixed(3)), roundedLongitude = Number(longitude.toFixed(3));
   try {
     const [directory, fabric] = await Promise.all([
       getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
       getJson(new URL("/api/fabric/capacity", FABRIC_ORIGIN)),
     ]);
-    if (!fabric.ok) return reply({ ok: false, error: "hub-fabric-unavailable", fabricStatus: fabric.status }, 502);
+    if (!fabric.ok) return reply({ ok: false, error: "guild-fabric-unavailable", fabricStatus: fabric.status }, 502);
+
     const directoryById = new Map((Array.isArray(directory.payload?.nodes) ? directory.payload.nodes : [])
-      .filter((node: JsonRecord) => /^[a-z0-9-]{1,120}$/.test(String(node?.nodeId || "")))
+      .filter((node: JsonRecord) => !synthetic(node) && /^[a-z0-9-]{1,120}$/.test(String(node?.nodeId || "")))
       .map((node: JsonRecord) => [String(node.nodeId), node]));
     const hostNodeIds = [...new Set((Array.isArray(fabric.payload?.hostNodeIds) ? fabric.payload.hostNodeIds : [])
       .map((value: unknown) => String(value || ""))
       .filter((value: string) => /^[a-z0-9-]{1,120}$/.test(value)))].slice(0, MAX_CAPACITY_PROBES);
+
     const manifests = await Promise.all(hostNodeIds.map(async nodeId => {
       const response = await getJson(new URL(`/n/${nodeId}/api/ai/node/manifest`, FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} }));
-      return response.ok ? (response.payload?.manifest || response.payload || {}) : {};
+      if (!response.ok || response.payload?.stagingSynthetic === true) return {};
+      const manifest = response.payload?.manifest || response.payload || {};
+      return synthetic(manifest) ? {} : manifest;
     }));
+
     const candidates = hostNodeIds.map((nodeId, index) => {
       const node = { ...(directoryById.get(nodeId) || {}), ...(manifests[index] || {}), nodeId };
       const location = locationFor(node);
       return { ...node, distanceKm: location ? distanceKm(roundedLatitude, roundedLongitude, location.latitude, location.longitude) : null };
-    }).filter((node: JsonRecord) => node.status !== "offline")
+    }).filter((node: JsonRecord) => !synthetic(node) && node.status !== "offline")
       .sort((left: JsonRecord, right: JsonRecord) => left.distanceKm == null ? 1 : right.distanceKm == null ? -1 : left.distanceKm - right.distanceKm);
+
     const probed = await Promise.all(candidates.map(async (node: JsonRecord) => {
       const nodeId = String(node.nodeId), hostOrigin = FABRIC_ORIGIN;
       try {
-        const capacityUrl = new URL("/api/fabric/capacity", hostOrigin);capacityUrl.searchParams.set("nodeId", nodeId);
+        const capacityUrl = new URL("/api/fabric/capacity", hostOrigin); capacityUrl.searchParams.set("nodeId", nodeId);
         const capacityResult = await getJson(capacityUrl);
-        if (!capacityResult.ok) return null;
+        if (!capacityResult.ok || capacityResult.payload?.stagingSynthetic === true) return null;
         const slots = slotsFor(capacityResult.payload || {});
         if (!matches(mode, slots)) return null;
         return {
-          schema: "civweave.nearby-hub.v1",
+          schema: "civweave.nearby-guild.v1",
           nodeId,
-          displayName: String(node.displayName || nodeId).slice(0, 180),
+          displayName: String(node.displayName || node.label || nodeId).slice(0, 180),
           hostOrigin,
           runtime: String(node.runtime || "cloudflare-host-node").slice(0, 120),
           status: String(node.status || "active"),
           distanceKm: node.distanceKm == null ? null : Number(node.distanceKm.toFixed(2)),
+          locationPublished: node.distanceKm != null,
           slots,
+          stagingSynthetic: false,
         };
       } catch {
         return null;
       }
     }));
+
     return reply({
-      schema: "civweave.nearby-hub-search.v1",
+      schema: "civweave.nearby-guild-search.v1",
       ok: true,
+      environment: "production",
+      stagingSynthetic: false,
       mode,
       nodes: probed.filter(Boolean).slice(0, MAX_RESULTS),
+      source: {
+        directory: directory.ok ? "core-guild-directory" : "unavailable",
+        fabric: "cloudflare-guild-fabric",
+        capacity: "live-probed",
+      },
       privacy: { coordinateDecimals: 3, exactLocationStored: false, exactLocationReturned: false },
     });
   } catch (error) {
-    return reply({ ok: false, error: "hub-search-failed", message: String((error as Error)?.message || error) }, 502);
+    return reply({ ok: false, error: "guild-search-failed", message: String((error as Error)?.message || error) }, 502);
   }
 };
