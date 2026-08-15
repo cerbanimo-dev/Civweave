@@ -45,14 +45,18 @@ async function health(timeoutMs = 1200) {
   }
 }
 
+function isolatedStagingHealth(probe) {
+  return Boolean(
+    probe?.response.ok
+    && probe.payload?.service === 'civweave-cloudflare-pages'
+    && probe.payload?.environment === 'staging'
+    && probe.payload?.productionIsolation === true
+  );
+}
+
 const existing = await health();
 if (existing) {
-  if (
-    existing.response.ok
-    && existing.payload?.service === 'civweave-cloudflare-pages'
-    && existing.payload?.environment === 'staging'
-    && existing.payload?.productionIsolation === true
-  ) {
+  if (isolatedStagingHealth(existing)) {
     console.log(`[civweave-local-staging] already running at ${origin}/app/`);
     console.log(`[civweave-local-staging] MCP browser target: ${origin}`);
     process.exit(0);
@@ -96,23 +100,16 @@ child.once('exit', (code, signal) => {
   childExit = { code: code ?? (signal ? 1 : 0), signal };
 });
 
+let ready = false;
 for (let attempt = 1; attempt <= 80; attempt += 1) {
   if (childExit) break;
   await new Promise(resolvePromise => setTimeout(resolvePromise, 250));
   const probe = await health(500);
-  if (
-    probe?.response.ok
-    && probe.payload?.service === 'civweave-cloudflare-pages'
-    && probe.payload?.environment === 'staging'
-    && probe.payload?.productionIsolation === true
-  ) {
+  if (isolatedStagingHealth(probe)) {
+    ready = true;
     console.log(`[civweave-local-staging] ready: ${origin}/app/`);
     console.log(`[civweave-local-staging] MCP browser target: ${origin}`);
     break;
-  }
-  if (attempt === 80) {
-    child.kill();
-    throw new Error(`Local staging did not become healthy at ${origin}/api/health.`);
   }
 }
 
@@ -120,8 +117,16 @@ if (childExit) {
   if (childExit.error) throw childExit.error;
   process.exit(childExit.code || 1);
 }
+if (!ready) {
+  child.kill();
+  throw new Error(`Local staging did not become healthy at ${origin}/api/health.`);
+}
 
 const exit = await new Promise(resolvePromise => {
+  if (child.exitCode !== null || child.signalCode) {
+    resolvePromise({ code: child.exitCode, signal: child.signalCode });
+    return;
+  }
   child.once('exit', (code, signal) => resolvePromise({ code, signal }));
 });
 process.exit(exit.code ?? (exit.signal ? 1 : 0));
