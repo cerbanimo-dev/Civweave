@@ -1,31 +1,43 @@
-# Cerbanimo Intention Landscape v1
+# Civweave Guild Quest Tracker contract
 
-Cerbanimo's default cabinet landing surface is a three-level causal browser inspired by the progressive galaxy → star → planet focus mechanics in the original `glaedn/Cerbanimo` visualizer family. The new surface keeps that depth-based navigation model while adapting it to hubs, shared intentions, and execution maps.
+Cerbanimo's default landscape is the canonical three-tier browser for Civweave's community work hierarchy. The fantasy language is not decorative terminology layered over a second data model. It maps directly onto existing Civweave records:
 
-## Level contract
+- **Guild = Node.** A local, nearby, saved, or boosted Civweave hub/node is presented as a Guild.
+- **Quest = Shared intention.** An intention published by a Guild is presented as a Quest.
+- **Quest Map = Intention plan.** The Quest's existing Living School, Cerbanimo, and FellowFare paths are rendered as the three execution lanes of one map.
 
-1. **Hub level** shows nearby and boosted hub nodes in a true CSS 3D carousel. The centered hub owns the description card. Tapping the centered title or card descends to intentions.
-2. **Intention level** keeps the parent hub rail visible but shifted upward. Shared intention titles rotate in their own 3D rail. The lower card shows current open needs. Tapping the centered intention descends to its map.
-3. **Map level** removes the hub rail and keeps the intention rail as the parent selector. The map uses three execution lanes:
-   - Living School: emerald, for learning, documentation, and research.
-   - Cerbanimo: neon purple fading to magenta, for practice, labor, and making.
-   - FellowFare: amber, for resources, mentors, access, and outsourcing.
+The hierarchy is therefore **Guilds (Nodes) → Quests (shared intentions) → Quest Maps**.
 
-The landscape is offline-first and renders only discovered/local data. It does not invent community hubs, intentions, needs, or tasks when none exist.
+## Three-tier interaction contract
 
-## Hub discovery adapters
+1. **Guild level** shows nearby, saved, boosted, and local nodes in the mobile-first 3D carousel. The centered Guild owns the detail card. Swipe, wheel, arrow keys, and direct card selection rotate the rail. Selecting the centered Guild descends to its Quests.
+2. **Quest level** keeps the parent Guild rail visible in a compressed state while the Guild's shared intentions rotate in their own carousel. The selected Quest shows its outcome, progress, and open needs. Selecting it descends to the Quest Map.
+3. **Quest Map level** keeps the selected Quest available as context and renders exactly three execution lanes from the Quest's existing plan paths:
+   - **Living School** — canonical `#aeea57`, Learn & Grow.
+   - **Cerbanimo** — canonical `#e85dff`, Design & Build.
+   - **FellowFare** — canonical `#efb452`, Support & Share.
 
-The v1 browser reads:
+The tier selector follows Civweave's current palette: Civweave mint for Guilds, Cerbanimo purple for Quests, and FellowFare amber for the Quest Map. House colors remain community identity accents and do not replace realm lane colors.
 
-- `civweave.hub-discovery.v1` for explicit hub discovery records.
-- `federation-finder.mesh-nodes.v1` for saved/nearby Civweave mesh nodes.
-- `civweave.intentions.v127` for intentions belonging to the local Civweave hub.
+## Progress semantics
 
-Explicit discovery records can carry `boosted` / `boostScore`, distance metadata, descriptions, `sharedIntentions`, and an explicit House assignment.
+Quest Map steps are not a second task ledger. Each lane reads the Quest's existing `plan.paths` / `tracks` and uses path/task status plus stored `path.progress` to determine completion. Proof-driven progress events may refresh the view, but the tracker does not award completion by itself.
 
-## The five Houses
+Open needs are read directly when a Quest publishes them. When explicit needs are absent, unfinished path steps may be summarized as needs. The tracker must never invent Guilds, Quests, tasks, progress, or community activity.
 
-Every hub receives one persisted random House when no explicit House is published:
+## Guild discovery adapters
+
+The tracker reads:
+
+- `civweave.hub-discovery.v1` for explicit Guild/node discovery records.
+- `federation-finder.mesh-nodes.v1` for saved and nearby Civweave mesh nodes.
+- `civweave.intentions.v127` for Quests belonging to the local Civweave Guild.
+
+Existing discovery fields remain valid. The interface may call them Guilds, but persistence and federation compatibility continue to accept existing hub/node identifiers and fields.
+
+## Houses remain orthogonal
+
+Every Guild receives one persisted House when no explicit House is published:
 
 - House Magenta
 - House Cyan
@@ -33,16 +45,16 @@ Every hub receives one persisted random House when no explicit House is publishe
 - House Purple
 - House Pearl
 
-Assignments are stored in `civweave.hub-houses.v1`, so a hub does not change identity on every render. House identity is visual/community metadata, not a permission or ranking tier.
+Assignments remain stored in `civweave.hub-houses.v1`. A House is social/visual identity, not the Guild itself, not a permission tier, and not an economic ranking.
 
-A House change must be governed. The landscape's **Vote on House** action creates a `civweave.house-change-proposal.v1` request in `civweave.anarchadia.pending-proposals.v1` and emits `civweave:anarchadia-proposal-requested`. Anarchadia remains responsible for the actual vote, decision rule, and application of an approved change.
+A House change remains governed. The **Guild House vote** action creates a `civweave.house-change-proposal.v1` request in `civweave.anarchadia.pending-proposals.v1` and emits `civweave:anarchadia-proposal-requested`. The proposal keeps legacy `hubId`/`hubName` fields and also supplies `guildId`/`guildName` so existing governance consumers remain compatible while the user-facing lore becomes consistent.
 
-House identity is intentionally suitable for later friendly inter-House challenges. Competition mechanics must be built from community-requested unmet-needs metrics and must not silently convert House assignment into access, reputation, or economic privilege.
+## Anarchadia vote identity badges
 
-## Vote identity badges
+Quest Map steps can carry Anarchadia vote references directly. The tracker also reads the governance vault (`civweave-anarchadia-governance-v145`) and `civweave.anarchadia.vote-index.v1`. Each open vote receives a stable color derived from its vote ID. The same numbered/color badge appears on every related step so one governance question can be followed across all three lanes.
 
-Task nodes can carry Anarchadia vote references directly, and the landscape also reads the governance vault (`civweave-anarchadia-governance-v145`) plus `civweave.anarchadia.vote-index.v1`. Each unique open vote gets a stable color derived from the vote ID. That same color appears on every related task, with a small numeric identity badge, so users can visually trace one vote across the map.
+## Canonical access and compatibility
 
-## Legacy workspace access
+The tracker owns the default `?system=cerbanimo&embed=1` landscape route. Existing Cerbanimo rooms and capabilities remain untouched. Opening a room restores the canonical realm-console workspace and exposes a **Guild Quest Tracker** return link.
 
-The landscape owns the default `?system=cerbanimo&embed=1` landing route. Existing canonical Cerbanimo rooms remain untouched. Opening a room or capability restores the existing realm-console workspace, and those screens receive an **Intention Landscape** return link.
+`CivweaveCerbanimoIntentionLandscapeV1` remains exported for compatibility. `CivweaveGuildQuestTrackerV1` is the lore-aligned alias for new callers. No dynamic script injection, build-time source rewriting, or runtime patch layer is part of this feature.
