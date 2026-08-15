@@ -27,17 +27,19 @@ const required=[
   [installerHtml,'/app/installer-repair-only-v2.js','installer cache-distinct repair bridge'],
   [installRuntime,`const VERSION = '${version}';`,'installer runtime'],
   [installedEntryHtml,`/app/installed-entry-v146.js?v=${version}`,'installed entry HTML'],
-  [installedEntryHtml,'installed-entry-browser-gate-v2','installed entry capability-aware pre-paint gate'],
-  [installedEntryHtml,"const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'",'installed entry capability key'],
+  [installedEntryHtml,'installed-entry-browser-gate-v3-launch-session','installed entry launch-session pre-paint gate'],
+  [installedEntryHtml,"const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'",'installed entry PWA launch-session key'],
+  [installedEntryHtml,'globalThis.launchQueue.setConsumer','installed entry Launch Handler consumer'],
   [installedEntryRuntime,`const FALLBACK_VERSION='${version}';`,'installed entry runtime'],
-  [installedEntryRuntime,"browserRuntimePolicy:'installed-display-or-verified-installed-capability'",'installed entry browser boundary'],
+  [installedEntryRuntime,"const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'",'installed entry runtime launch-session key'],
+  [installedEntryRuntime,"browserRuntimePolicy:'installed-display-or-pwa-launch-session'",'installed entry browser boundary'],
   [installedEntryRuntime,'async function installedLaunchAuthorized()','installed entry authorization boundary'],
   [routes,`const VERSION='${version}';`,'route contract'],
   [nav,`const VERSION='${version}-five-system-navigation-v227';`,'themed navigation'],
   [boundary,`const VERSION='${version}';`,'install boundary'],
   [boundary,"const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';",'install-only boundary revision'],
-  [boundary,"const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'",'install boundary capability key'],
-  [boundary,"browserRuntimePolicy:'installed-display-or-verified-installed-capability'",'install boundary policy'],
+  [boundary,"const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'",'install boundary launch-session key'],
+  [boundary,"browserRuntimePolicy:'installed-display-or-pwa-launch-session'",'install boundary policy'],
   [boundary,'installedQueryIsAuthorization:false','query must not authorize installed runtime'],
   [campusHtml,`Civweave Working Campus · v${version}`,'Working Campus title'],
   [campusHtml,`<b class="version-chip">v${version}</b>`,'Working Campus chip'],
@@ -50,6 +52,8 @@ const required=[
 ];
 for(const [source,token,label] of required)check(source.includes(token),`${label} is not synchronized to Civweave ${version}: missing ${token}`);
 
+check(!installedEntryHtml.includes('localStorage.setItem(INSTALL_CAPABILITY_KEY'),'Installed entry must not persist runtime authorization in localStorage.');
+check(!boundary.includes('civweave.pwa.installed-capability.v1'),'Working Campus must not retain the retired durable runtime capability.');
 check(!installerHtml.includes('/app/pwa-install-prompt-v249.js'),'Installer still loads the stale-cache-prone v249 install bridge.');
 check(!installerHtml.includes('/app/installer-repair-only-v1.js'),'Installer still loads the stale shell-cached v1 repair bridge.');
 check(!installerHtml.includes('open-online-campus-v225'),'Installer still exposes the retired anonymous browser fallback.');
@@ -73,4 +77,4 @@ for(const token of [
   'installOnlyPwa'
 ])check(syncSource.includes(token),`Release synchronizer would erase the install-only/cache-distinct repair: missing ${token}`);
 
-console.log(JSON.stringify({ok:true,version,committedTreeVerified:true,verifierMutation:false,shellIntegrityCoherent:true,workingCampusReturnGuard:'v425',browserRuntime:'installed-display-or-verified-installed-capability',queryAuthorization:false,installOnlyPwa:'v1',installedCapability:'v1',cacheDistinctInstallerPaths:true,installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',securityScriptsRevalidate:true},null,2));
+console.log(JSON.stringify({ok:true,version,committedTreeVerified:true,verifierMutation:false,shellIntegrityCoherent:true,workingCampusReturnGuard:'v425',browserRuntime:'installed-display-or-pwa-launch-session',queryAuthorization:false,installOnlyPwa:'v1',pwaLaunchSession:'v1',cacheDistinctInstallerPaths:true,installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',securityScriptsRevalidate:true},null,2));
