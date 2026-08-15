@@ -13,16 +13,11 @@ const COMMUNITY_SEATS_PER_FREE_NODE = 6;
 const SURVIVAL_FLOOR_NEURONS = 25;
 const INCLUDED_POOL_BPS = 9_000;
 
-function loopbackHostname(hostname: string): boolean {
-  return ["localhost", "127.0.0.1", "::1", "[::1]"].includes(hostname.toLowerCase());
-}
-
 function hostOrigin(value: string | null): URL | null {
   if (!value) return null;
   try {
     const url = new URL(value);
-    const loopbackHttp = url.protocol === "http:" && loopbackHostname(url.hostname);
-    if ((url.protocol !== "https:" && !loopbackHttp) || url.username || url.password) return null;
+    if (url.protocol !== "https:" || url.username || url.password) return null;
     url.pathname = "/";
     url.search = "";
     url.hash = "";
