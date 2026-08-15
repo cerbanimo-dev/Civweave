@@ -8,7 +8,9 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..');
 const functionsRoot = resolve(repoRoot, 'functions');
 const stagingRuntimePath = resolve(functionsRoot, '_shared', 'staging-runtime.ts');
-const localConfigPath = resolve(repoRoot, 'wrangler.local-staging.jsonc');
+const localToolsRoot = resolve(repoRoot, 'tools', 'civweave-dev-mcp');
+const localConfigPath = resolve(localToolsRoot, 'wrangler.local-staging.jsonc');
+const localLauncherPath = resolve(localToolsRoot, 'start-local-staging.mjs');
 
 const productionTargets = [
   'civweave-core.cerbanimo.workers.dev',
@@ -62,14 +64,31 @@ for (const marker of [
 const config = readFileSync(localConfigPath, 'utf8');
 for (const marker of [
   '"name": "civweave-local-staging"',
-  '"pages_build_output_dir": "./public"',
   '"CIVWEAVE_ENVIRONMENT": "staging"',
   '"CIVWEAVE_PRODUCTION_ISOLATION": "true"',
 ]) {
   if (!config.includes(marker)) fail(`local staging config is missing safety marker: ${marker}`);
 }
+if (config.includes('"pages_build_output_dir"')) {
+  fail('local staging Wrangler config must remain local-development-only; static assets are passed explicitly by the launcher.');
+}
 if (/"name"\s*:\s*"civweave"(?:\s|,)/.test(config)) {
   fail('local staging config must never target the production Pages project name.');
+}
+
+const launcher = readFileSync(localLauncherPath, 'utf8');
+for (const marker of [
+  "'pages'",
+  "'dev'",
+  "'public'",
+  "'127.0.0.1'",
+  '8788',
+  'wrangler.local-staging.jsonc',
+]) {
+  if (!launcher.includes(marker)) fail(`local staging launcher is missing expected contract marker: ${marker}`);
+}
+if (!launcher.includes("const loopbackHosts = new Set(['127.0.0.1', 'localhost', '::1'])")) {
+  fail('local staging launcher must remain loopback-only.');
 }
 
 for (const file of walk(functionsRoot)) {
@@ -89,5 +108,5 @@ for (const file of walk(functionsRoot)) {
 }
 
 if (!process.exitCode) {
-  process.stdout.write('[local-staging] isolation verified: loopback uses staging fixtures and known production service targets are guarded.\n');
+  process.stdout.write('[local-staging] isolation verified: dev-tool-owned loopback staging uses staging fixtures and known production service targets are guarded.\n');
 }
