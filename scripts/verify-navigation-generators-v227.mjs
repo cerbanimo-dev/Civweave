@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [versionText,builder,versionSync,coherenceSync,installedEntry,installedLaunch,repairOnly,manifestText,shellRepair,wrapper,boundary]=await Promise.all([
-  read('VERSION'),read('scripts/build-service-worker-v211.mjs'),read('scripts/sync-release-version-assets.mjs'),read('scripts/sync-release-coherence-v220.mjs'),read('public/app/installed-entry-v146.js'),read('public/service-worker-installed-launch-v282.js'),read('public/app/installer-repair-only-v1.js'),read('public/app/manifest.webmanifest'),read('public/service-worker-shell-repair-v225.js'),read('public/service-worker-v203.js'),read('public/app/install-boundary-v146.js')
+  read('VERSION'),read('scripts/build-service-worker-v211.mjs'),read('scripts/sync-release-version-assets.mjs'),read('scripts/sync-release-coherence-v220.mjs'),read('public/app/installed-entry-v146.js'),read('public/service-worker-installed-launch-v282.js'),read('public/app/installer-repair-only-v2.js'),read('public/app/manifest.webmanifest'),read('public/service-worker-shell-repair-v225.js'),read('public/service-worker-v203.js'),read('public/app/install-boundary-v146.js')
 ]);
 const version=versionText.trim();
 const manifest=JSON.parse(manifestText);
@@ -29,13 +29,15 @@ assert(installedEntry.includes("if(!installedDisplay()&&!localDeveloper())"),'In
 assert(installedEntry.includes("browserRuntimePolicy:'installed-display-only'"),'Installed entry must declare installed-only runtime policy.');
 assert.equal(new URL(manifest.start_url,'https://civweave.invalid').pathname,'/app/installed-entry-v146.html','PWA manifest must launch through installed bootstrap.');
 assert(installedLaunch.includes("policy:'installed-entry-then-working-campus-never-installer-substitution'"),'Worker installed launch boundary regressed.');
-assert(shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'Shell repair must retain repair-only bridge.');
+assert(shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v2.js']"),'Shell repair must seed the current repair-only bridge v2.');
+assert(!shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'Shell repair must not seed the stale v1 repair bridge.');
 assert(!shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'Shell repair must not restore online fallback.');
 assert(repairOnly.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'Repair bridge must stay installer-only in browser display.');
 assert(repairOnly.includes("if(!required||!rawNext||!installedDisplay())return false"),'Required-next recovery must require installed display mode.');
+assert(repairOnly.includes('cacheDistinctPath:true'),'Current repair bridge must declare its stale-cache escape.');
 assert(boundary.includes('function allowed(){return installedDisplay()||developer()}'),'Shared boundary must not allow embedded browser documents.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Checked-in worker must load routes first.');
 assert(wrapper.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`),'Checked-in worker lost install-only core cache epoch.');
-assert(wrapper.includes('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1'),'Checked-in worker lost install-only repair epoch.');
+assert(wrapper.includes('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1'),'Checked-in worker lost stable V225 repair epoch.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Checked-in worker must keep canonical navigation final.');
-console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-install-only-pwa-v1',singleRouteAuthority:true,builderRouteFirst:true,builderIntegrityOrder:true,builderCanonicalAfterRepair:true,coherenceCannotRestoreBrowserRuntime:true,updaterFirstEntry:true,installedLaunchNeverInstaller:true,repairOnly:true,browserRuntime:false,workingCampusReturn:'v425',moduleSyntaxCheckedByWorkflow:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-install-only-pwa-v2-cache-distinct-repair',singleRouteAuthority:true,builderRouteFirst:true,builderIntegrityOrder:true,builderCanonicalAfterRepair:true,coherenceCannotRestoreBrowserRuntime:true,updaterFirstEntry:true,installedLaunchNeverInstaller:true,repairOnly:true,cacheDistinctRepair:true,stableV225WorkerEpoch:true,browserRuntime:false,workingCampusReturn:'v425',moduleSyntaxCheckedByWorkflow:true},null,2));
