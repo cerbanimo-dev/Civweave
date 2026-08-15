@@ -2,7 +2,7 @@
   "name":"civweave-host-node-hub",
   "version":"1.0.160",
   "private":true,
-  "description":"Civweave single-current-tree local-first application and host node.",
+  "description":"Civweave active application and host node; production surface under re-audit from current main.",
   "type":"module",
   "engines":{"node":"22.x"},
   "dependencies":{"onnxruntime-web":"1.27.0"},
