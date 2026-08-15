@@ -1,0 +1,84 @@
+name: Verify interface runtime v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/working-campus-v156.html'
+      - 'public/app/working-campus-v156.js'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/model-settings-controller-v173.js'
+      - 'public/app/local-ai/**'
+      - 'public/service-worker-v156.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-core-v208.js'
+      - 'scripts/prepare-start-v131.mjs'
+      - 'scripts/sync-release-version-assets.mjs'
+      - 'scripts/sync-release-coherence-v220.mjs'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/generate-prelive-metadata-v281.mjs'
+      - 'scripts/verify-interface-runtime-v1.mjs'
+      - 'scripts/verify-system-ownership-v317.mjs'
+      - 'scripts/verify-settings-freeze-recovery-v296.mjs'
+      - 'scripts/verify-local-model-settings-mount-v273.mjs'
+      - 'scripts/verify-local-model-download-v267.mjs'
+      - 'config/system-ownership.json'
+      - 'docs/architecture/chat-settings-inference-start-boundary.md'
+      - '.github/workflows/verify-interface-runtime-v1.yml'
+  push:
+    branches: [main, 'agent/interface-runtime-full-rebase']
+    paths:
+      - 'public/app/working-campus-v156.html'
+      - 'public/app/working-campus-v156.js'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/model-settings-controller-v173.js'
+      - 'public/app/local-ai/**'
+      - 'public/service-worker-v156.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-core-v208.js'
+      - 'scripts/**interface**'
+      - 'scripts/**settings**'
+      - 'scripts/sync-release-version-assets.mjs'
+      - 'scripts/sync-release-coherence-v220.mjs'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/generate-prelive-metadata-v281.mjs'
+      - 'config/system-ownership.json'
+      - '.github/workflows/verify-interface-runtime-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check public/app/working-campus-v156.js
+          node --check public/app/settings-gateway-v317.js
+          node --check public/service-worker-core-v208.js
+          node --check public/service-worker-v203.js
+          node --check scripts/prepare-start-v131.mjs
+          node --check scripts/sync-release-version-assets.mjs
+          node --check scripts/sync-release-coherence-v220.mjs
+          node --check scripts/build-service-worker-v211.mjs
+          node --check scripts/generate-prelive-metadata-v281.mjs
+      - name: Read-only release contracts
+        run: |
+          node scripts/sync-release-version-assets.mjs
+          node scripts/build-service-worker-v211.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+      - name: Interface ownership and inference boundaries
+        run: |
+          node scripts/verify-interface-runtime-v1.mjs
+          node scripts/verify-system-ownership-v317.mjs
+          node scripts/verify-ai-settings-cleanroom-v188.mjs
+          node scripts/verify-settings-freeze-recovery-v296.mjs
+          node scripts/verify-local-model-settings-mount-v273.mjs
+          node scripts/verify-local-model-download-v267.mjs
+          node scripts/verify-chat-launch-readiness-v295.mjs
