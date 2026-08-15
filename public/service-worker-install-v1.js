@@ -1,7 +1,7 @@
 'use strict';
 
 const VERSION = '1.0.160';
-const BUILD = 'installer-bootstrap-v1';
+const BUILD = 'installer-bootstrap-v1-local-first';
 const CACHE = `civweave-install-${VERSION}-${BUILD}`;
 const SHELL = [
   '/app/index.html',
@@ -16,6 +16,7 @@ const SHELL = [
   '/app/japanese-shell-copy-v1.js',
   '/app/logos/civweave-pwa-192-v247.png'
 ];
+const INSTALLER_PATHS = new Set(['/', '/index.html', '/app/index.html']);
 
 const keyFor = pathname => new Request(new URL(pathname, self.location.origin).href, { method: 'GET' });
 
@@ -31,7 +32,11 @@ async function cacheShell() {
   let bytes = 0;
   await notifyProgress(0, SHELL.length, 0, '');
   for (const pathname of SHELL) {
-    const response = await fetch(new Request(pathname, { cache: 'no-store', credentials: 'same-origin' }));
+    const response = await fetch(new Request(pathname, {
+      cache: 'no-store',
+      credentials: 'same-origin',
+      headers: { 'x-civweave-package': 'bootstrap-install' }
+    }));
     if (!response.ok) throw new Error(`Installer shell fetch failed: ${pathname} (${response.status})`);
     const length = Number(response.headers.get('content-length') || 0);
     if (Number.isFinite(length) && length > 0) bytes += length;
@@ -53,6 +58,8 @@ async function status() {
     type: 'CIVWEAVE_DEVICE_PACKAGE',
     mode: 'lightweight-shell',
     bootstrap: true,
+    localFirst: true,
+    runtimeNetworkFallback: false,
     version: VERSION,
     revision: BUILD,
     ready: missing.length === 0,
@@ -65,6 +72,37 @@ async function status() {
     modelOnDemand: true,
     knowledgeLibrarySeparate: true
   };
+}
+
+async function requestFromInstaller(clientId) {
+  if (!clientId) return false;
+  try {
+    const client = await self.clients.get(clientId);
+    if (!client?.url) return false;
+    const url = new URL(client.url);
+    return url.origin === self.location.origin && INSTALLER_PATHS.has(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
+function explicitPackageRequest(request) {
+  return Boolean(request.headers.get('x-civweave-package'));
+}
+
+function localPackageMissing(pathname) {
+  return new Response(JSON.stringify({
+    error: 'LOCAL_PACKAGE_REQUIRED',
+    pathname,
+    message: 'This Civweave capability is not installed on this device. Open the local package installer to add it.'
+  }), {
+    status: 503,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-civweave-local-first': 'package-required'
+    }
+  });
 }
 
 self.addEventListener('install', event => {
@@ -99,7 +137,8 @@ self.addEventListener('message', event => {
       failed: [],
       failedCount: 0,
       bytes: 0,
-      bootstrap: true
+      bootstrap: true,
+      localFirst: true
     });
   }
 });
@@ -112,6 +151,17 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cached = await caches.match(request, { ignoreSearch: true });
     if (cached) return cached;
+
+    const installerRequest = await requestFromInstaller(event.clientId);
+    const packageRequest = explicitPackageRequest(request);
+    if (!installerRequest && !packageRequest) {
+      if (request.mode === 'navigate') {
+        const entry = await caches.match(keyFor('/app/installed-entry-v146.html'), { ignoreSearch: true });
+        if (entry) return entry;
+      }
+      return localPackageMissing(url.pathname);
+    }
+
     try {
       return await fetch(request);
     } catch (error) {
