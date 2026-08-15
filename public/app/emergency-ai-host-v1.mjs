@@ -1,12 +1,12 @@
 import {EMERGENCY_AI_HOST_POLICY,evaluateEmergencyAiEligibility} from './shared/guild-host-resilience-v1.mjs';
-const VERSION='1.1.0-emergency-ai-host-v1-tier-bound',OPT_IN='civweave.emergency-ai-host.opt-in.v1',HEALTH='civweave.local-ai.health.v286';
+const VERSION='1.1.1-emergency-ai-host-v1-tier-bound',OPT_IN='civweave.emergency-ai-host.opt-in.v1',HEALTH='civweave.local-ai.health.v286';
 const readJson=key=>{try{return JSON.parse(globalThis.localStorage?.getItem(key)||'null')}catch{return null}};
 const optedIn=()=>{try{return globalThis.localStorage?.getItem(OPT_IN)==='1'}catch{return false}};
-const setOptIn=value=>{try{value?globalThis.localStorage?.setItem(OPT_IN,'1'):globalThis.localStorage?.removeItem(OPT_IN)}catch{}return status()};
 const tiers=()=>globalThis.CivweaveResponseRouterV347?.tiers||{};
 const health=()=>readJson(HEALTH)||{};
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function status(){return Object.freeze({version:VERSION,policy:EMERGENCY_AI_HOST_POLICY,...evaluateEmergencyAiEligibility({optedIn:optedIn(),tierCatalog:tiers(),speedChecks:health()})})}
+const setOptIn=value=>{try{value?globalThis.localStorage?.setItem(OPT_IN,'1'):globalThis.localStorage?.removeItem(OPT_IN)}catch{}const next=status();if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(new CustomEvent('civweave:emergency-ai-host-opt-in',{detail:next}));return next};
 function tierExecution(request={}){
   const tierId=String(request.emergencyTier||request.tierId||'fast').trim().toLowerCase();
   if(!EMERGENCY_AI_HOST_POLICY.requiredTierIds.includes(tierId))throw Object.assign(new RangeError(`Emergency AI tier must be one of: ${EMERGENCY_AI_HOST_POLICY.requiredTierIds.join(', ')}.`),{code:'EMERGENCY_AI_TIER_UNSUPPORTED'});
