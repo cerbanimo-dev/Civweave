@@ -42,7 +42,7 @@ jobs:
       - name: Verify local staging and MCP contract
         run: |
           node scripts/verify-local-staging-isolation.mjs
-          node --check scripts/start-local-staging.mjs
+          node --check tools/civweave-dev-mcp/start-local-staging.mjs
           node --check tools/civweave-dev-mcp/lib/local-staging-tools.mjs
           node --check tools/civweave-dev-mcp/server.mjs
           node --test tools/civweave-dev-mcp/test/dev-tools-mcp.test.mjs
