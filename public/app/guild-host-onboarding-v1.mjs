@@ -5,35 +5,35 @@ export const GUILD_HOST_ONBOARDING_SCHEMA='civweave.guild-host-onboarding.v1';
 const STATE_KEY='civweave.guild-host-onboarding.v1';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const now=()=>new Date().toISOString();
-const read=()=>{try{return JSON.parse(localStorage.getItem(STATE_KEY)||'null')}catch{return null}};
-const write=value=>{try{localStorage.setItem(STATE_KEY,JSON.stringify(value))}catch{}return value};
+const read=()=>{try{return JSON.parse(globalThis.localStorage?.getItem(STATE_KEY)||'null')}catch{return null}};
+const write=value=>{try{globalThis.localStorage?.setItem(STATE_KEY,JSON.stringify(value))}catch{}return value};
 
 export function classifyHostDevice({userAgent='',maxTouchPoints=0,coarsePointer=false}={}){
   const agent=String(userAgent||'');
   const mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(agent)||Number(maxTouchPoints||0)>1&&coarsePointer===true;
   if(mobile)return 'mobile';
-  if(/CrOS/i.test(agent))return 'desktop';
   return 'desktop';
 }
 
 export function recommendedHostRoute({deviceClass='desktop',localMeshAvailable=true}={}){
-  if(deviceClass==='mobile'&&localMeshAvailable)return 'pocket-node';
+  if(deviceClass==='mobile')return localMeshAvailable?'pocket-node':'cloudflare-host-node';
   return 'persistent-local-node';
 }
 
 export function deviceCapabilities(){
-  const coarsePointer=typeof matchMedia==='function'&&matchMedia('(pointer: coarse)').matches;
-  const deviceClass=classifyHostDevice({userAgent:navigator?.userAgent||'',maxTouchPoints:navigator?.maxTouchPoints||0,coarsePointer});
+  const nav=globalThis.navigator||{};
+  const coarsePointer=typeof globalThis.matchMedia==='function'&&globalThis.matchMedia('(pointer: coarse)').matches;
+  const deviceClass=classifyHostDevice({userAgent:nav.userAgent||'',maxTouchPoints:nav.maxTouchPoints||0,coarsePointer});
   const localMeshAvailable=Boolean(globalThis.CivweaveLocalMeshV146?.credential&&globalThis.CivweaveLocalMeshV146?.syncGateway);
   return Object.freeze({deviceClass,localMeshAvailable,recommendedRoute:recommendedHostRoute({deviceClass,localMeshAvailable}),persistentAlternatives:POCKET_NODE_POLICY.persistentAlternatives});
 }
 
-export async function completeGuildHostOnboarding({guildId,primaryOrigin=location.origin,route='auto',enablePocketNode=true}={}){
+export async function completeGuildHostOnboarding({guildId,primaryOrigin=globalThis.location?.origin||'https://civweave.invalid',route='auto',enablePocketNode=true}={}){
   const id=clean(guildId,180);if(!id)throw new TypeError('guildId is required.');
-  const origin=new URL(primaryOrigin||location.origin).origin;
+  const origin=new URL(primaryOrigin||globalThis.location?.origin||'https://civweave.invalid').origin;
   const capabilities=deviceCapabilities();
   const selectedRoute=route==='auto'?capabilities.recommendedRoute:clean(route,80);
-  const shouldEnrollPocket=enablePocketNode!==false&&(selectedRoute==='pocket-node'||capabilities.deviceClass==='mobile');
+  const shouldEnrollPocket=enablePocketNode!==false&&selectedRoute==='pocket-node'&&capabilities.localMeshAvailable;
   let pocketNode=null,pocketNodeError=null;
   if(shouldEnrollPocket){
     try{pocketNode=await CivweavePocketGuildNodeV1.enroll({guildId:id,primaryOrigin:origin})}
@@ -53,7 +53,7 @@ export async function completeGuildHostOnboarding({guildId,primaryOrigin=locatio
     completedAt:now(),
   });
   write(state);
-  globalThis.dispatchEvent?.(new CustomEvent('civweave:guild-host-onboarding-complete',{detail:state}));
+  if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(new CustomEvent('civweave:guild-host-onboarding-complete',{detail:state}));
   return Object.freeze({...state,pocketNode});
 }
 
