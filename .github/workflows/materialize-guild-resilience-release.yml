@@ -1,47 +1,42 @@
 name: Materialize Guild resilience release
 
 on:
-  pull_request:
+  push:
     branches:
-      - staging
-    paths:
-      - '.github/workflows/materialize-guild-resilience-release.yml'
+      - agent/guild-pocket-node-resilience
 
 permissions:
   contents: write
 
+concurrency:
+  group: materialize-guild-resilience-release
+  cancel-in-progress: false
+
 jobs:
   materialize:
-    if: github.event.pull_request.head.ref == 'agent/guild-pocket-node-resilience'
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: agent/guild-pocket-node-resilience
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Set release version
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFile, writeFile } from 'node:fs/promises';
-          const version='1.0.162';
-          await writeFile('VERSION',`${version}\n`,'utf8');
-          const pkg=JSON.parse(await readFile('package.json','utf8'));
-          pkg.version=version;
-          await writeFile('package.json',`${JSON.stringify(pkg,null,2)}\n`,'utf8');
-          NODE
-      - name: Materialize canonical release
+      - name: Materialize canonical release snapshot
         run: node scripts/materialize-canonical-release.mjs
-      - name: Commit generated release
+      - name: Commit generated release assets
+        shell: bash
         run: |
-          git config user.name 'civweave-release-bot'
-          git config user.email 'cerbanimo@gmail.com'
-          git add -A
-          if git diff --cached --quiet; then
-            echo 'No release changes to commit.'
+          set -euo pipefail
+          if git diff --quiet && test -z "$(git ls-files --others --exclude-standard)"; then
+            echo 'No generated release changes to commit.'
             exit 0
           fi
-          git commit -m 'Materialize Civweave 1.0.162 Guild resilience release'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VERSION package.json config/release-contract.json releases/1.0.162 public scripts
+          git commit -m 'Materialize Civweave 1.0.162 canonical release'
           git push origin HEAD:agent/guild-pocket-node-resilience
