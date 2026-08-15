@@ -12,6 +12,7 @@
       "runtimeProducer": "public/app/fast-interactive-runtime-v192.js",
       "rules": [
         "Every result produced through Civweave AI generation is labeled ai-generated in generation metadata at creation time.",
+        "Structured generated objects also carry metadata.civweaveProvenance so persistence of outputJson preserves origin.",
         "Persisted artifacts copy generation provenance into metadata.civweaveProvenance rather than attempting later AI detection.",
         "Once an artifact has explicit ai-generated, human-authored, or deterministic-generated origin, later review may not rewrite that origin.",
         "Human validation is additive metadata and never converts an AI-generated artifact into a human-authored artifact.",
@@ -24,11 +25,15 @@
       "canonicalApi": "globalThis.CivweaveLudditeModeV1",
       "storageKey": "civweave.operating-mode.v1",
       "packageManifest": "public/app/luddite-package-v1.json",
+      "manualAuthoringOwner": "public/app/luddite-manual-authoring-v1.js",
+      "manualAuthoringApi": "globalThis.CivweaveLudditeManualAuthoringV1",
+      "installerController": "public/app/luddite-installer-v1.js",
+      "entrySurface": "public/app/luddite-campus-v1.html",
       "rules": [
         "Luddite Mode does not invoke, load on demand, advertise, or require AI generation capabilities.",
         "Luddite Mode content discovery is provenance-based and admits only explicitly human-authored content; unknown and AI-generated content fail closed.",
         "Human validation of AI-generated content does not make that content visible in Luddite Mode because validation does not change creation origin.",
-        "Manual creation in Luddite Mode writes compatible Civweave records with explicit human-authored provenance.",
+        "Manual creation in Luddite Mode writes compatible Civweave records with explicit human-authored provenance through the declared manual authoring owner.",
         "The Luddite download is an allowlisted package boundary, not a renamed copy of the ordinary offline campus."
       ]
     },
