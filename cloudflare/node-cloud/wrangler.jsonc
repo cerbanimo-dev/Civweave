@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-node-cloud",
-  "main": "src/server-ai-entry-v5.mjs",
+  "main": "src/server-ai-entry-v6.mjs",
   "compatibility_date": "2026-08-14",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
@@ -68,8 +68,9 @@
   // CIVWEAVE_WORKERS_PLAN is a deployment capability flag. Setting it to "paid"
   // only permits funded overage; it does not increase the 10,000-neuron free pool.
   // Hub hosting capacity is separate: unpaid/expired hosting permits 28 residents;
-  // a paid hosting settlement permits up to 400 without changing per-user compute funding.
-  // The AI Gateway route is selected only after per-user pool policy chooses it.
-  // Lifetime credits always require explicit request permission before reservation.
+  // a paid hosting settlement permits up to 400, but expansion still requires one
+  // effective Guildkeeper per 28 Guild members. The AI Gateway route is selected
+  // only after per-user pool policy chooses it. Lifetime credits always require
+  // explicit request permission before reservation.
   // This Worker intentionally has no Stripe platform key and no Cerbanimo money-edge private key.
 }

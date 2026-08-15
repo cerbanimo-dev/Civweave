@@ -1,12 +1,14 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.132-host-node-session-v2-paid-join';
+const VERSION='1.0.133-host-node-session-v3-guild-host-onboarding';
 const SESSION_KEY='civweave.host-capacity.sessions.v1';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
+const STEWARD_KEY='civweave.host-steward.v1';
 const DEFAULT_NEURONS_PER_CHAT=12;
+const guildHostOnboardingInFlight=new Map();
 
 if(globalThis.CivweaveHostNodeSessionV1?.version===VERSION)return;
 
@@ -65,6 +67,22 @@ function clearSession(selector=''){
   for(const [nodeId,item] of Object.entries(all))if(!wanted||nodeId===wanted||item?.origin===wantedOrigin)delete all[nodeId];
   saveSessions(all);dispatchEvent(new CustomEvent('civweave:capacity-session-cleared',{detail:{selector:wanted||null}}));return true
 }
+function stewardBrowser(){try{return localStorage.getItem(STEWARD_KEY)==='1'}catch{return false}}
+async function ensureGuildHostOnboarding(session){
+  if(!stewardBrowser()||!session?.nodeId||!session?.origin)return null;
+  const key=`${session.origin}#${session.nodeId}`;if(guildHostOnboardingInFlight.has(key))return guildHostOnboardingInFlight.get(key);
+  const task=import('/app/guild-host-onboarding-v1.mjs').then(async module=>{
+    const prior=module.onboardingStatus?.();
+    if(prior?.guildId===session.nodeId&&(prior.pocketNodeEnrolled===true||prior.selectedRoute==='persistent-local-node'))return prior;
+    const result=await module.completeGuildHostOnboarding({guildId:session.nodeId,primaryOrigin:session.origin,route:'auto'});
+    dispatchEvent(new CustomEvent('civweave:guild-host-ready',{detail:{guildId:session.nodeId,origin:session.origin,route:result.selectedRoute,pocketNodeEnrolled:Boolean(result.pocketNodeEnrolled)}}));
+    return result;
+  }).catch(error=>{
+    dispatchEvent(new CustomEvent('civweave:guild-host-onboarding-unavailable',{detail:{guildId:session.nodeId,origin:session.origin,error:String(error?.message||error)}}));
+    return null;
+  }).finally(()=>guildHostOnboardingInFlight.delete(key));
+  guildHostOnboardingInFlight.set(key,task);return task;
+}
 async function jsonRequest(url,options={}){
   const response=await fetch(url,{cache:'no-store',...options,headers:{accept:'application/json',...(options.headers||{})}});
   const payload=await response.json().catch(()=>({}));
@@ -78,6 +96,7 @@ async function join(origin,{createCredential=true,nodeId=''}={}){
   const packet=await jsonRequest(endpoint,{method:'POST',headers:{'content-type':'application/json',...(requestedNodeId?{'x-civweave-node-id':requestedNodeId}:{})},body:JSON.stringify({userId:identity.userId,credential:identity.credential})});
   const session=setSession(packet,{quota:packet.quota||null});
   dispatchEvent(new CustomEvent('civweave:host-node-logged-in',{detail:{nodeId:session.nodeId,userId:session.userId,origin:session.origin,quota:clone(packet.quota||null),idempotent:Boolean(packet.idempotent)}}));
+  void ensureGuildHostOnboarding(session);
   return{...packet,session}
 }
 async function status(selector=''){
@@ -95,7 +114,7 @@ function selectedRecord(){
 }
 function selectedOrigin(){return selectedRecord().origin}
 async function ensureSelected(){
-  const selected=selectedRecord(),active=sessionFor(selected.nodeId||selected.origin);if(active)return active;
+  const selected=selectedRecord(),active=sessionFor(selected.nodeId||selected.origin);if(active){void ensureGuildHostOnboarding(active);return active}
   if(!selected.origin||!credentialFor(selected.origin,{nodeId:selected.nodeId}))return null;
   const packet=await join(selected.origin,{createCredential:false,nodeId:selected.nodeId});return packet.session
 }
@@ -123,7 +142,7 @@ function loadPaidJoinExtension(){
   return loaded
 }
 
-globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})),forgetCredential,publicStatus});
+globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})),forgetCredential,publicStatus,ensureGuildHostOnboarding});
 dispatchEvent(new CustomEvent('civweave:host-node-session-ready',{detail:{version:VERSION,sessionCount:publicStatus().sessions.length}}));
 loadPaidJoinExtension();
 })();
