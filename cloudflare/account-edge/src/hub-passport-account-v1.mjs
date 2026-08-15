@@ -25,7 +25,7 @@ async function sha256Bytes(value) { return new Uint8Array(await crypto.subtle.di
 async function sha256Hex(value) { return [...await sha256Bytes(value)].map(byte => byte.toString(16).padStart(2, '0')).join(''); }
 function normalizeResidentId(value) {
   const userId = clean(value, 180);
-  if (!/^[A-Za-z0-9:_-]{12,180}$/.test(userId)) throw Object.assign(new TypeError('A valid Hub resident id is required.'), { status: 400 });
+  if (!/^[A-Za-z0-9:_-]{12,180}$/.test(userId)) throw Object.assign(new TypeError('A valid Guild resident id is required.'), { status: 400 });
   return userId;
 }
 function normalizePassportId(value) {
@@ -74,7 +74,7 @@ function challengeKey(hash) { return `hub-passkey-challenge:${clean(hash, 128)}`
 
 async function vaultKey(secret) {
   const source = clean(secret, 20000);
-  if (source.length < 20) throw Object.assign(new Error('Hub account vault identity is unavailable.'), { status: 503 });
+  if (source.length < 20) throw Object.assign(new Error('Guild account vault identity is unavailable.'), { status: 503 });
   const digest = await crypto.subtle.digest('SHA-256', enc.encode(`civweave.hub-account-vault.v1\n${source}`));
   return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
@@ -87,7 +87,7 @@ async function decryptCredential(record, secret) {
   try {
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64url(record.iv) }, await vaultKey(secret), fromB64url(record.ciphertext));
     return normalizeCredential(dec.decode(plain));
-  } catch { throw Object.assign(new Error('Hub account vault could not unlock this account.'), { status: 503 }); }
+  } catch { throw Object.assign(new Error('Guild account vault could not unlock this account.'), { status: 503 }); }
 }
 function generatedAccountName() {
   const token = randomToken(7).toLowerCase().replace(/[^a-z0-9]/g, '').padEnd(9, 'x').slice(0, 9);
@@ -224,7 +224,7 @@ export class PassportAccountService {
   }
   async beginPassportRegistration(input = {}) {
     const userId = normalizeResidentId(input.userId), passportId = normalizePassportId(input.passportId), account = await this.accountForResident(userId);
-    if (!account) throw Object.assign(new Error('Create the Hub account first.'), { status: 404 });
+    if (!account) throw Object.assign(new Error('Create the Guild account first.'), { status: 404 });
     if (await this.passportHasPasskey(account, passportId)) return Object.freeze({ ok: true, alreadyRegistered: true, account: publicAccount(account, await this.countPasskeys(account)) });
     return Object.freeze({ ok: true, ...(await this.beginRegistration(account, passportId, input.rpId, input.origin)) });
   }
@@ -238,7 +238,7 @@ export class PassportAccountService {
     if (client.type !== 'webauthn.create' || client.challenge !== record.challenge || client.origin !== record.origin) throw Object.assign(new Error('Passkey registration proof did not match the challenge.'), { status: 400 });
     const spki = await verifiedAttestationSpki(input.attestationObject, input.credentialId, record.rpId), hash = await credentialHash(input.credentialId);
     if (await this.state.storage.get(passkeyKey(hash))) throw Object.assign(new Error('That passkey is already registered.'), { status: 409 });
-    let account = await this.state.storage.get(accountKey(record.accountId)); if (!account) throw Object.assign(new Error('Hub account is unavailable.'), { status: 404 });
+    let account = await this.state.storage.get(accountKey(record.accountId)); if (!account) throw Object.assign(new Error('Guild account is unavailable.'), { status: 404 });
     const passkey = Object.freeze({ schema: PASSKEY_SCHEMA, accountId: account.accountId, passportId: record.passportId, credentialId: clean(input.credentialId, 2000), publicKeySpki: b64url(spki), rpId: record.rpId, origin: record.origin, signCount: 0, transports: Array.isArray(input.transports) ? input.transports.map(v => clean(v, 40)).filter(Boolean).slice(0, 8) : [], createdAt: nowIso(this.now()), lastUsedAt: null });
     const hashes = new Set(account.passkeyHashes || []); hashes.add(hash); const passports = new Set(account.passportIds || []); passports.add(record.passportId);
     account = Object.freeze({ ...account, passkeyHashes: Object.freeze([...hashes]), passportIds: Object.freeze([...passports]), updatedAt: nowIso(this.now()) });
@@ -268,7 +268,7 @@ export class PassportAccountService {
     if (!await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, publicKey, derToRaw(input.signature), signed)) throw Object.assign(new Error('Passkey signature verification failed.'), { status: 403 });
     const count = uint32be(authData, 33); if (count && passkey.signCount && count <= passkey.signCount) throw Object.assign(new Error('Passkey counter moved backwards; credential may have been cloned.'), { status: 409 });
     await this.state.storage.put(passkeyKey(hash), Object.freeze({ ...passkey, signCount: Math.max(passkey.signCount || 0, count), lastUsedAt: nowIso(this.now()) }));
-    const account = await this.state.storage.get(accountKey(passkey.accountId)); if (!account) throw Object.assign(new Error('Hub account is unavailable.'), { status: 404 });
+    const account = await this.state.storage.get(accountKey(passkey.accountId)); if (!account) throw Object.assign(new Error('Guild account is unavailable.'), { status: 404 });
     return { challenge, account, passkey };
   }
   async beginLogin(input = {}) {
@@ -288,7 +288,7 @@ export class PassportAccountService {
     return Object.freeze({ ok: true, accepted: true, challengeToken: packet.challengeToken, message: 'Check that address for the next step.' });
   }
   async verifyRecoveryEmail(nodeId, input = {}) {
-    const userId = normalizeResidentId(input.userId), account = await this.accountForResident(userId); if (!account) throw Object.assign(new Error('Hub account is unavailable.'), { status: 404 });
+    const userId = normalizeResidentId(input.userId), account = await this.accountForResident(userId); if (!account) throw Object.assign(new Error('Guild account is unavailable.'), { status: 404 });
     const proof = await this.directory('verify', { challengeToken: clean(input.challengeToken, 400), code: clean(input.code, 40) });
     if (proof.existing && proof.locator && (proof.locator.nodeId !== nodeId || proof.locator.accountId !== account.accountId)) return Object.freeze({ ok: true, verified: true, linkRequired: true, proofToken: proof.proofToken, locator: proof.locator, message: 'Recovery address verified. Confirm an existing account passkey to add this Passport.' });
     const claim = await this.directory('claim', { proofToken: proof.proofToken, locator: { nodeId, accountId: account.accountId, accountName: account.accountName, origin: clean(input.hubOrigin, 1000) } });
@@ -298,8 +298,8 @@ export class PassportAccountService {
   }
   async beginPassportLink(nodeId, input = {}) {
     const proof = await this.directory('consume', { proofToken: clean(input.proofToken, 400) });
-    if (!proof?.existing || proof.locator?.nodeId !== nodeId) throw Object.assign(new Error('This account-link proof belongs to another Hub.'), { status: 403 });
-    const account = await this.state.storage.get(accountKey(proof.locator.accountId)); if (!account) throw Object.assign(new Error('Existing Hub account is unavailable.'), { status: 404 });
+    if (!proof?.existing || proof.locator?.nodeId !== nodeId) throw Object.assign(new Error('This account-link proof belongs to another Guild.'), { status: 403 });
+    const account = await this.state.storage.get(accountKey(proof.locator.accountId)); if (!account) throw Object.assign(new Error('Existing Guild account is unavailable.'), { status: 404 });
     return Object.freeze({ ok: true, ...(await this.beginAuthentication(account, input.rpId, input.origin, 'link-auth', { passportId: normalizePassportId(input.passportId) })) });
   }
   async authenticatePassportLink(input = {}) {
