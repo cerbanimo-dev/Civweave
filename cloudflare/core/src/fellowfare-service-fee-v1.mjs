@@ -85,7 +85,7 @@ async function markPendingFunds(edge, row, error) {
 
 async function attemptHostSettlement(edge, row) {
   const node = await hostNode(edge, row.node_id);
-  if (!node?.connected_account_id) throw Object.assign(new Error('The facilitating Hub Node has no registered Host Steward payout account.'), { status: 409 });
+  if (!node?.connected_account_id) throw Object.assign(new Error('The facilitating Guild has no registered Guildkeeper payout account.'), { status: 409 });
 
   const targetHostCents = targetHostEntitlement(row);
   const transferredCents = Number(row.host_transferred_cents || 0);
@@ -102,7 +102,7 @@ async function attemptHostSettlement(edge, row) {
     return settlementByFee(edge, row.application_fee_id);
   }
   if (row.host_transfer_id) {
-    throw Object.assign(new Error('FellowFare service-fee settlement requires an additional Host Steward transfer after an earlier transfer; refusing ambiguous double-transfer state.'), { status: 409 });
+    throw Object.assign(new Error('FellowFare service-fee settlement requires an additional Guildkeeper transfer after an earlier transfer; refusing ambiguous double-transfer state.'), { status: 409 });
   }
 
   let transfer;
@@ -164,9 +164,9 @@ async function ensureSettlementRow(edge, fee) {
     return { ignored: true, reason: 'not-fellowfare-direct-commerce' };
   }
   const nodeId = clean(metadata.fellowfare_node_id, 180);
-  if (!nodeId) throw Object.assign(new Error('FellowFare service charge is missing its facilitating Hub Node ID.'), { status: 409 });
+  if (!nodeId) throw Object.assign(new Error('FellowFare service charge is missing its facilitating Guild ID.'), { status: 409 });
   const node = await hostNode(edge, nodeId);
-  if (!node?.connected_account_id) throw Object.assign(new Error('The facilitating Hub Node has no registered Host Steward payout account.'), { status: 409 });
+  if (!node?.connected_account_id) throw Object.assign(new Error('The facilitating Guild has no registered Guildkeeper payout account.'), { status: 409 });
 
   const split = splitFellowFareServiceFee(feeCents);
   const at = iso(edge.now());
@@ -197,7 +197,7 @@ export async function refundFellowFareServiceFee(edge, fee) {
   const reverseCents = Math.max(0, desiredHostReversal - priorHostReversal);
 
   if (reverseCents > 0) {
-    if (!row.host_transfer_id) throw Object.assign(new Error('FellowFare Host Steward fee share cannot be reversed because its transfer ID is missing.'), { status: 409 });
+    if (!row.host_transfer_id) throw Object.assign(new Error('FellowFare Guildkeeper fee share cannot be reversed because its transfer ID is missing.'), { status: 409 });
     await edge.provider.reverseHostTransfer({
       transferId: row.host_transfer_id,
       amountCents: reverseCents,
@@ -214,7 +214,7 @@ export async function refundFellowFareServiceFee(edge, fee) {
   const at = iso(edge.now());
   const status = refundedFeeCents >= Number(row.fee_cents)
     ? 'refunded'
-    : row.host_transfer_id || targetHostCents === 0
+    : row.host_transfer_id || targetHostEntitlement(row) === 0
       ? 'partially-refunded'
       : 'pending-funds';
   await edge.db.prepare(`UPDATE money_edge_fellowfare_service_fees
