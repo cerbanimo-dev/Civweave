@@ -5,8 +5,11 @@ on:
     paths:
       - 'VERSION'
       - 'package.json'
+      - 'config/system-ownership.json'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/shared-guide-surface-v236-core-v244.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/guide-stream-thinking-v249.js'
@@ -21,28 +24,26 @@ on:
       - 'public/app/installed-entry-v146.js'
       - 'public/app/realm-console-v140.html'
       - 'public/app/shared-chat-face-icons-v255.js'
+      - 'public/app/avatar-expression-director-v345.js'
       - 'public/app/human-message-bubble-v1.js'
       - 'public/app/shared-intention-party-chat-v1.js'
-      - 'public/app/living-school-chat-workbench-v255.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
-      - 'scripts/verify-moss-curriculum-workbench-v255.mjs'
-      - 'scripts/verify-chat-controls-v253.mjs'
-      - 'scripts/verify-mobile-chat-layout-v248.mjs'
-      - 'scripts/verify-mobile-chat-bubble-anchor-v342.mjs'
+      - 'scripts/verify-chat-convergence-v250.mjs'
+      - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
       - 'scripts/verify-realm-session-integrity-v237.mjs'
-      - 'scripts/verify-guide-workspace-v242.mjs'
-      - 'scripts/verify-shared-guide-floating-v236.mjs'
-      - 'scripts/verify-guide-stream-thinking-v249.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   push:
     branches: ['**']
     paths:
       - 'VERSION'
       - 'package.json'
+      - 'config/system-ownership.json'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/shared-guide-surface-v236-core-v244.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/guide-stream-thinking-v249.js'
@@ -57,20 +58,15 @@ on:
       - 'public/app/installed-entry-v146.js'
       - 'public/app/realm-console-v140.html'
       - 'public/app/shared-chat-face-icons-v255.js'
+      - 'public/app/avatar-expression-director-v345.js'
       - 'public/app/human-message-bubble-v1.js'
       - 'public/app/shared-intention-party-chat-v1.js'
-      - 'public/app/living-school-chat-workbench-v255.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
-      - 'scripts/verify-moss-curriculum-workbench-v255.mjs'
-      - 'scripts/verify-chat-controls-v253.mjs'
-      - 'scripts/verify-mobile-chat-layout-v248.mjs'
-      - 'scripts/verify-mobile-chat-bubble-anchor-v342.mjs'
+      - 'scripts/verify-chat-convergence-v250.mjs'
+      - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
       - 'scripts/verify-realm-session-integrity-v237.mjs'
-      - 'scripts/verify-guide-workspace-v242.mjs'
-      - 'scripts/verify-shared-guide-floating-v236.mjs'
-      - 'scripts/verify-guide-stream-thinking-v249.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   workflow_dispatch:
 
@@ -90,10 +86,12 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Check chat runtime syntax
+      - name: Check canonical chat runtime syntax
         run: |
           node --check public/app/unified-chat-system-v1.js
           node --check public/app/shared-guide-surface-v236.js
+          node --check public/app/shared-guide-surface-v236-core-v244.js
+          node --check public/app/guide-chat-surface-v350.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
           node --check public/app/guide-stream-thinking-v249.js
@@ -104,47 +102,51 @@ jobs:
           node --check public/app/working-campus-topbar-v243.js
           node --check public/app/installed-entry-v146.js
           node --check public/app/shared-chat-face-icons-v255.js
+          node --check public/app/avatar-expression-director-v345.js
           node --check public/app/human-message-bubble-v1.js
           node --check public/app/shared-intention-party-chat-v1.js
           node --check public/service-worker-chat-repair-v245.js
           node --check public/service-worker-v203.js
-          node --check scripts/verify-chat-controls-v253.mjs
-          node --check scripts/verify-mobile-chat-layout-v248.mjs
-          node --check scripts/verify-mobile-chat-bubble-anchor-v342.mjs
+          node --check scripts/verify-chat-convergence-v250.mjs
+          node --check scripts/verify-chat-launch-readiness-v295.mjs
           node --check scripts/verify-human-message-bubble-v1.mjs
           node --check scripts/verify-realm-session-integrity-v237.mjs
-          node --check scripts/verify-guide-workspace-v242.mjs
-          node --check scripts/verify-shared-guide-floating-v236.mjs
-          node --check scripts/verify-guide-stream-thinking-v249.mjs
-      - name: Enforce one-core five-theme contract
+      - name: Enforce one-core five-guide avatar contract
         shell: bash
         run: |
-          test ! -e public/app/living-school-chat-workbench-v255.js
-          test ! -e scripts/verify-moss-curriculum-workbench-v255.mjs
-          test ! -e .github/workflows/verify-moss-curriculum-workbench-v255.yml
           node <<'NODE'
           const fs=require('node:fs');
           const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
           const loader=fs.readFileSync('public/app/shared-guide-surface-v236.js','utf8');
-          const workspace=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
+          const shared=fs.readFileSync('public/app/shared-guide-surface-v236-core-v244.js','utf8');
+          const surface=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
+          const compat=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
+          const faces=fs.readFileSync('public/app/shared-chat-face-icons-v255.js','utf8');
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
+          const repair=fs.readFileSync('public/service-worker-chat-repair-v245.js','utf8');
           for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
             if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
+            if(!surface.includes(system))throw new Error(`Canonical surface is missing guide ${system}`);
           }
           if(!sessions.includes('threadKey=system=>`civweave.guide-thread.${system}.v237`'))throw new Error('Five-folder realm memory contract is missing');
           if(!core.includes("architecture:'one-core-five-themes-five-memory-folders'"))throw new Error('Unified architecture marker missing');
           if(core.includes('setInterval('))throw new Error('Unified chat must not poll the DOM/runtime');
-          if(!workspace.includes("const ROOT_ID='cw-persistent-guide-chat-v215'"))throw new Error('Shared workspace root missing');
+          if(!surface.includes("const ROOT_ID='cw-persistent-guide-chat-v215'"))throw new Error('Canonical chat root missing');
+          if(!surface.includes('cw242-window-switcher')||!surface.includes('data-cw242-window')||!surface.includes('cw242-unread'))throw new Error('Five-avatar switcher/notification contract is missing');
+          if(surface.includes('<select data-guide-select'))throw new Error('Guide dropdown regression returned');
+          const start=surface.slice(surface.indexOf('function start(){'),surface.indexOf('\n\nconst api='));
+          if(start.includes('ensureRoot()')||start.includes('render()'))throw new Error('Chat surface is materializing at application launch');
+          if(!shared.includes('switchGuide?.(currentSystem,{open:false})'))throw new Error('Shared guide ownership can reopen chat during launch');
+          if(!faces.includes('idleUntilChatOpen:true')||!faces.includes("addEventListener('civweave:guide-chat-opened',activate)"))throw new Error('Avatar/semantic runtime is not deferred until chat opens');
+          if(!compat.includes('Compatibility loader only')||!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('V242 compatibility path is no longer a loader-only shim');
+          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-chat-face-icons-v255.js']){
+            if(!repair.includes(`'${path}'`))throw new Error(`PWA cache repair is missing ${path}`);
+          }
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
-          if(loader.includes('living-school-chat-workbench-v255.js'))throw new Error('Legacy Living School chat owner is still loaded');
           NODE
-      - name: Verify chat contracts
+      - name: Verify current chat contracts
         run: |
-          node scripts/verify-chat-controls-v253.mjs
-          node scripts/verify-mobile-chat-layout-v248.mjs
-          node scripts/verify-mobile-chat-bubble-anchor-v342.mjs
+          node scripts/verify-chat-convergence-v250.mjs
+          node scripts/verify-chat-launch-readiness-v295.mjs
           node scripts/verify-human-message-bubble-v1.mjs
           node scripts/verify-realm-session-integrity-v237.mjs
-          node scripts/verify-guide-workspace-v242.mjs
-          node scripts/verify-shared-guide-floating-v236.mjs
-          node scripts/verify-guide-stream-thinking-v249.mjs
