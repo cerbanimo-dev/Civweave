@@ -45,7 +45,7 @@ async function tokenHash(token) { return sha256Hex(`civweave.recovery-relay-toke
 async function emailHash(email) { return sha256Hex(`civweave.hub-inbound-email-address.v1\n${normalizeEmail(email)}`); }
 function proofKey(hash) { return `proof:${clean(hash, 128)}`; }
 function parseSubject(value) {
-  const match = clean(value, 500).match(/^Civweave Hub (verify-email|recover-account) ([A-Za-z0-9_-]{40,200})$/);
+  const match = clean(value, 500).match(/^Civweave (?:Guild|Hub) (verify-email|recover-account) ([A-Za-z0-9_-]{40,200})$/);
   return match ? Object.freeze({ purpose: match[1], token: match[2] }) : null;
 }
 function replyMime(from, to) {
@@ -59,7 +59,7 @@ function replyMime(from, to) {
     'Civweave received and authenticated your recovery proof email.',
     'Return to Civweave and paste the one-time code from the message you sent.',
     '',
-    'The recovery relay stores no Hub resident ID, Passport ID, payment data, or message body.',
+    'The recovery relay stores no Guild resident ID, Passport ID, payment data, or message body.',
   ].join('\r\n');
 }
 
