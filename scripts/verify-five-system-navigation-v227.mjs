@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-await import('./sync-release-version-assets.mjs');
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const version=(await read('VERSION')).trim();
 const paths={
