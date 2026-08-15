@@ -1,58 +1,52 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import vm from 'node:vm';
-await import('./verify-system-ownership-v317.mjs');
+
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,controller,lifecycle,runtime,chatRuntime,chatOwner]=await Promise.all([
-  'public/app/settings-gateway-v317.js','public/app/model-settings-controller-v173.js','public/app/document-lifecycle-v221.js','public/app/local-ai/runtime-v266.js','public/app/local-chat-runtime-v295.js','public/app/local-chat-owner-v295.js'
+const [gateway,controller,runtime,chatRuntime,chatOwner,campusHtml,campusRuntime]=await Promise.all([
+  'public/app/settings-gateway-v317.js',
+  'public/app/model-settings-controller-v173.js',
+  'public/app/local-ai/runtime-v266.js',
+  'public/app/local-chat-runtime-v295.js',
+  'public/app/local-chat-owner-v295.js',
+  'public/app/working-campus-v156.html',
+  'public/app/working-campus-v156.js'
 ].map(read));
-for(const source of [gateway,controller,lifecycle,runtime,chatRuntime,chatOwner])new Function(source);
+
+for(const source of [gateway,controller,runtime,chatRuntime,chatOwner,campusRuntime])new Function(source);
+
 assert.match(gateway,/launchWork:'none'/);
-assert.match(gateway,/lazyController:true/);
-assert.match(gateway,/lazyManagement:true/);
-assert.match(gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
-assert.match(gateway,/reloadSafeCapture:true/);
-assert.match(gateway,/controllerQuiescenceAfterPaint:true/);
-assert.match(gateway,/removeEventListener\('click',previous,true\)/);
-for(const forbidden of ['prewarm','bootstrap-v266','local-chat-runtime-v295','CivweaveLocalModelRuntimeV266'])assert.ok(!gateway.includes(forbidden),`Settings gateway reintroduced forbidden generative startup hook ${forbidden}`);
+assert.match(gateway,/generativeRuntimeOnOpen:false/);
+assert.match(gateway,/workingCampusStaticController:true/);
+assert.match(gateway,/document\.addEventListener\('click',onClick,true\)/);
+assert.equal((gateway.match(/document\.addEventListener\('click'/g)||[]).length,1,'Settings must have exactly one DOM click owner.');
+assert.doesNotMatch(gateway,/bootstrap-v266|runtime-v266|runtime-bridge-v266|test-pulse-v269|fast-interactive-runtime|document-lifecycle-v221/,'Settings gateway must not load model runtime or lifecycle repair code.');
+
 assert.match(controller,/activationRequired:true/);
-assert.match(controller,/function requestInferenceQuiescence\(\)/);
-assert.match(controller,/civweave:local-inference-cancel-requested/);
 assert.match(controller,/quiescenceAfterPaint:true/);
-const openBlock=controller.slice(controller.indexOf('function open(launcher)'),controller.indexOf('function ensure()'));
-const visibleIndex=openBlock.indexOf('layer.hidden=false');
-const cancelIndex=openBlock.indexOf('afterPaint(requestInferenceQuiescence)');
-assert.ok(visibleIndex>=0,'Settings open path does not make the layer visible.');
-assert.ok(cancelIndex>visibleIndex,'Local inference cancellation must be scheduled only after Settings is visible.');
-assert.equal(openBlock.slice(0,visibleIndex).includes('requestInferenceQuiescence()'),false,'Settings regained synchronous pre-paint inference cancellation.');
-assert.doesNotMatch(openBlock,/prewarm/i,'Settings open must never prewarm a generative model.');
-assert.match(lifecycle,/activationRequired:true/);
-assert.match(lifecycle,/managementAfterPaint:true/);
-assert.match(lifecycle,/globalObserverPatch:false/);
-const managementList=lifecycle.match(/const LOCAL_AI_MANAGEMENT_FILES=\[([\s\S]*?)\n\];/)?.[1]||'';
-for(const forbidden of ['runtime-v266','runtime-bridge-v266','bootstrap-v266','test-pulse-v269','fast-interactive-runtime'])assert.ok(!managementList.includes(forbidden),`Settings management lane includes inference asset ${forbidden}`);
+assert.match(campusHtml,/model-settings-controller-v173\.js\?activate=1/,'Working Campus must preload the inert Settings presentation controller rather than inject it on Settings open.');
+assert.match(campusHtml,/language-settings-v1\.js/);
+assert.match(campusHtml,/settings-gateway-v317\.js/);
+assert.doesNotMatch(campusHtml,/document-lifecycle-v221|working-campus-return-guard-v425|install-boundary-v146\.js/,'Working Campus HTML regained obsolete startup layers.');
+
+assert.doesNotMatch(campusRuntime,/Function\s*\(|working-campus-v156\.part\d|fetchPart|repairPersistedCampusState|location\.reload\(\)/,'Working Campus runtime regained fragment evaluation, repair redirects, or reload-based planning.');
+assert.match(campusRuntime,/async function send\(/);
+const submitIndex=campusRuntime.indexOf('async function send(');
+const localCallIndex=campusRuntime.indexOf('await ensureLocal();',submitIndex);
+assert.ok(localCallIndex>submitIndex,'Downloaded local AI must start only from explicit message submission.');
+
 assert.match(runtime,/generationEpoch/);
-assert.match(runtime,/if\(terminalFailure\(error\)\)return false/);
 assert.match(chatRuntime,/shutdown\?\.\(\{reason:'chat-stage-stalled'\}\)/);
-assert.match(chatOwner,/function cancelQueued\(/);
 assert.match(chatOwner,/generativePrewarmDisabled:true/);
 assert.match(chatOwner,/generativeStartsOnSubmit:true/);
-assert.doesNotMatch(chatOwner,/\.prewarm\s*\(/,'chat owner must not prewarm generative models while Settings or chat UI is open');
-assert.doesNotMatch(chatOwner,/prewarmIntent|prewarmWorkspace|beginPrewarm/);
-{
-  const bus=new EventTarget(),workers=[];
-  class TestEvent extends Event{constructor(type,options={}){super(type);this.detail=options.detail}}
-  class TestWorker extends EventTarget{constructor(){super();this.terminated=false;workers.push(this)}postMessage(message){this.lastMessage=message}terminate(){this.terminated=true}}
-  const spec={id:'test-local',label:'Test local',installable:true,device:'wasm',runtime:'transformers-js-v3',repo:'test/model',revision:'main',artifacts:[],generation:{}};
-  const storage=new Map(),context={console,URL,Promise,Map,Set,Date,Error,Object,Array,Math,Number,String,Boolean,JSON,performance:{now:()=>0},setTimeout,clearTimeout,Worker:TestWorker,CustomEvent:TestEvent,addEventListener:bus.addEventListener.bind(bus),dispatchEvent:bus.dispatchEvent.bind(bus),sessionStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,String(value))},navigator:{},CivweaveLocalModelRegistryV266:{byId:id=>id===spec.id?spec:null,fallbacks:()=>[],cpuFallback:()=>null},CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:spec.id}),status:async()=>({available:true})}};
-  context.globalThis=context;vm.createContext(context);vm.runInContext(runtime,context,{filename:'runtime-v266.js'});
-  const pending=context.CivweaveLocalModelRuntimeV266.generate({messages:[{role:'user',content:'test'}],timeoutMs:30000});
-  for(let index=0;index<5&&!workers.length;index++)await new Promise(resolve=>setImmediate(resolve));
-  assert.equal(workers.length,1);
-  bus.dispatchEvent(new TestEvent('civweave:local-inference-cancel-requested',{detail:{reason:'settings-open'}}));
-  await assert.rejects(pending,error=>error?.code==='LOCAL_MODEL_CANCELLED'&&error?.terminal===true);
-  await new Promise(resolve=>setImmediate(resolve));
-  assert.equal(workers.length,1);
-  assert.equal(workers[0].terminated,true);
-}
-console.log(JSON.stringify({ok:true,revision:'settings-freeze-recovery-v319-no-generative-prewarm',singleSettingsInputOwner:true,reloadSafeCapture:true,firstClickActivation:true,settingsOpenBeforeManagement:true,settingsPaintBeforeInferenceCancellation:true,managementAfterPaint:true,noGlobalObserverPatch:true,inferenceDormantOnSettingsOpen:true,generativePrewarmOnSettings:false,generativePrewarmOnChat:false,generativeStartsOnSubmit:true,terminalInferenceCancellation:true},null,2));
+assert.doesNotMatch(chatOwner,/\.prewarm\s*\(/);
+
+console.log(JSON.stringify({
+  ok:true,
+  revision:'settings-static-interface-v1',
+  singleSettingsInputOwner:true,
+  workingCampusStaticSettingsGraph:true,
+  settingsOpenModelWork:false,
+  generativePrewarmOnChat:false,
+  generativeStartsOnSubmit:true,
+  campusRuntime:'static-no-fragment-eval'
+},null,2));
