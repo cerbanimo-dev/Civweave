@@ -13,25 +13,25 @@
 </head>
 <body class="cw-frontdoor cw-anchor">
 <div class="anchor-shell">
-<header class="cw-brand-lockup" aria-label="Civweave platform and Cerbanimo stewardship">
+<header class="cw-brand-lockup" aria-label="Civweave platform and Cerbanimo Guildkeeper tools">
   <div class="cw-platform-brand">
     <img class="cw-platform-logo" src="/app/logos/civweave-prismatic-wordmark-v1.png" alt="Civweave">
-    <div class="cw-platform-copy"><small>LOCAL ANCHOR</small><h1>A root beneath the cloud</h1><p>Keep a recoverable local companion near your Civweave host.</p></div>
+    <div class="cw-platform-copy"><small>LOCAL ANCHOR</small><h1>A root beneath the cloud</h1><p>Keep a recoverable local companion near your Civweave Guild.</p></div>
   </div>
-  <div class="cw-steward-seal" aria-label="Cerbanimo steward tool">
+  <div class="cw-steward-seal" aria-label="Cerbanimo Guildkeeper tool">
     <img class="cw-steward-logo" src="/app/logos/cerbanimo-steward-mark-v1.png" alt="Cerbanimo">
-    <div class="cw-steward-copy"><small>Steward tool</small><strong>Cerbanimo</strong><span>Local resilience lane</span></div>
+    <div class="cw-steward-copy"><small>Guildkeeper tool</small><strong>Cerbanimo</strong><span>Local resilience lane</span></div>
   </div>
 </header>
 <main>
 <section class="anchor-intro">
-<p class="eyebrow">CIVWEAVE HOST STEWARD</p>
+<p class="eyebrow">CIVWEAVE GUILDKEEPER</p>
 <h1>Add a local Anchor</h1>
-<p>Your Cloudflare host can remain the public doorway. The local Anchor is the stubborn little root under the floorboards: it preserves host identity/state locally and is the right place for always-on discovery, scheduled relay, local AI, and recovery work.</p>
+<p>Your Cloudflare Guild can remain the public doorway. The local Anchor is the stubborn little root under the floorboards: it preserves Guild identity and state locally and is the right place for always-on discovery, scheduled relay, local AI, and recovery work.</p>
 </section>
 <section class="card">
 <h2>1. Install prerequisites and check Docker</h2>
-<p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the machine that will stay near this host.</p>
+<p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the machine that will stay near this Guild.</p>
 <pre><code>docker version
 docker context ls</code></pre>
 <p class="note">On Docker Desktop for Windows, <code>docker version</code> must show both Client and Server. Civweave's Anchor image is Linux-based, so Docker Desktop must have its Linux container engine running before continuing.</p>
@@ -41,27 +41,27 @@ docker context ls</code></pre>
 <pre><code>git clone https://github.com/cerbanimo-dev/Civweave.git
 cd Civweave
 cp .env.federated.example .env.federated</code></pre>
-<p class="note">Keep the data directory persistent. It contains the node identity, signing material, federation trust, and retained relay state.</p>
+<p class="note">Keep the data directory persistent. It contains the Anchor's technical identity, signing material, federation trust, and retained relay state.</p>
 </section>
 <section class="card">
 <h2>3. Start the local companion</h2>
 <pre><code>docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --build</code></pre>
 <p class="note">Run the command as one line. It works in PowerShell as written; do not add Bash-style trailing <code>\</code> line continuations.</p>
-<p>For a laptop-only backup, LAN access is enough. A public tunnel is optional. Civweave should recommend this local copy strongly, but the cloud host remains usable without it.</p>
+<p>For a laptop-only backup, LAN access is enough. A public tunnel is optional. Civweave should recommend this local copy strongly, but the Cloudflare Guild remains usable without it.</p>
 </section>
 <section class="card">
 <h2>4. Verify it</h2>
 <pre><code>curl http://127.0.0.1:8787/api/federation/health</code></pre>
-<p>When the local companion reports healthy, return to the host and mark the Anchor as paired. A later pairing pass can replace this acknowledgement with cryptographic reconstruction proofs.</p>
+<p>When the local companion reports healthy, return to the Guild setup page and mark the Anchor as paired. A later pairing pass can replace this acknowledgement with cryptographic reconstruction proofs.</p>
 </section>
 <section class="card">
-<h2>5. Connect steward payouts</h2>
-<p>Open the local operator console, unlock its controls with this node's internal credential, and choose <strong>Connect payouts</strong>. Stripe-hosted onboarding collects the steward's identity, tax, bank, and payout details; Civweave stores only the connected-account identifier and readiness status.</p>
+<h2>5. Connect Guildkeeper payouts</h2>
+<p>Open the local operator console, unlock its controls with this Anchor's internal credential, and choose <strong>Connect payouts</strong>. Stripe-hosted onboarding collects the Guildkeeper's identity, tax, bank, and payout details; Civweave stores only the connected-account identifier and readiness status.</p>
 <div class="actions"><a class="primary" href="http://127.0.0.1:8787/app/node-ai-operator-v1.html#liveCommerce">Open operator payout setup</a></div>
-<p class="note">A created Stripe account is not enough: steward revenue stays disabled until Stripe reports the connected account's transfer capability as active.</p>
+<p class="note">A created Stripe account is not enough: Guildkeeper revenue stays disabled until Stripe reports the connected account's transfer capability as active.</p>
 </section>
-<div class="actions"><a class="primary" href="/host-setup.html">Return to host setup</a><button type="button" id="mark-paired">Mark this Anchor paired</button></div>
-<p class="note">The current reminder is intentionally persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; marking the Anchor paired dismisses it for this steward browser.</p>
+<div class="actions"><a class="primary" href="/host-setup.html">Return to Guild setup</a><button type="button" id="mark-paired">Mark this Anchor paired</button></div>
+<p class="note">The current reminder is intentionally persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; marking the Anchor paired dismisses it for this Guildkeeper browser.</p>
 </main>
 </div>
 <script>
