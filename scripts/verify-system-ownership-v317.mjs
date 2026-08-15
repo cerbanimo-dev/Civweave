@@ -4,11 +4,13 @@ import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const registry=JSON.parse(await read('config/system-ownership.json'));
 const settings=registry.systems.settings;
+const interfaceRuntime=registry.systems['interface-runtime'];
 const paths={
   gateway:'public/app/settings-gateway-v317.js',
   controller:'public/app/model-settings-controller-v173.js',
   lifecycle:'public/app/document-lifecycle-v221.js',
   boundary:'public/app/install-boundary-v146.js',
+  coreRuntime:'public/app/core-interface-runtime-v1.js',
   orchestrator:'public/app/experience-orchestrator-v232.js',
   shell:'public/app/family-shell-v104.js',
   parity:'public/app/settings-parity-v295.js',
@@ -29,7 +31,7 @@ const paths={
   criticalCache:'public/service-worker-critical-v199.js'
 };
 const src=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([key,path])=>[key,await read(path)])));
-for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair','credentialHelper','anarchadiaStability','brand'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
+for(const key of ['gateway','controller','lifecycle','boundary','coreRuntime','orchestrator','shell','parity','delegation','bindGuard','repair','credentialHelper','anarchadiaStability','brand'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
 
 assert.equal(registry.policy,'extend-existing-owner-never-add-parallel-owner');
 assert.equal(settings.inputOwner,paths.gateway);
@@ -39,6 +41,14 @@ assert.equal(settings.credentialOwner,paths.controller);
 assert.equal(settings.canonicalControl,'[data-open-unified-ai-settings]');
 assert.deepEqual(settings.allowedInputListenerFiles,[paths.gateway]);
 assert.ok(settings.forbiddenInputOwnerFiles.includes(paths.campusRuntime),'Campus runtime must be explicitly registered as a forbidden Settings owner.');
+
+assert.ok(interfaceRuntime,'Five-system interface runtime must be registered.');
+assert.equal(interfaceRuntime.owner,paths.coreRuntime);
+assert.equal(interfaceRuntime.bootstrapCaller,paths.boundary);
+assert.equal(interfaceRuntime.routeContract,'public/app/system-routes-v227.js');
+assert.equal(interfaceRuntime.navigationSubscriber,paths.shell);
+assert.equal(interfaceRuntime.canonicalApi,'globalThis.CivweaveCoreInterfaceRuntimeV1');
+assert.deepEqual(interfaceRuntime.activeEntryRoutes,[paths.campus,paths.living,paths.cerbanimo,paths.fellowfare,paths.anarchadia]);
 
 // Gateway: the only Settings input listener, no launch-time implementation work.
 assert.match(src.gateway,/const SELECTOR='\[data-open-unified-ai-settings\]'/);
@@ -95,12 +105,21 @@ const sendWeavelingIndex=src.campusRuntime.indexOf('async function sendWeaveling
 assert.ok(localBootstrapIndex>=0&&sendWeavelingIndex>=0,'Campus lost its explicit inference bootstrap path.');
 assert.ok(!src.campusRuntime.slice(0,sendWeavelingIndex).includes('ensureDownloadedLocalAISettings();'),'Campus must not run local-AI bootstrap before an explicit chat/inference action.');
 
-// Install boundary may install the tiny gateway, never an activated implementation.
-assert.match(src.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
-const experience=src.boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
-assert.match(experience,/SETTINGS_GATEWAY/);
-for(const forbidden of ['AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','DOCUMENT_LIFECYCLE','model-settings-controller-v173','settings-delegation-v175','settings-parity-v295'])assert.ok(!experience.includes(forbidden),`Launch experience still eagerly contains ${forbidden}.`);
-assert.doesNotMatch(src.boundary,/addScript\(AI_SETTINGS_BIND_GUARD\)/);
+// Install boundary owns admission and boots exactly one shared interface runtime.
+assert.match(src.boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+assert.doesNotMatch(src.boundary,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS/,'Install boundary retained a superseded shared-loader manifest.');
+const boundaryBoot=src.boundary.match(/function installSystemExperienceSupport\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+assert.match(boundaryBoot,/addScript\(CORE_INTERFACE_RUNTIME\)/);
+assert.doesNotMatch(boundaryBoot,/SETTINGS_GATEWAY|model-settings-controller-v173|document-lifecycle-v221/,'Install boundary regained Settings loading ownership.');
+assert.match(src.boundary,/sharedLoadingOwner:'core-interface-runtime-v1'/);
+
+// Core runtime owns shared assembly but not Settings input or implementation activation.
+assert.match(src.coreRuntime,/const SHARED_BOOT_SCRIPTS=Object\.freeze\(\[/);
+assert.match(src.coreRuntime,/['"]\/app\/settings-gateway-v317\.js['"]/);
+assert.doesNotMatch(src.coreRuntime,/model-settings-controller-v173\.js\?activate=1|document-lifecycle-v221\.js\?activate=1/,'Core runtime must not eagerly activate Settings implementation or management.');
+assert.doesNotMatch(src.coreRuntime,/data-open-unified-ai-settings|addEventListener[^\n]*\('click'/,'Core runtime may assemble Settings but may not own Settings input.');
+assert.match(src.coreRuntime,/settingsInputOwner:'settings-gateway-v317'/);
+assert.match(src.coreRuntime,/familyNavigationOwner:'family-shell-v104'/);
 
 // Shared family shell displays the button but does not own its input.
 assert.match(src.shell,/data-open-unified-ai-settings/);
@@ -122,8 +141,9 @@ for(const key of ['campus','cerbanimo','fellowfare','anarchadia']){
 }
 assert.match(src.campus,/data-open-unified-ai-settings/,'Civweave lost its canonical Settings control marker.');
 
-// Offline-first invariant: the owner must already be cached before the first click.
+// Offline-first invariant: owners must already be cached before first demand.
 for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(src[key].includes("'/app/settings-gateway-v317.js'"),`${paths[key]} does not pin the Settings gateway for offline first-click use.`);
 assert.ok(src.codeCache.includes("'/app/model-settings-controller-v173.js'")&&src.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code coherence cache must retain the lazy controller and management subscriber for offline activation.');
+assert.ok(src.criticalCache.includes("'/app/core-interface-runtime-v1.js'"),'Critical cache must pin the shared five-system runtime.');
 
-console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,credentialOwner:settings.credentialOwner,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,campusPreflight:false,brandingDependency:false,prototypePatching:false,settingsApiPatching:false,realmFallbackListeners:false,offlineFirstClick:true}},null,2));
+console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,interfaceRuntime:{owner:interfaceRuntime.owner,bootstrapCaller:interfaceRuntime.bootstrapCaller,oneSharedLoader:true,systems:5},settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,credentialOwner:settings.credentialOwner,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,campusPreflight:false,brandingDependency:false,prototypePatching:false,settingsApiPatching:false,realmFallbackListeners:false,offlineFirstClick:true}},null,2));
