@@ -63,9 +63,11 @@ body.cw-installer .quest-opening{
 }
 body.cw-installer .quest-guide{
   position:relative;
-  min-height:210px;
+  min-height:224px;
   display:grid;
   place-items:center;
+  padding-bottom:24px;
+  box-sizing:border-box;
 }
 body.cw-installer .quest-guide::before{
   content:"";
@@ -82,7 +84,7 @@ body.cw-installer .quest-guide-sprite{
   position:relative;
   z-index:1;
   width:min(100%,205px);
-  aspect-ratio:1;
+  aspect-ratio:6/5;
   background-image:url('/Civweave-weaveling-sprites.png');
   background-repeat:no-repeat;
   background-size:500% 400%;
@@ -93,7 +95,7 @@ body.cw-installer .quest-guide-label{
   position:absolute;
   z-index:2;
   left:50%;
-  bottom:2px;
+  bottom:0;
   transform:translateX(-50%);
   white-space:nowrap;
   padding:5px 9px;
@@ -308,7 +310,7 @@ body.cw-installer .quest-footer-note{
   body.cw-installer .cw-brand-lockup{grid-template-columns:1fr}
   body.cw-installer .cw-steward-seal{justify-self:start}
   body.cw-installer .quest-opening{grid-template-columns:1fr;text-align:left}
-  body.cw-installer .quest-guide{min-height:158px;justify-items:start;place-items:center start;padding-left:8px}
+  body.cw-installer .quest-guide{min-height:180px;justify-items:start;place-items:center start;padding-left:8px;padding-bottom:26px}
   body.cw-installer .quest-guide::before{width:152px}
   body.cw-installer .quest-guide-sprite{width:150px}
   body.cw-installer .quest-guide-label{left:76px}
