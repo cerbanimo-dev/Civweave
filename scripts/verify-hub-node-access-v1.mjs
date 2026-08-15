@@ -63,7 +63,7 @@ assert.equal(browserRequests.length, 1);
 assert.match(browserRequests[0].url, /\/api\/ai\/node\/session\?nodeId=seed-nearby$/);
 assert.ok(JSON.parse(localStorage.getItem('civweave.host-node.credentials.v1'))['https://civweave-node-cloud.cerbanimo.workers.dev#seed-nearby'].credential.length >= 40);
 assert.equal(JSON.parse(sessionStorage.getItem('civweave.host-capacity.sessions.v1'))['seed-nearby'].token, 'signed.capacity.token');
-assert.ok(!JSON.stringify(browserEvents).includes('credential'), 'Hub events must never publish the reusable device credential');
+assert.ok(!JSON.stringify(browserEvents).includes('credential'), 'Guild events must never publish the reusable device credential');
 
 class MemoryStorage {
   constructor() { this.map = new Map(); }
@@ -130,7 +130,7 @@ assert.match(serverEntry, /quota: memberStatus\.quota/);
 assert.match(serverEntry, /access-control-allow-origin/);
 assert.match(router, /recordUsage/);
 assert.match(router, /approximateTurnsLeft/);
-assert.match(lobby, /Nearest Hubs with open slots/);
+assert.match(lobby, /Nearest Guilds with open slots/);
 for (const mode of ['free', 'paid', 'both']) assert.ok(lobby.includes(`<option value="${mode}">`) || searchFunction.includes(`"${mode}"`));
 assert.match(lobby, /Use my approximate location/);
 assert.match(searchFunction, /MAX_CAPACITY_PROBES = 24/);
