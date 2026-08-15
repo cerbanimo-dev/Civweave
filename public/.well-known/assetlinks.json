@@ -10,6 +10,13 @@
     "relation": ["delegate_permission/common.query_webapk"],
     "target": {
       "namespace": "web",
+      "site": "https://civweave-staging.pages.dev/app/manifest.webmanifest"
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.query_webapk"],
+    "target": {
+      "namespace": "web",
       "site": "https://civweave.pages.dev/app/manifest.webmanifest"
     }
   },
