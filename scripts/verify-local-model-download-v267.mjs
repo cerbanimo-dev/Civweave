@@ -33,16 +33,23 @@ assert.match(settings,/Model window/);
 assert.match(gateway,/managementActivation:'explicit-secondary-action'/);
 assert.match(gateway,/generativeRuntimeOnOpen:false/);
 assert.doesNotMatch(gateway,/bootstrap-v266|runtime-v266|runtime-bridge-v266|test-pulse-v269/);
+assert.match(campus,/async function ensureLocal\(\)/);
 assert.match(campus,/async function send\(/);
-const submit=campus.indexOf('async function send(');
-const bootstrap=campus.indexOf('/app/local-ai/bootstrap-v266.js',submit);
-assert.ok(bootstrap>submit,'Downloaded local AI bootstrap must remain inside explicit chat submission.');
+const ensureStart=campus.indexOf('async function ensureLocal()');
+const sendStart=campus.indexOf('async function send(');
+const languageStart=campus.indexOf('function language()',sendStart);
+const ensureBody=campus.slice(ensureStart,sendStart);
+const sendBody=campus.slice(sendStart,languageStart>sendStart?languageStart:undefined);
+assert.match(ensureBody,/\/app\/local-ai\/bootstrap-v266\.js/,'Downloaded local AI helper lost its explicit bootstrap.');
+assert.match(sendBody,/await ensureLocal\(\);/,'Downloaded local AI bootstrap helper must be called only from explicit chat submission.');
+assert.equal((campus.match(/ensureLocal\(\)/g)||[]).length,2,'ensureLocal must have one definition and one explicit submit call.');
+assert.doesNotMatch(campus.slice(0,sendStart),/addEventListener\([^\n]*(?:focus|input|keydown|pointer|click)[^\n]*ensureLocal/,'Downloaded local AI must not bind bootstrap to UI-open/focus/typing events.');
 assert.doesNotMatch(campus,/working-campus-v156\.part|Function\s*\(|repairPersistedCampusState/);
 
 const context={console,globalThis:null,localStorage:{getItem:()=>null,setItem:()=>{}},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}}};
 context.globalThis=context;vm.createContext(context);vm.runInContext(registry,context,{filename:'model-registry-v266.js'});
 const R=context.CivweaveLocalModelRegistryV266;
 assert.ok(R?.byId?.('gemma3-1b-it-q4f16'));
-assert.ok(Array.isArray(R?.fallbacks?.('gemma4-e4b-it-q2f16-mobile')));
+assert.ok(Array.isArray(R?.fallbacks?.('gemma4-e4b-q4f16-mobile'))||Array.isArray(R?.fallbacks?.('gemma4-e4b-it-q2f16-mobile')));
 
-console.log(JSON.stringify({ok:true,revision:'local-model-download-static-interface-v1',backgroundDownloadIntegrity:true,causalLM:true,settingsOpenInference:false,managementExplicit:true,generativeStart:'submit-only'},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-download-static-interface-v2',backgroundDownloadIntegrity:true,causalLM:true,settingsOpenInference:false,managementExplicit:true,generativeStart:'submit-only'},null,2));
