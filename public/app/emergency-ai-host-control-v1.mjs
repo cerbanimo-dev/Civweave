@@ -1,9 +1,9 @@
 import {CivweaveEmergencyAiHostV1} from './emergency-ai-host-v1.mjs';
 
-const VERSION='1.0.1-emergency-ai-host-control-v1';
+const VERSION='1.0.2-emergency-ai-host-control-v1';
 const ROOT_ID='emergencyAiHost';
 let timer=0,routerPromise=null,lastError='';
-const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 
 function ensureRouter(){
