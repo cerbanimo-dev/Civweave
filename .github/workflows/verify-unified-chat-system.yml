@@ -1,0 +1,54 @@
+name: Verify Unified Chat System
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/guide-workspace-v242.js'
+      - 'public/app/realm-session-integrity-v237.js'
+      - '.github/workflows/verify-unified-chat-system.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/guide-workspace-v242.js'
+      - 'public/app/realm-session-integrity-v237.js'
+      - '.github/workflows/verify-unified-chat-system.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check shared chat syntax
+        run: |
+          node --check public/app/unified-chat-system-v1.js
+          node --check public/app/shared-guide-surface-v236.js
+          node --check public/app/guide-workspace-v242.js
+          node --check public/app/realm-session-integrity-v237.js
+      - name: Enforce one-core five-theme contract
+        shell: bash
+        run: |
+          test ! -e public/app/living-school-chat-workbench-v255.js
+          test ! -e scripts/verify-moss-curriculum-workbench-v255.mjs
+          node <<'NODE'
+          const fs=require('node:fs');
+          const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
+          const loader=fs.readFileSync('public/app/shared-guide-surface-v236.js','utf8');
+          const workspace=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
+          const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
+          for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
+            if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
+            if(!sessions.includes(`civweave.guide-thread.${system}.v237`)&&!sessions.includes('threadKey=system=>`civweave.guide-thread.${system}.v237`'))throw new Error(`Realm memory contract is missing ${system}`);
+          }
+          if(!core.includes("architecture:'one-core-five-themes-five-memory-folders'"))throw new Error('Unified architecture marker missing');
+          if(core.includes('setInterval('))throw new Error('Unified chat must not poll the DOM/runtime');
+          if(!workspace.includes("const ROOT_ID='cw-persistent-guide-chat-v215'"))throw new Error('Shared workspace root missing');
+          if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
+          if(loader.includes('living-school-chat-workbench-v255.js'))throw new Error('Legacy Living School chat owner is still loaded');
+          NODE
