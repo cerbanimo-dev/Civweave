@@ -1,0 +1,68 @@
+name: One-shot installer source-truth maintenance
+
+on:
+  push:
+    branches:
+      - agent/root-installer-source-truth
+    paths:
+      - .github/workflows/one-shot-installer-source-truth-maintenance.yml
+
+permissions:
+  contents: write
+
+jobs:
+  maintain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/root-installer-source-truth
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Align remaining verifiers with current owners
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"expected source not found in {path}: {old}")
+              p.write_text(text.replace(old, new))
+
+          replace(
+              'scripts/smoke-service-worker-registration-watchdog-v207.mjs',
+              "assert(repair.includes('service-worker-shell-repair-v225.js'),'repair needs v225 loader');",
+              "assert(/event\\.data\\?\\.type\\s*!==\\s*['\\\"]REPAIR_DEVICE_PACKAGE['\\\"]/.test(repair),'v293 repair must own REPAIR_DEVICE_PACKAGE');\nassert(repair.includes(\"verified-shell-only-preserve-campus-model-school-storage\"),'v293 repair must preserve protected storage');\nassert(!repair.includes('service-worker-shell-repair-v225.js'),'v293 repair must not load retired v225');"
+          )
+          replace(
+              'scripts/verify-five-system-navigation-v227.mjs',
+              "const shellRepairImport=worker.indexOf('/service-worker-shell-repair-v225.js')",
+              "const shellRepairImport=worker.indexOf('/service-worker-shell-repair-v293.js')"
+          )
+          replace(
+              'scripts/verify-pwa-install-campus-v246.mjs',
+              "assert.ok(workerRepair.includes(\"if (event.data?.type !== 'REPAIR_DEVICE_PACKAGE') return\"),'v293 must own explicit installed-shell repair messaging');",
+              "assert.ok(/event\\.data\\?\\.type\\s*!==\\s*['\\\"]REPAIR_DEVICE_PACKAGE['\\\"]/.test(workerRepair),'v293 must own explicit installed-shell repair messaging');"
+          )
+      - name: Materialize canonical release metadata
+        run: |
+          set -euo pipefail
+          node scripts/sync-release-version-assets.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+      - name: Commit source and generated metadata
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No maintenance changes."
+            exit 0
+          fi
+          git commit -m "Align installer source-truth verifiers and metadata"
+          git push origin HEAD:agent/root-installer-source-truth
