@@ -27,9 +27,9 @@ assert.match(builder,/localAICodeCoherence:'v307-network-first-pre-core'/,'servi
 assert.match(generated,/working-campus-return-v425/,'local AI worker changes must preserve the current Working Campus return epoch');
 assert.match(generated,/chat-convergence-v250/,'local AI worker changes must preserve the current chat convergence epoch');
 
-assert.match(family,/LOCAL_AI_BOOTSTRAP_REVISION='1\.0\.115-local-ai-bootstrap-v302-session-handoff'/,'family loader must pin the compatible bootstrap revision');
-assert.match(family,/bootstrap-v266\.js\?v=1\.0\.121-local-ai-coherence-v307/,'family loader must request the v307 bootstrap epoch');
-assert.match(family,/CivweaveLocalAIBootstrapV266\?\.revision===LOCAL_AI_BOOTSTRAP_REVISION/,'family loader must reject a wrong bootstrap revision');
+assert.doesNotMatch(family,/local-ai\/bootstrap-v266\.js/,'generic family assistant loading must not bootstrap the local AI stack');
+assert.match(family,/localModelPathway:'explicit-demand-only-v315'/,'family loader must advertise explicit-demand local AI ownership');
+assert.match(family,/localAIOptionalSideEffects:false/,'generic assistant optional loading must stay free of local-AI side effects');
 
 assert.match(bootstrap,/componentCompatibility:'capability-contract-v307'/,'bootstrap must advertise the v307 compatibility contract');
 assert.match(bootstrap,/coherenceReload:true/,'bootstrap must expose stale-global coherence reload support');
@@ -59,10 +59,11 @@ assert.match(packageGuard,/preservesCachedWeights:true/,'migration must preserve
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-bootstrap-coherence-v307',
+  revision:'local-ai-bootstrap-coherence-v307-explicit-demand-v315',
   releaseVersion,
   localAICodeDelivery:'dedicated-network-first-pre-core-offline-cache-fallback',
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
+  familyLoaderPolicy:'no-local-ai-bootstrap-side-effects',
   incompatibleGlobals:'evicted-before-reload',
   gemma3Profile:'transformers-js-v4-q4-optimized',
   packageMigration:'stale-selection-suppressed-until-replacement-ready',
