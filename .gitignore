@@ -8,6 +8,11 @@ public/app/models/all-minilm-l6-v2/tokenizer.json
 public/app/models/all-minilm-l6-v2/tokenizer_config.json
 public/app/models/all-minilm-l6-v2/vocab.txt
 public/app/models/all-minilm-l6-v2/onnx/
+# SmolLM payloads are never repository content. Fetch/cache them outside Git if support is enabled.
+/public/app/models/smollm2-360m-instruct/tokenizer.json
+/public/app/models/smollm2-360m-instruct/onnx/
+# Redundant local dependency archive. The extracted source tree, not the ZIP, is canonical while vendored.
+/mempalace-develop.zip
 # Generated from the four compressed parity-ledger source parts during release builds.
 /public/app/shared/civweave-parity-ledger.json
 data/*.json
