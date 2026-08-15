@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 
 const root = resolve(process.cwd());
@@ -129,6 +129,16 @@ const rules = [
   },
 ];
 
+const retiredRuntimePaths = [
+  'public/app/ai-settings-bind-guard-v230.js',
+  'public/app/ai-settings-device-repair-v229.js',
+  'public/app/cw-reward-legacy-bridge-v2.js',
+  'public/app/v129-route-hotfix.js',
+  'public/app/pwa-install-prompt-v246.js',
+  'public/app/pwa-install-prompt-v247.js',
+  'public/app/pwa-install-prompt-v248.js',
+];
+
 const reviewedDynamic = new Map([
   ['public/app/anarchadia-local-sovereignty-v146.js', 'Explicit user-authored local sovereignty profiles intentionally alter selected DOM/assets and must follow later matching nodes.'],
   ['public/app/assistant-runtime-v141.js', 'Attaches the live assistant controller to dialogs that are genuinely created later; it renders conversation state rather than repairing static presentation.'],
@@ -142,16 +152,14 @@ const reviewedDynamic = new Map([
   ['public/app/hub-mail-claim-v1.js', 'Mail-claim UI is created/updated from asynchronous account recovery state.'],
   ['public/app/hub-recovery-ui-v1.js', 'Recovery UI reflects genuine recovery workflow state and dynamically discovered account data.'],
   ['public/app/installer-repair-only-v1.js', 'The remaining observer tracks real shell failure/repair state; static launcher cleanup is separately forbidden.'],
-  ['public/app/pwa-install-prompt-v246.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
-  ['public/app/pwa-install-prompt-v247.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
-  ['public/app/pwa-install-prompt-v248.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
-  ['public/app/pwa-install-prompt-v249.js', 'Current install-prompt runtime updates controls from real browser install availability and install completion.'],
+  ['public/app/pwa-install-prompt-v249.js', 'Sole shipped install-prompt runtime; updates controls from real browser install availability and exposes compatibility API aliases without parallel runtime files.'],
   ['public/app/shared-intention-party-chat-v1.js', 'Party chat renders newly arriving messages and participant state.'],
   ['public/app/shared-review-surface-v234.js', 'Review surface renders live pending/approved/rejected action state.'],
   ['public/app/shared/visual-shell-cleanup.js', 'Realm visual-shell renderer mounts the actual illustrated shell into intentionally empty render hosts; source pages do not contain fake classic UI to replace.'],
 ]);
 
 const failures = [];
+for (const path of retiredRuntimePaths) if (existsSync(resolve(root, path))) failures.push(`${path}: retired runtime must stay physically absent`);
 for (const rule of rules) {
   const source = read(rule.path);
   for (const [pattern, message] of rule.forbid || []) if (pattern.test(source)) failures.push(`${rule.path}: ${message}`);
@@ -187,8 +195,9 @@ for (const path of unclassified) failures.push(`${path}: observer+rewrite runtim
 const classifiedDynamic = candidates.map(path => ({ path, rationale: reviewedDynamic.get(path) || null }));
 
 console.log(JSON.stringify({
-  schema: 'civweave.presentation-source-truth.v5',
+  schema: 'civweave.presentation-source-truth.v6',
   enforcedFiles: rules.map(rule => rule.path),
+  retiredRuntimePaths,
   classifiedDynamic,
   unclassifiedCandidates: unclassified,
   failures,
@@ -200,4 +209,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('\nCanonical static presentation repair shims are retired. Every remaining observer+rewrite candidate is explicitly classified as live state, a renderer, or user-authored customization.');
+console.log('\nCanonical static presentation repair shims and retired parallel runtimes are physically absent. Every remaining observer+rewrite candidate is explicitly classified as live state, a renderer, or user-authored customization.');
