@@ -46,3 +46,5 @@ jobs:
           fi
           git commit -m "Materialize canonical release 1.0.161"
           git push origin HEAD:agent/single-canonical-settings-menu-current-main
+
+# One-shot release materializer; remove after the generated commit lands.
