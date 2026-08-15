@@ -1,4 +1,4 @@
-// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v2 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + strict-shell-install-v228 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-css-dvh-v349 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
+// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v2 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + luddite-package-v1 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-css-dvh-v349 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.162-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
@@ -11,6 +11,7 @@ importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
 importScripts('/service-worker-radio-core-v305.js?v=1.0.162-radio-core-shell-v305-playlist-only-v246');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
+importScripts('/service-worker-luddite-package-v1.js?v=luddite-package-v1');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
 importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224');
