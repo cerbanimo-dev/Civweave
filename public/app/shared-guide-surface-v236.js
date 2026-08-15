@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.121-shared-guide-surface-v236-response-router-v347-avatar-v346-party-chat-v1-human-bubble-v1-translation-v1';
+const VERSION='1.0.122-shared-guide-surface-v236-minilm-first-v348-response-router-v347-avatar-v346-party-chat-v1-human-bubble-v1-translation-v1';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function liveHead(){
@@ -46,6 +46,7 @@ function install(){
   if(!liveHead())return false;
   loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
   loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
+  load('/app/minilm-message-classifier-v348.js?v=1.0.0-minilm-first',null,()=>Boolean(globalThis.CivweaveMessageClassifierV348));
   load('/app/minilm-response-router-v347.js?v=1.0.0-response-router-v347',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
   load('/app/guide-stream-thinking-v249.js?v=1.0.118-v249-navigation-lifecycle-v424',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
   load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
@@ -78,5 +79,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(install));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347',plannerMaterialization:'v265',partyChat:'v1',partyIdentity:'anonymous-role-only',humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarRuntime:'v346-visible',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,messageClassifier:'minilm-v348-every-message-first',responseRouter:'minilm-v347',plannerMaterialization:'v265',partyChat:'v1',partyIdentity:'anonymous-role-only',humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarRuntime:'v346-visible',install});
 })();
