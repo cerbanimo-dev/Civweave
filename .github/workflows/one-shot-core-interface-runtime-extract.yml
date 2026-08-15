@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  EXTRACTION_REVISION: guide-mesh-verifiers-v5
+  EXTRACTION_REVISION: product-push-v6
 
 jobs:
   extract:
@@ -48,42 +48,27 @@ jobs:
       - name: Prove required shared dependency failure fails closed
         run: |
           node --input-type=module <<'NODE'
-          import assert from 'node:assert/strict';
-          import vm from 'node:vm';
-          import {readFile} from 'node:fs/promises';
+          import assert from 'node:assert/strict'; import vm from 'node:vm'; import {readFile} from 'node:fs/promises';
           const source=await readFile('public/app/core-interface-runtime-v1.js','utf8');
-          const body={dataset:{},append(){}};
-          const head={isConnected:true,append(node){setTimeout(()=>node.onerror?.(),0)}};
-          const document={
-            readyState:'complete',documentElement:{dataset:{},isConnected:true},head,body,scripts:[],
-            querySelector(){return null},getElementById(){return null},
-            createElement(tag){return tag==='script'?{src:'',async:true,onload:null,onerror:null}:{dataset:{},setAttribute(){},hasAttribute(){return false}}}
-          };
+          const body={dataset:{},append(){}}; const head={isConnected:true,append(node){setTimeout(()=>node.onerror?.(),0)}};
+          const document={readyState:'complete',documentElement:{dataset:{},isConnected:true},head,body,scripts:[],querySelector(){return null},getElementById(){return null},createElement(tag){return tag==='script'?{src:'',async:true,onload:null,onerror:null}:{dataset:{},setAttribute(){},hasAttribute(){return false}}}};
           class CE{constructor(type,init={}){this.type=type;this.detail=init.detail}}
-          const context={
-            URL,URLSearchParams,CustomEvent:CE,document,setTimeout,clearTimeout,
-            console:{log(){},warn(){},error(){}},
-            location:{search:'',pathname:'/app/working-campus-v156.html',origin:'https://test.invalid',href:'https://test.invalid/app/working-campus-v156.html'},
-            localStorage:{getItem(){return null}},addEventListener(){},dispatchEvent(){},requestAnimationFrame(fn){setTimeout(fn,0)}
-          };
-          context.globalThis=context;context.window=context;
-          vm.runInNewContext(source,context,{filename:'core-interface-runtime-v1.js'});
-          await new Promise(resolve=>setTimeout(resolve,40));
-          const status=context.CivweaveCoreInterfaceRuntimeV1.status();
-          assert.equal(status.phase,'failed');
-          assert.ok(status.sharedLoadFailures.length>0);
+          const context={URL,URLSearchParams,CustomEvent:CE,document,setTimeout,clearTimeout,console:{log(){},warn(){},error(){}},location:{search:'',pathname:'/app/working-campus-v156.html',origin:'https://test.invalid',href:'https://test.invalid/app/working-campus-v156.html'},localStorage:{getItem(){return null}},addEventListener(){},dispatchEvent(){},requestAnimationFrame(fn){setTimeout(fn,0)}};
+          context.globalThis=context;context.window=context;vm.runInNewContext(source,context);await new Promise(r=>setTimeout(r,40));
+          const status=context.CivweaveCoreInterfaceRuntimeV1.status();assert.equal(status.phase,'failed');assert.ok(status.sharedLoadFailures.length>0);
           NODE
-      - name: Check existing convergence contracts
+      - name: Check convergence contracts
         run: |
           node scripts/verify-five-system-navigation-v227.mjs
           node scripts/verify-system-radio-v233.mjs
           node scripts/verify-guide-workspace-v242.mjs
           node scripts/verify-civweave-systems-mesh-v251.mjs
-      - name: Commit extracted architecture and remove helpers
+      - name: Commit product architecture only
         run: |
-          git rm .github/workflows/one-shot-core-interface-runtime-extract.yml .github/scripts/one-shot-core-interface-runtime-extract.py .github/scripts/one-shot-migrate-cleanroom-to-core-runtime.py .github/scripts/one-shot-migrate-five-system-to-core-runtime.py .github/scripts/one-shot-migrate-radio-to-core-runtime.py .github/scripts/one-shot-migrate-guide-to-core-runtime.py .github/scripts/one-shot-migrate-mesh-to-core-runtime.py
+          git rm .github/scripts/one-shot-core-interface-runtime-extract.py .github/scripts/one-shot-migrate-cleanroom-to-core-runtime.py .github/scripts/one-shot-migrate-five-system-to-core-runtime.py .github/scripts/one-shot-migrate-radio-to-core-runtime.py .github/scripts/one-shot-migrate-guide-to-core-runtime.py .github/scripts/one-shot-migrate-mesh-to-core-runtime.py
+          rm -f .github/workflows/verify-core-interface-runtime-v1.yml
           git config user.name 'cerbanimo-dev'
           git config user.email 'cerbanimo@gmail.com'
-          git add .github/workflows/verify-core-interface-runtime-v1.yml config/system-ownership.json docs/architecture/core-interface-runtime-v1.md public/app/core-interface-runtime-v1.js public/app/install-boundary-v146.js public/service-worker-critical-v199.js scripts/sync-release-coherence-v220.mjs scripts/verify-system-ownership-v317.mjs scripts/verify-ai-settings-cleanroom-v188.mjs scripts/verify-five-system-navigation-v227.mjs scripts/verify-system-radio-v233.mjs scripts/verify-guide-workspace-v242.mjs scripts/verify-civweave-systems-mesh-v251.mjs
+          git add config/system-ownership.json docs/architecture/core-interface-runtime-v1.md public/app/core-interface-runtime-v1.js public/app/install-boundary-v146.js public/service-worker-critical-v199.js scripts/sync-release-coherence-v220.mjs scripts/verify-system-ownership-v317.mjs scripts/verify-ai-settings-cleanroom-v188.mjs scripts/verify-five-system-navigation-v227.mjs scripts/verify-system-radio-v233.mjs scripts/verify-guide-workspace-v242.mjs scripts/verify-civweave-systems-mesh-v251.mjs
           git commit -m 'Extract five-system core interface runtime onto current main'
           git push origin HEAD:helper/core-interface-runtime-current
