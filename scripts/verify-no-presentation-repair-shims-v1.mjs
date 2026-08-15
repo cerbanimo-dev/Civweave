@@ -136,7 +136,6 @@ const reviewedDynamic = new Map([
   ['public/app/avatar-expression-director-v345.js', 'Current live avatar-expression director; sprite changes are semantic expression state, not neutral-art repair.'],
   ['public/app/cerbanimo-proof-attachments-v165.js', 'User proof attachments and previews are created/updated from live submission state.'],
   ['public/app/civweave-world.js', 'Visual-world renderer owns scene changes and live world imagery; it is a renderer, not a patch over pre-rendered canonical markup.'],
-  ['public/app/cw-reward-legacy-bridge-v2.js', 'Data/runtime compatibility bridge patches reward APIs and injects itself into dynamically loaded legacy iframes; it does not repair static page presentation.'],
   ['public/app/cw-reward-surfaces-v2.js', 'Live reward balances and ledger surfaces update as reward state changes.'],
   ['public/app/guide-workspace-v242.js', 'Canonical live chat workspace renders messages, persona state, and model activity.'],
   ['public/app/host-node-v124.js', 'Host-node connection/status UI changes with actual network and node state.'],
@@ -176,8 +175,8 @@ for (const scanRoot of ['public/app', 'site/cerbanimo-cc']) {
     const path = relative(root, file).replaceAll('\\', '/');
     const source = readFileSync(file, 'utf8');
     const observer = /\bnew\s+MutationObserver\s*\(/.test(source);
-    const rewrite = /(?:\.replaceWith\s*\(|setAttribute\s*\(\s*['"](?:src|srcset|poster)['"]|\.src\s*=)/.test(source);
-    const legacyIntent = /(?:old|legacy|repair|fix|cleanup|decorate|brand)/i.test(source);
+    const rewrite = /(?:\.replaceWith\s*\(|setAttribute\s*\(\s*['"](?:src|srcset|poster)['"]|\.src\s*=|\bcreateTreeWalker\s*\(|\.replaceAll\s*\()/.test(source);
+    const legacyIntent = /(?:old|legacy|repair|fix|cleanup|decorate|brand|hotfix)/i.test(source);
     if (observer && rewrite && legacyIntent) discovery.push(path);
   }
 }
@@ -188,7 +187,7 @@ for (const path of unclassified) failures.push(`${path}: observer+rewrite runtim
 const classifiedDynamic = candidates.map(path => ({ path, rationale: reviewedDynamic.get(path) || null }));
 
 console.log(JSON.stringify({
-  schema: 'civweave.presentation-source-truth.v4',
+  schema: 'civweave.presentation-source-truth.v5',
   enforcedFiles: rules.map(rule => rule.path),
   classifiedDynamic,
   unclassifiedCandidates: unclassified,
@@ -201,4 +200,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('\nCanonical static presentation repair shims are retired. Every remaining observer+rewrite candidate is explicitly classified as live state, a renderer, compatibility data plumbing, or user-authored customization.');
+console.log('\nCanonical static presentation repair shims are retired. Every remaining observer+rewrite candidate is explicitly classified as live state, a renderer, or user-authored customization.');
