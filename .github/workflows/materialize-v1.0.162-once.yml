@@ -1,0 +1,60 @@
+name: Materialize v1.0.162 Once
+
+on:
+  push:
+    branches:
+      - fix/v350-hub-telemetry-release-1.0.162
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'Materialize Civweave 1.0.162 telemetry release')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Prepare v1.0.162 source
+        shell: bash
+        run: |
+          printf '1.0.162\n' > VERSION
+          npm version 1.0.162 --no-git-tag-version --allow-same-version
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='public/app/guide-chat-surface-v350.js';
+          let source=readFileSync(path,'utf8');
+          source=source.replace(`'"':'&quot'`,`'"':'&quot;'`);
+          writeFileSync(path,source,'utf8');
+          NODE
+      - name: Materialize canonical release
+        run: |
+          npm run release:materialize
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/sync-canonical-release-hashes.mjs
+      - name: Verify release and telemetry
+        run: |
+          node --check public/app/guide-chat-surface-v350.js
+          node --check scripts/verify-hub-node-access-v1.mjs
+          node scripts/verify-hub-node-access-v1.mjs
+          node scripts/verify-chat-convergence-v250.mjs
+          node scripts/verify-five-system-navigation-v227.mjs
+          node scripts/verify-canonical-core-only-v226.mjs
+          npm run check:release-discipline
+          npm run check
+          git diff --check
+      - name: Commit canonical generated release
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Materialize Civweave 1.0.162 telemetry release'
+          git push origin HEAD:fix/v350-hub-telemetry-release-1.0.162
