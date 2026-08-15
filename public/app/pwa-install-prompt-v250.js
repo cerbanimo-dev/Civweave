@@ -1,20 +1,22 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v250-cache-distinct-user-gesture-safe';
+const VERSION='pwa-install-prompt-v250-installed-capability-v1';
 const ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave';
 const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.cc';
+const STAGING_ORIGIN='https://civweave-staging.pages.dev';
 const PREVIOUS_CANONICAL_ORIGIN='https://civweave.pages.dev';
 const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
 const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
 const CANONICAL_MANIFEST=`${CANONICAL_ORIGIN}/app/manifest.webmanifest`;
+const STAGING_MANIFEST=`${STAGING_ORIGIN}/app/manifest.webmanifest`;
 const PREVIOUS_CANONICAL_MANIFEST=`${PREVIOUS_CANONICAL_ORIGIN}/app/manifest.webmanifest`;
 const LEGACY_CANONICAL_MANIFEST=`${LEGACY_CANONICAL_ORIGIN}/app/manifest.webmanifest`;
 const HOST_NODE_MANIFEST=`${HOST_NODE_ORIGIN}/app/manifest.webmanifest`;
+const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1';
 const PROMPT_WAIT_MS=6000;
 let promptEvent=null;
-let installed=false;
 let prompting=false;
 let buttonObserver=null;
 let refreshQueued=false;
@@ -23,6 +25,28 @@ let relatedApps=[];
 function standalone(){
   return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
 }
+function readCapability(){
+  try{
+    const packet=JSON.parse(localStorage.getItem(INSTALL_CAPABILITY_KEY)||'null');
+    return Boolean(packet&&packet.origin===location.origin&&packet.manifestId==='/civweave-local');
+  }catch{return false}
+}
+function rememberInstalled(source='appinstalled'){
+  try{
+    localStorage.setItem(INSTALL_CAPABILITY_KEY,JSON.stringify({
+      origin:location.origin,
+      manifestId:'/civweave-local',
+      source,
+      installedAt:new Date().toISOString()
+    }));
+  }catch{}
+  installed=true;
+  document.documentElement.dataset.civweaveInstalledCapability='present';
+  return true;
+}
+let installed=readCapability();
+if(installed)document.documentElement.dataset.civweaveInstalledCapability='present';
+
 function localDevelopment(){return ['localhost','127.0.0.1','::1'].includes(location.hostname)}
 function cloudflarePreview(){return location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length>3}
 function productionPagesOrigin(){return location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length===3}
@@ -53,7 +77,7 @@ function stableInstallerUrl(){
   return target;
 }
 function rerouteUnsafeInstall(){
-  if(standalone()||localDevelopment())return false;
+  if(standalone()||readCapability()||localDevelopment())return false;
   if(location.origin!==HOST_NODE_ORIGIN&&location.origin!==LEGACY_CANONICAL_ORIGIN&&location.origin!==PREVIOUS_CANONICAL_ORIGIN&&!cloudflarePreview())return false;
   location.replace(stableInstallerUrl().href);
   return true;
@@ -78,39 +102,42 @@ function queueRefresh(){
   });
 }
 function publish(type,detail={}){
-  try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,standalone:standalone(),installed,canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,...detail}}))}catch{}
+  try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,standalone:standalone(),installed,installedCapability:readCapability(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,...detail}}))}catch{}
 }
 async function discoverRelatedInstalls(){
   if(typeof navigator.getInstalledRelatedApps!=='function')return[];
   try{relatedApps=await navigator.getInstalledRelatedApps()||[]}catch{relatedApps=[]}
   const urls=new Set(relatedApps.map(app=>String(app?.url||'')));
+  const currentManifest=`${location.origin}/app/manifest.webmanifest`;
+  const currentInstalled=urls.has(currentManifest);
   const canonicalInstalled=urls.has(CANONICAL_MANIFEST);
+  const stagingInstalled=urls.has(STAGING_MANIFEST);
   const previousCanonicalInstalled=urls.has(PREVIOUS_CANONICAL_MANIFEST);
   const legacyCanonicalInstalled=urls.has(LEGACY_CANONICAL_MANIFEST);
   const hostNodeInstalled=urls.has(HOST_NODE_MANIFEST);
+  if(currentInstalled)rememberInstalled('getInstalledRelatedApps');
+  document.documentElement.dataset.civweaveCurrentInstall=currentInstalled?'installed':'unknown';
   document.documentElement.dataset.civweaveCanonicalInstall=canonicalInstalled?'installed':'unknown';
+  document.documentElement.dataset.civweaveStagingInstall=stagingInstalled?'installed':'absent';
   document.documentElement.dataset.civweavePreviousCanonicalInstall=previousCanonicalInstalled?'installed':'absent';
   document.documentElement.dataset.civweaveLegacyCanonicalInstall=legacyCanonicalInstalled?'installed':'absent';
   document.documentElement.dataset.civweaveLegacyRenderInstall=hostNodeInstalled?'installed':'absent';
-  publish('civweave:related-install-state',{canonicalInstalled,previousCanonicalInstalled,legacyCanonicalInstalled,hostNodeInstalled,relatedApps:[...relatedApps]});
+  publish('civweave:related-install-state',{currentInstalled,canonicalInstalled,stagingInstalled,previousCanonicalInstalled,legacyCanonicalInstalled,hostNodeInstalled,relatedApps:[...relatedApps]});
+  queueRefresh();
   return [...relatedApps];
 }
 function refreshButton(){
   const button=installButton();
   if(!button||/reset app shell|repair shell/i.test(button.textContent||''))return;
-  if(!installOrigin()&&!standalone()){
+  const capability=readCapability();
+  if(!installOrigin()&&!standalone()&&!capability){
     setButton(button,{disabled:false,text:'Open stable Civweave installer'});
     help('This address is not a stable Civweave install origin. Opening its production host instead.');
     return;
   }
-  if(standalone()){
+  if(standalone()||installed||capability){
     setButton(button,{disabled:false,text:'Open Civweave'});
-    help('Civweave is installed as an app from this host origin.');
-    return;
-  }
-  if(installed){
-    setButton(button,{disabled:true,text:'Civweave installed'});
-    help('Installation is complete. Open Civweave from your device app launcher; the campus does not run in this browser tab.');
+    help('Civweave is installed. Open the campus from this doorway.');
     return;
   }
   if(prompting)return;
@@ -133,6 +160,7 @@ function observeButton(){
   buttonObserver=new MutationObserver(queueRefresh);
   buttonObserver.observe(button,{attributes:true,attributeFilter:['disabled'],childList:true});
   refreshButton();
+  if(!installed)void discoverRelatedInstalls();
 }
 function capture(event){
   event.preventDefault();
@@ -145,7 +173,7 @@ function capture(event){
   queueRefresh();
 }
 function onInstalled(){
-  installed=true;
+  rememberInstalled('appinstalled');
   promptEvent=null;
   prompting=false;
   publish('civweave:pwa-installed',{available:false});
@@ -191,22 +219,17 @@ async function ownInstallClick(event){
   const button=event.target?.closest?.('#install-app');
   if(!button||button.disabled||prompting)return;
   if(/reset app shell|repair shell/i.test(button.textContent||''))return;
-  if(!installOrigin()&&!standalone()){
+  const capability=readCapability();
+  if(!installOrigin()&&!standalone()&&!capability){
     event.preventDefault();
     event.stopImmediatePropagation();
     location.assign(stableInstallerUrl().href);
     return;
   }
-  if(standalone()){
+  if(standalone()||installed||capability){
     event.preventDefault();
     event.stopImmediatePropagation();
     location.assign(ENTRY);
-    return;
-  }
-  if(installed){
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    help('Civweave is already installed. Open it from your device app launcher; browser-tab runtime is disabled.');
     return;
   }
   const shell=installer();
@@ -222,8 +245,16 @@ async function ownInstallClick(event){
   }
   const prompt=promptEvent;
   if(!prompt){
+    const related=await discoverRelatedInstalls();
+    if(readCapability()){
+      setButton(button,{disabled:false,text:'Open Civweave'});
+      help('Civweave is already installed. Tap Open Civweave to enter the campus.');
+      return;
+    }
     setButton(button,{disabled:false,text:'Install Civweave'});
-    help('The app shell is ready, but Chromium has not exposed its native install prompt yet. Wait a moment and tap Install again, or use the browser Install app command.');
+    help(related.length
+      ? 'Another related Civweave installation was found, but not this host installation. Use the browser Install app command for this host.'
+      : 'The app shell is ready, but Chromium has not exposed its native install prompt yet. Wait a moment and tap Install again, or use the browser Install app command.');
     return;
   }
 
@@ -235,9 +266,9 @@ async function ownInstallClick(event){
     prompt.prompt();
     const choice=await prompt.userChoice.catch(()=>null);
     if(choice?.outcome==='accepted'){
-      installed=true;
-      help('Civweave app installation accepted. Open the installed app from your device launcher; this browser tab remains installer-only.');
-      setButton(button,{disabled:true,text:'Civweave installed'});
+      rememberInstalled('native-install-accepted');
+      help('Civweave installation accepted. Tap Open Civweave to enter the campus.');
+      setButton(button,{disabled:false,text:'Open Civweave'});
     }else{
       help('Civweave app installation was dismissed. Reload this installer when you want the native install prompt again.');
       setButton(button,{disabled:false,text:'Reload to install'});
@@ -267,9 +298,13 @@ document.head.append(reminder);
 const api=Object.freeze({
   version:VERSION,
   canonicalOrigin:CANONICAL_ORIGIN,
+  stagingOrigin:STAGING_ORIGIN,
   previousCanonicalOrigin:PREVIOUS_CANONICAL_ORIGIN,
   legacyCanonicalOrigin:LEGACY_CANONICAL_ORIGIN,
   hostNodeOrigin:HOST_NODE_ORIGIN,
+  installCapabilityKey:INSTALL_CAPABILITY_KEY,
+  installedCapability:readCapability,
+  rememberInstalled,
   installOrigin,
   canonicalInstallOrigin:installOrigin,
   canonicalInstallerUrl:()=>stableInstallerUrl().href,
@@ -283,16 +318,16 @@ const api=Object.freeze({
   standalone,
   refresh:refreshButton,
   waitForPrompt,
-  browserRuntimePolicy:'installer-only-until-installed-display',
+  browserRuntimePolicy:'installed-capability-or-installed-display',
   installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture',
   promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click',
   observerPolicy:'idempotent-writes-coalesced-refresh',
-  eagerRelatedAppDiscovery:false,
+  eagerRelatedAppDiscovery:true,
   eagerShellPreparation:false,
   firstPaintShellWork:false,
   cacheDistinctPath:true,
   firstInputSafe:true,
-  state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
+  state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),installedCapability:readCapability(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
 });
 
 globalThis.CivweavePWAInstallV250=api;
