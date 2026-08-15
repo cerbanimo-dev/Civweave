@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-cloud-validation-executor-v1';
+const VERSION='1.0.1-cloud-validation-executor-v1-guild-copy';
 if(globalThis.CivweaveCloudValidationExecutorV1?.version===VERSION)return;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clone=value=>value==null?value:structuredClone(value);
 const access=()=>globalThis.CivweaveHostNodeSessionV1||null;
 function setSession(envelope){
-  if(!access()?.setSession)throw new Error('The canonical Hub Node session owner is not ready.');
+  if(!access()?.setSession)throw new Error('The canonical Guild session owner is not ready.');
   return access().setSession(envelope,{quota:envelope?.quota||null});
 }
 function usableSession(nodeId=''){
@@ -67,7 +67,7 @@ async function rewardReceipt(detail,result){
 }
 async function validate(detail={}){
   const preferredNode=clean(detail.nodeId,180),session=usableSession(preferredNode);
-  if(!session)throw new Error('This device does not have an active host-capacity session. Reconnect or rejoin the host before using cloud validation.');
+  if(!session)throw new Error('This device does not have an active Guild-capacity session. Reconnect or rejoin the Guild before using cloud validation.');
   const endpoint=new URL('/api/ai/node/validation',session.origin);
   endpoint.searchParams.set('nodeId',session.nodeId);
   const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId},body:JSON.stringify({packet:detail.packet,estimatedNeurons:detail.estimatedNeurons,allowLifetimeCredits:detail.allowLifetimeCredits===true})});
