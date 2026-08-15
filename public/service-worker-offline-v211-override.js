@@ -119,12 +119,10 @@ async function v211MigrateMeta(meta, manifest) {
   const failed = (Array.isArray(meta.failed) ? meta.failed : []).map(entry => v211FailureEntry(entry));
   const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
   const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
-  const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete);
-  const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry));
-  const blockingFailed = [...requiredFailed, ...retryableOptionalFailed];
+  const blockingFailed = requiredFailed;
   const obsoletePaths = new Set([
     ...(Array.isArray(meta.skipped) ? meta.skipped.map(entry => String(entry?.pathname || '')) : []),
-    ...obsoleteFailed.map(entry => entry.pathname)
+    ...optionalFailed.map(entry => entry.pathname)
   ].filter(Boolean));
   const previousAssets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(pathname => pathname && !obsoletePaths.has(pathname)))];
   const legacyDownloaded = Math.max(0, Number(meta.downloaded ?? meta.successful ?? meta.completed ?? 0) || 0);
@@ -152,12 +150,10 @@ async function v211SanitizeRetryMeta(meta, manifest) {
   const failed = (meta.failed || []).map(entry => v211FailureEntry(entry));
   const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
   const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
-  const obsoleteFailed = optionalFailed.filter(v211FailureIsObsolete);
-  const retryableOptionalFailed = optionalFailed.filter(entry => !v211FailureIsObsolete(entry));
-  const blockingFailed = [...requiredFailed, ...retryableOptionalFailed];
+  const blockingFailed = requiredFailed;
   const obsoletePaths = new Set([
     ...(meta.skipped || []).map(entry => String(entry?.pathname || '')),
-    ...obsoleteFailed.map(entry => entry.pathname)
+    ...optionalFailed.map(entry => entry.pathname)
   ].filter(Boolean));
   if (!obsoletePaths.size) return v211Packet(meta);
   const assets = (meta.assets || []).filter(pathname => !obsoletePaths.has(pathname));
@@ -303,7 +299,7 @@ async function v211DownloadOfflinePackage(event) {
         const prior = previousFailures.get(item.pathname);
         const attempts = Math.max(1, Number(prior?.attempts || 0) + 1);
         const entry = v211FailureEntry({ pathname: item.pathname, message: error?.message || String(error), status, attempts, required: item.required }, attempts);
-        if (!item.required && v211FailureIsObsolete(entry)) {
+        if (!item.required) {
           const structural = status >= 200 && status < 400;
           const notFound = status === 404 || status === 410;
           queued.delete(item.pathname);
