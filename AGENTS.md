@@ -226,3 +226,40 @@ The pipeline coordinates work. It does not grant architectural authority. Human 
 - The executable release selected by `VERSION` lives at `releases/{VERSION}/`; stable `server/*.mjs` entrypoints select that stored release directly.
 - New shipping versions must materialize their release directory with `npm run release:materialize` before they can pass the canonical launch gate.
 - Root server aliases, root symlinks, `releases/1.0.81/server/`, and a live `archive/` directory are forbidden. Git history is the archive.
+
+## Civweave Dev Tools MCP control instructions
+
+The canonical local agent bridge for direct Civweave PWA inspection and source editing is `tools/civweave-dev-mcp/`. It is an observation/interaction and source-edit boundary, not a runtime repair layer.
+
+Start it against a dedicated Chromium/Opera development profile whose Chrome DevTools Protocol endpoint is bound to loopback:
+
+```bash
+CIVWEAVE_REPO_ROOT=/path/to/Civweave \
+CIVWEAVE_CDP_ENDPOINT=http://127.0.0.1:9222 \
+node tools/civweave-dev-mcp/server.mjs
+```
+
+When the bridge is available:
+
+1. Use a dedicated Chromium/Opera development profile with CDP bound to loopback. Do not attach the bridge to a personal browsing profile.
+2. Start the bridge with `CIVWEAVE_REPO_ROOT` pointing at the canonical checkout and `CIVWEAVE_CDP_ENDPOINT` pointing at the dedicated browser. The CDP endpoint is operator configuration, never a model-selected tool parameter.
+3. Start with `pwa.list_targets`, then use `targetId` or `urlIncludes` to select the intended Civweave page.
+4. Inspect before editing: use `pwa.snapshot`, `pwa.runtime_state`, `pwa.query`, `pwa.screenshot`, and `pwa.watch` to reproduce and measure the problem.
+5. Use `pwa.navigate`, `pwa.reload`, `pwa.click`, `pwa.type`, and `pwa.scroll` only to reproduce normal user actions and verify a source change. They are not implementation mechanisms.
+6. Make persistent changes only in canonical repository source, using `repo.apply_patch` or normal source-editing tools. Review `repo.diff` immediately after a write and search for stale callers/owners before declaring the change complete.
+7. Run the narrowest relevant allowlisted verification through `repo.run_npm_script`, then run the broader gates required by this file (`npm run check`, installer checks, `npm run build:install`, etc.) for the affected system.
+8. Re-open or reload the active route and reproduce the original scenario after the source change. Browser success before source modification is not evidence of a fix.
+9. Deployment, merge, secrets, database mutation, paid-service activation, and other high-blast-radius actions remain outside this bridge and require their existing explicit tools and approvals.
+
+Hard controls:
+
+- Do not add or use arbitrary browser evaluation tools such as `pwa.eval`, caller-supplied `Runtime.evaluate`, runtime patch helpers, DOM/source injection, service-worker replacement, cache rewriting, or storage mutation as a fix.
+- Internal fixed CDP evaluation used by read tools must remain bounded and observational. `pwa.watch` must not install observers, globals, monkey patches, hooks, polling loops, or other instrumentation in the application page.
+- `pwa.runtime_state` may expose storage key names and availability, not stored values, unless a future narrowly scoped diagnostic tool receives explicit privacy review.
+- Browser navigation through the bridge is HTTP(S)-only. `javascript:`, `data:`, `file:`, and equivalent execution/read shortcuts are forbidden.
+- The configured CDP endpoint must not be overridable per tool call. Run a separate bridge for a different browser endpoint.
+- `repo.apply_patch` must remain checked (`git apply --check` before apply), repository-root constrained, and unable to modify `.git` metadata.
+- Do not add arbitrary shell execution, deploy, push, merge, secret, or database tools to this bridge. Use separate purpose-built integrations with approval boundaries.
+- The MCP server must bind to loopback by default. A non-loopback bind requires authentication and explicit allowed origins.
+- CDP calls must remain bounded by timeouts. If a renderer is frozen, return the available failure/partial diagnostics; do not add persistent runtime hooks to “recover” observability.
+- If the bridge is unavailable, do not emulate it by injecting code into the PWA. Fall back to ordinary browser inspection/screenshots and canonical source tools.
