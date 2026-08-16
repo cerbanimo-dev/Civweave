@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.164-saved-chat-ui-v352',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-saved-chat-ui-v295-style';
+const VERSION='1.0.165-saved-chat-ui-v353',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-saved-chat-ui-v295-style';
 if(globalThis.CivweaveSavedChatUIV295?.version===VERSION)return;
 const store=()=>globalThis.CivweaveSavedChatStoreV295,chat=()=>globalThis.CivweavePersistentGuideChatV215;
 let current='civweave';
@@ -13,7 +13,6 @@ function click(e){
   e.preventDefault();e.stopPropagation();
   const system=active(),changed=n?s.create(system):s.select(system,t.dataset.cw295Chat);if(!changed)return;
   const surface=chat();if(surface?.render)surface.render();else render(system);
-  if(n)queueMicrotask(()=>root.querySelector('textarea')?.focus?.({preventScroll:true}));
 }
 function render(system=active()){
   const root=document.getElementById(ROOT),s=store();if(!root||!s)return false;current=s.systems.includes(system)?system:current;
@@ -26,8 +25,8 @@ function render(system=active()){
 }
 function style(){
   if(document.getElementById(STYLE))return;const s=document.createElement('style');s.id=STYLE;s.textContent=`
-#${ROOT}.cw295-has-saved-chats{grid-template-rows:auto auto auto auto minmax(0,1fr) auto!important}
-#${ROOT}.cw295-has-saved-chats>.cw295-saved-chats{grid-row:4;position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;z-index:2;display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px;width:100%!important;min-width:0;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding:6px 8px;overflow:hidden;box-sizing:border-box!important;float:none!important;transform:none!important;border:0!important;border-bottom:1px solid #ffffff20!important;border-radius:0!important;background:#0004!important;isolation:isolate}
+#${ROOT}.cw295-has-saved-chats{grid-template-rows:max-content max-content max-content max-content minmax(0,1fr) max-content!important}
+#${ROOT}.cw295-has-saved-chats>.cw295-saved-chats{grid-row:4;align-self:start!important;justify-self:stretch!important;position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;z-index:2;display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;align-content:center;gap:6px;width:100%!important;min-width:0;height:auto!important;min-height:52px!important;max-height:52px!important;margin:0!important;padding:6px 8px;overflow:hidden;box-sizing:border-box!important;float:none!important;transform:none!important;border:0!important;border-bottom:1px solid #ffffff20!important;border-radius:0!important;background:#0004!important;isolation:isolate}
 #${ROOT}.cw295-has-saved-chats>[data-log]{grid-row:5}
 #${ROOT}.cw295-has-saved-chats>[data-persistent-form]{grid-row:6}
 #${ROOT} .cw295-saved-chats>span{flex:0 0 auto;color:#aeb9c7;font:800 9px/1 system-ui;text-transform:uppercase}
@@ -40,5 +39,5 @@ function style(){
 `;document.head.append(s)
 }
 style();addEventListener('civweave:guide-chat-ready',()=>queueMicrotask(()=>render(active())));addEventListener('civweave:guide-chat-state',e=>{if(store()?.systems?.includes(e.detail?.activeSystem))current=e.detail.activeSystem;queueMicrotask(()=>render(current))});addEventListener('civweave:realm-guide-thread-changed',()=>queueMicrotask(()=>render(active())));queueMicrotask(()=>render(active()));
-globalThis.CivweaveSavedChatUIV295=Object.freeze({version:VERSION,revision:'contained-threadbar-v352',savedTabs:true,render});
+globalThis.CivweaveSavedChatUIV295=Object.freeze({version:VERSION,revision:'contained-threadbar-v353',savedTabs:true,render,focusOnCreate:false});
 })();
