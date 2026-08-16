@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
   <link rel="stylesheet" href="/app/installer-quest-threshold-v1.css?v=quest-first-v2">
   <style>
-    .campus-install-progress{max-width:760px;margin:22px 0 12px;display:grid;gap:7px}.campus-progress-heading,.campus-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:12px}.campus-progress-heading span{color:#8de5ef;font-size:.72rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.campus-progress-heading strong{font-size:.84rem;color:#fff}.campus-progress-track{position:relative;height:8px;overflow:hidden;border:1px solid #7ee5ff44;border-radius:999px;background:#001018aa;box-shadow:inset 0 1px 4px #0008}.campus-progress-fill{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#72d9e7,#f3d77d);box-shadow:0 0 14px #7ee5ff77;transition:width .24s ease}.campus-progress-meta{color:var(--muted);font-size:.76rem}.campus-progress-meta strong{color:#f8e5a2;font:900 .76rem ui-monospace,monospace}.campus-install-progress[data-state="ready"] .campus-progress-fill{box-shadow:0 0 18px #8df0c688}.campus-install-progress[data-state="failed"] .campus-progress-heading strong{color:#ffd08a}.campus-retry{justify-self:start;min-height:32px;padding:5px 9px;border:1px solid #ffd08a77;border-radius:9px;background:#3b2a13;color:#fff;font-weight:800;cursor:pointer}.campus-retry[hidden]{display:none!important}.cw-language-control{min-width:42px;min-height:34px;padding:5px 9px;border:1px solid #8de5ef77;border-radius:999px;background:#13223dcc;color:#dffcff;font:900 .76rem/1 system-ui,sans-serif;letter-spacing:.06em;cursor:pointer}.cw-language-control:focus-visible{outline:2px solid #8de5ef;outline-offset:2px}.lud-mode-link{display:inline-block;margin-top:8px;color:#f8e5a2;font-weight:850}@media(max-width:820px){.campus-progress-heading,.campus-progress-meta{align-items:flex-start}.campus-progress-meta{font-size:.72rem}}
+    .campus-install-progress{max-width:760px;margin:22px 0 12px;display:grid;gap:7px}.campus-progress-heading,.campus-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:12px}.campus-progress-heading span{color:#8de5ef;font-size:.72rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.campus-progress-heading strong{font-size:.84rem;color:#fff}.campus-progress-track{position:relative;height:8px;overflow:hidden;border:1px solid #7ee5ff44;border-radius:999px;background:#001018aa;box-shadow:inset 0 1px 4px #0008}.campus-progress-fill{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#72d9e7,#f3d77d);box-shadow:0 0 14px #7ee5ff77;transition:width .24s ease}.campus-progress-meta{color:var(--muted);font-size:.76rem}.campus-progress-meta strong{color:#f8e5a2;font:900 .76rem ui-monospace,monospace}.campus-install-progress[data-state="ready"] .campus-progress-fill{box-shadow:0 0 18px #8df0c688}.campus-install-progress[data-state="failed"] .campus-progress-heading strong{color:#ffd08a}.campus-retry{justify-self:start;min-height:32px;padding:5px 9px;border:1px solid #ffd08a77;border-radius:9px;background:#3b2a13;color:#fff;font-weight:800;cursor:pointer}.campus-retry[hidden]{display:none!important}.cw-language-control{min-width:42px;min-height:34px;padding:5px 9px;border:1px solid #8de5ef77;border-radius:999px;background:#13223dcc;color:#dffcff;font:900 .76rem/1 system-ui,sans-serif;letter-spacing:.06em;cursor:pointer}.cw-language-control:focus-visible{outline:2px solid #8de5ef;outline-offset:2px}.lud-mode-link{display:inline-block;margin-top:8px;color:#f8e5a2;font-weight:850}.guild-host-card{border-color:#8de5ef55;background:linear-gradient(145deg,#071f2be8,#10152be8)}.guild-host-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.guild-host-option{padding:16px;border:1px solid #8de5ef33;border-radius:16px;background:#07151fcc}.guild-host-option h3{margin:.2em 0 .45em}.guild-host-option p{color:var(--muted);line-height:1.55}.guild-host-badge{display:inline-block;padding:3px 7px;border:1px solid #8de5ef55;border-radius:999px;color:#8de5ef;font-size:.68rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.mobile-guild-form{display:grid;gap:8px;margin-top:14px}.mobile-guild-form label{font-weight:850}.mobile-guild-form input{min-height:44px;width:100%;padding:10px 12px;border:1px solid #8de5ef55;border-radius:10px;background:#041019;color:#fff;font:inherit}.mobile-guild-form button,.guild-host-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid #e8c96b66;border-radius:11px;background:#604817;color:#fff;text-decoration:none;font-weight:850;cursor:pointer}.mobile-guild-form button:disabled{opacity:.55;cursor:wait}.mobile-guild-status{min-height:1.5em;margin:4px 0 0;color:#b9cbd1}.mobile-guild-status[data-state="ready"]{color:#9bdd91}.mobile-guild-status[data-state="failed"]{color:#ffd08a}.guild-resource-note{margin-top:12px;padding:10px 12px;border:1px solid #e8c96b44;border-radius:10px;background:#1b160c88;color:#f2dfaa;font-size:.86rem}@media(max-width:820px){.campus-progress-heading,.campus-progress-meta{align-items:flex-start}.campus-progress-meta{font-size:.72rem}.guild-host-options{grid-template-columns:1fr}}
   </style>
 </head>
 <body class="cw-frontdoor cw-installer">
@@ -91,6 +91,35 @@
     </div>
   </section>
 
+  <section class="knowledge-card guild-host-card" aria-labelledby="guild-host-title">
+    <div class="knowledge-school-copy">
+      <small>GUILD HOSTING · CHOOSE YOUR ROOT</small>
+      <h2 id="guild-host-title">Create a Guild from a phone or an always-on machine.</h2>
+      <p>A Guild belongs to its Guildkeeper and members. Creating one here never makes the Guild you downloaded Civweave from pay for your hosting.</p>
+    </div>
+    <div class="guild-host-options">
+      <article class="guild-host-option">
+        <span class="guild-host-badge">Premier route · phone or tablet</span>
+        <h3>Mobile Guild</h3>
+        <p>This device becomes the founding Pocket Node and stores the Guild's signed identity and mesh state locally. <strong>No Cloudflare Worker is created.</strong> No cloud account is required, and the current download site is not inherited as your backend.</p>
+        <form id="mobile-guild-create" class="mobile-guild-form">
+          <label for="mobile-guild-name">Guild name</label>
+          <input id="mobile-guild-name" name="guildName" maxlength="120" autocomplete="organization" placeholder="Northside Repair Guild" required>
+          <button id="create-mobile-guild" type="submit">Create mobile Guild</button>
+          <p id="mobile-guild-status" class="mobile-guild-status" role="status">Mesh code loads only when you create the Guild.</p>
+        </form>
+        <p class="guild-resource-note">Later, this same Guild can attach a desktop/Raspberry Pi host or its own Cloudflare public edge without changing Guild identity.</p>
+      </article>
+      <article class="guild-host-option">
+        <span class="guild-host-badge">Persistent route · desktop / Pi / server</span>
+        <h3>Desktop or Raspberry Pi Guild</h3>
+        <p>Run Civweave on hardware that can stay awake. Docker uses that machine's CPU, storage, and network. If you add a Cloudflare public edge, its Worker and Durable Objects are created in the Cloudflare account <strong>you authenticate for that Guild</strong>, never in the Guild you downloaded from.</p>
+        <a class="guild-host-link" href="/host-local-anchor.html?source=downloads">Desktop / Pi Guild directions</a>
+        <p class="guild-resource-note">A persistent host and a Pocket Node can both back up the same Guild. They are complementary replicas, not competing Guilds.</p>
+      </article>
+    </div>
+  </section>
+
   <section class="knowledge-card quest-sidepath" aria-labelledby="knowledge-school-title" data-lazy-offline-tools>
     <div class="knowledge-school-copy">
       <small>OPTIONAL SIDE PATH · OFFLINE KNOWLEDGE</small>
@@ -131,6 +160,22 @@
   function markOptIn(){try{localStorage.setItem(OPT_IN_KEY,'1')}catch{}}
   function loadController(){markOptIn();if(requested||globalThis.CivweaveInstallerStateV281)return;requested=true;const script=document.createElement('script');script.src='/app/installer-state-machine-v281.js?v=installer-state-authority-v281-lazy';script.async=true;script.dataset.cwInstallerStateV281='lazy';document.head.append(script)}
   button?.addEventListener('pointerdown',loadController,{capture:true,passive:true});button?.addEventListener('click',loadController,{capture:true});
+})();
+</script>
+<script>
+(()=>{
+  'use strict';
+  const form=document.querySelector('#mobile-guild-create'),button=document.querySelector('#create-mobile-guild'),status=document.querySelector('#mobile-guild-status'),name=document.querySelector('#mobile-guild-name');
+  if(!form||!button||!status||!name)return;
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();button.disabled=true;status.dataset.state='working';status.textContent='Creating the signed Guild identity on this device…';
+    try{
+      const module=await import('/app/mobile-guild-create-v1.mjs?v=independent-pocket-guild-v1');
+      const result=await module.createMobileGuild({displayName:name.value});
+      status.dataset.state='ready';status.innerHTML=`Created <strong>${result.displayName}</strong> on this device. Guild ID: <code>${result.guildId}</code>. No Cloudflare Worker was created and no other Guild is paying for this host.`;
+      button.textContent='Mobile Guild created';name.disabled=true;
+    }catch(error){status.dataset.state='failed';status.textContent=String(error?.message||error);button.disabled=false}
+  });
 })();
 </script>
 <script>
