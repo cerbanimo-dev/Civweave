@@ -146,9 +146,18 @@
       ]
     },
     "family-navigation": {
-      "capability": "Five-system navigation and realm status chrome",
-      "owner": "public/app/family-shell-v104.js",
-      "routeContract": "public/app/system-routes-v227.js"
+      "capability": "Five-system navigation and expressive realm-status chrome",
+      "owner": "public/app/themed-system-nav-v178.js",
+      "routeContract": "public/app/system-routes-v227.js",
+      "loader": "public/app/install-boundary-v146.js",
+      "retiredOwner": "public/app/family-shell-v104.js",
+      "rules": [
+        "The themed system navigation is the only module allowed to create five-system navigation DOM.",
+        "The family shell may own realm header, status, chat, and Settings chrome but may not create a second five-system navigation surface.",
+        "The retired #cwf104-tray and [data-cwf-system] family-navigation DOM contract must remain absent from active source.",
+        "Every first-class installed route receives the navigation owner through the install boundary.",
+        "No hidden, fallback, or compatibility family-navigation owner is permitted."
+      ]
     },
     "guide-chat": {
       "capability": "Five private guide threads on one current conversation surface",
