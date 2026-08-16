@@ -5,7 +5,7 @@ const STATE_KEY='civweave.mobile-guild.v1';
 const STEWARD_KEY='civweave.host-steward.v1';
 const clean=(value,max=240)=>String(value??'').trim().slice(0,max);
 const now=()=>new Date().toISOString();
-const slug=value=>clean(value,120).toLowerCase().normalize?.('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,42)||'guild';
+const slug=value=>clean(value,120).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,42)||'guild';
 const randomSuffix=()=>{try{return [...crypto.getRandomValues(new Uint8Array(5))].map(value=>value.toString(36)).join('').slice(0,8)}catch{return Math.random().toString(36).slice(2,10)}};
 const read=()=>{try{return JSON.parse(globalThis.localStorage?.getItem(STATE_KEY)||'null')}catch{return null}};
 const write=value=>{try{globalThis.localStorage?.setItem(STATE_KEY,JSON.stringify(value));globalThis.localStorage?.setItem(STEWARD_KEY,'1')}catch{}return value};
