@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
 
-const VERSION='civweave-hub-map-v1.1.1-guild-copy';
+const VERSION='civweave-hub-map-v1.2.0-guild-rally-point';
 const DIRECTORY_ENDPOINT='/api/hub-map-nodes';
 const DIRECTORY_CACHE_KEY='civweave.hub-map.directory.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
 const HOST_SELECTION_KEY='civweave.host-node.selection.v1';
+const RALLY_CACHE_KEY='civweave.guild-rally-point.selected.v1';
 const REFRESH_MS=2*60*1000;
 let directory={schema:'civweave.hub-map-directory.v1',nodes:[]};
 let proximityEnabled=false;
@@ -17,7 +18,7 @@ let booted=false;
 
 const now=()=>new Date().toISOString();
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
-const esc=value=>clean(value,5000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>clean(value,5000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const norm=value=>String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const loadCache=()=>{try{return parse(localStorage.getItem(DIRECTORY_CACHE_KEY),null)}catch{return null}};
@@ -29,16 +30,30 @@ function nodeById(nodeId){return (directory.nodes||[]).find(node=>node?.nodeId==
 function rowNodeId(row){return clean(row?.raw?.nodeId||row?.nodeId||row?.id?.replace(/^hub:/,''),180)}
 function setStatus(text){const el=document.getElementById('status');if(el)el.textContent=clean(text,800)}
 function setGossipStatus(text){const el=document.getElementById('hubGossipStatus');if(el)el.textContent=clean(text,900)}
+function rallyPointFor(node){const point=node?.location?.rallyPoint||node?.publicLocation?.rallyPoint||node?.rallyPoint||null;return point?.schema==='civweave.guild-rally-point.v1'&&clean(point.name,180)?point:null}
+function selectedRallyPoint(){try{return parse(localStorage.getItem(RALLY_CACHE_KEY),null)}catch{return null}}
+function cacheSelectedRallyPoint(node){
+  const point=rallyPointFor(node);let selected={};try{selected=parse(localStorage.getItem(HOST_SELECTION_KEY),{})}catch{}
+  if(!node?.nodeId||selected?.nodeId!==node.nodeId)return null;
+  try{
+    if(!point){localStorage.removeItem(RALLY_CACHE_KEY);return null}
+    const cached={schema:'civweave.guild-rally-point.selected.v1',nodeId:node.nodeId,displayName:clean(node.displayName||node.name||node.nodeId,180),rallyPoint:{...point},cachedAt:now()};
+    localStorage.setItem(RALLY_CACHE_KEY,JSON.stringify(cached));
+    dispatchEvent(new CustomEvent('civweave:guild-rally-point-updated',{detail:cached}));
+    return cached;
+  }catch{return null}
+}
+function refreshSelectedRallyCache(){let selected={};try{selected=parse(localStorage.getItem(HOST_SELECTION_KEY),{})}catch{}const node=nodeById(selected?.nodeId);if(node)cacheSelectedRallyPoint(node)}
 
 function normalizeDirectoryNode(node){
   const nodeId=clean(node?.nodeId,180),location=node?.location||{};
   const lat=Number(location.latitude),lon=Number(location.longitude);if(!nodeId||!Number.isFinite(lat)||!Number.isFinite(lon))return null;
-  const publicOrigin=clean(node.publicOrigin,1000),precision=Number(location.precisionMeters);
+  const publicOrigin=clean(node.publicOrigin,1000),precision=Number(location.precisionMeters),rally=rallyPointFor(node);
   return{
     id:`hub:${nodeId}`,name:clean(node.displayName||nodeId,300),coords:[lon,lat],framework:'Civweave Guild',country:'',city:'',region:'',model:'Civweave Guild',website:publicOrigin,email:'',
-    description:`${node.status==='active'?'Active':'Guild'}${Number.isFinite(precision)?` · public site precision ±${Math.round(precision)} m`:''}`,
-    search:norm([node.displayName,nodeId,'Civweave Guild',node.status].filter(Boolean).join(' ')),source:'node',hub:true,stale:node.status==='offline',lastSeenAt:node.updatedAt||location.syncedAt||'',
-    raw:{...node,nodeId,endpoint:publicOrigin,publicLocation:{lat,lon,precisionMeters:Number.isFinite(precision)?precision:null},_civweaveHubMap:true},
+    description:`${node.status==='active'?'Active':'Guild'}${Number.isFinite(precision)?` · public site precision ±${Math.round(precision)} m`:''}${rally?` · Rally Point: ${clean(rally.name,180)}`:''}`,
+    search:norm([node.displayName,nodeId,'Civweave Guild',node.status,rally?.name].filter(Boolean).join(' ')),source:'node',hub:true,stale:node.status==='offline',lastSeenAt:node.updatedAt||location.syncedAt||'',
+    raw:{...node,nodeId,endpoint:publicOrigin,publicLocation:{lat,lon,precisionMeters:Number.isFinite(precision)?precision:null,rallyPoint:rally?{...rally}:null},_civweaveHubMap:true},
   }
 }
 function installNodes(packet){
@@ -47,7 +62,7 @@ function installNodes(packet){
   for(const [id,row] of [...(s.state.nodes?.entries?.()||[])])if(row?.source==='hub-map-directory')s.state.nodes.delete(id);
   let count=0;
   for(const node of packet?.nodes||[]){const row=normalizeDirectoryNode(node);if(!row)continue;s.state.features.set(row.id,row);s.state.nodes?.set?.(row.id,{id:row.id,nodeId:node.nodeId,name:row.name,coords:row.coords,endpoint:node.publicOrigin,source:'hub-map-directory',location:node.location});count++}
-  s.state.mode='nodes';s.updateMapData?.();activateNodeMode();focusHubView();return count
+  s.state.mode='nodes';s.updateMapData?.();activateNodeMode();focusHubView();refreshSelectedRallyCache();return count
 }
 function activateNodeMode(){
   const ids=['modeAll','modeFederations','modeNodes'];for(const id of ids)document.getElementById(id)?.classList.toggle('active',id==='modeNodes');
@@ -87,19 +102,22 @@ async function showLedgerFor(node){
 }
 async function refreshSelectedHub(virtual=false){const node=selectedHubNode();if(!node){setGossipStatus('Select a Guild first.');return}try{setGossipStatus(virtual?'Passing by this Guild through the mesh…':'Reading cached locality ledger…');if(virtual)await gossip()?.passByHub?.(node,{physical:false});await showLedgerFor(node)}catch(error){setGossipStatus(`Guild refresh failed · ${error.message}`)}}
 function focusMyHub(){
-  try{const selected=parse(localStorage.getItem(HOST_SELECTION_KEY),{}),row=service()?.state?.features?.get?.(`hub:${selected.nodeId}`);if(row){service().state.selectedId=row.id;service().state.map?.flyTo?.({center:row.coords,zoom:10,essential:true});augmentDetail();return}setGossipStatus('This device does not have a mapped selected Guild yet.')}catch{setGossipStatus('No selected Guild is stored on this device.')}
+  try{const selected=parse(localStorage.getItem(HOST_SELECTION_KEY),{}),row=service()?.state?.features?.get?.(`hub:${selected.nodeId}`);if(row){service().state.selectedId=row.id;service().state.map?.flyTo?.({center:row.coords,zoom:10,essential:true});cacheSelectedRallyPoint(nodeById(selected.nodeId));augmentDetail();return}setGossipStatus('This device does not have a mapped selected Guild yet.')}catch{setGossipStatus('No selected Guild is stored on this device.')}
 }
 async function ensureSessionRuntime(){
   if(session())return session();await new Promise((resolve,reject)=>{const path='/app/host-node-session-v1.js',existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);if(existing){let ticks=0;const timer=setInterval(()=>{if(session()){clearInterval(timer);resolve()}else if(++ticks>200){clearInterval(timer);reject(new Error('Guild session runtime did not become ready.'))}},40);return}const script=document.createElement('script');script.src=`${path}?v=hub-map-v1`;script.async=false;script.onload=resolve;script.onerror=()=>reject(new Error('Could not load Guild session runtime.'));document.head.append(script)});if(!session())throw new Error('Guild session runtime is unavailable.');return session()
 }
 async function joinSelectedHub(){
   const node=selectedHubNode();if(!node)return;const origin=node.publicOrigin||node.endpoint;if(!origin){setGossipStatus('This Guild does not advertise a join origin.');return}
-  try{setGossipStatus(`Joining ${node.displayName||node.nodeId}…`);const runtime=await ensureSessionRuntime(),packet=await runtime.join(origin,{createCredential:true,nodeId:node.nodeId});const selection={schema:'civweave.host-node-selection.v1',origin:packet?.session?.origin||origin,nodeId:packet?.session?.nodeId||node.nodeId,displayName:node.displayName||node.nodeId,selectedAt:now(),source:VERSION};localStorage.setItem(HOST_ENDPOINT_KEY,selection.origin);localStorage.setItem(HOST_SELECTION_KEY,JSON.stringify(selection));gossip()?.rememberHub?.(node,'joined');dispatchEvent(new CustomEvent('civweave:host-node-selected',{detail:selection}));setGossipStatus(`Joined ${selection.displayName}. This Guild is now the selected Guild for this device.`);augmentDetail()}catch(error){setGossipStatus(`Could not join Guild · ${error.message}`)}
+  try{setGossipStatus(`Joining ${node.displayName||node.nodeId}…`);const runtime=await ensureSessionRuntime(),packet=await runtime.join(origin,{createCredential:true,nodeId:node.nodeId});const selection={schema:'civweave.host-node-selection.v1',origin:packet?.session?.origin||origin,nodeId:packet?.session?.nodeId||node.nodeId,displayName:node.displayName||node.nodeId,selectedAt:now(),source:VERSION};localStorage.setItem(HOST_ENDPOINT_KEY,selection.origin);localStorage.setItem(HOST_SELECTION_KEY,JSON.stringify(selection));cacheSelectedRallyPoint(node);gossip()?.rememberHub?.(node,'joined');dispatchEvent(new CustomEvent('civweave:host-node-selected',{detail:selection}));setGossipStatus(`Joined ${selection.displayName}. This Guild is now the selected Guild for this device.${rallyPointFor(node)?' Its Rally Point is cached for offline reconnection.':''}`);augmentDetail()}catch(error){setGossipStatus(`Could not join Guild · ${error.message}`)}
 }
 function augmentDetail(){
   if(renderingDetail)return;const detail=document.getElementById('detail'),row=selectedHubRow(),node=selectedHubNode();if(!detail||!row||!node?.nodeId)return;
   renderingDetail=true;try{
-    detail.querySelector('[data-hub-map-actions]')?.remove();const actions=document.createElement('div');actions.dataset.hubMapActions='1';actions.className='row';actions.style.marginTop='9px';actions.innerHTML=`<button type="button" class="btn primary" data-hub-join>Join Guild</button><button type="button" class="btn" data-hub-explore>Explore ledger</button><button type="button" class="btn" data-hub-pass>Pass by</button>${node.publicOrigin?`<a class="btn" href="${esc(node.publicOrigin)}" target="_blank" rel="noopener">Open Guild ↗</a>`:''}`;detail.append(actions);
+    detail.querySelector('[data-hub-map-actions]')?.remove();detail.querySelector('[data-guild-rally-point]')?.remove();
+    const rally=rallyPointFor(node);
+    if(rally){const card=document.createElement('div');card.dataset.guildRallyPoint='1';card.className='card';card.style.marginTop='9px';card.innerHTML=`<strong>Guild Rally Point · ${esc(rally.name)}</strong><small>Public offline reconnection place · cached with the Guild Map</small>${rally.directions?`<p>${esc(rally.directions)}</p>`:''}<p><small>${Number(rally.latitude).toFixed(6)}, ${Number(rally.longitude).toFixed(6)}${Number.isFinite(Number(rally.precisionMeters))?` · ±${Math.round(Number(rally.precisionMeters))} m`:''}</small></p>`;detail.append(card)}
+    const actions=document.createElement('div');actions.dataset.hubMapActions='1';actions.className='row';actions.style.marginTop='9px';actions.innerHTML=`<button type="button" class="btn primary" data-hub-join>Join Guild</button><button type="button" class="btn" data-hub-explore>Explore ledger</button><button type="button" class="btn" data-hub-pass>Pass by</button>${node.publicOrigin?`<a class="btn" href="${esc(node.publicOrigin)}" target="_blank" rel="noopener">Open Guild ↗</a>`:''}`;detail.append(actions);
     actions.querySelector('[data-hub-join]')?.addEventListener('click',joinSelectedHub);actions.querySelector('[data-hub-explore]')?.addEventListener('click',()=>showLedgerFor(node));actions.querySelector('[data-hub-pass]')?.addEventListener('click',()=>refreshSelectedHub(true));gossip()?.rememberHub?.(node,'map-select');showLedgerFor(node).catch(()=>{});
   }finally{renderingDetail=false}
 }
@@ -122,5 +140,5 @@ async function boot(){
   if(booted)return true;let ticks=0;while((!service()?.state?.map||!document.getElementById('panel'))&&ticks++<240)await new Promise(resolve=>setTimeout(resolve,50));if(!service()?.state?.map)return false;booted=true;installPanel();activateNodeMode();observeDetail();bind();await loadDirectory({network:true});await gossip()?.ensureMesh?.().catch(()=>{});virtualMemberRefresh().catch(()=>{});refreshTimer=setInterval(()=>loadDirectory({network:navigator.onLine!==false}).catch(()=>{}),REFRESH_MS);dispatchEvent(new CustomEvent('civweave:hub-map-ready',{detail:{version:VERSION,nodeCount:directory.nodes?.length||0,at:now()}}));return true
 }
 
-globalThis.CivweaveHubMapV1=Object.freeze({version:VERSION,boot,loadDirectory,installNodes,focusHubView,joinSelectedHub,refreshSelectedHub,startProximity,stopProximity,get directory(){return cloneDirectory()}});function cloneDirectory(){return typeof structuredClone==='function'?structuredClone(directory):parse(JSON.stringify(directory),directory)}document.readyState==='loading'?addEventListener('DOMContentLoaded',()=>boot().catch(()=>{}),{once:true}):queueMicrotask(()=>boot().catch(()=>{}));
+globalThis.CivweaveHubMapV1=Object.freeze({version:VERSION,boot,loadDirectory,installNodes,focusHubView,joinSelectedHub,refreshSelectedHub,startProximity,stopProximity,selectedRallyPoint,get directory(){return cloneDirectory()}});function cloneDirectory(){return typeof structuredClone==='function'?structuredClone(directory):parse(JSON.stringify(directory),directory)}document.readyState==='loading'?addEventListener('DOMContentLoaded',()=>boot().catch(()=>{}),{once:true}):queueMicrotask(()=>boot().catch(()=>{}));
 })();

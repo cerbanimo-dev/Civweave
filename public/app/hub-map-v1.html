@@ -24,7 +24,7 @@ function install(){
   if(intro)intro.textContent='Browse Guildkeeper-placed Civweave Guilds first. Join one, explore its most recent cached Needs, Offerings, and Ideas, or pass by through the mesh when distance is only virtual.';
   const all=doc.getElementById('modeAll'),federations=doc.getElementById('modeFederations'),nodes=doc.getElementById('modeNodes');
   all?.classList.remove('active');federations?.classList.remove('active');nodes?.classList.add('active');if(nodes)nodes.textContent='Guilds';
-  addScript(doc,'/app/host-node-session-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-hub-map-v1.js?v=hub-map-v1')));
+  addScript(doc,'/app/host-node-session-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-hub-map-v1.js?v=guild-rally-point-v1')));
 }
 frame.addEventListener('load',install,{once:true});
 })();

@@ -42,7 +42,7 @@ for(const url of manifests)assert.ok(querySites.has(url),`asset links must allow
 
 assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'root entry must know civweave.cc as the canonical PWA origin');
 assert.ok(rootHtml.includes(`const PREVIOUS_CANONICAL_ORIGIN='${previousCanonicalOrigin}'`),'root entry must retain the previous Pages origin during migration');
-assert.ok(rootHtml.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'root entry must retain the legacy Commonweave origin during migration');
+assert.ok(rootHtml.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'root entry must retain the legacy origin during migration');
 assert.ok(rootHtml.includes("location.hostname.endsWith('.pages.dev')&&labels.length>3"),'root entry must recognize Pages preview aliases');
 assert.ok(rootHtml.includes("labels.slice(1).join('.')"),'preview root must resolve its parent production host');
 assert.ok(rootHtml.includes("target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical')"),'root handoff must distinguish host-production recovery from canonical migration');
@@ -53,12 +53,17 @@ assert.ok(bridge.includes("const INSTALL_MARKER_KEY='civweave.pwa.installed-mark
 assert.ok(bridge.includes("const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'"),'installer must share the PWA launch-session key');
 assert.ok(bridge.includes("const RETIRED_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'"),'installer must explicitly retire the unsafe durable runtime capability');
 assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer may discover related installs for UX when supported');
-assert.ok(bridge.includes("rememberInstalled('appinstalled')"),'successful app installation must persist only the installed UX marker');
-assert.ok(bridge.includes("rememberInstalled('getInstalledRelatedApps')"),'related-app discovery may recover only the installed UX marker');
-assert.ok(bridge.includes("if(installed){setButton(button,{disabled:true,text:'Civweave installed'})"),'ordinary browser tabs must not expose an Open Civweave runtime button merely because installation is known');
+assert.ok(bridge.includes("let installed=false,installedHint=readInstalledMarker()"),'a durable install marker must never initialize confirmed installation state');
+assert.ok(bridge.includes("rememberInstalled('appinstalled')"),'successful app installation must persist the installed UX marker only after appinstalled confirmation');
+assert.ok(bridge.includes("rememberInstalled('getInstalledRelatedApps')"),'fresh related-app discovery may recover the installed UX marker');
+assert.ok(bridge.includes("else if(installedHint)forgetInstalledMarker()"),'fresh negative related-app discovery must clear a stale marker');
+assert.ok(!bridge.includes("rememberInstalled('native-install-accepted')"),'accepting the native prompt must never be treated as completed installation');
+assert.ok(bridge.includes("text:'Finishing installation…'"),'accepted installation must wait visibly for browser confirmation');
+assert.ok(bridge.includes("installStatePolicy:'confirmed-install-only-marker-is-hint'"),'installer must declare confirmed-install-only state semantics');
+assert.ok(bridge.includes("if(installed){setButton(button,{disabled:true,text:'Civweave installed'})"),'confirmed installation may disable the browser installer button');
 assert.ok(bridge.includes("if(appRuntime()){setButton(button,{disabled:false,text:'Open Civweave'})"),'only an installed display or PWA launch session may expose the campus action');
 assert.ok(bridge.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session-only'"),'installer bridge must keep runtime authorization session-scoped');
-assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture'"),'installer must prepare the shell only after explicit install interaction, then require a fresh install gesture');
+assert.ok(bridge.includes("installSequencingPolicy:'download-on-first-interaction-then-install-on-fresh-gesture'"),'installer must download the shell only after explicit interaction, then require a fresh install gesture');
 assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'installer must invoke the captured native prompt synchronously from the fresh install gesture');
 assert.ok(bridge.includes('eagerRelatedAppDiscovery:false'),'installer must keep related-app discovery off the first-paint path');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'installer bridge must explicitly forbid eager shell preparation');
@@ -131,12 +136,14 @@ assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v250-launch-session-v1',
+  revision:'pwa-install-campus-v250-confirmed-install-only-v3',
   canonicalOrigin,
   stagingOrigin,
   previousCanonicalOrigin,
   browserRuntime:'installed-display-or-pwa-launch-session',
   installedMarkerAuthorizesRuntime:false,
+  installedMarkerAuthorizesInstallState:false,
+  nativePromptAcceptanceConfirmsInstall:false,
   anonymousOnlineFallback:false,
   repairOnly:true,
   firstPaintShellWork:false,

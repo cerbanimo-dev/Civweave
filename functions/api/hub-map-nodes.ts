@@ -45,6 +45,30 @@ function safeHttps(value: unknown) {
   }
 }
 
+function publicRallyPoint(value: JsonRecord) {
+  const point = value?.rallyPoint || {};
+  const latitude = Number(point.latitude ?? point.lat);
+  const longitude = Number(point.longitude ?? point.lon);
+  if (point?.schema !== "civweave.guild-rally-point.v1") return null;
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) return null;
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) return null;
+  const name = String(point.name || "").trim().slice(0, 180);
+  if (!name) return null;
+  const precisionMeters = Number(point.precisionMeters ?? point.accuracyMeters);
+  return {
+    schema: "civweave.guild-rally-point.v1",
+    name,
+    directions: String(point.directions || "").trim().slice(0, 600) || null,
+    latitude,
+    longitude,
+    precisionMeters: Number.isFinite(precisionMeters) && precisionMeters > 0 ? Math.round(precisionMeters) : null,
+    publicPlaceConfirmed: point.publicPlaceConfirmed === true,
+    source: String(point.source || "guildkeeper-published-node-manifest").slice(0, 120),
+    capturedAt: point.capturedAt || null,
+    updatedAt: point.updatedAt || null,
+  };
+}
+
 function publicLocation(node: JsonRecord) {
   const value = node?.location || node?.publicLocation || node?.metadata?.publicLocation || {};
   const latitude = Number(value.latitude ?? value.lat);
@@ -59,9 +83,10 @@ function publicLocation(node: JsonRecord) {
     longitude,
     precisionMeters: Number.isFinite(precisionMeters) && precisionMeters > 0 ? Math.round(precisionMeters) : null,
     coordinateDecimals: Number.isSafeInteger(coordinateDecimals) ? coordinateDecimals : null,
-    source: String(value.source || "steward-published-node-manifest").slice(0, 120),
+    source: String(value.source || "guildkeeper-published-node-manifest").slice(0, 120),
     capturedAt: value.capturedAt || null,
     syncedAt: value.syncedAt || node?.updatedAt || null,
+    rallyPoint: publicRallyPoint(value),
   };
 }
 
@@ -91,6 +116,7 @@ function stagingDirectory(request: Request) {
         source: "staging-fixture-city-center",
         capturedAt: null,
         syncedAt: null,
+        rallyPoint: null,
       },
       updatedAt: null,
       slots: { free: guild.freeSlots, paid: guild.paidSlots },
@@ -101,7 +127,8 @@ function stagingDirectory(request: Request) {
       fabric: "staging-fixture",
     },
     privacy: {
-      publicLocationsAreStewardPublished: false,
+      publicLocationsAreGuildkeeperPublished: false,
+      rallyPointsAreGuildkeeperPublished: false,
       roamingDeviceLocationIncluded: false,
       syntheticCityCentersOnly: true,
     },
@@ -161,11 +188,12 @@ export const onRequestGet: PagesFunction = async context => {
         fabric: fabricResult.ok ? "cloudflare-node-fabric" : "unavailable",
       },
       privacy: {
-        publicLocationsAreStewardPublished: true,
+        publicLocationsAreGuildkeeperPublished: true,
+        rallyPointsAreGuildkeeperPublished: true,
         roamingDeviceLocationIncluded: false,
       },
     });
   } catch (error) {
-    return reply({ ok: false, error: "hub-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
+    return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
   }
 };

@@ -156,6 +156,5 @@ export const actions={
   'save-profile':async target=>{const s=state();s.passport={...s.passport,displayName:clean(field('displayName',formFor(target)),100)||'Local learner'};persist('passport-updated')},
   'copy-record':async()=>{if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable.');await navigator.clipboard.writeText(JSON.stringify({...state(),exportedAt:now()},null,2));toast('Record copied.')},
   'restore-record':async target=>{const restored=JSON.parse(clean(field('restoreJson',formFor(target)),500000));writeJson(`${STATE_KEY}.backup.${Date.now()}`,state());replaceState(normalizeState(restored));persist('cleanroom-record-restored');toast('Record restored without legacy navigation state.')},
-  'reset-record':async()=>{writeJson(`${STATE_KEY}.backup.${Date.now()}`,state());replaceState(freshState());persist('cleanroom-record-reset');toast('Reset complete. Backup preserved.')},
-  'open-ai-settings':async()=>{if(globalThis.CivweaveFamilyAILoaderV105?.openSettings)return globalThis.CivweaveFamilyAILoaderV105.openSettings();throw new Error('AI settings are still loading.')}
+  'reset-record':async()=>{writeJson(`${STATE_KEY}.backup.${Date.now()}`,state());replaceState(freshState());persist('cleanroom-record-reset');toast('Reset complete. Backup preserved.')}
 };

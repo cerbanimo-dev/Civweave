@@ -23,6 +23,7 @@ const CHAT_PATHS=new Set([
   '/app/install-boundary-v146.js',
   '/app/mobile-ai-hardening-v302.js',
   '/app/realm-console-v140.html',
+  '/app/anarchadia-console-v139.html',
   '/app/family-ai-loader-v105.js',
   '/app/platform-stability-v159.js',
   '/app/experience-orchestrator-v232.js',

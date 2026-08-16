@@ -31,14 +31,17 @@ const promptCall=installClick.indexOf('prompt.prompt();');
 const choiceAwait=installClick.indexOf('await prompt.userChoice',promptCall);
 const shellAwait=installClick.indexOf('await shell.prepareShell');
 
-assert.ok(prepareStart>=0&&prepareCall>prepareStart,'front door must prepare the lightweight shell only after explicit install interaction');
+assert.ok(prepareStart>=0&&prepareCall>prepareStart,'front door must download the lightweight shell only after explicit install interaction');
 assert.ok(!bridge.includes('queueMicrotask(()=>void primeInstallability())'),'front door must never prewarm the app shell during first paint');
 assert.ok(!bridge.includes('async function primeInstallability()'),'front door must not retain a load-time shell-preparation path');
 assert.ok(promptCall>=0,'native install bridge must invoke the saved browser prompt');
 assert.ok(choiceAwait>promptCall,'native prompt must be invoked synchronously in the fresh click handler before awaiting the browser choice');
 assert.equal(shellAwait,-1,'fresh install click must never wait for service-worker preparation before prompting');
-assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture'"),'bridge must publish its two-phase user-gesture-safe install contract');
+assert.ok(bridge.includes("installSequencingPolicy:'download-on-first-interaction-then-install-on-fresh-gesture'"),'bridge must publish its Download then Install user-gesture-safe contract');
 assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'bridge must publish its native prompt user-gesture contract');
+assert.ok(bridge.includes("installStatePolicy:'confirmed-install-only-marker-is-hint'"),'bridge must not let remembered UX state masquerade as a current install');
+assert.ok(!bridge.includes("rememberInstalled('native-install-accepted')"),'native prompt acceptance must not confirm installation');
+assert.ok(bridge.includes("text:'Finishing installation…'"),'native prompt acceptance must wait for browser install confirmation');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'bridge must explicitly forbid eager shell preparation');
 assert.ok(bridge.includes('firstPaintShellWork:false'),'bridge must explicitly forbid first-paint shell work');
 assert.ok(bridge.includes('eagerRelatedAppDiscovery:false'),'bridge must keep related-app discovery off first paint');
@@ -62,11 +65,13 @@ assert.ok(!boundary.includes('civweave.pwa.installed-capability.v1'),'fresh-inst
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fresh-install-paths-v6-pwa-launch-session-v1',
+  revision:'fresh-install-paths-v7-confirmed-install-only',
   exactEntry,
   shellPrimedBeforeClick:false,
   shellPreparationUserInitiated:true,
   promptSynchronousOnFreshClick:true,
+  nativePromptAcceptanceConfirmsInstall:false,
+  rememberedMarkerConfirmsInstall:false,
   cacheDistinctPath:true,
   browserInstallStaysInstallerOnly:true,
   pwaLaunchSession:true,

@@ -7,6 +7,7 @@ on:
       - 'public/app/radio-track-suggestions-v240.js'
       - 'public/app/radio-track-map-v241.json'
       - 'public/app/radio-directory-v240/**'
+      - 'public/app/radio-playlist-governance-v1.js'
       - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/experience-orchestrator-v232.js'
@@ -21,12 +22,13 @@ on:
       - 'VERSION'
       - 'package.json'
   push:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'public/app/system-radio-agent-v233.js'
       - 'public/app/radio-track-suggestions-v240.js'
       - 'public/app/radio-track-map-v241.json'
       - 'public/app/radio-directory-v240/**'
+      - 'public/app/radio-playlist-governance-v1.js'
       - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/experience-orchestrator-v232.js'
@@ -58,6 +60,7 @@ jobs:
         run: |
           node --check public/app/system-radio-agent-v233.js
           node --check public/app/radio-track-suggestions-v240.js
+          node --check public/app/radio-playlist-governance-v1.js
           node --check public/app/install-boundary-v146.js
           node --check public/service-worker-radio-core-v305.js
           node --check scripts/build-service-worker-v211.mjs

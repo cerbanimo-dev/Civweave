@@ -1,0 +1,72 @@
+name: Verify Chat Lazy Boot
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/guide-chat-surface-v350.js'
+      - '.github/workflows/verify-chat-lazy-boot-v1.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/guide-chat-surface-v350.js'
+      - '.github/workflows/verify-chat-lazy-boot-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-chat-lazy-boot-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Verify chat stays unmaterialized until explicit open
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const source = fs.readFileSync('public/app/guide-chat-surface-v350.js', 'utf8');
+
+          new Function(source);
+
+          const startAt = source.indexOf('function start(){');
+          const apiAt = source.indexOf('\n\nconst api=', startAt);
+          if (startAt < 0 || apiAt < 0) throw new Error('Could not locate canonical chat start() boundary');
+          const start = source.slice(startAt, apiAt);
+
+          if (start.includes('ensureRoot()')) throw new Error('Chat root is being created during application launch');
+          if (start.includes('render()')) throw new Error('Chat history is being rendered during application launch');
+          if (!start.includes('ensureLauncher()')) throw new Error('Lightweight chat launcher is missing from application launch');
+          if (!start.includes('openState=false')) throw new Error('Chat does not explicitly begin closed');
+
+          const openAt = source.indexOf('function open(options={}){');
+          const closeAt = source.indexOf('\nfunction close()', openAt);
+          if (openAt < 0 || closeAt < 0) throw new Error('Could not locate explicit chat open() boundary');
+          const open = source.slice(openAt, closeAt);
+          if (!open.includes('ensureRoot()')) throw new Error('Explicit chat open no longer materializes the chat root');
+          if (!open.includes('root.hidden=false')) throw new Error('Explicit chat open no longer reveals the chat root');
+
+          if (!source.includes('cw242-window-switcher') || !source.includes('data-cw242-window')) {
+            throw new Error('Five-guide avatar switcher contract is missing');
+          }
+          if (source.includes('<select data-guide-select')) throw new Error('Retired guide dropdown returned');
+
+          console.log(JSON.stringify({
+            ok: true,
+            contract: 'chat-lazy-boot-v1',
+            startup: 'launcher-only',
+            chatRootAtBoot: false,
+            historyRenderAtBoot: false,
+            chatRootOnExplicitOpen: true,
+            fiveGuideSwitcher: true
+          }, null, 2));
+          NODE

@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-anarchadia-runtime-stability-v159-canonical-chat-r2';
+const VERSION='1.0.4-anarchadia-runtime-stability-v159-canonical-chat-r3';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
@@ -58,6 +58,5 @@ document.addEventListener('click',event=>{
   const workbench=event.target.closest?.('[data-anarchadia-workbench]');if(workbench){event.preventDefault();event.stopImmediatePropagation();openWorkbench(workbench.dataset.anarchadiaWorkbench||'workbench');return}
   if(event.target.closest?.('[data-cwf-chat]')&&!actualLoader()){event.preventDefault();event.stopImmediatePropagation();proxy.openChat('anarchadia',{contextSystem:'anarchadia'});return}
 },true);
-compactLegacyState();
 globalThis.AnarchadiaRuntimeStabilityV159={version:VERSION,loadFamily,compactLegacyState,askMerlin,settingsInputOwnership:false,settingsOwner:'settings-gateway-v317'};
 })();

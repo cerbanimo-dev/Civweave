@@ -71,11 +71,8 @@
       <section class="ac-screen" id="screen-automation" data-screen="automation" hidden><header class="ac-screen-head"><div><small>ACCOUNTABLE AUTOMATION</small><h2>Change pipeline</h2></div><button type="button" data-screen-target="home">×</button></header><p class="ac-screen-copy">Low-risk layout commands can generate a live-page preview immediately. Keeping one stores a reversible override on this device together with a fallback copy of the server-provided element and placement. Broader changes still pass through review before generation.</p><div class="ac-pipeline-list" id="ac-pipeline-list"></div></section>
       <section class="ac-screen" id="screen-observatory" data-screen="observatory" hidden><header class="ac-screen-head"><div><small>READINESS &amp; RISK</small><h2>Observatory</h2></div><button type="button" data-screen-target="home">×</button></header><div class="ac-observatory" id="ac-observatory"></div></section>
       <section class="ac-screen" id="screen-request" data-screen="request" hidden><header class="ac-screen-head"><div><small id="ac-request-kicker">CHANGE REQUEST</small><h2 id="ac-request-title">Submit request</h2></div><button type="button" data-screen-target="proposals">×</button></header><form class="ac-form" id="ac-request-form"><input type="hidden" name="kind" value="feature"><label>Title<input name="title" maxlength="120" required placeholder="What should change?"></label><label>Current problem<textarea name="problem" required placeholder="What is happening now, and who is affected?"></textarea></label><label>Expected result<textarea name="expected" required placeholder="What should happen instead?"></textarea></label><label>Affected area<select name="area"><option>Civweave</option><option>Anarchadia</option><option>Living School</option><option>Cerbanimo</option><option>FellowFare</option><option>Installer / PWA</option><option>Model runtime</option></select></label><label>Acceptance criteria<textarea name="acceptance" required placeholder="One testable outcome per line"></textarea></label><label>Risk and consent notes<textarea name="risk" placeholder="Data, permissions, cost, publishing, deletion, external messages, or people affected"></textarea></label><label>Evidence or reproduction steps<textarea name="evidence" placeholder="Screenshots, logs, routes, inputs, or exact steps"></textarea></label><p class="ac-form-note">Submission creates a reviewable request only. Code generation starts after you review and approve it. The generated preview then requires a separate Keep or Revert decision.</p><button class="ac-submit" type="submit">SEND TO REVIEW</button></form></section>
-      <section class="ac-merlin-chat" aria-label="Chat with Merlin">
-        <header class="ac-merlin-head"><img src="/app/assets/ai/merlin.png" alt="Merlin"><div><small>ANARCHADIA GUIDE</small><h2>Merlin</h2><span>Civic clarity, accountable automation, and reversible local interface changes.</span></div><button type="button" data-action="open-merlin-guide">OPEN FULL GUIDE</button></header>
-        <div class="ac-merlin-log" id="ac-merlin-log" aria-live="polite"></div>
-        <form class="ac-merlin-form" id="ac-merlin-form"><textarea id="ac-merlin-input" name="message" maxlength="8000" required placeholder="Try: Move this chat window to the top of the page."></textarea><button id="ac-merlin-send" type="submit">SEND</button><small class="ac-merlin-status" id="ac-merlin-status">Local history · reversible layout requests generate live previews</small></form>
-      </section>
+      <div id="ac-merlin-log" hidden></div>
+      <form id="ac-merlin-form" hidden aria-hidden="true"><textarea id="ac-merlin-input" name="message" maxlength="8000"></textarea><button id="ac-merlin-send" type="submit">SEND</button><small id="ac-merlin-status"></small></form>
       <footer class="ac-footer"><span>★ Choose where to participate.</span><b>POWER TO THE PEOPLE. Ⓐ</b></footer>
     </section>
   </main>
@@ -84,15 +81,14 @@
   <script src="/app/local-first-policy-v131.js?v=1.0.4" defer></script>
   <script src="/app/platform-stability-v159.js?v=tray-escape-r1" defer></script>
   <script src="/app/platform-experience-v160.js?v=dark-review-r1" defer></script>
-  <script src="/app/anarchadia-runtime-stability-v159.js?v=boot-stable-r1" defer></script>
+  <script src="/app/anarchadia-runtime-stability-v159.js?v=boot-stable-r2" defer></script>
   <script src="/app/shared/civweave-parity-runtime.js?v=direct-r36" defer></script>
   <script src="/app/anarchadia-console-v158.js?v=merlin-r1" defer></script>
   <script src="/app/anarchadia-passport-v193.js?v=expanded-passport-r1" defer></script>
   <script src="/app/action-followthrough-v165.js?v=explicit-approval-r1" defer></script>
-  <script src="/app/anarchadia-change-review-v165.js?v=review-preview-revert-r1" defer></script>
+  <script src="/app/anarchadia-change-review-v165.js?v=review-freeze-r2" defer></script>
   <script src="/app/anarchadia-live-layout-v167.js?v=local-layout-fallback-r1" defer></script>
   <script src="/app/model-settings-controller-v173.js?v=direct-settings-r1" defer></script>
-  <script src="/app/family-ai-loader-v105.js?v=direct-r42" defer></script>
   <script src="/app/family-shell-v104.js?v=merlinites-r2" defer></script>
   <script src="/app/local-rails-validator-v170.js?v=local-rails-r1" defer></script>
   <script src="/app/mobile-regression-v170.js?v=mobile-r170" defer></script>

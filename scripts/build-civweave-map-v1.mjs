@@ -33,7 +33,7 @@ async function copyTree(source,destination,root,files){
 run('stage-maplibre-v275.mjs');
 run('stage-federation-finder-data-v274.mjs');
 const contract=JSON.parse(await fs.readFile(CONTRACT,'utf8'));
-const validName=contract?.name==='Civweave Map'||contract?.name==='Civweave Hub Map';
+const validName=contract?.name==='Civweave Map'||contract?.name==='Civweave Guild Map';
 const validVersion=typeof contract?.version==='string'&&/^1\.\d+\.\d+$/.test(contract.version);
 if(contract?.schema!=='civweave.map.package/v1'||!validName||!validVersion)throw new Error('Civweave Map v1 package contract is invalid.');
 const atlas=JSON.parse(await fs.readFile(ATLAS,'utf8'));
@@ -44,7 +44,7 @@ try{
   for(const asset of contract.assets||[])await copyAsset(asset,root,files);
   await copyAsset('/app/civweave-map-v1-manifest.json',root,files);
   const atlasTarget=path.join(root,'app','federation-finder-data','atlas-v274');await fs.mkdir(atlasTarget,{recursive:true});await copyTree(ATLAS_DIR,atlasTarget,root,files);
-  const readme=`# Civweave Map v1\n\nCivweave Map v1 is the portable Federation Finder map runtime. Serve this directory over HTTP and open \`${contract.entry}\`.\n\n## Offline behavior\n\n- MapLibre and PMTiles are packaged locally; no CDN is required for the map runtime.\n- The full pinned federation/contact atlas is bundled in this archive for clean-install offline discovery.\n- A local coordinate-field basemap appears when no downloaded PMTiles region is available.\n- Federated PMTiles regions are streamed into chunked IndexedDB storage, SHA-256 verified, and rendered directly from that local store.\n\n## Privacy\n\nDevice geolocation is session-only and is never automatically published to the Civweave mesh. Only explicitly public locality and node metadata federate.\n\n## Node freshness\n\nFederated node-location status is marked stale after six hours and expires after twenty-four hours unless refreshed.\n`;
+  const readme=`# Civweave Map v1\n\nCivweave Map v1 is the portable Guild Map runtime. Serve this directory over HTTP and open \`${contract.entry}\`.\n\n## Offline behavior\n\n- MapLibre and PMTiles are packaged locally; no CDN is required for the map runtime.\n- The full pinned federation/contact atlas is bundled in this archive for clean-install offline discovery.\n- A local coordinate-field basemap appears when no downloaded PMTiles region is available.\n- Federated PMTiles regions are streamed into chunked IndexedDB storage, SHA-256 verified, and rendered directly from that local store.\n- Guild Rally Points already learned by a member device remain available from the cached Guild directory while offline.\n\n## Privacy\n\nDevice geolocation is session-only and is never automatically published to the Civweave mesh. Only explicitly public locality, Guild, and Rally Point metadata federate.\n\n## Guild freshness\n\nFederated Guild-location status is marked stale after six hours and expires after twenty-four hours unless refreshed.\n`;
   await fs.writeFile(path.join(root,'README.md'),readme,'utf8');files.push({path:'/README.md',...await hashFile(path.join(root,'README.md'))});
   const atlasBytes=files.filter(file=>file.path.startsWith('/app/federation-finder-data/atlas-v274/')).reduce((sum,file)=>sum+file.bytes,0);
   const packageManifest={...contract,builtAt:new Date().toISOString(),atlas:{schema:atlas.schema,source:atlas.source,featureCount:atlas.featureCount,edgeCount:atlas.edgeCount,hydration:'bundled',bytes:atlasBytes},files};

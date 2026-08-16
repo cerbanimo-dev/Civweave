@@ -1,11 +1,11 @@
 {
   "schema": "civweave.map.package/v1",
-  "name": "Civweave Hub Map",
-  "version": "1.1.0",
+  "name": "Civweave Guild Map",
+  "version": "1.2.0",
   "entry": "/app/hub-map-v1.html",
   "route": "/finder",
   "offlineFirst": true,
-  "description": "Hub-node-first locality map with steward-published physical Hub locations, join/explore actions, signed offline Needs/Offerings/Ideas gossip, and peer-healed map coverage.",
+  "description": "Guild-first locality map with Guildkeeper-published Guild locations and Rally Points, join/explore actions, signed offline Needs/Offerings/Ideas gossip, and peer-healed map coverage.",
   "renderers": {
     "maplibre": "5.13.0",
     "pmtiles": "4.4.1",
@@ -36,16 +36,25 @@
     "types": ["need", "offering", "idea"],
     "physicalRadiusMeters": 750,
     "physicalExchange": "foreground proximity after user enables map location",
-    "virtualExchange": "Hub-member pass-by over the federated community-object gateway",
-    "relevance": ["selected hub", "frequent partner hubs", "recent foreground passersby"],
+    "virtualExchange": "Guild-member pass-by over the federated community-object gateway",
+    "relevance": ["selected Guild", "frequent partner Guilds", "recent foreground passersby"],
     "offlineCopy": true
+  },
+  "rallyPoint": {
+    "schema": "civweave.guild-rally-point.v1",
+    "requiredForGuildSetup": true,
+    "publicPlaceConfirmationRequired": true,
+    "cachedWithDirectory": true,
+    "selectedGuildCacheKey": "civweave.guild-rally-point.selected.v1",
+    "purpose": "Physical reconnection rendezvous when digital networking is unavailable"
   },
   "privacy": {
     "deviceLocation": "session-only",
     "deviceLocationPublished": false,
     "deviceLocationStoredByGossip": false,
-    "hubLocation": "steward-published physical node manifest",
-    "federatedData": "explicitly public or federated signed locality and node metadata only"
+    "guildLocation": "Guildkeeper-published physical Guild manifest",
+    "rallyPoint": "Guildkeeper-published public reconnection location",
+    "federatedData": "explicitly public or federated signed locality and Guild metadata only"
   },
   "assets": [
     "/finder/index.html",

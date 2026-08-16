@@ -9,12 +9,14 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
+      - 'public/app/shared-intention-party-chat-v1.js'
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/family-ai-loader-v105.js'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
+      - 'public/app/anarchadia-console-v139.html'
       - 'public/app/installed-entry-v146.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
@@ -30,12 +32,14 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
+      - 'public/app/shared-intention-party-chat-v1.js'
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/family-ai-loader-v105.js'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
+      - 'public/app/anarchadia-console-v139.html'
       - 'public/app/installed-entry-v146.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
@@ -66,6 +70,7 @@ jobs:
           node --check public/app/unified-chat-system-v1.js
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/shared-guide-surface-v236-core-v244.js
+          node --check public/app/shared-intention-party-chat-v1.js
           node --check public/app/guide-chat-surface-v350.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
@@ -86,10 +91,12 @@ jobs:
           const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
           const loader=fs.readFileSync('public/app/shared-guide-surface-v236.js','utf8');
           const shared=fs.readFileSync('public/app/shared-guide-surface-v236-core-v244.js','utf8');
+          const party=fs.readFileSync('public/app/shared-intention-party-chat-v1.js','utf8');
           const surface=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
           const compat=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
           const faces=fs.readFileSync('public/app/shared-chat-face-icons-v255.js','utf8');
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
+          const anarchadia=fs.readFileSync('public/app/anarchadia-console-v139.html','utf8');
           const repair=fs.readFileSync('public/service-worker-chat-repair-v245.js','utf8');
 
           for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
@@ -104,13 +111,28 @@ jobs:
           if(surface.includes('<select data-guide-select'))throw new Error('Guide dropdown regression returned');
           const start=surface.slice(surface.indexOf('function start(){'),surface.indexOf('\n\nconst api='));
           if(start.includes('ensureRoot()')||start.includes('render()'))throw new Error('Chat surface is materializing at application launch');
+          if(!start.includes('ensureLauncher()'))throw new Error('Canonical chat owner no longer creates the lightweight universal launcher');
+          if(!shared.includes('api?.ensureLauncher?.()'))throw new Error('Universal guide layer cannot repair a missing launcher');
+          if(!shared.includes("launcherOwner:'guide-chat-surface-v350'"))throw new Error('Universal launcher ownership is not explicit');
+          if(!shared.includes("addEventListener('pageshow',repairSurface)"))throw new Error('Universal launcher is not reconciled after BFCache/page restoration');
+          if(anarchadia.includes('class="ac-merlin-chat"')||anarchadia.includes('aria-label="Chat with Merlin"'))throw new Error('Anarchadia rebuilt a page-local Merlin chat surface instead of using the universal launcher');
+          if(!anarchadia.includes('/app/install-boundary-v146.js'))throw new Error('Anarchadia is no longer attached to the universal system experience boundary');
           if(!shared.includes('switchGuide?.(currentSystem,{open:false})'))throw new Error('Shared guide ownership can reopen chat during launch');
-          if(!faces.includes('idleUntilChatOpen:true')||!faces.includes("addEventListener('civweave:guide-chat-opened',activate)"))throw new Error('Avatar/semantic runtime is not deferred until chat opens');
+          if(!faces.includes('idleUntilChatOpen:true')||!faces.includes("addEventListener('civweave:guide-chat-opened',activate)"))throw new Error('Avatar presentation is not deferred until chat opens');
+          if(!faces.includes('heavyRuntimeOnOpen:false')||!faces.includes("expressionRuntimeTrigger:'first-chat-submit'")||!faces.includes('miniLmPolling:false'))throw new Error('Chat-open heavy-runtime guard is missing');
+          const activateStart=faces.indexOf('function activate(){'),activateEnd=faces.indexOf('\nfunction start(){',activateStart),activateBody=faces.slice(activateStart,activateEnd);
+          if(activateBody.includes('ensureExpressionDirector')||activateBody.includes('setInterval('))throw new Error('Opening chat is starting expression/MiniLM work');
+          if(faces.includes('miniLmLampTimer=setInterval')||faces.includes('setInterval(refreshMiniLmLamp'))throw new Error('Face runtime reintroduced MiniLM polling');
           if(!compat.includes('Compatibility loader only')||!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('V242 compatibility path is no longer a loader-only shim');
-          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-chat-face-icons-v255.js']){
+          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/shared-chat-face-icons-v255.js']){
             if(!repair.includes(`'${path}'`))throw new Error(`PWA cache repair is missing ${path}`);
           }
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
+          if(!loader.includes('partyAutostart:false')||!loader.includes('activatePartyChat'))throw new Error('Party chat is not explicitly lazy');
+          const installStart=loader.indexOf('function install(){'),installEnd=loader.indexOf('\n}\n\ninstall();',installStart),installBody=loader.slice(installStart,installEnd);
+          if(installBody.includes('/app/shared-intention-party-chat-v1.js'))throw new Error('Party chat is loading during ordinary guide startup');
+          if(!loader.includes("addEventListener('civweave:open-human-thread',onPartyRequest)"))throw new Error('Lazy party activation is not connected to explicit human-party use');
+          if(!party.includes('function startTransport()'))throw new Error('Party transport contract disappeared');
           NODE
 
       - name: Verify current chat behavior
