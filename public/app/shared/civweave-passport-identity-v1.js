@@ -2,7 +2,7 @@
 'use strict';
 if(globalThis.CivweavePassportIdentityV1)return;
 
-const VERSION='1.1.0';
+const VERSION='1.2.0';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const SCHEMA='civweave.anarchadia-console.v1';
 const CHAT_KEYCHAIN_SCHEMA='civweave.passport-chat-keychain.v1';
@@ -80,7 +80,10 @@ async function chatPublicIdentity(){const record=ensure(),chain=await ensureChat
 async function signChatValue(value){const chain=await ensureChatKeychain();return signWith(chain.current.privateKey,value)}
 async function verifyChatValue(publicKey,value,signature){return verifyWith(publicKey,value,signature)}
 async function rotateChatKey(){
-  const record=ensure(),chain=await ensureChatKeychain(),prior=chain.current,priorEntry=chain.history.at(-1),pair=await generatePair(),generation=Number(chain.generation||0)+1,keyId=`pk:${await fingerprint(pair.publicKey)}`,publicName=await publicNameForKey(pair.publicKey),activatedAt=now();
+  const record=ensure(),chain=await ensureChatKeychain(),prior=chain.current,priorEntry=chain.history.at(-1),generation=Number(chain.generation||0)+1,activatedAt=now();
+  let pair,publicName;
+  do{pair=await generatePair();publicName=await publicNameForKey(pair.publicKey)}while(publicName===prior.publicName);
+  const keyId=`pk:${await fingerprint(pair.publicKey)}`;
   const entry={schema:CHAT_HISTORY_SCHEMA,generation,keyId,publicKey:pair.publicKey,publicName,activatedAt,previousKeyId:prior.keyId,previousEntryHash:priorEntry?.entryHash||null,transitionSignature:null};
   entry.transitionSignature=await signWith(prior.privateKey,transitionFor(record.passportId,entry));entry.entryHash=await entryHash(entry);
   const nextChain={schema:CHAT_KEYCHAIN_SCHEMA,generation,current:{keyId,publicKey:pair.publicKey,privateKey:pair.privateKey,publicName,activatedAt},history:[...chain.history,entry]};
