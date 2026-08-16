@@ -34,8 +34,13 @@ assert.match(generated,/selected-local-minilm-v357/,'generated worker must prese
 assert.match(generated,/server-auto-local-failover-v358/,'generated worker must preserve server-auto local failover delivery');
 assert.match(generated,/local-ai-bootstrap-capability-v359/,'generated worker must activate the bootstrap capability repair');
 
-assert.doesNotMatch(family,/local-ai\/bootstrap-v266\.js/,'generic family assistant loading must not bootstrap the local AI stack');
-assert.match(family,/localModelPathway:'explicit-demand-only-v315'/,'family loader must advertise explicit-demand local AI ownership');
+// The family loader may bootstrap local AI only after a selected/configured local
+// route is actually requested. Ordinary family loading and optional modules must
+// remain free of generative local-AI startup side effects.
+assert.match(family,/const LOCAL_BOOTSTRAP=\['\/app\/local-ai\/bootstrap-v266\.js/,'family loader must retain the on-demand local bootstrap path');
+assert.match(family,/async function ensureLocalAI\(\)\{\s*if\(!localRequested\(\)\)return false;/s,'family loader must gate local bootstrap behind an actual local-model request');
+assert.match(family,/await loadScript\(\.\.\.LOCAL_BOOTSTRAP\)/,'selected local generation must be able to initialize its bootstrap');
+assert.match(family,/localModelPathway:'selected-model-on-demand-v316'/,'family loader must advertise selected-model on-demand local AI ownership');
 assert.match(family,/localAIOptionalSideEffects:false/,'generic assistant optional loading must stay free of local-AI side effects');
 
 assert.match(bootstrap,/componentCompatibility:'capability-contract-v324'/,'bootstrap must advertise the mutable-component capability contract');
@@ -75,7 +80,7 @@ console.log(JSON.stringify({
   localAICodeDelivery:'dedicated-network-first-pre-core-offline-cache-fallback-v308',
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
   bootstrapCompatibility:'capability-contract-v324',
-  familyLoaderPolicy:'no-local-ai-bootstrap-side-effects',
+  familyLoaderPolicy:'selected-model-on-demand-only',
   incompatibleGlobals:'evicted-before-reload',
   mutableSupportModules:'capability-gated-not-exact-version-pinned',
   gemma3Profile:'transformers-js-v4-q4-optimized',
