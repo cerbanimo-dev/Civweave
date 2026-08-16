@@ -7,6 +7,11 @@ const STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname;
 const QUERY=new URLSearchParams(location.search);
 const EMBEDDED=window.self!==window.top||(QUERY.get('civweave')==='1'&&QUERY.get('cabinet')==='1');
+const PREVIOUS=globalThis.CivweaveFamilyNavigationV178;
+if(PREVIOUS?.owner&&typeof PREVIOUS.ensureMounted==='function'){
+  PREVIOUS.ensureMounted();
+  return;
+}
 const ROUTES=globalThis.CivweaveSystemRoutesV227;
 const STATE_MAPPER='/app/subsystem-avatar-state-v347.js?v=1.0.0';
 const SHEETS=Object.freeze({
@@ -62,11 +67,14 @@ function currentSystem(){
   if(found)return found;
   const explicit=QUERY.get('system');
   if(SYSTEMS.some(x=>x.id===explicit))return explicit;
+  const declared=String(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||'').toLowerCase();
+  if(SYSTEMS.some(x=>x.id===declared))return declared;
   if(document.documentElement.hasAttribute('data-living-school-cabinet')||PATH.includes('/cabinets/living-school/'))return'living-school';
   if(PATH.includes('fellowfare'))return'fellowfare';
   if(PATH.includes('anarchadia'))return'anarchadia';
   if(PATH.includes('realm-console-v140.html'))return explicit==='civweave'?'civweave':'cerbanimo';
   if(PATH.includes('working-campus-v156.html'))return'civweave';
+  if(PATH.includes('fullscreen-family-v104.html'))return SYSTEMS.some(x=>x.id===explicit)?explicit:'civweave';
   return'';
 }
 function installStyle(){
@@ -194,13 +202,22 @@ function hydrate(){
 }
 function mount(){
   const current=currentSystem();
-  if(!current||document.getElementById(NAV_ID))return;
-  ROUTES?.authorize?.();
+  if(!current)return false;
+  if(!document.body){
+    document.addEventListener('DOMContentLoaded',mount,{once:true});
+    return false;
+  }
   installStyle();
   document.documentElement.classList.add('cw-themed-system-nav-active');
   document.documentElement.dataset.cwThemedCurrent=current;
   document.documentElement.dataset.familyNavigationOwner='themed-system-nav-v178';
-
+  const existing=document.getElementById(NAV_ID);
+  if(existing){
+    existing.dataset.navigationRevision=VERSION;
+    hydrate();
+    return true;
+  }
+  ROUTES?.authorize?.();
   const nav=document.createElement('nav');
   nav.id=NAV_ID;
   nav.dataset.navigationRevision=VERSION;
@@ -220,12 +237,21 @@ function mount(){
   for(const item of SYSTEMS)setExpression(item.id,'neutral','boot');
   hydrate();
   void ensureStateMapper().then(hydrate);
-  addEventListener('civweave:subsystem-avatar-state',event=>applySubsystem(event.detail||{}));
-  addEventListener('civweave:subsystem-avatar-state-ready',hydrate);
-  addEventListener('civweave:avatar-expression',event=>applyChat(event.detail||{}));
+  return true;
+}
+function ensureMounted(){
+  if(EMBEDDED){clearEmbedded();return false;}
+  return mount();
 }
 
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',mount,{once:true}):mount();
+addEventListener('civweave:subsystem-avatar-state',event=>applySubsystem(event.detail||{}));
+addEventListener('civweave:subsystem-avatar-state-ready',hydrate);
+addEventListener('civweave:avatar-expression',event=>applyChat(event.detail||{}));
+addEventListener('pageshow',ensureMounted);
+addEventListener('focus',ensureMounted);
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureMounted,{once:true});else ensureMounted();
+setTimeout(ensureMounted,120);
+setTimeout(ensureMounted,900);
 
 globalThis.CivweaveFamilyNavigationV178=Object.freeze({
   version:VERSION,
@@ -234,6 +260,8 @@ globalThis.CivweaveFamilyNavigationV178=Object.freeze({
   systems:SYSTEMS.map(item=>item.id),
   routeContract:'system-routes-v227',
   currentSystem,
+  mount,
+  ensureMounted,
   setExpression
 });
 })();
