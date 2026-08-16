@@ -7,6 +7,8 @@ export const HUMAN_VALIDATION_NEURON_POLICY = Object.freeze({
   allowedValidatorCounts: Object.freeze([2, 3]),
   sourceMode: 'lud',
   validatorMode: 'standard',
+  earnedBonusRollsOver: false,
+  earnedBonusExpiry: 'daily-reset',
 });
 
 const clean = (value, max = 240) => String(value ?? '').trim().slice(0, max);
@@ -21,10 +23,9 @@ const includedUsageKey = (day, nodeId, userId) => `usage-v2:included:${day}:${cl
 const totalUsageKey = (day, nodeId, userId) => `usage-v2:total:${day}:${clean(nodeId, 180)}:${clean(userId, 180)}`;
 const workersFreeTotalKey = day => `usage-v2:workers-free-total:${day}`;
 const reservationKey = id => `reservation:${clean(id, 240)}`;
-const earnedKey = (nodeId, userId) => `validation-earned:${clean(nodeId, 180)}:${clean(userId, 180)}`;
+const earnedKey = (day, nodeId, userId) => `validation-earned:${clean(day, 20)}:${clean(nodeId, 180)}:${clean(userId, 180)}`;
 const requestKey = requestId => `human-validation-request:${clean(requestId, 240)}`;
 const requestPrefix = 'human-validation-request:';
-const emptyEarned = () => ({ schema: 'civweave.validation-earned-neurons.v1', balanceNeurons: 0, earnedNeurons: 0, spentNeurons: 0, updatedAt: null });
 
 async function storedNumber(storage, key, fallbackKey = '') {
   const value = await storage.get(key);
@@ -37,13 +38,28 @@ function resetAt(now = Date.now()) {
   reset.setUTCHours(24, 0, 0, 0);
   return reset;
 }
-function publicEarned(wallet) {
-  const row = { ...emptyEarned(), ...(wallet || {}) };
+function emptyEarned(now = Date.now()) {
+  return {
+    schema: 'civweave.validation-earned-neurons.v2',
+    sourceDay: dayKey(now),
+    balanceNeurons: 0,
+    earnedNeurons: 0,
+    spentNeurons: 0,
+    expiresAt: resetAt(now).toISOString(),
+    updatedAt: null,
+  };
+}
+function publicEarned(wallet, now = Date.now()) {
+  const currentDay = dayKey(now);
+  const active = wallet && wallet.sourceDay === currentDay && Date.parse(wallet.expiresAt) > now;
+  const row = active ? { ...emptyEarned(now), ...wallet } : emptyEarned(now);
   return Object.freeze({
     schema: row.schema,
+    sourceDay: row.sourceDay,
     balanceNeurons: Math.max(0, Number(row.balanceNeurons || 0)),
     earnedNeurons: Math.max(0, Number(row.earnedNeurons || 0)),
     spentNeurons: Math.max(0, Number(row.spentNeurons || 0)),
+    expiresAt: row.expiresAt,
     updatedAt: row.updatedAt || null,
   });
 }
@@ -54,8 +70,9 @@ function publicRequest(request, now = Date.now()) {
 }
 
 export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount {
-  async validationEarned(nodeId, userId) {
-    return publicEarned(await this.state.storage.get(earnedKey(nodeId, userId)));
+  async validationEarned(nodeId, userId, now = Date.now()) {
+    const day = dayKey(now);
+    return publicEarned(await this.state.storage.get(earnedKey(day, nodeId, userId)), now);
   }
 
   async memberStatus(input) {
@@ -66,6 +83,8 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
       quota: Object.freeze({
         ...base.quota,
         validationEarnedNeurons: earned.balanceNeurons,
+        validationBonusNeurons: earned.balanceNeurons,
+        validationBonusExpiresAt: earned.expiresAt,
         totalRemainingNeurons: Number(base.quota?.totalRemainingNeurons || 0) + earned.balanceNeurons,
       }),
     });
@@ -118,9 +137,8 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
       expiresAt,
     });
 
-    // This consumes the requester's ordinary included daily quota, but does not claim that
-    // Workers AI ran. The provider/free-pool counter only changes when a validator later
-    // spends earned neurons on actual inference.
+    // The transfer reserves part of the requester's ordinary current-day included quota.
+    // No provider usage is recorded until a validator spends the same-day bonus on inference.
     await this.state.storage.put(includedKey, includedUsed + totalNeurons);
     await this.state.storage.put(totalKey, totalUsed + totalNeurons);
     await this.state.storage.put(key, request);
@@ -138,22 +156,26 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
     const key = requestKey(requestId), stored = await this.state.storage.get(key);
     if (!stored || stored.nodeId !== nodeId) throw Object.assign(new RangeError('Human-validation neuron request was not found.'), { status: 404 });
     const request = { ...stored, claims: Array.isArray(stored.claims) ? [...stored.claims] : [] };
+    const now = Date.now();
     if (request.requesterUserId === validatorUserId) throw Object.assign(new RangeError('A Lud requester cannot pay themselves for validating their own work.'), { status: 409 });
-    if (Date.parse(request.expiresAt) <= Date.now()) throw Object.assign(new RangeError('This Lud validation payment expired at the daily neuron reset.'), { status: 410 });
+    if (Date.parse(request.expiresAt) <= now || request.sourceDay !== dayKey(now)) throw Object.assign(new RangeError('This Lud validation payment expired at the daily neuron reset.'), { status: 410 });
     const prior = request.claims.find(claim => claim.validatorUserId === validatorUserId || claim.receiptId === receiptId);
     if (prior) {
       if (prior.validatorUserId !== validatorUserId || prior.receiptId !== receiptId) throw Object.assign(new RangeError('Validator or receipt has already been used for this request.'), { status: 409 });
-      return { claim: prior, request: publicRequest(request), earned: await this.validationEarned(nodeId, validatorUserId), idempotent: true };
+      return { claim: prior, request: publicRequest(request), earned: await this.validationEarned(nodeId, validatorUserId, now), idempotent: true };
     }
     if (request.claims.length >= request.validatorCount) throw Object.assign(new RangeError('All validator neuron shares have already been claimed.'), { status: 409 });
 
     const neurons = Number(request.perValidatorNeurons || 0);
     if (!Number.isSafeInteger(neurons) || neurons < 1) throw Object.assign(new RangeError('Human-validation request has an invalid neuron split.'), { status: 500 });
-    const earnedStorageKey = earnedKey(nodeId, validatorUserId), wallet = await this.validationEarned(nodeId, validatorUserId), at = new Date().toISOString();
+    const earnedStorageKey = earnedKey(request.sourceDay, nodeId, validatorUserId), wallet = await this.validationEarned(nodeId, validatorUserId, now), at = new Date(now).toISOString();
     const nextWallet = Object.freeze({
       ...wallet,
+      schema: 'civweave.validation-earned-neurons.v2',
+      sourceDay: request.sourceDay,
       balanceNeurons: wallet.balanceNeurons + neurons,
       earnedNeurons: wallet.earnedNeurons + neurons,
+      expiresAt: request.expiresAt,
       updatedAt: at,
     });
     const claim = Object.freeze({
@@ -163,6 +185,8 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
       receiptId,
       receiptHash,
       neurons,
+      sourceDay: request.sourceDay,
+      expiresAt: request.expiresAt,
       createdAt: at,
     });
     request.claims.push(claim);
@@ -170,7 +194,7 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
     request.updatedAt = at;
     await this.state.storage.put(earnedStorageKey, nextWallet);
     await this.state.storage.put(key, Object.freeze(request));
-    return { claim, request: publicRequest(request), earned: publicEarned(nextWallet), idempotent: false };
+    return { claim, request: publicRequest(request), earned: publicEarned(nextWallet, now), idempotent: false };
   }
 
   async humanValidationStatus(input = {}) {
@@ -188,7 +212,7 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
       nodeId,
       userId,
       policy: HUMAN_VALIDATION_NEURON_POLICY,
-      earned: await this.validationEarned(nodeId, userId),
+      earned: await this.validationEarned(nodeId, userId, now),
       source: Object.freeze({
         dailyBudgetNeurons: dailyValidationBudget,
         remainingNeurons: sourceRemainingNeurons,
@@ -203,11 +227,12 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
     const nodeId = clean(input.nodeId, 180), userId = clean(input.userId, 180), requested = whole(input.requestedNeurons, 'requestedNeurons', 1);
     const billingCeiling = whole(input.billingCeilingNeurons ?? requested, 'billingCeilingNeurons', 1);
     if (!await this.member(nodeId, userId)) throw Object.assign(new RangeError('Member is not admitted to this Guild.'), { status: 404 });
-    const earned = await this.validationEarned(nodeId, userId);
-    if (requested > earned.balanceNeurons) throw Object.assign(new RangeError('Insufficient earned human-validation neurons.'), { status: 402 });
+    const now = Date.now(), day = dayKey(now), earned = await this.validationEarned(nodeId, userId, now);
+    if (Date.parse(earned.expiresAt) <= now || earned.sourceDay !== day) throw Object.assign(new RangeError('Today\'s human-validation neuron bonus has expired.'), { status: 410 });
+    if (requested > earned.balanceNeurons) throw Object.assign(new RangeError('Insufficient same-day human-validation bonus neurons.'), { status: 402 });
     const billingRail = clean(input.billingRail, 80).toLowerCase() || 'ai-gateway-unified-billing';
     if (!['workers-ai-free', 'workers-ai-paid-overage', 'ai-gateway-unified-billing'].includes(billingRail)) throw Object.assign(new RangeError('Unknown Cloudflare billing rail.'), { status: 400 });
-    const capacity = await this.snapshot(nodeId), now = Date.now(), day = dayKey(now);
+    const capacity = await this.snapshot(nodeId);
     if (billingRail === 'workers-ai-paid-overage' && capacity.workersPlan !== 'paid') throw Object.assign(new RangeError('Workers AI paid overage requires Workers Paid.'), { status: 409 });
     if (billingRail === 'workers-ai-free') {
       const workersFreeRemaining = Math.max(0, HOST_ECONOMY_POLICY.cloudflareFreeNeuronsPerDay - Number(capacity.dailyUsedNeurons || 0));
@@ -218,10 +243,10 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
     }
 
     const totalKey = totalUsageKey(day, nodeId, userId), totalUsed = await storedNumber(this.state.storage, totalKey, legacyUsageKey(day, nodeId, userId));
-    const reservationId = `compute:${crypto.randomUUID()}`, at = new Date().toISOString();
+    const reservationId = `compute:${crypto.randomUUID()}`, at = new Date(now).toISOString();
     await this.state.storage.put(totalKey, totalUsed + requested);
     if (billingRail === 'workers-ai-free') await this.state.storage.put(workersFreeTotalKey(day), Number(capacity.dailyUsedNeurons || 0) + requested);
-    await this.state.storage.put(earnedKey(nodeId, userId), { ...earned, balanceNeurons: earned.balanceNeurons - requested, spentNeurons: earned.spentNeurons + requested, updatedAt: at });
+    await this.state.storage.put(earnedKey(day, nodeId, userId), { ...earned, balanceNeurons: earned.balanceNeurons - requested, spentNeurons: earned.spentNeurons + requested, updatedAt: at });
     const reservation = Object.freeze({
       schema: 'civweave.compute-reservation.v2', reservationId, nodeId, userId, day,
       requestedNeurons: requested,
@@ -232,6 +257,7 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
       fundingSource: 'validation-earned',
       billingRail,
       billingModel: clean(input.billingModel, 180) || null,
+      bonusExpiresAt: earned.expiresAt,
       createdAt: at,
     });
     await this.state.storage.put(reservationKey(reservationId), reservation);
@@ -257,9 +283,10 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
     const refund = reservation.requestedNeurons - actual;
     const totalKey = totalUsageKey(reservation.day, reservation.nodeId, reservation.userId), currentTotal = await storedNumber(this.state.storage, totalKey);
     await this.state.storage.put(totalKey, Math.max(0, currentTotal - refund));
-    if (refund > 0) {
-      const earned = await this.validationEarned(reservation.nodeId, reservation.userId);
-      await this.state.storage.put(earnedKey(reservation.nodeId, reservation.userId), { ...earned, balanceNeurons: earned.balanceNeurons + refund, spentNeurons: Math.max(0, earned.spentNeurons - refund), updatedAt: new Date().toISOString() });
+    const now = Date.now(), bonusStillActive = dayKey(now) === reservation.day && Date.parse(reservation.bonusExpiresAt) > now;
+    if (refund > 0 && bonusStillActive) {
+      const earned = await this.validationEarned(reservation.nodeId, reservation.userId, now);
+      await this.state.storage.put(earnedKey(reservation.day, reservation.nodeId, reservation.userId), { ...earned, balanceNeurons: earned.balanceNeurons + refund, spentNeurons: Math.max(0, earned.spentNeurons - refund), updatedAt: new Date(now).toISOString() });
     }
     if (reservation.billingRail === 'workers-ai-free') {
       const freeKey = workersFreeTotalKey(reservation.day), currentFree = await storedNumber(this.state.storage, freeKey);
@@ -281,10 +308,12 @@ export class CivweaveHumanValidationCapacityAccount extends BaseCapacityAccount 
       schema: 'civweave.compute-settlement.v2', reservationId: id,
       billingRail: reservation.billingRail, billingModel: reservation.billingModel, fundingSource: 'validation-earned',
       requestedNeurons: reservation.requestedNeurons, actualNeurons: actual, actualBillingNeurons: actualBilling,
-      chargedSpendableMicrocents, refundedNeurons: refund,
+      chargedSpendableMicrocents,
+      refundedNeurons: refund,
       refundedIncludedNeurons: 0,
       refundedLifetimeNeurons: 0,
-      refundedValidationEarnedNeurons: refund,
+      refundedValidationEarnedNeurons: bonusStillActive ? refund : 0,
+      expiredValidationBonusNeurons: bonusStillActive ? 0 : refund,
       capacity: await this.snapshot(reservation.nodeId),
     });
   }
