@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.123-shared-guide-surface-v236-unified-chat-v1-avatar-contain-v1';
+const VERSION='1.0.124-shared-guide-surface-v236-unified-chat-v1-avatar-contain-v1-header-clearance-v1';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function liveHead(){
@@ -66,7 +66,7 @@ function install(){
         load('/app/local-ai/translation-packs-v1.js?v=translation-packs-v1',()=>{
           try{dispatchEvent(new CustomEvent('civweave:translation-workflow-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveTranslationPacksV1));
-        load('/app/shared-chat-face-icons-v255.js?v=1.0.114-avatar-contain-v1',()=>{
+        load('/app/shared-chat-face-icons-v255.js?v=1.0.115-header-clearance-v1',()=>{
           try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveSharedChatFaceIconsV255));
       },()=>Boolean(globalThis.CivweaveSharedGuideSurfaceV236));
