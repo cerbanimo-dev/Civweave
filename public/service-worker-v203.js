@@ -2,7 +2,7 @@
 // chat-open-ui-only-v351: opening the chat surface must not start avatar-expression or MiniLM work.
 // chat-party-lazy-v353: ordinary AI chat open must not start party DOM observers, mesh sessions, gateway polling, or intention-ledger decoration.
 // universal-chat-launcher-v354: every first-class realm receives the same canonical launcher; stale Anarchadia page/chat assets are purged on activation.
-// radio-clean-default-v355: lyric-audited radio is persistent and user-opened; playlist governance is event-driven so it cannot starve later universal surfaces.
+// radio-safe-station-v356: clean/default and S.A.F.E. are separate station tiers; S.A.F.E. owns an independent fail-closed queue and tier-aware suggestions.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.162-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
@@ -12,7 +12,7 @@ importScripts('/service-worker-core-v208.js?v=1.0.162-chat-convergence-v250-inst
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=1.0.162-radio-core-shell-v305-persistent-clean-v355');
+importScripts('/service-worker-radio-core-v305.js?v=1.0.162-radio-core-shell-v305-safe-station-v356');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-lud-package-v1.js?v=lud-package-v1');
