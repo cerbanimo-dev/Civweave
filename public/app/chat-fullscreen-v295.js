@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.107-chat-fullscreen-v299',REVISION='mobile-chat-saved-tabs-grid-v350',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-chat-fullscreen-v299-style';
+const VERSION='1.0.108-chat-fullscreen-v299',REVISION='saved-tabs-grid-v351',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-chat-fullscreen-v299-style';
 if(globalThis.CivweaveChatFullscreenV295?.version===VERSION&&globalThis.CivweaveChatFullscreenV295?.revision===REVISION)return;
 
 function root(){return document.getElementById(ROOT)}
@@ -49,6 +49,7 @@ function settleViewport(){
 function style(){
   if(document.getElementById(STYLE))return;
   const s=document.createElement('style');s.id=STYLE;s.textContent=`
+#${ROOT}:not([hidden]):not(.is-minimized):has(>.cw295-saved-chats){grid-template-rows:auto auto auto auto minmax(0,1fr) auto!important}
 @media(max-width:720px){
 #${ROOT}:not([hidden]):not(.is-minimized){position:fixed!important;inset:0!important;left:0!important;right:0!important;top:0!important;bottom:0!important;width:100vw!important;height:100dvh!important;min-height:0!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;border:0!important;overflow:hidden!important;overscroll-behavior:contain!important;contain:layout paint style!important;z-index:2147483646!important;display:grid!important;grid-template-rows:auto auto auto minmax(0,1fr) auto!important;box-sizing:border-box!important;pointer-events:auto!important}
 #${ROOT}:not([hidden]):not(.is-minimized):has(>.cw295-saved-chats){grid-template-rows:auto auto auto auto minmax(0,1fr) auto!important}
