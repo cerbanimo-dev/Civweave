@@ -11,6 +11,7 @@ const required=[
   'public/service-worker-local-ai-coherence-v307.js',
   'public/service-worker-code-coherence-v288.js',
   'public/service-worker-core-v208.js',
+  'public/service-worker-shell-assets-v1.js',
   'public/service-worker-installed-launch-v282.js',
   'public/service-worker-installer-state-v280.js',
   'public/service-worker-shell-integrity-v281.js',
@@ -28,7 +29,7 @@ const required=[
   'public/service-worker-boot-recovery-v426.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v2 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + lud-package-v1 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + strict-shell-install-v228 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-css-dvh-v349 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
+const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v2 + retained lightweight shell core + shell-assets-v1-repair-v2 + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + lud-package-v1 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + strict-shell-install-v228 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-css-dvh-v349 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
 // chat-open-ui-only-v351: opening the chat surface must not start avatar-expression or MiniLM work.
 // chat-party-lazy-v353: ordinary AI chat open must not start party DOM observers, mesh sessions, gateway polling, or intention-ledger decoration.
 // universal-chat-launcher-v354: every first-class realm receives the same canonical launcher; stale Anarchadia page/chat assets are purged on activation.
@@ -39,6 +40,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=${version}-local-ai-code-coherence-v307');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v288-language-v2');
 importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v2');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
@@ -61,12 +63,13 @@ console.log(JSON.stringify({
   ok:true,
   version,
   output:'public/service-worker-v203.js',
-  imports:19,
+  imports:20,
   localAICodeCoherence:'v307-network-first-pre-core',
   codeCoherence:'v288-language-v2',
   installedLaunch:'installed-pwa-launch-v294-campus-recovery',
   radioCore:'radio-core-shell-v305',
   radioAssetHandoff:'safe-station-v356',
+  shellAssets:'shell-assets-v1-repair-v2',
   installedShellRepair:'installed-shell-repair-v293',
   offlineRevision:'offline-campus-current-graph-v280',
   offlinePolicy:'resumable-pause-v280',
