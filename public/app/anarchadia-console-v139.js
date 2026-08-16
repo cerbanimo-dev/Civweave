@@ -25,7 +25,13 @@ function defaultState(){
 }
 let state=load();
 let requestKind='feature';
-function load(){const saved=parse(localStorage.getItem(STORAGE_KEY),null);return saved?.schema==='civweave.anarchadia-console.v1'?saved:defaultState()}
+function load(){
+  const saved=parse(localStorage.getItem(STORAGE_KEY),null);
+  if(saved?.schema==='civweave.anarchadia-console.v1'&&saved?.passportId)return saved;
+  const fresh=defaultState();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(fresh))}catch{}
+  return fresh;
+}
 function save(kind,detail,proposalId=null){if(kind)state.ledger.unshift({id:uid('evt'),time:now(),kind,detail,proposalId});state.ledger=state.ledger.slice(0,250);localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderAll()}
 function proposal(id){return state.proposals.find(item=>item.id===id)}
 function setScreen(name){$('#ac-app').dataset.screen=name;$$('.ac-screen').forEach(node=>node.hidden=node.dataset.screen!==name);const home=name==='home';$$('.ac-passport,.ac-grid,.ac-pulse').forEach(node=>node.hidden=!home);window.scrollTo({top:0,behavior:'smooth'})}
