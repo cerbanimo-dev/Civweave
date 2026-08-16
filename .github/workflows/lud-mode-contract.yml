@@ -16,6 +16,8 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
+      - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
+      - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
       - '.github/workflows/lud-mode-contract.yml'
   push:
@@ -35,6 +37,8 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
+      - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
+      - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
       - '.github/workflows/lud-mode-contract.yml'
 
@@ -60,5 +64,12 @@ jobs:
           node --check public/app/family-ai-loader-v105.js
           node --check public/service-worker-lud-package-v1.js
           node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
-      - name: Verify no-AI, no-generated-visual, and provenance contracts
+          node --check scripts/browser-lud-mode-gauntlet-v1.mjs
+      - name: Verify no-AI, no-generated-visual, provenance, and route contracts
         run: node --test scripts/test-lud-mode-v1.mjs
+      - name: Install browser gauntlet
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install chromium
+      - name: Exercise Lud download, canonical open, and offline reload
+        run: node scripts/browser-lud-mode-gauntlet-v1.mjs

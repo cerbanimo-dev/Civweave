@@ -3,6 +3,7 @@
   "mode": "lud",
   "label": "Lud Mode",
   "entry": "/app/lud/campus.html",
+  "entryRoute": "/app/lud/campus",
   "policy": {
     "recursiveDiscovery": false,
     "aiGeneration": false,
