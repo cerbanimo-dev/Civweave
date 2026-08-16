@@ -1,13 +1,13 @@
 ;(()=>{
 'use strict';
 
-const LUD_REVISION='lud-package-v1';
+const LUD_REVISION='lud-package-v1.1-game-ui';
 const LUD_MANIFEST_URL='/app/lud-package-v1.json';
 const LUD_META_URL='/__civweave/lud-package-v1.json';
 const LUD_ENTRY_ASSET='/app/lud/campus.html';
 const LUD_ENTRY_ROUTE='/app/lud/campus';
 const LUD_STANDALONE=typeof OFFLINE_CACHE!=='string';
-const LUD_CACHE_NAME=LUD_STANDALONE?'civweave-lud-v1':OFFLINE_CACHE;
+const LUD_CACHE_NAME=LUD_STANDALONE?'civweave-lud-v1-1-game-ui':OFFLINE_CACHE;
 const LUD_INSTALLER_PATHS=new Set([
   '/app/lud/',
   '/app/lud/index.html',
@@ -57,7 +57,7 @@ async function loadLudManifest(){
   for(const asset of assets){let url;try{url=new URL(asset,self.location.origin)}catch{throw new Error(`Invalid Lud asset: ${asset}`)}if(url.origin!==self.location.origin||!url.pathname.startsWith('/'))throw new Error(`Lud asset leaves the Civweave origin: ${asset}`);const lower=url.pathname.toLowerCase();const blocked=forbidden.find(fragment=>lower.includes(fragment));if(blocked)throw new Error(`Lud manifest rejected forbidden path ${asset} (${blocked}).`)}
   return{...manifest,assets,entry:String(manifest.entry||LUD_ENTRY_ASSET),entryRoute:String(manifest.entryRoute||LUD_ENTRY_ROUTE)};
 }
-async function ludStatus(){const meta=await readLudMeta();if(meta)return ludPacket(meta);try{const manifest=await loadLudManifest();return ludPacket({ready:false,running:false,downloaded:0,total:manifest.assets.length,assets:manifest.assets,entry:manifest.entry,entryRoute:manifest.entryRoute})}catch(error){return ludPacket({ready:false,running:false,downloaded:0,total:0,failed:[{pathname:'manifest',message:String(error?.message||error)}]})}}
+async function ludStatus(){const meta=await readLudMeta();if(meta?.revision===LUD_REVISION)return ludPacket(meta);try{const manifest=await loadLudManifest();return ludPacket({ready:false,running:false,downloaded:0,total:manifest.assets.length,assets:manifest.assets,entry:manifest.entry,entryRoute:manifest.entryRoute})}catch(error){return ludPacket({ready:false,running:false,downloaded:0,total:0,failed:[{pathname:'manifest',message:String(error?.message||error)}]})}}
 async function downloadLud(event){
   const manifest=await loadLudManifest(),cache=await ludCache(),failed=[],downloadedAssets=[];let bytes=0;
   let packet=await writeLudMeta({ready:false,running:true,downloaded:0,total:manifest.assets.length,assets:manifest.assets,entry:manifest.entry,entryRoute:manifest.entryRoute,failed,bytes,updatedAt:ludNow()});ludPost(event,{...packet,type:'CIVWEAVE_LUD_PACKAGE_PROGRESS'});await ludBroadcast({...packet,type:'CIVWEAVE_LUD_PACKAGE_PROGRESS'});
@@ -68,7 +68,7 @@ function startLudDownload(event){if(ludDownloadPromise)return ludDownloadPromise
 async function clearLud(){const cache=await ludCache();const meta=await readLudMeta();for(const pathname of meta?.assets||[])try{await cache.delete(ludKey(pathname),{ignoreSearch:true})}catch{}await cache.delete(ludKey(LUD_META_URL),{ignoreSearch:true});return ludStatus()}
 async function standaloneAssetPolicy(){
   const meta=await readLudMeta();
-  if(Array.isArray(meta?.assets)&&meta.assets.length)return{assets:new Set(ludUnique(meta.assets)),entry:String(meta.entry||LUD_ENTRY_ASSET),entryRoute:String(meta.entryRoute||LUD_ENTRY_ROUTE),ready:Boolean(meta.ready)};
+  if(meta?.revision===LUD_REVISION&&Array.isArray(meta?.assets)&&meta.assets.length)return{assets:new Set(ludUnique(meta.assets)),entry:String(meta.entry||LUD_ENTRY_ASSET),entryRoute:String(meta.entryRoute||LUD_ENTRY_ROUTE),ready:Boolean(meta.ready)};
   try{const manifest=await loadLudManifest();return{assets:new Set(manifest.assets),entry:manifest.entry,entryRoute:manifest.entryRoute,ready:false}}catch{return{assets:new Set(),entry:LUD_ENTRY_ASSET,entryRoute:LUD_ENTRY_ROUTE,ready:false}}
 }
 function ludOfflineError(message,status=503){return new Response(message,{status,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store'}})}
