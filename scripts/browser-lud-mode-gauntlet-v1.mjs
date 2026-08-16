@@ -81,7 +81,7 @@ try{
   await page.waitForSelector('#cw-host-node-lobby',{state:'attached',timeout:10000});
   await page.waitForFunction(()=>/^AC-[A-F0-9]{8}$/.test(document.querySelector('#lud-passport-id')?.textContent?.trim()||''),undefined,{timeout:10000});
   assert.equal((await page.locator('h1').textContent())?.trim(),'Lud Mode','Lud campus did not render after canonical navigation');
-  assert.equal(canonicalCampusRequests,beforeOpenCanonicalRequests,'opening downloaded Lud Mode should be fulfilled from its cache, not refetched from the network');
+  assert.ok(canonicalCampusRequests>beforeOpenCanonicalRequests,'opening downloaded Lud Mode while online should refresh the canonical campus route before cache fallback');
   const firstPassport=(await page.locator('#lud-passport-id').textContent())?.trim();
   assert.match(firstPassport||'',/^AC-[A-F0-9]{8}$/,'Lud Mode did not create a Passport');
   assert.equal(await page.locator('#cw-host-node-lobby').count(),1,'Lud Mode did not expose the canonical Guild lobby');
@@ -108,6 +108,7 @@ try{
   assert.ok(resources.includes('/app/lud-manual-authoring-v1.js'),'offline Lud campus did not load manual authoring');
   assert.ok(resources.includes('/app/shared/civweave-passport-identity-v1.js'),'offline Lud campus did not load Passport identity');
   assert.ok(resources.includes('/app/host-node-session-v1.js'),'offline Lud campus did not load the shared Guild session owner');
+  assert.ok(resources.includes('/app/quest-arc-chronicle-v1.js'),'offline Lud campus did not load the Quest Arc Chronicle core');
   assert.equal(resources.some(resource=>resource.includes('/local-ai/')||resource.includes('/models/')||resource.includes('family-ai-loader')||resource.includes('guide-chat')),false,'Lud campus loaded an AI runtime dependency');
 
   console.log(JSON.stringify({
@@ -115,8 +116,9 @@ try{
     revision:'browser-lud-mode-gauntlet-v1',
     cloudflareCleanUrlRedirectExercised:htmlRedirects>0,
     canonicalEntry:'/app/lud/campus',
-    cachedOpen:true,
+    onlineRefresh:true,
     offlineReload:true,
+    questArcOffline:true,
     passportPersistent:true,
     guildLobby:true,
     dedicatedWorker:true,
