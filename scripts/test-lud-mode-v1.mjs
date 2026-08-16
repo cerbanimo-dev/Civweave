@@ -123,11 +123,14 @@ test('cloud generation API labels AI provenance before returning artifacts',asyn
   assert.match(source,/metadata: \{ generation: provenance\.generation \}/);
 });
 
-test('staging synthetic generation is explicitly non-AI provenance',async()=>{
+test('staging generation stays isolated behind the staging Guild-server proxy',async()=>{
   const source=await read('functions/api/ai/node/generate.ts');
-  assert.match(source,/kind: "deterministic-generated"/);
-  assert.match(source,/aiGenerated: false/);
-  assert.match(source,/origin: "deterministic-generated"/);
+  assert.match(source,/STAGING_GUILD_SERVER_ORIGIN/);
+  assert.match(source,/civweave-node-cloud-staging\.cerbanimo\.workers\.dev/);
+  assert.match(source,/target\.searchParams\.set\("nodeId", guild\.nodeId\)/);
+  assert.match(source,/responseHeaders\.set\("x-civweave-staging-guild-server", "isolated"\)/);
+  assert.match(source,/productionIsolation: true/);
+  assert.doesNotMatch(source,/deterministic-generated/);
 });
 
 test('provenance keeps AI origin immutable while human validation is additive',async()=>{
