@@ -119,15 +119,21 @@ self.addEventListener('fetch', event => {
           ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers })
           : cached;
       }
-      return fetch(request);
+      return new Response(`Civweave local-AI code unavailable: ${url.pathname}`, {
+        status: 503,
+        headers: { 'content-type': 'text/plain; charset=utf-8' }
+      });
     }
   })());
 });
 
-self.CivweaveLocalAICoherenceV307 = Object.freeze({
+self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   version: CW_LOCAL_AI_COHERENCE_VERSION,
   cache: CW_LOCAL_AI_COHERENCE_CACHE,
-  critical: Object.freeze([...CW_LOCAL_AI_CRITICAL]),
+  critical: CW_LOCAL_AI_CRITICAL.slice(),
   extraPaths: Object.freeze([...CW_LOCAL_AI_EXTRA_PATHS]),
+  policy: 'network-first-current-bytes-offline-cache-fallback',
+  smoothFitOrchestrator: true,
+  ownsBeforeGenericCodeCoherence: true,
   bootstrapCapabilityReadiness: true
 });
