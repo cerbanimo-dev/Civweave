@@ -4,6 +4,8 @@ on:
     branches: [staging]
     paths:
       - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-route-v323.js'
+      - 'public/app/install-boundary-v146.js'
       - 'public/app/document-lifecycle-v221.js'
       - 'public/app/server-ai-settings-v301.js'
       - 'public/app/gemini-task-tier-router-v213.js'
