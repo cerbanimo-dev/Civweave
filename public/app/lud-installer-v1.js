@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1';
-const WORKER_URL='/service-worker-lud-package-v1.js?v=1.0.1';
+const VERSION='1.0.2';
+const WORKER_URL='/service-worker-lud-package-v1.js?v=1.0.2';
 const WORKER_SCOPE='/app/lud/';
+const ENTRY_ROUTE='/app/lud/campus';
 const ACTIVATION_TIMEOUT_MS=15000;
 const COMMAND_TIMEOUT_MS=12000;
 const DOWNLOAD_IDLE_TIMEOUT_MS=30000;
@@ -23,18 +24,18 @@ function render(status=latest){
   meta.textContent=total?`${downloaded} / ${total} allowlisted files`:'explicit human-operated allowlist';
   button.disabled=busy||running;
   button.textContent=ready?'Open Lud Mode':'Download Lud Mode';
-  if(open)open.hidden=!ready;
+  if(open){open.hidden=!ready;open.href=status.entryRoute||ENTRY_ROUTE}
 }
 async function registration(){
   if(!('serviceWorker'in navigator))throw new Error('This browser does not support the Lud Mode offline worker.');
-  if(!registrationPromise)registrationPromise=navigator.serviceWorker.register(WORKER_URL,{scope:WORKER_SCOPE,updateViaCache:'none'});
+  if(!registrationPromise)registrationPromise=navigator.serviceWorker.register(WORKER_URL,{scope:WORKER_SCOPE,updateViaCache:'none'}).then(async reg=>{try{await reg.update()}catch{}return reg});
   return registrationPromise;
 }
 async function activeWorker(){
   const reg=await registration(),started=Date.now();
   while(Date.now()-started<ACTIVATION_TIMEOUT_MS){
-    if(reg.waiting)try{reg.waiting.postMessage({type:'SKIP_WAITING'})}catch{}
-    if(reg.installing?.state==='installed')try{reg.installing.postMessage({type:'SKIP_WAITING'})}catch{}
+    if(reg.waiting){try{reg.waiting.postMessage({type:'SKIP_WAITING'})}catch{}await pause(100);continue}
+    if(reg.installing){if(reg.installing.state==='installed')try{reg.installing.postMessage({type:'SKIP_WAITING'})}catch{}await pause(100);continue}
     if(reg.active?.state==='activated')return reg.active;
     await pause(100);
   }
@@ -63,7 +64,7 @@ async function refresh(){
   const help=$('#lud-help');
   try{const status=await request('GET_LUD_PACKAGE_STATUS');render(status)}catch(error){if(help)help.textContent=String(error?.message||error).slice(0,300);render({ready:false,running:false,total:0,downloaded:0,failed:[{message:String(error?.message||error)}],failedCount:1})}
 }
-function enter(){globalThis.CivweaveLudModeV1?.enable?.({source:'lud-download-page'});location.href='/app/lud/campus.html'}
+function enter(){globalThis.CivweaveLudModeV1?.enable?.({source:'lud-download-page'});location.assign(latest?.entryRoute||ENTRY_ROUTE)}
 async function click(){
   if(latest?.ready){enter();return}
   if(busy)return;
@@ -81,7 +82,7 @@ function bind(){
   if(bound)return;bound=true;
   $('#download-lud-mode')?.addEventListener('click',click);
   $('#open-lud-mode')?.addEventListener('click',event=>{event.preventDefault();enter()});
-  render({ready:false,running:false,total:0,downloaded:0});
+  render({ready:false,running:false,total:0,downloaded:0,entryRoute:ENTRY_ROUTE});
   refresh();
 }
 globalThis.CivweaveLudInstallerV1=Object.freeze({version:VERSION,refresh,enter,status:()=>latest});
