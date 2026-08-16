@@ -100,7 +100,7 @@ body.cw-installer .quest-guide-sprite::before{
   background-repeat:no-repeat;
   background-size:500% 400%;
   background-position:50% 100%;
-  clip-path:inset(1px);
+  clip-path:inset(2px 3px 12px);
 }
 body.cw-installer .quest-guide-label{
   position:absolute;
