@@ -31,7 +31,35 @@ function installStyle(){
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`#${PANEL_ID},#${COMMERCE_ID}{display:grid;gap:12px;padding:16px;border:1px solid rgba(126,239,213,.24);border-radius:15px;background:#0a1730}#${PANEL_ID}[hidden],#${COMMERCE_ID}[hidden]{display:none!important}.cw-settings-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.cw-settings-tabs button{min-width:0;padding-inline:8px;background:#0b1329;color:#cbd4ee}.cw-settings-tabs button[aria-selected="true"]{border-color:#7eeed5;background:#26365f;color:#fff;box-shadow:inset 0 -3px #7eeed5}.cw-settings-tab-panel{display:grid;gap:17px}.cw-settings-tab-panel[hidden]{display:none!important}.cw-server-order{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.cw-server-hop{padding:10px;border:1px solid #ffffff18;border-radius:11px;background:#071226}.cw-server-hop b{display:block}.cw-server-hop small{display:block;margin-top:4px;color:#b8c7df;letter-spacing:0!important;font-weight:500}.cw-server-commerce-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cw-server-commerce-grid>div{display:grid;gap:8px;padding:12px;border:1px solid #ffffff16;border-radius:12px}.cw-server-commerce-grid label{display:grid;gap:6px}.cw-community-share-row{display:grid!important;grid-template-columns:auto 1fr!important;align-items:center;gap:8px!important}.cw-community-share-row input{width:auto}.cw-community-share-note{display:block;color:#b8c7df;font-size:.78rem;line-height:1.35}.cw-community-dividend-note{padding:10px 11px;border:1px solid #7eeed533;border-radius:10px;background:#7eeed50d;color:#d8fff5;font-size:.82rem;line-height:1.4}.cw-server-commerce-status{min-height:1.4em;color:#9ff2dc}@media(max-width:640px){.cw-server-order,.cw-server-commerce-grid{grid-template-columns:1fr}}`;document.head.append(style);
 }
 function selectTab(form,name){for(const button of form.querySelectorAll('[data-settings-tab]'))button.setAttribute('aria-selected',String(button.dataset.settingsTab===name));for(const panel of form.querySelectorAll('[data-settings-tab-panel]'))panel.hidden=panel.dataset.settingsTabPanel!==name}
-function installTabbedLayout(form){if(form.dataset.settingsTabs==='1')return form;const tabs=document.createElement('nav');tabs.className='cw-settings-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Settings sections');tabs.innerHTML='<button type="button" role="tab" aria-selected="true" data-settings-tab="general">AI & safety</button><button type="button" role="tab" aria-selected="false" data-settings-tab="local-models">Local models</button><button type="button" role="tab" aria-selected="false" data-settings-tab="membership">Membership</button>';const general=document.createElement('div'),local=document.createElement('div'),membership=document.createElement('div');for(const [panel,name] of [[general,'general'],[local,'local-models'],[membership,'membership']]){panel.className='cw-settings-tab-panel';panel.dataset.settingsTabPanel=name;panel.hidden=name!=='general'}const children=[...form.children];form.append(tabs,general,local,membership);for(const child of children)general.append(child);const existingLocal=general.querySelector('#cw-local-ai-v266'),existingCommerce=general.querySelector(`#${COMMERCE_ID}`);if(existingLocal)local.append(existingLocal);if(existingCommerce)membership.append(existingCommerce);tabs.addEventListener('click',event=>{const button=event.target.closest('[data-settings-tab]');if(button)selectTab(form,button.dataset.settingsTab)});form.dataset.settingsTabs='1';return form}
+function installTabbedLayout(form){
+  if(form.dataset.settingsTabs==='1')return form;
+  const tabs=document.createElement('nav');
+  tabs.className='cw-settings-tabs';
+  tabs.setAttribute('role','tablist');
+  tabs.setAttribute('aria-label','Settings sections');
+  tabs.innerHTML='<button type="button" role="tab" aria-selected="true" data-settings-tab="general">AI & safety</button><button type="button" role="tab" aria-selected="false" data-settings-tab="local-models">Local models</button><button type="button" role="tab" aria-selected="false" data-settings-tab="membership">Membership</button>';
+  const originalChildren=[...form.children];
+  const canonicalLocal=originalChildren.find(child=>child.matches?.('[data-settings-tab-panel="local-models"]'))||null;
+  const general=document.createElement('div');
+  const local=canonicalLocal||document.createElement('div');
+  const membership=document.createElement('div');
+  general.className='cw-settings-tab-panel';
+  general.dataset.settingsTabPanel='general';
+  general.hidden=false;
+  local.classList.add('cw-settings-tab-panel');
+  local.dataset.settingsTabPanel='local-models';
+  local.hidden=true;
+  membership.className='cw-settings-tab-panel';
+  membership.dataset.settingsTabPanel='membership';
+  membership.hidden=true;
+  form.append(tabs,general,local,membership);
+  for(const child of originalChildren)if(child!==canonicalLocal)general.append(child);
+  const existingCommerce=general.querySelector(`#${COMMERCE_ID}`);
+  if(existingCommerce)membership.append(existingCommerce);
+  tabs.addEventListener('click',event=>{const button=event.target.closest('[data-settings-tab]');if(button)selectTab(form,button.dataset.settingsTab)});
+  form.dataset.settingsTabs='1';
+  return form;
+}
 function saveServerRoute(form){
   const interactive={route:ROUTE,provider:ROUTE,model:'civweave-server-auto-v1',endpoint:'',externalConsent:true,serverOrder:['device-local','server-local','cloudflare-workers-ai']};
   const saved={...interactive,consent:true,agenticEnabled:false,version:'1.0.117',settingsController:VERSION};
