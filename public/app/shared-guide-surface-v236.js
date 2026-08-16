@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.128-shared-guide-surface-v236-thread-routing-v2';
+const VERSION='1.0.129-shared-guide-surface-v236-learning-continuation';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -74,7 +74,7 @@ function install(){
     load('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265',()=>{
       load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.126-universal-launcher-v1',()=>{
         globalThis.CivweaveSharedGuideSurfaceV236?.repairSurface?.();
-        load('/app/unified-chat-system-v1.js?v=1.0.1-assistant-lifecycle',()=>{
+        load('/app/unified-chat-system-v1.js?v=1.0.2-learning-continuation',()=>{
           try{dispatchEvent(new CustomEvent('civweave:unified-chat-system-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveUnifiedChatSystemV1));
         load('/app/human-message-bubble-v1.js?v=1.0.0-human-message-bubble-v1',()=>{
@@ -95,5 +95,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(()=>{install();globalThis.CivweaveSharedGuideSurfaceV236?.repairSurface?.()}));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-thread-network-v2',plannerMaterialization:'v265',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.1-assistant-lifecycle',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-thread-network-v2',plannerMaterialization:'v265',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.2-learning-continuation',install});
 })();
