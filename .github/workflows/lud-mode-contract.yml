@@ -7,15 +7,24 @@ on:
       - 'public/app/lud/**'
       - 'public/app/lud-*.js'
       - 'public/app/lud-*.json'
+      - 'public/app/human-validation-neuron-client-v1.js'
+      - 'public/app/node-ai-mesh-v1.js'
+      - 'public/app/cerbanimo-quest-engine-v144.js'
+      - 'public/app/proposal-voting-gate-v2.js'
+      - 'public/app/local-object-mesh-v146.js'
       - 'public/app/shared/civweave-identity-sync.js'
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
       - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-lud-package-v1.js'
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
+      - 'scripts/test-lud-human-validation-neurons-v1.mjs'
       - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
       - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
@@ -28,15 +37,24 @@ on:
       - 'public/app/lud/**'
       - 'public/app/lud-*.js'
       - 'public/app/lud-*.json'
+      - 'public/app/human-validation-neuron-client-v1.js'
+      - 'public/app/node-ai-mesh-v1.js'
+      - 'public/app/cerbanimo-quest-engine-v144.js'
+      - 'public/app/proposal-voting-gate-v2.js'
+      - 'public/app/local-object-mesh-v146.js'
       - 'public/app/shared/civweave-identity-sync.js'
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
       - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-lud-package-v1.js'
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
+      - 'scripts/test-lud-human-validation-neurons-v1.mjs'
       - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
       - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
@@ -57,16 +75,24 @@ jobs:
         run: |
           node --check public/app/content-provenance-v1.js
           node --check public/app/lud-mode-v1.js
+          node --check public/app/lud-human-tools-v1.js
           node --check public/app/lud-manual-authoring-v1.js
+          node --check public/app/human-validation-neuron-client-v1.js
           node --check public/app/lud-installer-v1.js
           node --check public/app/shared/civweave-identity-sync.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check public/app/family-ai-loader-v105.js
           node --check public/service-worker-lud-package-v1.js
+          node --check cloudflare/node-cloud/src/capacity-human-validation-v1.mjs
+          node --check cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs
           node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v5.mjs
+          node --check scripts/test-lud-human-validation-neurons-v1.mjs
           node --check scripts/browser-lud-mode-gauntlet-v1.mjs
-      - name: Verify no-AI, no-generated-visual, provenance, and route contracts
-        run: node --test scripts/test-lud-mode-v1.mjs
+      - name: Verify no-AI, no-generated-visual, provenance, route, and human-validation contracts
+        run: |
+          node --test scripts/test-lud-mode-v1.mjs
+          node --test scripts/test-lud-human-validation-neurons-v1.mjs
       - name: Install browser gauntlet
         run: |
           npm install --no-save --ignore-scripts playwright@1.55.0
