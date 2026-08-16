@@ -7,7 +7,7 @@ const LUD_META_URL='/__civweave/lud-package-v1.json';
 const LUD_ENTRY_ASSET='/app/lud/campus.html';
 const LUD_ENTRY_ROUTE='/app/lud/campus';
 const LUD_STANDALONE=typeof OFFLINE_CACHE!=='string';
-const LUD_CACHE_NAME=LUD_STANDALONE?'civweave-lud-v1-1-game-ui':OFFLINE_CACHE;
+const LUD_CACHE_NAME=LUD_STANDALONE?'civweave-lud-v1':OFFLINE_CACHE;
 const LUD_INSTALLER_PATHS=new Set([
   '/app/lud/',
   '/app/lud/index.html',
