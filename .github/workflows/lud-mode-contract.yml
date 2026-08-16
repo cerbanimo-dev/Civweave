@@ -8,6 +8,7 @@ on:
       - 'public/app/lud-*.css'
       - 'public/app/lud-*.js'
       - 'public/app/lud-*.json'
+      - 'public/app/shared-human-group-transport-v1.js'
       - 'public/app/human-validation-neuron-client-v1.js'
       - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/cerbanimo-quest-engine-v144.js'
@@ -26,6 +27,8 @@ on:
       - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v7.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-lud-package-v1.js'
       - 'public/service-worker-v203.js'
@@ -48,6 +51,7 @@ on:
       - 'public/app/lud-*.css'
       - 'public/app/lud-*.js'
       - 'public/app/lud-*.json'
+      - 'public/app/shared-human-group-transport-v1.js'
       - 'public/app/human-validation-neuron-client-v1.js'
       - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/cerbanimo-quest-engine-v144.js'
@@ -66,6 +70,8 @@ on:
       - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v7.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-lud-package-v1.js'
       - 'public/service-worker-v203.js'
@@ -97,6 +103,7 @@ jobs:
           node --check public/app/lud-mode-v1.js
           node --check public/app/lud-game-ui-v1.js
           node --check public/app/lud-guild-party-chat-v1.js
+          node --check public/app/shared-human-group-transport-v1.js
           node --check public/app/lud-human-tools-v1.js
           node --check public/app/lud-manual-authoring-v1.js
           node --check public/app/human-validation-neuron-client-v1.js
@@ -115,6 +122,7 @@ jobs:
           node --check cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs
           node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
           node --check cloudflare/node-cloud/src/server-ai-entry-v5.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v7.mjs
           node --check scripts/test-lud-human-validation-neurons-v1.mjs
           node --check scripts/test-lud-guild-passport-v1.mjs
           node --check scripts/test-lud-game-ui-v1.mjs
