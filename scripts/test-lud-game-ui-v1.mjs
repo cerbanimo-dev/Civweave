@@ -21,14 +21,19 @@ test('Lud surfaces use the shared lightweight game UI with inline critical styli
   }
   assert.ok(manifest.assets.includes('/app/lud-game-ui-v1.css'));
   assert.ok(manifest.assets.includes('/app/lud-game-ui-v1.js'));
+  assert.ok(manifest.assets.includes('/app/quest-arc-chronicle-v1.js'));
 });
 
-test('Lud campus exposes game-like HUD and human-powered labels without changing capability owners',async()=>{
+test('Lud campus exposes game-like HUD, Quest Chronicle, and human-powered labels without changing capability owners',async()=>{
   const campus=await read('public/app/lud/campus.html');
   assert.match(campus,/class="lud-hud"/);
   assert.match(campus,/id="lud-hud-passport"/);
   assert.match(campus,/id="lud-hud-guild"/);
+  assert.match(campus,/id="lud-hud-beat"/);
+  assert.match(campus,/id="lud-beat-history"/);
+  assert.match(campus,/quest-arc-chronicle-v1\.js/);
   assert.match(campus,/Questboard · Human creation/);
+  assert.match(campus,/Quest Chronicle · Your human work/);
   assert.match(campus,/Guild Gate · Passport/);
   assert.match(campus,/Proof arena · Human validation/);
   assert.match(campus,/Market caravan · FellowFare human-only/);
@@ -50,13 +55,16 @@ test('Lud game CSS is colorful, responsive, reduced-motion aware, and contains n
   assert.doesNotMatch(css,/background-image\s*:/i);
 });
 
-test('Lud game JS is presentation-only and reads canonical Passport and Guild status',async()=>{
+test('Lud game JS is presentation-only and reads canonical Passport, Guild, and Quest Arc status',async()=>{
   const source=await read('public/app/lud-game-ui-v1.js');
   assert.match(source,/CivweavePassportIdentityV1/);
   assert.match(source,/CivweaveHostNodeSessionV1/);
+  assert.match(source,/CivweaveQuestArcChronicleV1/);
+  assert.match(source,/historyProjections/);
   assert.match(source,/publicStatus/);
   assert.match(source,/civweave:capacity-session-ready/);
   assert.match(source,/civweave:passport-ready/);
+  assert.match(source,/civweave:quest-arc-changed/);
   assert.doesNotMatch(source,/fetch\s*\(/);
   assert.doesNotMatch(source,/setInterval\s*\(/);
   assert.doesNotMatch(source,/MutationObserver/);
@@ -68,9 +76,9 @@ test('Lud package worker rejects stale ready metadata after a package generation
     read('public/app/lud-installer-v1.js'),
     read('public/service-worker-lud-package-v1.js'),
   ]);
-  assert.match(installer,/VERSION='1\.0\.4'/);
-  assert.match(installer,/service-worker-lud-package-v1\.js\?v=1\.0\.4/);
-  assert.match(worker,/LUD_REVISION='lud-package-v1\.2-custom-forms'/);
+  assert.match(installer,/VERSION='1\.0\.5'/);
+  assert.match(installer,/service-worker-lud-package-v1\.js\?v=1\.0\.5/);
+  assert.match(worker,/LUD_REVISION='lud-package-v1\.3-quest-arc'/);
   assert.match(worker,/if\(meta\?\.revision===LUD_REVISION\)return ludPacket\(meta\)/);
   assert.match(worker,/meta\?\.revision===LUD_REVISION&&Array\.isArray/);
 });
