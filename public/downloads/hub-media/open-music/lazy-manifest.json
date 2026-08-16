@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-08-15T07:17:31Z",
-  "entry_count": 37,
+  "built_at": "2026-08-16T07:20:13Z",
+  "entry_count": 34,
   "entries": [
     {
       "candidate_id": "openmusic:569ec9ac3677c7bc12286dbb",
@@ -284,182 +284,42 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:908d711ba12ce08f41e85860",
-      "title": "ometotchtli - iris",
-      "artist": "ometotchtli",
-      "source_url": "https://archive.org/details/Ometotchtli-Iris",
+      "candidate_id": "openmusic:2462ab3746c4d4a2c29dbaef",
+      "title": "The Goslings - Grandeur of Hair",
+      "artist": "The Goslings, Noise, Rock, Noise Rock, Doomgaze, Shoegaze, Drone,",
+      "source_url": "https://archive.org/details/the-goslings-grandeur-of-hair",
       "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
+        "spdx": "PUBLIC-DOMAIN",
+        "label": "PUBLIC-DOMAIN",
+        "url": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/mark/1.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
         "share_alike": false
       },
       "attribution": {
-        "creator": "ometotchtli",
-        "source_title": "ometotchtli - iris",
-        "source_url": "https://archive.org/details/Ometotchtli-Iris",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
+        "creator": "The Goslings, Noise, Rock, Noise Rock, Doomgaze, Shoegaze, Drone,",
+        "source_title": "The Goslings - Grandeur of Hair",
+        "source_url": "https://archive.org/details/the-goslings-grandeur-of-hair",
+        "license": "PUBLIC-DOMAIN",
+        "license_url": "https://creativecommons.org/publicdomain/mark/1.0/"
       },
       "files": [
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/02-Iris.mp3",
-          "bytes": 46606929,
-          "provider_sha1": "5f455d668c063e4544be585898cc285eab08cbc0",
-          "provider_md5": "5a016f30061861d03c234c89226c8654",
+          "url": "https://archive.org/download/the-goslings-grandeur-of-hair/The%20Goslings%20-%20Grandeur%20of%20Hair/01%20-%20Own%20a%20Car.mp3",
+          "bytes": 7565436,
+          "provider_sha1": "f33762fe12485fc443d74ef36867e1eaf4c82a1d",
+          "provider_md5": "212104350cbc901db26112e0cd4883e1",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/05-Awning.mp3",
-          "bytes": 46203599,
-          "provider_sha1": "e59eea8c3351e046ce0c514876cac2e0ba53a288",
-          "provider_md5": "cc39f02f436017129afd80e77de03f9c",
+          "url": "https://archive.org/download/the-goslings-grandeur-of-hair/The%20Goslings%20-%20Grandeur%20of%20Hair/02%20-%20Croatan.mp3",
+          "bytes": 5298842,
+          "provider_sha1": "9730ac817a9710b8355bf646c3d263f5eb7c63a5",
+          "provider_md5": "db191a3978f01fea1010bdabdbece819",
           "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/01-Opened.mp3",
-          "bytes": 42344554,
-          "provider_sha1": "6c94e180fe76023b77f254ce0b3925d6071ae83f",
-          "provider_md5": "6fc3e049955954170be627dc1d18faae",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/06-Listening.mp3",
-          "bytes": 27265868,
-          "provider_sha1": "d91f8532334c0c976ca4c45df9ad1f4dfdb7c2ee",
-          "provider_md5": "cfda66932124ac2ea346830d91b53cc4",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/03-Join.mp3",
-          "bytes": 21614703,
-          "provider_sha1": "8d290beb332c4be9fa6bf7ea81cd23684d8258f7",
-          "provider_md5": "673f7987acf0452a117e6bb10152398b",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/04-Antique.mp3",
-          "bytes": 13034996,
-          "provider_sha1": "9a455653207a7f2b520ae73ad4d52616be343095",
-          "provider_md5": "07c1e86cb7d3c62cb4ef5f3ade44a9f8",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/01-Opened.ogg",
-          "bytes": 13440017,
-          "provider_sha1": "25e379674527b6bb41c45226c681fcc35fe8eab9",
-          "provider_md5": "77ddc26282174faacc3237002f291d73",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/05-Awning.ogg",
-          "bytes": 10644993,
-          "provider_sha1": "c431620bd59592483c1ce74d248b544b2bed63f2",
-          "provider_md5": "1e463eaa3fa0d6817c298d548a8c9632",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
-      "candidate_id": "openmusic:363054694b5d107fc22e9a80",
-      "title": "Pretty and Invisible",
-      "artist": "Monplaisir",
-      "source_url": "https://archive.org/details/PrettyAndInvisible",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Monplaisir",
-        "source_title": "Pretty and Invisible",
-        "source_url": "https://archive.org/details/PrettyAndInvisible",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2001%20Loved%20and%20Respected.flac",
-          "bytes": 27786047,
-          "provider_sha1": "2dcdf33fb8298369cb9bc72ba7f2edac98f273cd",
-          "provider_md5": "38442aa87d93df70b79ce9afeba0ed40",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2005%20Harsh%20and%20Soft.flac",
-          "bytes": 26092851,
-          "provider_sha1": "fb2d0749681817c426271ccd9abb1d3ac54f12c1",
-          "provider_md5": "357160bb9d2dda3d8a31ee204c1b61ce",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2002%20Far%20and%20High.flac",
-          "bytes": 22746629,
-          "provider_sha1": "d7c2eb9f5e122b8c81d9a0f18b447a4d1db8ed6a",
-          "provider_md5": "22fdcb0928182befaf1e87bb1cef4ba1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2004%20Safe%20and%20Clear.flac",
-          "bytes": 22697291,
-          "provider_sha1": "3e212da825f504c36ee3f4c24e84757dce6ba8b5",
-          "provider_md5": "17dd306de2afb708b0d870ea7b999339",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2006%20Talentuous%20and%20Shy.flac",
-          "bytes": 22488418,
-          "provider_sha1": "f222cb5b8850997b8f4058ae5be6830f6c7994ab",
-          "provider_md5": "d9d973096255ab5a5197f258ac64bfe2",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2003%20Sticky%20and%20Addictive.flac",
-          "bytes": 21063361,
-          "provider_sha1": "38131d33f269079e8c55da1abac5b80d265cc9f9",
-          "provider_md5": "37afacaa4b8b8eea5f4c186b36420887",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2008%20Pretty%20and%20Invisible.flac",
-          "bytes": 16218037,
-          "provider_sha1": "26fae85586252e3606ad9796816cbb8cc1e0a29e",
-          "provider_md5": "551923acc05188daf1548904715029a1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2007%20Sacred%20and%20Empty.flac",
-          "bytes": 7950879,
-          "provider_sha1": "6df2524543ad42d3c6ddff5b753e70eaa0168924",
-          "provider_md5": "e6ce845655c3963126095a4ff618f00c",
-          "format": "Flac",
           "role": "original"
         }
       ],
@@ -678,10 +538,10 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:b6aa257cfbf0f6e421d37a0d",
-      "title": "Turdus merula - Common Blackbird XC436361",
-      "artist": "Joost van Bruggen",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC436361.mp3",
+      "candidate_id": "openmusic:47bad33d2d28a7f0f077b33e",
+      "title": "Turdus merula - Common Blackbird XC446151",
+      "artist": "James Ray",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC446151.mp3",
       "license": {
         "spdx": "CC-BY-SA",
         "label": "CC BY-SA 4.0",
@@ -693,18 +553,18 @@
         "share_alike": true
       },
       "attribution": {
-        "creator": "Joost van Bruggen",
-        "source_title": "Turdus merula - Common Blackbird XC436361",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC436361.mp3",
+        "creator": "James Ray",
+        "source_title": "Turdus merula - Common Blackbird XC446151",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC446151.mp3",
         "license": "CC BY-SA 4.0",
         "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
       },
       "files": [
         {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Turdus_merula_-_Common_Blackbird_XC436361.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Turdus_merula_-_Common_Blackbird_XC446151.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
           "mime": "audio/mpeg",
-          "bytes": 297488,
-          "provider_sha1": "3d40241644dc2d14fdce5607f6d95d41f18abe3e",
+          "bytes": 4185936,
+          "provider_sha1": "21c62dd1faf3c5056166d03a101552db79b0a2e0",
           "role": "original"
         }
       ],
@@ -741,101 +601,6 @@
           "bytes": 817043,
           "provider_sha1": "16ba0113febcd9caf69d18b510dd8818c3a33ee7",
           "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
-      "candidate_id": "openmusic:29f06ec37d72826ac10a042e",
-      "title": "Turdus merula - Common Blackbird XC561032",
-      "artist": "Olivier Grimm",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC561032.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "attribution": {
-        "creator": "Olivier Grimm",
-        "source_title": "Turdus merula - Common Blackbird XC561032",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC561032.mp3",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Turdus_merula_-_Common_Blackbird_XC561032.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 9825670,
-          "provider_sha1": "7d3fa3a93294ffd224ebc224e88103629f590362",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
-      "candidate_id": "openmusic:d1053bd3fca384b4be63cf2e",
-      "title": "Experimental Tides",
-      "artist": "Dusty Grimm",
-      "source_url": "https://archive.org/details/ExperimentalTides",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "http://creativecommons.org/licenses/by/3.0/us/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/us/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Dusty Grimm",
-        "source_title": "Experimental Tides",
-        "source_url": "https://archive.org/details/ExperimentalTides",
-        "license": "CC-BY",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/us/"
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/ExperimentalTides/1.mp3",
-          "bytes": 3473241,
-          "provider_sha1": "7950c614a4b5dc84b148ac85e67cd0f93c1f6354",
-          "provider_md5": "85c832f1a9dabe3b834abdd8f96fed77",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ExperimentalTides/2.mp3",
-          "bytes": 3448477,
-          "provider_sha1": "8c1ea67fd5b1822767c6f381b80efcb3d6813887",
-          "provider_md5": "ad387332196895362f6977164af15098",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ExperimentalTides/2.ogg",
-          "bytes": 2964525,
-          "provider_sha1": "5267ceb3d21832aad5af38cc3efc8716b5af7591",
-          "provider_md5": "fa58eb0a0fd4da0f0eb1de20aa24d550",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        },
-        {
-          "url": "https://archive.org/download/ExperimentalTides/1.ogg",
-          "bytes": 2744723,
-          "provider_sha1": "a3a513879bb1bc6d6cb44edd7fbf69c9719c9f53",
-          "provider_md5": "6edaf26e2b839dab0d44ccbb025762c3",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
         }
       ],
       "content_hash": null,
@@ -895,89 +660,89 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:ea1f567322a760ace5f7e5bf",
-      "title": "Scumpos / Sound of Work (2008)",
-      "artist": "Scumpos (C. Schuch)",
-      "source_url": "https://archive.org/details/ScumposSoundOfWork2008",
+      "candidate_id": "openmusic:ae2eae3f9bcfb23597b315e0",
+      "title": "n-логия «Старые песни о всяком». Часть I. Частичка Солнца и Куда исчезают мечты",
+      "artist": "krai",
+      "source_url": "https://archive.org/details/sameoldsongs1",
       "license": {
         "spdx": "CC-BY-SA",
         "label": "CC-BY-SA",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/3.0/",
+        "url": "http://creativecommons.org/licenses/by-sa/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/4.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
         "share_alike": true
       },
       "attribution": {
-        "creator": "Scumpos (C. Schuch)",
-        "source_title": "Scumpos / Sound of Work (2008)",
-        "source_url": "https://archive.org/details/ScumposSoundOfWork2008",
+        "creator": "krai",
+        "source_title": "n-логия «Старые песни о всяком». Часть I. Частичка Солнца и Куда исчезают мечты",
+        "source_url": "https://archive.org/details/sameoldsongs1",
         "license": "CC-BY-SA",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        "license_url": "http://creativecommons.org/licenses/by-sa/4.0/"
       },
       "files": [
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/05BlackGravitationalPulse_01.wav.mp3",
-          "bytes": 7444724,
-          "provider_sha1": "ae79905a9e8d25e024439bd6d8ad2d997c291d2f",
-          "provider_md5": "e5f56ed60feb50035e1754fa364b8bf7",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/16%20-%20%D0%BB%D0%B5%D1%81%D1%82%D0%BD%D0%B8%D1%86%D0%B0,%20(%D0%BD%D0%B5)%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8.mp3",
+          "bytes": 40005503,
+          "provider_sha1": "c1a04600cb6ce592b2ce1032065d7041ce5aaf54",
+          "provider_md5": "18ec5b8514c990f27053e9c58ab0c33c",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/07TreeOrNoTreeharpmadness.wav.mp3",
-          "bytes": 6283822,
-          "provider_sha1": "ee282728863e385bb0095530ae3022a78cf81a77",
-          "provider_md5": "2143c644543a074f98970be5f6be4d4c",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/11%20-%20%D0%A7%D1%82%D0%BE-%D1%82%D0%BE%20%D0%BC%D0%B5%D0%B6%D0%B4%D1%83.mp3",
+          "bytes": 15454518,
+          "provider_sha1": "5355d833867929bd85e338773d7a6a31d3308562",
+          "provider_md5": "ccedec976c357b86122624b9a0778f52",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/14SharkInDistress.wav.mp3",
-          "bytes": 5982595,
-          "provider_sha1": "3d4df886ccfdc079c2186d239048b1170d527567",
-          "provider_md5": "d5086476a96221db44fc4e853b1068e3",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/15%20-%20%D0%B3%D0%BE%D0%B2%D0%BD%D0%B0%D0%BA%D0%B8%20%D0%B2%20%D0%BC%D0%BE%D0%B8%D1%85%20%D0%B3%D0%BB%D0%B0%D0%B7%D0%B0%D1%85%20(%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D1%8C,%20(%D0%BD%D0%B5)%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8).mp3",
+          "bytes": 13082317,
+          "provider_sha1": "b2f9cfeb70592ffaccb149f2b426b593344dce86",
+          "provider_md5": "1153e37bac85cac2534249f1e85a718c",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/01OutOffWindow.wav.mp3",
-          "bytes": 5791698,
-          "provider_sha1": "94ebcd5eb5e8e3b45fd13de1f12262a2f22a98d6",
-          "provider_md5": "455a38c7c4f7d5aee8d8c102dc8d0938",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/13%20-%20%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F,%20%D0%BD%D0%B5%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8.mp3",
+          "bytes": 11102733,
+          "provider_sha1": "601855ffb9730c8b61cb0eeea09c9f6e4b399d46",
+          "provider_md5": "a3b0d41583d0c96de250fef3b17ad630",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/19CuiBono.wav.mp3",
-          "bytes": 5776750,
-          "provider_sha1": "478a690a66a45f7e2cb77330e2ba0b3b9317e997",
-          "provider_md5": "8ea1e61c9080ae70dede6610a43a9035",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/07%20-%20%D0%9D%D0%B0%D0%B4%D0%B5%D0%B6%D0%B4%D0%B0.mp3",
+          "bytes": 6946985,
+          "provider_sha1": "dd556051886dc56d5ff73cf30a624e70a6f6e37d",
+          "provider_md5": "b877a93ef195594819bdb7d1174094aa",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/08BenYoung.wav.mp3",
-          "bytes": 5630465,
-          "provider_sha1": "09e238d3630feecd07851c15ee21708c955162c7",
-          "provider_md5": "3da3e12ea6b974502623340a690720b9",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/17%20-%20%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D0%B2%D1%8B%D0%B6%D0%B8%D0%B2%D0%B0%D0%BD%D0%B8%D1%8E%20(overLetov%20noise%20remix%20by%20Kfor).mp3",
+          "bytes": 6635815,
+          "provider_sha1": "d4e6eb07109c2af9d9ba5337a75d2dd92b0d4cee",
+          "provider_md5": "9db9320d4b0576edae0d62ec3b664d40",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/10CalculatingStatics.wav.mp3",
-          "bytes": 4562057,
-          "provider_sha1": "3934b512185adab99a93debdeebd62aa9f736515",
-          "provider_md5": "7824861287ffeb227a26c99b3029d2ec",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/14%20-%20%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F,%20(%D0%BD%D0%B5)%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8.mp3",
+          "bytes": 6382437,
+          "provider_sha1": "89c3cc0a666c87248030c5284c6255dc0b3bfc8e",
+          "provider_md5": "bca8aa151e7bb45c698a2708d1647acb",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/18ThoughtYouCould.wav.mp3",
-          "bytes": 4556832,
-          "provider_sha1": "9eb1e105d6c50282d1d008b99517acd06c0fc77e",
-          "provider_md5": "eb12da6e019d938bdf9cb80f9ca6e132",
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/04%20-%20%D0%AF%D0%BD%D0%B2%D0%B0%D1%80%D1%8C%20%D0%B2%20%D0%BC%D0%BE%D0%B8%D1%85%20%D0%B3%D0%BB%D0%B0%D0%B7%D0%B0%D1%85.mp3",
+          "bytes": 5599179,
+          "provider_sha1": "67dcb0a0bd6536148e4bbbca6a442129b54fc77b",
+          "provider_md5": "ec3e841803f8ac186c9c03a74aa52d80",
           "format": "VBR MP3",
           "role": "original"
         }
