@@ -4,7 +4,16 @@
 const LUD_REVISION='lud-package-v1';
 const LUD_MANIFEST_URL='/app/lud-package-v1.json';
 const LUD_META_URL='/__civweave/lud-package-v1.json';
-const LUD_CACHE_NAME=typeof OFFLINE_CACHE==='string'?OFFLINE_CACHE:'civweave-lud-v1';
+const LUD_STANDALONE=typeof OFFLINE_CACHE!=='string';
+const LUD_CACHE_NAME=LUD_STANDALONE?'civweave-lud-v1':OFFLINE_CACHE;
+const LUD_INSTALLER_PATHS=new Set([
+  '/app/lud/',
+  '/app/lud/index.html',
+  '/app/lud-installer-v1.js',
+  '/app/lud-mode-v1.js',
+  LUD_MANIFEST_URL,
+  '/service-worker-lud-package-v1.js'
+]);
 let ludDownloadPromise=null;
 const ludNow=()=>new Date().toISOString();
 const ludUnique=values=>[...new Set((Array.isArray(values)?values:[]).filter(Boolean).map(String))];
@@ -30,5 +39,39 @@ async function downloadLud(event){
 }
 function startLudDownload(event){if(ludDownloadPromise)return ludDownloadPromise.then(packet=>{ludPost(event,packet);return packet});ludDownloadPromise=downloadLud(event).finally(()=>{ludDownloadPromise=null});return ludDownloadPromise}
 async function clearLud(){const cache=await ludCache();const meta=await readLudMeta();for(const pathname of meta?.assets||[])try{await cache.delete(pathname)}catch{}await cache.delete(LUD_META_URL);return ludStatus()}
+async function standaloneAssetPolicy(){
+  const meta=await readLudMeta();
+  if(Array.isArray(meta?.assets)&&meta.assets.length)return{assets:new Set(ludUnique(meta.assets)),entry:String(meta.entry||'/app/lud/campus.html'),ready:Boolean(meta.ready)};
+  try{const manifest=await loadLudManifest();return{assets:new Set(manifest.assets),entry:manifest.entry,ready:false}}catch{return{assets:new Set(),entry:'/app/lud/campus.html',ready:false}}
+}
+function ludOfflineError(message,status=503){return new Response(message,{status,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store'}})}
+async function standaloneFetch(request){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.origin!==self.location.origin)return fetch(request);
+  const pathname=url.pathname,cache=await ludCache(),policy=await standaloneAssetPolicy();
+  if(request.mode==='navigate'){
+    if(pathname==='/app/lud/'||pathname==='/app/lud/index.html'){
+      try{const response=await fetch(request,{cache:'no-store'});if(response.ok)return response}catch{}
+      if(policy.ready){const cached=await cache.match(policy.entry);if(cached)return cached}
+      return ludOfflineError('Lud Mode is not ready offline on this device. Reconnect and finish Download Lud Mode.');
+    }
+    if(pathname===policy.entry||pathname==='/app/lud/campus.html'){
+      const cached=await cache.match(policy.entry);if(cached)return cached;
+      try{return await fetch(request,{cache:'no-store'})}catch{return ludOfflineError('The Lud Mode campus is not cached on this device.')}
+    }
+    return fetch(request);
+  }
+  if(policy.assets.has(pathname)){
+    const cached=await cache.match(pathname);if(cached)return cached;
+    try{const response=await fetch(request,{cache:'no-store'});if(response.ok)return response}catch{}
+    return ludOfflineError(`Lud Mode required asset is unavailable: ${pathname}`,504);
+  }
+  if(LUD_INSTALLER_PATHS.has(pathname))return fetch(request,{cache:'no-store'});
+  return ludOfflineError(`Lud Mode blocked a non-allowlisted request: ${pathname}`,403);
+}
 self.addEventListener('message',event=>{const type=event.data?.type;if(type==='SKIP_WAITING'){event.waitUntil(self.skipWaiting());return}if(type==='GET_LUD_PACKAGE_STATUS')event.waitUntil(ludStatus().then(packet=>ludPost(event,packet)));else if(type==='DOWNLOAD_LUD_PACKAGE')event.waitUntil(startLudDownload(event));else if(type==='CLEAR_LUD_PACKAGE')event.waitUntil(clearLud().then(packet=>ludPost(event,packet)))});
+if(LUD_STANDALONE){
+  self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
+  self.addEventListener('fetch',event=>event.respondWith(standaloneFetch(event.request)));
+}
 })();
