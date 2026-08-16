@@ -47,14 +47,17 @@ test('Lud download controller forces a fresh dedicated worker and uses the canon
   assert.doesNotMatch(source,/service-worker-v203\.js/);
 });
 
-test('Lud campus is also plain and image-free',async()=>{
+test('Lud campus is plain, image-free, and explains the 30-neuron human review split',async()=>{
   const html=await read('public/app/lud/campus.html');
   assert.match(html,/<h1>Lud Mode<\/h1>/);
   assert.match(html,/AI generation off/);
+  assert.match(html,/30 neurons fund human review/);
+  assert.match(html,/Two validators receive 15 each; three receive 10 each/);
+  assert.match(html,/Unused daily capacity expires at reset/);
   assertPlainSurface(html,'Lud campus');
 });
 
-test('Lud package is an explicit no-AI no-generated-visual allowlist with a clean entry route',async()=>{
+test('Lud package is an explicit no-AI no-generated-visual allowlist with human capability owners',async()=>{
   const manifest=await json('public/app/lud-package-v1.json');
   assert.equal(manifest.schema,'civweave.lud-package.v1');
   assert.equal(manifest.mode,'lud');
@@ -66,7 +69,7 @@ test('Lud package is an explicit no-AI no-generated-visual allowlist with a clea
   assert.equal(manifest.policy.localModels,false);
   assert.equal(manifest.policy.remoteModels,false);
   assert.equal(manifest.policy.generatedVisualAssets,false);
-  assert.ok(manifest.assets.includes('/app/shared/civweave-identity-sync.js'),'human validation signer must be packaged');
+  for(const required of ['/app/shared/civweave-identity-sync.js','/app/human-validation-neuron-client-v1.js','/app/lud-human-tools-v1.js','/app/cerbanimo-quest-engine-v144.js','/app/local-object-mesh-v146.js','/app/proposal-voting-gate-v2.js'])assert.ok(manifest.assets.includes(required),`${required} must be packaged`);
   for(const asset of manifest.assets){const lower=String(asset).toLowerCase();for(const fragment of [...forbiddenRuntime,'/images/','/logos/'])assert.equal(lower.includes(fragment),false,`${asset} contains forbidden ${fragment}`)}
 });
 
@@ -143,23 +146,45 @@ test('shared AI loader refuses Lud Mode',async()=>{
   assert.match(source,/ludGuard:true/);
 });
 
-test('manual authoring produces human provenance and human-only market filtering',async()=>{
-  const source=await read('public/app/lud-manual-authoring-v1.js');
-  assert.match(source,/humanAuthored\(/);
-  assert.match(source,/isLudVisible/);
-  assert.match(source,/validatorType:'human'/);
-  assert.match(source,/provenance:'human-review'/);
+test('Lud manual surface delegates human creation to existing Cerbanimo and Living School owners',async()=>{
+  const [manual,tools]=await Promise.all([read('public/app/lud-manual-authoring-v1.js'),read('public/app/lud-human-tools-v1.js')]);
+  assert.match(manual,/humanAuthored\(/);
+  assert.match(manual,/isLudVisible/);
+  assert.match(manual,/tools\.createQuest/);
+  assert.match(manual,/tools\.proposeTask/);
+  assert.match(manual,/tools\.proposeLearningModule/);
+  assert.match(tools,/CivweaveCerbanimoQuestV144/);
+  assert.match(tools,/CivweaveProposalVotingGateV2/);
+  assert.match(tools,/proposeCurriculumModule/);
+  assert.doesNotMatch(manual,/\.generate\s*\(/);
+  assert.doesNotMatch(tools,/\.generate\s*\(/);
+});
+
+test('human validation neuron client is a session subscriber and not a capacity-session owner',async()=>{
+  const source=await read('public/app/human-validation-neuron-client-v1.js');
+  assert.match(source,/\/api\/node\/human-validation\/request/);
+  assert.match(source,/\/api\/node\/human-validation\/claim/);
+  assert.match(source,/civweave:validation-labor-awarded/);
+  assert.match(source,/SESSION_KEY='civweave\.host-capacity\.sessions\.v1'/);
+  assert.doesNotMatch(source,/sessionStorage\.setItem/);
   assert.doesNotMatch(source,/\.generate\s*\(/);
 });
 
-test('system ownership declares Lud authorities',async()=>{
-  const ownership=await json('config/system-ownership.json');
+test('system ownership declares Lud authorities and non-rollover validation-neuron policy',async()=>{
+  const ownership=await json('config/system-ownership.json'),mode=ownership.systems['operating-mode'];
   assert.equal(ownership.systems['content-provenance'].owner,'public/app/content-provenance-v1.js');
-  assert.equal(ownership.systems['operating-mode'].owner,'public/app/lud-mode-v1.js');
-  assert.equal(ownership.systems['operating-mode'].modeValue,'lud');
-  assert.equal(ownership.systems['operating-mode'].manualAuthoringOwner,'public/app/lud-manual-authoring-v1.js');
-  assert.equal(ownership.systems['operating-mode'].packageManifest,'public/app/lud-package-v1.json');
-  assert.equal(ownership.systems['operating-mode'].downloadSurface,'public/app/lud/index.html');
+  assert.equal(mode.owner,'public/app/lud-mode-v1.js');
+  assert.equal(mode.modeValue,'lud');
+  assert.equal(mode.manualAuthoringOwner,'public/app/lud-manual-authoring-v1.js');
+  assert.equal(mode.humanAuthoringAdapter,'public/app/lud-human-tools-v1.js');
+  assert.equal(mode.humanValidationNeuronAuthority,'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs');
+  assert.equal(mode.humanValidationNeuronPolicy.requestNeurons,30);
+  assert.deepEqual(mode.humanValidationNeuronPolicy.validatorCounts,[2,3]);
+  assert.equal(mode.humanValidationNeuronPolicy.twoValidatorShareNeurons,15);
+  assert.equal(mode.humanValidationNeuronPolicy.threeValidatorShareNeurons,10);
+  assert.equal(mode.humanValidationNeuronPolicy.unusedSourceCapacityRollsOver,false);
+  assert.equal(mode.packageManifest,'public/app/lud-package-v1.json');
+  assert.equal(mode.downloadSurface,'public/app/lud/index.html');
 });
 
 test('service worker includes the separate Lud package lane',async()=>{
@@ -171,6 +196,6 @@ test('service worker includes the separate Lud package lane',async()=>{
 });
 
 test('canonical Lud feature files contain no retired Luddite naming',async()=>{
-  const files=['public/app/lud/index.html','public/app/lud/campus.html','public/app/lud-mode-v1.js','public/app/lud-installer-v1.js','public/app/lud-manual-authoring-v1.js','public/app/lud-package-v1.json','public/service-worker-lud-package-v1.js','docs/architecture/lud-mode-v1.md','config/system-ownership.json'];
+  const files=['public/app/lud/index.html','public/app/lud/campus.html','public/app/lud-mode-v1.js','public/app/lud-installer-v1.js','public/app/lud-manual-authoring-v1.js','public/app/lud-human-tools-v1.js','public/app/human-validation-neuron-client-v1.js','public/app/lud-package-v1.json','public/service-worker-lud-package-v1.js','docs/architecture/lud-mode-v1.md','config/system-ownership.json'];
   for(const file of files)assert.doesNotMatch(await read(file),/luddite/i,`${file} contains retired naming`);
 });
