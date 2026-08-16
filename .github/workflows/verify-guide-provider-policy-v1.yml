@@ -1,0 +1,48 @@
+name: Verify Guide Provider Policy
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/guide-provider-policy-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/server-ai-router-v301.js'
+      - 'public/app/server-ai-settings-v301.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'scripts/verify-guide-provider-policy-v1.mjs'
+      - '.github/workflows/verify-guide-provider-policy-v1.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/guide-provider-policy-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/server-ai-router-v301.js'
+      - 'public/app/server-ai-settings-v301.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'scripts/verify-guide-provider-policy-v1.mjs'
+      - '.github/workflows/verify-guide-provider-policy-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-guide-provider-policy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check provider policy syntax
+        run: |
+          node --check public/app/guide-provider-policy-v1.js
+          node --check scripts/verify-guide-provider-policy-v1.mjs
+      - name: Verify local-first server-auto behavior
+        run: node scripts/verify-guide-provider-policy-v1.mjs
