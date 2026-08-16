@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='civweave-hub-map-v1.2.0-guild-rally-point';
+const VERSION='civweave-hub-map-v1.2.1-detail-idempotence';
 const DIRECTORY_ENDPOINT='/api/hub-map-nodes';
 const DIRECTORY_CACHE_KEY='civweave.hub-map.directory.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -113,15 +113,26 @@ async function joinSelectedHub(){
 }
 function augmentDetail(){
   if(renderingDetail)return;const detail=document.getElementById('detail'),row=selectedHubRow(),node=selectedHubNode();if(!detail||!row||!node?.nodeId)return;
-  renderingDetail=true;try{
+  const nodeId=clean(node.nodeId,180),existingActions=detail.querySelector('[data-hub-map-actions]');
+  if(detail.dataset.civweaveGuildDetailNodeId===nodeId&&existingActions)return;
+  renderingDetail=true;detailObserver?.disconnect();try{
     detail.querySelector('[data-hub-map-actions]')?.remove();detail.querySelector('[data-guild-rally-point]')?.remove();
     const rally=rallyPointFor(node);
     if(rally){const card=document.createElement('div');card.dataset.guildRallyPoint='1';card.className='card';card.style.marginTop='9px';card.innerHTML=`<strong>Guild Rally Point · ${esc(rally.name)}</strong><small>Public offline reconnection place · cached with the Guild Map</small>${rally.directions?`<p>${esc(rally.directions)}</p>`:''}<p><small>${Number(rally.latitude).toFixed(6)}, ${Number(rally.longitude).toFixed(6)}${Number.isFinite(Number(rally.precisionMeters))?` · ±${Math.round(Number(rally.precisionMeters))} m`:''}</small></p>`;detail.append(card)}
     const actions=document.createElement('div');actions.dataset.hubMapActions='1';actions.className='row';actions.style.marginTop='9px';actions.innerHTML=`<button type="button" class="btn primary" data-hub-join>Join Guild</button><button type="button" class="btn" data-hub-explore>Explore ledger</button><button type="button" class="btn" data-hub-pass>Pass by</button>${node.publicOrigin?`<a class="btn" href="${esc(node.publicOrigin)}" target="_blank" rel="noopener">Open Guild ↗</a>`:''}`;detail.append(actions);
+    detail.dataset.civweaveGuildDetailNodeId=nodeId;
     actions.querySelector('[data-hub-join]')?.addEventListener('click',joinSelectedHub);actions.querySelector('[data-hub-explore]')?.addEventListener('click',()=>showLedgerFor(node));actions.querySelector('[data-hub-pass]')?.addEventListener('click',()=>refreshSelectedHub(true));gossip()?.rememberHub?.(node,'map-select');showLedgerFor(node).catch(()=>{});
-  }finally{renderingDetail=false}
+  }finally{if(detailObserver)detailObserver.observe(detail,{childList:true});renderingDetail=false}
 }
-function observeDetail(){const detail=document.getElementById('detail');if(!detail||detailObserver)return;detailObserver=new MutationObserver(()=>queueMicrotask(augmentDetail));detailObserver.observe(detail,{childList:true,subtree:true})}
+function observeDetail(){
+  const detail=document.getElementById('detail');if(!detail||detailObserver)return;
+  detailObserver=new MutationObserver(()=>{
+    if(renderingDetail)return;const node=selectedHubNode();if(!node?.nodeId)return;
+    const nodeId=clean(node.nodeId,180);if(detail.dataset.civweaveGuildDetailNodeId===nodeId&&detail.querySelector('[data-hub-map-actions]'))return;
+    queueMicrotask(augmentDetail)
+  });
+  detailObserver.observe(detail,{childList:true})
+}
 
 async function proximityReading(position){if(!proximityEnabled)return;const hits=await gossip()?.proximityUpdate?.(position,directory.nodes||[],{radiusMeters:750});if(hits?.length){const closest=hits.sort((a,b)=>a.distanceMeters-b.distanceMeters)[0];setGossipStatus(`Local gossip exchanged near ${nodeById(closest.nodeId)?.displayName||closest.nodeId} · ${closest.distanceMeters} m away`)}}
 function startProximity(){
