@@ -2,7 +2,7 @@ name: Verify Canonical Rewards v2
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'public/app/cw-reward-*.js'
       - 'public/app/civweave-basic-value*.js'
@@ -15,7 +15,7 @@ on:
       - 'scripts/verify-economic-valuation-review-v1.mjs'
       - '.github/workflows/verify-canonical-rewards-v2.yml'
   push:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'public/app/cw-reward-*.js'
       - 'public/app/civweave-basic-value*.js'
@@ -51,7 +51,6 @@ jobs:
           node --check public/app/civweave-basic-value-systems-v1.js
           node --check public/app/family-ai-loader-v105.js
           node --check public/app/cw-reward-receivers-v2.js
-          node --check public/app/cw-reward-legacy-bridge-v2.js
           node --check public/app/cw-reward-surfaces-v2.js
           node --check scripts/verify-canonical-rewards-v2.mjs
           node --check scripts/verify-reward-model-contract-v2.mjs
@@ -68,7 +67,8 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const manifest=JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8'));
-          const required=['/app/cw-reward-ledger-v2.js','/app/civweave-basic-value-v1.js','/app/civweave-economic-policy-v1.js','/app/civweave-basic-value-model-v1.js','/app/civweave-basic-value-review-v1.js','/app/civweave-basic-value-systems-v1.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-legacy-bridge-v2.js','/app/cw-reward-surfaces-v2.js'];
+          const required=['/app/cw-reward-ledger-v2.js','/app/civweave-basic-value-v1.js','/app/civweave-economic-policy-v1.js','/app/civweave-basic-value-model-v1.js','/app/civweave-basic-value-review-v1.js','/app/civweave-basic-value-systems-v1.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-surfaces-v2.js'];
           for(const path of required){if(!manifest.seeds.includes(path))throw new Error(`Offline package omits ${path}`)}
+          if(manifest.seeds.includes('/app/cw-reward-legacy-bridge-v2.js'))throw new Error('Offline package resurrects the retired reward injector');
           console.log('canonical reward, basic-value, economic-policy, and valuation-review runtimes are seeded for offline use');
           NODE
