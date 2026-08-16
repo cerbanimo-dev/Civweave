@@ -63,7 +63,6 @@ test('generation runtime stamps both result and structured output provenance',as
   assert.match(source,/origin=generation\.aiGenerated\?'ai-generated'/);
   assert.match(source,/structuredOutputWithProvenance\(result\.outputJson,generation\)/);
   assert.match(source,/CIVWEAVE_LUD_AI_DISABLED/);
-  assert.doesNotMatch(source,/Luddite Mode/);
 });
 
 test('cloud generation API labels AI provenance before returning artifacts',async()=>{
@@ -96,7 +95,6 @@ test('shared AI loader refuses Lud Mode',async()=>{
   assert.match(source,/CIVWEAVE_LUD_AI_DISABLED/);
   assert.match(source,/assertAIAllowed\('Guide and model generation'\)/);
   assert.match(source,/ludGuard:true/);
-  assert.doesNotMatch(source,/Luddite Mode/);
 });
 
 test('manual authoring produces human provenance and human-only market filtering',async()=>{
@@ -106,7 +104,6 @@ test('manual authoring produces human provenance and human-only market filtering
   assert.match(source,/validatorType:'human'/);
   assert.match(source,/provenance:'human-review'/);
   assert.doesNotMatch(source,/\.generate\s*\(/);
-  assert.doesNotMatch(source,/Luddite/);
 });
 
 test('system ownership declares Lud authorities',async()=>{
@@ -125,4 +122,9 @@ test('service worker includes the separate Lud package lane',async()=>{
   assert.doesNotMatch(worker,/service-worker-luddite-package/);
   assert.match(builder,/service-worker-lud-package-v1\.js/);
   assert.match(builder,/ludPackage:'v1-explicit-allowlist-no-generated-visual-assets'/);
+});
+
+test('canonical Lud feature files contain no retired Luddite naming',async()=>{
+  const files=['public/app/lud/index.html','public/app/lud/campus.html','public/app/lud-mode-v1.js','public/app/lud-installer-v1.js','public/app/lud-manual-authoring-v1.js','public/app/lud-package-v1.json','public/service-worker-lud-package-v1.js','docs/architecture/lud-mode-v1.md','config/system-ownership.json'];
+  for(const file of files)assert.doesNotMatch(await read(file),/luddite/i,`${file} contains retired naming`);
 });
