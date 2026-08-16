@@ -1,16 +1,16 @@
 # Civweave Guild Quest Tracker contract
 
-Cerbanimo's default landscape is the canonical three-tier browser for Civweave's community work hierarchy. The fantasy language is not decorative terminology layered over a second data model. It maps directly onto existing Civweave records:
+The Civweave Guild Quest Tracker is the canonical three-tier browser for Civweave's community work hierarchy. It belongs to Civweave, not Cerbanimo. The fantasy language is not decorative terminology layered over a second data model; it maps directly onto existing Civweave records while legacy hub/node field names remain accepted for persistence and federation compatibility.
 
-- **Guild = Node.** A local, nearby, saved, or boosted Civweave hub/node is presented as a Guild.
+- **Guild = community host record.** A local, nearby, saved, or boosted Civweave community host is presented to people as a Guild.
 - **Quest = Shared intention.** An intention published by a Guild is presented as a Quest.
 - **Quest Map = Intention plan.** The Quest's existing Living School, Cerbanimo, and FellowFare paths are rendered as the three execution lanes of one map.
 
-The hierarchy is therefore **Guilds (Nodes) → Quests (shared intentions) → Quest Maps**.
+The user-facing hierarchy is therefore **Guilds → Quests (shared intentions) → Quest Maps**.
 
 ## Three-tier interaction contract
 
-1. **Guild level** shows nearby, saved, boosted, and local nodes in the mobile-first 3D carousel. The centered Guild owns the detail card. Swipe, wheel, arrow keys, and direct card selection rotate the rail. Selecting the centered Guild descends to its Quests.
+1. **Guild level** shows nearby, saved, boosted, and local Guilds in the mobile-first 3D carousel. The centered Guild owns the detail card. Swipe, wheel, arrow keys, and direct card selection rotate the rail. Selecting the centered Guild descends to its Quests.
 2. **Quest level** keeps the parent Guild rail visible in a compressed state while the Guild's shared intentions rotate in their own carousel. The selected Quest shows its outcome, progress, and open needs. Selecting it descends to the Quest Map.
 3. **Quest Map level** keeps the selected Quest available as context and renders exactly three execution lanes from the Quest's existing plan paths:
    - **Living School** — canonical `#aeea57`, Learn & Grow.
@@ -29,11 +29,11 @@ Open needs are read directly when a Quest publishes them. When explicit needs ar
 
 The tracker reads:
 
-- `civweave.hub-discovery.v1` for explicit Guild/node discovery records.
-- `federation-finder.mesh-nodes.v1` for saved and nearby Civweave mesh nodes.
+- `civweave.hub-discovery.v1` for existing discovery records.
+- `federation-finder.mesh-nodes.v1` for saved and nearby Civweave mesh records.
 - `civweave.intentions.v127` for Quests belonging to the local Civweave Guild.
 
-Existing discovery fields remain valid. The interface may call them Guilds, but persistence and federation compatibility continue to accept existing hub/node identifiers and fields.
+Existing persistence fields remain valid. The interface calls these communities Guilds; legacy hub/node identifiers and fields remain internal compatibility inputs only and are not canonical user-facing terminology.
 
 ## Houses remain orthogonal
 
@@ -47,7 +47,7 @@ Every Guild receives one persisted House when no explicit House is published:
 
 Assignments remain stored in `civweave.hub-houses.v1`. A House is social/visual identity, not the Guild itself, not a permission tier, and not an economic ranking.
 
-A House change remains governed. The **Guild House vote** action creates a `civweave.house-change-proposal.v1` request in `civweave.anarchadia.pending-proposals.v1` and emits `civweave:anarchadia-proposal-requested`. The proposal keeps legacy `hubId`/`hubName` fields and also supplies `guildId`/`guildName` so existing governance consumers remain compatible while the user-facing lore becomes consistent.
+A House change remains governed. The **Guild House vote** action creates a `civweave.house-change-proposal.v1` request in `civweave.anarchadia.pending-proposals.v1` and emits `civweave:anarchadia-proposal-requested`. The proposal keeps legacy `hubId`/`hubName` fields and also supplies `guildId`/`guildName` so existing governance consumers remain compatible while the user-facing lore stays consistent.
 
 ## Anarchadia vote identity badges
 
@@ -55,6 +55,8 @@ Quest Map steps can carry Anarchadia vote references directly. The tracker also 
 
 ## Canonical access and compatibility
 
-The tracker owns the default `?system=cerbanimo&embed=1` landscape route. Existing Cerbanimo rooms and capabilities remain untouched. Opening a room restores the canonical realm-console workspace and exposes a **Guild Quest Tracker** return link.
+The tracker lives on the Civweave-owned sub-surface `/app/civweave-guild-quest-v1.html`. The Civweave Working Campus exposes it through the **Guilds** control. Cerbanimo's default realm-console surface no longer loads or owns the Guild Quest Tracker; Cerbanimo remains focused on its own Quest workbench and capabilities.
 
-`CivweaveCerbanimoIntentionLandscapeV1` remains exported for compatibility. `CivweaveGuildQuestTrackerV1` is the lore-aligned alias for new callers. No dynamic script injection, build-time source rewriting, or runtime patch layer is part of this feature.
+The route contract recognizes `/app/civweave-guild-quest-v1.html` as a Civweave surface without replacing `/app/working-campus-v156.html` as Civweave's primary system route. This keeps existing Civweave navigation stable while giving the Guild hierarchy a first-class Civweave home.
+
+The implementation file names `cerbanimo-intention-landscape-v1.js` and `cerbanimo-intention-landscape-v1.css`, plus the `CivweaveCerbanimoIntentionLandscapeV1` global, remain temporarily for compatibility. `CivweaveGuildQuestTrackerV1` is the canonical API for new callers. No dynamic script injection, build-time source rewriting, or runtime patch layer is part of this feature.
