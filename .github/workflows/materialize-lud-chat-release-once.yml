@@ -1,0 +1,39 @@
+name: Materialize Lud chat release once
+
+on:
+  push:
+    branches:
+      - codex/lud-guild-party-chat-v1
+    paths:
+      - '.github/workflows/materialize-lud-chat-release-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.event.head_commit.message == 'Trigger canonical 1.0.164 materialization'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/lud-guild-party-chat-v1
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Materialize canonical release
+        run: |
+          printf '1.0.164\n' > VERSION
+          npm run release:materialize
+      - name: Commit generated release
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No release changes generated.'
+            exit 0
+          fi
+          git commit -m 'Materialize Civweave 1.0.164 Lud Guild chat release'
+          git push origin HEAD:codex/lud-guild-party-chat-v1
