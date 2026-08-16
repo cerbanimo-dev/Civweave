@@ -9,6 +9,7 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
+      - 'public/app/shared-intention-party-chat-v1.js'
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
@@ -30,6 +31,7 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
+      - 'public/app/shared-intention-party-chat-v1.js'
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
@@ -66,6 +68,7 @@ jobs:
           node --check public/app/unified-chat-system-v1.js
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/shared-guide-surface-v236-core-v244.js
+          node --check public/app/shared-intention-party-chat-v1.js
           node --check public/app/guide-chat-surface-v350.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
@@ -86,6 +89,7 @@ jobs:
           const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
           const loader=fs.readFileSync('public/app/shared-guide-surface-v236.js','utf8');
           const shared=fs.readFileSync('public/app/shared-guide-surface-v236-core-v244.js','utf8');
+          const party=fs.readFileSync('public/app/shared-intention-party-chat-v1.js','utf8');
           const surface=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
           const compat=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
           const faces=fs.readFileSync('public/app/shared-chat-face-icons-v255.js','utf8');
@@ -111,10 +115,15 @@ jobs:
           if(activateBody.includes('ensureExpressionDirector')||activateBody.includes('setInterval('))throw new Error('Opening chat is starting expression/MiniLM work');
           if(faces.includes('miniLmLampTimer=setInterval')||faces.includes('setInterval(refreshMiniLmLamp'))throw new Error('Face runtime reintroduced MiniLM polling');
           if(!compat.includes('Compatibility loader only')||!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('V242 compatibility path is no longer a loader-only shim');
-          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-chat-face-icons-v255.js']){
+          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/shared-chat-face-icons-v255.js']){
             if(!repair.includes(`'${path}'`))throw new Error(`PWA cache repair is missing ${path}`);
           }
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
+          if(!loader.includes('partyAutostart:false')||!loader.includes('activatePartyChat'))throw new Error('Party chat is not explicitly lazy');
+          const installStart=loader.indexOf('function install(){'),installEnd=loader.indexOf('\n}\n\ninstall();',installStart),installBody=loader.slice(installStart,installEnd);
+          if(installBody.includes('/app/shared-intention-party-chat-v1.js'))throw new Error('Party chat is loading during ordinary guide startup');
+          if(!loader.includes("addEventListener('civweave:open-human-thread',onPartyRequest)"))throw new Error('Lazy party activation is not connected to explicit human-party use');
+          if(!party.includes('function startTransport()'))throw new Error('Party transport contract disappeared');
           NODE
 
       - name: Verify current chat behavior
