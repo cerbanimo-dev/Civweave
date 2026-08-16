@@ -6,6 +6,7 @@ on:
       - 'VERSION'
       - 'package.json'
       - 'config/system-ownership.json'
+      - 'public/app/experience-orchestrator-v232.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
@@ -33,6 +34,7 @@ on:
       - 'VERSION'
       - 'package.json'
       - 'config/system-ownership.json'
+      - 'public/app/experience-orchestrator-v232.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
@@ -75,6 +77,7 @@ jobs:
 
       - name: Check canonical chat runtime syntax
         run: |
+          node --check public/app/experience-orchestrator-v232.js
           node --check public/app/unified-chat-system-v1.js
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/shared-guide-surface-v236-core-v244.js
@@ -100,6 +103,7 @@ jobs:
         run: |
           node <<'NODE'
           const fs=require('node:fs');
+          const orchestrator=fs.readFileSync('public/app/experience-orchestrator-v232.js','utf8');
           const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
           const loader=fs.readFileSync('public/app/shared-guide-surface-v236.js','utf8');
           const shared=fs.readFileSync('public/app/shared-guide-surface-v236-core-v244.js','utf8');
@@ -120,6 +124,8 @@ jobs:
             if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
             if(!surface.includes(system))throw new Error(`Canonical surface is missing guide ${system}`);
           }
+          if(!orchestrator.includes("REVISION='experience-orchestrator-v355-minilm-submit-gate'"))throw new Error('Selected-local submit owner lost MiniLM-first routing');
+          if(!orchestrator.includes('await router.classify(text,')||!orchestrator.includes("route.taskClass==='ordinary'")||!orchestrator.includes('!route.networkRequired'))throw new Error('Selected-local capture can bypass MiniLM classification');
           if(!sessions.includes('threadKey=system=>`civweave.guide-thread.${system}.v237`'))throw new Error('Five-folder realm memory contract is missing');
           if(!core.includes("architecture:'one-core-five-themes-five-memory-folders'"))throw new Error('Unified architecture marker missing');
           if(core.includes('setInterval('))throw new Error('Unified chat must not poll the DOM/runtime');
