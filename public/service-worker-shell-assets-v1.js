@@ -1,8 +1,8 @@
 ;(()=>{
 'use strict';
 const REVISION='shell-assets-v1-repair-v3-family-navigation';
-const OPTIONAL=[
-  '/app/installer-repair-only-v2.js',
+const OPTIONAL=['/app/installer-repair-only-v2.js'];
+const FAMILY_NAV=[
   '/app/system-routes-v227.js',
   '/app/themed-system-nav-v178.js',
   '/app/subsystem-avatar-state-v347.js',
@@ -17,9 +17,9 @@ const OPTIONAL=[
   '/app/assets/ai/chat/rook-face-v255.webp',
   '/app/assets/ai/chat/merlin-face-v255.webp'
 ];
-for(const pathname of OPTIONAL){
+for(const pathname of [...OPTIONAL,...FAMILY_NAV]){
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-self.CivweaveShellAssetsV1=Object.freeze({revision:REVISION,optional:[...OPTIONAL],policy:'declarative-shell-assets-only-no-repair-or-message-ownership'});
+self.CivweaveShellAssetsV1=Object.freeze({revision:REVISION,optional:[...OPTIONAL,...FAMILY_NAV],policy:'declarative-shell-assets-only-no-repair-or-message-ownership'});
 })();
