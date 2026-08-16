@@ -27,6 +27,7 @@ globalThis.CivweaveLocalMeshV146={
 
 const {createMobileGuild,mobileGuildStatus}=await import('../public/app/mobile-guild-create-v1.mjs');
 const {CivweavePocketGuildNodeV1}=await import('../public/app/pocket-guild-node-v1.mjs');
+const {CivweaveEmergencyAiMeshV1}=await import('../public/app/emergency-ai-mesh-v1.mjs');
 
 const result=await createMobileGuild({displayName:'Northside Repair Guild',guildId:'northside-repair'});
 assert.equal(result.guildId,'northside-repair');
@@ -58,5 +59,6 @@ assert.equal(saved.guildId,'northside-repair');
 assert.equal(saved.workerCreated,false);
 assert.equal(saved.downloadOriginUsedAsBackend,false);
 assert.ok(!JSON.stringify(saved).includes('guild-A.example'));
+CivweaveEmergencyAiMeshV1.stop();
 
 console.log(JSON.stringify({ok:true,schema:'civweave.mobile-guild-create.test.v1',guildId:result.guildId,route:result.route,cloudAttached:false,workerCreated:false,downloadOriginInherited:false,genesisObject:true}));
