@@ -3,9 +3,11 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const forwardPath='public/app/guide-forward-failure-policy-v1.js';
+const hardeningPath='public/app/guide-forward-failure-hardening-v1.js';
 const serverPath='public/app/server-ai-router-v301.js';
 const loaderPath='public/app/shared-guide-surface-v236.js';
 const source=fs.readFileSync(forwardPath,'utf8');
+const hardening=fs.readFileSync(hardeningPath,'utf8');
 const server=fs.readFileSync(serverPath,'utf8');
 const loader=fs.readFileSync(loaderPath,'utf8');
 
@@ -16,7 +18,8 @@ const document={
   head:{append(){},appendChild(){}},
   getElementById(){return null},
   createElement(tag){return tag==='style'?{id:'',textContent:''}:{addEventListener(){},set type(v){},set className(v){},set textContent(v){},disabled:false}},
-  querySelector(){return null}
+  querySelector(){return null},
+  addEventListener(){}
 };
 const context={
   console,URL,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,Set,Map,WeakMap,structuredClone,
@@ -62,10 +65,18 @@ assert.equal(sanitized.messages[1].content,'Can you help me make a learning plan
 assert.ok(!sanitized.messages.some(row=>/kept this locally/i.test(row.content)));
 
 assert.match(loader,/guide-forward-failure-policy-v1\.js/);
+assert.match(loader,/guide-forward-failure-hardening-v1\.js/);
 assert.match(loader,/deterministicAnswerFallback:false/);
+assert.match(loader,/deterministicTerminalVisible:false/);
+assert.match(hardening,/provider==='deterministic-local'\|\|provider==='local-contract'/);
+assert.match(hardening,/server-auto-forwarding/);
+assert.match(hardening,/guild-handoff-ready/);
+assert.match(hardening,/event\.stopImmediatePropagation\(\)/);
+assert.match(hardening,/recent\.at\(-1\)\?\.role==='user'/);
+assert.match(hardening,/guildRequestDeduplicated:true/);
 assert.match(server,/guildOnly=request\.guildOnly===true/);
 assert.match(server,/if\(guildOnly\)\{/);
 assert.ok(server.indexOf('if(guildOnly){')<server.indexOf('try{const edge=await cloudflare'), 'Guild-only branch must stop before Cloudflare');
 assert.match(server,/GUILD_AI_UNAVAILABLE/);
 
-console.log('Guide forward failure policy verified.');
+console.log('Guide forward failure policy and terminal hardening verified.');
