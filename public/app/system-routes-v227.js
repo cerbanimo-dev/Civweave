@@ -11,6 +11,7 @@ const ROUTES=Object.freeze({
   anarchadia:Object.freeze({id:'anarchadia',label:'Anarchadia',pathname:'/app/anarchadia-console-v139.html',params:Object.freeze({cabinet:'1'})})
 });
 const PATH_TO_ID=new Map(Object.values(ROUTES).map(route=>[route.pathname,route.id]));
+PATH_TO_ID.set('/app/civweave-guild-quest-v1.html','civweave');
 function normalizePathname(value){
   let pathname=String(value||'/').split(/[?#]/,1)[0]||'/';
   try{pathname=decodeURI(pathname)}catch{}
