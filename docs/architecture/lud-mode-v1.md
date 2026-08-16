@@ -13,7 +13,8 @@ Lud Mode is Civweave's dedicated human-operated lane. It is a package and operat
 - Lud package service-worker lane: `public/service-worker-lud-package-v1.js`
 - Download controller: `public/app/lud-installer-v1.js`
 - Dedicated download page: `public/app/lud/index.html`
-- Entry surface: `public/app/lud/campus.html`
+- Entry surface asset: `public/app/lud/campus.html`
+- Canonical browser entry route: `/app/lud/campus`
 
 The corresponding declarations live in `config/system-ownership.json`.
 
@@ -22,6 +23,8 @@ The corresponding declarations live in `config/system-ownership.json`.
 Lud Mode is downloaded from `/app/lud/`, not from the standard Civweave installer controls. The standard installer may link to the Lud download page but does not own or initiate the Lud package download.
 
 The Lud download page is deliberately plain and contains no generated visual assets. It must not contain image elements, picture elements, SVG artwork, canvas artwork, CSS background images, logos, mascot art, or decorative media. The packaged Lud campus follows the same plain-surface rule.
+
+The repository keeps `public/app/lud/campus.html` as the package asset and cache key, while browser navigation uses the extensionless `/app/lud/campus` route. Cloudflare Pages canonicalizes HTML pages to clean URLs, so the service worker normalizes the fetched HTML into a fresh response before caching or serving it. A cached redirect response is never used directly as a navigation response.
 
 ## Package boundary
 
@@ -91,6 +94,8 @@ The existing independent-review, portable-identity, evidence-inspection, rubric-
 
 ## Verification
 
-`node --test scripts/test-lud-mode-v1.mjs` verifies the dedicated download surface, no-generated-visual-assets rule, package allowlist, no-AI entry surface, generation provenance, immutable origin, Lud runtime guards, human authoring, ownership declarations, and service-worker lane.
+`node --test scripts/test-lud-mode-v1.mjs` verifies the dedicated download surface, no-generated-visual-assets rule, package allowlist, no-AI entry surface, generation provenance, immutable origin, Lud runtime guards, human authoring, ownership declarations, canonical entry route, and service-worker lane.
 
-`.github/workflows/lud-mode-contract.yml` runs the contract on relevant pull requests and staging changes.
+`scripts/browser-lud-mode-gauntlet-v1.mjs` exercises the actual service-worker flow in Chromium. It emulates the Cloudflare Pages `.html` clean-URL redirect, downloads the Lud allowlist, opens the canonical `/app/lud/campus` route from cache, then disables the network and verifies the same route reloads successfully without AI-runtime requests.
+
+`.github/workflows/lud-mode-contract.yml` runs both contracts on relevant pull requests and staging changes.
