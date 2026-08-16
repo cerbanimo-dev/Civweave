@@ -4,13 +4,14 @@
 const LUD_REVISION='lud-package-v1';
 const LUD_MANIFEST_URL='/app/lud-package-v1.json';
 const LUD_META_URL='/__civweave/lud-package-v1.json';
+const LUD_CACHE_NAME=typeof OFFLINE_CACHE==='string'?OFFLINE_CACHE:'civweave-lud-v1';
 let ludDownloadPromise=null;
 const ludNow=()=>new Date().toISOString();
 const ludUnique=values=>[...new Set((Array.isArray(values)?values:[]).filter(Boolean).map(String))];
-function ludPost(event,payload){try{post(event,payload)}catch{try{event.source?.postMessage?.(payload)}catch{}}}
+function ludPost(event,payload){try{post(event,payload)}catch{try{event.ports?.[0]?.postMessage?.(payload)}catch{}try{event.source?.postMessage?.(payload)}catch{}}}
 async function ludBroadcast(payload){try{const clients=await self.clients?.matchAll?.({type:'window',includeUncontrolled:true})||[];for(const client of clients)try{client.postMessage(payload)}catch{}}catch{}return payload}
-function ludPacket(value={}){return{type:'CIVWEAVE_LUD_PACKAGE_STATUS',mode:'lud',revision:LUD_REVISION,version:typeof VERSION==='string'?VERSION:'unknown',cache:typeof OFFLINE_CACHE==='string'?OFFLINE_CACHE:null,ready:Boolean(value.ready),running:Boolean(value.running),downloaded:Number(value.downloaded||0),total:Number(value.total||0),bytes:Number(value.bytes||0),failed:Array.isArray(value.failed)?value.failed:[],failedCount:Array.isArray(value.failed)?value.failed.length:0,entry:value.entry||'/app/lud/campus.html',assets:ludUnique(value.assets),updatedAt:value.updatedAt||null}}
-async function ludCache(){return caches.open(OFFLINE_CACHE)}
+function ludPacket(value={}){return{type:'CIVWEAVE_LUD_PACKAGE_STATUS',mode:'lud',revision:LUD_REVISION,version:typeof VERSION==='string'?VERSION:'lud-v1',cache:LUD_CACHE_NAME,ready:Boolean(value.ready),running:Boolean(value.running),downloaded:Number(value.downloaded||0),total:Number(value.total||0),bytes:Number(value.bytes||0),failed:Array.isArray(value.failed)?value.failed:[],failedCount:Array.isArray(value.failed)?value.failed.length:0,entry:value.entry||'/app/lud/campus.html',assets:ludUnique(value.assets),updatedAt:value.updatedAt||null}}
+async function ludCache(){return caches.open(LUD_CACHE_NAME)}
 async function readLudMeta(){try{const response=await(await ludCache()).match(LUD_META_URL);return response?await response.json():null}catch{return null}}
 async function writeLudMeta(value){const packet=ludPacket(value);await(await ludCache()).put(LUD_META_URL,new Response(JSON.stringify(packet),{headers:{'content-type':'application/json','cache-control':'no-store'}}));return packet}
 async function loadLudManifest(){
@@ -29,5 +30,5 @@ async function downloadLud(event){
 }
 function startLudDownload(event){if(ludDownloadPromise)return ludDownloadPromise.then(packet=>{ludPost(event,packet);return packet});ludDownloadPromise=downloadLud(event).finally(()=>{ludDownloadPromise=null});return ludDownloadPromise}
 async function clearLud(){const cache=await ludCache();const meta=await readLudMeta();for(const pathname of meta?.assets||[])try{await cache.delete(pathname)}catch{}await cache.delete(LUD_META_URL);return ludStatus()}
-self.addEventListener('message',event=>{const type=event.data?.type;if(type==='GET_LUD_PACKAGE_STATUS')event.waitUntil(ludStatus().then(packet=>ludPost(event,packet)));else if(type==='DOWNLOAD_LUD_PACKAGE')event.waitUntil(startLudDownload(event));else if(type==='CLEAR_LUD_PACKAGE')event.waitUntil(clearLud().then(packet=>ludPost(event,packet)))});
+self.addEventListener('message',event=>{const type=event.data?.type;if(type==='SKIP_WAITING'){event.waitUntil(self.skipWaiting());return}if(type==='GET_LUD_PACKAGE_STATUS')event.waitUntil(ludStatus().then(packet=>ludPost(event,packet)));else if(type==='DOWNLOAD_LUD_PACKAGE')event.waitUntil(startLudDownload(event));else if(type==='CLEAR_LUD_PACKAGE')event.waitUntil(clearLud().then(packet=>ludPost(event,packet)))});
 })();

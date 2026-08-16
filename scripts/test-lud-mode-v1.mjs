@@ -24,8 +24,21 @@ test('Lud download page is plain and has no generated visual asset hooks',async(
   const html=await read('public/app/lud/index.html');
   assert.match(html,/<h1>Lud Mode<\/h1>/);
   assert.match(html,/>Download Lud Mode<\/button>/);
+  assert.match(html,/id="open-lud-mode"[^>]*hidden/);
+  assert.match(html,/\[hidden\]\{display:none!important\}/);
   assert.match(html,/no generated visual assets/i);
   assertPlainSurface(html,'Lud download page');
+});
+
+test('Lud download controller uses its dedicated package worker and bounded command replies',async()=>{
+  const source=await read('public/app/lud-installer-v1.js');
+  assert.match(source,/WORKER_URL='\/service-worker-lud-package-v1\.js\?v=/);
+  assert.match(source,/WORKER_SCOPE='\/app\/lud\/'/);
+  assert.match(source,/updateViaCache:'none'/);
+  assert.match(source,/new MessageChannel\(\)/);
+  assert.match(source,/DOWNLOAD_IDLE_TIMEOUT_MS/);
+  assert.match(source,/type:'SKIP_WAITING'/);
+  assert.doesNotMatch(source,/service-worker-v203\.js/);
 });
 
 test('Lud campus is also plain and image-free',async()=>{
@@ -47,6 +60,14 @@ test('Lud package is an explicit no-AI no-generated-visual allowlist',async()=>{
   assert.equal(manifest.policy.generatedVisualAssets,false);
   assert.ok(manifest.assets.includes('/app/shared/civweave-identity-sync.js'),'human validation signer must be packaged');
   for(const asset of manifest.assets){const lower=String(asset).toLowerCase();for(const fragment of [...forbiddenRuntime,'/images/','/logos/'])assert.equal(lower.includes(fragment),false,`${asset} contains forbidden ${fragment}`)}
+});
+
+test('dedicated Lud package worker is standalone-safe',async()=>{
+  const source=await read('public/service-worker-lud-package-v1.js');
+  assert.match(source,/LUD_CACHE_NAME=typeof OFFLINE_CACHE==='string'\?OFFLINE_CACHE:'civweave-lud-v1'/);
+  assert.match(source,/event\.ports\?\.\[0\]\?\.postMessage/);
+  assert.match(source,/type==='SKIP_WAITING'/);
+  assert.match(source,/caches\.open\(LUD_CACHE_NAME\)/);
 });
 
 test('identity signer is WebCrypto-only and exposes no AI runtime dependency',async()=>{
