@@ -1,11 +1,12 @@
 import {
   isStagingRequest,
-  requestOrigin,
   stagingGuild,
 } from "../_shared/staging-runtime";
 
 const CORE_DIRECTORY = "https://civweave-core.cerbanimo.workers.dev/api/nodes?limit=100";
 const FABRIC_ORIGIN = "https://civweave-node-cloud.cerbanimo.workers.dev";
+const STAGING_GUILD_SERVER_ORIGIN = "https://civweave-node-cloud-staging.cerbanimo.workers.dev";
+const STAGING_NODE_ID = "civweave-cloud";
 const COMMUNITY_SEATS_PER_FREE_NODE = 6;
 const SURVIVAL_FLOOR_NEURONS = 25;
 const INCLUDED_POOL_BPS = 9_000;
@@ -37,6 +38,14 @@ function slotsFor(capacity: JsonRecord) {
     ((finiteWhole(capacity.dailyCeilingNeurons) ?? 0) * INCLUDED_POOL_BPS / 10_000) / SURVIVAL_FLOOR_NEURONS,
   ) - (finiteWhole(capacity.memberCount) ?? 0));
   return { free, paid };
+}
+
+function stagingSlots(guild: NonNullable<ReturnType<typeof stagingGuild>>, capacity: JsonRecord) {
+  const remaining = finiteWhole(capacity.totalSeatsRemaining);
+  return {
+    free: Math.max(0, Math.min(guild.freeSlots, remaining ?? guild.freeSlots)),
+    paid: 0,
+  };
 }
 
 function distanceKm(latitude: number, longitude: number, targetLatitude: number, targetLongitude: number) {
@@ -80,20 +89,28 @@ function matches(mode: string, slots: { free: number; paid: number }) {
   return slots.free > 0 || slots.paid > 0;
 }
 
-async function stagingSearch(request: Request, latitude: number, longitude: number, mode: string) {
+async function stagingSearch(latitude: number, longitude: number, mode: string) {
   const roundedLatitude = Number(latitude.toFixed(3));
   const roundedLongitude = Number(longitude.toFixed(3));
-  const origin = requestOrigin(request);
 
-  const [directory, fabric] = await Promise.all([
+  const [directory, fabric, stagingCapacity] = await Promise.all([
     getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
     getJson(new URL("/api/fabric/capacity", FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
+    getJson(new URL(`/api/fabric/capacity?nodeId=${encodeURIComponent(STAGING_NODE_ID)}`, STAGING_GUILD_SERVER_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
   ]);
   if (!fabric.ok) return reply({
     schema: "civweave.nearby-hub-search.v1",
     ok: false,
     environment: "staging",
     error: "live-guild-fabric-unavailable",
+    productionMembershipIsolation: true,
+    nodes: [],
+  }, 502);
+  if (!stagingCapacity.ok || stagingCapacity.payload?.stagingIsolatedGuildServer !== true) return reply({
+    schema: "civweave.nearby-hub-search.v1",
+    ok: false,
+    environment: "staging",
+    error: "staging-guild-server-unavailable",
     productionMembershipIsolation: true,
     nodes: [],
   }, 502);
@@ -111,16 +128,16 @@ async function stagingSearch(request: Request, latitude: number, longitude: numb
 
   const nodes = hostNodeIds.map((nodeId, index) => {
     const guild = stagingGuild(nodeId);
-    if (!guild) return null;
+    if (!guild || nodeId !== STAGING_NODE_ID) return null;
     const node: JsonRecord = { ...(directoryById.get(nodeId) || {}), ...(manifests[index] || {}), nodeId };
     const location = locationFor(node) || { latitude: guild.latitude, longitude: guild.longitude };
-    const slots = { free: guild.freeSlots, paid: guild.paidSlots };
+    const slots = stagingSlots(guild, stagingCapacity.payload || {});
     if (!matches(mode, slots)) return null;
     return {
       schema: "civweave.nearby-hub.v1",
       nodeId,
       displayName: guild.displayName || String(node.displayName || nodeId).slice(0, 180),
-      hostOrigin: origin,
+      hostOrigin: STAGING_GUILD_SERVER_ORIGIN,
       liveHostOrigin: safeHttps(node.publicOrigin) || FABRIC_ORIGIN,
       runtime: String(node.runtime || "cloudflare-host-node").slice(0, 120),
       status: String(node.status || "active"),
@@ -128,6 +145,7 @@ async function stagingSearch(request: Request, latitude: number, longitude: numb
       slots,
       liveGuild: true,
       stagingShadowSeats: true,
+      stagingGuildServerIsolated: true,
       productionMembershipIsolation: true,
     };
   }).filter(Boolean)
@@ -140,6 +158,7 @@ async function stagingSearch(request: Request, latitude: number, longitude: numb
     environment: "staging",
     stagingSynthetic: false,
     stagingShadowSeats: true,
+    stagingGuildServerIsolated: true,
     productionMembershipIsolation: true,
     productionDiscoveryReadOnly: true,
     mode,
@@ -147,7 +166,7 @@ async function stagingSearch(request: Request, latitude: number, longitude: numb
     source: {
       directory: directory.ok ? "core-node-directory" : "unavailable",
       fabric: "cloudflare-node-fabric",
-      seats: "staging-shadow-overlay",
+      seats: "isolated-staging-guild-server",
     },
     privacy: { coordinateDecimals: 3, exactLocationStored: false, exactLocationReturned: false },
   });
@@ -164,7 +183,7 @@ export const onRequestPost: PagesFunction = async (context) => {
   }
 
   if (isStagingRequest(context.request)) {
-    return stagingSearch(context.request, latitude, longitude, mode);
+    return stagingSearch(latitude, longitude, mode);
   }
 
   const roundedLatitude = Number(latitude.toFixed(3)), roundedLongitude = Number(longitude.toFixed(3));
