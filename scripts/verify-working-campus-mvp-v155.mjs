@@ -31,8 +31,8 @@ for(const token of [
   'civweave.working-campus.v1','civweave.intentions.v127',
   'civweave.realm-inbox.v1','civweave.context.v1',
   'civweave.active-handoff.v1','civweave.intention-weave.v1',
-  '/app/assets/ai/weaveling.png','/app/assets/ai/moss.png','/app/assets/ai/kamiya.png',
-  '/app/assets/ai/rook.png','/app/assets/ai/merlin.png'
+  '/app/assets/ai/weaveling.png','/Living-School-moss-sprites.png','/Cerbanimo-kamiya-sprites.png',
+  '/FellowFare-rook-sprites.png','/Anarchadia-merlin-sprites.png'
 ])assert(surface.toLowerCase().includes(token.toLowerCase()),`Working Campus is missing ${token}`);
 
 for(const token of [
