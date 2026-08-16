@@ -22,9 +22,11 @@ test('Lud surfaces use the shared lightweight game UI with inline critical styli
   assert.ok(manifest.assets.includes('/app/lud-game-ui-v1.css'));
   assert.ok(manifest.assets.includes('/app/lud-game-ui-v1.js'));
   assert.ok(manifest.assets.includes('/app/quest-arc-chronicle-v1.js'));
+  assert.ok(manifest.assets.includes('/app/cerbanimo-intention-landscape-v1.css'));
+  assert.ok(manifest.assets.includes('/app/cerbanimo-intention-landscape-v1.js'));
 });
 
-test('Lud campus exposes game-like HUD, Quest Chronicle, and human-powered labels without changing capability owners',async()=>{
+test('Lud campus exposes the canonical Guild Quest carousel alongside its human-powered HUD and Chronicle',async()=>{
   const campus=await read('public/app/lud/campus.html');
   assert.match(campus,/class="lud-hud"/);
   assert.match(campus,/id="lud-hud-passport"/);
@@ -32,6 +34,10 @@ test('Lud campus exposes game-like HUD, Quest Chronicle, and human-powered label
   assert.match(campus,/id="lud-hud-beat"/);
   assert.match(campus,/id="lud-beat-history"/);
   assert.match(campus,/quest-arc-chronicle-v1\.js/);
+  assert.match(campus,/id="rc-app" class="lud-quest-tracker-host"/);
+  assert.match(campus,/class="rc-shell"/);
+  assert.match(campus,/href="\/app\/cerbanimo-intention-landscape-v1\.css"/);
+  assert.match(campus,/src="\/app\/cerbanimo-intention-landscape-v1\.js"/);
   assert.match(campus,/Questboard · Human creation/);
   assert.match(campus,/Quest Chronicle · Your human work/);
   assert.match(campus,/Guild Gate · Passport/);
@@ -71,14 +77,15 @@ test('Lud game JS is presentation-only and reads canonical Passport, Guild, and 
   assert.doesNotMatch(source,/\.generate\s*\(/);
 });
 
-test('Lud package worker rejects stale ready metadata after a package generation bump',async()=>{
+test('Lud package worker rejects stale ready metadata after a package generation bump and permits the live Guild directory',async()=>{
   const [installer,worker]=await Promise.all([
     read('public/app/lud-installer-v1.js'),
     read('public/service-worker-lud-package-v1.js'),
   ]);
   assert.match(installer,/VERSION='1\.0\.5'/);
   assert.match(installer,/service-worker-lud-package-v1\.js\?v=1\.0\.5/);
-  assert.match(worker,/LUD_REVISION='lud-package-v1\.3-quest-arc'/);
+  assert.match(worker,/LUD_REVISION='lud-package-v1\.4-quest-tracker'/);
+  assert.match(worker,/['"]\/api\/hub-map-nodes['"]/);
   assert.match(worker,/if\(meta\?\.revision===LUD_REVISION\)return ludPacket\(meta\)/);
   assert.match(worker,/meta\?\.revision===LUD_REVISION&&Array\.isArray/);
 });

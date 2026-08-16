@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const LUD_REVISION='lud-package-v1.3-quest-arc';
+const LUD_REVISION='lud-package-v1.4-quest-tracker';
 const LUD_MANIFEST_URL='/app/lud-package-v1.json';
 const LUD_META_URL='/__civweave/lud-package-v1.json';
 const LUD_ENTRY_ASSET='/app/lud/campus.html';
@@ -21,6 +21,7 @@ const LUD_NETWORK_PATHS=new Set([
   '/.well-known/civweave',
   '/api/host-node-status',
   '/api/host-node-search',
+  '/api/hub-map-nodes',
   '/api/ai/node/session',
   '/api/commerce/membership/prejoin',
   '/api/federation/capacity',
