@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.165-saved-chat-ui-v353',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-saved-chat-ui-v295-style';
+const VERSION='1.0.166-saved-chat-ui-v354',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-saved-chat-ui-v354-style',LEGACY_STYLE='cw-saved-chat-ui-v295-style';
 if(globalThis.CivweaveSavedChatUIV295?.version===VERSION)return;
 const store=()=>globalThis.CivweaveSavedChatStoreV295,chat=()=>globalThis.CivweavePersistentGuideChatV215;
 let current='civweave';
@@ -24,11 +24,13 @@ function render(system=active()){
   nav.innerHTML=`<span>Saved</span><div>${rows.map(x=>`<button type="button" data-cw295-chat="${esc(x.id)}" aria-selected="${x.id===state.activeId}" title="${esc(x.title)}">${esc(x.title)}</button>`).join('')}</div><button type="button" data-cw295-new aria-label="New saved chat">+</button>`;return true
 }
 function style(){
+  document.getElementById(LEGACY_STYLE)?.remove();
   if(document.getElementById(STYLE))return;const s=document.createElement('style');s.id=STYLE;s.textContent=`
 #${ROOT}.cw295-has-saved-chats{grid-template-rows:max-content max-content max-content max-content minmax(0,1fr) max-content!important}
-#${ROOT}.cw295-has-saved-chats>.cw295-saved-chats{grid-row:4;align-self:start!important;justify-self:stretch!important;position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;z-index:2;display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;align-content:center;gap:6px;width:100%!important;min-width:0;height:auto!important;min-height:52px!important;max-height:52px!important;margin:0!important;padding:6px 8px;overflow:hidden;box-sizing:border-box!important;float:none!important;transform:none!important;border:0!important;border-bottom:1px solid #ffffff20!important;border-radius:0!important;background:#0004!important;isolation:isolate}
-#${ROOT}.cw295-has-saved-chats>[data-log]{grid-row:5}
-#${ROOT}.cw295-has-saved-chats>[data-persistent-form]{grid-row:6}
+html[data-civweave-mobile-ai-hardening="v302"] body #${ROOT}.cw295-has-saved-chats:not([hidden]):not(.is-minimized){grid-template-rows:max-content max-content max-content max-content minmax(0,1fr) max-content!important}
+#${ROOT}.cw295-has-saved-chats>.cw295-saved-chats{grid-row:4!important;align-self:start!important;justify-self:stretch!important;position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;z-index:2;display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;align-items:center!important;align-content:center!important;gap:6px!important;width:100%!important;min-width:0!important;height:52px!important;min-height:52px!important;max-height:52px!important;margin:0!important;padding:6px 8px!important;overflow:hidden!important;box-sizing:border-box!important;float:none!important;transform:none!important;border:0!important;border-bottom:1px solid #ffffff20!important;border-radius:0!important;background:#0004!important;isolation:isolate}
+#${ROOT}.cw295-has-saved-chats>[data-log]{grid-row:5!important}
+#${ROOT}.cw295-has-saved-chats>[data-persistent-form]{grid-row:6!important}
 #${ROOT} .cw295-saved-chats>span{flex:0 0 auto;color:#aeb9c7;font:800 9px/1 system-ui;text-transform:uppercase}
 #${ROOT} .cw295-saved-chats>div{display:flex;align-items:center;gap:5px;min-width:0;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 #${ROOT} .cw295-saved-chats>div::-webkit-scrollbar{display:none}
@@ -39,5 +41,5 @@ function style(){
 `;document.head.append(s)
 }
 style();addEventListener('civweave:guide-chat-ready',()=>queueMicrotask(()=>render(active())));addEventListener('civweave:guide-chat-state',e=>{if(store()?.systems?.includes(e.detail?.activeSystem))current=e.detail.activeSystem;queueMicrotask(()=>render(current))});addEventListener('civweave:realm-guide-thread-changed',()=>queueMicrotask(()=>render(active())));queueMicrotask(()=>render(active()));
-globalThis.CivweaveSavedChatUIV295=Object.freeze({version:VERSION,revision:'contained-threadbar-v353',savedTabs:true,render,focusOnCreate:false});
+globalThis.CivweaveSavedChatUIV295=Object.freeze({version:VERSION,revision:'contained-threadbar-v354',savedTabs:true,render,focusOnCreate:false,mobileRowOverride:true});
 })();
