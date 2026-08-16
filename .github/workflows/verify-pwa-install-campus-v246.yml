@@ -20,6 +20,7 @@ on:
       - 'public/service-worker-shell-repair-v293.js'
       - 'public/service-worker-campus-completion-v246.js'
       - 'scripts/verify-installer-front-door-v1.mjs'
+      - 'scripts/verify-pwa-installability-bootstrap-v1.mjs'
       - 'scripts/verify-pwa-install-campus-v246.mjs'
       - 'scripts/verify-fresh-install-paths-v1.mjs'
       - '.github/workflows/verify-pwa-install-campus-v246.yml'
@@ -43,6 +44,7 @@ on:
       - 'public/service-worker-shell-repair-v293.js'
       - 'public/service-worker-campus-completion-v246.js'
       - 'scripts/verify-installer-front-door-v1.mjs'
+      - 'scripts/verify-pwa-installability-bootstrap-v1.mjs'
       - 'scripts/verify-pwa-install-campus-v246.mjs'
       - 'scripts/verify-fresh-install-paths-v1.mjs'
       - '.github/workflows/verify-pwa-install-campus-v246.yml'
@@ -74,6 +76,8 @@ jobs:
       - run: node --check public/service-worker-shell-assets-v1.js
       - run: node --check public/service-worker-shell-repair-v293.js
       - run: node --check public/service-worker-campus-completion-v246.js
+      - run: node --check scripts/verify-pwa-installability-bootstrap-v1.mjs
+      - run: node scripts/verify-pwa-installability-bootstrap-v1.mjs
       - run: node scripts/verify-pwa-install-campus-v246.mjs
       - run: node scripts/verify-fresh-install-paths-v1.mjs
       - run: node scripts/verify-installer-front-door-v1.mjs
