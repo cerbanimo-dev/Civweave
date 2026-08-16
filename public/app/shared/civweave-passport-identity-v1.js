@@ -2,7 +2,7 @@
 'use strict';
 if(globalThis.CivweavePassportIdentityV1)return;
 
-const VERSION='1.2.0';
+const VERSION='1.2.1';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const SCHEMA='civweave.anarchadia-console.v1';
 const CHAT_KEYCHAIN_SCHEMA='civweave.passport-chat-keychain.v1';
@@ -93,16 +93,22 @@ async function rotateChatKey(){
 }
 async function chatHistory(){const chain=await ensureChatKeychain();return clone(chain.history)}
 async function verifyChatHistory(){
-  const record=ensure(),chain=await ensureChatKeychain();let previous=null;
-  for(const entry of chain.history){
+  const record=ensure(),chain=await ensureChatKeychain(),history=chain.history;
+  if(!Array.isArray(history)||!history.length)return{ok:false,error:'history-empty'};
+  if(Number(chain.generation)!==history.length)return{ok:false,error:'history-generation-mismatch',generation:chain.generation,count:history.length};
+  let previous=null;
+  for(const entry of history){
     if(entry?.schema!==CHAT_HISTORY_SCHEMA||await entryHash(entry)!==entry.entryHash)return{ok:false,error:'history-entry-invalid',generation:entry?.generation||null};
+    if(entry.generation!==(previous?previous.generation+1:1))return{ok:false,error:'history-generation-sequence-invalid',generation:entry.generation};
     if(entry.previousKeyId!==(previous?.keyId||null)||entry.previousEntryHash!==(previous?.entryHash||null))return{ok:false,error:'history-chain-invalid',generation:entry.generation};
     if(await publicNameForKey(entry.publicKey)!==entry.publicName)return{ok:false,error:'public-name-invalid',generation:entry.generation};
     if(previous&&!await verifyWith(previous.publicKey,transitionFor(record.passportId,entry),entry.transitionSignature))return{ok:false,error:'transition-signature-invalid',generation:entry.generation};
     if(!previous&&entry.transitionSignature!==null)return{ok:false,error:'genesis-signature-invalid',generation:entry.generation};
     previous=entry;
   }
-  return{ok:true,count:chain.history.length,generation:chain.generation,head:previous?.entryHash||null,keyId:previous?.keyId||null}
+  const current=chain.current;
+  if(!current||previous.generation!==chain.generation||current.keyId!==previous.keyId||current.publicName!==previous.publicName||canonical(current.publicKey)!==canonical(previous.publicKey))return{ok:false,error:'history-head-current-mismatch',generation:chain.generation};
+  return{ok:true,count:history.length,generation:chain.generation,head:previous.entryHash,keyId:previous.keyId}
 }
 
 const api=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,schema:SCHEMA,chatKeychainSchema:CHAT_KEYCHAIN_SCHEMA,chatHistorySchema:CHAT_HISTORY_SCHEMA,ensure,passportId,snapshot,chatPublicIdentity,signChatValue,verifyChatValue,rotateChatKey,chatHistory,verifyChatHistory,publicNameForKey});
