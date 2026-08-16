@@ -49,6 +49,27 @@ export const onRequestPost: PagesFunction = async context => {
   const body = await context.request.json().catch(() => ({})) as JsonRecord;
   const prompt = lastPrompt(body);
   const responseFormat = clean(body.responseFormat, 40).toLowerCase();
+  const generatedAt = new Date().toISOString();
+  const generation = {
+    schema: "civweave.generation-provenance.v1",
+    kind: "deterministic-generated",
+    aiGenerated: false,
+    provider: "civweave-staging-synthetic",
+    model: "civweave-staging-synthetic",
+    requestId: clean(body.requestId, 180),
+    purpose: clean(body.purpose || "staging-route-check", 180),
+    generatedAt,
+  };
+  const artifactProvenance = {
+    schema: "civweave.content-provenance.v1",
+    origin: "deterministic-generated",
+    aiGenerated: false,
+    createdAt: generatedAt,
+    sourceSystem: "civweave-staging-synthetic",
+    artifactType: "structured-generation-output",
+    generation,
+    humanValidations: [],
+  };
   const outputJson = responseFormat === "json"
     ? {
         ok: true,
@@ -56,6 +77,7 @@ export const onRequestPost: PagesFunction = async context => {
         synthetic: true,
         nodeId: session.nodeId,
         promptReceived: prompt,
+        metadata: { civweaveProvenance: artifactProvenance },
       }
     : null;
   const text = outputJson
@@ -73,6 +95,7 @@ export const onRequestPost: PagesFunction = async context => {
     model: "civweave-staging-synthetic",
     text,
     outputJson,
+    metadata: { generation },
     usage: {
       inputTokens: Math.max(1, Math.ceil(prompt.length / 4)),
       outputTokens: Math.max(1, Math.ceil(text.length / 4)),

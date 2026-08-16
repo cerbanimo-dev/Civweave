@@ -124,6 +124,39 @@ function parseStructured(text) {
   const source = clean(text, 5_000_000).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
   try { return JSON.parse(source); } catch { return null; }
 }
+function generationProvenance(model, computeRoute, input = {}) {
+  const generatedAt = new Date().toISOString();
+  const generation = Object.freeze({
+    schema: 'civweave.generation-provenance.v1',
+    kind: 'ai-generated',
+    aiGenerated: true,
+    provider: computeRoute === 'ai-gateway-unified-billing' ? 'cloudflare-ai-gateway' : 'cloudflare-workers-ai',
+    model: clean(model, 240),
+    requestId: clean(input.requestId, 180),
+    purpose: clean(input.purpose || 'cloud-generation', 180),
+    generatedAt,
+  });
+  return Object.freeze({
+    generation,
+    artifact: Object.freeze({
+      schema: 'civweave.content-provenance.v1',
+      origin: 'ai-generated',
+      aiGenerated: true,
+      createdAt: generatedAt,
+      sourceSystem: 'civweave-cloud-generation',
+      artifactType: 'structured-model-output',
+      generation,
+      humanValidations: [],
+    }),
+  });
+}
+function stampStructuredOutput(outputJson, artifactProvenance) {
+  if (!outputJson || typeof outputJson !== 'object' || Array.isArray(outputJson)) return outputJson;
+  const metadata = outputJson.metadata && typeof outputJson.metadata === 'object' && !Array.isArray(outputJson.metadata) ? outputJson.metadata : {};
+  const existing = metadata.civweaveProvenance && typeof metadata.civweaveProvenance === 'object' && !Array.isArray(metadata.civweaveProvenance) ? metadata.civweaveProvenance : null;
+  const provenance = existing?.origin && existing.origin !== 'unknown' ? existing : artifactProvenance;
+  return { ...outputJson, metadata: { ...metadata, civweaveProvenance: provenance } };
+}
 function resolveNodeId(request, env) {
   const url = new URL(request.url), domain = env.NODE_DOMAIN || 'nodes.commonweave.earth';
   return normalizeNodeId(request.headers.get('x-civweave-node-id') || url.searchParams.get('nodeId') || nodeIdFromHostname(url.hostname, domain));
@@ -184,9 +217,12 @@ async function handleGenerate(request, env, nodeId) {
     const chargedQuota = Math.min(reservation.requestedNeurons, quotaActual), chargedProvider = Math.min(reservation.billingCeilingNeurons, providerActual);
     const settlement = await settle(env, reservation, chargedQuota, chargedProvider);
     const updatedStatus = await capacityPost(env, '/members/status', { nodeId, userId: session.userId });
-    const text = extractText(result), outputJson = schema || input.responseFormat === 'json' ? parseStructured(text) : null;
-    if ((schema || input.responseFormat === 'json') && !outputJson) return json({ ok: false, error: 'Cloudflare AI did not return valid structured output.', model: route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL, computeRoute: route.route, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota }, 502);
-    return json({ ok: true, schema: 'civweave.cloud-generation.v2', nodeId, userId: session.userId, model: route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL, computeRoute: route.route, pool: route.pool, text, outputJson, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota });
+    const text = extractText(result), parsedOutputJson = schema || input.responseFormat === 'json' ? parseStructured(text) : null;
+    if ((schema || input.responseFormat === 'json') && !parsedOutputJson) return json({ ok: false, error: 'Cloudflare AI did not return valid structured output.', model: route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL, computeRoute: route.route, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota }, 502);
+    const model = route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL;
+    const provenance = generationProvenance(model, route.route, input);
+    const outputJson = stampStructuredOutput(parsedOutputJson, provenance.artifact);
+    return json({ ok: true, schema: 'civweave.cloud-generation.v2', nodeId, userId: session.userId, model, computeRoute: route.route, pool: route.pool, text, outputJson, metadata: { generation: provenance.generation }, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota });
   } catch (error) { await settle(env, reservation, 0, 0).catch(() => {}); return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 502); }
 }
 
