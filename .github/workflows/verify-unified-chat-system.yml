@@ -14,6 +14,9 @@ on:
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/minilm-context-router-v344.js'
+      - 'public/app/minilm-response-router-v347.js'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
       - 'public/app/anarchadia-console-v139.html'
@@ -37,6 +40,9 @@ on:
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/minilm-context-router-v344.js'
+      - 'public/app/minilm-response-router-v347.js'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
       - 'public/app/anarchadia-console-v139.html'
@@ -75,6 +81,9 @@ jobs:
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
           node --check public/app/family-ai-loader-v105.js
+          node --check public/app/assistant-runtime-v141.js
+          node --check public/app/minilm-context-router-v344.js
+          node --check public/app/minilm-response-router-v347.js
           node --check public/app/shared-chat-face-icons-v255.js
           node --check public/app/avatar-expression-director-v345.js
           node --check public/app/installed-entry-v146.js
@@ -94,6 +103,10 @@ jobs:
           const party=fs.readFileSync('public/app/shared-intention-party-chat-v1.js','utf8');
           const surface=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
           const compat=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
+          const family=fs.readFileSync('public/app/family-ai-loader-v105.js','utf8');
+          const assistant=fs.readFileSync('public/app/assistant-runtime-v141.js','utf8');
+          const minilmContext=fs.readFileSync('public/app/minilm-context-router-v344.js','utf8');
+          const minilmResponse=fs.readFileSync('public/app/minilm-response-router-v347.js','utf8');
           const faces=fs.readFileSync('public/app/shared-chat-face-icons-v255.js','utf8');
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
           const anarchadia=fs.readFileSync('public/app/anarchadia-console-v139.html','utf8');
@@ -133,6 +146,16 @@ jobs:
           if(installBody.includes('/app/shared-intention-party-chat-v1.js'))throw new Error('Party chat is loading during ordinary guide startup');
           if(!loader.includes("addEventListener('civweave:open-human-thread',onPartyRequest)"))throw new Error('Lazy party activation is not connected to explicit human-party use');
           if(!party.includes('function startTransport()'))throw new Error('Party transport contract disappeared');
+
+          if(!family.includes('async function ensureLocalAI()')||!family.includes('await ensureLocalAI()'))throw new Error('Selected downloaded-local model bootstrap is no longer attached to guide generation');
+          if(!family.includes('/app/minilm-response-router-v347.js'))throw new Error('MiniLM response router is no longer loaded with guide generation');
+          if(!assistant.includes('async function semanticRoute(')||!assistant.includes('CivweaveContextRouterV344'))throw new Error('Assistant no longer asks MiniLM for semantic routing');
+          if(assistant.includes("if(type)return{response:conversational"))throw new Error('Deterministic small-talk shortcut bypasses the selected model');
+          if(!assistant.includes("code:'SELECTED_LOCAL_MODEL_FAILED'"))throw new Error('Selected local model failures can silently fall back again');
+          if(!minilmContext.includes("model:'Xenova/all-MiniLM-L6-v2'"))throw new Error('MiniLM context router model contract is missing');
+          if(!minilmResponse.includes("dispatchEvent(new CustomEvent('civweave:response-route'"))throw new Error('MiniLM response routing event contract is missing');
+          if(!surface.includes("provider:'local-model-error'"))throw new Error('Canonical chat can silently label a selected local model failure as deterministic output');
+          if(!surface.includes("'civweave:avatar-direct-text'")||!surface.includes('data-message-role')||!surface.includes('data-pending'))throw new Error('Canonical chat no longer feeds response lifecycle into MiniLM avatar expression selection');
           NODE
 
       - name: Verify current chat behavior
