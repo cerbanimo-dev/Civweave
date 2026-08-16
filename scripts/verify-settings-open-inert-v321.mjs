@@ -1,64 +1,88 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,manager,policy,panel,serverAI,gemini,livingActions]=await Promise.all([
+const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,livingActions]=await Promise.all([
   'public/app/settings-gateway-v317.js',
   'public/app/document-lifecycle-v221.js',
+  'public/app/local-ai/settings-panel-v267.js',
+  'public/app/settings-local-route-v323.js',
+  'public/app/install-boundary-v146.js',
   'public/app/local-ai/download-manager-v267.js',
   'public/app/local-ai/download-policy-v278.js',
-  'public/app/local-ai/settings-panel-v267.js',
   'public/app/server-ai-settings-v301.js',
   'public/app/gemini-task-tier-router-v213.js',
   'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
 ].map(read));
-for(const source of [gateway,lifecycle,manager,policy,panel,serverAI,gemini])new Function(source);
+for(const source of [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini])new Function(source);
 
 const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
 assert.doesNotMatch(openBlock,/ensureManagement\(/,'Opening Settings must not load downloaded-model management automatically.');
 assert.doesNotMatch(openBlock,/requestInferenceQuiescence|local-inference-cancel-requested/,'Opening Settings must not tear down inference automatically.');
-assert.doesNotMatch(gateway,/data-load-local-model-management/,'The freeze-triggering Manage downloaded local AI gate returned.');
-assert.match(gateway,/data-settings-tabs="1"/,'Canonical Settings must own the three-tab layout.');
+assert.doesNotMatch(gateway,/data-load-local-model-management/,'The old freeze-triggering management button returned.');
+assert.match(gateway,/data-settings-tabs="1"/);
 assert.match(gateway,/data-settings-tab="general"/);
 assert.match(gateway,/data-settings-tab="local-models"/);
 assert.match(gateway,/data-settings-tab="membership"/);
 assert.match(gateway,/const GEMINI_SMALL='gemini-3\.1-flash-lite'/);
 assert.match(gateway,/const GEMINI_COMPLEX='gemini-3\.7-flash'/);
-assert.match(gateway,/geminiRouting:GEMINI_ROUTING/,'Gemini save path must persist the current task-tier preset pair.');
-assert.match(gateway,/if\(name==='local-models'\)/,'Local model management must be activated by the Local models tab.');
+assert.match(gateway,/geminiRouting:GEMINI_ROUTING/);
+assert.match(gateway,/if\(name==='local-models'\)/);
 const localTabBlock=gateway.slice(gateway.indexOf("if(name==='local-models')"),gateway.indexOf("if(name==='membership')"));
 assert.match(localTabBlock,/ensureManagement\(layer\)/);
-assert.doesNotMatch(localTabBlock,/requestInferenceQuiescence|local-inference-cancel-requested/,'Viewing Local models must not terminate inference or initialize a runtime.');
-assert.match(gateway,/afterPaint\(\(\)=>void ensureSettingsUI\(layer\)\)/,'Shared lightweight Settings extensions must be attached consistently after paint.');
+assert.doesNotMatch(localTabBlock,/requestInferenceQuiescence|local-inference-cancel-requested|requestAdapter|new Worker|\.generate\(/);
 
-assert.match(lifecycle,/explicitTabActivation:true/);
-assert.match(lifecycle,/bfCacheAutoManagement:false/);
-assert.match(lifecycle,/snapshot-first-v322/);
-assert.doesNotMatch(lifecycle,/function revive\(\)[\s\S]*scheduleSettingsManagement\(layer\)/,'BFCache restore must not silently activate model management.');
+assert.match(lifecycle,/document-lifecycle-v323-local-model-view-service/);
+assert.match(lifecycle,/document-lifecycle-v323-view-only-actions-lazy/);
+assert.match(lifecycle,/viewOnlyOnTab:true/);
+assert.match(lifecycle,/actionModulesOnDemand:true/);
+const viewList=lifecycle.match(/const LOCAL_AI_VIEW_FILES=\[([\s\S]*?)\n\];/)?.[1]||'';
+for(const required of ['model-registry-v266.js','settings-panel-v267.js'])assert.ok(viewList.includes(required),`Local-model view lost ${required}`);
+for(const forbidden of ['download-manager-v267.js','download-policy-v278.js','metadata-repair-v276.js','primary-route-v283.js','hardware-tier-ui-v278.js','runtime-v266','bootstrap-v266'])assert.ok(!viewList.includes(forbidden),`Opening Local models still loads action/runtime module ${forbidden}`);
+assert.doesNotMatch(lifecycle,/HardwareTierUI|\.decorate\(/,'Local-model view lifecycle must not run hardware decoration.');
+assert.doesNotMatch(lifecycle,/function revive\(\)[\s\S]*scheduleSettingsManagement\(layer\)/,'BFCache restore must not silently activate local-model view work.');
+
+assert.match(panel,/openPath:'saved-state-view-v323'/);
+assert.match(panel,/snapshotOnlyView:true/);
+assert.match(panel,/actionModulesOnDemand:true/);
+assert.match(panel,/managerLoadedOnView:false/);
+assert.match(panel,/cacheReadOnView:false/);
+assert.match(panel,/serviceWorkerReadyOnView:false/);
+assert.match(panel,/hardwareProbeOnView:false/);
+const renderBlock=panel.slice(panel.indexOf('function render(panel)'),panel.indexOf('function show('));
+assert.doesNotMatch(renderBlock,/\.status\(|caches\.|serviceWorker\.ready|requestAdapter|ensureActionModules/,'Rendering Local models must use saved state only.');
+const actionFiles=panel.match(/const ACTION_FILES=\[([\s\S]*?)\n\];/)?.[1]||'';
+for(const required of ['download-manager-v267.js','download-policy-v278.js','metadata-repair-v276.js'])assert.ok(actionFiles.includes(required),`Explicit model actions lost ${required}`);
+assert.match(panel,/await afterPaint\(\);await ensureActionModules\(\)/,'Explicit model action must paint feedback before loading its action stack.');
 
 assert.match(manager,/autoSyncOnLoad:false/);
 assert.match(manager,/explicitSyncOnly:true/);
-assert.doesNotMatch(manager,/queueMicrotask\(\(\)=>sync\(\)/,'Download manager must not reconcile cache/background jobs on module load.');
-assert.doesNotMatch(manager,/addEventListener\('pageshow',[^\n]*sync/,'Download manager must not reconcile jobs merely because a page returned.');
+assert.doesNotMatch(manager,/queueMicrotask\(\(\)=>sync\(\)/);
 assert.match(policy,/autoSyncOnLoad:false/);
-assert.doesNotMatch(policy,/queueMicrotask\(\(\)=>sync\(\)/,'Download policy must not reconcile jobs on module load.');
-assert.match(panel,/backgroundSyncOnView:false/);
-assert.match(panel,/snapshotOnlyView:true/);
-assert.doesNotMatch(panel,/pageshow[^\n]*syncBackgroundJobs/,'Local model UI must render from saved state on BFCache restore.');
+assert.doesNotMatch(policy,/queueMicrotask\(\(\)=>sync\(\)/);
 
-assert.match(serverAI,/if\(form\.dataset\.settingsTabs==='1'\)return form/,'Server/membership enhancer must reuse canonical tabs instead of creating a second layout.');
-assert.match(gemini,/canonicalSettingsPresentation:true/,'Gemini router must defer Settings presentation to the canonical v322 owner.');
-assert.match(gemini,/const canonicalV322=form\.dataset\.settingsTabs==='1'/);
-const geminiPatch=gemini.slice(gemini.indexOf('function patchSettings()'),gemini.indexOf('function middleware()'));
-assert.match(geminiPatch,/if\(canonicalV322\)\{note\?\.remove\(\);return\}/,'Gemini router must remove its legacy note instead of duplicating the v322 preset cards.');
-assert.doesNotMatch(livingActions,/['"]open-ai-settings['"]/,'Living School cabinet-era Settings action must not survive canonical consolidation.');
+assert.match(localRoute,/const ROUTE='downloaded-local'/);
+assert.match(localRoute,/option\.textContent='Downloaded local AI'/);
+assert.match(localRoute,/managerDependency:false/);
+assert.match(localRoute,/runtimeDependency:false/);
+assert.match(localRoute,/cacheDependency:false/);
+assert.match(localRoute,/event\.preventDefault\(\);event\.stopImmediatePropagation\(\)/,'Downloaded local route must preserve the configured fallback instead of overwriting provider settings.');
+assert.match(boundary,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v323\.js'/);
+assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[SETTINGS_GATEWAY,SETTINGS_LOCAL_ROUTE,/,'All five systems must load the same lightweight local-route enhancer after the canonical Settings owner.');
+
+assert.match(serverAI,/if\(form\.dataset\.settingsTabs==='1'\)return form/);
+assert.match(gemini,/canonicalSettingsPresentation:true/);
+assert.doesNotMatch(livingActions,/['"]open-ai-settings['"]/);
 
 console.log(JSON.stringify({
   ok:true,
-  contract:'settings-open-inert-v322',
+  contract:'settings-local-model-v323',
   canonicalTabs:true,
+  localRouteVisibleWithoutManager:true,
+  localModelsViewOnlyOnTab:true,
+  localModelActionModulesOnDemand:true,
+  cacheReadOnView:false,
+  serviceWorkerReadyOnView:false,
+  hardwareProbeOnView:false,
   geminiPresets:['gemini-3.1-flash-lite','gemini-3.7-flash'],
-  geminiPresentationOwner:'CivweaveSettingsV320',
-  localModelsOnTabOnly:true,
-  cacheSyncOnView:false,
   livingSchoolSpecialSettings:false
 },null,2));
