@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNode,hostedEntry,deployedEntryV5,deployedEntryV6,guildkeeperCapacity,accountEdge,legacyAccountEdge,wrangler] = await Promise.all([
+const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNode,hostedEntry,deployedEntryV5,deployedEntryV6,deployedEntryV7,guildkeeperCapacity,accountEdge,legacyAccountEdge,wrangler] = await Promise.all([
   'cloudflare/node-cloud/src/server-ai-entry-v2.mjs',
   'cloudflare/node-cloud/src/user-ai-pool-router-v2.mjs',
   'cloudflare/node-cloud/src/capacity-user-pools-v2.mjs',
@@ -12,6 +12,7 @@ const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNo
   'cloudflare/node-cloud/src/server-ai-entry-v4.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v5.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v6.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v7.mjs',
   'cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs',
   'cloudflare/account-edge/src/index.mjs',
   'cloudflare/account-edge/src/index-legacy-v1.mjs',
@@ -61,8 +62,12 @@ assert.match(hostedEntry,/cloud-node-recovery-v1\.mjs/,'The v4 composition layer
 assert.match(deployedEntryV5,/server-ai-entry-v4\.mjs/,'The v5 entry must preserve the v4 hosting and user-pool composition.');
 assert.match(deployedEntryV5,/cloud-node-recovery-v2\.mjs/,'The v5 entry must add the current recovery wrapper.');
 assert.match(deployedEntryV5,/account-directory-v1\.mjs/,'The v5 entry must retain account-directory composition.');
-assert.match(deployedEntryV6,/server-ai-entry-v5\.mjs/,'The deployed v6 entry must preserve the complete v5 user-pool, hosting, recovery, and account-directory chain.');
-assert.match(deployedEntryV6,/capacity-guildkeeper-v1\.mjs/,'The deployed v6 entry must add Guildkeeper-aware capacity without replacing user-pool behavior.');
+assert.match(deployedEntryV6,/server-ai-entry-v5\.mjs/,'The v6 entry must preserve the complete v5 user-pool, hosting, recovery, and account-directory chain.');
+assert.match(deployedEntryV6,/capacity-guildkeeper-v1\.mjs/,'The v6 entry must add Guildkeeper-aware capacity without replacing user-pool behavior.');
+assert.match(deployedEntryV7,/server-ai-entry-v6\.mjs/,'The deployed v7 entry must preserve the complete v6 chain.');
+assert.match(deployedEntryV7,/CivweaveCloudNode extends BaseCloudNode/,'Human-group relay must extend the canonical deployed Cloud Node.');
+assert.match(deployedEntryV7,/\/api\/chat\/channel-key/);
+assert.match(deployedEntryV7,/\/api\/chat\/envelopes/);
 assert.match(guildkeeperCapacity,/extends HostingCapacityAccount/,'Guildkeeper capacity must extend the canonical hosting capacity chain.');
 
 assert.match(accountEdge,/index-legacy-v1\.mjs/);
@@ -71,9 +76,9 @@ assert.match(accountEdge,/capacity-user-pools-v2\.mjs/);
 assert.match(accountEdge,/legacyAccountEdge\.fetch/);
 assert.match(legacyAccountEdge,/central-money-edge-required/,'Legacy account-edge money authority guard must remain intact.');
 
-assert.match(wrangler,/"main": "src\/server-ai-entry-v6\.mjs"/);
+assert.match(wrangler,/"main": "src\/server-ai-entry-v7\.mjs"/);
 assert.match(wrangler,/"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-flash-lite"/);
 assert.match(wrangler,/"CIVWEAVE_AI_GATEWAY_ID": "default"/);
 assert.match(wrangler,/"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave\.cc"/);
 
-console.log(JSON.stringify({ok:true,revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-guildkeepers-v6',personalIncludedPoolGuard:true,sharedFreePoolSeparated:true,unifiedBillingFallback:true,paidMembershipPreserved:true,hostedCapacity:true,recoveryAwareHosting:true,guildkeeperCapacity:true,deployedEntry:'v6',freeHostMaxMembers:28,hostedMaxMembers:400,accountEdgeDelegated:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-guildkeepers-human-group-v7',personalIncludedPoolGuard:true,sharedFreePoolSeparated:true,unifiedBillingFallback:true,paidMembershipPreserved:true,hostedCapacity:true,recoveryAwareHosting:true,guildkeeperCapacity:true,humanGroupRelay:true,deployedEntry:'v7',freeHostMaxMembers:28,hostedMaxMembers:400,accountEdgeDelegated:true},null,2));

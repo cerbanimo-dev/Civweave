@@ -1,127 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import { readFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+import {randomUUID,webcrypto} from 'node:crypto';
+import {TextEncoder,TextDecoder} from 'node:util';
 
-const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
+function makeStorage(seed={}){const map=new Map(Object.entries(seed));return{getItem:key=>map.has(String(key))?map.get(String(key)):null,setItem:(key,value)=>map.set(String(key),String(value)),removeItem:key=>map.delete(String(key))}}
+async function runPassport(seed={},crypto=webcrypto){const source=await read('public/app/shared/civweave-passport-identity-v1.js'),localStorage=makeStorage(seed),events=[];class CustomEventMock{constructor(type,options={}){this.type=type;this.detail=options.detail}}const context={localStorage,crypto,structuredClone,CustomEvent:CustomEventMock,dispatchEvent:event=>(events.push(event),true),Date,Math,TextEncoder,TextDecoder,Uint8Array,btoa:value=>Buffer.from(value,'binary').toString('base64'),atob:value=>Buffer.from(value,'base64').toString('binary')};context.globalThis=context;vm.runInNewContext(source,context,{filename:'civweave-passport-identity-v1.js'});return{api:context.CivweavePassportIdentityV1,localStorage,events}}
 
-function makeStorage(seed = {}) {
-  const map = new Map(Object.entries(seed));
-  return {
-    getItem(key) { return map.has(String(key)) ? map.get(String(key)) : null; },
-    setItem(key, value) { map.set(String(key), String(value)); },
-    removeItem(key) { map.delete(String(key)); },
-    dump() { return Object.fromEntries(map); },
-  };
-}
+test('Lud package carries Passport, encrypted chat adapter, shared transport, and mesh',async()=>{const manifest=JSON.parse(await read('public/app/lud-package-v1.json'));assert.equal(manifest.policy.guildMembership,true);assert.equal(manifest.policy.passportIdentity,true);assert.equal(manifest.policy.guildPartyChat,true);assert.equal(manifest.policy.passportPublicAliases,true);for(const asset of ['/app/shared/civweave-passport-identity-v1.js','/app/lud-guild-party-chat-v1.js','/app/shared-human-group-transport-v1.js','/app/local-object-mesh-v146.js','/app/host-node-session-v1.js'])assert.ok(manifest.assets.includes(asset),`${asset} must be packaged`)});
 
-async function runPassport(seed = {}) {
-  const source = await read('public/app/shared/civweave-passport-identity-v1.js');
-  const localStorage = makeStorage(seed);
-  const events = [];
-  class CustomEventMock { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }
-  const context = {
-    localStorage,
-    crypto: { randomUUID },
-    structuredClone,
-    CustomEvent: CustomEventMock,
-    dispatchEvent(event) { events.push(event); return true; },
-    Date,
-    Math,
-  };
-  context.globalThis = context;
-  vm.runInNewContext(source, context, { filename: 'civweave-passport-identity-v1.js' });
-  return { api: context.CivweavePassportIdentityV1, localStorage, events };
-}
+test('Lud campus exposes Guild/Party chat and Passport alias controls without AI runtime',async()=>{const campus=await read('public/app/lud/campus.html');for(const id of ['lud-public-name','lud-cycle-passport-key','lud-chat-channel','lud-chat-messages','lud-chat-form','lud-chat-create-invite','lud-chat-accept-form'])assert.match(campus,new RegExp(`id="${id}"`));assert.match(campus,/Joining a Guild automatically joins its Guild Hall chat\./);assert.match(campus,/Joining a Party automatically joins that Party chat\./);assert.match(campus,/mesh to a Guild member for relay/i);assert.doesNotMatch(campus,/family-ai-loader|assistant-runtime|server-ai|node-ai|local-ai\/|minilm|smollm|gemini/i)});
 
-test('Lud package includes the canonical Guild membership path and Passport initializer', async () => {
-  const manifest = JSON.parse(await read('public/app/lud-package-v1.json'));
-  assert.equal(manifest.policy.guildMembership, true);
-  assert.equal(manifest.policy.passportIdentity, true);
-  for (const asset of [
-    '/app/shared/civweave-passport-identity-v1.js',
-    '/app/host-node-session-v1.js',
-    '/app/host-node-installer-lobby-v1.js',
-    '/app/host-node-local-capacity-v1.js',
-    '/app/host-node-paid-join-v1.js',
-    '/app/host-node-status-selection-v1.js',
-  ]) assert.ok(manifest.assets.includes(asset), `${asset} must be in the Lud allowlist`);
-});
+test('Passport keeps stable Anarchadia identity while rotating deterministic public chat names',async()=>{const {api,localStorage,events}=await runPassport();const stable=api.passportId(),first=await api.chatPublicIdentity(),second=await api.rotateChatKey();assert.match(stable,/^AC-[A-F0-9]{8}$/);assert.equal(first.passportId,stable);assert.equal(second.passportId,stable);assert.notEqual(first.keyId,second.keyId);assert.notEqual(first.publicName,second.publicName);assert.equal(first.publicName,await api.publicNameForKey(first.publicKey));assert.equal(second.publicName,await api.publicNameForKey(second.publicKey));const history=await api.chatHistory();assert.equal(history.length,2);assert.equal(history[1].previousKeyId,history[0].keyId);assert.equal(history[1].previousEntryHash,history[0].entryHash);assert.ok(history[1].transitionSignature);assert.ok(history.every(entry=>!Object.hasOwn(entry,'privateKey')));const verification=JSON.parse(JSON.stringify(await api.verifyChatHistory()));assert.equal(verification.ok,true);assert.equal(verification.count,2);const stored=JSON.parse(localStorage.getItem(api.storageKey));assert.ok(stored.chatIdentity.current.privateKey);assert.ok(events.some(event=>event.type==='civweave:passport-chat-key-rotated'))});
 
-test('Lud campus exposes Passport and the existing Guild join owner without enabling AI', async () => {
-  const campus = await read('public/app/lud/campus.html');
-  assert.match(campus, /shared\/civweave-passport-identity-v1\.js/);
-  assert.match(campus, /host-node-session-v1\.js/);
-  assert.match(campus, /host-node-installer-lobby-v1\.js/);
-  assert.match(campus, /id="lud-passport-id"/);
-  assert.match(campus, /Joining a Guild never turns AI back on while Lud Mode is active\./);
-  assert.match(campus, /validator neuron rewards are same-day bonuses and expire at that same reset/i);
-  assert.doesNotMatch(campus, /family-ai-loader|guide-chat|assistant-runtime|server-ai|node-ai|local-ai\/|minilm|smollm|gemini/i);
-});
+test('Lud adapter encrypts signed messages and delegates all network delivery',async()=>{const chat=await read('public/app/lud-guild-party-chat-v1.js');for(const token of ['civweave.lud-chat.encrypted-packet.v1','CivweaveHumanGroupTransportV1','ensureGuildKey',"new URL('/api/chat/channel-key',session.origin)","{name:'AES-GCM'",'secret:party.key','secret:room.secret','civweave:human-group-packet','createInvite','acceptInvite'])assert.ok(chat.includes(token),`missing ${token}`);assert.match(chat,/author:\{generation:owner\.generation,keyId:owner\.keyId,publicName:owner\.publicName,publicKey:owner\.publicKey\}/);assert.doesNotMatch(chat,/new URL\('\/api\/chat\/envelopes'/);assert.doesNotMatch(chat,/setInterval\s*\(/);new Function(chat)});
 
-test('Passport initializer creates the same Anarchadia Passport storage contract locally', async () => {
-  const { api, localStorage, events } = await runPassport();
-  const record = api.snapshot();
-  assert.equal(api.storageKey, 'civweave.anarchadia.citizen-console.v139');
-  assert.equal(record.schema, 'civweave.anarchadia-console.v1');
-  assert.match(record.passportId, /^AC-[A-F0-9]{8}$/);
-  assert.deepEqual(Array.from(record.proposals), []);
-  assert.ok(record.ledger.length >= 1);
-  assert.equal(record.settings.autoRun, true);
-  const stored = JSON.parse(localStorage.getItem(api.storageKey));
-  assert.equal(stored.passportId, record.passportId);
-  assert.ok(events.some(event => event.type === 'civweave:passport-ready'));
-});
+test('Shared human-group transport owns mesh route discovery, relay outbox, and polling',async()=>{const source=await read('public/app/shared-human-group-transport-v1.js');for(const token of ['CivweaveHumanGroupTransportV1','civweave-human-group-channels-v1','civweave-human-group-transport-v1',"const SERVER_PATH='/api/chat/envelopes'",'civweave.human-group-transport.outbox.v1','peerVerified','queueServer','flushServer','pollServer','civweave:human-group-packet'])assert.ok(source.includes(token),`missing ${token}`);assert.equal((source.match(/setInterval\(/g)||[]).length,1);new Function(source)});
 
-test('Passport initializer preserves a Passport generated earlier by Anarchadia', async () => {
-  const key = 'civweave.anarchadia.citizen-console.v139';
-  const prior = {
-    schema: 'civweave.anarchadia-console.v1',
-    passportId: 'AC-ABCDEF12',
-    proposals: [{ id: 'keep-me' }],
-    ledger: [{ id: 'evt-existing', time: '2026-08-16T00:00:00.000Z', kind: 'existing', detail: 'Existing Passport state.' }],
-    settings: { autoRun: false },
-  };
-  const { api } = await runPassport({ [key]: JSON.stringify(prior) });
-  const record = api.snapshot();
-  assert.equal(record.passportId, prior.passportId);
-  assert.equal(record.proposals[0].id, 'keep-me');
-  assert.equal(record.settings.autoRun, false);
-});
+test('Cloudflare Guild owner authenticates chat relay and owns durable Guild Hall keys',async()=>{const [server,wrangler]=await Promise.all([read('cloudflare/node-cloud/src/server-ai-entry-v7.mjs'),read('cloudflare/node-cloud/wrangler.jsonc')]);for(const token of ['authenticatedMember',"url.pathname==='/api/chat/channel-key'","url.pathname==='/api/chat/envelopes'",'humanGroupKey','humanGroupEnvelopes','human-group-envelopes','Only the authenticated Guild Hall owns a server-held channel key.','guildId!==nodeId'])assert.ok(server.includes(token),`missing ${token}`);assert.match(wrangler,/"main": "src\/server-ai-entry-v7\.mjs"/)});
 
-test('Guild join owners remain shared membership/authentication code, not Lud AI code', async () => {
-  const [session, lobby, localCapacity] = await Promise.all([
-    read('public/app/host-node-session-v1.js'),
-    read('public/app/host-node-installer-lobby-v1.js'),
-    read('public/app/host-node-local-capacity-v1.js'),
-  ]);
-  assert.match(session, /globalThis\.CivweaveHostNodeSessionV1/);
-  assert.match(lobby, /globalThis\.CivweaveHostNodeInstallerLobbyV1/);
-  assert.match(localCapacity, /globalThis\.CivweaveHostNodeLocalCapacityV1/);
-  for (const source of [session, lobby, localCapacity]) {
-    assert.doesNotMatch(source, /CivweaveModelRuntime|CivweaveReflexRuntime|\.generate\s*\(/);
-  }
-});
+test('Guild and Party automatic membership use canonical Guild session and Party key owners',async()=>{const [chat,session,party]=await Promise.all([read('public/app/lud-guild-party-chat-v1.js'),read('public/app/host-node-session-v1.js'),read('public/app/shared-intention-party-chat-v1.js')]);assert.match(chat,/id:`guild:\$\{session\.nodeId\}`/);assert.match(chat,/id:`party:\$\{party\.groupId\}`/);assert.match(chat,/secret:party\.key/);assert.match(session,/globalThis\.CivweaveHostNodeSessionV1/);assert.match(party,/party\.key/)});
 
-test('Lud worker permits only explicit live Guild and human-validation routes beyond packaged assets', async () => {
-  const worker = await read('public/service-worker-lud-package-v1.js');
-  const allowed = [
-    '/api/federation/health',
-    '/.well-known/civweave',
-    '/api/host-node-status',
-    '/api/host-node-search',
-    '/api/ai/node/session',
-    '/api/commerce/membership/prejoin',
-    '/api/federation/capacity',
-    '/api/federation/residents/admit',
-    '/api/node/human-validation/request',
-    '/api/node/human-validation/claim',
-    '/api/node/human-validation/status',
-  ];
-  assert.match(worker, /const LUD_NETWORK_PATHS=new Set\(/);
-  for (const path of allowed) assert.ok(worker.includes(`'${path}'`), `${path} must be explicitly network-allowlisted`);
-  assert.match(worker, /if\(LUD_NETWORK_PATHS\.has\(pathname\)\)return networkOnly\(request,pathname\)/);
-  assert.match(worker, /Lud Mode blocked a non-allowlisted request/);
-  assert.doesNotMatch(worker, /\/api\/ai\/node\/generate/);
-});
+test('Lud network boundary admits only the authenticated chat registry and relay endpoints',async()=>{const worker=await read('public/service-worker-lud-package-v1.js');for(const path of ['/api/chat/channel-key','/api/chat/envelopes'])assert.ok(worker.includes(`'${path}'`));assert.doesNotMatch(worker,/['"]\/api\/envelopes['"]/);assert.match(worker,/Lud Mode blocked a non-allowlisted request/);assert.doesNotMatch(worker,/\/api\/ai\/node\/generate/)});

@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const LUD_REVISION='lud-package-v1.2-custom-forms';
+const LUD_REVISION='lud-package-v1.4-human-group-chat';
 const LUD_MANIFEST_URL='/app/lud-package-v1.json';
 const LUD_META_URL='/__civweave/lud-package-v1.json';
 const LUD_ENTRY_ASSET='/app/lud/campus.html';
@@ -27,7 +27,9 @@ const LUD_NETWORK_PATHS=new Set([
   '/api/federation/residents/admit',
   '/api/node/human-validation/request',
   '/api/node/human-validation/claim',
-  '/api/node/human-validation/status'
+  '/api/node/human-validation/status',
+  '/api/chat/channel-key',
+  '/api/chat/envelopes'
 ]);
 let ludDownloadPromise=null;
 const ludNow=()=>new Date().toISOString();
