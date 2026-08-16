@@ -120,13 +120,15 @@ jobs:
           node --check scripts/test-lud-game-ui-v1.mjs
           node --check scripts/verify-lud-guild-party-chat-v1.mjs
           node --check scripts/browser-lud-mode-gauntlet-v1.mjs
-      - name: Verify no-AI, game UI, provenance, route, Guild, Passport, chat, and human-validation contracts
+      - name: Verify Lud Guild Party chat contract
         run: |
-          node --test scripts/test-lud-mode-v1.mjs
-          node --test scripts/test-lud-human-validation-neurons-v1.mjs
           node --test scripts/test-lud-guild-passport-v1.mjs
           node --test scripts/test-lud-game-ui-v1.mjs
           node scripts/verify-lud-guild-party-chat-v1.mjs
+      - name: Verify existing no-AI, provenance, route, and human-validation contracts
+        run: |
+          node --test scripts/test-lud-human-validation-neurons-v1.mjs
+          node --test scripts/test-lud-mode-v1.mjs
       - name: Install browser gauntlet
         run: |
           npm install --no-save --ignore-scripts playwright@1.55.0
