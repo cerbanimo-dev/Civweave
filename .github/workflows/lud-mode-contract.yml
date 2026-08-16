@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/app/content-provenance-v1.js'
       - 'public/app/lud/**'
+      - 'public/app/lud-*.css'
       - 'public/app/lud-*.js'
       - 'public/app/lud-*.json'
       - 'public/app/human-validation-neuron-client-v1.js'
@@ -32,6 +33,7 @@ on:
       - 'scripts/test-lud-mode-v1.mjs'
       - 'scripts/test-lud-human-validation-neurons-v1.mjs'
       - 'scripts/test-lud-guild-passport-v1.mjs'
+      - 'scripts/test-lud-game-ui-v1.mjs'
       - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
       - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
@@ -42,6 +44,7 @@ on:
     paths:
       - 'public/app/content-provenance-v1.js'
       - 'public/app/lud/**'
+      - 'public/app/lud-*.css'
       - 'public/app/lud-*.js'
       - 'public/app/lud-*.json'
       - 'public/app/human-validation-neuron-client-v1.js'
@@ -69,6 +72,7 @@ on:
       - 'scripts/test-lud-mode-v1.mjs'
       - 'scripts/test-lud-human-validation-neurons-v1.mjs'
       - 'scripts/test-lud-guild-passport-v1.mjs'
+      - 'scripts/test-lud-game-ui-v1.mjs'
       - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
       - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
@@ -89,6 +93,7 @@ jobs:
         run: |
           node --check public/app/content-provenance-v1.js
           node --check public/app/lud-mode-v1.js
+          node --check public/app/lud-game-ui-v1.js
           node --check public/app/lud-human-tools-v1.js
           node --check public/app/lud-manual-authoring-v1.js
           node --check public/app/human-validation-neuron-client-v1.js
@@ -109,12 +114,14 @@ jobs:
           node --check cloudflare/node-cloud/src/server-ai-entry-v5.mjs
           node --check scripts/test-lud-human-validation-neurons-v1.mjs
           node --check scripts/test-lud-guild-passport-v1.mjs
+          node --check scripts/test-lud-game-ui-v1.mjs
           node --check scripts/browser-lud-mode-gauntlet-v1.mjs
-      - name: Verify no-AI, no-generated-visual, provenance, route, Guild, Passport, and human-validation contracts
+      - name: Verify no-AI, game UI, provenance, route, Guild, Passport, and human-validation contracts
         run: |
           node --test scripts/test-lud-mode-v1.mjs
           node --test scripts/test-lud-human-validation-neurons-v1.mjs
           node --test scripts/test-lud-guild-passport-v1.mjs
+          node --test scripts/test-lud-game-ui-v1.mjs
       - name: Install browser gauntlet
         run: |
           npm install --no-save --ignore-scripts playwright@1.55.0
