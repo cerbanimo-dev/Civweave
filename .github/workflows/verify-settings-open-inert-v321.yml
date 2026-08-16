@@ -6,6 +6,7 @@ on:
       - 'public/app/settings-gateway-v317.js'
       - 'public/app/document-lifecycle-v221.js'
       - 'public/app/server-ai-settings-v301.js'
+      - 'public/app/gemini-task-tier-router-v213.js'
       - 'public/app/local-ai/download-manager-v267.js'
       - 'public/app/local-ai/download-policy-v278.js'
       - 'public/app/local-ai/settings-panel-v267.js'
