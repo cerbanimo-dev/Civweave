@@ -20,24 +20,30 @@ test('standard installer links to a separate Lud download page and does not own 
   assert.doesNotMatch(installer,/lud-installer-v1\.js/);
 });
 
-test('Lud download page is plain and has no generated visual asset hooks',async()=>{
+test('Lud download page is plain and opens the Cloudflare-canonical extensionless campus route',async()=>{
   const html=await read('public/app/lud/index.html');
   assert.match(html,/<h1>Lud Mode<\/h1>/);
   assert.match(html,/>Download Lud Mode<\/button>/);
-  assert.match(html,/id="open-lud-mode"[^>]*hidden/);
+  assert.match(html,/id="open-lud-mode"[^>]*href="\/app\/lud\/campus"[^>]*hidden/);
+  assert.doesNotMatch(html,/href="\/app\/lud\/campus\.html"/);
   assert.match(html,/\[hidden\]\{display:none!important\}/);
   assert.match(html,/no generated visual assets/i);
   assertPlainSurface(html,'Lud download page');
 });
 
-test('Lud download controller uses its dedicated package worker and bounded command replies',async()=>{
+test('Lud download controller forces a fresh dedicated worker and uses the canonical campus route',async()=>{
   const source=await read('public/app/lud-installer-v1.js');
   assert.match(source,/WORKER_URL='\/service-worker-lud-package-v1\.js\?v=/);
   assert.match(source,/WORKER_SCOPE='\/app\/lud\/'/);
+  assert.match(source,/ENTRY_ROUTE='\/app\/lud\/campus'/);
   assert.match(source,/updateViaCache:'none'/);
+  assert.match(source,/await reg\.update\(\)/);
+  assert.match(source,/if\(reg\.installing\)/);
   assert.match(source,/new MessageChannel\(\)/);
   assert.match(source,/DOWNLOAD_IDLE_TIMEOUT_MS/);
   assert.match(source,/type:'SKIP_WAITING'/);
+  assert.match(source,/location\.assign\(latest\?\.entryRoute\|\|ENTRY_ROUTE\)/);
+  assert.doesNotMatch(source,/campus\.html/);
   assert.doesNotMatch(source,/service-worker-v203\.js/);
 });
 
@@ -48,11 +54,13 @@ test('Lud campus is also plain and image-free',async()=>{
   assertPlainSurface(html,'Lud campus');
 });
 
-test('Lud package is an explicit no-AI no-generated-visual allowlist',async()=>{
+test('Lud package is an explicit no-AI no-generated-visual allowlist with a clean entry route',async()=>{
   const manifest=await json('public/app/lud-package-v1.json');
   assert.equal(manifest.schema,'civweave.lud-package.v1');
   assert.equal(manifest.mode,'lud');
   assert.equal(manifest.label,'Lud Mode');
+  assert.equal(manifest.entry,'/app/lud/campus.html');
+  assert.equal(manifest.entryRoute,'/app/lud/campus');
   assert.equal(manifest.policy.recursiveDiscovery,false);
   assert.equal(manifest.policy.aiGeneration,false);
   assert.equal(manifest.policy.localModels,false);
@@ -62,18 +70,28 @@ test('Lud package is an explicit no-AI no-generated-visual allowlist',async()=>{
   for(const asset of manifest.assets){const lower=String(asset).toLowerCase();for(const fragment of [...forbiddenRuntime,'/images/','/logos/'])assert.equal(lower.includes(fragment),false,`${asset} contains forbidden ${fragment}`)}
 });
 
-test('dedicated Lud package worker is standalone-safe and serves only its offline allowlist',async()=>{
+test('dedicated Lud package worker normalizes redirected HTML and serves only its offline allowlist',async()=>{
   const source=await read('public/service-worker-lud-package-v1.js');
+  assert.match(source,/LUD_ENTRY_ASSET='\/app\/lud\/campus\.html'/);
+  assert.match(source,/LUD_ENTRY_ROUTE='\/app\/lud\/campus'/);
   assert.match(source,/LUD_STANDALONE=typeof OFFLINE_CACHE!=='string'/);
   assert.match(source,/LUD_CACHE_NAME=LUD_STANDALONE\?'civweave-lud-v1':OFFLINE_CACHE/);
+  assert.match(source,/const ludKey=pathname=>new Request\(new URL\(pathname,self\.location\.origin\)\.href/);
+  assert.match(source,/async function normalizeLudHtmlResponse/);
+  assert.match(source,/headers\.delete\('content-length'\)/);
+  assert.match(source,/headers\.delete\('content-encoding'\)/);
+  assert.match(source,/headers\.delete\('location'\)/);
+  assert.match(source,/new Response\(body,\{status:200,statusText:'OK',headers\}\)/);
+  assert.match(source,/entryRoute:value\.entryRoute\|\|LUD_ENTRY_ROUTE/);
   assert.match(source,/event\.ports\?\.\[0\]\?\.postMessage/);
   assert.match(source,/type==='SKIP_WAITING'/);
   assert.match(source,/caches\.open\(LUD_CACHE_NAME\)/);
   assert.match(source,/if\(LUD_STANDALONE\)\{/);
   assert.match(source,/addEventListener\('fetch'/);
   assert.match(source,/policy\.assets\.has\(pathname\)/);
-  assert.match(source,/cache\.match\(policy\.entry\)/);
+  assert.match(source,/cache\.match\(ludKey\(policy\.entry\)/);
   assert.match(source,/Lud Mode blocked a non-allowlisted request/);
+  assert.match(source,/Lud Mode request failed safely/);
   assert.doesNotMatch(source,/clients\.claim\s*\(/);
 });
 
