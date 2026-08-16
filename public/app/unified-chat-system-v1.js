@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-unified-chat-system-v1';
+const VERSION='1.0.1-unified-chat-system-v1-assistant-lifecycle';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -170,7 +170,7 @@ function synchronize(){normalizeSurface();patchLoader();patchAssistant();consume
 function bindLifecycle(){
   if(lifecycleBound)return;
   lifecycleBound=true;
-  for(const name of ['civweave:guide-workspace-ready','civweave:guide-loader-reset','civweave:living-school-workbench-ready','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
+  for(const name of ['civweave:guide-workspace-ready','civweave:guide-loader-reset','civweave:assistant-runtime-ready','civweave:response-router-installed','civweave:living-school-workbench-ready','civweave:guide-chat-opened','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
 }
 function start(){bindLifecycle();synchronize();document.documentElement.dataset.civweaveChatSystem='unified-v1'}
 
