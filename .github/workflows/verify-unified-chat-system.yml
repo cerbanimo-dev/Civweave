@@ -111,6 +111,7 @@ jobs:
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
           const anarchadia=fs.readFileSync('public/app/anarchadia-console-v139.html','utf8');
           const repair=fs.readFileSync('public/service-worker-chat-repair-v245.js','utf8');
+          const serviceWorker=fs.readFileSync('public/service-worker-v203.js','utf8');
 
           for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
             if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
@@ -137,9 +138,11 @@ jobs:
           if(activateBody.includes('ensureExpressionDirector')||activateBody.includes('setInterval('))throw new Error('Opening chat is starting expression/MiniLM work');
           if(faces.includes('miniLmLampTimer=setInterval')||faces.includes('setInterval(refreshMiniLmLamp'))throw new Error('Face runtime reintroduced MiniLM polling');
           if(!compat.includes('Compatibility loader only')||!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('V242 compatibility path is no longer a loader-only shim');
-          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/shared-chat-face-icons-v255.js']){
+          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/shared-chat-face-icons-v255.js','/app/assistant-runtime-v141.js','/app/minilm-response-router-v347.js']){
             if(!repair.includes(`'${path}'`))throw new Error(`PWA cache repair is missing ${path}`);
           }
+          if(!repair.includes("MODEL_ROUTE_REVISION='selected-local-minilm-v357'"))throw new Error('PWA cache repair lost the selected-local/MiniLM delivery revision');
+          if(!serviceWorker.includes('model=selected-local-minilm-v357'))throw new Error('Main service worker no longer activates selected-local/MiniLM cache repair');
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
           if(!loader.includes('partyAutostart:false')||!loader.includes('activatePartyChat'))throw new Error('Party chat is not explicitly lazy');
           const installStart=loader.indexOf('function install(){'),installEnd=loader.indexOf('\n}\n\ninstall();',installStart),installBody=loader.slice(installStart,installEnd);
