@@ -217,7 +217,6 @@ body.cw-installer .quest-install-controls .campus-install-progress{
   border-radius:17px;
   background:rgba(2,7,22,.32);
 }
-body.cw-installer .quest-install-controls .campus-progress-heading span::before{content:"OPTIONAL · "}
 body.cw-installer .quest-install-controls .gateway-actions{margin-top:16px}
 body.cw-installer .quest-install-controls .gateway-actions .primary{
   min-height:54px;
