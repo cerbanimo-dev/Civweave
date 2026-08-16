@@ -1,8 +1,8 @@
 ;(()=>{
 'use strict';
 
-const REVISION='campus-retired-completion-v246';
-const INSTALL_BRIDGE='/app/pwa-install-prompt-v246.js';
+const REVISION='campus-current-completion-v250';
+const INSTALL_BRIDGE='/app/pwa-install-prompt-v250.js';
 const previousOfflineStatus=offlineStatus;
 const previousDownloadOfflinePackage=downloadOfflinePackage;
 
