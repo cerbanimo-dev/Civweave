@@ -1,8 +1,9 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveLudHumanToolsV1)return;
-const VERSION='1.0.0';
+const VERSION='1.0.1';
 const CERBANIMO='/app/cerbanimo-quest-engine-v144.js?v=lud-human-tools-v1';
+const MESH='/app/local-object-mesh-v146.js?v=lud-human-tools-v1';
 const VOTING='/app/proposal-voting-gate-v2.js?v=lud-human-tools-v1';
 const LIVING_KEY='civweave.living-school.cabinet.v151';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
@@ -14,7 +15,8 @@ function assertLud(){if(globalThis.CivweaveLudModeV1?.isEnabled?.()!==true)throw
 function humanMetadata(kind){const p=provenance();return{civweaveProvenance:p?.humanAuthored?.({sourceSystem:'lud-mode',artifactType:kind})||{schema:'civweave.content-provenance.v1',origin:'human-authored',aiGenerated:false,sourceSystem:'lud-mode',artifactType:kind,createdAt:new Date().toISOString(),humanValidations:[]}}}
 function load(src,ready){if(ready?.())return Promise.resolve(ready());return new Promise((resolve,reject)=>{const path=new URL(src,location.href).pathname,existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);if(existing){let ticks=0;const timer=setInterval(()=>{const value=ready?.();if(value){clearInterval(timer);resolve(value)}else if(++ticks>160){clearInterval(timer);reject(new Error(`${path} loaded without becoming ready.`))}},50);return}const script=document.createElement('script');script.src=src;script.async=false;script.onload=()=>{const value=ready?.();value?resolve(value):reject(new Error(`${path} loaded without its canonical API.`))};script.onerror=()=>reject(new Error(`Could not load ${path}.`));document.head.append(script)})}
 async function cerbanimo(){assertLud();return load(CERBANIMO,()=>globalThis.CivweaveCerbanimoQuestV144)}
-async function voting(){assertLud();return load(VOTING,()=>globalThis.CivweaveProposalVotingGateV2)}
+async function localMesh(){assertLud();return load(MESH,()=>globalThis.CivweaveLocalMeshV146)}
+async function voting(){assertLud();await localMesh();return load(VOTING,()=>globalThis.CivweaveProposalVotingGateV2)}
 function livingState(){return parse(localStorage.getItem(LIVING_KEY),{})||{}}
 async function createQuest(input={}){
   const engine=await cerbanimo(),details=lines(input.steps||input.details),quest=engine.createQuestFromInput({title:clean(input.title,180),objective:clean(input.objective||input.description,3000),description:clean(input.description,5000),steps:details,acceptanceCriteria:lines(input.acceptanceCriteria),proofRequirements:lines(input.proofRequirements),sequential:input.sequential!==false,source:'lud-human-authored'}),result=engine.addQuest(quest,{activate:true});
@@ -37,7 +39,7 @@ async function proposeLearningModule(input={}){
   try{dispatchEvent(new CustomEvent('civweave:lud-human-learning-module-proposed',{detail:{proposal:copy(proposal),quorum:copy(quorum),commit:copy(commit)}}))}catch{}return{proposal,quorum,commit}
 }
 async function proposalState(){const gate=await voting();return gate.read?.()||null}
-const api=Object.freeze({version:VERSION,cerbanimo,voting,livingState,createQuest,proposeTask,proposeLearningModule,proposalState});
+const api=Object.freeze({version:VERSION,cerbanimo,localMesh,voting,livingState,createQuest,proposeTask,proposeLearningModule,proposalState});
 globalThis.CivweaveLudHumanToolsV1=api;
 try{dispatchEvent(new CustomEvent('civweave:lud-human-tools-ready',{detail:{version:VERSION}}))}catch{}
 })();
