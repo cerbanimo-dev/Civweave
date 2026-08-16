@@ -10,7 +10,7 @@ The user-facing hierarchy is therefore **Guilds → Quests (shared intentions) �
 
 ## Three-tier interaction contract
 
-1. **Guild level** shows nearby, saved, boosted, and local Guilds in the mobile-first 3D carousel. The centered Guild owns the detail card. Swipe, wheel, arrow keys, and direct card selection rotate the rail. Selecting the centered Guild descends to its Quests.
+1. **Guild level** shows live, nearby, saved, boosted, and selected Guilds in the mobile-first 3D carousel. The centered Guild owns the detail card. Swipe, wheel, arrow keys, and direct card selection rotate the rail. Selecting the centered Guild descends to its Quests.
 2. **Quest level** keeps the parent Guild rail visible in a compressed state while the Guild's shared intentions rotate in their own carousel. The selected Quest shows its outcome, progress, and open needs. Selecting it descends to the Quest Map.
 3. **Quest Map level** keeps the selected Quest available as context and renders exactly three execution lanes from the Quest's existing plan paths:
    - **Living School** — canonical `#aeea57`, Learn & Grow.
@@ -23,21 +23,24 @@ The tier selector follows Civweave's current palette: Civweave mint for Guilds, 
 
 Quest Map steps are not a second task ledger. Each lane reads the Quest's existing `plan.paths` / `tracks` and uses path/task status plus stored `path.progress` to determine completion. Proof-driven progress events may refresh the view, but the tracker does not award completion by itself.
 
-Open needs are read directly when a Quest publishes them. When explicit needs are absent, unfinished path steps may be summarized as needs. The tracker must never invent Guilds, Quests, tasks, progress, or community activity.
+Open needs are read directly when a Quest publishes them. When explicit needs are absent, unfinished path steps may be summarized as needs. The tracker must never invent Guilds, Quests, tasks, progress, community activity, titles, descriptions, or House assignments. Missing records render as explicit empty states rather than demo content.
 
 ## Guild discovery adapters
 
-The tracker reads:
+The tracker uses the same actual Guild identity sources as the Guild Map:
 
-- `civweave.hub-discovery.v1` for existing discovery records.
-- `federation-finder.mesh-nodes.v1` for saved and nearby Civweave mesh records.
-- `civweave.intentions.v127` for Quests belonging to the local Civweave Guild.
+- `/api/hub-map-nodes` is the live directory source and `civweave.hub-map.directory.v1` is its offline cache.
+- `civweave.host-node.selection.v1` identifies this device's selected Guild. Device-local `civweave.intentions.v127` Quests may be attached only to that selected real Guild identity.
+- `civweave.hub-discovery.v1` remains an accepted source for existing saved/discovered Guild records.
+- `federation-finder.mesh-nodes.v1` remains an accepted source for saved and nearby Civweave mesh records.
+
+Records are merged by their real Guild/node ID. Directory fields such as the Guild's published display name, status, public origin, capacity slots, location, and Rally Point remain authoritative when present. The tracker must not inject a synthetic "Your Civweave Guild" record when no Guild is selected or discoverable.
 
 Existing persistence fields remain valid. The interface calls these communities Guilds; legacy hub/node identifiers and fields remain internal compatibility inputs only and are not canonical user-facing terminology.
 
 ## Houses remain orthogonal
 
-Every Guild receives one persisted House when no explicit House is published:
+The available community Houses are:
 
 - House Magenta
 - House Cyan
@@ -45,7 +48,7 @@ Every Guild receives one persisted House when no explicit House is published:
 - House Purple
 - House Pearl
 
-Assignments remain stored in `civweave.hub-houses.v1`. A House is social/visual identity, not the Guild itself, not a permission tier, and not an economic ranking.
+A Guild shows a House only when an explicit House is published or an existing assignment for that real Guild ID is stored in `civweave.hub-houses.v1`. Rendering the tracker must not randomly assign a House. A Guild with no House remains visually neutral until its community establishes one.
 
 A House change remains governed. The **Guild House vote** action creates a `civweave.house-change-proposal.v1` request in `civweave.anarchadia.pending-proposals.v1` and emits `civweave:anarchadia-proposal-requested`. The proposal keeps legacy `hubId`/`hubName` fields and also supplies `guildId`/`guildName` so existing governance consumers remain compatible while the user-facing lore stays consistent.
 
