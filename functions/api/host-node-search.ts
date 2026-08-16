@@ -1,7 +1,7 @@
 import {
   isStagingRequest,
   requestOrigin,
-  STAGING_GUILDS,
+  stagingGuild,
 } from "../_shared/staging-runtime";
 
 const CORE_DIRECTORY = "https://civweave-core.cerbanimo.workers.dev/api/nodes?limit=100";
@@ -65,41 +65,90 @@ function locationFor(node: JsonRecord) {
   return { latitude, longitude };
 }
 
+function safeHttps(value: unknown) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" && !url.username && !url.password ? url.origin : "";
+  } catch {
+    return "";
+  }
+}
+
 function matches(mode: string, slots: { free: number; paid: number }) {
   if (mode === "free") return slots.free > 0;
   if (mode === "paid") return slots.paid > 0;
   return slots.free > 0 || slots.paid > 0;
 }
 
-function stagingSearch(request: Request, latitude: number, longitude: number, mode: string) {
+async function stagingSearch(request: Request, latitude: number, longitude: number, mode: string) {
   const roundedLatitude = Number(latitude.toFixed(3));
   const roundedLongitude = Number(longitude.toFixed(3));
   const origin = requestOrigin(request);
-  const nodes = STAGING_GUILDS
-    .map(guild => ({
+
+  const [directory, fabric] = await Promise.all([
+    getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
+    getJson(new URL("/api/fabric/capacity", FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
+  ]);
+  if (!fabric.ok) return reply({
+    schema: "civweave.nearby-hub-search.v1",
+    ok: false,
+    environment: "staging",
+    error: "live-guild-fabric-unavailable",
+    productionMembershipIsolation: true,
+    nodes: [],
+  }, 502);
+
+  const directoryById = new Map((Array.isArray(directory.payload?.nodes) ? directory.payload.nodes : [])
+    .filter((node: JsonRecord) => /^[a-z0-9-]{1,120}$/.test(String(node?.nodeId || "")))
+    .map((node: JsonRecord) => [String(node.nodeId), node]));
+  const hostNodeIds = [...new Set((Array.isArray(fabric.payload?.hostNodeIds) ? fabric.payload.hostNodeIds : [])
+    .map((value: unknown) => String(value || ""))
+    .filter((value: string) => /^[a-z0-9-]{1,120}$/.test(value)))].slice(0, MAX_CAPACITY_PROBES);
+  const manifests = await Promise.all(hostNodeIds.map(async nodeId => {
+    const response = await getJson(new URL(`/n/${nodeId}/api/ai/node/manifest`, FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} }));
+    return response.ok ? (response.payload?.manifest || response.payload || {}) : {};
+  }));
+
+  const nodes = hostNodeIds.map((nodeId, index) => {
+    const guild = stagingGuild(nodeId);
+    if (!guild) return null;
+    const node: JsonRecord = { ...(directoryById.get(nodeId) || {}), ...(manifests[index] || {}), nodeId };
+    const location = locationFor(node) || { latitude: guild.latitude, longitude: guild.longitude };
+    const slots = { free: guild.freeSlots, paid: guild.paidSlots };
+    if (!matches(mode, slots)) return null;
+    return {
       schema: "civweave.nearby-hub.v1",
-      nodeId: guild.nodeId,
-      displayName: guild.displayName,
+      nodeId,
+      displayName: guild.displayName || String(node.displayName || nodeId).slice(0, 180),
       hostOrigin: origin,
-      runtime: "civweave-staging-pages-fixture",
-      status: "active",
-      distanceKm: Number(distanceKm(roundedLatitude, roundedLongitude, guild.latitude, guild.longitude).toFixed(2)),
-      slots: { free: guild.freeSlots, paid: guild.paidSlots },
-      stagingSynthetic: true,
-    }))
-    .filter(node => matches(mode, node.slots))
-    .sort((left, right) => left.distanceKm - right.distanceKm)
+      liveHostOrigin: safeHttps(node.publicOrigin) || FABRIC_ORIGIN,
+      runtime: String(node.runtime || "cloudflare-host-node").slice(0, 120),
+      status: String(node.status || "active"),
+      distanceKm: Number(distanceKm(roundedLatitude, roundedLongitude, location.latitude, location.longitude).toFixed(2)),
+      slots,
+      liveGuild: true,
+      stagingShadowSeats: true,
+      productionMembershipIsolation: true,
+    };
+  }).filter(Boolean)
+    .sort((left: any, right: any) => left.distanceKm - right.distanceKm)
     .slice(0, MAX_RESULTS);
 
   return reply({
     schema: "civweave.nearby-hub-search.v1",
     ok: true,
     environment: "staging",
-    stagingSynthetic: true,
-    productionIsolation: true,
+    stagingSynthetic: false,
+    stagingShadowSeats: true,
+    productionMembershipIsolation: true,
+    productionDiscoveryReadOnly: true,
     mode,
     nodes,
-    source: "staging-fixture",
+    source: {
+      directory: directory.ok ? "core-node-directory" : "unavailable",
+      fabric: "cloudflare-node-fabric",
+      seats: "staging-shadow-overlay",
+    },
     privacy: { coordinateDecimals: 3, exactLocationStored: false, exactLocationReturned: false },
   });
 }
