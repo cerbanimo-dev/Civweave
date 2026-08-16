@@ -1,8 +1,9 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-minilm-response-router-v347-guide-language-routing';
+const VERSION='1.2.0-minilm-response-router-v347-thread-network-gate';
 const ADAPTER='/app/models/all-minilm-l6-v2/adapter.js';
 const ROUTER='/app/minilm-context-router-v344.js?v=1.0.0';
+const SERVER_ROUTER='/app/server-ai-router-v301.js?v=1.0.116-server-ai-router-v301';
 const MODEL_IDS=Object.freeze({
   short:Object.freeze(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16','smollm2-360m-instruct-q4f16','smollm2-135m-instruct-q8-wasm']),
   medium:Object.freeze(['qwen3-1.7b-q4f16','smollm3-3b-q4f16']),
@@ -49,28 +50,32 @@ const ARTIFACT_PROTOTYPES=Object.freeze([
 ]);
 const clean=(value,max=12000)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-let adapterPromise=null,semanticPromise=null,wrappedRuntime=null,installTimer=0,installedCache={at:0,ids:new Set()},localSwitchQueue=Promise.resolve();
+let adapterPromise=null,semanticPromise=null,serverRouterPromise=null,wrappedRuntime=null,installTimer=0,installedCache={at:0,ids:new Set()},localSwitchQueue=Promise.resolve(),spineRegistered=false;
 function adapter(){if(!adapterPromise)adapterPromise=import(ADAPTER).catch(error=>{adapterPromise=null;throw error});return adapterPromise}
+function loadScript(src,ready){
+  if(ready?.())return Promise.resolve(ready());
+  const path=new URL(src,location.href).pathname,existing=[...(document.scripts||[])].find(node=>{try{return new URL(node.src,location.href).pathname===path}catch{return false}});
+  if(existing)return new Promise(resolve=>{if(ready?.())return resolve(ready());existing.addEventListener?.('load',()=>resolve(ready?.()||null),{once:true});existing.addEventListener?.('error',()=>resolve(null),{once:true});setTimeout(()=>resolve(ready?.()||null),2500)});
+  return new Promise(resolve=>{let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(value)},script=document.createElement('script'),timer=setTimeout(()=>finish(ready?.()||null),500);script.src=src;script.async=false;script.onload=()=>finish(ready?.()||null);script.onerror=()=>finish(null);document.head?.append(script)});
+}
 function semanticRouter(){
   if(globalThis.CivweaveContextRouterV344)return Promise.resolve(globalThis.CivweaveContextRouterV344);
   if(semanticPromise)return semanticPromise;
-  semanticPromise=new Promise(resolve=>{
-    const existing=[...(document.scripts||[])].find(node=>String(node.src||'').includes('/app/minilm-context-router-v344.js'));
-    if(existing){existing.addEventListener('load',()=>resolve(globalThis.CivweaveContextRouterV344||null),{once:true});existing.addEventListener('error',()=>resolve(null),{once:true});return}
-    const script=document.createElement('script');script.src=ROUTER;script.async=true;script.dataset.cwMinilmContext='v344-response-router';script.onload=()=>resolve(globalThis.CivweaveContextRouterV344||null);script.onerror=()=>resolve(null);document.head?.append(script);
-  });
+  semanticPromise=loadScript(ROUTER,()=>globalThis.CivweaveContextRouterV344).catch(()=>null);
   return semanticPromise;
+}
+async function serverRouter(){
+  if(globalThis.CivweaveServerAIRouterV301?.handle)return globalThis.CivweaveServerAIRouterV301;
+  if(!serverRouterPromise)serverRouterPromise=loadScript(SERVER_ROUTER,()=>globalThis.CivweaveServerAIRouterV301).catch(()=>null);
+  return serverRouterPromise;
 }
 function explicitWordRequest(text){
   const t=clean(text,4000).toLowerCase();
   let match=t.match(/\b(\d{1,4})\s*(?:-|–|—|to)\s*(\d{1,4})\s*words?\b/);
   if(match)return{min:Number(match[1]),max:Number(match[2]),explicit:true};
-  match=t.match(/\b(?:under|fewer than|no more than|max(?:imum)?|up to|≤)\s*(\d{1,4})\s*words?\b/);
-  if(match)return{min:0,max:Number(match[1]),explicit:true};
-  match=t.match(/\b(?:at least|minimum|min(?:imum)?|over|more than|≥)\s*(\d{1,4})\s*words?\b/);
-  if(match)return{min:Number(match[1]),max:null,explicit:true};
-  match=t.match(/\b(?:about|around|roughly|approximately)?\s*(\d{1,4})\s*words?\b/);
-  if(match)return{min:Number(match[1]),max:Number(match[1]),explicit:true};
+  match=t.match(/\b(?:under|fewer than|no more than|max(?:imum)?|up to|≤)\s*(\d{1,4})\s*words?\b/);if(match)return{min:0,max:Number(match[1]),explicit:true};
+  match=t.match(/\b(?:at least|minimum|min(?:imum)?|over|more than|≥)\s*(\d{1,4})\s*words?\b/);if(match)return{min:Number(match[1]),max:null,explicit:true};
+  match=t.match(/\b(?:about|around|roughly|approximately)?\s*(\d{1,4})\s*words?\b/);if(match)return{min:Number(match[1]),max:Number(match[1]),explicit:true};
   if(/\b(one sentence|single sentence|briefly|very brief|super brief|short answer|keep it short|concise)\b/.test(t))return{min:0,max:50,explicit:true};
   if(/\b(medium length|medium-length)\b/.test(t))return{min:100,max:200,explicit:true};
   if(/\b(deep dive|comprehensive|exhaustive|long form|long-form|very detailed)\b/.test(t))return{min:900,max:null,explicit:true};
@@ -78,9 +83,7 @@ function explicitWordRequest(text){
 }
 function complexity(text){
   const raw=String(text||''),t=raw.toLowerCase();let score=0;
-  score+=Math.min(3,Math.floor(raw.length/500));
-  score+=Math.min(2,(raw.match(/\?/g)||[]).length);
-  score+=Math.min(2,(raw.match(/\n\s*[-*\d]/g)||[]).length);
+  score+=Math.min(3,Math.floor(raw.length/500));score+=Math.min(2,(raw.match(/\?/g)||[]).length);score+=Math.min(2,(raw.match(/\n\s*[-*\d]/g)||[]).length);
   if(/\b(analy[sz]e|compare|architecture|design|reason|tradeoff|debug|diagnose|investigate|research|plan|strategy|evaluate|synthesize)\b/.test(t))score+=2;
   if(/\b(step[- ]by[- ]step|multiple|all of|every|thorough|detailed)\b/.test(t))score+=1;
   return Math.min(10,score);
@@ -91,33 +94,13 @@ function hardTaskClass(text,request={}){
   const agentic=String(request.executionProfile||'').toLowerCase()==='agentic'||/\b(implement|build and merge|fix and merge|commit and merge|create (?:a )?pr|open (?:a )?pr|ship it|deploy it|monitor|use tools|browse and|investigate and|go ahead and build|execute this|agentic|orchestrate)\b/.test(t);
   return programming?'programming':agentic?'agentic':'ordinary';
 }
-function fallbackLength(text,request={}){
-  const explicit=explicitWordRequest(text);const c=complexity(text);
-  if(explicit){
-    const ceiling=explicit.max,minimum=explicit.min||0;
-    if(ceiling!=null&&ceiling<=50)return'short';
-    if(ceiling!=null&&ceiling<100)return c>=4?'medium':'short';
-    if(ceiling!=null&&ceiling<=200)return'medium';
-    if(ceiling!=null&&ceiling<250)return c>=4?'fast':'medium';
-    if(ceiling!=null&&ceiling<=800)return'fast';
-    if(minimum>=900||(ceiling!=null&&ceiling>=900))return'smart';
-  }
-  const t=clean(text,8000).toLowerCase();
-  if(/\b(deep dive|comprehensive|exhaustive|long form|long-form|very detailed)\b/.test(t))return'smart';
-  if(c>=7)return'fast';
-  if(c>=4)return'medium';
-  if(String(text||'').length<=180)return'short';
-  return'medium';
+function fallbackLength(text){
+  const explicit=explicitWordRequest(text),c=complexity(text);
+  if(explicit){const ceiling=explicit.max,minimum=explicit.min||0;if(ceiling!=null&&ceiling<=50)return'short';if(ceiling!=null&&ceiling<100)return c>=4?'medium':'short';if(ceiling!=null&&ceiling<=200)return'medium';if(ceiling!=null&&ceiling<250)return c>=4?'fast':'medium';if(ceiling!=null&&ceiling<=800)return'fast';if(minimum>=900||(ceiling!=null&&ceiling>=900))return'smart'}
+  const t=clean(text,8000).toLowerCase();if(/\b(deep dive|comprehensive|exhaustive|long form|long-form|very detailed)\b/.test(t))return'smart';if(c>=7)return'fast';if(c>=4)return'medium';if(String(text||'').length<=180)return'short';return'medium';
 }
 async function semanticRank(text,prototypes,cacheKey,timeoutMs=650){
-  try{
-    const context=await semanticRouter();
-    if(context?.status?.().available&&!context.status().ready)await Promise.race([context.warm?.(),sleep(900)]);
-    const api=await adapter(),status=await api.status();if(!status.available)return null;
-    if(!status.ready)await Promise.race([api.prewarm({explicit:true,installIfMissing:false,timeoutMs:45000}),sleep(900)]);
-    const ranked=await Promise.race([api.rank(clean(text,8000),prototypes,{limit:6,cacheKey,timeoutMs:1800}),sleep(timeoutMs).then(()=>null)]);
-    return ranked?.matches?.length?ranked.matches:null;
-  }catch{return null}
+  try{const context=await semanticRouter();if(context?.status?.().available&&!context.status().ready)await Promise.race([context.warm?.(),sleep(900)]);const api=await adapter(),status=await api.status();if(!status.available)return null;if(!status.ready)await Promise.race([api.prewarm({explicit:true,installIfMissing:false,timeoutMs:45000}),sleep(900)]);const ranked=await Promise.race([api.rank(clean(text,8000),prototypes,{limit:6,cacheKey,timeoutMs:1800}),sleep(timeoutMs).then(()=>null)]);return ranked?.matches?.length?ranked.matches:null}catch{return null}
 }
 function requestSystem(request={}){const id=clean(request?.context?.guide?.system||request?.task?.systemId||request?.context?.currentContext?.systemId||'',80).toLowerCase();return['civweave','living-school','cerbanimo','fellowfare','anarchadia'].includes(id)?id:'civweave'}
 function artifactForSystem(system){return system==='living-school'?'curriculum':system==='cerbanimo'?'quest':system==='fellowfare'?'resource':system==='anarchadia'?'governance':'weave'}
@@ -128,153 +111,88 @@ function declaredArtifact(request={}){
   if(request?.capabilityRequirements?.planning===true||request?.task?.requirements?.planning===true)return{id:artifactForSystem(requestSystem(request)),source:'declared-planning',confidence:.98};
   return null;
 }
+function structureArtifact(text,system){
+  const t=clean(text,8000).toLowerCase();
+  if(system==='living-school'&&/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|learning plan|study plan|lesson plan|skill tree|teaching plan)\b/.test(t))return'curriculum';
+  if(system==='cerbanimo'&&/\b(quest|project plan|work plan|implementation plan|roadmap|milestones?|checkpoints?|deliverable)\b/.test(t))return'quest';
+  if(system==='fellowfare'&&/\b(resource manifest|skill manifest|resource plan|procurement|sourcing plan|request|offer|inventory plan|materials? list)\b/.test(t))return'resource';
+  if(system==='anarchadia'&&/\b(proposal|policy|rule change|charter|governance plan|motion|vote plan|agreement)\b/.test(t))return'governance';
+  if(system==='civweave'&&/\b(weave|cross[- ]realm|multi[- ]realm|roadmap|intention plan|quest plan)\b/.test(t))return'weave';
+  return'';
+}
 function ruleArtifact(text,request={}){
-  const t=clean(text,8000).toLowerCase(),system=requestSystem(request),build=/\b(build|create|make|generate|draft|design|develop|structure|prepare|start|regenerate|rebuild|revise|update|plan|need|want|please|let['’]?s)\b/.test(t);
-  if(!build)return null;
-  if(system==='living-school'&&/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|study plan|skill tree|teaching plan)\b/.test(t))return{id:'curriculum',source:'realm-rules',confidence:.97};
-  if(system==='cerbanimo'&&/\b(quest|project plan|work plan|implementation plan|roadmap|milestones?|checkpoints?|deliverable)\b/.test(t))return{id:'quest',source:'realm-rules',confidence:.94};
-  if(system==='fellowfare'&&/\b(resource manifest|skill manifest|resource plan|procurement|sourcing plan|request|offer|inventory plan|materials? list)\b/.test(t))return{id:'resource',source:'realm-rules',confidence:.94};
-  if(system==='anarchadia'&&/\b(proposal|policy|rule change|charter|governance plan|motion|vote plan|agreement)\b/.test(t))return{id:'governance',source:'realm-rules',confidence:.94};
-  if(system==='civweave'&&/\b(weave|cross[- ]realm|multi[- ]realm|roadmap|intention plan|quest plan)\b/.test(t))return{id:'weave',source:'realm-rules',confidence:.92};
+  const t=clean(text,8000).toLowerCase(),system=requestSystem(request),build=/\b(build|create|make|generate|draft|design|develop|structure|prepare|start|regenerate|rebuild|revise|update|plan|need|want|please|let['’]?s|help(?: me| us)?(?: make| create| build| design)?)\b/.test(t);
+  if(!build)return null;const id=structureArtifact(t,system);return id?{id,source:'realm-rules',confidence:id==='curriculum'?.97:.94}:null;
+}
+function continuationCue(text){const t=clean(text,1000).toLowerCase();return /^(?:[.…·•-]{1,8}|continue|continue please|keep going|go on|carry on|resume|resume please|finish|finish it|finish this|keep building|keep writing|pick up where (?:you|we) left off|continue where (?:you|we) left off|and continue)[.!?]*$/.test(t)}
+function historyRows(request={}){
+  const rows=[];for(const row of request?.context?.recentConversation||[])rows.push({role:row?.role,text:clean(row?.text||row?.content,5000)});for(const row of request?.messages||[])rows.push({role:row?.role,text:clean(row?.content||row?.text,5000)});return rows.filter(row=>row.text).slice(-24);
+}
+function continuationArtifact(text,request={}){
+  if(!continuationCue(text))return null;const system=requestSystem(request),rows=historyRows(request);let skippedCurrent=false;
+  for(let i=rows.length-1;i>=0;i--){const row=rows[i];if(row.role==='user'&&!skippedCurrent&&clean(row.text,1000)===clean(text,1000)){skippedCurrent=true;continue}if(row.role!=='user')continue;const id=structureArtifact(row.text,system);if(id)return{id,source:'thread-continuation',confidence:.99}}
   return null;
 }
 async function artifactIntent(text,request={}){
-  const declared=declaredArtifact(request);if(declared)return declared;
-  const ruled=ruleArtifact(text,request);if(ruled)return ruled;
-  const system=requestSystem(request),rows=await semanticRank(`realm ${system}. user request ${text}`,ARTIFACT_PROTOTYPES,'civweave-artifact-intent-v348',700);
-  if(!rows?.[0])return{id:'dialogue',source:'rules',confidence:.5};
-  const top=rows[0],second=rows[1],score=Number(top.score||0),margin=score-Number(second?.score||0);
-  if(top.id!=='dialogue'&&score>=.29&&margin>=.025)return{id:top.id,source:'minilm-artifact',confidence:Math.max(.62,Math.min(.96,.64+margin*2.6)),semantic:{score,margin}};
-  return{id:'dialogue',source:'minilm-artifact',confidence:.62,semantic:{top:top.id,score,margin}};
+  const declared=declaredArtifact(request);if(declared)return declared;const continuation=continuationArtifact(text,request);if(continuation)return continuation;const ruled=ruleArtifact(text,request);if(ruled)return ruled;
+  const system=requestSystem(request),rows=await semanticRank(`realm ${system}. user request ${text}`,ARTIFACT_PROTOTYPES,'civweave-artifact-intent-v348',700);if(!rows?.[0])return{id:'dialogue',source:'rules',confidence:.5};
+  const top=rows[0],second=rows[1],score=Number(top.score||0),margin=score-Number(second?.score||0);if(top.id!=='dialogue'&&score>=.29&&margin>=.025)return{id:top.id,source:'minilm-artifact',confidence:Math.max(.62,Math.min(.96,.64+margin*2.6)),semantic:{score,margin}};return{id:'dialogue',source:'minilm-artifact',confidence:.62,semantic:{top:top.id,score,margin}};
 }
 function tierFor(id){return TIERS[id]||TIERS.medium}
 async function classify(text,request={}){
-  const taskHard=hardTaskClass(text,request);
-  if(taskHard!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass:taskHard,artifactClass:null,networkRequired:false,complexity:complexity(text),confidence:1,source:'hard-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
-  const fallback=fallbackLength(text,request),explicit=explicitWordRequest(text),c=complexity(text);
-  const [lengthRows,taskRows,artifact]=await Promise.all([
-    explicit?Promise.resolve(null):semanticRank(text,LENGTH_PROTOTYPES,'civweave-response-length-v347'),
-    semanticRank(text,TASK_PROTOTYPES,'civweave-response-task-v347'),
-    artifactIntent(text,request)
-  ]);
-  let taskClass='ordinary';
-  if(taskRows?.[0]&&Number(taskRows[0].score||0)>=.28){const top=taskRows[0],second=taskRows[1],margin=Number(top.score||0)-Number(second?.score||0);if(margin>=.025&&['programming','agentic'].includes(top.id))taskClass=top.id}
+  const taskHard=hardTaskClass(text,request);if(taskHard!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass:taskHard,artifactClass:null,networkRequired:false,complexity:complexity(text),confidence:1,source:'hard-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
+  const fallback=fallbackLength(text),explicit=explicitWordRequest(text),c=complexity(text),[lengthRows,taskRows,artifact]=await Promise.all([explicit?Promise.resolve(null):semanticRank(text,LENGTH_PROTOTYPES,'civweave-response-length-v347'),semanticRank(text,TASK_PROTOTYPES,'civweave-response-task-v347'),artifactIntent(text,request)]);
+  let taskClass='ordinary';if(taskRows?.[0]&&Number(taskRows[0].score||0)>=.28){const top=taskRows[0],second=taskRows[1],margin=Number(top.score||0)-Number(second?.score||0);if(margin>=.025&&['programming','agentic'].includes(top.id))taskClass=top.id}
   if(taskClass!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass,artifactClass:null,networkRequired:false,complexity:c,confidence:.82,source:'minilm-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
-  if(artifact?.id&&artifact.id!=='dialogue'){
-    const lengthClass=c>=7?'smart':'fast';
-    return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass,taskClass:'structured-artifact',artifactClass:artifact.id,networkRequired:true,complexity:c,confidence:artifact.confidence,source:artifact.source,semantic:artifact.semantic||null,tier:tierFor(lengthClass),reviewRequired:false,reviewTier:null});
-  }
-  let lengthClass=fallback,confidence=explicit?1:.56,source=explicit?'explicit-user-length':'rules';
-  if(lengthRows?.[0]){
-    const top=lengthRows[0],second=lengthRows[1],margin=Number(top.score||0)-Number(second?.score||0);
-    if(Number(top.score||0)>=.24&&margin>=.018){lengthClass=top.id;confidence=Math.max(.58,Math.min(.96,.62+margin*2.8));source='minilm'}
-  }
+  if(artifact?.id&&artifact.id!=='dialogue'){const lengthClass=c>=7?'smart':'fast';return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass,taskClass:'structured-artifact',artifactClass:artifact.id,networkRequired:true,complexity:c,confidence:artifact.confidence,source:artifact.source,semantic:artifact.semantic||null,tier:tierFor(lengthClass),reviewRequired:false,reviewTier:null})}
+  let lengthClass=fallback,confidence=explicit?1:.56,source=explicit?'explicit-user-length':'rules';if(lengthRows?.[0]){const top=lengthRows[0],second=lengthRows[1],margin=Number(top.score||0)-Number(second?.score||0);if(Number(top.score||0)>=.24&&margin>=.018){lengthClass=top.id;confidence=Math.max(.58,Math.min(.96,.62+margin*2.8));source='minilm'}}
   return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass,taskClass:'ordinary',artifactClass:null,networkRequired:false,complexity:c,confidence,source,tier:tierFor(lengthClass),reviewRequired:false,reviewTier:null});
 }
-function userText(request={}){
-  const messages=Array.isArray(request.messages)?request.messages:[];
-  for(let i=messages.length-1;i>=0;i--){if(messages[i]?.role==='user')return clean(messages[i].content,12000)}
-  return clean(request.prompt||request.input||'',12000);
-}
+function userText(request={}){const messages=Array.isArray(request.messages)?request.messages:[];for(let i=messages.length-1;i>=0;i--){if(messages[i]?.role==='user')return clean(messages[i].content,12000)}return clean(request.prompt||request.input||'',12000)}
 function provider(request={}){return clean(request?.config?.provider||request?.config?.route||request.provider||'',80).toLowerCase()}
 function modelId(request={}){return clean(request?.config?.model||request?.config?.modelId||request.model||'',240)}
 function isGuideRequest(request={}){return /^civweave-guide-response(?:-v141)?/.test(clean(request.purpose,200))}
-function tinyGuidePrompt(request={}){
-  const system=requestSystem(request),role=TINY_GUIDE[system]||TINY_GUIDE.civweave;
-  return `${role} ${LANGUAGE_PACK.tiny} Speak directly and briefly. Do not invent saved state, prices, votes, tool use, or execution. Consequential actions require explicit Hero approval. Return valid JSON with keys answer, choice, assumptions, requiresConsent, confidence, questDraft.`;
-}
+function tinyGuidePrompt(request={}){const system=requestSystem(request),role=TINY_GUIDE[system]||TINY_GUIDE.civweave;return `${role} ${LANGUAGE_PACK.tiny} Speak directly and briefly. Continue the current thread when the Hero gives a continuation cue. Do not invent saved state, prices, votes, tool use, or execution. Consequential actions require explicit Hero approval. Return valid JSON with keys answer, choice, assumptions, requiresConsent, confidence, questDraft.`}
 function applyGuideLanguage(request={}){
-  if(!isGuideRequest(request)||request.__civweaveGuideLanguageApplied)return request;
-  const messages=Array.isArray(request.messages)?request.messages.map(row=>({...row})):[],tiny=provider(request)==='downloaded-local'&&TINY_LOCAL_SET.has(modelId(request));
-  if(tiny){
-    const recent=messages.filter(row=>row?.role!=='system').slice(-3);
-    return{...request,messages:[{role:'system',content:tinyGuidePrompt(request)},...recent],__civweaveGuideLanguageApplied:'tiny',guidePromptProfile:'tiny-condensed'};
-  }
-  const marker='Civweave language pack:';let index=messages.findIndex(row=>row?.role==='system');
-  if(index<0){messages.unshift({role:'system',content:LANGUAGE_PACK.full});index=0}
-  else if(!String(messages[index].content||'').includes(marker))messages[index]={...messages[index],content:`${LANGUAGE_PACK.full}\n\n${messages[index].content||''}`};
-  return{...request,messages,__civweaveGuideLanguageApplied:'full',guidePromptProfile:'full'};
+  if(!isGuideRequest(request)||request.__civweaveGuideLanguageApplied)return request;const messages=Array.isArray(request.messages)?request.messages.map(row=>({...row})):[],tiny=provider(request)==='downloaded-local'&&TINY_LOCAL_SET.has(modelId(request));
+  if(tiny){const recent=messages.filter(row=>row?.role!=='system').slice(-3);return{...request,messages:[{role:'system',content:tinyGuidePrompt(request)},...recent],__civweaveGuideLanguageApplied:'tiny',guidePromptProfile:'tiny-condensed'}}
+  const marker='Civweave language pack:';let index=messages.findIndex(row=>row?.role==='system');if(index<0){messages.unshift({role:'system',content:LANGUAGE_PACK.full});index=0}else if(!String(messages[index].content||'').includes(marker))messages[index]={...messages[index],content:`${LANGUAGE_PACK.full}\n\n${messages[index].content||''}`};return{...request,messages,__civweaveGuideLanguageApplied:'full',guidePromptProfile:'full'};
 }
-function forceNetworkForArtifact(request,route){
-  if(!route?.networkRequired)return request;
-  const config={...(request.config||{}),provider:'server-auto',route:'server-auto',model:'civweave-server-auto',preferredLocalModelIds:[]};
-  return{...request,config,__civweaveNetworkRequired:true,networkRoute:{schema:'civweave.guide-network-route.v1',reason:'structured-artifact',artifactClass:route.artifactClass,qualifier:route.source}};
-}
-async function installedIds(){
-  if(Date.now()-installedCache.at<30000)return installedCache.ids;
-  const manager=globalThis.CivweaveLocalModelDownloadV266;if(!manager?.catalogueStatus)return installedCache.ids;
-  try{const rows=await manager.catalogueStatus(),ids=new Set(rows.filter(row=>row?.status?.available).map(row=>row.spec?.id).filter(Boolean));installedCache={at:Date.now(),ids};return ids}catch{return installedCache.ids}
-}
+function forceNetworkForArtifact(request,route){if(!route?.networkRequired)return request;const config={...(request.config||{}),provider:'server-auto',route:'server-auto',model:'civweave-server-auto',preferredLocalModelIds:[]};return{...request,config,__civweaveNetworkRequired:true,networkRoute:{schema:'civweave.guide-network-route.v1',reason:'structured-artifact',artifactClass:route.artifactClass,qualifier:route.source}}}
+async function installedIds(){if(Date.now()-installedCache.at<30000)return installedCache.ids;const manager=globalThis.CivweaveLocalModelDownloadV266;if(!manager?.catalogueStatus)return installedCache.ids;try{const rows=await manager.catalogueStatus(),ids=new Set(rows.filter(row=>row?.status?.available).map(row=>row.spec?.id).filter(Boolean));installedCache={at:Date.now(),ids};return ids}catch{return installedCache.ids}}
 async function chooseInstalled(preferred=[]){const ids=await installedIds();return preferred.find(id=>ids.has(id))||null}
 async function waitActive(id,timeoutMs=12000){const start=Date.now();while(Date.now()-start<timeoutMs){if(globalThis.CivweaveLocalModelRuntimeV266?.activeSpec?.()?.id===id)return true;await sleep(80)}return false}
-async function withLocalTier(route,request,run){
-  if(provider(request)!=='downloaded-local')return run(request);
-  const manager=globalThis.CivweaveLocalModelDownloadV266;if(!manager?.selection||!manager?.select)return run(request);
-  const chosen=await chooseInstalled(route.tier.preferredModelIds);if(!chosen)return run(request);
-  const previous=manager.selection();if(previous?.id===chosen)return run(request);
-  const task=async()=>{
-    manager.select(chosen);await waitActive(chosen).catch(()=>false);
-    try{return await run(request)}finally{if(previous?.active&&previous.id)manager.select(previous.id);else manager.select(null)}
-  };
-  const queued=localSwitchQueue.then(task,task);localSwitchQueue=queued.catch(()=>{});return queued;
-}
-function reviewConfig(runtime){
-  try{
-    const agentic=runtime?.readSharedConfig?.('agentic')||null;
-    const interactive=runtime?.readSharedConfig?.('interactive')||null;
-    const candidate=agentic||interactive;if(!candidate)return null;
-    const p=clean(candidate.provider||candidate.route,80).toLowerCase();
-    if(!p||['downloaded-local','bundled','deterministic','browser','manual'].includes(p))return null;
-    return candidate;
-  }catch{return null}
-}
-function reviewMessages(request,primary){
-  const original=Array.isArray(request.messages)?request.messages.slice(-20):[];
-  const primaryText=clean(primary?.outputText||primary?.outputJson&&JSON.stringify(primary.outputJson)||'',48000);
-  return [
-    {role:'system',content:'You are the high-tier reviewer for Civweave. Review the lower-tier model result against the original request. Correct factual, reasoning, coding, safety, completeness, or instruction-following errors. Return the improved final answer only. Do not discuss the review process unless the Hero asked for it.'},
-    ...original,
-    {role:'assistant',content:primaryText},
-    {role:'user',content:'Review the candidate answer above and return the corrected final answer.'}
-  ];
-}
+async function withLocalTier(route,request,run){if(provider(request)!=='downloaded-local')return run(request);const manager=globalThis.CivweaveLocalModelDownloadV266;if(!manager?.selection||!manager?.select)return run(request);const chosen=await chooseInstalled(route.tier.preferredModelIds);if(!chosen)return run(request);const previous=manager.selection();if(previous?.id===chosen)return run(request);const task=async()=>{manager.select(chosen);await waitActive(chosen).catch(()=>false);try{return await run(request)}finally{if(previous?.active&&previous.id)manager.select(previous.id);else manager.select(null)}};const queued=localSwitchQueue.then(task,task);localSwitchQueue=queued.catch(()=>{});return queued}
+function reviewConfig(runtime){try{const agentic=runtime?.readSharedConfig?.('agentic')||null,interactive=runtime?.readSharedConfig?.('interactive')||null,candidate=agentic||interactive;if(!candidate)return null;const p=clean(candidate.provider||candidate.route,80).toLowerCase();if(!p||['downloaded-local','bundled','deterministic','browser','manual'].includes(p))return null;return candidate}catch{return null}}
+function reviewMessages(request,primary){const original=Array.isArray(request.messages)?request.messages.slice(-20):[],primaryText=clean(primary?.outputText||primary?.outputJson&&JSON.stringify(primary.outputJson)||'',48000);return[{role:'system',content:'You are the high-tier reviewer for Civweave. Review the lower-tier model result against the original request. Correct factual, reasoning, coding, safety, completeness, or instruction-following errors. Return the improved final answer only. Do not discuss the review process unless the Hero asked for it.'},...original,{role:'assistant',content:primaryText},{role:'user',content:'Review the candidate answer above and return the corrected final answer.'}]}
 async function reviewedResult(previous,request,primary,route,runtime){
-  if(!route.reviewRequired||request.__civweaveSkipResponseRouter)return primary;
+  if(!route?.reviewRequired||request.__civweaveSkipResponseRouter)return primary;
   const config=reviewConfig(runtime);
   if(!config){dispatchEvent(new CustomEvent('civweave:high-tier-review-needed',{detail:{version:VERSION,route,reason:'No eligible high-tier agentic provider is configured.'}}));return{...primary,responseRouting:route,review:{required:true,completed:false,reason:'high-tier-provider-unavailable'}}}
   try{
     const reviewRequest={...request,__civweaveSkipResponseRouter:true,purpose:'civweave-high-tier-review',executionProfile:'agentic',config:{...config,maxTokens:Math.max(Number(config.maxTokens||0),route.tier.maxTokens)},messages:reviewMessages(request,primary)};
     const reviewed=await previous(reviewRequest);
     if(!['success','fallback'].includes(reviewed?.status))throw new Error(reviewed?.error?.message||'High-tier reviewer did not complete.');
-    return {...reviewed,responseRouting:route,review:{required:true,completed:true,primary:{provider:primary?.actual?.provider||primary?.requested?.provider||'',model:primary?.actual?.model||primary?.requested?.model||'',outputText:primary?.outputText||''},reviewer:{provider:reviewed?.actual?.provider||config.provider||config.route||'',model:reviewed?.actual?.model||config.model||''}}};
+    return{...reviewed,responseRouting:route,review:{required:true,completed:true,primary:{provider:primary?.actual?.provider||primary?.requested?.provider||'',model:primary?.actual?.model||primary?.requested?.model||'',outputText:primary?.outputText||''},reviewer:{provider:reviewed?.actual?.provider||config.provider||config.route||'',model:reviewed?.actual?.model||config.model||''}}};
   }catch(error){dispatchEvent(new CustomEvent('civweave:high-tier-review-failed',{detail:{version:VERSION,message:String(error?.message||error),route}}));return{...primary,responseRouting:route,review:{required:true,completed:false,reason:String(error?.message||error)}}}
 }
 async function enhance(request={}){
-  if(request.__civweaveSkipResponseRouter)return{request,route:null};
-  const text=userText(request),route=await classify(text,request),baseConfig={...(request.config||{})};
-  if(!Number(baseConfig.maxTokens)||Number(baseConfig.maxTokens)>route.tier.maxTokens)baseConfig.maxTokens=route.tier.maxTokens;
-  baseConfig.responseLengthClass=route.lengthClass;baseConfig.responseTargetWords=route.tier.targetWords;baseConfig.preferredLocalModelIds=[...route.tier.preferredModelIds];
-  let next={...request,config:baseConfig,responseRouting:route,__civweaveResponseRoute:route};
-  next=forceNetworkForArtifact(next,route);
-  next=applyGuideLanguage(next);
-  dispatchEvent(new CustomEvent('civweave:response-route',{detail:{...route,provider:provider(next),promptProfile:next.guidePromptProfile||null}}));
-  if(route.networkRequired)dispatchEvent(new CustomEvent('civweave:structured-artifact-network-route',{detail:{version:VERSION,artifactClass:route.artifactClass,system:requestSystem(request),source:route.source,provider:provider(next)}}));
-  return{request:next,route};
+  if(request.__civweaveSkipResponseRouter)return{request,route:null};if(request.__civweaveResponseRoute)return{request,route:request.__civweaveResponseRoute};const text=userText(request),route=await classify(text,request),baseConfig={...(request.config||{})};if(!Number(baseConfig.maxTokens)||Number(baseConfig.maxTokens)>route.tier.maxTokens)baseConfig.maxTokens=route.tier.maxTokens;baseConfig.responseLengthClass=route.lengthClass;baseConfig.responseTargetWords=route.tier.targetWords;baseConfig.preferredLocalModelIds=[...route.tier.preferredModelIds];let next={...request,config:baseConfig,responseRouting:route,__civweaveResponseRoute:route};next=forceNetworkForArtifact(next,route);next=applyGuideLanguage(next);dispatchEvent(new CustomEvent('civweave:response-route',{detail:{...route,provider:provider(next),promptProfile:next.guidePromptProfile||null}}));if(route.networkRequired)dispatchEvent(new CustomEvent('civweave:structured-artifact-network-route',{detail:{version:VERSION,artifactClass:route.artifactClass,system:requestSystem(request),source:route.source,provider:provider(next)}}));return{request:next,route};
+}
+async function directNetworkHandle(request={}){
+  if(!request.__civweaveNetworkRequired)return null;const server=await serverRouter();if(!server?.handle){const error=new Error('Structured artifact generation requires a server-side model, but the server AI router is unavailable. Local generation was intentionally skipped.');error.code='STRUCTURED_ARTIFACT_NETWORK_UNAVAILABLE';throw error}
+  const next={...request,config:{...(request.config||{}),provider:'server-auto',route:'server-auto',model:'civweave-server-auto',preferredLocalModelIds:[]}};const handled=await server.handle(next);if(handled?.handled)return handled;const error=new Error('Structured artifact generation could not obtain a server-side model. Local generation was intentionally skipped.');error.code='STRUCTURED_ARTIFACT_NETWORK_EXHAUSTED';throw error;
+}
+function registerSpineInterceptor(){
+  if(spineRegistered)return true;const spine=globalThis.CivweaveFastInteractiveV192;if(!spine?.register)return false;
+  spine.register('minilm-response-router-v347',{before:async request=>{const out=await enhance(request||{});return{request:out.request,state:{route:out.route}}},handle:directNetworkHandle,after:(result,request,ctx)=>{const route=request?.__civweaveResponseRoute||ctx?.states?.['minilm-response-router-v347']?.route;if(!route||!result||typeof result!=='object')return result;return{...result,responseRouting:result.responseRouting||route}}},120);spineRegistered=true;dispatchEvent(new CustomEvent('civweave:response-router-spine-registered',{detail:{version:VERSION,priority:120,networkGate:true,threadContinuation:true}}));return true;
 }
 function installRuntimeInterceptor(){
-  const runtime=globalThis.CivweaveModelRuntime;if(!runtime?.generate||runtime.__minilmResponseRouterV347)return false;if(wrappedRuntime===runtime)return true;
-  const previous=runtime.generate.bind(runtime);
-  const generate=async request=>{
-    if(request?.__civweaveSkipResponseRouter)return previous(request);
-    const {request:next,route}=await enhance(request||{});
-    const primary=await withLocalTier(route,next,previous);
-    return reviewedResult(previous,next,primary,route,runtime);
-  };
-  globalThis.CivweaveModelRuntime={...runtime,generate,__minilmResponseRouterV347:true};wrappedRuntime=globalThis.CivweaveModelRuntime;dispatchEvent(new CustomEvent('civweave:response-router-installed',{detail:{version:VERSION,guideLanguage:true,artifactNetworkRouting:true,tinyPrompt:true}}));return true;
+  registerSpineInterceptor();const runtime=globalThis.CivweaveModelRuntime;if(!runtime?.generate||runtime.__minilmResponseRouterV347)return Boolean(runtime?.generate);if(wrappedRuntime===runtime)return true;const previous=runtime.generate.bind(runtime),generate=async request=>{if(request?.__civweaveSkipResponseRouter)return previous(request);const {request:next,route}=await enhance(request||{});const primary=await withLocalTier(route,next,previous);return reviewedResult(previous,next,primary,route,runtime)};globalThis.CivweaveModelRuntime={...runtime,generate,__minilmResponseRouterV347:true};wrappedRuntime=globalThis.CivweaveModelRuntime;dispatchEvent(new CustomEvent('civweave:response-router-installed',{detail:{version:VERSION,guideLanguage:true,artifactNetworkRouting:true,tinyPrompt:true,threadContinuation:true,spineGate:spineRegistered}}));return true;
 }
-const api=Object.freeze({version:VERSION,tiers:TIERS,models:MODEL_IDS,tinyModels:TINY_LOCAL_MODELS,languagePack:LANGUAGE_PACK,classify,artifactIntent,declaredArtifact,ruleArtifact,fallbackLength,hardTaskClass,explicitWordRequest,complexity,requestSystem,applyGuideLanguage,forceNetworkForArtifact,installRuntimeInterceptor,invisibleInfrastructure:true,settingsAutostart:false});
+const api=Object.freeze({version:VERSION,tiers:TIERS,models:MODEL_IDS,tinyModels:TINY_LOCAL_MODELS,languagePack:LANGUAGE_PACK,classify,artifactIntent,declaredArtifact,ruleArtifact,continuationArtifact,continuationCue,fallbackLength,hardTaskClass,explicitWordRequest,complexity,requestSystem,applyGuideLanguage,forceNetworkForArtifact,directNetworkHandle,registerSpineInterceptor,installRuntimeInterceptor,invisibleInfrastructure:true,settingsAutostart:false});
 globalThis.CivweaveResponseRouterV347=api;
-installRuntimeInterceptor();let attempts=0;installTimer=setInterval(()=>{attempts+=1;if(!globalThis.CivweaveModelRuntime?.__minilmResponseRouterV347)installRuntimeInterceptor();if(attempts>160)clearInterval(installTimer)},250);
-addEventListener('civweave:model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-downloaded',()=>{installedCache.at=0});addEventListener('civweave:local-model-removed',()=>{installedCache.at=0});addEventListener('pagehide',()=>clearInterval(installTimer),{once:true});
-dispatchEvent(new CustomEvent('civweave:minilm-response-router-ready',{detail:{version:VERSION,tiers:Object.keys(TIERS),reviewGate:'programming-or-agentic',guideLanguage:true,artifactNetworkRouting:true,tinyPrompt:true}}));
+installRuntimeInterceptor();let attempts=0;installTimer=setInterval(()=>{attempts+=1;registerSpineInterceptor();if(!globalThis.CivweaveModelRuntime?.__minilmResponseRouterV347)installRuntimeInterceptor();if(attempts>160)clearInterval(installTimer)},250);
+for(const name of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:local-model-runtime-ready','civweave:local-model-bridge-installed'])addEventListener(name,()=>queueMicrotask(installRuntimeInterceptor));addEventListener('civweave:local-model-downloaded',()=>{installedCache.at=0});addEventListener('civweave:local-model-removed',()=>{installedCache.at=0});addEventListener('pagehide',()=>clearInterval(installTimer),{once:true});
+dispatchEvent(new CustomEvent('civweave:minilm-response-router-ready',{detail:{version:VERSION,tiers:Object.keys(TIERS),reviewGate:'programming-or-agentic',guideLanguage:true,artifactNetworkRouting:true,tinyPrompt:true,threadContinuation:true,networkGate:'runtime-spine'}}));
 })();
