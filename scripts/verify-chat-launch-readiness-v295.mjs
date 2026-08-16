@@ -21,7 +21,7 @@ for(const source of [orchestrator,fullscreen,mobile,store,ui,localRuntime,localO
 new Function('self','caches','fetch',repair)({addEventListener(){},CivweaveChatCacheRepairV245:null},{keys:async()=>[]},async()=>({ok:true,clone(){return this}}));
 
 // One canonical chat owner. Settings and inference stay separate from opening chat.
-assert.match(orchestrator,/REVISION='experience-orchestrator-v320-submit-only-generative'/);
+assert.match(orchestrator,/REVISION='experience-orchestrator-v355-minilm-submit-gate'/);
 for(const file of ['chat-fullscreen-v295.js','saved-chat-store-v295.js','saved-chat-ui-v295.js','local-chat-runtime-v295.js','local-chat-owner-v295.js'])assert.ok(orchestrator.includes(file),`orchestrator lost ${file}`);
 assert.doesNotMatch(orchestrator,/settings-parity-v295\.js/,'chat orchestrator must not preload Settings presentation');
 assert.doesNotMatch(orchestrator,/addEventListener\('click'/,'chat orchestrator must not intercept Settings input');
@@ -29,7 +29,8 @@ assert.match(orchestrator,/settingsInputOwnership:false/);
 assert.match(orchestrator,/settingsOwner:'settings-gateway-v317'/);
 assert.match(orchestrator,/settingsLaunchWork:'none'/);
 assert.match(gateway,/addEventListener\('click',onClick,true\)/,'Settings gateway must remain the sole delegated input owner');
-assert.match(orchestrator,/1\.0\.106-chat-fullscreen-v299/);
+assert.match(orchestrator,/1\.0\.108-chat-fullscreen-v299/);
+assert.match(orchestrator,/saved-tabs-grid-v351/);
 assert.match(orchestrator,/1\.0\.117-local-chat-runtime-v305-mobile-bootstrap-recovery/);
 assert.match(orchestrator,/v312-runtime-first-bootstrap/);
 assert.match(orchestrator,/1\.0\.158-local-chat-owner-v303-submit-only/);
@@ -44,9 +45,20 @@ assert.match(chatSurface,/presentationOwner:'guide-chat-surface-v350'/);
 assert.match(chatSurface,/root\.querySelector\('\[data-persistent-form\]'\)\.addEventListener\('submit'/);
 assert.doesNotMatch(chatSurface,/document\.addEventListener\('submit'/,'canonical chat surface must not own document-wide submit capture');
 
-// v349 invariant: opening chat must be a CSS state change, not a JS repair workload.
-assert.match(fullscreen,/1\.0\.106-chat-fullscreen-v299/);
-assert.match(fullscreen,/REVISION='mobile-chat-css-only-v349'/);
+// v355 invariant: selected-local capture must never bypass semantic routing.
+assert.match(orchestrator,/minilm-response-router-v347\.js\?v=1\.3\.0-minilm-primary/);
+assert.match(orchestrator,/async function localRouteDecision\(system,text\)/);
+assert.match(orchestrator,/await router\.classify\(text,/);
+assert.match(orchestrator,/!route\.networkRequired&&route\.taskClass==='ordinary'&&!route\.artifactClass/);
+assert.match(orchestrator,/if\(!decision\.local\)\{delegateCanonical\(system,text,input\);return\}/);
+assert.match(orchestrator,/minilmBeforeLocalFastPath:true/);
+const classifyIndex=orchestrator.indexOf('localRouteDecision(system,text)');
+const enqueueIndex=orchestrator.indexOf('CivweaveLocalChatOwnerV295?.enqueue');
+assert.ok(classifyIndex>=0&&enqueueIndex>classifyIndex,'MiniLM decision must occur before selected-local enqueue');
+
+// v351 invariant: opening chat must remain CSS-owned, not become a JS repair workload.
+assert.match(fullscreen,/1\.0\.108-chat-fullscreen-v299/);
+assert.match(fullscreen,/REVISION='saved-tabs-grid-v351'/);
 assert.match(fullscreen,/height:100dvh!important/);
 assert.match(fullscreen,/cssOnlyLayout:true/);
 assert.match(fullscreen,/mainThreadQuiescent:true/);
@@ -134,4 +146,4 @@ assert.match(minilm,/idleWarm\(\)/);
 assert.match(minilm,/settingsAutostart:false/);
 assert.doesNotMatch(minilm,/civweave:guide-workspace-state/,'MiniLM must remain independent of chat-open events');
 
-console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v350-v349-main-thread-quiescence',features:{fiveChats:true,canonicalChatOwner:'guide-chat-surface-v350',settingsOwner:'settings-gateway-v317',settingsIndependentOfChat:true,cssOnlyMobileFullscreen:true,visualViewportOwnership:false,chatMutationObservers:false,chatSettlingTimers:false,mainThreadQuiescentOnOpen:true,localFifoQueue:true,generativePrewarm:false,generativeStartsOnSubmit:true,minilmIndependent:true,fullChatRepairCoverage:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v355-minilm-submit-gate',features:{fiveChats:true,canonicalChatOwner:'guide-chat-surface-v350',settingsOwner:'settings-gateway-v317',settingsIndependentOfChat:true,cssOnlyMobileFullscreen:true,visualViewportOwnership:false,chatMutationObservers:false,chatSettlingTimers:false,mainThreadQuiescentOnOpen:true,localFifoQueue:true,generativePrewarm:false,generativeStartsOnSubmit:true,minilmIndependent:true,minilmBeforeLocalFastPath:true,fullChatRepairCoverage:true}},null,2));

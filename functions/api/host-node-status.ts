@@ -2,12 +2,12 @@ import {
   isStagingRequest,
   requestOrigin,
   stagingGuild,
-  stagingGuildStatus,
   stagingProductionTargetBlocked,
 } from "../_shared/staging-runtime";
 
 const NODE_DOMAIN = "nodes.commonweave.earth";
 const CENTRAL_FABRIC_HOST = "civweave-node-cloud.cerbanimo.workers.dev";
+const STAGING_GUILD_SERVER_ORIGIN = "https://civweave-node-cloud-staging.cerbanimo.workers.dev";
 const LEGACY_HOSTS = new Set(["civweave-host-node.onrender.com"]);
 const COMMUNITY_SEATS_PER_FREE_NODE = 6;
 const SURVIVAL_FLOOR_NEURONS = 25;
@@ -95,12 +95,15 @@ function reply(value: unknown, status = 200) {
   });
 }
 
-function stagingStatus(request: Request) {
+async function stagingStatus(request: Request) {
   const requestUrl = new URL(request.url);
   const target = hostOrigin(requestUrl.searchParams.get("host"));
   if (!target) return reply({ ok: false, error: "host-node-not-allowed" }, 400);
-  const origin = requestOrigin(request);
-  if (target.origin !== origin) return stagingProductionTargetBlocked(request, target.origin);
+  const pagesOrigin = requestOrigin(request);
+  if (target.origin !== pagesOrigin && target.origin !== STAGING_GUILD_SERVER_ORIGIN) {
+    return stagingProductionTargetBlocked(request, target.origin);
+  }
+
   const nodeId = requestedNodeId(requestUrl.searchParams.get("node"));
   const guild = stagingGuild(nodeId);
   if (!guild) return reply({
@@ -110,7 +113,68 @@ function stagingStatus(request: Request) {
     productionIsolation: true,
     nodeId,
   }, 404);
-  return reply(stagingGuildStatus(guild, origin));
+
+  try {
+    const stagingOrigin = new URL(STAGING_GUILD_SERVER_ORIGIN);
+    const [manifestResult, capacityResult, healthResult] = await Promise.all([
+      getJson(new URL(`/n/${guild.nodeId}/api/ai/node/manifest`, stagingOrigin)),
+      getJson(new URL(`/api/fabric/capacity?nodeId=${encodeURIComponent(guild.nodeId)}`, stagingOrigin)),
+      getJson(new URL(`/n/${guild.nodeId}/api/node/health`, stagingOrigin)),
+    ]);
+    if (!manifestResult.ok || !capacityResult.ok || capacityResult.payload?.stagingIsolatedGuildServer !== true) {
+      return reply({
+        ok: false,
+        error: "staging-guild-server-unavailable",
+        environment: "staging",
+        productionIsolation: true,
+        nodeId: guild.nodeId,
+        manifestStatus: manifestResult.status,
+        capacityStatus: capacityResult.status,
+      }, 502);
+    }
+
+    const manifest = manifestResult.payload?.manifest || manifestResult.payload || {};
+    const capacity = capacityResult.payload || {};
+    return reply({
+      schema: "civweave.host-node-status.v1",
+      ok: true,
+      environment: "staging",
+      stagingSynthetic: false,
+      stagingGuildServerIsolated: true,
+      productionIsolation: true,
+      kind: "staging-cloudflare-capacity-host",
+      hostOrigin: target.origin,
+      guildServerOrigin: STAGING_GUILD_SERVER_ORIGIN,
+      nodeId: String(manifest.nodeId || capacity.nodeId || guild.nodeId),
+      displayName: guild.displayName || String(manifest.displayName || manifest.nodeId || guild.nodeId),
+      runtime: String(manifest.runtime || "cloudflare-host-node"),
+      status: String(manifest.status || "active"),
+      health: healthResult.ok ? {
+        ok: healthResult.payload?.ok === true,
+        connections: finiteWhole(healthResult.payload?.connections),
+        updatedAt: healthResult.payload?.updatedAt || manifest.updatedAt || null,
+      } : { ok: false, connections: null, updatedAt: manifest.updatedAt || null },
+      slots: cloudNodeSlots(capacity),
+      capacityAvailable: true,
+      capacity: {
+        workersPlan: capacity.workersPlan || null,
+        nodeMembers: finiteWhole(capacity.nodeMembers),
+        nodeCommunityMembers: finiteWhole(capacity.nodeCommunityMembers),
+        activePaidMembers: finiteWhole(capacity.activePaidMembers),
+        includedDailyNeurons: finiteWhole(capacity.includedDailyNeurons),
+        dailyRemainingNeurons: finiteWhole(capacity.dailyRemainingNeurons),
+      },
+    });
+  } catch (error) {
+    return reply({
+      ok: false,
+      error: "staging-guild-status-fetch-failed",
+      environment: "staging",
+      productionIsolation: true,
+      nodeId: guild.nodeId,
+      message: String((error as Error)?.message || error),
+    }, 502);
+  }
 }
 
 export const onRequestGet: PagesFunction = async (context) => {

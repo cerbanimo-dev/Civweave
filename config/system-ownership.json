@@ -3,6 +3,84 @@
   "policy": "extend-existing-owner-never-add-parallel-owner",
   "requiredForAgentWork": true,
   "systems": {
+    "content-provenance": {
+      "capability": "Immutable creation provenance for Civweave artifacts and additive human-validation history",
+      "owner": "public/app/content-provenance-v1.js",
+      "canonicalApi": "globalThis.CivweaveContentProvenanceV1",
+      "generationMetadataSchema": "civweave.generation-provenance.v1",
+      "artifactMetadataSchema": "civweave.content-provenance.v1",
+      "runtimeProducer": "public/app/fast-interactive-runtime-v192.js",
+      "rules": [
+        "Every result produced through Civweave AI generation is labeled ai-generated in generation metadata at creation time.",
+        "Structured generated objects also carry metadata.civweaveProvenance so persistence of outputJson preserves origin.",
+        "Persisted artifacts copy generation provenance into metadata.civweaveProvenance rather than attempting later AI detection.",
+        "Once an artifact has explicit ai-generated, human-authored, or deterministic-generated origin, later review may not rewrite that origin.",
+        "Human validation is additive metadata and never converts an AI-generated artifact into a human-authored artifact.",
+        "Legacy or imported content without reliable provenance is marked unknown and is never silently inferred to be human-authored."
+      ]
+    },
+    "passport-identity": {
+      "capability": "Local-first Civweave Passport creation and shared Passport identity continuity",
+      "owner": "public/app/shared/civweave-passport-identity-v1.js",
+      "canonicalApi": "globalThis.CivweavePassportIdentityV1",
+      "storageKey": "civweave.anarchadia.citizen-console.v139",
+      "schema": "civweave.anarchadia-console.v1",
+      "rules": [
+        "Passport creation is local-first and requires no AI, network service, Guild membership, or Anarchadia UI.",
+        "If an Anarchadia Passport already exists, every operating mode reuses that Passport ID and preserves its existing local state.",
+        "If no Passport exists, the owner initializes the same Anarchadia-compatible Passport state used by the existing Passport surface so Lud and Standard mode do not fork identity.",
+        "Presentation surfaces may display the Passport ID but may not mint a second Passport identifier or maintain a mode-specific Passport store."
+      ]
+    },
+    "operating-mode": {
+      "capability": "Cross-system Standard and Lud operating-mode policy",
+      "owner": "public/app/lud-mode-v1.js",
+      "canonicalApi": "globalThis.CivweaveLudModeV1",
+      "storageKey": "civweave.operating-mode.v1",
+      "modeValue": "lud",
+      "packageManifest": "public/app/lud-package-v1.json",
+      "manualAuthoringOwner": "public/app/lud-manual-authoring-v1.js",
+      "manualAuthoringApi": "globalThis.CivweaveLudManualAuthoringV1",
+      "humanAuthoringAdapter": "public/app/lud-human-tools-v1.js",
+      "passportIdentityOwner": "public/app/shared/civweave-passport-identity-v1.js",
+      "guildAccessOwners": [
+        "public/app/host-node-session-v1.js",
+        "public/app/host-node-installer-lobby-v1.js"
+      ],
+      "canonicalHumanCreationOwners": [
+        "public/app/cerbanimo-quest-engine-v144.js",
+        "public/app/proposal-voting-gate-v2.js"
+      ],
+      "humanValidationNeuronAuthority": "cloudflare/node-cloud/src/capacity-human-validation-v1.mjs",
+      "humanValidationNeuronClient": "public/app/human-validation-neuron-client-v1.js",
+      "humanValidationNeuronPolicy": {
+        "requestNeurons": 30,
+        "validatorCounts": [2, 3],
+        "twoValidatorShareNeurons": 15,
+        "threeValidatorShareNeurons": 10,
+        "unusedSourceCapacityRollsOver": false,
+        "earnedValidatorBonusRollsOver": false,
+        "earnedValidatorBonusExpiresAt": "daily-reset"
+      },
+      "installerController": "public/app/lud-installer-v1.js",
+      "downloadSurface": "public/app/lud/index.html",
+      "entrySurface": "public/app/lud/campus.html",
+      "rules": [
+        "Lud Mode does not invoke, load on demand, advertise, or require AI generation capabilities.",
+        "Lud Mode content discovery is provenance-based and admits only explicitly human-authored content; unknown and AI-generated content fail closed.",
+        "Human validation of AI-generated content does not make that content visible in Lud Mode because validation does not change creation origin.",
+        "Lud Mode creates or reuses the same local Passport identity as Standard Civweave and Anarchadia; it never maintains a Lud-only Passport.",
+        "Lud Mode exposes the canonical Guild login and membership surfaces, and joining a Guild does not enable AI while Lud Mode remains active.",
+        "Lud human creation delegates Quests to the canonical Cerbanimo quest engine and task/module additions to the canonical human proposal gate instead of maintaining parallel state owners.",
+        "The Lud-only manual record store is limited to human drafts or manifests that do not already have a canonical creation owner.",
+        "A Lud-funded human validation request consumes exactly 30 neurons from that resident's current-day included allowance and uses exactly two or three independent human validators.",
+        "Two-validator requests pay 15 neurons to each accepted validator; three-validator requests pay 10 neurons to each accepted validator.",
+        "Unused daily Lud validation capacity expires at the ordinary daily included-neuron reset and never becomes a rollover wallet balance.",
+        "Accepted validators receive a same-day neuron bonus that expires at the ordinary daily reset; it never rolls over or becomes a persistent or cash-backed lifetime compute balance.",
+        "The Lud download is an allowlisted package boundary, not a renamed copy of the ordinary offline campus.",
+        "The Lud download surface and packaged Lud campus contain no generated visual assets, images, logos, SVG illustrations, canvases, or background-image URLs."
+      ]
+    },
     "settings": {
       "capability": "Cross-system Settings entry, presentation, credential state, and fixed section layout",
       "owner": "public/app/settings-gateway-v317.js",
@@ -90,9 +168,18 @@
       ]
     },
     "family-navigation": {
-      "capability": "Five-system navigation and realm status chrome",
-      "owner": "public/app/family-shell-v104.js",
-      "routeContract": "public/app/system-routes-v227.js"
+      "capability": "Five-system navigation and expressive realm-status chrome",
+      "owner": "public/app/themed-system-nav-v178.js",
+      "routeContract": "public/app/system-routes-v227.js",
+      "loader": "public/app/install-boundary-v146.js",
+      "retiredOwner": "public/app/family-shell-v104.js",
+      "rules": [
+        "The themed system navigation is the only module allowed to create five-system navigation DOM.",
+        "The family shell may own realm header, status, chat, and Settings chrome but may not create a second five-system navigation surface.",
+        "The retired #cwf104-tray and [data-cwf-system] family-navigation DOM contract must remain absent from active source.",
+        "Every first-class installed route receives the navigation owner through the install boundary.",
+        "No hidden, fallback, or compatibility family-navigation owner is permitted."
+      ]
     },
     "guide-chat": {
       "capability": "Five private guide threads on one current conversation surface",
@@ -108,20 +195,24 @@
       "rule": "Settings may manage downloaded models but must never start inference on open."
     },
     "host-node-access": {
-      "capability": "Device-bound Hub Node login, capacity sessions, and neuron quota telemetry",
+      "capability": "Device-bound Guild login, capacity sessions, membership admission, and neuron quota telemetry",
       "owner": "public/app/host-node-session-v1.js",
       "admissionSurface": "public/app/host-node-installer-lobby-v1.js",
+      "ludAdmissionSurface": "public/app/lud/campus.html",
       "cloudAuthority": "cloudflare/node-cloud/src/entry.mjs",
       "subscribers": [
         "public/app/server-ai-router-v301.js",
         "public/app/cloud-validation-executor-v1.js",
+        "public/app/human-validation-neuron-client-v1.js",
         "public/app/working-campus-topbar-v243.js",
         "public/app/guide-chat-surface-v350.js"
       ],
       "rules": [
-        "Only the owner writes browser Hub capacity sessions and device login credentials.",
+        "Only the owner writes browser Guild capacity sessions and device login credentials.",
         "Capacity bearer tokens remain tab-scoped in sessionStorage; device login credentials remain local and are never dispatched in events.",
-        "Cloudflare AI generation and validation require a verified Hub capacity session.",
+        "Cloudflare AI generation and validation require a verified Guild capacity session in operating modes that permit AI.",
+        "Lud Mode may use the same Guild discovery, admission, membership, and session owner while its operating-mode policy continues to prohibit AI generation.",
+        "Human-validation neuron funding and claims reuse the verified capacity session; their browser client may read but never write the session store.",
         "Paid-expansion availability may be discovered, but a new paid-expansion resident is never admitted without active membership authority."
       ]
     },

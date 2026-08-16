@@ -1,13 +1,13 @@
-name: Verify PWA Install + Campus Completion v246
+name: Verify PWA Install + Campus Completion
 
 on:
   pull_request:
     paths:
       - 'public/app/index.html'
-      - 'public/app/pwa-install-prompt-v246.js'
-      - 'public/app/pwa-install-prompt-v247.js'
       - 'public/app/pwa-install-prompt-v249.js'
       - 'public/app/pwa-install-prompt-v250.js'
+      - 'public/pwa-installability-worker-v1.js'
+      - 'public/_headers'
       - 'public/install-v130.js'
       - 'public/app/installer-repair-only-v1.js'
       - 'public/app/installer-repair-only-v2.js'
@@ -16,9 +16,11 @@ on:
       - 'public/app/offline-campus-status-v211.js'
       - 'public/app/required-campus-autostart-v1.js'
       - 'public/service-worker-v203.js'
-      - 'public/service-worker-shell-repair-v225.js'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'public/service-worker-shell-repair-v293.js'
       - 'public/service-worker-campus-completion-v246.js'
       - 'scripts/verify-installer-front-door-v1.mjs'
+      - 'scripts/verify-pwa-installability-bootstrap-v1.mjs'
       - 'scripts/verify-pwa-install-campus-v246.mjs'
       - 'scripts/verify-fresh-install-paths-v1.mjs'
       - '.github/workflows/verify-pwa-install-campus-v246.yml'
@@ -26,10 +28,10 @@ on:
     branches: [main, staging]
     paths:
       - 'public/app/index.html'
-      - 'public/app/pwa-install-prompt-v246.js'
-      - 'public/app/pwa-install-prompt-v247.js'
       - 'public/app/pwa-install-prompt-v249.js'
       - 'public/app/pwa-install-prompt-v250.js'
+      - 'public/pwa-installability-worker-v1.js'
+      - 'public/_headers'
       - 'public/install-v130.js'
       - 'public/app/installer-repair-only-v1.js'
       - 'public/app/installer-repair-only-v2.js'
@@ -38,9 +40,11 @@ on:
       - 'public/app/offline-campus-status-v211.js'
       - 'public/app/required-campus-autostart-v1.js'
       - 'public/service-worker-v203.js'
-      - 'public/service-worker-shell-repair-v225.js'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'public/service-worker-shell-repair-v293.js'
       - 'public/service-worker-campus-completion-v246.js'
       - 'scripts/verify-installer-front-door-v1.mjs'
+      - 'scripts/verify-pwa-installability-bootstrap-v1.mjs'
       - 'scripts/verify-pwa-install-campus-v246.mjs'
       - 'scripts/verify-fresh-install-paths-v1.mjs'
       - '.github/workflows/verify-pwa-install-campus-v246.yml'
@@ -58,10 +62,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - run: node --check public/app/pwa-install-prompt-v246.js
-      - run: node --check public/app/pwa-install-prompt-v247.js
       - run: node --check public/app/pwa-install-prompt-v249.js
       - run: node --check public/app/pwa-install-prompt-v250.js
+      - run: node --check public/pwa-installability-worker-v1.js
       - run: node --check public/install-v130.js
       - run: node --check public/app/installer-repair-only-v1.js
       - run: node --check public/app/installer-repair-only-v2.js
@@ -70,8 +73,11 @@ jobs:
       - run: node --check public/app/offline-campus-status-v211.js
       - run: node --check public/app/required-campus-autostart-v1.js
       - run: node --check public/service-worker-v203.js
-      - run: node --check public/service-worker-shell-repair-v225.js
+      - run: node --check public/service-worker-shell-assets-v1.js
+      - run: node --check public/service-worker-shell-repair-v293.js
       - run: node --check public/service-worker-campus-completion-v246.js
-      - run: node scripts/verify-installer-front-door-v1.mjs
+      - run: node --check scripts/verify-pwa-installability-bootstrap-v1.mjs
+      - run: node scripts/verify-pwa-installability-bootstrap-v1.mjs
       - run: node scripts/verify-pwa-install-campus-v246.mjs
       - run: node scripts/verify-fresh-install-paths-v1.mjs
+      - run: node scripts/verify-installer-front-door-v1.mjs

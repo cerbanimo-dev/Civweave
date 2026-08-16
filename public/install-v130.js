@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.162';
+const VERSION = '1.0.163';
 const ENTRY = '/app/installed-entry-v146.html?installed=1&system=civweave';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
 const WORKER_SCRIPT_REVISION = 'release-coherence-v226';
@@ -77,8 +77,7 @@ function workerMatches(worker) {
   try {
     const url = new URL(worker?.scriptURL || '');
     return url.pathname === '/service-worker-v203.js' &&
-      url.searchParams.get('v') === WORKER_BUILD &&
-      url.searchParams.get('revision') === WORKER_SCRIPT_REVISION;
+      url.searchParams.get('v') === WORKER_BUILD;
   } catch {
     return false;
   }
@@ -377,6 +376,7 @@ async function prepareShell(options = {}) {
     updateButton.disabled = true;
     updateButton.textContent = options.manual ? 'Checking release…' : 'Preparing shell…';
   }
+  let releaseCheckTimedOut = false;
   try {
     if (!('serviceWorker' in navigator)) throw new Error('This browser does not support service workers.');
     const migrated = await migrateKnowledgeCache();
@@ -397,8 +397,17 @@ async function prepareShell(options = {}) {
       worker = activeWorker;
       if (options.manual) {
         help('Checking the lightweight app worker for an updated release…');
-        await withTimeout(registration.update(), REGISTRATION_TIMEOUT_MS, 'Chrome did not finish checking the app worker.', 'service-worker update');
-        worker = await waitForCurrentWorker();
+        try {
+          await withTimeout(registration.update(), REGISTRATION_TIMEOUT_MS, 'Chrome did not finish checking the app worker.', 'service-worker update');
+          worker = await waitForCurrentWorker();
+        } catch (error) {
+          if (error?.code === 'CIVWEAVE_PACKAGE_TIMEOUT' && error?.phase === 'service-worker update') {
+            releaseCheckTimedOut = true;
+            worker = activeWorker;
+          } else {
+            throw error;
+          }
+        }
       }
     } else {
       if (exactCandidate) {
@@ -425,7 +434,11 @@ async function prepareShell(options = {}) {
     await confirmShell(worker);
     sessionStorage.removeItem(WATCHDOG_RECOVERY_KEY);
     await refreshOfflineStatus();
-    if (options.manual) help('The app shell is current. Offline-campus files remain separate and start only when requested.');
+    if (options.manual) {
+      help(releaseCheckTimedOut
+        ? 'Release check timed out. The current working shell was kept; no repair is needed.'
+        : 'The app shell is current. Offline-campus files remain separate and start only when requested.');
+    }
   } catch (error) {
     if (error?.code === 'CIVWEAVE_PACKAGE_TIMEOUT') {
       try {
@@ -503,7 +516,7 @@ async function installOrOpen() {
     return;
   }
   if (!shellReady) {
-    await prepareShell({ manual: true });
+    await prepareShell({ manual: false });
     if (!shellReady) return;
   }
   if (installPrompt) {

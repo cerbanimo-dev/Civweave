@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v308-bootstrap-capability';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -131,7 +131,9 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   version: CW_LOCAL_AI_COHERENCE_VERSION,
   cache: CW_LOCAL_AI_COHERENCE_CACHE,
   critical: CW_LOCAL_AI_CRITICAL.slice(),
+  extraPaths: Object.freeze([...CW_LOCAL_AI_EXTRA_PATHS]),
   policy: 'network-first-current-bytes-offline-cache-fallback',
   smoothFitOrchestrator: true,
-  ownsBeforeGenericCodeCoherence: true
+  ownsBeforeGenericCodeCoherence: true,
+  bootstrapCapabilityReadiness: true
 });

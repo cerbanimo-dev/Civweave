@@ -9,30 +9,17 @@ export type StagingGuild = {
 
 export const STAGING_PROJECT_HOST = "civweave-staging.pages.dev";
 
+// Staging shadows real, publicly discoverable Guild identities but never admits
+// residents into the production membership ledger. Keep this list deliberately
+// narrow: each entry is an explicit staging test-seat overlay for a live Guild.
 export const STAGING_GUILDS: readonly StagingGuild[] = Object.freeze([
   Object.freeze({
-    nodeId: "staging-guild-north",
-    displayName: "North Test Guild",
+    nodeId: "civweave-cloud",
+    displayName: "Civweave Commons",
     latitude: 43.9748,
     longitude: -75.9108,
     freeSlots: 4,
-    paidSlots: 12,
-  }),
-  Object.freeze({
-    nodeId: "staging-guild-central",
-    displayName: "Central Test Guild",
-    latitude: 39.0997,
-    longitude: -94.5786,
-    freeSlots: 2,
-    paidSlots: 18,
-  }),
-  Object.freeze({
-    nodeId: "staging-guild-west",
-    displayName: "West Test Guild",
-    latitude: 34.0522,
-    longitude: -118.2437,
-    freeSlots: 5,
-    paidSlots: 9,
+    paidSlots: 0,
   }),
 ]);
 
@@ -127,12 +114,13 @@ export function stagingGuildStatus(guild: StagingGuild, origin: string) {
     ok: true,
     environment: "staging",
     stagingSynthetic: true,
+    stagingShadowSeats: true,
     productionIsolation: true,
-    kind: "staging-fixture-host",
+    kind: "staging-shadow-host",
     hostOrigin: origin,
     nodeId: guild.nodeId,
     displayName: guild.displayName,
-    runtime: "civweave-staging-pages-fixture",
+    runtime: "civweave-staging-shadow",
     status: "active",
     health: {
       ok: true,
@@ -142,9 +130,9 @@ export function stagingGuildStatus(guild: StagingGuild, origin: string) {
     slots: { free: guild.freeSlots, paid: guild.paidSlots },
     capacityAvailable: true,
     capacity: {
-      workersPlan: "staging",
-      nodeMembers: 1,
-      nodeCommunityMembers: 1,
+      workersPlan: "staging-shadow",
+      nodeMembers: 0,
+      nodeCommunityMembers: 0,
       activePaidMembers: 0,
       includedDailyNeurons: 480,
       dailyRemainingNeurons: 480,

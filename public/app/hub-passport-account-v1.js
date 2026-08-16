@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='hub-passport-account-v1.0.1-guild-copy';
+const VERSION='hub-passport-account-v1.0.2-passport-bootstrap';
 const PASSPORT_KEY='civweave.anarchadia.citizen-console.v139';
+const PASSPORT_SCHEMA='civweave.anarchadia-console.v1';
 const STATE_KEY='civweave.passport-account.client.v1';
 if(globalThis.CivweaveHubPassportAccountV1?.version===VERSION)return;
 const clean=(v,m=2000)=>String(v??'').trim().slice(0,m);
@@ -14,7 +15,31 @@ const lobby=()=>globalThis.CivweaveHostNodeInstallerLobbyV1||null;
 function selected(){try{return parse(localStorage.getItem('civweave.host-node.selection.v1'),{})}catch{return{}}}
 function host(){return origin(lobby()?.normalizedHost?.()||selected()?.origin||'')}
 function nodeId(){const q=clean(new URLSearchParams(location.search).get('node'),180);if(/^[a-z0-9-]{1,120}$/.test(q))return q;const s=clean(selected()?.nodeId,180);return /^[a-z0-9-]{1,120}$/.test(s)?s:''}
-function passport(){try{return clean(parse(localStorage.getItem(PASSPORT_KEY),{})?.passportId,180)}catch{return''}}
+function generatedPassportId(){
+ const uuid=globalThis.crypto?.randomUUID?.();
+ if(uuid)return `AC-${uuid.slice(0,8).toUpperCase()}`;
+ try{return `AC-${Array.from(globalThis.crypto.getRandomValues(new Uint8Array(4)),byte=>byte.toString(16).padStart(2,'0')).join('').toUpperCase()}`}
+ catch{return `AC-${Date.now().toString(36).slice(-8).toUpperCase()}`}
+}
+function passport(){
+ try{
+  const saved=parse(localStorage.getItem(PASSPORT_KEY),null);
+  const existing=clean(saved?.passportId,180);
+  if(existing)return existing;
+  const passportId=generatedPassportId();
+  const next={
+   ...(saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{}),
+   schema:PASSPORT_SCHEMA,
+   passportId,
+   proposals:Array.isArray(saved?.proposals)?saved.proposals:[],
+   ledger:Array.isArray(saved?.ledger)?saved.ledger:[],
+   settings:saved?.settings&&typeof saved.settings==='object'&&!Array.isArray(saved.settings)?saved.settings:{autoRun:true}
+  };
+  localStorage.setItem(PASSPORT_KEY,JSON.stringify(next));
+  dispatchEvent(new CustomEvent('civweave:passport-ready',{detail:{passportId}}));
+  return passportId;
+ }catch{return''}
+}
 function identity(h=host(),n=nodeId()){return h&&n?sessionExport()?.current?.(h,n)||null:null}
 function key(h=host(),n=nodeId()){return h&&n?`${h}#${n}`:''}
 function state(){try{return parse(localStorage.getItem(STATE_KEY),{})||{}}catch{return{}}}
@@ -30,7 +55,7 @@ async function post(path,body,h=host(),n=nodeId()){
  const packet=await response.json().catch(()=>({}));if(!response.ok||packet?.ok===false){const error=new Error(clean(packet?.error||`Guild returned HTTP ${response.status}.`,1200));error.status=response.status;throw error}return packet
 }
 function authPayload(h=host(),n=nodeId()){
- const login=identity(h,n),passportId=passport();if(!login?.userId||!login?.credential)throw new Error('Join this Guild before setting up the account.');if(!passportId)throw new Error('Create or load a Passport first.');return{userId:clean(login.userId,180),credential:clean(login.credential,400),passportId}
+ const login=identity(h,n),passportId=passport();if(!login?.userId||!login?.credential)throw new Error('Join this Guild before setting up the account.');if(!passportId)throw new Error('Passport identity could not be stored on this device.');return{userId:clean(login.userId,180),credential:clean(login.credential,400),passportId}
 }
 function rp(){return{rpId:location.hostname.toLowerCase(),origin:location.origin}}
 function creationOptions(packet){const options=structuredClone(packet.publicKey||{});options.challenge=unb64u(options.challenge);if(options.user?.id)options.user.id=unb64u(options.user.id);if(Array.isArray(options.excludeCredentials))for(const item of options.excludeCredentials)item.id=unb64u(item.id);return options}
@@ -63,8 +88,8 @@ async function verifyRecoveryEmail(code){
  if(packet.linkRequired)return finishLink(packet,h,n);if(packet.account)saveAccount(packet.account,h,n);return packet
 }
 function hasPasskey(){const account=current();return Boolean(account&&Number(account.passkeyCount||0)>0)}
-async function bootstrap(){try{const packet=await ensureAccount();if(packet?.passportHasPasskey===false)dispatchEvent(new CustomEvent('civweave:passport-passkey-needed',{detail:{account:packet.account}}));return packet}catch{return null}}
-function boot(){addEventListener('civweave:host-node-logged-in',()=>void bootstrap());addEventListener('civweave:host-node-selected',()=>dispatchEvent(new CustomEvent('civweave:passport-account',{detail:{account:current()}})));if(identity()&&passport())void bootstrap()}
+async function bootstrap(){try{passport();const packet=await ensureAccount();if(packet?.passportHasPasskey===false)dispatchEvent(new CustomEvent('civweave:passport-passkey-needed',{detail:{account:packet.account}}));return packet}catch{return null}}
+function boot(){passport();addEventListener('civweave:host-node-logged-in',()=>void bootstrap());addEventListener('civweave:host-node-selected',()=>dispatchEvent(new CustomEvent('civweave:passport-account',{detail:{account:current()}})));if(identity())void bootstrap()}
 const api=Object.freeze({version:VERSION,host,nodeId,passport,identity,current,ensureAccount,registerCurrentPassport,login,beginRecoveryEmail,verifyRecoveryEmail,hasPasskey,bootstrap});
 globalThis.CivweaveHubPassportAccountV1=api;if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

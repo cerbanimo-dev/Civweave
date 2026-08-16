@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.116-mobile-ai-hardening-v302';
+const VERSION='1.0.117-mobile-ai-hardening-v302';
 const REVISION='mobile-chat-css-dvh-v349';
 const STYLE_ID='cw-mobile-ai-hardening-v302-style';
 const TEST_MARKER='civweave.local-ai.test-inflight.v302';
@@ -55,7 +55,7 @@ html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v2
   border:0!important;
   border-radius:0!important;
   display:grid!important;
-  grid-template-rows:auto auto minmax(0,1fr) auto!important;
+  grid-template-rows:max-content max-content max-content minmax(0,1fr) max-content!important;
   overflow:hidden!important;
   overscroll-behavior:contain!important;
   background:var(--guide-panel,#111827)!important;
@@ -66,7 +66,7 @@ html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v2
   pointer-events:auto!important;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized):has(>.cw295-saved-chats){
-  grid-template-rows:auto auto auto minmax(0,1fr) auto!important;
+  grid-template-rows:max-content max-content max-content max-content minmax(0,1fr) max-content!important;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized)>header{
   grid-template-columns:44px minmax(0,1fr) 38px 38px!important;
@@ -189,5 +189,5 @@ function start(){
 }
 
 start();
-globalThis.CivweaveMobileAIHardeningV302=Object.freeze({version:VERSION,revision:REVISION,isMobile,syncViewport,recoverInterruptedTest,beginTest,finishTest,testMarker:TEST_MARKER,recoveryKey:RECOVERY_KEY,mobileFullscreenChat:true,mobileSafeCompatibility:true,mobileBenchmarkDisabled:true,interruptedTestRecovery:true,chatLayoutMode:'css-dvh-only',viewportEventOwnership:false,viewportStyleWrites:false,mainThreadQuiescentOnChatOpen:true});
+globalThis.CivweaveMobileAIHardeningV302=Object.freeze({version:VERSION,revision:REVISION,isMobile,syncViewport,recoverInterruptedTest,beginTest,finishTest,testMarker:TEST_MARKER,recoveryKey:RECOVERY_KEY,mobileFullscreenChat:true,mobileSafeCompatibility:true,mobileBenchmarkDisabled:true,interruptedTestRecovery:true,chatLayoutMode:'css-dvh-only',savedThreadRows:6,viewportEventOwnership:false,viewportStyleWrites:false,mainThreadQuiescentOnChatOpen:true});
 })();

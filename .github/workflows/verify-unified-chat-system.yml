@@ -6,6 +6,7 @@ on:
       - 'VERSION'
       - 'package.json'
       - 'config/system-ownership.json'
+      - 'public/app/experience-orchestrator-v232.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
@@ -14,6 +15,9 @@ on:
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/minilm-context-router-v344.js'
+      - 'public/app/minilm-response-router-v347.js'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
       - 'public/app/anarchadia-console-v139.html'
@@ -22,6 +26,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
+      - 'scripts/verify-minilm-response-router-v347.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   push:
     branches: ['**']
@@ -29,6 +34,7 @@ on:
       - 'VERSION'
       - 'package.json'
       - 'config/system-ownership.json'
+      - 'public/app/experience-orchestrator-v232.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
@@ -37,6 +43,9 @@ on:
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/realm-session-integrity-v237.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/minilm-context-router-v344.js'
+      - 'public/app/minilm-response-router-v347.js'
       - 'public/app/shared-chat-face-icons-v255.js'
       - 'public/app/avatar-expression-director-v345.js'
       - 'public/app/anarchadia-console-v139.html'
@@ -45,6 +54,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
+      - 'scripts/verify-minilm-response-router-v347.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   workflow_dispatch:
 
@@ -67,6 +77,7 @@ jobs:
 
       - name: Check canonical chat runtime syntax
         run: |
+          node --check public/app/experience-orchestrator-v232.js
           node --check public/app/unified-chat-system-v1.js
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/shared-guide-surface-v236-core-v244.js
@@ -75,6 +86,9 @@ jobs:
           node --check public/app/guide-workspace-v242.js
           node --check public/app/realm-session-integrity-v237.js
           node --check public/app/family-ai-loader-v105.js
+          node --check public/app/assistant-runtime-v141.js
+          node --check public/app/minilm-context-router-v344.js
+          node --check public/app/minilm-response-router-v347.js
           node --check public/app/shared-chat-face-icons-v255.js
           node --check public/app/avatar-expression-director-v345.js
           node --check public/app/installed-entry-v146.js
@@ -82,27 +96,36 @@ jobs:
           node --check public/service-worker-v203.js
           node --check scripts/verify-chat-launch-readiness-v295.mjs
           node --check scripts/verify-human-message-bubble-v1.mjs
+          node --check scripts/verify-minilm-response-router-v347.mjs
 
       - name: Enforce one-core five-guide avatar contract
         shell: bash
         run: |
           node <<'NODE'
           const fs=require('node:fs');
+          const orchestrator=fs.readFileSync('public/app/experience-orchestrator-v232.js','utf8');
           const core=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
           const loader=fs.readFileSync('public/app/shared-guide-surface-v236.js','utf8');
           const shared=fs.readFileSync('public/app/shared-guide-surface-v236-core-v244.js','utf8');
           const party=fs.readFileSync('public/app/shared-intention-party-chat-v1.js','utf8');
           const surface=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
           const compat=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
+          const family=fs.readFileSync('public/app/family-ai-loader-v105.js','utf8');
+          const assistant=fs.readFileSync('public/app/assistant-runtime-v141.js','utf8');
+          const minilmContext=fs.readFileSync('public/app/minilm-context-router-v344.js','utf8');
+          const minilmResponse=fs.readFileSync('public/app/minilm-response-router-v347.js','utf8');
           const faces=fs.readFileSync('public/app/shared-chat-face-icons-v255.js','utf8');
           const sessions=fs.readFileSync('public/app/realm-session-integrity-v237.js','utf8');
           const anarchadia=fs.readFileSync('public/app/anarchadia-console-v139.html','utf8');
           const repair=fs.readFileSync('public/service-worker-chat-repair-v245.js','utf8');
+          const serviceWorker=fs.readFileSync('public/service-worker-v203.js','utf8');
 
           for(const system of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
             if(!core.includes(system))throw new Error(`Unified chat is missing theme ${system}`);
             if(!surface.includes(system))throw new Error(`Canonical surface is missing guide ${system}`);
           }
+          if(!orchestrator.includes("REVISION='experience-orchestrator-v355-minilm-submit-gate'"))throw new Error('Selected-local submit owner lost MiniLM-first routing');
+          if(!orchestrator.includes('await router.classify(text,')||!orchestrator.includes("route.taskClass==='ordinary'")||!orchestrator.includes('!route.networkRequired'))throw new Error('Selected-local capture can bypass MiniLM classification');
           if(!sessions.includes('threadKey=system=>`civweave.guide-thread.${system}.v237`'))throw new Error('Five-folder realm memory contract is missing');
           if(!core.includes("architecture:'one-core-five-themes-five-memory-folders'"))throw new Error('Unified architecture marker missing');
           if(core.includes('setInterval('))throw new Error('Unified chat must not poll the DOM/runtime');
@@ -124,18 +147,32 @@ jobs:
           if(activateBody.includes('ensureExpressionDirector')||activateBody.includes('setInterval('))throw new Error('Opening chat is starting expression/MiniLM work');
           if(faces.includes('miniLmLampTimer=setInterval')||faces.includes('setInterval(refreshMiniLmLamp'))throw new Error('Face runtime reintroduced MiniLM polling');
           if(!compat.includes('Compatibility loader only')||!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('V242 compatibility path is no longer a loader-only shim');
-          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/shared-chat-face-icons-v255.js']){
+          for(const path of ['/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/shared-chat-face-icons-v255.js','/app/assistant-runtime-v141.js','/app/minilm-response-router-v347.js']){
             if(!repair.includes(`'${path}'`))throw new Error(`PWA cache repair is missing ${path}`);
           }
+          if(!repair.includes("MODEL_ROUTE_REVISION='selected-local-minilm-v357'"))throw new Error('PWA cache repair lost the selected-local/MiniLM delivery revision');
+          if(!serviceWorker.includes('model=selected-local-minilm-v357'))throw new Error('Main service worker no longer activates selected-local/MiniLM cache repair');
           if(!loader.includes('/app/unified-chat-system-v1.js'))throw new Error('Shared guide loader does not load unified chat');
           if(!loader.includes('partyAutostart:false')||!loader.includes('activatePartyChat'))throw new Error('Party chat is not explicitly lazy');
           const installStart=loader.indexOf('function install(){'),installEnd=loader.indexOf('\n}\n\ninstall();',installStart),installBody=loader.slice(installStart,installEnd);
           if(installBody.includes('/app/shared-intention-party-chat-v1.js'))throw new Error('Party chat is loading during ordinary guide startup');
           if(!loader.includes("addEventListener('civweave:open-human-thread',onPartyRequest)"))throw new Error('Lazy party activation is not connected to explicit human-party use');
           if(!party.includes('function startTransport()'))throw new Error('Party transport contract disappeared');
+
+          if(!family.includes('async function ensureLocalAI()')||!family.includes('await ensureLocalAI()'))throw new Error('Selected downloaded-local model bootstrap is no longer attached to guide generation');
+          if(!family.includes('/app/minilm-response-router-v347.js'))throw new Error('MiniLM response router is no longer loaded with guide generation');
+          if(!assistant.includes('async function semanticRoute(')||!assistant.includes('CivweaveContextRouterV344'))throw new Error('Assistant no longer asks MiniLM for semantic routing');
+          if(assistant.includes("if(type)return{response:conversational"))throw new Error('Deterministic small-talk shortcut bypasses the selected model');
+          if(!assistant.includes("code:'SELECTED_LOCAL_MODEL_FAILED'"))throw new Error('Selected local model failures can silently fall back again');
+          if(!minilmContext.includes("model:'Xenova/all-MiniLM-L6-v2'"))throw new Error('MiniLM context router model contract is missing');
+          if(!minilmResponse.includes("dispatchEvent(new CustomEvent('civweave:response-route'"))throw new Error('MiniLM response routing event contract is missing');
+          if(!minilmResponse.includes('minilmPrimary:true')||!minilmResponse.includes('deterministicFallbackOnly:true'))throw new Error('Free-form prompt routing is no longer MiniLM-first with deterministic fallback only');
+          if(!surface.includes("provider:'local-model-error'"))throw new Error('Canonical chat can silently label a selected local model failure as deterministic output');
+          if(!surface.includes("'civweave:avatar-direct-text'")||!surface.includes('data-message-role')||!surface.includes('data-pending'))throw new Error('Canonical chat no longer feeds response lifecycle into MiniLM avatar expression selection');
           NODE
 
       - name: Verify current chat behavior
         run: |
           node scripts/verify-chat-launch-readiness-v295.mjs
           node scripts/verify-human-message-bubble-v1.mjs
+          node scripts/verify-minilm-response-router-v347.mjs

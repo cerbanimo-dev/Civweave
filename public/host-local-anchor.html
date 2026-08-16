@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#141126">
-<title>Add a local Civweave Anchor</title>
+<title>Create a desktop or Raspberry Pi Civweave Guild host</title>
 <link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">
 <style>
-:root{color-scheme:dark}body{margin:0;background:#07111b;color:#f4f0e7;font:16px/1.5 system-ui,-apple-system,sans-serif}main{max-width:820px;margin:auto;padding:34px 20px 80px}h1{font-size:clamp(2rem,7vw,4rem);line-height:1;margin:.2em 0}.eyebrow{color:#e6c766;font-weight:900;letter-spacing:.12em}.card{margin:20px 0;padding:20px;border:1px solid #dfc16655;border-radius:20px;background:#0e1b28}pre{overflow:auto;padding:14px;border-radius:12px;background:#02080d;color:#dff7f4}code{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.note{color:#bdcbd2}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions a,.actions button{padding:11px 14px;border:1px solid #dfc16666;border-radius:11px;background:#1a2938;color:white;text-decoration:none;font-weight:800;cursor:pointer}.actions .primary{background:#604817}
+:root{color-scheme:dark}body{margin:0;background:#07111b;color:#f4f0e7;font:16px/1.5 system-ui,-apple-system,sans-serif}main{max-width:820px;margin:auto;padding:34px 20px 80px}h1{font-size:clamp(2rem,7vw,4rem);line-height:1;margin:.2em 0}.eyebrow{color:#e6c766;font-weight:900;letter-spacing:.12em}.card{margin:20px 0;padding:20px;border:1px solid #dfc16655;border-radius:20px;background:#0e1b28}pre{overflow:auto;padding:14px;border-radius:12px;background:#02080d;color:#dff7f4}code{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.note{color:#bdcbd2}.ownership{padding:14px 16px;border:1px solid #74dfc766;border-radius:14px;background:#09251f;color:#dff7ef}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions a,.actions button{padding:11px 14px;border:1px solid #dfc16666;border-radius:11px;background:#1a2938;color:white;text-decoration:none;font-weight:800;cursor:pointer}.actions .primary{background:#604817}
 </style>
 <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
 </head>
@@ -16,7 +16,7 @@
 <header class="cw-brand-lockup" aria-label="Civweave platform and Cerbanimo Guildkeeper tools">
   <div class="cw-platform-brand">
     <img class="cw-platform-logo" src="/app/logos/civweave-prismatic-wordmark-v1.png" alt="Civweave">
-    <div class="cw-platform-copy"><small>LOCAL ANCHOR</small><h1>A root beneath the cloud</h1><p>Keep a recoverable local companion near your Civweave Guild.</p></div>
+    <div class="cw-platform-copy"><small>DESKTOP / PI GUILD HOST</small><h1>A root beneath the cloud</h1><p>Create or add a persistent Civweave Guild host on hardware you control.</p></div>
   </div>
   <div class="cw-steward-seal" aria-label="Cerbanimo Guildkeeper tool">
     <img class="cw-steward-logo" src="/app/logos/cerbanimo-steward-mark-v1.png" alt="Cerbanimo">
@@ -26,42 +26,50 @@
 <main>
 <section class="anchor-intro">
 <p class="eyebrow">CIVWEAVE GUILDKEEPER</p>
-<h1>Add a local Anchor</h1>
-<p>Your Cloudflare Guild can remain the public doorway. The local Anchor is the stubborn little root under the floorboards: it preserves Guild identity and state locally and is the right place for always-on discovery, scheduled relay, local AI, and recovery work.</p>
+<h1>Create a desktop or Raspberry Pi Guild host</h1>
+<p>Use a desktop, laptop, Raspberry Pi, NAS, or home server when you want a Guild replica that can stay awake. This machine supplies its own CPU, storage, memory, and network connection. It does not borrow compute from the Guild where you downloaded Civweave.</p>
+<p class="ownership"><strong>Cloud hosting is separate and optional.</strong> If you later add a Cloudflare public edge, its Pages project, Worker, and Durable Objects are created only in the Cloudflare account you authenticate for this Guild. A Pocket Guild can attach this persistent host later without becoming a different Guild.</p>
 </section>
 <section class="card">
 <h2>1. Install prerequisites and check Docker</h2>
 <p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the machine that will stay near this Guild.</p>
 <pre><code>docker version
 docker context ls</code></pre>
-<p class="note">On Docker Desktop for Windows, <code>docker version</code> must show both Client and Server. Civweave's Anchor image is Linux-based, so Docker Desktop must have its Linux container engine running before continuing.</p>
+<p class="note">On Docker Desktop for Windows, <code>docker version</code> must show both Client and Server. Civweave's host image is Linux-based, so Docker Desktop must have its Linux container engine running before continuing.</p>
 </section>
 <section class="card">
 <h2>2. Clone Civweave</h2>
 <pre><code>git clone https://github.com/cerbanimo-dev/Civweave.git
 cd Civweave
 cp .env.federated.example .env.federated</code></pre>
-<p class="note">Keep the data directory persistent. It contains the Anchor's technical identity, signing material, federation trust, and retained relay state.</p>
+<p class="note">Keep the data directory persistent. It contains this host's technical identity, signing material, federation trust, and retained relay state.</p>
 </section>
 <section class="card">
-<h2>3. Start the local companion</h2>
+<h2>3. Start the persistent Guild host</h2>
 <pre><code>docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --build</code></pre>
 <p class="note">Run the command as one line. It works in PowerShell as written; do not add Bash-style trailing <code>\</code> line continuations.</p>
-<p>For a laptop-only backup, LAN access is enough. A public tunnel is optional. Civweave should recommend this local copy strongly, but the Cloudflare Guild remains usable without it.</p>
+<p>For a laptop-only backup, LAN access is enough. A public tunnel is optional. A persistent Docker host can coexist with Pocket Nodes and a Cloudflare edge as independent replicas of the same Guild.</p>
 </section>
 <section class="card">
 <h2>4. Verify it</h2>
 <pre><code>curl http://127.0.0.1:8787/api/federation/health</code></pre>
-<p>When the local companion reports healthy, return to the Guild setup page and mark the Anchor as paired. A later pairing pass can replace this acknowledgement with cryptographic reconstruction proofs.</p>
+<p>When the local host reports healthy, return to Guild setup and mark it as paired. A later pairing pass can replace this acknowledgement with cryptographic reconstruction proofs.</p>
 </section>
 <section class="card">
-<h2>5. Connect Guildkeeper payouts</h2>
-<p>Open the local operator console, unlock its controls with this Anchor's internal credential, and choose <strong>Connect payouts</strong>. Stripe-hosted onboarding collects the Guildkeeper's identity, tax, bank, and payout details; Civweave stores only the connected-account identifier and readiness status.</p>
+<h2>5. Optional: give the Guild its own Cloudflare doorway</h2>
+<p>Only do this if you want an always-online public edge. Authenticate Wrangler to the Cloudflare account that should own this Guild, then choose a Guild ID:</p>
+<pre><code>npx wrangler login
+node scripts/setup-cloudflare-node.mjs --host-id &lt;guild-id&gt;</code></pre>
+<p class="note">That setup creates <code>civweave-&lt;guild-id&gt;.pages.dev</code>, the <code>civweave-host-edge</code> Worker, and three starter Durable Object nodes in the authenticated Cloudflare account. Nothing is created in the download source Guild's account.</p>
+</section>
+<section class="card">
+<h2>6. Connect Guildkeeper payouts</h2>
+<p>Open the local operator console, unlock its controls with this host's internal credential, and choose <strong>Connect payouts</strong>. Stripe-hosted onboarding collects the Guildkeeper's identity, tax, bank, and payout details; Civweave stores only the connected-account identifier and readiness status.</p>
 <div class="actions"><a class="primary" href="http://127.0.0.1:8787/app/node-ai-operator-v1.html#liveCommerce">Open operator payout setup</a></div>
 <p class="note">A created Stripe account is not enough: Guildkeeper revenue stays disabled until Stripe reports the connected account's transfer capability as active.</p>
 </section>
-<div class="actions"><a class="primary" href="/host-setup.html">Return to Guild setup</a><button type="button" id="mark-paired">Mark this Anchor paired</button></div>
-<p class="note">The current reminder is intentionally persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; marking the Anchor paired dismisses it for this Guildkeeper browser.</p>
+<div class="actions"><a class="primary" href="/host-setup.html">Return to Guild setup</a><a href="/app/index.html#guild-host-title">Return to Downloads</a><button type="button" id="mark-paired">Mark this host paired</button></div>
+<p class="note">The current reminder is intentionally persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; marking the host paired dismisses it for this Guildkeeper browser.</p>
 </main>
 </div>
 <script>

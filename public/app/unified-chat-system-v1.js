@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-unified-chat-system-v1';
+const VERSION='1.0.2-unified-chat-system-v1-learning-continuation';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -58,10 +58,11 @@ function stateForLivingSchool(){
   try{return globalThis.LivingSchoolCleanroomV218?.getState?.()||parse(localStorage.getItem('civweave.living-school.cabinet.v151'),{})}catch{return{}}
 }
 
-const STRUCTURE=/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\b/i;
+const STRUCTURE=/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|learning plan|study plan|lesson plan|skill tree)\b/i;
 const BUILD=/\b(build|create|make|generate|draft|design|develop|structure|regenerate|rebuild|revise|update|convert|start)\b/i;
 const REVISE=/\b(revise|update|regenerate|rebuild|edit|change|modify|continue|add|remove|expand|deepen|shorten|simplify)\b/i;
 const PRONOUN_BUILD=/^\s*(?:yes[,! ]*)?(?:let['’]?s\s+)?(?:go\s+ahead\s+and\s+)?(?:draft|build|make|generate|create|rebuild|revise|do)\s+(?:it|that|this)\s*[.!]?\s*$/i;
+const CONTINUE=/^\s*(?:[.…·•-]{1,8}|continue|continue please|keep going|go on|carry on|resume|resume please|finish|finish it|finish this|pick up where (?:you|we) left off|continue where (?:you|we) left off|and continue)\s*[.!?]*\s*$/i;
 const MUTATION_CLAIM=/(?:\b(?:i|we)(?:['’]ve|\s+have)\s+(?:drafted|created|built|generated|structured|saved|updated|revised|made)\b|\b(?:has\s+been|was)\s+(?:created|generated|built|saved|drafted|structured|revised)\b)/i;
 
 function rowsFor(options={}){
@@ -70,22 +71,27 @@ function rowsFor(options={}){
   if(current&&!rows.some((row,index)=>index>=rows.length-2&&clean(row?.text||row?.content,12000)===current))rows.push({role:'user',text:current});
   return rows.map(row=>({role:clean(row?.role,40)||'unknown',text:clean(row?.text||row?.content,5000)})).filter(row=>row.text);
 }
-function recentStructure(rows){return rows.slice(-8).some(row=>STRUCTURE.test(row.text))}
+function recentStructure(rows){return rows.slice(-10).some(row=>STRUCTURE.test(row.text))}
 function curriculumIntent(text,history=[]){
-  const value=clean(text,4000),rows=[...history.map(row=>({text:clean(row?.text||row?.content,4000)})),{text:value}];
+  const value=clean(text,4000),rows=[...history.map(row=>({role:clean(row?.role,40)||'unknown',text:clean(row?.text||row?.content,4000)})),{role:'user',text:value}];
   if(!value)return false;
-  if(STRUCTURE.test(value)&&(BUILD.test(value)||/\b(?:want|need|please|let['’]?s|ready)\b/i.test(value)))return true;
+  if(STRUCTURE.test(value)&&(BUILD.test(value)||/\b(?:want|need|please|let['’]?s|ready|help)\b/i.test(value)))return true;
   if(PRONOUN_BUILD.test(value)&&recentStructure(rows))return true;
+  if(CONTINUE.test(value)&&recentStructure(rows))return true;
   return BUILD.test(value)&&/\b(?:learning|lessons?|modules?)\b/i.test(value)&&recentStructure(rows);
 }
 function sentenceTail(value){return clean(value,1200).replace(/^[\s:,-]+/,'').split(/(?<=[.!?])\s+/)[0].replace(/[.!?]+$/,'').trim()}
 function normalizeSubject(value){return clean(sentenceTail(value).replace(/^how\s+(?:do|can|could|should|would)\s+(?:i|we)\s+/i,'').replace(/^how\s+to\s+/i,'').replace(/^learn(?:ing)?\s+(?:how\s+to\s+|to\s+)/i,'').replace(/^to\s+/i,'').replace(/^(?:about|on)\s+/i,''),1200)}
 function explicitSubject(text){
-  const value=clean(text,5000),patterns=[
-    /\b(?:build|create|make|generate|draft|design|develop|start|regenerate|rebuild)\s+(?:(?:me|us)\s+)?(?:(?:a|an|the|this|that|new)\s+)?(?:curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\s*(?:(?:about|on|for|to learn|covering)\s+|[:,-]\s*)(.+)$/i,
-    /\b(?:curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\s+(?:about|on|for|to learn|covering)\s+(.+)$/i
+  const value=clean(text,5000),structure='(?:curriculum|course|syllabus|learning path|learning pathway|learning program|learning plan|study plan|lesson plan|skill tree)',patterns=[
+    new RegExp(`\\b(?:(?:can|could|would)\\s+you\\s+help\\s+(?:me|us)\\s+)?(?:build|create|make|generate|draft|design|develop|start|regenerate|rebuild)\\s+(?:(?:me|us)\\s+)?(?:(?:a|an|the|this|that|new)\\s+)?${structure}\\s*(?:(?:about|on|for|to learn|covering|that teaches?|to teach)\\s+|[:,-]\\s*)(.+)$`,'i'),
+    new RegExp(`\\b${structure}\\s+(?:about|on|for|to learn|covering|that teaches?|to teach)\\s+(.+)$`,'i')
   ];
   for(const pattern of patterns){const match=value.match(pattern);if(match){const subject=normalizeSubject(match[1]);if(subject.length>2)return subject}}
+  return'';
+}
+function recentSubject(rows){
+  for(const row of [...rows].reverse())if(row.role==='user'){const subject=explicitSubject(row.text);if(subject)return subject}
   return'';
 }
 function userCapability(rows){
@@ -102,11 +108,11 @@ function moduleCount(rows,current){
   return 4;
 }
 function curriculumRequest(options={}){
-  const rows=rowsFor(options),state=stateForLivingSchool(),school=state?.school||{},path=state?.pathContext||{},text=clean(options.text,5000),subject=explicitSubject(text);
-  const hasActive=Boolean(school?.title||school?.capability),newPath=Boolean(subject||/\bnew\s+(?:curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\b/i.test(text)||!hasActive||(STRUCTURE.test(text)&&BUILD.test(text)&&!REVISE.test(text)));
-  const capability=clean(newPath?(subject||userCapability(rows)):(school.capability||path.capability||userCapability(rows)),2400);
+  const rows=rowsFor(options),state=stateForLivingSchool(),school=state?.school||{},path=state?.pathContext||{},text=clean(options.text,5000),continuing=CONTINUE.test(text),subject=explicitSubject(text)||(continuing?recentSubject(rows):'');
+  const hasActive=Boolean(school?.title||school?.capability),newPath=Boolean(subject||/\bnew\s+(?:curriculum|course|syllabus|learning path|learning pathway|learning program|learning plan|study plan|lesson plan|skill tree)\b/i.test(text)||!hasActive||(STRUCTURE.test(text)&&BUILD.test(text)&&!REVISE.test(text)));
+  const capability=clean(newPath?(subject||recentSubject(rows)||userCapability(rows)):(school.capability||path.capability||recentSubject(rows)||userCapability(rows)),2400);
   const title=clean(newPath?(titleCase(subject||capability)):(school.title||path.title||titleCase(capability)),240)||'Learning Path';
-  return{title,capability,level:newPath?'beginner':clean(school.level,80)||'beginner',count:moduleCount(rows,newPath?0:school.modules?.length),mode:clean(state?.settings?.mode,80)||'guided',modelRoute:clean(state?.settings?.modelRoute,120)||'shared',proof:newPath?'A working artifact, explanation, and independent receipt.':clean(school.proof||path.proof,3000)||'A working artifact, explanation, and independent receipt.',intent:newPath?'new':'revise',newPath,replaceExisting:newPath,requestedAt:now(),sourceText:clean(options.text,4000)};
+  return{title,capability,level:newPath?'beginner':clean(school.level,80)||'beginner',count:moduleCount(rows,newPath?0:school.modules?.length),mode:clean(state?.settings?.mode,80)||'guided',modelRoute:clean(state?.settings?.modelRoute,120)||'shared',proof:newPath?'A working artifact, explanation, and independent receipt.':clean(school.proof||path.proof,3000)||'A working artifact, explanation, and independent receipt.',intent:newPath?'new':'revise',newPath,replaceExisting:newPath,requestedAt:now(),sourceText:clean(options.text,4000),continuation:continuing};
 }
 function packet(answer,nextAction='',extra={}){return{response:{answer,choice:{mode:'Learn',system:'living-school',room:'',nextAction},assumptions:[],requiresConsent:false,confidence:.99},provider:extra.provider||'unified-chat-capability',model:extra.model||'living-school-learning-engine',action:extra.action||null,context:{guide:{system:'living-school',name:'Moss'},capability:'curriculum'},fallbackFrom:null}}
 async function runLivingSchoolCurriculum(options={}){
@@ -170,7 +176,7 @@ function synchronize(){normalizeSurface();patchLoader();patchAssistant();consume
 function bindLifecycle(){
   if(lifecycleBound)return;
   lifecycleBound=true;
-  for(const name of ['civweave:guide-workspace-ready','civweave:guide-loader-reset','civweave:living-school-workbench-ready','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
+  for(const name of ['civweave:guide-workspace-ready','civweave:guide-loader-reset','civweave:assistant-runtime-ready','civweave:response-router-installed','civweave:living-school-workbench-ready','civweave:guide-chat-opened','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
 }
 function start(){bindLifecycle();synchronize();document.documentElement.dataset.civweaveChatSystem='unified-v1'}
 

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const REVISION='installer-repair-only-v2-cache-distinct-lazy-guild-tools-quest-threshold-v3';
+const REVISION='installer-repair-only-v2-cache-distinct-lazy-guild-tools-quest-threshold-v5-auto-self-heal-controller-sync';
 const CANONICAL_NEXT_PATHS=new Set([
   '/app/working-campus-v156.html',
   '/app/cabinets/living-school/index.html',
@@ -17,6 +17,8 @@ const installButton=document.getElementById('install-app');
 const updateButton=document.getElementById('check-update');
 const helpNode=document.getElementById('install-help');
 let repairing=false;
+let autoRepairAttempted=false;
+let autoRepairQueued=false;
 let hubToolsStarted=false;
 
 function installedDisplay(){
@@ -174,11 +176,20 @@ async function requestRepair(){
     catch(error){clearTimeout(timer);reject(error)}
   });
 }
-async function repairInstalledShell(){
+async function syncInstallerController(){
+  const installer=globalThis.CivweaveInstallerV130;
+  if(!installer?.prepareShell)return false;
+  if(installer.shellReady)return true;
+  await installer.prepareShell({manual:false});
+  return Boolean(installer.shellReady);
+}
+async function repairInstalledShell({automatic=false}={}){
   if(repairing)return;
+  if(automatic&&autoRepairAttempted)return;
+  if(automatic)autoRepairAttempted=true;
   repairing=true;
-  if(installButton){installButton.disabled=true;installButton.textContent='Repairing shell…'}
-  if(updateButton){updateButton.disabled=true;updateButton.textContent='Repairing shell…'}
+  if(installButton){installButton.disabled=true;installButton.textContent=automatic?'Repairing shell automatically…':'Repairing shell…'}
+  if(updateButton){updateButton.disabled=true;updateButton.textContent=automatic?'Repairing shell automatically…':'Repairing shell…'}
   if(helpNode)helpNode.textContent='Rebuilding only the small verified Civweave shell. Campus, model, media, and knowledge-school storage are untouched.';
   try{
     const packet=await requestRepair();
@@ -187,6 +198,8 @@ async function repairInstalledShell(){
       const first=Array.isArray(packet.failures)&&packet.failures[0];
       throw new Error(first?.message||packet.error||'The verified shell is still incomplete.');
     }
+    if(!(await syncInstallerController()))throw new Error('The shell was repaired, but the installer controller did not confirm readiness.');
+    autoRepairAttempted=false;
     if(stateNode)stateNode.textContent='ready';
     if(assetsNode&&packet.assetCount)assetsNode.textContent=`${packet.presentCount||packet.assetCount}/${packet.assetCount} shell files`;
     if(updateButton){updateButton.disabled=false;updateButton.textContent='Check release'}
@@ -194,7 +207,7 @@ async function repairInstalledShell(){
       if(helpNode)helpNode.textContent='Civweave shell repaired. Opening the installed app.';
       location.assign(installedEntryUrl());
     }else{
-      if(helpNode)helpNode.textContent='Civweave shell repaired. Install or open Civweave from your device app launcher; the campus does not run in a browser tab.';
+      if(helpNode)helpNode.textContent=automatic?'Civweave repaired the incomplete shell automatically. Continue with Install Civweave.':'Civweave shell repaired. Install or open Civweave from your device app launcher; the campus does not run in a browser tab.';
       if(installButton){installButton.disabled=false;installButton.textContent='Install Civweave'}
       queueMicrotask(()=>globalThis.CivweavePWAInstallV250?.refresh?.());
     }
@@ -205,8 +218,20 @@ async function repairInstalledShell(){
     if(updateButton){updateButton.disabled=false;updateButton.textContent='Repair shell'}
   }finally{repairing=false}
 }
+function queueAutomaticRepair(){
+  if(repairing||autoRepairAttempted||autoRepairQueued||!failed())return false;
+  autoRepairQueued=true;
+  if(helpNode)helpNode.textContent='The small app shell is incomplete. Civweave is repairing it automatically while preserving campus, model, media, and knowledge-school storage.';
+  queueMicrotask(()=>{
+    autoRepairQueued=false;
+    if(repairing||autoRepairAttempted||!failed())return;
+    void repairInstalledShell({automatic:true});
+  });
+  return true;
+}
 function apply(){
   if(repairing||!failed())return;
+  if(queueAutomaticRepair())return;
   if(installButton){
     installButton.disabled=false;
     if(installButton.textContent!=='Repair shell')installButton.textContent='Repair shell';
@@ -258,6 +283,8 @@ const api=Object.freeze({
   resumeRequiredNext,
   browserRuntimePolicy:'installer-only-until-installed-display',
   repairMessage:'REPAIR_DEVICE_PACKAGE',
+  autoRepairPolicy:'one-automatic-attempt-before-manual-repair',
+  controllerSyncPolicy:'repair-worker-then-confirm-through-installer-controller',
   storagePolicy:'preserve-campus-model-media-school-storage',
   hubToolsPolicy:'explicit-user-load-only',
   firstPaintHubWork:false,

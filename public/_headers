@@ -6,6 +6,9 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: same-origin
 
+/pwa-installability-worker-v1.js
+  Cache-Control: no-cache
+
 /app/install-boundary-v146.js
   Cache-Control: no-cache
 
@@ -15,14 +18,11 @@
 /app/installed-entry-v146.html
   Cache-Control: no-cache
 
-/app/pwa-install-prompt-v247.js
-  Cache-Control: no-cache
-
 /app/pwa-install-prompt-v249.js
   Cache-Control: no-cache
 
 /app/pwa-install-prompt-v250.js
-  Cache-Control: no-cache
+  Cache-Control: no-store, max-age=0
 
 /app/installer-repair-only-v1.js
   Cache-Control: no-cache

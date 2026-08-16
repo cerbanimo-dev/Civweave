@@ -1,0 +1,166 @@
+name: Lud Mode contract
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/lud/**'
+      - 'public/app/lud-*.css'
+      - 'public/app/lud-*.js'
+      - 'public/app/lud-*.json'
+      - 'public/app/quest-arc-chronicle-v1.js'
+      - 'public/app/quest-verse-generator-v1.js'
+      - 'public/app/quest-chronicle-receipts-v1.js'
+      - 'public/app/realm-console-v140.html'
+      - 'public/app/human-validation-neuron-client-v1.js'
+      - 'public/app/node-ai-mesh-v1.js'
+      - 'public/app/cerbanimo-quest-engine-v144.js'
+      - 'public/app/proposal-voting-gate-v2.js'
+      - 'public/app/local-object-mesh-v146.js'
+      - 'public/app/shared/civweave-identity-sync.js'
+      - 'public/app/shared/civweave-passport-identity-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-installer-lobby-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'public/app/host-node-paid-join-v1.js'
+      - 'public/app/host-node-status-selection-v1.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
+      - 'functions/api/ai/node/generate.ts'
+      - 'public/service-worker-lud-package-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-lud-mode-v1.mjs'
+      - 'scripts/test-lud-human-validation-neurons-v1.mjs'
+      - 'scripts/test-lud-guild-passport-v1.mjs'
+      - 'scripts/test-lud-game-ui-v1.mjs'
+      - 'scripts/test-quest-arc-chronicle-v1.mjs'
+      - 'scripts/test-quest-verse-generator-v1.mjs'
+      - 'scripts/test-quest-chronicle-receipts-v1.mjs'
+      - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
+      - 'docs/architecture/lud-mode-v1.md'
+      - 'docs/architecture/quest-arc-chronicle-v1.md'
+      - 'config/system-ownership.json'
+      - '.github/workflows/lud-mode-contract.yml'
+  push:
+    branches:
+      - staging
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/lud/**'
+      - 'public/app/lud-*.css'
+      - 'public/app/lud-*.js'
+      - 'public/app/lud-*.json'
+      - 'public/app/quest-arc-chronicle-v1.js'
+      - 'public/app/quest-verse-generator-v1.js'
+      - 'public/app/quest-chronicle-receipts-v1.js'
+      - 'public/app/realm-console-v140.html'
+      - 'public/app/human-validation-neuron-client-v1.js'
+      - 'public/app/node-ai-mesh-v1.js'
+      - 'public/app/cerbanimo-quest-engine-v144.js'
+      - 'public/app/proposal-voting-gate-v2.js'
+      - 'public/app/local-object-mesh-v146.js'
+      - 'public/app/shared/civweave-identity-sync.js'
+      - 'public/app/shared/civweave-passport-identity-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-installer-lobby-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'public/app/host-node-paid-join-v1.js'
+      - 'public/app/host-node-status-selection-v1.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
+      - 'functions/api/ai/node/generate.ts'
+      - 'public/service-worker-lud-package-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-lud-mode-v1.mjs'
+      - 'scripts/test-lud-human-validation-neurons-v1.mjs'
+      - 'scripts/test-lud-guild-passport-v1.mjs'
+      - 'scripts/test-lud-game-ui-v1.mjs'
+      - 'scripts/test-quest-arc-chronicle-v1.mjs'
+      - 'scripts/test-quest-verse-generator-v1.mjs'
+      - 'scripts/test-quest-chronicle-receipts-v1.mjs'
+      - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
+      - 'docs/architecture/lud-mode-v1.md'
+      - 'docs/architecture/quest-arc-chronicle-v1.md'
+      - 'config/system-ownership.json'
+      - '.github/workflows/lud-mode-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check Lud runtime
+        run: |
+          node --check public/app/content-provenance-v1.js
+          node --check public/app/lud-mode-v1.js
+          node --check public/app/lud-game-ui-v1.js
+          node --check public/app/lud-human-tools-v1.js
+          node --check public/app/lud-manual-authoring-v1.js
+          node --check public/app/quest-arc-chronicle-v1.js
+          node --check public/app/quest-verse-generator-v1.js
+          node --check public/app/quest-chronicle-receipts-v1.js
+          node --check public/app/human-validation-neuron-client-v1.js
+          node --check public/app/lud-installer-v1.js
+          node --check public/app/shared/civweave-identity-sync.js
+          node --check public/app/shared/civweave-passport-identity-v1.js
+          node --check public/app/host-node-session-v1.js
+          node --check public/app/host-node-installer-lobby-v1.js
+          node --check public/app/host-node-local-capacity-v1.js
+          node --check public/app/host-node-paid-join-v1.js
+          node --check public/app/host-node-status-selection-v1.js
+          node --check public/app/fast-interactive-runtime-v192.js
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/service-worker-lud-package-v1.js
+          node --check cloudflare/node-cloud/src/capacity-human-validation-v1.mjs
+          node --check cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v5.mjs
+          node --check scripts/test-lud-human-validation-neurons-v1.mjs
+          node --check scripts/test-lud-guild-passport-v1.mjs
+          node --check scripts/test-lud-game-ui-v1.mjs
+          node --check scripts/test-quest-arc-chronicle-v1.mjs
+          node --check scripts/test-quest-verse-generator-v1.mjs
+          node --check scripts/test-quest-chronicle-receipts-v1.mjs
+          node --check scripts/browser-lud-mode-gauntlet-v1.mjs
+      - name: Verify Quest Chronicle contracts
+        run: |
+          node --test scripts/test-quest-arc-chronicle-v1.mjs
+          node --test scripts/test-quest-verse-generator-v1.mjs
+          node --test scripts/test-quest-chronicle-receipts-v1.mjs
+      - name: Verify inherited Lud contracts
+        run: |
+          check() {
+            output=$(node --test "$1" 2>&1) || {
+              printf '%s\n' "$output"
+              message=$(printf '%s' "$output" | tail -c 1800 | tr '\n' ' ' | sed 's/%/%25/g')
+              echo "::error file=$1::$message"
+              exit 1
+            }
+            printf '%s\n' "$output"
+          }
+          check scripts/test-lud-mode-v1.mjs
+          check scripts/test-lud-human-validation-neurons-v1.mjs
+          check scripts/test-lud-guild-passport-v1.mjs
+          check scripts/test-lud-game-ui-v1.mjs
+      - name: Install browser gauntlet
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install chromium
+      - name: Exercise Lud download, canonical open, and offline reload
+        run: node scripts/browser-lud-mode-gauntlet-v1.mjs

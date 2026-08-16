@@ -10,34 +10,50 @@ const bootstrap=await readFile('public/app/local-ai/bootstrap-v266.js','utf8');
 const registry=await readFile('public/app/local-ai/model-registry-v266.js','utf8');
 const packageGuard=await readFile('public/app/local-ai/package-revision-guard-v307.js','utf8');
 
-assert.match(localAIGate,/CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307'/,'dedicated local AI code gate must advertise v307');
+assert.match(localAIGate,/CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v308-bootstrap-capability'/,'dedicated local AI code gate must advertise the bootstrap capability epoch');
 assert.match(localAIGate,/url\.pathname\.startsWith\('\/app\/local-ai\/'\)/,'all local AI modules must be owned by the dedicated gate');
 assert.match(localAIGate,/event\.stopImmediatePropagation\(\)/,'local AI gate must stop later generic cache handlers from owning the request');
 assert.match(localAIGate,/new Request\(pathnameOrRequest, \{ cache: 'no-store' \}\)/,'local AI gate must request current network bytes');
 assert.match(localAIGate,/cache\.match\(key, \{ ignoreSearch: true \}\).*caches\.match\(key, \{ ignoreSearch: true \}\)/s,'local AI gate must retain cached offline fallback');
-assert.match(localAIGate,/package-revision-guard-v307\.js/,'new package revision guard must be prefetched for offline recovery');
+assert.match(localAIGate,/package-revision-guard-v307\.js/,'package revision guard must be prefetched for offline recovery');
+assert.match(localAIGate,/bootstrapCapabilityReadiness: true/,'coherence gate must expose the bootstrap capability repair marker');
 
 const localGateImport="importScripts('/service-worker-local-ai-coherence-v307.js";
 const genericCodeImport="importScripts('/service-worker-code-coherence-v288.js";
 const coreImport="importScripts('/service-worker-core-v208.js";
-assert.ok(generated.includes(`${localGateImport}?v=${releaseVersion}-local-ai-code-coherence-v307`),'generated service worker must rotate the local AI coherence epoch with the release');
+assert.ok(generated.includes(`${localGateImport}?v=${releaseVersion}-local-ai-code-coherence-v308-bootstrap-capability`),'generated service worker must rotate the local AI coherence epoch with the release');
 assert.ok(generated.indexOf(localGateImport)>=0&&generated.indexOf(localGateImport)<generated.indexOf(genericCodeImport)&&generated.indexOf(genericCodeImport)<generated.indexOf(coreImport),'local AI code gate must register before generic code coherence and the shell core');
-assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=\$\{version\}-local-ai-code-coherence-v307/,'service worker generator must preserve the local AI v307 epoch');
-assert.match(builder,/localAICodeCoherence:'v307-network-first-pre-core'/,'service worker diagnostics must expose the dedicated local AI code policy');
+assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=\$\{version\}-local-ai-code-coherence-v308-bootstrap-capability/,'service worker generator must preserve the local AI bootstrap capability epoch');
+assert.match(builder,/localAICodeCoherence:'v308-bootstrap-capability-network-first-pre-core'/,'service worker diagnostics must expose the dedicated local AI code policy');
+assert.match(builder,/selectedLocalMiniLM:'v357'/,'service worker generator must preserve selected-local/MiniLM cache repair');
+assert.match(builder,/serverAutoFailover:'v358'/,'service worker generator must preserve server-auto fallback cache repair');
+assert.match(builder,/localAIBootstrapCapability:'v359'/,'service worker diagnostics must expose the bootstrap capability epoch');
 assert.match(generated,/working-campus-return-v425/,'local AI worker changes must preserve the current Working Campus return epoch');
 assert.match(generated,/chat-convergence-v250/,'local AI worker changes must preserve the current chat convergence epoch');
+assert.match(generated,/selected-local-minilm-v357/,'generated worker must preserve selected-local/MiniLM delivery');
+assert.match(generated,/server-auto-local-failover-v358/,'generated worker must preserve server-auto local failover delivery');
+assert.match(generated,/local-ai-bootstrap-capability-v359/,'generated worker must activate the bootstrap capability repair');
 
-assert.doesNotMatch(family,/local-ai\/bootstrap-v266\.js/,'generic family assistant loading must not bootstrap the local AI stack');
-assert.match(family,/localModelPathway:'explicit-demand-only-v315'/,'family loader must advertise explicit-demand local AI ownership');
+// The family loader may bootstrap local AI only after a selected/configured local
+// route is actually requested. Ordinary family loading and optional modules must
+// remain free of generative local-AI startup side effects.
+assert.match(family,/const LOCAL_BOOTSTRAP=\['\/app\/local-ai\/bootstrap-v266\.js/,'family loader must retain the on-demand local bootstrap path');
+assert.match(family,/async function ensureLocalAI\(\)\{\s*if\(!localRequested\(\)\)return false;/s,'family loader must gate local bootstrap behind an actual local-model request');
+assert.match(family,/await loadScript\(\.\.\.LOCAL_BOOTSTRAP\)/,'selected local generation must be able to initialize its bootstrap');
+assert.match(family,/localModelPathway:'selected-model-on-demand-v316'/,'family loader must advertise selected-model on-demand local AI ownership');
 assert.match(family,/localAIOptionalSideEffects:false/,'generic assistant optional loading must stay free of local-AI side effects');
 
-assert.match(bootstrap,/componentCompatibility:'capability-contract-v307'/,'bootstrap must advertise the v307 compatibility contract');
+assert.match(bootstrap,/componentCompatibility:'capability-contract-v324'/,'bootstrap must advertise the mutable-component capability contract');
+assert.match(bootstrap,/mutableComponentCapabilityReadiness:true/,'bootstrap must expose capability-based mutable support module readiness');
 assert.match(bootstrap,/coherenceReload:true/,'bootstrap must expose stale-global coherence reload support');
 assert.match(bootstrap,/function evict\(name,ready\)/,'bootstrap must be able to evict an incompatible resident component');
 assert.match(bootstrap,/shutdown\?\.\(\{reason:'bootstrap-coherence-reload'\}\)/,'runtime eviction must shut down the old inference worker first');
 assert.match(bootstrap,/delete globalThis\[name\]/,'bootstrap must delete incompatible globals so same-version module guards cannot deadlock reload');
 assert.match(bootstrap,/metadataReady=.*?metadataRepairRaceSafe===true/s,'metadata repair readiness must include its wrapped-manager capability marker');
-assert.match(bootstrap,/downloadPolicyReady=.*?largeExternalDataForeground===true/s,'download policy readiness must include its wrapped-manager capability marker');
+assert.match(bootstrap,/downloadManagerReady=.*?explicitSyncOnly===true.*?autoSyncOnLoad===false/s,'download manager readiness must be capability based instead of pinned to a retired version');
+assert.match(bootstrap,/downloadPolicyReady=.*?largeExternalDataForeground===true.*?explicitSyncOnly===true/s,'download policy readiness must include its wrapped-manager capability marker');
+assert.match(bootstrap,/settingsReady=.*?snapshotOnlyView===true.*?settingsPresentationOwnership===false/s,'settings readiness must follow its current view-only capability contract');
+assert.match(bootstrap,/hardwareTierReady=.*?deviceFitRecommendations===true.*?settingsOpenGpuProbe===false/s,'hardware tier readiness must follow current device-fit capabilities');
 assert.match(bootstrap,/bridgeReady=.*?continuationValidation===true/s,'runtime bridge readiness must include the capability required by bootstrap');
 assert.match(bootstrap,/packageRevisionReady=.*?packageRevisionGuard===true/s,'bootstrap must require the local package revision migration guard');
 assert.match(bootstrap,/download-manager-v267[^\n]*[\s\S]*package-revision-guard-v307[^\n]*[\s\S]*download-policy-v278/,'package revision guard must install immediately after the download manager and before wrappers that preserve it');
@@ -59,14 +75,18 @@ assert.match(packageGuard,/preservesCachedWeights:true/,'migration must preserve
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-bootstrap-coherence-v307-explicit-demand-v315',
+  revision:'local-ai-bootstrap-coherence-v324-capability-readiness',
   releaseVersion,
-  localAICodeDelivery:'dedicated-network-first-pre-core-offline-cache-fallback',
+  localAICodeDelivery:'dedicated-network-first-pre-core-offline-cache-fallback-v308',
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
-  familyLoaderPolicy:'no-local-ai-bootstrap-side-effects',
+  bootstrapCompatibility:'capability-contract-v324',
+  familyLoaderPolicy:'selected-model-on-demand-only',
   incompatibleGlobals:'evicted-before-reload',
+  mutableSupportModules:'capability-gated-not-exact-version-pinned',
   gemma3Profile:'transformers-js-v4-q4-optimized',
   packageMigration:'stale-selection-suppressed-until-replacement-ready',
+  selectedLocalMiniLMPreserved:true,
+  serverAutoFailoverPreserved:true,
   workingCampusReturnPreserved:true,
   chatConvergencePreserved:true,
   staleQueryRetryPrevented:true,

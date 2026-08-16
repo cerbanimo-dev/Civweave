@@ -1,4 +1,4 @@
-import { CivweaveUserPoolCapacityAccount as BaseCapacityAccount } from './capacity-user-pools-v2.mjs';
+import { CivweaveHumanValidationCapacityAccount as BaseCapacityAccount } from './capacity-human-validation-v1.mjs';
 
 export const CIVWEAVE_HUB_HOSTING = Object.freeze({
   schema: 'civweave.hub-hosting.v1',

@@ -56,11 +56,11 @@ const CRITICAL_FILES=[
   '/extensions/civweave-antigravity-live-source-guard-v167.js',
   '/app/assets/ai/moss-acorn.png',
   '/app/assets/ai/weaveling-compass.png',
-  '/app/assets/navigation/200-civweave-nav.webp',
-  '/app/assets/navigation/200-cerbanimo-nav.webp',
-  '/app/assets/navigation/200-living-school-nav.webp',
-  '/app/assets/navigation/200-fellowfare-nav.webp',
-  '/app/assets/navigation/200-anarchadia-nav.webp'
+  '/Civweave-weaveling-sprites.png',
+  '/Cerbanimo-kamiya-sprites.png',
+  '/Living-School-moss-sprites.png',
+  '/FellowFare-rook-sprites.png',
+  '/Anarchadia-merlin-sprites.png'
 ];
 const CRITICAL_PATHS=new Set(CRITICAL_FILES);
 let finalized=false;

@@ -13,17 +13,150 @@
 (()=>{
 'use strict';
 const frame=document.getElementById('hubMapFrame');
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const GUILD_SCOUT_CSS=`
+:root{--scout-ink:#07131f;--scout-deep:#091a25;--scout-panel:#0a1924f5;--scout-line:#d8bd7445;--scout-gold:#f2d483;--scout-gold-soft:#f2d48320;--scout-mint:#86e4d1;--scout-violet:#b99cff;--scout-parchment:#f4ead2;--scout-shadow:#02070dcc}
+body{background:var(--scout-ink)}
+.top{min-height:72px;padding:max(12px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--scout-line);background:linear-gradient(180deg,#07131ff7,#091a25f2);box-shadow:0 10px 30px #0006}
+.brand small{color:var(--scout-gold);font-size:9px;letter-spacing:.18em;font-weight:700}
+.brand strong{font-size:24px;color:var(--scout-parchment);text-shadow:0 2px 14px #0008}
+.status{justify-self:end;max-width:min(43vw,520px);padding:7px 10px;border:1px solid #86e4d127;border-radius:999px;background:#86e4d10b;color:#acd7d0;font-size:9px;letter-spacing:.035em}
+.btn{min-height:42px;border:1px solid #f2d4832e;border-radius:13px;padding:9px 13px;background:linear-gradient(180deg,#ffffff0d,#ffffff06);box-shadow:inset 0 1px #ffffff0d,0 4px 14px #0002;transition:transform .12s ease,border-color .12s ease,background .12s ease;touch-action:manipulation}
+.btn:hover,.btn:focus-visible,.btn.active{border-color:#f2d4838a;background:linear-gradient(180deg,#f2d4831c,#86e4d10d);outline:none}
+.btn:active{transform:translateY(1px)}
+.btn.primary{border-color:#f2d48386;background:linear-gradient(180deg,#f2d48325,#86e4d112);color:#fff7df;font-weight:700}
+.layout{grid-template-columns:minmax(310px,400px) minmax(0,1fr)}
+.panel{padding:16px;border-right:1px solid var(--scout-line);background:radial-gradient(circle at 10% 0%,#153344 0,#0a1924 38%,#07131f 100%);box-shadow:18px 0 50px #0005;scrollbar-color:#f2d48350 transparent}
+.panel h2{margin:2px 0 7px;font-size:27px;line-height:1.03;color:var(--scout-parchment);text-shadow:0 2px 18px #0008}
+.panel h2 + p{font-size:11px;line-height:1.62;color:#b4c7c8}
+.panel h3{margin-top:20px;color:var(--scout-gold);font-size:9px;letter-spacing:.18em}
+.scout-brief{position:relative;margin:14px 0 16px;padding:13px 14px 13px 15px;border:1px solid #f2d48342;border-radius:15px;background:linear-gradient(135deg,#f2d48312,#86e4d108 62%,#b99cff0b);box-shadow:inset 0 1px #ffffff0c,0 10px 28px #0002;overflow:hidden}
+.scout-brief:before{content:'✦';position:absolute;right:12px;top:7px;color:#f2d48348;font-size:31px}
+.scout-brief small{display:block;margin-bottom:4px;color:var(--scout-mint);font-size:8px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.scout-brief strong{display:block;max-width:85%;font:italic 17px Georgia,serif;color:#fff5dc}
+.scout-brief p{margin:5px 0 0!important;max-width:92%;font-size:10px!important;line-height:1.48!important;color:#aabfc0!important}
+.field label{color:#9fb6b5;font-size:8px;letter-spacing:.14em;font-weight:700}
+.field input,.field select{min-height:44px;border-color:#f2d48330;border-radius:12px;background:#02090fd9;box-shadow:inset 0 1px 0 #ffffff08;color:#fff6df}
+.field input:focus,.field select:focus{border-color:#86e4d180;outline:2px solid #86e4d11f;outline-offset:1px}
+.searchrow{gap:8px}
+.guild-scout-mode{margin:10px 0 12px}
+.guild-scout-mode .btn{width:100%;border-color:#86e4d15f;background:#86e4d10e;color:#dffbf4;font-weight:750;letter-spacing:.035em}
+.stats.guild-scout-stats{grid-template-columns:1fr;margin:8px 0 12px}
+.stats.guild-scout-stats .stat{padding:12px 13px;border-color:#f2d4832c;border-radius:14px;background:linear-gradient(135deg,#f2d48311,#ffffff05)}
+.stats.guild-scout-stats .stat strong{font:italic 24px Georgia,serif;color:#fff1c7}
+.stats.guild-scout-stats .stat small{color:#9fb6b5;letter-spacing:.15em}
+.legend{grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 2px}
+.legend span{padding:7px 8px;border:1px solid #ffffff10;border-radius:10px;background:#ffffff05;font-size:8px;color:#aabfc0}
+.legend .dot{width:9px;height:9px;box-shadow:0 0 0 3px #ffffff08}
+.results{gap:7px;max-height:290px}
+.results-heading{color:var(--scout-gold);font-weight:750;letter-spacing:.14em}
+.results button{padding:10px 11px;border-color:#f2d48320;border-radius:12px;background:linear-gradient(180deg,#ffffff08,#ffffff04)}
+.results button:hover,.results button:focus-visible{border-color:#86e4d16f;background:#86e4d10b;outline:none}
+.empty{padding:11px;border-color:#f2d48325;border-radius:12px;color:#9fb6b5;background:#ffffff03}
+.card{padding:12px;border-color:#f2d4832d;border-radius:14px;background:linear-gradient(145deg,#ffffff09,#ffffff04);box-shadow:inset 0 1px #ffffff09}
+.card strong{color:#fff2cf;font-size:12px}
+.card a{color:var(--scout-mint)}
+.note{margin-top:14px;padding:11px 12px;border-color:#86e4d127;border-radius:13px;background:#86e4d108;color:#a9c9c4}
+.provider-badge{border-color:#f2d48320;border-radius:11px;background:#07131fe6;color:#91a9aa}
+.maplibregl-ctrl-group{border-color:#f2d48338!important;border-radius:12px!important;overflow:hidden;box-shadow:0 8px 24px #0005!important}
+.maplibregl-ctrl-group button{width:38px!important;height:38px!important;background-color:#07131fe8!important}
+.maplibregl-ctrl-group button:hover{background-color:#f2d48318!important}
+.maplibregl-ctrl-attrib{border:1px solid #f2d48318!important;border-radius:9px!important}
+#hubMapLedger{margin-top:2px;padding-top:2px}
+#hubMapLedger .row .btn{font-size:10px}
+#hubGossipStatus{padding:9px 10px;border-left:2px solid #86e4d155;background:#86e4d106;border-radius:0 9px 9px 0}
+@media(max-width:760px){
+ .top{min-height:94px;padding-left:12px;padding-right:12px}.brand strong{font-size:20px}.brand small{font-size:8px;letter-spacing:.13em}.status{grid-column:1/-1;justify-self:stretch;max-width:none;text-align:left;padding:6px 9px}
+ .layout{grid-template-columns:1fr}.panel{top:104px;left:7px;bottom:calc(7px + env(safe-area-inset-bottom));width:min(93vw,390px);padding:14px;border-color:#f2d48335;border-radius:17px;box-shadow:0 20px 60px #000c}
+ .panel h2{font-size:25px}.btn{min-height:44px}.mobile-toggle{font-weight:750;color:#fff0c8}.scout-brief{margin-top:12px}
+}
+`;
 function addScript(doc,src,onload){const script=doc.createElement('script');script.src=src;script.async=false;if(onload)script.onload=onload;doc.body.append(script)}
+function setText(el,text){if(el)el.textContent=text}
+function addScoutStyles(doc){
+  if(doc.getElementById('civweave-guild-scout-ui'))return;
+  const style=doc.createElement('style');style.id='civweave-guild-scout-ui';style.textContent=GUILD_SCOUT_CSS;doc.head.append(style);
+}
+function hideLegacyNodeDiscovery(doc){
+  const heading=[...doc.querySelectorAll('.panel > h3')].find(el=>/^Node discovery$/i.test(el.textContent.trim()));
+  let el=heading;
+  for(let i=0;i<4&&el;i++){
+    const next=el.nextElementSibling;el.hidden=true;el=next;
+  }
+}
+function installScoutCopy(doc){
+  const panel=doc.getElementById('panel');
+  setText(doc.getElementById('back'),'← Civweave');
+  setText(doc.querySelector('.brand small'),"HERO'S FIELD MAP · LOCAL GUILDS · OFFLINE READY");
+  setText(doc.querySelector('.brand strong'),'Guild Scout');
+  setText(panel?.querySelector('h2'),'Scout the Guild Halls');
+  setText(panel?.querySelector('h2 + p'),'Every Guild has a place in the world. Scout the halls near you, read what the community needs and offers, and join when you find one that feels like home.');
+  const intro=panel?.querySelector('h2 + p');
+  if(intro&&!doc.getElementById('guildScoutBrief')){
+    const brief=doc.createElement('div');brief.id='guildScoutBrief';brief.className='scout-brief';brief.innerHTML='<small>Field Quest</small><strong>Find a Guild worth visiting.</strong><p>Choose a place, follow a beacon, and open the hall to see its local board, Rally Point, and ways to take part.</p>';intro.after(brief);
+  }
+  const searchLabel=doc.querySelector('label[for="search"]'),search=doc.getElementById('search'),searchButton=doc.getElementById('searchButton');
+  setText(searchLabel,'Where are you scouting?');if(search)search.placeholder='Town, neighborhood, landmark, or coordinates';setText(searchButton,'✦ Scout');
+  const modeRow=doc.getElementById('modeNodes')?.closest('.row');modeRow?.classList.add('guild-scout-mode');setText(doc.getElementById('modeNodes'),'⚑ Guild halls');
+  const featureStat=doc.getElementById('featureCount')?.closest('.stat'),atlasStat=doc.getElementById('atlasCount')?.closest('.stat'),nodeStat=doc.getElementById('nodeCount')?.closest('.stat');
+  if(featureStat)featureStat.hidden=true;if(atlasStat)atlasStat.hidden=true;if(nodeStat){setText(nodeStat.querySelector('small'),'Guild halls on the map');nodeStat.parentElement?.classList.add('guild-scout-stats')}
+  const legend=doc.querySelector('.legend');if(legend)legend.innerHTML='<span><i class="dot" style="background:var(--scout-gold)"></i>Guild hall</span><span><i class="dot" style="background:var(--scout-violet)"></i>Guild cluster</span>';
+  const mapSkin=[...doc.querySelectorAll('.panel > h3')].find(el=>/^Map skin$/i.test(el.textContent.trim()));setText(mapSkin,'Field map');
+  setText(doc.querySelector('label[for="theme"]'),'Choose your map');
+  const theme=doc.getElementById('theme');if(theme?.options?.length>=3){theme.options[0].text='Hero’s Atlas';theme.options[1].text='Night Watch';theme.options[2].text='Parchment Trail'}
+  const mapSkinCopy=theme?.closest('.field')?.nextElementSibling;setText(mapSkinCopy,'Change the field map without changing the Guilds beneath it. Roads, water, parks, and labels stay live and navigable.');
+  const locality=[...doc.querySelectorAll('.panel > h3')].find(el=>/^Your locality$/i.test(el.textContent.trim()));setText(locality,'Your position');setText(doc.getElementById('locate'),'◎ Orient me');
+  setText(doc.getElementById('locationStatus'),'Your exact device location is used only to orient this scouting session. It is not stored or published to the mesh.');
+  const empty=doc.querySelector('#results .empty');setText(empty,'Scout a place or orient yourself to find the nearest Guild halls.');
+  const selected=[...doc.querySelectorAll('.panel > h3')].find(el=>/^Selected$/i.test(el.textContent.trim()));setText(selected,'Guild Hall');
+  const detail=doc.getElementById('detail');if(detail&&!detail.dataset.civweaveGuildDetailNodeId){setText(detail.querySelector('strong'),'No Guild hall selected');setText(detail.querySelector('small'),'Tap a Guild beacon on the map to scout the hall.')}
+  const note=doc.querySelector('.panel > .note');setText(note,'Scout’s note: Guild locations are placed by Guildkeepers and cached for offline use. Signed locality gossip can carry public Needs, Offerings, and Ideas between nearby Guilds. Your roaming GPS is never auto-published.');
+  const map=doc.getElementById('map');if(map)map.setAttribute('aria-label','Interactive map for scouting nearby Civweave Guild halls');
+  const toggle=doc.getElementById('mobileToggle');setText(toggle,'Scout');toggle?.setAttribute('aria-label','Open Guild scouting panel');toggle?.setAttribute('aria-expanded',panel?.classList.contains('open')?'true':'false');
+  hideLegacyNodeDiscovery(doc);
+}
+function applyGuildBeaconSkin(win){
+  const map=win.CivweaveMapService?.state?.map;if(!map)return false;
+  try{
+    if(map.getSource('civweave-contacts')&&map.getLayer('civweave-points')){
+      if(!map.getLayer('civweave-guild-beacons'))map.addLayer({id:'civweave-guild-beacons',type:'circle',source:'civweave-contacts',filter:['!',['has','point_count']],paint:{'circle-color':'#f2d483','circle-opacity':0.13,'circle-radius':['interpolate',['linear'],['zoom'],2,11,8,16,13,23],'circle-stroke-color':'#f2d483','circle-stroke-opacity':0.28,'circle-stroke-width':1}},'civweave-points');
+      map.setPaintProperty('civweave-points','circle-color','#f2d483');map.setPaintProperty('civweave-points','circle-radius',['interpolate',['linear'],['zoom'],2,5.5,8,8,13,11]);map.setPaintProperty('civweave-points','circle-stroke-color','#2c1732');map.setPaintProperty('civweave-points','circle-stroke-width',2);
+    }
+    if(map.getLayer('civweave-clusters')){map.setPaintProperty('civweave-clusters','circle-color','#9d7be8');map.setPaintProperty('civweave-clusters','circle-opacity',0.9);map.setPaintProperty('civweave-clusters','circle-stroke-color','#f2d483');map.setPaintProperty('civweave-clusters','circle-stroke-width',2)}
+    return true;
+  }catch{return false}
+}
+async function installGuildTapInteraction(win,doc){
+  let ticks=0;
+  while((!win.CivweaveMapService?.state?.map||!win.CivweaveMapService?.selectFeature)&&ticks++<240)await sleep(50);
+  const service=win.CivweaveMapService,map=service?.state?.map;if(!map||map.__civweaveGuildTapInstalled)return false;
+  map.__civweaveGuildTapInstalled=true;
+  map.on('click',event=>{
+    const point=event?.point;if(!point)return;
+    const pad=24;
+    let hits=[];
+    try{hits=map.queryRenderedFeatures([[point.x-pad,point.y-pad],[point.x+pad,point.y+pad]],{layers:['civweave-points']})||[]}catch{}
+    const hit=hits.find(feature=>feature?.properties?.id);if(!hit)return;
+    service.selectFeature(String(hit.properties.id),true);
+    doc.getElementById('panel')?.classList.add('open');
+    doc.getElementById('mobileToggle')?.setAttribute('aria-expanded','true');
+  });
+  map.on('style.load',()=>requestAnimationFrame(()=>applyGuildBeaconSkin(win)));
+  requestAnimationFrame(()=>applyGuildBeaconSkin(win));
+  return true;
+}
 function install(){
   const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc)return;
-  doc.title='Civweave Guild Map';
-  const eyebrow=doc.querySelector('.brand small'),title=doc.querySelector('.brand strong'),heading=doc.querySelector('.panel h2'),intro=doc.querySelector('.panel h2 + p');
-  if(eyebrow)eyebrow.textContent='Physical Guilds + signed locality ledger + offline gossip';
-  if(title)title.textContent='Guild Map';
-  if(heading)heading.textContent='Find a Guild in place';
-  if(intro)intro.textContent='Browse Guildkeeper-placed Civweave Guilds first. Join one, explore its most recent cached Needs, Offerings, and Ideas, or pass by through the mesh when distance is only virtual.';
+  doc.title='Civweave Guild Scout';
+  addScoutStyles(doc);installScoutCopy(doc);
+  setText(doc.getElementById('status'),'Opening the Guild field map…');
   const all=doc.getElementById('modeAll'),federations=doc.getElementById('modeFederations'),nodes=doc.getElementById('modeNodes');
-  all?.classList.remove('active');federations?.classList.remove('active');nodes?.classList.add('active');if(nodes)nodes.textContent='Guilds';
+  if(all){all.classList.remove('active');all.hidden=true}
+  if(federations){federations.classList.remove('active');federations.hidden=true}
+  nodes?.classList.add('active');
+  const toggle=doc.getElementById('mobileToggle'),panel=doc.getElementById('panel');
+  toggle?.addEventListener('click',()=>queueMicrotask(()=>toggle.setAttribute('aria-expanded',panel?.classList.contains('open')?'true':'false')));
+  installGuildTapInteraction(win,doc).catch(error=>console.error('[Civweave Guild Map] tap interaction',error));
   addScript(doc,'/app/host-node-session-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-hub-map-v1.js?v=guild-rally-point-v1')));
 }
 frame.addEventListener('load',install,{once:true});

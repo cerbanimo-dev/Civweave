@@ -5,14 +5,15 @@ import {readFile} from 'node:fs/promises';
 const source=await readFile('public/app/local-ai/bootstrap-v266.js','utf8');
 new Function(source);
 
-assert.match(source,/selfHealingBootstrap===true&&existing\?\.smoothFitRuntime===true.*?existing\?\.readyState!=='failed'/,'a previously failed or pre-smooth-fit bootstrap must never short-circuit a fresh script execution');
+assert.match(source,/selfHealingBootstrap===true&&existing\?\.smoothFitRuntime===true.*?mutableComponentCapabilityReadiness===true&&existing\?\.readyState!=='failed'/,'a previously failed or pre-capability bootstrap must never short-circuit a fresh script execution');
 assert.match(source,/for\(let pass=0;pass<2;pass\+\+\)/,'bootstrap must retry the component graph once before declaring local AI unavailable');
 assert.match(source,/civweave:local-ai-recovering/,'bootstrap must expose the recovery pass');
 assert.match(source,/function retry\(\)/,'bootstrap must expose a manual retry entry point');
 assert.match(source,/componentStatus/,'bootstrap must preserve per-component compatibility diagnostics');
 assert.match(source,/get readyState\(\)/,'bootstrap must expose resolved startup state instead of only a promise');
 assert.match(source,/get lastError\(\)/,'bootstrap must retain the actual component failure');
-assert.match(source,/componentCompatibility:'capability-contract-v307'/,'self-healing must preserve the v307 component contract');
+assert.match(source,/componentCompatibility:'capability-contract-v324'/,'self-healing must preserve the current component capability contract');
+assert.match(source,/mutableComponentCapabilityReadiness:true/,'bootstrap must advertise mutable support-module capability readiness');
 assert.match(source,/fastInteractiveSpineContract:'capability-v313'/,'bootstrap must expose the current fast interactive spine contract');
 assert.match(source,/const fastInteractiveReady=.*?runtime-spine-v271.*?register.*?diagnostics.*?serverAuto.*?localResultNeedsFailover/s,'fast interactive readiness must follow capabilities rather than an obsolete exact release string');
 assert.match(source,/fast-interactive-runtime-v192\.js\?v=1\.0\.124-v313-runtime-spine-contract/,'bootstrap must rotate the fast runtime asset epoch');
@@ -48,6 +49,7 @@ const context={
   console,
   setTimeout,
   clearTimeout,
+  queueMicrotask,
   Promise,
   Object,
   Error,
@@ -58,17 +60,17 @@ const context={
   CivweaveAICapabilityBrokerV268:{version:'1.0.67-ai-capability-broker-v271-semantics'},
   CivweaveFastInteractiveV192:{version:'1.0.116-runtime-spine-v271-server-auto-v301',register(){},diagnostics(){},serverAuto(){return false},localResultNeedsFailover(){return false}},
   CivweaveLocalModelRegistryV266:{version:'1.0.115-local-ai-registry-v302-gemma3-v4',installable(){},byId(){},directUrl(){},artifactRevision(){},sourceUrl(){},gemma3OptimizedQ4:true},
-  CivweaveLocalModelDownloadV266:{version:'1.0.67-local-ai-download-v271-integrity',packageRevisionGuard:true,largeExternalDataForeground:true,metadataOnlyRepair:true,metadataRepairRaceSafe:true},
+  CivweaveLocalModelDownloadV266:{version:'1.0.68-local-ai-download-v322-explicit-sync',start(){},status(){},selection(){},state(){},syncBackgroundJobs(){},packageRevisionGuard:true,largeExternalDataForeground:true,metadataOnlyRepair:true,metadataRepairRaceSafe:true,explicitSyncOnly:true,autoSyncOnLoad:false},
   CivweaveLocalModelPackageRevisionGuardV307:{version:'1.0.121-local-model-package-revision-guard-v307'},
-  CivweaveLocalModelDownloadPolicyV278:{version:'1.0.81-local-ai-download-policy-v278-foreground-large-files'},
+  CivweaveLocalModelDownloadPolicyV278:{version:'1.0.82-local-ai-download-policy-v322-explicit-sync',start(){},sync(){},forceForeground(){return true},explicitSyncOnly:true,autoSyncOnLoad:false},
   CivweaveLocalModelMetadataRepairV276:{version:'1.0.81-local-ai-metadata-repair-v277-race-safe'},
   CivweaveLocalSmallModelPolicyV283:{version:'1.0.85-local-ai-small-model-policy-v283'},
   CivweaveLocalModelBridgeV266:{version:'1.0.83-local-ai-bridge-v282-health-fallback',revision:'1.0.88-local-ai-bridge-v283-small-model-fast-path',continuationValidation:true},
   CivweaveBrowserToolV1:{version:'1.0.0-browser-tool-v1'},
   CivweaveLocalBrowserAgentV1:{version:'1.0.1-local-browser-agent-v1'},
-  CivweaveLocalAISettingsV266:{version:'1.0.116-local-ai-settings-v305-download-dock-layout',truthfulCompletion:true,cacheIntegrityOnDemand:true,openPath:'snapshot-first-v287'},
+  CivweaveLocalAISettingsV266:{version:'1.0.118-local-ai-settings-v323-view-only',truthfulCompletion:true,cacheIntegrityOnDemand:true,snapshotOnlyView:true,settingsClickOwnership:false,settingsPresentationOwnership:false,canonicalSlotOnly:true},
   CivweaveLocalAIPrimaryRouteV283:{version:'1.0.85-local-ai-primary-route-v283'},
-  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.81-local-ai-hardware-tier-ui-v278',deviceFitRecommendations:true},
+  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.82-local-ai-hardware-tier-ui-v321-settings-open-idle',deviceFitRecommendations:true,lowEndGeneratorAware:true,observerFeedbackBounded:true,settingsOpenGpuProbe:false,explicitHardwareProbe:true},
   CivweaveLocalModelTestPulseV269:{version:'1.0.116-local-model-test-pulse-v303-mobile-safe'},
 };
 context.globalThis=context;
@@ -94,16 +96,19 @@ assert.ok(events.some(event=>event.type==='civweave:local-ai-recovering'),'first
 const readyEvent=events.findLast(event=>event.type==='civweave:local-ai-ready');
 assert.equal(readyEvent?.detail?.recoveredBootstrap,true,'successful retry should be observable');
 assert.equal(readyEvent?.detail?.fastInteractiveSpineContract,'capability-v313','ready event must report the repaired fast runtime contract');
+assert.equal(readyEvent?.detail?.componentCompatibility,'capability-contract-v324','ready event must report the mutable-component contract');
+assert.equal(readyEvent?.detail?.mutableComponentCapabilityReadiness,true,'ready event must expose support-module capability gating');
 assert.equal(readyEvent?.detail?.smoothFitRuntime,true,'ready event must advertise the tuned runtime contract');
 if(source.includes('delegatedBrowserTools:true'))assert.equal(readyEvent?.detail?.delegatedBrowserTools,true,'ready event must advertise delegated browser tools');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-bootstrap-retry-v312-smooth-fit-v314-browser-compatible',
-  contract:'capability-contract-v307',
+  revision:'local-ai-bootstrap-retry-v324-capability-readiness',
+  contract:'capability-contract-v324',
   fastInteractiveSpineContract:'capability-v313',
   transientCompatibilityFailure:'recovered-on-second-pass',
   failedBootstrapShortCircuit:'blocked',
+  mutableSupportModules:'capability-gated',
   shippingFastRuntimeAccepted:true,
   smoothFitRuntime:true,
   delegatedBrowserTools:source.includes('delegatedBrowserTools:true'),

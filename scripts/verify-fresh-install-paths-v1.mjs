@@ -23,7 +23,7 @@ assert.ok(!bridge.includes(`const ENTRY='${staleInstallerEntry}'`),'front-door b
 assert.ok(!installer.includes(`const ENTRY = '${staleInstallerEntry}'`),'fallback installer must never point installed launch back at /app/');
 
 const prepareStart=bridge.indexOf('async function prepareAfterInteraction');
-const prepareCall=bridge.indexOf('await shell.prepareShell({manual:true})',prepareStart);
+const prepareCall=bridge.indexOf('await shell.prepareShell({manual:false})',prepareStart);
 const installClickStart=bridge.indexOf('async function ownInstallClick(event)');
 const installClickEnd=bridge.indexOf("if(hostSetupRedirect())return;",installClickStart);
 const installClick=bridge.slice(installClickStart,installClickEnd);
@@ -31,7 +31,7 @@ const promptCall=installClick.indexOf('prompt.prompt();');
 const choiceAwait=installClick.indexOf('await prompt.userChoice',promptCall);
 const shellAwait=installClick.indexOf('await shell.prepareShell');
 
-assert.ok(prepareStart>=0&&prepareCall>prepareStart,'front door must download the lightweight shell only after explicit install interaction');
+assert.ok(prepareStart>=0&&prepareCall>prepareStart,'front door must download the lightweight shell only after explicit install interaction without forcing a release check');
 assert.ok(!bridge.includes('queueMicrotask(()=>void primeInstallability())'),'front door must never prewarm the app shell during first paint');
 assert.ok(!bridge.includes('async function primeInstallability()'),'front door must not retain a load-time shell-preparation path');
 assert.ok(promptCall>=0,'native install bridge must invoke the saved browser prompt');
@@ -65,10 +65,11 @@ assert.ok(!boundary.includes('civweave.pwa.installed-capability.v1'),'fresh-inst
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fresh-install-paths-v7-confirmed-install-only',
+  revision:'fresh-install-paths-v8-install-download-no-release-check',
   exactEntry,
   shellPrimedBeforeClick:false,
   shellPreparationUserInitiated:true,
+  shellPreparationForcesReleaseCheck:false,
   promptSynchronousOnFreshClick:true,
   nativePromptAcceptanceConfirmsInstall:false,
   rememberedMarkerConfirmsInstall:false,

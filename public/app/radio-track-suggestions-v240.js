@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
 
-const VERSION='1.5.0';
-const REVISION='radio-track-suggestions-v246';
-const PICK_KEY='civweave.radio.track-picks.v242';
+const VERSION='1.6.0';
+const REVISION='radio-track-suggestions-v247-persistent-station-v1';
+const PICK_KEY='civweave.radio.track-picks.v247';
 const TRACK_MAP_PATH='/app/radio-track-map-v241.json';
-const CARD_ID='cw-radio-suggestion-v233';
+const PANEL_ID='cw-radio-station-panel-v1';
+const STYLE_ID='cw-radio-track-style-v247';
 const RECENT_WINDOW=6;
 const DIRECTORY_PATHS=Object.freeze({
   civweave:'/app/radio-directory-v240/civweave.txt',
@@ -50,187 +51,167 @@ const SYSTEM_ALIASES=Object.freeze({living_school:'living-school'});
 const trackCache=new Map();
 let trackMapPromise=null;
 
-function deepFreeze(value){
-  if(value&&typeof value==='object'&&!Object.isFrozen(value)){
-    Object.freeze(value);Object.values(value).forEach(deepFreeze);
-  }
-  return value;
-}
+function deepFreeze(value){if(value&&typeof value==='object'&&!Object.isFrozen(value)){Object.freeze(value);Object.values(value).forEach(deepFreeze)}return value}
 function parse(value,fallback){try{return JSON.parse(value)??fallback}catch{return fallback}}
-function normalizeSystemId(value){
-  const raw=String(value||'').trim().toLowerCase();
-  return SYSTEM_ALIASES[raw]||raw;
-}
-function randomIndex(length){
-  if(length<=1)return 0;
-  if(globalThis.crypto?.getRandomValues){
-    const values=new Uint32Array(1);globalThis.crypto.getRandomValues(values);return values[0]%length;
-  }
-  return Math.floor(Math.random()*length);
-}
+function esc(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+function normalizeSystemId(value){const raw=String(value||'').trim().toLowerCase();return SYSTEM_ALIASES[raw]||raw}
+function randomIndex(length){if(length<=1)return 0;if(globalThis.crypto?.getRandomValues){const values=new Uint32Array(1);globalThis.crypto.getRandomValues(values);return values[0]%length}return Math.floor(Math.random()*length)}
 function spotifyTrackId(value){
-  const raw=String(value||'').trim();
-  if(!raw)return'';
+  const raw=String(value||'').trim();if(!raw)return'';
   const uri=raw.match(/^spotify:track:([A-Za-z0-9]+)$/i);if(uri)return uri[1];
   const url=raw.match(/open\.spotify\.com\/track\/([A-Za-z0-9]+)/i);if(url)return url[1];
   return /^[A-Za-z0-9]{22}$/.test(raw)?raw:'';
 }
 function parseTrackLine(line,index=0){
-  const raw=String(line||'').trim();
-  if(!raw)return null;
-  const parts=raw.split('\t').map(part=>part.trim());
-  const label=parts[0]||'';
-  const id=spotifyTrackId(parts[1]||'');
+  const raw=String(line||'').trim();if(!raw)return null;
+  const parts=raw.split('\t').map(part=>part.trim()),label=parts[0]||'',id=spotifyTrackId(parts[1]||'');
   return label?Object.freeze({label,position:index,spotifyTrackId:id}):null;
 }
-function trackKey(track){
-  const id=spotifyTrackId(track?.spotifyTrackId||'');
-  return id||String(track?.label||track||'').trim().toLowerCase();
+function normalizeTrack(track,index=0){
+  if(!track)return null;
+  const title=String(track.title||'').trim(),artist=String(track.artist||'').trim(),label=String(track.label||[artist,title].filter(Boolean).join(' · ')).trim();
+  return Object.freeze({...track,title,artist,label,position:Number.isInteger(track.position)?track.position:index,spotifyTrackId:spotifyTrackId(track.spotifyTrackId||'')});
 }
+function trackKey(track){const id=spotifyTrackId(track?.spotifyTrackId||'');return id||String(track?.label||track?.title||track||'').trim().toLowerCase()}
+function loadPicks(){try{return parse(sessionStorage.getItem(PICK_KEY),{})||{}}catch{return{}}}
+function savePicks(value){try{sessionStorage.setItem(PICK_KEY,JSON.stringify(value))}catch{}return value}
 function pickDifferent(list,recent=[]){
   if(!Array.isArray(list)||!list.length)return null;
   const blocked=new Set((Array.isArray(recent)?recent:[recent]).map(value=>String(value||'').trim().toLowerCase()).filter(Boolean));
-  const fresh=list.filter(item=>!blocked.has(trackKey(item)));
-  const pool=fresh.length?fresh:list;
+  const fresh=list.filter(item=>!blocked.has(trackKey(item))),pool=fresh.length?fresh:list;
   return pool[randomIndex(pool.length)]||null;
 }
-function loadPicks(){return parse(sessionStorage.getItem(PICK_KEY),{})}
-function savePicks(value){try{sessionStorage.setItem(PICK_KEY,JSON.stringify(value))}catch{}return value}
+function rememberPick(system,scope,track){
+  if(!track)return null;
+  const id=normalizeSystemId(system),picks=loadPicks(),bucket=picks[id]?.[scope]||{},recent=Array.isArray(bucket.recent)?bucket.recent:[],key=trackKey(track);
+  const nextRecent=[key,...recent.filter(value=>value!==key)].slice(0,RECENT_WINDOW);
+  savePicks({...picks,[id]:{...(picks[id]||{}),[scope]:{track:track.label||track.title||'',spotifyTrackId:spotifyTrackId(track.spotifyTrackId),recent:nextRecent}}});
+  return track;
+}
+function recentFor(system,scope){const picks=loadPicks();return Array.isArray(picks[normalizeSystemId(system)]?.[scope]?.recent)?picks[normalizeSystemId(system)][scope].recent:[]}
+function pickTag(systemId){
+  const system=normalizeSystemId(systemId),tags=TAGS[system]||[],picks=loadPicks();let tag=tags.length?tags[randomIndex(tags.length)]:'';
+  for(let i=0;i<4&&tag===picks[system]?.tag&&tags.length>1;i++)tag=tags[randomIndex(tags.length)];
+  if(tag)savePicks({...picks,[system]:{...(picks[system]||{}),tag}});return tag;
+}
 function mappedTrackId(map,system,position){return spotifyTrackId(map?.systems?.[system]?.tracks?.[position]||'')}
 async function loadTrackMap(){
-  if(!trackMapPromise){
-    trackMapPromise=fetch(TRACK_MAP_PATH,{cache:'force-cache'})
-      .then(response=>response.ok?response.json():{systems:{}})
-      .catch(()=>({systems:{}}));
-  }
+  if(!trackMapPromise)trackMapPromise=fetch(TRACK_MAP_PATH,{cache:'force-cache'}).then(response=>response.ok?response.json():{systems:{}}).catch(()=>({systems:{}}));
   return trackMapPromise;
 }
-function radioFor(systemId){
-  const system=normalizeSystemId(systemId);
-  return globalThis.CivweaveRadioRecommendationAgentV233?.registry?.[system]||null;
-}
-function playlistMeta(systemId){
-  const system=normalizeSystemId(systemId),radio=radioFor(system);
-  const spotifyUrl=String(radio?.spotifyUrl||'');
-  const match=spotifyUrl.match(/open\.spotify\.com\/playlist\/([A-Za-z0-9]+)/i);
-  if(!match)return null;
-  return Object.freeze({system,playlistId:match[1],playlistUri:`spotify:playlist:${match[1]}`,spotifyUrl});
-}
-function stationUrl(systemId){return playlistMeta(systemId)?.spotifyUrl||'https://open.spotify.com/'}
-function spotifyPlaylistTrackUrl(track,systemId){
-  const meta=playlistMeta(systemId);if(!meta)return'https://open.spotify.com/';
-  const id=spotifyTrackId(track?.spotifyTrackId||'');
-  if(!id)return meta.spotifyUrl;
-  const url=new URL(meta.spotifyUrl);
-  url.searchParams.set('highlight',`spotify:track:${id}`);
-  return url.href;
-}
-// Compatibility helpers intentionally resolve to the playlist resource only.
-function spotifyContextUrl(track,systemId){return spotifyPlaylistTrackUrl(track,systemId)}
-function spotifyContentLink(track,systemId){return spotifyPlaylistTrackUrl(track,systemId)}
-function spotifyHighlightedPlaylistUrl(track,systemId){return spotifyPlaylistTrackUrl(track,systemId)}
 async function loadTracks(systemId){
-  const system=normalizeSystemId(systemId),path=DIRECTORY_PATHS[system];
-  if(!path)return[];
+  const system=normalizeSystemId(systemId),path=DIRECTORY_PATHS[system];if(!path)return[];
   if(!trackCache.has(system)){
     trackCache.set(system,Promise.all([
       fetch(path,{cache:'force-cache'}).then(response=>{if(!response.ok)throw new Error(`radio directory ${response.status}`);return response.text()}),
       loadTrackMap()
     ]).then(([text,map])=>text.split(/\r?\n/).map((line,index)=>{
       const parsed=parseTrackLine(line,index);if(!parsed)return null;
-      const id=parsed.spotifyTrackId||mappedTrackId(map,system,index);
-      return id?Object.freeze({...parsed,spotifyTrackId:id}):parsed;
+      return normalizeTrack({...parsed,spotifyTrackId:parsed.spotifyTrackId||mappedTrackId(map,system,index)},index);
     }).filter(Boolean)).catch(error=>{trackCache.delete(system);console.warn('[Civweave Radio] station directory unavailable.',system,error);return[]}));
   }
   return trackCache.get(system);
 }
-async function pickTrack(systemId){
-  const system=normalizeSystemId(systemId),tracks=await loadTracks(system);
-  const picks=loadPicks(),prior=picks[system]||{};
-  const recent=Array.isArray(prior.recent)?prior.recent:[];
-  const track=pickDifferent(tracks,recent);
-  if(track){
-    const key=trackKey(track);
-    const nextRecent=[key,...recent.filter(value=>value!==key)].slice(0,RECENT_WINDOW);
-    savePicks({...picks,[system]:{...prior,track:track.label,spotifyTrackId:spotifyTrackId(track.spotifyTrackId),recent:nextRecent}});
-  }
-  return track;
+function radioFor(systemId){return globalThis.CivweaveRadioRecommendationAgentV233?.registry?.[normalizeSystemId(systemId)]||null}
+function playlistMeta(systemId){
+  const system=normalizeSystemId(systemId),spotifyUrl=String(radioFor(system)?.spotifyUrl||''),match=spotifyUrl.match(/open\.spotify\.com\/playlist\/([A-Za-z0-9]+)/i);if(!match)return null;
+  return Object.freeze({system,playlistId:match[1],playlistUri:`spotify:playlist:${match[1]}`,spotifyUrl});
 }
-function pickTag(systemId){
-  const system=normalizeSystemId(systemId),tags=TAGS[system]||[];
-  const picks=loadPicks();
-  let tag=tags.length?tags[randomIndex(tags.length)]:'';
-  for(let i=0;i<4&&tag===picks[system]?.tag&&tags.length>1;i++)tag=tags[randomIndex(tags.length)];
-  if(tag)savePicks({...picks,[system]:{...(picks[system]||{}),tag}});
-  return tag;
+function stationUrl(systemId){return playlistMeta(systemId)?.spotifyUrl||'https://open.spotify.com/'}
+function spotifyPlaylistTrackUrl(track,systemId){
+  const meta=playlistMeta(systemId);if(!meta)return'https://open.spotify.com/';
+  const id=spotifyTrackId(track?.spotifyTrackId||'');if(!id)return meta.spotifyUrl;
+  const url=new URL(meta.spotifyUrl);url.searchParams.set('highlight',`spotify:track:${id}`);return url.href;
+}
+function spotifyContextUrl(track,systemId){return spotifyPlaylistTrackUrl(track,systemId)}
+function spotifyContentLink(track,systemId){return spotifyPlaylistTrackUrl(track,systemId)}
+function spotifyHighlightedPlaylistUrl(track,systemId){return spotifyPlaylistTrackUrl(track,systemId)}
+function surface(){return globalThis.CivweaveRadioStationSurfaceV1||null}
+function safeApi(){return globalThis.CivweaveRadioSafeStationsV1||null}
+function safeModeEnabled(){return Boolean(safeApi()?.safeModeEnabled?.()||surface()?.safeModeEnabled?.())}
+function activeSystem(){return normalizeSystemId(surface()?.detectSystem?.()||safeApi()?.currentSystem?.()||'')}
+function activeMode(){return safeModeEnabled()?'safe':surface()?.mode?.()||'clean'}
+async function pickTrack(systemId){
+  const system=normalizeSystemId(systemId),tracks=await loadTracks(system),track=pickDifferent(tracks,recentFor(system,'original'));return rememberPick(system,'original',track);
+}
+async function pickSuggestion(systemId=activeSystem()){
+  const system=normalizeSystemId(systemId),mode=activeMode();
+  if(mode==='safe'){
+    const api=safeApi(),track=api?.suggestTrack?.(system);return track?normalizeTrack(track):null;
+  }
+  if(mode==='clean'){
+    const rows=(surface()?.tracksFor?.(system)||[]).map(normalizeTrack).filter(Boolean),track=pickDifferent(rows,recentFor(system,'clean'));return rememberPick(system,'clean',track);
+  }
+  return pickTrack(system);
 }
 function installStyle(){
-  if(document.getElementById('cw-radio-track-style-v246'))return;
-  const style=document.createElement('style');style.id='cw-radio-track-style-v246';style.textContent=`
-#${CARD_ID} .cw-radio-pick-v241{margin:0 0 12px;padding:10px 11px;border:1px solid #ffffff24;border-radius:13px;background:#00000024}
-#${CARD_ID} .cw-radio-tag-v241{display:inline-flex;max-width:100%;margin:0 0 7px;padding:4px 8px;border:1px solid #ffffff34;border-radius:999px;background:#ffffff10;font-size:10px;font-weight:900;letter-spacing:.08em;line-height:1.25;text-transform:uppercase}
-#${CARD_ID} .cw-radio-pick-label-v241{display:block;margin:0 0 2px;opacity:.66;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-#${CARD_ID} .cw-radio-track-v241{display:block;font-size:14px;line-height:1.35}
-#${CARD_ID} .cw-radio-track-position-v245{display:block;margin-top:3px;opacity:.66;font-size:10px;font-weight:750;letter-spacing:.04em;text-transform:uppercase}
-#${CARD_ID} .cw-radio-link{min-height:36px;padding:0 12px;font-size:12px}
-`;document.head?.append(style);
+  if(document.getElementById(STYLE_ID))return;
+  const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
+#${PANEL_ID} .cw-radio-persistent-suggestion{display:grid;gap:6px;margin:4px 0 10px;padding:10px 11px;border:1px solid #ffffff24;border-radius:13px;background:#00000024}
+#${PANEL_ID} .cw-radio-persistent-suggestion small{opacity:.66;font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+#${PANEL_ID} .cw-radio-persistent-suggestion strong{font-size:14px;line-height:1.35}
+#${PANEL_ID} .cw-radio-persistent-suggestion span{opacity:.7;font-size:11px}
+#${PANEL_ID} .cw-radio-persistent-suggestion a,#${PANEL_ID} .cw-radio-persistent-suggestion button{justify-self:start;min-height:34px;display:inline-flex;align-items:center;border:1px solid #ffffff28;border-radius:999px;padding:0 11px;background:#ffffff0a;color:#fff;text-decoration:none;font-weight:800}
+#${PANEL_ID} .cw-radio-track[data-radio-suggested="true"]{outline:1px solid #83e9ff88;border-radius:10px;background:#83e9ff10}
+`;
+  document.head?.append(style);
 }
-function externalizeSpotifyLink(link){
-  if(!link)return null;
-  link.target='_blank';
-  link.rel='noopener noreferrer external';
-  return link;
+function emitSuggested(system,mode,track,extra={}){
+  try{dispatchEvent(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_SUGGESTED',revision:REVISION,system,mode,track:track?.label||track?.title||'',position:Number.isInteger(track?.position)?track.position:null,spotifyTrackId:spotifyTrackId(track?.spotifyTrackId||''),persistentSurface:true,...extra}}))}catch{}
+}
+function highlightCleanTrack(title){
+  const panel=document.getElementById(PANEL_ID),rows=[...(panel?.querySelectorAll?.('.cw-radio-track')||[])];let found=null;
+  for(const row of rows){row.removeAttribute('data-radio-suggested');if(!found&&row.querySelector('strong')?.textContent?.trim()===title)found=row}
+  if(found){found.dataset.radioSuggested='true';found.scrollIntoView?.({block:'nearest',behavior:'smooth'});setTimeout(()=>found?.removeAttribute?.('data-radio-suggested'),3500)}
+  return Boolean(found);
 }
 function configureStationLink(link,track,system,tag){
   if(!link)return'';
-  const meta=playlistMeta(system);
-  const resolved=spotifyTrackId(track?.spotifyTrackId||'');
-  link.href=resolved?spotifyPlaylistTrackUrl({...track,spotifyTrackId:resolved},system):stationUrl(system);
-  link.textContent=resolved?'Open station at suggested track ↗':'Open station ↗';
-  link.dataset.spotifyPlaylistId=meta?.playlistId||'';
-  link.dataset.spotifyTrackId=resolved;
-  link.dataset.spotifyPlaylistOnly='true';
-  link.addEventListener?.('click',()=>{
-    globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_CLICKED',revision:REVISION,system,track:track?.label||'',position:Number.isInteger(track?.position)?track.position:null,spotifyTrackId:resolved,playlistId:meta?.playlistId||'',playlistUrl:link.href,playlistOnly:true,highlighted:Boolean(resolved),external:true,tag}}));
-  },{once:true});
+  const meta=playlistMeta(system),resolved=spotifyTrackId(track?.spotifyTrackId||'');
+  link.href=resolved?spotifyPlaylistTrackUrl({...track,spotifyTrackId:resolved},system):stationUrl(system);link.target='_blank';link.rel='noopener noreferrer external';
+  link.textContent=resolved?'Open station at suggested track ↗':'Open station ↗';link.dataset.spotifyPlaylistId=meta?.playlistId||'';link.dataset.spotifyTrackId=resolved;link.dataset.spotifyPlaylistOnly='true';
+  link.addEventListener?.('click',()=>{try{dispatchEvent(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_CLICKED',revision:REVISION,system,mode:'original',track:track?.label||'',spotifyTrackId:resolved,playlistId:meta?.playlistId||'',playlistUrl:link.href,playlistOnly:true,external:true,tag}}))}catch{}},{once:true});
   return resolved;
 }
-async function decorate(systemId){
-  const system=normalizeSystemId(systemId),card=document.getElementById(CARD_ID);
-  if(!card||!DIRECTORY_PATHS[system])return null;
-  if(card.dataset.radioTrackSuggestionRevision===REVISION)return card.dataset.radioTrack||null;
-  const tracks=await loadTracks(system);
-  const track=await pickTrack(system);if(!track||!card.isConnected)return null;
-  const tag=pickTag(system);installStyle();
-  const block=document.createElement('div');block.className='cw-radio-pick-v241';
-  const badge=document.createElement('span');badge.className='cw-radio-tag-v241';badge.textContent=tag;
-  const label=document.createElement('span');label.className='cw-radio-pick-label-v241';label.textContent='Suggested from this station';
-  const title=document.createElement('strong');title.className='cw-radio-track-v241';title.textContent=track.label;
-  const position=document.createElement('span');position.className='cw-radio-track-position-v245';position.textContent=`Station track ${track.position+1} of ${tracks.length}`;
-  block.append(badge,label,title,position);
-
-  let stationLink=externalizeSpotifyLink(card.querySelector?.('.cw-radio-link'));
-  if(!stationLink){
-    stationLink=externalizeSpotifyLink(document.createElement('a'));
-    stationLink.className='cw-radio-link';
-    block.after?.(stationLink);
+function externalizeSpotifyLink(link){if(!link)return null;link.target='_blank';link.rel='noopener noreferrer external';return link}
+async function renderSuggestion(systemId=activeSystem()){
+  const panel=document.getElementById(PANEL_ID),body=panel?.querySelector?.('[data-radio-body]');if(!panel||panel.hidden||!body)return null;
+  body.querySelector('[data-radio-persistent-suggestion]')?.remove();
+  const system=normalizeSystemId(systemId||activeSystem()),mode=activeMode(),track=await pickSuggestion(system);if(!track||!body.isConnected)return null;
+  installStyle();const tag=pickTag(system),root=document.createElement('div');root.className='cw-radio-persistent-suggestion';root.dataset.radioPersistentSuggestion='true';
+  const title=track.title||track.label||'',artist=track.artist||'';
+  root.innerHTML=`<small>${esc(tag||'Suggested from this station')}</small><strong>${esc(title)}</strong>${artist?`<span>${esc(artist)}</span>`:''}`;
+  if(mode==='safe'){
+    const button=document.createElement('button');button.type='button';button.textContent='Use this suggestion';button.addEventListener('click',()=>{safeApi()?.selectSuggested?.(system);safeApi()?.render?.();queueMicrotask(()=>renderSuggestion(system))});root.append(button);
+    emitSuggested(system,mode,track,{safeStation:true,playlistOnly:false,external:false});
+  }else if(mode==='clean'){
+    const button=document.createElement('button');button.type='button';button.textContent='Show in station';button.addEventListener('click',()=>highlightCleanTrack(track.title));root.append(button);
+    emitSuggested(system,mode,track,{auditedStation:true,playlistOnly:false,external:false});
+  }else{
+    const link=document.createElement('a');configureStationLink(link,track,system,tag);root.append(link);
+    emitSuggested(system,mode,track,{playlistOnly:true,external:true,playlistUrl:link.href,playlistId:playlistMeta(system)?.playlistId||''});
   }
-  const initialId=configureStationLink(stationLink,track,system,tag);
-
-  const radioTitle=card.querySelector?.('.cw-radio-title');
-  if(radioTitle?.after)radioTitle.after(block);else card.insertBefore?.(block,stationLink||null);
-
-  card.dataset.radioTrackSuggestionRevision=REVISION;card.dataset.radioTrack=track.label;card.dataset.radioTrackPosition=String(track.position);card.dataset.spotifyTrackId=initialId;
-  globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_SUGGESTED',revision:REVISION,system,track:track.label,position:track.position,stationTrackNumber:track.position+1,stationTrackCount:tracks.length,spotifyTrackId:initialId,playlistId:playlistMeta(system)?.playlistId||'',playlistUrl:stationLink?.href||stationUrl(system),playlistOnly:true,highlighted:Boolean(initialId),external:true,tag}}));
-  return track.label;
+  body.prepend(root);return track;
 }
-function onRadioEvent(event){const detail=event?.detail||{};if(detail.type==='RADIO_CTA_SHOWN')decorate(detail.system)}
+function scheduleSuggestion(system){queueMicrotask(()=>{renderSuggestion(system).catch(error=>console.warn('[Civweave Radio] suggestion render failed.',error))})}
+function decorate(systemId){scheduleSuggestion(systemId);return Promise.resolve(null)}
+function onRadioEvent(event){const detail=event?.detail||{};if(detail.type==='RADIO_CTA_SHOWN')scheduleSuggestion(detail.system)}
 function start(){
+  installStyle();
   addEventListener('civweave:radio-event',onRadioEvent);
-  const existing=document.getElementById(CARD_ID);if(existing)decorate(existing.dataset.system||'');
+  addEventListener('civweave:radio-station-opened',event=>scheduleSuggestion(event?.detail?.system));
+  addEventListener('civweave:radio-station-mode-changed',event=>scheduleSuggestion(event?.detail?.system));
+  addEventListener('civweave:safe-mode-changed',()=>scheduleSuggestion(activeSystem()));
+  addEventListener('pageshow',()=>{const panel=document.getElementById(PANEL_ID);if(panel&&!panel.hidden)scheduleSuggestion(activeSystem())});
   return true;
 }
-const api=Object.freeze({version:VERSION,revision:REVISION,recentWindow:RECENT_WINDOW,directoryPaths:DIRECTORY_PATHS,trackMapPath:TRACK_MAP_PATH,tags:TAGS,normalizeSystemId,spotifyTrackId,parseTrackLine,trackKey,playlistMeta,stationUrl,spotifyPlaylistTrackUrl,spotifyContextUrl,spotifyContentLink,spotifyHighlightedPlaylistUrl,loadTrackMap,loadTracks,pickTrack,pickTag,externalizeSpotifyLink,configureStationLink,decorate,start});
+const api=Object.freeze({
+  version:VERSION,revision:REVISION,recentWindow:RECENT_WINDOW,directoryPaths:DIRECTORY_PATHS,trackMapPath:TRACK_MAP_PATH,tags:TAGS,
+  normalizeSystemId,spotifyTrackId,parseTrackLine,trackKey,playlistMeta,stationUrl,spotifyPlaylistTrackUrl,spotifyContextUrl,spotifyContentLink,spotifyHighlightedPlaylistUrl,
+  loadTrackMap,loadTracks,pickTrack,pickSuggestion,pickTag,externalizeSpotifyLink,configureStationLink,renderSuggestion,decorate,start,
+  persistentSurface:true,safeAware:true,cleanAware:true,originalPlaylistContext:true,isolatedTrackLinks:false
+});
+globalThis.CivweaveRadioTrackSuggestionsV247=api;
 globalThis.CivweaveRadioTrackSuggestionsV246=api;
 globalThis.CivweaveRadioTrackSuggestionsV245=api;
 globalThis.CivweaveRadioTrackSuggestionsV244=api;
@@ -239,5 +220,5 @@ globalThis.CivweaveRadioTrackSuggestionsV242=api;
 globalThis.CivweaveRadioTrackSuggestionsV241=api;
 globalThis.CivweaveRadioTrackSuggestionsV240=api;
 start();
-globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-suggestions-ready',{detail:{version:VERSION,revision:REVISION,systems:Object.keys(DIRECTORY_PATHS),playlistContext:true,highlightedPlaylistTrack:true,playlistOnly:true,isolatedTrackLinks:false,externalPlaybackHandoff:true,recentWindow:RECENT_WINDOW,trackMapPath:TRACK_MAP_PATH}}));
+try{dispatchEvent(new CustomEvent('civweave:radio-track-suggestions-ready',{detail:{version:VERSION,revision:REVISION,systems:Object.keys(DIRECTORY_PATHS),persistentSurface:true,safeAware:true,cleanAware:true,originalPlaylistContext:true,recentWindow:RECENT_WINDOW}}))}catch{}
 })();

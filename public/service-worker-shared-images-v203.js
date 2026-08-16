@@ -1,8 +1,8 @@
 'use strict';
 (()=>{
-const VERSION='shared-image-delivery-v203';
+const VERSION='shared-image-delivery-v203-family-nav-single-owner-r1';
 if(self.CivweaveSharedImagesV203)return;
-const CACHE='cwimg-shared-v203';
+const CACHE='cwimg-shared-v203-family-nav-single-owner-r1';
 const FETCH_TIMEOUT_MS=12000;
 const ESSENTIAL=[
   '/app/assets/ai/weaveling-compass.png',
@@ -15,19 +15,26 @@ const ESSENTIAL=[
   '/app/assets/ai/kamiya.png',
   '/app/assets/ai/rook.png',
   '/app/assets/ai/merlin.png',
-  '/app/assets/navigation/200-civweave-nav.webp',
-  '/app/assets/navigation/200-cerbanimo-nav.webp',
-  '/app/assets/navigation/200-living-school-nav.webp',
-  '/app/assets/navigation/200-fellowfare-nav.webp',
-  '/app/assets/navigation/200-anarchadia-nav.webp',
+  '/Civweave-weaveling-sprites.png',
+  '/Living-School-moss-sprites.png',
+  '/Cerbanimo-kamiya-sprites.png',
+  '/FellowFare-rook-sprites.png',
+  '/Anarchadia-merlin-sprites.png',
   '/app/logos/civweave.webp',
   '/app/logos/cerbanimo.webp',
   '/app/logos/civweave-prismatic-wordmark-v1.png',
   '/app/logos/cerbanimo-steward-mark-v1.png',
   '/app/logos/fellowfare-v2.webp'
 ];
+const ROOT_SHARED=new Set([
+  '/Civweave-weaveling-sprites.png',
+  '/Living-School-moss-sprites.png',
+  '/Cerbanimo-kamiya-sprites.png',
+  '/FellowFare-rook-sprites.png',
+  '/Anarchadia-merlin-sprites.png'
+]);
 const IMAGE_EXT=/\.(?:png|webp|jpe?g|gif|svg|avif)$/i;
-function owns(pathname){return IMAGE_EXT.test(pathname)&&(pathname.startsWith('/app/assets/')||pathname.startsWith('/app/logos/'))}
+function owns(pathname){return IMAGE_EXT.test(pathname)&&(pathname.startsWith('/app/assets/')||pathname.startsWith('/app/logos/')||ROOT_SHARED.has(pathname))}
 function valid(response){if(!response?.ok)return false;const type=String(response.headers.get('content-type')||'').toLowerCase();return type.startsWith('image/')||type.includes('svg+xml')}
 function head(response){return new Response(null,{status:response.status,statusText:response.statusText,headers:response.headers})}
 async function network(requestOrPath){

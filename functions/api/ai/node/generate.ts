@@ -1,11 +1,9 @@
 import {
-  parseStagingSessionToken,
   stagingGuild,
   stagingOnly,
-  stagingQuota,
 } from "../../../_shared/staging-runtime";
 
-type JsonRecord = Record<string, any>;
+const STAGING_GUILD_SERVER_ORIGIN = "https://civweave-node-cloud-staging.cerbanimo.workers.dev";
 
 function reply(value: unknown, status = 200) {
   return Response.json(value, {
@@ -17,68 +15,57 @@ function reply(value: unknown, status = 200) {
   });
 }
 
-function clean(value: unknown, max = 1200) {
-  return String(value ?? "").trim().slice(0, max);
-}
-
-function lastPrompt(body: JsonRecord) {
-  if (Array.isArray(body.messages)) {
-    for (let index = body.messages.length - 1; index >= 0; index -= 1) {
-      const text = clean(body.messages[index]?.content, 600);
-      if (text) return text;
-    }
-  }
-  return clean(body.prompt, 600) || clean(body.system, 600) || "staging route check";
+function nodeIdFrom(request: Request) {
+  const url = new URL(request.url);
+  return String(
+    url.searchParams.get("nodeId")
+      || request.headers.get("x-civweave-node-id")
+      || "",
+  ).trim().toLowerCase();
 }
 
 export const onRequestPost: PagesFunction = async context => {
   const blocked = stagingOnly(context.request);
   if (blocked) return blocked;
 
-  const authorization = context.request.headers.get("authorization") || "";
-  const session = parseStagingSessionToken(authorization.replace(/^Bearer\s+/i, "").trim());
-  const url = new URL(context.request.url);
-  const requestedNodeId = clean(
-    url.searchParams.get("nodeId") || context.request.headers.get("x-civweave-node-id"),
-    180,
-  ).toLowerCase();
-  if (!session || !stagingGuild(session.nodeId) || (requestedNodeId && session.nodeId !== requestedNodeId)) {
-    return reply({ ok: false, error: "staging-session-invalid" }, 401);
-  }
+  const nodeId = nodeIdFrom(context.request);
+  const guild = stagingGuild(nodeId);
+  if (!guild) return reply({ ok: false, error: "staging-guild-not-found", nodeId }, 404);
 
-  const body = await context.request.json().catch(() => ({})) as JsonRecord;
-  const prompt = lastPrompt(body);
-  const responseFormat = clean(body.responseFormat, 40).toLowerCase();
-  const outputJson = responseFormat === "json"
-    ? {
-        ok: true,
-        environment: "staging",
-        synthetic: true,
-        nodeId: session.nodeId,
-        promptReceived: prompt,
-      }
-    : null;
-  const text = outputJson
-    ? JSON.stringify(outputJson)
-    : `[STAGING] Synthetic AI route verified through ${session.nodeId}. No production model was called. Prompt received: ${prompt}`;
-  const quota = { ...stagingQuota(), includedRemainingNeurons: 479, usedNeuronsToday: 1 };
-
-  return reply({
-    schema: "civweave.node-ai-generate.v1",
-    ok: true,
-    environment: "staging",
-    stagingSynthetic: true,
-    productionIsolation: true,
-    nodeId: session.nodeId,
-    model: "civweave-staging-synthetic",
-    text,
-    outputJson,
-    usage: {
-      inputTokens: Math.max(1, Math.ceil(prompt.length / 4)),
-      outputTokens: Math.max(1, Math.ceil(text.length / 4)),
-      chargedNeurons: 1,
-      synthetic: true,
-    },
-    quota,
+  const target = new URL("/api/ai/node/generate", STAGING_GUILD_SERVER_ORIGIN);
+  target.searchParams.set("nodeId", guild.nodeId);
+  const headers = new Headers({
+    accept: context.request.headers.get("accept") || "application/json",
+    "content-type": context.request.headers.get("content-type") || "application/json",
+    "x-civweave-node-id": guild.nodeId,
   });
+  const authorization = context.request.headers.get("authorization");
+  if (authorization) headers.set("authorization", authorization);
+
+  try {
+    const upstream = await fetch(target, {
+      method: "POST",
+      headers,
+      body: await context.request.arrayBuffer(),
+      cache: "no-store",
+      redirect: "manual",
+    });
+    const responseHeaders = new Headers(upstream.headers);
+    responseHeaders.set("cache-control", "no-store");
+    responseHeaders.set("x-civweave-staging-guild-server", "isolated");
+    return new Response(upstream.body, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers: responseHeaders,
+    });
+  } catch (error) {
+    return reply({
+      ok: false,
+      error: "staging-guild-generate-proxy-failed",
+      environment: "staging",
+      productionIsolation: true,
+      nodeId: guild.nodeId,
+      message: String((error as Error)?.message || error),
+    }, 502);
+  }
 };

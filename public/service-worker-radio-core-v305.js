@@ -6,6 +6,7 @@ const V305_REQUIRED_ASSETS = Object.freeze([
   '/app/install-boundary-v146.js',
   '/app/experience-orchestrator-v232.js',
   '/app/system-radio-agent-v233.js',
+  '/app/radio-safe-stations-v1.js',
   '/app/radio-track-suggestions-v240.js',
   '/app/canonical-playlists-v1.js',
   '/app/radio-playlist-governance-v1.js',
