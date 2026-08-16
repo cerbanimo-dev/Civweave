@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.120-shared-guide-surface-v236-idle-chat-v1';
+const VERSION='1.0.126-shared-guide-surface-v236-universal-launcher-v1';
 const STYLE_ID='cw-shared-guide-surface-v236-style';
 const LAUNCHER_ID='cwp215-launcher';
 const CHAT_ROOT_ID='cw-persistent-guide-chat-v215';
@@ -62,14 +62,17 @@ function renderTranscript(){return false}
 function setInlineInteractive(){return false}
 function syncInlineVisibility(){return false}
 function removeEmbeddedGuideCards(){return false}
-
+function canonicalSurface(){
+  const api=globalThis.CivweaveGuideChatSurfaceV350||globalThis.CivweavePersistentGuideChatV215;
+  return api?.canonicalOwner?api:null;
+}
 function ownPageGuide(){
-  const api=globalThis.CivweavePersistentGuideChatV215;
+  const api=canonicalSurface();
   if(!api||!currentSystem)return false;
   try{api.switchGuide?.(currentSystem,{open:false});return true}catch{return false}
 }
 async function submitInline(text){
-  const value=clean(text,8000),api=globalThis.CivweavePersistentGuideChatV215;
+  const value=clean(text,8000),api=canonicalSurface();
   if(!value||typeof api?.submitText!=='function')return false;
   api.switchGuide?.(currentSystem,{open:false});
   return (await api.submitText(value,currentSystem))!==false;
@@ -86,18 +89,27 @@ function observeNav(){
   if(observedNav!==nav){if(observedNav)try{layoutObserver.unobserve(observedNav)}catch{};observedNav=nav;layoutObserver.observe(nav)}
   return true;
 }
-function repairSurface(){observeNav();normalizeFloatingLayout();return true}
+function repairSurface(){
+  currentSystem=detectSystem()||currentSystem;
+  const api=canonicalSurface();
+  try{api?.ensureLauncher?.()}catch{}
+  ownPageGuide();observeNav();normalizeFloatingLayout();
+  return Boolean(api);
+}
 function mount(){
   if(mounted)return;
   mounted=true;
   currentSystem=detectSystem();if(!currentSystem)return;
-  installStyle();ownPageGuide();observeNav();normalizeFloatingLayout();
-  addEventListener('civweave:persistent-guide-chat-ready',()=>{ownPageGuide();observeNav();normalizeFloatingLayout()});
+  installStyle();repairSurface();
+  addEventListener('civweave:persistent-guide-chat-ready',repairSurface);
+  addEventListener('civweave:guide-chat-ready',repairSurface);
+  addEventListener('pageshow',repairSurface);
   addEventListener('resize',normalizeFloatingLayout,{passive:true});
   document.documentElement.dataset.civweaveGuideSurface=VERSION;
   document.documentElement.dataset.civweaveGuideSurfaceMode='bubble-only';
+  document.documentElement.dataset.civweaveGuideLauncherOwner='guide-chat-surface-v350';
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 
-globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({version:VERSION,mode:'bubble-only',sourceTruth:true,detectSystem,guideFor:system=>GUIDE[system]||null,renderTranscript,normalizeFloatingLayout,ownPageGuide,submitInline,syncInlineVisibility,setInlineInteractive,buildInline,repairSurface,removeEmbeddedGuideCards,mount});
+globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({version:VERSION,mode:'bubble-only',sourceTruth:true,launcherOwner:'guide-chat-surface-v350',detectSystem,guideFor:system=>GUIDE[system]||null,renderTranscript,normalizeFloatingLayout,ownPageGuide,submitInline,syncInlineVisibility,setInlineInteractive,buildInline,repairSurface,removeEmbeddedGuideCards,mount});
 })();
