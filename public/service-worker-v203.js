@@ -10,7 +10,7 @@
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
-importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.164-local-ai-code-coherence-v308-bootstrap-capability');
+importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.163-local-ai-code-coherence-v308-bootstrap-capability');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v288-language-v2');
 importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1');
 importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v2');
