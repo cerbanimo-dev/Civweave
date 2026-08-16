@@ -8,7 +8,7 @@ const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const now=()=>new Date().toISOString();
 const read=()=>{try{return JSON.parse(globalThis.localStorage?.getItem(STATE_KEY)||'null')}catch{return null}};
 const write=value=>{try{globalThis.localStorage?.setItem(STATE_KEY,JSON.stringify(value))}catch{}return value};
-const normalizedOrigin=value=>{if(value==null||value==='')return null;return new URL(value).origin};
+const normalizedPrimary=value=>{if(value==null||value==='')return null;const url=new URL(value);if(!['http:','https:'].includes(url.protocol))throw new TypeError('primaryOrigin must use http or https.');url.hash='';url.search='';if(!url.pathname.endsWith('/'))url.pathname=`${url.pathname}/`;return url.href};
 
 export function classifyHostDevice({userAgent='',maxTouchPoints=0,coarsePointer=false}={}){
   const agent=String(userAgent||'');
@@ -18,7 +18,7 @@ export function classifyHostDevice({userAgent='',maxTouchPoints=0,coarsePointer=
 }
 
 export function recommendedHostRoute({deviceClass='desktop',localMeshAvailable=true}={}){
-  if(deviceClass==='mobile')return localMeshAvailable?'pocket-node':'pocket-node-pending';
+  if(deviceClass==='mobile')return localMeshAvailable?'pocket-node':'cloudflare-host-node';
   return 'persistent-local-node';
 }
 
@@ -30,15 +30,15 @@ export function deviceCapabilities(){
   return Object.freeze({deviceClass,localMeshAvailable,recommendedRoute:recommendedHostRoute({deviceClass,localMeshAvailable}),persistentAlternatives:POCKET_NODE_POLICY.persistentAlternatives});
 }
 
-export async function completeGuildHostOnboarding({guildId,primaryOrigin=null,route='auto',enablePocketNode=true}={}){
+export async function completeGuildHostOnboarding({guildId,primaryOrigin=null,membershipKey=null,route='auto',enablePocketNode=true}={}){
   const id=clean(guildId,180);if(!id)throw new TypeError('guildId is required.');
-  const origin=normalizedOrigin(primaryOrigin);
+  const origin=normalizedPrimary(primaryOrigin);
   const capabilities=deviceCapabilities();
   const selectedRoute=route==='auto'?capabilities.recommendedRoute:clean(route,80);
   const shouldEnrollPocket=enablePocketNode!==false&&selectedRoute==='pocket-node'&&capabilities.localMeshAvailable;
   let pocketNode=null,pocketNodeError=null,emergencyAiMesh=null,emergencyAiMeshError=null;
   if(shouldEnrollPocket){
-    try{pocketNode=await CivweavePocketGuildNodeV1.enroll({guildId:id,primaryOrigin:origin})}
+    try{pocketNode=await CivweavePocketGuildNodeV1.enroll({guildId:id,primaryOrigin:origin,membershipKey})}
     catch(error){pocketNodeError=String(error?.message||error)}
   }
   if(capabilities.localMeshAvailable){
