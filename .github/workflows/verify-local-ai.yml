@@ -27,7 +27,7 @@ on:
       - 'scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs'
       - '.github/workflows/verify-local-ai.yml'
   push:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'public/app/local-ai/runtime-v266.js'
       - 'public/app/local-ai/worker-v266.js'
