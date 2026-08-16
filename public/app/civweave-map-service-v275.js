@@ -1,7 +1,9 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.74-civweave-map-service-v275';
+const VERSION='1.0.75-civweave-map-service-v275-guild-directory-view';
+const VIEW=new URLSearchParams(location.search).get('view')||'';
+const GUILD_DIRECTORY_VIEW=VIEW==='hub-nodes';
 const BUNDLED='/app/federation-finder-data/federation-seed-v269.json';
 const ATLAS='/app/federation-finder-data/atlas-v274/manifest.json';
 const NODE_KEY='federation-finder.physical-node-endpoint';
@@ -28,8 +30,8 @@ const state={
   hubIds:new Set(),
   nodes:new Map(),
   atlasManifest:null,
-  source:'bootstrap',
-  mode:'all',
+  source:GUILD_DIRECTORY_VIEW?'guild-directory':'bootstrap',
+  mode:GUILD_DIRECTORY_VIEW?'nodes':'all',
   query:'',
   selectedId:null,
   userLocation:null,
@@ -49,6 +51,7 @@ function validCoords(value){return Array.isArray(value)&&Number.isFinite(Number(
 function setStatus(text){if(els.status)els.status.textContent=text}
 function setLocationStatus(text){if(els.locationStatus)els.locationStatus.textContent=text}
 function safeHttp(value=''){try{const raw=String(value||'').trim();if(!raw)return'';const u=new URL(/^https?:\/\//i.test(raw)?raw:`https://${raw}`);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return''}}
+function isGuildDirectoryFeature(row){return Boolean(row?.raw?._civweaveHubMap)}
 function normalizeFeature(feature,source='public'){
   const p={...(feature?.properties||{})};
   const coords=validCoords(feature?.geometry?.coordinates);
@@ -145,14 +148,16 @@ async function loadAtlas(){
 function featureCollection(){
   const features=[];
   for(const f of state.features.values()){
-    if(state.mode==='federations'&&!state.hubIds.has(f.id)&&!f.hub)continue;
-    if(state.mode==='nodes'&&!['local','node'].includes(f.source))continue;
+    if(GUILD_DIRECTORY_VIEW&&!isGuildDirectoryFeature(f))continue;
+    if(!GUILD_DIRECTORY_VIEW&&state.mode==='federations'&&!state.hubIds.has(f.id)&&!f.hub)continue;
+    if(!GUILD_DIRECTORY_VIEW&&state.mode==='nodes'&&!['local','node'].includes(f.source))continue;
     if(state.query&&!f.search.includes(state.query))continue;
     features.push({type:'Feature',id:f.id,geometry:{type:'Point',coordinates:f.coords},properties:{id:f.id,name:f.name,city:f.city,region:f.region,country:f.country,framework:f.framework,model:f.model,source:f.source,hub:state.hubIds.has(f.id)||f.hub}});
   }
   return {type:'FeatureCollection',features};
 }
 function edgeCollection(){
+  if(GUILD_DIRECTORY_VIEW)return{type:'FeatureCollection',features:[]};
   const features=[];
   for(const e of state.edges){
     const a=state.features.get(e.source),b=state.features.get(e.target);
@@ -161,10 +166,12 @@ function edgeCollection(){
   }
   return {type:'FeatureCollection',features};
 }
+function visibleFeatureCount(){return GUILD_DIRECTORY_VIEW?[...state.features.values()].filter(isGuildDirectoryFeature).length:state.features.size}
 function updateStats(){
-  if(els.featureCount)els.featureCount.textContent=state.features.size.toLocaleString();
-  if(els.nodeCount)els.nodeCount.textContent=state.nodes.size.toLocaleString();
-  if(els.atlasCount)els.atlasCount.textContent=Number(state.atlasManifest?.featureCount||state.features.size).toLocaleString();
+  const visible=visibleFeatureCount();
+  if(els.featureCount)els.featureCount.textContent=visible.toLocaleString();
+  if(els.nodeCount)els.nodeCount.textContent=(GUILD_DIRECTORY_VIEW?visible:state.nodes.size).toLocaleString();
+  if(els.atlasCount)els.atlasCount.textContent=Number(GUILD_DIRECTORY_VIEW?visible:(state.atlasManifest?.featureCount||state.features.size)).toLocaleString();
 }
 function updateMapData(){
   updateStats();
@@ -238,6 +245,7 @@ function initMap(){
 function resultLabel(f){return [f.city,f.region,f.country].filter(Boolean).join(', ')}
 function selectFeature(id,fly=false){
   const f=state.features.get(id);if(!f)return;
+  if(GUILD_DIRECTORY_VIEW&&!isGuildDirectoryFeature(f))return;
   state.selectedId=id;
   if(fly&&state.map)state.map.flyTo({center:f.coords,zoom:Math.max(state.map.getZoom(),8),essential:true});
   if(els.detail)els.detail.innerHTML=`<strong>${esc(f.name)}</strong><small>${esc(resultLabel(f)||f.framework||f.model||'Mapped Civweave contact')}</small>${f.description?`<p>${esc(f.description)}</p>`:''}${f.website?`<a href="${esc(safeHttp(f.website))}" target="_blank" rel="noopener">Open website ↗</a>`:''}<div class="coord">${f.coords[1].toFixed(4)}, ${f.coords[0].toFixed(4)}</div>`;
@@ -252,8 +260,9 @@ function localSearch(q){
   const nq=norm(q);if(!nq)return[];
   const exact=[],prefix=[],contains=[];
   for(const f of state.features.values()){
-    if(state.mode==='federations'&&!state.hubIds.has(f.id)&&!f.hub)continue;
-    if(state.mode==='nodes'&&!['local','node'].includes(f.source))continue;
+    if(GUILD_DIRECTORY_VIEW&&!isGuildDirectoryFeature(f))continue;
+    if(!GUILD_DIRECTORY_VIEW&&state.mode==='federations'&&!state.hubIds.has(f.id)&&!f.hub)continue;
+    if(!GUILD_DIRECTORY_VIEW&&state.mode==='nodes'&&!['local','node'].includes(f.source))continue;
     const name=norm(f.name),place=norm([f.city,f.region,f.country].filter(Boolean).join(' '));
     if(name===nq||place===nq)exact.push(f);
     else if(name.startsWith(nq)||place.startsWith(nq))prefix.push(f);
@@ -304,7 +313,7 @@ async function search(){
   updateMapData();
   if(!query){renderResults([]);return}
   const local=localSearch(query);
-  if(local.length){renderResults(local,`Civweave matches · ${local.length}`);if(local.length===1)selectFeature(local[0].id,true);return}
+  if(local.length){renderResults(local,GUILD_DIRECTORY_VIEW?`Guild matches · ${local.length}`:`Civweave matches · ${local.length}`);if(local.length===1)selectFeature(local[0].id,true);return}
   setStatus(`Searching locality data for “${query}”…`);
   try{const places=await geocodePlace(query);renderPlaceResults(places);if(places[0])showPlace(places[0]);setStatus(`${OPENFREEMAP.name} map · locality search ready`)}
   catch(error){console.warn(error);renderResults([]);setStatus('Map online · locality search temporarily unavailable')}
@@ -316,9 +325,9 @@ function distanceKm(a,b){
   return 2*R*Math.asin(Math.sqrt(h));
 }
 function renderNearby(coords){
-  const rows=[...state.features.values()].map(f=>({f,d:distanceKm(coords,f.coords)})).sort((a,b)=>a.d-b.d).slice(0,24).map(x=>({...x.f,distance:x.d}));
+  const rows=[...state.features.values()].filter(f=>!GUILD_DIRECTORY_VIEW||isGuildDirectoryFeature(f)).map(f=>({f,d:distanceKm(coords,f.coords)})).sort((a,b)=>a.d-b.d).slice(0,24).map(x=>({...x.f,distance:x.d}));
   if(!els.results)return;
-  els.results.innerHTML='<div class="results-heading">Nearest mapped contacts</div>'+rows.map(row=>`<button type="button" data-result-id="${esc(row.id)}"><strong>${esc(row.name)}</strong><small>${row.distance<1?`${Math.round(row.distance*1000)} m`:`${row.distance.toFixed(1)} km`} · ${esc(resultLabel(row)||row.framework||'')}</small></button>`).join('');
+  els.results.innerHTML=`<div class="results-heading">${GUILD_DIRECTORY_VIEW?'Nearest Guilds':'Nearest mapped contacts'}</div>`+rows.map(row=>`<button type="button" data-result-id="${esc(row.id)}"><strong>${esc(row.name)}</strong><small>${row.distance<1?`${Math.round(row.distance*1000)} m`:`${row.distance.toFixed(1)} km`} · ${esc(resultLabel(row)||row.framework||'')}</small></button>`).join('');
   els.results.querySelectorAll('[data-result-id]').forEach(button=>button.addEventListener('click',()=>selectFeature(button.dataset.resultId,true)));
 }
 function locate(){
@@ -332,6 +341,7 @@ function locate(){
   },error=>setLocationStatus(`Location unavailable: ${error.message}`),{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
 }
 async function syncNode(){
+  if(GUILD_DIRECTORY_VIEW){setStatus('Guild discovery comes from the signed Guild directory.');return}
   const endpoint=safeHttp(els.nodeEndpoint?.value||localStorage.getItem(NODE_KEY)||'');
   if(!endpoint){setStatus('Enter a Node Host endpoint first.');return}
   localStorage.setItem(NODE_KEY,endpoint);setStatus('Reading node finder status…');
@@ -346,6 +356,7 @@ async function syncNode(){
   }catch(error){setStatus(`Node discovery failed · ${error.message}`)}
 }
 function changeMode(mode){
+  if(GUILD_DIRECTORY_VIEW)mode='nodes';
   state.mode=mode;
   for(const [name,el] of [['all',els.modeAll],['federations',els.modeFederations],['nodes',els.modeNodes]])el?.classList.toggle('active',name===mode);
   state.query='';if(els.search)els.search.value='';updateMapData();renderResults([]);
@@ -359,7 +370,7 @@ function bind(){
   els.search?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();search()}});
   els.locate?.addEventListener('click',locate);
   els.syncNode?.addEventListener('click',syncNode);
-  els.openNode?.addEventListener('click',()=>{const endpoint=safeHttp(els.nodeEndpoint?.value||localStorage.getItem(NODE_KEY)||'');if(endpoint)window.open(endpoint,'_blank','noopener')});
+  els.openNode?.addEventListener('click',()=>{if(GUILD_DIRECTORY_VIEW)return;const endpoint=safeHttp(els.nodeEndpoint?.value||localStorage.getItem(NODE_KEY)||'');if(endpoint)window.open(endpoint,'_blank','noopener')});
   els.modeAll?.addEventListener('click',()=>changeMode('all'));
   els.modeFederations?.addEventListener('click',()=>changeMode('federations'));
   els.modeNodes?.addEventListener('click',()=>changeMode('nodes'));
@@ -370,15 +381,21 @@ function bind(){
   if(els.provider)els.provider.textContent=`${OPENFREEMAP.name} vector tiles · MapLibre renderer`;
 }
 async function boot(){
-  bind();setStatus('Loading Civweave locality map…');
-  try{await loadBundled()}catch(error){console.warn('[CivweaveMap] bundled seed failed',error)}
-  loadSavedNodes();
+  bind();setStatus(GUILD_DIRECTORY_VIEW?'Loading Civweave Guild Map…':'Loading Civweave locality map…');
+  let atlas=false;
+  if(!GUILD_DIRECTORY_VIEW){
+    try{await loadBundled()}catch(error){console.warn('[CivweaveMap] bundled seed failed',error)}
+    loadSavedNodes();
+  }
   try{initMap()}catch(error){setStatus(error.message);return}
   updateStats();
-  const atlas=await loadAtlas();
-  loadSavedNodes();updateMapData();
-  setStatus(`${atlas?'Offline federation atlas':'Bundled federation seed'} + ${OPENFREEMAP.name} locality map ready`);
-  window.CivweaveMapService={version:VERSION,state,search,locate,syncNode,selectFeature,changeTheme,updateMapData,provider:OPENFREEMAP};
+  if(!GUILD_DIRECTORY_VIEW){
+    atlas=await loadAtlas();
+    loadSavedNodes();
+  }
+  updateMapData();
+  setStatus(GUILD_DIRECTORY_VIEW?`${OPENFREEMAP.name} Guild Map ready`:`${atlas?'Offline federation atlas':'Bundled federation seed'} + ${OPENFREEMAP.name} locality map ready`);
+  window.CivweaveMapService={version:VERSION,state,search,locate,syncNode,selectFeature,changeTheme,updateMapData,provider:OPENFREEMAP,guildDirectoryView:GUILD_DIRECTORY_VIEW};
 }
 
 boot().catch(error=>{console.error('[CivweaveMap] boot failed',error);setStatus(`Map failed · ${error.message}`)});
