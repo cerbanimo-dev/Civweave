@@ -8,6 +8,7 @@ const root = path.resolve(here, '..');
 const publicDir = path.join(root, 'public');
 const version = (await fs.readFile(path.join(root, 'VERSION'), 'utf8')).trim();
 const workerPath = path.join(publicDir, 'service-worker-core-v208.js');
+const shellAssetsWorkerPath = path.join(publicDir, 'service-worker-shell-assets-v1.js');
 const installerWorkerPath = path.join(publicDir, 'service-worker-installer-state-v280.js');
 const offlineManifestPath = path.join(publicDir, 'app', 'offline-package-v208.json');
 const integrityPath = path.join(publicDir, 'app', 'shell-integrity-v281.json');
@@ -59,12 +60,14 @@ function isCandidate(urlPath, manifest) {
   return DISCOVERABLE_EXTENSION.test(urlPath);
 }
 
-const [workerSource, installerWorkerSource] = await Promise.all([
+const [workerSource, shellAssetsWorkerSource, installerWorkerSource] = await Promise.all([
   fs.readFile(workerPath, 'utf8'),
+  fs.readFile(shellAssetsWorkerPath, 'utf8'),
   fs.readFile(installerWorkerPath, 'utf8')
 ]);
 const requiredShellAssets = [...new Set([
   ...extractStringArray(workerSource, 'REQUIRED_SHELL_ASSETS', 'service-worker-core-v208.js'),
+  ...extractStringArray(shellAssetsWorkerSource, 'REQUIRED_FAMILY_NAV', 'service-worker-shell-assets-v1.js'),
   ...extractStringArray(installerWorkerSource, 'INSTALLER_STATE_ASSETS', 'service-worker-installer-state-v280.js')
 ])];
 const hashes = {};
