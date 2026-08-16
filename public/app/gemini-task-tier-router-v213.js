@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.67-gemini-task-tier-router-v271-spine';
+const VERSION='1.0.68-gemini-task-tier-router-v322-canonical-settings';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const COMPLEX_MODEL='gemini-3.7-flash';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -90,11 +90,23 @@ function disclose(decision,model,request={}){
   notice.textContent=`Capability routing selected Gemini 3.7 Flash for ${decision.reason}. Routine requests use Gemini 3.1 Flash-Lite.`;notice.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{if(notice?.isConnected)notice.hidden=true},7000);return detail;
 }
 function patchSettings(){
-  if(typeof document==='undefined')return;installStyle();const form=document.querySelector('[data-cw-cleanroom-form]');if(!form)return;
+  if(typeof document==='undefined')return;
+  installStyle();
+  const form=document.querySelector('[data-cw-cleanroom-form]');
+  if(!form)return;
   const route=form.elements?.namedItem?.('route'),model=form.elements?.namedItem?.('model'),remote=form.querySelector('[data-panel="remote"]'),gemini=providerName(route?.value)==='gemini';
-  if(model){if(gemini){model.value=SMALL_MODEL;model.readOnly=true;model.setAttribute('aria-describedby','cw-gemini-routing-note-v213')}else{model.readOnly=false;model.removeAttribute('aria-describedby')}}
-  let note=form.querySelector('#cw-gemini-routing-note-v213');
-  if(gemini&&remote){if(!note){note=document.createElement('div');note.id='cw-gemini-routing-note-v213';note.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Planning, research, code generation, and agentic work use Gemini 3.7 Flash. Capability classification is provider-neutral; Gemini selection happens only after Gemini is the chosen provider.</span>';remote.insertBefore(note,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}note.hidden=false;}else if(note)note.hidden=true;
+  const canonicalV322=form.dataset.settingsTabs==='1'&&Boolean(form.querySelector('[data-gemini-presets]'));
+  if(model){
+    if(gemini){model.value=SMALL_MODEL;model.readOnly=true;if(canonicalV322)model.removeAttribute('aria-describedby');else model.setAttribute('aria-describedby','cw-gemini-routing-note-v213')}
+    else{model.readOnly=false;model.removeAttribute('aria-describedby')}
+  }
+  const note=form.querySelector('#cw-gemini-routing-note-v213');
+  if(canonicalV322){note?.remove();return}
+  if(gemini&&remote){
+    let legacyNote=note;
+    if(!legacyNote){legacyNote=document.createElement('div');legacyNote.id='cw-gemini-routing-note-v213';legacyNote.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Planning, research, code generation, and agentic work use Gemini 3.7 Flash. Capability classification is provider-neutral; Gemini selection happens only after Gemini is the chosen provider.</span>';remote.insertBefore(legacyNote,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}
+    legacyNote.hidden=false;
+  }else if(note)note.hidden=true;
 }
 function middleware(){
   return{
@@ -121,5 +133,5 @@ addEventListener?.('civweave:model-settings-saved',()=>{migrateStoredGeminiPolic
 addEventListener?.('civweave:model-settings-opened',()=>queueMicrotask(patchSettings));
 if(typeof document!=='undefined'){document.addEventListener('change',event=>{if(event.target?.name==='route')queueMicrotask(patchSettings)});document.addEventListener('submit',event=>{if(event.target?.matches?.('[data-cw-cleanroom-form]'))patchSettings()},true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',patchSettings,{once:true});else patchSettings();}
 migrateStoredGeminiPolicy();install();
-globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID});
+globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID,canonicalSettingsPresentation:true});
 })();
