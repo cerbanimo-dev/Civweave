@@ -6,8 +6,8 @@ const DEFAULT_TTL_MS=18000;
 const PROTECTED_ROUTE_RE=/(?:^|\/)(?:checkout|payment|billing|auth|login|sign[-_]?in|sign[-_]?up|submit|confirmation?|destructive|recovery|error)(?:\/|$)/i;
 const CHAT_MODULES=[
  ['/app/chat-fullscreen-v295.js',()=>globalThis.CivweaveChatFullscreenV295?.version==='1.0.108-chat-fullscreen-v299'&&globalThis.CivweaveChatFullscreenV295?.revision==='saved-tabs-grid-v351'],
- ['/app/saved-chat-store-v295.js',()=>globalThis.CivweaveSavedChatStoreV295?.version==='1.0.97-saved-chat-store-v295'],
- ['/app/saved-chat-ui-v295.js',()=>globalThis.CivweaveSavedChatUIV295?.version==='1.0.161-saved-chat-ui-v350'],
+ ['/app/saved-chat-store-v295.js?rev=1.0.164-thread-tabs-v352',()=>globalThis.CivweaveSavedChatStoreV295?.version==='1.0.164-saved-chat-store-v352'],
+ ['/app/saved-chat-ui-v295.js?rev=1.0.164-thread-tabs-v352',()=>globalThis.CivweaveSavedChatUIV295?.version==='1.0.164-saved-chat-ui-v352'],
  ['/app/local-chat-runtime-v295.js?v=1.0.124-v312-runtime-first-bootstrap',()=>globalThis.CivweaveLocalChatRuntimeV295?.version==='1.0.117-local-chat-runtime-v305-mobile-bootstrap-recovery'&&globalThis.CivweaveLocalChatRuntimeV295?.revision==='v312-runtime-first-bootstrap'&&globalThis.CivweaveLocalChatRuntimeV295?.smoothFitRuntime===true],
  ['/app/local-chat-owner-v295.js?v=1.0.159-live-thread-render-v351',()=>globalThis.CivweaveLocalChatOwnerV295?.version==='1.0.158-local-chat-owner-v303-submit-only'&&globalThis.CivweaveLocalChatOwnerV295?.revision==='live-thread-render-v351'&&globalThis.CivweaveLocalChatOwnerV295?.generativePrewarmDisabled===true&&globalThis.CivweaveLocalChatOwnerV295?.generativeStartsOnSubmit===true&&globalThis.CivweaveLocalChatOwnerV295?.liveThreadRender===true]
 ];
