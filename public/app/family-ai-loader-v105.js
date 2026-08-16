@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.126-headless-canonical-chat-r54-selected-local';
+const VERSION='1.0.127-headless-canonical-chat-thread-routing';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -22,7 +22,7 @@ const VALUE_MODEL=[
   ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1-idle-safe-v1',()=>globalThis.CivweaveBasicValueSystemsV1?.eventDriven===true]
 ];
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.124-v313-runtime-spine-contract',()=>globalThis.CivweaveFastInteractiveV192];
-const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.0.0-response-router-v347',()=>globalThis.CivweaveResponseRouterV347];
+const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.2.0-thread-network-gate',()=>globalThis.CivweaveResponseRouterV347];
 const LOCAL_BOOTSTRAP=['/app/local-ai/bootstrap-v266.js?v=1.0.83-v282-inference-health',()=>globalThis.CivweaveLocalAIBootstrapV266];
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.5-minilm-local-route',()=>globalThis.CivweaveAssistantV141];
 const PATCHES=[
