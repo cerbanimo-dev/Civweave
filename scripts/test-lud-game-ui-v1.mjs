@@ -63,14 +63,14 @@ test('Lud game JS is presentation-only and reads canonical Passport and Guild st
   assert.doesNotMatch(source,/\.generate\s*\(/);
 });
 
-test('Lud package worker rejects stale ready metadata after a presentation generation bump',async()=>{
+test('Lud package worker rejects stale ready metadata after a package generation bump',async()=>{
   const [installer,worker]=await Promise.all([
     read('public/app/lud-installer-v1.js'),
     read('public/service-worker-lud-package-v1.js'),
   ]);
-  assert.match(installer,/VERSION='1\.0\.3'/);
-  assert.match(installer,/service-worker-lud-package-v1\.js\?v=1\.0\.3/);
-  assert.match(worker,/LUD_REVISION='lud-package-v1\.1-game-ui'/);
+  assert.match(installer,/VERSION='1\.0\.4'/);
+  assert.match(installer,/service-worker-lud-package-v1\.js\?v=1\.0\.4/);
+  assert.match(worker,/LUD_REVISION='lud-package-v1\.2-custom-forms'/);
   assert.match(worker,/if\(meta\?\.revision===LUD_REVISION\)return ludPacket\(meta\)/);
   assert.match(worker,/meta\?\.revision===LUD_REVISION&&Array\.isArray/);
 });
