@@ -25,6 +25,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
+      - 'scripts/verify-minilm-response-router-v347.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   push:
     branches: ['**']
@@ -51,6 +52,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
+      - 'scripts/verify-minilm-response-router-v347.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   workflow_dispatch:
 
@@ -91,6 +93,7 @@ jobs:
           node --check public/service-worker-v203.js
           node --check scripts/verify-chat-launch-readiness-v295.mjs
           node --check scripts/verify-human-message-bubble-v1.mjs
+          node --check scripts/verify-minilm-response-router-v347.mjs
 
       - name: Enforce one-core five-guide avatar contract
         shell: bash
@@ -157,6 +160,7 @@ jobs:
           if(!assistant.includes("code:'SELECTED_LOCAL_MODEL_FAILED'"))throw new Error('Selected local model failures can silently fall back again');
           if(!minilmContext.includes("model:'Xenova/all-MiniLM-L6-v2'"))throw new Error('MiniLM context router model contract is missing');
           if(!minilmResponse.includes("dispatchEvent(new CustomEvent('civweave:response-route'"))throw new Error('MiniLM response routing event contract is missing');
+          if(!minilmResponse.includes('minilmPrimary:true')||!minilmResponse.includes('deterministicFallbackOnly:true'))throw new Error('Free-form prompt routing is no longer MiniLM-first with deterministic fallback only');
           if(!surface.includes("provider:'local-model-error'"))throw new Error('Canonical chat can silently label a selected local model failure as deterministic output');
           if(!surface.includes("'civweave:avatar-direct-text'")||!surface.includes('data-message-role')||!surface.includes('data-pending'))throw new Error('Canonical chat no longer feeds response lifecycle into MiniLM avatar expression selection');
           NODE
@@ -165,3 +169,4 @@ jobs:
         run: |
           node scripts/verify-chat-launch-readiness-v295.mjs
           node scripts/verify-human-message-bubble-v1.mjs
+          node scripts/verify-minilm-response-router-v347.mjs
