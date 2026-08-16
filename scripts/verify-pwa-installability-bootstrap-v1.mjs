@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [bridge,worker,manifestText,headers]=await Promise.all([
+const [bridge,worker,manifestText,headers,installer]=await Promise.all([
   read('public/app/pwa-install-prompt-v250.js'),
   read('public/pwa-installability-worker-v1.js'),
   read('public/app/manifest.webmanifest'),
-  read('public/_headers')
+  read('public/_headers'),
+  read('public/install-v130.js')
 ]);
 const manifest=JSON.parse(manifestText);
 
@@ -33,12 +34,22 @@ assert.ok(bridge.includes('firstPaintShellWork:false'),'first paint must remain 
 assert.ok(bridge.includes('void completeShellAfterBrowserInstall()'),'browser-menu installation must still prepare the real shell after installation');
 assert.match(headers,/\/pwa-installability-worker-v1\.js\s+Cache-Control: no-cache/,'bootstrap worker must bypass stale HTTP caching');
 
+// The PWA bridge is the only effective owner of Chromium's deferred prompt.
+// install-v130 still contains a legacy listener for compatibility, so v250 must intercept
+// the event in capture phase and stop it before that listener can call preventDefault again.
+assert.ok(bridge.includes("addEventListener('beforeinstallprompt',capture,{capture:true})"),'v250 must capture beforeinstallprompt before legacy listeners');
+assert.ok(bridge.includes('event.stopImmediatePropagation()'),'v250 must stop duplicate beforeinstallprompt ownership');
+assert.ok(bridge.includes("singleOwnerPromptPolicy:'capture-stop-immediate-propagation'"),'v250 must publish its single-owner prompt contract');
+assert.ok(bridge.includes('prompt.prompt();'),'the sole prompt owner must call the native prompt from the install click');
+assert.ok(installer.includes("addEventListener('beforeinstallprompt'"),'legacy listener remains detectable until it is retired intentionally');
+
 console.log(JSON.stringify({
   ok:true,
-  revision:'desktop-pwa-installability-bootstrap-v1',
+  revision:'desktop-pwa-installability-bootstrap-v2-single-prompt-owner',
   bootstrapWorker:'/pwa-installability-worker-v1.js',
   bootstrapCachesShell:false,
   rootScope:true,
   shellPreparationUserInitiated:true,
-  browserMenuInstallCompletesShell:true
+  browserMenuInstallCompletesShell:true,
+  singlePromptOwner:'pwa-install-prompt-v250'
 },null,2));
