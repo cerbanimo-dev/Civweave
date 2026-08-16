@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.154-hub-passport-account-ui-v2-guild-copy';
+const VERSION='1.0.155-hub-passport-account-ui-v2-guild-copy';
 if(globalThis.CivweaveHubRecoveryUiV1?.version===VERSION)return;
 const accounts=()=>globalThis.CivweaveHubPassportAccountV1||null;
 const legacy=()=>globalThis.CivweaveHubRecoveryApiV1||null;
@@ -8,7 +8,7 @@ let accountModulePromise=null;
 function ensureAccountModule(){
  if(globalThis.CivweaveHubPassportAccountV1)return Promise.resolve(globalThis.CivweaveHubPassportAccountV1);
  if(accountModulePromise)return accountModulePromise;
- accountModulePromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/app/hub-passport-account-v1.js?v=passport-account-passkeys-v1';script.async=false;script.onload=()=>globalThis.CivweaveHubPassportAccountV1?resolve(globalThis.CivweaveHubPassportAccountV1):reject(new Error('Passport account module loaded without its API.'));script.onerror=()=>reject(new Error('Passport account module could not load.'));document.head.append(script)}).catch(error=>{accountModulePromise=null;throw error});
+ accountModulePromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/app/hub-passport-account-v1.js?v=passport-account-passkeys-v2';script.async=false;script.onload=()=>globalThis.CivweaveHubPassportAccountV1?resolve(globalThis.CivweaveHubPassportAccountV1):reject(new Error('Passport account module loaded without its API.'));script.onerror=()=>reject(new Error('Passport account module could not load.'));document.head.append(script)}).catch(error=>{accountModulePromise=null;throw error});
  return accountModulePromise;
 }
 const clean=(v,m=800)=>String(v??'').trim().slice(0,m);
