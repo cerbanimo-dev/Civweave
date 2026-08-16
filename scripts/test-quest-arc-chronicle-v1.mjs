@@ -48,7 +48,20 @@ row=api.syncQuest(quest);
 assert.equal(row.currentBeatId,'reckoning');
 for(const id of ['deepening','descent','ordeal','breakthrough','claim','homeward-road'])assert(row.history.some(item=>item.beatId===id),`${id} should be captured in the default arc.`);
 quest.status='completed';
-assert.equal(api.syncQuest(quest).currentBeatId,'gift');
+row=api.syncQuest(quest);
+assert.equal(row.currentBeatId,'gift');
+assert(row.history.some(item=>item.beatId==='gift'&&item.outcome==='CLEARED'),'The Gift must mint a final Chronicle receipt when the Quest completes.');
+const giftReceipts=row.history.filter(item=>item.beatId==='gift').length;
+row=api.syncQuest(quest);
+assert.equal(row.history.filter(item=>item.beatId==='gift').length,giftReceipts,'Repeated sync must not duplicate The Gift receipt.');
+
+const releasedQuest={id:'quest-release',title:'Retire an old plan',objective:'Close the Quest intentionally',status:'archived',tasks:[]};
+let released=api.syncQuest(releasedQuest);
+assert.equal(released.currentBeatId,'release');
+assert(released.history.some(item=>item.beatId==='release'&&item.outcome==='CLEARED'),'The Release must mint an alternate terminal Chronicle receipt.');
+const releaseReceipts=released.history.filter(item=>item.beatId==='release').length;
+released=api.syncQuest(releasedQuest);
+assert.equal(released.history.filter(item=>item.beatId==='release').length,releaseReceipts,'Repeated sync must not duplicate The Release receipt.');
 
 assert.equal(api.validateVerse('One\nTwo\nThree\nFour').ok,true);
 assert.equal(api.validateVerse('One\nTwo\nThree').ok,false);
@@ -90,8 +103,9 @@ assert.equal(safe.entries[0].receiptCommitment.legacyUnsalted,true);
 assert.equal(safe.entries[0].receiptCommitment.digest,'a'.repeat(64));
 const history=api.historyProjections('quest-1',{limit:50});
 assert(history.length>=10,'The automatic Hero arc should leave a visible Chronicle trail.');
+assert(history.some(item=>item.beatId==='gift'),'The public history projection must include the terminal Gift receipt.');
 assert(history.every(item=>item.privacy.workSummaryIncluded===false));
 
 assert.match(api.versePrompt({publicQuestName:'Garden',beatId:'snare',outcome:'SETBACK'}),/exactly four short lines/i);
 assert.equal(api.deterministicBeatText('snare','SETBACK'),'The Snare — Setback');
-console.log('Quest Arc Chronicle progression, AI-free core, four-line fallback, and sealed-receipt privacy checks passed.');
+console.log('Quest Arc Chronicle progression, terminal receipts, AI-free core, four-line fallback, and sealed-receipt privacy checks passed.');
