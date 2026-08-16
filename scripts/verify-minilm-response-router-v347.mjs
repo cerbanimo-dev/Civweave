@@ -39,10 +39,12 @@ for(const marker of [
   "Local generation was intentionally skipped"
 ])assert.ok(source.includes(marker),`missing response-router marker: ${marker}`);
 assert.ok(loader.includes('/app/minilm-response-router-v347.js?v=1.2.0-thread-network-gate'),'shared guide loader must cache-bust the thread-aware network response router');
-assert.ok(loader.includes('/app/unified-chat-system-v1.js?v=1.0.1-assistant-lifecycle'),'shared guide loader must cache-bust the assistant-lifecycle unified chat runtime');
+assert.ok(loader.includes('/app/unified-chat-system-v1.js?v=1.0.2-learning-continuation'),'shared guide loader must cache-bust the learning-continuation unified chat runtime');
 assert.ok(unified.includes("'civweave:assistant-runtime-ready'"),'unified chat must reattach after assistant runtime readiness');
 assert.ok(unified.includes("'civweave:response-router-installed'"),'unified chat must reattach after response-router replacement');
 assert.ok(unified.includes("'civweave:guide-chat-opened'"),'opening chat must self-heal a missing assistant wrapper');
+assert.ok(unified.includes('learning plan|study plan'),'unified Living School detector must recognize learning-plan wording');
+assert.ok(unified.includes('const CONTINUE='),'unified Living School detector must preserve thread continuation cues');
 const registrations=[];
 const context={
   globalThis:null,
