@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v250-download-then-install-v3-confirmed-install-only';
+const VERSION='pwa-install-prompt-v250-download-then-install-v4-refresh-installability';
 const ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave';
 const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.cc';
@@ -13,6 +13,7 @@ const MANIFESTS=[CANONICAL_ORIGIN,STAGING_ORIGIN,PREVIOUS_CANONICAL_ORIGIN,LEGAC
 const INSTALL_MARKER_KEY='civweave.pwa.installed-marker.v1';
 const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
 const RETIRED_CAPABILITY_KEY='civweave.pwa.installed-capability.v1';
+const POST_DOWNLOAD_RELOAD_KEY='civweave.pwa.post-download-reload.v1';
 const PROMPT_WAIT_MS=6000;
 const INSTALL_CONFIRM_TIMEOUT_MS=3500;
 let promptEvent=null,prompting=false,buttonObserver=null,refreshQueued=false,relatedApps=[];
@@ -21,11 +22,14 @@ function standalone(){return navigator.standalone===true||['standalone','fullscr
 function launchSession(){try{return sessionStorage.getItem(LAUNCH_SESSION_KEY)==='1'}catch{return false}}
 function appRuntime(){return standalone()||launchSession()}
 function readInstalledMarker(){try{const value=JSON.parse(localStorage.getItem(INSTALL_MARKER_KEY)||'null');return Boolean(value&&value.origin===location.origin&&value.manifestId==='/civweave-local')}catch{return false}}
+function postDownloadReloadArmed(){try{return sessionStorage.getItem(POST_DOWNLOAD_RELOAD_KEY)===VERSION}catch{return false}}
+function armPostDownloadReload(){try{sessionStorage.setItem(POST_DOWNLOAD_RELOAD_KEY,VERSION);return true}catch{return false}}
+function clearPostDownloadReload(){try{sessionStorage.removeItem(POST_DOWNLOAD_RELOAD_KEY)}catch{}return true}
 let installed=false,installedHint=readInstalledMarker();
 if(installedHint)document.documentElement.dataset.civweaveInstalledMarker='hint';
 function rememberInstalled(source='appinstalled'){
   try{localStorage.setItem(INSTALL_MARKER_KEY,JSON.stringify({origin:location.origin,manifestId:'/civweave-local',source,installedAt:new Date().toISOString()}));localStorage.removeItem(RETIRED_CAPABILITY_KEY)}catch{}
-  installed=true;installedHint=true;document.documentElement.dataset.civweaveInstalledMarker='confirmed';return true;
+  installed=true;installedHint=true;document.documentElement.dataset.civweaveInstalledMarker='confirmed';clearPostDownloadReload();return true;
 }
 function forgetInstalledMarker(){
   try{localStorage.removeItem(INSTALL_MARKER_KEY);localStorage.removeItem(RETIRED_CAPABILITY_KEY)}catch{}
@@ -73,7 +77,58 @@ function observeButton(){const button=installButton();if(!button)return;buttonOb
 function capture(event){event.preventDefault();if(!installOrigin()){rerouteUnsafeInstall();return}promptEvent=event;publish('civweave:pwa-install-prompt-ready',{available:true});queueRefresh()}
 function onInstalled(){rememberInstalled('appinstalled');promptEvent=null;prompting=false;publish('civweave:pwa-installed',{available:false});queueRefresh();void discoverRelatedInstalls()}
 function waitForPrompt(timeoutMs=PROMPT_WAIT_MS){if(promptEvent)return Promise.resolve(promptEvent);return new Promise(resolve=>{let settled=false;const finish=value=>{if(settled)return;settled=true;clearTimeout(timer);removeEventListener('beforeinstallprompt',onPrompt);resolve(value||null)},onPrompt=event=>{if(!promptEvent)promptEvent=event;finish(promptEvent||event)},timer=setTimeout(()=>finish(promptEvent),timeoutMs);addEventListener('beforeinstallprompt',onPrompt)})}
-async function prepareAfterInteraction(shell,button){prompting=true;setButton(button,{disabled:true,text:'Downloading Civweave…'});help('Downloading the small Civweave app files. The offline campus, media, knowledge packs, and local models are not part of this download.');publish('civweave:pwa-installability-preparing',{eager:false,userInitiated:true});try{await shell.prepareShell({manual:false});publish('civweave:pwa-installability-ready',{ready:Boolean(shell.shellReady),userInitiated:true})}catch(error){publish('civweave:pwa-installability-error',{message:error?.message||String(error),userInitiated:true})}finally{prompting=false;setButton(button,{disabled:false});queueRefresh()}}
+async function prepareAfterInteraction(shell,button){
+  prompting=true;
+  let reloading=false;
+  setButton(button,{disabled:true,text:'Downloading Civweave…'});
+  help('Downloading the small Civweave app files. The offline campus, media, knowledge packs, and local models are not part of this download.');
+  publish('civweave:pwa-installability-preparing',{eager:false,userInitiated:true});
+  try{
+    await shell.prepareShell({manual:false});
+    const ready=Boolean(shell.shellReady);
+    publish('civweave:pwa-installability-ready',{ready,userInitiated:true});
+    if(ready&&!promptEvent&&!appRuntime()&&!postDownloadReloadArmed()){
+      armPostDownloadReload();
+      reloading=true;
+      setButton(button,{disabled:true,text:'Download complete · preparing install…'});
+      help('Civweave is downloaded. Refreshing the installer once so Chromium can expose the native Install app prompt.');
+      const next=new URL(location.href);
+      next.searchParams.set('install_ready',Date.now().toString(36));
+      location.replace(next.href);
+      return;
+    }
+  }catch(error){
+    clearPostDownloadReload();
+    publish('civweave:pwa-installability-error',{message:error?.message||String(error),userInitiated:true});
+  }finally{
+    if(!reloading){prompting=false;setButton(button,{disabled:false});queueRefresh()}
+  }
+}
+async function resumeAfterDownloadReload(){
+  const current=new URL(location.href);
+  if(!current.searchParams.has('install_ready')||!postDownloadReloadArmed()||appRuntime()||!installOrigin())return false;
+  const shell=installer(),button=installButton();
+  if(!shell?.prepareShell||!button)return false;
+  prompting=true;
+  setButton(button,{disabled:true,text:'Preparing Install Civweave…'});
+  help('Download complete. Verifying the already-downloaded shell after refresh so the browser can expose Install Civweave.');
+  publish('civweave:pwa-post-download-resume',{started:true});
+  try{
+    await shell.prepareShell({manual:false});
+    const ready=Boolean(shell.shellReady);
+    if(ready)clearPostDownloadReload();
+    publish('civweave:pwa-post-download-resume',{started:false,ready});
+    return ready;
+  }catch(error){
+    clearPostDownloadReload();
+    publish('civweave:pwa-installability-error',{message:error?.message||String(error),postDownloadResume:true});
+    return false;
+  }finally{
+    prompting=false;
+    setButton(button,{disabled:false});
+    queueRefresh();
+  }
+}
 async function verifyAcceptedInstall(button){
   await new Promise(resolve=>setTimeout(resolve,INSTALL_CONFIRM_TIMEOUT_MS));
   if(installed||appRuntime())return true;
@@ -111,8 +166,10 @@ async function ownInstallClick(event){
 }
 
 if(hostSetupRedirect())return;if(rerouteUnsafeInstall())return;
-addEventListener('beforeinstallprompt',capture);addEventListener('appinstalled',onInstalled);document.addEventListener('click',ownInstallClick,true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',observeButton,{once:true});else observeButton();addEventListener('pagehide',()=>buttonObserver?.disconnect(),{once:true});
+addEventListener('beforeinstallprompt',capture);addEventListener('appinstalled',onInstalled);document.addEventListener('click',ownInstallClick,true);
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',()=>{observeButton();void resumeAfterDownloadReload()},{once:true});else{observeButton();void resumeAfterDownloadReload()}
+addEventListener('pagehide',()=>buttonObserver?.disconnect(),{once:true});
 const reminder=document.createElement('script');reminder.src='/app/host-steward-reminder-v1.js?v=1';reminder.async=true;document.head.append(reminder);
-const api=Object.freeze({version:VERSION,canonicalOrigin:CANONICAL_ORIGIN,stagingOrigin:STAGING_ORIGIN,previousCanonicalOrigin:PREVIOUS_CANONICAL_ORIGIN,legacyCanonicalOrigin:LEGACY_CANONICAL_ORIGIN,hostNodeOrigin:HOST_NODE_ORIGIN,installMarkerKey:INSTALL_MARKER_KEY,launchSessionKey:LAUNCH_SESSION_KEY,installedMarker:readInstalledMarker,launchSession,appRuntime,rememberInstalled,forgetInstalledMarker,installOrigin,canonicalInstallOrigin:installOrigin,canonicalInstallerUrl:()=>stableInstallerUrl().href,stableInstallerUrl:()=>stableInstallerUrl().href,discoverRelatedInstalls,relatedInstalls:()=>[...relatedApps],available:()=>Boolean(promptEvent),peek:()=>promptEvent,consume(){const value=promptEvent;promptEvent=null;return value},restore(event){if(event)promptEvent=event;return Boolean(promptEvent)},standalone,refresh:refreshButton,waitForPrompt,browserRuntimePolicy:'installed-display-or-pwa-launch-session-only',installStatePolicy:'confirmed-install-only-marker-is-hint',installSequencingPolicy:'download-on-first-interaction-then-install-on-fresh-gesture',promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click',observerPolicy:'idempotent-writes-coalesced-refresh',eagerRelatedAppDiscovery:false,eagerShellPreparation:false,firstPaintShellWork:false,cacheDistinctPath:true,firstInputSafe:true,state:()=>({available:Boolean(promptEvent),installed,installedHint,prompting,standalone:standalone(),launchSession:launchSession(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})});
+const api=Object.freeze({version:VERSION,canonicalOrigin:CANONICAL_ORIGIN,stagingOrigin:STAGING_ORIGIN,previousCanonicalOrigin:PREVIOUS_CANONICAL_ORIGIN,legacyCanonicalOrigin:LEGACY_CANONICAL_ORIGIN,hostNodeOrigin:HOST_NODE_ORIGIN,installMarkerKey:INSTALL_MARKER_KEY,launchSessionKey:LAUNCH_SESSION_KEY,installedMarker:readInstalledMarker,launchSession,appRuntime,rememberInstalled,forgetInstalledMarker,installOrigin,canonicalInstallOrigin:installOrigin,canonicalInstallerUrl:()=>stableInstallerUrl().href,stableInstallerUrl:()=>stableInstallerUrl().href,discoverRelatedInstalls,relatedInstalls:()=>[...relatedApps],available:()=>Boolean(promptEvent),peek:()=>promptEvent,consume(){const value=promptEvent;promptEvent=null;return value},restore(event){if(event)promptEvent=event;return Boolean(promptEvent)},standalone,refresh:refreshButton,waitForPrompt,browserRuntimePolicy:'installed-display-or-pwa-launch-session-only',installStatePolicy:'confirmed-install-only-marker-is-hint',installSequencingPolicy:'download-on-first-interaction-then-install-on-fresh-gesture',promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click',postDownloadInstallabilityPolicy:'single-user-initiated-refresh-then-shell-rehydrate',observerPolicy:'idempotent-writes-coalesced-refresh',eagerRelatedAppDiscovery:false,eagerShellPreparation:false,firstPaintShellWork:false,cacheDistinctPath:true,firstInputSafe:true,state:()=>({available:Boolean(promptEvent),installed,installedHint,prompting,standalone:standalone(),launchSession:launchSession(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})});
 globalThis.CivweavePWAInstallV250=api;globalThis.CivweavePWAInstallV249=api;globalThis.CivweavePWAInstallV248=api;globalThis.CivweavePWAInstallV247=api;globalThis.CivweavePWAInstallV246=api;publish('civweave:pwa-install-bridge-ready',{available:Boolean(promptEvent)});
 })();
