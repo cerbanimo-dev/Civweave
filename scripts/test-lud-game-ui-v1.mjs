@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('Lud surfaces use the shared lightweight game UI',async()=>{
+test('Lud surfaces use the shared lightweight game UI with inline critical styling',async()=>{
   const [download,campus,manifestText]=await Promise.all([
     read('public/app/lud/index.html'),
     read('public/app/lud/campus.html'),
@@ -13,6 +13,9 @@ test('Lud surfaces use the shared lightweight game UI',async()=>{
   const manifest=JSON.parse(manifestText);
   for(const html of [download,campus]){
     assert.match(html,/data-lud-ui="game-v1"/);
+    assert.match(html,/data-lud-critical-ui="game-v1"/);
+    assert.match(html,/--cyan:#5ce5ff/);
+    assert.match(html,/linear-gradient/);
     assert.match(html,/href="\/app\/lud-game-ui-v1\.css"/);
     assert.match(html,/src="\/app\/lud-game-ui-v1\.js"/);
   }
@@ -58,4 +61,16 @@ test('Lud game JS is presentation-only and reads canonical Passport and Guild st
   assert.doesNotMatch(source,/setInterval\s*\(/);
   assert.doesNotMatch(source,/MutationObserver/);
   assert.doesNotMatch(source,/\.generate\s*\(/);
+});
+
+test('Lud package worker rejects stale ready metadata after a presentation generation bump',async()=>{
+  const [installer,worker]=await Promise.all([
+    read('public/app/lud-installer-v1.js'),
+    read('public/service-worker-lud-package-v1.js'),
+  ]);
+  assert.match(installer,/VERSION='1\.0\.3'/);
+  assert.match(installer,/service-worker-lud-package-v1\.js\?v=1\.0\.3/);
+  assert.match(worker,/LUD_REVISION='lud-package-v1\.1-game-ui'/);
+  assert.match(worker,/if\(meta\?\.revision===LUD_REVISION\)return ludPacket\(meta\)/);
+  assert.match(worker,/meta\?\.revision===LUD_REVISION&&Array\.isArray/);
 });
