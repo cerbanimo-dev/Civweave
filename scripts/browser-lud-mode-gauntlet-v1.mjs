@@ -14,6 +14,7 @@ const base=`http://${host}:${port}`;
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8'};
 let htmlRedirects=0;
 let canonicalCampusRequests=0;
+let serverClosed=false;
 
 function publicPath(pathname){
   const relative=pathname.replace(/^\/+/, '');
@@ -22,6 +23,12 @@ function publicPath(pathname){
   return candidate;
 }
 function githubEscape(value){return String(value??'').replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A')}
+async function stopServer(){
+  if(serverClosed)return;
+  serverClosed=true;
+  server.closeAllConnections?.();
+  await new Promise(resolve=>server.close(()=>resolve()));
+}
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||'/',base);
@@ -94,13 +101,14 @@ try{
   assert.match(controller.scriptURL,/service-worker-lud-package-v1\.js/,'wrong service worker controls the Lud campus');
 
   const requestsBeforeOfflineReload=canonicalCampusRequests;
+  await stopServer();
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded',timeout:15000});
   await page.waitForSelector('#author-form',{state:'attached',timeout:10000});
   await page.waitForSelector('#cw-host-node-lobby',{state:'attached',timeout:10000});
   assert.equal(new URL(page.url()).pathname,'/app/lud/campus','offline reload left the canonical Lud route');
   assert.equal((await page.locator('h1').textContent())?.trim(),'Lud Mode','Lud campus did not survive offline reload');
-  assert.equal(canonicalCampusRequests,requestsBeforeOfflineReload,'offline Lud reload reached the network instead of the package cache');
+  assert.equal(canonicalCampusRequests,requestsBeforeOfflineReload,'offline Lud reload reached the stopped origin instead of falling back to the package cache');
   assert.equal((await page.locator('#lud-passport-id').textContent())?.trim(),firstPassport,'Lud Passport changed across offline reload');
 
   const resources=await page.evaluate(()=>performance.getEntriesByType('resource').map(entry=>new URL(entry.name).pathname));
@@ -117,7 +125,8 @@ try{
     cloudflareCleanUrlRedirectExercised:htmlRedirects>0,
     canonicalEntry:'/app/lud/campus',
     onlineRefresh:true,
-    offlineReload:true,
+    originStoppedBeforeOfflineReload:true,
+    offlineFallback:true,
     questArcOffline:true,
     passportPersistent:true,
     guildLobby:true,
@@ -130,6 +139,5 @@ try{
   throw error;
 }finally{
   await browser.close().catch(()=>{});
-  server.closeAllConnections?.();
-  await new Promise(resolve=>server.close(()=>resolve()));
+  await stopServer();
 }
