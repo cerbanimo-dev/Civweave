@@ -210,8 +210,16 @@ async function liveDirectory(request: Request, stagingShadow = false) {
 }
 
 export const onRequestGet: PagesFunction = async context => {
+  if (isStagingRequest(context.request)) {
+    try {
+      return await liveDirectory(context.request, true);
+    } catch (error) {
+      return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
+    }
+  }
+
   try {
-    return await liveDirectory(context.request, isStagingRequest(context.request));
+    return await liveDirectory(context.request, false);
   } catch (error) {
     return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
   }
