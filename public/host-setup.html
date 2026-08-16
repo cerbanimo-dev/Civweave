@@ -27,7 +27,7 @@
 <header class="brand"><img src="/app/logos/civweave-day-logo.jpg" alt="Civweave"><div><small>Guildkeeper</small><h1>Civweave</h1></div></header>
 <section class="card hero">
 <p class="eyebrow">GUILD SETUP</p>
-<h2>Your cloud doorway is live. Now make it resilient.</h2>
+<h2>This Guild's cloud doorway is live. Now make it resilient.</h2>
 <p>This page belongs to the Guildkeeper, not ordinary Civweave visitors. It records this browser as a Guildkeeper browser and keeps the local Anchor recommendation visible without blocking the campus.</p>
 <div class="grid">
 <div class="tile"><small>Guild host</small><strong id="host-origin">loading…</strong></div>
@@ -71,8 +71,8 @@
 </section>
 <section class="card edge-card" id="edge-card">
 <p class="eyebrow">CLOUDFLARE DEPLOYMENT</p>
-<h2>Worker + three starter nodes</h2>
-<p class="muted">Civweave attempts this layer automatically during Guild creation and every automated deployment. Pages remains usable if it needs follow-up.</p>
+<h2>Cloud-backed Guild: Worker + three starter nodes</h2>
+<p class="muted">This layer exists only when a Guildkeeper provisions Cloudflare for this Guild. Wrangler creates it in the Cloudflare account authenticated for this Guild. Pocket-only mobile Guilds create no Worker and never consume another Guild's Worker or Durable Object capacity.</p>
 <div class="grid">
 <div class="tile"><small>Account Worker</small><strong id="edge-worker">checking…</strong></div>
 <div class="tile"><small>Starter A</small><strong id="edge-node-a">checking…</strong></div>
@@ -128,8 +128,7 @@ function randomLocationKey(){
   catch{return ''}
 }
 function getLocationKey(){
-  try{const saved=localStorage.getItem(LOCATION_KEY);if(saved)return saved;const created=randomLocationKey();if(created)localStorage.setItem(LOCATION_KEY,created);return created}catch{return ''}
-}
+  try{const saved=localStorage.getItem(LOCATION_KEY);if(saved)return saved;const created=randomLocationKey();if(created)localStorage.setItem(LOCATION_KEY,created);return created}catch{return ''}}
 function savedLocationState(){try{return JSON.parse(localStorage.getItem(LOCATION_STATE_KEY)||'null')}catch{return null}}
 function renderPrecisionChoice(){if(locationPublicMode)locationPublicMode.textContent=locationPrecise?.checked?'Precise · measured GPS accuracy':'Rounded · about 100 m or wider'}
 function renderLocationState(){
