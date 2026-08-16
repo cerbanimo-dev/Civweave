@@ -70,14 +70,10 @@ jobs:
       - name: Deploy isolated Worker and Durable Objects
         run: npx wrangler deploy --config cloudflare/node-cloud/wrangler.staging.jsonc
 
-      - name: Rotate staging-only session authority and register Guild shadow
+      - name: Preserve session authority and ensure Guild shadow exists
         shell: bash
         run: |
           set -euo pipefail
-          session_secret="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")"
-          operator_secret="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")"
-          printf '%s\n' "$session_secret" | npx wrangler secret put NODE_FABRIC_SESSION_SECRET --config cloudflare/node-cloud/wrangler.staging.jsonc
-          printf '%s\n' "$operator_secret" | npx wrangler secret put NODE_FABRIC_OPERATOR_TOKEN --config cloudflare/node-cloud/wrangler.staging.jsonc
 
           for attempt in $(seq 1 12); do
             status="$(curl -sS -o /tmp/staging-capacity.json -w '%{http_code}' "$STAGING_ORIGIN/api/fabric/capacity" || true)"
@@ -86,19 +82,36 @@ jobs:
           done
           test "${status:-}" = '200'
 
-          curl --fail-with-body --silent --show-error \
-            -X POST "$STAGING_ORIGIN/api/fabric/nodes/$STAGING_NODE_ID" \
-            -H "authorization: Bearer $operator_secret" \
-            -H 'content-type: application/json' \
-            --data "{\"displayName\":\"Civweave Commons\",\"operatorId\":\"civweave-staging-shadow\",\"publicOrigin\":\"$STAGING_ORIGIN\"}" \
-            > /tmp/staging-register.json
+          secrets_json="$(npx wrangler secret list --config cloudflare/node-cloud/wrangler.staging.jsonc --format json)"
+          has_session="$(printf '%s' "$secrets_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const x=JSON.parse(s);const rows=Array.isArray(x)?x:(x.result||x.secrets||[]);process.stdout.write(rows.some(r=>(r.name||r.key)==='NODE_FABRIC_SESSION_SECRET')?'1':'0')})")"
+          if [ "$has_session" != '1' ]; then
+            session_secret="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")"
+            printf '%s\n' "$session_secret" | npx wrangler secret put NODE_FABRIC_SESSION_SECRET --config cloudflare/node-cloud/wrangler.staging.jsonc
+          fi
+
+          registered="$(node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const capacity = JSON.parse(readFileSync('/tmp/staging-capacity.json', 'utf8'));
+          process.stdout.write(Array.isArray(capacity.hostNodeIds) && capacity.hostNodeIds.includes('civweave-cloud') ? '1' : '0');
+          NODE
+          )"
+          if [ "$registered" != '1' ]; then
+            operator_secret="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")"
+            printf '%s\n' "$operator_secret" | npx wrangler secret put NODE_FABRIC_OPERATOR_TOKEN --config cloudflare/node-cloud/wrangler.staging.jsonc
+            curl --fail-with-body --silent --show-error \
+              -X POST "$STAGING_ORIGIN/api/fabric/nodes/$STAGING_NODE_ID" \
+              -H "authorization: Bearer $operator_secret" \
+              -H 'content-type: application/json' \
+              --data "{\"displayName\":\"Civweave Commons\",\"operatorId\":\"civweave-staging-shadow\",\"publicOrigin\":\"$STAGING_ORIGIN\"}" \
+              > /tmp/staging-register.json
+          fi
 
       - name: Verify four-seat isolated capacity
         shell: bash
         run: |
           set -euo pipefail
           curl --fail-with-body --silent --show-error "$STAGING_ORIGIN/api/fabric/capacity?nodeId=$STAGING_NODE_ID" > /tmp/staging-capacity.json
-          curl --fail-with-body --silent --show-error "$STAGING_ORIGIN/api/ai/node/manifest?nodeId=$STAGING_NODE_ID" > /tmp/staging-manifest.json
+          curl --fail-with-body --silent --show-error "$STAGING_ORIGIN/n/$STAGING_NODE_ID/api/ai/node/manifest" > /tmp/staging-manifest.json
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
           const capacity = JSON.parse(readFileSync('/tmp/staging-capacity.json', 'utf8'));
