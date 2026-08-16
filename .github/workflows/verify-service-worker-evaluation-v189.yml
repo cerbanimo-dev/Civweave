@@ -2,7 +2,7 @@ name: Verify Service Worker Evaluation v189
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'VERSION'
       - 'package.json'
@@ -40,7 +40,7 @@ on:
       - 'scripts/browser-installer-gauntlet-v281.mjs'
       - '.github/workflows/verify-service-worker-evaluation-v189.yml'
   pull_request:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'VERSION'
       - 'package.json'
@@ -111,6 +111,7 @@ jobs:
           node --check public/service-worker-v203.js
           node --check public/service-worker-code-coherence-v288.js
           node --check public/service-worker-core-v208.js
+          node --check public/service-worker-shell-assets-v1.js
           node --check public/service-worker-installed-launch-v282.js
           node --check public/service-worker-installer-state-v280.js
           node --check public/service-worker-shell-integrity-v281.js
@@ -119,7 +120,6 @@ jobs:
           node --check public/service-worker-campus-completion-v246.js
           node --check public/service-worker-release-coherence-v220.js
           node --check public/service-worker-navigation-safety-v224.js
-          node --check public/service-worker-shell-repair-v225.js
           node --check public/service-worker-canonical-navigation-v227.js
           node --check public/app/document-lifecycle-v221.js
           node --check public/app/installer-online-fallback-v225.js
@@ -157,7 +157,7 @@ jobs:
         run: node scripts/verify-release-coherence-v220.mjs
       - name: Verify redirected navigation response safety
         run: node scripts/verify-navigation-redirect-safety-v224.mjs
-      - name: Verify empty shell self-repair and online fallback
+      - name: Verify retired v225 / canonical v293 shell repair ownership
         run: node scripts/verify-shell-self-repair-v225.mjs
       - name: Verify installed shell in-place repair
         run: node scripts/verify-installed-shell-repair-v293.mjs

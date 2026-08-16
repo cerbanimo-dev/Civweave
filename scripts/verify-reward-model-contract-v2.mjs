@@ -25,12 +25,9 @@ assert.ok(captured.schema.required.includes('rewards'),'receiver did not require
 assert.equal(captured.context.rewardContract.authority,'living-school');
 assert.equal(result.outputJson.rewards.skillXp[0].amount,20);
 const fastGenerate=async request=>patched.generate(request);Object.defineProperty(fastGenerate,'__civweaveFastInteractiveV192',{value:true});
-const fastProxy=Object.freeze({...patched,generate:fastGenerate});
-context.CivweaveModelRuntime=fastProxy;
-assert.equal(context.CivweaveModelRuntime,fastProxy,'fast runtime identity should survive when it inherits the reward contract marker');
-const oldMoss=input=>[{slug:'wrong',name:'Wrong',baseXp:Number(input.rewardXp||40)}];
-context.CivweaveRewardWeave={core:{mossTagTask:oldMoss},skills:oldMoss,submit:value=>value,registerQuest:value=>value};
-vm.runInContext(read('public/app/cw-reward-legacy-bridge-v2.js'),context,{filename:'cw-reward-legacy-bridge-v2.js'});
-const exact=context.CivweaveRewardWeave.core.mossTagTask({title:'Exact decimals',skillRewards:[{skillId:'Carpentry',amount:2.5},{skillId:'Planning',amount:1.25}]});
-assert.deepEqual(JSON.parse(JSON.stringify(exact.map(row=>[row.slug,row.baseXp]))),[['carpentry',2.5],['planning',1.25]]);
-console.log('reward model contract and legacy bridge v2 verified');
+const fastProxy=Object.freeze({...patched,generate:fastGenerate});context.CivweaveModelRuntime=fastProxy;assert.equal(context.CivweaveModelRuntime,fastProxy,'fast runtime identity should survive when it inherits the reward contract marker');
+const exact=context.CivweaveCanonicalRewardsV2.normalizeRewardBundle({skillRewards:[{skillId:'Carpentry',amount:2.5},{skillId:'Planning',amount:1.25}]},{sourceKind:'learning',sourceSystem:'living-school'});
+assert.deepEqual(JSON.parse(JSON.stringify(exact.skillXp.map(row=>[row.skillId,row.amount]))),[['carpentry',2.5],['planning',1.25]],'canonical v2 ledger must preserve exact decimal Skill XP without a legacy runtime bridge');
+assert.equal(exact.exactSkillAmounts,true);assert.equal(exact.legacyFallback,false);
+assert.equal(fs.existsSync(new URL('public/app/cw-reward-legacy-bridge-v2.js',root)),false,'legacy reward injector must remain physically absent');
+console.log('reward model contract and canonical exact Skill XP verified');

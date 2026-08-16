@@ -13,7 +13,7 @@ on:
       - 'docs/operations/cloudflare-setup.md'
       - 'public/index.html'
       - 'public/app/manifest.webmanifest'
-      - 'public/app/pwa-install-prompt-v246.js'
+      - 'public/app/pwa-install-prompt-v250.js'
       - 'public/app/host-deployment-v1.json'
       - 'public/app/host-steward-reminder-v1.js'
       - 'public/host-local-anchor.html'
