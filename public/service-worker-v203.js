@@ -2,6 +2,7 @@
 // chat-open-ui-only-v351: opening the chat surface must not start avatar-expression or MiniLM work.
 // chat-party-lazy-v353: ordinary AI chat open must not start party DOM observers, mesh sessions, gateway polling, or intention-ledger decoration.
 // universal-chat-launcher-v354: every first-class realm receives the same canonical launcher; stale Anarchadia page/chat assets are purged on activation.
+// radio-clean-default-v355: lyric-audited radio is persistent and user-opened; playlist governance is event-driven so it cannot starve later universal surfaces.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.162-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
@@ -11,7 +12,7 @@ importScripts('/service-worker-core-v208.js?v=1.0.162-chat-convergence-v250-inst
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=1.0.162-radio-core-shell-v305-playlist-only-v246');
+importScripts('/service-worker-radio-core-v305.js?v=1.0.162-radio-core-shell-v305-persistent-clean-v355');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
@@ -20,7 +21,6 @@ importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-s
 importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
 importScripts('/service-worker-chat-repair-v245.js?v=chat-avatar-visible-v346&purge=chat-avatar-visible-v346&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-css-dvh-v349&party=lazy-v353');
-// Non-executable legacy audit marker only: importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v426');
 // atomic-update-handoff-v427: updated workers remain waiting until the visible update controller explicitly activates them.
