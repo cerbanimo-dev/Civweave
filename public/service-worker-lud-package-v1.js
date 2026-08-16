@@ -99,16 +99,17 @@ async function standaloneFetch(request){
       return ludOfflineError('Lud Mode is not ready offline on this device. Reconnect and finish Download Lud Mode.');
     }
     if(pathname===policy.entryRoute||pathname===LUD_ENTRY_ROUTE||pathname===policy.entry||pathname===LUD_ENTRY_ASSET){
+      const network=await fetchLudEntry();
+      if(network){try{await cache.put(ludKey(policy.entry||LUD_ENTRY_ASSET),network.clone())}catch{}return network}
       const cached=await cache.match(ludKey(policy.entry),{ignoreSearch:true})||await cache.match(ludKey(LUD_ENTRY_ASSET),{ignoreSearch:true});if(cached)return normalizeLudHtmlResponse(cached);
-      const network=await fetchLudEntry();if(network)return network;
       return ludOfflineError('The Lud Mode campus is not cached on this device.');
     }
     if(pathname.startsWith('/app/lud/'))return ludOfflineError(`Lud Mode blocked a non-allowlisted navigation: ${pathname}`,403);
     return fetch(request);
   }
   if(policy.assets.has(pathname)){
+    try{const response=await fetch(request);if(response.ok){try{await cache.put(ludKey(pathname),response.clone())}catch{}return response}}catch{}
     const cached=await cache.match(ludKey(pathname),{ignoreSearch:true});if(cached)return cached;
-    try{const response=await fetch(request);if(response.ok)return response}catch{}
     return ludOfflineError(`Lud Mode required asset is unavailable: ${pathname}`,504);
   }
   if(LUD_INSTALLER_PATHS.has(pathname)){try{return await fetch(request)}catch{return ludOfflineError(`Lud Mode installer asset is unavailable: ${pathname}`,504)}}

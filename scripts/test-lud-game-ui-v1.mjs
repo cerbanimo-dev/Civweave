@@ -74,3 +74,22 @@ test('Lud package worker rejects stale ready metadata after a presentation gener
   assert.match(worker,/if\(meta\?\.revision===LUD_REVISION\)return ludPacket\(meta\)/);
   assert.match(worker,/meta\?\.revision===LUD_REVISION&&Array\.isArray/);
 });
+
+test('Lud package refreshes allowlisted assets online before using its offline cache',async()=>{
+  const worker=await read('public/service-worker-lud-package-v1.js');
+  const entryStart=worker.indexOf("if(pathname===policy.entryRoute");
+  const entryEnd=worker.indexOf("if(pathname.startsWith('/app/lud/'))",entryStart);
+  const entryBlock=worker.slice(entryStart,entryEnd);
+  assert.ok(entryStart>=0&&entryEnd>entryStart);
+  assert.ok(entryBlock.indexOf('const network=await fetchLudEntry()')>=0);
+  assert.ok(entryBlock.indexOf('const network=await fetchLudEntry()')<entryBlock.indexOf('const cached=await cache.match'));
+  assert.match(entryBlock,/cache\.put\(ludKey\(policy\.entry\|\|LUD_ENTRY_ASSET\),network\.clone\(\)\)/);
+
+  const assetStart=worker.indexOf('if(policy.assets.has(pathname))');
+  const assetEnd=worker.indexOf('if(LUD_INSTALLER_PATHS.has(pathname))',assetStart);
+  const assetBlock=worker.slice(assetStart,assetEnd);
+  assert.ok(assetStart>=0&&assetEnd>assetStart);
+  assert.ok(assetBlock.indexOf('const response=await fetch(request)')>=0);
+  assert.ok(assetBlock.indexOf('const response=await fetch(request)')<assetBlock.indexOf('const cached=await cache.match'));
+  assert.match(assetBlock,/cache\.put\(ludKey\(pathname\),response\.clone\(\)\)/);
+});
