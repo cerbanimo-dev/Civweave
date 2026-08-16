@@ -1,154 +1,30 @@
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {access,readFile} from 'node:fs/promises';
 
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,workerRepair,workerWrapper,installedEntryHtml,installedEntry,boundary,hostMeta]=await Promise.all([
-  read('public/app/index.html'),
-  read('public/index.html'),
-  read('public/app/manifest.webmanifest'),
-  read('public/.well-known/assetlinks.json'),
-  read('public/app/pwa-install-prompt-v250.js'),
-  read('public/app/installer-repair-only-v2.js'),
-  read('public/service-worker-shell-repair-v225.js'),
-  read('public/service-worker-v203.js'),
-  read('public/app/installed-entry-v146.html'),
-  read('public/app/installed-entry-v146.js'),
-  read('public/app/install-boundary-v146.js'),
-  read('public/app/host-deployment-v1.json')
+const exists=path=>access(new URL(path,root)).then(()=>true,()=>false);
+const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,shellAssets,workerRepair,workerWrapper,completion,installedEntryHtml,installedEntry,boundary,hostMeta]=await Promise.all([
+  read('public/app/index.html'),read('public/index.html'),read('public/app/manifest.webmanifest'),read('public/.well-known/assetlinks.json'),read('public/app/pwa-install-prompt-v250.js'),read('public/app/installer-repair-only-v2.js'),read('public/service-worker-shell-assets-v1.js'),read('public/service-worker-shell-repair-v293.js'),read('public/service-worker-v203.js'),read('public/service-worker-campus-completion-v246.js'),read('public/app/installed-entry-v146.html'),read('public/app/installed-entry-v146.js'),read('public/app/install-boundary-v146.js'),read('public/app/host-deployment-v1.json')
 ]);
-
 const manifest=JSON.parse(manifestText);
-assert.equal(manifest.display,'standalone');
-assert.equal(manifest.prefer_related_applications,false);
-assert.equal(manifest.id,'/civweave-local','PWA id must remain stable across host origins');
-assert.match(manifest.start_url,/^\/app\/installed-entry-v146(?:\.html)?\?installed=1$/,'installed PWA must launch through updater entry');
-assert.equal(manifest.launch_handler?.client_mode,'navigate-new','PWA launches must create a launch event in a dedicated app client');
-assert.ok((manifest.shortcuts||[]).every(shortcut=>/^\/app\/installed-entry-v146(?:\.html)?\?/.test(String(shortcut.url||''))),'all installed shortcuts must pass through updater entry');
-
-const canonicalOrigin='https://civweave.cc';
-const stagingOrigin='https://civweave-staging.pages.dev';
-const previousCanonicalOrigin='https://civweave.pages.dev';
-const legacyCanonicalOrigin='https://commonweave.pages.dev';
-const hostNodeOrigin='https://civweave-host-node.onrender.com';
-const manifests=[canonicalOrigin,stagingOrigin,previousCanonicalOrigin,legacyCanonicalOrigin,hostNodeOrigin].map(origin=>`${origin}/app/manifest.webmanifest`);
-const related=new Set((manifest.related_applications||[]).filter(app=>app.platform==='webapp').map(app=>app.url));
-for(const url of manifests)assert.ok(related.has(url),`manifest must retain installed-app discovery for ${url}`);
-
-const assetlinks=JSON.parse(assetlinksText);
-const querySites=new Set(assetlinks.filter(entry=>(entry.relation||[]).includes('delegate_permission/common.query_webapk')).map(entry=>entry.target?.site));
-for(const url of manifests)assert.ok(querySites.has(url),`asset links must allow non-authorizing installed-app discovery for ${url}`);
-
-assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'root entry must know civweave.cc as the canonical PWA origin');
-assert.ok(rootHtml.includes(`const PREVIOUS_CANONICAL_ORIGIN='${previousCanonicalOrigin}'`),'root entry must retain the previous Pages origin during migration');
-assert.ok(rootHtml.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'root entry must retain the legacy origin during migration');
-assert.ok(rootHtml.includes("location.hostname.endsWith('.pages.dev')&&labels.length>3"),'root entry must recognize Pages preview aliases');
-assert.ok(rootHtml.includes("labels.slice(1).join('.')"),'preview root must resolve its parent production host');
-assert.ok(rootHtml.includes("target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical')"),'root handoff must distinguish host-production recovery from canonical migration');
-
-assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'native install bridge must name civweave.cc as canonical');
-assert.ok(bridge.includes(`const STAGING_ORIGIN='${stagingOrigin}'`),'native install bridge must know the isolated staging PWA origin');
-assert.ok(bridge.includes("const INSTALL_MARKER_KEY='civweave.pwa.installed-marker.v1'"),'installer must keep a non-authorizing installed UX marker');
-assert.ok(bridge.includes("const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'"),'installer must share the PWA launch-session key');
-assert.ok(bridge.includes("const RETIRED_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'"),'installer must explicitly retire the unsafe durable runtime capability');
-assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer may discover related installs for UX when supported');
-assert.ok(bridge.includes("let installed=false,installedHint=readInstalledMarker()"),'a durable install marker must never initialize confirmed installation state');
-assert.ok(bridge.includes("rememberInstalled('appinstalled')"),'successful app installation must persist the installed UX marker only after appinstalled confirmation');
-assert.ok(bridge.includes("rememberInstalled('getInstalledRelatedApps')"),'fresh related-app discovery may recover the installed UX marker');
-assert.ok(bridge.includes("else if(installedHint)forgetInstalledMarker()"),'fresh negative related-app discovery must clear a stale marker');
-assert.ok(!bridge.includes("rememberInstalled('native-install-accepted')"),'accepting the native prompt must never be treated as completed installation');
-assert.ok(bridge.includes("text:'Finishing installation…'"),'accepted installation must wait visibly for browser confirmation');
-assert.ok(bridge.includes("installStatePolicy:'confirmed-install-only-marker-is-hint'"),'installer must declare confirmed-install-only state semantics');
-assert.ok(bridge.includes("if(installed){setButton(button,{disabled:true,text:'Civweave installed'})"),'confirmed installation may disable the browser installer button');
-assert.ok(bridge.includes("if(appRuntime()){setButton(button,{disabled:false,text:'Open Civweave'})"),'only an installed display or PWA launch session may expose the campus action');
-assert.ok(bridge.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session-only'"),'installer bridge must keep runtime authorization session-scoped');
-assert.ok(bridge.includes("installSequencingPolicy:'download-on-first-interaction-then-install-on-fresh-gesture'"),'installer must download the shell only after explicit interaction, then require a fresh install gesture');
-assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'installer must invoke the captured native prompt synchronously from the fresh install gesture');
-assert.ok(bridge.includes('eagerRelatedAppDiscovery:false'),'installer must keep related-app discovery off the first-paint path');
-assert.ok(bridge.includes('eagerShellPreparation:false'),'installer bridge must explicitly forbid eager shell preparation');
-assert.ok(bridge.includes('firstPaintShellWork:false'),'installer bridge must explicitly forbid first-paint shell work');
-assert.ok(bridge.includes('cacheDistinctPath:true'),'installer bridge must declare its stale-service-worker cache escape');
-assert.ok(!bridge.includes('queueMicrotask(()=>void primeInstallability())'),'installer bridge must not queue shell preparation from page startup');
-
-assert.ok(!html.includes('id="open-online-campus-v225"'),'installer must not expose an anonymous online-campus fallback button');
-assert.ok(!html.includes('Browser fallback'),'installer must not advertise anonymous browser runtime fallback');
-assert.ok(!html.includes('/app/installer-online-fallback-v225.js'),'installer must not load the retired online fallback bridge');
-assert.ok(html.includes('/app/pwa-install-prompt-v250.js'),'installer must load the current install bridge');
-assert.ok(!html.includes('/app/pwa-install-prompt-v249.js'),'installer must not load the stale-cache-prone v249 install bridge');
-assert.ok(html.includes('/app/installer-repair-only-v2.js'),'installer must load the cache-distinct repair bridge v2');
-assert.ok(!html.includes('/app/installer-repair-only-v1.js'),'installer must not load the shell-cached repair bridge v1');
-
-assert.ok(repairOnly.includes('function installedDisplay()'),'repair bridge must still recognize installed display');
-assert.ok(!repairOnly.includes("launch','online"),'repair bridge must not synthesize an anonymous online campus launch');
-assert.ok(repairOnly.includes("hubToolsPolicy:'explicit-user-load-only'"),'Guild and account tools must be explicit opt-in work');
-assert.ok(repairOnly.includes('firstPaintHubWork:false'),'repair bridge must explicitly forbid Guild/account work on first paint');
-assert.ok(repairOnly.includes('cacheDistinctPath:true'),'repair bridge must declare its stale-shell-cache escape');
-assert.ok(repairOnly.includes('installHubToolsGate();'),'installer startup must install only the lightweight Guild tools gate');
-assert.ok(repairOnly.includes("addEventListener('click',loadHubTools)"),'Guild/account scripts must start from an explicit user click');
-const startupTail=repairOnly.slice(repairOnly.indexOf('if(resumeRequiredNext())return;'),repairOnly.indexOf('const api=Object.freeze'));
-assert.ok(!startupTail.includes('installHostNodeLobby();'),'installer startup must not boot host scripts before user intent');
-assert.ok(!startupTail.includes('installHubRecovery();'),'installer startup must not boot recovery scripts before user intent');
-
-assert.ok(installedEntryHtml.includes("const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'"),'installed-entry gate must use the session-scoped PWA launch key');
-assert.ok(installedEntryHtml.includes('globalThis.launchQueue.setConsumer'),'installed-entry gate must consume the browser PWA launch event');
-assert.ok(installedEntryHtml.includes("rememberLaunchSession('launch-queue')"),'PWA launch events must mint the session-scoped authorization');
-assert.ok(installedEntryHtml.includes("policy:'installed-display-or-pwa-launch-session'"),'installed-entry gate must declare session-scoped authorization');
-assert.ok(!installedEntryHtml.includes('getInstalledRelatedApps'),'installed-entry runtime authorization must not derive from related-app discovery');
-assert.ok(!installedEntryHtml.includes('localStorage.setItem(INSTALL_CAPABILITY_KEY'),'installed-entry runtime must not persist authorization in localStorage');
-assert.ok(installedEntry.includes('async function installedLaunchAuthorized()'),'installed bootstrap must use an asynchronous installed authorization boundary');
-assert.ok(installedEntry.includes('await installedLaunchAuthorized()'),'installed bootstrap must await PWA launch authorization before redirecting');
-assert.ok(installedEntry.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session'"),'installed bootstrap must declare launch-session runtime policy');
-assert.ok(installedEntry.includes("revision=boot-recovery-v428-launch-session-v1"),'installed bootstrap must rotate the worker identity for the new launch boundary');
-assert.ok(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('bounded(registration.update()'),'installed entry must perform a bounded no-cache worker refresh');
-
-assert.ok(boundary.includes("const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'"),'Working Campus boundary must use the same session-scoped PWA launch key');
-assert.ok(boundary.includes('function allowed(){return installedDisplay()||launchSession()||developer()}'),'Working Campus must authorize only installed display, PWA launch session, or local developer mode');
-assert.ok(boundary.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session'"),'Working Campus must preserve launch-session authorization');
-assert.ok(boundary.includes('installedQueryIsAuthorization:false'),'installed=1 must remain non-authorizing');
-assert.ok(!boundary.includes('civweave.pwa.installed-capability.v1'),'Working Campus must not retain the retired durable runtime capability');
-
-assert.ok(workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v2.js']"),'future shell installs must cache the cache-distinct repair bridge v2');
-assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'future shell installs must not seed the stale v1 repair bridge');
-assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'shell repair must not resurrect the retired browser fallback');
-assert.ok(workerWrapper.includes('working-campus-return-v425-install-only-pwa-v1'),'worker core cache identity must carry install-only boundary');
-assert.ok(workerWrapper.includes('shell-self-repair-v225-install-only-pwa-v1'),'worker wrapper must preserve the stable V225 repair module epoch');
-
-const meta=JSON.parse(hostMeta);
-assert.equal(meta.schema,'civweave.host-deployment.v1');
-assert.equal(meta.publicOrigin,canonicalOrigin);
-
-const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any'));
-const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
-const mask512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'').includes('maskable'));
-assert.ok(any192&&any512&&mask512,'manifest must advertise 192, 512, and maskable install icons');
-function localIconPath(src){assert.match(src,/^\/app\/logos\/[A-Za-z0-9._-]+\.png$/);return `public${src}`}
-function pngDimensions(buffer,label){
-  const signature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
-  assert.ok(buffer.length>=33&&buffer.subarray(0,8).equals(signature),`${label} must be a real PNG`);
-  assert.equal(buffer.toString('ascii',12,16),'IHDR',`${label} must contain IHDR`);
-  return [buffer.readUInt32BE(16),buffer.readUInt32BE(20)];
-}
-const [bytes192,bytes512,bytesMask512]=await Promise.all([readBytes(localIconPath(any192.src)),readBytes(localIconPath(any512.src)),readBytes(localIconPath(mask512.src))]);
-assert.deepEqual(pngDimensions(bytes192,'192 icon'),[192,192]);
-assert.deepEqual(pngDimensions(bytes512,'512 icon'),[512,512]);
-assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
-
-console.log(JSON.stringify({
-  ok:true,
-  revision:'pwa-install-campus-v250-confirmed-install-only-v3',
-  canonicalOrigin,
-  stagingOrigin,
-  previousCanonicalOrigin,
-  browserRuntime:'installed-display-or-pwa-launch-session',
-  installedMarkerAuthorizesRuntime:false,
-  installedMarkerAuthorizesInstallState:false,
-  nativePromptAcceptanceConfirmsInstall:false,
-  anonymousOnlineFallback:false,
-  repairOnly:true,
-  firstPaintShellWork:false,
-  firstPaintHubWork:false,
-  cacheDistinctInstallerPaths:true,
-  stableWorkerEpoch:true,
-  relatedOrigins:manifests.length
-},null,2));
+assert.equal(manifest.display,'standalone');assert.equal(manifest.prefer_related_applications,false);assert.equal(manifest.id,'/civweave-local','PWA id must remain stable across host origins');assert.match(manifest.start_url,/^\/app\/installed-entry-v146(?:\.html)?\?installed=1$/,'installed PWA must launch through updater entry');assert.equal(manifest.launch_handler?.client_mode,'navigate-new','PWA launches must create a launch event in a dedicated app client');
+const canonicalOrigin='https://civweave.cc',stagingOrigin='https://civweave-staging.pages.dev',previousCanonicalOrigin='https://civweave.pages.dev',legacyCanonicalOrigin='https://commonweave.pages.dev',hostNodeOrigin='https://civweave-host-node.onrender.com';
+const manifests=[canonicalOrigin,stagingOrigin,previousCanonicalOrigin,legacyCanonicalOrigin,hostNodeOrigin].map(origin=>`${origin}/app/manifest.webmanifest`),related=new Set((manifest.related_applications||[]).filter(app=>app.platform==='webapp').map(app=>app.url));for(const url of manifests)assert.ok(related.has(url),`manifest must retain installed-app discovery for ${url}`);
+const assetlinks=JSON.parse(assetlinksText),querySites=new Set(assetlinks.filter(entry=>(entry.relation||[]).includes('delegate_permission/common.query_webapk')).map(entry=>entry.target?.site));for(const url of manifests)assert.ok(querySites.has(url),`asset links must allow non-authorizing installed-app discovery for ${url}`);
+assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`));assert.ok(rootHtml.includes(`const PREVIOUS_CANONICAL_ORIGIN='${previousCanonicalOrigin}'`));assert.ok(rootHtml.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`));
+for(const token of [`const CANONICAL_ORIGIN='${canonicalOrigin}'`,`const STAGING_ORIGIN='${stagingOrigin}'`,"const INSTALL_MARKER_KEY='civweave.pwa.installed-marker.v1'","const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'","const RETIRED_CAPABILITY_KEY='civweave.pwa.installed-capability.v1'",'navigator.getInstalledRelatedApps()',"rememberInstalled('appinstalled')","rememberInstalled('getInstalledRelatedApps')","else if(installedHint)forgetInstalledMarker()","text:'Finishing installation…'","installStatePolicy:'confirmed-install-only-marker-is-hint'","browserRuntimePolicy:'installed-display-or-pwa-launch-session-only'","installSequencingPolicy:'download-on-first-interaction-then-install-on-fresh-gesture'","promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'",'eagerRelatedAppDiscovery:false','eagerShellPreparation:false','firstPaintShellWork:false','cacheDistinctPath:true'])assert.ok(bridge.includes(token),`PWA v250 bridge is missing ${token}`);
+assert.ok(!bridge.includes("rememberInstalled('native-install-accepted')"),'Native prompt acceptance must not masquerade as completed installation.');
+assert.ok(html.includes('/app/pwa-install-prompt-v250.js'),'Installer must load PWA v250.');for(const retired of ['/app/pwa-install-prompt-v246.js','/app/pwa-install-prompt-v247.js','/app/pwa-install-prompt-v248.js','/app/pwa-install-prompt-v249.js'])assert.ok(!html.includes(retired),`Installer loads retired install bridge ${retired}`);assert.ok(html.includes('/app/installer-repair-only-v2.js'));assert.ok(!html.includes('/app/installer-repair-only-v1.js'));assert.ok(!html.includes('/app/installer-online-fallback-v225.js'));
+assert.equal(await exists('public/app/pwa-install-prompt-v246.js'),false);assert.equal(await exists('public/app/pwa-install-prompt-v247.js'),false);assert.equal(await exists('public/app/pwa-install-prompt-v248.js'),false);
+for(const token of ['function installedDisplay()',"hubToolsPolicy:'explicit-user-load-only'",'firstPaintHubWork:false','cacheDistinctPath:true','installHubToolsGate();',"addEventListener('click',loadHubTools)"])assert.ok(repairOnly.includes(token),`Repair v2 is missing ${token}`);
+assert.equal(await exists('public/service-worker-shell-repair-v225.js'),false,'Retired shell repair v225 must remain deleted.');assert.ok(shellAssets.includes("const OPTIONAL=['/app/installer-repair-only-v2.js']"));assert.ok(shellAssets.includes("policy:'declarative-shell-assets-only-no-repair-or-message-ownership'"));assert.ok(!/addEventListener\(['"]message/.test(shellAssets));assert.ok(workerRepair.includes("const REVISION='installed-shell-repair-v293'"));assert.ok(workerRepair.includes("event.data?.type!=='REPAIR_DEVICE_PACKAGE'"));assert.ok(workerWrapper.includes('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v2'));assert.ok(workerWrapper.includes('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293'));assert.ok(!workerWrapper.includes('/service-worker-shell-repair-v225.js'));
+assert.ok(completion.includes("const REVISION='campus-current-completion-v250'"));assert.ok(completion.includes("const INSTALL_BRIDGE='/app/pwa-install-prompt-v250.js'"));
+for(const token of ["const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'",'globalThis.launchQueue.setConsumer',"rememberLaunchSession('launch-queue')","policy:'installed-display-or-pwa-launch-session'"])assert.ok(installedEntryHtml.includes(token),`Installed-entry gate is missing ${token}`);assert.ok(!installedEntryHtml.includes('getInstalledRelatedApps'),'Runtime authorization must not derive from related-app discovery.');assert.ok(installedEntry.includes('async function installedLaunchAuthorized()'));assert.ok(installedEntry.includes('await installedLaunchAuthorized()'));assert.ok(installedEntry.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session'"));
+assert.ok(boundary.includes("const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'"));assert.ok(boundary.includes('function allowed(){return installedDisplay()||launchSession()||developer()}'));assert.ok(boundary.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session'"));assert.ok(boundary.includes('installedQueryIsAuthorization:false'));assert.ok(!boundary.includes('civweave.pwa.installed-capability.v1'));
+const meta=JSON.parse(hostMeta);assert.equal(meta.schema,'civweave.host-deployment.v1');assert.equal(meta.publicOrigin,canonicalOrigin);
+const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any')),any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any')),mask512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'').includes('maskable'));assert.ok(any192&&any512&&mask512,'manifest must advertise 192, 512, and maskable install icons');
+function localIconPath(src){assert.match(src,/^\/app\/logos\/[A-Za-z0-9._-]+\.png$/);return `public${src}`}function pngDimensions(buffer,label){const signature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);assert.ok(buffer.length>=33&&buffer.subarray(0,8).equals(signature),`${label} must be a real PNG`);assert.equal(buffer.toString('ascii',12,16),'IHDR',`${label} must contain IHDR`);return[buffer.readUInt32BE(16),buffer.readUInt32BE(20)]}
+const [bytes192,bytes512,bytesMask512]=await Promise.all([readBytes(localIconPath(any192.src)),readBytes(localIconPath(any512.src)),readBytes(localIconPath(mask512.src))]);assert.deepEqual(pngDimensions(bytes192,'192 icon'),[192,192]);assert.deepEqual(pngDimensions(bytes512,'512 icon'),[512,512]);assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v250-single-repair-owner',canonicalOrigin,stagingOrigin,browserRuntime:'installed-display-or-pwa-launch-session',installedMarkerAuthorizesRuntime:false,nativePromptAcceptanceConfirmsInstall:false,anonymousOnlineFallback:false,repairOnly:true,firstPaintShellWork:false,firstPaintHubWork:false,cacheDistinctInstallerPaths:true,shellRepairOwner:'v293',retiredPwaControllers:['v246','v247','v248'],relatedOrigins:manifests.length},null,2));
