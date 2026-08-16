@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.162-five-system-navigation-v227';
+const VERSION='1.0.163-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname;
@@ -47,7 +47,7 @@ const explicitState=new Map();
 let statePromise=null;
 
 function href(item){
-  return ROUTES?.urlFor?.(item.id,{version:'1.0.162',source:currentSystem()||'navigation'}).href||item.fallback;
+  return ROUTES?.urlFor?.(item.id,{version:'1.0.163',source:currentSystem()||'navigation'}).href||item.fallback;
 }
 function clearEmbedded(){
   document.getElementById(NAV_ID)?.remove();
@@ -231,7 +231,7 @@ function mount(){
     const link=event.target.closest('a[data-system]');
     if(!link||!ROUTES?.navigate)return;
     event.preventDefault();
-    ROUTES.navigate(link.dataset.system,{version:'1.0.162',source:current});
+    ROUTES.navigate(link.dataset.system,{version:'1.0.163',source:current});
   });
   document.body.append(nav);
   for(const item of SYSTEMS)setExpression(item.id,'neutral','boot');

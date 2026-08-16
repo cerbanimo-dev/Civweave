@@ -1,28 +1,36 @@
 # Guild host resilience v1
 
-Civweave treats a Guild as a replicated social system, not as one machine. The Cloudflare Host Node remains the convenient always-online rendezvous and public service endpoint, while local replicas preserve Guild continuity when the Internet or the cloud path is unavailable.
+Civweave treats a Guild as a replicated social system, not as one machine. A Guild may begin on one Pocket Node, one persistent local host, or a cloud-backed public edge. Those routes are replicas and service roles of the same Guild rather than separate kinds of community.
 
 ## Host routes
 
 ### Pocket Node — premier onboarding route
 
-Creating a Guild from Android or iPhone enrolls the steward device as a Pocket Node whenever the installed local mesh is available. The device keeps an encrypted/signed local replica, remains authorized while disconnected, reconciles with the Cloudflare Host Node when reachable, and participates in the local WebRTC object mesh while Civweave is available to run.
+Creating a Guild from Android or iPhone creates an independent Guild identity on the steward device and enrolls that device as the founding Pocket Node whenever the installed local mesh is available. The device keeps the signed local replica, remains authorized while disconnected, and participates in the local WebRTC object mesh while Civweave is available to run.
+
+A newly created Pocket Guild has **no implicit cloud primary**. It does not inherit the origin from which Civweave was downloaded, it does not create a Cloudflare Worker, and it does not consume Worker, Durable Object, compute, or storage capacity belonging to the source Guild. A Cloudflare/public gateway may be attached later only as an explicit expansion of that Guild.
 
 Pocket Nodes use a bounded active synchronization window of **four peers per device**. Authorization is not rotated: only the live synchronization connections rotate. Peers with pending changes are favored, then peers with the stalest completed synchronization. This bounds radio, battery, socket, and memory pressure without shrinking Guild membership.
 
-If the local mesh is not available during mobile onboarding, the Cloudflare Host Node remains the immediate route. The steward session can complete Pocket Node enrollment later when the mesh becomes available.
+If the local mesh is not available during mobile onboarding, mobile Guild creation remains a Pocket route waiting for local mesh readiness. It must not silently fall back to the current website as a backend.
 
 A PWA Pocket Node is opportunistic on mobile operating systems. It must never be treated as the sole always-running server. Future native companions may improve background availability without changing the replication contract.
 
 ### Persistent local nodes — maintained first-class routes
 
-Desktop, laptop, Raspberry Pi, NAS, home-server, and similar Docker deployments remain first-class persistent nodes. They use the same Guild identity and replication contract and are preferred when a community has hardware that can stay awake. Pocket Nodes complement these deployments rather than replace them.
+Desktop, laptop, Raspberry Pi, NAS, home-server, and similar Docker deployments remain first-class persistent nodes. Docker uses that machine's own CPU, storage, memory, and network connection. They use the same Guild identity and replication contract and are preferred when a community has hardware that can stay awake. Pocket Nodes complement these deployments rather than replace them.
 
-The desired resilient Guild therefore has several independent copies when possible:
+### Optional Cloudflare public edge
 
-1. Cloudflare Host Node for public reachability and rendezvous.
-2. One or more Pocket Nodes carried by Guild members.
-3. Optional persistent Docker nodes on desktops, Raspberry Pis, NAS devices, or home servers.
+A Guildkeeper may explicitly add an always-online Cloudflare doorway. The canonical setup runs Wrangler under the Cloudflare account the Guildkeeper authenticates for that Guild. It creates the Guild's Pages project plus the `civweave-host-edge` Worker and three starter Durable Object nodes in **that authenticated Cloudflare account**.
+
+Cloudflare resources are never provisioned in the account or Worker capacity of the Guild from which a user happened to download Civweave. Download origin is software distribution provenance, not hosting authority.
+
+The desired resilient Guild can therefore accumulate several independent copies when useful:
+
+1. One or more Pocket Nodes carried by Guild members.
+2. Optional persistent Docker nodes on desktops, Raspberry Pis, NAS devices, or home servers.
+3. An optional Cloudflare public edge for always-online reachability and rendezvous.
 
 No route is allowed to make another route non-canonical or silently retire it.
 

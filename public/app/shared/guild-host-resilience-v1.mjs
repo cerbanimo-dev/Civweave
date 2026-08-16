@@ -6,7 +6,9 @@ export const POCKET_NODE_POLICY=Object.freeze({
   maxActiveSyncPeers:4,
   authorizationPersists:true,
   rotation:'priority-then-stalest',
-  primaryReplica:'cloudflare-host-node',
+  primaryReplica:'device-local-pocket-guild',
+  cloudReplicaOptional:true,
+  inheritDownloadOrigin:false,
   persistentAlternatives:Object.freeze(['desktop-docker','raspberry-pi-docker','nas-docker','home-server-docker']),
 });
 export const EMERGENCY_AI_HOST_POLICY=Object.freeze({

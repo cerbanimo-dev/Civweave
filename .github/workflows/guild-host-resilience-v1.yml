@@ -2,9 +2,13 @@ name: Guild host resilience
 on:
   pull_request:
     paths:
+      - 'public/app/index.html'
+      - 'public/host-setup.html'
+      - 'public/host-local-anchor.html'
       - 'public/app/shared/guild-host-resilience-v1.mjs'
       - 'public/app/pocket-guild-node-v1.mjs'
       - 'public/app/guild-host-onboarding-v1.mjs'
+      - 'public/app/mobile-guild-create-v1.mjs'
       - 'public/app/emergency-ai-host-v1.mjs'
       - 'public/app/emergency-ai-mesh-v1.mjs'
       - 'public/app/emergency-ai-host-control-v1.mjs'
@@ -17,14 +21,19 @@ on:
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
+      - 'scripts/test-mobile-guild-create-v1.mjs'
       - 'scripts/test-emergency-ai-mesh-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
   push:
     branches: [staging]
     paths:
+      - 'public/app/index.html'
+      - 'public/host-setup.html'
+      - 'public/host-local-anchor.html'
       - 'public/app/shared/guild-host-resilience-v1.mjs'
       - 'public/app/pocket-guild-node-v1.mjs'
       - 'public/app/guild-host-onboarding-v1.mjs'
+      - 'public/app/mobile-guild-create-v1.mjs'
       - 'public/app/emergency-ai-host-v1.mjs'
       - 'public/app/emergency-ai-mesh-v1.mjs'
       - 'public/app/emergency-ai-host-control-v1.mjs'
@@ -37,6 +46,7 @@ on:
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
+      - 'scripts/test-mobile-guild-create-v1.mjs'
       - 'scripts/test-emergency-ai-mesh-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
 jobs:
@@ -50,6 +60,7 @@ jobs:
       - run: node --check public/app/shared/guild-host-resilience-v1.mjs
       - run: node --check public/app/pocket-guild-node-v1.mjs
       - run: node --check public/app/guild-host-onboarding-v1.mjs
+      - run: node --check public/app/mobile-guild-create-v1.mjs
       - run: node --check public/app/emergency-ai-host-v1.mjs
       - run: node --check public/app/emergency-ai-mesh-v1.mjs
       - run: node --check public/app/emergency-ai-host-control-v1.mjs
@@ -59,5 +70,6 @@ jobs:
       - run: node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
       - run: node scripts/test-guild-host-resilience-v1.mjs
       - run: node scripts/test-guild-host-onboarding-v1.mjs
+      - run: node scripts/test-mobile-guild-create-v1.mjs
       - run: node scripts/test-emergency-ai-mesh-v1.mjs
       - run: node scripts/test-guildkeeper-capacity-v1.mjs
