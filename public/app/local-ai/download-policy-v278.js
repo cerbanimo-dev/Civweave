@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.81-local-ai-download-policy-v278-foreground-large-files';
-const REVISION='1.0.122-local-ai-download-policy-v311-phone-foreground';
+const VERSION='1.0.82-local-ai-download-policy-v322-explicit-sync';
+const REVISION='1.0.123-local-ai-download-policy-v322-phone-foreground';
 const FOREGROUND_PHONE_MODELS=new Set(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16']);
 if(globalThis.CivweaveLocalModelDownloadPolicyV278?.version===VERSION&&globalThis.CivweaveLocalModelDownloadPolicyV278?.revision===REVISION)return;
 const base=globalThis.CivweaveLocalModelDownloadV266;
@@ -26,9 +26,8 @@ async function sync(){
   }
   return rows.filter(id=>!forceForeground(id,registry()?.byId?.(id)));
 }
-const wrapped=Object.freeze({...base,start,install:start,syncBackgroundJobs:sync,downloadPolicyVersion:VERSION,downloadPolicyRevision:REVISION,largeExternalDataForeground:true,phoneModelForeground:true,foregroundPhoneModels:Object.freeze([...FOREGROUND_PHONE_MODELS])});
+const wrapped=Object.freeze({...base,start,install:start,syncBackgroundJobs:sync,downloadPolicyVersion:VERSION,downloadPolicyRevision:REVISION,largeExternalDataForeground:true,phoneModelForeground:true,foregroundPhoneModels:Object.freeze([...FOREGROUND_PHONE_MODELS]),autoSyncOnLoad:false,explicitSyncOnly:true});
 globalThis.CivweaveLocalModelDownloadV266=wrapped;
-globalThis.CivweaveLocalModelDownloadPolicyV278=Object.freeze({version:VERSION,revision:REVISION,start,sync,forceForeground,phoneModelForeground:true,foregroundPhoneModels:Object.freeze([...FOREGROUND_PHONE_MODELS])});
-queueMicrotask(()=>sync().catch(error=>console.warn('[Civweave] Could not reconcile stale phone-model background downloads.',error)));
-try{dispatchEvent(new CustomEvent('civweave:local-model-download-policy-ready',{detail:{version:VERSION,revision:REVISION,largeExternalDataForeground:true,phoneModelForeground:true,foregroundPhoneModels:[...FOREGROUND_PHONE_MODELS]}}))}catch{}
+globalThis.CivweaveLocalModelDownloadPolicyV278=Object.freeze({version:VERSION,revision:REVISION,start,sync,forceForeground,phoneModelForeground:true,foregroundPhoneModels:Object.freeze([...FOREGROUND_PHONE_MODELS]),autoSyncOnLoad:false,explicitSyncOnly:true});
+try{dispatchEvent(new CustomEvent('civweave:local-model-download-policy-ready',{detail:{version:VERSION,revision:REVISION,largeExternalDataForeground:true,phoneModelForeground:true,foregroundPhoneModels:[...FOREGROUND_PHONE_MODELS],autoSyncOnLoad:false}}))}catch{}
 })();
