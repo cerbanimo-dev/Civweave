@@ -1,11 +1,12 @@
 import {
   isStagingRequest,
-  requestOrigin,
   stagingGuild,
 } from "../_shared/staging-runtime";
 
 const CORE_DIRECTORY = "https://civweave-core.cerbanimo.workers.dev/api/nodes?limit=100";
 const FABRIC_ORIGIN = "https://civweave-node-cloud.cerbanimo.workers.dev";
+const STAGING_GUILD_SERVER_ORIGIN = "https://civweave-node-cloud-staging.cerbanimo.workers.dev";
+const STAGING_NODE_ID = "civweave-cloud";
 const MAX_NODES = 64;
 
 type JsonRecord = Record<string, any>;
@@ -43,6 +44,11 @@ function safeHttps(value: unknown) {
   } catch {
     return "";
   }
+}
+
+function finiteWhole(value: unknown): number | null {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? Math.floor(number) : null;
 }
 
 function publicRallyPoint(value: JsonRecord) {
@@ -106,10 +112,21 @@ function stagingLocation(nodeId: string) {
   };
 }
 
-async function liveDirectory(request: Request, stagingShadow = false) {
-  const [directoryResult, fabricResult] = await Promise.all([
+function stagingSlots(guild: NonNullable<ReturnType<typeof stagingGuild>>, capacity: JsonRecord) {
+  const remaining = finiteWhole(capacity.totalSeatsRemaining);
+  return {
+    free: Math.max(0, Math.min(guild.freeSlots, remaining ?? guild.freeSlots)),
+    paid: 0,
+  };
+}
+
+async function liveDirectory(stagingShadow = false) {
+  const [directoryResult, fabricResult, stagingCapacityResult] = await Promise.all([
     getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
     getJson(new URL("/api/fabric/capacity", FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
+    stagingShadow
+      ? getJson(new URL(`/api/fabric/capacity?nodeId=${encodeURIComponent(STAGING_NODE_ID)}`, STAGING_GUILD_SERVER_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} }))
+      : Promise.resolve({ ok: true, status: 200, payload: {} }),
   ]);
 
   if (!fabricResult.ok && stagingShadow) {
@@ -118,6 +135,16 @@ async function liveDirectory(request: Request, stagingShadow = false) {
       ok: false,
       environment: "staging",
       error: "live-guild-fabric-unavailable",
+      productionMembershipIsolation: true,
+      nodes: [],
+    }, 502, "no-store");
+  }
+  if (stagingShadow && (!stagingCapacityResult.ok || stagingCapacityResult.payload?.stagingIsolatedGuildServer !== true)) {
+    return reply({
+      schema: "civweave.hub-map-directory.v1",
+      ok: false,
+      environment: "staging",
+      error: "staging-guild-server-unavailable",
       productionMembershipIsolation: true,
       nodes: [],
     }, 502, "no-store");
@@ -140,30 +167,30 @@ async function liveDirectory(request: Request, stagingShadow = false) {
     return result.ok ? (result.payload?.manifest || result.payload || {}) : {};
   }));
 
-  const stagingOrigin = stagingShadow ? requestOrigin(request) : "";
   const nodes = registered.map((nodeId, index) => {
     const merged: JsonRecord = { ...(directoryById.get(nodeId) || {}), ...(manifests[index] || {}), nodeId };
     const liveOrigin = safeHttps(merged.publicOrigin) || FABRIC_ORIGIN;
 
     if (stagingShadow) {
       const guild = stagingGuild(nodeId);
-      if (!guild) return null;
+      if (!guild || nodeId !== STAGING_NODE_ID) return null;
       const location = publicLocation(merged) || stagingLocation(nodeId);
       if (!location) return null;
       return {
         schema: "civweave.hub-map-node.v1",
         nodeId,
         displayName: guild.displayName || String(merged.displayName || merged.label || nodeId).slice(0, 180),
-        publicOrigin: stagingOrigin,
+        publicOrigin: STAGING_GUILD_SERVER_ORIGIN,
         livePublicOrigin: liveOrigin,
         runtime: String(merged.runtime || "cloudflare-host-node").slice(0, 120),
         status: String(merged.status || "active").slice(0, 40),
         capabilities: Array.isArray(merged.capabilities) ? merged.capabilities.map(String).slice(0, 40) : [],
         location,
         updatedAt: merged.updatedAt || location.syncedAt || null,
-        slots: { free: guild.freeSlots, paid: guild.paidSlots },
+        slots: stagingSlots(guild, stagingCapacityResult.payload || {}),
         liveGuild: true,
         stagingShadowSeats: true,
+        stagingGuildServerIsolated: true,
         productionMembershipIsolation: true,
       };
     }
@@ -190,6 +217,7 @@ async function liveDirectory(request: Request, stagingShadow = false) {
       environment: "staging",
       stagingSynthetic: false,
       stagingShadowSeats: true,
+      stagingGuildServerIsolated: true,
       productionMembershipIsolation: true,
       productionDiscoveryReadOnly: true,
     } : {}),
@@ -198,7 +226,7 @@ async function liveDirectory(request: Request, stagingShadow = false) {
     source: {
       directory: directoryResult.ok ? "core-node-directory" : "unavailable",
       fabric: fabricResult.ok ? "cloudflare-node-fabric" : "unavailable",
-      ...(stagingShadow ? { seats: "staging-shadow-overlay" } : {}),
+      ...(stagingShadow ? { seats: "isolated-staging-guild-server" } : {}),
     },
     privacy: {
       publicLocationsAreGuildkeeperPublished: true,
@@ -212,14 +240,14 @@ async function liveDirectory(request: Request, stagingShadow = false) {
 export const onRequestGet: PagesFunction = async context => {
   if (isStagingRequest(context.request)) {
     try {
-      return await liveDirectory(context.request, true);
+      return await liveDirectory(true);
     } catch (error) {
       return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
     }
   }
 
   try {
-    return await liveDirectory(context.request, false);
+    return await liveDirectory(false);
   } catch (error) {
     return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
   }
