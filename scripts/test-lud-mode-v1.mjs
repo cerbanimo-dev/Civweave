@@ -62,12 +62,19 @@ test('Lud package is an explicit no-AI no-generated-visual allowlist',async()=>{
   for(const asset of manifest.assets){const lower=String(asset).toLowerCase();for(const fragment of [...forbiddenRuntime,'/images/','/logos/'])assert.equal(lower.includes(fragment),false,`${asset} contains forbidden ${fragment}`)}
 });
 
-test('dedicated Lud package worker is standalone-safe',async()=>{
+test('dedicated Lud package worker is standalone-safe and serves only its offline allowlist',async()=>{
   const source=await read('public/service-worker-lud-package-v1.js');
-  assert.match(source,/LUD_CACHE_NAME=typeof OFFLINE_CACHE==='string'\?OFFLINE_CACHE:'civweave-lud-v1'/);
+  assert.match(source,/LUD_STANDALONE=typeof OFFLINE_CACHE!=='string'/);
+  assert.match(source,/LUD_CACHE_NAME=LUD_STANDALONE\?'civweave-lud-v1':OFFLINE_CACHE/);
   assert.match(source,/event\.ports\?\.\[0\]\?\.postMessage/);
   assert.match(source,/type==='SKIP_WAITING'/);
   assert.match(source,/caches\.open\(LUD_CACHE_NAME\)/);
+  assert.match(source,/if\(LUD_STANDALONE\)\{/);
+  assert.match(source,/addEventListener\('fetch'/);
+  assert.match(source,/policy\.assets\.has\(pathname\)/);
+  assert.match(source,/cache\.match\(policy\.entry\)/);
+  assert.match(source,/Lud Mode blocked a non-allowlisted request/);
+  assert.doesNotMatch(source,/clients\.claim\s*\(/);
 });
 
 test('identity signer is WebCrypto-only and exposes no AI runtime dependency',async()=>{
