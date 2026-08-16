@@ -4,9 +4,8 @@
 const VERSION='1.0.163-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
-const PATH=location.pathname;
-const QUERY=new URLSearchParams(location.search);
-const EMBEDDED=window.self!==window.top||(QUERY.get('civweave')==='1'&&QUERY.get('cabinet')==='1');
+const INITIAL_QUERY=new URLSearchParams(location.search);
+const EMBEDDED=window.self!==window.top||(INITIAL_QUERY.get('civweave')==='1'&&INITIAL_QUERY.get('cabinet')==='1');
 const PREVIOUS=globalThis.CivweaveFamilyNavigationV178;
 if(PREVIOUS?.owner&&typeof PREVIOUS.ensureMounted==='function'){
   PREVIOUS.ensureMounted();
@@ -63,18 +62,20 @@ if(EMBEDDED){
   return;
 }
 function currentSystem(){
-  const found=ROUTES?.identify?.(PATH);
+  const path=location.pathname;
+  const query=new URLSearchParams(location.search);
+  const found=ROUTES?.identify?.(path);
   if(found)return found;
-  const explicit=QUERY.get('system');
+  const explicit=query.get('system');
   if(SYSTEMS.some(x=>x.id===explicit))return explicit;
   const declared=String(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||'').toLowerCase();
   if(SYSTEMS.some(x=>x.id===declared))return declared;
-  if(document.documentElement.hasAttribute('data-living-school-cabinet')||PATH.includes('/cabinets/living-school/'))return'living-school';
-  if(PATH.includes('fellowfare'))return'fellowfare';
-  if(PATH.includes('anarchadia'))return'anarchadia';
-  if(PATH.includes('realm-console-v140.html'))return explicit==='civweave'?'civweave':'cerbanimo';
-  if(PATH.includes('working-campus-v156.html'))return'civweave';
-  if(PATH.includes('fullscreen-family-v104.html'))return SYSTEMS.some(x=>x.id===explicit)?explicit:'civweave';
+  if(document.documentElement.hasAttribute('data-living-school-cabinet')||path.includes('/cabinets/living-school/'))return'living-school';
+  if(path.includes('fellowfare'))return'fellowfare';
+  if(path.includes('anarchadia'))return'anarchadia';
+  if(path.includes('realm-console-v140.html'))return explicit==='civweave'?'civweave':'cerbanimo';
+  if(path.includes('working-campus-v156.html'))return'civweave';
+  if(path.includes('fullscreen-family-v104.html'))return SYSTEMS.some(x=>x.id===explicit)?explicit:'civweave';
   return'';
 }
 function installStyle(){
@@ -94,10 +95,11 @@ html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-mos
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-compass{bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 14px)!important}
 #${NAV_ID}{position:fixed;z-index:2147483600;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + var(--cw-themed-nav-bottom-gap));width:100vw;height:var(--cw-themed-nav-height);display:grid;grid-template-columns:repeat(5,minmax(0,var(--cw-themed-nav-button-width)));justify-content:center;align-items:stretch;padding:0;margin:0;background:transparent!important;isolation:isolate;overflow:visible}
 #${NAV_ID}::before{content:"";position:absolute;left:max(6px,calc((100vw - 780px)/2));right:max(6px,calc((100vw - 780px)/2));top:2px;bottom:2px;border:1px solid #d6ab4f88;border-radius:16px;background:linear-gradient(180deg,#1a1320cc,#100d17cc);box-shadow:0 6px 18px #0007;pointer-events:none}
-#${NAV_ID} .cw-themed-system-link{position:relative;min-width:0;width:100%;height:100%;display:grid;place-items:center;margin:0;padding:0;border:0;background:var(--system-shade);box-shadow:inset 0 1px 0 #f6dda0,inset 0 -1px 0 #765018;text-decoration:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;isolation:isolate;overflow:hidden}
+#${NAV_ID} .cw-themed-system-link{position:relative;min-width:0;width:100%;height:100%;display:grid;place-items:center;margin:0;padding:0;border:0;background:color-mix(in srgb,var(--system-shade) 42%,#17131c);box-shadow:inset 0 1px 0 #f6dda055,inset 0 -1px 0 #765018;text-decoration:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;isolation:isolate;overflow:hidden;opacity:.72;filter:saturate(.76) brightness(.82);transition:opacity .16s ease,filter .16s ease,transform .16s ease,box-shadow .16s ease,background .16s ease}
 #${NAV_ID} .cw-themed-system-link:first-child{border-left:1px solid #d6ab4f;border-radius:15px 0 0 15px}
 #${NAV_ID} .cw-themed-system-link:last-child{border-right:1px solid #d6ab4f;border-radius:0 15px 15px 0}
-#${NAV_ID} .cw-themed-system-link::before{content:"";position:absolute;z-index:-1;inset:3px 2px;border-radius:14px;opacity:.18;background:var(--system-panel);box-shadow:inset 0 0 12px var(--system-glow),0 0 16px var(--system-glow)}
+#${NAV_ID} .cw-themed-system-link::before{content:"";position:absolute;z-index:-1;inset:3px 2px;border-radius:14px;opacity:.12;background:var(--system-panel);box-shadow:inset 0 0 12px var(--system-glow),0 0 16px var(--system-glow)}
+#${NAV_ID} .cw-themed-system-link.is-current{z-index:2;opacity:1;filter:none;background:var(--system-shade);transform:translateY(-4px);box-shadow:inset 0 0 0 2px var(--system-ring),inset 0 1px 0 #fff8d8,0 -5px 16px color-mix(in srgb,var(--system-glow) 72%,transparent),0 5px 16px #0009}
 #${NAV_ID} .cw-themed-system-link.is-current::before{opacity:.96}
 #${NAV_ID} .cw-themed-system-link:focus-visible{outline:3px solid #fff8c7;outline-offset:-4px}
 #${NAV_ID} .cw-themed-system-button{width:calc(100% - 4px);height:calc(100% - 6px);display:flex;align-items:center;gap:8px;padding:4px 10px 4px 9px;box-sizing:border-box}
@@ -124,7 +126,7 @@ html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-com
 @media(display-mode:window-controls-overlay){html.cwf104-active body{padding-top:max(var(--cwf104-head-total,54px),env(titlebar-area-height,54px))!important}.cwf104-head{min-height:max(var(--cwf104-head-h,54px),env(titlebar-area-height,54px))!important}}
 @media(max-width:680px){:root{--cw-themed-nav-height:clamp(60px,15vw,68px);--cw-themed-nav-button-width:132px;--cw-themed-nav-bottom-gap:3px}#${NAV_ID}::before{left:6px;right:6px;top:4px;bottom:7px}#${NAV_ID} .cw-themed-system-button{height:calc(100% - 9px);gap:6px;padding:3px 7px 3px 6px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:38px;height:38px}#${NAV_ID} .cw-themed-system-monogram{font-size:clamp(21px,6vw,28px)}}
 @media(max-width:430px){#${NAV_ID} .cw-themed-system-button{gap:4px;padding-left:5px;padding-right:5px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:34px;height:34px}#${NAV_ID} .cw-themed-system-monogram{font-size:clamp(19px,5.8vw,25px)}}
-@media(prefers-reduced-motion:reduce){#${NAV_ID} .cw-themed-system-avatar{transition:none}}
+@media(prefers-reduced-motion:reduce){#${NAV_ID} .cw-themed-system-link,#${NAV_ID} .cw-themed-system-avatar{transition:none}}
 `;
   document.head.append(style);
 }
@@ -200,6 +202,18 @@ function hydrate(){
   const rows=globalThis.CivweaveSubsystemAvatarStateV347?.all?.()||{};
   for(const row of Object.values(rows))applySubsystem(row);
 }
+function syncCurrentSelection(current=currentSystem()){
+  if(!SYSTEMS.some(item=>item.id===current))return false;
+  document.documentElement.dataset.cwThemedCurrent=current;
+  for(const item of SYSTEMS){
+    const link=linkFor(item.id);
+    if(!link)continue;
+    const selected=item.id===current;
+    link.classList.toggle('is-current',selected);
+    if(selected)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+  }
+  return true;
+}
 function mount(){
   const current=currentSystem();
   if(!current)return false;
@@ -214,6 +228,7 @@ function mount(){
   const existing=document.getElementById(NAV_ID);
   if(existing){
     existing.dataset.navigationRevision=VERSION;
+    syncCurrentSelection(current);
     hydrate();
     return true;
   }
@@ -231,9 +246,12 @@ function mount(){
     const link=event.target.closest('a[data-system]');
     if(!link||!ROUTES?.navigate)return;
     event.preventDefault();
-    ROUTES.navigate(link.dataset.system,{version:'1.0.163',source:current});
+    const target=String(link.dataset.system||'');
+    syncCurrentSelection(target);
+    ROUTES.navigate(target,{version:'1.0.163',source:current});
   });
   document.body.append(nav);
+  syncCurrentSelection(current);
   for(const item of SYSTEMS)setExpression(item.id,'neutral','boot');
   hydrate();
   void ensureStateMapper().then(hydrate);
@@ -247,6 +265,9 @@ function ensureMounted(){
 addEventListener('civweave:subsystem-avatar-state',event=>applySubsystem(event.detail||{}));
 addEventListener('civweave:subsystem-avatar-state-ready',hydrate);
 addEventListener('civweave:avatar-expression',event=>applyChat(event.detail||{}));
+addEventListener('civweave:system-route-changed',()=>syncCurrentSelection());
+addEventListener('popstate',()=>syncCurrentSelection());
+addEventListener('hashchange',()=>syncCurrentSelection());
 addEventListener('pageshow',ensureMounted);
 addEventListener('focus',ensureMounted);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureMounted,{once:true});else ensureMounted();
@@ -262,6 +283,7 @@ globalThis.CivweaveFamilyNavigationV178=Object.freeze({
   currentSystem,
   mount,
   ensureMounted,
+  syncCurrentSelection,
   setExpression
 });
 })();
