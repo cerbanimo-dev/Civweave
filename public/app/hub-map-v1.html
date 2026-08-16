@@ -13,7 +13,24 @@
 (()=>{
 'use strict';
 const frame=document.getElementById('hubMapFrame');
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function addScript(doc,src,onload){const script=doc.createElement('script');script.src=src;script.async=false;if(onload)script.onload=onload;doc.body.append(script)}
+async function installGuildTapInteraction(win,doc){
+  let ticks=0;
+  while((!win.CivweaveMapService?.state?.map||!win.CivweaveMapService?.selectFeature)&&ticks++<240)await sleep(50);
+  const service=win.CivweaveMapService,map=service?.state?.map;if(!map||map.__civweaveGuildTapInstalled)return false;
+  map.__civweaveGuildTapInstalled=true;
+  map.on('click',event=>{
+    const point=event?.point;if(!point)return;
+    const pad=24;
+    let hits=[];
+    try{hits=map.queryRenderedFeatures([[point.x-pad,point.y-pad],[point.x+pad,point.y+pad]],{layers:['civweave-points']})||[]}catch{}
+    const hit=hits.find(feature=>feature?.properties?.id);if(!hit)return;
+    service.selectFeature(String(hit.properties.id),true);
+    doc.getElementById('panel')?.classList.add('open');
+  });
+  return true;
+}
 function install(){
   const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc)return;
   doc.title='Civweave Guild Map';
@@ -28,6 +45,7 @@ function install(){
   if(federations){federations.classList.remove('active');federations.hidden=true}
   nodes?.classList.add('active');if(nodes)nodes.textContent='Guilds';
   const atlasStat=doc.getElementById('atlasCount')?.closest?.('.stat');if(atlasStat)atlasStat.hidden=true;
+  installGuildTapInteraction(win,doc).catch(error=>console.error('[Civweave Guild Map] tap interaction',error));
   addScript(doc,'/app/host-node-session-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-hub-map-v1.js?v=guild-rally-point-v1')));
 }
 frame.addEventListener('load',install,{once:true});
