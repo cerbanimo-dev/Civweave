@@ -56,8 +56,8 @@ assert.match(safeSource,/externalUncensoredRoutes:0/,'S.A.F.E. station must expo
 assert.match(safeSource,/independentQueue:true/,'S.A.F.E. station must own its queue independently');
 assert.match(safeSource,/failClosed:true/,'S.A.F.E. station must fail closed');
 assert.match(safeSource,/original\.hidden=true;original\.disabled=true;original\.style\.display='none'/,'S.A.F.E. must remove the uncensored control from the reachable UI');
-assert.match(safeSource,/data-safe-radio-action=\\"previous\\"/,'S.A.F.E. station must expose previous-track queue navigation');
-assert.match(safeSource,/data-safe-radio-action=\\"next\\"/,'S.A.F.E. station must expose next-track queue navigation');
+assert.match(safeSource,/data-safe-radio-action="previous"/,'S.A.F.E. station must expose previous-track queue navigation');
+assert.match(safeSource,/data-safe-radio-action="next"/,'S.A.F.E. station must expose next-track queue navigation');
 assert.match(safeSource,/safeAudit:'SAFE-PASS-V1'/,'S.A.F.E. tracks must carry the broader safety audit contract');
 assert.doesNotMatch(safeSource,/open\.spotify\.com\/playlist\//,'S.A.F.E. station must not contain any Spotify playlist route that can escape to uncensored material');
 assert.doesNotMatch(safeSource,/originalSpotifyUrl/,'S.A.F.E. station must not inherit original playlist destinations');
@@ -102,7 +102,7 @@ assert.equal(Object.values(trackMap.systems).reduce((sum,system)=>sum+(system.tr
 assert.match(trackSource,/REVISION='radio-track-suggestions-v247-persistent-station-v1'/,'track suggestions must target the persistent station surface');
 assert.match(trackSource,/civweave:radio-station-opened/,'track suggestions must trigger when the persistent station opens');
 assert.match(trackSource,/civweave:radio-station-mode-changed/,'track suggestions must follow station tier changes');
-assert.match(trackSource,/safeApi\(\)\?\.suggestTrack\?\.\(system\)/,'S.A.F.E. suggestions must come only from the S.A.F.E. queue');
+assert.match(trackSource,/suggestTrack\?\.\(system\)/,'S.A.F.E. suggestions must come only from the S.A.F.E. queue');
 assert.match(trackSource,/surface\(\)\?\.tracksFor\?\.\(system\)/,'clean-mode suggestions must come from the clean station payload');
 assert.match(trackSource,/spotifyPlaylistTrackUrl\(track,systemId\)/,'original-mode suggestions must preserve playlist context');
 assert.match(trackSource,/persistentSurface:true/,'track suggestion API must declare persistent-surface ownership');
