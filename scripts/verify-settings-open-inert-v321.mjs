@@ -1,20 +1,21 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,manager,policy,panel,serverAI,livingActions]=await Promise.all([
+const [gateway,lifecycle,manager,policy,panel,serverAI,gemini,livingActions]=await Promise.all([
   'public/app/settings-gateway-v317.js',
   'public/app/document-lifecycle-v221.js',
   'public/app/local-ai/download-manager-v267.js',
   'public/app/local-ai/download-policy-v278.js',
   'public/app/local-ai/settings-panel-v267.js',
   'public/app/server-ai-settings-v301.js',
+  'public/app/gemini-task-tier-router-v213.js',
   'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
 ].map(read));
-for(const source of [gateway,lifecycle,manager,policy,panel,serverAI])new Function(source);
+for(const source of [gateway,lifecycle,manager,policy,panel,serverAI,gemini])new Function(source);
 
 const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
 assert.doesNotMatch(openBlock,/ensureManagement\(/,'Opening Settings must not load downloaded-model management automatically.');
-assert.doesNotMatch(openBlock,/local-inference-cancel-requested|requestInferenceQuiescence/,'Opening Settings must not tear down inference automatically.');
+assert.doesNotMatch(openBlock,/requestInferenceQuiescence|local-inference-cancel-requested/,'Opening Settings must not tear down inference automatically.');
 assert.doesNotMatch(gateway,/data-load-local-model-management/,'The freeze-triggering Manage downloaded local AI gate returned.');
 assert.match(gateway,/data-settings-tabs="1"/,'Canonical Settings must own the three-tab layout.');
 assert.match(gateway,/data-settings-tab="general"/);
@@ -45,6 +46,10 @@ assert.match(panel,/snapshotOnlyView:true/);
 assert.doesNotMatch(panel,/pageshow[^\n]*syncBackgroundJobs/,'Local model UI must render from saved state on BFCache restore.');
 
 assert.match(serverAI,/if\(form\.dataset\.settingsTabs==='1'\)return form/,'Server/membership enhancer must reuse canonical tabs instead of creating a second layout.');
+assert.match(gemini,/canonicalSettingsPresentation:true/,'Gemini router must defer Settings presentation to the canonical v322 owner.');
+assert.match(gemini,/const canonicalV322=form\.dataset\.settingsTabs==='1'/);
+const geminiPatch=gemini.slice(gemini.indexOf('function patchSettings()'),gemini.indexOf('function middleware()'));
+assert.match(geminiPatch,/if\(canonicalV322\)\{note\?\.remove\(\);return\}/,'Gemini router must remove its legacy note instead of duplicating the v322 preset cards.');
 assert.doesNotMatch(livingActions,/['"]open-ai-settings['"]/,'Living School cabinet-era Settings action must not survive canonical consolidation.');
 
 console.log(JSON.stringify({
@@ -52,6 +57,7 @@ console.log(JSON.stringify({
   contract:'settings-open-inert-v322',
   canonicalTabs:true,
   geminiPresets:['gemini-3.1-flash-lite','gemini-3.7-flash'],
+  geminiPresentationOwner:'CivweaveSettingsV320',
   localModelsOnTabOnly:true,
   cacheSyncOnView:false,
   livingSchoolSpecialSettings:false
