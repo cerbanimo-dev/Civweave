@@ -130,12 +130,13 @@ jobs:
           node --check scripts/browser-lud-mode-gauntlet-v1.mjs
       - name: Verify no-AI, game UI, provenance, route, Guild, Passport, Quest Chronicle, and human-validation contracts
         run: |
-          node --test scripts/test-lud-mode-v1.mjs
-          node --test scripts/test-lud-human-validation-neurons-v1.mjs
-          node --test scripts/test-lud-guild-passport-v1.mjs
-          node --test scripts/test-lud-game-ui-v1.mjs
-          node --test scripts/test-quest-arc-chronicle-v1.mjs
-          node --test scripts/test-quest-verse-generator-v1.mjs
+          check() { node --test "$1" || { echo "::error file=$1::Lud contract failed in $1"; exit 1; }; }
+          check scripts/test-lud-mode-v1.mjs
+          check scripts/test-lud-human-validation-neurons-v1.mjs
+          check scripts/test-lud-guild-passport-v1.mjs
+          check scripts/test-lud-game-ui-v1.mjs
+          check scripts/test-quest-arc-chronicle-v1.mjs
+          check scripts/test-quest-verse-generator-v1.mjs
       - name: Install browser gauntlet
         run: |
           npm install --no-save --ignore-scripts playwright@1.55.0
