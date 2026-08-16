@@ -18,9 +18,11 @@ async function account(){
   return{capacity,storage}
 }
 
-test('policy is 30 neurons split exactly across two or three validators',()=>{
+test('policy is 30 neurons split exactly across two or three validators with no earned-bonus rollover',()=>{
   assert.equal(HUMAN_VALIDATION_NEURON_POLICY.requestNeurons,30);
   assert.deepEqual([...HUMAN_VALIDATION_NEURON_POLICY.allowedValidatorCounts],[2,3]);
+  assert.equal(HUMAN_VALIDATION_NEURON_POLICY.earnedBonusRollsOver,false);
+  assert.equal(HUMAN_VALIDATION_NEURON_POLICY.earnedBonusExpiry,'daily-reset');
   assert.equal(30/2,15);
   assert.equal(30/3,10);
 });
@@ -62,18 +64,51 @@ test('accepted Standard validators claim their split once, while self and Lud cl
   assert.equal((await capacity.validationEarned('guild-one','validator-user-0003')).balanceNeurons,15);
 });
 
-test('validator neurons are a separate persistent earned-compute balance, not lifetime credits',async()=>{
-  const{capacity}=await account();
-  await capacity.openHumanValidationRequest({nodeId:'guild-one',requesterUserId:'lud-user-0001',requestId:'earned-spend',packetId:'packet-earned',projectId:'project-earned',validatorCount:2,operatingMode:'lud'});
-  await capacity.claimHumanValidation({nodeId:'guild-one',validatorUserId:'validator-user-0002',requestId:'earned-spend',receiptId:'receipt-earned',receiptHash:'hash-earned',accepted:true,validatorMode:'standard'});
-  assert.equal((await capacity.wallet('guild-one','validator-user-0002')).balanceNeurons,0,'cash-backed lifetime wallet must remain untouched');
-  const reservation=await capacity.reserveUsage({nodeId:'guild-one',userId:'validator-user-0002',requestedNeurons:10,billingCeilingNeurons:10,billingRail:'workers-ai-free',fundingSource:'lifetime'});
-  assert.equal(reservation.reservation.fundingSource,'validation-earned');
-  assert.equal(reservation.reservation.fromValidationEarnedNeurons,10);
-  const settlement=await capacity.settleUsage({reservationId:reservation.reservation.reservationId,actualNeurons:8,actualBillingNeurons:8});
-  assert.equal(settlement.refundedValidationEarnedNeurons,2);
-  assert.equal((await capacity.validationEarned('guild-one','validator-user-0002')).balanceNeurons,7);
-  assert.equal((await capacity.wallet('guild-one','validator-user-0002')).balanceNeurons,0);
+test('validator neurons are a same-day bonus, not persistent or lifetime credits',async()=>{
+  const realNow=Date.now,base=Date.UTC(2026,7,16,12,0,0);
+  Date.now=()=>base;
+  try{
+    const{capacity}=await account();
+    await capacity.openHumanValidationRequest({nodeId:'guild-one',requesterUserId:'lud-user-0001',requestId:'earned-spend',packetId:'packet-earned',projectId:'project-earned',validatorCount:2,operatingMode:'lud'});
+    await capacity.claimHumanValidation({nodeId:'guild-one',validatorUserId:'validator-user-0002',requestId:'earned-spend',receiptId:'receipt-earned',receiptHash:'hash-earned',accepted:true,validatorMode:'standard'});
+    assert.equal((await capacity.wallet('guild-one','validator-user-0002')).balanceNeurons,0,'cash-backed lifetime wallet must remain untouched');
+    const earnedToday=await capacity.validationEarned('guild-one','validator-user-0002');
+    assert.equal(earnedToday.balanceNeurons,15);
+    assert.equal(earnedToday.sourceDay,'2026-08-16');
+    assert.equal(earnedToday.expiresAt,'2026-08-17T00:00:00.000Z');
+    const reservation=await capacity.reserveUsage({nodeId:'guild-one',userId:'validator-user-0002',requestedNeurons:10,billingCeilingNeurons:10,billingRail:'workers-ai-free',fundingSource:'lifetime'});
+    assert.equal(reservation.reservation.fundingSource,'validation-earned');
+    assert.equal(reservation.reservation.fromValidationEarnedNeurons,10);
+    const settlement=await capacity.settleUsage({reservationId:reservation.reservation.reservationId,actualNeurons:8,actualBillingNeurons:8});
+    assert.equal(settlement.refundedValidationEarnedNeurons,2);
+    assert.equal(settlement.expiredValidationBonusNeurons,0);
+    assert.equal((await capacity.validationEarned('guild-one','validator-user-0002')).balanceNeurons,7);
+    assert.equal((await capacity.wallet('guild-one','validator-user-0002')).balanceNeurons,0);
+
+    Date.now=()=>base+24*60*60*1000;
+    const tomorrow=await capacity.validationEarned('guild-one','validator-user-0002');
+    assert.equal(tomorrow.balanceNeurons,0,'unused validator bonus must disappear at the daily reset');
+    assert.equal(tomorrow.earnedNeurons,0,'prior-day earnings must not reappear as a new-day wallet');
+    const memberTomorrow=await capacity.memberStatus({nodeId:'guild-one',userId:'validator-user-0002'});
+    assert.equal(memberTomorrow.quota.validationBonusNeurons,0);
+    assert.equal((await capacity.wallet('guild-one','validator-user-0002')).balanceNeurons,0);
+  }finally{Date.now=realNow}
+});
+
+test('unused reservation refund also expires if settlement crosses the daily reset',async()=>{
+  const realNow=Date.now,base=Date.UTC(2026,7,16,23,50,0);
+  Date.now=()=>base;
+  try{
+    const{capacity}=await account();
+    await capacity.openHumanValidationRequest({nodeId:'guild-one',requesterUserId:'lud-user-0001',requestId:'cross-reset',packetId:'packet-cross',projectId:'project-cross',validatorCount:2,operatingMode:'lud'});
+    await capacity.claimHumanValidation({nodeId:'guild-one',validatorUserId:'validator-user-0002',requestId:'cross-reset',receiptId:'receipt-cross',receiptHash:'hash-cross',accepted:true,validatorMode:'standard'});
+    const reservation=await capacity.reserveUsage({nodeId:'guild-one',userId:'validator-user-0002',requestedNeurons:10,billingCeilingNeurons:10,billingRail:'workers-ai-free',fundingSource:'validation-earned'});
+    Date.now=()=>base+20*60*1000;
+    const settlement=await capacity.settleUsage({reservationId:reservation.reservation.reservationId,actualNeurons:8,actualBillingNeurons:8});
+    assert.equal(settlement.refundedValidationEarnedNeurons,0);
+    assert.equal(settlement.expiredValidationBonusNeurons,2);
+    assert.equal((await capacity.validationEarned('guild-one','validator-user-0002')).balanceNeurons,0);
+  }finally{Date.now=realNow}
 });
 
 test('unclaimed request shares expire with the Lud daily reset instead of rolling over',async()=>{

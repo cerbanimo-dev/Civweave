@@ -40,7 +40,9 @@
         "validatorCounts": [2, 3],
         "twoValidatorShareNeurons": 15,
         "threeValidatorShareNeurons": 10,
-        "unusedSourceCapacityRollsOver": false
+        "unusedSourceCapacityRollsOver": false,
+        "earnedValidatorBonusRollsOver": false,
+        "earnedValidatorBonusExpiresAt": "daily-reset"
       },
       "installerController": "public/app/lud-installer-v1.js",
       "downloadSurface": "public/app/lud/index.html",
@@ -54,7 +56,7 @@
         "A Lud-funded human validation request consumes exactly 30 neurons from that resident's current-day included allowance and uses exactly two or three independent human validators.",
         "Two-validator requests pay 15 neurons to each accepted validator; three-validator requests pay 10 neurons to each accepted validator.",
         "Unused daily Lud validation capacity expires at the ordinary daily included-neuron reset and never becomes a rollover wallet balance.",
-        "Only neurons actually earned by completed accepted validation labor persist as validator compute credits; these credits remain separate from cash-backed lifetime compute credits.",
+        "Accepted validators receive a same-day neuron bonus that expires at the ordinary daily reset; it never rolls over or becomes a persistent or cash-backed lifetime compute balance.",
         "The Lud download is an allowlisted package boundary, not a renamed copy of the ordinary offline campus.",
         "The Lud download surface and packaged Lud campus contain no generated visual assets, images, logos, SVG illustrations, canvases, or background-image URLs."
       ]
