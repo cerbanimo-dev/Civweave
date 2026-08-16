@@ -13,6 +13,12 @@ on:
       - 'public/app/proposal-voting-gate-v2.js'
       - 'public/app/local-object-mesh-v146.js'
       - 'public/app/shared/civweave-identity-sync.js'
+      - 'public/app/shared/civweave-passport-identity-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-installer-lobby-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'public/app/host-node-paid-join-v1.js'
+      - 'public/app/host-node-status-selection-v1.js'
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/family-ai-loader-v105.js'
       - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
@@ -25,6 +31,7 @@ on:
       - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
       - 'scripts/test-lud-human-validation-neurons-v1.mjs'
+      - 'scripts/test-lud-guild-passport-v1.mjs'
       - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
       - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
@@ -43,6 +50,12 @@ on:
       - 'public/app/proposal-voting-gate-v2.js'
       - 'public/app/local-object-mesh-v146.js'
       - 'public/app/shared/civweave-identity-sync.js'
+      - 'public/app/shared/civweave-passport-identity-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-installer-lobby-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'public/app/host-node-paid-join-v1.js'
+      - 'public/app/host-node-status-selection-v1.js'
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/family-ai-loader-v105.js'
       - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
@@ -55,6 +68,7 @@ on:
       - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
       - 'scripts/test-lud-human-validation-neurons-v1.mjs'
+      - 'scripts/test-lud-guild-passport-v1.mjs'
       - 'scripts/browser-lud-mode-gauntlet-v1.mjs'
       - 'docs/architecture/lud-mode-v1.md'
       - 'config/system-ownership.json'
@@ -80,6 +94,12 @@ jobs:
           node --check public/app/human-validation-neuron-client-v1.js
           node --check public/app/lud-installer-v1.js
           node --check public/app/shared/civweave-identity-sync.js
+          node --check public/app/shared/civweave-passport-identity-v1.js
+          node --check public/app/host-node-session-v1.js
+          node --check public/app/host-node-installer-lobby-v1.js
+          node --check public/app/host-node-local-capacity-v1.js
+          node --check public/app/host-node-paid-join-v1.js
+          node --check public/app/host-node-status-selection-v1.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check public/app/family-ai-loader-v105.js
           node --check public/service-worker-lud-package-v1.js
@@ -88,11 +108,13 @@ jobs:
           node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
           node --check cloudflare/node-cloud/src/server-ai-entry-v5.mjs
           node --check scripts/test-lud-human-validation-neurons-v1.mjs
+          node --check scripts/test-lud-guild-passport-v1.mjs
           node --check scripts/browser-lud-mode-gauntlet-v1.mjs
-      - name: Verify no-AI, no-generated-visual, provenance, route, and human-validation contracts
+      - name: Verify no-AI, no-generated-visual, provenance, route, Guild, Passport, and human-validation contracts
         run: |
           node --test scripts/test-lud-mode-v1.mjs
           node --test scripts/test-lud-human-validation-neurons-v1.mjs
+          node --test scripts/test-lud-guild-passport-v1.mjs
       - name: Install browser gauntlet
         run: |
           npm install --no-save --ignore-scripts playwright@1.55.0

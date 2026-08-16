@@ -5,6 +5,9 @@ Lud Mode is Civweave's dedicated human-operated lane. It is a package and operat
 ## Canonical owners
 
 - Operating mode: `public/app/lud-mode-v1.js`
+- Passport identity: `public/app/shared/civweave-passport-identity-v1.js`
+- Guild session/login: `public/app/host-node-session-v1.js`
+- Guild discovery/admission surface: `public/app/host-node-installer-lobby-v1.js`
 - Lud presentation/manual drafts: `public/app/lud-manual-authoring-v1.js`
 - Human creation adapter: `public/app/lud-human-tools-v1.js`
 - Cerbanimo Quests: `public/app/cerbanimo-quest-engine-v144.js`
@@ -24,9 +27,21 @@ These declarations are mirrored in `config/system-ownership.json`.
 
 Lud Mode is downloaded separately from `/app/lud/`. Its package is an explicit allowlist, not recursive dependency discovery. The download page and campus contain no generated visual assets, images, logos, SVG artwork, canvases, or CSS background images.
 
-The package may include human-only Civweave capabilities such as the Cerbanimo Quest engine, proposal voting, local mesh, reward records, and human validation settlement. It may not include model weights, local-model runtimes, guide generation, server-AI routing, browser agents, model settings, image directories, or logo directories.
+The package may include human-only Civweave capabilities such as Passport identity, Guild membership, the Cerbanimo Quest engine, proposal voting, local mesh, reward records, and human validation settlement. It may not include model weights, local-model runtimes, guide generation, server-AI routing, browser agents, model settings, image directories, or logo directories.
 
 `public/app/lud/campus.html` remains the cached asset while navigation uses `/app/lud/campus`, matching Cloudflare Pages clean-URL behavior.
+
+## Passport and Guild membership
+
+Lud Mode participates in the same identity and Guild systems as Standard Civweave rather than maintaining mode-specific copies.
+
+`CivweavePassportIdentityV1` initializes the local Passport before any Guild join is required. It uses the existing Anarchadia Passport storage contract, `civweave.anarchadia.citizen-console.v139` with schema `civweave.anarchadia-console.v1`. If a Passport already exists, Lud preserves and reuses its ID and state. If no Passport exists, the shared owner creates the same compatible local record that Anarchadia consumes. There is no Lud-specific Passport ID or Passport store.
+
+Guild discovery, Citizen/Patron capacity, device login, admission, membership checkout, and capacity sessions remain owned by the existing shared Guild access modules. Joining a Guild while Lud Mode is active does **not** enable local or server AI; the Lud operating-mode boundary remains authoritative.
+
+Because the dedicated Lud service worker fails closed on unknown requests, it contains an explicit network-only allowlist for the live Guild membership/session and human-validation endpoints used by these shared owners. Those responses are never added to the offline Lud asset cache. Arbitrary same-origin APIs, including AI generation endpoints, remain blocked.
+
+Offline Lud work and Passport identity remain available without a Guild connection. Guild discovery, admission, membership checkout, live capacity, and server-backed validation settlement naturally require a reachable Guild or service endpoint.
 
 ## Human creation reuses Civweave
 
@@ -71,5 +86,7 @@ Lud discovery admits only explicitly human-authored content. Unknown provenance 
 `node --test scripts/test-lud-mode-v1.mjs` checks the package boundary, no-generated-visual rule, no-AI runtime boundary, provenance rules, and canonical human-tool reuse.
 
 `node --test scripts/test-lud-human-validation-neurons-v1.mjs` checks the 30-neuron request, 15/10 split, 900-to-30 daily ceiling, non-rollover source allowance, same-day validator-bonus expiry, distinct validator claims, and separation from cash-backed lifetime credits.
+
+`node --test scripts/test-lud-guild-passport-v1.mjs` checks shared Passport generation/preservation, Guild-owner reuse, the packaged Guild membership assets, the no-AI boundary, and the service worker's explicit membership/validation network allowlist.
 
 `scripts/browser-lud-mode-gauntlet-v1.mjs` exercises the dedicated service worker in Chromium through download, clean-route open, and offline reload.

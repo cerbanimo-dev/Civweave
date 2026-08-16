@@ -11,26 +11,42 @@
 <script src="/app/content-provenance-v1.js"></script>
 <script src="/app/lud-mode-v1.js"></script>
 <script src="/app/shared/civweave-identity-sync.js"></script>
+<script src="/app/shared/civweave-passport-identity-v1.js"></script>
 <script src="/app/shared/civweave-reward-weave.js"></script>
+<script src="/app/host-node-session-v1.js"></script>
+<script src="/app/host-node-installer-lobby-v1.js"></script>
 <script src="/app/human-validation-neuron-client-v1.js"></script>
 <script src="/app/lud-human-tools-v1.js"></script>
 </head>
 <body>
 <main>
-<header><small>Civweave · human-operated lane</small><h1>Lud Mode</h1><p class="lede">No model is asked to plan, write, classify, recommend, validate, or decorate this surface. Human work uses the same Cerbanimo, Living School, FellowFare, validation, and mesh records as the rest of Civweave.</p></header>
-<section class="rules"><div><strong>AI generation off</strong><span>No guide or model execution belongs to this mode.</span></div><div><strong>Human provenance required</strong><span>Unknown and AI-generated content stay out of the human-only feed.</span></div><div><strong>30 neurons fund human review</strong><span>Two validators receive 15 each; three receive 10 each. Unused daily capacity expires at reset.</span></div></section>
+<header><small>Civweave · human-operated lane</small><h1>Lud Mode</h1><p class="lede">No model is asked to plan, write, classify, recommend, validate, or decorate this surface. Human work uses the same Cerbanimo, Living School, FellowFare, validation, identity, Guild, and mesh records as the rest of Civweave.</p></header>
+<section class="rules"><div><strong>AI generation off</strong><span>No guide or model execution belongs to this mode.</span></div><div><strong>Human provenance required</strong><span>Unknown and AI-generated content stay out of the human-only feed.</span></div><div><strong>30 neurons fund human review</strong><span>Two validators receive 15 each; three receive 10 each. Source capacity and validator bonuses expire at reset.</span></div></section>
+<section class="panel install-card"><span class="eyebrow">Passport & Guild</span><h2>Use the same Civweave identity and Guilds</h2><p>Lud Mode creates the same local Passport record used by Anarchadia and can join the same Civweave Guilds as Standard Mode. Joining a Guild never turns AI back on while Lud Mode is active.</p><article class="card"><span>Passport</span><h3 id="lud-passport-id">Creating Passport…</h3><p>This Passport is stored locally first and is reused if you later open Anarchadia or Standard Civweave.</p></article><p class="status">Guild discovery and joining use Civweave's existing Guild login and capacity owners. The Guild chooser appears directly below this panel.</p></section>
 <div class="layout">
 <div>
 <section class="panel"><span class="eyebrow">Human creation</span><h2>Use Civweave's existing tools</h2><p>Quests go through Cerbanimo's quest engine. Tasks and Living School modules use the shared human proposal gate. Only manifests and program drafts without another canonical owner stay in Lud's small manual store.</p><form id="author-form"><label><span>Type</span><select name="kind"><option value="quest">Cerbanimo Quest</option><option value="task">Cerbanimo task proposal</option><option value="learning-module">Living School module proposal</option><option value="learning-program">Learning program draft</option><option value="resource-manifest">Resource manifest</option><option value="skill-manifest">Skill manifest</option></select></label><label><span>Title</span><input name="title" maxlength="180" required></label><label><span>Description or objective</span><textarea name="description" rows="4" maxlength="6000" required></textarea></label><label><span>Steps, lesson blocks, acceptance criteria, resources, or evidence</span><textarea name="details" rows="6" maxlength="12000"></textarea></label><label class="check"><input name="marketDraft" type="checkbox"><span>Also create a human-authored FellowFare draft when this can be offered or shared.</span></label><button type="submit">Save through human tools</button><p id="status" class="status" role="status"></p></form></section>
 <section class="panel"><span class="eyebrow">Your human work</span><h2>Shared Civweave records</h2><div id="records" class="stream"></div></section>
 </div>
 <div>
-<section class="panel"><span class="eyebrow">Human validation</span><h2>Pay people instead of a model</h2><p>Each funded validation request spends 30 neurons from today's included Lud allowance. Choose two independent validators at 15 neurons each or three at 10 each. The source allowance resets daily and does not roll over; neurons earned by completed validators remain spendable compute credits.</p><div id="validations" class="stream"></div><p id="validation-status" class="status" role="status">Checking today's human-review capacity…</p></section>
+<section class="panel"><span class="eyebrow">Human validation</span><h2>Pay people instead of a model</h2><p>Each funded validation request spends 30 neurons from today's included Lud allowance. Choose two independent validators at 15 neurons each or three at 10 each. The source allowance resets daily and does not roll over; validator neuron rewards are same-day bonuses and expire at that same reset.</p><div id="validations" class="stream"></div><p id="validation-status" class="status" role="status">Checking today's human-review capacity…</p></section>
 <section class="panel"><span class="eyebrow">FellowFare · human-only</span><h2>Human-made feed</h2><p id="market-note">Only explicitly human-authored listings are admitted.</p><div id="market" class="stream"></div></section>
 </div>
 </div>
 <p class="footer"><a href="/app/lud/">Lud Mode downloads</a> · <a href="/app/">Standard Civweave installer</a></p>
 </main>
 <script src="/app/lud-manual-authoring-v1.js"></script>
+<script>
+(()=>{
+  const renderPassport=()=>{
+    const node=document.getElementById('lud-passport-id');
+    if(!node)return;
+    try{node.textContent=globalThis.CivweavePassportIdentityV1?.passportId?.()||'Passport unavailable';}
+    catch{node.textContent='Passport unavailable';}
+  };
+  renderPassport();
+  addEventListener('civweave:passport-ready',renderPassport);
+})();
+</script>
 </body>
 </html>
