@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.124-shared-guide-surface-v236-unified-chat-v1-avatar-contain-v1-header-clearance-v1';
+const VERSION='1.0.125-shared-guide-surface-v236-party-lazy-v1';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
+let partyRequested=false;
 function liveHead(){
   const head=document.head;
   return document.documentElement?.isConnected&&head?.isConnected?head:null;
@@ -42,8 +43,26 @@ function loadStyle(href){
   head.append(link);
   return true;
 }
+function activatePartyChat(reason='explicit-party-use'){
+  partyRequested=true;
+  return load('/app/shared-intention-party-chat-v1.js?v=1.0.1-party-chat-lazy-v1',()=>{
+    try{dispatchEvent(new CustomEvent('civweave:shared-intention-party-ready',{detail:{version:VERSION,reason,lazy:true}}))}catch{}
+  },()=>Boolean(globalThis.CivweaveSharedIntentionPartyChatV1));
+}
+function onPartyRequest(event){
+  if(event?.type==='civweave:open-human-thread'&&event?.detail?.source!=='party')return;
+  activatePartyChat(event?.type||'explicit-party-use');
+}
+function bindPartyActivation(){
+  if(document.documentElement.dataset.civweavePartyLazyBound==='true')return;
+  document.documentElement.dataset.civweavePartyLazyBound='true';
+  addEventListener('civweave:open-human-thread',onPartyRequest);
+  addEventListener('civweave:party-activate-request',onPartyRequest);
+  addEventListener('civweave:shared-intention-party-use',onPartyRequest);
+}
 function install(){
   if(!liveHead())return false;
+  bindPartyActivation();
   loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
   loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
   load('/app/minilm-response-router-v347.js?v=1.0.0-response-router-v347',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
@@ -57,9 +76,6 @@ function install(){
         load('/app/unified-chat-system-v1.js?v=1.0.0-unified-chat-system-v1',()=>{
           try{dispatchEvent(new CustomEvent('civweave:unified-chat-system-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveUnifiedChatSystemV1));
-        load('/app/shared-intention-party-chat-v1.js?v=1.0.0-party-chat-v1',()=>{
-          try{dispatchEvent(new CustomEvent('civweave:shared-intention-party-ready',{detail:{version:VERSION}}))}catch{}
-        },()=>Boolean(globalThis.CivweaveSharedIntentionPartyChatV1));
         load('/app/human-message-bubble-v1.js?v=1.0.0-human-message-bubble-v1',()=>{
           try{dispatchEvent(new CustomEvent('civweave:human-message-bubble-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveHumanMessageBubbleV1));
@@ -78,5 +94,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(install));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347',plannerMaterialization:'v265',partyChat:'v1',partyIdentity:'anonymous-role-only',humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347',plannerMaterialization:'v265',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',install});
 })();
