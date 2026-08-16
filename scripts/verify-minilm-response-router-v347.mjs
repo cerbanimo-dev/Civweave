@@ -100,6 +100,10 @@ assert.ok(full.messages[0].content.includes('KEEP THIS FULL MOSS PROMPT'));
 // Exact phrases belong in regression tests only. In this VM MiniLM is intentionally unavailable,
 // so these assertions prove the deterministic safety net still works without making it primary.
 const fallbackRequest={context:{guide:{system:'living-school'}},task:{kind:'dialogue',systemId:'living-school',requirements:{planning:false}}};
+const ordinaryTestRoute=await api.classify('Test',fallbackRequest);
+assert.equal(ordinaryTestRoute.taskClass,'ordinary');
+assert.equal(ordinaryTestRoute.artifactClass,null);
+assert.equal(ordinaryTestRoute.networkRequired,false);
 const mossRule=api.ruleArtifact("Ok let's make a learning path that teaches parents gentle parenting",fallbackRequest);
 assert.equal(mossRule.id,'curriculum');
 const learningPlanRule=api.ruleArtifact('Can you help me make a learning plan that teaches parents gentle parenting?',fallbackRequest);
@@ -138,4 +142,4 @@ assert.equal(api.continuationCue('Tell me a joke'),false);
 assert.ok(registrations.some(row=>row.id==='minilm-response-router-v347'&&row.priority===120),'response router must register on the runtime spine before local inference');
 const declared=api.declaredArtifact({context:{guide:{system:'fellowfare'}},task:{kind:'resource-draft'}});
 assert.equal(declared.id,'resource');
-console.log('PASS MiniLM-primary prompt classification, deterministic-only fallback, five-guide language, tiny-prompt, thread continuation, spine network gate, and structured-artifact router v347.');
+console.log('PASS MiniLM-primary prompt classification, ordinary local-safe fallback, deterministic-only safety net, five-guide language, tiny-prompt, thread continuation, spine network gate, and structured-artifact router v347.');
