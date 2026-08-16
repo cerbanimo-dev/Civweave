@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const REVISION='radio-safe-stations-v1-general-audience-queue';
 const SAFE_KEY='civweave.safe-mode.v1';
 const STATE_KEY='civweave.radio.safe-station-state.v1';
@@ -48,12 +48,12 @@ const SAFE_STATIONS=deepFreeze({
     tracks:[
       track('Genesis','Justice','5iG0sNphqkvscYeBxWkNKE'),
       track('Robot Rock','Daft Punk','7LL40F6YdZgeiQ6en1c7Lk'),
-      track('Odessa','Caribou','1KnvBEzvNo3ha7ozE0eWUb'),
       track('Atlas','Battles','0QhOKLjueYgO6bUY9K7JVa'),
-      track('Over And Over','Hot Chip','3vxYFt4Ty5sw1C1B1pRZlD'),
+      track('Soulful Strut','Young-Holt Unlimited','6v8mOtpRlXbG3BOauqPRHC'),
+      track('Loud Pipes','Ratatat','3qkFIjYRInFasy2jeDZPgm'),
       track("Ain't No Stoppin' Us Now",'McFadden & Whitehead','4Ymk3pqpkGx19gyxxUj5LK'),
       track('Move on Up - Single Edit','Curtis Mayfield','0MHXrqn909p0LRTPsNsGEi'),
-      track("I'll Take You There",'The Staple Singers','7jiugKbRYzAptqScmOANqT')
+      track('Back Pocket','Vulfpeck, Theo Katzman, Christine Hucal, Mark Dover','0tLwe28zupkUQMpoXIDgX2')
     ]
   },
   fellowfare:{
@@ -73,13 +73,13 @@ const SAFE_STATIONS=deepFreeze({
     name:'Anarchadia Radio',guide:'Merlin',policy:'general-audience-non-graphic-v1',
     tracks:[
       track("Talkin' Bout a Revolution",'Tracy Chapman','0YMFcrMtBowDdD5bPz0cgy'),
-      track('We Got to Have Peace','Curtis Mayfield','1Hqtsr4UAaj495dQxFqdk8'),
-      track('Revolution','The Beatles','5KGLcZLBCAqdPP6sa5zLYs'),
-      track('There Is Power in a Union','Billy Bragg','23ZMCzhyAclr3CslulKe39'),
-      track('The Laws Have Changed','The New Pornographers','0mgAzpg1dOmr2meovmlBwp'),
-      track('All You Fascists','Billy Bragg, Wilco','7ELquuoDdTdpZGENKNbkBy'),
       track('Resister','She Drew The Gun','2T6hgTJJ5x7qNxcy9w7R3a'),
-      track("Busy Earnin'",'Jungle','5TloYFwzd09yWy8xkRLVUu')
+      track('Everyday People','Sly & The Family Stone','4ZVZBc5xvMyV3WzWktn8i7'),
+      track('Shiny Happy People','R.E.M.','1v2zyAJrChw5JnfafSkwkJ'),
+      track('Higher Ground','Stevie Wonder','6OlRnUa93tkUXDX8Ow3Bko'),
+      track('You Can Get It If You Really Want','Jimmy Cliff','1Pao4DTLMB4gJPTnqmLgSQ'),
+      track("I'll Take You There",'The Staple Singers','7jiugKbRYzAptqScmOANqT'),
+      track("Ain't No Stoppin' Us Now",'McFadden & Whitehead','4Ymk3pqpkGx19gyxxUj5LK')
     ]
   }
 });
@@ -122,7 +122,7 @@ function select(index,system=currentSystem()){
 }
 function next(system=currentSystem()){const tracks=tracksFor(system),state=stateFor(system);return tracks.length?select((state.index+1)%tracks.length,system):null}
 function previous(system=currentSystem()){const tracks=tracksFor(system),state=stateFor(system);return tracks.length?select((state.index-1+tracks.length)%tracks.length,system):null}
-function randomIndex(length){if(length<=1)return 0;if(crypto?.getRandomValues){const value=new Uint32Array(1);crypto.getRandomValues(value);return value[0]%length}return Math.floor(Math.random()*length)}
+function randomIndex(length){if(length<=1)return 0;if(globalThis.crypto?.getRandomValues){const value=new Uint32Array(1);globalThis.crypto.getRandomValues(value);return value[0]%length}return Math.floor(Math.random()*length)}
 function suggestTrack(system=currentSystem()){
   const id=normalizeSystemId(system),tracks=tracksFor(id),state=stateFor(id);if(!tracks.length)return null;
   const blocked=new Set(state.recent);let candidates=tracks.map((track,index)=>({track,index})).filter(({track})=>!blocked.has(track.spotifyTrackId)&&track.spotifyTrackId!==currentTrack(id)?.spotifyTrackId);
@@ -159,18 +159,26 @@ function installStyle(){
 `;
   document.head?.append(style);
 }
+function sanitizeCoreCopy(){
+  const panel=document.getElementById(PANEL_ID);if(!panel)return false;
+  const auditLabel=panel.querySelector(':scope > header small');if(auditLabel)auditLabel.hidden=true;
+  panel.querySelector('.cw-radio-note')?.remove();
+  panel.querySelectorAll('.cw-radio-track > div > span').forEach(node=>{node.textContent=String(node.textContent||'').replace(/\s+·\s+PASS(?:-LIGHT)?\s*$/,'')});
+  const originalNote=panel.querySelector('.cw-radio-original p');if(originalNote)originalNote.textContent='This opens the original station and may contain explicit content.';
+  return true;
+}
 function restoreCoreSurface(){
   const panel=document.getElementById(PANEL_ID),surface=globalThis.CivweaveRadioStationSurfaceV1;if(!panel)return false;
   const original=panel.querySelector('[data-radio-mode="original"]'),clean=panel.querySelector('[data-radio-mode="clean"]');
   if(original){original.style.removeProperty('display');original.removeAttribute('aria-hidden')}
   if(clean)clean.textContent='Clean station';
-  surface?.refresh?.();
+  surface?.refresh?.();sanitizeCoreCopy();
   return true;
 }
 function render(){
-  if(!safeModeEnabled())return false;
+  if(!safeModeEnabled()){sanitizeCoreCopy();return false}
   const panel=document.getElementById(PANEL_ID),id=currentSystem(),item=station(id);if(!panel||!item)return false;
-  installStyle();
+  installStyle();sanitizeCoreCopy();
   const original=panel.querySelector('[data-radio-mode="original"]'),clean=panel.querySelector('[data-radio-mode="clean"]'),badge=panel.querySelector('[data-radio-safe]'),body=panel.querySelector('[data-radio-body]');
   if(original){original.hidden=true;original.disabled=true;original.style.display='none';original.setAttribute('aria-hidden','true')}
   if(clean){clean.textContent='S.A.F.E. station';clean.setAttribute('aria-pressed','true')}
@@ -197,18 +205,18 @@ function enforce(){
   return restoreCoreSurface();
 }
 function start(){
-  installStyle();
-  addEventListener('civweave:radio-station-opened',()=>{if(safeModeEnabled())render()});
-  addEventListener('civweave:radio-station-mode-changed',()=>{if(safeModeEnabled())render()});
+  installStyle();sanitizeCoreCopy();
+  addEventListener('civweave:radio-station-opened',()=>{safeModeEnabled()?render():sanitizeCoreCopy()});
+  addEventListener('civweave:radio-station-mode-changed',()=>{safeModeEnabled()?render():sanitizeCoreCopy()});
   addEventListener('civweave:safe-mode-changed',enforce);
-  addEventListener('pageshow',()=>{if(safeModeEnabled())render()});
+  addEventListener('pageshow',()=>{safeModeEnabled()?render():sanitizeCoreCopy()});
   if(safeModeEnabled())queueMicrotask(render);
   return true;
 }
 
 const api=Object.freeze({
   version:VERSION,revision:REVISION,systems:Object.freeze([...SYSTEMS]),stations:SAFE_STATIONS,
-  safeModeEnabled,currentSystem,station,tracksFor,stateFor,currentTrack,select,next,previous,suggestTrack,suggestedTrack,selectSuggested,spotifyTrackUrl,render,enforce,start,
+  safeModeEnabled,currentSystem,station,tracksFor,stateFor,currentTrack,select,next,previous,suggestTrack,suggestedTrack,selectSuggested,spotifyTrackUrl,render,enforce,sanitizeCoreCopy,start,
   failClosed:true,externalUncensoredRoutes:0,independentQueue:true,policy:'general-audience-non-graphic-v1'
 });
 globalThis.CivweaveRadioSafeStationsV1=api;
