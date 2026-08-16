@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const REVISION='installer-repair-only-v2-cache-distinct-lazy-guild-tools-quest-threshold-v4-auto-self-heal';
+const REVISION='installer-repair-only-v2-cache-distinct-lazy-guild-tools-quest-threshold-v5-auto-self-heal-controller-sync';
 const CANONICAL_NEXT_PATHS=new Set([
   '/app/working-campus-v156.html',
   '/app/cabinets/living-school/index.html',
@@ -176,6 +176,13 @@ async function requestRepair(){
     catch(error){clearTimeout(timer);reject(error)}
   });
 }
+async function syncInstallerController(){
+  const installer=globalThis.CivweaveInstallerV130;
+  if(!installer?.prepareShell)return false;
+  if(installer.shellReady)return true;
+  await installer.prepareShell({manual:false});
+  return Boolean(installer.shellReady);
+}
 async function repairInstalledShell({automatic=false}={}){
   if(repairing)return;
   if(automatic&&autoRepairAttempted)return;
@@ -191,6 +198,7 @@ async function repairInstalledShell({automatic=false}={}){
       const first=Array.isArray(packet.failures)&&packet.failures[0];
       throw new Error(first?.message||packet.error||'The verified shell is still incomplete.');
     }
+    if(!(await syncInstallerController()))throw new Error('The shell was repaired, but the installer controller did not confirm readiness.');
     autoRepairAttempted=false;
     if(stateNode)stateNode.textContent='ready';
     if(assetsNode&&packet.assetCount)assetsNode.textContent=`${packet.presentCount||packet.assetCount}/${packet.assetCount} shell files`;
@@ -276,6 +284,7 @@ const api=Object.freeze({
   browserRuntimePolicy:'installer-only-until-installed-display',
   repairMessage:'REPAIR_DEVICE_PACKAGE',
   autoRepairPolicy:'one-automatic-attempt-before-manual-repair',
+  controllerSyncPolicy:'repair-worker-then-confirm-through-installer-controller',
   storagePolicy:'preserve-campus-model-media-school-storage',
   hubToolsPolicy:'explicit-user-load-only',
   firstPaintHubWork:false,
