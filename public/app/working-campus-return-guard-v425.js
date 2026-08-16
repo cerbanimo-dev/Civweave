@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='working-campus-return-v425';
-const REVISION='desktop-reload-storm-v428';
+const REVISION='core-support-v429';
 const RECOVERY_KEY='civweave.working-campus.return-recovery.v425';
 const RECOVERY_WINDOW_MS=30_000;
 const STARTUP_GRACE_MS=2400;
@@ -13,6 +13,7 @@ const BOOT_KEY='civweave.install-boundary.boot.v228';
 const LEGACY_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
 const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
+const SUPPORT_URL='https://www.patreon.com/c/Civweave';
 const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
 let lastInspection=null;
 let recoveryPanel=null;
@@ -49,6 +50,23 @@ function activateLanguageMode(){
   script.dataset.cwJapaneseMode='';
   (document.head||document.documentElement).append(script);
   return selected;
+}
+function ensureSupportButton(){
+  const foot=document.querySelector('.guide-foot');
+  if(!foot)return false;
+  if(foot.querySelector('[data-civweave-core-support]'))return true;
+  const link=document.createElement('a');
+  link.dataset.civweaveCoreSupport='';
+  link.className='btn';
+  link.href=SUPPORT_URL;
+  link.target='_blank';
+  link.rel='noopener noreferrer';
+  link.textContent='Support';
+  link.setAttribute('aria-label','Support Civweave directly on Patreon');
+  link.title='Support Civweave directly';
+  link.style.cssText='display:inline-flex;align-items:center;justify-content:center;margin-left:auto;padding:7px 8px;font-size:11px;text-decoration:none;white-space:nowrap;';
+  foot.append(link);
+  return true;
 }
 function preauthorizeCanonicalCampus(){
   try{
@@ -184,18 +202,19 @@ function holdBfCache(event){
 function resume(event){
   preauthorizeCanonicalCampus();
   activateLanguageMode();
+  ensureSupportButton();
   if(document.documentElement)document.documentElement.dataset.civweaveBfcacheResume=event?.persisted?VERSION:'normal';
   try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,revision:REVISION,persisted:Boolean(event?.persisted)}}))}catch{}
   if(event?.persisted)void verifyOrRecover('bfcache-return');
   else scheduleVerify('pageshow',RETRY_DELAY_MS);
 }
-function scheduleInitialCheck(){scheduleVerify('initial-paint',RETRY_DELAY_MS)}
+function scheduleInitialCheck(){ensureSupportButton();scheduleVerify('initial-paint',RETRY_DELAY_MS)}
 
 preauthorizeCanonicalCampus();
 activateLanguageMode();
 addEventListener('pagehide',holdBfCache,true);
 addEventListener('pageshow',resume,true);
-addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')scheduleVerify('visibility-return',RETRY_DELAY_MS)});
+addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){ensureSupportButton();scheduleVerify('visibility-return',RETRY_DELAY_MS)}});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleInitialCheck,{once:true});else scheduleInitialCheck();
 
 globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
@@ -210,6 +229,8 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   canonicalUrl,
   preauthorizeCanonicalCampus,
   activateLanguageMode,
+  ensureSupportButton,
+  supportUrl:SUPPORT_URL,
   language:requestedLanguage,
   startupGraceMs:STARTUP_GRACE_MS,
   unhealthyHoldMs:UNHEALTHY_HOLD_MS,
