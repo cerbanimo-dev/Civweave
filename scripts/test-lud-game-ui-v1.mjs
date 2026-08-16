@@ -93,3 +93,16 @@ test('Lud package refreshes allowlisted assets online before using its offline c
   assert.ok(assetBlock.indexOf('const response=await fetch(request)')<assetBlock.indexOf('const cached=await cache.match'));
   assert.match(assetBlock,/cache\.put\(ludKey\(pathname\),response\.clone\(\)\)/);
 });
+
+test('Lud custom forms expose static starter templates without adding AI generation',async()=>{
+  const source=await read('public/app/lud-manual-authoring-v1.js');
+  assert.match(source,/VERSION='1\.3\.0-templates'/);
+  assert.match(source,/const TEMPLATES=Object\.freeze/);
+  for(const kind of ['quest','task','learning-module','learning-program','resource-manifest','skill-manifest'])assert.match(source,new RegExp(`['\"]?${kind.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}['\"]?\\s*:`));
+  assert.match(source,/Jumpstart with a template/);
+  assert.match(source,/data-apply-template/);
+  assert.match(source,/function applyTemplate\(/);
+  assert.match(source,/Static human-authored starters only/);
+  assert.match(source,/civweave:lud-template-applied/);
+  assert.doesNotMatch(source,/\.generate\s*\(/);
+});
