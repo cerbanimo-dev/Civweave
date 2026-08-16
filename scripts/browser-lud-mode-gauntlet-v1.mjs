@@ -21,6 +21,7 @@ function publicPath(pathname){
   if(!candidate.startsWith(`${publicDir}${path.sep}`)&&candidate!==path.join(publicDir,'index.html'))return null;
   return candidate;
 }
+function githubEscape(value){return String(value??'').replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A')}
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||'/',base);
@@ -122,6 +123,9 @@ try{
     aiRuntimeRequests:false
   },null,2));
   await context.close();
+}catch(error){
+  if(process.env.GITHUB_ACTIONS)console.error(`::error file=scripts/browser-lud-mode-gauntlet-v1.mjs::${githubEscape(error?.stack||error?.message||error)}`);
+  throw error;
 }finally{
   await browser.close().catch(()=>{});
   server.closeAllConnections?.();
