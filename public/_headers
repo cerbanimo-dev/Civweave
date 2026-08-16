@@ -6,6 +6,9 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: same-origin
 
+/pwa-installability-worker-v1.js
+  Cache-Control: no-cache
+
 /app/install-boundary-v146.js
   Cache-Control: no-cache
 
