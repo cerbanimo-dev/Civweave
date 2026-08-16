@@ -11,7 +11,7 @@ on:
       - 'docs/contracts/cerbanimo-intention-landscape-v1.md'
       - '.github/workflows/verify-cerbanimo-intention-landscape-v1.yml'
   push:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'public/app/cerbanimo-intention-landscape-v1.js'
       - 'public/app/cerbanimo-intention-landscape-v1.css'
