@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-quest-beat';
+const VERSION='1.2.0-quest-chronicle';
 if(globalThis.CivweaveLudGameUiV1?.version===VERSION)return;
 
 const text=(id,value)=>{const node=document.getElementById(id);if(node&&value!=null)node.textContent=String(value)};
@@ -17,15 +17,29 @@ function guild(){
   }catch{}
   return{label:'Find a Guild',state:'open'};
 }
-function questBeat(){
+function activeQuestStory(){
   try{
     const arc=globalThis.CivweaveQuestArcChronicleV1;
-    if(!arc)return'The Spark';
-    const engineState=globalThis.CivweaveCerbanimoQuestV144?.readState?.(),activeId=clean(engineState?.preferences?.activeQuestId),active=activeId?engineState?.quests?.find?.(row=>row?.id===activeId):engineState?.quests?.find?.(row=>!['completed','archived'].includes(row?.status))||engineState?.quests?.[0];
-    let story=active?.id?arc.questState?.(active.id):null;
+    if(!arc)return{arc:null,quest:null,story:null};
+    const engineState=globalThis.CivweaveCerbanimoQuestV144?.readState?.(),activeId=clean(engineState?.preferences?.activeQuestId),quest=activeId?engineState?.quests?.find?.(row=>row?.id===activeId):engineState?.quests?.find?.(row=>!['completed','archived'].includes(row?.status))||engineState?.quests?.[0]||null;
+    let story=quest?.id?arc.questState?.(quest.id):null;
     if(!story){const rows=Object.values(arc.readState?.().quests||{}).sort((a,b)=>Date.parse(b?.updatedAt||0)-Date.parse(a?.updatedAt||0));story=rows[0]||null}
-    return arc.beat?.(story?.currentBeatId||'spark')?.label||'The Spark';
-  }catch{return'The Spark'}
+    return{arc,quest,story};
+  }catch{return{arc:null,quest:null,story:null}}
+}
+function questBeat(){const {arc,story}=activeQuestStory();return arc?.beat?.(story?.currentBeatId||'spark')?.label||'The Spark'}
+function renderChronicle(){
+  const host=document.getElementById('lud-beat-history');if(!host)return[];
+  host.replaceChildren();
+  const {arc,story}=activeQuestStory(),rows=story?.questId?arc?.historyProjections?.(story.questId,{limit:8})||[]:[];
+  if(!rows.length){const empty=document.createElement('p');empty.className='status';empty.textContent='Cleared and setback Quest Beats will appear here as the Chronicle grows.';host.append(empty);return[]}
+  for(const row of rows.slice().reverse()){
+    const card=document.createElement('article');card.className='card lud-chronicle-receipt';
+    const title=document.createElement('h3');title.textContent=row.displayText;
+    const meta=document.createElement('p');meta.textContent=`Quest Chronicle · ${row.outcome==='SETBACK'?'route changed':'beat cleared'}`;
+    card.append(title,meta);host.append(card);
+  }
+  return rows;
 }
 function renderHud(){
   const passportId=passport(),guildState=guild(),beatLabel=questBeat();
@@ -34,7 +48,8 @@ function renderHud(){
   text('lud-hud-guild',guildState.label);
   text('lud-hud-beat',beatLabel);
   const node=document.getElementById('lud-hud-guild');if(node)node.dataset.state=guildState.state;
-  return{passportId,guild:guildState,questBeat:beatLabel};
+  const chronicle=renderChronicle();
+  return{passportId,guild:guildState,questBeat:beatLabel,chronicleCount:chronicle.length};
 }
 function markReady(){
   document.documentElement.dataset.ludUi='game-v1';
@@ -60,5 +75,5 @@ addEventListener('pointercancel',event=>pressed(event,false),{passive:true});
 addEventListener('blur',()=>document.querySelectorAll('[data-pressed="true"]').forEach(node=>delete node.dataset.pressed));
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 
-globalThis.CivweaveLudGameUiV1=Object.freeze({version:VERSION,renderHud,status:()=>({passportId:passport(),guild:guild(),questBeat:questBeat()})});
+globalThis.CivweaveLudGameUiV1=Object.freeze({version:VERSION,renderHud,renderChronicle,status:()=>({passportId:passport(),guild:guild(),questBeat:questBeat()})});
 })();
