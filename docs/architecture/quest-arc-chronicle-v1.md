@@ -63,24 +63,43 @@ The optional low-tier generator lives separately in `public/app/quest-verse-gene
 
 ## Quest Verse contract
 
-The Verse adapter passes only public story inputs:
+The Verse adapter passes only Chronicle-safe story inputs:
 
-- public Quest name
-- public Quest brief
+- Quest name
+- short Quest objective/brief
 - current Quest Beat and Beat meaning
 - `CLEARED` or `SETBACK`
 - optional safe outcome hint
 
 It requests the shared interactive runtime with `taskTier: "small"`, `complexity: "small"`, `maxTokens: 160`, streaming disabled, and a maximum 12-second runtime timeout. The core validates exactly four non-empty short lines, allows one constrained retry, then falls back to the deterministic Beat receipt.
 
-Private receipt text, evidence, validator identities, source artifacts, and work summaries are never inputs to the Verse prompt.
+Private receipt text, task descriptions, review notes, evidence, proof values, validator identities, source artifacts, and work summaries are never inputs to the Verse prompt.
+
+## Standard Cerbanimo receipt bridge
+
+`public/app/quest-chronicle-receipts-v1.js` mounts the Chronicle into the existing Cerbanimo receipt card instead of exposing the Quest engine's raw transition receipt list as the primary visible work receipt surface.
+
+For every newly cleared or setback Beat it:
+
+1. derives a structured private work summary from the canonical Quest engine;
+2. creates a salted SHA-256 commitment to that exact private receipt;
+3. stores the private receipt as a Local Object Mesh object with `consent: "private"`, `publish: false`, and `hopLimit: 0`;
+4. immediately creates a deterministic Quest Beat stand-in;
+5. for the newest newly completed Beat, asks the low-tier Verse adapter for a four-line rendering using only the Quest name, short objective, Beat, outcome, and commitment;
+6. replaces the Beat stand-in with the Verse only if generation passes the exact four-line validator.
+
+Backfilled history does not trigger one model request per old Beat. All missing Beats receive deterministic stand-ins, while only the newest missing Beat is eligible for Verse generation. Already projected Beats never regenerate on ordinary rerenders.
+
+The private receipt can be opened deliberately on the local Cerbanimo screen. That reveal comes from the private mesh object and is not part of `publicChronicle()`.
+
+If private mesh storage cannot be created, the controller uses a local-only fallback store rather than publishing the receipt. Proof contents themselves remain in the canonical Quest engine and are never copied into the Chronicle private summary.
 
 ## Receipt projection and privacy
 
 A public projection has schema `civweave.quest-chronicle-projection.v1` and carries only:
 
 - Quest identifier when the caller is allowed to expose it
-- public Quest name
+- Chronicle-safe Quest name
 - Beat identifier and label
 - outcome
 - deterministic Beat text and/or validated Verse
@@ -95,9 +114,11 @@ Existing Quest Veil entries already expose a SHA-256 `sourceHash`. When a Beat r
 
 `safeVeilReceiptStandIns()` reads only `CivweaveQuestVeilLedgerGateV1.humanChronicle()`. It never reads the validation ledger or raw submission. Only final `verified-pass` and `verified-fail` task-veils become receipt stand-ins, and the Quest Veil title/story are intentionally discarded during projection.
 
-## Public metadata rule
+## Chronicle-safe metadata rule
 
-Quest names and briefs are not assumed public merely because they exist in a local Quest record. Network Verse generation must receive explicitly public-safe Quest metadata from its caller. If public metadata is unavailable, the deterministic Beat receipt remains valid and requires no generation.
+The Standard Cerbanimo bridge treats only the Quest title and short objective as Chronicle-safe story metadata. These are the only Quest-specific text fields passed to the Verse adapter. Task descriptions, task titles, owners, review notes, proof labels/values, source transition details, and the structured private work summary stay below the public projection boundary.
+
+The deterministic Beat receipt remains valid when no model is available, when Lud Mode is active, or when Verse generation fails validation.
 
 ## Regression coverage
 
@@ -111,6 +132,12 @@ Quest names and briefs are not assumed public merely because they exist in a loc
 - `scripts/test-quest-verse-generator-v1.mjs`
   - explicit small-tier routing and resource caps
   - Lud no-model boundary
+- `scripts/test-quest-chronicle-receipts-v1.mjs`
+  - private mesh storage uses private consent and is never published
+  - Verse input excludes private review notes and proof contents
+  - public Chronicle excludes the private work summary
+  - local private receipt reveal recovers the sealed work summary
+  - rerenders do not duplicate Verse spend
 - `scripts/test-lud-game-ui-v1.mjs`
   - current Quest Beat HUD
   - visible deterministic Chronicle
