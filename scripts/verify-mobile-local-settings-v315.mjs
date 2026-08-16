@@ -2,25 +2,34 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 await import('./verify-system-ownership-v317.mjs');
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,living,boundary,mobile]=await Promise.all([
+const [gateway,lifecycle,living,actions,boundary,mobile]=await Promise.all([
   read('public/app/settings-gateway-v317.js'),
   read('public/app/document-lifecycle-v221.js'),
   read('public/app/cabinets/living-school/index.html'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/mobile-ai-hardening-v302.js')
 ]);
 assert.match(gateway,/globalThis\.CivweaveSettingsV320=api/);
 assert.match(gateway,/singleMenu:true/);
 assert.match(gateway,/singleLauncherListener:true/);
-assert.match(gateway,/localModelExtensionSlot:true/);
+assert.match(gateway,/settingsTabsCanonical:true/);
+assert.match(gateway,/localModelManagementOnTab:true/);
+assert.match(gateway,/data-settings-tab="local-models"/);
 assert.match(gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
-assert.match(lifecycle,/document-lifecycle-v320-single-menu/);
+const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
+assert.doesNotMatch(openBlock,/ensureManagement\(/,'Mobile Settings open must remain UI-only.');
+assert.doesNotMatch(openBlock,/requestInferenceQuiescence|local-inference-cancel-requested/);
+assert.match(lifecycle,/document-lifecycle-v322-explicit-local-model-tab/);
 assert.match(lifecycle,/activationRequired:true/);
 assert.match(lifecycle,/managementAfterPaint:true/);
+assert.match(lifecycle,/explicitTabActivation:true/);
+assert.match(lifecycle,/bfCacheAutoManagement:false/);
 assert.match(lifecycle,/presentationOwnership:false/);
 assert.doesNotMatch(living,/>Settings<\/button>/i);
+assert.doesNotMatch(actions,/['"]open-ai-settings['"]|openSettings/,'Living School may not keep a cabinet-local Settings action.');
 assert.match(living,/family-shell-v104\.js/);
 assert.ok(boundary.indexOf('SETTINGS_GATEWAY')<boundary.indexOf('EXPERIENCE_ORCHESTRATOR'),'Settings gateway must be registered before general experience modules.');
 assert.match(mobile,/mobileFullscreenChat:true/);
 assert.doesNotMatch(mobile,/addEventListener\('click'/,'Mobile hardening must not own Settings input.');
-console.log(JSON.stringify({ok:true,revision:'mobile-local-settings-v320',systems:5,settingsOwner:'CivweaveSettingsV320',singleMenu:true,managementAfterPaint:true,livingSchoolShared:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'mobile-local-settings-v322',systems:5,settingsOwner:'CivweaveSettingsV320',singleMenu:true,localModelsOnTabOnly:true,livingSchoolShared:true},null,2));
