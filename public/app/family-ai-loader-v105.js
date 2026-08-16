@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.127-headless-canonical-chat-thread-routing';
+const VERSION='1.0.128-local-bootstrap-nonblocking-routing';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -41,11 +41,12 @@ const GUIDE={civweave:{name:'Weaveling',role:'Central mirror and project-memory 
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const MODEL_PROFILES_KEY='civweave-model-profiles-v1';
 const UNIVERSAL_AI_KEY='civweave.universal-ai.v127';
-let promise=null,optionalPromise=null,valueCorePromise=null,valueModelPromise=null,localBootstrapPromise=null,economicReviewQueued=false,generation=0;
+let promise=null,optionalPromise=null,valueCorePromise=null,valueModelPromise=null,localBootstrapPromise=null,economicReviewQueued=false,generation=0,lastLocalError='';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const arr=key=>{const value=parse(localStorage.getItem(key),[]);return Array.isArray(value)?value:[]};
 const obj=key=>{const value=parse(localStorage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}};
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function ludEnabled(){if(globalThis.CivweaveLudModeV1?.isEnabled)return globalThis.CivweaveLudModeV1.isEnabled();try{return parse(localStorage.getItem('civweave.operating-mode.v1'),{})?.mode==='lud'}catch{return false}}
 function assertAIAllowed(capability='AI generation'){if(!ludEnabled())return true;const error=new Error(`${capability} is unavailable in Lud Mode.`);error.code='CIVWEAVE_LUD_AI_DISABLED';error.mode='lud';throw error}
 function detect(){const query=new URLSearchParams(location.search).get('system');if(LABEL[query])return query;const declared=clean(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||document.body?.dataset?.civweaveSystem||document.body?.dataset?.system,80).toLowerCase();if(LABEL[declared])return declared;const path=location.pathname.toLowerCase(),host=location.hostname.toLowerCase();if(document.documentElement.hasAttribute('data-living-school-cabinet')||path.includes('/cabinets/living-school/')||path.includes('living-school'))return'living-school';if(path.includes('realm-console-v140')||path.includes('cerbanimo')||path.split('/').includes('loom')||host==='cerbanimo.com'||host.startsWith('cerbanimo.'))return'cerbanimo';if(path.includes('fellowfare'))return'fellowfare';if(path.includes('anarchadia'))return'anarchadia';return'civweave'}
@@ -69,22 +70,25 @@ async function ensureLocalAI(){
     const ready=await bootstrap?.ready;
     if(ready===false||bootstrap?.readyState!=='ready')throw new Error(bootstrap?.lastError||'The selected downloaded-local runtime did not become ready.');
     if(!globalThis.CivweaveLocalModelBridgeV266?.registered&&!globalThis.CivweaveLocalModelBridgeV266?.patch?.())throw new Error('The downloaded-local runtime bridge did not attach to the model runtime.');
-    return true;
+    lastLocalError='';return true;
   })().catch(error=>{localBootstrapPromise=null;throw error});
   return localBootstrapPromise;
 }
+function emitLocalDegraded(error){lastLocalError=clean(error?.message||error||'The selected local AI runtime is unavailable.',900);try{console.warn('[Civweave local AI degraded]',lastLocalError)}catch{}try{dispatchEvent(new CustomEvent('civweave:local-ai-degraded',{detail:{version:VERSION,system:detect(),model:selectedLocal()?.id||'',message:lastLocalError,assistantAvailable:Boolean(globalThis.CivweaveAssistantV141),responseRouterAvailable:Boolean(globalThis.CivweaveResponseRouterV347),at:new Date().toISOString()}}))}catch{}return false}
+async function tryEnsureLocalAI(){if(!localRequested())return false;try{return await ensureLocalAI()}catch(error){return emitLocalDegraded(error)}}
+async function warmLocalAIOptional(timeoutMs=900){if(!localRequested())return false;return Promise.race([tryEnsureLocalAI(),sleep(timeoutMs).then(()=>false)])}
 function reset(reason='manual reset'){generation++;promise=null;optionalPromise=null;valueModelPromise=null;localBootstrapPromise=null;try{dispatchEvent(new CustomEvent('civweave:guide-loader-reset',{detail:{reason,at:new Date().toISOString()}}))}catch{}}
 function loadOptional(){assertAIAllowed('AI-adjacent optional runtime loading');if(optionalPromise)return optionalPromise;optionalPromise=Promise.allSettled(OPTIONAL.map(([src,ready])=>loadScript(src,ready))).then(()=>true);return optionalPromise}
-function emitAssistantReady(){try{dispatchEvent(new CustomEvent('civweave:assistant-runtime-ready',{detail:{version:VERSION,system:detect(),at:new Date().toISOString(),localModelRequested:localRequested(),localModelReady:globalThis.CivweaveLocalAIBootstrapV266?.readyState==='ready'}}))}catch{}}
+function emitAssistantReady(){try{dispatchEvent(new CustomEvent('civweave:assistant-runtime-ready',{detail:{version:VERSION,system:detect(),at:new Date().toISOString(),localModelRequested:localRequested(),localModelReady:globalThis.CivweaveLocalAIBootstrapV266?.readyState==='ready',localModelError:lastLocalError||null,responseRouterReady:Boolean(globalThis.CivweaveResponseRouterV347)}}))}catch{}}
 async function ensure(){
   assertAIAllowed('Guide and model generation');
   if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191&&globalThis.CivweaveKnowledgeEncyclopediaBridgeV271){
-    await loadValueCore();await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);await ensureLocalAI();globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();loadOptional();emitAssistantReady();return true;
+    await loadValueCore();await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);await warmLocalAIOptional();globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();loadOptional();emitAssistantReady();return true;
   }
   if(promise)return promise;
   const ticket=++generation;
   promise=(async()=>{
-    CSS.forEach(addCss);await loadValueCore();await Promise.all(PREREQUISITES.map(([src,ready])=>loadScript(src,ready)));if(ticket!==generation)throw new Error('Civweave loading was reset.');await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);await ensureLocalAI();await loadScript(...ASSISTANT);await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.install?.();globalThis.CivweaveDeterministicModeV175?.installAssistantPatch?.();globalThis.CivweaveWeavelingMemoryBridgeV191?.install?.();loadOptional();emitAssistantReady();return true;
+    CSS.forEach(addCss);await loadValueCore();await Promise.all(PREREQUISITES.map(([src,ready])=>loadScript(src,ready)));if(ticket!==generation)throw new Error('Civweave loading was reset.');await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);await loadScript(...ASSISTANT);await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.install?.();globalThis.CivweaveDeterministicModeV175?.installAssistantPatch?.();globalThis.CivweaveWeavelingMemoryBridgeV191?.install?.();await warmLocalAIOptional();loadOptional();emitAssistantReady();return true;
   })().catch(error=>{if(ticket===generation)reset(error.message);throw error});
   return promise;
 }
@@ -100,5 +104,5 @@ async function openSettings(launcher){const gateway=globalThis.CivweaveSettingsG
 function warm(){assertAIAllowed('AI runtime warmup');return ensure()}
 function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message))}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();addEventListener('pageshow',boot);addEventListener('civweave:guide-workspace-ready',patchHeader);addEventListener('civweave:operating-mode-changed',patchHeader);addEventListener('civweave:working-campus-plan-built',()=>requestEconomicReview('working-campus-plan-built'));addEventListener('cerbanimo:quest-engine-changed',()=>requestEconomicReview('cerbanimo-quest-changed'));
-globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,ensureLocalAI,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v250-headless-explicit-demand-only',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',ludGuard:true,aiAllowed:()=>!ludEnabled(),eagerWarm:false};
+globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v351-local-bootstrap-nonblocking-routing',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:true,knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',ludGuard:true,aiAllowed:()=>!ludEnabled(),eagerWarm:false};
 })();
