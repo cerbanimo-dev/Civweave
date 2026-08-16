@@ -12,6 +12,8 @@
     "humanAuthoredOnlyFeed": true,
     "unknownProvenanceFailsClosed": true,
     "humanValidation": true,
+    "guildMembership": true,
+    "passportIdentity": true,
     "generatedVisualAssets": false
   },
   "assets": [
@@ -22,7 +24,13 @@
     "/app/lud-human-tools-v1.js",
     "/app/human-validation-neuron-client-v1.js",
     "/app/shared/civweave-identity-sync.js",
+    "/app/shared/civweave-passport-identity-v1.js",
     "/app/shared/civweave-reward-weave.js",
+    "/app/host-node-session-v1.js",
+    "/app/host-node-installer-lobby-v1.js",
+    "/app/host-node-local-capacity-v1.js",
+    "/app/host-node-paid-join-v1.js",
+    "/app/host-node-status-selection-v1.js",
     "/app/cerbanimo-quest-engine-v144.js",
     "/app/local-object-mesh-v146.js",
     "/app/proposal-voting-gate-v2.js"

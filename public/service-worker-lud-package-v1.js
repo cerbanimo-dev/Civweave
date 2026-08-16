@@ -16,6 +16,19 @@ const LUD_INSTALLER_PATHS=new Set([
   LUD_MANIFEST_URL,
   '/service-worker-lud-package-v1.js'
 ]);
+const LUD_NETWORK_PATHS=new Set([
+  '/api/federation/health',
+  '/.well-known/civweave',
+  '/api/host-node-status',
+  '/api/host-node-search',
+  '/api/ai/node/session',
+  '/api/commerce/membership/prejoin',
+  '/api/federation/capacity',
+  '/api/federation/residents/admit',
+  '/api/node/human-validation/request',
+  '/api/node/human-validation/claim',
+  '/api/node/human-validation/status'
+]);
 let ludDownloadPromise=null;
 const ludNow=()=>new Date().toISOString();
 const ludUnique=values=>[...new Set((Array.isArray(values)?values:[]).filter(Boolean).map(String))];
@@ -69,10 +82,16 @@ async function fetchLudEntry(){
   }
   return null;
 }
+async function networkOnly(request,pathname){
+  try{return await fetch(request)}catch{return ludOfflineError(`Lud Mode network service is unavailable offline: ${pathname}`,503)}
+}
 async function standaloneFetch(request){
   const url=new URL(request.url);
-  if(request.method!=='GET'||url.origin!==self.location.origin)return fetch(request);
+  if(request.method!=='GET'&&request.method!=='POST')return fetch(request);
+  if(url.origin!==self.location.origin)return fetch(request);
   const pathname=url.pathname,cache=await ludCache(),policy=await standaloneAssetPolicy();
+  if(LUD_NETWORK_PATHS.has(pathname))return networkOnly(request,pathname);
+  if(request.method!=='GET')return ludOfflineError(`Lud Mode blocked a non-allowlisted request: ${pathname}`,403);
   if(request.mode==='navigate'){
     if(pathname==='/app/lud/'||pathname==='/app/lud/index.html'){
       try{const response=await fetch(request);if(response.ok)return response}catch{}

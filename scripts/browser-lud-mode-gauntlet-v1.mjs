@@ -27,8 +27,6 @@ const server=http.createServer(async(req,res)=>{
   const pathname=decodeURIComponent(url.pathname);
   const common={'cache-control':'no-store','service-worker-allowed':'/'};
 
-  // Emulate Cloudflare Pages clean URLs: explicit .html requests redirect to
-  // their extensionless route, while the clean route serves the HTML file.
   if(pathname==='/app/lud/campus.html'){
     htmlRedirects+=1;
     res.writeHead(308,{...common,location:'/app/lud/campus'});
@@ -79,8 +77,13 @@ try{
   await page.click('#open-lud-mode');
   await page.waitForURL(url=>url.pathname==='/app/lud/campus',{timeout:15000});
   await page.waitForSelector('#author-form',{state:'attached',timeout:10000});
+  await page.waitForSelector('#cw-host-node-lobby',{state:'attached',timeout:10000});
+  await page.waitForFunction(()=>/^AC-[A-F0-9]{8}$/.test(document.querySelector('#lud-passport-id')?.textContent?.trim()||''),undefined,{timeout:10000});
   assert.equal((await page.locator('h1').textContent())?.trim(),'Lud Mode','Lud campus did not render after canonical navigation');
   assert.equal(canonicalCampusRequests,beforeOpenCanonicalRequests,'opening downloaded Lud Mode should be fulfilled from its cache, not refetched from the network');
+  const firstPassport=(await page.locator('#lud-passport-id').textContent())?.trim();
+  assert.match(firstPassport||'',/^AC-[A-F0-9]{8}$/,'Lud Mode did not create a Passport');
+  assert.equal(await page.locator('#cw-host-node-lobby').count(),1,'Lud Mode did not expose the canonical Guild lobby');
 
   const controller=await page.evaluate(()=>({
     controlled:Boolean(navigator.serviceWorker.controller),
@@ -93,13 +96,17 @@ try{
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded',timeout:15000});
   await page.waitForSelector('#author-form',{state:'attached',timeout:10000});
+  await page.waitForSelector('#cw-host-node-lobby',{state:'attached',timeout:10000});
   assert.equal(new URL(page.url()).pathname,'/app/lud/campus','offline reload left the canonical Lud route');
   assert.equal((await page.locator('h1').textContent())?.trim(),'Lud Mode','Lud campus did not survive offline reload');
   assert.equal(canonicalCampusRequests,requestsBeforeOfflineReload,'offline Lud reload reached the network instead of the package cache');
+  assert.equal((await page.locator('#lud-passport-id').textContent())?.trim(),firstPassport,'Lud Passport changed across offline reload');
 
   const resources=await page.evaluate(()=>performance.getEntriesByType('resource').map(entry=>new URL(entry.name).pathname));
   assert.ok(resources.includes('/app/content-provenance-v1.js'),'offline Lud campus did not load the provenance runtime');
   assert.ok(resources.includes('/app/lud-manual-authoring-v1.js'),'offline Lud campus did not load manual authoring');
+  assert.ok(resources.includes('/app/shared/civweave-passport-identity-v1.js'),'offline Lud campus did not load Passport identity');
+  assert.ok(resources.includes('/app/host-node-session-v1.js'),'offline Lud campus did not load the shared Guild session owner');
   assert.equal(resources.some(resource=>resource.includes('/local-ai/')||resource.includes('/models/')||resource.includes('family-ai-loader')||resource.includes('guide-chat')),false,'Lud campus loaded an AI runtime dependency');
 
   console.log(JSON.stringify({
@@ -109,6 +116,8 @@ try{
     canonicalEntry:'/app/lud/campus',
     cachedOpen:true,
     offlineReload:true,
+    passportPersistent:true,
+    guildLobby:true,
     dedicatedWorker:true,
     aiRuntimeRequests:false
   },null,2));
