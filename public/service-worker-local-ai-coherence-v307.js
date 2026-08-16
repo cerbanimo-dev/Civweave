@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v308-bootstrap-capability';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -119,19 +119,15 @@ self.addEventListener('fetch', event => {
           ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers })
           : cached;
       }
-      return new Response(`Civweave local-AI code unavailable: ${url.pathname}`, {
-        status: 503,
-        headers: { 'content-type': 'text/plain; charset=utf-8' }
-      });
+      return fetch(request);
     }
   })());
 });
 
-self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
+self.CivweaveLocalAICoherenceV307 = Object.freeze({
   version: CW_LOCAL_AI_COHERENCE_VERSION,
   cache: CW_LOCAL_AI_COHERENCE_CACHE,
-  critical: CW_LOCAL_AI_CRITICAL.slice(),
-  policy: 'network-first-current-bytes-offline-cache-fallback',
-  smoothFitOrchestrator: true,
-  ownsBeforeGenericCodeCoherence: true
+  critical: Object.freeze([...CW_LOCAL_AI_CRITICAL]),
+  extraPaths: Object.freeze([...CW_LOCAL_AI_EXTRA_PATHS]),
+  bootstrapCapabilityReadiness: true
 });
