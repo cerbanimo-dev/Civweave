@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const LUD_REVISION='lud-package-v1.1-game-ui';
+const LUD_REVISION='lud-package-v1.2-custom-forms';
 const LUD_MANIFEST_URL='/app/lud-package-v1.json';
 const LUD_META_URL='/__civweave/lud-package-v1.json';
 const LUD_ENTRY_ASSET='/app/lud/campus.html';

@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.3';
-const WORKER_URL='/service-worker-lud-package-v1.js?v=1.0.3';
+const VERSION='1.0.4';
+const WORKER_URL='/service-worker-lud-package-v1.js?v=1.0.4';
 const WORKER_SCOPE='/app/lud/';
 const ENTRY_ROUTE='/app/lud/campus';
 const ACTIVATION_TIMEOUT_MS=15000;
