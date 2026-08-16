@@ -131,7 +131,8 @@ test('Passport chat key creates a repeatable public name and cycles through pred
   assert.ok(history[1].transitionSignature);
   assert.equal(Object.hasOwn(history[0], 'privateKey'), false);
   assert.equal(Object.hasOwn(history[1], 'privateKey'), false);
-  assert.deepEqual(await api.verifyChatHistory(), {
+  const verification = JSON.parse(JSON.stringify(await api.verifyChatHistory()));
+  assert.deepEqual(verification, {
     ok: true,
     count: 2,
     generation: 2,
