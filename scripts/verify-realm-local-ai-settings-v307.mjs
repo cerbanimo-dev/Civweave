@@ -2,30 +2,39 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 await import('./verify-system-ownership-v317.mjs');
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [boundary,gateway,lifecycle,settings,routes,cerbanimo,livingSchool,fellowfare,anarchadia]=await Promise.all([
-  'public/app/install-boundary-v146.js','public/app/settings-gateway-v317.js','public/app/document-lifecycle-v221.js','public/app/local-ai/settings-panel-v267.js','public/app/system-routes-v227.js','public/app/realm-console-v140.html','public/app/cabinets/living-school/index.html','public/app/fellowfare-cabinet-v144.html','public/app/anarchadia-console-v139.html'
+const [boundary,gateway,lifecycle,settings,routes,cerbanimo,livingSchool,livingActions,fellowfare,anarchadia]=await Promise.all([
+  'public/app/install-boundary-v146.js','public/app/settings-gateway-v317.js','public/app/document-lifecycle-v221.js','public/app/local-ai/settings-panel-v267.js','public/app/system-routes-v227.js','public/app/realm-console-v140.html','public/app/cabinets/living-school/index.html','public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs','public/app/fellowfare-cabinet-v144.html','public/app/anarchadia-console-v139.html'
 ].map(read));
 for(const source of [boundary,gateway,lifecycle,settings])new Function(source);
 assert.match(boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
 assert.match(gateway,/globalThis\.CivweaveSettingsV320=api/);
 assert.match(gateway,/singleMenu:true/);
+assert.match(gateway,/settingsTabsCanonical:true/);
 assert.match(gateway,/data-settings-tab-panel="local-models"/);
 assert.match(gateway,/document-lifecycle-v221\.js\?activate=1/);
+assert.match(gateway,/if\(name==='local-models'\)/);
 assert.match(gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
-assert.match(lifecycle,/document-lifecycle-v320-single-menu/);
+const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
+assert.doesNotMatch(openBlock,/ensureManagement\(/,'Realm Settings open must not auto-load local model management.');
+assert.match(lifecycle,/document-lifecycle-v322-explicit-local-model-tab/);
 assert.match(lifecycle,/function ensureLocalAISettingsManagement\(/);
 assert.match(lifecycle,/function scheduleSettingsManagement\(/);
 assert.match(lifecycle,/settings-panel-v267\.js/);
 assert.match(lifecycle,/serviceRole:'downloaded-model-settings-content'/);
 assert.match(lifecycle,/managementAfterPaint:true/);
+assert.match(lifecycle,/explicitTabActivation:true/);
+assert.match(lifecycle,/bfCacheAutoManagement:false/);
 assert.match(lifecycle,/inputOwnership:false/);
 assert.match(lifecycle,/presentationOwnership:false/);
 assert.match(lifecycle,/globalObserverPatch:false/);
 assert.doesNotMatch(lifecycle,/runtime-v266|runtime-bridge-v266|bootstrap-v266|test-pulse-v269/,'Settings management must not include inference startup.');
 for(const token of ['Downloaded local AI','Download','Resume','Use locally','Remove','Model window','Civweave working default'])assert.ok(settings.includes(token),`Local AI settings lost ${token}.`);
 for(const token of ['data-local-download','data-local-use','data-local-remove','[data-settings-tab-panel="local-models"]'])assert.ok(settings.includes(token),`Local AI settings lost ${token}.`);
+assert.match(settings,/snapshotOnlyView:true/);
+assert.match(settings,/backgroundSyncOnView:false/);
 const realms=new Map([['cerbanimo',cerbanimo],['living-school',livingSchool],['fellowfare',fellowfare],['anarchadia',anarchadia]]);
 for(const [name,html] of realms)assert.ok(html.includes('/app/install-boundary-v146.js'),`${name} must enter the canonical install boundary.`);
 for(const pathname of ['/app/realm-console-v140.html','/app/cabinets/living-school/index.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert.ok(routes.includes(`pathname:'${pathname}'`),`Missing canonical route ${pathname}.`);
 assert.doesNotMatch(livingSchool,/model-settings-controller-v173\.js|ai-settings-bind-guard-v230\.js|ai-settings-device-repair-v229\.js/);
-console.log(JSON.stringify({ok:true,revision:'realm-local-ai-settings-v320',realms:[...realms.keys()],settingsAuthority:'CivweaveSettingsV320',managementServiceOnly:true,managementAfterPaint:true,inferenceDormantOnOpen:true,globalObserverPatch:false},null,2));
+assert.doesNotMatch(livingActions,/['"]open-ai-settings['"]|openSettings/,'Living School regained a cabinet-local Settings path.');
+console.log(JSON.stringify({ok:true,revision:'realm-local-ai-settings-v322',realms:[...realms.keys()],settingsAuthority:'CivweaveSettingsV320',managementServiceOnly:true,localModelsOnTabOnly:true,inferenceDormantOnOpen:true,globalObserverPatch:false},null,2));
