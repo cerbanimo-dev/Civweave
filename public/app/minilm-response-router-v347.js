@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-minilm-response-router-v347';
+const VERSION='1.1.0-minilm-response-router-v347-guide-language-routing';
 const ADAPTER='/app/models/all-minilm-l6-v2/adapter.js';
 const ROUTER='/app/minilm-context-router-v344.js?v=1.0.0';
 const MODEL_IDS=Object.freeze({
@@ -15,6 +15,19 @@ const TIERS=Object.freeze({
   fast:Object.freeze({id:'fast',minWords:250,maxWords:800,targetWords:520,maxTokens:1400,modelClass:'Gemma4-26B-fast',preferredModelIds:MODEL_IDS.fast}),
   smart:Object.freeze({id:'smart',minWords:900,maxWords:null,targetWords:1200,maxTokens:3072,modelClass:'Gemma4-26B-smart',preferredModelIds:MODEL_IDS.smart})
 });
+const TINY_LOCAL_MODELS=Object.freeze(['smollm2-135m-instruct-q8-wasm','smollm2-360m-instruct-q4f16']);
+const TINY_LOCAL_SET=new Set(TINY_LOCAL_MODELS);
+const LANGUAGE_PACK=Object.freeze({
+  full:'Civweave language pack: refer to a person using Civweave as a Hero (Heroes plural). A goal or intention plan is a Quest; Heroes collaborating on a Quest are a Party. A host community is a Guild and its human operator is the Guildkeeper. The territory-level chartering and continuity role is Charterkeeper. The map is the Guild Map. Citizen and Patron are membership/slot labels. Rook is the Quartermaster guide; Quartermaster is not the Guild operator. Use these terms naturally. Do not revive Hub, Hub Node, Node Steward, Territory Steward, or Guild Steward in user-facing language.',
+  tiny:'Civweave words: user=Hero; plan/intention=Quest; Quest group=Party; host community=Guild; operator=Guildkeeper; regional charter role=Charterkeeper; map=Guild Map; Rook=Quartermaster. Never call the Guildkeeper Quartermaster.'
+});
+const TINY_GUIDE=Object.freeze({
+  civweave:'You are Weaveling. Reflect the Hero’s intent and connect the four realms.',
+  'living-school':'You are Moss. Teach clearly, build understanding, give suitable practice, and check learning.',
+  cerbanimo:'You are Kamiya, the Questwright. Turn work into concrete, inspectable Quests; never pretend work was executed.',
+  fellowfare:'You are Rook, the Quartermaster. Match needs, offers, materials, services, and logistics; never invent price or availability.',
+  anarchadia:'You are Merlin. Help shape proposals, rules, coordination, and automations; keep draft, vote, approval, and execution distinct.'
+});
 const LENGTH_PROTOTYPES=Object.freeze([
   {id:'short',text:'brief direct answer one sentence tiny reply quick confirmation simple fact concise under fifty words'},
   {id:'medium',text:'moderate explanation useful context a few paragraphs answer in one hundred to two hundred words'},
@@ -25,6 +38,14 @@ const TASK_PROTOTYPES=Object.freeze([
   {id:'programming',text:'write code debug bug fix programming refactor implementation repository pull request commit merge tests CI API database script deploy'},
   {id:'agentic',text:'perform multiple steps use tools investigate execute implement ship monitor deploy browse repository create pull request merge orchestrate workflow'},
   {id:'ordinary',text:'conversation explanation question recommendation summary simple writing general information'}
+]);
+const ARTIFACT_PROTOTYPES=Object.freeze([
+  {id:'curriculum',text:'create build draft generate design learning path learning pathway learning program curriculum course syllabus lesson plan skill tree study plan teaching program'},
+  {id:'quest',text:'create build draft design plan quest project work plan implementation plan deliverable checkpoints acceptance criteria evidence skilled work'},
+  {id:'resource',text:'create build draft resource manifest skill manifest procurement request offer sourcing plan materials inventory needs exchange listing'},
+  {id:'governance',text:'create build draft proposal policy rule charter governance plan vote motion agreement decision process civic change'},
+  {id:'weave',text:'create build draft cross realm plan roadmap intention weave multi realm strategy coordinated quest'},
+  {id:'dialogue',text:'chat answer explain discuss question brainstorm clarify reflect converse without creating a structured artifact'}
 ]);
 const clean=(value,max=12000)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -94,28 +115,61 @@ async function semanticRank(text,prototypes,cacheKey,timeoutMs=650){
     if(context?.status?.().available&&!context.status().ready)await Promise.race([context.warm?.(),sleep(900)]);
     const api=await adapter(),status=await api.status();if(!status.available)return null;
     if(!status.ready)await Promise.race([api.prewarm({explicit:true,installIfMissing:false,timeoutMs:45000}),sleep(900)]);
-    const ranked=await Promise.race([api.rank(clean(text,8000),prototypes,{limit:4,cacheKey,timeoutMs:1800}),sleep(timeoutMs).then(()=>null)]);
+    const ranked=await Promise.race([api.rank(clean(text,8000),prototypes,{limit:6,cacheKey,timeoutMs:1800}),sleep(timeoutMs).then(()=>null)]);
     return ranked?.matches?.length?ranked.matches:null;
   }catch{return null}
+}
+function requestSystem(request={}){const id=clean(request?.context?.guide?.system||request?.task?.systemId||request?.context?.currentContext?.systemId||'',80).toLowerCase();return['civweave','living-school','cerbanimo','fellowfare','anarchadia'].includes(id)?id:'civweave'}
+function artifactForSystem(system){return system==='living-school'?'curriculum':system==='cerbanimo'?'quest':system==='fellowfare'?'resource':system==='anarchadia'?'governance':'weave'}
+function declaredArtifact(request={}){
+  const kind=clean(request?.task?.kind||request?.artifactKind||'',100).toLowerCase();
+  const map={'curriculum-draft':'curriculum','learning-path':'curriculum','quest-draft':'quest','resource-draft':'resource','resource-manifest':'resource','governance-draft':'governance','campus-weave':'weave'};
+  if(map[kind])return{id:map[kind],source:'declared-task',confidence:1};
+  if(request?.capabilityRequirements?.planning===true||request?.task?.requirements?.planning===true)return{id:artifactForSystem(requestSystem(request)),source:'declared-planning',confidence:.98};
+  return null;
+}
+function ruleArtifact(text,request={}){
+  const t=clean(text,8000).toLowerCase(),system=requestSystem(request),build=/\b(build|create|make|generate|draft|design|develop|structure|prepare|start|regenerate|rebuild|revise|update|plan|need|want|please|let['’]?s)\b/.test(t);
+  if(!build)return null;
+  if(system==='living-school'&&/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|study plan|skill tree|teaching plan)\b/.test(t))return{id:'curriculum',source:'realm-rules',confidence:.97};
+  if(system==='cerbanimo'&&/\b(quest|project plan|work plan|implementation plan|roadmap|milestones?|checkpoints?|deliverable)\b/.test(t))return{id:'quest',source:'realm-rules',confidence:.94};
+  if(system==='fellowfare'&&/\b(resource manifest|skill manifest|resource plan|procurement|sourcing plan|request|offer|inventory plan|materials? list)\b/.test(t))return{id:'resource',source:'realm-rules',confidence:.94};
+  if(system==='anarchadia'&&/\b(proposal|policy|rule change|charter|governance plan|motion|vote plan|agreement)\b/.test(t))return{id:'governance',source:'realm-rules',confidence:.94};
+  if(system==='civweave'&&/\b(weave|cross[- ]realm|multi[- ]realm|roadmap|intention plan|quest plan)\b/.test(t))return{id:'weave',source:'realm-rules',confidence:.92};
+  return null;
+}
+async function artifactIntent(text,request={}){
+  const declared=declaredArtifact(request);if(declared)return declared;
+  const ruled=ruleArtifact(text,request);if(ruled)return ruled;
+  const system=requestSystem(request),rows=await semanticRank(`realm ${system}. user request ${text}`,ARTIFACT_PROTOTYPES,'civweave-artifact-intent-v348',700);
+  if(!rows?.[0])return{id:'dialogue',source:'rules',confidence:.5};
+  const top=rows[0],second=rows[1],score=Number(top.score||0),margin=score-Number(second?.score||0);
+  if(top.id!=='dialogue'&&score>=.29&&margin>=.025)return{id:top.id,source:'minilm-artifact',confidence:Math.max(.62,Math.min(.96,.64+margin*2.6)),semantic:{score,margin}};
+  return{id:'dialogue',source:'minilm-artifact',confidence:.62,semantic:{top:top.id,score,margin}};
 }
 function tierFor(id){return TIERS[id]||TIERS.medium}
 async function classify(text,request={}){
   const taskHard=hardTaskClass(text,request);
-  if(taskHard!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass:taskHard,complexity:complexity(text),confidence:1,source:'hard-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
+  if(taskHard!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass:taskHard,artifactClass:null,networkRequired:false,complexity:complexity(text),confidence:1,source:'hard-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
   const fallback=fallbackLength(text,request),explicit=explicitWordRequest(text),c=complexity(text);
-  const [lengthRows,taskRows]=await Promise.all([
+  const [lengthRows,taskRows,artifact]=await Promise.all([
     explicit?Promise.resolve(null):semanticRank(text,LENGTH_PROTOTYPES,'civweave-response-length-v347'),
-    semanticRank(text,TASK_PROTOTYPES,'civweave-response-task-v347')
+    semanticRank(text,TASK_PROTOTYPES,'civweave-response-task-v347'),
+    artifactIntent(text,request)
   ]);
   let taskClass='ordinary';
   if(taskRows?.[0]&&Number(taskRows[0].score||0)>=.28){const top=taskRows[0],second=taskRows[1],margin=Number(top.score||0)-Number(second?.score||0);if(margin>=.025&&['programming','agentic'].includes(top.id))taskClass=top.id}
-  if(taskClass!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass,complexity:c,confidence:.82,source:'minilm-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
+  if(taskClass!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass,artifactClass:null,networkRequired:false,complexity:c,confidence:.82,source:'minilm-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
+  if(artifact?.id&&artifact.id!=='dialogue'){
+    const lengthClass=c>=7?'smart':'fast';
+    return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass,taskClass:'structured-artifact',artifactClass:artifact.id,networkRequired:true,complexity:c,confidence:artifact.confidence,source:artifact.source,semantic:artifact.semantic||null,tier:tierFor(lengthClass),reviewRequired:false,reviewTier:null});
+  }
   let lengthClass=fallback,confidence=explicit?1:.56,source=explicit?'explicit-user-length':'rules';
   if(lengthRows?.[0]){
     const top=lengthRows[0],second=lengthRows[1],margin=Number(top.score||0)-Number(second?.score||0);
     if(Number(top.score||0)>=.24&&margin>=.018){lengthClass=top.id;confidence=Math.max(.58,Math.min(.96,.62+margin*2.8));source='minilm'}
   }
-  return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass,taskClass:'ordinary',complexity:c,confidence,source,tier:tierFor(lengthClass),reviewRequired:false,reviewTier:null});
+  return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass,taskClass:'ordinary',artifactClass:null,networkRequired:false,complexity:c,confidence,source,tier:tierFor(lengthClass),reviewRequired:false,reviewTier:null});
 }
 function userText(request={}){
   const messages=Array.isArray(request.messages)?request.messages:[];
@@ -123,6 +177,29 @@ function userText(request={}){
   return clean(request.prompt||request.input||'',12000);
 }
 function provider(request={}){return clean(request?.config?.provider||request?.config?.route||request.provider||'',80).toLowerCase()}
+function modelId(request={}){return clean(request?.config?.model||request?.config?.modelId||request.model||'',240)}
+function isGuideRequest(request={}){return /^civweave-guide-response(?:-v141)?/.test(clean(request.purpose,200))}
+function tinyGuidePrompt(request={}){
+  const system=requestSystem(request),role=TINY_GUIDE[system]||TINY_GUIDE.civweave;
+  return `${role} ${LANGUAGE_PACK.tiny} Speak directly and briefly. Do not invent saved state, prices, votes, tool use, or execution. Consequential actions require explicit Hero approval. Return valid JSON with keys answer, choice, assumptions, requiresConsent, confidence, questDraft.`;
+}
+function applyGuideLanguage(request={}){
+  if(!isGuideRequest(request)||request.__civweaveGuideLanguageApplied)return request;
+  const messages=Array.isArray(request.messages)?request.messages.map(row=>({...row})):[],tiny=provider(request)==='downloaded-local'&&TINY_LOCAL_SET.has(modelId(request));
+  if(tiny){
+    const recent=messages.filter(row=>row?.role!=='system').slice(-3);
+    return{...request,messages:[{role:'system',content:tinyGuidePrompt(request)},...recent],__civweaveGuideLanguageApplied:'tiny',guidePromptProfile:'tiny-condensed'};
+  }
+  const marker='Civweave language pack:';let index=messages.findIndex(row=>row?.role==='system');
+  if(index<0){messages.unshift({role:'system',content:LANGUAGE_PACK.full});index=0}
+  else if(!String(messages[index].content||'').includes(marker))messages[index]={...messages[index],content:`${LANGUAGE_PACK.full}\n\n${messages[index].content||''}`};
+  return{...request,messages,__civweaveGuideLanguageApplied:'full',guidePromptProfile:'full'};
+}
+function forceNetworkForArtifact(request,route){
+  if(!route?.networkRequired)return request;
+  const config={...(request.config||{}),provider:'server-auto',route:'server-auto',model:'civweave-server-auto',preferredLocalModelIds:[]};
+  return{...request,config,__civweaveNetworkRequired:true,networkRoute:{schema:'civweave.guide-network-route.v1',reason:'structured-artifact',artifactClass:route.artifactClass,qualifier:route.source}};
+}
 async function installedIds(){
   if(Date.now()-installedCache.at<30000)return installedCache.ids;
   const manager=globalThis.CivweaveLocalModelDownloadV266;if(!manager?.catalogueStatus)return installedCache.ids;
@@ -155,7 +232,7 @@ function reviewMessages(request,primary){
   const original=Array.isArray(request.messages)?request.messages.slice(-20):[];
   const primaryText=clean(primary?.outputText||primary?.outputJson&&JSON.stringify(primary.outputJson)||'',48000);
   return [
-    {role:'system',content:'You are the high-tier reviewer for Civweave. Review the lower-tier model result against the original request. Correct factual, reasoning, coding, safety, completeness, or instruction-following errors. Return the improved final answer only. Do not discuss the review process unless the user asked for it.'},
+    {role:'system',content:'You are the high-tier reviewer for Civweave. Review the lower-tier model result against the original request. Correct factual, reasoning, coding, safety, completeness, or instruction-following errors. Return the improved final answer only. Do not discuss the review process unless the Hero asked for it.'},
     ...original,
     {role:'assistant',content:primaryText},
     {role:'user',content:'Review the candidate answer above and return the corrected final answer.'}
@@ -174,11 +251,14 @@ async function reviewedResult(previous,request,primary,route,runtime){
 }
 async function enhance(request={}){
   if(request.__civweaveSkipResponseRouter)return{request,route:null};
-  const text=userText(request),route=await classify(text,request),config={...(request.config||{})};
-  if(!Number(config.maxTokens)||Number(config.maxTokens)>route.tier.maxTokens)config.maxTokens=route.tier.maxTokens;
-  config.responseLengthClass=route.lengthClass;config.responseTargetWords=route.tier.targetWords;config.preferredLocalModelIds=[...route.tier.preferredModelIds];
-  const next={...request,config,responseRouting:route,__civweaveResponseRoute:route};
-  dispatchEvent(new CustomEvent('civweave:response-route',{detail:route}));
+  const text=userText(request),route=await classify(text,request),baseConfig={...(request.config||{})};
+  if(!Number(baseConfig.maxTokens)||Number(baseConfig.maxTokens)>route.tier.maxTokens)baseConfig.maxTokens=route.tier.maxTokens;
+  baseConfig.responseLengthClass=route.lengthClass;baseConfig.responseTargetWords=route.tier.targetWords;baseConfig.preferredLocalModelIds=[...route.tier.preferredModelIds];
+  let next={...request,config:baseConfig,responseRouting:route,__civweaveResponseRoute:route};
+  next=forceNetworkForArtifact(next,route);
+  next=applyGuideLanguage(next);
+  dispatchEvent(new CustomEvent('civweave:response-route',{detail:{...route,provider:provider(next),promptProfile:next.guidePromptProfile||null}}));
+  if(route.networkRequired)dispatchEvent(new CustomEvent('civweave:structured-artifact-network-route',{detail:{version:VERSION,artifactClass:route.artifactClass,system:requestSystem(request),source:route.source,provider:provider(next)}}));
   return{request:next,route};
 }
 function installRuntimeInterceptor(){
@@ -190,11 +270,11 @@ function installRuntimeInterceptor(){
     const primary=await withLocalTier(route,next,previous);
     return reviewedResult(previous,next,primary,route,runtime);
   };
-  globalThis.CivweaveModelRuntime={...runtime,generate,__minilmResponseRouterV347:true};wrappedRuntime=globalThis.CivweaveModelRuntime;dispatchEvent(new CustomEvent('civweave:response-router-installed',{detail:{version:VERSION}}));return true;
+  globalThis.CivweaveModelRuntime={...runtime,generate,__minilmResponseRouterV347:true};wrappedRuntime=globalThis.CivweaveModelRuntime;dispatchEvent(new CustomEvent('civweave:response-router-installed',{detail:{version:VERSION,guideLanguage:true,artifactNetworkRouting:true,tinyPrompt:true}}));return true;
 }
-const api=Object.freeze({version:VERSION,tiers:TIERS,models:MODEL_IDS,classify,fallbackLength,hardTaskClass,explicitWordRequest,complexity,installRuntimeInterceptor,invisibleInfrastructure:true,settingsAutostart:false});
+const api=Object.freeze({version:VERSION,tiers:TIERS,models:MODEL_IDS,tinyModels:TINY_LOCAL_MODELS,languagePack:LANGUAGE_PACK,classify,artifactIntent,declaredArtifact,ruleArtifact,fallbackLength,hardTaskClass,explicitWordRequest,complexity,requestSystem,applyGuideLanguage,forceNetworkForArtifact,installRuntimeInterceptor,invisibleInfrastructure:true,settingsAutostart:false});
 globalThis.CivweaveResponseRouterV347=api;
 installRuntimeInterceptor();let attempts=0;installTimer=setInterval(()=>{attempts+=1;if(!globalThis.CivweaveModelRuntime?.__minilmResponseRouterV347)installRuntimeInterceptor();if(attempts>160)clearInterval(installTimer)},250);
 addEventListener('civweave:model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-downloaded',()=>{installedCache.at=0});addEventListener('civweave:local-model-removed',()=>{installedCache.at=0});addEventListener('pagehide',()=>clearInterval(installTimer),{once:true});
-dispatchEvent(new CustomEvent('civweave:minilm-response-router-ready',{detail:{version:VERSION,tiers:Object.keys(TIERS),reviewGate:'programming-or-agentic'}}));
+dispatchEvent(new CustomEvent('civweave:minilm-response-router-ready',{detail:{version:VERSION,tiers:Object.keys(TIERS),reviewGate:'programming-or-agentic',guideLanguage:true,artifactNetworkRouting:true,tinyPrompt:true}}));
 })();
