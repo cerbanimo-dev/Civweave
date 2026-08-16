@@ -23,6 +23,7 @@
     "/app/lud-game-ui-v1.css",
     "/app/lud-game-ui-v1.js",
     "/app/lud-guild-party-chat-v1.js",
+    "/app/shared-human-group-transport-v1.js",
     "/app/content-provenance-v1.js",
     "/app/lud-mode-v1.js",
     "/app/lud-manual-authoring-v1.js",
