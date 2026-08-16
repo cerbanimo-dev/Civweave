@@ -22,12 +22,14 @@ const requiredRadioAssets = [
   '/app/radio-directory-v240/anarchadia.txt'
 ];
 
-const [versionText, layer, wrapper, builder, trackSuggestions, ...assetContents] = await Promise.all([
+const [versionText, layer, wrapper, builder, radioAgent, trackSuggestions, governance, ...assetContents] = await Promise.all([
   read('VERSION'),
   read('public/service-worker-radio-core-v305.js'),
   read('public/service-worker-v203.js'),
   read('scripts/build-service-worker-v211.mjs'),
+  read('public/app/system-radio-agent-v233.js'),
   read('public/app/radio-track-suggestions-v240.js'),
+  read('public/app/radio-playlist-governance-v1.js'),
   ...requiredRadioAssets.map(path => read(`public${path}`))
 ]);
 const version = versionText.trim();
@@ -54,11 +56,21 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf('/service-worker-shell-integrity-v281.js') < source.indexOf(radioImport), 'Radio shell must wrap the integrity-owned cacheShell implementation.');
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
-assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305-playlist-only-v246`), `Committed worker is stale: radio shell must carry the playlist-only station handoff for release ${version}.`);
-assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-playlist-only-v246');"), 'Worker builder must preserve the playlist-only radio cache-bust token.');
+assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305-persistent-clean-v355`), `Committed worker is stale: radio shell must carry the persistent lyric-audited station handoff for release ${version}.`);
+assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-persistent-clean-v355');"), 'Worker builder must preserve the persistent clean-radio cache-bust token.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
 assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
-assert(builder.includes("radioAssetHandoff:'playlist-only-v246'"), 'Worker builder must report the active playlist-only radio handoff revision.');
+assert(builder.includes("radioAssetHandoff:'persistent-clean-v355'"), 'Worker builder must report the active persistent clean-radio handoff revision.');
+assert(builder.includes('party=lazy-v353'), 'Worker builder must preserve lazy party-chat activation while rotating the radio shell.');
+assert(wrapper.includes('party=lazy-v353'), 'Committed worker must preserve lazy party-chat activation while rotating the radio shell.');
+
+assert(radioAgent.includes("REVISION='system-radio-agent-v233-persistent-station-v1'"), 'Installed radio owner must use the persistent clean-default station contract.');
+assert(radioAgent.includes('autoRecommend:false'), 'Installed radio owner must not auto-display transient recommendation cards.');
+assert(radioAgent.includes("const LAUNCHER_ID='cw-radio-station-launcher-v1'"), 'Installed radio owner must expose the universal persistent launcher.');
+assert(radioAgent.includes("if(safeModeEnabled())return'clean'"), 'Installed radio owner must force the lyric-audited station in S.A.F.E. mode.');
+assert(!radioAgent.includes('MutationObserver'), 'Installed radio owner must remain idle when the user is not interacting with it.');
+assert(!governance.includes('MutationObserver'), 'Installed playlist governance must remain event-driven and must not create a DOM mutation loop.');
+assert(governance.includes('idleEventDriven:true'), 'Installed playlist governance must declare its event-driven idle contract.');
 
 for (let index = 0; index < requiredRadioAssets.length; index += 1) {
   assert(assetContents[index].length > 0, `${requiredRadioAssets[index]} is empty.`);
@@ -67,17 +79,17 @@ for (const pathname of requiredRadioAssets.filter(path => path.includes('/radio-
   assert(trackSuggestions.includes(pathname), `Track picker no longer references ${pathname}.`);
 }
 assert(trackSuggestions.includes('/app/radio-track-map-v241.json'), 'Track picker no longer references the exact-track map.');
-assert(trackSuggestions.includes("REVISION='radio-track-suggestions-v246'"), 'Installed radio core must carry the playlist-only Spotify handoff.');
-assert(trackSuggestions.includes("new URL(meta.spotifyUrl)"), 'Installed radio core must build suggested-track handoff from the approved station playlist.');
-assert(trackSuggestions.includes("searchParams.set('highlight',`spotify:track:${id}`)"), 'Installed radio core must identify the suggested track inside the playlist URL.');
-assert(trackSuggestions.includes("configureStationLink(stationLink,track,system,tag)"), 'Installed radio core must decorate the station link rather than create a track link.');
-assert(trackSuggestions.includes("playlistOnly:true"), 'Installed radio core must expose the playlist-only invariant.');
+assert(trackSuggestions.includes("REVISION='radio-track-suggestions-v246'"), 'Installed legacy track helper must retain its stable playlist-context compatibility contract.');
+assert(trackSuggestions.includes("new URL(meta.spotifyUrl)"), 'Installed legacy track helper must build suggested-track handoff from the approved station playlist.');
+assert(trackSuggestions.includes("searchParams.set('highlight',`spotify:track:${id}`)"), 'Installed legacy track helper must identify the suggested track inside the playlist URL.');
+assert(trackSuggestions.includes("configureStationLink(stationLink,track,system,tag)"), 'Installed legacy track helper must decorate the station link rather than create a track link.');
+assert(trackSuggestions.includes('playlistOnly:true'), 'Installed legacy track helper must expose the playlist-context invariant.');
 assert(trackSuggestions.includes("link.target='_blank'"), 'Installed radio core must keep Civweave open while Spotify opens externally.');
-assert(!trackSuggestions.includes("new URL(`https://open.spotify.com/track/${id}`)"), 'Installed radio core must never construct an isolated Spotify track destination.');
-assert(!trackSuggestions.includes('spotify.link/content_linking'), 'Installed radio core must not use a content-link wrapper around a track resource.');
-assert(!trackSuggestions.includes('trackLink'), 'Installed radio core must not create a separate track CTA.');
+assert(!trackSuggestions.includes("new URL(`https://open.spotify.com/track/${id}`)"), 'Legacy recommendation helper must never construct an isolated Spotify track destination.');
+assert(!trackSuggestions.includes('spotify.link/content_linking'), 'Legacy recommendation helper must not use a content-link wrapper around a track resource.');
+assert(!trackSuggestions.includes('trackLink'), 'Legacy recommendation helper must not create a separate track CTA.');
 assert(!trackSuggestions.includes('location.assign'), 'Installed radio core must never navigate the PWA away to Spotify.');
-assert(trackSuggestions.includes('recent:nextRecent'), 'Installed radio core must preserve recent-track anti-repeat history.');
+assert(trackSuggestions.includes('recent:nextRecent'), 'Legacy recommendation helper must preserve recent-track anti-repeat history.');
 
 function makeRuntime({ failPath = '' } = {}) {
   const stores = new Map();
@@ -144,12 +156,14 @@ console.log(JSON.stringify({
   ok: true,
   version,
   revision: 'radio-core-shell-v305',
-  radioAssetHandoff: 'playlist-only-v246',
+  radioAssetHandoff: 'persistent-clean-v355',
   committedWorkerCurrent: true,
   requiredAssetCount: requiredRadioAssets.length,
   freshInstallRequired: true,
   repairRequired: true,
   offlineCampusIndependent: true,
   missingRadioMakesShellUnready: true,
-  atomicStaging: true
+  atomicStaging: true,
+  eventDrivenGovernance: true,
+  persistentStationLauncher: true
 }, null, 2));
