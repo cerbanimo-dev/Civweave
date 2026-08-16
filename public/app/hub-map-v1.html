@@ -13,20 +13,41 @@
 (()=>{
 'use strict';
 const frame=document.getElementById('hubMapFrame');
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function addScript(doc,src,onload){const script=doc.createElement('script');script.src=src;script.async=false;if(onload)script.onload=onload;doc.body.append(script)}
-function install(){
+function isolateGuildDirectory(win){
+  const service=win.CivweaveMapService,state=service?.state;if(!state?.map)return false;
+  state.features?.clear?.();
+  state.nodes?.clear?.();
+  state.hubIds?.clear?.();
+  state.edges=[];
+  state.atlasManifest=null;
+  state.source='guild-directory';
+  state.mode='nodes';
+  state.query='';
+  state.selectedId=null;
+  service.updateMapData?.();
+  return true;
+}
+async function install(){
   const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc)return;
   doc.title='Civweave Guild Map';
-  const eyebrow=doc.querySelector('.brand small'),title=doc.querySelector('.brand strong'),heading=doc.querySelector('.panel h2'),intro=doc.querySelector('.panel h2 + p');
+  const eyebrow=doc.querySelector('.brand small'),title=doc.querySelector('.brand strong'),heading=doc.querySelector('.panel h2'),intro=doc.querySelector('.panel h2 + p'),toggle=doc.getElementById('mobileToggle');
   if(eyebrow)eyebrow.textContent='Physical Guilds + signed locality ledger + offline gossip';
   if(title)title.textContent='Guild Map';
   if(heading)heading.textContent='Find a Guild in place';
   if(intro)intro.textContent='Browse Guildkeeper-placed Civweave Guilds first. Join one, explore its most recent cached Needs, Offerings, and Ideas, or pass by through the mesh when distance is only virtual.';
+  if(toggle)toggle.textContent='Guilds';
   const all=doc.getElementById('modeAll'),federations=doc.getElementById('modeFederations'),nodes=doc.getElementById('modeNodes');
-  all?.classList.remove('active');federations?.classList.remove('active');nodes?.classList.add('active');if(nodes)nodes.textContent='Guilds';
+  if(all){all.classList.remove('active');all.hidden=true}
+  if(federations){federations.classList.remove('active');federations.hidden=true}
+  nodes?.classList.add('active');if(nodes)nodes.textContent='Guilds';
+  const atlasStat=doc.getElementById('atlasCount')?.closest?.('.stat');if(atlasStat)atlasStat.hidden=true;
+  let ticks=0;while(!isolateGuildDirectory(win)&&ticks++<240)await sleep(50);
+  if(!win.CivweaveMapService?.state?.map)return;
   addScript(doc,'/app/host-node-session-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-hub-map-v1.js?v=guild-rally-point-v1')));
 }
-frame.addEventListener('load',install,{once:true});
+frame.addEventListener('load',()=>install().catch(error=>console.error('[Civweave Guild Map]',error)),{once:true});
 })();
 </script>
 </body>
