@@ -22,7 +22,7 @@
   Cache-Control: no-cache
 
 /app/pwa-install-prompt-v250.js
-  Cache-Control: no-cache
+  Cache-Control: no-store, max-age=0
 
 /app/installer-repair-only-v1.js
   Cache-Control: no-cache
