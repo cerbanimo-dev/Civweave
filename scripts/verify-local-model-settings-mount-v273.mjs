@@ -1,21 +1,25 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,settings,bootstrap,controller,pulse,registry,downloadPolicy]=await Promise.all([
-  'public/app/settings-gateway-v317.js','public/app/document-lifecycle-v221.js','public/app/local-ai/settings-panel-v267.js','public/app/local-ai/bootstrap-v266.js','public/app/model-settings-controller-v173.js','public/app/local-ai/test-pulse-v269.js','public/app/local-ai/model-registry-v266.js','public/app/local-ai/download-policy-v278.js'
+const [gateway,lifecycle,settings,bootstrap,controller,pulse,registry,downloadPolicy,downloadManager]=await Promise.all([
+  'public/app/settings-gateway-v317.js','public/app/document-lifecycle-v221.js','public/app/local-ai/settings-panel-v267.js','public/app/local-ai/bootstrap-v266.js','public/app/model-settings-controller-v173.js','public/app/local-ai/test-pulse-v269.js','public/app/local-ai/model-registry-v266.js','public/app/local-ai/download-policy-v278.js','public/app/local-ai/download-manager-v267.js'
 ].map(read));
-for(const source of [gateway,lifecycle,settings,bootstrap,controller,pulse,registry,downloadPolicy])new Function(source);
+for(const source of [gateway,lifecycle,settings,bootstrap,controller,pulse,registry,downloadPolicy,downloadManager])new Function(source);
 
 assert.match(gateway,/globalThis\.CivweaveSettingsV320=api/);
 assert.match(gateway,/singleMenu:true/);
 assert.match(gateway,/singleLauncherListener:true/);
-assert.match(gateway,/data-cw-settings-form data-cw-cleanroom-form/);
+assert.match(gateway,/data-cw-settings-form data-cw-cleanroom-form data-settings-tabs="1"/);
 assert.match(gateway,/data-settings-tab-panel="local-models"/);
+assert.doesNotMatch(gateway,/data-load-local-model-management/);
+assert.match(gateway,/if\(name==='local-models'\)/);
 assert.match(gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
-assert.match(lifecycle,/document-lifecycle-v320-settings-service/);
-assert.match(lifecycle,/document-lifecycle-v320-single-menu/);
+const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
+assert.doesNotMatch(openBlock,/ensureManagement\(/,'Opening Settings must not load local-model management until the tab is requested.');
+assert.match(lifecycle,/document-lifecycle-v322-settings-tab-service/);
+assert.match(lifecycle,/document-lifecycle-v322-explicit-local-model-tab/);
 assert.match(lifecycle,/searchParams\.get\('activate'\)==='1'/);
-assert.match(lifecycle,/activation:'settings-v320'/);
+assert.match(lifecycle,/activation:'settings-v322-local-model-tab'/);
 assert.match(lifecycle,/ensureLocalAISettingsManagement/);
 assert.match(lifecycle,/function scheduleSettingsManagement\(/);
 assert.match(lifecycle,/settingsEntryOwner:'settings-v320'/);
@@ -27,6 +31,8 @@ assert.match(lifecycle,/settingsRootCreation:false/);
 assert.match(lifecycle,/managementAfterPaint:true/);
 assert.match(lifecycle,/globalObserverPatch:false/);
 assert.match(lifecycle,/activationRequired:true/);
+assert.match(lifecycle,/explicitTabActivation:true/);
+assert.match(lifecycle,/bfCacheAutoManagement:false/);
 assert.match(lifecycle,/launchWork:'none'/);
 assert.doesNotMatch(lifecycle,/captureSettingsOpen|document\.addEventListener\('click'/,'management lifecycle must not intercept Settings clicks');
 assert.doesNotMatch(lifecycle,/MutationObserver|globalThis\.MutationObserver\s*=/,'management lifecycle must not patch or observe the global DOM');
@@ -35,8 +41,8 @@ for(const token of ['model-registry-v266.js','download-manager-v267.js','setting
 for(const forbidden of ['runtime-v266','runtime-bridge-v266','bootstrap-v266','test-pulse-v269','fast-interactive-runtime'])assert.ok(!managementList.includes(forbidden),`Settings management lane includes inference asset ${forbidden}.`);
 const settingsOpenBody=lifecycle.match(/function ensureLocalAISettingsManagement\([^)]*\)\{([\s\S]*?)\}\nfunction scheduleSettingsManagement/)?.[1]||'';
 assert.ok(settingsOpenBody,'Downloaded-model management function must remain inspectable.');
-assert.doesNotMatch(settingsOpenBody,/bootstrap\.ready|runtime-v266|runtime-bridge|test-pulse-v269|new Worker\(|\.generate\(/,'Opening Settings must not start inference.');
-for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove','Model window','Civweave working default','TTFT'])assert.ok(settings.toLowerCase().includes(text.toLowerCase()));
+assert.doesNotMatch(settingsOpenBody,/bootstrap\.ready|runtime-v266|runtime-bridge|test-pulse-v269|new Worker\(|\.generate\(/,'Viewing Local models must not start inference.');
+for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove','Model window','Civweave working default'])assert.ok(settings.toLowerCase().includes(text.toLowerCase()));
 assert.match(settings,/document\.querySelector\('\[data-cw-settings-form\]'\)/,'Downloaded-model settings must target only the canonical Settings form.');
 assert.match(settings,/\[data-settings-tab-panel="local-models"\]/,'Downloaded-model settings must mount into the canonical local-model slot.');
 assert.match(settings,/d\.dataset\.openUnifiedAiSettings=''/,'Download dock must route through the one delegated Settings click owner.');
@@ -47,10 +53,19 @@ assert.match(settings,/CivweaveSettingsV320\?\.open\?\.\(\)/,'Programmatic local
 assert.match(settings,/settingsClickOwnership:false/);
 assert.match(settings,/settingsPresentationOwnership:false/);
 assert.match(settings,/canonicalSlotOnly:true/);
-assert.match(settings,/truthfulCompletion:true/);assert.match(settings,/cacheIntegrityOnDemand:true/);assert.match(settings,/openPath:'snapshot-first-v287'/);
+assert.match(settings,/truthfulCompletion:true/);
+assert.match(settings,/cacheIntegrityOnDemand:true/);
+assert.match(settings,/openPath:'snapshot-first-v322'/);
+assert.match(settings,/snapshotOnlyView:true/);
+assert.match(settings,/backgroundSyncOnView:false/);
+assert.match(downloadManager,/autoSyncOnLoad:false/);
+assert.match(downloadManager,/explicitSyncOnly:true/);
+assert.doesNotMatch(downloadManager,/queueMicrotask\(\(\)=>sync\(\)/);
+assert.match(downloadPolicy,/largeExternalDataForeground:true/);
+assert.match(downloadPolicy,/autoSyncOnLoad:false/);
+assert.doesNotMatch(downloadPolicy,/queueMicrotask\(\(\)=>sync\(\)/);
 assert.match(pulse,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/);assert.match(pulse,/Test model/);assert.match(pulse,/raceSafeRepair:true/);
 assert.match(bootstrap,/capability-contract-v307/);assert.match(bootstrap,/package-revision-guard-v307\.js/);assert.match(bootstrap,/backendFallback:true/);assert.match(bootstrap,/canonicalCausalLM:true/);
 assert.match(controller,/compatibilityFacade:true/);assert.match(controller,/canonical:'CivweaveSettingsV320'/);assert.match(controller,/presentationOwnership:false/);assert.doesNotMatch(controller,/civweave:model-settings-opened|document\.createElement|addEventListener\('click'/);
 for(const token of ["id:'gemma3-1b-it-q4f16'","id:'qwen3-0.6b-q4f16'",'function directUrl','function artifactRevision'])assert.ok(registry.includes(token));
-assert.match(downloadPolicy,/largeExternalDataForeground:true/);
-console.log(JSON.stringify({ok:true,revision:'local-model-settings-mount-v320',canonicalSettingsMount:true,settingsAuthority:'CivweaveSettingsV320',singleSettingsClickOwner:true,localModelServiceOnly:true,managementAfterPaint:true,noSettingsCaptureInLifecycle:true,inferenceDormantUntilNeeded:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-settings-mount-v322',canonicalSettingsMount:true,settingsAuthority:'CivweaveSettingsV320',singleSettingsClickOwner:true,localModelServiceOnly:true,localModelsOnTabOnly:true,noSettingsCaptureInLifecycle:true,inferenceDormantUntilNeeded:true,cacheSyncOnView:false},null,2));
