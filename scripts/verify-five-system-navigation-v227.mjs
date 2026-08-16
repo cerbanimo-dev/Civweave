@@ -32,6 +32,7 @@ const paths={
 };
 const experienceScripts=[
   '/app/settings-gateway-v317.js',
+  '/app/settings-local-route-v323.js',
   '/app/mobile-ai-hardening-v302.js',
   '/app/experience-orchestrator-v232.js',
   '/app/system-radio-agent-v233.js',

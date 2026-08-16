@@ -1,9 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='1.0.158-local-chat-owner-v303-submit-only',SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'],GUIDE={civweave:['Weaveling','central mirror and orchestrator'],'living-school':['Moss','learning guide'],cerbanimo:['Kamiya','questwright and skilled-work guide'],fellowfare:['Rook','quartermaster and exchange guide'],anarchadia:['Merlin','civic and automation guide']};
-if(globalThis.CivweaveLocalChatOwnerV295?.version===VERSION&&globalThis.CivweaveLocalChatOwnerV295?.generativePrewarmDisabled===true)return;
+const VERSION='1.0.158-local-chat-owner-v303-submit-only',REVISION='live-thread-render-v351',SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'],GUIDE={civweave:['Weaveling','central mirror and orchestrator'],'living-school':['Moss','learning guide'],cerbanimo:['Kamiya','questwright and skilled-work guide'],fellowfare:['Rook','quartermaster and exchange guide'],anarchadia:['Merlin','civic and automation guide']};
+if(globalThis.CivweaveLocalChatOwnerV295?.version===VERSION&&globalThis.CivweaveLocalChatOwnerV295?.revision===REVISION&&globalThis.CivweaveLocalChatOwnerV295?.generativePrewarmDisabled===true)return;
 const clean=(v,n=12000)=>String(v??'').trim().slice(0,n),now=()=>new Date().toISOString(),uid=p=>`${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,queues=new Map(),running=new Set(),api=()=>globalThis.CivweaveRealmSessionIntegrityV237,runtime=()=>globalThis.CivweaveLocalChatRuntimeV295;
+let renderQueued=false,renderSystem='';
 function queue(system){let value=queues.get(system);if(!value){value=[];queues.set(system,value)}return value}
+function scheduleRender(system){
+ if(!SYSTEMS.includes(system))return false;renderSystem=system;if(renderQueued)return true;renderQueued=true;
+ queueMicrotask(()=>{renderQueued=false;const target=renderSystem;renderSystem='';const surface=globalThis.CivweaveGuideChatSurfaceV350||globalThis.CivweavePersistentGuideChatV215;if(!surface?.state?.().open||surface?.activeWindow?.()!==target)return;try{surface.render?.()}catch{}});return true
+}
 function history(system,exclude=''){return(api()?.readThread?.(system)?.messages||[]).filter(x=>x.id!==exclude&&!x.pending&&!x.queuePending&&['user','assistant'].includes(x.role)).slice(-6).map(x=>({role:x.role,content:clean(x.text,900)})).filter(x=>x.content)}
 function update(system,id,patch){const a=api(),t=a?.readThread?.(system);if(!t)return false;const i=(t.messages||[]).findIndex(x=>x.id===id);if(i<0)return false;t.messages[i]={...t.messages[i],...patch};a.writeThread(system,t);return true}
 function append(system,row){const a=api(),t=a?.readThread?.(system);if(!t)return false;t.messages=[...(t.messages||[]),row];a.writeThread(system,t);return true}
@@ -39,6 +44,7 @@ function enqueue(system,text,form){
 function submit(system,text,form){return enqueue(system,text,form)}
 function queued(system){return queue(system).length+(running.has(system)?1:0)}
 function cancelQueued(reason='settings-open'){let count=0;for(const [system,items] of queues){for(const item of items){update(system,item.messageId,{queuePending:false,queueCancelled:true,queueCancelReason:reason});count+=1}items.length=0}queues.clear();return count}
+addEventListener('civweave:realm-guide-thread-changed',event=>scheduleRender(event?.detail?.system));
 addEventListener('civweave:local-inference-cancel-requested',event=>cancelQueued(event?.detail?.reason||'external-request'));
-globalThis.CivweaveLocalChatOwnerV295=Object.freeze({version:VERSION,capturePhase:false,canonicalSubmitOwner:false,fiveGuideWindows:true,truthfulLoadProgress:true,boundedStartupRecovery:true,freshWorkerFallback:true,truthfulExecutionModel:true,fifoQueue:true,terminalCancellation:true,settingsTeardown:true,intentPrewarm:false,chatOpenPrewarm:false,generativePrewarmDisabled:true,generativeStartsOnSubmit:true,prewarmTrigger:'none',enqueue,submit,queued,drain,cancelQueued});
+globalThis.CivweaveLocalChatOwnerV295=Object.freeze({version:VERSION,revision:REVISION,capturePhase:false,canonicalSubmitOwner:false,fiveGuideWindows:true,truthfulLoadProgress:true,boundedStartupRecovery:true,freshWorkerFallback:true,truthfulExecutionModel:true,fifoQueue:true,terminalCancellation:true,settingsTeardown:true,intentPrewarm:false,chatOpenPrewarm:false,generativePrewarmDisabled:true,generativeStartsOnSubmit:true,prewarmTrigger:'none',liveThreadRender:true,renderScheduling:'microtask-coalesced-active-thread-only',enqueue,submit,queued,drain,cancelQueued});
 })();

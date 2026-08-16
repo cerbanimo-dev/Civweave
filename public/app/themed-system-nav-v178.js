@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.162-five-system-navigation-v227-single-owner-r1';
+const VERSION='1.0.162-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname;
