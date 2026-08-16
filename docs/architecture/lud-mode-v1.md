@@ -54,7 +54,7 @@ Opening the request consumes 30 neurons from the requester's current-day include
 
 **Unused daily validation capacity does not roll over.** It is an included service allowance, not a wallet balance.
 
-Only completed accepted human review creates persistent validator compute credits. Those earned neurons are stored separately from cash-backed lifetime credits. If a Standard-mode validator later spends earned neurons on AI, provider usage and any provider cost are settled at that later inference. The lifetime-credit cash reserve is not used merely because validator neurons persist.
+Accepted human review gives each validator a **same-day neuron bonus**. The bonus is usable only until that day's ordinary neuron reset and does not roll over or become a persistent wallet balance. It also never enters the cash-backed lifetime-credit wallet. If a Standard-mode validator spends the bonus on AI before reset, provider usage and any provider cost are settled at that inference; any unspent bonus simply expires at reset.
 
 Existing Buttons, Acorns, Cotokens, evidence requirements, independence rules, and cross-device validation rules remain authoritative. Neuron transfer is an additional Lud-funded reward leg.
 
@@ -70,6 +70,6 @@ Lud discovery admits only explicitly human-authored content. Unknown provenance 
 
 `node --test scripts/test-lud-mode-v1.mjs` checks the package boundary, no-generated-visual rule, no-AI runtime boundary, provenance rules, and canonical human-tool reuse.
 
-`node --test scripts/test-lud-human-validation-neurons-v1.mjs` checks the 30-neuron request, 15/10 split, 900-to-30 daily ceiling, non-rollover source allowance, distinct validator claims, and the separation between earned validator compute and cash-backed lifetime credits.
+`node --test scripts/test-lud-human-validation-neurons-v1.mjs` checks the 30-neuron request, 15/10 split, 900-to-30 daily ceiling, non-rollover source allowance, same-day validator-bonus expiry, distinct validator claims, and separation from cash-backed lifetime credits.
 
 `scripts/browser-lud-mode-gauntlet-v1.mjs` exercises the dedicated service worker in Chromium through download, clean-route open, and offline reload.
