@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.126-shared-guide-surface-v236-universal-launcher-v1';
+const VERSION='1.0.127-shared-guide-surface-v236-quest-language';
 const STYLE_ID='cw-shared-guide-surface-v236-style';
 const LAUNCHER_ID='cwp215-launcher';
 const CHAT_ROOT_ID='cw-persistent-guide-chat-v215';
@@ -14,7 +14,7 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const GUIDE=Object.freeze({
-  civweave:{name:'Weaveling',label:'Civweave',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',accent2:'#8ee8ff',placeholder:'Tell Weaveling your wish, revise the route, or ask what connects next.'},
+  civweave:{name:'Weaveling',label:'Civweave',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',accent2:'#8ee8ff',placeholder:'Tell Weaveling what Quest you want to pursue, revise the route, or ask what connects next.'},
   'living-school':{name:'Moss',label:'Living School',role:'Learning guide',avatar:'/app/assets/ai/chat/moss-face-v255.webp',accent:'#59cf87',accent2:'#f3cf65',placeholder:'Ask Moss what you should learn, practice, or demonstrate.'},
   cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/chat/kamiya-face-v255.webp',accent:'#ff54d3',accent2:'#55edff',placeholder:'Tell Kamiya what you want to build, plan, repair, or ship.'},
   fellowfare:{name:'Rook',label:'FellowFare',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/chat/rook-face-v255.webp',accent:'#f2a93b',accent2:'#55c49a',placeholder:'Tell Rook what you need, offer, or want to exchange.'},
