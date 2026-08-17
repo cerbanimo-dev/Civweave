@@ -25,13 +25,15 @@ for(const gate of ['open-plan','activate-plan','open-action','approve-action']){
 }
 assert.doesNotMatch(review,/CivweaveIntentionUI|CivweaveActionUI|intention-ui-v138|core-loop-v152/,'New review surface must not revive old review UI/runtime dependencies.');
 assert.match(review,/CONTRACT_SCRIPT='\/app\/guide-contracts-v141\.js'/,'Realm approval must use the current action data contract.');
-assert.match(review,/WEAVES UNDER REVIEW/,'Main Weaveling surface must expose review-state weaves.');
-assert.match(review,/<details><summary>/,'Review-state weaves must be collapsed by default.');
-assert.doesNotMatch(review,/<details\s+open/,'Review-state weaves must not auto-expand.');
-assert.match(review,/write\(INTENTIONS_KEY/,'Weave activation must update the canonical intention ledger.');
-assert.match(review,/write\(REALM_INBOX_KEY/,'Weave activation must create canonical realm handoffs.');
-assert.match(review,/write\(WORKING_KEY/,'Weave activation must synchronize Working Campus state.');
-assert.match(review,/civweave:review-plan-activated/,'Weave activation must emit a review lifecycle event.');
+assert.match(review,/QUESTS UNDER REVIEW/,'Main Weaveling surface must expose review-state Quests.');
+assert.match(review,/Quest goal:/,'Quest review must label the governing request with current Quest terminology.');
+assert.doesNotMatch(review,/Wish:<\/strong>/,'Quest review must not expose the retired Wish label.');
+assert.match(review,/<details><summary>/,'Review-state Quests must be collapsed by default.');
+assert.doesNotMatch(review,/<details\s+open/,'Review-state Quests must not auto-expand.');
+assert.match(review,/write\(INTENTIONS_KEY/,'Quest activation must update the canonical intention ledger.');
+assert.match(review,/write\(REALM_INBOX_KEY/,'Quest activation must create canonical realm handoffs.');
+assert.match(review,/write\(WORKING_KEY/,'Quest activation must synchronize Working Campus state.');
+assert.match(review,/civweave:review-plan-activated/,'Quest activation must emit a review lifecycle event.');
 assert.match(review,/civweave:review-action-approved/,'Realm approval must emit a review lifecycle event.');
 
 assert.match(boundary,/SHARED_REVIEW_SURFACE='\/app\/shared-review-surface-v234\.js'/,'Shared boundary must load the review extension.');
@@ -53,9 +55,9 @@ console.log(JSON.stringify({
   ok:true,
   version,
   revision:'shared-review-surface-v234',
-  reviewKinds:['weave','realm-action'],
+  reviewKinds:['quest','realm-action'],
   chatGateFormats:2,
-  reviewWeavesCollapsedByDefault:true,
+  reviewQuestsCollapsedByDefault:true,
   installerMutationFeedbackLoop:false,
   installerProgressPolling:false,
   offlineStatusOwnsWorkerLifecycle:false
