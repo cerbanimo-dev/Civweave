@@ -264,26 +264,33 @@ async function liveProductionDirectory() {
 }
 
 export const onRequestGet: PagesFunction = async context => {
-  const staging = isStagingRequest(context.request);
   const cacheUrl = new URL(context.request.url);
   cacheUrl.search = "";
   const cacheKey = new Request(cacheUrl.toString(), { method: "GET" });
   const cache = caches.default;
 
-  try {
-    const cached = await cache.match(cacheKey);
-    if (cached) return cached;
-  } catch {
-    // Cache availability must never prevent the public Guild Map from loading.
+  const serve = async (builder: () => Promise<Response>) => {
+    try {
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+    } catch {
+      // Cache availability must never prevent the public Guild Map from loading.
+    }
+
+    try {
+      const response = await builder();
+      if (response.ok && !String(response.headers.get("cache-control") || "").includes("no-store")) {
+        context.waitUntil(cache.put(cacheKey, response.clone()).catch(() => undefined));
+      }
+      return response;
+    } catch (error) {
+      return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
+    }
+  };
+
+  if (isStagingRequest(context.request)) {
+    return serve(liveStagingDirectory);
   }
 
-  try {
-    const response = staging ? await liveStagingDirectory() : await liveProductionDirectory();
-    if (response.ok && !String(response.headers.get("cache-control") || "").includes("no-store")) {
-      context.waitUntil(cache.put(cacheKey, response.clone()).catch(() => undefined));
-    }
-    return response;
-  } catch (error) {
-    return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
-  }
+  return serve(liveProductionDirectory);
 };
