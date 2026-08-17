@@ -46,9 +46,8 @@ const SYSTEMS=Object.freeze([
 ]);
 const QUICK=Object.freeze({
   civweave:Object.freeze([
-    Object.freeze({id:'weave',label:'Current Quest',hint:'Resume the active weave'}),
-    Object.freeze({id:'progress',label:'Progress',hint:'See completed and remaining work'}),
-    Object.freeze({id:'library',label:'Library',hint:'Open saved weaves'}),
+    Object.freeze({id:'quest',label:'Current Quest',hint:'Resume the active Quest'}),
+    Object.freeze({id:'library',label:'Quest Library',hint:'Open saved Quests'}),
     Object.freeze({id:'chat',label:'Talk to Weaveling',hint:'Open the Civweave guide thread'}),
     Object.freeze({id:'settings',label:'Settings',hint:'Open shared Civweave settings'})
   ]),
@@ -139,6 +138,7 @@ html.cw-themed-system-nav-active nav.bottom,
 html.cw-themed-system-nav-active .rc-bottom,
 html.cw-themed-system-nav-active .ls-tray,
 html.cw-themed-system-nav-active .bottom-nav{display:none!important}
+html.cw-themed-system-nav-active body [data-open-unified-ai-settings]{display:none!important}
 html.cw-themed-system-nav-active[data-cw-themed-current="civweave"] main.app>.campus,
 html.cw-themed-system-nav-active[data-cw-themed-current="civweave"] details[data-cw-pd-id="civweave-campus"]{display:none!important}
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-app{grid-template-rows:54px minmax(0,1fr)!important}
@@ -273,6 +273,7 @@ function reveal(target){
   requestAnimationFrame(()=>{target.scrollIntoView?.({behavior:'smooth',block:'start'});const focusable=target.matches?.('button,a,input,select,textarea,summary,[tabindex]')?target:target.querySelector?.('button,a,input,select,textarea,summary,[tabindex]');focusable?.focus?.({preventScroll:true})});return true;
 }
 function openChat(system){const chat=globalThis.CivweaveGuideChatSurfaceV350||globalThis.CivweavePersistentGuideChatV215;try{return Boolean(chat?.open?.({guide:system,focus:true}))}catch{return false}}
+function openSettings(){const settings=globalThis.CivweaveSettingsV320||globalThis.CivweaveSettingsGatewayV317;try{if(settings?.open){settings.open(linkFor('civweave')||document.activeElement);return true}}catch{}return false}
 function livingTarget(feature){
   if(feature==='continue')return document.querySelector('.lsc218-lesson')||document.querySelector('.lsc218-module-rail')||document.querySelector('.lsc218-hero');
   if(feature==='path')return document.querySelector('details[data-cw-pd-id="living-path-setup"]')||[...document.querySelectorAll('.lsc218-panel')].find(panel=>/choose or define the path/i.test(panel.textContent||''));
@@ -284,8 +285,10 @@ function activateLocalFeature(system,feature){
   if(system!==currentSystem())return false;
   if(feature==='chat')return openChat(system);
   if(system==='civweave'){
-    if(feature==='settings'){const control=document.querySelector('[data-open-unified-ai-settings]');if(control){control.click();return true}return false}
-    const button=document.querySelector(`nav.bottom [data-view="${feature}"]`);if(button){button.click();return true}return false;
+    if(feature==='settings')return openSettings();
+    const target=feature==='weave'||feature==='progress'?'quest':feature,campus=globalThis.CivweaveWorkingCampusV156;
+    try{if(campus?.openView?.(target))return true}catch{}
+    return false;
   }
   if(system==='living-school')return reveal(livingTarget(feature));
   if(system==='cerbanimo'){
@@ -305,6 +308,7 @@ function activateLocalFeature(system,feature){
 }
 function launchFeature(system,feature){
   closeQuickMenu({restoreFocus:false});
+  if(system==='civweave'&&feature==='settings'&&openSettings())return true;
   if(system===currentSystem()&&activateLocalFeature(system,feature))return true;
   return routeSystem(system,feature);
 }
@@ -323,7 +327,7 @@ function mount(){
   installStyle();document.documentElement.classList.add('cw-themed-system-nav-active');document.documentElement.dataset.cwThemedCurrent=current;document.documentElement.dataset.familyNavigationOwner='themed-system-nav-v178';
   let nav=document.getElementById(NAV_ID);
   if(!nav){
-    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v305-hold-menu';nav.setAttribute('aria-label','Civweave five-guide rail');
+    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v306-current-quest';nav.setAttribute('aria-label','Civweave five-guide rail');
     nav.innerHTML=SYSTEMS.map(item=>{const selected=item.id===current;return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${href(item)}" target="_top" aria-label="${item.character} · ${item.label}. Tap to open ${item.label}. Press and hold for shortcuts." aria-haspopup="menu" aria-expanded="false"${selected?' aria-current="page"':''} style="--system-glow:${item.glow};--system-shade:${item.shade};--system-label:${item.labelColor};--system-shell:${item.shell};--system-ring:${item.ring};--system-panel:${item.panel};--system-sheet:url('${SHEETS[item.id]}');--system-fallback:url('${FALLBACK[item.id]}');--sprite-col:0;--sprite-row:0"><span class="cw-themed-system-button"><span class="cw-themed-system-avatar-wrap"><span class="cw-themed-system-avatar" role="img" aria-label="${item.character}"></span><span class="cw-themed-unread" hidden></span></span><span class="cw-themed-system-copy"><b>${item.character}</b><small>${item.label}</small></span></span></a>`}).join('');
     nav.addEventListener('pointerdown',event=>{const link=event.target.closest?.('a[data-system]');if(link)startHold(event,link)});
     nav.addEventListener('pointermove',moveHold);
