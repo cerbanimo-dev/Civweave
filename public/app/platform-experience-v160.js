@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-platform-experience-v160.1-hud-stable';
+const VERSION='1.0.5-platform-experience-v160.1-quest-copy';
 // Compatibility marker: VERSION='1.0.4-platform-experience-v160'
 if(globalThis.CivweavePlatformExperienceV160?.version===VERSION)return;
 const THEME_KEY='civweave.appearance.v160';
@@ -168,7 +168,7 @@ function pending(){
   const intentions=list(INTENTION_KEY).filter(item=>item?.kind==='weave-plan'&&(item.state==='review'||item.plan?.state==='review'));
   return[
     ...actions.map(item=>({type:'action',id:item.id,title:item.title,at:item.updatedAt||item.createdAt,state:item.state,system:item.system})),
-    ...intentions.map(item=>({type:'intention',id:item.id,title:item.title||item.plan?.title||'Review weave',at:item.updatedAt||item.createdAt,state:'review',system:'civweave'}))
+    ...intentions.map(item=>({type:'intention',id:item.id,title:item.title||item.plan?.title||'Review Quest',at:item.updatedAt||item.createdAt,state:'review',system:'civweave'}))
   ].sort((a,b)=>(Date.parse(b.at||0)||0)-(Date.parse(a.at||0)||0));
 }
 async function openLatest(){
