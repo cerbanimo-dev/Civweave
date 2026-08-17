@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   diagnose:
-    name: Inspect actual Cloudflare Pages audit history
+    name: Query actual custom-domain request traffic
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -22,31 +22,30 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Read Pages project metadata and audit changes
+      - name: Query zone traffic by hostname and path
         shell: bash
         run: |
           set -euo pipefail
           node <<'NODE'
           const token=process.env.CLOUDFLARE_API_TOKEN||'';
           const account=process.env.CLOUDFLARE_ACCOUNT_ID||'';
-          const headers={authorization:`Bearer ${token}`,accept:'application/json'};
-          const projectsResponse=await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects`,{headers});
-          const projects=await projectsResponse.json().catch(()=>({}));
-          console.log('CURRENT_PROJECTS');
-          for(const p of projects.result||[])console.log(JSON.stringify({name:p.name,id:p.id,createdOn:p.created_on,productionScriptName:p.production_script_name,previewScriptName:p.preview_script_name,productionBranch:p.production_branch,latestDeployment:p.latest_deployment?{id:p.latest_deployment.id,createdOn:p.latest_deployment.created_on,environment:p.latest_deployment.environment,url:p.latest_deployment.url}:null,canonicalDeployment:p.canonical_deployment?{id:p.canonical_deployment.id,createdOn:p.canonical_deployment.created_on,url:p.canonical_deployment.url}:null}));
-
-          const auditUrl=new URL(`https://api.cloudflare.com/client/v4/accounts/${account}/logs/audit`);
-          auditUrl.searchParams.set('since','2026-08-15T00:00:00Z');
-          auditUrl.searchParams.set('before','2026-08-17T14:15:00Z');
-          auditUrl.searchParams.set('limit','1000');
-          const ar=await fetch(auditUrl,{headers});
-          const ap=await ar.json().catch(()=>({}));
-          console.log('AUDIT_STATUS',ar.status);
-          if(!ar.ok){console.log('AUDIT_ERROR',JSON.stringify(ap));process.exit(0)}
-          const rows=Array.isArray(ap.result)?ap.result:[];
-          console.log('AUDIT_TOTAL',rows.length);
-          for(const row of rows){
-            const text=JSON.stringify(row).toLowerCase();
-            if(/pages|workers|script|deployment|function/.test(text))console.log('AUDIT_ROW',JSON.stringify(row));
+          const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
+          const zr=await fetch(`https://api.cloudflare.com/client/v4/zones?account.id=${encodeURIComponent(account)}&per_page=100`,{headers});
+          const zp=await zr.json().catch(()=>({}));
+          console.log('ZONES_STATUS',zr.status);
+          if(!zr.ok){console.log('ZONES_ERROR',JSON.stringify(zp));process.exit(0)}
+          const zones=(zp.result||[]).map(z=>({id:z.id,name:z.name,status:z.status}));
+          console.log('ZONES',JSON.stringify(zones));
+          const start='2026-08-16T00:00:00.000Z', end='2026-08-17T07:00:00.000Z';
+          async function gql(label,query,variables){const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});const p=await r.json().catch(()=>({}));if(!r.ok||p.errors?.length){console.log(`${label}_ERROR`,JSON.stringify({status:r.status,errors:p.errors||p}));return null}return p.data;}
+          for(const zone of zones){
+            const query=`query Traffic($zoneTag:string,$start:Time!,$end:Time!){viewer{zones(filter:{zoneTag:$zoneTag}){httpRequestsAdaptiveGroups(limit:10000,filter:{datetime_geq:$start,datetime_lt:$end},orderBy:[count_DESC]){count dimensions{clientRequestHTTPHost clientRequestPath clientRequestHTTPMethod edgeResponseStatus datetimeHour}}}}}`;
+            const data=await gql('ZONE',query,{zoneTag:zone.id,start,end});
+            const rows=data?.viewer?.zones?.[0]?.httpRequestsAdaptiveGroups||[];
+            const byHost=new Map(),byPath=new Map();let total=0;
+            for(const row of rows){const n=Number(row?.count||0);total+=n;const d=row?.dimensions||{};const host=String(d.clientRequestHTTPHost||'');const path=String(d.clientRequestPath||'');byHost.set(host,(byHost.get(host)||0)+n);const key=`${host}${path}`;byPath.set(key,(byPath.get(key)||0)+n)}
+            console.log('ZONE_TOTAL',JSON.stringify({zone:zone.name,requests:total,groups:rows.length}));
+            console.log('ZONE_TOP_HOSTS',JSON.stringify({zone:zone.name,rows:[...byHost.entries()].sort((a,b)=>b[1]-a[1]).slice(0,20).map(([host,requests])=>({host,requests}))}));
+            console.log('ZONE_TOP_PATHS',JSON.stringify({zone:zone.name,rows:[...byPath.entries()].sort((a,b)=>b[1]-a[1]).slice(0,40).map(([path,requests])=>({path,requests}))}));
           }
           NODE
