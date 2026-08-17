@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-guide-capability-passover-v1-canonical-artifacts';
+const VERSION='1.1.1-guide-capability-passover-v1-canonical-targets';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 
@@ -22,6 +22,7 @@ const DECLARED_KIND=Object.freeze({weave:'campus-weave',curriculum:'learning-pat
 const STORE_PREFIX='civweave.guide-capability-passover.v1';
 const STYLE_ID='cw-guide-capability-passover-v1-style';
 const BUILD=/\b(build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|set up|implement|ship|revise|update|want|need|help)\b/i;
+const DIRECT_CANONICAL=/\b(?:build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|set up|revise|update|want(?:\s+to)?|need(?:\s+to)?)\s+(?:me\s+|us\s+)?(?:(?:a|an|the|this|that|new)\s+)?(learning journey|endeavou?r|manifest|quest)s?\b/i;
 let assistantPatched=false;
 let clickBound=false;
 
@@ -34,16 +35,31 @@ function systemFor(options={}){const value=compact(options.systemId||options?.co
 function ownerFor(artifact){return OWNER[compact(artifact,80)]||''}
 function canonicalFor(system){return CANONICAL[SYSTEMS.includes(system)?system:'civweave']}
 function artifactForSystem(system){return canonicalFor(system).internalArtifactClass}
-
+function canonicalTermArtifact(term){
+  const value=compact(term,80).toLowerCase();
+  if(value==='learning journey')return'curriculum';
+  if(value==='endeavor'||value==='endeavour')return'quest';
+  if(value==='manifest')return'resource';
+  if(value==='quest')return'weave';
+  return'';
+}
+function explicitCanonicalArtifact(t){
+  const direct=t.match(DIRECT_CANONICAL),directArtifact=canonicalTermArtifact(direct?.[1]);if(directArtifact)return directArtifact;
+  const technicalManifest=/\b(web|pwa|package|npm|json|xml|app|application|deployment|docker|kubernetes)\b/.test(t);
+  const mentions=[];
+  for(const [pattern,artifact] of [[/\blearning journeys?\b/,'curriculum'],[/\bendeavou?rs?\b/,'quest'],[/\bmanifests?\b/,'resource'],[/\bquests?\b/,'weave']]){
+    const match=t.match(pattern);if(match&&!(artifact==='resource'&&technicalManifest))mentions.push({artifact,index:match.index??Number.MAX_SAFE_INTEGER});
+  }
+  if(!mentions.length)return'';
+  mentions.sort((a,b)=>a.index-b.index);
+  return mentions[0].artifact;
+}
 function candidateDetails(text){
   const value=compact(text,8000),t=value.toLowerCase();if(!value)return{artifact:'',explicitCanonical:false};
   const building=BUILD.test(t);
   if(!building)return{artifact:'',explicitCanonical:false};
 
-  if(/\blearning journeys?\b/.test(t))return{artifact:'curriculum',explicitCanonical:true};
-  if(/\bendeavou?rs?\b/.test(t))return{artifact:'quest',explicitCanonical:true};
-  if(/\bquests?\b/.test(t))return{artifact:'weave',explicitCanonical:true};
-  if(/\bmanifests?\b/.test(t)&&!/\b(web|pwa|package|npm|json|xml|app|application|deployment|docker|kubernetes)\b/.test(t))return{artifact:'resource',explicitCanonical:true};
+  const canonical=explicitCanonicalArtifact(t);if(canonical)return{artifact:canonical,explicitCanonical:true};
 
   if(/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|learning plan|learning content|educational content|teaching content|lesson plan|study plan|training plan|training program|skill tree)\b/.test(t))return{artifact:'curriculum',explicitCanonical:false};
   if(/\b(resource manifest|skill manifest|procurement plan|sourcing plan|materials? list|inventory plan|resource plan|resource request|resource offer)\b/.test(t))return{artifact:'resource',explicitCanonical:false};
@@ -114,7 +130,7 @@ async function confirmedArtifact(text,sourceSystem,candidate){
 }
 function handoffResult(options,sourceSystem,targetSystem,artifact,route){
   const source=GUIDE[sourceSystem]||GUIDE.civweave,target=GUIDE[targetSystem]||GUIDE.civweave,label=ARTIFACT_LABEL[artifact]||'specialized artifact';
-  const sourceText=preserve(options?.text,12000),answer=`Talk to ${target.name} in ${target.label} for this. ${target.name} makes ${label}${label.endsWith('s')?'':'s'}, so I’ll keep ${source.name} focused on ${source.focus} instead of duplicating that capability here.`;
+  const sourceText=preserve(options?.text,12000),plural=CANONICAL[targetSystem]?.plural||`${label}s`,answer=`Talk to ${target.name} in ${target.label} for this. ${target.name} makes ${plural}, so I’ll keep ${source.name} focused on ${source.focus} instead of duplicating that capability here.`;
   const handoff={schema:'civweave.guide-capability-passover.v1',id:uid(),kind:'guide-capability-passover',sourceSystem,targetSystem,sourceText,artifactClass:artifact,canonicalArtifactName:label,label:`Pass to ${target.name}`,createdAt:now(),resubmit:true,open:true};
   return{response:{answer,choice:{mode:MODE[targetSystem]||'Plan',system:targetSystem,room:'',nextAction:`Use “Pass to ${target.name}” to send your request to ${target.name} and open that chat.`},assumptions:[],requiresConsent:false,confidence:.99,handoffSystem:targetSystem},provider:'unified-chat-passover',model:'canonical-capability-owner-router',handoff,responseRouting:route,context:{guide:{system:sourceSystem,name:source.name},capability:'passover',requestedArtifact:artifact,canonicalArtifactName:label,capabilityOwner:targetSystem},fallbackFrom:null};
 }
@@ -183,7 +199,7 @@ function start(){
   for(const name of ['civweave:assistant-runtime-ready','civweave:response-router-installed','civweave:unified-chat-system-ready','civweave:guide-chat-ready','civweave:guide-chat-opened','civweave:guide-chat-state','civweave:realm-guide-thread-changed','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
 }
 
-const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,canonicalUserFacingTerms:true});
+const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,explicitCanonicalArtifact,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,canonicalUserFacingTerms:true});
 globalThis.CivweaveGuideCapabilityPassoverV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
