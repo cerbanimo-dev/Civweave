@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   diagnose:
-    name: Test Cloudflare Pages attribution fields
+    name: Compare actual Pages Function traffic by day
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -22,7 +22,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Test Pages project/deployment fields
+      - name: Query recent Pages Function hours
         shell: bash
         run: |
           set -euo pipefail
@@ -30,9 +30,15 @@ jobs:
           const token=process.env.CLOUDFLARE_API_TOKEN||'';
           const accountTag=process.env.CLOUDFLARE_ACCOUNT_ID||'';
           const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
-          async function gql(label,query,variables={accountTag}){const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});const p=await r.json().catch(()=>({}));console.log(label,JSON.stringify(p.errors||p.data||p));}
-          const dims=['projectName','deploymentId','environment','scriptVersion','hostname','requestPath','clientRequestPath'];
-          for(const field of dims){await gql(`DIM_${field}`,`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1,filter:{}){sum{requests}dimensions{${field}}}}}}`);}
-          const filters=['projectName','deploymentId','environment','scriptVersion'];
-          for(const field of filters){await gql(`FILTER_${field}`,`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1,filter:{${field}:"civweave"}){sum{requests}dimensions{datetimeHour}}}}}`);}
+          const end=new Date();
+          const start=new Date(end.getTime()-4*24*60*60*1000);
+          const query=`query Usage($accountTag:string,$datetimeStart:string,$datetimeEnd:string){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_leq:$datetimeEnd}){sum{requests subrequests errors}dimensions{datetimeHour status}}}}}`;
+          const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables:{accountTag,datetimeStart:start.toISOString(),datetimeEnd:end.toISOString()}})});
+          const p=await r.json().catch(()=>({}));
+          if(!r.ok||p.errors?.length){console.error('ERROR',JSON.stringify(p.errors||p));process.exit(2)}
+          const rows=p?.data?.viewer?.accounts?.[0]?.pagesFunctionsInvocationsAdaptiveGroups||[];
+          const hours=new Map(),days=new Map();
+          for(const row of rows){const hour=String(row?.dimensions?.datetimeHour||'');const day=hour.slice(0,10);const req=Number(row?.sum?.requests||0),sub=Number(row?.sum?.subrequests||0),err=Number(row?.sum?.errors||0);const h=hours.get(hour)||{hour,requests:0,subrequests:0,errors:0};h.requests+=req;h.subrequests+=sub;h.errors+=err;hours.set(hour,h);const d=days.get(day)||{day,requests:0,subrequests:0,errors:0};d.requests+=req;d.subrequests+=sub;d.errors+=err;days.set(day,d)}
+          console.log('PAGES_DAILY_TOTALS');for(const d of [...days.values()].sort((a,b)=>a.day.localeCompare(b.day)))console.log(JSON.stringify(d));
+          console.log('PAGES_HOURLY_TOTALS');for(const h of [...hours.values()].sort((a,b)=>a.hour.localeCompare(b.hour)))console.log(JSON.stringify(h));
           NODE
