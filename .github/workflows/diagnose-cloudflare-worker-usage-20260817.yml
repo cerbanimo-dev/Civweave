@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   diagnose:
-    name: Query actual Cloudflare Pages metadata
+    name: Discover Cloudflare Pages analytics schema
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -22,28 +22,27 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Inspect Pages analytics dimensions
+      - name: Discover Pages filters and dimensions
         shell: bash
         run: |
           set -euo pipefail
           node <<'NODE'
           const token=process.env.CLOUDFLARE_API_TOKEN||'';
+          const accountTag=process.env.CLOUDFLARE_ACCOUNT_ID||'';
           const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
           async function gql(query,variables={}){const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});return{status:r.status,payload:await r.json().catch(()=>({}))};}
-          function unwrap(t){while(t?.ofType)t=t.ofType;return t?.name||''}
-          const accountType=await gql(`query { __type(name: "Account") { fields { name type { kind name ofType { kind name ofType { kind name } } } } } }`);
-          console.log('INTROSPECTION_ACCOUNT_STATUS',accountType.status);
-          if(accountType.payload?.errors) console.log('INTROSPECTION_ACCOUNT_ERROR',JSON.stringify(accountType.payload.errors));
-          const fields=accountType.payload?.data?.__type?.fields||[];
-          const target=fields.find(f=>f.name==='pagesFunctionsInvocationsAdaptiveGroups');
-          console.log('PAGES_ANALYTICS_FIELD_TYPE',JSON.stringify(target||null));
-          const groupType=unwrap(target?.type);
-          if(groupType){
-            const group=await gql(`query($name:String!){__type(name:$name){name fields{name type{kind name ofType{kind name ofType{kind name}}}}}}`,{name:groupType});
-            console.log('PAGES_GROUP_TYPE',JSON.stringify(group.payload?.data?.__type||group.payload?.errors||null));
-            const dimField=group.payload?.data?.__type?.fields?.find(f=>f.name==='dimensions');
-            const dimType=unwrap(dimField?.type);
-            console.log('PAGES_DIMENSION_TYPE',dimType);
-            if(dimType){const dims=await gql(`query($name:String!){__type(name:$name){name fields{name type{kind name ofType{kind name}}}}}`,{name:dimType});console.log('PAGES_DIMENSION_FIELDS',JSON.stringify(dims.payload?.data?.__type||dims.payload?.errors||null));}
-          }
+          async function introspect(name){const r=await gql(`query($name:String!){__type(name:$name){name inputFields{name type{kind name ofType{kind name}}} fields{name type{kind name ofType{kind name}}}}}`,{name});return r.payload?.data?.__type||r.payload?.errors||null;}
+          const badFilter=await gql(`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1,filter:{foo:"x"}){sum{requests}}}}}`,{accountTag});
+          console.log('BAD_FILTER',JSON.stringify(badFilter.payload?.errors||badFilter.payload));
+          const filterText=JSON.stringify(badFilter.payload?.errors||[]);
+          const filterType=(filterText.match(/type ['"]?([A-Za-z0-9_]+)['"]?/)||[])[1]||'';
+          console.log('FILTER_TYPE',filterType);
+          if(filterType) console.log('FILTER_FIELDS',JSON.stringify(await introspect(filterType)));
+
+          const badDimension=await gql(`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1){sum{requests}dimensions{foo}}}}}`,{accountTag});
+          console.log('BAD_DIMENSION',JSON.stringify(badDimension.payload?.errors||badDimension.payload));
+          const dimText=JSON.stringify(badDimension.payload?.errors||[]);
+          const dimType=(dimText.match(/type ['"]?([A-Za-z0-9_]+)['"]?/)||[])[1]||'';
+          console.log('DIMENSION_TYPE',dimType);
+          if(dimType) console.log('DIMENSION_FIELDS',JSON.stringify(await introspect(dimType)));
           NODE
