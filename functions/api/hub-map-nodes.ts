@@ -8,10 +8,11 @@ const FABRIC_ORIGIN = "https://civweave-node-cloud.cerbanimo.workers.dev";
 const STAGING_GUILD_SERVER_ORIGIN = "https://civweave-node-cloud-staging.cerbanimo.workers.dev";
 const STAGING_NODE_ID = "civweave-cloud";
 const MAX_NODES = 64;
+const MAP_CACHE_CONTROL = "public, max-age=15, s-maxage=60, stale-while-revalidate=300";
 
 type JsonRecord = Record<string, any>;
 
-function reply(value: unknown, status = 200, cache = "public, max-age=30, stale-while-revalidate=120") {
+function reply(value: unknown, status = 200, cache = MAP_CACHE_CONTROL) {
   return Response.json(value, {
     status,
     headers: {
@@ -120,26 +121,28 @@ function stagingSlots(guild: NonNullable<ReturnType<typeof stagingGuild>>, capac
   };
 }
 
-async function liveDirectory(stagingShadow = false) {
-  const [directoryResult, fabricResult, stagingCapacityResult] = await Promise.all([
-    getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
-    getJson(new URL("/api/fabric/capacity", FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
-    stagingShadow
-      ? getJson(new URL(`/api/fabric/capacity?nodeId=${encodeURIComponent(STAGING_NODE_ID)}`, STAGING_GUILD_SERVER_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} }))
-      : Promise.resolve({ ok: true, status: 200, payload: {} }),
-  ]);
-
-  if (!fabricResult.ok && stagingShadow) {
+async function liveStagingDirectory() {
+  const guild = stagingGuild(STAGING_NODE_ID);
+  if (!guild) {
     return reply({
       schema: "civweave.hub-map-directory.v1",
       ok: false,
       environment: "staging",
-      error: "live-guild-fabric-unavailable",
+      error: "staging-guild-not-configured",
       productionMembershipIsolation: true,
       nodes: [],
-    }, 502, "no-store");
+    }, 500, "no-store");
   }
-  if (stagingShadow && (!stagingCapacityResult.ok || stagingCapacityResult.payload?.stagingIsolatedGuildServer !== true)) {
+
+  // Staging intentionally reads only the one live Guild identity it shadows.
+  // Never enumerate production fabric membership or manifests from this path.
+  const [directoryResult, manifestResult, stagingCapacityResult] = await Promise.all([
+    getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
+    getJson(new URL(`/n/${encodeURIComponent(STAGING_NODE_ID)}/api/ai/node/manifest`, FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
+    getJson(new URL(`/api/fabric/capacity?nodeId=${encodeURIComponent(STAGING_NODE_ID)}`, STAGING_GUILD_SERVER_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
+  ]);
+
+  if (!stagingCapacityResult.ok || stagingCapacityResult.payload?.stagingIsolatedGuildServer !== true) {
     return reply({
       schema: "civweave.hub-map-directory.v1",
       ok: false,
@@ -149,6 +152,62 @@ async function liveDirectory(stagingShadow = false) {
       nodes: [],
     }, 502, "no-store");
   }
+
+  const directory = Array.isArray(directoryResult.payload?.nodes) ? directoryResult.payload.nodes : [];
+  const directoryNode = directory.find((node: JsonRecord) => String(node?.nodeId || "").trim() === STAGING_NODE_ID) || {};
+  const manifest = manifestResult.ok ? (manifestResult.payload?.manifest || manifestResult.payload || {}) : {};
+  const merged: JsonRecord = { ...directoryNode, ...manifest, nodeId: STAGING_NODE_ID };
+  const location = publicLocation(merged) || stagingLocation(STAGING_NODE_ID);
+  const liveOrigin = safeHttps(merged.publicOrigin) || FABRIC_ORIGIN;
+
+  const nodes = location ? [{
+    schema: "civweave.hub-map-node.v1",
+    nodeId: STAGING_NODE_ID,
+    displayName: guild.displayName || String(merged.displayName || merged.label || STAGING_NODE_ID).slice(0, 180),
+    publicOrigin: STAGING_GUILD_SERVER_ORIGIN,
+    livePublicOrigin: liveOrigin,
+    runtime: String(merged.runtime || "cloudflare-host-node").slice(0, 120),
+    status: String(merged.status || "active").slice(0, 40),
+    capabilities: Array.isArray(merged.capabilities) ? merged.capabilities.map(String).slice(0, 40) : [],
+    location,
+    updatedAt: merged.updatedAt || location.syncedAt || null,
+    slots: stagingSlots(guild, stagingCapacityResult.payload || {}),
+    liveGuild: true,
+    stagingShadowSeats: true,
+    stagingGuildServerIsolated: true,
+    productionMembershipIsolation: true,
+  }] : [];
+
+  return reply({
+    schema: "civweave.hub-map-directory.v1",
+    ok: true,
+    environment: "staging",
+    stagingSynthetic: false,
+    stagingShadowSeats: true,
+    stagingGuildServerIsolated: true,
+    productionMembershipIsolation: true,
+    productionDiscoveryReadOnly: true,
+    generatedAt: new Date().toISOString(),
+    nodes,
+    source: {
+      directory: directoryResult.ok ? "core-node-directory" : "unavailable",
+      guild: manifestResult.ok ? "single-live-guild-manifest" : "unavailable",
+      seats: "isolated-staging-guild-server",
+    },
+    privacy: {
+      publicLocationsAreGuildkeeperPublished: true,
+      rallyPointsAreGuildkeeperPublished: true,
+      roamingDeviceLocationIncluded: false,
+      stagingLocationFallbackMayBeUsed: true,
+    },
+  });
+}
+
+async function liveProductionDirectory() {
+  const [directoryResult, fabricResult] = await Promise.all([
+    getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
+    getJson(new URL("/api/fabric/capacity", FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
+  ]);
 
   const directory = Array.isArray(directoryResult.payload?.nodes) ? directoryResult.payload.nodes : [];
   const directoryById = new Map(
@@ -163,6 +222,8 @@ async function liveDirectory(stagingShadow = false) {
   )].slice(0, MAX_NODES);
 
   const manifests = await Promise.all(registered.map(async nodeId => {
+    const directoryNode = directoryById.get(nodeId) || {};
+    if (publicLocation(directoryNode)) return {};
     const result = await getJson(new URL(`/n/${nodeId}/api/ai/node/manifest`, FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} }));
     return result.ok ? (result.payload?.manifest || result.payload || {}) : {};
   }));
@@ -170,31 +231,6 @@ async function liveDirectory(stagingShadow = false) {
   const nodes = registered.map((nodeId, index) => {
     const merged: JsonRecord = { ...(directoryById.get(nodeId) || {}), ...(manifests[index] || {}), nodeId };
     const liveOrigin = safeHttps(merged.publicOrigin) || FABRIC_ORIGIN;
-
-    if (stagingShadow) {
-      const guild = stagingGuild(nodeId);
-      if (!guild || nodeId !== STAGING_NODE_ID) return null;
-      const location = publicLocation(merged) || stagingLocation(nodeId);
-      if (!location) return null;
-      return {
-        schema: "civweave.hub-map-node.v1",
-        nodeId,
-        displayName: guild.displayName || String(merged.displayName || merged.label || nodeId).slice(0, 180),
-        publicOrigin: STAGING_GUILD_SERVER_ORIGIN,
-        livePublicOrigin: liveOrigin,
-        runtime: String(merged.runtime || "cloudflare-host-node").slice(0, 120),
-        status: String(merged.status || "active").slice(0, 40),
-        capabilities: Array.isArray(merged.capabilities) ? merged.capabilities.map(String).slice(0, 40) : [],
-        location,
-        updatedAt: merged.updatedAt || location.syncedAt || null,
-        slots: stagingSlots(guild, stagingCapacityResult.payload || {}),
-        liveGuild: true,
-        stagingShadowSeats: true,
-        stagingGuildServerIsolated: true,
-        productionMembershipIsolation: true,
-      };
-    }
-
     const location = publicLocation(merged);
     if (!location) return null;
     return {
@@ -213,41 +249,40 @@ async function liveDirectory(stagingShadow = false) {
   return reply({
     schema: "civweave.hub-map-directory.v1",
     ok: true,
-    ...(stagingShadow ? {
-      environment: "staging",
-      stagingSynthetic: false,
-      stagingShadowSeats: true,
-      stagingGuildServerIsolated: true,
-      productionMembershipIsolation: true,
-      productionDiscoveryReadOnly: true,
-    } : {}),
     generatedAt: new Date().toISOString(),
     nodes,
     source: {
       directory: directoryResult.ok ? "core-node-directory" : "unavailable",
       fabric: fabricResult.ok ? "cloudflare-node-fabric" : "unavailable",
-      ...(stagingShadow ? { seats: "isolated-staging-guild-server" } : {}),
     },
     privacy: {
       publicLocationsAreGuildkeeperPublished: true,
       rallyPointsAreGuildkeeperPublished: true,
       roamingDeviceLocationIncluded: false,
-      ...(stagingShadow ? { stagingLocationFallbackMayBeUsed: true } : {}),
     },
-  }, 200, stagingShadow ? "no-store" : undefined);
+  });
 }
 
 export const onRequestGet: PagesFunction = async context => {
-  if (isStagingRequest(context.request)) {
-    try {
-      return await liveDirectory(true);
-    } catch (error) {
-      return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
-    }
+  const staging = isStagingRequest(context.request);
+  const cacheUrl = new URL(context.request.url);
+  cacheUrl.search = "";
+  const cacheKey = new Request(cacheUrl.toString(), { method: "GET" });
+  const cache = caches.default;
+
+  try {
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+  } catch {
+    // Cache availability must never prevent the public Guild Map from loading.
   }
 
   try {
-    return await liveDirectory(false);
+    const response = staging ? await liveStagingDirectory() : await liveProductionDirectory();
+    if (response.ok && !String(response.headers.get("cache-control") || "").includes("no-store")) {
+      context.waitUntil(cache.put(cacheKey, response.clone()).catch(() => undefined));
+    }
+    return response;
   } catch (error) {
     return reply({ ok: false, error: "guild-map-directory-failed", message: String((error as Error)?.message || error) }, 502, "no-store");
   }
