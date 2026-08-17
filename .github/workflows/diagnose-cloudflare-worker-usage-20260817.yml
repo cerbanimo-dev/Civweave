@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   diagnose:
-    name: Attribute actual Pages traffic by project
+    name: Inspect actual Cloudflare Pages audit history
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -22,33 +22,31 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Filter Pages metrics by production script name
+      - name: Read Pages project metadata and audit changes
         shell: bash
         run: |
           set -euo pipefail
           node <<'NODE'
           const token=process.env.CLOUDFLARE_API_TOKEN||'';
-          const accountTag=process.env.CLOUDFLARE_ACCOUNT_ID||'';
-          const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
-          const list=await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountTag}/pages/projects`,{headers});
-          const packet=await list.json().catch(()=>({}));
-          if(!list.ok){console.error('PROJECTS_ERROR',JSON.stringify(packet));process.exit(2)}
-          const projects=(packet.result||[]).map(p=>({name:p.name,productionScriptName:p.production_script_name,previewScriptName:p.preview_script_name}));
-          console.log('PAGES_SCRIPT_NAMES',JSON.stringify(projects));
-          const start='2026-08-16T00:00:00.000Z',end='2026-08-17T07:00:00.000Z';
-          async function query(scriptName){
-            const q=`query Usage($accountTag:string,$datetimeStart:string,$datetimeEnd:string,$scriptName:string){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_lt:$datetimeEnd,scriptName:$scriptName}){sum{requests subrequests errors}dimensions{datetimeHour status scriptName}}}}}`;
-            const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query:q,variables:{accountTag,datetimeStart:start,datetimeEnd:end,scriptName}})});
-            const p=await r.json().catch(()=>({}));return{status:r.status,p};
-          }
-          for(const project of projects){
-            for(const [kind,script] of [['production',project.productionScriptName],['preview',project.previewScriptName]]){
-              if(!script)continue;
-              const {status,p}=await query(script);
-              if(p.errors?.length){console.log('PROJECT_FILTER_ERROR',JSON.stringify({project:project.name,kind,script,status,errors:p.errors}));continue}
-              const rows=p?.data?.viewer?.accounts?.[0]?.pagesFunctionsInvocationsAdaptiveGroups||[];let requests=0,subrequests=0,errors=0;const hours=[];
-              for(const row of rows){const req=Number(row?.sum?.requests||0),sub=Number(row?.sum?.subrequests||0),err=Number(row?.sum?.errors||0);requests+=req;subrequests+=sub;errors+=err;hours.push({hour:row?.dimensions?.datetimeHour,status:row?.dimensions?.status,requests:req,subrequests:sub,errors:err,scriptName:row?.dimensions?.scriptName||null})}
-              console.log('PROJECT_USAGE',JSON.stringify({project:project.name,kind,script,requests,subrequests,errors,hours:hours.sort((a,b)=>String(a.hour).localeCompare(String(b.hour)))}));
-            }
+          const account=process.env.CLOUDFLARE_ACCOUNT_ID||'';
+          const headers={authorization:`Bearer ${token}`,accept:'application/json'};
+          const projectsResponse=await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects`,{headers});
+          const projects=await projectsResponse.json().catch(()=>({}));
+          console.log('CURRENT_PROJECTS');
+          for(const p of projects.result||[])console.log(JSON.stringify({name:p.name,id:p.id,createdOn:p.created_on,productionScriptName:p.production_script_name,previewScriptName:p.preview_script_name,productionBranch:p.production_branch,latestDeployment:p.latest_deployment?{id:p.latest_deployment.id,createdOn:p.latest_deployment.created_on,environment:p.latest_deployment.environment,url:p.latest_deployment.url}:null,canonicalDeployment:p.canonical_deployment?{id:p.canonical_deployment.id,createdOn:p.canonical_deployment.created_on,url:p.canonical_deployment.url}:null}));
+
+          const auditUrl=new URL(`https://api.cloudflare.com/client/v4/accounts/${account}/logs/audit`);
+          auditUrl.searchParams.set('since','2026-08-15T00:00:00Z');
+          auditUrl.searchParams.set('before','2026-08-17T14:15:00Z');
+          auditUrl.searchParams.set('limit','1000');
+          const ar=await fetch(auditUrl,{headers});
+          const ap=await ar.json().catch(()=>({}));
+          console.log('AUDIT_STATUS',ar.status);
+          if(!ar.ok){console.log('AUDIT_ERROR',JSON.stringify(ap));process.exit(0)}
+          const rows=Array.isArray(ap.result)?ap.result:[];
+          console.log('AUDIT_TOTAL',rows.length);
+          for(const row of rows){
+            const text=JSON.stringify(row).toLowerCase();
+            if(/pages|workers|script|deployment|function/.test(text))console.log('AUDIT_ROW',JSON.stringify(row));
           }
           NODE
