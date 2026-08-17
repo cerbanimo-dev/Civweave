@@ -32,6 +32,7 @@ const retiredFamilyNavAssets=[
   'public/app/assets/navigation/200-fellowfare-nav.webp',
   'public/app/assets/navigation/200-anarchadia-nav.webp'
 ];
+const campusPartPaths=[1,2,3,4,5].map(number=>`public/app/working-campus-v156.part${number}.txt`);
 
 const [routesSource,boundarySource,navSource,familyShell,workerWrapper,workerNavigation,...pages]=await Promise.all([
   read('public/app/system-routes-v227.js'),
@@ -42,8 +43,11 @@ const [routesSource,boundarySource,navSource,familyShell,workerWrapper,workerNav
   read('public/service-worker-canonical-navigation-v227.js'),
   ...Object.values(paths).map(path=>read(`public${path}`))
 ]);
+const campusParts=(await Promise.all(campusPartPaths.map(read))).join('');
+const campusRuntime=await read('public/app/working-campus-v156.js');
+const campusPage=pages[0];
 
-for(const source of [routesSource,boundarySource,navSource,familyShell,workerNavigation])new Function(source);
+for(const source of [routesSource,boundarySource,navSource,familyShell,workerNavigation,campusRuntime,campusParts])new Function(source);
 
 // Ownership and presentation: five guides, one global navigation rail.
 assert.match(navSource,/CivweaveFamilyNavigationV178/,'The navigation owner must publish its ownership contract.');
@@ -57,6 +61,12 @@ assert.doesNotMatch(navSource,/cwf104-tray/,'The current navigation owner must n
 assert.match(familyShell,/familyNavigationOwner:'themed-system-nav-v178'/,'Family shell must delegate navigation ownership.');
 assert.match(familyShell,/familyNavigationOwnership:false/,'Family shell must explicitly disclaim navigation ownership.');
 assert.doesNotMatch(familyShell,/cwf104-tray|data-cwf-system|cwf104-system/,'Family shell regained retired five-system navigation DOM.');
+
+// Settings: one shared presentation, exposed through Weaveling's quick menu instead of realm-local launchers.
+assert.match(navSource,/CivweaveSettingsV320\|\|globalThis\.CivweaveSettingsGatewayV317/,'The guide rail must invoke the canonical shared Settings API.');
+assert.match(navSource,/body \[data-open-unified-ai-settings\]\{display:none!important\}/,'Realm-local Settings launchers must stay suppressed while the guide rail owns the global entry point.');
+assert.doesNotMatch(familyShell,/data-open-unified-ai-settings/,'Family shell must not render a realm-local Settings launcher.');
+assert.doesNotMatch(campusPage,/data-open-unified-ai-settings/,'Working Campus must not render a local Settings launcher.');
 
 // Hold/right-click/keyboard quick-launch contract.
 assert.match(navSource,/const MENU_ID='cw-themed-system-nav-menu'/,'The rail must own one quick-launch menu.');
@@ -73,7 +83,7 @@ assert.match(navSource,/navigator\.vibrate/,'A successful mobile hold may provid
 
 // Each guide gets useful first-order shortcuts and the canonical guide thread.
 const requiredQuickActions={
-  civweave:['weave','progress','library','chat','settings'],
+  civweave:['quest','library','chat','settings'],
   'living-school':['continue','path','modules','practicum','chat'],
   cerbanimo:['quest','mission-room','project-workbench','observatory','chat'],
   fellowfare:['market','loom','assemblies','inbox','profile','chat'],
@@ -83,11 +93,25 @@ for(const [system,actions] of Object.entries(requiredQuickActions)){
   assert.match(navSource,new RegExp(`(?:'${system}'|${system.replaceAll('-','\\-')}):Object\\.freeze\\(\\[`),`${system} is missing its quick-launch set.`);
   for(const action of actions)assert.match(navSource,new RegExp(`id:'${action.replaceAll('-','\\-')}'`),`${system} is missing quick action ${action}.`);
 }
+assert.doesNotMatch(navSource,/Object\.freeze\(\{id:'progress',label:'Progress'/,'Progress must not remain a competing Weaveling quick-launch destination.');
+assert.match(navSource,/CivweaveWorkingCampusV156/,'Current Quest shortcuts must target the Working Campus view API instead of hidden legacy tabs.');
+assert.match(navSource,/feature==='weave'\|\|feature==='progress'\?'quest'/,'Legacy Weave/Progress feature URLs must converge on Current Quest.');
 assert.match(navSource,/CivweaveGuideChatSurfaceV350/,'Guide chat shortcuts must target the canonical chat surface.');
 assert.match(navSource,/url\.searchParams\.set\('feature',feature\)/,'Cross-system quick launches must preserve the requested feature through canonical routing.');
 assert.match(navSource,/applyRequestedFeature/,'A destination system must consume its requested quick-launch feature.');
 assert.match(navSource,/civweave:guide-chat-state/,'Guide unread state must feed the rail.');
 assert.match(navSource,/civweave:onboarding-step/,'Onboarding must highlight the canonical guide rail instead of a retired system switcher.');
+
+// Working Campus: Quest is the single current-state surface; guidance mode belongs to an active Quest.
+assert.doesNotMatch(campusPage,/id="guided-mode"|id="roam-mode"|class="bottom"/,'Working Campus must not retain permanent mode controls or its retired local bottom navigation.');
+assert.match(campusPage,/id="view-title">Current Quest</,'Working Campus must name the canonical current-state surface Current Quest.');
+assert.match(campusParts,/function questModeControls\(/,'Guided Rails / Free Roam must be rendered contextually inside the active Quest.');
+assert.match(campusParts,/data-quest-mode="guided"/,'The active Quest must expose Guided Rails contextually.');
+assert.match(campusParts,/data-quest-mode="roam"/,'The active Quest must expose Free Roam contextually.');
+assert.doesNotMatch(campusParts,/function progressView\(/,'Progress must not remain a separate Working Campus view.');
+assert.match(campusParts,/CivweaveWorkingCampusV156/,'Working Campus must publish its canonical view API.');
+assert.match(campusRuntime,/state\.view==='weave'\|\|state\.view==='progress'\?'quest'/,'Persisted legacy Weave/Progress views must migrate to Current Quest.');
+assert.match(campusRuntime,/\['quest','library','campus'\]/,'State repair must accept only the canonical Quest/library/campus view set.');
 
 for(const asset of retiredFamilyNavAssets)assert.equal(await exists(asset),false,`Retired navigation asset still exists: ${asset}`);
 
@@ -138,13 +162,17 @@ assert.match(workerNavigation,/precacheCanonicalRoutes/);
 console.log(JSON.stringify({
   ok:true,
   version,
-  revision:'five-guide-rail-hold-menu-v228',
+  revision:'five-guide-rail-current-quest-settings-v229',
   systems:Object.keys(paths),
   guides:['Weaveling','Moss','Kamiya','Rook','Merlin'],
   routeMatrix:25,
   interaction:'tap-system-hold-shortcuts',
   holdMilliseconds:460,
   quickLaunch:true,
+  currentQuest:true,
+  separateProgressView:false,
+  contextualQuestMode:true,
+  settingsEntry:'weaveling-hold-menu',
   canonicalChatOwner:chatOwner,
   familyNavigationOwner:familyNav.owner,
   competingPersistentNavigationSuppressed:true,
