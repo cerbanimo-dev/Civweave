@@ -23,13 +23,13 @@ jobs:
         run: |
           set -euo pipefail
           echo '=== TIMER FILES ==='
-          rg -n -l 'setInterval|setTimeout|requestAnimationFrame' public functions scripts 2>/dev/null | sort | head -n 400 || true
-          echo '=== TIMER + API CONTEXT ==='
-          for f in $(rg -l 'setInterval|setTimeout' public functions scripts 2>/dev/null | sort); do
-            if rg -q 'fetch\(|/api/' "$f"; then
+          grep -RIlE 'setInterval|setTimeout|requestAnimationFrame' public functions scripts 2>/dev/null | sort | head -n 400 || true
+          echo '=== TIMER + API FILES ==='
+          while IFS= read -r f; do
+            if grep -Eq 'fetch\(|/api/' "$f"; then
               echo "--- $f"
-              rg -n -C 4 'setInterval|setTimeout|fetch\(|/api/' "$f" | head -n 240 || true
+              grep -nE 'setInterval|setTimeout|fetch\(|/api/' "$f" | head -n 240 || true
             fi
-          done
+          done < <(grep -RIlE 'setInterval|setTimeout' public functions scripts 2>/dev/null | sort)
           echo '=== PAGES FUNCTION FETCH TARGETS ==='
-          rg -n -C 3 'fetch\(|request\.url|new URL\(|\.origin|pages\.dev|civweave\.cc|cerbanimo\.cc' functions | head -n 1600 || true
+          grep -RInE 'fetch\(|request\.url|new URL\(|\.origin|pages\.dev|civweave\.cc|cerbanimo\.cc' functions 2>/dev/null | head -n 1600 || true
