@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-guide-capability-passover-v1';
+const VERSION='1.0.1-guide-capability-passover-v1';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const OWNER=Object.freeze({curriculum:'living-school',quest:'cerbanimo',resource:'fellowfare',governance:'anarchadia',weave:'civweave'});
@@ -86,7 +86,8 @@ function patchAssistant(){
   if(originalFn.__cwGuideCapabilityPassoverV1){assistantPatched=true;return true}
   const original=originalFn.bind(api),respond=async options=>{const passover=await maybePassover(options||{});if(passover){remember(passover);return passover}return original(options)};
   respond.__cwGuideCapabilityPassoverV1=true;
-  for(const key of ['__cwUnifiedChatSystemV1','__guideIdentityIntegrityV216','__deterministicModeV175'])if(originalFn[key])respond[key]=originalFn[key];
+  respond.__prior=originalFn;
+  for(const key of ['__cwUnifiedChatSystemV1','__weavelingPlanJsonV190','__guideIdentityIntegrityV216','__deterministicModeV175'])if(originalFn[key])respond[key]=originalFn[key];
   try{api.respond=respond;assistantPatched=api.respond===respond}catch{}
   if(!assistantPatched){try{globalThis.CivweaveAssistantV141={...api,respond};assistantPatched=true}catch{}}
   return assistantPatched;
