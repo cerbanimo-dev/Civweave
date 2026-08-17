@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0';
+const VERSION='1.0.1-direct-quest-copy';
 const REVISION='shared-review-surface-v234';
 const STYLE_ID='cw-shared-review-style-v234';
 const SURFACE_ID='cw-shared-review-surface-v234';
@@ -113,7 +113,7 @@ function renderPlan(item,source=null){
   const governance=plan.governance&&typeof plan.governance==='object'?plan.governance:null;
   surface.innerHTML=`
     <header class="cwsr234-head"><div><small>QUEST REVIEW</small><h2>${esc(plan.title||item.text||'Untitled Quest')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
-    <div class="cwsr234-summary">${plan.wish?`<p><strong>Wish:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
+    <div class="cwsr234-summary">${plan.wish?`<p><strong>Quest goal:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
     ${paths.map((path,index)=>`<section class="cwsr234-block"><small>${esc(`${index+1} · ${SYSTEM_LABEL[realm(path.realm)]||humanKey(path.realm)} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',path.steps)}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
     ${listMarkup('ASSUMPTIONS',plan.assumptions)}
     ${governance?`<section class="cwsr234-block"><small>ANARCHADIA · PASSPORT AND CONSENT</small><h3>${esc(governance.title||'Governance layer')}</h3>${governance.purpose?`<p>${esc(governance.purpose)}</p>`:''}${Array.isArray(governance.agreements)&&governance.agreements.length?`<ul>${governance.agreements.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:''}</section>`:''}
