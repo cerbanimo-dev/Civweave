@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const passover=fs.readFileSync('public/app/guide-capability-passover-v1.js','utf8');
 const unified=fs.readFileSync('public/app/unified-chat-system-v1.js','utf8');
@@ -75,4 +76,27 @@ if(onboarding.includes('Questwright'))throw new Error('Onboarding still exposes 
 if(onboarding.includes('A learning path can become'))throw new Error('Onboarding still calls Moss output a learning path.');
 for(const phrase of ['Moss · Learning Journey guide','Kamiya · Endeavor guide','Rook · Manifest guide and Quartermaster','Weaveling makes the Quest, Moss makes Learning Journeys, Kamiya makes Endeavors, Rook makes Manifests'])if(!onboarding.includes(phrase))throw new Error(`Onboarding missing canonical language: ${phrase}`);
 
-console.log('Guide artifact language and capability passover contract verified across chat, generation, prompts, profiles, onboarding, and docs.');
+const storage=new Map();
+const sandbox={
+  console,
+  document:{readyState:'loading',documentElement:{dataset:{}},getElementById:()=>null,head:{append(){}}},
+  localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value))},
+  addEventListener(){},dispatchEvent(){},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},
+  requestAnimationFrame:fn=>fn(),setTimeout,clearTimeout
+};
+sandbox.globalThis=sandbox;
+vm.runInNewContext(passover,sandbox,{filename:'guide-capability-passover-v1.js'});
+const route=sandbox.CivweaveGuideCapabilityPassoverV1?.candidateArtifact;
+if(typeof route!=='function')throw new Error('Passover candidate router did not export.');
+for(const [prompt,want] of [
+  ['Create a Quest that needs a Manifest','weave'],
+  ['Create a Learning Journey for my Quest','curriculum'],
+  ['Create an Endeavor for my Quest','quest'],
+  ['Create a Manifest for my Quest','resource'],
+  ['Build a productive project for this Quest','quest'],
+  ['Draft a learning plan for this Endeavor','curriculum']
+]){
+  const got=route(prompt);if(got!==want)throw new Error(`Artifact target routing failed for “${prompt}”: expected ${want}, got ${got}`);
+}
+
+console.log('Guide artifact language and capability passover contract verified across chat, generation, prompts, profiles, onboarding, docs, and target-routing cases.');
