@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.142-shared-guide-surface-v236-weaveling-plan-continuation';
+const VERSION='1.0.143-shared-guide-surface-v236-capability-passover-v1';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -81,6 +81,9 @@ function install(){
       load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.126-universal-launcher-v1',()=>{
         globalThis.CivweaveSharedGuideSurfaceV236?.repairSurface?.();
         load('/app/unified-chat-system-v1.js?v=1.0.3-weaveling-plan-continuation',()=>{
+          load('/app/guide-capability-passover-v1.js?v=1.0.0-guide-capability-passover-v1',()=>{
+            try{dispatchEvent(new CustomEvent('civweave:guide-capability-passover-ready',{detail:{version:VERSION}}))}catch{}
+          },()=>Boolean(globalThis.CivweaveGuideCapabilityPassoverV1));
           try{dispatchEvent(new CustomEvent('civweave:unified-chat-system-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveUnifiedChatSystemV1));
         load('/app/human-message-bubble-v1.js?v=1.0.0-human-message-bubble-v1',()=>{
@@ -101,5 +104,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(()=>{install();globalThis.CivweaveSharedGuideSurfaceV236?.repairSurface?.()}));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-primary-v3',generationFloor:'guide-generation-floor-v1-900-tokens',routeDecisionStrip:'v1.1-router-watch',assistantLoader:'family-ai-loader-v105-on-demand',assistantLoaderEagerWarm:false,providerPolicy:'guide-provider-policy-v1-server-auto-local-first',failurePolicy:'guide-forward-failure-policy-v1',failureHardening:'guide-forward-failure-hardening-v1-router-stable',failureDirection:'forward-only',terminalGenerativeFallback:'automatic-server-auto',deterministicAnswerFallback:false,deterministicTerminalVisible:false,deterministicAssistantPatchRetired:true,guildRequestDeduplicated:true,plannerMaterialization:'v265-structured-and-deterministic',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.3-weaveling-plan-continuation',standardAIOnly:true,localModelStartup:'request-driven-only',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-primary-v3',generationFloor:'guide-generation-floor-v1-900-tokens',routeDecisionStrip:'v1.1-router-watch',assistantLoader:'family-ai-loader-v105-on-demand',assistantLoaderEagerWarm:false,providerPolicy:'guide-provider-policy-v1-server-auto-local-first',failurePolicy:'guide-forward-failure-policy-v1',failureHardening:'guide-forward-failure-hardening-v1-router-stable',failureDirection:'forward-only',terminalGenerativeFallback:'automatic-server-auto',deterministicAnswerFallback:false,deterministicTerminalVisible:false,deterministicAssistantPatchRetired:true,guildRequestDeduplicated:true,plannerMaterialization:'v265-structured-and-deterministic',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.3-weaveling-plan-continuation',capabilityPassover:'guide-capability-passover-v1',passoverResubmitsOriginal:true,standardAIOnly:true,localModelStartup:'request-driven-only',install});
 })();
