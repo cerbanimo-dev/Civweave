@@ -112,12 +112,12 @@ function renderPlan(item,source=null){
   const paths=Array.isArray(plan.paths)?plan.paths:[];
   const governance=plan.governance&&typeof plan.governance==='object'?plan.governance:null;
   surface.innerHTML=`
-    <header class="cwsr234-head"><div><small>WEAVE REVIEW</small><h2>${esc(plan.title||item.text||'Untitled weave')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
+    <header class="cwsr234-head"><div><small>QUEST REVIEW</small><h2>${esc(plan.title||item.text||'Untitled Quest')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
     <div class="cwsr234-summary">${plan.wish?`<p><strong>Wish:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
     ${paths.map((path,index)=>`<section class="cwsr234-block"><small>${esc(`${index+1} · ${SYSTEM_LABEL[realm(path.realm)]||humanKey(path.realm)} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',path.steps)}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
     ${listMarkup('ASSUMPTIONS',plan.assumptions)}
     ${governance?`<section class="cwsr234-block"><small>ANARCHADIA · PASSPORT AND CONSENT</small><h3>${esc(governance.title||'Governance layer')}</h3>${governance.purpose?`<p>${esc(governance.purpose)}</p>`:''}${Array.isArray(governance.agreements)&&governance.agreements.length?`<ul>${governance.agreements.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:''}</section>`:''}
-    <div class="cwsr234-actions"><button type="button" data-review-command="close">Keep under review</button>${String(item.state||plan.state||'review')==='review'?`<button type="button" class="primary" data-review-command="activate-plan" data-id="${esc(item.id||plan.id)}">Activate weave</button>`:''}</div>`;
+    <div class="cwsr234-actions"><button type="button" data-review-command="close">Keep under review</button>${String(item.state||plan.state||'review')==='review'?`<button type="button" class="primary" data-review-command="activate-plan" data-id="${esc(item.id||plan.id)}">Activate Quest</button>`:''}</div>`;
   host.node.append(surface);current={kind:'weave',id:surface.dataset.id,source};return surface;
 }
 function renderAction(action,source=null){
@@ -142,12 +142,12 @@ function renderAction(action,source=null){
     <div class="cwsr234-actions"><button type="button" data-review-command="focus-chat">Return to chat</button>${approvable?`<button type="button" class="primary" data-review-command="approve-action" data-id="${esc(action.id)}">${esc(action.approval?.label||'Approve')}</button>`:''}</div>`;
   host.node.append(surface);current={kind:'action',id:action.id,source};return surface;
 }
-function openPlan(id,options={}){const item=findPlanItem(id);if(!item){notify('civweave','That weave is no longer present on this device.');return false}return renderPlan(item,options.source||null)}
+function openPlan(id,options={}){const item=findPlanItem(id);if(!item){notify('civweave','That Quest is no longer present on this device.');return false}return renderPlan(item,options.source||null)}
 function openAction(id,options={}){const action=findAction(id);if(!action){notify('civweave','That draft is no longer present on this device.');return false}return renderAction(action,options.source||null)}
 
 function buildHandoffs(plan){
   const packets=(Array.isArray(plan.paths)?plan.paths:[]).map(path=>({
-    id:uid('handoff'),schema:'civweave.handoff.v1',source:'civweave',target:realm(path.realm),kind:path.type||'path',title:path.title||'Weave path',status:'accepted',
+    id:uid('handoff'),schema:'civweave.handoff.v1',source:'civweave',target:realm(path.realm),kind:path.type||'path',title:path.title||'Quest path',status:'accepted',
     payload:{weaveId:plan.id,wish:plan.wish||'',path,profile:plan.profile||{},manualReviewRequired:true},createdAt:now()
   }));
   if(plan.governance){packets.push({id:uid('handoff'),schema:'civweave.handoff.v1',source:'civweave',target:'anarchadia',kind:'intention-passport',title:plan.governance.title||'Personal passport entry',status:'accepted',payload:{weaveId:plan.id,wish:plan.wish||'',governance:plan.governance,manualReviewRequired:true},createdAt:now()})}
@@ -155,7 +155,7 @@ function buildHandoffs(plan){
 }
 function activatePlan(id){
   const items=arr(INTENTIONS_KEY),index=items.findIndex(item=>item?.id===id||item?.plan?.id===id);
-  if(index<0)return{ok:false,error:'The saved weave could not be found.'};
+  if(index<0)return{ok:false,error:'The saved Quest could not be found.'};
   const item=items[index],plan=structuredClone(item.plan||item);
   const at=now();
   plan.state='active';plan.updatedAt=at;
@@ -165,11 +165,11 @@ function activatePlan(id){
   const oldInbox=arr(REALM_INBOX_KEY).filter(packet=>packet?.payload?.weaveId!==plan.id);
   write(REALM_INBOX_KEY,[...buildHandoffs(plan),...oldInbox].slice(0,120));
   const working=obj(WORKING_KEY);
-  write(WORKING_KEY,{...working,wish:plan.wish||working.wish||'',plan,stage:'active',view:'weave',updatedAt:at});
+  write(WORKING_KEY,{...working,wish:plan.wish||working.wish||'',plan,stage:'active',view:'quest',updatedAt:at});
   try{dispatchEvent(new CustomEvent('civweave:intentions-changed',{detail:{items}}))}catch{}
   try{dispatchEvent(new CustomEvent('civweave:working-campus-plan-built',{detail:{plan,state:'active',source:REVISION}}))}catch{}
   try{dispatchEvent(new CustomEvent('civweave:review-plan-activated',{detail:{id:plan.id,plan,source:REVISION}}))}catch{}
-  removeSurface();mountPendingWeaves();notify('civweave',`The weave “${plan.title||'Untitled weave'}” is active. Its realm handoffs are ready.`);
+  removeSurface();mountPendingWeaves();notify('civweave',`The Quest “${plan.title||'Untitled Quest'}” is active. Its realm handoffs are ready.`);
   return{ok:true,item,plan};
 }
 function ensureGuideContracts(){
@@ -218,7 +218,7 @@ function onGateCapture(event){
 function pendingMarkup(items){
   return items.map(item=>{
     const plan=item.plan||{},paths=Array.isArray(plan.paths)?plan.paths:[];
-    return`<details><summary><span><small>WEAVE REVIEW</small><strong>${esc(plan.title||item.text||'Untitled weave')}</strong></span><b>${esc(item.state||'review')}</b></summary><div class="cwsr234-pending-body">${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}${paths.length?`<div class="cwsr234-path-list">${paths.map(path=>`<span>${esc(SYSTEM_LABEL[realm(path.realm)]||humanKey(path.realm))}: ${esc(path.title||'path')}</span>`).join('')}</div>`:''}<button type="button" class="cwsr234-review-button" data-review-hub="${esc(item.id||plan.id)}">Review in chat</button></div></details>`;
+    return`<details><summary><span><small>QUEST REVIEW</small><strong>${esc(plan.title||item.text||'Untitled Quest')}</strong></span><b>${esc(item.state||'review')}</b></summary><div class="cwsr234-pending-body">${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}${paths.length?`<div class="cwsr234-path-list">${paths.map(path=>`<span>${esc(SYSTEM_LABEL[realm(path.realm)]||humanKey(path.realm))}: ${esc(path.title||'path')}</span>`).join('')}</div>`:''}<button type="button" class="cwsr234-review-button" data-review-hub="${esc(item.id||plan.id)}">Review in chat</button></div></details>`;
   }).join('');
 }
 function mountPendingWeaves(){
@@ -231,7 +231,7 @@ function mountPendingWeaves(){
   if(section?.dataset.signature===signature)return true;
   if(!section){section=document.createElement('section');section.id=PENDING_ID;section.className='wh233-panel cwsr234-pending';const thread=hub.querySelector('.wh233-thread');thread?.insertAdjacentElement('afterend',section);if(!section.isConnected)hub.prepend(section)}
   section.dataset.signature=signature;
-  section.innerHTML=`<header><div><small>WEAVES UNDER REVIEW</small><h2>Waiting for your call</h2></div><b>${items.length}</b></header><div class="cwsr234-pending-list">${pendingMarkup(items)}</div>`;
+  section.innerHTML=`<header><div><small>QUESTS UNDER REVIEW</small><h2>Waiting for your call</h2></div><b>${items.length}</b></header><div class="cwsr234-pending-list">${pendingMarkup(items)}</div>`;
   section.onclick=event=>{const button=event.target.closest('[data-review-hub]');if(button)openPlan(button.dataset.reviewHub,{source:button})};
   return true;
 }
