@@ -1,0 +1,40 @@
+{
+  "schema": "civweave.guide-artifact-language.v1",
+  "policy": "canonical-user-facing-artifact-names",
+  "internalArtifactClassesAreCompatibilityOnly": true,
+  "guides": {
+    "civweave": {
+      "guide": "Weaveling",
+      "artifact": "Quest",
+      "plural": "Quests",
+      "internalArtifactClass": "weave"
+    },
+    "living-school": {
+      "guide": "Moss",
+      "artifact": "Learning Journey",
+      "plural": "Learning Journeys",
+      "internalArtifactClass": "curriculum"
+    },
+    "cerbanimo": {
+      "guide": "Kamiya",
+      "artifact": "Endeavor",
+      "plural": "Endeavors",
+      "internalArtifactClass": "quest"
+    },
+    "fellowfare": {
+      "guide": "Rook",
+      "artifact": "Manifest",
+      "plural": "Manifests",
+      "internalArtifactClass": "resource"
+    }
+  },
+  "rules": [
+    "Weaveling creates and coordinates Quests.",
+    "Moss creates Learning Journeys.",
+    "Kamiya creates Endeavors.",
+    "Rook creates Manifests.",
+    "The legacy internal artifact classes weave, curriculum, quest, and resource may remain for compatibility but must not redefine user-facing ownership.",
+    "A request addressed to the wrong guide must offer a passover to the canonical owner instead of duplicating that guide's artifact generator.",
+    "A passover preserves the request, opens the destination guide, and resubmits the request through the shared canonical chat path."
+  ]
+}
