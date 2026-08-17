@@ -11,7 +11,7 @@ const HARDENING_REVISION='mobile-chat-css-dvh-v349';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const MODEL_ROUTE_REVISION='selected-local-minilm-v357';
 const SERVER_AUTO_FAILOVER_REVISION='server-auto-local-failover-v358';
-const GUIDE_ROUTE_REVISION='guide-thread-network-routing-v360';
+const GUIDE_ROUTE_REVISION='guide-capability-passover-v361';
 const THREAD_TABS_REVISION='saved-tabs-contained-v353';
 const PARTY_PATH='/app/shared-intention-party-chat-v1.js';
 const PARTY_CACHE='civweave-party-v1';
@@ -36,6 +36,7 @@ const CHAT_PATHS=new Set([
   '/app/guide-workspace-v242.js',
   '/app/guide-chat-surface-v350.js',
   '/app/unified-chat-system-v1.js',
+  '/app/guide-capability-passover-v1.js',
   '/app/chat-fullscreen-v295.js',
   '/app/saved-chat-store-v295.js',
   '/app/saved-chat-ui-v295.js',
