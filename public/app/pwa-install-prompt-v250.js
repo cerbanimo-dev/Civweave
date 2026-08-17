@@ -38,6 +38,7 @@ function stableInstallerUrl(){const destination=previewParentOrigin()||CANONICAL
 function hostSetupRedirect(){const current=new URL(location.href);if(current.searchParams.get('host_setup')!=='1'||current.pathname===HOST_SETUP_PATH)return false;location.replace(new URL(HOST_SETUP_PATH,current.origin).href);return true}
 function rerouteUnsafeInstall(){if(appRuntime()||localDevelopment())return false;if(![HOST_NODE_ORIGIN,LEGACY_CANONICAL_ORIGIN,PREVIOUS_CANONICAL_ORIGIN].includes(location.origin)&&!cloudflarePreview())return false;location.replace(stableInstallerUrl().href);return true}
 function help(message){const node=document.querySelector('#install-help');if(node&&node.textContent!==message)node.textContent=message}
+function loadProgressiveDisclosure(){if(globalThis.CivweaveProgressiveDisclosureV1||document.querySelector('script[data-cw-progressive-disclosure-v1]'))return true;const script=document.createElement('script');script.src='/app/usability-progressive-disclosure-v1.js?v=1.0.0';script.async=true;script.dataset.cwProgressiveDisclosureV1='';document.head.append(script);return true}
 function installButton(){return document.querySelector('#install-app')}
 function installer(){return globalThis.CivweaveInstallerV130||null}
 function setButton(button,{disabled,text}={}){if(!button)return;if(typeof disabled==='boolean')button.disabled=disabled;if(typeof text==='string'&&button.textContent!==text)button.textContent=text}
@@ -135,7 +136,7 @@ if(hostSetupRedirect())return;if(rerouteUnsafeInstall())return;
 addEventListener('beforeinstallprompt',capture,{capture:true});
 addEventListener('appinstalled',onInstalled);
 document.addEventListener('click',ownInstallClick,true);
-const startInstaller=()=>{observeButton();void ensureInstallabilityBootstrap()};
+const startInstaller=()=>{loadProgressiveDisclosure();observeButton();void ensureInstallabilityBootstrap()};
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',startInstaller,{once:true});else startInstaller();
 addEventListener('pagehide',()=>buttonObserver?.disconnect(),{once:true});
 
