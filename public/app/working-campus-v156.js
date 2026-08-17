@@ -244,7 +244,7 @@ async function boot(){
   if(!liveDocument())throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
   Function(source.join(''))();
   document.documentElement.dataset.civweaveCampusRuntime='ready';
-  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-current-quest-five-system-routing'}}));
+  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing',questStatePolicy:'current-quest-single-surface'}}));
 }
 boot().catch(error=>{
   if(!active||error?.name==='AbortError')return;
