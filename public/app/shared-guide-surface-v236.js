@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.144-shared-guide-surface-v236-canonical-guide-artifacts';
+const VERSION='1.0.145-shared-guide-surface-v236-canonical-guide-artifacts';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -78,7 +78,7 @@ function install(){
   },()=>Boolean(globalThis.CivweaveGeminiDeviceDirectV257));
   load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
     load('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265',()=>{
-      load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.126-universal-launcher-v1',()=>{
+      load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.128-canonical-artifacts',()=>{
         globalThis.CivweaveSharedGuideSurfaceV236?.repairSurface?.();
         load('/app/unified-chat-system-v1.js?v=1.0.3-weaveling-plan-continuation',()=>{
           load('/app/guide-capability-passover-v1.js?v=1.1.0-canonical-guide-artifacts',()=>{
