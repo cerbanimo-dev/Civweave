@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-usability-progressive-disclosure-v1';
+const VERSION='1.0.1-usability-progressive-disclosure-v1';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const STYLE_ID='cw-usability-progressive-disclosure-v1-style';
@@ -11,6 +11,7 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const text=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
 const q=(selector,root=document)=>root?.querySelector?.(selector)||null;
 const qa=(selector,root=document)=>[...(root?.querySelectorAll?.(selector)||[])];
+const escaped=value=>globalThis.CSS?.escape?CSS.escape(String(value)):String(value).replace(/[^a-zA-Z0-9_-]/g,'\\$&');
 let queued=false,observer=null,patching=false;
 
 function installStyle(){
@@ -23,11 +24,11 @@ function installStyle(){
 .cw-pd-details>summary::-webkit-details-marker{display:none}.cw-pd-details>summary::after{content:'+';font-size:19px;font-weight:700;opacity:.72}.cw-pd-details[open]>summary::after{content:'−'}
 .cw-pd-summary-copy{display:grid;gap:2px}.cw-pd-summary-copy small{font-size:9px;letter-spacing:.09em;text-transform:uppercase;opacity:.66}.cw-pd-summary-copy strong{font-size:13px}
 .cw-pd-details>.cw-pd-body{padding:0 10px 10px}.cw-pd-details>.cw-pd-body>:first-child{margin-top:0}.cw-pd-details>.cw-pd-body>:last-child{margin-bottom:0}
-.cw-pd-installer-disclosure{max-width:1180px;margin:14px auto}.cw-pd-installer-disclosure>.cw-pd-body{padding:0}.cw-pd-installer-disclosure>.cw-pd-body>.knowledge-card,.cw-pd-installer-disclosure>.cw-pd-body>.gateway-grid{margin:0!important;border:0!important;border-radius:0 0 14px 14px!important;box-shadow:none!important}
+.cw-pd-installer-disclosure{max-width:1180px;margin:14px auto}.cw-pd-installer-disclosure>.cw-pd-body{padding:0}.cw-pd-installer-disclosure>.cw-pd-body>.knowledge-card,.cw-pd-installer-disclosure>.cw-pd-body>.gateway-grid,.cw-pd-installer-disclosure>.cw-pd-body>.status-card{margin:0!important;border:0!important;border-radius:0 0 14px 14px!important;box-shadow:none!important}
 .cw-pd-campus-disclosure{max-width:1180px;margin:8px auto}.cw-pd-campus-disclosure>.cw-pd-body{padding:0}.cw-pd-campus-disclosure .campus{margin:0!important;padding:8px}
 .guide .cw-pd-guide-toggle{margin-left:auto;min-height:34px;padding:6px 9px;border:1px solid #ffffff24;border-radius:9px;background:#ffffff0b;color:inherit;font:800 11px/1 system-ui,sans-serif}
 body[data-cw-pd-stage="active"] .main{grid-template-columns:minmax(0,1fr)!important}body[data-cw-pd-stage="active"] .work{order:1}body[data-cw-pd-stage="active"] .guide{order:2}
-body[data-cw-pd-stage="active"] .guide.cw-pd-collapsible:not(.cw-pd-open) .conversation,body[data-cw-pd-stage="active"] .guide.cw-pd-collapsible:not(.cw-pd-open) .weaveling-chat-form,body[data-cw-pd-stage="active"] .guide.cw-pd-collapsible:not(.cw-pd-open) .guide-foot{display:none!important}
+body[data-cw-pd-stage="active"] .guide.cw-pd-collapsible:not(.cw-pd-open) .conversation,body[data-cw-pd-stage="active"] .guide.cw-pd-collapsible:not(.cw-pd-open) .weaveling-chat-form,body[data-cw-pd-stage="active"] .guide.cw-pd-collapsible:not(.cw-pd-open) .cw-pd-details[data-cw-pd-id="civweave-guide-options"]{display:none!important}
 body[data-cw-pd-stage="active"] .guide.cw-pd-collapsible:not(.cw-pd-open) .guide-head{border-bottom:0!important}.cw-pd-guide-toggle[aria-expanded="true"]{background:#8af5d21a;border-color:#8af5d266}
 .cw-pd-profile-more>.cw-pd-body{display:grid;gap:10px}.cw-pd-profile-more .field{width:100%}.cw-pd-profile-more .field.full{grid-column:auto!important}
 .lsc218-root .cw-pd-details{border-color:#65d49238;background:#0c1f1788}.lsc218-root .cw-pd-details>summary{color:#e8f7e6}.lsc218-root .cw-pd-details>.cw-pd-body{padding:0 12px 12px}.lsc218-root .cw-pd-details>.cw-pd-body>.lsc218-panel,.lsc218-root .cw-pd-details>.cw-pd-body>.lsc218-content-block{margin:0!important;border:0!important;box-shadow:none!important}
@@ -46,13 +47,13 @@ function summaryMarkup(kicker,label){
   span.append(small,strong);
   return span;
 }
-function wrapperFor(id){return q(`details[data-cw-pd-id="${CSS.escape(id)}"]`)}
-function wrap(node,{id,label,kicker='Optional',open=false,className=''}={}){
+function wrapperFor(id){return q(`details[data-cw-pd-id="${escaped(id)}"]`)}
+function wrap(node,{id,label,kicker='Optional',open=false,className='',forceOpen=false}={}){
   if(!node?.parentNode||!id)return null;
-  const parent=node.closest?.(`details[data-cw-pd-id="${CSS.escape(id)}"]`);
-  if(parent){parent.open=Boolean(open);return parent}
+  const parent=node.closest?.(`details[data-cw-pd-id="${escaped(id)}"]`);
+  if(parent){if(forceOpen)parent.open=true;return parent}
   const existing=wrapperFor(id);
-  if(existing){if(!existing.contains(node))q('.cw-pd-body',existing)?.append(node);existing.open=Boolean(open);return existing}
+  if(existing){if(!existing.contains(node))q('.cw-pd-body',existing)?.append(node);if(forceOpen)existing.open=true;return existing}
   const details=document.createElement('details');
   details.className=`cw-pd-details ${className}`.trim();
   details.dataset.cwPdId=id;
@@ -72,7 +73,6 @@ function group(nodes,{id,label,kicker='Optional',open=false,className='',before=
     const body=document.createElement('div');body.className='cw-pd-body';details.append(summary,body);
     const anchor=before?.isConnected?before:list[0];anchor.parentNode.insertBefore(details,anchor);
   }
-  details.open=Boolean(open);
   const body=q('.cw-pd-body',details);for(const node of list)if(node.parentNode!==body)body.append(node);
   return details;
 }
@@ -95,16 +95,17 @@ function syncInstaller(){
   const technical=q('.quest-technical'),release=q('#check-update');
   if(technical&&release&&release.parentNode!==technical){technical.append(release);release.classList.add('cw-pd-release-check')}
   const offline=q('#campus-install-progress');if(offline)wrap(offline,{id:'installer-offline-campus',kicker:'Optional road pack',label:'Add the offline campus',open:false,className:'cw-pd-installer-disclosure'});
+  const guildGate=q('[data-civweave-hub-tools-gate]');if(guildGate)wrap(guildGate,{id:'installer-find-guild',kicker:'Optional community path',label:'Find a Guild or recover a Passport',open:false,className:'cw-pd-installer-disclosure'});
   const guild=q('.guild-host-card');if(guild)wrap(guild,{id:'installer-guild-hosting',kicker:'After you enter Civweave',label:'Create or host a Guild',open:false,className:'cw-pd-installer-disclosure'});
   const knowledge=q('.quest-sidepath');if(knowledge)wrap(knowledge,{id:'installer-knowledge',kicker:'Optional offline knowledge',label:'Knowledge Schools and field libraries',open:false,className:'cw-pd-installer-disclosure'});
   const road=q('.quest-road-grid');if(road)wrap(road,{id:'installer-road-ahead',kicker:'Orientation & recovery',label:'What waits beyond the threshold',open:false,className:'cw-pd-installer-disclosure'});
 }
 
 function syncWorkingCampus(){
-  const state=workingState(),stage=String(state.stage||'wish'),hasPlan=Boolean(state.plan),view=String(state.view||'weave');
+  const state=workingState(),stage=String(state.stage||'wish'),hasPlan=Boolean(state.plan),view=String(state.view||'weave'),pastWish=stage!=='wish';
   document.body.dataset.cwPdStage=stage;
   const campus=q('.campus');
-  if(campus&&hasPlan){const details=wrap(campus,{id:'civweave-campus',kicker:'Explore when needed',label:'Living School, Cerbanimo, FellowFare & Anarchadia',open:view==='campus',className:'cw-pd-campus-disclosure'});if(details&&view==='campus')details.open=true}
+  if(campus&&pastWish){wrap(campus,{id:'civweave-campus',kicker:'Explore when needed',label:'Living School, Cerbanimo, FellowFare & Anarchadia',open:view==='campus',forceOpen:view==='campus',className:'cw-pd-campus-disclosure'})}
   const guide=q('.guide');
   if(guide){
     guide.classList.toggle('cw-pd-collapsible',stage==='active');
@@ -113,7 +114,7 @@ function syncWorkingCampus(){
     if(stage==='active'&&head&&!toggle){toggle=document.createElement('button');toggle.type='button';toggle.className='cw-pd-guide-toggle';toggle.textContent='Ask Weaveling';toggle.setAttribute('aria-expanded','false');toggle.addEventListener('click',()=>{const open=guide.classList.toggle('cw-pd-open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'Hide Weaveling':'Ask Weaveling'});head.append(toggle)}
     if(stage!=='active'){guide.classList.remove('cw-pd-open');toggle?.remove()}
   }
-  const foot=q('.guide-foot');if(foot&&hasPlan)wrap(foot,{id:'civweave-guide-options',kicker:'Secondary controls',label:'Guide options, export & support',open:false});
+  const foot=q('.guide-foot');if(foot&&pastWish)wrap(foot,{id:'civweave-guide-options',kicker:'Secondary controls',label:'Guide options, export & support',open:false});
   const progress=q('.bottom [data-view="progress"]'),library=q('.bottom [data-view="library"]');
   if(progress)progress.hidden=!hasPlan;
   if(library)library.hidden=savedWeaves().length===0;
@@ -173,14 +174,14 @@ function syncAnarchadia(){
   const rank=q('.ac-passport-rank',passport),weave=q('.ac-passport-panel.is-weave',passport);
   if(rank&&weave&&weave.parentNode!==passport)rank.after(weave);
   const wallet=q('.ac-passport-wallet',passport),deck=q('.ac-passport-deck',passport),lower=q('.ac-passport-lower',passport),ownership=q('.ac-ownership-strip',passport),legend=q('.ac-passport-legend',passport);
-  group([wallet,deck,lower,ownership,legend],{id:'anarchadia-passport-details',kicker:'Reference & receipts',label:'Passport details',open:false,before:q('.ac-grid')});
+  group([wallet,deck,lower,ownership,legend],{id:'anarchadia-passport-details',kicker:'Reference & receipts',label:'Passport details',open:false});
   const grid=q('.ac-grid');
   if(grid&&!q('.cw-pd-civic-primary')){
     const proposal=q('[data-screen-target="proposals"]',grid),governed=q('[data-ag145-open]',grid);
     if(proposal||governed){const primary=document.createElement('div');primary.className='cw-pd-civic-primary';grid.parentNode.insertBefore(primary,grid);if(proposal)primary.append(proposal);if(governed&&governed!==proposal)primary.append(governed)}
     wrap(grid,{id:'anarchadia-civic-tools',kicker:'Less frequent',label:'More civic tools',open:false});
   }
-  const pulse=q('.ac-pulse');if(pulse){const count=Number(text(q('#ac-proposal-count')))||0;wrap(pulse,{id:'anarchadia-civic-pulse',kicker:'Community status',label:'Civic pulse',open:count>0})}
+  const pulse=q('.ac-pulse');if(pulse){const count=Number(text(q('#ac-proposal-count')))||0;wrap(pulse,{id:'anarchadia-civic-pulse',kicker:'Community status',label:'Civic pulse',open:count>0,forceOpen:count>0})}
 }
 
 function sync(){
