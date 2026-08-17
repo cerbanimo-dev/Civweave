@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-08-15T07:17:31Z",
-  "entry_count": 37,
+  "built_at": "2026-08-17T08:06:38Z",
+  "entry_count": 35,
   "entries": [
     {
       "candidate_id": "openmusic:569ec9ac3677c7bc12286dbb",
@@ -284,10 +284,10 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:908d711ba12ce08f41e85860",
-      "title": "ometotchtli - iris",
-      "artist": "ometotchtli",
-      "source_url": "https://archive.org/details/Ometotchtli-Iris",
+      "candidate_id": "openmusic:f85a4448f10370dbf3ce3807",
+      "title": "Weeping Icon - Weeping Icon vinyl rip",
+      "artist": "Weeping Icon",
+      "source_url": "https://archive.org/details/weeping-icon-raw-wav",
       "license": {
         "spdx": "CC0",
         "label": "CC0",
@@ -299,167 +299,75 @@
         "share_alike": false
       },
       "attribution": {
-        "creator": "ometotchtli",
-        "source_title": "ometotchtli - iris",
-        "source_url": "https://archive.org/details/Ometotchtli-Iris",
+        "creator": "Weeping Icon",
+        "source_title": "Weeping Icon - Weeping Icon vinyl rip",
+        "source_url": "https://archive.org/details/weeping-icon-raw-wav",
         "license": "CC0",
         "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
       },
       "files": [
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/02-Iris.mp3",
-          "bytes": 46606929,
-          "provider_sha1": "5f455d668c063e4544be585898cc285eab08cbc0",
-          "provider_md5": "5a016f30061861d03c234c89226c8654",
+          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20WAV.wav",
+          "bytes": 828196962,
+          "provider_sha1": "3c52fe7971736d3e20c5fdf188f0ca348226c163",
+          "provider_md5": "7992337931b1d32a2e451f5105cee9bc",
+          "format": "WAVE",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20FLAC.flac",
+          "bytes": 417207231,
+          "provider_sha1": "850c6ff47b12471900efbb2d7fa67de68276ee29",
+          "provider_md5": "c01d0d1bb55d127dbf81c8e3b11de67c",
+          "format": "24bit Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/weeping-icon-raw-wav/B6%20Control.mp3",
+          "bytes": 14566230,
+          "provider_sha1": "70e5fa4fa5858d94ff5d08b2d01a39cca9980f3b",
+          "provider_md5": "4c8c895d6b2af5793ba8a7f01cba1cbd",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/05-Awning.mp3",
-          "bytes": 46203599,
-          "provider_sha1": "e59eea8c3351e046ce0c514876cac2e0ba53a288",
-          "provider_md5": "cc39f02f436017129afd80e77de03f9c",
+          "url": "https://archive.org/download/weeping-icon-raw-wav/A8%20Natural%20Selection.mp3",
+          "bytes": 10444959,
+          "provider_sha1": "6ad5a2d5d64548431b06f0b82306011d53800776",
+          "provider_md5": "0c21830fa9090d23b563b46af628b835",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/01-Opened.mp3",
-          "bytes": 42344554,
-          "provider_sha1": "6c94e180fe76023b77f254ce0b3925d6071ae83f",
-          "provider_md5": "6fc3e049955954170be627dc1d18faae",
+          "url": "https://archive.org/download/weeping-icon-raw-wav/B4%20Live%20Envy.mp3",
+          "bytes": 10010072,
+          "provider_sha1": "00eb8852a7a77859320bd3ef6bc23abe092e6c45",
+          "provider_md5": "2cc6b69f473b51947c4ef8ccb67a8462",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/06-Listening.mp3",
-          "bytes": 27265868,
-          "provider_sha1": "d91f8532334c0c976ca4c45df9ad1f4dfdb7c2ee",
-          "provider_md5": "cfda66932124ac2ea346830d91b53cc4",
+          "url": "https://archive.org/download/weeping-icon-raw-wav/B2%20Power%20Trip.mp3",
+          "bytes": 9670233,
+          "provider_sha1": "67aca8a202fdef8145f8de4dd1cd5b3a6eb99e40",
+          "provider_md5": "1bb1a9b79383651bfa4e295622929430",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/03-Join.mp3",
-          "bytes": 21614703,
-          "provider_sha1": "8d290beb332c4be9fa6bf7ea81cd23684d8258f7",
-          "provider_md5": "673f7987acf0452a117e6bb10152398b",
+          "url": "https://archive.org/download/weeping-icon-raw-wav/A6%20Ripe%20for%20Consumption.mp3",
+          "bytes": 8510562,
+          "provider_sha1": "f1710c5d2a180800e94bb70c3b22b5fa50fb9e89",
+          "provider_md5": "723769e5d611043c33a836a2e62406ff",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/Ometotchtli-Iris/04-Antique.mp3",
-          "bytes": 13034996,
-          "provider_sha1": "9a455653207a7f2b520ae73ad4d52616be343095",
-          "provider_md5": "07c1e86cb7d3c62cb4ef5f3ade44a9f8",
+          "url": "https://archive.org/download/weeping-icon-raw-wav/A2%20Ankles.mp3",
+          "bytes": 8414548,
+          "provider_sha1": "9e49867a806a328517d4f07a5523a185fe17a340",
+          "provider_md5": "43c5a70b3ed8a87b0b04f6ae44729566",
           "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/01-Opened.ogg",
-          "bytes": 13440017,
-          "provider_sha1": "25e379674527b6bb41c45226c681fcc35fe8eab9",
-          "provider_md5": "77ddc26282174faacc3237002f291d73",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        },
-        {
-          "url": "https://archive.org/download/Ometotchtli-Iris/05-Awning.ogg",
-          "bytes": 10644993,
-          "provider_sha1": "c431620bd59592483c1ce74d248b544b2bed63f2",
-          "provider_md5": "1e463eaa3fa0d6817c298d548a8c9632",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
-      "candidate_id": "openmusic:363054694b5d107fc22e9a80",
-      "title": "Pretty and Invisible",
-      "artist": "Monplaisir",
-      "source_url": "https://archive.org/details/PrettyAndInvisible",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Monplaisir",
-        "source_title": "Pretty and Invisible",
-        "source_url": "https://archive.org/details/PrettyAndInvisible",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2001%20Loved%20and%20Respected.flac",
-          "bytes": 27786047,
-          "provider_sha1": "2dcdf33fb8298369cb9bc72ba7f2edac98f273cd",
-          "provider_md5": "38442aa87d93df70b79ce9afeba0ed40",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2005%20Harsh%20and%20Soft.flac",
-          "bytes": 26092851,
-          "provider_sha1": "fb2d0749681817c426271ccd9abb1d3ac54f12c1",
-          "provider_md5": "357160bb9d2dda3d8a31ee204c1b61ce",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2002%20Far%20and%20High.flac",
-          "bytes": 22746629,
-          "provider_sha1": "d7c2eb9f5e122b8c81d9a0f18b447a4d1db8ed6a",
-          "provider_md5": "22fdcb0928182befaf1e87bb1cef4ba1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2004%20Safe%20and%20Clear.flac",
-          "bytes": 22697291,
-          "provider_sha1": "3e212da825f504c36ee3f4c24e84757dce6ba8b5",
-          "provider_md5": "17dd306de2afb708b0d870ea7b999339",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2006%20Talentuous%20and%20Shy.flac",
-          "bytes": 22488418,
-          "provider_sha1": "f222cb5b8850997b8f4058ae5be6830f6c7994ab",
-          "provider_md5": "d9d973096255ab5a5197f258ac64bfe2",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2003%20Sticky%20and%20Addictive.flac",
-          "bytes": 21063361,
-          "provider_sha1": "38131d33f269079e8c55da1abac5b80d265cc9f9",
-          "provider_md5": "37afacaa4b8b8eea5f4c186b36420887",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2008%20Pretty%20and%20Invisible.flac",
-          "bytes": 16218037,
-          "provider_sha1": "26fae85586252e3606ad9796816cbb8cc1e0a29e",
-          "provider_md5": "551923acc05188daf1548904715029a1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2007%20Sacred%20and%20Empty.flac",
-          "bytes": 7950879,
-          "provider_sha1": "6df2524543ad42d3c6ddff5b753e70eaa0168924",
-          "provider_md5": "e6ce845655c3963126095a4ff618f00c",
-          "format": "Flac",
           "role": "original"
         }
       ],
@@ -748,101 +656,6 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:29f06ec37d72826ac10a042e",
-      "title": "Turdus merula - Common Blackbird XC561032",
-      "artist": "Olivier Grimm",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC561032.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "attribution": {
-        "creator": "Olivier Grimm",
-        "source_title": "Turdus merula - Common Blackbird XC561032",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC561032.mp3",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Turdus_merula_-_Common_Blackbird_XC561032.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 9825670,
-          "provider_sha1": "7d3fa3a93294ffd224ebc224e88103629f590362",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
-      "candidate_id": "openmusic:d1053bd3fca384b4be63cf2e",
-      "title": "Experimental Tides",
-      "artist": "Dusty Grimm",
-      "source_url": "https://archive.org/details/ExperimentalTides",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "http://creativecommons.org/licenses/by/3.0/us/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/us/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Dusty Grimm",
-        "source_title": "Experimental Tides",
-        "source_url": "https://archive.org/details/ExperimentalTides",
-        "license": "CC-BY",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/us/"
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/ExperimentalTides/1.mp3",
-          "bytes": 3473241,
-          "provider_sha1": "7950c614a4b5dc84b148ac85e67cd0f93c1f6354",
-          "provider_md5": "85c832f1a9dabe3b834abdd8f96fed77",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ExperimentalTides/2.mp3",
-          "bytes": 3448477,
-          "provider_sha1": "8c1ea67fd5b1822767c6f381b80efcb3d6813887",
-          "provider_md5": "ad387332196895362f6977164af15098",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ExperimentalTides/2.ogg",
-          "bytes": 2964525,
-          "provider_sha1": "5267ceb3d21832aad5af38cc3efc8716b5af7591",
-          "provider_md5": "fa58eb0a0fd4da0f0eb1de20aa24d550",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        },
-        {
-          "url": "https://archive.org/download/ExperimentalTides/1.ogg",
-          "bytes": 2744723,
-          "provider_sha1": "a3a513879bb1bc6d6cb44edd7fbf69c9719c9f53",
-          "provider_md5": "6edaf26e2b839dab0d44ccbb025762c3",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
       "candidate_id": "openmusic:f7ee36f3919da8a5156a7579",
       "title": "Hit the Shop",
       "artist": "JML",
@@ -888,6 +701,98 @@
           "provider_md5": "297fd2882689d2fbc39bf1ff631429c7",
           "format": "64Kbps MP3",
           "role": "derivative"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
+      "candidate_id": "openmusic:ae2eae3f9bcfb23597b315e0",
+      "title": "n-логия «Старые песни о всяком». Часть I. Частичка Солнца и Куда исчезают мечты",
+      "artist": "krai",
+      "source_url": "https://archive.org/details/sameoldsongs1",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "CC-BY-SA",
+        "url": "http://creativecommons.org/licenses/by-sa/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "attribution": {
+        "creator": "krai",
+        "source_title": "n-логия «Старые песни о всяком». Часть I. Частичка Солнца и Куда исчезают мечты",
+        "source_url": "https://archive.org/details/sameoldsongs1",
+        "license": "CC-BY-SA",
+        "license_url": "http://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/16%20-%20%D0%BB%D0%B5%D1%81%D1%82%D0%BD%D0%B8%D1%86%D0%B0,%20(%D0%BD%D0%B5)%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8.mp3",
+          "bytes": 40005503,
+          "provider_sha1": "c1a04600cb6ce592b2ce1032065d7041ce5aaf54",
+          "provider_md5": "18ec5b8514c990f27053e9c58ab0c33c",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/11%20-%20%D0%A7%D1%82%D0%BE-%D1%82%D0%BE%20%D0%BC%D0%B5%D0%B6%D0%B4%D1%83.mp3",
+          "bytes": 15454518,
+          "provider_sha1": "5355d833867929bd85e338773d7a6a31d3308562",
+          "provider_md5": "ccedec976c357b86122624b9a0778f52",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/15%20-%20%D0%B3%D0%BE%D0%B2%D0%BD%D0%B0%D0%BA%D0%B8%20%D0%B2%20%D0%BC%D0%BE%D0%B8%D1%85%20%D0%B3%D0%BB%D0%B0%D0%B7%D0%B0%D1%85%20(%D1%8F%D0%BD%D0%B2%D0%B0%D1%80%D1%8C,%20(%D0%BD%D0%B5)%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8).mp3",
+          "bytes": 13082317,
+          "provider_sha1": "b2f9cfeb70592ffaccb149f2b426b593344dce86",
+          "provider_md5": "1153e37bac85cac2534249f1e85a718c",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/13%20-%20%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F,%20%D0%BD%D0%B5%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8.mp3",
+          "bytes": 11102733,
+          "provider_sha1": "601855ffb9730c8b61cb0eeea09c9f6e4b399d46",
+          "provider_md5": "a3b0d41583d0c96de250fef3b17ad630",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/07%20-%20%D0%9D%D0%B0%D0%B4%D0%B5%D0%B6%D0%B4%D0%B0.mp3",
+          "bytes": 6946985,
+          "provider_sha1": "dd556051886dc56d5ff73cf30a624e70a6f6e37d",
+          "provider_md5": "b877a93ef195594819bdb7d1174094aa",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/17%20-%20%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D0%B2%D1%8B%D0%B6%D0%B8%D0%B2%D0%B0%D0%BD%D0%B8%D1%8E%20(overLetov%20noise%20remix%20by%20Kfor).mp3",
+          "bytes": 6635815,
+          "provider_sha1": "d4e6eb07109c2af9d9ba5337a75d2dd92b0d4cee",
+          "provider_md5": "9db9320d4b0576edae0d62ec3b664d40",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/14%20-%20%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%86%D0%B8%D1%8F,%20(%D0%BD%D0%B5)%D1%83%D0%B4%D0%B0%D1%87%D0%BD%D1%8B%D0%B5%20%D0%B4%D1%83%D0%B1%D0%BB%D0%B8.mp3",
+          "bytes": 6382437,
+          "provider_sha1": "89c3cc0a666c87248030c5284c6255dc0b3bfc8e",
+          "provider_md5": "bca8aa151e7bb45c698a2708d1647acb",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/sameoldsongs1/2018%20-%20%D0%A7%D0%B0%D1%81%D1%82%D0%B8%D1%87%D0%BA%D0%B0%20%D0%A1%D0%BE%D0%BB%D0%BD%D1%86%D0%B0%20%D0%B8%20%D0%9A%D1%83%D0%B4%D0%B0%20%D0%B8%D1%81%D1%87%D0%B5%D0%B7%D0%B0%D1%8E%D1%82%20%D0%BC%D0%B5%D1%87%D1%82%D1%8B/04%20-%20%D0%AF%D0%BD%D0%B2%D0%B0%D1%80%D1%8C%20%D0%B2%20%D0%BC%D0%BE%D0%B8%D1%85%20%D0%B3%D0%BB%D0%B0%D0%B7%D0%B0%D1%85.mp3",
+          "bytes": 5599179,
+          "provider_sha1": "67dcb0a0bd6536148e4bbbca6a442129b54fc77b",
+          "provider_md5": "ec3e841803f8ac186c9c03a74aa52d80",
+          "format": "VBR MP3",
+          "role": "original"
         }
       ],
       "content_hash": null,
