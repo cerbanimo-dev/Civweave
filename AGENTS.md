@@ -2,6 +2,18 @@
 
 This file applies to the entire repository. Every coding agent must read it before choosing an edit target.
 
+## Repository map
+
+Before choosing an edit target, read:
+
+`docs/architecture/repository-map.md`
+
+That file is the canonical **repository navigation atlas**: it identifies the major source areas, the active installed-family route snapshot, shared capability landmarks, release/materialization boundaries, generated or historical surfaces that must not be treated as source, and the verification commands expected for common classes of work.
+
+The repository map is for navigation, not architectural authority. If it disagrees with `docs/contracts/mobile-interface-contract.md`, `docs/architecture/systems-of-practice.md`, `config/system-ownership.json`, or the active canonical implementation, those sources win and the repository map must be corrected in the same change.
+
+When a change moves the installed-family dispatcher, a canonical shared owner, a major top-level source responsibility, a stable server entrypoint, a release/materialization rule, or a generated/legacy boundary, update `docs/architecture/repository-map.md` in the same change.
+
 ## Canonical interface and runtime contract
 
 Before changing any interface, chat, shared runtime, loader, cross-system behavior, mobile interaction, or verification architecture, read:
@@ -62,15 +74,16 @@ Living School curriculum and learning tools are capabilities. They do not justif
 
 For any interface, shared-system, or cross-system task:
 
-1. Read `docs/contracts/mobile-interface-contract.md`.
-2. Read `docs/architecture/systems-of-practice.md` when the change affects shared ownership.
-3. Read `config/system-ownership.json` when the capability is registered there.
-4. Identify the canonical functional owner before editing presentation code.
-5. Search the repository for every owner, caller, subscriber, loader, registration, storage key, service-worker entry, workflow reference, and obsolete predecessor related to the capability.
-6. Trace the active route only as needed to understand how the visible UI reaches the canonical implementation.
-7. Repair or extend the existing owner. Do not add a parallel owner.
-8. If duplicated ownership already exists, consolidation is the task. Do not bridge duplicates with a third layer.
-9. If the change makes another active artifact obsolete, delete that artifact and every stale reference in the same change.
+1. Read `docs/architecture/repository-map.md` to locate the current source and runtime boundaries without guessing from filenames.
+2. Read `docs/contracts/mobile-interface-contract.md`.
+3. Read `docs/architecture/systems-of-practice.md` when the change affects shared ownership.
+4. Read `config/system-ownership.json` when the capability is registered there.
+5. Identify the canonical functional owner before editing presentation code.
+6. Search the repository for every owner, caller, subscriber, loader, registration, storage key, service-worker entry, workflow reference, and obsolete predecessor related to the capability.
+7. Trace the active route only as needed to understand how the visible UI reaches the canonical implementation.
+8. Repair or extend the existing owner. Do not add a parallel owner.
+9. If duplicated ownership already exists, consolidation is the task. Do not bridge duplicates with a third layer.
+10. If the change makes another active artifact obsolete, delete that artifact and every stale reference in the same change.
 
 A visible button does not own its behavior merely because it is nearby. A realm page may expose a canonical shared control, but it may not independently intercept or reimplement that control.
 
@@ -80,9 +93,9 @@ Browser prototypes and globals must never be patched to compensate for an implem
 
 When debugging a concrete rendered surface, trace the route actually used by the current application rather than guessing from filenames or directories.
 
-`public/app/fullscreen-family-v104.html` may be used to discover current presentation entrypoints when it is still the active dispatcher, but it is not an architectural contract. Do not encode its current visual routing topology into shared-system design.
+Use `docs/architecture/repository-map.md` for the current route snapshot, then verify it against `public/app/fullscreen-family-v104.html` before editing. The dispatcher may be used to discover current presentation entrypoints when it is still active, but it is not an architectural contract. Do not encode its current visual routing topology into shared-system design.
 
-If recent commits, an active route, and an older document disagree, the canonical contract and current functional ownership win. Update or delete misleading documentation in the same change.
+If recent commits, an active route, and an older document disagree, the canonical contract and current functional ownership win. Update or delete misleading documentation in the same change, including the repository map when its route snapshot is stale.
 
 ## Source-of-truth rules
 
@@ -137,6 +150,7 @@ Git history is the archive. A replacement is not complete until the superseded a
 Treat the repository root as a control surface, not a storage location.
 
 - New general documentation belongs under `docs/`.
+- The repository atlas belongs at `docs/architecture/repository-map.md`; do not create a root-level `REPOSITORY-MAP.md` copy.
 - Release notes, audits, and planning records may live under `docs/history/` when they are genuine records rather than copies of obsolete implementations.
 - Do not create retired implementation archives.
 - Workflow touch/sentinel files belong under `ops/triggers/`, never as hidden files at `/`.
@@ -172,7 +186,7 @@ For installer or packaged-runtime changes, run the relevant installer checks and
 npm run build:install
 ```
 
-For documentation-only changes, verify every named path against the current branch and inspect the Markdown diff.
+For documentation-only changes, verify every named path against the current branch and inspect the Markdown diff. If the change moves a route, owner, source boundary, stable server entrypoint, release rule, or generated/legacy boundary, verify `docs/architecture/repository-map.md` was updated too.
 
 A task is not complete when only a legacy or spatially duplicated copy works. Confirm the active presentation route reaches the canonical shared implementation and delete any predecessor made obsolete by the change.
 
@@ -183,7 +197,7 @@ A task is not complete when only a legacy or spatially duplicated copy works. Co
 - List the verification performed.
 - When a migration retires an old path, delete the retired active artifact and stale references in the same change, then update current pointer documentation that would otherwise mislead agents.
 
-When uncertain, return to `docs/contracts/mobile-interface-contract.md`, the ownership registry, and the active shared implementation. Do not infer architecture from scenery.
+When uncertain, return to `docs/contracts/mobile-interface-contract.md`, the ownership registry, the repository map, and the active shared implementation. Do not infer architecture from scenery.
 
 ## Long-horizon agentic pipeline mode
 
