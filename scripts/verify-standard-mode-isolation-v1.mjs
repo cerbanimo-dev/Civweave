@@ -37,13 +37,16 @@ assert.doesNotMatch(runtime,/Object\.freeze\(\{\.\.\.base,[\s\S]*?generate/,'Sta
 assert.doesNotMatch(runtime,/Object\.freeze\(\{\.\.\.runtime,generate:prior/,'Legacy runtime unwrapping must remain mutable.');
 
 const loader=await read('public/app/family-ai-loader-v105.js');
-assert.match(loader,/1\.0\.131-standard-ai-only/);
+assert.match(loader,/1\.0\.132-standard-ai-lazy-local/);
 assert.match(loader,/fast-interactive-runtime-v192\.js\?v=1\.0\.117-standard-ai-only/);
 assert.match(loader,/standardAIOnly:true/);
+assert.match(loader,/localAIOptionalSideEffects:false/);
+assert.doesNotMatch(loader,/installStructuredFallbackGuard\(\);await warmLocalAIOptional\(\)/,'Generic guide loading must not warm local inference.');
 
 const surface=await read('public/app/shared-guide-surface-v236.js');
-assert.match(surface,/1\.0\.139-shared-guide-surface-v236-standard-ai-only/);
-assert.match(surface,/family-ai-loader-v105\.js\?v=1\.0\.131-standard-ai-only/);
+assert.match(surface,/1\.0\.140-shared-guide-surface-v236-standard-lazy-local/);
+assert.match(surface,/family-ai-loader-v105\.js\?v=1\.0\.132-standard-ai-lazy-local/);
+assert.match(surface,/localModelStartup:'request-driven-only'/);
 
 const worker=await read('public/service-worker-v203.js');
 assert.match(worker,/standard-ai-isolation-v1/);
@@ -67,5 +70,6 @@ console.log(JSON.stringify({
   standardWorkerGeneratorImportsAlternateWorker:false,
   standardInstallerLinksAlternateMode:false,
   standardOfflinePackageExcludesAlternateAssets:true,
-  modelRuntimeMutable:true
+  modelRuntimeMutable:true,
+  localModelStartup:'request-driven-only'
 },null,2));
