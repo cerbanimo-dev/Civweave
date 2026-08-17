@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   diagnose:
-    name: Discover Cloudflare Pages analytics schema
+    name: Test Cloudflare Pages attribution fields
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -22,7 +22,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Discover Pages filters and dimensions
+      - name: Test Pages project/deployment fields
         shell: bash
         run: |
           set -euo pipefail
@@ -30,19 +30,9 @@ jobs:
           const token=process.env.CLOUDFLARE_API_TOKEN||'';
           const accountTag=process.env.CLOUDFLARE_ACCOUNT_ID||'';
           const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
-          async function gql(query,variables={}){const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});return{status:r.status,payload:await r.json().catch(()=>({}))};}
-          async function introspect(name){const r=await gql(`query($name:String!){__type(name:$name){name inputFields{name type{kind name ofType{kind name}}} fields{name type{kind name ofType{kind name}}}}}`,{name});return r.payload?.data?.__type||r.payload?.errors||null;}
-          const badFilter=await gql(`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1,filter:{foo:"x"}){sum{requests}}}}}`,{accountTag});
-          console.log('BAD_FILTER',JSON.stringify(badFilter.payload?.errors||badFilter.payload));
-          const filterText=JSON.stringify(badFilter.payload?.errors||[]);
-          const filterType=(filterText.match(/type ['"]?([A-Za-z0-9_]+)['"]?/)||[])[1]||'';
-          console.log('FILTER_TYPE',filterType);
-          if(filterType) console.log('FILTER_FIELDS',JSON.stringify(await introspect(filterType)));
-
-          const badDimension=await gql(`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1){sum{requests}dimensions{foo}}}}}`,{accountTag});
-          console.log('BAD_DIMENSION',JSON.stringify(badDimension.payload?.errors||badDimension.payload));
-          const dimText=JSON.stringify(badDimension.payload?.errors||[]);
-          const dimType=(dimText.match(/type ['"]?([A-Za-z0-9_]+)['"]?/)||[])[1]||'';
-          console.log('DIMENSION_TYPE',dimType);
-          if(dimType) console.log('DIMENSION_FIELDS',JSON.stringify(await introspect(dimType)));
+          async function gql(label,query,variables={accountTag}){const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});const p=await r.json().catch(()=>({}));console.log(label,JSON.stringify(p.errors||p.data||p));}
+          const dims=['projectName','deploymentId','environment','scriptVersion','hostname','requestPath','clientRequestPath'];
+          for(const field of dims){await gql(`DIM_${field}`,`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1,filter:{}){sum{requests}dimensions{${field}}}}}}`);}
+          const filters=['projectName','deploymentId','environment','scriptVersion'];
+          for(const field of filters){await gql(`FILTER_${field}`,`query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:1,filter:{${field}:"civweave"}){sum{requests}dimensions{datetimeHour}}}}}`);}
           NODE
