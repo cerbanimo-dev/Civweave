@@ -1,0 +1,38 @@
+name: Verify Guide Capability Passover
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/guide-capability-passover-v1.js'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'scripts/verify-guide-capability-passover-v1.mjs'
+      - '.github/workflows/verify-guide-capability-passover-v1.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/guide-capability-passover-v1.js'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'scripts/verify-guide-capability-passover-v1.mjs'
+      - '.github/workflows/verify-guide-capability-passover-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check passover runtime syntax
+        run: |
+          node --check public/app/guide-capability-passover-v1.js
+          node --check scripts/verify-guide-capability-passover-v1.mjs
+      - name: Verify specialized capability ownership and passover
+        run: node scripts/verify-guide-capability-passover-v1.mjs
