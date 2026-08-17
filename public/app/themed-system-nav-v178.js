@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.164-five-guide-rail-hold-menu-v228';
+const VERSION='1.0.163-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const MENU_ID='cw-themed-system-nav-menu';
 const STYLE_ID='cw-themed-system-nav-style';
