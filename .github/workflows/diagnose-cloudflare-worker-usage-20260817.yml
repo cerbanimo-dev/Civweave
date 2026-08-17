@@ -13,38 +13,23 @@ permissions:
 
 jobs:
   diagnose:
-    name: Query actual custom-domain request traffic
+    name: Trace periodic Pages API callers
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment:
-      name: staging
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Query zone traffic by hostname and path
+      - uses: actions/checkout@v4
+      - name: Find periodic API callers and recursive proxies
         shell: bash
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const token=process.env.CLOUDFLARE_API_TOKEN||'';
-          const account=process.env.CLOUDFLARE_ACCOUNT_ID||'';
-          const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
-          const zr=await fetch(`https://api.cloudflare.com/client/v4/zones?account.id=${encodeURIComponent(account)}&per_page=100`,{headers});
-          const zp=await zr.json().catch(()=>({}));
-          if(!zr.ok){console.log('ZONES_ERROR',JSON.stringify(zp));process.exit(0)}
-          const zones=(zp.result||[]).map(z=>({id:z.id,name:z.name,status:z.status}));
-          const start='2026-08-16T00:00:00.000Z', end='2026-08-17T07:00:00.000Z';
-          async function gql(query,variables){const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});const p=await r.json().catch(()=>({}));if(!r.ok||p.errors?.length){console.log('ZONE_ERROR',JSON.stringify({status:r.status,errors:p.errors||p}));return null}return p.data;}
-          for(const zone of zones){
-            const query=`query Traffic($zoneTag:string,$start:Time!,$end:Time!){viewer{zones(filter:{zoneTag:$zoneTag}){httpRequestsAdaptiveGroups(limit:10000,filter:{datetime_geq:$start,datetime_lt:$end},orderBy:[count_DESC]){count dimensions{clientRequestHTTPHost clientRequestPath edgeResponseStatus datetimeHour}}}}}`;
-            const data=await gql(query,{zoneTag:zone.id,start,end});
-            const rows=data?.viewer?.zones?.[0]?.httpRequestsAdaptiveGroups||[];
-            const byHost=new Map(),byPath=new Map(),byHour=new Map();let total=0;
-            for(const row of rows){const n=Number(row?.count||0);total+=n;const d=row?.dimensions||{};const host=String(d.clientRequestHTTPHost||'');const path=String(d.clientRequestPath||'');const hour=String(d.datetimeHour||'');byHost.set(host,(byHost.get(host)||0)+n);byPath.set(`${host}${path}`,(byPath.get(`${host}${path}`)||0)+n);byHour.set(hour,(byHour.get(hour)||0)+n)}
-            console.log('ZONE_TOTAL',JSON.stringify({zone:zone.name,requests:total,groups:rows.length}));
-            console.log('ZONE_TOP_HOSTS',JSON.stringify({zone:zone.name,rows:[...byHost.entries()].sort((a,b)=>b[1]-a[1]).slice(0,20).map(([host,requests])=>({host,requests}))}));
-            console.log('ZONE_TOP_PATHS',JSON.stringify({zone:zone.name,rows:[...byPath.entries()].sort((a,b)=>b[1]-a[1]).slice(0,40).map(([path,requests])=>({path,requests}))}));
-            console.log('ZONE_HOURS',JSON.stringify({zone:zone.name,rows:[...byHour.entries()].sort().map(([hour,requests])=>({hour,requests}))}));
-          }
-          NODE
+          echo '=== TIMER FILES ==='
+          rg -n -l 'setInterval|setTimeout|requestAnimationFrame' public functions scripts 2>/dev/null | sort | head -n 400 || true
+          echo '=== TIMER + API CONTEXT ==='
+          for f in $(rg -l 'setInterval|setTimeout' public functions scripts 2>/dev/null | sort); do
+            if rg -q 'fetch\(|/api/' "$f"; then
+              echo "--- $f"
+              rg -n -C 4 'setInterval|setTimeout|fetch\(|/api/' "$f" | head -n 240 || true
+            fi
+          done
+          echo '=== PAGES FUNCTION FETCH TARGETS ==='
+          rg -n -C 3 'fetch\(|request\.url|new URL\(|\.origin|pages\.dev|civweave\.cc|cerbanimo\.cc' functions | head -n 1600 || true
