@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.1-guide-capability-passover-v1-canonical-targets';
+const VERSION='1.1.2-guide-capability-passover-v1-target-precedence';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 
@@ -43,29 +43,39 @@ function canonicalTermArtifact(term){
   if(value==='quest')return'weave';
   return'';
 }
-function explicitCanonicalArtifact(t){
-  const direct=t.match(DIRECT_CANONICAL),directArtifact=canonicalTermArtifact(direct?.[1]);if(directArtifact)return directArtifact;
-  const technicalManifest=/\b(web|pwa|package|npm|json|xml|app|application|deployment|docker|kubernetes)\b/.test(t);
+function technicalManifestContext(t){return/\b(web|pwa|package|npm|json|xml|app|application|deployment|docker|kubernetes|webmanifest|manifest\.json)\b/.test(t)}
+function directCanonicalArtifact(t){
+  const match=t.match(DIRECT_CANONICAL),artifact=canonicalTermArtifact(match?.[1]);
+  if(artifact==='resource'&&technicalManifestContext(t))return'';
+  return artifact;
+}
+function mentionedCanonicalArtifact(t){
   const mentions=[];
   for(const [pattern,artifact] of [[/\blearning journeys?\b/,'curriculum'],[/\bendeavou?rs?\b/,'quest'],[/\bmanifests?\b/,'resource'],[/\bquests?\b/,'weave']]){
-    const match=t.match(pattern);if(match&&!(artifact==='resource'&&technicalManifest))mentions.push({artifact,index:match.index??Number.MAX_SAFE_INTEGER});
+    const match=t.match(pattern);if(match&&!(artifact==='resource'&&technicalManifestContext(t)))mentions.push({artifact,index:match.index??Number.MAX_SAFE_INTEGER});
   }
   if(!mentions.length)return'';
   mentions.sort((a,b)=>a.index-b.index);
   return mentions[0].artifact;
 }
+function explicitCanonicalArtifact(t){return directCanonicalArtifact(t)||mentionedCanonicalArtifact(t)}
 function candidateDetails(text){
   const value=compact(text,8000),t=value.toLowerCase();if(!value)return{artifact:'',explicitCanonical:false};
   const building=BUILD.test(t);
   if(!building)return{artifact:'',explicitCanonical:false};
 
-  const canonical=explicitCanonicalArtifact(t);if(canonical)return{artifact:canonical,explicitCanonical:true};
+  // A directly requested canonical artifact wins. Compatibility aliases are
+  // checked next so context such as "for this Quest" cannot steal a request
+  // for a productive project, learning plan, or resource manifest.
+  const direct=directCanonicalArtifact(t);if(direct)return{artifact:direct,explicitCanonical:true};
 
   if(/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|learning plan|learning content|educational content|teaching content|lesson plan|study plan|training plan|training program|skill tree)\b/.test(t))return{artifact:'curriculum',explicitCanonical:false};
   if(/\b(resource manifest|skill manifest|procurement plan|sourcing plan|materials? list|inventory plan|resource plan|resource request|resource offer)\b/.test(t))return{artifact:'resource',explicitCanonical:false};
   if(/\b(proposal|policy|rule change|charter|governance plan|motion|vote plan|civic change|community agreement)\b/.test(t))return{artifact:'governance',explicitCanonical:false};
   if(/\b(cross[- ]realm|multi[- ]realm|across (?:the )?realms?|whole civweave|civweave-wide|intention plan|coordinated intention)\b/.test(t))return{artifact:'weave',explicitCanonical:false};
   if(/\b(productive project|project|project plan|work plan|implementation plan|deliverable|prototype|feature|software product|repair plan|program of work|codebase work)\b/.test(t))return{artifact:'quest',explicitCanonical:false};
+
+  const mentioned=mentionedCanonicalArtifact(t);if(mentioned)return{artifact:mentioned,explicitCanonical:true};
   return{artifact:'',explicitCanonical:false};
 }
 function candidateArtifact(text){return candidateDetails(text).artifact}
@@ -199,7 +209,7 @@ function start(){
   for(const name of ['civweave:assistant-runtime-ready','civweave:response-router-installed','civweave:unified-chat-system-ready','civweave:guide-chat-ready','civweave:guide-chat-opened','civweave:guide-chat-state','civweave:realm-guide-thread-changed','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
 }
 
-const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,explicitCanonicalArtifact,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,canonicalUserFacingTerms:true});
+const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,explicitCanonicalArtifact,directCanonicalArtifact,mentionedCanonicalArtifact,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,canonicalUserFacingTerms:true});
 globalThis.CivweaveGuideCapabilityPassoverV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
