@@ -2,12 +2,14 @@
 'use strict';
 
 const VERSION='working-campus-return-v425';
-const REVISION='core-support-v429';
+const REVISION='interaction-recovery-v430';
 const RECOVERY_KEY='civweave.working-campus.return-recovery.v425';
 const RECOVERY_WINDOW_MS=30_000;
 const STARTUP_GRACE_MS=2400;
 const UNHEALTHY_HOLD_MS=900;
 const RETRY_DELAY_MS=260;
+const INTERACTION_GRACE_MS=1800;
+const INTERACTION_FAILSAFE_MS=10_000;
 const CANONICAL_PATH='/app/working-campus-v156.html';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
 const LEGACY_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
@@ -15,11 +17,15 @@ const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
 const SUPPORT_URL='https://www.patreon.com/c/Civweave';
 const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
+const WEAVELING_INTERACTION_SELECTOR='.guide button,.guide a,.weaveling-chat-form textarea,.weaveling-chat-form button,[data-open-unified-ai-settings],[data-cw-onboarding-replay]';
 let lastInspection=null;
 let recoveryPanel=null;
 let verifyFlight=null;
 let retryTimer=0;
 let unhealthySince=0;
+let protectedInteractionActive=false;
+let lastProtectedInteractionAt=0;
+let protectedInteractionFailsafeTimer=0;
 const bootStartedAt=Date.now();
 
 if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION&&globalThis.CivweaveWorkingCampusReturnGuardV425?.revision===REVISION)return;
@@ -79,6 +85,10 @@ function preauthorizeCanonicalCampus(){
 function readRecovery(){try{return parse(sessionStorage.getItem(RECOVERY_KEY))}catch{return null}}
 function writeRecovery(value){try{sessionStorage.setItem(RECOVERY_KEY,JSON.stringify(value))}catch{}}
 function clearRecovery(){try{sessionStorage.removeItem(RECOVERY_KEY)}catch{}}
+function releaseExpiredRecovery(){
+  const previous=readRecovery();
+  if(previous&&Number(previous.at)<=now()-RECOVERY_WINDOW_MS)clearRecovery();
+}
 function currentRelease(){
   const param=new URLSearchParams(location.search).get('version');
   if(/^\d+\.\d+\.\d+$/.test(param||''))return param;
@@ -158,16 +168,52 @@ function scheduleVerify(reason='settle',delay=RETRY_DELAY_MS){
   retryTimer=setTimeout(()=>{retryTimer=0;void verifyOrRecover(reason)},Math.max(0,Number(delay)||0));
   return true;
 }
+function interactionGraceRemaining(){
+  if(protectedInteractionActive)return INTERACTION_GRACE_MS;
+  if(!lastProtectedInteractionAt)return 0;
+  return Math.max(0,INTERACTION_GRACE_MS-(now()-lastProtectedInteractionAt));
+}
+function deferForProtectedInteraction(reason){
+  const remaining=interactionGraceRemaining();
+  if(!remaining)return false;
+  unhealthySince=0;
+  scheduleVerify(`${reason}-interaction-settle`,Math.max(RETRY_DELAY_MS,remaining+40));
+  if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn='interaction-settling';
+  return true;
+}
+function protectedInteractionStart(event){
+  const target=event?.target;
+  if(!target?.closest?.(WEAVELING_INTERACTION_SELECTOR))return;
+  protectedInteractionActive=true;
+  lastProtectedInteractionAt=now();
+  unhealthySince=0;
+  clearRetry();
+  if(protectedInteractionFailsafeTimer)clearTimeout(protectedInteractionFailsafeTimer);
+  protectedInteractionFailsafeTimer=setTimeout(()=>{
+    protectedInteractionFailsafeTimer=0;
+    protectedInteractionActive=false;
+    lastProtectedInteractionAt=now();
+    scheduleVerify('interaction-failsafe-release',INTERACTION_GRACE_MS);
+  },INTERACTION_FAILSAFE_MS);
+}
+function protectedInteractionEnd(){
+  if(!protectedInteractionActive)return;
+  protectedInteractionActive=false;
+  lastProtectedInteractionAt=now();
+  if(protectedInteractionFailsafeTimer){clearTimeout(protectedInteractionFailsafeTimer);protectedInteractionFailsafeTimer=0}
+  scheduleVerify('interaction-release',INTERACTION_GRACE_MS);
+}
 async function verifyOnce(reason='check'){
   if(document.visibilityState==='hidden')return{deferred:true,reason};
+  if(deferForProtectedInteraction(reason))return{deferred:true,reason,interaction:true};
   preauthorizeCanonicalCampus();
   await frame();await frame();
   let inspection=inspect();
-  if(inspection.healthy){unhealthySince=0;clearRetry();clearRecovery();return inspection}
+  if(inspection.healthy){unhealthySince=0;clearRetry();releaseExpiredRecovery();return inspection}
   forceReveal();
   await frame();
   inspection=inspect();
-  if(inspection.healthy){unhealthySince=0;clearRetry();clearRecovery();return inspection}
+  if(inspection.healthy){unhealthySince=0;clearRetry();releaseExpiredRecovery();return inspection}
   const observedAt=now();
   if(!unhealthySince)unhealthySince=observedAt;
   const startupAge=observedAt-bootStartedAt;
@@ -180,6 +226,7 @@ async function verifyOnce(reason='check'){
     if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn='settling';
     return{...inspection,deferred:true,settling:true,startupAge,unhealthyAge};
   }
+  if(deferForProtectedInteraction(reason))return{...inspection,deferred:true,interaction:true,startupAge,unhealthyAge};
   const previous=readRecovery();
   const recent=previous&&Number(previous.at)>now()-RECOVERY_WINDOW_MS;
   if(recent){renderFailSafe(reason,inspection);return{...inspection,failsafe:true}}
@@ -212,9 +259,18 @@ function scheduleInitialCheck(){ensureSupportButton();scheduleVerify('initial-pa
 
 preauthorizeCanonicalCampus();
 activateLanguageMode();
+document.addEventListener('pointerdown',protectedInteractionStart,true);
+document.addEventListener('pointerup',protectedInteractionEnd,true);
+document.addEventListener('pointercancel',protectedInteractionEnd,true);
+document.addEventListener('contextmenu',event=>{if(event?.target?.closest?.(WEAVELING_INTERACTION_SELECTOR)){lastProtectedInteractionAt=now();scheduleVerify('interaction-contextmenu',INTERACTION_GRACE_MS)}},true);
 addEventListener('pagehide',holdBfCache,true);
 addEventListener('pageshow',resume,true);
-addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){ensureSupportButton();scheduleVerify('visibility-return',RETRY_DELAY_MS)}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){clearRetry();return}
+  ensureSupportButton();
+  const grace=interactionGraceRemaining();
+  scheduleVerify('visibility-return',Math.max(RETRY_DELAY_MS,grace+40));
+});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleInitialCheck,{once:true});else scheduleInitialCheck();
 
 globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
@@ -234,8 +290,9 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   language:requestedLanguage,
   startupGraceMs:STARTUP_GRACE_MS,
   unhealthyHoldMs:UNHEALTHY_HOLD_MS,
+  interactionGraceMs:INTERACTION_GRACE_MS,
   installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary-v228',
-  reloadPolicy:'sustained-failure-only-single-flight',
-  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer)})
+  reloadPolicy:'sustained-failure-only-single-flight-with-interaction-grace',
+  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer),protectedInteractionActive,lastProtectedInteractionAt})
 });
 })();
