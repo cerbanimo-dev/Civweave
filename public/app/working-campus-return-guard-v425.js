@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='working-campus-return-v425';
-const REVISION='interaction-recovery-v430';
+const REVISION='legacy-nav-first-paint-v431';
 const RECOVERY_KEY='civweave.working-campus.return-recovery.v425';
 const RECOVERY_WINDOW_MS=30_000;
 const STARTUP_GRACE_MS=2400;
@@ -16,6 +16,7 @@ const LEGACY_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-
 const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
 const SUPPORT_URL='https://www.patreon.com/c/Civweave';
+const LEGACY_NAV_STYLE_ID='cw-working-campus-legacy-nav-first-paint-v431';
 const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
 const WEAVELING_INTERACTION_SELECTOR='.guide button,.guide a,.weaveling-chat-form textarea,.weaveling-chat-form button,[data-open-unified-ai-settings],[data-cw-onboarding-replay]';
 let lastInspection=null;
@@ -33,6 +34,15 @@ if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION&&globalThi
 const now=()=>Date.now();
 const parse=value=>{try{return JSON.parse(value||'null')}catch{return null}};
 const frame=()=>new Promise(resolve=>(globalThis.requestAnimationFrame||((fn)=>setTimeout(fn,0)))(()=>resolve()));
+function suppressLegacyNavigationFirstPaint(){
+  if(document.getElementById(LEGACY_NAV_STYLE_ID))return true;
+  const style=document.createElement('style');
+  style.id=LEGACY_NAV_STYLE_ID;
+  style.textContent='main.app>.campus,nav.bottom{display:none!important}';
+  (document.head||document.documentElement).append(style);
+  document.documentElement?.setAttribute('data-civweave-legacy-navigation','suppressed-before-first-paint-v431');
+  return true;
+}
 function requestedLanguage(){
   let explicit='';
   try{
@@ -257,6 +267,7 @@ function resume(event){
 }
 function scheduleInitialCheck(){ensureSupportButton();scheduleVerify('initial-paint',RETRY_DELAY_MS)}
 
+suppressLegacyNavigationFirstPaint();
 preauthorizeCanonicalCampus();
 activateLanguageMode();
 document.addEventListener('pointerdown',protectedInteractionStart,true);
@@ -285,6 +296,7 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   canonicalUrl,
   preauthorizeCanonicalCampus,
   activateLanguageMode,
+  suppressLegacyNavigationFirstPaint,
   ensureSupportButton,
   supportUrl:SUPPORT_URL,
   language:requestedLanguage,
@@ -293,6 +305,7 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   interactionGraceMs:INTERACTION_GRACE_MS,
   installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary-v228',
   reloadPolicy:'sustained-failure-only-single-flight-with-interaction-grace',
+  legacyNavigationPolicy:'suppressed-before-first-paint-v431',
   state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer),protectedInteractionActive,lastProtectedInteractionAt})
 });
 })();
