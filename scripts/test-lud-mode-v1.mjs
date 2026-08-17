@@ -12,10 +12,10 @@ const forbiddenVisualMarkup=[/<img\b/i,/<picture\b/i,/<svg\b/i,/<canvas\b/i,/bac
 
 function assertPlainSurface(html,label){for(const pattern of forbiddenVisualMarkup)assert.doesNotMatch(html,pattern,`${label} contains forbidden visual surface pattern ${pattern}`)}
 
-test('standard installer links to a separate Lud download page and does not own the Lud download control',async()=>{
+test('standard installer does not link, load, or own the standalone mode',async()=>{
   const installer=await read('public/app/index.html');
-  assert.match(installer,/href="\/app\/lud\/"/);
-  assert.match(installer,/Download Lud Mode separately/);
+  assert.doesNotMatch(installer,/href="\/app\/lud\/"/);
+  assert.doesNotMatch(installer,/Download Lud Mode separately/);
   assert.doesNotMatch(installer,/id="download-lud-mode"/);
   assert.doesNotMatch(installer,/lud-installer-v1\.js/);
 });
@@ -105,13 +105,14 @@ test('identity signer is WebCrypto-only and exposes no AI runtime dependency',as
   for(const fragment of forbiddenRuntime)assert.equal(source.includes(fragment),false,`identity signer contains forbidden ${fragment}`);
 });
 
-test('generation runtime stamps both result and structured output provenance',async()=>{
+test('generation runtime stamps result provenance without alternate-mode gating',async()=>{
   const source=await read('public/app/fast-interactive-runtime-v192.js');
   assert.match(source,/schema:'civweave\.generation-provenance\.v1'/);
   assert.match(source,/schema:'civweave\.content-provenance\.v1'/);
   assert.match(source,/origin=generation\.aiGenerated\?'ai-generated'/);
   assert.match(source,/structuredOutputWithProvenance\(result\.outputJson,generation\)/);
-  assert.match(source,/CIVWEAVE_LUD_AI_DISABLED/);
+  assert.doesNotMatch(source,/CIVWEAVE_LUD_AI_DISABLED/);
+  assert.doesNotMatch(source,/civweave\.operating-mode\.v1/);
 });
 
 test('cloud generation API labels AI provenance before returning artifacts',async()=>{
@@ -142,11 +143,12 @@ test('provenance keeps AI origin immutable while human validation is additive',a
   assert.doesNotMatch(source,/isLudditeVisible/);
 });
 
-test('shared AI loader refuses Lud Mode',async()=>{
+test('standard AI loader has no alternate-mode gate',async()=>{
   const source=await read('public/app/family-ai-loader-v105.js');
-  assert.match(source,/CIVWEAVE_LUD_AI_DISABLED/);
-  assert.match(source,/assertAIAllowed\('Guide and model generation'\)/);
-  assert.match(source,/ludGuard:true/);
+  assert.match(source,/standardAIOnly:true/);
+  assert.doesNotMatch(source,/CIVWEAVE_LUD_AI_DISABLED/);
+  assert.doesNotMatch(source,/assertAIAllowed/);
+  assert.doesNotMatch(source,/ludGuard/);
 });
 
 test('Lud manual surface delegates human creation to existing Cerbanimo and Living School owners',async()=>{
@@ -190,12 +192,12 @@ test('system ownership declares Lud authorities and non-rollover validation-neur
   assert.equal(mode.downloadSurface,'public/app/lud/index.html');
 });
 
-test('service worker includes the separate Lud package lane',async()=>{
+test('standard worker and its builder do not include the standalone package lane',async()=>{
   const worker=await read('public/service-worker-v203.js'),builder=await read('scripts/build-service-worker-v211.mjs');
-  assert.match(worker,/service-worker-lud-package-v1\.js/);
-  assert.doesNotMatch(worker,/service-worker-luddite-package/);
-  assert.match(builder,/service-worker-lud-package-v1\.js/);
-  assert.match(builder,/ludPackage:'v1-explicit-allowlist-no-generated-visual-assets'/);
+  assert.doesNotMatch(worker,/service-worker-lud-package-v1\.js/);
+  assert.doesNotMatch(builder,/service-worker-lud-package-v1\.js/);
+  assert.doesNotMatch(builder,/ludPackage:/);
+  assert.match(builder,/standardModeIsolation:true/);
 });
 
 test('canonical Lud feature files contain no retired Luddite naming',async()=>{

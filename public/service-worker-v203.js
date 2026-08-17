@@ -1,4 +1,4 @@
-// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v308 + code-coherence-v288-language-v2 + retained lightweight shell core + shell-assets-v1-repair-v2 + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + lud-package-v1 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + strict-shell-install-v228 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-css-dvh-v349 + selected-local-minilm-v357 + server-auto-local-failover-v358 + local-ai-bootstrap-capability-v359 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1 + family-nav-single-owner-r1 + family-navigation-live-r2
+// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v308 + code-coherence-v288-language-v2 + retained lightweight shell core + shell-assets-v1-repair-v2 + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + strict-shell-install-v228 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-css-dvh-v349 + selected-local-minilm-v357 + server-auto-local-failover-v358 + local-ai-bootstrap-capability-v359 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1 + family-nav-single-owner-r1 + family-navigation-live-r2 + standard-ai-isolation-v1
 // chat-open-ui-only-v351: opening the chat surface must not start avatar-expression or MiniLM work.
 // chat-party-lazy-v353: ordinary AI chat open must not start party DOM observers, mesh sessions, gateway polling, or intention-ledger decoration.
 // universal-chat-launcher-v354: every first-class realm receives the same canonical launcher; stale Anarchadia page/chat assets are purged on activation.
@@ -7,6 +7,7 @@
 // server-auto-local-failover-v358: a failed selected device-local chat turn continues through the configured host and Cloudflare rungs instead of terminating early.
 // local-ai-bootstrap-capability-v359: mutable local-AI support modules are accepted by capability contract so a version bump cannot prevent the inference runtime from loading.
 // family-navigation-live-r2: rotate the installed shell so the canonical themed navigation and route contract replace stale shell-cached copies before a realm opens.
+// standard-ai-isolation-v1: the standard worker owns only the five-system Civweave shell and does not import alternate-mode workers.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
@@ -20,7 +21,6 @@ importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
 importScripts('/service-worker-radio-core-v305.js?v=1.0.163-radio-core-shell-v305-safe-station-v356');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
-importScripts('/service-worker-lud-package-v1.js?v=lud-package-v1');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-current-completion-v250');
 importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224');
