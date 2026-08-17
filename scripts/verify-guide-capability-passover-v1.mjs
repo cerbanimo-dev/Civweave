@@ -35,16 +35,21 @@ for(const [artifact,system] of Object.entries({weave:'civweave',curriculum:'livi
 if(!unified.includes('generateCurriculumFromChat'))throw new Error('Moss Learning Journey generator was removed from unified chat.');
 if(!unified.includes("registerCapability('living-school'"))throw new Error('Moss learning capability handler was removed.');
 if(passover.includes("registerCapability('living-school'"))throw new Error('Passover layer must not replace Moss\'s learning capability handler.');
+if(!unified.includes('learning journey|curriculum|course|syllabus|learning path'))throw new Error('Moss capability no longer recognizes canonical Learning Journey language alongside compatibility aliases.');
+if(unified.includes('I can build the learning path')||unified.includes('Your queued learning path'))throw new Error('Living School user-facing generation copy regressed to learning-path language.');
+if(!unified.includes('Your queued Learning Journey'))throw new Error('Living School queued generation does not use Learning Journey language.');
 if(!passover.includes('globalThis.CivweaveResponseRouterV347'))throw new Error('Passover preflight no longer consults the shared MiniLM response router.');
 if(!passover.includes("dispatchEvent(new CustomEvent('civweave:response-route'"))throw new Error('Passover decisions are no longer visible to the shared route strip.');
 if(!passover.includes('surface.submitText(offer.sourceText,offer.targetSystem)'))throw new Error('Passover must resubmit the preserved original request.');
 if(!passover.includes("surface.switchGuide?.(offer.targetSystem,{open:true"))throw new Error('Passover no longer opens the destination guide chat.');
 if(!passover.includes('cw-capability-passover-v1'))throw new Error('Passover action button contract is missing.');
-if(!passover.includes("if(/\\bquests?\\b/.test(t))return{artifact:'weave',explicitCanonical:true}"))throw new Error('User-facing Quest must route to Weaveling/Civweave.');
-if(!passover.includes("if(/\\bendeavou?rs?\\b/.test(t))return{artifact:'quest',explicitCanonical:true}"))throw new Error('User-facing Endeavor must route to Kamiya/Cerbanimo.');
-if(!passover.includes("if(/\\blearning journeys?\\b/.test(t))return{artifact:'curriculum',explicitCanonical:true}"))throw new Error('User-facing Learning Journey must route to Moss/Living School.');
+for(const [term,artifact] of Object.entries({'quest':'weave','endeavor':'quest','manifest':'resource','learning journey':'curriculum'})){
+  if(!passover.includes(`if(value==='${term}')return'${artifact}'`))throw new Error(`Canonical term ${term} no longer maps to internal ${artifact}.`);
+}
+if(!passover.includes('DIRECT_CANONICAL'))throw new Error('Canonical passover targeting no longer distinguishes the requested artifact from incidental Quest context.');
 if(!passover.includes("canonicalUserFacingTerms:true"))throw new Error('Canonical user-facing artifact language marker is missing.');
-if(!loader.includes('/app/guide-capability-passover-v1.js'))throw new Error('Shared guide loader does not load the capability passover owner.');
+if(!loader.includes('/app/guide-capability-passover-v1.js?v=1.1.1-canonical-targets'))throw new Error('Shared guide loader does not load the canonical-target passover revision.');
+if(!loader.includes('/app/unified-chat-system-v1.js?v=1.0.4-learning-journey'))throw new Error('Shared guide loader does not load the canonical Learning Journey unified-chat revision.');
 if(!loader.includes('1.0.128-canonical-artifacts'))throw new Error('Shared guide loader does not request the canonical-artifact shared surface revision.');
 
 for(const required of [
@@ -67,4 +72,4 @@ if(onboarding.includes('Questwright'))throw new Error('Onboarding still exposes 
 if(onboarding.includes('A learning path can become'))throw new Error('Onboarding still calls Moss output a learning path.');
 for(const phrase of ['Moss · Learning Journey guide','Kamiya · Endeavor guide','Rook · Manifest guide and Quartermaster','Weaveling makes the Quest, Moss makes Learning Journeys, Kamiya makes Endeavors, Rook makes Manifests'])if(!onboarding.includes(phrase))throw new Error(`Onboarding missing canonical language: ${phrase}`);
 
-console.log('Guide artifact language and capability passover contract verified across chat, prompts, profiles, onboarding, and docs.');
+console.log('Guide artifact language and capability passover contract verified across chat, generation, prompts, profiles, onboarding, and docs.');
