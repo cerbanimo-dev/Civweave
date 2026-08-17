@@ -65,8 +65,8 @@ assert.match(navSource,/function startHold\(/,'The rail must implement pointer h
 assert.match(navSource,/function openQuickMenu\(/,'The rail must expose the guide shortcut menu.');
 assert.match(navSource,/contextmenu/,'Desktop right-click must open the same guide shortcut menu.');
 assert.match(navSource,/ContextMenu.*ArrowUp.*shiftKey/s,'Keyboard users must have a shortcut-menu equivalent.');
-assert.match(navSource,/aria-haspopup=\\"menu\\"/,'Guide controls must advertise their menu relationship.');
-assert.match(navSource,/role=\\"menuitem\\"/,'Quick-launch actions must expose menuitem semantics.');
+assert.match(navSource,/aria-haspopup="menu"/,'Guide controls must advertise their menu relationship.');
+assert.match(navSource,/role="menuitem"/,'Quick-launch actions must expose menuitem semantics.');
 assert.match(navSource,/event\.key==='Escape'/,'The quick menu must support Escape.');
 assert.match(navSource,/event\.key==='ArrowDown'/,'The quick menu must support arrow-key traversal.');
 assert.match(navSource,/navigator\.vibrate/,'A successful mobile hold may provide bounded tactile confirmation.');
