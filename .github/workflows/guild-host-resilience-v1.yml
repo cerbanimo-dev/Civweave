@@ -19,6 +19,7 @@ on:
       - 'cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
       - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'cloudflare/mobile-guild-edge/**'
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
@@ -44,6 +45,7 @@ on:
       - 'cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
       - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'cloudflare/mobile-guild-edge/**'
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
@@ -68,6 +70,13 @@ jobs:
       - run: node --check lib/emergency-ai-share-v1.mjs
       - run: node --check cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs
       - run: node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
+      - run: node --check cloudflare/mobile-guild-edge/src/index.mjs
+      - name: Install mobile Guild edge deployment dependencies
+        run: npm install --prefix cloudflare/mobile-guild-edge --no-audit --no-fund
+      - name: Dry-run standalone mobile Guild edge deployment
+        run: npm --prefix cloudflare/mobile-guild-edge run deploy -- --dry-run --outdir "$RUNNER_TEMP/mobile-guild-edge-dry-run"
+        env:
+          CIVWEAVE_GUILD_CLAIM_TOKEN: ci-placeholder-not-used-by-dry-run-12345678901234567890
       - run: node scripts/test-guild-host-resilience-v1.mjs
       - run: node scripts/test-guild-host-onboarding-v1.mjs
       - run: node scripts/test-mobile-guild-create-v1.mjs
