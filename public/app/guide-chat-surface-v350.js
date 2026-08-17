@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.163-guide-chat-surface-v350-model-route-v2';
+const VERSION='1.0.164-guide-chat-surface-v350-canonical-artifacts';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -10,16 +10,16 @@ const RETIRED_STATE_KEY='civweave.guide-workspace.v242';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE=Object.freeze({
-  civweave:{name:'Weaveling',label:'Civweave',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling'},
-  'living-school':{name:'Moss',label:'Living School',role:'Learning guide',avatar:'/app/assets/ai/chat/moss-face-v255.webp',accent:'#59cf87',panel:'#17342c',placeholder:'Message Moss'},
-  cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/chat/kamiya-face-v255.webp',accent:'#ff54d3',panel:'#170824',placeholder:'Message Kamiya'},
-  fellowfare:{name:'Rook',label:'FellowFare',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/chat/rook-face-v255.webp',accent:'#f2a93b',panel:'#2c1b17',placeholder:'Message Rook'},
+  civweave:{name:'Weaveling',label:'Civweave',role:'Quest guide and central orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling about a Quest'},
+  'living-school':{name:'Moss',label:'Living School',role:'Learning Journey guide',avatar:'/app/assets/ai/chat/moss-face-v255.webp',accent:'#59cf87',panel:'#17342c',placeholder:'Message Moss about a Learning Journey'},
+  cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Endeavor guide',avatar:'/app/assets/ai/chat/kamiya-face-v255.webp',accent:'#ff54d3',panel:'#170824',placeholder:'Message Kamiya about an Endeavor'},
+  fellowfare:{name:'Rook',label:'FellowFare',role:'Manifest guide and Quartermaster',avatar:'/app/assets/ai/chat/rook-face-v255.webp',accent:'#f2a93b',panel:'#2c1b17',placeholder:'Message Rook about a Manifest'},
   anarchadia:{name:'Merlin',label:'Anarchadia',role:'Civic and automation guide',avatar:'/app/assets/ai/chat/merlin-face-v255.webp',accent:'#ff4f9a',panel:'#090909',placeholder:'Message Merlin'}
 });
 if(globalThis.CivweaveGuideChatSurfaceV350?.version===VERSION)return;
 
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clone=value=>{try{return typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value))}catch{return value}};
 const now=()=>new Date().toISOString();
@@ -168,11 +168,11 @@ function render(){
 function historyFor(system){return(readThread(system).messages||[]).filter(row=>!row.pending&&['user','assistant'].includes(row.role)).slice(-16).map(row=>({role:row.role,text:clean(row.text,6000)}))}
 function deterministicReply(system,text){
   const value=clean(text,180),g=guide(system);
-  if(system==='living-school')return`Moss kept this locally. For “${value}”, identify the skill, the smallest practice step, and the evidence that would prove it.`;
-  if(system==='cerbanimo')return`Kamiya kept this locally. For “${value}”, define the concrete deliverable, what counts as done, and the first verifiable dependency.`;
-  if(system==='fellowfare')return`Rook kept this locally. For “${value}”, name the exact need or offer, timing, acceptable substitutes, and exchange boundary.`;
+  if(system==='living-school')return`Moss kept this locally. For “${value}”, identify the capability, the smallest practice step, and the evidence that would prove it before shaping a Learning Journey.`;
+  if(system==='cerbanimo')return`Kamiya kept this locally. For “${value}”, define the Endeavor's concrete deliverable, what counts as done, and the first verifiable dependency.`;
+  if(system==='fellowfare')return`Rook kept this locally. For “${value}”, name the exact need or offer, timing, acceptable substitutes, and exchange boundary for the Manifest.`;
   if(system==='anarchadia')return`Merlin kept this locally. For “${value}”, name the proposed change, who it affects, and the reversible test for success.`;
-  return`${g.name} kept this locally. For “${value}”, start with the outcome you want, then separate what must be learned, built, acquired, or agreed.`;
+  return`${g.name} kept this locally. For “${value}”, start with the Quest outcome you want, then separate what must be learned, built, acquired, or agreed.`;
 }
 function localFailure(system,selection,error){const message=clean(error?.message||error||'The selected local model did not complete.',900);return{text:`${guide(system).name} could not run the selected local model ${selection?.id||''}: ${message}`,provider:'local-model-error',model:selection?.id||'',error:message}}
 async function fallbackReply(system,text){
@@ -224,10 +224,11 @@ function start(){
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
   document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';
+  document.documentElement.dataset.civweaveGuideArtifactLanguage='canonical-v1';
   try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
