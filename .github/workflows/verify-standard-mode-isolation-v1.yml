@@ -1,0 +1,47 @@
+name: Verify Standard Mode Isolation
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/minilm-response-router-v347.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'public/app/offline-package-v208.json'
+      - 'public/app/index.html'
+      - 'scripts/verify-standard-mode-isolation-v1.mjs'
+      - '.github/workflows/verify-standard-mode-isolation-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/minilm-response-router-v347.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'public/app/offline-package-v208.json'
+      - 'public/app/index.html'
+      - 'scripts/verify-standard-mode-isolation-v1.mjs'
+      - '.github/workflows/verify-standard-mode-isolation-v1.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check standard runtime syntax
+        run: |
+          node --check public/app/fast-interactive-runtime-v192.js
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/app/shared-guide-surface-v236.js
+          node --check scripts/build-service-worker-v211.mjs
+          node --check scripts/verify-standard-mode-isolation-v1.mjs
+      - name: Verify isolation contract
+        run: node scripts/verify-standard-mode-isolation-v1.mjs

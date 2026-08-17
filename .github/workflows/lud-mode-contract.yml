@@ -24,16 +24,12 @@ on:
       - 'public/app/host-node-local-capacity-v1.js'
       - 'public/app/host-node-paid-join-v1.js'
       - 'public/app/host-node-status-selection-v1.js'
-      - 'public/app/fast-interactive-runtime-v192.js'
-      - 'public/app/family-ai-loader-v105.js'
       - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
       - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
       - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-lud-package-v1.js'
-      - 'public/service-worker-v203.js'
-      - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
       - 'scripts/test-lud-human-validation-neurons-v1.mjs'
       - 'scripts/test-lud-guild-passport-v1.mjs'
@@ -71,16 +67,12 @@ on:
       - 'public/app/host-node-local-capacity-v1.js'
       - 'public/app/host-node-paid-join-v1.js'
       - 'public/app/host-node-status-selection-v1.js'
-      - 'public/app/fast-interactive-runtime-v192.js'
-      - 'public/app/family-ai-loader-v105.js'
       - 'cloudflare/node-cloud/src/capacity-human-validation-v1.mjs'
       - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v5.mjs'
       - 'functions/api/ai/node/generate.ts'
       - 'public/service-worker-lud-package-v1.js'
-      - 'public/service-worker-v203.js'
-      - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/test-lud-mode-v1.mjs'
       - 'scripts/test-lud-human-validation-neurons-v1.mjs'
       - 'scripts/test-lud-guild-passport-v1.mjs'
@@ -124,8 +116,6 @@ jobs:
           node --check public/app/host-node-local-capacity-v1.js
           node --check public/app/host-node-paid-join-v1.js
           node --check public/app/host-node-status-selection-v1.js
-          node --check public/app/fast-interactive-runtime-v192.js
-          node --check public/app/family-ai-loader-v105.js
           node --check public/service-worker-lud-package-v1.js
           node --check cloudflare/node-cloud/src/capacity-human-validation-v1.mjs
           node --check cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs

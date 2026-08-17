@@ -6,10 +6,12 @@ const forwardPath='public/app/guide-forward-failure-policy-v1.js';
 const hardeningPath='public/app/guide-forward-failure-hardening-v1.js';
 const serverPath='public/app/server-ai-router-v301.js';
 const loaderPath='public/app/shared-guide-surface-v236.js';
+const decisionStripPath='public/app/minilm-decision-strip-v1.js';
 const source=fs.readFileSync(forwardPath,'utf8');
 const hardening=fs.readFileSync(hardeningPath,'utf8');
 const server=fs.readFileSync(serverPath,'utf8');
 const loader=fs.readFileSync(loaderPath,'utf8');
+const decisionStrip=fs.readFileSync(decisionStripPath,'utf8');
 
 const storage=()=>{const values=new Map();return{getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)}};
 const localStorage=storage(),sessionStorage=storage();
@@ -65,18 +67,35 @@ assert.equal(sanitized.messages[1].content,'Can you help me make a learning plan
 assert.ok(!sanitized.messages.some(row=>/kept this locally/i.test(row.content)));
 
 assert.match(loader,/guide-forward-failure-policy-v1\.js/);
-assert.match(loader,/guide-forward-failure-hardening-v1\.js/);
+assert.match(loader,/guide-forward-failure-hardening-v1\.js\?v=1\.2\.0-router-stable/);
+assert.match(loader,/minilm-decision-strip-v1\.js\?v=1\.1\.0-router-watch/);
 assert.match(loader,/deterministicAnswerFallback:false/);
 assert.match(loader,/deterministicTerminalVisible:false/);
-assert.match(hardening,/provider==='deterministic-local'\|\|provider==='local-contract'/);
+assert.match(loader,/deterministicAssistantPatchRetired:true/);
+
+assert.match(hardening,/1\.2\.0-guide-forward-failure-hardening-v1-router-stable/);
+assert.match(hardening,/installDeterministicCompatibility\(\)/);
+assert.match(hardening,/automaticAssistantPatch:false/);
+assert.match(hardening,/__civweaveCloudFallbackV2/);
+assert.match(hardening,/__deterministicModeV175/);
+assert.match(hardening,/legacy-deterministic-wrapper-bypassed/);
+assert.match(hardening,/provider\.startsWith\('deterministic'\)/);
 assert.match(hardening,/server-auto-forwarding/);
-assert.match(hardening,/guild-handoff-ready/);
 assert.match(hardening,/event\.stopImmediatePropagation\(\)/);
-assert.match(hardening,/recent\.at\(-1\)\?\.role==='user'/);
-assert.match(hardening,/guildRequestDeduplicated:true/);
+assert.match(hardening,/deterministicAssistantPatchRetired:true/);
+assert.ok(!hardening.includes('Object.freeze({...assistant,respond'), 'assistant replacement must remain mutable');
+assert.ok(!hardening.includes('classifyBackup('), 'assistant boundary must not run a second MiniLM classifier');
+
+assert.match(decisionStrip,/1\.1\.0-minilm-decision-strip-router-watch/);
+assert.match(decisionStrip,/classification still in progress/);
+assert.match(decisionStrip,/response router has not emitted a decision/);
+assert.match(decisionStrip,/slowRouteWarningMs:2200/);
+assert.match(decisionStrip,/missingRouteErrorMs:12000/);
+assert.ok(!decisionStrip.includes('chat submit did not reach the response router'), '2.2s timeout must not claim the router was bypassed');
+
 assert.match(server,/guildOnly=request\.guildOnly===true/);
 assert.match(server,/if\(guildOnly\)\{/);
 assert.ok(server.indexOf('if(guildOnly){')<server.indexOf('try{const edge=await cloudflare'), 'Guild-only branch must stop before Cloudflare');
 assert.match(server,/GUILD_AI_UNAVAILABLE/);
 
-console.log('Guide forward failure policy and terminal hardening verified.');
+console.log('Guide routing contract verified: one canonical MiniLM router, deterministic terminal retired, automatic server/cloud fallback enabled.');

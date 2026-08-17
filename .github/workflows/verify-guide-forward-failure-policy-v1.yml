@@ -6,6 +6,7 @@ on:
     paths:
       - 'public/app/guide-forward-failure-policy-v1.js'
       - 'public/app/guide-forward-failure-hardening-v1.js'
+      - 'public/app/minilm-decision-strip-v1.js'
       - 'public/app/server-ai-router-v301.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'scripts/verify-guide-forward-failure-policy-v1.mjs'
@@ -24,6 +25,8 @@ jobs:
         run: node --check public/app/guide-forward-failure-policy-v1.js
       - name: Check terminal hardening syntax
         run: node --check public/app/guide-forward-failure-hardening-v1.js
+      - name: Check MiniLM decision strip syntax
+        run: node --check public/app/minilm-decision-strip-v1.js
       - name: Check Guild server router syntax
         run: node --check public/app/server-ai-router-v301.js
       - name: Check shared guide loader syntax
