@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.131-standard-ai-only';
+const VERSION='1.0.132-standard-ai-lazy-local';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -94,12 +94,12 @@ function loadOptional(){if(optionalPromise)return optionalPromise;optionalPromis
 function emitAssistantReady(){try{dispatchEvent(new CustomEvent('civweave:assistant-runtime-ready',{detail:{version:VERSION,system:detect(),at:new Date().toISOString(),localModelRequested:localRequested(),localModelReady:globalThis.CivweaveLocalAIBootstrapV266?.readyState==='ready',localModelError:lastLocalError||null,responseRouterReady:Boolean(globalThis.CivweaveResponseRouterV347),structuredFallbackGuard:Boolean(globalThis.CivweaveModelRuntime?.__civweaveStructuredFallbackGuardV352)}}))}catch{}}
 async function ensure(){
   if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191&&globalThis.CivweaveKnowledgeEncyclopediaBridgeV271){
-    await loadValueCore();await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();await warmLocalAIOptional();installStructuredFallbackGuard();globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();loadOptional();emitAssistantReady();return true;
+    await loadValueCore();await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();loadOptional();emitAssistantReady();return true;
   }
   if(promise)return promise;
   const ticket=++generation;
   promise=(async()=>{
-    CSS.forEach(addCss);await loadValueCore();await Promise.all(PREREQUISITES.map(([src,ready])=>loadScript(src,ready)));if(ticket!==generation)throw new Error('Civweave loading was reset.');await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();await loadScript(...ASSISTANT);await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.install?.();globalThis.CivweaveDeterministicModeV175?.installAssistantPatch?.();globalThis.CivweaveWeavelingMemoryBridgeV191?.install?.();await warmLocalAIOptional();installStructuredFallbackGuard();loadOptional();emitAssistantReady();return true;
+    CSS.forEach(addCss);await loadValueCore();await Promise.all(PREREQUISITES.map(([src,ready])=>loadScript(src,ready)));if(ticket!==generation)throw new Error('Civweave loading was reset.');await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();await loadScript(...ASSISTANT);await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.install?.();globalThis.CivweaveDeterministicModeV175?.installAssistantPatch?.();globalThis.CivweaveWeavelingMemoryBridgeV191?.install?.();installStructuredFallbackGuard();loadOptional();emitAssistantReady();return true;
   })().catch(error=>{if(ticket===generation)reset(error.message);throw error});
   return promise;
 }
@@ -115,5 +115,5 @@ async function openSettings(launcher){const gateway=globalThis.CivweaveSettingsG
 function warm(){return ensure()}
 function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message));installStructuredFallbackGuard()}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();addEventListener('pageshow',boot);addEventListener('civweave:guide-workspace-ready',patchHeader);addEventListener('civweave:working-campus-plan-built',()=>requestEconomicReview('working-campus-plan-built'));addEventListener('cerbanimo:quest-engine-changed',()=>requestEconomicReview('cerbanimo-quest-changed'));for(const name of ['civweave:response-router-installed','civweave:model-runtime-ready','civweave:local-model-runtime-ready','civweave:local-model-bridge-installed'])addEventListener(name,()=>queueMicrotask(installStructuredFallbackGuard));
-globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:true,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
+globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
 })();
