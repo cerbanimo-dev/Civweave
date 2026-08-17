@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-guild-edge",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "durable_objects": {
+    "bindings": [
+      { "name": "GUILD_STATE", "class_name": "CivweaveGuildEdgeState" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["CivweaveGuildEdgeState"] }
+  ],
+  "observability": { "enabled": true }
+}
