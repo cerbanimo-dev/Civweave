@@ -1,81 +1,108 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-guide-forward-failure-hardening-v1';
+const VERSION='1.1.0-guide-forward-failure-hardening-v1-cloud-services';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const SERVER_ROUTER='/app/server-ai-router-v301.js?v=1.0.117-guild-only-handoff';
+const REPAIRABLE_PROVIDERS=new Set(['deterministic-local','local-contract','guild-handoff-ready']);
+const FALLBACK_SOURCE_RE=/(?:deterministic|fallback)/i;
+let serverRouterPromise=null,patchedAssistant=null,clickBound=false,threadBound=false,installTimer=0;
 const repairing=new Set();
-let serverRouterPromise=null,clickBound=false,threadBound=false;
 
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const now=()=>new Date().toISOString();
 const realmApi=()=>globalThis.CivweaveRealmSessionIntegrityV237||null;
 const surface=()=>globalThis.CivweaveGuideChatSurfaceV350||globalThis.CivweavePersistentGuideChatV215||null;
-const serverAutoConfigured=()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1?.serverAutoConfigured?.()||globalThis.CivweaveGuideProviderPolicyV1?.serverAutoConfigured?.());
 function guideName(system){return system==='living-school'?'Moss':system==='cerbanimo'?'Kamiya':system==='fellowfare'?'Rook':system==='anarchadia'?'Merlin':'Weaveling'}
+function guideMode(system){return system==='living-school'?'Learn':system==='cerbanimo'?'Build':system==='fellowfare'?'Acquire':system==='anarchadia'?'Govern':'Reflect'}
+function validSystem(value){return SYSTEMS.includes(value)?value:'civweave'}
+function repairableRow(row){return REPAIRABLE_PROVIDERS.has(clean(row?.provider,120).toLowerCase())}
 function deterministicRow(row){const provider=clean(row?.provider,120).toLowerCase();return provider==='deterministic-local'||provider==='local-contract'}
 function precedingUser(messages,index){for(let i=index-1;i>=0;i--){const row=messages[i];if(row?.role==='user'&&clean(row.text))return clean(row.text,12000)}return''}
-function safeHistory(messages,index){return messages.slice(Math.max(0,index-16),index).filter(row=>['user','assistant'].includes(row?.role)&&clean(row.text)&&!deterministicRow(row)).map(row=>({role:row.role,text:clean(row.text,6000)}))}
+function safeHistoryRows(messages,index){return messages.slice(Math.max(0,index-16),index).filter(row=>['user','assistant'].includes(row?.role)&&clean(row.text)&&!repairableRow(row)&&row?.provider!=='server-auto-unavailable').map(row=>({role:row.role,content:clean(row.text,6000)}))}
+function safeArgsHistory(args={}){return (Array.isArray(args.history)?args.history:[]).slice(-16).map(row=>({role:row?.role==='assistant'?'assistant':'user',content:clean(row?.content||row?.text,6000)})).filter(row=>row.content)}
+function emit(type,detail={}){try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:now(),...detail}}))}catch{}}
+function setDecisionStrip(text,state='pending'){const node=document.querySelector('#cw-persistent-guide-chat-v215 [data-minilm-decision-strip]');if(!node)return;node.dataset.state=state;const label=node.querySelector('span')||node;label.textContent=text}
 function writeRow(system,index,patch){const api=realmApi(),thread=api?.readThread?.(system);if(!thread?.messages?.[index])return false;thread.messages[index]={...thread.messages[index],...patch};thread.updatedAt=now();api.writeThread(system,thread);surface()?.render?.();return true}
-function handoffPatch(system,requestText,reason='deterministic-answer-blocked'){
-  return{pending:false,text:`${guideName(system)} did not replace this request with a deterministic answer. Civweave preserved it on this device. You can send it to your Guild for processing when you choose.`,provider:'guild-handoff-ready',model:'',approvalGate:{kind:'guild-ai-request',required:true,label:'Send request to Guild',requestText,systemId:system,reason},forwardFailureBoundary:VERSION};
-}
-function resultPatch(system,result){const answer=clean(result?.response?.answer,10000),next=clean(result?.response?.choice?.nextAction,1200),provider=clean(result?.provider||result?.requestedProvider,120).toLowerCase();if(!answer||provider==='deterministic-local'||provider==='local-contract')return null;return{pending:false,text:[answer,next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:provider||'server-auto',model:clean(result?.model,180),approvalGate:result?.response?.approvalGate||null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,forwardFailureBoundary:VERSION};}
-async function repairDeterministic(system,index){
-  if(!SYSTEMS.includes(system))return false;const key=`${system}:${index}`;if(repairing.has(key))return false;
-  const api=realmApi(),thread=api?.readThread?.(system),row=thread?.messages?.[index];if(!deterministicRow(row))return false;
-  const requestText=precedingUser(thread.messages,index);if(!requestText)return false;
-  repairing.add(key);
-  try{
-    if(!serverAutoConfigured()){writeRow(system,index,handoffPatch(system,requestText));return true}
-    writeRow(system,index,{pending:true,text:`${guideName(system)} is forwarding this request to the configured generative AI route…`,provider:'server-auto-forwarding',model:'',approvalGate:null,forwardFailureBoundary:VERSION});
-    try{
-      await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
-      const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('The configured guide AI runtime is not ready.');
-      const result=await assistant.respond({text:requestText,systemId:system,history:safeHistory(thread.messages,index)}),patch=resultPatch(system,result);
-      if(!patch)throw new Error('The configured generative route did not return a usable non-deterministic response.');
-      writeRow(system,index,patch);return true;
-    }catch(error){writeRow(system,index,{pending:false,text:`${guideName(system)} could not complete this through the configured generative AI route. Civweave did not substitute a deterministic answer. ${clean(error?.message||error,700)}`,provider:'server-auto-unavailable',model:'',approvalGate:null,forwardFailureBoundary:VERSION});return false}
-  }finally{repairing.delete(key)}
-}
-function repairThread(system){
-  if(!SYSTEMS.includes(system))return false;const thread=realmApi()?.readThread?.(system);if(!Array.isArray(thread?.messages))return false;
-  thread.messages.forEach((row,index)=>{if(deterministicRow(row))void repairDeterministic(system,index)});return true
-}
 
 function loadServerRouter(){
   if(globalThis.CivweaveServerAIRouterV301?.handle)return Promise.resolve(globalThis.CivweaveServerAIRouterV301);
   if(serverRouterPromise)return serverRouterPromise;
-  serverRouterPromise=new Promise((resolve,reject)=>{const script=document.createElement('script'),timer=setTimeout(()=>reject(new Error('Guild AI routing did not load.')),12000);script.src=SERVER_ROUTER;script.async=false;script.onload=()=>{clearTimeout(timer);globalThis.CivweaveServerAIRouterV301?.handle?resolve(globalThis.CivweaveServerAIRouterV301):reject(new Error('Guild AI routing loaded without becoming ready.'))};script.onerror=()=>{clearTimeout(timer);reject(new Error('Could not load Guild AI routing.'))};document.head?.append(script)}).finally(()=>{serverRouterPromise=null});return serverRouterPromise
+  serverRouterPromise=new Promise((resolve,reject)=>{
+    const script=document.createElement('script'),timer=setTimeout(()=>reject(new Error('Cloud AI routing did not load.')),12000);
+    script.src=SERVER_ROUTER;script.async=false;
+    script.onload=()=>{clearTimeout(timer);globalThis.CivweaveServerAIRouterV301?.handle?resolve(globalThis.CivweaveServerAIRouterV301):reject(new Error('Cloud AI routing loaded without becoming ready.'))};
+    script.onerror=()=>{clearTimeout(timer);reject(new Error('Could not load cloud AI routing.'))};
+    document.head?.append(script);
+  }).finally(()=>{serverRouterPromise=null});
+  return serverRouterPromise;
 }
-function rowForButton(button){
-  const root=document.getElementById('cw-persistent-guide-chat-v215'),article=button?.closest?.('article[data-message-role="assistant"]');if(!root||!article)return null;
-  const active=surface()?.activeWindow?.()||'civweave',thread=realmApi()?.readThread?.(active);if(!Array.isArray(thread?.messages))return null;
-  const articles=[...root.querySelectorAll('article[data-message-role="assistant"]')],position=articles.indexOf(article);if(position<0)return null;
-  const indices=thread.messages.map((row,index)=>row?.role==='assistant'?index:-1).filter(index=>index>=0),index=indices[position];return Number.isInteger(index)?{system:active,thread,index,row:thread.messages[index]}:null
+function routeNeedsCloud(route){
+  if(!route)return true;
+  const source=clean(route.source||route.routeSource,180),semanticFallback=clean(route.semanticFallback,80).toLowerCase();
+  return FALLBACK_SOURCE_RE.test(source)||semanticFallback==='unavailable'||semanticFallback==='ambiguous';
 }
-async function sendGuildOnce(button){
-  const located=rowForButton(button),gate=located?.row?.approvalGate;if(!located||gate?.kind!=='guild-ai-request'||gate.required!==true)return false;
-  const {system,thread,index}=located,requestText=clean(gate.requestText,12000);if(!requestText)return false;
-  button.disabled=true;writeRow(system,index,{pending:true,text:'Sending this request to your Guild…',provider:'guild-handoff-sending'});
+async function classifyBackup(args={}){
+  const router=globalThis.CivweaveResponseRouterV347;if(!router?.classify)return null;
+  try{return await router.classify(clean(args.text,12000),{purpose:`${validSystem(args.systemId)}-guide-chat-v350`,executionProfile:'interactive',context:{guide:{system:validSystem(args.systemId)},recentConversation:Array.isArray(args.history)?args.history:[]},task:{kind:'dialogue',systemId:validSystem(args.systemId),requirements:{planning:false}}})}catch{return null}
+}
+function publishCloudRoute(route,reason){
+  const detail={...(route||{}),taskClass:route?.taskClass||'cloud-fallback',lengthClass:route?.lengthClass||'medium',networkRequired:true,confidence:Number.isFinite(Number(route?.confidence))?Number(route.confidence):1,source:'cloud-services-fallback',semanticFallback:route?.semanticFallback||reason};
+  emit('civweave:cloud-fallback-route',{reason,route:detail});
+  try{dispatchEvent(new CustomEvent('civweave:response-route',{detail}))}catch{}
+  setDecisionStrip('Fallback route · MiniLM unavailable or inconclusive · cloud services','pending');
+  return detail;
+}
+function unavailableResult(args,reason,error,prior=null){
+  const system=validSystem(args?.systemId),message=clean(error?.message||error||'No cloud model route completed the request.',900);
+  return{...(prior&&typeof prior==='object'?prior:{}),response:{answer:`${guideName(system)} could not reach an available Guild or Cloudflare AI service for this request. Civweave did not substitute a deterministic answer.`,choice:{mode:guideMode(system),system,room:'',nextAction:'Retry when a cloud route is available, or check Guild and AI capacity in Settings.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'server-auto',provider:'server-auto-unavailable',model:'',usage:null,responseRouting:prior?.responseRouting||null,fallbackFrom:{provider:clean(prior?.provider||prior?.requestedProvider,120)||'local-route',reason},providerRouteFailure:{code:error?.code||'CLOUD_FALLBACK_UNAVAILABLE',message}};
+}
+async function cloudResult(args={},reason='local-route-unavailable',prior=null){
+  const system=validSystem(args.systemId),text=clean(args.text,12000);if(!text)return unavailableResult(args,reason,new Error('The request text was empty.'),prior);
+  publishCloudRoute(prior?.responseRouting||null,reason);
   try{
-    const router=await loadServerRouter(),recent=thread.messages.slice(Math.max(0,index-10),index).filter(row=>['user','assistant'].includes(row?.role)&&clean(row.text)&&!deterministicRow(row)&&row?.provider!=='guild-handoff-ready').map(row=>({role:row.role,content:clean(row.text,5000)}));
-    if(recent.at(-1)?.role==='user'&&clean(recent.at(-1).content,12000)===requestText)recent.pop();
-    const handled=await router.handle({guildOnly:true,purpose:`${system}-guide-guild-handoff`,executionProfile:'interactive',config:{provider:'server-auto',route:'server-auto',model:'civweave-guild-auto-v1',externalConsent:true,maxTokens:900},messages:[{role:'system',content:`You are ${guideName(system)}, a Civweave guide. Process the Hero's request usefully and directly. Do not claim app actions happened unless the request itself provides evidence.`},...recent,{role:'user',content:requestText}]});
-    const result=handled?.result,answer=clean(result?.outputText||result?.text||result?.output,12000);if(!handled?.handled||!answer)throw new Error('The Guild returned no AI response.');
-    writeRow(system,index,{pending:false,text:answer,provider:clean(result?.actual?.provider||result?.provider||'server-local',120),model:clean(result?.actual?.model||result?.model,180),approvalGate:null,guildHandoff:{completedAt:now(),requestText,routeTrace:result?.routeTrace||result?.diagnostics?.find?.(item=>item?.code==='SERVER_AUTO_TRACE')?.routeTrace||null},forwardFailureBoundary:VERSION});
-  }catch(error){writeRow(system,index,{pending:false,text:`Your Guild could not process this request yet: ${clean(error?.message||error,700)}`,provider:'guild-handoff-ready',approvalGate:{...gate,required:true,label:'Retry with Guild'},guildHandoff:{lastError:clean(error?.message||error,900),failedAt:now(),requestText},forwardFailureBoundary:VERSION})}
-  finally{button.disabled=false;queueMicrotask(()=>globalThis.CivweaveGuideForwardFailurePolicyV1?.renderHandoffActions?.())}
-  return true
+    const router=await loadServerRouter(),messages=[{role:'system',content:`You are ${guideName(system)}, a Civweave guide. Answer the Hero directly and usefully. Do not claim app actions happened unless the request provides evidence.`},...safeArgsHistory(args),{role:'user',content:text}];
+    const handled=await router.handle({purpose:`${system}-guide-cloud-fallback`,executionProfile:'interactive',config:{provider:'server-auto',route:'server-auto',model:'civweave-server-auto-v1',externalConsent:true,maxTokens:Math.max(256,Number(prior?.responseRouting?.tier?.maxTokens||900)||900)},messages});
+    const result=handled?.result,answer=clean(result?.outputText||result?.text||result?.output,120000);if(!handled?.handled||!answer)throw new Error('Cloud AI routing returned no response.');
+    setDecisionStrip(`Fallback route · ${clean(result?.actual?.provider||'cloud services',80)} · ${clean(result?.actual?.model||'',100)}`,'minilm');
+    emit('civweave:cloud-fallback-complete',{reason,provider:result?.actual?.provider||'',model:result?.actual?.model||''});
+    return{response:{answer,choice:{mode:guideMode(system),system,room:'',nextAction:''},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'server-auto',provider:clean(result?.actual?.provider||result?.provider||'server-auto',120),model:clean(result?.actual?.model||result?.model,180),usage:result?.usage||null,responseRouting:prior?.responseRouting||null,fallbackFrom:{provider:clean(prior?.provider||prior?.requestedProvider,120)||'local-route',reason},context:{...(prior?.context||{}),routingAnswer:{...(prior?.context?.routingAnswer||{}),networkRequired:true,source:'cloud-services-fallback'}},cloudFallback:{completedAt:now(),reason,routeTrace:result?.diagnostics?.find?.(item=>item?.code==='SERVER_AUTO_TRACE')?.routeTrace||null}};
+  }catch(error){setDecisionStrip('Fallback route · cloud services unavailable','error');emit('civweave:cloud-fallback-failed',{reason,message:clean(error?.message||error,900)});return unavailableResult(args,reason,error,prior)}
 }
-function bindClickGuard(){
-  if(clickBound)return;clickBound=true;document.addEventListener('click',event=>{const button=event.target?.closest?.('.cw-guild-ai-send');if(!button)return;event.preventDefault();event.stopImmediatePropagation();void sendGuildOnce(button)},true)
+function resultNeedsCloud(result){const provider=clean(result?.provider||result?.requestedProvider,120).toLowerCase(),answer=clean(result?.response?.answer,2000);return REPAIRABLE_PROVIDERS.has(provider)||provider==='deterministic'||/deterministic(?:-| )local|kept this locally\.|send (?:it|request) to your guild/i.test(answer)}
+function patchAssistant(){
+  const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)return false;
+  if(assistant.respond.__civweaveCloudFallbackV1){patchedAssistant=assistant;return true}
+  const previous=assistant.respond.bind(assistant);
+  const respond=async args=>{
+    const request=args||{},route=await classifyBackup(request);
+    if(routeNeedsCloud(route))return cloudResult(request,route?'minilm-inconclusive':'minilm-router-unavailable',{responseRouting:route});
+    try{const result=await previous(request);return resultNeedsCloud(result)?cloudResult(request,'non-generative-result-blocked',result):result}catch(error){return cloudResult(request,`primary-route-error:${clean(error?.message||error,300)}`,null)}
+  };
+  try{Object.defineProperty(respond,'__civweaveCloudFallbackV1',{value:true})}catch{}
+  globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,__civweaveCloudFallbackV1:true,cloudFallbackVersion:VERSION,deterministicAnswerFallback:false,automaticCloudFallback:true});
+  patchedAssistant=globalThis.CivweaveAssistantV141;emit('civweave:guide-cloud-fallback-installed',{});return true
 }
-function bindThreadGuard(){
-  if(threadBound)return;threadBound=true;addEventListener('civweave:realm-guide-thread-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system))queueMicrotask(()=>repairThread(system))})
+
+async function repairDeterministic(system,index){
+  system=validSystem(system);const key=`${system}:${index}`;if(repairing.has(key))return false;
+  const api=realmApi(),thread=api?.readThread?.(system),row=thread?.messages?.[index];if(!repairableRow(row))return false;
+  const requestText=precedingUser(thread.messages,index);if(!requestText)return false;repairing.add(key);
+  try{
+    writeRow(system,index,{pending:true,text:`${guideName(system)} is forwarding this request to cloud services…`,provider:'server-auto-forwarding',model:'',approvalGate:null,forwardFailureBoundary:VERSION});
+    const result=await cloudResult({text:requestText,systemId:system,history:safeHistoryRows(thread.messages,index)},'thread-deterministic-repair',null);
+    writeRow(system,index,{pending:false,text:clean(result?.response?.answer,120000),provider:clean(result?.provider,120)||'server-auto-unavailable',model:clean(result?.model,180),approvalGate:null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,forwardFailureBoundary:VERSION});return result?.provider!=='server-auto-unavailable';
+  }finally{repairing.delete(key)}
 }
-function install(){bindClickGuard();bindThreadGuard();SYSTEMS.forEach(system=>queueMicrotask(()=>repairThread(system)));return true}
-install();
-addEventListener('pageshow',install);
-globalThis.CivweaveGuideForwardFailureHardeningV1=Object.freeze({version:VERSION,install,deterministicRow,repairThread,repairDeterministic,sendGuildOnce,deterministicTerminalVisible:false,guildRequestDeduplicated:true,serverAutoRaceRepair:true});
+function repairThread(system){system=validSystem(system);const thread=realmApi()?.readThread?.(system);if(!Array.isArray(thread?.messages))return false;thread.messages.forEach((row,index)=>{if(repairableRow(row))void repairDeterministic(system,index)});return true}
+
+function rowForButton(button){const root=document.getElementById('cw-persistent-guide-chat-v215'),article=button?.closest?.('article[data-message-role="assistant"]');if(!root||!article)return null;const system=validSystem(surface()?.activeWindow?.()),thread=realmApi()?.readThread?.(system);if(!Array.isArray(thread?.messages))return null;const articles=[...root.querySelectorAll('article[data-message-role="assistant"]')],position=articles.indexOf(article);if(position<0)return null;const indices=thread.messages.map((row,index)=>row?.role==='assistant'?index:-1).filter(index=>index>=0),index=indices[position];return Number.isInteger(index)?{system,thread,index,row:thread.messages[index]}:null}
+async function sendGuildOnce(button){const located=rowForButton(button),gate=located?.row?.approvalGate;if(!located||gate?.kind!=='guild-ai-request')return false;button.disabled=true;try{return await repairDeterministic(located.system,located.index)}finally{button.disabled=false}}
+function bindClickGuard(){if(clickBound)return;clickBound=true;document.addEventListener('click',event=>{const button=event.target?.closest?.('.cw-guild-ai-send');if(!button)return;event.preventDefault();event.stopImmediatePropagation();void sendGuildOnce(button)},true)}
+function bindThreadGuard(){if(threadBound)return;threadBound=true;addEventListener('civweave:realm-guide-thread-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system))queueMicrotask(()=>repairThread(system))})}
+function install(){patchAssistant();bindClickGuard();bindThreadGuard();SYSTEMS.forEach(system=>queueMicrotask(()=>repairThread(system)));return true}
+for(const name of ['civweave:assistant-runtime-ready','civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:response-router-installed','civweave:family-ai-ready'])addEventListener(name,()=>queueMicrotask(install));
+addEventListener('pageshow',()=>queueMicrotask(install));
+install();let attempts=0;installTimer=setInterval(()=>{attempts+=1;install();if(attempts>160)clearInterval(installTimer)},250);addEventListener('pagehide',()=>clearInterval(installTimer),{once:true});
+globalThis.CivweaveGuideForwardFailureHardeningV1=Object.freeze({version:VERSION,install,deterministicRow,repairThread,repairDeterministic,sendGuildOnce,routeNeedsCloud,cloudResult,automaticCloudFallback:true,deterministicTerminalVisible:false,guildRequestDeduplicated:true,serverAutoRaceRepair:true});
 })();
