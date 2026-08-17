@@ -17,25 +17,30 @@ Agents and automated contributors must read [`AGENTS.md`](./AGENTS.md) before ed
 
 ## Repository map
 
-The repository root is a control surface, not an archive. Keep root files limited to runtime entrypoints, tool-required configuration, and stable compatibility pointers.
+The canonical repository atlas is [`docs/architecture/repository-map.md`](./docs/architecture/repository-map.md). It records the current source areas, active installed-family route snapshot, shared capability landmarks, release/materialization boundaries, generated/legacy exclusions, and verification landmarks.
 
-- [`docs/`](./docs/) - current engineering and product documentation.
-- [`docs/contracts/`](./docs/contracts/) - stable architecture and behavior contracts.
-- [`docs/operations/`](./docs/operations/) - installation, hosting, and deployment guidance.
-- [`docs/roadmap/`](./docs/roadmap/) - long-horizon pipeline, rebase, and renewal procedures.
-- [`docs/history/`](./docs/history/) - versioned release notes, audits, design backlogs, inventories, and other historical records.
-- [`server/`](./server/) - stable server entrypoints; versioned compatibility implementations live under `releases/1.0.81/server/`.
-- [`archive/runtime/`](./archive/runtime/) - historical server wrappers retained for provenance.
-- [`ops/triggers/`](./ops/triggers/) - workflow sentinel files used to deliberately trigger materialization or recovery jobs.
-- [`scripts/`](./scripts/) - verification, migration, packaging, and maintenance tools.
+The repository root is a control surface, not an archive. Keep root files limited to runtime entrypoints, tool-required configuration, stable pointer documents, and explicitly required executable contracts.
+
+High-level areas:
+
+- [`public/app/`](./public/app/) - active installed application surfaces and browser/client runtime.
+- [`public/extensions/`](./public/extensions/) - optional cross-cutting installed-package capabilities.
+- [`config/`](./config/) - declarative ownership and policy/configuration registries.
+- [`lib/`](./lib/) - shared Node/service logic.
+- [`cloudflare/`](./cloudflare/) - Cloudflare Workers and hosted network services.
+- [`server/`](./server/) - stable local, development, federated, and gateway entrypoints.
+- [`scripts/`](./scripts/) - verification, migration, packaging, release, and maintenance tools.
 - [`.github/workflows/`](./.github/workflows/) - CI and automation definitions.
+- [`ops/triggers/`](./ops/triggers/) - workflow sentinel files used to deliberately trigger materialization or recovery jobs.
+- [`docs/`](./docs/) - current engineering and product documentation.
+- [`releases/`](./releases/) - immutable materialized shipping releases selected through `VERSION`.
 - [`RELEASE-NOTES.md`](./RELEASE-NOTES.md) - stable pointer to the historical release-note collection.
 
-Do not add new versioned Markdown reports, hidden trigger files, or full versioned server implementations to the repository root. `scripts/verify-root-hygiene.mjs` and the root-hygiene workflow enforce this boundary. Legacy root server names may exist only as lightweight compatibility pointers.
+Do not create a live `archive/` tree, retired implementation archive, root server alias, root symlink, hidden root trigger file, or convenience Markdown report at repository root. Git history is the archive. `scripts/verify-root-hygiene.mjs` and release-discipline checks enforce these boundaries.
 
 ## Current cabinet entry map
 
-`public/app/fullscreen-family-v104.html` is the active installed cabinet-family dispatcher. On the current `main` branch it opens:
+`public/app/fullscreen-family-v104.html` is the active installed cabinet-family dispatcher. It currently opens:
 
 | System | Active entry |
 | --- | --- |
@@ -45,36 +50,41 @@ Do not add new versioned Markdown reports, hidden trigger files, or full version
 | FellowFare | `public/app/fellowfare-cabinet-v144.html?cabinet=1` |
 | Anarchadia | `public/app/anarchadia-console-v139.html?cabinet=1` |
 
-These filenames are versioned compatibility boundaries. The route table above is more authoritative than an older page, similarly named directory, generated installer copy, or historical release note.
+The dispatcher appends installed-package state when it routes. This table is a route snapshot, not an architectural ownership contract. Keep the canonical copy in [`docs/architecture/repository-map.md`](./docs/architecture/repository-map.md) synchronized when the dispatcher changes.
 
 ## Where current work belongs
 
 - `public/app/fullscreen-family-v104.html` - canonical installed family dispatcher.
 - `public/app/family-shell-v104.js` and `public/app/family-shell-v104.css` - shared cabinet chrome and navigation behavior.
-- `public/app/cabinets/<realm>/` - modular cabinet implementations. Living School is currently developed here.
+- `public/app/cabinets/<realm>/` - modular cabinet presentation implementations where actively routed. Living School is currently developed here.
 - `public/app/*-cabinet-v*`, `public/app/*-console-v*`, and `public/app/working-campus-v*` - active realm parent surfaces referenced by the dispatcher.
-- `public/app/services/<realm>/` - mature embedded realm tools and internal surfaces used by cabinet parents.
+- `public/app/services/<realm>/` - embedded realm tools and internal surfaces used by active parent surfaces.
 - `public/app/shared/` - shared contracts, parity state, and cross-realm runtime code.
 - `public/extensions/` - optional cross-cutting capabilities loaded by the installed package.
 - `server/` - stable host, local, development, and federated runtime entrypoints.
 - `scripts/` and `.github/workflows/` - verification, packaging, and release automation.
 
-Before changing a cabinet, inspect the newest commits touching its active entry and follow its imports, scripts, stylesheets, iframes, and service-worker references. Recent work may have moved one realm without moving the others.
+Presentation location does not determine functional ownership. For shared behavior, consult `docs/architecture/systems-of-practice.md` and `config/system-ownership.json` before editing a realm/page surface.
+
+Before changing a cabinet, inspect the newest commits touching its active entry and follow its imports, scripts, stylesheets, iframes, shared owners, and service-worker references. Recent work may have moved one realm without moving the others.
 
 ## Legacy and generated paths
 
-The repository retains older interfaces for migration history, comparison, and compatibility. They are not automatically valid edit targets.
+Older, generated, compatibility, and materialized surfaces are not automatically valid edit targets.
 
 Do not edit these by default:
 
-- `public/cabinet/`
-- root-level historical pages such as `public/cabinet-v*.html`, `public/civweave-v*.html`, `public/index_old.html`, and backup variants
-- copied `www/app/` trees inside installer or release bundles
-- ZIP contents and other generated package mirrors
-- `public/cabinetonly/index.html`, which is only a compatibility redirect
-- `releases/1.0.81/server/` and `archive/runtime/` unless the task explicitly concerns compatibility or migration behavior
+- `public/cabinet/` when it is not part of the active route;
+- root-level historical pages such as `public/cabinet-v*.html`, `public/civweave-v*.html`, `public/index_old.html`, and backup variants when they are not actively routed;
+- copied `www/app/` trees inside installer or release bundles;
+- ZIP contents and other generated package mirrors;
+- compatibility redirects such as `public/cabinetonly/index.html` when their only purpose is delegation;
+- `releases/{VERSION}/` or older materialized release trees as ordinary source-edit targets;
+- files in `docs/history/` as architectural authority.
 
-Change one of those only when the task explicitly concerns that legacy surface, redirect, or generated artifact. Canonical source changes belong in `public/app/` or a stable `server/` entrypoint first. Regenerate packages afterward rather than hand-editing their copies.
+Change one of those only when the task explicitly concerns that compatibility, migration, generated-output, or release-materialization boundary. Canonical source changes belong in the active functional owner first. Regenerate packages or materialize a new release afterward rather than hand-editing their copies.
+
+A live `archive/` directory and retired implementation folders are forbidden. Git history is the archive.
 
 ## Host and installed-runtime topology
 
@@ -116,7 +126,7 @@ See [`docs/operations/host-node-setup.md`](./docs/operations/host-node-setup.md)
 
 ## Development rule of thumb
 
-**Trace from the active dispatcher, edit the referenced source, verify the route, then regenerate downstream packages.** This keeps the living cabinet from being patched in one room while workers repaint an abandoned hallway elsewhere in the repository.
+**Find the functional owner, trace the active route that reaches it, edit the canonical source, verify the route, then regenerate downstream packages.** This keeps presentation code from becoming a second owner and keeps generated output from becoming a competing source tree.
 
 ## Canonical release storage
 
