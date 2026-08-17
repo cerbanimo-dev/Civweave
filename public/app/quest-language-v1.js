@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-quest-language-v1';
+const VERSION='1.0.1-quest-language-v1';
 if(globalThis.CivweaveQuestLanguageV1?.version===VERSION)return;
 
 const SKIP_SELECTOR='textarea,input,select,option,script,style,.message.user,[data-user-message],[data-role="user"]';
@@ -10,6 +10,7 @@ const EXACT=new Map([
   ['Review weave','Review Quest'],
   ['Revise wish','Revise Quest'],
   ['Reviewable weave','Reviewable Quest'],
+  ['Restored intention weave','Restored Quest'],
   ['Wish:','Quest goal:'],
   ['What is your wish? Tell me what you want to make true. I will map the learning, skilled work, materials, and agreements it may require.','What Quest do you want to begin? Tell me what you want to make true. I will map the learning, skilled work, materials, and agreements it may require.'],
   ['This is a real saved weave in REVIEW, not a chat-only outline. Nothing has been activated.','This is a real saved Quest in REVIEW, not a chat-only outline. Nothing has been activated.']
@@ -25,7 +26,8 @@ const PHRASES=[
   [/\bRevise wish\b/g,'Revise Quest'],
   [/\bReview weave\b/g,'Review Quest'],
   [/\bactivate the weave\b/g,'activate the Quest'],
-  [/\bActivate the weave\b/g,'Activate the Quest']
+  [/\bActivate the weave\b/g,'Activate the Quest'],
+  [/\bafter the weave feels usable\b/g,'after the Quest feels usable']
 ];
 
 function canonicalText(value){
