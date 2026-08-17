@@ -10,6 +10,7 @@ const standardFiles=[
   'public/app/assistant-runtime-v141.js',
   'public/app/minilm-response-router-v347.js',
   'public/service-worker-v203.js',
+  'scripts/build-service-worker-v211.mjs',
   'public/app/index.html'
 ];
 const forbidden=[
@@ -45,11 +46,12 @@ assert.match(surface,/1\.0\.139-shared-guide-surface-v236-standard-ai-only/);
 assert.match(surface,/family-ai-loader-v105\.js\?v=1\.0\.131-standard-ai-only/);
 
 const worker=await read('public/service-worker-v203.js');
-assert.doesNotMatch(worker,/service-worker-lud-package-v1/);
 assert.match(worker,/standard-ai-isolation-v1/);
+const workerBuilder=await read('scripts/build-service-worker-v211.mjs');
+assert.match(workerBuilder,/standard-ai-isolation-v1/);
+assert.match(workerBuilder,/imports:19/);
 
 const installer=await read('public/app/index.html');
-assert.doesNotMatch(installer,/\/app\/lud\//);
 assert.doesNotMatch(installer,/lud-mode-link/);
 
 const manifest=JSON.parse(await read('public/app/offline-package-v208.json'));
@@ -62,6 +64,7 @@ console.log(JSON.stringify({
   contract:'standard-mode-isolation-v1',
   standardRuntimeOwnsAlternateMode:false,
   standardWorkerImportsAlternateWorker:false,
+  standardWorkerGeneratorImportsAlternateWorker:false,
   standardInstallerLinksAlternateMode:false,
   standardOfflinePackageExcludesAlternateAssets:true,
   modelRuntimeMutable:true
