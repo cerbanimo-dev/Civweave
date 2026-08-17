@@ -6,6 +6,8 @@ on:
       - 'public/app/guide-capability-passover-v1.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'config/guide-artifact-language-v1.json'
+      - 'docs/contracts/guide-artifact-language-v1.md'
       - 'scripts/verify-guide-capability-passover-v1.mjs'
       - '.github/workflows/verify-guide-capability-passover-v1.yml'
   push:
@@ -14,6 +16,8 @@ on:
       - 'public/app/guide-capability-passover-v1.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'config/guide-artifact-language-v1.json'
+      - 'docs/contracts/guide-artifact-language-v1.md'
       - 'scripts/verify-guide-capability-passover-v1.mjs'
       - '.github/workflows/verify-guide-capability-passover-v1.yml'
   workflow_dispatch:
@@ -34,5 +38,5 @@ jobs:
         run: |
           node --check public/app/guide-capability-passover-v1.js
           node --check scripts/verify-guide-capability-passover-v1.mjs
-      - name: Verify specialized capability ownership and passover
+      - name: Verify canonical guide artifact ownership and passover
         run: node scripts/verify-guide-capability-passover-v1.mjs
