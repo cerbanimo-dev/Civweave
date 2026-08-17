@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.58-weaveling-plan-materialization-v265-quest-language';
+const VERSION='1.0.59-weaveling-plan-materialization-v265-quest-language';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const BANNER_ID='cw-weave-review-ready-v265';
@@ -28,7 +28,9 @@ const questText=value=>{
     .replace(/\bthe weave is in REVIEW\b/g,'the Quest is in REVIEW')
     .replace(/\bstated wish\b/g,'Quest goal')
     .replace(/\bReview weave\b/g,'Review Quest')
-    .replace(/\bRevise wish\b/g,'Revise Quest');
+    .replace(/\bRevise wish\b/g,'Revise Quest')
+    .replace(/\bafter the weave feels usable\b/g,'after the Quest feels usable')
+    .replace(/\bRestored intention weave\b/g,'Restored Quest');
 };
 
 function isCivweavePage(){
@@ -164,7 +166,7 @@ function ensurePlanner(){
     const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===PLANNER_PATH}catch{return false}});
     if(!existing){
       const script=document.createElement('script');
-      script.src=`${PLANNER_PATH}?v=1.0.58-v265-quest-language`;
+      script.src=`${PLANNER_PATH}?v=1.0.59-v265-quest-language`;
       script.async=false;
       document.head.append(script);
     }
