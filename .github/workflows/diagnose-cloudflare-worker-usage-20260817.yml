@@ -22,7 +22,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: List Pages projects and inspect Pages analytics schema
+      - name: Resolve Pages projects and analytics dimensions
         shell: bash
         run: |
           set -euo pipefail
@@ -30,29 +30,24 @@ jobs:
           const token=process.env.CLOUDFLARE_API_TOKEN||'';
           const account=process.env.CLOUDFLARE_ACCOUNT_ID||'';
           const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
-          const projectsResponse=await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects?per_page=100`,{headers});
+          const projectsResponse=await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects`,{headers});
           const projectsPayload=await projectsResponse.json().catch(()=>({}));
           console.log('PAGES_PROJECTS_STATUS',projectsResponse.status);
+          if(!projectsResponse.ok) console.log('PAGES_PROJECTS_ERROR',JSON.stringify(projectsPayload));
           for(const p of projectsPayload?.result||[]){
-            console.log('PAGES_PROJECT',JSON.stringify({
-              name:p.name,subdomain:p.subdomain,domains:p.domains||[],productionBranch:p.production_branch,
-              latestProduction:p.latest_production_deployment?{id:p.latest_production_deployment.id,environment:p.latest_production_deployment.environment,url:p.latest_production_deployment.url,createdOn:p.latest_production_deployment.created_on}:null,
-              source:p.source?.config?{owner:p.source.config.owner,repoName:p.source.config.repo_name,productionBranch:p.source.config.production_branch}:null
-            }));
+            console.log('PAGES_PROJECT',JSON.stringify({name:p.name,subdomain:p.subdomain,domains:p.domains||[],productionBranch:p.production_branch,usesFunctions:p.canonical_deployment?.uses_functions??p.latest_production_deployment?.uses_functions??null,canonical:p.canonical_deployment?{id:p.canonical_deployment.id,url:p.canonical_deployment.url,createdOn:p.canonical_deployment.created_on,usesFunctions:p.canonical_deployment.uses_functions}:null,latestProduction:p.latest_production_deployment?{id:p.latest_production_deployment.id,url:p.latest_production_deployment.url,createdOn:p.latest_production_deployment.created_on,usesFunctions:p.latest_production_deployment.uses_functions}:null}));
           }
-          async function gql(query,variables={}){
-            const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});
-            return {status:r.status,payload:await r.json().catch(()=>({}))};
-          }
-          const accountType=await gql(`query{__type(name:"Account"){fields{name type{kind name ofType{kind name ofType{kind name}}}}}}}`);
+          async function gql(query,variables={}){const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query,variables})});return{status:r.status,payload:await r.json().catch(()=>({}))};}
+          const accountType=await gql(`query { __type(name: "Account") { fields { name type { kind name ofType { kind name ofType { kind name } } } } } } }`);
           console.log('INTROSPECTION_ACCOUNT_STATUS',accountType.status);
+          if(accountType.payload?.errors) console.log('INTROSPECTION_ACCOUNT_ERROR',JSON.stringify(accountType.payload.errors));
           const fields=accountType.payload?.data?.__type?.fields||[];
           const target=fields.find(f=>f.name==='pagesFunctionsInvocationsAdaptiveGroups');
-          console.log('PAGES_ANALYTICS_FIELD_TYPE',JSON.stringify(target||accountType.payload?.errors||null));
+          console.log('PAGES_ANALYTICS_FIELD_TYPE',JSON.stringify(target||null));
           function unwrap(t){while(t?.ofType)t=t.ofType;return t?.name||''}
           const groupType=unwrap(target?.type);
           if(groupType){
-            const group=await gql(`query($name:String!){__type(name:$name){name fields{name type{kind name ofType{kind name ofType{kind name}}}}}}}`,{name:groupType});
+            const group=await gql(`query($name:String!){__type(name:$name){name fields{name type{kind name ofType{kind name ofType{kind name}}}}}}`,{name:groupType});
             console.log('PAGES_GROUP_TYPE',JSON.stringify(group.payload?.data?.__type||group.payload?.errors||null));
             const dimField=group.payload?.data?.__type?.fields?.find(f=>f.name==='dimensions');
             const dimType=unwrap(dimField?.type);
