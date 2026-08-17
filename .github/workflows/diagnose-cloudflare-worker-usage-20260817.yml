@@ -10,11 +10,10 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
   diagnose:
-    name: Correlate actual Pages traffic and staging CI
+    name: Attribute actual Pages traffic by project
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -22,41 +21,34 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      GH_READ_TOKEN: ${{ github.token }}
-      GH_REPOSITORY: ${{ github.repository }}
     steps:
-      - name: Query and correlate hourly metrics
+      - name: Filter Pages metrics by production script name
         shell: bash
         run: |
           set -euo pipefail
           node <<'NODE'
-          const cfToken=process.env.CLOUDFLARE_API_TOKEN||'';
+          const token=process.env.CLOUDFLARE_API_TOKEN||'';
           const accountTag=process.env.CLOUDFLARE_ACCOUNT_ID||'';
-          const ghToken=process.env.GH_READ_TOKEN||'';
-          const repo=process.env.GH_REPOSITORY||'';
-          const start=new Date('2026-08-16T00:00:00.000Z');
-          const end=new Date('2026-08-17T07:00:00.000Z');
-          const cfHeaders={authorization:`Bearer ${cfToken}`,accept:'application/json','content-type':'application/json'};
-          const query=`query Usage($accountTag:string,$datetimeStart:string,$datetimeEnd:string){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_lt:$datetimeEnd}){sum{requests subrequests errors}dimensions{datetimeHour status}}}}}`;
-          const cr=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers:cfHeaders,body:JSON.stringify({query,variables:{accountTag,datetimeStart:start.toISOString(),datetimeEnd:end.toISOString()}})});
-          const cp=await cr.json().catch(()=>({}));
-          if(!cr.ok||cp.errors?.length){console.error('CLOUDFLARE_ERROR',JSON.stringify(cp.errors||cp));process.exit(2)}
-          const pagesHours=new Map();
-          for(const row of cp?.data?.viewer?.accounts?.[0]?.pagesFunctionsInvocationsAdaptiveGroups||[]){const hour=String(row?.dimensions?.datetimeHour||'');const h=pagesHours.get(hour)||{requests:0,subrequests:0,errors:0};h.requests+=Number(row?.sum?.requests||0);h.subrequests+=Number(row?.sum?.subrequests||0);h.errors+=Number(row?.sum?.errors||0);pagesHours.set(hour,h)}
-
-          const ghHeaders={authorization:`Bearer ${ghToken}`,accept:'application/vnd.github+json','x-github-api-version':'2022-11-28'};
-          const runs=[];
-          for(let page=1;page<=20;page++){
-            const url=new URL(`https://api.github.com/repos/${repo}/actions/runs`);
-            url.searchParams.set('branch','staging');url.searchParams.set('created','2026-08-16T00:00:00Z..2026-08-17T07:00:00Z');url.searchParams.set('per_page','100');url.searchParams.set('page',String(page));
-            const r=await fetch(url,{headers:ghHeaders});const p=await r.json().catch(()=>({}));if(!r.ok){console.error('GITHUB_ERROR',JSON.stringify({status:r.status,payload:p}));process.exit(3)}
-            const batch=Array.isArray(p.workflow_runs)?p.workflow_runs:[];runs.push(...batch);if(batch.length<100)break;
+          const headers={authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'};
+          const list=await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountTag}/pages/projects`,{headers});
+          const packet=await list.json().catch(()=>({}));
+          if(!list.ok){console.error('PROJECTS_ERROR',JSON.stringify(packet));process.exit(2)}
+          const projects=(packet.result||[]).map(p=>({name:p.name,productionScriptName:p.production_script_name,previewScriptName:p.preview_script_name}));
+          console.log('PAGES_SCRIPT_NAMES',JSON.stringify(projects));
+          const start='2026-08-16T00:00:00.000Z',end='2026-08-17T07:00:00.000Z';
+          async function query(scriptName){
+            const q=`query Usage($accountTag:string,$datetimeStart:string,$datetimeEnd:string,$scriptName:string){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_lt:$datetimeEnd,scriptName:$scriptName}){sum{requests subrequests errors}dimensions{datetimeHour status scriptName}}}}}`;
+            const r=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers,body:JSON.stringify({query:q,variables:{accountTag,datetimeStart:start,datetimeEnd:end,scriptName}})});
+            const p=await r.json().catch(()=>({}));return{status:r.status,p};
           }
-          const ciHours=new Map(),workflows=new Map();
-          for(const run of runs){const created=String(run.created_at||'');const hour=created.slice(0,13)+':00:00Z';ciHours.set(hour,(ciHours.get(hour)||0)+1);const name=String(run.name||run.path||'unknown');const w=workflows.get(name)||{name,runs:0,success:0,failure:0,cancelled:0};w.runs++;if(run.conclusion==='success')w.success++;else if(run.conclusion==='failure')w.failure++;else if(run.conclusion==='cancelled')w.cancelled++;workflows.set(name,w)}
-          console.log('CORRELATION_TOTALS',JSON.stringify({workflowRuns:runs.length,pagesRequests:[...pagesHours.values()].reduce((s,h)=>s+h.requests,0),pagesSubrequests:[...pagesHours.values()].reduce((s,h)=>s+h.subrequests,0)}));
-          console.log('HOURLY_CORRELATION');
-          for(let t=start.getTime();t<end.getTime();t+=3600000){const hour=new Date(t).toISOString().slice(0,13)+':00:00Z';const p=pagesHours.get(hour)||{requests:0,subrequests:0,errors:0};console.log(JSON.stringify({hour,pagesRequests:p.requests,pagesSubrequests:p.subrequests,pagesErrors:p.errors,stagingWorkflowRuns:ciHours.get(hour)||0}))}
-          console.log('TOP_WORKFLOWS');
-          for(const row of [...workflows.values()].sort((a,b)=>b.runs-a.runs).slice(0,40))console.log(JSON.stringify(row));
+          for(const project of projects){
+            for(const [kind,script] of [['production',project.productionScriptName],['preview',project.previewScriptName]]){
+              if(!script)continue;
+              const {status,p}=await query(script);
+              if(p.errors?.length){console.log('PROJECT_FILTER_ERROR',JSON.stringify({project:project.name,kind,script,status,errors:p.errors}));continue}
+              const rows=p?.data?.viewer?.accounts?.[0]?.pagesFunctionsInvocationsAdaptiveGroups||[];let requests=0,subrequests=0,errors=0;const hours=[];
+              for(const row of rows){const req=Number(row?.sum?.requests||0),sub=Number(row?.sum?.subrequests||0),err=Number(row?.sum?.errors||0);requests+=req;subrequests+=sub;errors+=err;hours.push({hour:row?.dimensions?.datetimeHour,status:row?.dimensions?.status,requests:req,subrequests:sub,errors:err,scriptName:row?.dimensions?.scriptName||null})}
+              console.log('PROJECT_USAGE',JSON.stringify({project:project.name,kind,script,requests,subrequests,errors,hours:hours.sort((a,b)=>String(a.hour).localeCompare(String(b.hour)))}));
+            }
+          }
           NODE
