@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.136-shared-guide-surface-v236-cloud-fallback';
+const VERSION='1.0.138-shared-guide-surface-v236-router-stable';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -66,11 +66,11 @@ function install(){
   loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
   loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
   load('/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
-  load('/app/minilm-decision-strip-v1.js?v=1.0.0-live-route',null,()=>Boolean(globalThis.CivweaveMiniLMDecisionStripV1));
-  load('/app/family-ai-loader-v105.js?v=1.0.129-structured-fallback-network-gate',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
+  load('/app/minilm-decision-strip-v1.js?v=1.1.0-router-watch',null,()=>Boolean(globalThis.CivweaveMiniLMDecisionStripV1));
+  load('/app/family-ai-loader-v105.js?v=1.0.130-shared-ai-lud-boundary',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
   load('/app/guide-forward-failure-policy-v1.js?v=1.0.0-forward-only-guild-handoff',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
-  load('/app/guide-forward-failure-hardening-v1.js?v=1.1.0-cloud-services-fallback',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
+  load('/app/guide-forward-failure-hardening-v1.js?v=1.2.0-router-stable',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
   load('/app/guide-stream-thinking-v249.js?v=1.0.118-v249-navigation-lifecycle-v424',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
   load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
     load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.57-v257',null,()=>Boolean(globalThis.CivweaveGeminiInteractionsV159));
@@ -100,5 +100,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(()=>{install();globalThis.CivweaveSharedGuideSurfaceV236?.repairSurface?.()}));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-primary-v3',routeDecisionStrip:'v1-live-actual-events',assistantLoader:'family-ai-loader-v105-on-demand',assistantLoaderEagerWarm:false,providerPolicy:'guide-provider-policy-v1-server-auto-local-first',failurePolicy:'guide-forward-failure-policy-v1',failureHardening:'guide-forward-failure-hardening-v1-cloud-services',failureDirection:'forward-only',terminalGenerativeFallback:'automatic-server-auto',deterministicAnswerFallback:false,deterministicTerminalVisible:false,guildRequestDeduplicated:true,plannerMaterialization:'v265',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.2-learning-continuation',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-primary-v3',routeDecisionStrip:'v1.1-router-watch',assistantLoader:'family-ai-loader-v105-on-demand',assistantLoaderEagerWarm:false,providerPolicy:'guide-provider-policy-v1-server-auto-local-first',failurePolicy:'guide-forward-failure-policy-v1',failureHardening:'guide-forward-failure-hardening-v1-router-stable',failureDirection:'forward-only',terminalGenerativeFallback:'automatic-server-auto',deterministicAnswerFallback:false,deterministicTerminalVisible:false,deterministicAssistantPatchRetired:true,guildRequestDeduplicated:true,plannerMaterialization:'v265',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.2-learning-continuation',install});
 })();
