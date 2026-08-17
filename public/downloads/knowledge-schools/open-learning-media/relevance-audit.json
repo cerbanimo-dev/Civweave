@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-08-10T14:16:41Z",
-  "before": 847,
-  "after": 379,
-  "rejected": 468,
+  "built_at": "2026-08-17T08:03:20Z",
+  "before": 845,
+  "after": 378,
+  "rejected": 467,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -49,21 +49,21 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 10,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 6
+        "peertube": 5,
+        "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "When Code Became a Weapon - Crypto Wars Explained",
+        "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
     },
@@ -71,41 +71,40 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 16,
-      "mesh_redistributable": 6,
+      "records": 15,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 15,
+        "peertube": 14,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "Properties of Hydrogen - Chemistry for All - FuseSchool"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 4,
+      "records": 7,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -128,11 +127,11 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+        "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
       ]
     },
     "astronomy-space": {
@@ -149,8 +148,8 @@
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
         "Solar System explained by simpleshow foundation",
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
+        "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
         "Animation Using Constraints Example Solar System",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 2 XD99775b"
@@ -160,20 +159,21 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -240,48 +240,50 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 5,
       "providers": {
-        "wikimedia-commons": 2
+        "wikimedia-commons": 2,
+        "peertube": 3
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
+        "peertube": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
-        "Il Prompt Engineering"
+        "Effective prompt engineering for Python programmers"
       ]
     },
     "pseudocoding": {
@@ -302,17 +304,15 @@
       "name": "Critical Thinking & Media Literacy",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 1,
-        "internet-archive": 1
+        "peertube": 1
       },
       "top_titles": [
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
-        "The Facts about Fact Checking: Crash Course Navigating Digital Information #2",
-        "TAM 2014 - Steven Novella - How to Think Like a Skeptical Neurologist"
+        "The Facts about Fact Checking: Crash Course Navigating Digital Information #2"
       ]
     },
     "logical-frameworks": {
@@ -340,15 +340,14 @@
       "name": "Personal Finance",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "GnuCash for Personal Finance - Getting Started and Basics",
         "GnuCash for Personal Finance - Split Transactions",
-        "Saving a Windows 8 Tablet with Debian Linux!",
         "“WISE BUYING” 1950 HOME ECONOMICS FILM SHOPPING, BUDGETING AND MANAGING FINANCES XD11974"
       ]
     },
@@ -410,12 +409,13 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 5
+        "peertube": 6
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "[Tech Maid] Mesecons Basics",
@@ -494,12 +494,17 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1
+        "peertube": 6
       },
       "top_titles": [
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -516,20 +521,21 @@
       },
       "top_titles": [
         "Welcome to Climate Change and Health – From Science to Practice",
-        "Climate Change: Science, Policy, Action",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "Climate Change: Science, Policy, Action"
       ]
     },
     "law-rights-basics": {
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 0,
+      "records": 4,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 3
+        "peertube": 4
       },
       "top_titles": [
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
         "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
@@ -754,6 +760,16 @@
     },
     {
       "provider": "peertube",
+      "title": "Banana DNA Experiment",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "peertube",
+      "title": "CRISPR Science: DNA, RNA, and Gene Editing",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "peertube",
       "title": "20260724 - MY LITTLE PONY： Career Day",
       "topic_slug": "career-work-skills"
     },
@@ -775,11 +791,6 @@
     {
       "provider": "peertube",
       "title": "Accelerate Your Career_ Comprehensive Automotive Training in Philadelphia.",
-      "topic_slug": "career-work-skills"
-    },
-    {
-      "provider": "peertube",
-      "title": "Ce livre résume 15 ans de recherche scientifique et 150 interviews sur la transition écologique",
       "topic_slug": "career-work-skills"
     },
     {
@@ -844,6 +855,11 @@
     },
     {
       "provider": "peertube",
+      "title": "Ce livre résume 15 ans de recherche scientifique et 150 interviews sur la transition écologique",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
       "title": "GirlsLab",
       "topic_slug": "career-work-skills"
     },
@@ -874,11 +890,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Finnish Grandparents for Climate singing children's song on Europa Day 2025",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
       "title": "Civic Data Lab: Daten VON und FÜR die Zivilgesellschaft!",
       "topic_slug": "civics-society"
     },
@@ -889,7 +900,7 @@
     },
     {
       "provider": "peertube",
-      "title": "Le Royaume-Uni adopte la loi sur l’expulsion des demandeurs d’asile au Rwanda",
+      "title": "TICTeC Show & Tell - Right to Know across Europe: impacts and lessons learned",
       "topic_slug": "civics-society"
     },
     {
@@ -909,7 +920,27 @@
     },
     {
       "provider": "peertube",
-      "title": "Sad moment for our fundamental rights",
+      "title": "A brief history of representation in nearly 60 seconds",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "How does the House of Lords work? Jump Start",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "Parliament’s structure explained (primary)",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "What is the House of Commons?",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "What is the House of Lords? Jump Start",
       "topic_slug": "civics-society"
     },
     {
@@ -1048,11 +1079,6 @@
       "topic_slug": "computing-basics"
     },
     {
-      "provider": "internet-archive",
-      "title": "DTNS 20180301",
-      "topic_slug": "computing-basics"
-    },
-    {
       "provider": "peertube",
       "title": "“ AUTOMATION - THE NEXT REVOLUTION ” 1963 NEWS FILM COMPUTERS, ROBOTS & MANUFACTURING 90004",
       "topic_slug": "computing-basics"
@@ -1063,6 +1089,11 @@
       "topic_slug": "computing-basics"
     },
     {
+      "provider": "internet-archive",
+      "title": "DTNS 20180301",
+      "topic_slug": "computing-basics"
+    },
+    {
       "provider": "wikimedia-commons",
       "title": "Five Signs of Severe Food Poisoning",
       "topic_slug": "cooking-food-safety"
@@ -1070,11 +1101,6 @@
     {
       "provider": "wikimedia-commons",
       "title": "Prevent Food Poisoning- Safety tips for handling and preparing common food",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Cooking with Agents in VS Code — Liam Hampton, Microsoft",
       "topic_slug": "cooking-food-safety"
     },
     {
@@ -1095,6 +1121,11 @@
     {
       "provider": "peertube",
       "title": "3d printable design kitchen scale - operation and calibration",
+      "topic_slug": "cooking-food-safety"
+    },
+    {
+      "provider": "peertube",
+      "title": "Cooking crêpes",
       "topic_slug": "cooking-food-safety"
     },
     {
@@ -1188,11 +1219,6 @@
       "topic_slug": "critical-thinking"
     },
     {
-      "provider": "internet-archive",
-      "title": "Lecture by Yuval Noah Harari",
-      "topic_slug": "critical-thinking"
-    },
-    {
       "provider": "peertube",
       "title": "Александра Архипова, «Как устроены паники о цифровом влиянии в прошлом и настоящем»",
       "topic_slug": "critical-thinking"
@@ -1219,7 +1245,17 @@
     },
     {
       "provider": "internet-archive",
-      "title": "JUST IN: American Flight Attendant’s Secret Gesture at 30,000 Feet GOES VIRAL!",
+      "title": "Even RUSSIA is Stunned! China FLOODS Iran With Weapons of Mass D3struction. Israel shocked!",
+      "topic_slug": "critical-thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "LEAKED Footage: Israel’s Biggest LIE EXPOSED After Iran STRIKE!",
+      "topic_slug": "critical-thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Lecture by Yuval Noah Harari",
       "topic_slug": "critical-thinking"
     },
     {
@@ -1305,36 +1341,6 @@
     {
       "provider": "peertube",
       "title": "Sketching a Raptor with a Novelty Pencil",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Sketching at the Coffee Shop",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Sketching at the Lo-Fi Bar and Lounge",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Sketching the Gallery of Madame Liu Tsong",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Fun programming 86: Drawing shapes with your mouse",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Electron Configuration Diagrams | Properties of Matter | Chemistry | FuseSchool",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Inkscape Beginner Tutorial: Simple Icon Drawings",
       "topic_slug": "drawing-design"
     }
   ]

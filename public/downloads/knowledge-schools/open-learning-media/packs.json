@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-packs.v1",
-  "built_at": "2026-08-10T14:16:41Z",
+  "built_at": "2026-08-17T08:03:20Z",
   "revision": "general-knowledge-packs-v1",
   "default_pack": "general-knowledge",
   "packs": [
@@ -87,7 +87,7 @@
         "climate-environment",
         "law-rights-basics"
       ],
-      "coverage": 0.8,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -120,7 +120,7 @@
         "philosophy-ethics",
         "law-rights-basics"
       ],
-      "coverage": 0.8333,
+      "coverage": 1.0,
       "available": true
     }
   ],

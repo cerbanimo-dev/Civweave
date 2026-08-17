@@ -1,24 +1,24 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-08-10T14:16:41Z",
-  "record_count": 153,
-  "mesh_redistributable_count": 105,
-  "download_candidate_count": 237,
+  "built_at": "2026-08-17T08:03:20Z",
+  "record_count": 160,
+  "mesh_redistributable_count": 113,
+  "download_candidate_count": 245,
   "providers": {
     "internet-archive": {
       "records": 6,
       "mesh_redistributable": 0,
-      "download_candidates": 15
+      "download_candidates": 4
     },
     "peertube": {
-      "records": 103,
-      "mesh_redistributable": 61,
-      "download_candidates": 178
+      "records": 111,
+      "mesh_redistributable": 70,
+      "download_candidates": 198
     },
     "wikimedia-commons": {
-      "records": 44,
-      "mesh_redistributable": 44,
-      "download_candidates": 44
+      "records": 43,
+      "mesh_redistributable": 43,
+      "download_candidates": 43
     }
   },
   "focus_topics": {
@@ -66,19 +66,19 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 6,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 3,
-        "wikimedia-commons": 5
+        "peertube": 4,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
     },
@@ -86,22 +86,22 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 14,
-      "mesh_redistributable": 5,
+      "records": 13,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 14
+        "peertube": 13
       },
       "top_titles": [
-        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts"
       ]
     },
     "physics-foundations": {
@@ -111,12 +111,12 @@
       "records": 6,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 5,
-        "wikimedia-commons": 1
+        "peertube": 4,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -143,8 +143,8 @@
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+        "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
       ]
     },
     "astronomy-space": {
@@ -171,20 +171,21 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -250,48 +251,50 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 5,
       "providers": {
-        "wikimedia-commons": 2
+        "wikimedia-commons": 2,
+        "peertube": 3
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
+        "peertube": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
-        "Il Prompt Engineering"
+        "Effective prompt engineering for Python programmers"
       ]
     },
     "pseudocoding": {
@@ -415,12 +418,13 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
@@ -493,12 +497,17 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1
+        "peertube": 6
       },
       "top_titles": [
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -510,25 +519,26 @@
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "internet-archive": 1,
-        "peertube": 1
+        "peertube": 1,
+        "internet-archive": 1
       },
       "top_titles": [
         "Welcome to Climate Change and Health – From Science to Practice",
-        "Climate Change: Science, Policy, Action",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "Climate Change: Science, Policy, Action"
       ]
     },
     "law-rights-basics": {
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 0,
+      "records": 4,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 3
+        "peertube": 4
       },
       "top_titles": [
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
         "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
@@ -1053,27 +1063,10 @@
         "derivatives": true,
         "share_alike": false
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/0fefe46b15c94a6983ceF722d28491b41080/0fefe46b-15c9-4a69-83ce-f722d28491b4-1080.mp4",
-          "bytes": 49353237,
-          "provider_sha1": "ea196b1bb327602df4c90c0ae3fc9107598fe08a",
-          "provider_md5": "b58446e00db706974fdc6e9692d17d31",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/0fefe46b15c94a6983ceF722d28491b41080/0fefe46b-15c9-4a69-83ce-f722d28491b4-1080.ogv",
-          "bytes": 36900638,
-          "provider_sha1": "75bea56b5b11a5325d625a17de078e3509a69b86",
-          "provider_md5": "0cd116599964e8b648813f482c5c5400",
-          "format": "Ogg Video",
-          "role": "derivative"
-        }
-      ],
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
@@ -1088,11 +1081,11 @@
           "topic_slug": "arts-culture",
           "school_slug": "arts",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 68,
+          "pedagogy_score": 58,
           "relevance_score": 20
         }
       ],
-      "quality_score": 85,
+      "quality_score": 27,
       "relevance": {
         "arts-culture": {
           "score": 20,
@@ -1113,13 +1106,13 @@
           "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 68
+          "pedagogy_score": 58
         }
       },
       "selection": {
         "arts-culture": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 68
+          "pedagogy_score": 58
         }
       }
     },
@@ -1799,7 +1792,7 @@
       ],
       "matched_query": "astronomy basics",
       "title": "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
-      "description": "It makes sense to use a telescope to look up at the heavens, but what can we learn from using a microscope instead? Meteorites are natural objects that survive their fall to Earth from space. Almost all are fragments of ancient asteroids, forme...",
+      "description": "It makes sense to use a telescope to look up at the heavens, but what can we learn from using a microscope instead? Meteorites are natural objects that survive their fall to Earth from space. Almost all are fragments of ancient asteroids, formed at the birth of the Solar System, approx 4567 million years ago. Meteorites carry within them a record of the history of the solar system. Tiny grains within meteorites have come from other stars, giving information about the stellar neighbourhood in which the Sun was born. And some meteorites contain organic compounds – materials which might have helped life on Earth to get started!",
       "creator": "jpan",
       "language": "en",
       "duration_seconds": 3277,
@@ -1849,17 +1842,20 @@
           "topic_slug": "astronomy-space",
           "school_slug": "science",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36,
-          "relevance_score": 10
+          "pedagogy_score": 44,
+          "relevance_score": 24
         }
       ],
       "quality_score": 88,
       "relevance": {
         "astronomy-space": {
-          "score": 10,
+          "score": 24,
           "evidence": [
             "astronomy",
-            "astronomy"
+            "solar system",
+            "astronomy",
+            "solar system",
+            "stars"
           ]
         }
       },
@@ -1868,18 +1864,20 @@
           "strong_title_matches": [
             "astronomy"
           ],
-          "strong_description_matches": [],
+          "strong_description_matches": [
+            "solar system"
+          ],
           "educational_intent": true,
           "instructional_title": false,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 36
+          "pedagogy_score": 44
         }
       },
       "selection": {
         "astronomy-space": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36
+          "pedagogy_score": 44
         }
       }
     },
@@ -2141,7 +2139,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "6dd957a0-fb41-4248-80e3-ac3b74c72158",
+      "provider_id": "f38b2ae2-b316-489f-bfd9-f5fb8053c925",
       "topic_slug": "biology-life",
       "topic_name": "Biology & Life",
       "school_slug": "science",
@@ -2151,14 +2149,14 @@
         "genetics",
         "ecology"
       ],
-      "matched_query": "cell biology educational film",
-      "title": "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-      "description": "This talk examines the engineering challenges of building foundation models for single-cell biology from a non-biologist’s perspective. Speakers: - Akram Baharlouei (Altos Labs): Machine learning engineer at Altos Labs working on foundation model...",
-      "creator": "Bleme",
+      "matched_query": "biology educational film",
+      "title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+      "description": "This presentation dives deep into the journey of the Hydro Guardian! We'll explore the educational and human practices that shaped and refined our project. We were thrilled to engage with stakeholders through interviews, as this allowed us to gain valuable knowledge and adjust and enhance our project based on real-world needs and feedback. Our efforts in communicating the Hydro Guardian Project within the scientific community — through presentations, meetups, and collaborations with other iGEM-Teams — has fostered valuable partnerships and gained some amazing insights. Additionally, our outreach to the public through educational initiatives, such as a children's book and school visits, has been a great way to expand the understanding of our project and synthetic biology. These continuous learning cycles and adaptive approaches show just how important educational and human practices are in ensuring a responsible and impactful synthetic biology project!",
+      "creator": "iGEM Teams",
       "language": "en",
-      "duration_seconds": 1017,
-      "source_url": "https://video.ut0pia.org/videos/watch/6dd957a0-fb41-4248-80e3-ac3b74c72158",
-      "source_host": "video.ut0pia.org",
+      "duration_seconds": 498,
+      "source_url": "https://video.igem.org/videos/watch/f38b2ae2-b316-489f-bfd9-f5fb8053c925",
+      "source_host": "video.igem.org",
       "license": {
         "spdx": "CC-BY",
         "label": "Attribution",
@@ -2173,20 +2171,36 @@
       "download_enabled": true,
       "files": [
         {
-          "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/6dd957a0-fb41-4248-80e3-ac3b74c72158-720-fragmented.mp4",
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-1080-fragmented.mp4",
           "mime": "video/mp4",
-          "bytes": 41423487,
-          "resolution": "720p",
-          "fps": 25,
+          "bytes": 179939165,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 33928655,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-240-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 10810452,
+          "resolution": "240p",
+          "fps": 30,
           "role": "streaming-file"
         }
       ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "Bleme",
-        "source_title": "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-        "source_url": "https://video.ut0pia.org/videos/watch/6dd957a0-fb41-4248-80e3-ac3b74c72158",
+        "creator": "iGEM Teams",
+        "source_title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "source_url": "https://video.igem.org/videos/watch/f38b2ae2-b316-489f-bfd9-f5fb8053c925",
         "license": "Attribution",
         "license_url": ""
       },
@@ -2195,43 +2209,39 @@
           "topic_slug": "biology-life",
           "school_slug": "science",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 72,
-          "relevance_score": 24
+          "pedagogy_score": 56,
+          "relevance_score": 10
         }
       ],
       "quality_score": 88,
       "relevance": {
         "biology-life": {
-          "score": 24,
+          "score": 10,
           "evidence": [
             "biology",
-            "cell biology",
-            "biology",
-            "cells"
+            "biology"
           ]
         }
       },
       "pedagogy": {
         "biology-life": {
           "strong_title_matches": [
-            "biology",
-            "cell biology"
+            "biology"
           ],
           "strong_description_matches": [
-            "biology",
-            "cell biology"
+            "biology"
           ],
           "educational_intent": true,
-          "instructional_title": false,
+          "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 72
+          "pedagogy_score": 56
         }
       },
       "selection": {
         "biology-life": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 72
+          "pedagogy_score": 56
         }
       }
     },
@@ -2325,113 +2335,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "f38b2ae2-b316-489f-bfd9-f5fb8053c925",
-      "topic_slug": "biology-life",
-      "topic_name": "Biology & Life",
-      "school_slug": "science",
-      "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
-      ],
-      "matched_query": "biology educational film",
-      "title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
-      "description": "This presentation dives deep into the journey of the Hydro Guardian! We'll explore the educational and human practices that shaped and refined our project. We were thrilled to engage with stakeholders through interviews, as this allowed us to gain...",
-      "creator": "iGEM Teams",
-      "language": "en",
-      "duration_seconds": 498,
-      "source_url": "https://video.igem.org/videos/watch/f38b2ae2-b316-489f-bfd9-f5fb8053c925",
-      "source_host": "video.igem.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-1080-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 179939165,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-480-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 33928655,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-240-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 10810452,
-          "resolution": "240p",
-          "fps": 30,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "iGEM Teams",
-        "source_title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
-        "source_url": "https://video.igem.org/videos/watch/f38b2ae2-b316-489f-bfd9-f5fb8053c925",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "biology-life": {
-          "score": 10,
-          "evidence": [
-            "biology",
-            "biology"
-          ]
-        }
-      },
-      "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [
-            "biology"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 48
-        }
-      },
-      "selection": {
-        "biology-life": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "93ff2046-d427-4f4b-8590-9de10877c4e6",
       "topic_slug": "biology-life",
       "topic_name": "Biology & Life",
@@ -2444,7 +2347,7 @@
       ],
       "matched_query": "biology educational film",
       "title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
-      "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business le...",
+      "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business leaders, community surveys and organizing iGEM Day at our University. We will present what we have learnt from these activities, and how they have inpacted our community. Our main goal of the stage talk is to share our local community educational efforts with other iGEM teams so that it may encourage them to also act locally to influence their own communities in a sustainable way.",
       "creator": "iGEM Teams",
       "language": "en",
       "duration_seconds": 605,
@@ -3416,12 +3319,12 @@
       "topic_name": "Chemistry Foundations",
       "school_slug": "science",
       "concepts": [
-        "physics",
-        "forces",
-        "motion",
-        "energy"
+        "chemistry",
+        "atoms",
+        "periodic table",
+        "reactions"
       ],
-      "matched_query": "physics basics",
+      "matched_query": "chemistry basics",
       "title": "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
       "description": "Learn the basics about Mendeleev and the Periodic Table. Who is Mendeleev and what did his periodic table look like? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
       "creator": "FuseSchool - Global Education",
@@ -3878,98 +3781,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
-      "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
-      "topic_slug": "chemistry-foundations",
-      "topic_name": "Chemistry Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "chemistry",
-        "atoms",
-        "periodic table",
-        "reactions"
-      ],
-      "matched_query": "chemistry basics",
-      "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-      "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
-      "creator": "FuseSchool - Global Education",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 8378497,
-          "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "FuseSchool - Global Education",
-        "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "chemistry-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "chemistry-foundations": {
-          "score": 10,
-          "evidence": [
-            "chemistry",
-            "chemistry"
-          ]
-        }
-      },
-      "pedagogy": {
-        "chemistry-foundations": {
-          "strong_title_matches": [
-            "chemistry"
-          ],
-          "strong_description_matches": [
-            "chemistry"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "chemistry-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
       "provider_id": "File:How to Understand Mendeleev's Periodic Table of 1869.webm",
       "topic_slug": "chemistry-foundations",
       "topic_name": "Chemistry Foundations",
@@ -4135,143 +3946,6 @@
         "chemistry-foundations": {
           "strong_title_matches": [
             "periodic table"
-          ],
-          "strong_description_matches": [
-            "chemistry",
-            "periodic table"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 52
-        }
-      },
-      "selection": {
-        "chemistry-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 52
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "chemistry-cas",
-      "topic_slug": "chemistry-foundations",
-      "topic_name": "Chemistry Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "chemistry",
-        "atoms",
-        "periodic table",
-        "reactions"
-      ],
-      "matched_query": "periodic table chemistry",
-      "title": "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-      "description": "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series . More series information page: https://web.archive.org/web/20140209085708/http://learner.org/resources/series218.html . Study Guide as One PDF: https://web.archive.org/web/20140209071704/http://learner.org/courses/chemistry/course_guide/pdfs/complete.pdf . Interactive online course website: https://web.archive.org/web/20140209112154/http://www.learner.org/courses/chemistry/ Chemistry: Challenges and Solutions was a video-based instructional series in chemistry with accompanying web site for high school and college classes. 13 half-hour programs , online text , course guide, interactive lessons, historical timeline and periodic table. Chemistry: Challenges and Solutions teaches concepts of general chemistry by presenting real challenges in energy production, materials development, biochemistry, and environmental protection. The course zeroes in on core topics taught in introductory chemistry, providing a strong foundation for learners to pursue further study in science, med-tech fields, or a liberal education. Videos include lab demonstrations of key laws and processes, interviews with research scientists and industrial chemists, and explanatory animations. An online text covers science history and major discoveries with clear explanations and graphics. Interactive labs provide hands-on simulations of chemical processes. Produced by the Harvard-Smithsonian Center for Astrophysics. 2014. Complete online Study Guide: https://web.archive.org/web/20140209112154/http://www.learner.org/courses/chemistry/course_guide/course_guide.html 01. Matter and the Rise of Atomic Theory: The Art of the Meticulous 02. The Behavior of Atoms: Phases of Matter and the Properties of Gases 03. Atoms and Light: Exploring Atomic",
-      "creator": "Harvard-Smithsonian Center for Astrophysics",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/chemistry-cas",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "https://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/chemistry-cas/Chemistry%20CAS%2009%20Equilibrium%20and%20Advanced%20Thermodynamics%20Balance%20in%20Chemical%20Reactions.mp4",
-          "bytes": 184037997,
-          "provider_sha1": "f000a4480bb36a37c3b69bbcf4c98b8fdb08dd2b",
-          "provider_md5": "79ffeb17ef74acde1bd214034faf3eb8",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/chemistry-cas/Chemistry%20CAS%2011%20The%20Metallic%20World%20Electrochemistry%20and%20Coordination%20Compounds.mp4",
-          "bytes": 192950532,
-          "provider_sha1": "574a985897c5f34671db1819e8cd84eb48e13843",
-          "provider_md5": "7afb586712d2059e27327b49aba67254",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/chemistry-cas/Chemistry%20CAS%2003%20Atoms%20and%20Light%20Exploring%20Atomic%20and%20Electronic%20Structure.mp4",
-          "bytes": 205729820,
-          "provider_sha1": "9345a8325a1cacd7bd373fc3874997d276b4319f",
-          "provider_md5": "7e6c45aa3cf0d50d7ba7d956339ff7b4",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/chemistry-cas/Chemistry%20CAS%2012%20Kinetics%20and%20Nuclear%20Chemistry%20The%20Need%20for%20Speed.mp4",
-          "bytes": 211234865,
-          "provider_sha1": "4df6530e6d7e678a26e14276ae65ac105b0bfe23",
-          "provider_md5": "fbf5da224a211549cd862a9deb961914",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/chemistry-cas/Chemistry%20CAS%2005%20Making%20Molecules%20Lewis%20Structures%20and%20Molecular%20Geometries.mp4",
-          "bytes": 211808101,
-          "provider_sha1": "f01caf42585d2de977d5ad4b8235a560f21d4ed9",
-          "provider_md5": "81dcaaa013940638ec67e83204544167",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/chemistry-cas/Chemistry%20CAS%2004%20Organizing%20Atoms%20and%20Electrons%20The%20Periodic%20Table.mp4",
-          "bytes": 213635308,
-          "provider_sha1": "7d8bddf3e064ed71f2ee4e0813be4d78c8e899e0",
-          "provider_md5": "768e2773507acd0b0166787708499dec",
-          "format": "MPEG4",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Harvard-Smithsonian Center for Astrophysics",
-        "source_title": "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "source_url": "https://archive.org/details/chemistry-cas",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "https://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "chemistry-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 52,
-          "relevance_score": 24
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "chemistry-foundations": {
-          "score": 24,
-          "evidence": [
-            "chemistry",
-            "periodic table",
-            "chemistry",
-            "atoms",
-            "periodic table"
-          ]
-        }
-      },
-      "pedagogy": {
-        "chemistry-foundations": {
-          "strong_title_matches": [
-            "chemistry"
           ],
           "strong_description_matches": [
             "chemistry",
@@ -5161,6 +4835,94 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "internet-archive",
+      "provider_id": "chemistry-cas",
+      "topic_slug": "chemistry-foundations",
+      "topic_name": "Chemistry Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "chemistry",
+        "atoms",
+        "periodic table",
+        "reactions"
+      ],
+      "matched_query": "periodic table chemistry",
+      "title": "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
+      "description": "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series . More series information page: https://web.archive.org/web/20140209085708/http://learner.org/resources/series218.html . Study Guide as One PDF: https://web.archive.org/web/20140209071704/http://learner.org/courses/chemistry/course_guide/pdfs/complete.pdf . Interactive online course website: https://web.archive.org/web/20140209112154/http://www.learner.org/courses/chemistry/ Chemistry: Challenges and Solutions was a video-based instructional series in chemistry with accompanying web site for high school and college classes. 13 half-hour programs , online text , course guide, interactive lessons, historical timeline and periodic table. Chemistry: Challenges and Solutions teaches concepts of general chemistry by presenting real challenges in energy production, materials development, biochemistry, and environmental protection. The course zeroes in on core topics taught in introductory chemistry, providing a strong foundation for learners to pursue further study in science, med-tech fields, or a liberal education. Videos include lab demonstrations of key laws and processes, interviews with research scientists and industrial chemists, and explanatory animations. An online text covers science history and major discoveries with clear explanations and graphics. Interactive labs provide hands-on simulations of chemical processes. Produced by the Harvard-Smithsonian Center for Astrophysics. 2014. Complete online Study Guide: https://web.archive.org/web/20140209112154/http://www.learner.org/courses/chemistry/course_guide/course_guide.html 01. Matter and the Rise of Atomic Theory: The Art of the Meticulous 02. The Behavior of Atoms: Phases of Matter and the Properties of Gases 03. Atoms and Light: Exploring Atomic",
+      "creator": "Harvard-Smithsonian Center for Astrophysics",
+      "language": "eng",
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/chemistry-cas",
+      "source_host": "archive.org",
+      "license": {
+        "spdx": "PUBLIC-DOMAIN",
+        "label": "PUBLIC-DOMAIN",
+        "url": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/mark/1.0/",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Harvard-Smithsonian Center for Astrophysics",
+        "source_title": "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
+        "source_url": "https://archive.org/details/chemistry-cas",
+        "license": "PUBLIC-DOMAIN",
+        "license_url": "https://creativecommons.org/publicdomain/mark/1.0/"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 42,
+          "relevance_score": 24
+        }
+      ],
+      "quality_score": 29,
+      "relevance": {
+        "chemistry-foundations": {
+          "score": 24,
+          "evidence": [
+            "chemistry",
+            "periodic table",
+            "chemistry",
+            "atoms",
+            "periodic table"
+          ]
+        }
+      },
+      "pedagogy": {
+        "chemistry-foundations": {
+          "strong_title_matches": [
+            "chemistry"
+          ],
+          "strong_description_matches": [
+            "chemistry",
+            "periodic table"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 42
+        }
+      },
+      "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 42
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
       "provider_id": "0d790aa2-05a8-4302-bf6d-4ebce174c0fb",
       "topic_slug": "chemistry-foundations",
@@ -5631,96 +5393,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
-      "provider_id": "File:Elections and voting explained (UK).webm",
-      "topic_slug": "civics-society",
-      "topic_name": "Civics & Society",
-      "school_slug": "society-and-social-sciences",
-      "concepts": [
-        "civics",
-        "government",
-        "democracy",
-        "institutions"
-      ],
-      "matched_query": "parliament government introduction",
-      "title": "Elections and voting explained (UK)",
-      "description": "Discover how elections work in the UK and take a closer look at the General Election, exploring: our right to vote, how candidates and parties gain votes and what happens once elected. If you are a teacher, this animation is a quick and easy way to introduce the General Election with secondary students studying subjects such as Citizenship or Government & Politics. This is just one chapter of the ‘An Introduction to Parliament’ video. Find the full video, along with further chapters, such as Parliament’s Structure and Your Voice, here: https://www.youtube.com/watch?v=RAMbIz3Y2JA",
-      "creator": "UK Parliament",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Elections_and_voting_explained_%28UK%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 7768739,
-          "provider_sha1": "d9fb26a96fbab6fda2f8774fea28f96a52241d1b",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "UK Parliament",
-        "source_title": "Elections and voting explained (UK)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "civics-society",
-          "school_slug": "society-and-social-sciences",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "civics-society": {
-          "score": 10,
-          "evidence": [
-            "government",
-            "government"
-          ]
-        }
-      },
-      "pedagogy": {
-        "civics-society": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "government"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "civics-society": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
       "provider_id": "File:This is Trade and Investment. This is Wales. Welsh Government video.webm",
       "topic_slug": "civics-society",
       "topic_name": "Civics & Society",
@@ -5895,6 +5567,90 @@
         "civics-society": {
           "reason": "topic-description-anchor-plus-instructional-title",
           "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "b069053f-c242-4e7d-8b81-b77571559eac",
+      "topic_slug": "civics-society",
+      "topic_name": "Civics & Society",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "civics",
+        "government",
+        "democracy",
+        "institutions"
+      ],
+      "matched_query": "democracy civics lesson",
+      "title": "Houses of History - Explore the story of Parliament and democracy",
+      "description": "Journey through time with this playful, animated and interactive timeline, and explore the story of democracy. Explore the Houses of History interactive timeline at: http://www.parliament.uk/education/teaching-resources-lesson-plans/history-of-...",
+      "creator": "Open History",
+      "language": "en",
+      "duration_seconds": 190,
+      "source_url": "https://tilvids.com/videos/watch/b069053f-c242-4e7d-8b81-b77571559eac",
+      "source_host": "tilvids.com",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Open History",
+        "source_title": "Houses of History - Explore the story of Parliament and democracy",
+        "source_url": "https://tilvids.com/videos/watch/b069053f-c242-4e7d-8b81-b77571559eac",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "civics-society",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 35,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 30,
+      "relevance": {
+        "civics-society": {
+          "score": 10,
+          "evidence": [
+            "democracy",
+            "democracy"
+          ]
+        }
+      },
+      "pedagogy": {
+        "civics-society": {
+          "strong_title_matches": [
+            "democracy"
+          ],
+          "strong_description_matches": [
+            "democracy"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 35
+        }
+      },
+      "selection": {
+        "civics-society": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 35
         }
       }
     },
@@ -6099,27 +5855,10 @@
         "derivatives": true,
         "share_alike": false
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/snafuinfinitySFTP-Climate-Citizen-CL19/SFTP-Climate-Citizen-CL19.ogv",
-          "bytes": 249348824,
-          "provider_sha1": "56d86cf8117bc6a3e3d0833f5868b385128d5d21",
-          "provider_md5": "82f8e68e4cb8314e9d1fdf3c90f9b7e3",
-          "format": "Ogg Video",
-          "role": "derivative"
-        },
-        {
-          "url": "https://archive.org/download/snafuinfinitySFTP-Climate-Citizen-CL19/SFTP-Climate-Citizen-CL19.mp4",
-          "bytes": 341636588,
-          "provider_sha1": "723ebdd541c8725a16e84004f46e521b43e53338",
-          "provider_md5": "8712e0094d3870284141a2a50c07b2d0",
-          "format": "h.264",
-          "role": "derivative"
-        }
-      ],
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
@@ -6134,11 +5873,11 @@
           "topic_slug": "climate-environment",
           "school_slug": "science",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44,
+          "pedagogy_score": 34,
           "relevance_score": 10
         }
       ],
-      "quality_score": 87,
+      "quality_score": 29,
       "relevance": {
         "climate-environment": {
           "score": 10,
@@ -6159,13 +5898,13 @@
           "instructional_title": false,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 44
+          "pedagogy_score": 34
         }
       },
       "selection": {
         "climate-environment": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44
+          "pedagogy_score": 34
         }
       }
     },
@@ -6277,7 +6016,7 @@
       ],
       "matched_query": "computer science basics",
       "title": "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
-      "description": "Donate and Support this Channel: https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S Introduction Article to Heuristics and Metaheuristics: http://muonray.blogspot.ie/2016/04/meta-heuristics-and-universal-power-law.html Ric...",
+      "description": "Donate and Support this Channel: https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S Introduction Article to Heuristics and Metaheuristics: http://muonray.blogspot.ie/2016/04/meta-heuristics-and-universal-power-law.html Richard Feynman, Winner of the 1965 Nobel Prize in Physics, gives us an insightful lecture about computer heuristics: how computers work, how they file information, how they handle data, how they use their information in allocated processing in a finite amount of time to solve problems and how they actually compute values of interest to human beings. These topics are essential in the study of what processes reduce the amount of work done in solving a particular problem in computers, giving them speeds of solving problems that can outmatch humans in certain fields but which have not yet reached the complexity of human driven intelligence. The question if human thought is a series of fixed processes that could be, in principle, imitated by a computer is a major theme of this lecture and, in Feynman's trademark style of teaching, gives us clear and yet very powerful answers for this field which has gone on to consume so much of our lives today. No doubt this lecture will be of crucial interest to anyone who has ever wondered about the process of human or machine thinking and if a synthesis between the two can be made without violating logic.",
       "creator": "sb",
       "language": "en",
       "duration_seconds": 4547,
@@ -6498,7 +6237,7 @@
       ],
       "matched_query": "computer science basics",
       "title": "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-      "description": "Our job might be to build web applications, but we can't build apps that rely on networking if we don't know how these networks and the big network that connects them all (this thing called the Internet) actually work. I'll walk through the basics...",
+      "description": "Our job might be to build web applications, but we can't build apps that rely on networking if we don't know how these networks and the big network that connects them all (this thing called the Internet) actually work. I'll walk through the basics of networking, then dive a lot deeper (from TCP/UDP to IPv4/6, source/destination ports, sockets, DNS, switching, firewalling and even OSPF, VRRP and BGP). Prepare for an eye-opener when you realize how much a typical app relies on all of these (and many more) working flawlessly... and how you can prepare your app for failure in the chain.",
       "creator": "PHP UK Conference",
       "language": "en",
       "duration_seconds": 3498,
@@ -6818,7 +6557,7 @@
       ],
       "matched_query": "food safety hygiene",
       "title": "HunanU: AptAbt: Aptamer-based antibiotic biosensor for ensuring food safety (2025) - Team Presentation [English]",
-      "description": "**Title:** AptAbt: Aptamer-based antibiotic biosensor for ensuring food safety **Description:** This is the prensentation video of our project, offering details about experimental design, data analysis, results and human practice activities. [Wi...",
+      "description": "**Title:** AptAbt: Aptamer-based antibiotic biosensor for ensuring food safety **Description:** This is the prensentation video of our project, offering details about experimental design, data analysis, results and human practice activities. [Wiki](https://2025.igem.wiki/hunanu) | [Official Page](https://teams.igem.org/5772)",
       "creator": "iGEM Teams",
       "language": "en",
       "duration_seconds": 895,
@@ -7278,7 +7017,7 @@
       ],
       "matched_query": "food safety hygiene",
       "title": "SubCat-Peking: Production of Natural Food Preservatives Containing Lysozyme and ... (2025) - Team Presentation [English]",
-      "description": "**Title:** Production of Natural Food Preservatives Containing Lysozyme and Antimicrobial Peptides Using Synthetic Biology **Description:** With the continuous growth of the global population, food safety has gradually become a key concern worldw...",
+      "description": "**Title:** Production of Natural Food Preservatives Containing Lysozyme and Antimicrobial Peptides Using Synthetic Biology **Description:** With the continuous growth of the global population, food safety has gradually become a key concern worldwide. Although traditional chemical preservatives can effectively extend food shelf life, their widespread use has raised numerous health concerns. Consequently, the development of natural, green, and non-toxic preservatives has emerged as a crucial trend in the food industry. Lysozyme and antimicrobial peptides (AMPs), as natural antibacterial components, have become research hotspots in food preservation due to their excellent antimicrobial properties and high safety profile. Lysozyme functions by catalyzing the hydrolysis of glycosidic bonds in bacterial cell walls, primarily targeting Gram-positive bacteria. Antimicrobial peptides, on the other hand, disrupt bacterial cell membrane structures, inhibiting pathogen growth with broad-spectrum antibacterial activity.This study aims to explore the combined preservative effects of lysozyme and antimicrobial peptides in food applications. The goal is to develop a green, safe, and natural food preservation technology. [Wiki](https://2025.igem.wiki/subcat-peking) | [Official Page](https://teams.igem.org/5742)",
       "creator": "iGEM Teams",
       "language": "en",
       "duration_seconds": 781,
@@ -8156,7 +7895,7 @@
       ],
       "matched_query": "free maps free knowledge",
       "title": "How to use Mergin Maps in Academia",
-      "description": "Mergin Maps is a mobile app for collecting, storing, and synchronizing data with students, built on QGIS. The Mergin Maps University Program offers a free Academic Plan for lecturers and students. This plan includes 5 GB of storage, a free book fo...",
+      "description": "Mergin Maps is a mobile app for collecting, storing, and synchronizing data with students, built on QGIS. The Mergin Maps University Program offers a free Academic Plan for lecturers and students. This plan includes 5 GB of storage, a free book for teachers, unlimited workspaces, and the ability to add unlimited students to projects. To apply for the Academic Plan, you need to fill out a Google Form found on the Mergin Maps academia-plan webpage. The plan is valid for one calendar year and requires re-verification of academic status annually. See more: https://merginmaps.com/academic-plan #QGIS #MerginMaps #AcademicPlan #OpenSource #GIS #FieldDataCollection",
       "creator": "hansakwast",
       "language": "en",
       "duration_seconds": 1079,
@@ -8695,9 +8434,9 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "Map Themes in QGIS and Mergin Maps",
-      "description": "In this tutorial, we show you how to use Map Themes to create a seamless transition between different background maps and layer styles directly on your mobile device. You will learn how to define custom symbology for your survey layers and configu...",
+      "description": "In this tutorial, we show you how to use Map Themes to create a seamless transition between different background maps and layer styles directly on your mobile device. You will learn how to define custom symbology for your survey layers and configure themes in QGIS using the eye icon in the Layers panel. By syncing these themes to the Mergin Maps mobile app, you can switch backgrounds and styles instantly while in the field. This ensures your data remains visible and clear, whether you are using standard topographic maps or high-resolution satellite imagery. Mergin Maps is an intuitive, open-source platform designed to take your QGIS projects into the field. It allows for seamless data synchronization and works entirely offline, making it the perfect tool for capturing geodata in any environment.",
       "creator": "hansakwast",
       "language": "en",
       "duration_seconds": 212,
@@ -8806,7 +8545,7 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
       "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
       "creator": "amal",
@@ -8889,7 +8628,7 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
       "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
       "creator": "amal",
@@ -9073,7 +8812,7 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144",
       "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm This WWII era educational film from the U.S. Army Signal Corps gives an overview of \"Map Reading\", providing lessons on elevation, logical co...",
       "creator": "amal",
@@ -9140,6 +8879,109 @@
         "earth-geography": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 35
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
+      "topic_slug": "electronics-basics",
+      "topic_name": "Electronics Basics",
+      "school_slug": "technology",
+      "concepts": [
+        "electronics",
+        "circuits",
+        "soldering"
+      ],
+      "matched_query": "soldering electronics beginner",
+      "title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+      "description": "That's it - new soldering equipment time in my lab! My previous station (Solomon SL20) served me well for 15 years if not more, but I grew more and more impatient with having to wait until it heats up, and I work with SMT electronics pretty often, so I needed a modern iron for precise tips and a hot air station. Will this one deliver? Sure so! The intro was recorded later on after I found out I lost audio on a good part of the footage. Had this issue once before, got no idea why it's the case. Still gotta pin that pesky little bugger down... Anyway, I had some time to work with the new station, both hot air and iron, and am really satisfied with it. 0:00 Intro From the Future! 1:16 It's There 1:58 Goodbye, Solomon 4:45 New Iron 7:50 Back To The Past... Unboxing 18:00 Station Outside 20:20 Moving the Hot Air Handle Holder 24:00 Front Panel 25:30 No Warranty to Void? Take It Apart! 31:20 Grounding Check 35:08 Back Together... and Testing It! 44:17 Hot Air Test 48:00 Desoldering Station Accessories 51:45 Afterword Support me on my Patreon page at https://www.patreon.com/KeritechElectronics or via PayPal https://paypal.me/keritech Instagram - https://www.instagram.com/KeriSzafir Hackaday - https://hackaday.io/keritech #ElectronicsCreators #Keritech #Electronics",
+      "creator": "Keri Szafir",
+      "language": "en",
+      "duration_seconds": 3170,
+      "source_url": "https://makertube.net/videos/watch/7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
+      "source_host": "makertube.net",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://makertube.net/download/streaming-playlists/hls/videos/7bb03b6d-9710-4a46-a2db-021c4af7dfd8-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 1221267030,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://makertube.net/download/streaming-playlists/hls/videos/7bb03b6d-9710-4a46-a2db-021c4af7dfd8-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 659077585,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Keri Szafir",
+        "source_title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+        "source_url": "https://makertube.net/videos/watch/7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "electronics-basics",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 52,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "electronics-basics": {
+          "score": 20,
+          "evidence": [
+            "electronics",
+            "soldering",
+            "electronics",
+            "soldering"
+          ]
+        }
+      },
+      "pedagogy": {
+        "electronics-basics": {
+          "strong_title_matches": [
+            "soldering"
+          ],
+          "strong_description_matches": [
+            "electronics",
+            "soldering"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 52
+        }
+      },
+      "selection": {
+        "electronics-basics": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 52
         }
       }
     },
@@ -9362,7 +9204,7 @@
       ],
       "matched_query": "fractions equations math",
       "title": "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
-      "description": "Christopher Howard (he/him) https://emacsconf.org/2025/talks/calc 00:03 Introduction 02:36 What is Calc? 04:54 calc-algebraic-entry 06:37 calc-roll-down 08:07 Advanced functions 08:58 Solving equations with calc-solve-for 09:54 Systems of equati...",
+      "description": "Christopher Howard (he/him) https://emacsconf.org/2025/talks/calc 00:03 Introduction 02:36 What is Calc? 04:54 calc-algebraic-entry 06:37 calc-roll-down 08:07 Advanced functions 08:58 Solving equations with calc-solve-for 09:54 Systems of equations 12:00 calc-find-root 12:39 Derivatives and integrals 14:17 Programmable functions 18:12 Plotting 20:08 Wish list 22:38 Wrapping up You can view this and other resources using free/libre software at https://emacsconf.org/2025/talks/calc . This video is available under the terms of the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) license.",
       "creator": "bandali",
       "language": "en",
       "duration_seconds": 1416,
@@ -10371,6 +10213,142 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "63e18058-19fa-441f-8ccb-02494ae38b62",
+      "topic_slug": "law-rights-basics",
+      "topic_name": "Law & Rights Basics",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "law",
+        "rights",
+        "civil rights",
+        "legal systems"
+      ],
+      "matched_query": "civil rights law basics",
+      "title": "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
+      "description": "Civil Rights Act of 1964 | Montgomery Bus Boycott | Rosa Parks and Martin Luther King American civil rights movement took place mainly during the 1950s and 1960s. It emerged as a response to the existing discrimination based on race, color, religion, sex, and national origin. One example of racial discrimination would be the segregation of public facilities such as schools, restaurants, buses, and restrooms. The purpose of the civil rights movement was to enforce constitutional and legal rights for all, especially for black people residing in the United States. Civil rights activists tried to promote equality and social justice through nonviolent protests. In 1955, Rosa Parks refused to give up her bus seat to a white passenger. Her arrest provoked the Montgomery Bus Boycott, which united supporters across the country and led to the desegregation of public buses. Martin Luther King, Jr. was one of the organizers of the boycott. Promoting equality and human rights through peaceful protests and public speeches, he became one of the most prominent leaders of the civil rights movement. The joint efforts of civil rights activists across the country influenced American lawmakers. The Civil Rights Act of 1964 ended segregation laws in America.",
+      "creator": "Mrs Tailliez",
+      "language": "en",
+      "duration_seconds": 311,
+      "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/63e18058-19fa-441f-8ccb-02494ae38b62",
+      "source_host": "tube-langues-vivantes.apps.education.fr",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/63e18058-19fa-441f-8ccb-02494ae38b62-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 23132738,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/63e18058-19fa-441f-8ccb-02494ae38b62-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 16245751,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/63e18058-19fa-441f-8ccb-02494ae38b62-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 12163968,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/63e18058-19fa-441f-8ccb-02494ae38b62-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 23103316,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/63e18058-19fa-441f-8ccb-02494ae38b62-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 16214777,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/63e18058-19fa-441f-8ccb-02494ae38b62-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 12130806,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Mrs Tailliez",
+        "source_title": "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
+        "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/63e18058-19fa-441f-8ccb-02494ae38b62",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "law-rights-basics",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 52,
+          "relevance_score": 24
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "law-rights-basics": {
+          "score": 24,
+          "evidence": [
+            "legal rights",
+            "civil rights",
+            "rights",
+            "civil rights"
+          ]
+        }
+      },
+      "pedagogy": {
+        "law-rights-basics": {
+          "strong_title_matches": [
+            "civil rights"
+          ],
+          "strong_description_matches": [
+            "legal rights",
+            "civil rights"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 52
+        }
+      },
+      "selection": {
+        "law-rights-basics": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 52
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "499b9c26-35ab-4a77-8696-e1bfe49774d8",
       "topic_slug": "law-rights-basics",
       "topic_name": "Law & Rights Basics",
@@ -11345,6 +11323,109 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+      "topic_slug": "mathematics-foundations",
+      "topic_name": "Mathematics Foundations",
+      "school_slug": "mathematics",
+      "concepts": [
+        "arithmetic",
+        "algebra",
+        "geometry",
+        "mathematical reasoning"
+      ],
+      "matched_query": "mathematics basics algebra",
+      "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+      "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
+      "creator": "Charlotte Aten",
+      "language": "en",
+      "duration_seconds": 2446,
+      "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+      "source_host": "peertube.wtf",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 109870045,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 66441980,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Charlotte Aten",
+        "source_title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "mathematics-foundations",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "mathematics-foundations": {
+          "score": 20,
+          "evidence": [
+            "mathematics",
+            "algebra",
+            "algebra"
+          ]
+        }
+      },
+      "pedagogy": {
+        "mathematics-foundations": {
+          "strong_title_matches": [
+            "algebra"
+          ],
+          "strong_description_matches": [
+            "mathematics",
+            "algebra"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 64
+        }
+      },
+      "selection": {
+        "mathematics-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "65b65650-2b35-492d-84d7-1e516dc721a5",
       "topic_slug": "mathematics-foundations",
       "topic_name": "Mathematics Foundations",
@@ -11357,7 +11438,7 @@
       ],
       "matched_query": "mathematics basics algebra",
       "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-      "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
+      "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
       "creator": "Charlotte Aten",
       "language": "en",
       "duration_seconds": 2446,
@@ -11744,6 +11825,115 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "48450782-7789-4099-b54d-5ee1e57aefb1",
+      "topic_slug": "mathematics-foundations",
+      "topic_name": "Mathematics Foundations",
+      "school_slug": "mathematics",
+      "concepts": [
+        "arithmetic",
+        "algebra",
+        "geometry",
+        "mathematical reasoning"
+      ],
+      "matched_query": "mathematics basics algebra",
+      "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+      "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early stages of lattice theory. The 1935 paper of Birkhoff I mention can be found at [https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf](https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf). The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
+      "creator": "Charlotte Aten",
+      "language": "en",
+      "duration_seconds": 2965,
+      "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
+      "source_host": "peertube.wtf",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 127878198,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 77337120,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-360-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 37375797,
+          "resolution": "360p",
+          "fps": 25,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Charlotte Aten",
+        "source_title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "mathematics-foundations",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "mathematics-foundations": {
+          "score": 10,
+          "evidence": [
+            "algebra",
+            "algebra"
+          ]
+        }
+      },
+      "pedagogy": {
+        "mathematics-foundations": {
+          "strong_title_matches": [
+            "algebra"
+          ],
+          "strong_description_matches": [
+            "algebra"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "mathematics-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "6a2c633d-cea5-4c61-87db-3479b4fef231",
       "topic_slug": "mathematics-foundations",
       "topic_name": "Mathematics Foundations",
@@ -11938,98 +12128,6 @@
         "mathematics-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 48
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
-      "topic_slug": "mathematics-foundations",
-      "topic_name": "Mathematics Foundations",
-      "school_slug": "mathematics",
-      "concepts": [
-        "arithmetic",
-        "algebra",
-        "geometry",
-        "mathematical reasoning"
-      ],
-      "matched_query": "mathematics basics algebra",
-      "title": "Vartika: Inside nowadays Mathematics (Part 4)",
-      "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge....",
-      "creator": "danisanti",
-      "language": "en",
-      "duration_seconds": 945,
-      "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
-      "source_host": "peertube.be",
-      "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
-        "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/b356b20b-d97b-4727-acc3-3b5ee5c17bb9-450-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 67491768,
-          "resolution": "450p",
-          "fps": 30,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "danisanti",
-        "source_title": "Vartika: Inside nowadays Mathematics (Part 4)",
-        "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
-        "license": "Public Domain Dedication",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "mathematics-foundations",
-          "school_slug": "mathematics",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 45,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 90,
-      "relevance": {
-        "mathematics-foundations": {
-          "score": 10,
-          "evidence": [
-            "mathematics"
-          ]
-        }
-      },
-      "pedagogy": {
-        "mathematics-foundations": {
-          "strong_title_matches": [
-            "mathematics"
-          ],
-          "strong_description_matches": [
-            "mathematics"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 45
-        }
-      },
-      "selection": {
-        "mathematics-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 45
         }
       }
     },
@@ -12732,7 +12830,7 @@
       ],
       "matched_query": "philosophy introduction",
       "title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-      "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://g...",
+      "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://github.com/stagfoo/joro //----------------Libraries------------------/// https://github.com/stagfoo/chumbucket https://github.com/visionmedia/page.js https://github.com/choojs/nanohtml",
       "creator": "stagfoo",
       "language": "en",
       "duration_seconds": 1303,
@@ -12847,89 +12945,6 @@
         "philosophy-ethics": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "48d6402f-6599-4fe0-a7cf-6acb5c54c14b",
-      "topic_slug": "philosophy-ethics",
-      "topic_name": "Philosophy & Ethics",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "philosophy",
-        "ethics",
-        "moral reasoning"
-      ],
-      "matched_query": "philosophical reasoning",
-      "title": "The Philosophy of William James",
-      "description": "William James came into the American Philosophical tradition during a time period where it yearned for an intellectual voice which it could call its own. It’s not that there were no other great philosophic minds present at the time of his ascension, but that no other carried within them, so genuinely, the American spirit. Here we will all but pass over the Psychology which he has been traditionally remember by and take a seat to learn why James is perhaps America’s most influential philosopher. Music: “Where Stars Fall” – Scott Buckley Sources: Site 1: https://philosophy.lander.edu/intro/articles/james-a.pdf Site 2: https://iep.utm.edu/james-o/ Site 3: https://en.wikipedia.org/wiki/William_James Site 4: https://www.britannica.com/topic/radical-empiricism Site 5: https://plato.stanford.edu/entries/james/#Prag1907 Book 1: The Story of Philosophy – Will Durant CC: Painting 1: https://commons.wikimedia.org/wiki/File:C._Flammarion_-_Universum_-_Paris_1888_-_Colored_Heliocentric_Panorama.jpg #westernphilosophy #WilliamJames #philosophy",
-      "creator": "Let's Talk Philosophy",
-      "language": "en",
-      "duration_seconds": 773,
-      "source_url": "https://tilvids.com/videos/watch/48d6402f-6599-4fe0-a7cf-6acb5c54c14b",
-      "source_host": "tilvids.com",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Let's Talk Philosophy",
-        "source_title": "The Philosophy of William James",
-        "source_url": "https://tilvids.com/videos/watch/48d6402f-6599-4fe0-a7cf-6acb5c54c14b",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "philosophy-ethics",
-          "school_slug": "philosophy-and-religion",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 35,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 30,
-      "relevance": {
-        "philosophy-ethics": {
-          "score": 10,
-          "evidence": [
-            "philosophy",
-            "philosophy"
-          ]
-        }
-      },
-      "pedagogy": {
-        "philosophy-ethics": {
-          "strong_title_matches": [
-            "philosophy"
-          ],
-          "strong_description_matches": [
-            "philosophy"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 35
-        }
-      },
-      "selection": {
-        "philosophy-ethics": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 35
         }
       }
     },
@@ -13641,8 +13656,8 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "816a526f-039e-4b23-b3de-be75bc98bcdd",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
       "topic_slug": "physics-foundations",
       "topic_name": "Physics Foundations",
       "school_slug": "science",
@@ -13653,18 +13668,18 @@
         "energy"
       ],
       "matched_query": "physics basics",
-      "title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
-      "description": "Please Help Support This Channel:https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S A 40 minute audio recording, restored with visual aids and diagrams, given by the legendary physicist and educator Richard Feynman on the ...",
-      "creator": "sb",
-      "language": "en",
-      "duration_seconds": 2490,
-      "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
-      "source_host": "tube.sbcloud.cc",
+      "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+      "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
+      "creator": "FuseSchool - Global Education",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+      "source_host": "commons.wikimedia.org",
       "license": {
         "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
         "commercial_use": true,
         "derivatives": true,
         "share_alike": false
@@ -13674,59 +13689,94 @@
       "download_enabled": true,
       "files": [
         {
-          "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/816a526f-039e-4b23-b3de-be75bc98bcdd-1080-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 174713047,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "streaming-file"
+          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 8378497,
+          "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
+          "role": "original"
         }
       ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "sb",
-        "source_title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
-        "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
-        "license": "Attribution",
-        "license_url": ""
+        "creator": "FuseSchool - Global Education",
+        "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
       },
       "topic_matches": [
         {
           "topic_slug": "physics-foundations",
           "school_slug": "science",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
+          "pedagogy_score": 64,
+          "relevance_score": 20
+        },
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
           "relevance_score": 10
         }
       ],
-      "quality_score": 88,
+      "quality_score": 89,
       "relevance": {
-        "physics-foundations": {
+        "chemistry-foundations": {
           "score": 10,
           "evidence": [
+            "chemistry",
+            "chemistry"
+          ]
+        },
+        "physics-foundations": {
+          "score": 20,
+          "evidence": [
             "physics",
-            "physics"
+            "energy",
+            "physics",
+            "energy"
           ]
         }
       },
       "pedagogy": {
-        "physics-foundations": {
+        "chemistry-foundations": {
           "strong_title_matches": [
-            "physics"
+            "chemistry"
           ],
-          "strong_description_matches": [],
+          "strong_description_matches": [
+            "chemistry"
+          ],
           "educational_intent": true,
           "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 48
+          "pedagogy_score": 56
+        },
+        "physics-foundations": {
+          "strong_title_matches": [
+            "energy"
+          ],
+          "strong_description_matches": [
+            "physics",
+            "energy"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 64
         }
       },
       "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        },
         "physics-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
+          "pedagogy_score": 64
         }
       }
     },
@@ -14264,19 +14314,10 @@
         "derivatives": true,
         "share_alike": false
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/effective-prompt-engineering-for-python-programmers/Effective%20prompt%20engineering%20for%20Python%20programmers.mp4",
-          "bytes": 580905223,
-          "provider_sha1": "ebd1c7e46bed5cb7e512a8b6424c718074391870",
-          "provider_md5": "0631f39b2b51c5762a446b84e1f8f4f9",
-          "format": "MPEG4",
-          "role": "original"
-        }
-      ],
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
@@ -14291,11 +14332,11 @@
           "topic_slug": "prompt-engineering",
           "school_slug": "technology",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
+          "pedagogy_score": 46,
           "relevance_score": 10
         }
       ],
-      "quality_score": 85,
+      "quality_score": 27,
       "relevance": {
         "prompt-engineering": {
           "score": 10,
@@ -14317,95 +14358,13 @@
           "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 56
+          "pedagogy_score": 46
         }
       },
       "selection": {
         "prompt-engineering": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
-      "topic_slug": "prompt-engineering",
-      "topic_name": "Prompt Engineering",
-      "school_slug": "technology",
-      "concepts": [
-        "prompt engineering",
-        "LLM prompting",
-        "prompt patterns",
-        "evaluation"
-      ],
-      "matched_query": "prompt engineering",
-      "title": "Il Prompt Engineering",
-      "description": "Esempi di prompt professionali e di applicazioni pratiche, in diverse aree professionali Area: Dummies Relatore: Lorenzo Bargnani (Invisible farm, https://www.invisiblefarm.it/)",
-      "creator": "LUGMan",
-      "language": "it",
-      "duration_seconds": 1738,
-      "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
-      "source_host": "video.linux.it",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "LUGMan",
-        "source_title": "Il Prompt Engineering",
-        "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "prompt-engineering",
-          "school_slug": "technology",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 38,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 29,
-      "relevance": {
-        "prompt-engineering": {
-          "score": 10,
-          "evidence": [
-            "prompt engineering",
-            "prompt engineering"
-          ]
-        }
-      },
-      "pedagogy": {
-        "prompt-engineering": {
-          "strong_title_matches": [
-            "prompt engineering"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 38
-        }
-      },
-      "selection": {
-        "prompt-engineering": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 38
+          "pedagogy_score": 46
         }
       }
     },
@@ -14422,7 +14381,7 @@
         "flowcharts",
         "computational thinking"
       ],
-      "matched_query": "algorithm design",
+      "matched_query": "computational thinking",
       "title": "Dijkstra s algorithm explained",
       "description": "Tutorial of the Dijkstra's algorithm for finding the shortest path between nodes in a network.",
       "creator": "Jaakko",
@@ -14594,6 +14553,484 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+      "topic_slug": "statistics-data-literacy",
+      "topic_name": "Statistics & Data Literacy",
+      "school_slug": "mathematics",
+      "concepts": [
+        "statistics",
+        "data literacy",
+        "probability",
+        "graphs"
+      ],
+      "matched_query": "probability statistics",
+      "title": "Lecture 1： Probability and Counting ｜ Statistics 110",
+      "description": "We introduce sample spaces and the naive definition of probability (we'll get to the non-naive definition later). To apply the naive definition, we need to be able to count. So we introduce the multiplication rule, binomial coefficients, and the s...",
+      "creator": "zaimon",
+      "language": "en",
+      "duration_seconds": 2789,
+      "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+      "source_host": "tube.cosmicflow.space",
+      "license": {
+        "spdx": "PUBLIC-DOMAIN",
+        "label": "Free of known copyright restrictions",
+        "url": "",
+        "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/a224e97c-f67c-4cbd-9a76-42d23fbe735e-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 175595558,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "zaimon",
+        "source_title": "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+        "license": "Free of known copyright restrictions",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "statistics-data-literacy",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 90,
+      "relevance": {
+        "statistics-data-literacy": {
+          "score": 20,
+          "evidence": [
+            "statistics",
+            "probability",
+            "statistics",
+            "probability"
+          ]
+        }
+      },
+      "pedagogy": {
+        "statistics-data-literacy": {
+          "strong_title_matches": [
+            "statistics",
+            "probability"
+          ],
+          "strong_description_matches": [
+            "probability"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 77
+        }
+      },
+      "selection": {
+        "statistics-data-literacy": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+      "topic_slug": "statistics-data-literacy",
+      "topic_name": "Statistics & Data Literacy",
+      "school_slug": "mathematics",
+      "concepts": [
+        "statistics",
+        "data literacy",
+        "probability",
+        "graphs"
+      ],
+      "matched_query": "probability statistics",
+      "title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+      "description": "We discuss the birthday problem (how many people do you need to have a 50% chance of there being 2 with the same birthday?), the matching problem (de Montmort), inclusion-exclusion, and properties of probability.",
+      "creator": "zaimon",
+      "language": "en",
+      "duration_seconds": 2934,
+      "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+      "source_host": "tube.cosmicflow.space",
+      "license": {
+        "spdx": "PUBLIC-DOMAIN",
+        "label": "Free of known copyright restrictions",
+        "url": "",
+        "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 215357082,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "zaimon",
+        "source_title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+        "license": "Free of known copyright restrictions",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "statistics-data-literacy",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 90,
+      "relevance": {
+        "statistics-data-literacy": {
+          "score": 20,
+          "evidence": [
+            "statistics",
+            "probability",
+            "statistics",
+            "probability"
+          ]
+        }
+      },
+      "pedagogy": {
+        "statistics-data-literacy": {
+          "strong_title_matches": [
+            "statistics",
+            "probability"
+          ],
+          "strong_description_matches": [
+            "probability"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 77
+        }
+      },
+      "selection": {
+        "statistics-data-literacy": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+      "topic_slug": "statistics-data-literacy",
+      "topic_name": "Statistics & Data Literacy",
+      "school_slug": "mathematics",
+      "concepts": [
+        "statistics",
+        "data literacy",
+        "probability",
+        "graphs"
+      ],
+      "matched_query": "statistics basics data literacy",
+      "title": "Lecture 4： Conditional Probability ｜ Statistics 110",
+      "description": "We introduce conditional probability, independence of events, and Bayes' rule.",
+      "creator": "zaimon",
+      "language": "en",
+      "duration_seconds": 2985,
+      "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+      "source_host": "tube.cosmicflow.space",
+      "license": {
+        "spdx": "PUBLIC-DOMAIN",
+        "label": "Free of known copyright restrictions",
+        "url": "",
+        "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/7ec1769f-c185-4ddb-9d73-cfdb674995e9-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 240622288,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "zaimon",
+        "source_title": "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+        "license": "Free of known copyright restrictions",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "statistics-data-literacy",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 90,
+      "relevance": {
+        "statistics-data-literacy": {
+          "score": 20,
+          "evidence": [
+            "statistics",
+            "probability",
+            "statistics",
+            "probability"
+          ]
+        }
+      },
+      "pedagogy": {
+        "statistics-data-literacy": {
+          "strong_title_matches": [
+            "statistics",
+            "probability"
+          ],
+          "strong_description_matches": [
+            "probability"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 77
+        }
+      },
+      "selection": {
+        "statistics-data-literacy": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+      "topic_slug": "statistics-data-literacy",
+      "topic_name": "Statistics & Data Literacy",
+      "school_slug": "mathematics",
+      "concepts": [
+        "statistics",
+        "data literacy",
+        "probability",
+        "graphs"
+      ],
+      "matched_query": "probability statistics",
+      "title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+      "description": "We continue further with conditional probability, and discuss the law of total probability, the so-called prosecutor's fallacy, a disease testing example, and the crucial distinction between independence and conditional independence.",
+      "creator": "zaimon",
+      "language": "en",
+      "duration_seconds": 3001,
+      "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+      "source_host": "tube.cosmicflow.space",
+      "license": {
+        "spdx": "PUBLIC-DOMAIN",
+        "label": "Free of known copyright restrictions",
+        "url": "",
+        "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/287bec4a-6717-4f2e-956b-09bb7db6b0d7-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 308676613,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "zaimon",
+        "source_title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+        "license": "Free of known copyright restrictions",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "statistics-data-literacy",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 90,
+      "relevance": {
+        "statistics-data-literacy": {
+          "score": 20,
+          "evidence": [
+            "statistics",
+            "probability",
+            "statistics",
+            "probability"
+          ]
+        }
+      },
+      "pedagogy": {
+        "statistics-data-literacy": {
+          "strong_title_matches": [
+            "statistics",
+            "probability"
+          ],
+          "strong_description_matches": [
+            "probability"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 77
+        }
+      },
+      "selection": {
+        "statistics-data-literacy": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 77
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "332961a8-c516-4604-8c7b-928d1988a465",
+      "topic_slug": "statistics-data-literacy",
+      "topic_name": "Statistics & Data Literacy",
+      "school_slug": "mathematics",
+      "concepts": [
+        "statistics",
+        "data literacy",
+        "probability",
+        "graphs"
+      ],
+      "matched_query": "probability statistics",
+      "title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+      "description": "We fill in the \"Bose-Einstein\" entry of the sampling table, and discuss story proofs. For example, proving Vandermonde's identity with a story is easier and more insightful than going through a tedious algebraic derivation. We then introduce the a...",
+      "creator": "zaimon",
+      "language": "en",
+      "duration_seconds": 2740,
+      "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
+      "source_host": "tube.cosmicflow.space",
+      "license": {
+        "spdx": "PUBLIC-DOMAIN",
+        "label": "Free of known copyright restrictions",
+        "url": "",
+        "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/332961a8-c516-4604-8c7b-928d1988a465-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 196752740,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "zaimon",
+        "source_title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
+        "license": "Free of known copyright restrictions",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "statistics-data-literacy",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 69,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 90,
+      "relevance": {
+        "statistics-data-literacy": {
+          "score": 20,
+          "evidence": [
+            "statistics",
+            "probability",
+            "statistics",
+            "probability"
+          ]
+        }
+      },
+      "pedagogy": {
+        "statistics-data-literacy": {
+          "strong_title_matches": [
+            "statistics",
+            "probability"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 69
+        }
+      },
+      "selection": {
+        "statistics-data-literacy": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 69
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "28780678-085f-4a41-be57-650a21a419e6",
       "topic_slug": "statistics-data-literacy",
       "topic_name": "Statistics & Data Literacy",
@@ -14606,7 +15043,7 @@
       ],
       "matched_query": "statistics basics data literacy",
       "title": "Quick Statistics and Visual Overview of Data in LabPlot",
-      "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistic...",
+      "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistics and visual overview of your data in LabPlot.",
       "creator": "KDE",
       "language": "en",
       "duration_seconds": 61,
@@ -14664,7 +15101,7 @@
           "topic_slug": "statistics-data-literacy",
           "school_slug": "mathematics",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
+          "pedagogy_score": 64,
           "relevance_score": 20
         }
       ],
@@ -14685,19 +15122,20 @@
             "statistics"
           ],
           "strong_description_matches": [
+            "statistics",
             "data visualization"
           ],
           "educational_intent": true,
           "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 56
+          "pedagogy_score": 64
         }
       },
       "selection": {
         "statistics-data-literacy": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
+          "pedagogy_score": 64
         }
       }
     },
@@ -14882,6 +15320,297 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+      "topic_slug": "vibe-coding",
+      "topic_name": "Vibe Coding",
+      "school_slug": "technology",
+      "concepts": [
+        "vibe coding",
+        "AI-assisted programming",
+        "code generation",
+        "software iteration"
+      ],
+      "matched_query": "vibe coding",
+      "title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+      "description": "In this debut episode of The BMad Code Podcast, I sit down with Marten Angner, a 26-year UX veteran, digital product manager, and the creator of the Whiteport Design Studio (WDS), the first official community module in the BMad Method ecosystem. Marten founded Whiteport Studio in Stockholm in 2003 and has personally taught over 2,500 people how to sketch interfaces by hand. When AI hit, he went through the same panic most designers did. He tried the \"vibe coding\" tools, hated them, and went looking for something built for serious professionals. That search led him to BMad, and eventually to building the WDS. We talk about why most designers (and developers) are doing UX backwards, why the trigger map is the most valuable hour you will spend on a project, and why \"specifications are the new code\" is the shift every serious builder needs to make. If you have ever felt like AI was making you faster but dumber, this one is for you. Topics covered: - Why pixel-first design is the wrong starting point for AI-era software - The trigger map: business goals, target groups, driving forces (positive and negative) - Loss aversion, FOMO, and why fear motivates users more than benefit - Scenarios, selective ignorance, and the shortest path from natural starting point to value - Lo-fi wireframes as a tool for failing with grace - Why Figma is now an \"agent training tool,\" not a design destination - Naming every component so AI agents can actually work with your design - Specifications as the new code, and why AI agents love what developers throw away - The future role of designers as strategists and user researchers, not pixel pushers - How WDS plugs into the BMad Method to take you from product brief to working code ================================================================ LIN",
+      "creator": "Bleme",
+      "language": "en",
+      "duration_seconds": 5112,
+      "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+      "source_host": "video.ut0pia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-2160-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 2187969975,
+          "resolution": "2160p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 485728739,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Bleme",
+        "source_title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "vibe-coding",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "vibe-coding": {
+          "score": 10,
+          "evidence": [
+            "vibe coding",
+            "vibe coding"
+          ]
+        }
+      },
+      "pedagogy": {
+        "vibe-coding": {
+          "strong_title_matches": [
+            "vibe coding"
+          ],
+          "strong_description_matches": [
+            "vibe coding"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+      "topic_slug": "vibe-coding",
+      "topic_name": "Vibe Coding",
+      "school_slug": "technology",
+      "concepts": [
+        "vibe coding",
+        "AI-assisted programming",
+        "code generation",
+        "software iteration"
+      ],
+      "matched_query": "vibe coding",
+      "title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+      "description": "*Note: Kenton has just released Cloudflare OS today: https://x.com/KentonVarda/status/2084990137180590572 This talk was recorded a month prior to launch.* Claude needed a strikethrough the slide app did not have, so it added one to the app. Asked to build a deck from a Google doc, it also added text centering and a box that accepts raw SVG, then generated the SVG for a diagram the app could not otherwise draw. That is Kenton Varda's argument in a single move. Software today ships from a developer to users whose feature requests die in Jira, and the escape hatch developers reach for is a plugin architecture rewrite that takes years and never lands. If a user's own agent can add the feature, the core app stays clean and nobody waits. Nothing in current infrastructure supports that. Mobile platforms will not run unsigned code, and 25 years of cloud architecture put one blessed version of every app on the developer's server. Gadgets is his answer, built on Cloudflare Workers with no containers and no database. Each gadget is a single instance of an app, one deck or one board, and sharing is implemented by the platform so the app itself cannot get access control wrong. The UI runs in a null origin iframe that can only postMessage to its parent, over a Cap'n Web RPC session to server code in a dynamic worker sandbox, so an XSS bug in vibecoded code has nothing left to leak. The whole demo ran locally on workerd, so a dead conference network cost him only the one call that needed a model. Speaker info: - https://x.com/KentonVarda - https://lanparty.house - https://github.com/cloudflare/workerd Timestamps: 0:00 - Personal AI codegen breaks cloud infrastructure 1:16 - How feature requests die today 2:35 - The plugin system rewrite trap 3:27 - What if users could add their own fe",
+      "creator": "Bleme",
+      "language": "en",
+      "duration_seconds": 1133,
+      "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+      "source_host": "video.ut0pia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 89849511,
+          "resolution": "1080p",
+          "fps": 60,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 57610775,
+          "resolution": "720p",
+          "fps": 60,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Bleme",
+        "source_title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "vibe-coding",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "vibe-coding": {
+          "score": 10,
+          "evidence": [
+            "vibe coding",
+            "vibe coding"
+          ]
+        }
+      },
+      "pedagogy": {
+        "vibe-coding": {
+          "strong_title_matches": [
+            "vibe coding"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "f398c8fb-3928-488f-aaed-ea8176ee124b",
+      "topic_slug": "vibe-coding",
+      "topic_name": "Vibe Coding",
+      "school_slug": "technology",
+      "concepts": [
+        "vibe coding",
+        "AI-assisted programming",
+        "code generation",
+        "software iteration"
+      ],
+      "matched_query": "vibe coding",
+      "title": "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+      "description": "The template code: https://gitlab.com/lexoyo/silex_retro-web-haven # Retro Web Haven – retro 90s-inspired website template Vibe coded with [Silex](https://www.silex.me) and Claude Code System prompt for Claude when building Silex websites: https://prompts-1776e5.gitlab.io/Silex_designer.md You can open Claude in Cloud Mode and give it the system-prompt URL above to generate or extend pages. ## Live Demo 👉 [**View the live site:**](https://silex-retro-web-haven-62e7ad.gitlab.io/) ## Project Prompt Create a retro 90s-inspired website template with pixel-art influences, neon gradients, soft VHS noise, and simple geometric layouts. Use basic HTML structure and lightweight CSS. The aesthetic should evoke the early web, personal homepages, digital vernacular art, and the playful DIY spirit found on NeoCities. Integrate indie web concepts: small web publishing, digital autonomy, CHATON values, commons-based culture, and community stewardship of the open web. Pages required: - Home: introduction to the small web ethos, why low-tech personal websites matter, references to digital commons and community-run infrastructures - About: who the author is, why they chose a retro aesthetic, their relation to independent hosting and open commons - Projects: list of personal or collective projects, presented with pixel accents or simple retro layout blocks - Links: curated small web resources, indie web tools, peer-hosted services, CHATON collectives, NeoCities inspirations - How to host this site on Neocities: - In Silex, open “Publish” then choose “Download zip file” to export a fully static version of the site - This works only when the site does not use CMS or data sources - Explain how to upload the extracted files to Neocities via the dashboard file uploader - Add instructions for th",
+      "creator": "lexoyo",
+      "language": null,
+      "duration_seconds": 177,
+      "source_url": "https://video.silex.me/videos/watch/f398c8fb-3928-488f-aaed-ea8176ee124b",
+      "source_host": "video.silex.me",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.silex.me/download/streaming-playlists/hls/videos/f398c8fb-3928-488f-aaed-ea8176ee124b-1440-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 18416370,
+          "resolution": "1440p",
+          "fps": 16,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "lexoyo",
+        "source_title": "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "source_url": "https://video.silex.me/videos/watch/f398c8fb-3928-488f-aaed-ea8176ee124b",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "vibe-coding",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "vibe-coding": {
+          "score": 10,
+          "evidence": [
+            "vibe coding",
+            "vibe coding"
+          ]
+        }
+      },
+      "pedagogy": {
+        "vibe-coding": {
+          "strong_title_matches": [
+            "vibe coding"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "299634be-daa9-4367-a7d1-be64654c90f8",
       "topic_slug": "woodworking-basics",
       "topic_name": "Woodworking Basics",
@@ -14893,7 +15622,7 @@
       ],
       "matched_query": "woodworking basics",
       "title": "Woodworking Design Rejected! Learning Amazon's Other Content Policy",
-      "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BE...",
+      "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BELL for new content notifications. ▬ ABOUT ME ▬ Hey, what's up? I'm Frank, a content creator focused on print-on-demand, gaming, using Canadian technologies that prioritize privacy, community, and digital sovereignty. 🌐 WEBSITE: https://fraxoweb.com 💬 SOCIALS: https://fraxoweb.com/socials ⭐ DONATE: https://fraxoweb.com/donate Original upload: Dec 17, 2023",
       "creator": "Frank",
       "language": "en",
       "duration_seconds": 509,
@@ -15162,7 +15891,7 @@
       ],
       "matched_query": "world history overview",
       "title": "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-      "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey o...",
+      "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey or refreshing the basics, this video will help you *boost your daily English communication skills*. What You’ll Learn in This Video: ✅ Pronunciation – Learn how to say \"Civilization\" easily and correctly. ✅ Meaning – Understand its definition: \"Advanced human society\" ✅ Part of Speech – See how \"Civilization\" works as a Noun in simple sentences. ✅ Synonyms & Antonyms – Explore similar and opposite words to grow your vocabulary. ✅ Real-Life Examples – Discover how to use \"Civilization\" in sentences you can actually use every day. Why Should You Learn This Word? The word \"Civilization\" is a super useful way to talk about the development and characteristics of different societies throughout history in English. It’s one of the basic words B2 learners must know to make their speech more natural and clear. By mastering it, you’ll feel more confident in conversations, writing, and even exams. Word Breakdown: • Vocabulary Level : B2 • Part of Speech : Noun • Word : Civilization • Definition : \"Advanced human society\" • Synonyms : Society, Culture, Development • Antonyms : Barbarism, Savagery, Primitivity • Example Sentences : 1. The Roman Civilization was known for its advanced engineering. 2. Contact with other civilizations broadened their cultural horizons. 3. Preserving our civilization for future generations is crucial. Tips for Beginners: 👉 Start using \"Civilization\" in your daily conversations. For example: \"The museum showcases artifacts from various civilizations.\" 👉 Compare it with similar words like \"Culture\" to understand su",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 311,
@@ -15213,16 +15942,17 @@
           "school_slug": "history",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 48,
-          "relevance_score": 10
+          "relevance_score": 14
         }
       ],
       "quality_score": 87,
       "relevance": {
         "world-history": {
-          "score": 10,
+          "score": 14,
           "evidence": [
             "world history",
-            "world history"
+            "world history",
+            "civilizations"
           ]
         }
       },
@@ -15329,12 +16059,12 @@
       }
     }
   ],
-  "record_count_before_relevance_gate": 847,
-  "record_count_before_pedagogy_gate": 379,
-  "record_count_before_selection_gate": 217,
-  "rejected_by_relevance_gate": 468,
-  "rejected_by_pedagogy_gate": 162,
-  "rejected_by_selection_gate": 52,
+  "record_count_before_relevance_gate": 845,
+  "record_count_before_pedagogy_gate": 378,
+  "record_count_before_selection_gate": 226,
+  "rejected_by_relevance_gate": 467,
+  "rejected_by_pedagogy_gate": 152,
+  "rejected_by_selection_gate": 56,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -15380,19 +16110,19 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 6,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 3,
-        "wikimedia-commons": 5
+        "peertube": 4,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
     },
@@ -15400,22 +16130,22 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 14,
-      "mesh_redistributable": 5,
+      "records": 13,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 14
+        "peertube": 13
       },
       "top_titles": [
-        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts"
       ]
     },
     "physics-foundations": {
@@ -15425,12 +16155,12 @@
       "records": 6,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 5,
-        "wikimedia-commons": 1
+        "peertube": 4,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -15457,8 +16187,8 @@
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+        "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
       ]
     },
     "astronomy-space": {
@@ -15485,20 +16215,21 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -15564,48 +16295,50 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 5,
       "providers": {
-        "wikimedia-commons": 2
+        "wikimedia-commons": 2,
+        "peertube": 3
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
+        "peertube": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
-        "Il Prompt Engineering"
+        "Effective prompt engineering for Python programmers"
       ]
     },
     "pseudocoding": {
@@ -15729,12 +16462,13 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
@@ -15807,12 +16541,17 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1
+        "peertube": 6
       },
       "top_titles": [
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -15824,25 +16563,26 @@
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "internet-archive": 1,
-        "peertube": 1
+        "peertube": 1,
+        "internet-archive": 1
       },
       "top_titles": [
         "Welcome to Climate Change and Health – From Science to Practice",
-        "Climate Change: Science, Policy, Action",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "Climate Change: Science, Policy, Action"
       ]
     },
     "law-rights-basics": {
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 0,
+      "records": 4,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 3
+        "peertube": 4
       },
       "top_titles": [
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
         "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
@@ -15883,7 +16623,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 70,
+      "records": 68,
       "available": true
     },
     "digital-ai-literacy": {
@@ -15907,7 +16647,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 17,
+      "records": 20,
       "available": true
     },
     "practical-life": {
@@ -15929,7 +16669,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 21,
       "available": true
     },
     "maker-creative": {
@@ -15965,10 +16705,11 @@
         "critical-thinking",
         "civics-society",
         "statistics-data-literacy",
-        "climate-environment"
+        "climate-environment",
+        "law-rights-basics"
       ],
-      "coverage": 0.8,
-      "records": 11,
+      "coverage": 1.0,
+      "records": 16,
       "available": true
     },
     "deep-science": {
@@ -15990,7 +16731,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 30,
+      "records": 28,
       "available": true
     },
     "humanities-culture": {
@@ -16010,15 +16751,16 @@
         "earth-geography",
         "arts-culture",
         "civics-society",
-        "philosophy-ethics"
+        "philosophy-ethics",
+        "law-rights-basics"
       ],
-      "coverage": 0.8333,
+      "coverage": 1.0,
       "records": 26,
       "available": true
     }
   },
   "pack_registry_revision": "general-knowledge-packs-v1",
-  "records_before_title_quality_gate": 165,
-  "rejected_by_title_quality_gate": 12,
-  "rejected_topic_links_by_title_quality_gate": 14
+  "records_before_title_quality_gate": 170,
+  "rejected_by_title_quality_gate": 10,
+  "rejected_topic_links_by_title_quality_gate": 11
 }

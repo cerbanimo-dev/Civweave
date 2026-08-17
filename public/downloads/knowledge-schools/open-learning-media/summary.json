@@ -1,24 +1,24 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T14:16:41Z",
-  "records": 153,
-  "mesh_redistributable": 105,
-  "download_candidates": 237,
+  "built_at": "2026-08-17T08:03:20Z",
+  "records": 160,
+  "mesh_redistributable": 113,
+  "download_candidates": 245,
   "providers": {
     "internet-archive": {
       "records": 6,
       "mesh_redistributable": 0,
-      "download_candidates": 15
+      "download_candidates": 4
     },
     "peertube": {
-      "records": 103,
-      "mesh_redistributable": 61,
-      "download_candidates": 178
+      "records": 111,
+      "mesh_redistributable": 70,
+      "download_candidates": 198
     },
     "wikimedia-commons": {
-      "records": 44,
-      "mesh_redistributable": 44,
-      "download_candidates": 44
+      "records": 43,
+      "mesh_redistributable": 43,
+      "download_candidates": 43
     }
   },
   "focus_topics": {
@@ -66,19 +66,19 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 6,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 3,
-        "wikimedia-commons": 5
+        "peertube": 4,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
     },
@@ -86,22 +86,22 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 14,
-      "mesh_redistributable": 5,
+      "records": 13,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 14
+        "peertube": 13
       },
       "top_titles": [
-        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts"
       ]
     },
     "physics-foundations": {
@@ -111,12 +111,12 @@
       "records": 6,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 5,
-        "wikimedia-commons": 1
+        "peertube": 4,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -143,8 +143,8 @@
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+        "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
       ]
     },
     "astronomy-space": {
@@ -171,20 +171,21 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -250,48 +251,50 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 5,
       "providers": {
-        "wikimedia-commons": 2
+        "wikimedia-commons": 2,
+        "peertube": 3
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
+        "peertube": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
-        "Il Prompt Engineering"
+        "Effective prompt engineering for Python programmers"
       ]
     },
     "pseudocoding": {
@@ -415,12 +418,13 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
@@ -493,12 +497,17 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1
+        "peertube": 6
       },
       "top_titles": [
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -510,25 +519,26 @@
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "internet-archive": 1,
-        "peertube": 1
+        "peertube": 1,
+        "internet-archive": 1
       },
       "top_titles": [
         "Welcome to Climate Change and Health – From Science to Practice",
-        "Climate Change: Science, Policy, Action",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "Climate Change: Science, Policy, Action"
       ]
     },
     "law-rights-basics": {
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 0,
+      "records": 4,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 3
+        "peertube": 4
       },
       "top_titles": [
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
         "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
@@ -536,12 +546,12 @@
     }
   },
   "failures": 0,
-  "records_before_relevance_gate": 847,
-  "records_before_pedagogy_gate": 379,
-  "records_before_selection_gate": 217,
-  "rejected_by_relevance_gate": 468,
-  "rejected_by_pedagogy_gate": 162,
-  "rejected_by_selection_gate": 52,
+  "records_before_relevance_gate": 845,
+  "records_before_pedagogy_gate": 378,
+  "records_before_selection_gate": 226,
+  "rejected_by_relevance_gate": 467,
+  "rejected_by_pedagogy_gate": 152,
+  "rejected_by_selection_gate": 56,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -587,19 +597,19 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 6,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 3,
-        "wikimedia-commons": 5
+        "peertube": 4,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
     },
@@ -607,22 +617,22 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 14,
-      "mesh_redistributable": 5,
+      "records": 13,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 14
+        "peertube": 13
       },
       "top_titles": [
-        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts"
       ]
     },
     "physics-foundations": {
@@ -632,12 +642,12 @@
       "records": 6,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 5,
-        "wikimedia-commons": 1
+        "peertube": 4,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -664,8 +674,8 @@
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+        "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
       ]
     },
     "astronomy-space": {
@@ -692,20 +702,21 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -771,48 +782,50 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 5,
       "providers": {
-        "wikimedia-commons": 2
+        "wikimedia-commons": 2,
+        "peertube": 3
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
+        "peertube": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
-        "Il Prompt Engineering"
+        "Effective prompt engineering for Python programmers"
       ]
     },
     "pseudocoding": {
@@ -936,12 +949,13 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
@@ -1014,12 +1028,17 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1
+        "peertube": 6
       },
       "top_titles": [
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -1031,25 +1050,26 @@
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "internet-archive": 1,
-        "peertube": 1
+        "peertube": 1,
+        "internet-archive": 1
       },
       "top_titles": [
         "Welcome to Climate Change and Health – From Science to Practice",
-        "Climate Change: Science, Policy, Action",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "Climate Change: Science, Policy, Action"
       ]
     },
     "law-rights-basics": {
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 0,
+      "records": 4,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 3
+        "peertube": 4
       },
       "top_titles": [
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
         "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
@@ -1090,7 +1110,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 70,
+      "records": 68,
       "available": true
     },
     "digital-ai-literacy": {
@@ -1114,7 +1134,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 17,
+      "records": 20,
       "available": true
     },
     "practical-life": {
@@ -1136,7 +1156,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 21,
       "available": true
     },
     "maker-creative": {
@@ -1172,10 +1192,11 @@
         "critical-thinking",
         "civics-society",
         "statistics-data-literacy",
-        "climate-environment"
+        "climate-environment",
+        "law-rights-basics"
       ],
-      "coverage": 0.8,
-      "records": 11,
+      "coverage": 1.0,
+      "records": 16,
       "available": true
     },
     "deep-science": {
@@ -1197,7 +1218,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 30,
+      "records": 28,
       "available": true
     },
     "humanities-culture": {
@@ -1217,9 +1238,10 @@
         "earth-geography",
         "arts-culture",
         "civics-society",
-        "philosophy-ethics"
+        "philosophy-ethics",
+        "law-rights-basics"
       ],
-      "coverage": 0.8333,
+      "coverage": 1.0,
       "records": 26,
       "available": true
     }
@@ -1237,9 +1259,9 @@
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
-  "records_before_title_quality_gate": 165,
-  "rejected_by_title_quality_gate": 12,
-  "rejected_topic_links_by_title_quality_gate": 14,
+  "records_before_title_quality_gate": 170,
+  "rejected_by_title_quality_gate": 10,
+  "rejected_topic_links_by_title_quality_gate": 11,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v1",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary."
