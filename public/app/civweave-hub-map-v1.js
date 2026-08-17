@@ -1,13 +1,14 @@
 (()=>{
 'use strict';
 
-const VERSION='civweave-hub-map-v1.2.1-detail-idempotence';
+const VERSION='civweave-hub-map-v1.3.0-hourly-directory-sync';
 const DIRECTORY_ENDPOINT='/api/hub-map-nodes';
 const DIRECTORY_CACHE_KEY='civweave.hub-map.directory.v1';
+const DIRECTORY_BURST_KEY='civweave.hub-map.directory-burst-at.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
 const HOST_SELECTION_KEY='civweave.host-node.selection.v1';
 const RALLY_CACHE_KEY='civweave.guild-rally-point.selected.v1';
-const REFRESH_MS=2*60*1000;
+const REFRESH_MS=60*60*1000;
 let directory={schema:'civweave.hub-map-directory.v1',nodes:[]};
 let proximityEnabled=false;
 let watchId=null;
@@ -23,6 +24,10 @@ const norm=value=>String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const loadCache=()=>{try{return parse(localStorage.getItem(DIRECTORY_CACHE_KEY),null)}catch{return null}};
 const saveCache=value=>{try{localStorage.setItem(DIRECTORY_CACHE_KEY,JSON.stringify(value))}catch{}};
+const lastBurstAt=()=>{try{return Number(localStorage.getItem(DIRECTORY_BURST_KEY))||0}catch{return 0}};
+function claimDirectoryBurst(){
+  const startedAt=Date.now();try{const previous=lastBurstAt();if(previous&&startedAt-previous<REFRESH_MS)return false;localStorage.setItem(DIRECTORY_BURST_KEY,String(startedAt));return true}catch{return true}
+}
 const service=()=>globalThis.CivweaveMapService;
 const gossip=()=>globalThis.CivweaveLocalityGossipV1;
 const session=()=>globalThis.CivweaveHostNodeSessionV1;
@@ -78,8 +83,8 @@ function focusHubView(){
 }
 async function loadDirectory({network=true}={}){
   const cached=loadCache();if(cached?.schema==='civweave.hub-map-directory.v1'&&Array.isArray(cached.nodes)){directory=cached;installNodes(directory);setStatus(`Guild Map · ${cached.nodes.length} cached Guild${cached.nodes.length===1?'':'s'}`)}
-  if(!network||navigator.onLine===false)return directory;
-  try{const response=await fetch(DIRECTORY_ENDPOINT,{cache:'no-store',headers:{accept:'application/json'}}),packet=await response.json().catch(()=>({}));if(!response.ok||packet?.ok!==true||!Array.isArray(packet.nodes))throw new Error(packet?.error||`HTTP ${response.status}`);directory=packet;saveCache(packet);const count=installNodes(packet);setStatus(`Guild Map · ${count} Guildkeeper-placed Guild${count===1?'':'s'} · live directory`);dispatchEvent(new CustomEvent('civweave:hub-map-directory',{detail:{count,at:now()}}));return packet}catch(error){if(!cached)setStatus(`Guild Map directory unavailable · ${error.message}`);return directory}
+  if(!network||navigator.onLine===false||!claimDirectoryBurst())return directory;
+  try{const response=await fetch(DIRECTORY_ENDPOINT,{cache:'no-store',headers:{accept:'application/json'}}),packet=await response.json().catch(()=>({}));if(!response.ok||packet?.ok!==true||!Array.isArray(packet.nodes))throw new Error(packet?.error||`HTTP ${response.status}`);directory=packet;saveCache(packet);const count=installNodes(packet);setStatus(`Guild Map · ${count} Guildkeeper-placed Guild${count===1?'':'s'} · hourly directory sync`);dispatchEvent(new CustomEvent('civweave:hub-map-directory',{detail:{count,at:now()}}));return packet}catch(error){if(!cached)setStatus(`Guild Map directory unavailable · ${error.message}`);return directory}
 }
 function selectedHubRow(){const s=service();return s?.state?.features?.get?.(s?.state?.selectedId)||null}
 function selectedHubNode(){const row=selectedHubRow(),nodeId=rowNodeId(row);return nodeById(nodeId)||(row?.raw?._civweaveHubMap?row.raw:null)}
@@ -144,8 +149,9 @@ async function virtualMemberRefresh(){
   if(navigator.onLine===false)return;const active=session()?.publicStatus?.()?.sessions?.filter(item=>item.active)||[];if(!active.length)return;
   try{return await gossip()?.syncRegion?.({nodes:directory.nodes||[],networkDirectory:false})}catch{return null}
 }
+function applyCachedDirectory(){return loadDirectory({network:false}).catch(()=>directory)}
 function bind(){
-  document.getElementById('locate')?.addEventListener('click',startProximity,{capture:true});addEventListener('online',()=>{loadDirectory({network:true}).then(()=>virtualMemberRefresh()).catch(()=>{})});addEventListener('civweave:map-mesh-applied',()=>{activateNodeMode();augmentDetail()});addEventListener('civweave:locality-ledger-changed',()=>refreshSelectedHub(false).catch(()=>{}));addEventListener('visibilitychange',()=>{if(document.hidden)stopProximity();else if(proximityEnabled)startProximity()});addEventListener('pagehide',()=>{stopProximity();if(refreshTimer)clearInterval(refreshTimer)},{once:true});
+  document.getElementById('locate')?.addEventListener('click',startProximity,{capture:true});addEventListener('online',()=>{loadDirectory({network:true}).then(()=>virtualMemberRefresh()).catch(()=>{})});addEventListener('storage',event=>{if(event.key===DIRECTORY_CACHE_KEY)applyCachedDirectory()});addEventListener('civweave:map-mesh-applied',()=>{applyCachedDirectory();activateNodeMode();augmentDetail()});addEventListener('civweave:locality-ledger-changed',()=>refreshSelectedHub(false).catch(()=>{}));addEventListener('visibilitychange',()=>{if(document.hidden)stopProximity();else if(proximityEnabled)startProximity()});addEventListener('pagehide',()=>{stopProximity();if(refreshTimer)clearInterval(refreshTimer)},{once:true});
 }
 async function boot(){
   if(booted)return true;let ticks=0;while((!service()?.state?.map||!document.getElementById('panel'))&&ticks++<240)await new Promise(resolve=>setTimeout(resolve,50));if(!service()?.state?.map)return false;booted=true;installPanel();activateNodeMode();observeDetail();bind();await loadDirectory({network:true});await gossip()?.ensureMesh?.().catch(()=>{});virtualMemberRefresh().catch(()=>{});refreshTimer=setInterval(()=>loadDirectory({network:navigator.onLine!==false}).catch(()=>{}),REFRESH_MS);dispatchEvent(new CustomEvent('civweave:hub-map-ready',{detail:{version:VERSION,nodeCount:directory.nodes?.length||0,at:now()}}));return true
