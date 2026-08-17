@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.59-weaveling-plan-materialization-v265-quest-language';
+const VERSION='1.0.60-weaveling-plan-materialization-v265-direct-quest-copy';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const BANNER_ID='cw-weave-review-ready-v265';
@@ -16,22 +16,6 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const clone=value=>{try{return typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value))}catch{return value}};
 const now=()=>new Date().toISOString();
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const questText=value=>{
-  const source=clean(value,8000);
-  const canonical=globalThis.CivweaveQuestLanguageV1?.canonicalText?.(source);
-  if(canonical!=null)return canonical;
-  return source
-    .replace(/\bReviewable weave\b/g,'Reviewable Quest')
-    .replace(/\breviewable weave\b/g,'reviewable Quest')
-    .replace(/\bsaved weave\b/g,'saved Quest')
-    .replace(/\bThe weave is in REVIEW\b/g,'The Quest is in REVIEW')
-    .replace(/\bthe weave is in REVIEW\b/g,'the Quest is in REVIEW')
-    .replace(/\bstated wish\b/g,'Quest goal')
-    .replace(/\bReview weave\b/g,'Review Quest')
-    .replace(/\bRevise wish\b/g,'Revise Quest')
-    .replace(/\bafter the weave feels usable\b/g,'after the Quest feels usable')
-    .replace(/\bRestored intention weave\b/g,'Restored Quest');
-};
 
 function isCivweavePage(){
   const route=globalThis.CivweaveSystemRoutesV227?.identify?.(location.pathname);
@@ -51,8 +35,6 @@ function materialize(plan,{source='weaveling-shared-chat-v265'}={}){
   const current=parse(localStorage.getItem(WORKING_KEY),{}),at=now(),saved=clone(plan);
   saved.state='review';
   saved.updatedAt=at;
-  saved.outcome=questText(saved.outcome);
-  if(Array.isArray(saved.reviewOptions))saved.reviewOptions=saved.reviewOptions.map(option=>questText(option));
   const next={
     ...current,
     stage:'review',
@@ -126,10 +108,9 @@ function patchPlanner(api=globalThis.CivweaveIntentionPlanner){
     const result=original(options);
     if(result?.plan&&result?.item){
       materialize(result.plan,{source:'weaveling-shared-chat-v265'});
-      const originalAnswer=questText(result.response?.answer);
       result.response={
         ...(result.response||{}),
-        answer:`I generated and saved the reviewable Quest “${clean(result.plan.title,220)||'your Quest'}”. It is now in REVIEW on the Civweave workspace. Nothing is active yet.\n\n${originalAnswer}`.trim(),
+        answer:`I generated and saved the reviewable Quest “${clean(result.plan.title,220)||'your Quest'}”. It is now in REVIEW on the Civweave workspace. Nothing is active yet.\n\n${clean(result.response?.answer,7000)}`.trim(),
         choice:{...(result.response?.choice||{}),mode:'Plan',system:'civweave',nextAction:'Review the saved Quest, revise it, or activate it after review.'},
         requiresConsent:true,
         approvalGate:{kind:'intention-activation',planId:result.item.id,state:'review',required:true,actions:['review','revise','activate']}
@@ -166,7 +147,7 @@ function ensurePlanner(){
     const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===PLANNER_PATH}catch{return false}});
     if(!existing){
       const script=document.createElement('script');
-      script.src=`${PLANNER_PATH}?v=1.0.59-v265-quest-language`;
+      script.src=`${PLANNER_PATH}?v=1.0.60-v265-direct-quest-copy`;
       script.async=false;
       document.head.append(script);
     }
