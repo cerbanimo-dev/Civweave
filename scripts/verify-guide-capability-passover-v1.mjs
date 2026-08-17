@@ -43,9 +43,12 @@ if(!passover.includes("dispatchEvent(new CustomEvent('civweave:response-route'")
 if(!passover.includes('surface.submitText(offer.sourceText,offer.targetSystem)'))throw new Error('Passover must resubmit the preserved original request.');
 if(!passover.includes("surface.switchGuide?.(offer.targetSystem,{open:true"))throw new Error('Passover no longer opens the destination guide chat.');
 if(!passover.includes('cw-capability-passover-v1'))throw new Error('Passover action button contract is missing.');
-for(const [term,artifact] of Object.entries({'quest':'weave','endeavor':'quest','manifest':'resource','learning journey':'curriculum'})){
-  if(!passover.includes(`if(value==='${term}')return'${artifact}'`))throw new Error(`Canonical term ${term} no longer maps to internal ${artifact}.`);
-}
+for(const snippet of [
+  "if(value==='quest')return'weave'",
+  "if(value==='endeavor'||value==='endeavour')return'quest'",
+  "if(value==='manifest')return'resource'",
+  "if(value==='learning journey')return'curriculum'"
+])if(!passover.includes(snippet))throw new Error(`Canonical term mapping missing: ${snippet}`);
 if(!passover.includes('DIRECT_CANONICAL'))throw new Error('Canonical passover targeting no longer distinguishes the requested artifact from incidental Quest context.');
 if(!passover.includes("canonicalUserFacingTerms:true"))throw new Error('Canonical user-facing artifact language marker is missing.');
 if(!loader.includes('/app/guide-capability-passover-v1.js?v=1.1.1-canonical-targets'))throw new Error('Shared guide loader does not load the canonical-target passover revision.');
