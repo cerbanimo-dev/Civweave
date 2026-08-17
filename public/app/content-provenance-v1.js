@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-standard-neutral';
+const VERSION='1.0.0';
 const SCHEMA='civweave.content-provenance.v1';
 const GENERATION_SCHEMA='civweave.generation-provenance.v1';
 const METADATA_KEY='civweaveProvenance';
@@ -33,8 +33,9 @@ function addHumanValidation(record,review={}){
 }
 function isAiGenerated(record){return read(record)?.origin==='ai-generated'}
 function isHumanAuthored(record){return read(record)?.origin==='human-authored'}
-function filterHumanAuthored(rows){return(Array.isArray(rows)?rows:[]).filter(isHumanAuthored)}
-const api=Object.freeze({version:VERSION,schema:SCHEMA,generationSchema:GENERATION_SCHEMA,metadataKey:METADATA_KEY,read,generationFromResult,fromModelResult,humanAuthored,unknown,stamp,addHumanValidation,isAiGenerated,isHumanAuthored,filterHumanAuthored});
+function isLudVisible(record){return isHumanAuthored(record)}
+function filterLud(rows){return(Array.isArray(rows)?rows:[]).filter(isLudVisible)}
+const api=Object.freeze({version:VERSION,schema:SCHEMA,generationSchema:GENERATION_SCHEMA,metadataKey:METADATA_KEY,read,generationFromResult,fromModelResult,humanAuthored,unknown,stamp,addHumanValidation,isAiGenerated,isHumanAuthored,isLudVisible,filterLud});
 globalThis.CivweaveContentProvenanceV1=api;
 try{dispatchEvent(new CustomEvent('civweave:content-provenance-ready',{detail:{version:VERSION,schema:SCHEMA}}))}catch{}
 })();
