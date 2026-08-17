@@ -1,10 +1,11 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2-unified-chat-system-v1-learning-continuation';
+const VERSION='1.0.3-unified-chat-system-v1-weaveling-plan-continuation';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
+const WEAVELING_ORCHESTRATOR_PATH='/extensions/civweave-weaveling-plan-json-v190.js';
 const MEMORY_FOLDERS=Object.freeze(Object.fromEntries(SYSTEMS.map(system=>[system,`civweave.guide-thread.${system}.v237`])));
 const THEMES=Object.freeze({
   civweave:{name:'Weaveling',label:'Civweave'},
@@ -24,6 +25,7 @@ let assistantPatched=false;
 let loaderPatched=false;
 let lifecycleBound=false;
 let pendingRun=null;
+let orchestratorPromise=null;
 
 function activeTheme(){
   const candidate=globalThis.CivweavePersistentGuideChatV215?.activeWindow?.()
@@ -143,16 +145,44 @@ registerCapability('living-school',async(request,next)=>{
   return guardLivingSchoolMutation(result,before);
 });
 
+function hasResponseLayer(fn,flag){
+  let current=fn,depth=0;
+  while(typeof current==='function'&&depth<16){if(current[flag])return true;current=current.__prior;depth++}
+  return false;
+}
+function loadScript(path,version){
+  const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}});
+  if(existing)return Promise.resolve(existing);
+  return new Promise((resolve,reject)=>{
+    const script=document.createElement('script');script.src=`${path}?v=${encodeURIComponent(version)}`;script.async=false;
+    script.onload=()=>resolve(script);script.onerror=()=>reject(new Error(`Could not load ${path}.`));document.head?.append(script);
+  });
+}
+async function ensureWeavelingOrchestrator(){
+  const assistant=globalThis.CivweaveAssistantV141;
+  if(!assistant?.respond)return false;
+  if(hasResponseLayer(assistant.respond,'__weavelingPlanJsonV190'))return true;
+  const install=()=>{
+    const api=globalThis.CivweaveWeavelingPlanJsonV190;
+    if(!api?.install)throw new Error('The Weaveling structured-plan orchestrator loaded without its runtime.');
+    api.install();
+    return hasResponseLayer(globalThis.CivweaveAssistantV141?.respond,'__weavelingPlanJsonV190');
+  };
+  if(globalThis.CivweaveWeavelingPlanJsonV190?.install)return install();
+  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.0.8-contextual-review-materialization').then(install).catch(error=>{orchestratorPromise=null;throw error});
+  return orchestratorPromise;
+}
 function patchAssistant(){
   const api=globalThis.CivweaveAssistantV141;
-  if(!api?.respond||api.respond.__cwUnifiedChatSystemV1)return false;
+  if(!api?.respond||hasResponseLayer(api.respond,'__cwUnifiedChatSystemV1'))return false;
   const originalFn=api.respond,original=originalFn.bind(api);
   const respond=async options=>{
     const request={...(options||{})},system=SYSTEMS.includes(clean(request.systemId,80).toLowerCase())?clean(request.systemId,80).toLowerCase():'civweave',handler=capabilityHandlers.get(system);
     return handler?handler({...request,systemId:system},original):original({...request,systemId:system});
   };
   respond.__cwUnifiedChatSystemV1=true;
-  for(const key of ['__guideIdentityIntegrityV216','__deterministicModeV175'])if(originalFn[key])respond[key]=originalFn[key];
+  respond.__prior=originalFn;
+  for(const key of ['__weavelingPlanJsonV190','__guideIdentityIntegrityV216','__deterministicModeV175'])if(originalFn[key])respond[key]=originalFn[key];
   try{api.respond=respond;assistantPatched=api.respond===respond}catch{}
   if(!assistantPatched){try{globalThis.CivweaveAssistantV141={...api,respond};assistantPatched=true}catch{}}
   return assistantPatched;
@@ -160,8 +190,14 @@ function patchAssistant(){
 function patchLoader(){
   const loader=globalThis.CivweaveFamilyAILoaderV105;
   if(!loader?.ensure||loader.ensure.__cwUnifiedChatSystemV1)return false;
-  const original=loader.ensure.bind(loader),ensure=async(...args)=>{const result=await original(...args);patchAssistant();return result};
+  const originalFn=loader.ensure,original=originalFn.bind(loader),ensure=async(...args)=>{
+    const result=await original(...args);
+    try{await ensureWeavelingOrchestrator()}catch(error){console.warn('[Civweave] Weaveling planning layer did not attach:',error)}
+    patchAssistant();
+    return result;
+  };
   ensure.__cwUnifiedChatSystemV1=true;
+  ensure.__prior=originalFn;
   try{loader.ensure=ensure;loaderPatched=true}catch{}
   return loaderPatched;
 }
@@ -180,7 +216,7 @@ function bindLifecycle(){
 }
 function start(){bindLifecycle();synchronize();document.documentElement.dataset.civweaveChatSystem='unified-v1'}
 
-const api=Object.freeze({version:VERSION,systems:SYSTEMS,themes:THEMES,memoryFolders:MEMORY_FOLDERS,memoryFolder,activeTheme,registerCapability,normalizeSurface,synchronize,curriculumIntent,curriculumRequest,runLivingSchoolCurriculum,architecture:'one-core-five-themes-five-memory-folders',inputOwners:1,polling:false});
+const api=Object.freeze({version:VERSION,systems:SYSTEMS,themes:THEMES,memoryFolders:MEMORY_FOLDERS,memoryFolder,activeTheme,registerCapability,normalizeSurface,synchronize,ensureWeavelingOrchestrator,curriculumIntent,curriculumRequest,runLivingSchoolCurriculum,architecture:'one-core-five-themes-five-memory-folders',inputOwners:1,polling:false});
 globalThis.CivweaveUnifiedChatSystemV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
