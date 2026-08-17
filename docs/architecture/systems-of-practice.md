@@ -68,10 +68,26 @@ Realm pages can expose realm-native navigation inside their content, but cross-s
 
 ## Guide chat
 
-- Workspace owner: `public/app/guide-workspace-v242.js`
-- Loader: `public/app/family-ai-loader-v105.js`
+- Canonical chat surface: `public/app/guide-chat-surface-v350.js`
+- Unified capability layer: `public/app/unified-chat-system-v1.js`
+- Capability passover and canonical artifact-language adapter: `public/app/guide-capability-passover-v1.js`
+- Compatibility-only historical loader: `public/app/guide-workspace-v242.js`
+- Shared dependency loader: `public/app/family-ai-loader-v105.js`
+- Canonical artifact-language contract: `config/guide-artifact-language-v1.json`
+- Human-readable artifact-language contract: `docs/contracts/guide-artifact-language-v1.md`
 
-Realm code should request the canonical guide window. It should not create another persistent guide-chat owner because a specific page wants a different guide identity.
+There is one chat system with five guide themes and separate memory folders. Realm code should request the canonical guide surface; it must not create another persistent chat owner because a page wants a different guide identity.
+
+Specialized artifact ownership is fixed in user-facing language:
+
+- **Weaveling makes Quests.**
+- **Moss makes Learning Journeys.**
+- **Kamiya makes Endeavors.**
+- **Rook makes Manifests.**
+
+The internal artifact IDs `weave`, `curriculum`, `quest`, and `resource` predate this language and remain compatibility identifiers only. In particular, internal `quest` currently maps to Kamiya's **Endeavor** machinery; it does not mean that Kamiya owns user-facing Quests. User-facing **Quest** always belongs to Weaveling.
+
+A guide may discuss another domain, but creating another guide's specialized artifact must produce a passover offer rather than duplicate the generator. Accepting the passover opens the destination guide and resubmits the preserved request through the shared chat path. Moss's Living School generator remains the materialization owner for Learning Journeys.
 
 ## Local AI inference
 
