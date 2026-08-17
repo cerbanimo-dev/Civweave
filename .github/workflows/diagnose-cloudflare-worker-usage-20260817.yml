@@ -22,7 +22,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Query Workers request totals since UTC reset
+      - name: Query Workers, Pages Functions, and Durable Objects since UTC reset
         shell: bash
         run: |
           set -euo pipefail
@@ -33,66 +33,49 @@ jobs:
             console.error('CLOUDFLARE_DIAGNOSTIC_ERROR missing Cloudflare deployment credentials');
             process.exit(2);
           }
-
           const now = new Date();
           const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
-          const query = `query GetWorkersAnalytics($accountTag: string, $datetimeStart: string, $datetimeEnd: string) {
-            viewer {
-              accounts(filter: {accountTag: $accountTag}) {
-                workersInvocationsAdaptive(limit: 10000, filter: {
-                  datetime_geq: $datetimeStart,
-                  datetime_leq: $datetimeEnd
-                }) {
-                  sum { subrequests requests errors }
-                  dimensions { scriptName status }
-                }
-              }
+          const variables = {accountTag, datetimeStart:start.toISOString(), datetimeEnd:now.toISOString()};
+          async function gql(label, query) {
+            const response = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+              method:'POST',
+              headers:{authorization:`Bearer ${token}`,accept:'application/json','content-type':'application/json'},
+              body:JSON.stringify({query,variables})
+            });
+            const payload = await response.json().catch(()=>({}));
+            if (!response.ok || payload.errors?.length) {
+              console.log(`${label}_ERROR`, JSON.stringify({status:response.status,errors:payload.errors||payload}));
+              return null;
             }
-          }`;
+            return payload?.data?.viewer?.accounts?.[0] || {};
+          }
+          function aggregate(rows, extraDimensions=[]) {
+            const map = new Map();
+            for (const row of rows || []) {
+              const d=row?.dimensions||{}, s=row?.sum||{};
+              const dims={script:String(d.scriptName||'__unknown__'),status:String(d.status||'unknown')};
+              for(const key of extraDimensions) if(d[key]!=null)dims[key]=String(d[key]);
+              const key=JSON.stringify(dims);
+              const item=map.get(key)||{...dims,requests:0,subrequests:0,errors:0};
+              item.requests+=Number(s.requests||0);item.subrequests+=Number(s.subrequests||0);item.errors+=Number(s.errors||0);map.set(key,item);
+            }
+            return [...map.values()].sort((a,b)=>b.requests-a.requests||b.subrequests-a.subrequests);
+          }
 
-          const response = await fetch('https://api.cloudflare.com/client/v4/graphql', {
-            method: 'POST',
-            headers: {
-              authorization: `Bearer ${token}`,
-              accept: 'application/json',
-              'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-              query,
-              variables: {
-                accountTag,
-                datetimeStart: start.toISOString(),
-                datetimeEnd: now.toISOString()
-              }
-            })
-          });
-          const payload = await response.json().catch(() => ({}));
-          if (!response.ok || payload.errors?.length) {
-            console.error('CLOUDFLARE_GRAPHQL_ERROR', JSON.stringify({status: response.status, errors: payload.errors || payload}));
-            process.exit(3);
-          }
-          const rows = payload?.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive || [];
-          const scripts = new Map();
-          let accountRequests = 0, accountSubrequests = 0, accountErrors = 0;
-          for (const row of rows) {
-            const name = String(row?.dimensions?.scriptName || '(unknown)');
-            const status = String(row?.dimensions?.status || 'unknown');
-            const requests = Number(row?.sum?.requests || 0);
-            const subrequests = Number(row?.sum?.subrequests || 0);
-            const errors = Number(row?.sum?.errors || 0);
-            accountRequests += requests;
-            accountSubrequests += subrequests;
-            accountErrors += errors;
-            const item = scripts.get(name) || {script:name, requests:0, subrequests:0, errors:0, statuses:{}};
-            item.requests += requests;
-            item.subrequests += subrequests;
-            item.errors += errors;
-            item.statuses[status] = (item.statuses[status] || 0) + requests;
-            scripts.set(name, item);
-          }
-          const ranked = [...scripts.values()].sort((a,b) => b.requests - a.requests || b.subrequests - a.subrequests);
-          console.log('CLOUDFLARE_USAGE_WINDOW', JSON.stringify({from:start.toISOString(), to:now.toISOString(), returnedRows:rows.length}));
-          console.log('CLOUDFLARE_ACCOUNT_TOTALS', JSON.stringify({requests:accountRequests, subrequests:accountSubrequests, errors:accountErrors}));
-          console.log('CLOUDFLARE_USAGE_BY_SCRIPT');
-          for (const item of ranked) console.log(JSON.stringify(item));
+          const workers = await gql('WORKERS', `query Usage($accountTag:string,$datetimeStart:string,$datetimeEnd:string){viewer{accounts(filter:{accountTag:$accountTag}){workersInvocationsAdaptive(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_leq:$datetimeEnd}){sum{requests subrequests errors}dimensions{scriptName status}}}}}`);
+          const workerRows=workers?.workersInvocationsAdaptive||[];
+          const rankedWorkers=aggregate(workerRows);
+          console.log('CLOUDFLARE_USAGE_WINDOW',JSON.stringify({from:start.toISOString(),to:now.toISOString()}));
+          console.log('WORKERS_BY_SCRIPT'); for(const row of rankedWorkers)console.log(JSON.stringify(row));
+
+          const pages = await gql('PAGES', `query Usage($accountTag:string,$datetimeStart:string,$datetimeEnd:string){viewer{accounts(filter:{accountTag:$accountTag}){pagesFunctionsInvocationsAdaptiveGroups(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_leq:$datetimeEnd}){sum{requests subrequests errors}dimensions{scriptName status datetimeHour}}}}}`);
+          const pageRows=pages?.pagesFunctionsInvocationsAdaptiveGroups||[];
+          console.log('PAGES_FUNCTIONS_BY_SCRIPT_HOUR'); for(const row of aggregate(pageRows,['datetimeHour']))console.log(JSON.stringify(row));
+          const pagesByScript=new Map();for(const row of aggregate(pageRows)){const item=pagesByScript.get(row.script)||{script:row.script,requests:0,subrequests:0,errors:0};item.requests+=row.requests;item.subrequests+=row.subrequests;item.errors+=row.errors;pagesByScript.set(row.script,item)}
+          console.log('PAGES_FUNCTIONS_TOTALS');for(const row of [...pagesByScript.values()].sort((a,b)=>b.requests-a.requests))console.log(JSON.stringify(row));
+
+          const durable = await gql('DURABLE', `query Usage($accountTag:string,$datetimeStart:string,$datetimeEnd:string){viewer{accounts(filter:{accountTag:$accountTag}){durableObjectsInvocationsAdaptiveGroups(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_leq:$datetimeEnd}){sum{requests}dimensions{scriptName status datetimeHour name namespaceId type}}}}}`);
+          const durableRows=durable?.durableObjectsInvocationsAdaptiveGroups||[];
+          const doMap=new Map();for(const row of durableRows){const d=row?.dimensions||{};const key=JSON.stringify({script:d.scriptName||'__unknown__',name:d.name||'',namespaceId:d.namespaceId||'',type:d.type||'',status:d.status||''});const item=doMap.get(key)||{script:d.scriptName||'__unknown__',name:d.name||'',namespaceId:d.namespaceId||'',type:d.type||'',status:d.status||'',requests:0};item.requests+=Number(row?.sum?.requests||0);doMap.set(key,item)}
+          console.log('DURABLE_OBJECT_TOTALS');for(const row of [...doMap.values()].sort((a,b)=>b.requests-a.requests))console.log(JSON.stringify(row));
           NODE
