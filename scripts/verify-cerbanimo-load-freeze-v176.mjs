@@ -9,14 +9,13 @@ const activeWorker=read('public/service-worker-v203.js');
 const releaseCoherence=read('public/service-worker-release-coherence-v220.js');
 const questPath=read('public/app/cerbanimo-quest-path-v266.js');
 const questEngine=read('public/app/cerbanimo-quest-engine-v144.js');
-const familyShell=read('public/app/family-shell-v104.js');
 const navStability=read('public/app/cerbanimo-nav-stability-v1.js');
 const packs=read('public/app/cerbanimo-learning-packs-v1.js');
 const videos=read('public/app/cerbanimo-video-task-contract-v1.mjs');
 const proofs=read('public/app/cerbanimo-proof-attachments-v165.js');
 
 assert(dispatcher.includes("cerbanimo:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1'"),'Canonical dispatcher no longer points to the tested Cerbanimo console.');
-assert(realm.includes('data-build="realm-console-canonical-v246-long-session-stability-r1"'),'Cerbanimo console is missing the long-session stability build marker.');
+assert(realm.includes('data-build="realm-console-canonical-v247-direct-nav-no-family-poller-r1"'),'Cerbanimo console is missing the direct hot-path stability build marker.');
 
 assert(realm.includes('parity-bounded-r1'),'Cerbanimo console must cache-bust the bounded parity runtime.');
 assert(parity.includes('FETCH_TIMEOUT_MS'),'Parity ledger loading must have a finite startup deadline.');
@@ -52,13 +51,12 @@ assert(navStability.includes("addEventListener('pageshow',ensure)"),'Navigation 
 assert(navStability.includes('window.top.location.replace(location.href)'),'An installed Cerbanimo surface must escape an accidental embedded route instead of silently deleting global navigation.');
 assert(!navStability.includes('setInterval'),'Navigation recovery must not use a permanent polling timer.');
 
-assert(!familyShell.includes('setInterval(refresh,30000)'),'The shared family shell must not wake every 30 seconds and rescan local state during an idle session.');
-assert(familyShell.includes("addEventListener('cerbanimo:quest-engine-changed',refresh)"),'Cerbanimo family status must refresh from actual quest changes.');
-assert(familyShell.includes('scheduleClickRefresh'),'Family-shell click refreshes must be coalesced.');
+assert(!realm.includes('/app/family-shell-v104.js'),'Cerbanimo must not load the legacy family-shell polling runtime.');
+assert(!realm.includes('/app/family-shell-v104.css'),'Cerbanimo must not depend on legacy family-shell presentation CSS.');
 
 assert(realm.includes('/app/cerbanimo-quest-engine-v144.js?v=quest-engine-r25-frame-bounded'),'Cerbanimo must cache-bust the frame-bounded Quest engine.');
 assert(questEngine.includes("const VERSION='1.0.33-cerbanimo-v144-frame-bounded'"),'Quest engine must expose the frame-bounded runtime revision.');
-assert(questEngine.includes("requestAnimationFrame(run)"),'Quest engine rerenders must yield to a browser frame instead of chaining microtasks.');
+assert(questEngine.includes('requestAnimationFrame(run)'),'Quest engine rerenders must yield to a browser frame instead of chaining microtasks.');
 assert(questEngine.includes("observer.observe(target,{childList:true,subtree:false})"),'Quest engine must observe only console-shell replacement, not every descendant mutation.');
 assert(!questEngine.includes("observer.observe(document.querySelector('#rc-app')||document.documentElement,{childList:true,subtree:true})"),'Quest engine must not restore the broad subtree observer that wakes on every UI mutation.');
 
@@ -91,4 +89,4 @@ assert(proofs.includes("if(span.textContent!==text)span.textContent=text"),'Atta
 assert(proofs.includes("if(link.textContent!==value)link.textContent=value"),'Proof-link decoration must be idempotent.');
 assert(realm.includes('file-link-image-proof-r2'),'Cerbanimo console must cache-bust the idempotent proof runtime.');
 
-console.log('Cerbanimo load-freeze regression contract passed: navigation is directly owned and bounded-recoverable; idle family-shell polling is removed; Quest rerenders are frame-bounded; parity remains recoverable; generated paths, packs, and media stay lazy; proof decoration converges.');
+console.log('Cerbanimo load-freeze regression contract passed: navigation is directly owned and bounded-recoverable; the legacy family poller is absent from the Cerbanimo hot path; Quest rerenders are frame-bounded; parity remains recoverable; generated paths, packs, and media stay lazy; proof decoration converges.');
