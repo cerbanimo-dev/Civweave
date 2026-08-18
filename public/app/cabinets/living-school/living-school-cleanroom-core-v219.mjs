@@ -1,4 +1,4 @@
-export * from './living-school-cleanroom-core-v218.mjs';
+export * from './living-school-cleanroom-core-v218-base.mjs';
 
 import {
   state,
@@ -8,7 +8,7 @@ import {
   uid,
   moduleFor,
   normalizeModule,
-} from './living-school-cleanroom-core-v218.mjs';
+} from './living-school-cleanroom-core-v218-base.mjs';
 
 function questionSchema(){
   return {type:'object',required:['type','prompt'],properties:{
