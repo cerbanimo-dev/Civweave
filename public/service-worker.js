@@ -2,11 +2,11 @@
 const VERSION='1.0.7';
 const CACHE_REVISION='direct-family-r46-installer-brand-v1';
 const GUIDE_REVISION='five-system-chat-r46-weaveling-memory';
-const CABINET_REVISION='direct-software-r38-v106';
+const CABINET_REVISION='direct-software-r39-cerbanimo-parity-bounded';
 const DEVICE_REVISION='device-package-r43-hub-map-offline';
 const CALIBRATION_REVISION='marketing-only-r1';
 const INSTALL_REVISION='direct-entry-r45-memory-credential-v191';
-const LEDGER_HYDRATION_REVISION='direct-software-r35';
+const LEDGER_HYDRATION_REVISION='direct-software-r36-bounded-parity';
 const AI_REVISION='settings-v191-explicit-device-credential';
 const BASE_PACKAGE_RECOVERY_REVISION='device-package-self-heal-v191';
 const MEMORY_REVISION='weaveling-working-long-memory-v191';
