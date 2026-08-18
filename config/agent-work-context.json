@@ -64,6 +64,18 @@
     "anarchadia": "civweave.guide-thread.anarchadia.v237"
   },
   "crossGuideContextPolicy": "explicit-handoff-or-user-directed-transfer-only",
+  "hostedAIDegradationPolicy": {
+    "activation": "explicit-server-auto-configuration",
+    "serverOrder": [
+      "device-local",
+      "server-local",
+      "cloudflare-workers-ai"
+    ],
+    "preserveSelectedLocalFirst": true,
+    "hostedConsentRequired": true,
+    "failureMustBeVisible": true,
+    "silentDeterministicMasking": false
+  },
   "meshConflictPolicy": {
     "sameRevisionDifferentHash": "preserve-both-and-select-deterministic-canonical-hash",
     "automaticFieldMerge": false,
