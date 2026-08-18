@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/app/fullscreen-family-v104.html'
       - 'public/app/realm-console-v140.html'
+      - 'public/app/cerbanimo-quest-path-v266.js'
       - 'public/app/cerbanimo-learning-packs-v1.js'
       - 'public/app/cerbanimo-video-task-contract-v1.mjs'
       - 'public/app/cerbanimo-proof-attachments-v165.js'
@@ -24,6 +25,7 @@ jobs:
           node-version: 22
       - name: Syntax check Cerbanimo boot runtimes
         run: |
+          node --check public/app/cerbanimo-quest-path-v266.js
           node --check public/app/cerbanimo-learning-packs-v1.js
           node --check public/app/cerbanimo-video-task-contract-v1.mjs
           node --check public/app/cerbanimo-proof-attachments-v165.js
