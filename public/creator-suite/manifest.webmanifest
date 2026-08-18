@@ -1,0 +1,11 @@
+{
+  "name": "Civweave Creator Suite",
+  "short_name": "Creator Suite",
+  "description": "Offline-first text, audio, and video creation with Civweave provenance receipts.",
+  "start_url": "/creator-suite/",
+  "scope": "/creator-suite/",
+  "display": "standalone",
+  "background_color": "#111316",
+  "theme_color": "#111316",
+  "categories": ["productivity", "multimedia", "utilities"]
+}
