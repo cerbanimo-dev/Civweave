@@ -40,6 +40,7 @@
     "Keep one chat core with five isolated guide memory scopes.",
     "Move cross-guide context only through explicit handoff or user-directed transfer.",
     "Preserve local-first operation and make hosted-service degradation or failure explicit.",
+    "Keep the optional five-guide human orientation reachable without making it part of the capability architecture.",
     "Write or identify a failing executable contract before behavior code whenever the failure can be expressed deterministically."
   ],
   "testFirst": {
@@ -64,6 +65,21 @@
     "anarchadia": "civweave.guide-thread.anarchadia.v237"
   },
   "crossGuideContextPolicy": "explicit-handoff-or-user-directed-transfer-only",
+  "humanOnboardingPolicy": {
+    "owner": "public/app/new-user-onboarding-v1.js",
+    "activeSurface": "public/app/working-campus-v156.html",
+    "systems": [
+      "civweave",
+      "living-school",
+      "cerbanimo",
+      "fellowfare",
+      "anarchadia"
+    ],
+    "optional": true,
+    "autoOpen": "new-user-without-meaningful-prior-activity",
+    "replayControl": "data-cw-onboarding-replay",
+    "capabilityOwnership": false
+  },
   "hostedAIDegradationPolicy": {
     "activation": "explicit-server-auto-configuration",
     "serverOrder": [
