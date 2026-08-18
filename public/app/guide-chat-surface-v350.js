@@ -1,13 +1,15 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.165-guide-chat-surface-v350-themed-focus-ring';
+const VERSION='1.0.166-guide-chat-surface-v350-voice-addressing';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
 const STATE_KEY='civweave.guide-chat-surface.v350';
 const RETIRED_STATE_KEY='civweave.guide-workspace.v242';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
+const SPECIALIZED_MODELS_PATH='/app/local-ai/specialized-model-capabilities-v1.js?v=1.0.0';
+const VOICE_RUNTIME_PATH='/app/guide-voice-runtime-v1.js?v=1.0.0';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE=Object.freeze({
   civweave:{name:'Weaveling',label:'Civweave',role:'Quest guide and central orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling about a Quest'},
@@ -16,6 +18,7 @@ const GUIDE=Object.freeze({
   fellowfare:{name:'Rook',label:'FellowFare',role:'Manifest guide and Quartermaster',avatar:'/app/assets/ai/chat/rook-face-v255.webp',accent:'#f2a93b',panel:'#2c1b17',placeholder:'Message Rook about a Manifest'},
   anarchadia:{name:'Merlin',label:'Anarchadia',role:'Civic and automation guide',avatar:'/app/assets/ai/chat/merlin-face-v255.webp',accent:'#ff4f9a',panel:'#090909',placeholder:'Message Merlin'}
 });
+const GUIDE_ADDRESS=Object.freeze(Object.fromEntries(Object.entries(GUIDE).map(([system,item])=>[item.name.toLowerCase(),system])));
 if(globalThis.CivweaveGuideChatSurfaceV350?.version===VERSION)return;
 
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
@@ -32,6 +35,8 @@ let busy=false;
 let seen={};
 let root=null;
 let launcher=null;
+let voicePromise=null;
+let voiceStatus='';
 
 function detectSystem(){
   const route=globalThis.CivweaveSystemRoutesV227?.identify?.(location.pathname);
@@ -61,7 +66,8 @@ function append(system,row){
   return writeThread(system,thread);
 }
 function selectedLocal(){try{const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});return value?.active&&value?.id?value:null}catch{return null}}
-function state(){return Object.freeze({version:VERSION,pageSystem,activeWindow:activeSystem,activeSystem,open:openState,minimized,busy,canonicalOwner:true,presentation:'single-current-chat-surface',selectedLocalModel:selectedLocal()?.id||''})}
+function voiceState(){try{return globalThis.CivweaveGuideVoiceV1?.state?.()||null}catch{return null}}
+function state(){const voice=voiceState();return Object.freeze({version:VERSION,pageSystem,activeWindow:activeSystem,activeSystem,open:openState,minimized,busy,canonicalOwner:true,presentation:'single-current-chat-surface',selectedLocalModel:selectedLocal()?.id||'',voice:{loaded:Boolean(globalThis.CivweaveGuideVoiceV1),listening:Boolean(voice?.listening),source:voice?.source||'',status:voiceStatus}})}
 function saveState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({...state(),seen:{...seen},updatedAt:now()}))}catch{}}
 function restoreState(){
   let value={};try{value=parse(localStorage.getItem(STATE_KEY),{})}catch{}
@@ -84,6 +90,32 @@ function emitState(){
 function emitOpened(){try{dispatchEvent(new CustomEvent('civweave:guide-chat-opened',{detail:state()}))}catch{}}
 function emitAvatar(system,text,userText='',phase='response'){try{dispatchEvent(new CustomEvent('civweave:avatar-direct-text',{detail:{system,text:clean(text),userText:clean(userText,1200),phase}}))}catch{}}
 function guide(system=activeSystem){return GUIDE[system]||GUIDE.civweave}
+function resolveGuideAddress(text,{allowBare=false}={}){
+  const value=clean(text);if(!value)return{system:'',guide:'',text:'',addressed:false};
+  const names=Object.keys(GUIDE_ADDRESS).join('|');
+  const prefix=allowBare?'(?:(?:hey|hi|hello|ok|okay)\\s+)?':'(?:hey|hi|hello|ok|okay)\\s+';
+  const match=value.match(new RegExp(`^\\s*${prefix}(${names})\\b[\\s,:;.!?-]*(.*)$`,'i'));
+  if(!match)return{system:'',guide:'',text:value,addressed:false};
+  const name=match[1].toLowerCase(),system=GUIDE_ADDRESS[name]||'';
+  return{system,guide:name,text:clean(match[2]),addressed:Boolean(system)};
+}
+function loadScript(path,ready){
+  if(ready?.())return Promise.resolve(true);
+  const pathname=new URL(path,location.href).pathname,existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===pathname}catch{return false}});
+  if(existing)return new Promise((resolve,reject)=>{let elapsed=0;const timer=setInterval(()=>{elapsed+=50;if(ready?.()){clearInterval(timer);resolve(true)}else if(elapsed>=12000){clearInterval(timer);reject(new Error(`${pathname} loaded without its runtime.`))}},50)});
+  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=path;script.async=false;script.onload=()=>ready?.()?resolve(true):reject(new Error(`${pathname} loaded without its runtime.`));script.onerror=()=>reject(new Error(`Could not load ${pathname}.`));document.head.append(script)});
+}
+async function ensureSpecializedRegistry(){await loadScript(SPECIALIZED_MODELS_PATH,()=>globalThis.CivweaveLocalSpecializedAI);return globalThis.CivweaveLocalSpecializedAI}
+async function ensureVoiceRuntime(){
+  if(globalThis.CivweaveGuideVoiceV1)return globalThis.CivweaveGuideVoiceV1;
+  if(voicePromise)return voicePromise;
+  voiceStatus='Loading offline voice…';syncChrome();
+  voicePromise=(async()=>{await ensureSpecializedRegistry();await loadScript(VOICE_RUNTIME_PATH,()=>globalThis.CivweaveGuideVoiceV1);voiceStatus='';syncChrome();return globalThis.CivweaveGuideVoiceV1})().catch(error=>{voicePromise=null;voiceStatus=clean(error?.message||error,240);syncChrome();throw error});
+  return voicePromise;
+}
+async function toggleVoice(){
+  try{const voice=await ensureVoiceRuntime();voiceStatus='';await voice.toggle?.({guide:activeSystem});syncChrome();emitState();return Boolean(voice.state?.().listening)}catch(error){voiceStatus=clean(error?.message||error||'Offline voice is unavailable.',300);syncChrome();emitState();return false}
+}
 
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
@@ -105,9 +137,9 @@ function installStyle(){
 #${ROOT_ID} .cw242-unread{position:absolute;right:7px;top:6px;width:10px;height:10px;border:2px solid #08111d;border-radius:50%;background:var(--window-accent);box-shadow:0 0 9px var(--window-accent)}#${ROOT_ID} .cw242-unread[hidden]{display:none!important}
 #${ROOT_ID} .cw350-context{padding:7px 11px;border-bottom:1px solid #ffffff12;color:#9fb0c3;font-size:11px;background:#0002}#${ROOT_ID} [data-log]{min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}#${ROOT_ID} [data-log]:empty::before{content:'Start a conversation';margin:auto;color:#71839a;font-weight:750}
 #${ROOT_ID} article{display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;align-items:start}#${ROOT_ID} article.is-user{display:flex;justify-content:flex-end;padding-left:42px}#${ROOT_ID} article>img{width:32px;height:32px;border:1px solid var(--guide-accent);border-radius:10px;object-fit:cover}#${ROOT_ID} .cw350-bubble{max-width:88%;padding:9px 11px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff0b;white-space:pre-wrap;overflow-wrap:anywhere}#${ROOT_ID} .is-user .cw350-bubble{background:color-mix(in srgb,var(--guide-accent) 16%,#ffffff08);border-color:color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} .cw350-meta{margin-top:5px;color:#8394aa;font-size:10px}
-#${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit;caret-color:var(--guide-accent);outline:none}#${ROOT_ID} textarea:focus,#${ROOT_ID} textarea:focus-visible{border-color:var(--guide-accent)!important;outline:3px solid color-mix(in srgb,var(--guide-accent) 88%,#fff 12%)!important;outline-offset:2px;box-shadow:0 0 0 1px color-mix(in srgb,var(--guide-accent) 56%,transparent),0 0 18px color-mix(in srgb,var(--guide-accent) 30%,transparent)}#${ROOT_ID} [data-send]{min-width:76px;border:1px solid var(--guide-accent);border-radius:12px;padding:0 14px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} button{cursor:pointer}
+#${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit;caret-color:var(--guide-accent);outline:none}#${ROOT_ID} textarea:focus,#${ROOT_ID} textarea:focus-visible{border-color:var(--guide-accent)!important;outline:3px solid color-mix(in srgb,var(--guide-accent) 88%,#fff 12%)!important;outline-offset:2px;box-shadow:0 0 0 1px color-mix(in srgb,var(--guide-accent) 56%,transparent),0 0 18px color-mix(in srgb,var(--guide-accent) 30%,transparent)}#${ROOT_ID} [data-send],#${ROOT_ID} [data-voice]{border:1px solid var(--guide-accent);border-radius:12px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} [data-send]{min-width:76px;padding:0 14px}#${ROOT_ID} [data-voice]{min-width:54px;padding:0 10px;font-size:20px}#${ROOT_ID} [data-voice][data-listening="true"]{background:color-mix(in srgb,var(--guide-accent) 60%,#182334);box-shadow:0 0 18px color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} button{cursor:pointer}
 @media(max-width:720px){#${ROOT_ID}{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:100dvh;border:0;border-radius:0;grid-template-rows:auto auto auto minmax(0,1fr) auto}#${ROOT_ID}>header{grid-template-columns:44px minmax(0,1fr) 40px;padding-top:calc(7px + env(safe-area-inset-top))}#${ROOT_ID}>header img{width:44px;height:44px}#${ROOT_ID} .cw242-window-switcher{gap:4px;padding:7px 5px 8px}#${ROOT_ID} .cw242-window img{width:48px;height:48px;border-radius:12px}#${LAUNCHER_ID}{width:56px;height:56px}}
-@media(max-width:390px){#${ROOT_ID} .cw242-window-switcher{gap:2px;padding-left:3px;padding-right:3px}#${ROOT_ID} .cw242-window img{width:44px;height:44px}}
+@media(max-width:390px){#${ROOT_ID} .cw242-window-switcher{gap:2px;padding-left:3px;padding-right:3px}#${ROOT_ID} .cw242-window img{width:44px;height:44px}#${ROOT_ID} [data-send]{min-width:66px;padding:0 10px}#${ROOT_ID} [data-voice]{min-width:48px}}
 `;
   document.head.append(style);
 }
@@ -123,10 +155,11 @@ function switcherMarkup(){return SYSTEMS.map(system=>{const item=GUIDE[system];r
 function ensureRoot(){
   if(root?.isConnected)return root;
   root=document.getElementById(ROOT_ID)||document.createElement('section');root.id=ROOT_ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Civweave guide chat');
-  root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><button data-close type="button" aria-label="Close chat">×</button></header><nav class="cw242-window-switcher" aria-label="Guide chats">${switcherMarkup()}</nav><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-send type="submit">Send</button></form>`;
+  root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><button data-close type="button" aria-label="Close chat">×</button></header><nav class="cw242-window-switcher" aria-label="Guide chats">${switcherMarkup()}</nav><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-voice type="button" aria-label="Start offline voice" title="Start offline voice">◉</button><button data-send type="submit">Send</button></form>`;
   root.querySelector('[data-close]').addEventListener('click',close);
   root.querySelector('.cw242-window-switcher').addEventListener('click',event=>{const button=event.target.closest?.('[data-cw242-window]');if(button)switchGuide(button.dataset.cw242Window,{open:true,focus:true})});
-  root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitActive(text)});
+  root.querySelector('[data-voice]').addEventListener('click',()=>{void toggleVoice()});
+  root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitText(text,activeSystem)});
   root.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close()}});
   if(!root.isConnected)document.body.append(root);
   syncChrome();render();return root;
@@ -140,7 +173,7 @@ function syncSwitcher(){
   });
 }
 function syncChrome(){
-  const current=guide(activeSystem),page=guide(pageSystem);
+  const current=guide(activeSystem),page=guide(pageSystem),voice=voiceState();
   document.documentElement.style.setProperty('--guide-accent',current.accent);
   if(launcher){launcher.style.setProperty('--guide-accent',page.accent);const image=launcher.querySelector('img');if(image){image.src=page.avatar;image.alt=page.name}}
   if(!root)return;
@@ -149,7 +182,8 @@ function syncChrome(){
   const name=root.querySelector('[data-guide-name]');if(name)name.textContent=current.name;
   const role=root.querySelector('[data-guide-role]');if(role)role.textContent=current.role;
   const input=root.querySelector('textarea');if(input)input.placeholder=current.placeholder;
-  const context=root.querySelector('[data-context]');if(context)context.textContent=activeSystem===pageSystem?current.label:`${current.label} conversation · opened from ${guide(pageSystem).label}`;
+  const voiceButton=root.querySelector('[data-voice]');if(voiceButton){const listening=Boolean(voice?.listening);voiceButton.dataset.listening=listening?'true':'false';voiceButton.setAttribute('aria-pressed',listening?'true':'false');voiceButton.setAttribute('aria-label',`${listening?'Stop':'Start'} offline voice with ${current.name}`);voiceButton.title=`${listening?'Stop':'Start'} offline voice with ${current.name}`;voiceButton.textContent=listening?'■':'◉'}
+  const context=root.querySelector('[data-context]');if(context){const base=activeSystem===pageSystem?current.label:`${current.label} conversation · opened from ${guide(pageSystem).label}`;context.textContent=[base,voiceStatus||(voice?.listening?`Offline voice listening · say “Hey ${current.name}” or another guide name to switch context.`:'')].filter(Boolean).join(' · ')}
   syncSwitcher();
 }
 function render(){
@@ -219,16 +253,25 @@ function minimize(){return close()}
 function openWindow(system,options={}){return open({guide:system,...options})}
 function closeWorkspace(){return close()}
 function activeWindow(){return activeSystem}
-async function submitText(text,system=activeSystem){if(SYSTEMS.includes(system)&&system!==activeSystem)switchGuide(system,{open:false});return submitActive(text)}
+async function submitText(text,system=activeSystem,options={}){
+  if(SYSTEMS.includes(system)&&system!==activeSystem)switchGuide(system,{open:false});
+  const value=clean(text);if(!value)return false;
+  const addressed=options.skipAddress?{addressed:false,text:value}:resolveGuideAddress(value,{allowBare:options.allowBare===true});
+  if(addressed.addressed){switchGuide(addressed.system,{open:openState,focus:false});if(!addressed.text)return true;return submitActive(addressed.text)}
+  return submitActive(value);
+}
+async function submitVoiceText(text,system=activeSystem){return submitText(text,system,{allowBare:true})}
 function start(){
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
+  void ensureSpecializedRegistry().catch(()=>{});
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
+  addEventListener('civweave:guide-voice-state',event=>{const detail=event.detail||{};voiceStatus=clean(detail.error||'',300);if(root)syncChrome();emitState()});
   document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';
   document.documentElement.dataset.civweaveGuideArtifactLanguage='canonical-v1';
   try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,submitVoiceText,resolveGuideAddress,ensureSpecializedRegistry,ensureVoiceRuntime,toggleVoice,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

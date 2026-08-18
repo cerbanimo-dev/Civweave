@@ -1,0 +1,30 @@
+name: Verify guide voice context
+
+on:
+  push:
+    paths:
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/guide-voice-runtime-v1.js'
+      - 'public/app/local-ai/specialized-model-capabilities-v1.js'
+      - 'scripts/test-guide-voice-context-v1.mjs'
+      - '.github/workflows/verify-guide-voice-context-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/guide-voice-runtime-v1.js'
+      - 'public/app/local-ai/specialized-model-capabilities-v1.js'
+      - 'scripts/test-guide-voice-context-v1.mjs'
+      - '.github/workflows/verify-guide-voice-context-v1.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/app/guide-chat-surface-v350.js
+      - run: node --check public/app/guide-voice-runtime-v1.js
+      - run: node --check public/app/local-ai/specialized-model-capabilities-v1.js
+      - run: node --test scripts/test-guide-voice-context-v1.mjs
