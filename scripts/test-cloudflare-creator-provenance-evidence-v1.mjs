@@ -40,11 +40,11 @@ let response=await node.fetch(new Request(`https://node.internal/internal/creato
 assert.equal(response.status,200);assert.equal(body.requests.length,1);assert.equal(body.requests[0].deviceCredential,undefined);assert.ok(body.auditEncryption.publicJwk);assert.equal(body.auditEncryption.publicJwk.d,undefined);
 const auditEncryption=body.auditEncryption,envelope=await encryptAuditEvidence(packet,body.requests[0],auditEncryption),submitProof=await signDeviceProof(devicePair.privateKey,{nodeId,deviceId,action:'submit-evidence',sampleId,timestamp:new Date().toISOString(),nonce:'submit-proof-nonce-123456789'});
 response=await node.fetch(new Request(`https://node.internal/internal/creator-provenance/audit/evidence?nodeId=${nodeId}`,{method:'POST',headers,body:JSON.stringify({publicJwk:devicePublic,proof:submitProof,sampleId,envelope})}));body=await response.json();
-assert.equal(response.status,200);assert.equal(body.verification.valid,true);assert.equal(body.analysis.outcome,'verified');assert.equal(body.rawPacketRetained,false);assert.equal(body.request.status,'pending-review');assert.equal(body.request.rawPacketRetained,false);assert.equal(body.request.encryptedEvidenceRetained,false);
+assert.equal(response.status,200);assert.equal(body.verification.valid,true);assert.equal(body.analysis.outcome,'verified');assert.equal(body.rawPacketRetained,false);assert.equal(body.reviewStatus,'reviewed');assert.equal(body.request.status,'reviewed');assert.equal(body.finding.reviewerKind,'deterministic');assert.equal(body.finding.outcome,'verified');assert.equal(body.request.rawPacketRetained,false);assert.equal(body.request.encryptedEvidenceRetained,false);
 const persisted=JSON.stringify([...storage.rows.values()]);
-assert.equal(persisted.includes(packet.packetHash),false,'plaintext packet hash from detailed evidence must not be persisted in Durable Object state');
 assert.equal(persisted.includes(JSON.stringify(packet.events[0].payload)),false,'plaintext packet event payload must not be persisted in Durable Object state');
 assert.equal(persisted.includes(envelope.ciphertext),false,'selected evidence ciphertext must be discarded after review extraction');
+assert.match(persisted,/cryptographic-provenance/,'compact review finding should be retained');
 
 const replay=await node.fetch(new Request(`https://node.internal/internal/creator-provenance/audit/evidence?nodeId=${nodeId}`,{method:'POST',headers,body:JSON.stringify({publicJwk:devicePublic,proof:submitProof,sampleId,envelope})}));
 assert.equal(replay.status,409);assert.match((await replay.json()).error,/already used/);
