@@ -1,0 +1,34 @@
+name: Verify AI model packs
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/model-packs-v1.js'
+      - 'public/app/local-ai/specialized-model-capabilities-v1.js'
+      - 'public/app/settings-local-route-v323.js'
+      - 'scripts/test-ai-model-packs-v1.mjs'
+      - '.github/workflows/verify-ai-model-packs-v1.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/local-ai/model-packs-v1.js'
+      - 'public/app/local-ai/specialized-model-capabilities-v1.js'
+      - 'public/app/settings-local-route-v323.js'
+      - 'scripts/test-ai-model-packs-v1.mjs'
+      - '.github/workflows/verify-ai-model-packs-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  model-packs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/app/local-ai/model-packs-v1.js
+      - run: node --check public/app/local-ai/specialized-model-capabilities-v1.js
+      - run: node --check public/app/settings-local-route-v323.js
+      - run: node --test scripts/test-ai-model-packs-v1.mjs
