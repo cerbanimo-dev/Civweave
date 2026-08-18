@@ -1,8 +1,13 @@
 ;(() => {
 'use strict';
 
-const V224_REVISION = 'navigation-redirect-safety-v224';
+const V224_REVISION = 'navigation-redirect-safety-v224-persistent-shell-integrity-v1';
 const V224_NAVIGATION_TIMEOUT_MS = 7000;
+const V224_PERSISTENT_SHELL_PATH = '/app/persistent-family-shell-v1.html';
+const V224_PERSISTENT_SHELL_MARKERS = [
+  'CivweavePersistentFamilyShellV1',
+  '<iframe id="cw-family-stage"'
+];
 const v224OriginalCacheFirst = cacheFirst;
 const v224OriginalStableAppEntry = stableAppEntry;
 
@@ -36,6 +41,37 @@ async function v224NormalizeResponse(response, request) {
   });
 }
 
+async function v224PersistentShellValid(response, request) {
+  if (!response?.ok) return false;
+  const type = String(response.headers?.get?.('content-type') || '');
+  if (type && !/text\/html/i.test(type)) return false;
+  if (request.method === 'HEAD') return true;
+  try {
+    const text = await response.clone().text();
+    return V224_PERSISTENT_SHELL_MARKERS.every(marker => text.includes(marker));
+  } catch {
+    return false;
+  }
+}
+
+function v224PersistentShellRecovery(request) {
+  const target = new URL('/app/working-campus-v156.html', self.location.origin);
+  target.searchParams.set('installed', '1');
+  target.searchParams.set('version', String(typeof VERSION === 'string' ? VERSION : '1.0.163'));
+  target.searchParams.set('recovery', 'persistent-shell-integrity-v1');
+  const href = `${target.pathname}${target.search}`;
+  const body = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#061019"><title>Opening Civweave</title><style>html,body{margin:0;min-height:100%;background:#061019;color:#f5fbff;font:16px/1.5 system-ui}main{min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}p{color:#b8cad5}</style></head><body><main><div><strong>Opening Civweave…</strong><p>The navigation shell did not pass its integrity check, so Civweave is opening the Working Campus directly.</p></div></main><script>location.replace(${JSON.stringify(href)})<\/script><noscript><a href="${href}">Open Civweave</a></noscript></body></html>`;
+  const headers = {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-store',
+    'x-civweave-navigation-normalized': V224_REVISION,
+    'x-civweave-persistent-shell-recovery': 'working-campus-direct'
+  };
+  return request.method === 'HEAD'
+    ? new Response(null, { status: 200, headers })
+    : new Response(body, { status: 200, headers });
+}
+
 function v224FollowedRequest(request) {
   return new Request(request.url, {
     method: request.method,
@@ -53,15 +89,24 @@ async function v224FreshNavigation(request) {
 
 networkFirst = async function navigationSafeNetworkFirst(request, fallbackPath = '/offline.html') {
   const url = new URL(request.url);
+  const persistentShell = url.pathname === V224_PERSISTENT_SHELL_PATH;
   try {
     const response = await v224FreshNavigation(request);
-    if (response?.ok) {
+    const valid = response?.ok && (!persistentShell || await v224PersistentShellValid(response, request));
+    if (valid) {
       if (request.method === 'GET') {
         await (await caches.open(RUNTIME_CACHE)).put(cacheKey(url.pathname), response.clone());
       }
       return response;
     }
   } catch {}
+
+  if (persistentShell) {
+    const cached = await findCached(url.pathname);
+    const normalized = await v224NormalizeResponse(cached, request);
+    if (await v224PersistentShellValid(normalized, request)) return normalized;
+    return v224PersistentShellRecovery(request);
+  }
 
   for (const pathname of [url.pathname, fallbackPath]) {
     const cached = await findCached(pathname);
@@ -98,7 +143,9 @@ cacheFirst = async function navigationSafeCacheFirst(request) {
 self.CivweaveNavigationSafetyV224 = Object.freeze({
   revision: V224_REVISION,
   navigationTimeoutMs: V224_NAVIGATION_TIMEOUT_MS,
-  policy: 'follow-internally-normalize-before-respond-with'
+  persistentShellPath: V224_PERSISTENT_SHELL_PATH,
+  persistentShellMarkers: [...V224_PERSISTENT_SHELL_MARKERS],
+  policy: 'follow-internally-normalize-and-validate-persistent-shell-before-respond-with'
 });
 
 })();
