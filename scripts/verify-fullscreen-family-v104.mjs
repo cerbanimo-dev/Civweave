@@ -11,7 +11,7 @@ const [shell,nav,routes,ownershipRaw,host,entry,manifestRaw,worker,loader,settin
   read('public/app/themed-system-nav-v178.js'),
   read('public/app/system-routes-v227.js'),
   read('config/system-ownership.json'),
-  read('public/app/fullscreen-family-v104.html'),
+  read('public/app/persistent-family-shell-v1.html'),
   read('public/app/installed-entry-v146.js'),
   read('public/app/manifest.webmanifest'),
   read('public/service-worker.js'),
@@ -36,9 +36,10 @@ for(const token of [
   "addEventListener('popstate'"
 ])assert(host.includes(token),`Persistent family host missing ${token}`);
 assert(!host.includes('location.replace(destination.href)'),'Persistent family host must not replace itself with a realm page.');
-assert(routes.includes("const SHELL_PATH='/app/fullscreen-family-v104.html'"),'Route contract must expose the persistent family shell.');
+assert(routes.includes("const SHELL_PATH='/app/persistent-family-shell-v1.html'"),'Route contract must expose the route-safe persistent family shell.');
 assert(routes.includes('function directUrlFor(')&&routes.includes('function shellUrlFor('),'Route contract must distinguish realm-stage URLs from top-level shell URLs.');
 assert(routes.includes("return window.self!==window.top"),'Embedded realm documents must keep direct URLs while top-level navigation uses the shell.');
+assert(shellAssets.includes("'/app/persistent-family-shell-v1.html'"),'Route-safe persistent family shell must be required offline.');
 for(const asset of [
   '/Civweave-weaveling-sprites.png',
   '/Living-School-moss-sprites.png',
@@ -53,9 +54,9 @@ for(const asset of [
 ])assert(shellAssets.includes(asset),`Required family navigation media missing ${asset}`);
 assert(shellAssets.includes("requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV]"),'Navigation media must be part of the required offline shell contract.');
 
-assert(entry.includes("const requested=params.get('system')||params.get('target')||'civweave'")
+assert((entry.includes("const requested=params.get('system')||params.get('target')||'civweave'")
   &&entry.includes('(sites[system]||sites.civweave)')
-  &&entry.includes("destination.searchParams.set('installed','1')")||entry.includes('routes.urlFor'),
+  &&entry.includes("destination.searchParams.set('installed','1')"))||entry.includes('routes.urlFor'),
   'Installed entry must resolve the requested system through the canonical route authority.');
 
 const manifest=JSON.parse(manifestRaw);
@@ -96,4 +97,4 @@ for(const retired of ['/app/assets/cabinets/civweave.webp','/app/assets/world/to
 
 for(const id of expectedOrder)assert(shell.includes(`${id}:`)||shell.includes(`'${id}':`)||shell.includes(`'${id}'`),`Family shell lost system compatibility metadata for ${id}.`);
 
-console.log('Civweave persistent family shell verification passed: the five-guide rail and avatar media remain mounted while realm stages switch underneath it.');
+console.log('Civweave persistent family shell verification passed: the route-safe five-guide rail and avatar media remain mounted while realm stages switch underneath it.');
