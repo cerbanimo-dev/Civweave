@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'public/app/guide-capability-passover-v1.js'
+      - 'public/app/guide-chat-response-integrity-v1.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
@@ -21,6 +22,7 @@ on:
     branches: ['**']
     paths:
       - 'public/app/guide-capability-passover-v1.js'
+      - 'public/app/guide-chat-response-integrity-v1.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/shared-guide-surface-v236-core-v244.js'
@@ -51,6 +53,7 @@ jobs:
       - name: Check canonical guide runtime syntax
         run: |
           node --check public/app/guide-capability-passover-v1.js
+          node --check public/app/guide-chat-response-integrity-v1.js
           node --check public/app/guide-chat-surface-v350.js
           node --check public/app/shared-guide-surface-v236.js
           node --check public/app/shared-guide-surface-v236-core-v244.js
