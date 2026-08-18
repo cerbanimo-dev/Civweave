@@ -91,7 +91,7 @@
   const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
   try{
     document.documentElement.dataset.livingSchoolWorkbench='loading';
-    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=research-first-v218.1-v304-nonblocking-boot');
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=model-authority-v323');
     bootComplete=true;
     clearTimeout(watchdog);
     document.documentElement.dataset.livingSchoolWorkbench='ready';
