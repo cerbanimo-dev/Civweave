@@ -20,10 +20,11 @@ async function sha256(value) { const bytes = typeof value === 'string' ? enc.enc
 function signableObject(object) { return { schema: object.schema, id: object.id, revision: object.revision, kind: object.kind, purpose: object.purpose, audience: object.audience, consent: object.consent, payload: object.payload, payloadHash: object.payloadHash, parentIds: object.parentIds, createdAt: object.createdAt, updatedAt: object.updatedAt, expiresAt: object.expiresAt, origin: object.origin, hopLimit: object.hopLimit }; }
 async function verify(publicKey, value, signature) { try { const key = await crypto.subtle.importKey('jwk', publicKey, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']); return crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, unb64(signature), enc.encode(canonical(value))); } catch { return false; } }
 
-export async function validateCreationReceiptObject(object = {}) {
+export async function validateCreationReceiptObject(object = {}, nodeId = '') {
   if (object.schema !== OBJECT_SCHEMA || object.kind !== RECEIPT_KIND) return { valid: false, reason: 'unsupported-object' };
   if (object.payload?.schema !== RECEIPT_SCHEMA) return { valid: false, reason: 'unsupported-receipt' };
-  if (!['public', 'federated'].includes(clean(object.consent, 40))) return { valid: false, reason: 'cloud-audit-requires-federated-receipt' };
+  const consent = clean(object.consent, 40), guildAudience = `guild:${clean(nodeId, 180)}`, groupAllowed = consent === 'group' && guildAudience !== 'guild:' && Array.isArray(object.audience) && object.audience.includes(guildAudience);
+  if (!['public', 'federated'].includes(consent) && !groupAllowed) return { valid: false, reason: 'cloud-audit-requires-guild-scoped-receipt' };
   if (!object.origin?.credential || !object.signature || !object.revisionHash || !object.payloadHash) return { valid: false, reason: 'unsigned-object' };
   if (await sha256(canonical(object.payload)) !== object.payloadHash) return { valid: false, reason: 'payload-hash' };
   const signable = signableObject(object);
@@ -47,7 +48,7 @@ export function nextAuditAlarm(nodeId, now = Date.now()) {
 export function previousUtcDay(now = Date.now()) { const date = new Date(now); date.setUTCDate(date.getUTCDate() - 1); return date.toISOString().slice(0, 10); }
 
 export async function ingestCreationReceipt(storage, nodeId, object, now = Date.now()) {
-  const validation = await validateCreationReceiptObject(object);
+  const validation = await validateCreationReceiptObject(object, nodeId);
   if (!validation.valid) throw Object.assign(new Error(`Creation receipt rejected: ${validation.reason}`), { status: 400 });
   const receipt = validation.receipt, key = receiptKey(receipt), existing = await storage.get(key);
   if (!existing) await storage.put(key, Object.freeze({
@@ -97,7 +98,7 @@ export async function listDeviceAuditRequests(storage, deviceId, { status = 'pen
 export async function readAuditRequest(storage, deviceId, sampleId) { return await storage.get(requestKey(deviceId, sampleId)) || null; }
 export async function updateAuditRequest(storage, deviceId, sampleId, patch = {}) {
   const key = requestKey(deviceId, sampleId), prior = await storage.get(key); if (!prior) return null;
-  const next = Object.freeze({ ...prior, ...patch, deviceId: prior.deviceId, deviceCredential: prior.deviceCredential, receipt: prior.receipt, reviewRequest: prior.reviewRequest, updatedAt: new Date().toISOString() });
+  const next = Object.freeze({ ...prior, ...patch, deviceId: prior.deviceId, deviceCredential: prior.deviceCredential, receipt: prior.receipt, reviewRequest: patch.reviewRequest || prior.reviewRequest, updatedAt: new Date().toISOString() });
   await storage.put(key, next); return next;
 }
 export async function readLatestGuildAudit(storage) { return await storage.get(LATEST_KEY) || null; }
