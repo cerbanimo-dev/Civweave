@@ -180,6 +180,103 @@
 .cw138-intentions menu{margin:0;padding:0;display:flex;justify-content:flex-end}
 .cw138-chat-gate button{padding:8px 12px}
 
+/* Five-guide generation loops. The assistant runtime already renders a pending
+   chat row while a model call is in flight; these turn that row into a small
+   in-conversation sprite performance using the existing 5x4 atlas assets. */
+.cw127-chat-log .cw138-chat-message.cw-ai-pending{
+  --cw-ai-sheet:url('/Civweave-weaveling-sprites.png');
+  grid-template-columns:82px minmax(0,1fr);
+  align-items:center;
+  gap:9px;
+  width:min(100%,300px);
+  min-height:76px;
+  padding:6px 10px 6px 5px;
+  border:1px solid #8de5ef38;
+  border-radius:15px;
+  background:linear-gradient(145deg,#061720e8,#10142ae8);
+  box-shadow:inset 0 1px 0 #ffffff12,0 7px 18px #0004;
+  animation:cw-ai-pending-pop .18s cubic-bezier(.2,.8,.2,1) both;
+}
+.cw127-chat-log .cw138-chat-message.cw-ai-pending::before{
+  content:"";
+  display:block;
+  width:82px;
+  aspect-ratio:1.2;
+  background-image:var(--cw-ai-sheet);
+  background-repeat:no-repeat;
+  background-size:500% 400%;
+  background-position:0 0;
+  filter:drop-shadow(0 4px 5px #0008);
+  animation:cw-ai-think-weaveling 1.7s steps(1,end) infinite;
+}
+.cw127-chat-log .cw138-chat-message.cw-ai-pending>p{
+  padding:7px 9px!important;
+  border:1px solid #ffffff16;
+  border-radius:11px;
+  background:#07121dcc!important;
+  color:#dffaff;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.3;
+  letter-spacing:.02em;
+}
+.cw127-chat-log .cw138-chat-message.cw-ai-pending>p::after{
+  content:"";
+  display:inline-block;
+  width:1.6em;
+  height:.8em;
+  margin-left:.35em;
+  vertical-align:baseline;
+  background:radial-gradient(circle,#8de5ef 1.5px,transparent 2px) 0 50%/ .55em .55em repeat-x;
+  animation:cw-ai-dots 1s steps(3,end) infinite;
+}
+[data-system="civweave"] .cw138-chat-message.cw-ai-pending{--cw-ai-sheet:url('/Civweave-weaveling-sprites.png')}
+[data-system="living-school"] .cw138-chat-message.cw-ai-pending{--cw-ai-sheet:url('/Living-School-moss-sprites.png')}
+[data-system="cerbanimo"] .cw138-chat-message.cw-ai-pending{--cw-ai-sheet:url('/Cerbanimo-kamiya-sprites.png')}
+[data-system="fellowfare"] .cw138-chat-message.cw-ai-pending{--cw-ai-sheet:url('/FellowFare-rook-sprites.png')}
+[data-system="anarchadia"] .cw138-chat-message.cw-ai-pending{--cw-ai-sheet:url('/Anarchadia-merlin-sprites.png')}
+[data-system="living-school"] .cw138-chat-message.cw-ai-pending::before{animation-name:cw-ai-think-moss}
+[data-system="cerbanimo"] .cw138-chat-message.cw-ai-pending::before{animation-name:cw-ai-think-kamiya}
+[data-system="fellowfare"] .cw138-chat-message.cw-ai-pending::before{animation-name:cw-ai-think-rook}
+[data-system="anarchadia"] .cw138-chat-message.cw-ai-pending::before{animation-name:cw-ai-think-merlin}
+@keyframes cw-ai-pending-pop{from{opacity:0;transform:translateY(5px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes cw-ai-dots{0%{width:.45em}34%{width:1em}67%,100%{width:1.6em}}
+/* Weaveling: think -> inspect -> thread tool -> weave magic. */
+@keyframes cw-ai-think-weaveling{
+  0%,100%{background-position:0 33.333%}
+  25%{background-position:100% 0}
+  50%{background-position:50% 66.667%}
+  75%{background-position:75% 100%}
+}
+/* Kamiya: plan -> inspect -> maker tool -> point the build route. */
+@keyframes cw-ai-think-kamiya{
+  0%,100%{background-position:0 33.333%}
+  25%{background-position:100% 0}
+  50%{background-position:100% 66.667%}
+  75%{background-position:75% 100%}
+}
+/* Rook: ponder -> witness scan -> reconsider -> shining offer. */
+@keyframes cw-ai-think-rook{
+  0%,100%{background-position:100% 0}
+  25%{background-position:100% 100%}
+  50%{background-position:0 33.333%}
+  75%{background-position:75% 66.667%}
+}
+/* Moss: leaf thought -> inspect -> lesson staff -> leaf magic. */
+@keyframes cw-ai-think-moss{
+  0%,100%{background-position:0 33.333%}
+  25%{background-position:100% 0}
+  50%{background-position:75% 66.667%}
+  75%{background-position:100% 66.667%}
+}
+/* Merlin: gears -> telescope scan -> charge -> full spell. */
+@keyframes cw-ai-think-merlin{
+  0%,100%{background-position:0 33.333%}
+  25%{background-position:100% 0}
+  50%{background-position:100% 66.667%}
+  75%{background-position:100% 100%}
+}
+
 @media(max-width:560px){
   .cw138-intentions{width:96vw}
   .cw138-path header,.cw138-plan>header{display:grid}
@@ -189,4 +286,12 @@
   .cw138-plan-actions button{width:100%;min-height:46px}
   .cw138-plan-actions button[data-plan-delete]{grid-column:1/-1}
   .cw138-chat-gate button{flex:1 1 130px}
+  .cw127-chat-log .cw138-chat-message.cw-ai-pending{grid-template-columns:70px minmax(0,1fr);width:min(100%,270px)}
+  .cw127-chat-log .cw138-chat-message.cw-ai-pending::before{width:70px}
+}
+@media(prefers-reduced-motion:reduce){
+  .cw127-chat-log .cw138-chat-message.cw-ai-pending,
+  .cw127-chat-log .cw138-chat-message.cw-ai-pending::before,
+  .cw127-chat-log .cw138-chat-message.cw-ai-pending>p::after{animation:none!important}
+  .cw127-chat-log .cw138-chat-message.cw-ai-pending::before{background-position:0 33.333%}
 }
