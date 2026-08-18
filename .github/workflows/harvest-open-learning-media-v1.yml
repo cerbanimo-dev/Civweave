@@ -16,6 +16,7 @@ on:
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
       - scripts/filter-open-learning-media-title-quality-v2.py
+      - scripts/filter-open-learning-media-subject-collisions-v2.py
       - scripts/report-open-learning-media-pack-coverage-v1.py
       - scripts/report-open-learning-media-topic-candidates-v1.py
       - scripts/report-open-learning-media-expanded-packs-v1.py
@@ -64,12 +65,12 @@ jobs:
           if [ "$curate_status" -ne 0 ]; then
             exit "$curate_status"
           fi
-          python scripts/filter-open-learning-media-title-quality-v2.py
+          python scripts/filter-open-learning-media-subject-collisions-v2.py
           python scripts/report-open-learning-media-expanded-packs-v1.py
 
       - name: Validate generated catalog and pack coverage before publication
         run: |
-          python -m py_compile scripts/filter-open-learning-media-title-quality-v2.py scripts/report-open-learning-media-expanded-packs-v1.py
+          python -m py_compile scripts/filter-open-learning-media-title-quality-v2.py scripts/filter-open-learning-media-subject-collisions-v2.py scripts/report-open-learning-media-expanded-packs-v1.py
           python scripts/test-open-learning-media-harvest-v1.py
           python scripts/test-open-learning-media-packs-v1.py
 
@@ -78,7 +79,7 @@ jobs:
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add public/downloads/knowledge-schools/open-learning-media
+          git add config/open-learning-media-packs-v1.json public/downloads/knowledge-schools/open-learning-media
           if git diff --cached --quiet; then
             echo 'Harvest produced no catalog diff.'
             exit 0
