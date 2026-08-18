@@ -1,10 +1,15 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v9-guild-roster-ble-mesh';
+const REVISION='shell-assets-v1-repair-v10-desktop-boot';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
   '/app/themed-system-nav-v178.js'
+];
+const REQUIRED_CIVWEAVE_BOOT=[
+  '/app/working-campus-return-guard-v425.js',
+  '/app/document-lifecycle-v221.js',
+  '/app/working-campus-home-declutter-v1.js'
 ];
 const OPTIONAL_FAMILY_NAV=[
   '/app/subsystem-avatar-state-v347.js',
@@ -36,7 +41,7 @@ const OPTIONAL_HUMAN_CHAT=[
   '/app/local-object-mesh-v146.js',
   '/app/shared-intention-party-chat-v1.js'
 ];
-for(const pathname of REQUIRED_FAMILY_NAV){
+for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_CIVWEAVE_BOOT]){
   const optionalIndex=OPTIONAL_SHELL_ASSETS.indexOf(pathname);
   if(optionalIndex>=0)OPTIONAL_SHELL_ASSETS.splice(optionalIndex,1);
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
@@ -49,6 +54,7 @@ for(const pathname of [...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUES
 self.CivweaveShellAssetsV1=Object.freeze({
   revision:REVISION,
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
+  requiredCivweaveBoot:[...REQUIRED_CIVWEAVE_BOOT],
   optional:[...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
   humanChat:[...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
