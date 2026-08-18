@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-anarchadia-quest-path-v266';
+const VERSION='1.0.1-anarchadia-quest-path-v266';
 if(globalThis.AnarchadiaQuestPathV266?.version===VERSION)return;
 
 const KEYS={
@@ -46,7 +46,7 @@ function resolveContext(){
   if(weaveId)plan=planFromLedger(weaveId);
   if(!plan&&handoff?.plan?.id)plan=handoff.plan;
   if(!plan&&campus?.plan?.id)plan=campus.plan;
-  if(!plan)return null;
+  if(!plan||plan.state==='review')return null;
   const paths=list(plan.paths).filter(path=>String(path?.realm||'').toLowerCase()==='anarchadia');
   let path=paths.find(item=>String(item.id)===pathId)||paths[0]||null;
   let synthetic=false;
