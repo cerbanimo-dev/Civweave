@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='living-school-cleanroom-v218';
+const REVISION='living-school-cleanroom-v219-lifecycle-deferred';
 const CANONICAL='/app/cabinets/living-school/index.html';
 const FRESH_PREFIX='/app/cabinets/living-school/living-school-cleanroom-';
 const GENERATION_GUARD='/app/living-school-generation-guard-v262.mjs';
@@ -50,8 +50,23 @@ async function fresh(request){
     return cached||new Response('Living School is temporarily unavailable.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});
   }
 }
-self.addEventListener('install',event=>event.waitUntil(evictRetired()));
-self.addEventListener('activate',event=>event.waitUntil((async()=>{await evictRetired();await self.clients.claim()})()));
+
+// Clean-room routing is enforced on every relevant fetch. Scanning every cache
+// during both install and activate made Living School cleanup a global PWA boot
+// dependency. Keep lifecycle bounded; cleanup is now explicit/background work.
+self.addEventListener('install',event=>event.waitUntil(Promise.resolve()));
+self.addEventListener('activate',event=>{
+  event.waitUntil(self.clients.claim());
+  void evictRetired().catch(()=>null);
+});
+self.addEventListener('message',event=>{
+  if(event.data?.type!=='CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP')return;
+  event.waitUntil(evictRetired().then(()=>{
+    const packet={type:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANED',revision:REVISION};
+    try{event.ports?.[0]?.postMessage(packet)}catch{}
+    try{event.source?.postMessage?.(packet)}catch{}
+  }));
+});
 self.addEventListener('fetch',event=>{
   const request=event.request;
   if(!['GET','HEAD'].includes(request.method))return;
@@ -72,5 +87,5 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Promise.resolve(retiredResponse(url.pathname)));
   }
 });
-self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,safePolicy:SAFE_POLICY,retired:[...RETIRED_PATHS]});
+self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,safePolicy:SAFE_POLICY,retired:[...RETIRED_PATHS],lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
 })();
