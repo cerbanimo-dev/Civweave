@@ -10,6 +10,8 @@ const version = (await fs.readFile(path.join(root, 'VERSION'), 'utf8')).trim();
 const workerPath = path.join(publicDir, 'service-worker-core-v208.js');
 const shellAssetsWorkerPath = path.join(publicDir, 'service-worker-shell-assets-v1.js');
 const installerWorkerPath = path.join(publicDir, 'service-worker-installer-state-v280.js');
+const installerRuntimePath = path.join(publicDir, 'install-v130.js');
+const installBridgePath = path.join(publicDir, 'app', 'pwa-install-prompt-v250.js');
 const appManifestPath = path.join(publicDir, 'app', 'manifest.webmanifest');
 const offlineManifestPath = path.join(publicDir, 'app', 'offline-package-v208.json');
 const integrityPath = path.join(publicDir, 'app', 'shell-integrity-v281.json');
@@ -36,6 +38,19 @@ async function writeJsonIfChanged(file, value) {
   return true;
 }
 
+async function patchTextIfChanged(file, transform) {
+  const before = await fs.readFile(file, 'utf8');
+  const after = transform(before);
+  if (after === before) return false;
+  await fs.writeFile(file, after, 'utf8');
+  return true;
+}
+
+function replaceRequired(source, before, after, label) {
+  if (!source.includes(before)) throw new Error(`Could not locate ${label}.`);
+  return source.replace(before, after);
+}
+
 async function walk(directory) {
   const output = [];
   const entries = await fs.readdir(directory, { withFileTypes: true }).catch(() => []);
@@ -60,6 +75,77 @@ function isCandidate(urlPath, manifest) {
   if (excludeExtensions.some(extension => urlPath.toLowerCase().endsWith(String(extension).toLowerCase()))) return false;
   return DISCOVERABLE_EXTENSION.test(urlPath);
 }
+
+// Never let an apparently matching v203 registration bypass a real byte update.
+// Android can retain the registration after the PWA icon is removed, and an old
+// wrapper can have the same versioned URL as the current lightweight shell.
+const installerRuntimeChanged = await patchTextIfChanged(installerRuntimePath, source => replaceRequired(
+  source,
+`    if (exactActive) {
+      registration = existing;
+      activeWorker = existing.active;
+      worker = activeWorker;
+      if (options.manual) {
+        help('Checking the lightweight app worker for an updated release…');
+        try {
+          await withTimeout(registration.update(), REGISTRATION_TIMEOUT_MS, 'Chrome did not finish checking the app worker.', 'service-worker update');
+          worker = await waitForCurrentWorker();
+        } catch (error) {
+          if (error?.code === 'CIVWEAVE_PACKAGE_TIMEOUT' && error?.phase === 'service-worker update') {
+            releaseCheckTimedOut = true;
+            worker = activeWorker;
+          } else {
+            throw error;
+          }
+        }
+      }
+    } else {`,
+`    if (exactActive) {
+      registration = existing;
+      activeWorker = existing.active;
+      worker = activeWorker;
+      help(options.manual ? 'Checking the lightweight app worker for an updated release…' : 'Refreshing the lightweight app worker before installation…');
+      try {
+        await withTimeout(registration.update(), REGISTRATION_TIMEOUT_MS, 'Chrome did not finish checking the app worker.', 'service-worker update');
+        worker = await waitForCurrentWorker();
+      } catch (error) {
+        if (options.manual && error?.code === 'CIVWEAVE_PACKAGE_TIMEOUT' && error?.phase === 'service-worker update') {
+          releaseCheckTimedOut = true;
+          worker = activeWorker;
+        } else {
+          throw error;
+        }
+      }
+    } else {`,
+  'installer exact-active worker refresh block'
+));
+
+// The installability bridge previously treated *any* active root worker as good
+// enough. Retired /service-worker.js registrations must be evicted instead of
+// being blessed as install-ready; current v203 registrations get an explicit
+// update check before the browser install prompt is allowed to proceed.
+const installBridgeChanged = await patchTextIfChanged(installBridgePath, source => replaceRequired(
+  source,
+`    const existing=await navigator.serviceWorker.getRegistration('/');
+    if(existing?.active){publish('civweave:pwa-installability-bootstrap',{ready:true,worker:workerPath(existing.active),reused:true});return true}
+    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`,
+`    const existing=await navigator.serviceWorker.getRegistration('/');
+    const active=existing?.active||null,activePath=workerPath(active);
+    if(activePath==='/service-worker-v203.js'){
+      try{await existing.update();existing.waiting?.postMessage?.({type:'SKIP_WAITING'})}catch{}
+      publish('civweave:pwa-installability-bootstrap',{ready:true,worker:activePath,reused:true,validatedCurrentShell:true});return true
+    }
+    if(activePath==='/pwa-installability-worker-v1.js'){
+      publish('civweave:pwa-installability-bootstrap',{ready:true,worker:activePath,reused:true,validatedInstallabilityWorker:true});return true
+    }
+    if(existing?.active){
+      publish('civweave:pwa-installability-bootstrap',{ready:false,worker:activePath,reused:false,retiredRootWorker:true});
+      await existing.unregister().catch(()=>false);
+      await new Promise(resolve=>setTimeout(resolve,80));
+    }
+    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`,
+  'installability active-root-worker validation block'
+));
 
 // The version synchronizer intentionally owns version text, but the PWA launch
 // contract is owned here because shell integrity must hash the *final* manifest.
@@ -130,6 +216,7 @@ const manifestChanged = await writeJsonIfChanged(offlineManifestPath, manifest);
 console.log(JSON.stringify({
   ok: true,
   version,
+  installHardening: { installerRuntimeChanged, installBridgeChanged },
   pwaManifest: { changed: appManifestChanged, startUrl: appManifest.start_url },
   shellIntegrity: { changed: integrityChanged, requiredAssetCount: requiredShellAssets.length },
   campusBudget: { changed: manifestChanged, ...manifest.preflight }
