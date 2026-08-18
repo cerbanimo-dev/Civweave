@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-anarchadia-runtime-stability-v159-quest-paths';
+const VERSION='1.0.6-anarchadia-runtime-stability-v159-quest-activation';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
@@ -56,10 +56,10 @@ async function askMerlin(_system,text,rows=[]){
 function openGovernance(proposalId=''){location.assign(`/app/anarchadia-governance-v145.html${proposalId?`?proposal=${encodeURIComponent(proposalId)}`:''}`)}
 function openWorkbench(route='workbench'){location.assign(`/app/services/anarchadia/workbench.html?cabinet=1#${encodeURIComponent(route)}`)}
 function currentQuestPlan(){
-  const campus=parse(localStorage.getItem(QUEST_KEYS.campus),{});
-  if(campus?.plan)return campus.plan;
+  const campus=parse(localStorage.getItem(QUEST_KEYS.campus),{}),campusPlan=campus?.plan;
+  if(campusPlan&&['active','completed'].includes(campusPlan.state))return campusPlan;
   const intentions=list(parse(localStorage.getItem(QUEST_KEYS.intentions),[]));
-  return intentions.find(item=>item?.state==='active'||item?.plan?.state==='active')?.plan||intentions.find(item=>item?.kind==='weave-plan'&&item?.state==='review')?.plan||null;
+  return intentions.find(item=>['active','completed'].includes(item?.plan?.state||item?.state))?.plan||null;
 }
 function realmLabel(realm){return({'living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'}[realm]||String(realm||'Realm'))}
 function prepareQuestHandoff(plan,path){
@@ -69,7 +69,7 @@ function prepareQuestHandoff(plan,path){
   try{localStorage.setItem(QUEST_KEYS.handoff,JSON.stringify(handoff));return true}catch{return false}
 }
 function openQuestPath(plan,path){
-  if(!plan||!path)return false;
+  if(!plan||!path||plan.state==='review')return false;
   prepareQuestHandoff(plan,path);
   const query=`weave=${encodeURIComponent(plan.id)}&path=${encodeURIComponent(path.id)}&source=anarchadia-passport`;
   const realm=String(path.realm||'').toLowerCase();
