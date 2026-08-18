@@ -2,7 +2,6 @@ import{
   CivweaveCapacityAccount as BaseCapacityAccount,
   HOST_ECONOMY_SCHEMA,
   admissionDecision,
-  normalizeTopupSharing,
   splitTopupNetCents,
   centsToMicrocents,
   microcentsToNeurons,
@@ -17,6 +16,13 @@ const topupSharingKey=topupId=>`topup-sharing:${clean(topupId,240)}`;
 const topupBackingKey=topupId=>`topup-backing:${clean(topupId,240)}`;
 const publicMember=member=>{if(!member||typeof member!=='object')return member;const{loginCredentialHash,...safe}=member;return Object.freeze(safe);};
 function pendingExpiry(row){const explicit=Date.parse(row?.expiresAt||''),created=Date.parse(row?.createdAt||'');return Number.isFinite(explicit)?explicit:Number.isFinite(created)?created+30*60*1000:0;}
+function normalizeTopupSharing({shareBps,shareMode}={}){
+  const mode=clean(shareMode,40).toLowerCase()==='node-equal'?'node-equal':'personal';
+  if(mode==='node-equal')return Object.freeze({shareMode:mode,shareBps:10_000});
+  const raw=shareBps==null||String(shareBps).trim()===''?500:Number(shareBps);
+  if(!Number.isSafeInteger(raw)||raw<500||raw>1000)throw new RangeError('shareBps must be between 500 and 1000.');
+  return Object.freeze({shareMode:mode,shareBps:raw});
+}
 
 export class CivweaveCapacityAccount extends BaseCapacityAccount{
   async activePendingPaidCount(now=Date.now()){
