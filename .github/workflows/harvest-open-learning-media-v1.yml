@@ -15,8 +15,10 @@ on:
       - scripts/harvest-open-learning-media-library-v1.py
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
+      - scripts/filter-open-learning-media-title-quality-v2.py
       - scripts/report-open-learning-media-pack-coverage-v1.py
       - scripts/report-open-learning-media-topic-candidates-v1.py
+      - scripts/report-open-learning-media-expanded-packs-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
       - scripts/test-open-learning-media-packs-v1.py
       - ops/triggers/open-learning-media-harvest.trigger
@@ -52,7 +54,6 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/harvest-open-learning-media-library-v1.py
-          OPEN_MEDIA_DIAGNOSTIC_TOPIC=communication-conflict python scripts/report-open-learning-media-topic-candidates-v1.py || true
           set +e
           python scripts/curate-open-learning-media-library-v1.py
           curate_status=$?
@@ -63,10 +64,12 @@ jobs:
           if [ "$curate_status" -ne 0 ]; then
             exit "$curate_status"
           fi
-          python scripts/filter-open-learning-media-title-quality-v1.py
+          python scripts/filter-open-learning-media-title-quality-v2.py
+          python scripts/report-open-learning-media-expanded-packs-v1.py
 
       - name: Validate generated catalog and pack coverage before publication
         run: |
+          python -m py_compile scripts/filter-open-learning-media-title-quality-v2.py scripts/report-open-learning-media-expanded-packs-v1.py
           python scripts/test-open-learning-media-harvest-v1.py
           python scripts/test-open-learning-media-packs-v1.py
 
