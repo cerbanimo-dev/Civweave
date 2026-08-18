@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.132-standard-ai-lazy-local';
+const VERSION='1.0.133-server-auto-shared-loader';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -22,6 +22,7 @@ const VALUE_MODEL=[
   ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1-idle-safe-v1',()=>globalThis.CivweaveBasicValueSystemsV1?.eventDriven===true]
 ];
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.117-standard-ai-only',()=>globalThis.CivweaveFastInteractiveV192];
+const SERVER_AI_ROUTER=['/app/server-ai-router-v301.js?v=1.0.117-guild-handoff',()=>globalThis.CivweaveServerAIRouterV301?.status?.().registered===true];
 const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.2.0-thread-network-gate',()=>globalThis.CivweaveResponseRouterV347];
 const LOCAL_BOOTSTRAP=['/app/local-ai/bootstrap-v266.js?v=1.0.83-v282-inference-health',()=>globalThis.CivweaveLocalAIBootstrapV266];
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.5-minilm-local-route',()=>globalThis.CivweaveAssistantV141];
@@ -94,12 +95,12 @@ function loadOptional(){if(optionalPromise)return optionalPromise;optionalPromis
 function emitAssistantReady(){try{dispatchEvent(new CustomEvent('civweave:assistant-runtime-ready',{detail:{version:VERSION,system:detect(),at:new Date().toISOString(),localModelRequested:localRequested(),localModelReady:globalThis.CivweaveLocalAIBootstrapV266?.readyState==='ready',localModelError:lastLocalError||null,responseRouterReady:Boolean(globalThis.CivweaveResponseRouterV347),structuredFallbackGuard:Boolean(globalThis.CivweaveModelRuntime?.__civweaveStructuredFallbackGuardV352)}}))}catch{}}
 async function ensure(){
   if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191&&globalThis.CivweaveKnowledgeEncyclopediaBridgeV271){
-    await loadValueCore();await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();loadOptional();emitAssistantReady();return true;
+    await loadValueCore();await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...SERVER_AI_ROUTER);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();loadOptional();emitAssistantReady();return true;
   }
   if(promise)return promise;
   const ticket=++generation;
   promise=(async()=>{
-    CSS.forEach(addCss);await loadValueCore();await Promise.all(PREREQUISITES.map(([src,ready])=>loadScript(src,ready)));if(ticket!==generation)throw new Error('Civweave loading was reset.');await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();await loadScript(...ASSISTANT);await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.install?.();globalThis.CivweaveDeterministicModeV175?.installAssistantPatch?.();globalThis.CivweaveWeavelingMemoryBridgeV191?.install?.();installStructuredFallbackGuard();loadOptional();emitAssistantReady();return true;
+    CSS.forEach(addCss);await loadValueCore();await Promise.all(PREREQUISITES.map(([src,ready])=>loadScript(src,ready)));if(ticket!==generation)throw new Error('Civweave loading was reset.');await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...SERVER_AI_ROUTER);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();await loadScript(...ASSISTANT);await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.install?.();globalThis.CivweaveDeterministicModeV175?.installAssistantPatch?.();globalThis.CivweaveWeavelingMemoryBridgeV191?.install?.();installStructuredFallbackGuard();loadOptional();emitAssistantReady();return true;
   })().catch(error=>{if(ticket===generation)reset(error.message);throw error});
   return promise;
 }
