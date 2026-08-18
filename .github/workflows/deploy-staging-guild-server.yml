@@ -63,12 +63,12 @@ jobs:
           if (config.name !== 'civweave-node-cloud-staging') throw new Error('Refusing non-staging Worker target.');
           if (config.name === 'civweave-node-cloud') throw new Error('Refusing production Worker target.');
           if (config.main !== 'src/staging-entry-v1.mjs') throw new Error('Staging Worker must use staging-entry-v1.mjs.');
-          if (Array.isArray(config.services) && config.services.length) throw new Error('Staging Guild server must not bind production services.');
+          if (Array.isArray(config.services) && config.services.length) throw new Error('Source staging config must not statically bind services; the isolated staging core binding is attached only when that Worker exists.');
           if (config.vars?.CIVWEAVE_ENVIRONMENT !== 'staging') throw new Error('Staging environment marker is required.');
           if (config.vars?.CIVWEAVE_PAYMENT_ENVIRONMENT !== 'stripe-test') throw new Error('Staging payment environment must be stripe-test.');
           if (config.vars?.CIVWEAVE_CORE_ORIGIN !== 'https://civweave-core-staging.cerbanimo.workers.dev') throw new Error('Staging Guild must use the isolated staging money edge.');
           if (/civweave-core\.cerbanimo\.workers\.dev/.test(String(config.vars?.CIVWEAVE_CORE_ORIGIN || ''))) throw new Error('Refusing production money edge from staging.');
-          if (config.vars?.NODE_DOMAIN !== 'nodes.civweave.invalid') throw new Error('Staging fabric routing must remain on the reserved .invalid namespace; membership return routing is overridden only in the staging entry wrapper.');
+          if (config.vars?.NODE_DOMAIN !== 'nodes.civweave.invalid') throw new Error('Staging fabric routing must remain on the reserved .invalid namespace; public payment callbacks are overridden only in the staging entry wrapper.');
           NODE
 
       - name: Verify Cloudflare authentication
@@ -76,6 +76,25 @@ jobs:
 
       - name: Deploy isolated Worker and Durable Objects
         run: npx wrangler deploy --config cloudflare/node-cloud/wrangler.staging.jsonc
+
+      - name: Attach isolated core trust binding when available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if curl --fail --silent --show-error "$STAGING_CORE_ORIGIN/api/money-edge/status" >/tmp/staging-core-status.json 2>/dev/null; then
+            cp cloudflare/node-cloud/wrangler.staging.jsonc cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc
+            node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = 'cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc';
+          const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (config.name !== 'civweave-node-cloud-staging') throw new Error('Refusing non-staging Guild binding target.');
+          config.services = [{ binding: 'CORE', service: 'civweave-core-staging' }];
+          fs.writeFileSync(path, JSON.stringify(config, null, 2));
+          NODE
+            npx wrangler deploy --keep-vars --config cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc
+          else
+            echo 'Isolated staging core does not exist yet; leaving CORE unbound until the Stripe sandbox deployment creates it.'
+          fi
 
       - name: Preserve session authority and ensure Guild shadow exists
         shell: bash
