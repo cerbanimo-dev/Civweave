@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='1.0.117-mobile-ai-hardening-v302';
-const REVISION='mobile-chat-css-dvh-v349';
+const REVISION='mobile-chat-composer-stack-v363';
 const STYLE_ID='cw-mobile-ai-hardening-v302-style';
 const TEST_MARKER='civweave.local-ai.test-inflight.v302';
 const RECOVERY_KEY='civweave.local-ai.test-recovery.v302';
@@ -91,16 +91,41 @@ html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v2
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized) [data-persistent-form]{
   min-width:0!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-columns:minmax(0,1fr) 68px!important;
+  grid-template-rows:38px 38px!important;
+  gap:8px!important;
+  align-items:stretch!important;
   padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized) [data-persistent-form] textarea{
+  grid-column:1!important;
+  grid-row:1 / span 2!important;
   min-width:0!important;
-  max-height:min(28dvh,180px)!important;
+  width:100%!important;
+  height:84px!important;
+  min-height:84px!important;
+  max-height:84px!important;
   resize:none!important;
 }
-html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized) [data-send]{
+html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized) [data-voice]{
+  grid-column:2!important;
+  grid-row:1!important;
+  width:68px!important;
   min-width:68px!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:0 10px!important;
+  align-self:stretch!important;
+}
+html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized) [data-send]{
+  grid-column:2!important;
+  grid-row:2!important;
+  width:68px!important;
+  min-width:68px!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:0 10px!important;
+  align-self:stretch!important;
 }
 }
 `;
@@ -181,7 +206,7 @@ function finishTest(spec={},detail={}){
 
 function start(){
   document.documentElement.dataset.civweaveMobileAiHardening='v302';
-  document.documentElement.dataset.civweaveChatLayout='css-dvh-v349';
+  document.documentElement.dataset.civweaveChatLayout='composer-stack-v363';
   installStyle();
   recoverInterruptedTest();
   addEventListener('civweave:model-settings-opened',()=>setTimeout(addRecoveryNotice,0));
@@ -189,5 +214,5 @@ function start(){
 }
 
 start();
-globalThis.CivweaveMobileAIHardeningV302=Object.freeze({version:VERSION,revision:REVISION,isMobile,syncViewport,recoverInterruptedTest,beginTest,finishTest,testMarker:TEST_MARKER,recoveryKey:RECOVERY_KEY,mobileFullscreenChat:true,mobileSafeCompatibility:true,mobileBenchmarkDisabled:true,interruptedTestRecovery:true,chatLayoutMode:'css-dvh-only',savedThreadRows:6,viewportEventOwnership:false,viewportStyleWrites:false,mainThreadQuiescentOnChatOpen:true});
+globalThis.CivweaveMobileAIHardeningV302=Object.freeze({version:VERSION,revision:REVISION,isMobile,syncViewport,recoverInterruptedTest,beginTest,finishTest,testMarker:TEST_MARKER,recoveryKey:RECOVERY_KEY,mobileFullscreenChat:true,mobileSafeCompatibility:true,mobileBenchmarkDisabled:true,interruptedTestRecovery:true,chatLayoutMode:'css-dvh-plus-stacked-composer',savedThreadRows:6,viewportEventOwnership:false,viewportStyleWrites:false,mainThreadQuiescentOnChatOpen:true});
 })();
