@@ -1,0 +1,1 @@
+(()=>{'use strict';let started=false;function start(){if(started)return;started=true;globalThis.CivweaveCreatorAuditClientV1?.init?.()}document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start()})();
