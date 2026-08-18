@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const source=await fs.readFile(new URL('../public/creator-suite/shared/provenance-vault-v1.js',import.meta.url),'utf8');
+assert.match(source,/async function prune/);
+assert.match(source,/maxAgeDays\s*=\s*30/);
+assert.match(source,/Math\.max\(7/,'automatic local detailed-evidence retention must keep at least a one-week audit window');
+assert.match(source,/remove\(row\.id\)|remove\(id\)/);
+assert.match(source,/prune/);
+assert.doesNotMatch(source,/remove.*receipt.*origin/i,'pruning private packets must not rewrite origin receipts');
+console.log('Creator encrypted provenance vault retention boundary passed');
