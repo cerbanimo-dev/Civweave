@@ -1,8 +1,8 @@
 import{ensureLivingSchool,ensureModuleVideo,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1';
-import{offerMediaPacksBeforeCurriculum}from'./living-school-media-pack-recommender-v1.mjs?v=media-pack-recommender-v1';
+import{offerMediaPacksBeforeCurriculum}from'./living-school-media-pack-recommender-v1.mjs?v=unified-source-packs-v1';
 import safeMode,{validateAdmission,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
 
-const REVISION='living-school-video-generation-guard-v1.1-subject-gate';
+const REVISION='living-school-video-generation-guard-v1.2-unified-source-packs';
 const CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const SUBJECT_STOP=new Set(['about','after','again','also','basic','basics','beginner','build','building','capability','complete','course','create','creating','curriculum','foundation','foundations','guide','guided','help','intro','introduction','learn','learning','lesson','make','module','people','practice','practical','read','skill','skills','study','teach','teaching','through','understand','using','vocabulary','want','with','your']);
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
