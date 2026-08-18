@@ -16,6 +16,7 @@ on:
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
       - scripts/report-open-learning-media-pack-coverage-v1.py
+      - scripts/report-open-learning-media-topic-candidates-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
       - scripts/test-open-learning-media-packs-v1.py
       - ops/triggers/open-learning-media-harvest.trigger
@@ -51,6 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/harvest-open-learning-media-library-v1.py
+          OPEN_MEDIA_DIAGNOSTIC_TOPIC=communication-conflict python scripts/report-open-learning-media-topic-candidates-v1.py || true
           set +e
           python scripts/curate-open-learning-media-library-v1.py
           curate_status=$?
