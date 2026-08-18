@@ -43,7 +43,15 @@ test('runtime preserves fork evidence instead of arrival-order overwrite', () =>
   assert.match(source, /const CONFLICT_SCHEMA='civweave\.community-conflict\.v1';/);
   assert.match(source, /async function recordConflict\(/);
   assert.match(source, /const decision=chooseCanonicalRevision\(local,object\);/);
+  assert.match(source, /winner:incomingHash<localHash\?'incoming':'local'/);
   assert.match(source, /decision\.relation==='conflict'/);
   assert.match(source, /listConflicts/);
   assert.match(source, /conflictPolicy:'same-revision-hash-tiebreak-preserve-both'/);
+});
+
+test('a resident fork winner keeps its own transit history and is flushed back to the peer', () => {
+  assert.match(source, /acceptedIncoming=canonical\.revisionHash===object\.revisionHash/);
+  assert.match(source, /if\(result\.status!=='conflict'\|\|acceptedIncoming\)await saveTransit\(canonical,transit\)/);
+  assert.match(source, /if\(result\.status==='conflict'&&!acceptedIncoming\)\{queueMicrotask\(\(\)=>flushAll\(\)\.catch\(\(\)=>\{\}\)\);return\}/);
+  assert.match(source, /if\(result\.status==='conflict'&&!acceptedIncoming\)queueMicrotask\(\(\)=>flushAll\(\)\.catch\(\(\)=>\{\}\)\)/);
 });
