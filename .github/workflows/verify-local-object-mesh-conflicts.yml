@@ -1,0 +1,34 @@
+name: Verify Local Object Mesh Conflicts
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-object-mesh-v146.js'
+      - 'docs/architecture/locality-gossip-ledger-v1.md'
+      - 'scripts/test-local-object-mesh-conflicts-v1.mjs'
+      - '.github/workflows/verify-local-object-mesh-conflicts.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/local-object-mesh-v146.js'
+      - 'docs/architecture/locality-gossip-ledger-v1.md'
+      - 'scripts/test-local-object-mesh-conflicts-v1.mjs'
+      - '.github/workflows/verify-local-object-mesh-conflicts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check mesh runtime syntax
+        run: node --check public/app/local-object-mesh-v146.js
+      - name: Run deterministic fork regression
+        run: node --test scripts/test-local-object-mesh-conflicts-v1.mjs
