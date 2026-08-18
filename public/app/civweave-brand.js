@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.32-creator-suite-download-v1';
+const VERSION='1.0.33-lud-download-entry-v1';
 const DAY_LOGO='/app/logos/civweave-day-logo.jpg';
 const NIGHT_LOGO='/app/logos/civweave-night-logo.jpg';
 const CANONICAL_LOGO=DAY_LOGO;
@@ -11,6 +11,7 @@ const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_RUNTIME='/app/japanese-mode-v1.js?v=japanese-shell-language-v2';
 const JAPANESE_SHELL_COPY='/app/japanese-shell-copy-v1.js?v=japanese-shell-language-v2';
 const SUPPORT_URL='https://www.patreon.com/c/Civweave';
+const LUD_MODE_URL='/app/lud/';
 const CREATOR_SUITE_URL='/creator-suite/';
 
 function wantsJapanese(){
@@ -62,6 +63,34 @@ function installInstallerDeliveryBridge(){
   script.async=false;
   script.dataset.civweaveHubDeliveryIntent='v1';
   document.head?.append(script);
+  return true;
+}
+
+function ensureLudModeLink(){
+  if(location.pathname!=='/app/index.html')return false;
+  if(document.querySelector('[data-civweave-lud-mode-download]'))return true;
+  const footer=document.querySelector('.quest-footer-note');
+  const main=document.querySelector('main.gateway');
+  if(!main)return false;
+  const panel=document.createElement('aside');
+  panel.dataset.civweaveLudModeDownload='';
+  panel.setAttribute('aria-label','Optional Lud Mode download');
+  panel.style.cssText='max-width:760px;margin:12px auto;padding:12px;border:1px solid #ffd45f66;border-radius:14px;background:linear-gradient(145deg,#171b12dd,#16152add);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#fffaf0;';
+  const copy=document.createElement('span');
+  copy.style.cssText='display:grid;gap:3px;min-width:0;flex:1 1 360px;';
+  const title=document.createElement('strong');
+  title.textContent='Lud Mode — human-operated Civweave';
+  const detail=document.createElement('small');
+  detail.textContent='Download the separate no-AI Civweave lane with the Lud HUD, Questboard, human validation, Passport, Guild, and human-only FellowFare tools.';
+  detail.style.cssText='color:#d5cfb4;line-height:1.4;';
+  const link=document.createElement('a');
+  link.href=LUD_MODE_URL;
+  link.textContent='Download Lud Mode';
+  link.setAttribute('aria-label','Open the separate Civweave Lud Mode download');
+  link.style.cssText='display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 11px;border:1px solid #ffd45f88;border-radius:10px;background:#3b2f16;color:#fff8d6;text-decoration:none;font-weight:850;white-space:nowrap;';
+  copy.append(title,detail);
+  panel.append(copy,link);
+  if(footer)footer.insertAdjacentElement('beforebegin',panel);else main.append(panel);
   return true;
 }
 
@@ -144,6 +173,7 @@ function apply(){
   installLanguageRuntime();
   bindEnglishLanguageControl();
   installInstallerDeliveryBridge();
+  ensureLudModeLink();
   ensureCreatorSuiteLink();
   ensureInstallerSupportLink();
   return true;
@@ -164,6 +194,8 @@ globalThis.CivweaveBrand=Object.freeze({
   installLanguageRuntime,
   ensureEnglishLanguageControl:bindEnglishLanguageControl,
   installInstallerDeliveryBridge,
+  ensureLudModeLink,
+  ludModeUrl:LUD_MODE_URL,
   ensureCreatorSuiteLink,
   creatorSuiteUrl:CREATOR_SUITE_URL,
   ensureInstallerSupportLink,
