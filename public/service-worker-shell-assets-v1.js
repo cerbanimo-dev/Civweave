@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v7-human-chat-network';
+const REVISION='shell-assets-v1-repair-v8-human-chat-guild-context';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
@@ -27,6 +27,7 @@ const OPTIONAL_GUILD_QUEST=[
 ];
 const OPTIONAL_HUMAN_CHAT=[
   '/app/human-message-bubble-v1.js',
+  '/app/human-chat-guild-context-v1.js',
   '/app/human-chat-network-v1.js',
   '/app/civweave-private-messaging-v1.js',
   '/app/local-object-mesh-v146.js',
