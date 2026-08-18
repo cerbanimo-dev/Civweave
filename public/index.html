@@ -12,7 +12,20 @@
     #cw-staging-root-rescue{max-width:32rem;margin:24px;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center}
     #cw-staging-root-rescue[data-state="failed"]{border-color:#ffad8a66;color:#ffd8c8}
   </style>
-  <script src="/staging-pwa-rescue-v431.js?v=1"></script>
+  <script>
+  (()=>{
+    'use strict';
+    const STAGING_ORIGIN='https://civweave-staging.pages.dev';
+    if(location.origin!==STAGING_ORIGIN){globalThis.CivweaveStagingPwaRescueLoader=Promise.resolve(null);return}
+    globalThis.CivweaveStagingPwaRescueLoader=new Promise(resolve=>{
+      const script=document.createElement('script');
+      script.src='/staging-pwa-rescue-v431.js?v=1';
+      script.onload=()=>resolve(globalThis.CivweaveStagingPwaRescueV431||null);
+      script.onerror=()=>resolve(null);
+      document.head.append(script);
+    });
+  })();
+  </script>
   <script src="/app/civweave-brand.js?v=1.0.163"></script>
   <script>
   (() => {
@@ -32,7 +45,7 @@
     const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     async function repairStagingLaunch(){
       if(location.origin!==STAGING_ORIGIN)return null;
-      const rescue=globalThis.CivweaveStagingPwaRescueV431;
+      const rescue=await Promise.race([globalThis.CivweaveStagingPwaRescueLoader||Promise.resolve(null),wait(2500).then(()=>null)]);
       if(!rescue?.ready)return null;
       return Promise.race([rescue.ready,wait(16000).then(()=>({ok:false,timeout:true}))]);
     }
