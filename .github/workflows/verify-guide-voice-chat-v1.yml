@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/guide-native-voice-v1.js'
       - 'public/app/guide-workspace-v242.js'
       - '.github/workflows/verify-guide-voice-chat-v1.yml'
   push:
     branches: ['**']
     paths:
       - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/guide-native-voice-v1.js'
       - 'public/app/guide-workspace-v242.js'
       - '.github/workflows/verify-guide-voice-chat-v1.yml'
   workflow_dispatch:
@@ -34,52 +36,73 @@ jobs:
       - name: Check voice-enabled chat syntax
         run: |
           node --check public/app/guide-chat-surface-v350.js
+          node --check public/app/guide-native-voice-v1.js
           node --check public/app/guide-workspace-v242.js
 
-      - name: Enforce voice accessibility and lazy-permission contract
+      - name: Enforce native voice ownership, privacy, and fallback contract
         shell: bash
         run: |
           node <<'NODE'
           const fs=require('node:fs');
           const source=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
+          const native=fs.readFileSync('public/app/guide-native-voice-v1.js','utf8');
           const compat=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
 
           for(const marker of [
             "const VOICE_PREFS_KEY='civweave.guide-chat.voice.v1'",
+            "const NATIVE_VOICE_SRC='/app/guide-native-voice-v1.js'",
             'data-mic',
             'data-auto-speak',
-            "inputMode:'voice'",
-            'function startListening()',
-            'function stopListening(',
+            'async function startListening()',
+            'async function stopListening(',
             'function speakText(',
             'function stopSpeaking(',
             "stopSpeaking({reason:'barge-in'})",
             'SpeechRecognition',
             'webkitSpeechRecognition',
-            'SpeechSynthesisUtterance'
+            'SpeechSynthesisUtterance',
+            "inputMode:'voice-native-gemini'",
+            "inputMode:'voice-native-gemma'",
+            "inputMode:'voice-device'"
           ]){
             if(!source.includes(marker))throw new Error(`Voice contract marker missing: ${marker}`);
           }
 
-          if(!source.includes("root.querySelector('[data-mic]').addEventListener('click',toggleListening)"))throw new Error('Microphone input is not owned by the canonical guide surface.');
+          if(!source.includes("root.querySelector('[data-mic]').addEventListener('click',()=>{void toggleListening()})"))throw new Error('Microphone input is not owned by the canonical guide surface.');
           if(!source.includes("root.querySelector('[data-auto-speak]').addEventListener('click',toggleAutoSpeak)"))throw new Error('Spoken-reply control is not owned by the canonical guide surface.');
-          if(!source.includes("submitActive(submitted,{inputMode:'voice'})"))throw new Error('Voice transcript bypasses the canonical chat submission path.');
-          if(!source.includes("maybeSpeak(system,replacement.text)"))throw new Error('Guide replies are not connected to optional speech output.');
-          if(!source.includes("mic.hidden=!support.speechRecognition"))throw new Error('Unsupported speech-recognition browsers do not gracefully fall back to text.');
-          if(!source.includes("speaker.hidden=!support.speechSynthesis"))throw new Error('Unsupported speech-synthesis browsers do not gracefully fall back to text.');
+          if(!source.includes("script.dataset.civweaveLazyVoice='explicit-mic'"))throw new Error('Native voice transport is not explicitly marked as mic-demand lazy.');
+          if(!source.includes("if(native&&await startNativeListening(native))return true;return startDeviceListening()"))throw new Error('Native voice does not degrade to device speech recognition.');
+          if(!source.includes("micAvailable=support.speechRecognition||support.nativeMedia"))throw new Error('Native voice cannot keep the microphone control available when browser SpeechRecognition is absent.');
+          if(!source.includes("speaker.hidden=!support.speechSynthesis"))throw new Error('Device spoken-reply control does not gracefully hide when TTS is unavailable.');
 
           const startAt=source.indexOf('function start(){');
           const apiAt=source.indexOf('\n\nconst api=',startAt);
           if(startAt<0||apiAt<0)throw new Error('Cannot locate canonical start lifecycle.');
           const boot=source.slice(startAt,apiAt);
-          if(boot.includes('startListening()')||boot.includes('.start()')||boot.includes('speechSynthesis.speak'))throw new Error('Voice work or microphone permission can begin during application boot.');
+          for(const forbidden of ['ensureNativeVoice()','startListening()','getUserMedia(','new WebSocket(','speechSynthesis.speak']){
+            if(boot.includes(forbidden))throw new Error(`Voice work can begin during application boot: ${forbidden}`);
+          }
 
-          const beginAt=source.indexOf('function startListening(){');
-          const stopAt=source.indexOf('function stopListening(',beginAt);
-          const begin=source.slice(beginAt,stopAt);
-          if(!begin.includes('const rec=new Ctor()')||!begin.includes('rec.start()'))throw new Error('Speech recognition is not created lazily from explicit voice input.');
-          if(!begin.includes("stopSpeaking({reason:'barge-in'})"))throw new Error('Voice input cannot interrupt spoken output.');
+          for(const marker of [
+            "const GEMINI_MODEL='gemini-3.1-flash-live-preview'",
+            "const TOKEN_URL='https://generativelanguage.googleapis.com/v1beta/auth_tokens'",
+            'BidiGenerateContentConstrained',
+            'access_token=',
+            "'x-goog-api-key':config.apiKey",
+            "mimeType:'audio/pcm;rate=16000'",
+            'sampleRate:24000',
+            'inputAudioTranscription:{}',
+            'outputAudioTranscription:{}',
+            'contextWindowCompression',
+            "reason:'gemma4-native-audio-awaits-transformers-js-4.3'",
+            "typeof runtime?.generateAudio!=='function'"
+          ]){
+            if(!native.includes(marker))throw new Error(`Native transport marker missing: ${marker}`);
+          }
+          if(native.includes('BidiGenerateContent?key=')||native.includes('?key=${'))throw new Error('Long-lived Gemini API key is being placed in the Live WebSocket URL.');
+          if(native.includes('@cf/deepgram/')||native.includes('workers.ai'))throw new Error('Cloudflare realtime speech must not become the default guide voice transport.');
+          if(!native.includes("if(gemma.available)return'gemma-native';")||!native.includes("if(gemini.available)return'gemini-live';")||!native.includes("return'device';"))throw new Error('Offline-first native voice route order changed.');
 
           if(!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('Compatibility loader no longer forwards to the canonical guide surface.');
-          if(!compat.includes('voice-v1'))throw new Error('Compatibility cache key was not refreshed for the voice-enabled guide surface.');
+          if(!compat.includes('native-voice-v2'))throw new Error('Compatibility cache key was not refreshed for native voice.');
           NODE
