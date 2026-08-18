@@ -4,15 +4,19 @@ on:
   push:
     branches:
       - main
+      - staging
       - 'agent/open-learning-media-*'
       - 'agent/general-knowledge-video-packs-*'
     paths:
       - config/open-learning-media-packs-v1.json
+      - config/open-learning-media-pack-expansion-v2.json
+      - scripts/apply-open-learning-media-pack-expansion-v2.py
       - scripts/harvest-open-learning-media-v1.py
       - scripts/harvest-open-learning-media-library-v1.py
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
+      - scripts/test-open-learning-media-packs-v1.py
       - ops/triggers/open-learning-media-harvest.trigger
   schedule:
     - cron: '17 5 * * 1'
@@ -33,6 +37,11 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Expand subject media pack registry
+        run: |
+          set -euo pipefail
+          python scripts/apply-open-learning-media-pack-expansion-v2.py
 
       - name: Harvest rights-cleared general and extension media metadata
         env:
