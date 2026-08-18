@@ -6,6 +6,18 @@ Status: proposed shared contract for the instrumented creation stack.
 
 Civweave records trustworthy, privacy-preserving evidence about how text, audio, and video artifacts were created without turning creation into pervasive oversight. The existing `CivweaveContentProvenanceV1` capability remains the artifact-origin authority. Creation tools, AI systems, importers, Guild audit jobs, and export adapters are callers or subscribers of that owner.
 
+## Creator Suite packaging boundary
+
+The text/audio/video authoring environment is an **optional, separately downloadable Creator Suite**, not part of Civweave's ordinary offline core.
+
+- Package scope: `/creator-suite/`
+- Package manifest: `/creator-suite/package-v1.json`
+- Installed entry: `/creator-suite/index.html`
+- Service-worker scope: `/creator-suite/`
+- The ordinary Civweave offline package must not implicitly pull Creator Suite editor engines, media-processing assets, or third-party editor dependencies into the core install.
+- The Creator Suite may call the canonical provenance, Passport identity, mesh, Guild, and AI capability APIs as explicitly declared shared dependencies.
+- AI systems and human UI operate through the same Creator Suite command/editing adapters when the suite is installed. Core Civweave must degrade cleanly when the optional suite is absent.
+
 ## Trust boundary
 
 The platform may assert only what its signed event history proves.
