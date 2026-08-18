@@ -5,11 +5,12 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [cabinet,marketplace,preflight,capabilities,fulfillment,symbols,bridge,parent,parentJs,legacyShim,liveData,browserCommerce,directCommerce]=await Promise.all([
+const [cabinet,marketplace,preflight,capabilities,questPath,fulfillment,symbols,bridge,parent,parentJs,legacyShim,liveData,browserCommerce,directCommerce]=await Promise.all([
   read('public/app/services/fellowfare/cabinet.html'),
   read('public/app/services/fellowfare/marketplace-v2.js'),
   read('public/app/services/fellowfare/live-data-preflight-v3.js'),
   read('public/app/services/fellowfare/marketplace-v2-capabilities.js'),
+  read('public/app/services/fellowfare/civweave-quest-path-v266.js'),
   read('public/app/services/fellowfare/fulfillment-economy-v2.js'),
   read('public/app/services/fellowfare/marketplace-v2-symbols.js'),
   read('public/app/services/fellowfare/cabinet-bridge.js'),
@@ -22,7 +23,7 @@ const [cabinet,marketplace,preflight,capabilities,fulfillment,symbols,bridge,par
 ]);
 
 for(const [name,source] of [
-  ['marketplace-v2.js',marketplace],['live-data-preflight-v3.js',preflight],['marketplace-v2-capabilities.js',capabilities],
+  ['marketplace-v2.js',marketplace],['live-data-preflight-v3.js',preflight],['marketplace-v2-capabilities.js',capabilities],['civweave-quest-path-v266.js',questPath],
   ['fulfillment-economy-v2.js',fulfillment],['marketplace-v2-symbols.js',symbols],['cabinet-bridge.js',bridge],
   ['fellowfare-cabinet-v144.js',parentJs],['civweave-live-data.js',liveData],['cerbanimo-commerce-distribution-v1.js',browserCommerce]
 ]) assert.doesNotThrow(()=>new Function(source),`${name} contains a JavaScript syntax error.`);
@@ -37,6 +38,8 @@ assert.ok(cabinet.includes('/app/cw-reward-ledger-v2.js'),'Canonical Acorn/Butto
 assert.ok(cabinet.includes('/app/cerbanimo-commerce-distribution-v1.js'),'Fail-closed legacy commerce compatibility stub is not carried.');
 assert.ok(cabinet.indexOf('marketplace-v2.js')<cabinet.indexOf('fulfillment-economy-v2.js'),'Economy policy must load after the base marketplace.');
 assert.ok(!cabinet.includes('src="app.js"'),'Legacy FellowFare runtime is still the active cabinet entry.');
+assert.ok(parent.includes('/app/services/fellowfare/civweave-quest-path-v266.js'),'FellowFare parent shell does not load the generated Quest work surface.');
+for(const token of ['civweave.fellowfare.quest-work.v1','Prepare need listing','Check marketplace','openComposer','sourceId','evidence-recorded','plan.state===\'review\''])assert.ok(questPath.includes(token),`FellowFare generated Quest work surface is missing ${token}.`);
 
 assert.match(legacyShim,/import '\.\/live-data-preflight-v3\.js'/);
 assert.match(legacyShim,/import '\.\/marketplace-v2\.js'/);
@@ -113,7 +116,8 @@ assert.match(liveData,/fellowfare\.marketplace\.v2/,'Civweave live data does not
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fellowfare-marketplace-v2-fulfillment-direct-commerce-v2',
+  revision:'fellowfare-marketplace-v2-fulfillment-direct-commerce-v2-quest-path-v266',
+  generatedQuestPath:'review-before-publish-with-evidence-checkpoints',
   goodsPayment:'seller-direct',
   serviceLearningTokens:'fulfillment-burn',
   serviceLearningUsd:'stripe-connect-direct-charge',
