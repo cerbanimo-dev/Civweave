@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-mobile-chat-visual-viewport-v1-long-thread-fit';
+const VERSION='1.0.2-mobile-chat-visual-viewport-v1-stacked-compact-composer';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-mobile-chat-visual-viewport-v1-style';
 if(globalThis.CivweaveMobileChatVisualViewportV1?.version===VERSION)return;
@@ -34,7 +34,7 @@ function apply(){
   root.style.setProperty('--cw-chat-visual-top',px(value.top));
   root.style.setProperty('--cw-chat-visual-left',px(value.left));
   const chat=document.getElementById(ROOT_ID);
-  if(chat)chat.dataset.civweaveVisualViewport='v1-long-thread-fit';
+  if(chat)chat.dataset.civweaveVisualViewport='v1-stacked-compact-composer';
   return value;
 }
 
@@ -94,12 +94,35 @@ html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form]{
   position:relative!important;
   z-index:2!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-columns:minmax(0,1fr) 86px!important;
+  grid-template-rows:38px 38px!important;
+  gap:8px!important;
+  align-items:stretch!important;
   flex:none!important;
   min-height:0!important;
   width:100%!important;
   margin:0!important;
 }
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form] textarea{
+  grid-column:1!important;
+  grid-row:1 / span 2!important;
+  height:84px!important;
+  min-height:84px!important;
+  max-height:84px!important;
+}
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form] [data-voice],
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form] [data-send]{
+  grid-column:2!important;
+  width:100%!important;
+  min-width:0!important;
+  height:38px!important;
+  min-height:38px!important;
+  max-height:38px!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+}
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form] [data-voice]{grid-row:1!important}
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form] [data-send]{grid-row:2!important}
 }
 `;
   document.head?.append(style);
@@ -124,5 +147,5 @@ function bind(){
 function start(){installStyle();bind();apply()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
-globalThis.CivweaveMobileChatVisualViewportV1=Object.freeze({version:VERSION,metrics,apply,schedule,bind,mobile,visualViewportOwned:true,composerVisibilityInvariant:true,longThreadScrollOwner:true,mobileLayout:'flex-column-fixed-composer'});
+globalThis.CivweaveMobileChatVisualViewportV1=Object.freeze({version:VERSION,metrics,apply,schedule,bind,mobile,visualViewportOwned:true,composerVisibilityInvariant:true,longThreadScrollOwner:true,mobileLayout:'flex-column-fixed-composer-stacked-actions'});
 })();
