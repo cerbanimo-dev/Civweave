@@ -9,6 +9,9 @@ assert.match(source,/receipt\?\.sessionId.*headHash/s,'vault evidence release mu
 assert.match(source,/signDeviceProof/);
 assert.match(source,/encryptAuditEvidence/);
 assert.match(source,/action:['"]appeal['"]/,'appeals must use a signed device proof');
+assert.match(source,/signReviewEndorsement/,'human tribunal findings must be signed by the reviewer device before submission');
+assert.match(source,/memberUserId:ctx\.session\.userId/,'review endorsement must bind the canonical authenticated Guild member ID');
+assert.match(source,/publicJwk:ctx\.credential\.publicKey,endorsement/,'human finding submission must carry the existing Civweave device public key and exact signed endorsement');
 assert.match(source,/human\/pending/);
 assert.match(source,/human\/finding/);
 assert.match(source,/materializeHumanReviews/,'eligible human review work should materialize through the canonical Reckoning adapter only on explicit audit UI use');
@@ -17,4 +20,4 @@ assert.match(source,/CivweaveHostNodeSessionV1/,'Creator audit must reuse canoni
 assert.doesNotMatch(source,/localStorage\.(?:setItem|removeItem)|sessionStorage\.(?:setItem|removeItem)/,'audit client must not create a second credential/session store');
 assert.doesNotMatch(source,/setInterval\(/,'audit client must not install a polling interval');
 assert.doesNotMatch(source,/style detector|ai detector|classif(?:y|ier).*style/i,'audit client must not add stylistic AI detection');
-console.log('Creator audit client bounded privacy and Reckoning closure contract passed');
+console.log('Creator audit client bounded privacy, reviewer endorsement, and Reckoning closure contract passed');
