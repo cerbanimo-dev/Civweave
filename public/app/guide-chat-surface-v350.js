@@ -271,9 +271,10 @@ function startListening(){
 }
 function stopListening({submit=true}={}){
   if(!recognition||!listening)return false;
-  if(!submit)voiceTranscript='';
-  try{submit?recognition.stop():recognition.abort()}catch{}
-  return true;
+  if(submit){try{recognition.stop()}catch{};return true}
+  const rec=recognition;rec.onstart=null;rec.onresult=null;rec.onerror=null;rec.onend=null;recognition=null;listening=false;voiceTranscript='';
+  try{rec.abort()}catch{}
+  syncVoiceControls();emitVoice('listening-ended',{discarded:true,text:''});voiceStatus('Voice input stopped.');return true;
 }
 function toggleListening(){return listening?stopListening({submit:true}):startListening()}
 
