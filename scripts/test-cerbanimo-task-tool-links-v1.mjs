@@ -6,8 +6,11 @@ const quest={id:'quest:private-42'};
 const kinds=task=>toolsForTask(quest,{id:'task:1',status:'ready',...task}).map(row=>row.kind);
 
 assert.deepEqual(kinds({title:'Draft the launch proposal'}),['text']);
+assert.deepEqual(kinds({title:'Write 500 words about what you learned'}),['text'],'strong text-production verbs should work without a file-type noun');
 assert.deepEqual(kinds({title:'Record the podcast introduction'}),['audio']);
+assert.deepEqual(kinds({title:'Mix and master the finished take'}),['audio'],'strong audio-production verbs should work without an audio noun');
 assert.deepEqual(kinds({title:'Edit the launch video'}),['video']);
+assert.deepEqual(kinds({title:'Film yourself demonstrating the technique'}),['video'],'strong video-production verbs should work without a video noun');
 assert.deepEqual(kinds({title:'Write the script and record the voiceover'}),['text','audio']);
 assert.deepEqual(kinds({title:'Watch the required video'}),[],'passive video consumption must not expose the Video Creator');
 assert.deepEqual(kinds({title:'Review the article'}),[],'passive review must not expose the Text Creator');
