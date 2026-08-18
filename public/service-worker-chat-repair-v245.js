@@ -12,6 +12,7 @@ const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const MODEL_ROUTE_REVISION='selected-local-minilm-v357';
 const SERVER_AUTO_FAILOVER_REVISION='server-auto-local-failover-v358';
 const GUIDE_ROUTE_REVISION='guide-thread-network-routing-v360';
+const GUIDE_VOICE_REVISION='guide-native-voice-v1';
 const THREAD_TABS_REVISION='saved-tabs-contained-v353';
 const PARTY_PATH='/app/shared-intention-party-chat-v1.js';
 const PARTY_CACHE='civweave-party-v1';
@@ -35,6 +36,7 @@ const CHAT_PATHS=new Set([
   '/app/realm-session-integrity-v237.js',
   '/app/guide-workspace-v242.js',
   '/app/guide-chat-surface-v350.js',
+  '/app/guide-native-voice-v1.js',
   '/app/unified-chat-system-v1.js',
   '/app/chat-fullscreen-v295.js',
   '/app/saved-chat-store-v295.js',
@@ -112,7 +114,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,threadTabsRevision:THREAD_TABS_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,guideVoiceRevision:GUIDE_VOICE_REVISION,threadTabsRevision:THREAD_TABS_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
 async function cacheRuntime(path,cacheName,revision,label){
   try{
@@ -143,5 +145,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,threadTabsRevision:THREAD_TABS_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanBubble:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,guideVoiceRevision:GUIDE_VOICE_REVISION,threadTabsRevision:THREAD_TABS_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanBubble:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime});
 })();
