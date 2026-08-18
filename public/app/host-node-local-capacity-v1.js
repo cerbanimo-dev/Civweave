@@ -86,21 +86,14 @@ function acquireNetworkLease({ force = false } = {}) {
   if (!force && failureBackoffActive(now)) return false;
   try {
     const current = parse(localStorage.getItem(LEASE_KEY), null);
-    if (!force && current?.owner !== INSTANCE_ID && Number(current?.expiresAt) > now) return false;
+    if (!force && Number(current?.expiresAt) > now) return false;
     const next = { owner: INSTANCE_ID, expiresAt: now + NETWORK_LEASE_MS, updatedAt: now };
     localStorage.setItem(LEASE_KEY, JSON.stringify(next));
     const stored = parse(localStorage.getItem(LEASE_KEY), null);
-    return stored?.owner === INSTANCE_ID;
+    return stored?.owner === INSTANCE_ID && Number(stored?.expiresAt) > now;
   } catch {
     return true;
   }
-}
-
-function releaseNetworkLease() {
-  try {
-    const current = parse(localStorage.getItem(LEASE_KEY), null);
-    if (current?.owner === INSTANCE_ID) localStorage.removeItem(LEASE_KEY);
-  } catch {}
 }
 
 async function jsonRequest(url, options = {}) {
@@ -163,7 +156,6 @@ async function refreshCapacity({ force = false } = {}) {
     return null;
   } finally {
     refreshing = false;
-    releaseNetworkLease();
   }
 }
 
@@ -259,7 +251,7 @@ async function boot() {
   if (document.visibilityState === 'visible') await refreshCapacity();
   scheduleRefresh();
   addEventListener('storage', event => { if (event.key === CACHE_KEY && localFederatedLobby()) renderCachedCapacity(); });
-  addEventListener('pagehide', () => { clearInterval(refreshTimer); releaseNetworkLease(); }, { once: true });
+  addEventListener('pagehide', () => clearInterval(refreshTimer), { once: true });
   return true;
 }
 
