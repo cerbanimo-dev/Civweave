@@ -9,6 +9,18 @@
   "ai": {
     "binding": "AI"
   },
+  "ratelimits": [
+    {
+      "name": "GUILD_API_RATE_LIMITER",
+      "namespace_id": "41101",
+      "simple": { "limit": 60, "period": 60 }
+    },
+    {
+      "name": "GUILD_AI_RATE_LIMITER",
+      "namespace_id": "41102",
+      "simple": { "limit": 6, "period": 60 }
+    }
+  ],
   "durable_objects": {
     "bindings": [
       { "name": "NODES", "class_name": "CivweaveCloudNode" },
