@@ -1,10 +1,13 @@
 (() => {
 'use strict';
 
-const REVISION='host-node-paid-join-v6-platform-membership';
+const REVISION='host-node-paid-join-v7-staging-payment-test';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
+const STAGING_HOST='civweave-staging.pages.dev';
+const STAGING_GUILD_ORIGIN='https://civweave-node-cloud-staging.cerbanimo.workers.dev';
+const STAGING_GUILD_ID='civweave-node-cloud-staging';
 const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 
@@ -15,6 +18,10 @@ function selected(){
     const origin=new URL(raw).origin,nodeId=clean(params.get('node')||saved?.nodeId,180);
     return{origin,nodeId};
   }catch{return{origin:'',nodeId:''};}
+}
+function stagingPaymentTest(origin,nodeId){
+  const params=new URLSearchParams(location.search);
+  return location.hostname===STAGING_HOST&&params.get('paymentTest')==='1'&&origin===STAGING_GUILD_ORIGIN&&nodeId===STAGING_GUILD_ID;
 }
 function ensureIdentity(origin,nodeId){
   const all=parse(localStorage.getItem(CREDENTIAL_KEY),{}),key=nodeId?`${origin}#${nodeId}`:origin,prior=all[key]||all[origin];
@@ -47,20 +54,27 @@ function apply(){
   const box=ensureUi();if(!box)return false;
   const free=slots('cw-host-free-slots'),paid=slots('cw-host-paid-slots'),{origin,nodeId}=selected();
   if(free==null||paid==null)return false;
-  const show=Boolean(origin.startsWith('https://')&&nodeId&&free<1&&paid>0&&!activeSession(nodeId,origin));box.dataset.visible=String(show);
-  const join=document.getElementById('cw-host-node-join');if(show&&join){join.dataset.mode='search';join.textContent='Find a Citizen slot';}
+  const testMode=stagingPaymentTest(origin,nodeId);
+  const show=Boolean(origin.startsWith('https://')&&nodeId&&paid>0&&!activeSession(nodeId,origin)&&(free<1||testMode));box.dataset.visible=String(show);
+  const button=document.getElementById('cw-paid-join-button'),note=document.getElementById('cw-paid-join-note');
+  if(testMode&&show){
+    if(button)button.textContent='Test membership checkout';
+    if(note)note.textContent='STAGING TEST MODE · Stripe test-mode only. Civweave/Cerbanimo is the membership seller; the selected staging Guildkeeper receives the contractual revenue-share transfer after settlement.';
+  }
+  const join=document.getElementById('cw-host-node-join');if(show&&join&&!testMode){join.dataset.mode='search';join.textContent='Find a Citizen slot';}
   return true;
 }
 async function beginCheckout(){
   const{origin,nodeId}=selected(),button=document.getElementById('cw-paid-join-button'),note=document.getElementById('cw-paid-join-note');
   if(!origin.startsWith('https://')||!nodeId){if(note)note.textContent='Choose a Cloudflare Guild before starting membership checkout.';return;}
-  const identity=ensureIdentity(origin,nodeId),tierId=document.getElementById('cw-paid-tier')?.value||'member';if(button){button.disabled=true;button.textContent='Opening checkout…';}
+  const testMode=stagingPaymentTest(origin,nodeId);
+  const identity=ensureIdentity(origin,nodeId),tierId=document.getElementById('cw-paid-tier')?.value||'member';if(button){button.disabled=true;button.textContent=testMode?'Opening test checkout…':'Opening checkout…';}
   try{
     const endpoint=new URL('/api/commerce/membership/prejoin',origin);endpoint.searchParams.set('nodeId',nodeId);
     const response=await fetch(endpoint,{method:'POST',cache:'no-store',headers:{accept:'application/json','content-type':'application/json','x-civweave-node-id':nodeId},body:JSON.stringify({userId:identity.userId,credential:identity.credential,tierId})}),packet=await response.json().catch(()=>({}));
     if(!response.ok)throw Object.assign(new Error(packet.error||`Guild returned HTTP ${response.status}.`),{status:response.status});
     const checkoutUrl=packet?.checkout?.checkoutUrl||packet?.membership?.checkoutUrl;if(!checkoutUrl)throw new Error('The Guild did not return a membership checkout URL.');location.assign(checkoutUrl);
-  }catch(error){if(note)note.textContent=Number(error?.status)===409?'That Patron capacity just filled. Find another Guild or a Citizen slot.':`Could not start membership checkout: ${error?.message||error}`;if(button){button.disabled=false;button.textContent='Join this Guild';}}
+  }catch(error){if(note)note.textContent=Number(error?.status)===409?'That Patron capacity just filled. Find another Guild or a Citizen slot.':`Could not start membership checkout: ${error?.message||error}`;if(button){button.disabled=false;button.textContent=testMode?'Test membership checkout':'Join this Guild';}}
 }
 async function finishReturn(){
   const params=new URLSearchParams(location.search),result=params.get('membership');if(!result)return;
