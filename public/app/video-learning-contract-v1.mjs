@@ -1,14 +1,14 @@
 import openMedia from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
 import safeMode,{validateAdmission,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
 
-const REVISION='civweave-video-learning-contract-v1.2-subject-relevance';
+const REVISION='civweave-video-learning-contract-v1.3-subject-stopwords';
 export const FALLBACK_VIDEO_URL='https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const LOOKUP_URL='/downloads/knowledge-schools/video-atlases/lookup.json';
 const AVAILABILITY_URL='/downloads/knowledge-schools/video-atlases/youtube-availability-current.json';
 const VIDEO_CACHE_NAME='cw-video-learning-atlas-v1';
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
 const copy=value=>{try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}};
-const STOP=new Set(['about','after','again','also','artifact','basic','basics','been','being','build','capability','complete','concept','concepts','could','course','create','doing','does','evidence','foundation','foundations','from','guide','have','into','intro','introduction','just','learn','learning','lesson','make','module','more','most','objective','other','over','practice','practical','same','skill','skills','some','study','such','summary','teach','teaching','than','that','their','then','there','these','they','this','through','under','using','very','vocabulary','want','what','when','where','which','while','with','would','your']);
+const STOP=new Set(['about','after','again','also','and','are','artifact','basic','basics','been','being','build','can','capability','complete','concept','concepts','could','course','create','doing','does','evidence','for','foundation','foundations','from','guide','have','how','into','intro','introduction','its','just','learn','learning','lesson','make','module','more','most','not','objective','one','other','over','per','practice','practical','same','skill','skills','some','study','such','summary','teach','teaching','than','that','the','their','then','there','these','they','this','through','under','use','using','very','vocabulary','want','what','when','where','which','while','with','would','you','your']);
 let lookupPromise=null,availabilityPromise=null;
 const safeAdmissionCache=new Map();
 
