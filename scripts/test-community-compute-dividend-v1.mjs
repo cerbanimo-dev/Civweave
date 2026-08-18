@@ -37,11 +37,29 @@ assert.equal(capacity.communitySeatLimit,16,'$10 membership contributes four fre
 assert.equal(capacity.communityDividend.contributionUnits,3);
 assert.equal(capacity.communityDividend.targetBonusNeuronsPerMember,600);
 
+await assert.rejects(
+  ()=>account.setTopupSharing({topupId:'topup-too-low',nodeId:'node-a',userId:'free-0',shareBps:499}),
+  /shareBps must be between 500 and 1000/,
+);
+await assert.rejects(
+  ()=>account.setTopupSharing({topupId:'topup-too-high',nodeId:'node-a',userId:'free-0',shareBps:1001}),
+  /shareBps must be between 500 and 1000/,
+);
+
+const defaultPreference=await account.setTopupSharing({topupId:'topup-default-share',nodeId:'node-a',userId:'free-0'});
+assert.equal(defaultPreference.shareBps,500,'5% is the enforced default community share');
+
 await account.setTopupSharing({topupId:'topup-five-percent',nodeId:'node-a',userId:'free-0',shareBps:500});
 const topup=await account.settleTopup({sourceId:'topup-paid-event',topupId:'topup-five-percent',nodeId:'node-a',userId:'free-0',netServiceCents:1000});
 assert.equal(topup.sharing.shareBps,500);
 assert.equal(topup.sharing.communitySharedCents,50);
 assert.equal(topup.sharing.personalCreditCents,650);
+
+await account.setTopupSharing({topupId:'topup-ten-percent',nodeId:'node-a',userId:'free-1',shareBps:1000});
+const tenPercentTopup=await account.settleTopup({sourceId:'topup-ten-percent-paid-event',topupId:'topup-ten-percent',nodeId:'node-a',userId:'free-1',netServiceCents:1000});
+assert.equal(tenPercentTopup.sharing.shareBps,1000);
+assert.equal(tenPercentTopup.sharing.communitySharedCents,100);
+assert.equal(tenPercentTopup.sharing.personalCreditCents,600);
 
 const adjustment=await account.adjustTopup({sourceId:'topup-refund-event',topupId:'topup-five-percent',nodeId:'node-a',userId:'free-0',kind:'refund',systemCreditCents:350});
 assert.equal(adjustment.personalCreditCents+adjustment.communitySharedCents,350);
@@ -61,4 +79,4 @@ assert.equal(capacity.grandfatheredOverCapacity,false);
 assert.equal(capacity.communityDividend.contributionUnits,2);
 assert.equal(capacity.communityDividend.targetBonusNeuronsPerMember,400);
 
-console.log(JSON.stringify({ok:true,capacity,topup:topup.sharing,nodeTopup:nodeTopup.sharing,refundSharedCents:adjustment.communitySharedCents},null,2));
+console.log(JSON.stringify({ok:true,capacity,defaultShareBps:defaultPreference.shareBps,topup:topup.sharing,tenPercentTopup:tenPercentTopup.sharing,nodeTopup:nodeTopup.sharing,refundSharedCents:adjustment.communitySharedCents},null,2));
