@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.2-guide-capability-passover-v1-target-precedence';
+const VERSION='1.1.3-guide-capability-passover-v1-canonical-prompt';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 
@@ -23,8 +23,10 @@ const STORE_PREFIX='civweave.guide-capability-passover.v1';
 const STYLE_ID='cw-guide-capability-passover-v1-style';
 const BUILD=/\b(build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|set up|implement|ship|revise|update|want|need|help)\b/i;
 const DIRECT_CANONICAL=/\b(?:build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|set up|revise|update|want(?:\s+to)?|need(?:\s+to)?)\s+(?:me\s+|us\s+)?(?:(?:a|an|the|this|that|new)\s+)?(learning journey|endeavou?r|manifest|quest)s?\b/i;
+const TINY_LOCAL_MODELS=new Set(['smollm2-135m-instruct-q8-wasm','smollm2-360m-instruct-q4f16']);
 let assistantPatched=false;
 let clickBound=false;
+let promptSpine=null;
 
 const compact=(value,max=12000)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
 const preserve=(value,max=12000)=>String(value??'').trim().slice(0,max);
@@ -82,6 +84,29 @@ function candidateArtifact(text){return candidateDetails(text).artifact}
 function offerKey(system){return`${STORE_PREFIX}.${system}`}
 function readOffer(system){try{return parse(localStorage.getItem(offerKey(system)),null)}catch{return null}}
 function writeOffer(offer){try{localStorage.setItem(offerKey(offer.sourceSystem),JSON.stringify(offer))}catch{}return offer}
+
+function canonicalPrompt(system,tiny=false){
+  const own=canonicalFor(system);
+  const vocabulary='Canonical Civweave artifact language: Weaveling creates Quests; Moss creates Learning Journeys; Kamiya creates Endeavors; Rook creates Manifests. A Quest is the cross-realm intention and route. A Learning Journey develops demonstrable capability. An Endeavor is productive work and may serve a Quest, but is not itself a Quest. A Manifest gathers skills, resources, materials, services, needs, and offers. Never call Kamiya a Questwright and never call a Kamiya artifact a Quest. Legacy internal words such as weave, curriculum, quest-draft, resource-manifest, or artifact classes are implementation details and must not redefine or leak into user-facing ownership.';
+  const world='Call a person using Civweave a Hero, collaborating Heroes a Party, a host community a Guild, its operator a Guildkeeper, the regional charter role a Charterkeeper, and the map the Guild Map. Rook is the Quartermaster guide, not the Guild operator.';
+  const identity=`You are ${own.guide}, ${own.role}. Your canonical artifact is ${own.artifact}.`;
+  if(tiny)return`${identity} ${vocabulary} ${world} Be direct. Do not invent saved state, prices, votes, tool use, or execution. Consequential actions require explicit Hero approval. Return valid JSON with keys answer, choice, assumptions, requiresConsent, confidence, questDraft.`;
+  return`Civweave canonical guide language v1. ${identity}\n\n${vocabulary}\n\n${world}\n\nUse these terms naturally and preserve the selected guide identity. Do not revive Hub, Hub Node, Node Steward, Territory Steward, Guild Steward, Questwright, or user-facing learning-path terminology.`;
+}
+function canonicalPromptRequest(request={}){
+  const purpose=compact(request.purpose,240);if(!/^civweave-guide-response(?:-v141)?/.test(purpose)||request.__civweaveGuideLanguageApplied==='canonical-artifacts-v1')return request;
+  const system=systemFor(request),messages=Array.isArray(request.messages)?request.messages.map(row=>({...row})):[],provider=compact(request?.config?.provider||request?.config?.route,80).toLowerCase(),model=compact(request?.config?.model,160),tiny=provider==='downloaded-local'&&TINY_LOCAL_MODELS.has(model);
+  if(tiny){const recent=messages.filter(row=>row?.role!=='system').slice(-3);return{...request,messages:[{role:'system',content:canonicalPrompt(system,true)},...recent],__civweaveGuideLanguageApplied:'canonical-artifacts-v1',guidePromptProfile:'tiny-canonical-artifacts-v1'}}
+  const prompt=canonicalPrompt(system,false),firstSystem=messages.findIndex(row=>row?.role==='system');
+  if(firstSystem<0)messages.unshift({role:'system',content:prompt});else messages[firstSystem]={...messages[firstSystem],content:`${prompt}\n\n${messages[firstSystem].content||''}`};
+  return{...request,messages,__civweaveGuideLanguageApplied:'canonical-artifacts-v1',guidePromptProfile:'canonical-artifacts-v1'};
+}
+function registerPromptMiddleware(){
+  const spine=globalThis.CivweaveFastInteractiveV192;if(!spine?.register)return false;if(promptSpine===spine)return true;
+  spine.register('canonical-guide-artifact-language-v1',{before:request=>({request:canonicalPromptRequest(request),state:{canonicalArtifactLanguage:true}})},130);promptSpine=spine;
+  try{dispatchEvent(new CustomEvent('civweave:canonical-guide-language-installed',{detail:{version:VERSION,priority:130,beforeMiniLM:true}}))}catch{}
+  return true;
+}
 
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
@@ -203,13 +228,13 @@ function bindClick(){
   if(clickBound)return;clickBound=true;
   addEventListener('click',event=>{const button=event.target?.closest?.('.cw-capability-passover-v1 button');if(!button)return;event.preventDefault();event.stopPropagation();if(button.disabled)return;button.disabled=true;void acceptOffer(compact(button.dataset.passoverSource,80),compact(button.dataset.passoverId,120))},true);
 }
-function synchronize(){patchAssistant();bindClick();scheduleDecorate();document.documentElement.dataset.civweaveCapabilityPassover='v1';document.documentElement.dataset.civweaveGuideArtifactLanguage='canonical-v1';return true}
+function synchronize(){patchAssistant();registerPromptMiddleware();bindClick();scheduleDecorate();document.documentElement.dataset.civweaveCapabilityPassover='v1';document.documentElement.dataset.civweaveGuideArtifactLanguage='canonical-v1';return true}
 function start(){
   synchronize();
-  for(const name of ['civweave:assistant-runtime-ready','civweave:response-router-installed','civweave:unified-chat-system-ready','civweave:guide-chat-ready','civweave:guide-chat-opened','civweave:guide-chat-state','civweave:realm-guide-thread-changed','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
+  for(const name of ['civweave:assistant-runtime-ready','civweave:response-router-installed','civweave:runtime-spine-ready','civweave:unified-chat-system-ready','civweave:guide-chat-ready','civweave:guide-chat-opened','civweave:guide-chat-state','civweave:realm-guide-thread-changed','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
 }
 
-const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,explicitCanonicalArtifact,directCanonicalArtifact,mentionedCanonicalArtifact,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,canonicalUserFacingTerms:true});
+const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,explicitCanonicalArtifact,directCanonicalArtifact,mentionedCanonicalArtifact,canonicalPrompt,canonicalPromptRequest,registerPromptMiddleware,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,canonicalUserFacingTerms:true,canonicalPromptBeforeMiniLM:true});
 globalThis.CivweaveGuideCapabilityPassoverV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
