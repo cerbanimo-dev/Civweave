@@ -49,14 +49,12 @@ jobs:
           OPEN_MEDIA_RESULTS_PER_QUERY: '6'
           OPEN_MEDIA_WORKERS: '8'
         run: |
-          set -uo pipefail
+          set -euo pipefail
           python scripts/harvest-open-learning-media-library-v1.py
-          harvest_status=$?
-          if [ "$harvest_status" -ne 0 ]; then
-            exit "$harvest_status"
-          fi
+          set +e
           python scripts/curate-open-learning-media-library-v1.py
           curate_status=$?
+          set -e
           if [ -f public/downloads/knowledge-schools/open-learning-media/summary.json ]; then
             python scripts/report-open-learning-media-pack-coverage-v1.py || true
           fi
