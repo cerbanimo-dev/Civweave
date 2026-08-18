@@ -2,6 +2,19 @@
 
 This file applies to the entire repository. Every coding agent must read it before choosing an edit target.
 
+## Machine-readable work context
+
+Before choosing an edit target, read:
+
+`config/agent-work-context.json`
+
+This file is the compact machine-readable guardrail for branch roles, authority order, immutable/materialized paths, test-first expectations, guide-memory scopes, mesh conflict policy, and the developer MCP boundary. It supplements this guide; it does not outrank the canonical contracts or active implementation.
+
+- Observe the actual checked-out branch. Treat `staging` as the development integration branch and `main` as the shipping branch unless an explicit task changes that policy.
+- Before editing a path, compare it with the context file's immutable, forbidden, and generated/materialized path rules. Do not edit `releases/**` as source except during an explicit release-materialization task.
+- For behavior changes, follow the test-first workflow below and identify the executable contract that proves the change.
+- If the machine-readable context disagrees with a higher-authority contract or current canonical implementation, fix `config/agent-work-context.json` in the same change rather than obeying stale metadata.
+
 ## Repository map
 
 Before choosing an edit target, read:
@@ -74,16 +87,17 @@ Living School curriculum and learning tools are capabilities. They do not justif
 
 For any interface, shared-system, or cross-system task:
 
-1. Read `docs/architecture/repository-map.md` to locate the current source and runtime boundaries without guessing from filenames.
-2. Read `docs/contracts/mobile-interface-contract.md`.
-3. Read `docs/architecture/systems-of-practice.md` when the change affects shared ownership.
-4. Read `config/system-ownership.json` when the capability is registered there.
-5. Identify the canonical functional owner before editing presentation code.
-6. Search the repository for every owner, caller, subscriber, loader, registration, storage key, service-worker entry, workflow reference, and obsolete predecessor related to the capability.
-7. Trace the active route only as needed to understand how the visible UI reaches the canonical implementation.
-8. Repair or extend the existing owner. Do not add a parallel owner.
-9. If duplicated ownership already exists, consolidation is the task. Do not bridge duplicates with a third layer.
-10. If the change makes another active artifact obsolete, delete that artifact and every stale reference in the same change.
+1. Read `config/agent-work-context.json` and compare the task with its branch, path, testing, memory-scope, and tool-boundary guardrails.
+2. Read `docs/architecture/repository-map.md` to locate the current source and runtime boundaries without guessing from filenames.
+3. Read `docs/contracts/mobile-interface-contract.md`.
+4. Read `docs/architecture/systems-of-practice.md` when the change affects shared ownership.
+5. Read `config/system-ownership.json` when the capability is registered there.
+6. Identify the canonical functional owner before editing presentation code.
+7. Search the repository for every owner, caller, subscriber, loader, registration, storage key, service-worker entry, workflow reference, and obsolete predecessor related to the capability.
+8. Trace the active route only as needed to understand how the visible UI reaches the canonical implementation.
+9. Repair or extend the existing owner. Do not add a parallel owner.
+10. If duplicated ownership already exists, consolidation is the task. Do not bridge duplicates with a third layer.
+11. If the change makes another active artifact obsolete, delete that artifact and every stale reference in the same change.
 
 A visible button does not own its behavior merely because it is nearby. A realm page may expose a canonical shared control, but it may not independently intercept or reimplement that control.
 
@@ -170,6 +184,18 @@ Preserve these architectural expectations unless the user explicitly changes the
 - Images, scenes, cabinets, rooms, terminals, and other visual metaphors may present functionality but never define ownership by themselves.
 - If a replacement makes an artifact obsolete, delete it and its stale references. Git history is the archive.
 
+## Test-first agent workflow
+
+For a behavior change, the default order is **contract first, implementation second**.
+
+1. Identify the smallest deterministic test, CI assertion, or end-to-end scenario that would fail before the intended behavior exists.
+2. Add or tighten that executable contract before editing the behavior owner. If an existing failing contract already proves the issue, name and reuse it rather than creating a duplicate test.
+3. Implement the change at the canonical owner.
+4. Run the narrow contract first, then the broader checks required by the affected system.
+5. Keep tests focused on observable behavior and architectural invariants. Do not add vacuous happy-path assertions merely to satisfy this rule.
+
+Documentation-only, comment-only, and mechanical generated-output changes do not require a synthetic failing test. When a defect cannot be reproduced deterministically, document the exact manual reproduction and acceptance evidence in the PR and add the closest stable contract that prevents the known regression.
+
 ## Verification
 
 Static repository-contract verification belongs in GitHub Actions, tests, linting, type checks, or review checks rather than standalone verifier files when practical.
@@ -243,7 +269,7 @@ The pipeline coordinates work. It does not grant architectural authority. Human 
 
 ## Civweave Dev Tools MCP control instructions
 
-The canonical local agent bridge for direct Civweave PWA inspection and source editing is `tools/civweave-dev-mcp/`. It is an observation/interaction and source-edit boundary, not a runtime repair layer.
+The canonical local agent bridge for direct Civweave PWA inspection and source editing is `tools/civweave-dev-mcp/`. It is a **developer and maintainer tool only**: an observation/interaction and source-edit boundary, not an end-user MCP surface and not a runtime repair layer. It must never be bundled into the installed PWA, exposed as a public Civweave endpoint, or treated as the product API for user-owned external agents. A future user-facing MCP or external-agent capability requires its own canonical owner, authentication/authorization contract, privacy review, abuse boundaries, and explicit product surface.
 
 Start it against a dedicated Chromium/Opera development profile whose Chrome DevTools Protocol endpoint is bound to loopback:
 
