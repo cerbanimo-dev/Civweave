@@ -11,6 +11,7 @@ const dec = new TextDecoder();
 const SESSION_DOMAIN = 'civweave.capacity-session.v1';
 const WORKERS_MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';
 const DEFAULT_GATEWAY_MODEL = 'google/gemini-3.1-flash-lite';
+const MAX_GENERATION_TOKENS = 16_384;
 const WORKERS_INPUT_NEURONS_PER_MILLION = 4_119;
 const WORKERS_OUTPUT_NEURONS_PER_MILLION = 34_868;
 const DEFAULT_GATEWAY_INPUT_NEURONS_PER_MILLION = 22_728;
@@ -121,8 +122,37 @@ function boundedSchema(value) {
   return JSON.parse(text);
 }
 function parseStructured(text) {
-  const source = clean(text, 5_000_000).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-  try { return JSON.parse(source); } catch { return null; }
+  const source = clean(text, 5_000_000).trim();
+  if (!source) return null;
+  const attempts = [source];
+  const fenced = source.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)?.[1]?.trim();
+  if (fenced) attempts.push(fenced);
+  const start = source.search(/[\[{]/);
+  if (start >= 0) {
+    let depth = 0, inString = false, escaped = false;
+    for (let index = start; index < source.length; index += 1) {
+      const char = source[index];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (char === '\\') escaped = true;
+        else if (char === '"') inString = false;
+        continue;
+      }
+      if (char === '"') { inString = true; continue; }
+      if (char === '{' || char === '[') depth += 1;
+      else if (char === '}' || char === ']') {
+        depth -= 1;
+        if (depth === 0) { attempts.push(source.slice(start, index + 1)); break; }
+      }
+    }
+  }
+  for (const candidate of attempts) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed && typeof parsed === 'object') return parsed;
+    } catch {}
+  }
+  return null;
 }
 function generationProvenance(model, computeRoute, input = {}) {
   const generatedAt = new Date().toISOString();
@@ -180,7 +210,7 @@ async function handleGenerate(request, env, nodeId) {
   try { session = await verifyCapacitySession(env, bearer(request), nodeId); }
   catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 401); }
   const input = await request.json().catch(() => ({}));
-  const rows = messages(input), maxTokens = Math.max(32, Math.min(4096, Number(input.maxTokens) || 1024));
+  const rows = messages(input), maxTokens = Math.max(32, Math.min(MAX_GENERATION_TOKENS, Number(input.maxTokens) || 1024));
   let schema;
   try { schema = boundedSchema(input.responseSchema); } catch (error) { return json({ ok: false, error: String(error?.message || error) }, 400); }
   let gateway;
