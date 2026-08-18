@@ -1,11 +1,17 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-guide-voice-runtime-v1';
+const VERSION='1.0.1-guide-voice-runtime-v1-pack-diagnostics';
 if(globalThis.CivweaveGuideVoiceV1?.version===VERSION)return;
 const SETTINGS_KEY='civweave.guide-voice.v1';
 const GUIDE=Object.freeze({weaveling:'civweave',moss:'living-school',kamiya:'cerbanimo',rook:'fellowfare',merlin:'anarchadia'});
 const SYSTEMS=Object.freeze(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
+const SPEECH_MODELS=Object.freeze([
+  Object.freeze({id:'parakeet-tdt-0.6b-v3-int8',label:'Parakeet TDT 0.6B v3 INT8',need:Object.freeze(['encoder.int8.onnx','decoder.int8.onnx','joiner.int8.onnx','tokens.txt'])}),
+  Object.freeze({id:'parakeet-tdt-0.6b-v3-fp32',label:'Parakeet TDT 0.6B v3',need:Object.freeze(['encoder.onnx','decoder.onnx','joiner.onnx','tokens.txt'])}),
+  Object.freeze({id:'omnilingual-asr-300m-int8',label:'Omnilingual ASR 300M INT8',need:Object.freeze(['model.int8.onnx','tokens.txt'])}),
+  Object.freeze({id:'omnilingual-asr-1b-int8',label:'Omnilingual ASR 1B INT8',need:Object.freeze(['model.int8.onnx','tokens.txt'])})
+]);
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 let listening=false,recognition=null,sessionSource='',lastInterim='',speaking=false;
@@ -39,6 +45,25 @@ async function startSpecialized(options={}){
   }catch(error){if(error?.code!=='LOCAL_SPECIALIZED_EXECUTOR_UNAVAILABLE')throw error}
   return false;
 }
+async function installedSpeechModelStatus(){
+  const packApi=globalThis.CivweaveLocalModelPacksV1;
+  if(packApi?.specializedStatus){
+    for(const model of SPEECH_MODELS){
+      try{const status=await packApi.specializedStatus(model.id);if(status?.available)return{installed:true,id:model.id,label:model.label,source:'pack-api'}}catch{}
+    }
+  }
+  if(!globalThis.caches?.open)return{installed:false,id:'',label:'',source:'unavailable'};
+  try{
+    const cache=await caches.open(packApi?.cache||'civweave-specialized-model-packs-v1');
+    const keys=await cache.keys();
+    const urls=keys.map(request=>String(request?.url||request));
+    for(const model of SPEECH_MODELS){
+      const matching=urls.filter(url=>url.includes(model.id.split('-int8')[0])||url.includes(model.id.startsWith('parakeet')?'parakeet-tdt-0.6b-v3':'omnilingual-asr'));
+      if(model.need.every(path=>matching.some(url=>url.endsWith('/'+path)||url.includes('/'+path+'?'))))return{installed:true,id:model.id,label:model.label,source:'cache'};
+    }
+  }catch{}
+  return{installed:false,id:'',label:'',source:'cache'};
+}
 function SpeechRecognitionCtor(){return globalThis.SpeechRecognition||globalThis.webkitSpeechRecognition||null}
 async function ensureOnDeviceLanguage(Ctor,language){
   if(typeof Ctor.available!=='function')return'unknown';
@@ -66,7 +91,9 @@ async function start(options={}){
   if(listening)return true;const language=options.language||settings().language;sessionSource='';
   if(await startSpecialized({language}).catch(error=>{emitState({error:clean(error?.message||error,600)});return false}))return true;
   if(await startWebSpeech({language}).catch(error=>{emitState({error:clean(error?.message||error,600),code:error?.code||''});return false}))return true;
-  throw Object.assign(new Error('No offline speech-recognition runtime is installed. Install a Civweave voice pack or an on-device browser language pack.'),{code:'OFFLINE_VOICE_RUNTIME_UNAVAILABLE'});
+  const installed=await installedSpeechModelStatus();
+  if(installed.installed)throw Object.assign(new Error(`Your Civweave ${installed.label} speech model is installed, but this build has no executable local speech-recognition runtime wired to it. The model download is intact; the missing piece is the Civweave speech executor.`),{code:'CIVWEAVE_SPEECH_EXECUTOR_UNAVAILABLE',modelId:installed.id});
+  throw Object.assign(new Error('No offline speech-recognition model or browser language pack is installed. Install a Civweave voice pack or an on-device browser language pack.'),{code:'OFFLINE_VOICE_RUNTIME_UNAVAILABLE'});
 }
 function stop(){const current=recognition;recognition=null;listening=false;lastInterim='';try{current?.stop?.()}catch{}try{current?.abort?.()}catch{}sessionSource='';emitState({stopped:true});return true}
 async function toggle(options={}){if(listening){stop();return false}await start(options);return true}
@@ -84,7 +111,7 @@ addEventListener('civweave:local-ai-transcript',event=>onTranscript(event.detail
 addEventListener('civweave:avatar-direct-text',event=>{const detail=event.detail||{};if(!listening||detail.phase!=='response'||!clean(detail.text))return;void speak(detail.text,{guide:detail.system})});
 addEventListener('pagehide',()=>{stop();stopSpeaking()},{capture:false});
 
-const api=Object.freeze({version:VERSION,guides:GUIDE,systems:SYSTEMS,resolveAddress,routeTranscript,start,stop,toggle,speak,stopSpeaking,state,settings,saveSettings,onTranscript});
+const api=Object.freeze({version:VERSION,guides:GUIDE,systems:SYSTEMS,resolveAddress,routeTranscript,start,stop,toggle,speak,stopSpeaking,state,settings,saveSettings,onTranscript,installedSpeechModelStatus});
 globalThis.CivweaveGuideVoiceV1=api;
 try{dispatchEvent(new CustomEvent('civweave:guide-voice-ready',{detail:state()}))}catch{}
 })();
