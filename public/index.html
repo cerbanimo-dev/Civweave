@@ -21,7 +21,6 @@
     const WORKER_BUILD=`${RELEASE_VERSION}-lightweight-shell-v208`;
     const STAGING_ORIGIN='https://civweave-staging.pages.dev';
     const RESCUE_URL='/staging-pwa-rescue-worker-v434.js?v=staging-rescue-v434';
-    const CURRENT_URL=`/service-worker-v203.js?v=${WORKER_BUILD}&revision=release-coherence-v226`;
     const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     const workerUrl=worker=>{try{return new URL(worker?.scriptURL||'',location.href)}catch{return null}};
     const workerPath=worker=>workerUrl(worker)?.pathname||'';
@@ -62,22 +61,17 @@
       }
       return navigator.serviceWorker.getRegistration('/').catch(()=>null);
     }
-    async function stageCurrentWorkerInBackground(){
-      try{
-        const registration=await navigator.serviceWorker.register(CURRENT_URL,{scope:'/',updateViaCache:'none'});
-        try{registration.waiting?.postMessage?.({type:'SKIP_WAITING'})}catch{}
-        return registration;
-      }catch{return null}
-    }
     async function ensureStagingLaunchLane(){
       if(location.origin!==STAGING_ORIGIN)return{ok:true,mode:'not-staging'};
       if(!('serviceWorker'in navigator))return{ok:false,mode:'unsupported'};
       const existing=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
       if(rootScope(existing)&&await currentShellReady(existing))return{ok:true,mode:'current-shell',registration:snapshot(existing)};
 
-      // Never delete the old caches or unregister the active worker before a
-      // replacement is ready. The previous recovery path did exactly that,
-      // leaving the active v203 worker alive but with 0 required shell files.
+      // Recovery is an atomic handoff: a minimal network-only worker must be
+      // fully active before the page leaves this root. Do not immediately start
+      // another service-worker replacement behind the first recovered
+      // navigation; doing so can terminate the rescue worker while it is still
+      // answering the Working Campus request and surface Chromium ERR_FAILED.
       status('Opening a clean staging launch lane…');
       let rescue;
       try{rescue=await navigator.serviceWorker.register(RESCUE_URL,{scope:'/',updateViaCache:'none'})}
@@ -88,13 +82,9 @@
         return{ok:false,mode:'rescue-activation-failed',registration:snapshot(activeRescue||rescue)};
       }
       status('Staging launch lane recovered.','ready');
-      // Let the full offline worker try to update behind the working network
-      // pass-through. If it takes a long time or fails, the rescue worker stays
-      // active instead of stranding the installed app.
-      setTimeout(()=>{void stageCurrentWorkerInBackground()},250);
       return{ok:true,mode:'network-rescue',registration:snapshot(activeRescue)};
     }
-    globalThis.CivweaveStagingLaunchLaneV434=Object.freeze({version:'staging-launch-lane-v434',ensure:ensureStagingLaunchLane,currentShellReady});
+    globalThis.CivweaveStagingLaunchLaneV435=Object.freeze({version:'staging-launch-lane-v435',ensure:ensureStagingLaunchLane,currentShellReady});
     globalThis.CivweaveStagingLaunchLaneReady=ensureStagingLaunchLane().catch(error=>({ok:false,mode:'exception',error:error?.message||String(error)}));
   })();
   </script>
@@ -132,7 +122,7 @@
       const home=new URL('/app/working-campus-v156.html',location.origin);
       for(const [key,value] of params){if(!['install','installrequired','next','rescue_stay'].includes(key))home.searchParams.append(key,value)}
       if(!home.searchParams.has('version'))home.searchParams.set('version','1.0.163');
-      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root-staging-lane-v434');
+      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root-staging-lane-v435');
       home.hash=location.hash;location.replace(home.href);
     }
     (async()=>{
