@@ -6,12 +6,19 @@
   <meta name="theme-color" content="#061019">
   <title>Civweave</title>
   <link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">
-  <style>html,body{width:100%;height:100%;margin:0;background:#061019}</style>
+  <style>
+    html,body{width:100%;height:100%;margin:0;background:#061019;color:#eaf8ff;font-family:system-ui,sans-serif}
+    body{display:grid;place-items:center}
+    #cw-staging-root-rescue{max-width:32rem;margin:24px;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center}
+    #cw-staging-root-rescue[data-state="failed"]{border-color:#ffad8a66;color:#ffd8c8}
+  </style>
+  <script src="/staging-pwa-rescue-v431.js?v=1"></script>
   <script src="/app/civweave-brand.js?v=1.0.163"></script>
   <script>
   (() => {
     'use strict';
     const CANONICAL_ORIGIN='https://civweave.cc';
+    const STAGING_ORIGIN='https://civweave-staging.pages.dev';
     const PREVIOUS_CANONICAL_ORIGIN='https://civweave.pages.dev';
     const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
     const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
@@ -21,39 +28,56 @@
     const previewParent=cloudflarePreview?`https://${labels.slice(1).join('.')}`:null;
     const previousCanonical=location.origin===PREVIOUS_CANONICAL_ORIGIN;
     const legacyCanonical=location.origin===LEGACY_CANONICAL_ORIGIN;
-    if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||previousCanonical||legacyCanonical||cloudflarePreview)){
-      const destination=cloudflarePreview&&previewParent&&previewParent!==PREVIOUS_CANONICAL_ORIGIN&&previewParent!==LEGACY_CANONICAL_ORIGIN?previewParent:CANONICAL_ORIGIN;
-      const target=new URL('/app/index.html',destination);
-      for(const [key,value] of new URL(location.href).searchParams){if(key!=='install_origin')target.searchParams.append(key,value)}
-      if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
-      target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');
-      target.hash=location.hash;
-      location.replace(target.href);
-      return;
-    }
-    const LEGACY_ENTRY='/app/installed-entry-v146.js?v=1.0.163';
-    const VERSION=new URL(LEGACY_ENTRY,location.origin).searchParams.get('v')||'';
     const params=new URLSearchParams(location.search);
-    const installRequired=params.get('install')==='required'||params.has('installrequired');
-    if(installRequired){
-      const installer=new URL('/app/index.html',location.origin);
-      for(const [key,value] of params)installer.searchParams.append(key,value);
-      installer.hash=location.hash;
-      location.replace(installer.href);
-      return;
+    const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    async function repairStagingLaunch(){
+      if(location.origin!==STAGING_ORIGIN)return null;
+      const rescue=globalThis.CivweaveStagingPwaRescueV431;
+      if(!rescue?.ready)return null;
+      return Promise.race([rescue.ready,wait(16000).then(()=>({ok:false,timeout:true}))]);
     }
-    const home=new URL('/app/working-campus-v156.html',location.origin);
-    for(const [key,value] of params){
-      if(key==='install'||key==='installrequired'||key==='next')continue;
-      home.searchParams.append(key,value);
+    function route(){
+      if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||previousCanonical||legacyCanonical||cloudflarePreview)){
+        const destination=cloudflarePreview&&previewParent&&previewParent!==PREVIOUS_CANONICAL_ORIGIN&&previewParent!==LEGACY_CANONICAL_ORIGIN?previewParent:CANONICAL_ORIGIN;
+        const target=new URL('/app/index.html',destination);
+        for(const [key,value] of new URL(location.href).searchParams){if(key!=='install_origin')target.searchParams.append(key,value)}
+        if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
+        target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');
+        target.hash=location.hash;
+        location.replace(target.href);
+        return;
+      }
+      const LEGACY_ENTRY='/app/installed-entry-v146.js?v=1.0.163';
+      const VERSION=new URL(LEGACY_ENTRY,location.origin).searchParams.get('v')||'';
+      const installRequired=params.get('install')==='required'||params.has('installrequired');
+      if(installRequired){
+        const installer=new URL('/app/index.html',location.origin);
+        for(const [key,value] of params)installer.searchParams.append(key,value);
+        installer.hash=location.hash;
+        location.replace(installer.href);
+        return;
+      }
+      const home=new URL('/app/working-campus-v156.html',location.origin);
+      for(const [key,value] of params){
+        if(key==='install'||key==='installrequired'||key==='next'||key==='rescue_stay')continue;
+        home.searchParams.append(key,value);
+      }
+      if(VERSION&&!home.searchParams.has('version'))home.searchParams.set('version',VERSION);
+      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root');
+      home.hash=location.hash;
+      location.replace(home.href);
     }
-    if(VERSION&&!home.searchParams.has('version'))home.searchParams.set('version',VERSION);
-    if(!home.searchParams.has('source'))home.searchParams.set('source','web-root');
-    home.hash=location.hash;
-    location.replace(home.href);
+    (async()=>{
+      const result=await repairStagingLaunch().catch(()=>null);
+      if(params.get('rescue_stay')==='1'){
+        const node=document.getElementById('cw-staging-root-rescue');
+        if(node){node.hidden=false;node.textContent=result?.ok?'Staging launch shell is current.':result?.timeout?'Staging launch repair is still running.':result?.error?`Staging launch repair failed: ${result.error}`:'Staging launch rescue was not needed.';node.dataset.state=result?.ok?'ready':result?.error?'failed':'pending'}
+        return;
+      }
+      route();
+    })();
   })();
   </script>
 </head>
-<body></body>
+<body><main id="cw-staging-root-rescue" hidden>Refreshing the staging launch shell…</main></body>
 </html>
-
