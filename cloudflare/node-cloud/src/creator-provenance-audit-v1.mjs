@@ -23,8 +23,8 @@ async function verify(publicKey, value, signature) { try { const key = await cry
 export async function validateCreationReceiptObject(object = {}, nodeId = '') {
   if (object.schema !== OBJECT_SCHEMA || object.kind !== RECEIPT_KIND) return { valid: false, reason: 'unsupported-object' };
   if (object.payload?.schema !== RECEIPT_SCHEMA) return { valid: false, reason: 'unsupported-receipt' };
-  const consent = clean(object.consent, 40), guildAudience = `guild:${clean(nodeId, 180)}`, groupAllowed = consent === 'group' && guildAudience !== 'guild:' && Array.isArray(object.audience) && object.audience.includes(guildAudience);
-  if (!['public', 'federated'].includes(consent) && !groupAllowed) return { valid: false, reason: 'cloud-audit-requires-guild-scoped-receipt' };
+  const guildAudience = `guild:${clean(nodeId, 180)}`;
+  if (object.consent !== 'group' || guildAudience === 'guild:' || !Array.isArray(object.audience) || !object.audience.includes(guildAudience)) return { valid: false, reason: 'cloud-audit-requires-guild-scoped-receipt' };
   if (!object.origin?.credential || !object.signature || !object.revisionHash || !object.payloadHash) return { valid: false, reason: 'unsigned-object' };
   if (await sha256(canonical(object.payload)) !== object.payloadHash) return { valid: false, reason: 'payload-hash' };
   const signable = signableObject(object);
