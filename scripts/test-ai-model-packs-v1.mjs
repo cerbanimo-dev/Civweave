@@ -1,0 +1,50 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {dirname,resolve} from 'node:path';
+
+const here=dirname(fileURLToPath(import.meta.url));
+const root=resolve(here,'..');
+const read=path=>readFileSync(resolve(root,path),'utf8');
+
+const packs=read('public/app/local-ai/model-packs-v1.js');
+const settings=read('public/app/settings-local-route-v323.js');
+const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js');
+
+test('AI downloads expose exactly the three intended named pack tiers',()=>{
+  for(const label of ['Minimum Spec Pack','Premier Phone Pack','Server Quality Pack'])assert.match(packs,new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  assert.doesNotMatch(packs,/Nothing Phone/i);
+  assert.match(settings,/Minimum Spec Pack/);
+  assert.match(settings,/Premier Phone Pack/);
+  assert.match(settings,/Server Quality Pack/);
+});
+
+test('minimum pack remains useful on constrained devices',()=>{
+  const block=packs.match(/'minimum-spec'[\s\S]*?(?=\n  'premier-phone')/)?.[0]||'';
+  for(const id of ['qwen3-0.6b-q8-wasm','smollm2-135m-instruct-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
+});
+
+test('Premier Phone pack carries the full 12 GB phone ladder',()=>{
+  const block=packs.match(/'premier-phone'[\s\S]*?(?=\n  'server-quality')/)?.[0]||'';
+  for(const id of ['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
+});
+
+test('server quality pack uses current executable high quality tiers and server speech',()=>{
+  const block=packs.match(/'server-quality'[\s\S]*?\n\}\);/)?.[0]||'';
+  for(const id of ['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-4b-q4f16','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-fp32','omnilingual-asr-1b-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
+  assert.doesNotMatch(block,/gemma-4-12b/i);
+});
+
+test('Local models view has pack actions without eagerly loading pack runtime',()=>{
+  for(const attr of ['data-local-pack-download','data-local-pack-use','data-local-pack-remove','data-local-pack-cancel'])assert.match(settings,new RegExp(attr));
+  assert.match(settings,/model-packs-v1\.js/);
+  assert.match(settings,/actionModulesOnDemand:true/);
+  assert.match(settings,/packRuntimeDependencyOnView:false/);
+});
+
+test('fresh speech models remain reusable outside voice chat',()=>{
+  assert.match(specialized,/supertonic-3-tts-int8/);
+  assert.match(specialized,/'speech-synthesis':freeze\(\{primary:\['supertonic-3-tts-int8'\]/);
+  for(const task of ['dictation','live-captions','media-transcription','read-aloud','translation','summarization','memory-retrieval','deep-reasoning','coding'])assert.match(specialized,new RegExp(`'${task}'`));
+});
