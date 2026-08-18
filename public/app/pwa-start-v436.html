@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061019">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>Civweave</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#061019;color:#f4fbff}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;background:#061019}body{display:grid;place-items:center;padding:max(24px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 34%,#123243 0,#07141d 36%,#061019 70%)}main{width:min(100%,420px);display:grid;justify-items:center;gap:14px;text-align:center}.mark{width:72px;height:72px;border:1px solid #8de5ef55;border-radius:22px;background:radial-gradient(circle,#1d4657,#0a1821 70%);box-shadow:0 14px 42px #0008,0 0 28px #8de5ef18}.mark::after{content:"◈";display:grid;place-items:center;width:100%;height:100%;font-size:34px;color:#a5edf4}small{color:#8de5ef;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{margin:0;font-size:1.35rem}p{margin:0;color:#b9ccd7;line-height:1.5}.pulse{width:44px;height:4px;border-radius:999px;overflow:hidden;background:#143545}.pulse::after{content:"";display:block;width:50%;height:100%;border-radius:inherit;background:#8de5ef;animation:cwstart 1s ease-in-out infinite alternate}@keyframes cwstart{from{transform:translateX(-80%)}to{transform:translateX(180%)}}a{display:none;min-height:46px;width:100%;place-items:center;padding:10px 14px;border:1px solid #8de5ef55;border-radius:13px;background:#102431;color:#f4fbff;text-decoration:none;font-weight:850}html[data-cw-pwa-start="recovery"] a{display:grid}
+</style>
+</head>
+<body>
+<main>
+  <div class="mark" aria-hidden="true"></div>
+  <small>Installed Civweave</small>
+  <h1>Opening the Commons…</h1>
+  <div class="pulse" aria-hidden="true"></div>
+  <p id="status">Starting the Working Campus without changing the app worker during launch.</p>
+  <a id="recover" href="/?installed=1&source=pwa-start-v436-recovery">Open startup recovery</a>
+</main>
+<script>
+(()=>{
+'use strict';
+const VERSION='1.0.163';
+const START_REVISION='pwa-start-v436';
+const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
+const BOOT_KEY='civweave.install-boundary.boot.v228';
+const params=new URLSearchParams(location.search);
+const status=document.querySelector('#status');
+const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+function rememberLaunch(){try{sessionStorage.setItem(LAUNCH_SESSION_KEY,'1');sessionStorage.setItem(BOOT_KEY,'1')}catch{}}
+function installer(){const url=new URL('/app/index.html',location.origin);url.searchParams.set('install','required');url.searchParams.set('source',START_REVISION+'-browser');return url}
+function campus(){const url=new URL('/app/working-campus-v156.html',location.origin);url.searchParams.set('installed','1');url.searchParams.set('version',VERSION);url.searchParams.set('source',START_REVISION);const system=params.get('system');if(system)url.searchParams.set('system',system);return url}
+function fail(message){document.documentElement.dataset.cwPwaStart='recovery';if(status)status.textContent=message}
+try{
+  if(!installedDisplay()){
+    location.replace(installer().href);
+    return;
+  }
+  rememberLaunch();
+  const destination=campus();
+  const watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open startup recovery.'),5000);
+  addEventListener('pagehide',()=>clearTimeout(watchdog),{once:true});
+  location.replace(destination.href);
+}catch(error){fail(`Startup could not continue: ${error?.message||error}`)}
+globalThis.CivweavePwaStartV436=Object.freeze({version:VERSION,revision:START_REVISION,installedDisplay,rememberLaunch,campus});
+})();
+</script>
+</body>
+</html>
