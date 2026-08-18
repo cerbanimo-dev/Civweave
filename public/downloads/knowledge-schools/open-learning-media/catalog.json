@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-08-18T02:00:39Z",
-  "record_count": 192,
-  "mesh_redistributable_count": 139,
-  "download_candidate_count": 297,
+  "built_at": "2026-08-18T02:06:46Z",
+  "record_count": 191,
+  "mesh_redistributable_count": 138,
+  "download_candidate_count": 292,
   "providers": {
     "internet-archive": {
       "records": 7,
@@ -11,9 +11,9 @@
       "download_candidates": 15
     },
     "peertube": {
-      "records": 135,
-      "mesh_redistributable": 89,
-      "download_candidates": 232
+      "records": 134,
+      "mesh_redistributable": 88,
+      "download_candidates": 227
     },
     "wikimedia-commons": {
       "records": 50,
@@ -139,12 +139,12 @@
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series"
       ]
     },
     "astronomy-space": {
@@ -178,9 +178,9 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -599,13 +599,12 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 1,
+      "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Parenting - Blender 2.80 Fundamentals",
         "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
       ]
     },
@@ -675,7 +674,7 @@
       ]
     }
   },
-  "failure_count": 28,
+  "failure_count": 24,
   "failures": [
     {
       "provider": "wikimedia-commons",
@@ -716,14 +715,14 @@
     {
       "provider": "wikimedia-commons",
       "topic_slug": "communication-conflict",
-      "query": "assertive communication skills training",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=assertive+communication+skills+training+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
+      "query": "difficult conversations training",
+      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=difficult+conversations+training+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     },
     {
       "provider": "wikimedia-commons",
       "topic_slug": "communication-conflict",
-      "query": "difficult conversations training",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=difficult+conversations+training+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
+      "query": "assertive communication skills training",
+      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=assertive+communication+skills+training+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     },
     {
       "provider": "wikimedia-commons",
@@ -794,12 +793,6 @@
     {
       "provider": "wikimedia-commons",
       "topic_slug": "entrepreneurship-small-business",
-      "query": "starting a small business workshop",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=starting+a+small+business+workshop+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "topic_slug": "entrepreneurship-small-business",
       "query": "business model customer basics tutorial",
       "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=business+model+customer+basics+tutorial+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     },
@@ -823,27 +816,9 @@
     },
     {
       "provider": "wikimedia-commons",
-      "topic_slug": "music-performance",
-      "query": "music performance practice workshop",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=music+performance+practice+workshop+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "topic_slug": "music-performance",
-      "query": "music theory beginner course",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=music+theory+beginner+course+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "topic_slug": "music-performance",
-      "query": "music fundamentals tutorial",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=music+fundamentals+tutorial+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "topic_slug": "language-learning",
-      "query": "ESL beginner lesson",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=ESL+beginner+lesson+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
+      "topic_slug": "entrepreneurship-small-business",
+      "query": "starting a small business workshop",
+      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=starting+a+small+business+workshop+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     }
   ],
   "records": [
@@ -4275,6 +4250,112 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "76846280-2d75-4397-8802-56d7a8ee2e14",
+      "topic_slug": "chemistry-foundations",
+      "topic_name": "Chemistry Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "chemistry",
+        "atoms",
+        "periodic table",
+        "reactions"
+      ],
+      "matched_query": "chemical reactions chemistry",
+      "title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+      "description": "Learn the basics about balancing equations, as a part of chemical calculations. The law of conservation of mass states that no atoms are lost or made during a chemical reaction. There are different ways of arranging the atoms. Chemical reactions are about rearranging atoms. Chemical reactions can be represented by symbol equations so long as the number of atoms on each side of the equals sign remains the same. Equations need to be balanced to conserve atoms, by putting numbers in front. A good way to balance an equation is to use a table to keep track of everything. You can only change the big number in front of the compounds, which says how many molecules you have. Charges in a formula also need to be balanced. So, both the atoms and the charges have to balance. Nothing can appear or disappear! This is the most important rule about balancing: no atoms or charges can be made or destroyed. Author: FuseSchool - Global Education",
+      "creator": "jessa",
+      "language": "en",
+      "duration_seconds": 182,
+      "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 7276195,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 4512470,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jessa",
+        "source_title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64,
+          "relevance_score": 38
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "chemistry-foundations": {
+          "score": 38,
+          "evidence": [
+            "chemistry",
+            "chemical reactions",
+            "molecules",
+            "chemistry",
+            "atoms",
+            "reactions"
+          ]
+        }
+      },
+      "pedagogy": {
+        "chemistry-foundations": {
+          "strong_title_matches": [
+            "chemistry"
+          ],
+          "strong_description_matches": [
+            "chemical reactions",
+            "molecules"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 64
+        }
+      },
+      "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "dfa4c11c-2412-4482-8ea4-a676812eee36",
       "topic_slug": "chemistry-foundations",
       "topic_name": "Chemistry Foundations",
@@ -4776,106 +4857,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "76846280-2d75-4397-8802-56d7a8ee2e14",
-      "topic_slug": "chemistry-foundations",
-      "topic_name": "Chemistry Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "chemistry",
-        "atoms",
-        "periodic table",
-        "reactions"
-      ],
-      "matched_query": "chemical reactions chemistry",
-      "title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-      "description": "Learn the basics about balancing equations, as a part of chemical calculations. The law of conservation of mass states that no atoms are lost or made during a chemical reaction. There are different ways of arranging the atoms. Chemical reac...",
-      "creator": "jessa",
-      "language": "en",
-      "duration_seconds": 182,
-      "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
-      "source_host": "diler.tube",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 7276195,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 4512470,
-          "resolution": "480p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "jessa",
-        "source_title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "chemistry-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
-          "relevance_score": 14
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "chemistry-foundations": {
-          "score": 14,
-          "evidence": [
-            "chemistry",
-            "chemistry",
-            "atoms"
-          ]
-        }
-      },
-      "pedagogy": {
-        "chemistry-foundations": {
-          "strong_title_matches": [
-            "chemistry"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 48
-        }
-      },
-      "selection": {
-        "chemistry-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51",
       "topic_slug": "chemistry-foundations",
       "topic_name": "Chemistry Foundations",
@@ -4888,7 +4869,7 @@
       ],
       "matched_query": "chemical reactions chemistry",
       "title": "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-      "description": "In this video, we’re going to learn about the loss of mass in a chemical reaction, how it happens and why we measure this. The total MASS of reactants will be the same as that of the products, as mass is always conserved in a chemical reaction...",
+      "description": "In this video, we’re going to learn about the loss of mass in a chemical reaction, how it happens and why we measure this. The total MASS of reactants will be the same as that of the products, as mass is always conserved in a chemical reaction. But often in a reaction, not all of the products formed will stay in the reaction vessel. Some may be lost to the surroundings as a gas. So when gas escapes from a reaction vessel, you can observe that mass has been lost and this mass can be measured. Measuring the loss of mass as a reaction occurs is important, because it can tell us the rate at which the reaction proceeds, which can be vital when it comes to producing chemicals in industry quickly and efficiently. On the other hand, measuring the total loss of mass once a reaction has gone to completion can tell us whether the experiment has been successful and whether the reactants are pure. To measure the loss of mass in a reaction, you can carry out the reaction on electronic scales. Record the initial mass, and then take recordings at regular intervals throughout the reaction. You then can plot a graph of 'loss of mass' against 'time' from which you can then work out the rate of reaction. You can also predict the loss of mass from the chemical equation for the reaction, and then check this expected value against the results of the experiment. Both are important techniques used by chemists. Author: FuseSchool - Global Education",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 282,
@@ -5555,7 +5536,7 @@
       ],
       "matched_query": "chemistry basics",
       "title": "What Is Water Pollution ｜ Environmental Chemistry ｜ Chemistry ｜ FuseSchool",
-      "description": "Learn the basics about water pollution, whilst learning about environmental chemistry. The substances mankind throws away have polluted lakes, rivers and even the oceans. The United Nations estimate that around 10% of the world’s people do ...",
+      "description": "Learn the basics about water pollution, whilst learning about environmental chemistry. The substances mankind throws away have polluted lakes, rivers and even the oceans. The United Nations estimate that around 10% of the world’s people do not have access to clean drinking water. The main problem with this untreated water is that it can carry diseases, such as cholera, that spread through untreated human faeces. This is particularly serious in shanty towns near big cities and in refugee camps. Rivers and streams can also be polluted with diseases from water coming from badly managed rubbish dumps. But human sewage is not the only substance that pollutes our water supplies – most of the other substances humans allow to escape into streams, rivers and the oceans, are more a danger to natural ecosystems than to us directly. Chemical fertilisers are much more soluble in water than organic, manure-based fertilisers, so heavy rain can wash them into streams and lakes, causing eutrophication. The fertilisers cause algae to grow very fast forming a mat on the lake surface, which blocks sunlight from the vegetation deeper down, which then dies. Bacteria feed off the dying vegetation and use up the remaining oxygen supply. Once the oxygen has gone all animal life dies and the lake ecosystem is destroyed. If heavy metals, such as lead mercury and cadmium, get into rivers and lakes many animals will die. Radioactive waste is normally stored above ground in water tanks, waiting for a more permanent underground storage where it has to be safe for millions of years. There are fears that these underground stores could fail and contaminate water courses. Following a nuclear disaster, water courses and the oceans can become dangerously polluted with radioactive waste. During mining and d",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 331,
@@ -13842,6 +13823,101 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "6d5ef824-df67-4eb1-8275-75e8bfb755a2",
+      "topic_slug": "mathematics-foundations",
+      "topic_name": "Mathematics Foundations",
+      "school_slug": "mathematics",
+      "concepts": [
+        "arithmetic",
+        "algebra",
+        "geometry",
+        "mathematical reasoning"
+      ],
+      "matched_query": "mathematics basics algebra",
+      "title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+      "description": "In this video we look at the basics of algebra, focusing on the notation that is used. In algebra we use symbols to represent numbers. These symbols are called variables. Some reasons for using symbols instead of numbers is that the symbols, or variables, can represent unknown quantities and for showing formulae like the area of a circle. Instead of writing a X b we remove the multiplication sign and just write ab instead. Two letters next to each other or a number and a letter, means those things are multiplied together. We use a curly x for the letter because otherwise it looks like a multiplication sign. Instead of the division sign, in algebra we usually write it as a fraction. Numbers are usually left as fractions rather than as decimals. Author: FuseSchool - Global Education",
+      "creator": "jessa",
+      "language": "en",
+      "duration_seconds": 185,
+      "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/6d5ef824-df67-4eb1-8275-75e8bfb755a2-360.mp4",
+          "mime": "video/mp4",
+          "bytes": 6825911,
+          "resolution": "360p",
+          "fps": 30,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jessa",
+        "source_title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "mathematics-foundations",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "mathematics-foundations": {
+          "score": 20,
+          "evidence": [
+            "algebra",
+            "fractions",
+            "algebra"
+          ]
+        }
+      },
+      "pedagogy": {
+        "mathematics-foundations": {
+          "strong_title_matches": [
+            "algebra"
+          ],
+          "strong_description_matches": [
+            "algebra",
+            "fractions"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 64
+        }
+      },
+      "selection": {
+        "mathematics-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
       "topic_slug": "mathematics-foundations",
       "topic_name": "Mathematics Foundations",
@@ -14048,99 +14124,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "6d5ef824-df67-4eb1-8275-75e8bfb755a2",
-      "topic_slug": "mathematics-foundations",
-      "topic_name": "Mathematics Foundations",
-      "school_slug": "mathematics",
-      "concepts": [
-        "arithmetic",
-        "algebra",
-        "geometry",
-        "mathematical reasoning"
-      ],
-      "matched_query": "mathematics basics algebra",
-      "title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
-      "description": "In this video we look at the basics of algebra, focusing on the notation that is used. In algebra we use symbols to represent numbers. These symbols are called variables. Some reasons for using symbols instead of numbers is that the symbols, o...",
-      "creator": "jessa",
-      "language": "en",
-      "duration_seconds": 185,
-      "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
-      "source_host": "diler.tube",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://diler.tube/download/web-videos/6d5ef824-df67-4eb1-8275-75e8bfb755a2-360.mp4",
-          "mime": "video/mp4",
-          "bytes": 6825911,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "jessa",
-        "source_title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "mathematics-foundations",
-          "school_slug": "mathematics",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "mathematics-foundations": {
-          "score": 10,
-          "evidence": [
-            "algebra",
-            "algebra"
-          ]
-        }
-      },
-      "pedagogy": {
-        "mathematics-foundations": {
-          "strong_title_matches": [
-            "algebra"
-          ],
-          "strong_description_matches": [
-            "algebra"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "mathematics-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "cf8641b0-88ee-498e-86eb-65b3028bea60",
       "topic_slug": "mathematics-foundations",
       "topic_name": "Mathematics Foundations",
@@ -14153,7 +14136,7 @@
       ],
       "matched_query": "geometry mathematics",
       "title": "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-      "description": "In this video, we apply the formula derived in the previous video to find the shortest distance between two skew lines. We first do that in vector form. We then apply the formula for vector form to solve a problem when the equations are given in c...",
+      "description": "In this video, we apply the formula derived in the previous video to find the shortest distance between two skew lines. We first do that in vector form. We then apply the formula for vector form to solve a problem when the equations are given in cartesian form. We realise that the vector form is more convenient. We finally solve a problem where the given equations need some rearrangement to get to the vector form. Author: Khan Academy India - English",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 644,
@@ -14255,7 +14238,7 @@
       ],
       "matched_query": "geometry mathematics",
       "title": "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
-      "description": "Today's episode is a special one, as we explore the fascinating world of Geometry: Patterns, Sketches, and Conjectures. If you're ready for a Funny Math Lesson that combines humor with learning, you're in the right place!📐🧮 🔍 In today's inst...",
+      "description": "Today's episode is a special one, as we explore the fascinating world of Geometry: Patterns, Sketches, and Conjectures. If you're ready for a Funny Math Lesson that combines humor with learning, you're in the right place!📐🧮 🔍 In today's installment, we'll delve into: The captivating intricacies of geometry, focusing on Math Pattern Recognition and the art of crafting precise Geometry Conjectures. A stimulating challenge straight from a McDougal Littell High School Geometry textbook. Can you visualize and sketch the next figure in our Geometry Sequences? 🧠 Why This Adventure? Sparking Curiosity: Geometry is more than just shapes; it's about recognizing patterns, discovering connections, and understanding the space around us. Tool Time: Sharpen your skills and precision with geometry tools like the compass, a staple in Math Exploration. Growth Mindset: Remember, it's okay to stumble. Each mistake paves the way to deeper understanding. Author: Mister Marx",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 253,
@@ -14566,7 +14549,7 @@
       ],
       "matched_query": "geometry mathematics",
       "title": "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-      "description": "In this video, we learn how to find the distance between two parallel lines in 3D. We first derive the formula to get the distance between two given lines. We then understand why it works in vector form. We then apply the formula to get the distan...",
+      "description": "In this video, we learn how to find the distance between two parallel lines in 3D. We first derive the formula to get the distance between two given lines. We then understand why it works in vector form. We then apply the formula to get the distance between two given parallel lines. Author: Khan Academy India - English",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 343,
@@ -14665,7 +14648,7 @@
       ],
       "matched_query": "geometry mathematics",
       "title": "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
-      "description": "In this video get to learn about the basic concept of volume and surface area of solids. How do we get the formulae for different 3D shapes? Learn more in this video. Khan Academy is a free learning platform for Class 1-12 students with videos,...",
+      "description": "In this video get to learn about the basic concept of volume and surface area of solids. How do we get the formulae for different 3D shapes? Learn more in this video. Khan Academy is a free learning platform for Class 1-12 students with videos, exercises, and tests for maths, science, and more subjects. Our content is aligned to CBSE syllabus and available in Hindi, English, and many more regional languages. Author: Khan Academy India - English",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 282,
@@ -15429,129 +15412,6 @@
         "mythology-folklore": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 27
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "9c41ef16-447e-42fe-87b7-bb24ab3b5802",
-      "topic_slug": "parenting-caregiving",
-      "topic_name": "Parenting & Caregiving",
-      "school_slug": "everyday-life",
-      "concepts": [
-        "parenting",
-        "caregiving",
-        "child development",
-        "co-regulation"
-      ],
-      "matched_query": "parenting skills child development course",
-      "title": "Parenting - Blender 2.80 Fundamentals",
-      "description": "Blender is Free and Open Source Software Download: https://blender.org/download Manual: https://docs.blender.org/manual/en/latest/ Support core Blender development - https://fund.blender.org -- This tutorial is part of the Blender Fundame...",
-      "creator": "Blender",
-      "language": null,
-      "duration_seconds": 417,
-      "source_url": "https://video.blender.org/videos/watch/9c41ef16-447e-42fe-87b7-bb24ab3b5802",
-      "source_host": "video.blender.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 42934688,
-          "resolution": "1080p",
-          "fps": 24,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-720.mp4",
-          "mime": "video/mp4",
-          "bytes": 26202168,
-          "resolution": "720p",
-          "fps": 24,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 17094347,
-          "resolution": "480p",
-          "fps": 24,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-360.mp4",
-          "mime": "video/mp4",
-          "bytes": 13414777,
-          "resolution": "360p",
-          "fps": 24,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-240.mp4",
-          "mime": "video/mp4",
-          "bytes": 10347126,
-          "resolution": "240p",
-          "fps": 24,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Blender",
-        "source_title": "Parenting - Blender 2.80 Fundamentals",
-        "source_url": "https://video.blender.org/videos/watch/9c41ef16-447e-42fe-87b7-bb24ab3b5802",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "parenting-caregiving",
-          "school_slug": "everyday-life",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "parenting-caregiving": {
-          "score": 10,
-          "evidence": [
-            "parenting",
-            "parenting"
-          ]
-        }
-      },
-      "pedagogy": {
-        "parenting-caregiving": {
-          "strong_title_matches": [
-            "parenting"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 48
-        }
-      },
-      "selection": {
-        "parenting-caregiving": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
         }
       }
     },
@@ -17781,7 +17641,7 @@
         "flowcharts",
         "computational thinking"
       ],
-      "matched_query": "algorithm design",
+      "matched_query": "computational thinking",
       "title": "Dijkstra s algorithm explained",
       "description": "Tutorial of the Dijkstra's algorithm for finding the shortest path between nodes in a network.",
       "creator": "Jaakko",
@@ -19460,11 +19320,11 @@
       }
     }
   ],
-  "record_count_before_relevance_gate": 1117,
-  "record_count_before_pedagogy_gate": 506,
+  "record_count_before_relevance_gate": 1118,
+  "record_count_before_pedagogy_gate": 507,
   "record_count_before_selection_gate": 275,
   "rejected_by_relevance_gate": 611,
-  "rejected_by_pedagogy_gate": 231,
+  "rejected_by_pedagogy_gate": 232,
   "rejected_by_selection_gate": 57,
   "topic_stats": {
     "world-history": {
@@ -19584,12 +19444,12 @@
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series"
       ]
     },
     "astronomy-space": {
@@ -19623,9 +19483,9 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -20044,13 +19904,12 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 1,
+      "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Parenting - Blender 2.80 Fundamentals",
         "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
       ]
     },
@@ -20336,13 +20195,12 @@
         "philosophy-ethics"
       ],
       "covered_topics": [
-        "parenting-caregiving",
         "health-wellness",
         "critical-thinking",
         "philosophy-ethics"
       ],
-      "coverage": 0.8,
-      "records": 10,
+      "coverage": 0.6,
+      "records": 9,
       "available": true
     },
     "garden-nature": {
@@ -20554,8 +20412,8 @@
   },
   "pack_registry_revision": "subject-media-packs-v2.5",
   "records_before_title_quality_gate": 218,
-  "rejected_by_title_quality_gate": 26,
-  "rejected_topic_links_by_title_quality_gate": 29,
+  "rejected_by_title_quality_gate": 27,
+  "rejected_topic_links_by_title_quality_gate": 30,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v2",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."

@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-packs.v1",
-  "built_at": "2026-08-18T02:00:39Z",
+  "built_at": "2026-08-18T02:06:46Z",
   "revision": "subject-media-packs-v2.5",
   "default_pack": "general-knowledge",
   "packs": [
@@ -165,7 +165,7 @@
         "critical-thinking",
         "philosophy-ethics"
       ],
-      "coverage": 0.8,
+      "coverage": 0.6,
       "available": true
     },
     {

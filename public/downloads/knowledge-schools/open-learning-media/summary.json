@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-18T02:00:39Z",
-  "records": 192,
-  "mesh_redistributable": 139,
-  "download_candidates": 297,
+  "built_at": "2026-08-18T02:06:46Z",
+  "records": 191,
+  "mesh_redistributable": 138,
+  "download_candidates": 292,
   "providers": {
     "internet-archive": {
       "records": 7,
@@ -11,9 +11,9 @@
       "download_candidates": 15
     },
     "peertube": {
-      "records": 135,
-      "mesh_redistributable": 89,
-      "download_candidates": 232
+      "records": 134,
+      "mesh_redistributable": 88,
+      "download_candidates": 227
     },
     "wikimedia-commons": {
       "records": 50,
@@ -139,12 +139,12 @@
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series"
       ]
     },
     "astronomy-space": {
@@ -178,9 +178,9 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -599,13 +599,12 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 1,
+      "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Parenting - Blender 2.80 Fundamentals",
         "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
       ]
     },
@@ -675,12 +674,12 @@
       ]
     }
   },
-  "failures": 28,
-  "records_before_relevance_gate": 1117,
-  "records_before_pedagogy_gate": 506,
+  "failures": 24,
+  "records_before_relevance_gate": 1118,
+  "records_before_pedagogy_gate": 507,
   "records_before_selection_gate": 275,
   "rejected_by_relevance_gate": 611,
-  "rejected_by_pedagogy_gate": 231,
+  "rejected_by_pedagogy_gate": 232,
   "rejected_by_selection_gate": 57,
   "topic_stats": {
     "world-history": {
@@ -800,12 +799,12 @@
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series"
       ]
     },
     "astronomy-space": {
@@ -839,9 +838,9 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -1260,13 +1259,12 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 1,
+      "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Parenting - Blender 2.80 Fundamentals",
         "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
       ]
     },
@@ -1552,13 +1550,12 @@
         "philosophy-ethics"
       ],
       "covered_topics": [
-        "parenting-caregiving",
         "health-wellness",
         "critical-thinking",
         "philosophy-ethics"
       ],
-      "coverage": 0.8,
-      "records": 10,
+      "coverage": 0.6,
+      "records": 9,
       "available": true
     },
     "garden-nature": {
@@ -1782,8 +1779,8 @@
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
   "records_before_title_quality_gate": 218,
-  "rejected_by_title_quality_gate": 26,
-  "rejected_topic_links_by_title_quality_gate": 29,
+  "rejected_by_title_quality_gate": 27,
+  "rejected_topic_links_by_title_quality_gate": 30,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v2",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."
