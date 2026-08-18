@@ -1,4 +1,4 @@
-const CACHE='civweave-creator-suite-v1';
+const CACHE='civweave-creator-suite-v2';
 const CORE=[
   '/creator-suite/',
   '/creator-suite/index.html',
@@ -6,7 +6,11 @@ const CORE=[
   '/creator-suite/creator-suite-v1.css',
   '/creator-suite/creator-suite-v1.js',
   '/creator-suite/shared/session-store-v1.js',
+  '/creator-suite/shared/storage-preflight-v1.js',
   '/creator-suite/shared/packet-crypto-v1.js',
+  '/creator-suite/shared/packet-codec-v1.js',
+  '/creator-suite/shared/import-provenance-v1.js',
+  '/creator-suite/shared/provenance-label-v1.js',
   '/creator-suite/shared/ai-tools-v1.js',
   '/creator-suite/text-editor-v1.js',
   '/creator-suite/audio-editor-v1.js',
