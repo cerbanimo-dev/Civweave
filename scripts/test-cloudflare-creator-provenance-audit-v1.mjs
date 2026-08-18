@@ -12,12 +12,13 @@ const canonical = value => JSON.stringify(normalized(value));
 const b64 = bytes => Buffer.from(bytes).toString('base64url');
 const sha = async value => b64(new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(typeof value === 'string' ? value : canonical(value)))));
 const signable = object => ({ schema: object.schema, id: object.id, revision: object.revision, kind: object.kind, purpose: object.purpose, audience: object.audience, consent: object.consent, payload: object.payload, payloadHash: object.payloadHash, parentIds: object.parentIds, createdAt: object.createdAt, updatedAt: object.updatedAt, expiresAt: object.expiresAt, origin: object.origin, hopLimit: object.hopLimit });
+const GUILD_ID = 'guild-test';
 
-async function signedReceipt(day = '2026-08-17') {
+async function signedReceipt(day = '2026-08-17', guildId = GUILD_ID) {
   const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
   const publicKey = await crypto.subtle.exportKey('jwk', pair.publicKey), fingerprint = (await sha(publicKey)).slice(0, 24);
   const payload = { schema: 'civweave.creation-receipt-summary.v1', sessionId: 'creation:test', mediaType: 'text', artifactType: 'document', eventCount: 3, headHash: 'head-hash', origin: 'human-authored', aiUsed: false, finalizedAt: `${day}T18:00:00.000Z`, receiptHash: 'receipt-hash' };
-  const object = { schema: 'civweave.community-object.v1', id: 'creation-receipt:test', revision: 1, kind: 'civweave.creation-receipt.v1', purpose: 'receipt', audience: [], consent: 'federated', payload, payloadHash: await sha(payload), parentIds: [], createdAt: `${day}T18:00:00.000Z`, updatedAt: `${day}T18:00:00.000Z`, expiresAt: null, origin: { nodeId: `device:${fingerprint}`, credential: publicKey, fingerprint }, hopLimit: 4 };
+  const object = { schema: 'civweave.community-object.v1', id: 'creation-receipt:test', revision: 1, kind: 'civweave.creation-receipt.v1', purpose: 'receipt', audience: [`guild:${guildId}`], consent: 'group', payload, payloadHash: await sha(payload), parentIds: [], createdAt: `${day}T18:00:00.000Z`, updatedAt: `${day}T18:00:00.000Z`, expiresAt: null, origin: { nodeId: `device:${fingerprint}`, credential: publicKey, fingerprint }, hopLimit: 4 };
   object.revisionHash = await sha(signable(object));
   object.signature = b64(new Uint8Array(await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, pair.privateKey, enc.encode(canonical(signable(object))))));
   return object;
@@ -34,30 +35,32 @@ class Storage {
 }
 
 const now = Date.parse('2026-08-18T08:00:00.000Z'), object = await signedReceipt('2026-08-17');
-assert.deepEqual(await validateCreationReceiptObject(object), { valid: true, receipt: object.payload });
+assert.deepEqual(await validateCreationReceiptObject(object, GUILD_ID), { valid: true, receipt: object.payload });
 const tampered = structuredClone(object); tampered.payload.eventCount = 99;
-assert.equal((await validateCreationReceiptObject(tampered)).valid, false);
+assert.equal((await validateCreationReceiptObject(tampered, GUILD_ID)).valid, false);
 const privateObject = structuredClone(object); privateObject.consent = 'private';
-assert.equal((await validateCreationReceiptObject(privateObject)).reason, 'cloud-audit-requires-federated-receipt');
+assert.equal((await validateCreationReceiptObject(privateObject, GUILD_ID)).reason, 'cloud-audit-requires-guild-scoped-receipt');
+const wrongGuild = structuredClone(object); wrongGuild.audience = ['guild:someone-else'];
+assert.equal((await validateCreationReceiptObject(wrongGuild, GUILD_ID)).reason, 'cloud-audit-requires-guild-scoped-receipt');
 
 const storage = new Storage();
-const first = await ingestCreationReceipt(storage, 'guild:test', object, now);
+const first = await ingestCreationReceipt(storage, GUILD_ID, object, now);
 assert.equal(first.stored, true);
 assert.ok(storage.alarm > now);
-assert.equal((await ingestCreationReceipt(storage, 'guild:test', object, now)).stored, false, 'same signed receipt must dedupe');
+assert.equal((await ingestCreationReceipt(storage, GUILD_ID, object, now)).stored, false, 'same signed receipt must dedupe');
 assert.equal((await listReceiptsForDay(storage, '2026-08-17')).length, 1);
 const storedReceipt = [...storage.rows.values()].find(row => row?.schema === 'civweave.guild-creator-receipt.v1');
 assert.equal(storedReceipt.originDeviceId, object.origin.nodeId);
 assert.deepEqual(storedReceipt.originCredential, object.origin.credential, 'receipt record must retain only the public device credential needed to authenticate later evidence release');
 assert.equal(previousUtcDay(now), '2026-08-17');
-assert.ok(nextAuditAlarm('guild:test', now) > now);
+assert.ok(nextAuditAlarm(GUILD_ID, now) > now);
 await setGuildAuditPolicy(storage, { baseSampleRate: 0.25, maxDailySamples: 10, secretSalt: 'must-not-store' });
 assert.equal(storage.rows.get('creator-provenance:policy').secretSalt, undefined);
 let auditSalt = '';
 for (let i = 0; i < 1000; i++) { const candidate = `guild-private-sampling-secret-v1-${i}`; if (await samplingScore(object.payload, { dayKey: '2026-08-17', secretSalt: candidate }) < 0.25) { auditSalt = candidate; break; } }
 assert.ok(auditSalt, 'test vector must find a deterministic selected receipt');
-const audit = await runGuildDailyAudit(storage, 'guild:test', auditSalt, now);
-assert.equal(audit.result.guildId, 'guild:test');
+const audit = await runGuildDailyAudit(storage, GUILD_ID, auditSalt, now);
+assert.equal(audit.result.guildId, GUILD_ID);
 assert.equal(audit.result.dayKey, '2026-08-17');
 assert.equal(audit.result.eligibleCount, 1);
 assert.equal(audit.result.selectedCount, 1);
