@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v6-working-campus-guild-quest';
+const REVISION='shell-assets-v1-repair-v7-human-chat-network';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
@@ -25,20 +25,28 @@ const OPTIONAL_GUILD_QUEST=[
   '/app/cerbanimo-intention-landscape-v1.css',
   '/app/cerbanimo-intention-landscape-v1.js'
 ];
+const OPTIONAL_HUMAN_CHAT=[
+  '/app/human-message-bubble-v1.js',
+  '/app/human-chat-network-v1.js',
+  '/app/civweave-private-messaging-v1.js',
+  '/app/local-object-mesh-v146.js',
+  '/app/shared-intention-party-chat-v1.js'
+];
 for(const pathname of REQUIRED_FAMILY_NAV){
   const optionalIndex=OPTIONAL_SHELL_ASSETS.indexOf(pathname);
   if(optionalIndex>=0)OPTIONAL_SHELL_ASSETS.splice(optionalIndex,1);
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-for(const pathname of [...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST]){
+for(const pathname of [...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
 self.CivweaveShellAssetsV1=Object.freeze({
   revision:REVISION,
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
-  optional:[...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST],
+  optional:[...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
+  humanChat:[...OPTIONAL_HUMAN_CHAT],
   policy:'declarative-shell-assets-only-no-repair-or-message-ownership'
 });
 })();
