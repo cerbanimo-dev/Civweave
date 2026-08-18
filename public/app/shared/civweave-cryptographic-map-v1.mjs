@@ -51,9 +51,21 @@ async function deterministicUid(prefix, seed) {
   return `${prefix}_${(await sha256Hex(seed)).slice(0, 32)}`;
 }
 
-async function colorMarkerFromSeed(seed) {
+function markerName(index) {
+  let n = Math.max(0, Math.floor(Number(index) || 0)) + 1;
+  let name = '';
+  while (n > 0) {
+    n -= 1;
+    name = String.fromCharCode(65 + (n % 26)) + name;
+    n = Math.floor(n / 26);
+  }
+  return name;
+}
+
+async function colorMarkerFromSeed(seed, colorIndex) {
   const digest = await sha256Hex(seed);
   return {
+    colorIndex,
     colorUid: `cwcolor_${digest.slice(8, 40)}`,
     colorCode: `#${digest.slice(0, 8).toUpperCase()}`,
   };
@@ -63,10 +75,6 @@ function rotateToIndex(values, sourceIndex, targetIndex) {
   const length = values.length;
   const shift = ((targetIndex - sourceIndex) % length + length) % length;
   return values.map((_, index) => values[((index - shift) % length + length) % length]);
-}
-
-function chordByUid(weave, chordUid) {
-  return weave?.chords?.find((chord) => chord.chordUid === chordUid) || null;
 }
 
 function positionByUid(chord, positionUid) {
@@ -108,16 +116,20 @@ async function createChordCore({
     if (!stitchSource) throw new Error('stitchFromPositionUid does not belong to the previous Chord.');
   }
 
-  const pairColor = await colorMarkerFromSeed(`${chordSeed}:pair`);
-  const outgoingColor = await colorMarkerFromSeed(`${chordSeed}:outgoing`);
-  const seedA = await colorMarkerFromSeed(`${chordSeed}:seed:a`);
-  const seedB = await colorMarkerFromSeed(`${chordSeed}:seed:b`);
+  const pairColor = await colorMarkerFromSeed(`${chordSeed}:pair`, index * 2);
+  const outgoingColor = await colorMarkerFromSeed(`${chordSeed}:outgoing`, index * 2 + 1);
+  const seedA = await colorMarkerFromSeed(`${chordSeed}:seed:a`, 0);
+  const seedB = await colorMarkerFromSeed(`${chordSeed}:seed:b`, 1);
 
   let colorMarkers;
   if (isSeedChord) {
     colorMarkers = [seedA, seedB, seedB, seedA];
   } else {
-    const incoming = { colorUid: stitchSource.colorUid, colorCode: stitchSource.colorCode };
+    const incoming = {
+      colorIndex: stitchSource.colorIndex,
+      colorUid: stitchSource.colorUid,
+      colorCode: stitchSource.colorCode,
+    };
     const canonicalOverlay = [incoming, pairColor, pairColor, outgoingColor];
     colorMarkers = rotateToIndex(canonicalOverlay, 0, Math.max(0, Math.min(3, stitchIntoPositionIndex)));
   }
@@ -129,6 +141,7 @@ async function createChordCore({
     slotIndex,
     structuralBit: structure.bits[slotIndex],
     structuralRole: structure.roles[slotIndex],
+    colorIndex: colorMarkers[slotIndex].colorIndex,
     colorUid: colorMarkers[slotIndex].colorUid,
     colorCode: colorMarkers[slotIndex].colorCode,
     stitchUid: null,
@@ -157,14 +170,7 @@ async function createChordCore({
     target.stitchUid = stitch.stitchUid;
   }
 
-  const colorRoleString = (() => {
-    const names = new Map();
-    let nextCode = 65;
-    return positions.map((position) => {
-      if (!names.has(position.colorUid)) names.set(position.colorUid, String.fromCharCode(nextCode++));
-      return names.get(position.colorUid);
-    }).join('');
-  })();
+  const colorRoleString = positions.map((position) => markerName(position.colorIndex)).join('');
 
   const core = {
     schema: CHORD_SCHEMA,

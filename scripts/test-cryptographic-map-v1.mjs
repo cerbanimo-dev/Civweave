@@ -31,6 +31,11 @@ test('color lineage advances ABBA ACCD DEEF FGGH by single-position Stitch', asy
   const weave = await createWeave(['seed', 'one', 'two', 'three']);
   const [zero, one, two, three] = weave.chords;
 
+  assert.equal(zero.color.roleString, 'ABBA');
+  assert.equal(one.color.roleString, 'ACCD');
+  assert.equal(two.color.roleString, 'DEEF');
+  assert.equal(three.color.roleString, 'FGGH');
+
   assert.equal(zero.positions[0].colorUid, zero.positions[3].colorUid);
   assert.equal(zero.positions[1].colorUid, zero.positions[2].colorUid);
   assert.equal(one.positions[0].colorUid, zero.positions[3].colorUid);
