@@ -1,6 +1,6 @@
 import media from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
 
-const REVISION='living-school-media-pack-recommender-v1';
+const REVISION='living-school-media-pack-recommender-v1.1-expanded';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const STOP=new Set(['about','after','again','also','basic','basics','beginner','build','building','capability','complete','course','create','creating','curriculum','foundation','foundations','guide','guided','intro','introduction','learn','learning','lesson','module','practice','practical','skill','skills','study','teach','teaching','through','using','vocabulary','with','your']);
 const PACK_RULES=Object.freeze({
@@ -12,9 +12,14 @@ const PACK_RULES=Object.freeze({
   'deep-science':['biology','physics','chemistry','astronomy','climate','science'],
   'humanities-culture':['history','culture','philosophy','ethics','geography','society','art'],
   'tarot-symbolic-practice':['tarot','tarot cards','major arcana','minor arcana','arcana','card reading','divination','cartomancy','symbolism','rider waite','rider-waite','marseille tarot'],
+  'mind-body-practice':['mindfulness','meditation','breathing','attention','contemplative','self reflection','wellness'],
+  'relationships-care':['parenting','gentle parenting','caregiving','child development','communication','conflict','active listening','relationships','family care'],
+  'garden-nature':['gardening','garden','plant care','plants','soil','vegetable garden','growing food','horticulture'],
+  'career-enterprise':['career','workplace','resume','interview','business','entrepreneurship','small business','self employment','finance','communication'],
+  'music-performance':['music','music theory','performance','rhythm','melody','instrument','singing'],
+  'language-communication':['language learning','second language','vocabulary','grammar','listening','speaking','communication'],
   'systems-decision-making':['systems thinking','logic','decision','reasoning','statistics','probability','critical thinking'],
-  'home-independence':['home maintenance','home repair','budgeting','cooking','food safety','wellness','independent living'],
-  'career-enterprise':['career','workplace','resume','interview','business','entrepreneurship','finance','communication'],
+  'home-independence':['home maintenance','home repair','budgeting','cooking','food safety','wellness','emergency preparedness','independent living'],
   'hands-on-maker':['electronics','circuits','woodworking','sewing','textiles','repair','maker','fabrication'],
   'environment-resilience':['climate','environment','emergency preparedness','disaster','resilience','geography','health'],
   'visual-storytelling':['drawing','design','photography','video','cinematography','visual art','storytelling'],
@@ -40,13 +45,14 @@ function packScore(pack,query,lookup){
   return score;
 }
 
-function fallbackPackRows(){return Object.keys(PACK_RULES).map(slug=>({slug,name:slug.split('-').map(value=>value[0]?.toUpperCase()+value.slice(1)).join(' '),description:'Suggested subject media pack.',topics:[],available:false,kind:'extension'}))}
+function prettySlug(slug){return slug.split('-').map(value=>value[0]?.toUpperCase()+value.slice(1)).join(' ')}
+function fallbackPackRows(){return Object.keys(PACK_RULES).map(slug=>({slug,name:prettySlug(slug),description:'Suggested subject media pack.',topics:[],available:false,kind:'extension'}))}
 
 export async function recommendMediaPacks(query,{limit=3}={}){
   let lookup=null;try{lookup=await media.loadLookup()}catch{}
-  const rows=Array.isArray(lookup?.packs)&&lookup.packs.length?lookup.packs:fallbackPackRows();
+  const rows=Array.isArray(lookup?.packs)&&lookup.packs.length?[...lookup.packs]:fallbackPackRows();
   const known=new Map(rows.map(pack=>[pack.slug,pack]));
-  for(const slug of Object.keys(PACK_RULES))if(!known.has(slug))rows.push({slug,name:slug.split('-').map(value=>value[0]?.toUpperCase()+value.slice(1)).join(' '),description:'This pack is queued for the next Open Learning Media catalog refresh.',topics:[],available:false,kind:'extension',catalogPending:true});
+  for(const slug of Object.keys(PACK_RULES))if(!known.has(slug))rows.push({slug,name:prettySlug(slug),description:'This pack is queued for the next Open Learning Media catalog refresh.',topics:[],available:false,kind:'extension',catalogPending:true});
   return rows.map(pack=>({...pack,score:packScore(pack,query,lookup)})).filter(pack=>pack.score>0).sort((a,b)=>b.score-a.score||Number(b.coverage||0)-Number(a.coverage||0)).slice(0,Math.max(1,limit));
 }
 
@@ -60,6 +66,7 @@ export async function downloadMediaPack(packSlug,{limitPerTopic=1,pinned=false}=
 
 function button(label,action,primary=false){const node=document.createElement('button');node.type='button';node.textContent=label;node.style.cssText=`border:1px solid currentColor;border-radius:999px;padding:9px 13px;background:${primary?'rgba(255,255,255,.12)':'transparent'};color:inherit;font:inherit;font-weight:700;`;node.addEventListener('click',action);return node}
 function packLabel(pack){return`${pack.name}${pack.available===false?' · catalog refresh needed':''}`}
+function packCopy(pack){const node=document.createElement('div');const title=document.createElement('b');title.textContent=packLabel(pack);const br=document.createElement('br');const detail=document.createElement('small');detail.textContent=clean(pack.description||'',500);node.append(title,br,detail);return node}
 
 export async function offerMediaPacksBeforeCurriculum(query,{limit=3}={}){
   const recommendations=await recommendMediaPacks(query,{limit});
@@ -69,12 +76,12 @@ export async function offerMediaPacksBeforeCurriculum(query,{limit=3}={}){
   const dialog=document.createElement('dialog');dialog.dataset.livingSchoolMediaPackOffer=REVISION;dialog.style.cssText='max-width:min(92vw,620px);border:1px solid currentColor;border-radius:20px;padding:0;background:#102f25;color:#f3f2df;box-shadow:0 24px 80px rgba(0,0,0,.45);';
   const body=document.createElement('div');body.style.cssText='display:grid;gap:14px;padding:20px;';
   const title=document.createElement('strong');title.textContent='Recommended video packs';title.style.cssText='font-size:1.15rem;';body.append(title);
-  const copy=document.createElement('p');copy.textContent='Before Moss builds this curriculum, you can seed the local video shelf with packs that match the subject. This is optional; if no relevant video survives the relevance gate, Civweave will use the required fallback instead.';copy.style.cssText='margin:0;line-height:1.45;';body.append(copy);
+  const copyNode=document.createElement('p');copyNode.textContent='Before Moss builds this curriculum, you can seed the local video shelf with packs that match the subject. This is optional; if no relevant video survives the relevance gate, Civweave will use the required fallback instead.';copyNode.style.cssText='margin:0;line-height:1.45;';body.append(copyNode);
   const list=document.createElement('div');list.style.cssText='display:grid;gap:9px;';body.append(list);
   let resolver=null;const done=new Promise(resolve=>{resolver=resolve});
   for(const pack of recommendations){
     const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid rgba(255,255,255,.2);border-radius:14px;';
-    const text=document.createElement('div');text.innerHTML=`<b>${packLabel(pack)}</b><br><small>${clean(pack.description||'',500)}</small>`;row.append(text);
+    row.append(packCopy(pack));
     const action=button(pack.available===false?'Not seeded':'Download',async()=>{if(pack.available===false)return;action.disabled=true;action.textContent='Downloading…';try{await downloadMediaPack(pack.slug,{limitPerTopic:1});action.textContent='Downloaded'}catch(error){action.textContent='Unavailable';action.title=error.message}},true);if(pack.available===false)action.disabled=true;row.append(action);list.append(row);
   }
   const actions=document.createElement('div');actions.style.cssText='display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;';
