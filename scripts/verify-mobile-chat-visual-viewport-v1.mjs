@@ -67,12 +67,19 @@ for(const required of [
   'overflow-y:auto!important',
   '>.cw295-saved-chats',
   '[data-persistent-form]',
+  'grid-template-columns:minmax(0,1fr) 86px!important',
+  'grid-template-rows:38px 38px!important',
+  'grid-row:1 / span 2!important',
+  'height:84px!important',
+  '[data-voice]{grid-row:1!important}',
+  '[data-send]{grid-row:2!important}',
   'html[data-civweave-mobile-ai-hardening="v302"]'
 ])if(!style.includes(required))throw new Error(`Missing long-thread viewport CSS contract: ${required}`);
 
 if(!listeners.some(row=>row.target==='visualViewport'&&row.type==='resize'))throw new Error('Visual viewport resize is not observed.');
 if(!listeners.some(row=>row.target==='visualViewport'&&row.type==='scroll'))throw new Error('Visual viewport offset changes are not observed.');
 if(!source.includes('composerVisibilityInvariant:true')||!source.includes('longThreadScrollOwner:true'))throw new Error('Long-thread composer visibility invariant is not declared.');
+if(!source.includes("mobileLayout:'flex-column-fixed-composer-stacked-actions'"))throw new Error('Stacked mobile composer action layout is not declared.');
 
 for(const required of [
   'function activateThreadUI',
@@ -86,4 +93,4 @@ if(!savedUi.includes('cw295-has-saved-chats')||!savedUi.includes('data-cw295-new
 if(!savedStore.includes('function create(system)')||!savedStore.includes('function select(system,id)'))throw new Error('Saved thread create/select persistence is missing.');
 if(!workerRepair.includes("'/app/mobile-chat-visual-viewport-v1.js'")||!workerRepair.includes("'/app/saved-chat-ui-v295.js'")||!workerRepair.includes("'/app/saved-chat-store-v295.js'"))throw new Error('Installed-PWA cache repair does not rotate the long-thread/threadbar assets.');
 
-console.log('Mobile guide chat verified: long transcripts stay inside the scroll region, the composer remains in-frame, and saved thread tabs/new-thread controls are restored on chat open.');
+console.log('Mobile guide chat verified: long transcripts stay inside the scroll region, the composer remains in-frame, voice/send actions stack compactly beside the matching-height text field, and saved thread tabs/new-thread controls are restored on chat open.');
