@@ -1,5 +1,5 @@
 import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs';
-import {state,persist,toast,progressFor,fields,clean,generateSchool} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
+import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 import {researchCapability} from './living-school-local-research-v243.mjs?v=research-links-v260';
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
@@ -7,6 +7,8 @@ const stage=(handler,name,detail={})=>{try{handler?.(name,detail)}catch{}};
 const REQUIRED_QUIZ_TYPES=['multiple-choice','multi-select','short-answer'];
 const fallbackQuestion=question=>/-fallback-\d+$/i.test(clean(question?.id,160));
 const genuineQuizBank=module=>(Array.isArray(module?.quiz?.bank)?module.quiz.bank:[]).filter(question=>!fallbackQuestion(question));
+const sameJson=(left,right)=>{try{return JSON.stringify(left)===JSON.stringify(right)}catch{return false}};
+
 export function stripLegacyFallbackQuestions(school){
   if(!school||clean(school.generation?.provider,80).toLowerCase()==='deterministic')return{school,removed:0};
   let removed=0;
@@ -19,6 +21,57 @@ export function stripLegacyFallbackQuestions(school){
   if(removed)school.generation={...(school.generation||{}),quizIntegrity:'deterministic-fillers-removed',quizIntegrityRemoved:removed,quizIntegrityAt:new Date().toISOString()};
   return{school,removed};
 }
+
+export function sharedSemanticFallbackIssues(school){
+  if(!school||school.generation?.fallback||clean(school.generation?.provider,80).toLowerCase()==='deterministic')return[];
+  const capability=clean(school.capability||school.title,2400),issues=[];
+  for(const [index,module] of (Array.isArray(school.modules)?school.modules:[]).entries()){
+    const fallback=moduleFor(index,capability),label=clean(module?.id,160)||`module-${index+1}`;
+    const checks=[
+      ['summary',module?.summary,fallback.summary],
+      ['objective',module?.objective,fallback.objective],
+      ['relevance',module?.relevance,fallback.relevance],
+      ['prerequisites',module?.prerequisites,fallback.prerequisites],
+      ['artifact',module?.artifact,fallback.artifact],
+      ['completionCriteria',module?.completionCriteria,fallback.completionCriteria],
+      ['learningObjectives',module?.learningObjectives,fallback.learningObjectives],
+      ['concepts',module?.concepts,fallback.concepts],
+      ['lessonBlocks',module?.lessonBlocks,fallback.lessonBlocks],
+      ['visualization.title',module?.visualization?.title,fallback.visualization.title],
+      ['visualization.caption',module?.visualization?.caption,fallback.visualization.caption],
+      ['visualization.items',module?.visualization?.items,fallback.visualization.items],
+      ['practice.prompt',module?.practice?.prompt,fallback.practice.prompt],
+      ['practice.steps',module?.practice?.steps,fallback.practice.steps],
+      ['practice.deliverable',module?.practice?.deliverable,fallback.practice.deliverable],
+      ['practice.rubric',module?.practice?.rubric,fallback.practice.rubric],
+      ['practice.completionCriteria',module?.practice?.completionCriteria,fallback.practice.completionCriteria],
+      ['badge.title',module?.badge?.title,fallback.badge.title],
+      ['badge.description',module?.badge?.description,fallback.badge.description],
+      ['cerbanimoQuest.title',module?.cerbanimoQuest?.title,fallback.cerbanimoQuest.title],
+      ['cerbanimoQuest.brief',module?.cerbanimoQuest?.brief,fallback.cerbanimoQuest.brief],
+      ['cerbanimoQuest.proof',module?.cerbanimoQuest?.proof,fallback.cerbanimoQuest.proof]
+    ];
+    for(const [section,value,deterministicValue] of checks){
+      if(value!==undefined&&value!==null&&sameJson(value,deterministicValue))issues.push(`${label}.${section}`);
+    }
+  }
+  return issues;
+}
+
+export function retireLegacyFailedSharedFallback(){
+  const s=state(),school=s.school;
+  if(!school?.generation?.fallback)return false;
+  const error=clean(school.generation?.error,1000),provider=clean(school.generation?.provider,120)||'deterministic';
+  s.school=null;
+  s.progress={};
+  s.activeModuleId='';
+  s.visualInspection=null;
+  if(clean(s.settings?.modelRoute,120).toLowerCase()==='deterministic')s.settings={...s.settings,modelRoute:'shared'};
+  persist('living-school-failed-shared-fallback-retired',{provider,error,policy:'never-persist-deterministic-substitute-for-shared-generation'});
+  return true;
+}
+retireLegacyFailedSharedFallback();
+
 const quizNeeds=school=>{
   if(!school||school.generation?.fallback||clean(school.generation?.provider,80).toLowerCase()==='deterministic')return[];
   const needs=[];
@@ -106,20 +159,32 @@ async function completeSharedQuizBank(data,school,options={}){
   return school;
 }
 async function generateSchoolWithAtomicSharedQuiz(data,options={}){
-  const school=await generateSchool(data),provider=clean(school.generation?.provider,80).toLowerCase();
+  const school=await generateSchool(data),provider=clean(school.generation?.provider,80).toLowerCase(),requestedRoute=clean(data.modelRoute,120).toLowerCase();
   stripLegacyFallbackQuestions(school);
-  if(school.generation?.fallback||provider==='deterministic')return school;
+  if(requestedRoute==='shared'&&(school.generation?.fallback||provider==='deterministic')){
+    const error=clean(school.generation?.error,1000);
+    persist('living-school-shared-generation-rejected',{source:clean(options.source,120)||'living-school-workbench',reason:'deterministic-fallback',provider,error,policy:'keep-previous-curriculum'});
+    throw new Error(`Shared curriculum generation did not complete${error?`: ${error}`:''}. Living School kept the previous curriculum instead of substituting generic deterministic lessons.`);
+  }
+  if(provider==='deterministic')return school;
+  const semanticIssues=sharedSemanticFallbackIssues(school);
+  if(semanticIssues.length){
+    persist('living-school-shared-generation-rejected',{source:clean(options.source,120)||'living-school-workbench',reason:'deterministic-semantic-padding',provider,issues:semanticIssues.slice(0,40),policy:'keep-previous-curriculum'});
+    const shown=semanticIssues.slice(0,6).join(', '),more=semanticIssues.length>6?` and ${semanticIssues.length-6} more section${semanticIssues.length-6===1?'':'s'}`:'';
+    throw new Error(`Shared AI returned an incomplete curriculum. Living School rejected deterministic scaffold substitutions in ${shown}${more} and kept the previous curriculum.`);
+  }
   return completeSharedQuizBank(data,school,options);
 }
 
 export async function generateCurriculumFromData(input={},options={}){
+  const current=state(),rawModelRoute=clean(input.modelRoute,120)||'shared',legacyAutoFallbackRoute=Boolean(current.school?.generation?.fallback)&&rawModelRoute.toLowerCase()==='deterministic';
   const data={
     title:clean(input.title,240),
     capability:clean(input.capability,2400),
     level:clean(input.level,80)||'beginner',
     count:input.count||4,
     mode:clean(input.mode,80)||'guided',
-    modelRoute:clean(input.modelRoute,120)||'shared',
+    modelRoute:legacyAutoFallbackRoute?'shared':rawModelRoute,
     proof:clean(input.proof,3000)||'A working artifact, explanation, and independent receipt.'
   };
   if(!data.capability)throw new Error('Name an observable capability.');
@@ -135,7 +200,7 @@ export async function generateCurriculumFromData(input={},options={}){
   stage(options.onStage,'generating',{capability:data.capability,researchMode:packet.mode});
   const s=state(),school=await generateSchoolWithAtomicSharedQuiz(data,{source,onStage:options.onStage}),old=s.school?.modules||[],nextProgress={};
   school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
-  const generatedProvider=clean(school.generation?.provider,80).toLowerCase(),usedDeterministic=Boolean(school.generation?.fallback)||generatedProvider==='deterministic';
+  const generatedProvider=clean(school.generation?.provider,80).toLowerCase(),usedDeterministic=generatedProvider==='deterministic';
   const actualModelRoute=usedDeterministic?'deterministic':data.modelRoute;
   s.school=school;
   s.activeModuleId=school.modules[0].id;
@@ -143,7 +208,7 @@ export async function generateCurriculumFromData(input={},options={}){
   s.settings={...s.settings,modelRoute:actualModelRoute,mode:data.mode};
   s.visualInspection=null;
   persist('curriculum-generated',{schoolId:school.id,researchMode:s.research?.mode||'none',sourceCount:s.sources.length,formatContract:school.generation.formatContract,fallback:Boolean(school.generation.fallback),generationError:clean(school.generation?.error,800),requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,source});
-  toast(usedDeterministic?`Moss used the deterministic local compiler: ${school.generation.error||'the selected route did not produce an AI curriculum'}`:'Moss researched first and generated the formatted curriculum with shared AI.');
+  toast(usedDeterministic?'Moss built the curriculum with the explicitly selected deterministic local compiler.':'Moss researched first and generated the formatted curriculum with shared AI.');
   stage(options.onStage,'complete',{schoolId:school.id,moduleCount:school.modules.length,requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,fallback:Boolean(school.generation?.fallback),deterministic:usedDeterministic});
   return school;
 }
