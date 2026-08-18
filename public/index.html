@@ -9,9 +9,10 @@
   <style>
     html,body{width:100%;height:100%;margin:0;background:#061019;color:#eaf8ff;font-family:system-ui,sans-serif}
     body{display:grid;place-items:center}
-    #cw-staging-root-rescue{max-width:34rem;margin:24px;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center;line-height:1.5}
+    #cw-staging-root-rescue{max-width:36rem;margin:24px;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center;line-height:1.5;overflow-wrap:anywhere}
     #cw-staging-root-rescue[data-state="failed"]{border-color:#ffad8a66;color:#ffd8c8}
     #cw-staging-root-rescue a{display:inline-flex;margin-top:12px;padding:9px 12px;border:1px solid #8de5ef66;border-radius:10px;color:#eaf8ff;text-decoration:none;font-weight:800}
+    #cw-staging-root-rescue code{display:block;margin-top:10px;padding:8px;border-radius:8px;background:#02080dcc;color:#dff8ff;font:12px/1.45 ui-monospace,monospace;text-align:left;white-space:pre-wrap}
   </style>
   <script>
   (()=>{
@@ -19,7 +20,7 @@
     const RELEASE_VERSION='1.0.163';
     const WORKER_BUILD=`${RELEASE_VERSION}-lightweight-shell-v208`;
     const STAGING_ORIGIN='https://civweave-staging.pages.dev';
-    const WORKER_URL=`/service-worker-v203.js?v=${WORKER_BUILD}&revision=staging-root-rescue-v432`;
+    const WORKER_URL=`/service-worker-v203.js?v=${WORKER_BUILD}&revision=staging-root-rescue-v433`;
     const STALE_CACHE_PREFIXES=['civweave-static-','civweave-runtime-','civweave-shell-','cwboot-','cwext-','cwimg-','cwrecovery-'];
     const PRESERVED_CACHE_PREFIXES=['civweave-offline-','civweave-model-','cwknowledge-','cwupdate-','cw-open-learning-media-'];
     const REALM_CACHE=/^(?:living-school|cerbanimo|fellowfare|anarchadia)-/;
@@ -48,18 +49,27 @@
         try{worker.postMessage({type},[channel.port2])}catch{clearTimeout(timer);resolve(null)}
       });
     }
+    function registrationSnapshot(registration){
+      const active=registration?.active||null,waiting=registration?.waiting||null,installing=registration?.installing||null;
+      return{
+        activePath:workerPath(active),activeUrl:active?.scriptURL||'',activeState:active?.state||'',
+        waitingPath:workerPath(waiting),waitingUrl:waiting?.scriptURL||'',waitingState:waiting?.state||'',
+        installingPath:workerPath(installing),installingUrl:installing?.scriptURL||'',installingState:installing?.state||''
+      };
+    }
     async function inspectCurrentShell(){
       const registration=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
       const active=registration?.active||null;
-      if(!registration||!rootScope(registration))return{ok:false,reason:'no-root-registration',registration,active};
-      if(!workerLooksCurrent(active))return{ok:false,reason:'worker-url-or-state-mismatch',registration,active};
+      const snapshot=registrationSnapshot(registration);
+      if(!registration||!rootScope(registration))return{ok:false,reason:'no-root-registration',registration,active,snapshot};
+      if(!workerLooksCurrent(active))return{ok:false,reason:'worker-url-or-state-mismatch',registration,active,snapshot};
       const [versionPacket,shellPacket]=await Promise.all([
-        askWorker(active,'GET_VERSION',2400),
-        askWorker(active,'GET_DEVICE_PACKAGE_STATUS',4200)
+        askWorker(active,'GET_VERSION',3000),
+        askWorker(active,'GET_DEVICE_PACKAGE_STATUS',6000)
       ]);
       const versionOk=versionPacket?.type==='CIVWEAVE_VERSION'&&versionPacket.version===RELEASE_VERSION&&versionPacket.installMode==='lightweight-shell';
       const shellOk=shellPacket?.type==='CIVWEAVE_DEVICE_PACKAGE'&&shellPacket.version===RELEASE_VERSION&&shellPacket.mode==='lightweight-shell'&&shellPacket.ready===true;
-      return{ok:Boolean(versionOk&&shellOk),reason:versionOk?shellOk?'current':'shell-incomplete':'version-contract-mismatch',registration,active};
+      return{ok:Boolean(versionOk&&shellOk),reason:versionOk?shellOk?'current':'shell-incomplete':'version-contract-mismatch',registration,active,snapshot,versionPacket,shellPacket};
     }
     async function clearStaleShellCaches(){
       if(!('caches'in globalThis))return[];
@@ -72,7 +82,7 @@
       const registrations=await navigator.serviceWorker.getRegistrations().catch(()=>[]);
       const root=registrations.filter(rootScope);
       await Promise.allSettled(root.map(registration=>registration.unregister()));
-      return root.map(registration=>workerPath(registration.active||registration.waiting||registration.installing)).filter(Boolean);
+      return root.map(registration=>registrationSnapshot(registration));
     }
     function promote(registration){
       const activate=worker=>{try{worker?.postMessage?.({type:'SKIP_WAITING'})}catch{}};
@@ -83,21 +93,22 @@
         else candidate.addEventListener('statechange',()=>{if(candidate.state==='installed')activate(candidate)});
       }
     }
-    async function waitForCurrentWorker(timeoutMs=18000){
+    async function waitForCurrentWorker(timeoutMs=45000){
       const started=Date.now();
+      let last=null;
       while(Date.now()-started<timeoutMs){
         const registration=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
-        if(registration){promote(registration);if(workerLooksCurrent(registration.active))return registration}
+        if(registration){promote(registration);last=registration;if(workerLooksCurrent(registration.active))return registration}
         await pause(180);
       }
-      return navigator.serviceWorker.getRegistration('/').catch(()=>null);
+      return last||navigator.serviceWorker.getRegistration('/').catch(()=>null);
     }
     async function repairStagingLaunch(){
       if(location.origin!==STAGING_ORIGIN)return{ok:true,skipped:true,reason:'not-staging'};
       if(!('serviceWorker'in navigator))return{ok:false,skipped:true,reason:'service-workers-unavailable'};
       status('Checking the staging launch shell…');
       const initial=await inspectCurrentShell().catch(error=>({ok:false,reason:error?.message||String(error)}));
-      if(initial.ok){status('Staging launch shell is current.','ready');return{ok:true,skipped:true,repaired:false,reason:'current-shell'}}
+      if(initial.ok){status('Staging launch shell is current.','ready');return{ok:true,skipped:true,repaired:false,reason:'current-shell',initial}};
       status('Refreshing stale staging shell data…');
       const deletedCaches=await clearStaleShellCaches().catch(()=>[]);
       status('Replacing the retained staging app worker…');
@@ -105,15 +116,15 @@
       await pause(120);
       const registration=await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
       promote(registration);
-      await waitForCurrentWorker();
-      const final=await inspectCurrentShell().catch(error=>({ok:false,reason:error?.message||String(error)}));
-      const result={ok:Boolean(final.ok),skipped:false,repaired:true,reason:final.reason||initial.reason,deletedCaches,removedWorkers};
-      status(result.ok?'Staging launch shell refreshed.':'The staging launch shell is still activating.',result.ok?'ready':'pending');
+      const waited=await waitForCurrentWorker();
+      const final=await inspectCurrentShell().catch(error=>({ok:false,reason:error?.message||String(error),snapshot:registrationSnapshot(waited||registration)}));
+      const result={ok:Boolean(final.ok),skipped:false,repaired:true,reason:final.reason||initial.reason,initialReason:initial.reason,finalReason:final.reason,initialSnapshot:initial.snapshot||null,finalSnapshot:final.snapshot||registrationSnapshot(waited||registration),missing:final.shellPacket?.missing||[],versionPacket:final.versionPacket||null,shellPacket:final.shellPacket||null,deletedCaches,removedWorkers};
+      status(result.ok?'Staging launch shell refreshed.':`Staging launch repair stopped at ${result.reason}.`,result.ok?'ready':'pending');
       return result;
     }
-    globalThis.CivweaveInlineStagingRescueV432=Object.freeze({version:'staging-root-rescue-v432',repairStagingLaunch,inspectCurrentShell});
+    globalThis.CivweaveInlineStagingRescueV433=Object.freeze({version:'staging-root-rescue-v433',repairStagingLaunch,inspectCurrentShell});
     globalThis.CivweaveInlineStagingRescueReady=repairStagingLaunch().catch(error=>{
-      const result={ok:false,error:error?.message||String(error)};
+      const result={ok:false,error:error?.message||String(error),stack:error?.stack||''};
       status(`Staging launch repair could not finish: ${result.error}`,'failed');
       return result;
     });
@@ -135,6 +146,7 @@
     const legacyCanonical=location.origin===LEGACY_CANONICAL_ORIGIN;
     const params=new URLSearchParams(location.search);
     const standalone=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+    const esc=value=>String(value??'').replace(/[<>&]/g,character=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[character]));
     function route(){
       if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||previousCanonical||legacyCanonical||cloudflarePreview)){
         const destination=cloudflarePreview&&previewParent&&previewParent!==PREVIOUS_CANONICAL_ORIGIN&&previewParent!==LEGACY_CANONICAL_ORIGIN?previewParent:CANONICAL_ORIGIN;
@@ -162,7 +174,7 @@
         home.searchParams.append(key,value);
       }
       if(VERSION&&!home.searchParams.has('version'))home.searchParams.set('version',VERSION);
-      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root-v432');
+      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root-v433');
       home.hash=location.hash;
       location.replace(home.href);
     }
@@ -172,16 +184,18 @@
         const node=document.getElementById('cw-staging-root-rescue');
         if(node){
           node.hidden=false;
-          node.dataset.state=result?.ok?'ready':result?.error?'failed':'pending';
-          node.innerHTML=result?.ok
-            ? 'Staging launch shell is current.'
-            : `Staging launch repair did not complete${result?.error?`: ${String(result.error).replace(/[<>&]/g,'')}`:'.'}<br><a href="/?rescue_stay=1&retry=${Date.now().toString(36)}">Retry launch repair</a>`;
+          node.dataset.state=result?.ok?'ready':'failed';
+          if(result?.ok){node.textContent='Staging launch shell is current.'}
+          else{
+            const diagnostics={reason:result?.reason||result?.error||'unknown',initialReason:result?.initialReason||'',finalReason:result?.finalReason||'',finalSnapshot:result?.finalSnapshot||null,missing:result?.missing||[],versionPacket:result?.versionPacket||null,shellPacket:result?.shellPacket?{type:result.shellPacket.type,version:result.shellPacket.version,mode:result.shellPacket.mode,ready:result.shellPacket.ready,presentCount:result.shellPacket.presentCount,assetCount:result.shellPacket.assetCount,missing:result.shellPacket.missing,integrityRevision:result.shellPacket.integrityRevision}:null};
+            node.innerHTML=`Staging launch repair did not complete.<code>${esc(JSON.stringify(diagnostics,null,2))}</code><a href="/?rescue_stay=1&retry=${Date.now().toString(36)}">Retry launch repair</a>`;
+          }
         }
         return;
       }
       if(location.origin===STAGING_ORIGIN&&standalone()&&!result?.ok){
         const node=document.getElementById('cw-staging-root-rescue');
-        if(node){node.hidden=false;node.dataset.state='failed';node.innerHTML='Civweave stopped before entering a stale installed shell.<br><a href="/?retry_launch=1">Retry startup</a>'}
+        if(node){node.hidden=false;node.dataset.state='failed';node.innerHTML=`Civweave stopped before entering a stale installed shell.<br><small>${esc(result?.reason||result?.error||'launch repair incomplete')}</small><br><a href="/?retry_launch=1">Retry startup</a>`}
         return;
       }
       route();
