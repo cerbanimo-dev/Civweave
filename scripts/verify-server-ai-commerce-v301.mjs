@@ -32,9 +32,9 @@ const accountRuntime = `${accountEdge}\n${legacyAccountEdge}`;
 
 assert.match(version.trim(), /^\d+\.\d+\.\d+$/);
 assert.match(router, /1\.0\.116-server-ai-router-v301/);
-assert.match(settings, /1\.0\.117-server-ai-settings-v305-community-dividend/);
+assert.match(settings, /1\.0\.118-server-ai-settings-v306-community-share/);
 assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.116-v301/);
-assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.117-v305-community-dividend/);
+assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.118-v306-community-share/);
 assert.match(router, /const ROUTE='server-auto'/);
 assert.match(router, /\['device-local','server-local','cloudflare-workers-ai'\]/);
 assert.match(router, /s\.register\(MIDDLEWARE_ID,\{handle\},60\)/);
@@ -64,7 +64,10 @@ assert.match(settings, /data-compute-buy/);
 assert.match(settings, /data-membership-buy/);
 assert.match(settings, /data-community-share-bps/);
 assert.match(settings, /data-node-equal-topup/);
-assert.match(settings, /Cloudflare top-ups always share at least 1% with everyone/);
+assert.match(settings, /Cloudflare top-ups share at least 5% with everyone, and you can raise that share to 10%/);
+assert.match(settings, /<option value="500">5% shared<\/option>/);
+assert.match(settings, /<option value="1000">10% shared<\/option>/);
+assert.match(settings, /Math\.max\(500,Math\.min\(1000/);
 assert.match(settings, /Every \$5\/month of active membership contributes \+2 potential free seats and a \+200 daily-neuron target for every member/);
 assert.match(settings, /shareMode:equal\?'node-equal':'personal'/);
 assert.match(settings, /shareBps,shareMode/);
@@ -100,11 +103,16 @@ assert.match(cloudRuntime, /x-civweave-node-signature/);
 assert.match(cloudEntryV2, /chooseUserAiPoolRoute/);
 assert.match(cloudEntryV2, /ai-gateway-unified-billing/);
 assert.match(cloudEntryV2, /\/api\/commerce\/membership\/prejoin/);
-assert.match(cloudEntryV3, /minimumCommunityShareBps:100/);
-assert.match(cloudEntryV3, /maximumCommunityShareBps:500/);
-assert.match(cloudEntryV3, /defaultCommunityShareBps:100/);
+assert.match(cloudEntryV3, /minimumCommunityShareBps:500/);
+assert.match(cloudEntryV3, /maximumCommunityShareBps:1000/);
+assert.match(cloudEntryV3, /defaultCommunityShareBps:500/);
+assert.match(cloudEntryV3, /between 5% and 10%/);
 assert.match(cloudEntryV3, /node-equal/);
 assert.match(cloudEntryV3, /\/topups\/share-preference/);
+assert.match(capacityExtension, /raw<500\|\|raw>1000/);
+assert.match(capacityExtension, /topup-sharing:/);
+assert.match(capacityExtension, /communityTopupReserveMicrocents/);
+assert.match(capacityExtension, /activePendingPaidCount/);
 assert.match(cloudEntryV4, /capacity-hosting-plan-v1\.mjs/);
 assert.match(cloudEntryV4, /cloud-node-recovery-v1\.mjs/);
 assert.match(cloudEntryV5, /server-ai-entry-v4\.mjs/);
@@ -123,9 +131,6 @@ assert.match(hostingCapacity, /freeMaxMembers:\s*28/);
 assert.match(hostingCapacity, /hostedMaxMembers:\s*400/);
 assert.match(hostingCapacity, /scaleThresholdMembers:\s*200/);
 assert.match(hostingNode, /hosting\.plan\.paid/);
-assert.match(capacityExtension, /topup-sharing:/);
-assert.match(capacityExtension, /communityTopupReserveMicrocents/);
-assert.match(capacityExtension, /activePendingPaidCount/);
 
 assert.match(accountEdge, /server-ai-entry-v2\.mjs/);
 assert.match(accountEdge, /legacyAccountEdge\.fetch/);
@@ -142,8 +147,8 @@ console.log(JSON.stringify({
   routeOrder: ['device-local', 'server-local', 'cloudflare-workers-ai'],
   memberships: true,
   topups: true,
-  communityTopupMinimumPercent: 1,
-  communityTopupMaximumPercent: 5,
+  communityTopupMinimumPercent: 5,
+  communityTopupMaximumPercent: 10,
   nodeEqualTopups: true,
   cloudflareGeneration: true,
   perUserPoolRouting: true,
