@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
-import { CivweaveCloudNode, creatorProvenanceInternalToken } from '../cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs';
+import { CivweaveCloudNode, creatorProvenanceInternalToken } from '../cloudflare/node-cloud/src/cloud-node-provenance-lifecycle-v1.mjs';
 import { encryptAuditEvidence, signDeviceProof } from '../public/creator-suite/audit/evidence-crypto-v1.mjs';
+import { verifyGuildReviewReceipt } from '../public/creator-suite/audit/review-receipt-v1.mjs';
 
 class Storage {
   constructor(){this.rows=new Map();this.alarm=null}
@@ -41,10 +42,11 @@ assert.equal(response.status,200);assert.equal(body.requests.length,1);assert.eq
 const auditEncryption=body.auditEncryption,envelope=await encryptAuditEvidence(packet,body.requests[0],auditEncryption),submitProof=await signDeviceProof(devicePair.privateKey,{nodeId,deviceId,action:'submit-evidence',sampleId,timestamp:new Date().toISOString(),nonce:'submit-proof-nonce-123456789'});
 response=await node.fetch(new Request(`https://node.internal/internal/creator-provenance/audit/evidence?nodeId=${nodeId}`,{method:'POST',headers,body:JSON.stringify({publicJwk:devicePublic,proof:submitProof,sampleId,envelope})}));body=await response.json();
 assert.equal(response.status,200);assert.equal(body.verification.valid,true);assert.equal(body.analysis.outcome,'verified');assert.equal(body.rawPacketRetained,false);assert.equal(body.reviewStatus,'reviewed');assert.equal(body.request.status,'reviewed');assert.equal(body.finding.reviewerKind,'deterministic');assert.equal(body.finding.outcome,'verified');assert.equal(body.request.rawPacketRetained,false);assert.equal(body.request.encryptedEvidenceRetained,false);
+assert.equal(body.signedReviewReceipt.schema,'civweave.creator-provenance-review-receipt.v1');assert.equal(body.signedReviewReceipt.reviewMethod,'deterministic');assert.equal(body.signedReviewReceipt.voteCount,0);assert.equal(body.signedReviewReceipt.endorsementCount,0);assert.equal(body.signedReviewReceipt.reviewOutcome,'verified');assert.equal(body.signedReviewReceipt.creationReceipt.origin,'human-authored');assert.equal((await verifyGuildReviewReceipt(body.signedReviewReceipt)).valid,true,'deterministic resolved audits must receive a portable Guild signature too');assert.equal(body.request.signedReviewReceipt.signature.value,body.signedReviewReceipt.signature.value);
 const persisted=JSON.stringify([...storage.rows.values()]);
 assert.equal(persisted.includes(JSON.stringify(packet.events[0].payload)),false,'plaintext packet event payload must not be persisted in Durable Object state');
 assert.equal(persisted.includes(envelope.ciphertext),false,'selected evidence ciphertext must be discarded after review extraction');
-assert.match(persisted,/cryptographic-provenance/,'compact review finding should be retained');
+assert.match(persisted,/cryptographic-provenance/,'compact review finding should be retained');assert.match(persisted,/creator-provenance-review-receipt/,'portable signed review receipt should be retained with the compact audit result');
 
 const replay=await node.fetch(new Request(`https://node.internal/internal/creator-provenance/audit/evidence?nodeId=${nodeId}`,{method:'POST',headers,body:JSON.stringify({publicJwk:devicePublic,proof:submitProof,sampleId,envelope})}));
 assert.equal(replay.status,409);assert.match((await replay.json()).error,/already used/);
@@ -52,4 +54,4 @@ const wrongPair=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'
 const wrong=await node.fetch(new Request(`https://node.internal/internal/creator-provenance/audit/requests?nodeId=${nodeId}`,{method:'POST',headers,body:JSON.stringify({publicJwk:wrongPublic,proof:wrongProof})}));
 assert.equal(wrong.status,401);
 
-console.log('Cloudflare selected Creator evidence handshake contract passed');
+console.log('Cloudflare selected evidence and Guild-signed deterministic Creator review contract passed');
