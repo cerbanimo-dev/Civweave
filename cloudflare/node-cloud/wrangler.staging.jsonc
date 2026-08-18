@@ -34,14 +34,16 @@
     { "tag": "v3", "new_sqlite_classes": ["CivweaveAccountDirectory"] }
   ],
   "vars": {
-    "NODE_DOMAIN": "nodes.civweave.invalid",
+    "NODE_DOMAIN": "cerbanimo.workers.dev",
     "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud-staging.cerbanimo.workers.dev",
+    "CIVWEAVE_CORE_ORIGIN": "https://civweave-core-staging.cerbanimo.workers.dev",
     "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave-staging.pages.dev",
     "CIVWEAVE_ACCOUNT_DIRECTORY_ORIGIN": "https://civweave-node-cloud-staging.cerbanimo.workers.dev",
     "CIVWEAVE_WORKERS_PLAN": "free",
     "CIVWEAVE_UNIFIED_BILLING_MODEL": "google/gemini-3.1-flash-lite",
     "CIVWEAVE_AI_GATEWAY_ID": "default",
-    "CIVWEAVE_ENVIRONMENT": "staging"
+    "CIVWEAVE_ENVIRONMENT": "staging",
+    "CIVWEAVE_PAYMENT_ENVIRONMENT": "stripe-test"
   },
   "observability": { "enabled": true }
 }
