@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {
-  ingestCreationReceipt, listReceiptsForDay, nextAuditAlarm, previousUtcDay,
+  ingestCreationReceipt, listDeviceAuditRequests, listReceiptsForDay, nextAuditAlarm, previousUtcDay,
   pruneGuildAuditStorage, readLatestGuildAudit, runGuildDailyAudit, setGuildAuditPolicy,
   validateCreationReceiptObject,
 } from '../cloudflare/node-cloud/src/creator-provenance-audit-v1.mjs';
+import { samplingScore } from '../lib/creator-provenance-audit-sampler-v1.mjs';
 
 const enc = new TextEncoder();
 const normalized = value => Array.isArray(value) ? value.map(normalized) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().filter(key => value[key] !== undefined).map(key => [key, normalized(value[key])])) : value;
@@ -45,15 +46,28 @@ assert.equal(first.stored, true);
 assert.ok(storage.alarm > now);
 assert.equal((await ingestCreationReceipt(storage, 'guild:test', object, now)).stored, false, 'same signed receipt must dedupe');
 assert.equal((await listReceiptsForDay(storage, '2026-08-17')).length, 1);
+const storedReceipt = [...storage.rows.values()].find(row => row?.schema === 'civweave.guild-creator-receipt.v1');
+assert.equal(storedReceipt.originDeviceId, object.origin.nodeId);
+assert.deepEqual(storedReceipt.originCredential, object.origin.credential, 'receipt record must retain only the public device credential needed to authenticate later evidence release');
 assert.equal(previousUtcDay(now), '2026-08-17');
 assert.ok(nextAuditAlarm('guild:test', now) > now);
 await setGuildAuditPolicy(storage, { baseSampleRate: 0.25, maxDailySamples: 10, secretSalt: 'must-not-store' });
 assert.equal(storage.rows.get('creator-provenance:policy').secretSalt, undefined);
-const audit = await runGuildDailyAudit(storage, 'guild:test', 'guild-private-sampling-secret-v1', now);
+let auditSalt = '';
+for (let i = 0; i < 1000; i++) { const candidate = `guild-private-sampling-secret-v1-${i}`; if (await samplingScore(object.payload, { dayKey: '2026-08-17', secretSalt: candidate }) < 0.25) { auditSalt = candidate; break; } }
+assert.ok(auditSalt, 'test vector must find a deterministic selected receipt');
+const audit = await runGuildDailyAudit(storage, 'guild:test', auditSalt, now);
 assert.equal(audit.result.guildId, 'guild:test');
 assert.equal(audit.result.dayKey, '2026-08-17');
 assert.equal(audit.result.eligibleCount, 1);
+assert.equal(audit.result.selectedCount, 1);
+assert.equal(audit.requestCount, 1);
 assert.equal(audit.result.privacy.unselectedPacketsAccessed, false);
+const requests = await listDeviceAuditRequests(storage, object.origin.nodeId);
+assert.equal(requests.length, 1);
+assert.equal(requests[0].sessionId, object.payload.sessionId);
+assert.equal(requests[0].status, 'pending-evidence');
+assert.deepEqual(requests[0].deviceCredential, object.origin.credential);
 assert.equal((await readLatestGuildAudit(storage)).schema, 'civweave.guild-creator-audit-record.v1');
 
 storage.rows.set('creator-provenance:audit:2000-01-01', { generatedAt: '2000-01-02T00:00:00.000Z' });
