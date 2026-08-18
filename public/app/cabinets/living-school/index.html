@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-civweave-system="living-school" data-living-school-runtime="cleanroom-v218" data-living-school-revision="research-first-v218.1">
+<html lang="en" data-civweave-system="living-school" data-living-school-runtime="cleanroom-v218" data-living-school-revision="flash-design-lite-recovery-v220">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -91,7 +91,7 @@
   const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
   try{
     document.documentElement.dataset.livingSchoolWorkbench='loading';
-    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=model-authority-v323');
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=flash-design-lite-recovery-v220');
     bootComplete=true;
     clearTimeout(watchdog);
     document.documentElement.dataset.livingSchoolWorkbench='ready';
