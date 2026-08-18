@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v12-persistent-shell-route-safe';
+const REVISION='shell-assets-v1-repair-v12-persistent-shell-route-safe-pwa-start-v436';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
@@ -19,6 +19,7 @@ const REQUIRED_FAMILY_NAV=[
   '/app/assets/ai/chat/merlin-face-v255.webp'
 ];
 const REQUIRED_CIVWEAVE_BOOT=[
+  '/app/pwa-start-v436.html',
   '/app/working-campus-return-guard-v425.js',
   '/app/document-lifecycle-v221.js',
   '/app/working-campus-home-declutter-v1.js'
@@ -58,6 +59,7 @@ self.CivweaveShellAssetsV1=Object.freeze({
   humanChat:[...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',
+  pwaStart:'/app/pwa-start-v436.html',
   policy:'declarative-shell-assets-only-no-repair-or-message-ownership'
 });
 })();
