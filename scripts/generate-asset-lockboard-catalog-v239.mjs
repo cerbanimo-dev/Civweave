@@ -150,3 +150,7 @@ console.log(`Asset lockboard catalog: ${assets.length} image files, ${slots.leng
 // catalog step. Those synchronizers can change required shell files, so refresh
 // integrity/storage metadata here from the exact bytes that will be published.
 await import('./generate-prelive-metadata-v281.mjs');
+// The final PWA launch contract must be applied after prelive metadata because
+// the version synchronizer intentionally rewrites the manifest first. This step
+// also refreshes the manifest/start-document integrity hashes atomically.
+await import('./finalize-pwa-start-v436.mjs');
