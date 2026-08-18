@@ -18,9 +18,10 @@ ORIGINAL = quality.title_supports_topic
 
 TAROT_GAME = re.compile(r"\b(?:game gear|video game|gameplay|playthrough|walkthrough|let'?s play)\b", re.I)
 PARENTING_SOFTWARE = re.compile(r"\b(?:blender|3d|rigging|armature|object parenting|bone parenting|animation fundamentals)\b", re.I)
-PARENTING_HUMAN = re.compile(r"\b(?:parenting|parenthood|gentle parent|caregiv|child development|children|family care|co[- ]regulation)\b", re.I)
+# A bare use of the word "parenting" is not enough to override an explicit
+# software/animation collision. Require stronger evidence of human/family care.
+PARENTING_HUMAN = re.compile(r"\b(?:parenting skills|gentle parent(?:ing)?|parent[- ]child|parenthood|caregiv|child development|children|family care|co[- ]regulation)\b", re.I)
 GARDENING_SOFTWARE = re.compile(r"\b(?:emacs|software|windows user|coding|programming|configuration)\b", re.I)
-GARDENING_PLANTS = re.compile(r"\b(?:garden|gardening|plant|soil|vegetable|horticultur|compost|seedling)\b", re.I)
 WOODWORKING_COMMERCE = re.compile(r"\b(?:amazon|content policy|listing rejected|seo|marketplace policy)\b", re.I)
 WOODWORKING_CRAFT = re.compile(r"\b(?:woodwork|carpentry|joinery|woodworking tool|lumber|timber|oak|saw|chisel)\b", re.I)
 
@@ -39,6 +40,13 @@ def collision_safe(slug: str, title: str) -> bool:
         return False
     return True
 
+
+# Regression checks for the exact word-sense collisions found during the
+# expanded-pack inspection. These execute before catalog mutation.
+assert not collision_safe("tarot-symbolism", "House of Tarot (Game Gear) gameplay")
+assert not collision_safe("parenting-caregiving", "Parenting - Blender 2.80 Fundamentals")
+assert not collision_safe("gardening-plants", "Gardening in Emacs: A Windows user's tale")
+assert collision_safe("parenting-caregiving", "Gentle Parenting Skills and Child Development")
 
 quality.title_supports_topic = collision_safe
 quality.main()
