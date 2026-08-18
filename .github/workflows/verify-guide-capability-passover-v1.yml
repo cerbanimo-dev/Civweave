@@ -17,6 +17,7 @@ on:
       - 'docs/contracts/guide-artifact-language-v1.md'
       - 'docs/architecture/systems-of-practice.md'
       - 'scripts/verify-guide-capability-passover-v1.mjs'
+      - 'scripts/verify-guide-chat-response-integrity-v1.mjs'
       - '.github/workflows/verify-guide-capability-passover-v1.yml'
   push:
     branches: ['**']
@@ -35,6 +36,7 @@ on:
       - 'docs/contracts/guide-artifact-language-v1.md'
       - 'docs/architecture/systems-of-practice.md'
       - 'scripts/verify-guide-capability-passover-v1.mjs'
+      - 'scripts/verify-guide-chat-response-integrity-v1.mjs'
       - '.github/workflows/verify-guide-capability-passover-v1.yml'
   workflow_dispatch:
 
@@ -60,5 +62,8 @@ jobs:
           node --check public/app/guide-identity-integrity-v216.js
           node --check public/app/new-user-onboarding-v1.js
           node --check scripts/verify-guide-capability-passover-v1.mjs
+          node --check scripts/verify-guide-chat-response-integrity-v1.mjs
       - name: Verify canonical guide artifact ownership and passover
         run: node scripts/verify-guide-capability-passover-v1.mjs
+      - name: Verify guide chat response integrity
+        run: node scripts/verify-guide-chat-response-integrity-v1.mjs
