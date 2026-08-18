@@ -1,9 +1,12 @@
 const TOOL_ORDER=Object.freeze(['text','audio','video']);
 const TOOL_LABELS=Object.freeze({text:'Open Text Creator',audio:'Open Audio Creator',video:'Open Video Creator'});
 const PRODUCE_RE=/\b(create|make|produce|draft|write|compose|edit|revise|rewrite|record|render|export|publish|deliver|assemble|cut|mix|master|narrate|film|shoot|capture|author)\b/i;
+const TEXT_VERB_RE=/\b(write|draft|rewrite|author)\b/i;
+const AUDIO_VERB_RE=/\b(mix|master|narrate)\b/i;
+const VIDEO_VERB_RE=/\b(film|shoot)\b/i;
 const TOOL_PATTERNS=Object.freeze({
-  text:/\b(document|report|essay|article|post|letter|email|proposal|plan|brief|copy|script|transcript|outline|story|poem|guide|manual|worksheet|memo|summary|draft|text)\b/i,
-  audio:/\b(audio|podcast|voice[- ]?over|narration|recording|song|music|track|sound|speech|mix)\b/i,
+  text:/\b(document|report|essay|article|post|letter|email|proposal|plan|brief|copy|script|transcript|outline|story|poem|guide|manual|worksheet|memo|summary|draft|text|reflection|response|journal|notes?|questions?|answers?|checklist|agenda|captions?)\b/i,
+  audio:/\b(audio|podcast|voice[- ]?over|voice memo|narration|recording|song|music|track|sound|speech|mix)\b/i,
   video:/\b(video|film|reel|short|clip|footage|screencast|screen recording|movie)\b/i,
 });
 const clean=(value,max=2400)=>String(value??'').trim().slice(0,max);
@@ -32,8 +35,9 @@ export function toolHref(kind,questId='',taskId=''){
 export function toolsForTask(quest={},task={}){
   if(!task?.id||task.status==='completed')return[];
   const corpus=taskCorpus(task),explicit=explicitKinds(task),hasProduceVerb=PRODUCE_RE.test(corpus),kinds=[];
+  const implied=Object.freeze({text:TEXT_VERB_RE.test(corpus),audio:AUDIO_VERB_RE.test(corpus),video:VIDEO_VERB_RE.test(corpus)});
   for(const kind of TOOL_ORDER){
-    if(explicit.has(kind)||(hasProduceVerb&&TOOL_PATTERNS[kind].test(corpus)))kinds.push(kind);
+    if(explicit.has(kind)||implied[kind]||(hasProduceVerb&&TOOL_PATTERNS[kind].test(corpus)))kinds.push(kind);
   }
   return kinds.map(kind=>Object.freeze({kind,label:TOOL_LABELS[kind],href:toolHref(kind,quest?.id,task.id)}));
 }
