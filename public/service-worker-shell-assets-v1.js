@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v12-persistent-shell-route-safe-pwa-start-v436';
+const REVISION='shell-assets-v1-repair-v12-persistent-shell-route-safe';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
