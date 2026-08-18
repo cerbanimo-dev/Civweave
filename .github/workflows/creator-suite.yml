@@ -1,0 +1,44 @@
+name: Creator Suite package
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/creator-suite/**'
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/test-creator-suite-package-v1.mjs'
+      - '.github/workflows/creator-suite.yml'
+  pull_request:
+    paths:
+      - 'public/creator-suite/**'
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/test-creator-suite-package-v1.mjs'
+      - '.github/workflows/creator-suite.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Check Creator Suite scripts
+        run: |
+          node --check public/creator-suite/service-worker.js
+          node --check public/creator-suite/creator-suite-v1.js
+          node --check public/creator-suite/shared/session-store-v1.js
+          node --check public/creator-suite/shared/packet-crypto-v1.js
+          node --check public/creator-suite/shared/ai-tools-v1.js
+          node --check public/creator-suite/text-editor-v1.js
+          node --check public/creator-suite/audio-editor-v1.js
+          node --check public/creator-suite/video-editor-v1.js
+      - name: Verify separate package boundary
+        run: node scripts/test-creator-suite-package-v1.mjs
+      - name: Verify provenance kernel
+        run: node scripts/test-content-provenance-creation-v1.mjs
