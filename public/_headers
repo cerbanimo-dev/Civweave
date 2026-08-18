@@ -6,6 +6,36 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: same-origin
 
+/
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/VERSION
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/manifest.webmanifest
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/manifest-v436.webmanifest
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/pwa-start-v436.html
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/service-worker.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/service-worker-v203.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/staging-pwa-rescue-worker-v434.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/staging-pwa-rescue-v431.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /pwa-installability-worker-v1.js
   Cache-Control: no-cache
 
