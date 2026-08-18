@@ -1,9 +1,10 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v11-persistent-nav-media';
+const REVISION='shell-assets-v1-repair-v12-persistent-shell-route-safe';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
+  '/app/persistent-family-shell-v1.html',
   '/app/themed-system-nav-v178.js',
   '/app/subsystem-avatar-state-v347.js',
   '/Civweave-weaveling-sprites.png',

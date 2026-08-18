@@ -7,6 +7,7 @@ const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a semantic release version.');
 const required=[
   'public/app/system-routes-v227.js',
+  'public/app/persistent-family-shell-v1.html',
   'public/service-worker-living-school-cleanroom-v218.js',
   'public/service-worker-local-ai-coherence-v307.js',
   'public/service-worker-code-coherence-v288.js',
@@ -31,7 +32,7 @@ const required=[
   'public/service-worker-boot-recovery-v426.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v308 + code-coherence-v288-language-v2 + retained lightweight shell core + shell-assets-v1-repair-v11-persistent-nav-media + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + strict-shell-install-v228 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-long-thread-fit-v362 + selected-local-minilm-v357 + server-auto-local-failover-v358 + guide-capability-passover-v361 + local-ai-bootstrap-capability-v359 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + guild-quest-browser-v430 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1 + family-nav-single-owner-r1 + family-navigation-live-r2 + persistent-family-shell-v1 + required-nav-media-v1 + standard-ai-isolation-v1 + cerbanimo-boot-network-first-v1 + desktop-civweave-boot-recovery-v363
+const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v308 + code-coherence-v288-language-v2 + retained lightweight shell core + shell-assets-v1-repair-v12-persistent-shell-route-safe + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + strict-shell-install-v228 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-main-thread-quiescence-v349 + mobile-chat-long-thread-fit-v362 + selected-local-minilm-v357 + server-auto-local-failover-v358 + guide-capability-passover-v361 + local-ai-bootstrap-capability-v359 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + guild-quest-browser-v430 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1 + family-nav-single-owner-r1 + family-navigation-live-r2 + persistent-family-shell-v1 + persistent-shell-route-safe-v1 + required-nav-media-v1 + standard-ai-isolation-v1 + cerbanimo-boot-network-first-v1 + desktop-civweave-boot-recovery-v363
 // chat-open-ui-only-v351: opening the chat surface must not start avatar-expression or MiniLM work.
 // chat-party-lazy-v353: ordinary AI chat open must not start party DOM observers, mesh sessions, gateway polling, or intention-ledger decoration.
 // universal-chat-launcher-v354: every first-class realm receives the same canonical launcher; stale Anarchadia page/chat assets are purged on activation.
@@ -42,6 +43,7 @@ const output=`// GENERATED: five-system route contract v227 + living-school clea
 // local-ai-bootstrap-capability-v359: mutable local-AI support modules are accepted by capability contract so a version bump cannot prevent the inference runtime from loading.
 // family-navigation-live-r2: rotate the installed shell so the canonical themed navigation and route contract replace stale shell-cached copies before a realm opens.
 // persistent-family-shell-v1: the five-guide rail is top-level PWA chrome and survives realm changes while only the realm stage is replaced.
+// persistent-shell-route-safe-v1: the live persistent shell uses a path distinct from legacy compatibility entries so the worker cannot substitute the installer for it.
 // required-nav-media-v1: the five avatar atlases and face fallbacks are required offline shell assets rather than best-effort optional media.
 // mobile-chat-long-thread-fit-v362: long guide transcripts scroll inside the remaining visual viewport; the composer and saved-thread bar stay in the fixed chat frame.
 // standard-ai-isolation-v1: the standard worker owns only the five-system Civweave shell and does not import alternate-mode workers.
@@ -53,7 +55,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=${version}-local-ai-code-coherence-v308-bootstrap-capability');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v288-language-v2');
 importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-// Keep the compatibility import URL expected by the release synchronizer; the imported file declares its own persistent-nav-media revision.
+// Keep the compatibility import URL expected by the release synchronizer; the imported file declares its own persistent-shell route-safe revision.
 importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v2');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
@@ -83,8 +85,9 @@ console.log(JSON.stringify({
   installedLaunch:'installed-pwa-launch-v294-campus-recovery',
   radioCore:'radio-core-shell-v305',
   radioAssetHandoff:'safe-station-v356',
-  shellAssets:'shell-assets-v1-repair-v11-persistent-nav-media',
+  shellAssets:'shell-assets-v1-repair-v12-persistent-shell-route-safe',
   persistentFamilyShell:'v1',
+  persistentShellRouteSafety:'v1',
   requiredNavigationMedia:true,
   installedShellRepair:'installed-shell-repair-v293',
   offlineRevision:'offline-campus-current-graph-v280',
