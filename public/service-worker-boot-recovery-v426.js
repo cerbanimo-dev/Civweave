@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='boot-recovery-v426-semver-document-rescue-v431';
+const REVISION='boot-recovery-v426-semver-document-rescue-v432-lifecycle-deferred';
 const RECOVERY_CACHE='cwrecovery-v426';
 const RECOVERY_PATH='/app/recovery-v426.html';
 const LAUNCH_BUDGET_MS=2200;
@@ -38,14 +38,26 @@ stableAppEntry=async function bootRecoveryStableAppEntry(request){try{const resp
 networkFirst=async function bootRecoveryNetworkFirst(request,fallbackPath='/offline.html'){
   const response=await previousNetworkFirst(request,fallbackPath);
   if(await looksLikeSemverDocument(response,request)){
-    const rescued=await stableAppEntry(installedEntryRequest(request,new URL(request.url).pathname==='/VERSION'?'version-document-rescue-v431':'semver-html-rescue-v431'));
+    const rescued=await stableAppEntry(installedEntryRequest(request,new URL(request.url).pathname==='/VERSION'?'version-document-rescue-v432':'semver-html-rescue-v432'));
     const headers=new Headers(rescued.headers);
-    headers.set('x-civweave-semver-document-rescue','v431');
+    headers.set('x-civweave-semver-document-rescue','v432');
     if(request.method==='HEAD')return new Response(null,{status:rescued.status,statusText:rescued.statusText,headers});
     return new Response(await rescued.clone().arrayBuffer(),{status:rescued.status,statusText:rescued.statusText,headers});
   }
   return response;
 };
-self.addEventListener('install',event=>{event.waitUntil(stageRecoveryAssets().catch(()=>null))});
-self.CivweaveBootRecoveryV426=Object.freeze({revision:REVISION,recoveryCache:RECOVERY_CACHE,recoveryPath:RECOVERY_PATH,launchBudgetMs:LAUNCH_BUDGET_MS,stagingHost:STAGING_HOST,semverDocumentRescue:true,policy:'paint-recovery-instead-of-native-splash-dead-end-plus-staging-semver-document-rescue'});
+
+// Recovery documents are useful, but staging them over the network cannot be a
+// prerequisite for service-worker installation. Synthetic recovery remains
+// available immediately and the real pages can be warmed explicitly later.
+self.addEventListener('install',event=>{event.waitUntil(Promise.resolve())});
+self.addEventListener('message',event=>{
+  if(event.data?.type!=='CIVWEAVE_WARM_BOOT_RECOVERY')return;
+  event.waitUntil(stageRecoveryAssets().then(()=>{
+    const packet={type:'CIVWEAVE_BOOT_RECOVERY_WARMED',revision:REVISION};
+    try{event.ports?.[0]?.postMessage(packet)}catch{}
+    try{event.source?.postMessage?.(packet)}catch{}
+  }));
+});
+self.CivweaveBootRecoveryV426=Object.freeze({revision:REVISION,recoveryCache:RECOVERY_CACHE,recoveryPath:RECOVERY_PATH,launchBudgetMs:LAUNCH_BUDGET_MS,stagingHost:STAGING_HOST,semverDocumentRescue:true,warmMessage:'CIVWEAVE_WARM_BOOT_RECOVERY',policy:'paint-synthetic-recovery-immediately-stage-recovery-assets-on-demand-plus-staging-semver-document-rescue'});
 })();
