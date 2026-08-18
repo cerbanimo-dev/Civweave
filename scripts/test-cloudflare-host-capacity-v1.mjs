@@ -26,11 +26,14 @@ assert.equal(membershipContributionUnits('member'), 1);
 assert.equal(membershipContributionUnits('maker'), 2);
 assert.equal(membershipContributionUnits('builder'), 4);
 assert.equal(membershipContributionUnits('steward'), 8);
-assert.deepEqual(normalizeTopupSharing({}), { shareMode: 'personal', shareBps: 100 });
-assert.deepEqual(normalizeTopupSharing({ shareBps: 500 }), { shareMode: 'personal', shareBps: 500 });
+assert.equal(HOST_ECONOMY_POLICY.topupMinSharedBps, 500);
+assert.equal(HOST_ECONOMY_POLICY.topupMaxSharedBps, 1000);
+assert.equal(HOST_ECONOMY_POLICY.topupDefaultSharedBps, 500);
+assert.deepEqual(normalizeTopupSharing({}), { shareMode: 'personal', shareBps: 500 });
+assert.deepEqual(normalizeTopupSharing({ shareBps: 1000 }), { shareMode: 'personal', shareBps: 1000 });
 assert.deepEqual(normalizeTopupSharing({ shareMode: 'node-equal' }), { shareMode: 'node-equal', shareBps: 10_000 });
-assert.throws(() => normalizeTopupSharing({ shareBps: 99 }), /shareBps/);
-assert.throws(() => normalizeTopupSharing({ shareBps: 501 }), /shareBps/);
+assert.throws(() => normalizeTopupSharing({ shareBps: 499 }), /shareBps/);
+assert.throws(() => normalizeTopupSharing({ shareBps: 1001 }), /shareBps/);
 
 const starter10 = deriveCapacity({
   workersPlan: 'free',
