@@ -24,6 +24,7 @@ on:
       - scripts/test-open-learning-media-harvest-v1.py
       - scripts/test-open-learning-media-packs-v1.py
       - scripts/test-open-learning-media-runtime-v1.mjs
+      - scripts/verify-video-learning-contract-v1.mjs
       - scripts/finalize-open-learning-media-topic-inference-v1.py
       - scripts/fix-open-learning-media-learning-path-budget-v1.py
       - scripts/fix-open-learning-media-finalizer-idempotency-v1.py
@@ -63,6 +64,7 @@ on:
       - scripts/filter-open-learning-media-subject-collisions-v2.py
       - scripts/test-open-learning-media-packs-v1.py
       - scripts/test-open-learning-media-runtime-v1.mjs
+      - scripts/verify-video-learning-contract-v1.mjs
       - scripts/finalize-open-learning-media-topic-inference-v1.py
       - public/app/open-learning-media-cache-v1.mjs
       - public/app/open-learning-media-installer-v1.mjs
