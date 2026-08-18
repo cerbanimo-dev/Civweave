@@ -1,6 +1,6 @@
 {
   "schema": "civweave.creator-suite-package.v1",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "name": "Civweave Creator Suite",
   "scope": "/creator-suite/",
   "entry": "/creator-suite/index.html",
@@ -10,6 +10,7 @@
   "coreIsolation": "This package is not part of public/app/offline-package-v208.json and must remain separately downloadable.",
   "sharedDependencies": [
     "/app/content-provenance-v1.js",
+    "/app/host-node-session-v1.js",
     "/app/local-object-mesh-v146.js",
     "/app/pocket-guild-node-v1.mjs",
     "/app/shared/guild-host-resilience-v1.mjs"
@@ -34,6 +35,7 @@
     "/creator-suite/shared/provenance-vault-v1.js",
     "/creator-suite/shared/mesh-provenance-v1.js",
     "/creator-suite/shared/guild-provenance-v1.js",
+    "/creator-suite/audit/client-v1.js",
     "/creator-suite/audit/evidence-crypto-v1.mjs",
     "/creator-suite/audit/quest-beat-v1.js",
     "/creator-suite/text-editor-v1.js",
