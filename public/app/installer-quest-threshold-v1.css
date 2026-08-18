@@ -86,7 +86,7 @@ body.cw-installer .quest-guide-sprite{
   z-index:1;
   width:min(100%,204px);
   aspect-ratio:1;
-  background:url('/app/weaveling-download-guide-v1.webp') center/contain no-repeat;
+  background:url('/app/weaveling-download-guide-v1.png') center/contain no-repeat;
   filter:drop-shadow(0 14px 22px rgba(0,0,0,.35)) drop-shadow(0 0 18px rgba(139,230,255,.18));
 }
 body.cw-installer .quest-guide-sprite::before{
