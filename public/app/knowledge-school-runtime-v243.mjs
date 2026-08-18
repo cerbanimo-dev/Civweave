@@ -1,4 +1,6 @@
-const VERSION='1.0.36-knowledge-school-runtime-v243-source-links';
+import {searchSupplementalArticles} from './learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
+
+const VERSION='1.0.37-knowledge-school-runtime-v243-source-pack-gaps';
 const INSTALLER='/app/knowledge-school-seeds-v1.js?v=local-reader-r2';
 const seedCache=new Map();
 let installerPromise=null;
@@ -114,11 +116,34 @@ function bestMetadataForPassage(text,tokens,metadata){
   }
   return best;
 }
-function schoolPriority(capability,records){const text=capability.toLowerCase(),preferred=[];const add=(...slugs)=>slugs.forEach(slug=>{if(!preferred.includes(slug))preferred.push(slug)});if(/game|story|narrative|character|art|music|film|design|write/.test(text))add('arts','technology');if(/software|code|computer|program|engine|technical|technology/.test(text))add('technology','mathematics','science');if(/time|physics|science|space|energy|biology|chemistry/.test(text))add('science','mathematics','philosophy-and-religion');if(/travel|place|world|country|map|geograph/.test(text))add('geography','history');if(/society|econom|govern|politic|culture|community/.test(text))add('society-and-social-sciences','history','philosophy-and-religion');if(/health|medicine|disease|body/.test(text))add('health-medicine-and-disease','science');if(/person|people|life|biograph/.test(text))add('people','history');for(const record of records)add(record.school_slug);return preferred}
+function schoolPriority(capability,records){
+  const text=capability.toLowerCase(),preferred=[];const add=(...slugs)=>slugs.forEach(slug=>{if(!preferred.includes(slug))preferred.push(slug)});
+  if(/tarot|arcana|cartomancy|divination|rider.?waite|symbol/.test(text))add('philosophy-and-religion','arts','history');
+  if(/myth|folklore|legend/.test(text))add('philosophy-and-religion','history','arts');
+  if(/meditat|mindful|breath|contemplat/.test(text))add('health-medicine-and-disease','philosophy-and-religion');
+  if(/garden|plant|horticult|soil|growing food/.test(text))add('everyday-life','science');
+  if(/parent|caregiv|relationship|conflict|communicat|active listen/.test(text))add('society-and-social-sciences','health-medicine-and-disease','people');
+  if(/finance|budget|credit|entrepreneur|small business|career|resume|résumé|interview|workplace/.test(text))add('everyday-life','society-and-social-sciences');
+  if(/language|vocabulary|grammar|speaking|listening|second.?language/.test(text))add('people','society-and-social-sciences');
+  if(/woodwork|sewing|textile|maker|solder|circuit|electronics|repair/.test(text))add('everyday-life','technology','arts');
+  if(/emergency|disaster|resilien|prepared/.test(text))add('geography','society-and-social-sciences','health-medicine-and-disease');
+  if(/game|story|narrative|character|art|music|film|design|write/.test(text))add('arts','technology');
+  if(/software|code|computer|program|engine|technical|technology|prompt|algorithm|pseudocode/.test(text))add('technology','mathematics','science');
+  if(/time|physics|science|space|energy|biology|chemistry|climate|environment/.test(text))add('science','mathematics','philosophy-and-religion');
+  if(/travel|place|world|country|map|geograph/.test(text))add('geography','history');
+  if(/society|econom|govern|politic|culture|community|rights|law/.test(text))add('society-and-social-sciences','history','philosophy-and-religion');
+  if(/health|medicine|disease|body|nutrition/.test(text))add('health-medicine-and-disease','science');
+  if(/person|people|life|biograph/.test(text))add('people','history');
+  for(const record of records)add(record.school_slug);return preferred
+}
 
 export async function searchDownloadedKnowledge(capability,{limit=10,maxSchools=5}={}){
   const query=clean(capability,1800),tokens=words(query);if(!tokens.length)return[];
   const store=await installer(),status=await store.status(),available=status.filter(record=>record.current),bySlug=new Map(available.map(record=>[record.school_slug,record])),slugs=schoolPriority(query,available).filter(slug=>bySlug.has(slug)).slice(0,maxSchools),results=[];
+  try{
+    const supplemental=await searchSupplementalArticles(query,{schoolSlugs:slugs,limit:Math.max(10,limit)});
+    for(const row of supplemental)results.push({...row,score:Number(row.score||0)+24});
+  }catch(error){console.warn('[Knowledge School supplemental reader]',error)}
   for(const slug of slugs){
     const record=bySlug.get(slug);
     try{
@@ -128,11 +153,11 @@ export async function searchDownloadedKnowledge(capability,{limit=10,maxSchools=
         results.push({title,url,notes:passage.text,score:passage.score,schoolSlug:slug,schoolName:record.school_name,table:'sqlite-byte-search',articleTitle:title,canonicalUrl:url,linkProvenance:url?(nearby?'archive-canonical-near-passage':'archive-manifest-title-match'):'unresolved'});
       }
     }catch(error){console.warn('[Knowledge School local reader]',slug,error)}
-    if(results.length>=limit*2)break;
+    if(results.length>=limit*3)break;
   }
-  const seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const key=item.notes.toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,200);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
+  const seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const key=(item.canonicalUrl||item.url||item.notes).toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,220);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
 }
 
 export function clearKnowledgeSchoolDatabaseCache(){seedCache.clear()}
 export const version=VERSION;
-globalThis.CivweaveKnowledgeSchoolRuntimeV243=Object.freeze({version:VERSION,search:searchDownloadedKnowledge,clear:clearKnowledgeSchoolDatabaseCache,engine:'dependency-free-sqlite-byte-search+canonical-source-links'});
+globalThis.CivweaveKnowledgeSchoolRuntimeV243=Object.freeze({version:VERSION,search:searchDownloadedKnowledge,clear:clearKnowledgeSchoolDatabaseCache,engine:'dependency-free-sqlite-byte-search+canonical-source-links+supplemental-source-pack'});
