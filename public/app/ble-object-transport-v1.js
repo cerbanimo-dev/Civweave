@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-ble-object-transport-v1';
+const VERSION='1.0.1-ble-object-transport-native-start';
 const SERVICE_UUID='7f3c2d10-8a24-4f6a-9b31-4d7f6c697665';
 const RX_UUID='7f3c2d11-8a24-4f6a-9b31-4d7f6c697665';
 const TX_UUID='7f3c2d12-8a24-4f6a-9b31-4d7f6c697665';
@@ -48,7 +48,9 @@ function bindNative(){
   addEventListener('civweave:native-ble-peer',event=>{const peerId=clean(event?.detail?.peerId,180);if(!peerId)return;if(event.detail.state==='closed'||event.detail.state==='disconnected'){peers.delete(peerId);return}peers.set(peerId,{id:peerId,type:'native',state:'open',write:async frame=>{const result=bridge.send?.(peerId,b64(frame));if(result&&typeof result.then==='function')await result;else if(result===false)throw new Error('Native BLE bridge rejected frame.')}});void flushPeer(peerId)});
   return true
 }
-async function startNative(){const bridge=nativeBridge();if(!bridge)return{ok:false,reason:'native bridge unavailable'};bindNative();const mesh=await ensureMesh(),nodeId=await mesh.deviceId?.(),config={protocol:PROTOCOL,serviceUuid:SERVICE_UUID,rxUuid:RX_UUID,txUuid:TX_UUID,nodeId,frameBytes:HEADER_BYTES+PAYLOAD_BYTES};let result=bridge.start?.(JSON.stringify(config));if(result&&typeof result.then==='function')result=await result;nativeStarted=result!==false;return{ok:nativeStarted,result:result??null}}
+async function startNative(){
+  const bridge=nativeBridge();if(!bridge)return{ok:false,reason:'native bridge unavailable'};bindNative();const mesh=await ensureMesh(),nodeId=await mesh.deviceId?.(),config={protocol:PROTOCOL,serviceUuid:SERVICE_UUID,rxUuid:RX_UUID,txUuid:TX_UUID,nodeId,frameBytes:HEADER_BYTES+PAYLOAD_BYTES};let result=bridge.start?.(JSON.stringify(config));if(result&&typeof result.then==='function')result=await result;let parsed=result;if(typeof result==='string')try{parsed=JSON.parse(result)}catch{}nativeStarted=parsed===true||parsed?.ok===true||parsed?.started===true;if(!nativeStarted)return{ok:false,reason:parsed?.reason||'native BLE bridge could not start',result:parsed??null};return{ok:true,result:parsed??null}
+}
 async function connectWebPeer(){
   if(!webSupported())throw new Error('Web Bluetooth is unavailable in this browser.');const device=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE_UUID]}],optionalServices:[SERVICE_UUID]}),server=await device.gatt.connect(),service=await server.getPrimaryService(SERVICE_UUID),rx=await service.getCharacteristic(RX_UUID),tx=await service.getCharacteristic(TX_UUID),peerId=`web:${device.id}`;
   await tx.startNotifications();tx.addEventListener('characteristicvaluechanged',event=>{const value=event.target.value,bytes=new Uint8Array(value.buffer,value.byteOffset,value.byteLength);void ingestFrame(peerId,bytes)});
