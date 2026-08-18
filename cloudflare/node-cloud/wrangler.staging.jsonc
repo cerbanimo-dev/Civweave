@@ -34,7 +34,7 @@
     { "tag": "v3", "new_sqlite_classes": ["CivweaveAccountDirectory"] }
   ],
   "vars": {
-    "NODE_DOMAIN": "cerbanimo.workers.dev",
+    "NODE_DOMAIN": "nodes.civweave.invalid",
     "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud-staging.cerbanimo.workers.dev",
     "CIVWEAVE_CORE_ORIGIN": "https://civweave-core-staging.cerbanimo.workers.dev",
     "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave-staging.pages.dev",
