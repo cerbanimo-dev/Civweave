@@ -1,0 +1,36 @@
+name: Cerbanimo task tool links
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/cerbanimo-task-tool-links-v1.mjs'
+      - 'public/app/realm-console-v140.html'
+      - 'public/creator-suite/creator-suite-v1.js'
+      - 'scripts/test-cerbanimo-task-tool-links-v1.mjs'
+      - '.github/workflows/cerbanimo-task-tool-links.yml'
+  pull_request:
+    paths:
+      - 'public/app/cerbanimo-task-tool-links-v1.mjs'
+      - 'public/app/realm-console-v140.html'
+      - 'public/creator-suite/creator-suite-v1.js'
+      - 'scripts/test-cerbanimo-task-tool-links-v1.mjs'
+      - '.github/workflows/cerbanimo-task-tool-links.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Check task tool-link modules
+        run: |
+          node --check public/app/cerbanimo-task-tool-links-v1.mjs
+          node --check public/creator-suite/creator-suite-v1.js
+      - name: Verify task deliverable tool links
+        run: node scripts/test-cerbanimo-task-tool-links-v1.mjs
