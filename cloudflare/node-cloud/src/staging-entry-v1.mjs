@@ -86,9 +86,10 @@ export default {
     const pathname = new URL(request.url).pathname;
     // Keep the staging Worker's normal NODE_DOMAIN intentionally non-routable so
     // root /api/fabric administration is not mistaken for a node-host request.
-    // Membership checkout alone needs the real workers.dev suffix so its Stripe
-    // success/cancel URLs resolve back to this isolated staging Worker.
-    if (pathname.startsWith('/api/commerce/membership/')) {
+    // Public membership and money-edge node callbacks need the real workers.dev
+    // suffix so Checkout returns, node proof challenges, manifests, and signed
+    // payment events resolve to this one isolated staging Guild.
+    if (pathname.startsWith('/api/commerce/membership/') || pathname.startsWith('/api/ai/node/')) {
       return baseWorker.fetch(request, { ...env, NODE_DOMAIN: STAGING_PUBLIC_WORKER_DOMAIN }, ctx);
     }
     return baseWorker.fetch(request, env, ctx);
