@@ -1,7 +1,7 @@
 ;(() => {
 'use strict';
 
-const V220_REVISION = 'release-coherence-v227-cerbanimo-boot-r1';
+const V220_REVISION = 'release-coherence-v226';
 const V220_NETWORK_TIMEOUT_MS = 7000;
 const V220_VERSION_KEYS = ['v', 'version', 'revision', 'build'];
 const V220_TEXT_ASSET = /\.(?:html?|css|m?js|json|webmanifest|txt|b64)$/i;
@@ -78,7 +78,7 @@ self.CivweaveReleaseCoherenceV220 = Object.freeze({
   networkTimeoutMs: V220_NETWORK_TIMEOUT_MS,
   versionKeys: [...V220_VERSION_KEYS],
   bootPaths: [...V220_BOOT_PATHS],
-  policy: 'version-pinned-and-cerbanimo-boot-text-network-first-cached-fallback'
+  policy: 'version-pinned-html-js-css-json-txt-network-first-cached-fallback'
 });
 
 })();
