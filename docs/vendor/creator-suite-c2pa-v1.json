@@ -1,0 +1,31 @@
+{
+  "schema": "civweave.creator-suite-vendor-review.v1",
+  "capability": "c2pa-content-credentials",
+  "status": "candidate-not-vendored",
+  "runtimePolicy": {
+    "optionalCreatorSuiteOnly": true,
+    "coreCivweaveDependency": false,
+    "cdnRuntimeAllowed": false,
+    "unsignedFallbackAllowed": false,
+    "shipBeforeTransitiveLicenseAudit": false,
+    "shipBeforeIntegrityPinning": false
+  },
+  "primaryCandidate": {
+    "repository": "contentauth/c2pa-js",
+    "package": "@contentauth/c2pa-web",
+    "observedVersion": "0.14.3",
+    "packageLicense": "MIT",
+    "wasmPackage": "@contentauth/c2pa-wasm",
+    "observedWasmVersion": "0.11.3",
+    "wasmPackageLicense": "MIT"
+  },
+  "requiredBeforeVendoring": [
+    "Resolve and pin the complete production dependency graph.",
+    "Record a compatible license and required notices for every production dependency.",
+    "Record exact source/package integrity hashes for every vendored JS/WASM asset.",
+    "Verify redistribution terms for generated WASM and bundled notices.",
+    "Run the independent export-verification corpus before enabling the product control."
+  ],
+  "approvedForShipping": false,
+  "notes": "Package-level MIT metadata is not sufficient to approve the complete transitive bundle. No C2PA runtime bytes belong in the Creator Suite package until this review is completed."
+}
