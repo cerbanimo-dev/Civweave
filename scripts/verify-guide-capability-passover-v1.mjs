@@ -52,7 +52,13 @@ for(const snippet of [
 ])if(!passover.includes(snippet))throw new Error(`Canonical term mapping missing: ${snippet}`);
 if(!passover.includes('DIRECT_CANONICAL'))throw new Error('Canonical passover targeting no longer distinguishes the requested artifact from incidental Quest context.');
 if(!passover.includes("canonicalUserFacingTerms:true"))throw new Error('Canonical user-facing artifact language marker is missing.');
-if(!loader.includes('/app/guide-capability-passover-v1.js?v=1.1.2-target-precedence'))throw new Error('Shared guide loader does not load the target-precedence passover revision.');
+if(!passover.includes("spine.register('canonical-guide-artifact-language-v1'"))throw new Error('Canonical guide language is not registered on the shared runtime spine.');
+if(!passover.includes("},130);promptSpine=spine"))throw new Error('Canonical guide language must execute before MiniLM response routing priority 120.');
+if(!passover.includes("__civweaveGuideLanguageApplied:'canonical-artifacts-v1'"))throw new Error('Canonical prompt does not suppress the older MiniLM guide-language injector.');
+if(!passover.includes('Weaveling creates Quests; Moss creates Learning Journeys; Kamiya creates Endeavors; Rook creates Manifests.'))throw new Error('Canonical model prompt is missing exact artifact ownership language.');
+if(!passover.includes('Never call Kamiya a Questwright'))throw new Error('Canonical model prompt does not explicitly retire Questwright.');
+if(!loader.includes('/app/guide-capability-passover-v1.js?v=1.1.3-canonical-prompt'))throw new Error('Shared guide loader does not load the canonical pre-MiniLM prompt revision.');
+if(!loader.includes('canonicalPromptBeforeMiniLM:true'))throw new Error('Shared guide loader does not advertise canonical prompt precedence.');
 if(!loader.includes('/app/unified-chat-system-v1.js?v=1.0.4-learning-journey'))throw new Error('Shared guide loader does not load the canonical Learning Journey unified-chat revision.');
 if(!loader.includes('1.0.128-canonical-artifacts'))throw new Error('Shared guide loader does not request the canonical-artifact shared surface revision.');
 
@@ -99,5 +105,11 @@ for(const [prompt,want] of [
 ]){
   const got=route(prompt);if(got!==want)throw new Error(`Artifact target routing failed for “${prompt}”: expected ${want||'(none)'}, got ${got||'(none)'}`);
 }
+const canonicalPrompt=sandbox.CivweaveGuideCapabilityPassoverV1?.canonicalPrompt;
+if(typeof canonicalPrompt!=='function')throw new Error('Canonical guide prompt helper did not export.');
+for(const system of ['civweave','living-school','cerbanimo','fellowfare']){
+  const prompt=canonicalPrompt(system,false);
+  for(const phrase of ['Weaveling creates Quests','Moss creates Learning Journeys','Kamiya creates Endeavors','Rook creates Manifests'])if(!prompt.includes(phrase))throw new Error(`${system} canonical prompt missing ${phrase}`);
+}
 
-console.log('Guide artifact language and capability passover contract verified across chat, generation, prompts, profiles, onboarding, docs, and target-routing cases.');
+console.log('Guide artifact language and capability passover contract verified across chat, generation, prompts, MiniLM precedence, profiles, onboarding, docs, and target-routing cases.');
