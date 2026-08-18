@@ -22,7 +22,7 @@
   <header class="toolbar">
     <div class="sample">
       <div class="eyebrow">Civweave Weave sample · SHA-256</div>
-      <div class="hash" id="weaveHash">generating…</div>
+      <div class="hash" id="seedChordHash">generating Seed Chord…</div>
       <div class="status" id="status">checking Chord invariants…</div>
     </div>
     <label class="control">chords <input id="chordCount" type="number" min="4" max="256" step="4" value="64" /></label>
@@ -31,88 +31,86 @@
   </header>
   <div class="legend" aria-hidden="true"><span>POSITION 1</span><span>POSITION 2</span><span>POSITION 3</span><span>POSITION 4</span></div>
   <section id="wall" class="wall" aria-live="polite"></section>
-  <div class="footer">Each Chord is SHA-256 chained to the previous Chord. Every position has its own UID. White inset = inherited position. Dashed inset = the exact outgoing position. The checker field exposes the literal alpha byte; no RGBA component is normalized or discarded.</div>
+  <div class="footer">Binary topology recursively expands by 1→1001 and 0→0110. Each Chord is SHA-256 chained to the previous Chord. Every position has its own UID. White inset = inherited position. Dashed inset = the exact outgoing position. The checker field exposes the literal alpha byte; no RGBA component is normalized or discarded.</div>
 </main>
 <script>
 (()=>{
 'use strict';
-const STRUCTURE_CYCLE=[[1,0,0,1],[0,1,1,0],[0,1,1,0],[1,0,0,1]];
 const encoder=new TextEncoder();
-const wall=document.getElementById('wall'),weaveHashEl=document.getElementById('weaveHash'),statusEl=document.getElementById('status'),countInput=document.getElementById('chordCount'),regenerateButton=document.getElementById('regenerate'),copyButton=document.getElementById('copySample');
+const wall=document.getElementById('wall'),seedChordHashEl=document.getElementById('seedChordHash'),statusEl=document.getElementById('status'),countInput=document.getElementById('chordCount'),regenerateButton=document.getElementById('regenerate'),copyButton=document.getElementById('copySample');
 let currentSample=null;
 const hex=bytes=>Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
-const canonical=value=>JSON.stringify(value,Object.keys(value).sort());
 async function sha256(value){const bytes=value instanceof Uint8Array?value:encoder.encode(value);return new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))}
 async function derive(rootHex,domain){return sha256(`${rootHex}|${domain}`)}
 function rgbaFrom(bytes){return `#${hex(bytes.slice(0,4))}`}
 function uidFrom(bytes,prefix){return `${prefix}_${hex(bytes.slice(0,16)).toLowerCase()}`}
 function rgbaCss(code){const r=parseInt(code.slice(1,3),16),g=parseInt(code.slice(3,5),16),b=parseInt(code.slice(5,7),16),a=parseInt(code.slice(7,9),16)/255;return `rgba(${r},${g},${b},${a})`}
 function markerName(index){let n=index+1,name='';while(n>0){n--;name=String.fromCharCode(65+(n%26))+name;n=Math.floor(n/26)}return name}
+function structuralTypeForChord(chordIndex){let symbol=1,n=chordIndex;const digits=[];do{digits.unshift(n%4);n=Math.floor(n/4)}while(n>0);for(const digit of digits)if(digit===1||digit===2)symbol=1-symbol;return symbol}
+function structureForChord(chordIndex){return structuralTypeForChord(chordIndex)?[1,0,0,1]:[0,1,1,0]}
+function localPattern(values){const seen=new Map();let next=0;return values.map(value=>{if(!seen.has(value))seen.set(value,markerName(next++));return seen.get(value)}).join('')}
 async function makeUniqueColor(rootHex,index,usedRgba){for(let nonce=0;;nonce++){const bytes=await derive(rootHex,`color:${index}:${nonce}`),rgba=rgbaFrom(bytes);if(!usedRgba.has(rgba)){usedRgba.add(rgba);return{markerIndex:index,marker:markerName(index),colorUid:uidFrom(bytes.slice(8),'color'),rgba}}}}
 function outgoingIndexForChord(chordIndex){return chordIndex===0?0:3}
+function positionHashPayload(p){return{position_uid:p.position_uid,structural_value:p.structural_value,color_uid:p.color_uid,rgba:p.rgba,inherited_from:p.inherited_from,stitch_uid:p.stitch_uid,outgoing:p.outgoing}}
+function chordHashPayload(chord){return{weave_uid:chord.weave_uid,chord_uid:chord.chord_uid,chord_index:chord.chord_index,previous_chord_hash:chord.previous_chord_hash,structure:chord.structure,color_signature:chord.color_signature,color_pattern:chord.color_pattern,positions:chord.positions.map(positionHashPayload)}}
 async function generateSample(chordCount){
-  const seed=crypto.getRandomValues(new Uint8Array(32));
-  const rootHex=hex(await sha256(seed));
-  const weaveUid=`weave_${rootHex.slice(0,32).toLowerCase()}`;
+  const entropy=crypto.getRandomValues(new Uint8Array(32));
+  const derivationRoot=hex(await sha256(entropy));
+  const weaveUid=`weave_${derivationRoot.slice(0,32).toLowerCase()}`;
   const colors=[],usedRgba=new Set();
-  const getColor=async index=>colors[index]||(colors[index]=await makeUniqueColor(rootHex,index,usedRgba));
+  const getColor=async index=>colors[index]||(colors[index]=await makeUniqueColor(derivationRoot,index,usedRgba));
   const chords=[];let incomingMarker=0,nextMarker=1,previousChordHash=null,previousOutgoingPosition=null;
   for(let chordIndex=0;chordIndex<chordCount;chordIndex++){
-    const structure=STRUCTURE_CYCLE[chordIndex%STRUCTURE_CYCLE.length];
-    let markerIndices;
+    const structure=structureForChord(chordIndex);let markerIndices;
     if(chordIndex===0){markerIndices=[0,1,1,0];nextMarker=2}else{const middle=nextMarker++,outgoing=nextMarker++;markerIndices=[incomingMarker,middle,middle,outgoing]}
-    const chordUid=uidFrom(await derive(rootHex,`chord:${chordIndex}`),'chord');
+    const chordUid=uidFrom(await derive(derivationRoot,`chord:${chordIndex}`),'chord');
     const positions=[];
     for(let positionIndex=0;positionIndex<4;positionIndex++){
       const color=await getColor(markerIndices[positionIndex]);
-      const positionUid=uidFrom(await derive(rootHex,`position:${chordIndex}:${positionIndex}`),'pos');
+      const positionUid=uidFrom(await derive(derivationRoot,`position:${chordIndex}:${positionIndex}`),'pos');
       const inheritedFrom=chordIndex>0&&positionIndex===0?previousOutgoingPosition:null;
-      positions.push({position_uid:positionUid,chord_uid:chordUid,position_index:positionIndex,structural_value:structure[positionIndex],structural_role:structure[positionIndex]?'A':'B',color_uid:color.colorUid,color_marker:color.marker,rgba:color.rgba,inherited_from:inheritedFrom,stitch_uid:inheritedFrom?uidFrom(await derive(rootHex,`stitch:${inheritedFrom}->${positionUid}`),'stitch'):null,outgoing:false});
+      positions.push({position_uid:positionUid,chord_uid:chordUid,position_index:positionIndex,structural_value:structure[positionIndex],structural_role:structure[positionIndex]?'A':'B',color_uid:color.colorUid,color_marker_index:color.markerIndex,color_marker:color.marker,rgba:color.rgba,inherited_from:inheritedFrom,stitch_uid:inheritedFrom?uidFrom(await derive(derivationRoot,`stitch:${inheritedFrom}->${positionUid}`),'stitch'):null,outgoing:false});
     }
-    const outgoingIndex=outgoingIndexForChord(chordIndex);
-    positions[outgoingIndex].outgoing=true;
-    const payload={weave_uid:weaveUid,chord_uid:chordUid,chord_index:chordIndex,previous_chord_hash:previousChordHash,structure:structure.join(''),color_signature:positions.map(p=>p.color_marker).join(''),positions:positions.map(p=>({position_uid:p.position_uid,structural_value:p.structural_value,color_uid:p.color_uid,rgba:p.rgba,inherited_from:p.inherited_from,stitch_uid:p.stitch_uid,outgoing:p.outgoing}))};
-    const chordHash=hex(await sha256(JSON.stringify(payload)));
-    const chord={...payload,chord_hash:chordHash,positions};
-    chords.push(chord);
-    previousChordHash=chordHash;
-    previousOutgoingPosition=positions[outgoingIndex].position_uid;
-    incomingMarker=markerIndices[outgoingIndex];
+    const outgoingIndex=outgoingIndexForChord(chordIndex);positions[outgoingIndex].outgoing=true;
+    const draft={weave_uid:weaveUid,chord_uid:chordUid,chord_index:chordIndex,previous_chord_hash:previousChordHash,structure:structure.join(''),color_signature:positions.map(p=>p.color_marker).join(''),color_pattern:localPattern(positions.map(p=>p.color_uid)),positions};
+    const chordHash=hex(await sha256(JSON.stringify(chordHashPayload(draft))));
+    const chord={...draft,chord_hash:chordHash};chords.push(chord);
+    previousChordHash=chordHash;previousOutgoingPosition=positions[outgoingIndex].position_uid;incomingMarker=markerIndices[outgoingIndex];
   }
-  return{schema:'civweave.weave-chord-sample.v1',weave_uid:weaveUid,weave_seed_hash:rootHex,chords};
+  return{schema:'civweave.weave-chord-sample.v1',weave_uid:weaveUid,generator_derivation_root:derivationRoot,seed_chord_hash:chords[0].chord_hash,chords};
 }
-function verify(sample){
+async function verify(sample){
   const errors=[];let synchronized=0;const seenPositions=new Set();
-  sample.chords.forEach((chord,index)=>{
-    const structureRoles=chord.positions.map(p=>p.structural_role).join('');
-    if(structureRoles==='ABBA'&&chord.color_signature==='ABBA')synchronized++;
-    if(index===0){if(chord.previous_chord_hash!==null)errors.push('Seed Chord has previous hash');if(chord.color_signature!=='ABBA')errors.push('Seed Chord color is not ABBA');if(structureRoles!=='ABBA')errors.push('Seed Chord structure is not ABBA')}
+  for(let index=0;index<sample.chords.length;index++){
+    const chord=sample.chords[index],structureRoles=chord.positions.map(p=>p.structural_role).join('');
+    if(structureRoles==='ABBA'&&chord.color_pattern==='ABBA')synchronized++;
+    const recomputed=hex(await sha256(JSON.stringify(chordHashPayload(chord))));if(recomputed!==chord.chord_hash)errors.push(`Chord ${index} hash mismatch`);
+    if(index===0){if(chord.previous_chord_hash!==null)errors.push('Seed Chord has previous hash');if(chord.color_signature!=='ABBA'||chord.color_pattern!=='ABBA')errors.push('Seed Chord color is not ABBA');if(structureRoles!=='ABBA'||chord.structure!=='1001')errors.push('Seed Chord structure is not ABBA')}
     else{
-      if(chord.previous_chord_hash!==sample.chords[index-1].chord_hash)errors.push(`Chord ${index} hash link mismatch`);
+      const previous=sample.chords[index-1];if(chord.previous_chord_hash!==previous.chord_hash)errors.push(`Chord ${index} hash link mismatch`);
       const inherited=chord.positions.filter(p=>p.inherited_from);if(inherited.length!==1)errors.push(`Chord ${index} does not inherit exactly one position`);
-      if(inherited.length===1){const source=sample.chords[index-1].positions.find(p=>p.position_uid===inherited[0].inherited_from);if(!source)errors.push(`Chord ${index} inheritance source missing`);else if(source.color_uid!==inherited[0].color_uid||source.rgba!==inherited[0].rgba)errors.push(`Chord ${index} inherited color mismatch`)}
-      const previousColors=new Set(sample.chords[index-1].positions.map(p=>p.color_uid));const shared=new Set(chord.positions.map(p=>p.color_uid).filter(id=>previousColors.has(id)));if(shared.size!==1)errors.push(`Chord ${index} shares ${shared.size} colors with previous Chord`)
+      if(inherited.length===1){const source=previous.positions.find(p=>p.position_uid===inherited[0].inherited_from);if(!source)errors.push(`Chord ${index} inheritance source missing`);else{if(!source.outgoing)errors.push(`Chord ${index} inheritance does not reference the outgoing position`);if(source.color_uid!==inherited[0].color_uid||source.rgba!==inherited[0].rgba)errors.push(`Chord ${index} inherited color mismatch`)}}
+      const previousColors=new Set(previous.positions.map(p=>p.color_uid));const shared=new Set(chord.positions.map(p=>p.color_uid).filter(id=>previousColors.has(id)));if(shared.size!==1)errors.push(`Chord ${index} shares ${shared.size} colors with previous Chord`)
     }
     chord.positions.forEach(p=>{if(seenPositions.has(p.position_uid))errors.push(`duplicate position UID ${p.position_uid}`);seenPositions.add(p.position_uid)});
     if(chord.positions.filter(p=>p.outgoing).length!==1)errors.push(`Chord ${index} does not define exactly one outgoing position`);
-  });
+  }
   if(synchronized!==1)errors.push(`expected exactly one ABBA+ABBA synchronization, found ${synchronized}`);
   return{ok:errors.length===0,errors,synchronized};
 }
 function render(sample){
   const fragment=document.createDocumentFragment();
   sample.chords.forEach((chord,index)=>{
-    const row=document.createElement('div');row.className=`chord${index===0?' seed':''}`;row.dataset.chordUid=chord.chord_uid;
+    const row=document.createElement('div');row.className=`chord${index===0?' seed':''}`;row.dataset.chordUid=chord.chord_uid;row.setAttribute('aria-label',`${index===0?'Seed Chord':`Chord ${index}`} structure ${chord.structure} color ${chord.color_signature}`);
     if(index===0){const badge=document.createElement('div');badge.className='chord-badge';badge.textContent='SEED CHORD · ABBA + ABBA';row.appendChild(badge)}
     chord.positions.forEach(position=>{
       const cell=document.createElement('div');cell.className=`cell${position.inherited_from?' inherited':''}${position.outgoing?' outgoing':''}`;cell.style.setProperty('--rgba',rgbaCss(position.rgba));
-      cell.title=[`chord_uid: ${chord.chord_uid}`,`chord_hash: ${chord.chord_hash}`,`previous_chord_hash: ${chord.previous_chord_hash||'—'}`,`position_uid: ${position.position_uid}`,`structural_value: ${position.structural_value}`,`structural_role: ${position.structural_role}`,`color_marker: ${position.color_marker}`,`color_uid: ${position.color_uid}`,`rgba: ${position.rgba}`,`inherited_from: ${position.inherited_from||'—'}`,`stitch_uid: ${position.stitch_uid||'—'}`,`outgoing: ${position.outgoing}`].join('\n');
-      cell.innerHTML=`<div class="swatch"></div><div class="shade"></div><div class="topline"><span class="role">${position.color_marker}</span><span class="bit">${position.structural_value}</span></div><div class="rgba">${position.rgba}</div><div class="uid">${position.position_uid}</div>${position.inherited_from?'<div class="edge">↳ inherited</div>':''}`;
-      row.appendChild(cell);
+      cell.title=[`chord_uid: ${chord.chord_uid}`,`chord_hash: ${chord.chord_hash}`,`previous_chord_hash: ${chord.previous_chord_hash||'—'}`,`structure: ${chord.structure}`,`color_signature: ${chord.color_signature}`,`position_uid: ${position.position_uid}`,`structural_value: ${position.structural_value}`,`structural_role: ${position.structural_role}`,`color_marker: ${position.color_marker}`,`color_uid: ${position.color_uid}`,`rgba: ${position.rgba}`,`inherited_from: ${position.inherited_from||'—'}`,`stitch_uid: ${position.stitch_uid||'—'}`,`outgoing: ${position.outgoing}`].join('\n');
+      cell.innerHTML=`<div class="swatch"></div><div class="shade"></div><div class="topline"><span class="role">${position.color_marker}</span><span class="bit">${position.structural_value}·${position.structural_role}</span></div><div class="rgba">${position.rgba}</div><div class="uid">${position.position_uid}</div>${position.inherited_from?'<div class="edge">↳ inherited</div>':''}`;row.appendChild(cell);
     });fragment.appendChild(row);
   });wall.replaceChildren(fragment)
 }
-async function regenerate(){regenerateButton.disabled=true;copyButton.disabled=true;const count=Math.max(4,Math.min(256,Number(countInput.value)||64));countInput.value=String(count);statusEl.className='status';statusEl.textContent='checking Chord invariants…';try{const sample=await generateSample(count),result=verify(sample);currentSample=sample;weaveHashEl.textContent=`${sample.weave_uid} · ${sample.weave_seed_hash}`;weaveHashEl.title=sample.weave_seed_hash;render(sample);statusEl.className=`status ${result.ok?'good':'bad'}`;statusEl.textContent=result.ok?`✓ ${count} Chords · exactly 1 Seed Chord synchronization · 1 inherited color per boundary`:`✕ ${result.errors.join(' · ')}`}finally{regenerateButton.disabled=false;copyButton.disabled=false}}
+async function regenerate(){regenerateButton.disabled=true;copyButton.disabled=true;const count=Math.max(4,Math.min(256,Number(countInput.value)||64));countInput.value=String(count);statusEl.className='status';statusEl.textContent='checking Chord invariants…';try{const sample=await generateSample(count),result=await verify(sample);currentSample=sample;seedChordHashEl.textContent=`Seed Chord · ${sample.seed_chord_hash}`;seedChordHashEl.title=`${sample.weave_uid}\n${sample.seed_chord_hash}`;render(sample);statusEl.className=`status ${result.ok?'good':'bad'}`;statusEl.textContent=result.ok?`✓ ${count} Chords · exactly 1 ABBA+ABBA Seed Chord · exactly 1 inherited color per boundary`:`✕ ${result.errors.join(' · ')}`}finally{regenerateButton.disabled=false;copyButton.disabled=false}}
 async function copySample(){if(!currentSample)return;await navigator.clipboard.writeText(JSON.stringify(currentSample,null,2));const old=copyButton.textContent;copyButton.textContent='COPIED';setTimeout(()=>copyButton.textContent=old,900)}
 regenerateButton.addEventListener('click',regenerate);copyButton.addEventListener('click',copySample);countInput.addEventListener('change',regenerate);regenerate();
 })();
