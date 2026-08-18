@@ -12,8 +12,9 @@ assert.match(source,/action:['"]appeal['"]/,'appeals must use a signed device pr
 assert.match(source,/human\/pending/);
 assert.match(source,/human\/finding/);
 assert.match(source,/materializeHumanReviews/,'eligible human review work should materialize through the canonical Reckoning adapter only on explicit audit UI use');
+assert.match(source,/recordFinding\?\.\(request\.sampleId,result\)/,'a decisive Guild tribunal response must close the matching canonical Reckoning work unit');
 assert.match(source,/CivweaveHostNodeSessionV1/,'Creator audit must reuse canonical Guild member authentication');
 assert.doesNotMatch(source,/localStorage\.(?:setItem|removeItem)|sessionStorage\.(?:setItem|removeItem)/,'audit client must not create a second credential/session store');
 assert.doesNotMatch(source,/setInterval\(/,'audit client must not install a polling interval');
 assert.doesNotMatch(source,/style detector|ai detector|classif(?:y|ier).*style/i,'audit client must not add stylistic AI detection');
-console.log('Creator audit client bounded privacy contract passed');
+console.log('Creator audit client bounded privacy and Reckoning closure contract passed');
