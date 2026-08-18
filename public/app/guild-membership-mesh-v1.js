@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-guild-membership-mesh-v1';
+const VERSION='1.0.1-guild-membership-mesh-pm-ready';
 const KIND='civweave.guild-membership.v1';
 const PAYLOAD_SCHEMA='civweave.guild-membership.claim.v1';
 const GROUPS_KEY='civweave.human-groups.v1';
@@ -76,7 +76,7 @@ function schedule(delay=300){clearTimeout(timer);timer=setTimeout(()=>void publi
 async function start(){
   const mesh=await ensureMesh().catch(()=>null);if(!mesh)return false;
   mesh.subscribe?.(event=>{if(['object-received','gateway-sync','object-created'].includes(event?.type))void rebuildRoster(mesh).catch(()=>{})});
-  for(const name of ['civweave:human-chat-guild-context','civweave:private-messaging-identity','civweave:host-node-logged-in','civweave:capacity-session-ready','online','pageshow'])addEventListener(name,()=>schedule(150));
+  for(const name of ['civweave:human-chat-guild-context','civweave:private-messaging-ready','civweave:private-messaging-identity','civweave:host-node-logged-in','civweave:capacity-session-ready','online','pageshow'])addEventListener(name,()=>schedule(150));
   addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedule(150)});
   await publish(true).catch(()=>null);await rebuildRoster(mesh).catch(()=>null);timer=setInterval(()=>void publish(false).catch(()=>{}),HEARTBEAT_MS);return true
 }
