@@ -1,12 +1,10 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v6-working-campus-guild-quest';
+const REVISION='shell-assets-v1-repair-v7-persistent-nav-media';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
-  '/app/themed-system-nav-v178.js'
-];
-const OPTIONAL_FAMILY_NAV=[
+  '/app/themed-system-nav-v178.js',
   '/app/subsystem-avatar-state-v347.js',
   '/Civweave-weaveling-sprites.png',
   '/Living-School-moss-sprites.png',
@@ -31,14 +29,14 @@ for(const pathname of REQUIRED_FAMILY_NAV){
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-for(const pathname of [...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST]){
+for(const pathname of [...OPTIONAL,...OPTIONAL_GUILD_QUEST]){
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
 self.CivweaveShellAssetsV1=Object.freeze({
   revision:REVISION,
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
-  optional:[...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST],
+  optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST],
   policy:'declarative-shell-assets-only-no-repair-or-message-ownership'
 });
 })();
