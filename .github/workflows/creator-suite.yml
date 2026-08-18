@@ -6,23 +6,29 @@ on:
     paths:
       - 'public/creator-suite/**'
       - 'public/app/content-provenance-v1.js'
+      - 'public/app/local-object-mesh-v146.js'
       - 'public/app/offline-package-v208.json'
       - 'scripts/test-creator-suite-package-v1.mjs'
       - 'scripts/test-creator-ai-tools-v1.mjs'
       - 'scripts/test-content-provenance-creation-v1.mjs'
       - 'scripts/test-content-provenance-adversarial-v1.mjs'
       - 'scripts/test-creator-packet-codec-v1.mjs'
+      - 'scripts/test-creator-mesh-provenance-v1.mjs'
+      - 'scripts/test-creator-finalization-anchor-v1.mjs'
       - '.github/workflows/creator-suite.yml'
   pull_request:
     paths:
       - 'public/creator-suite/**'
       - 'public/app/content-provenance-v1.js'
+      - 'public/app/local-object-mesh-v146.js'
       - 'public/app/offline-package-v208.json'
       - 'scripts/test-creator-suite-package-v1.mjs'
       - 'scripts/test-creator-ai-tools-v1.mjs'
       - 'scripts/test-content-provenance-creation-v1.mjs'
       - 'scripts/test-content-provenance-adversarial-v1.mjs'
       - 'scripts/test-creator-packet-codec-v1.mjs'
+      - 'scripts/test-creator-mesh-provenance-v1.mjs'
+      - 'scripts/test-creator-finalization-anchor-v1.mjs'
       - '.github/workflows/creator-suite.yml'
 
 permissions:
@@ -40,13 +46,18 @@ jobs:
         run: |
           node --check public/creator-suite/service-worker.js
           node --check public/creator-suite/creator-suite-v1.js
+          node --check public/creator-suite/project-browser-v1.js
+          node --check public/creator-suite/receipt-viewer-v1.js
           node --check public/creator-suite/shared/session-store-v1.js
+          node --check public/creator-suite/shared/crash-journal-v1.js
           node --check public/creator-suite/shared/storage-preflight-v1.js
           node --check public/creator-suite/shared/packet-crypto-v1.js
           node --check public/creator-suite/shared/packet-codec-v1.js
           node --check public/creator-suite/shared/import-provenance-v1.js
           node --check public/creator-suite/shared/provenance-label-v1.js
           node --check public/creator-suite/shared/ai-tools-v1.js
+          node --check public/creator-suite/shared/provenance-vault-v1.js
+          node --check public/creator-suite/shared/mesh-provenance-v1.js
           node --check public/creator-suite/text-editor-v1.js
           node --check public/creator-suite/audio-editor-v1.js
           node --check public/creator-suite/video-editor-v1.js
@@ -60,3 +71,7 @@ jobs:
         run: node scripts/test-creator-ai-tools-v1.mjs
       - name: Verify packet compression and chunk integrity
         run: node scripts/test-creator-packet-codec-v1.mjs
+      - name: Verify signed mesh provenance boundary
+        run: node scripts/test-creator-mesh-provenance-v1.mjs
+      - name: Verify finalization anchors
+        run: node scripts/test-creator-finalization-anchor-v1.mjs
