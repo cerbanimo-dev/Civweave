@@ -3,7 +3,7 @@
 const VERSION='1.0.163';
 const REVISION='five-system-route-contract-v227';
 const SHELL_REVISION='persistent-family-shell-v1';
-const SHELL_PATH='/app/fullscreen-family-v104.html';
+const SHELL_PATH='/app/persistent-family-shell-v1.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const ROUTES=Object.freeze({
   civweave:Object.freeze({id:'civweave',label:'Civweave',pathname:'/app/working-campus-v156.html',params:Object.freeze({})}),
