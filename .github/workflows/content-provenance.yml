@@ -1,0 +1,30 @@
+name: Content provenance contract
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'scripts/test-content-provenance-creation-v1.mjs'
+      - 'docs/contracts/content-creation-provenance-v1.md'
+      - '.github/workflows/content-provenance.yml'
+  pull_request:
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'scripts/test-content-provenance-creation-v1.mjs'
+      - 'docs/contracts/content-creation-provenance-v1.md'
+      - '.github/workflows/content-provenance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  creation-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Run creation provenance contract tests
+        run: node scripts/test-content-provenance-creation-v1.mjs
