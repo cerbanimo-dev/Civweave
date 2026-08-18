@@ -1,0 +1,85 @@
+name: Verify Guide Voice Chat
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/guide-workspace-v242.js'
+      - '.github/workflows/verify-guide-voice-chat-v1.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/guide-workspace-v242.js'
+      - '.github/workflows/verify-guide-voice-chat-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-guide-voice-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Check voice-enabled chat syntax
+        run: |
+          node --check public/app/guide-chat-surface-v350.js
+          node --check public/app/guide-workspace-v242.js
+
+      - name: Enforce voice accessibility and lazy-permission contract
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const source=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
+          const compat=fs.readFileSync('public/app/guide-workspace-v242.js','utf8');
+
+          for(const marker of [
+            "const VOICE_PREFS_KEY='civweave.guide-chat.voice.v1'",
+            'data-mic',
+            'data-auto-speak',
+            "inputMode:'voice'",
+            'function startListening()',
+            'function stopListening(',
+            'function speakText(',
+            'function stopSpeaking(',
+            "stopSpeaking({reason:'barge-in'})",
+            'SpeechRecognition',
+            'webkitSpeechRecognition',
+            'SpeechSynthesisUtterance'
+          ]){
+            if(!source.includes(marker))throw new Error(`Voice contract marker missing: ${marker}`);
+          }
+
+          if(!source.includes("root.querySelector('[data-mic]').addEventListener('click',toggleListening)"))throw new Error('Microphone input is not owned by the canonical guide surface.');
+          if(!source.includes("root.querySelector('[data-auto-speak]').addEventListener('click',toggleAutoSpeak)"))throw new Error('Spoken-reply control is not owned by the canonical guide surface.');
+          if(!source.includes("submitActive(submitted,{inputMode:'voice'})"))throw new Error('Voice transcript bypasses the canonical chat submission path.');
+          if(!source.includes("maybeSpeak(system,replacement.text)"))throw new Error('Guide replies are not connected to optional speech output.');
+          if(!source.includes("mic.hidden=!support.speechRecognition"))throw new Error('Unsupported speech-recognition browsers do not gracefully fall back to text.');
+          if(!source.includes("speaker.hidden=!support.speechSynthesis"))throw new Error('Unsupported speech-synthesis browsers do not gracefully fall back to text.');
+
+          const startAt=source.indexOf('function start(){');
+          const apiAt=source.indexOf('\n\nconst api=',startAt);
+          if(startAt<0||apiAt<0)throw new Error('Cannot locate canonical start lifecycle.');
+          const boot=source.slice(startAt,apiAt);
+          if(boot.includes('startListening()')||boot.includes('.start()')||boot.includes('speechSynthesis.speak'))throw new Error('Voice work or microphone permission can begin during application boot.');
+
+          const beginAt=source.indexOf('function startListening(){');
+          const stopAt=source.indexOf('function stopListening(',beginAt);
+          const begin=source.slice(beginAt,stopAt);
+          if(!begin.includes('const rec=new Ctor()')||!begin.includes('rec.start()'))throw new Error('Speech recognition is not created lazily from explicit voice input.');
+          if(!begin.includes("stopSpeaking({reason:'barge-in'})"))throw new Error('Voice input cannot interrupt spoken output.');
+
+          if(!compat.includes("const TARGET='/app/guide-chat-surface-v350.js'"))throw new Error('Compatibility loader no longer forwards to the canonical guide surface.');
+          if(!compat.includes('voice-v1'))throw new Error('Compatibility cache key was not refreshed for the voice-enabled guide surface.');
+          NODE
