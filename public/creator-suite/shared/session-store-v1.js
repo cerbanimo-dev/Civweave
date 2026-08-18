@@ -18,7 +18,8 @@ const api=Object.freeze({
   deleteSession(id){return run(SESSION_STORE,'readwrite',os=>os.delete(id))},
   listSessions(){return run(SESSION_STORE,'readonly',os=>os.getAll())},
   putArtifact(artifact){return run(ARTIFACT_STORE,'readwrite',os=>os.put(structuredClone(artifact)))},
-  getArtifact(id){return run(ARTIFACT_STORE,'readonly',os=>os.get(id))}
+  getArtifact(id){return run(ARTIFACT_STORE,'readonly',os=>os.get(id))},
+  deleteArtifact(id){return run(ARTIFACT_STORE,'readwrite',os=>os.delete(id))}
 });
 globalThis.CivweaveCreatorStoreV1=api;
 })();
