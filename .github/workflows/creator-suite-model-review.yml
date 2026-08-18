@@ -1,0 +1,47 @@
+name: Creator Suite model review
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'public/creator-suite/audit/evidence-crypto-v1.mjs'
+      - 'public/creator-suite/audit/review-receipt-v1.mjs'
+      - 'lib/creator-provenance-*.mjs'
+      - 'cloudflare/node-cloud/src/creator-provenance-reviewer-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-lifecycle-v1.mjs'
+      - 'scripts/test-cloudflare-creator-provenance-model-receipt-v1.mjs'
+      - '.github/workflows/creator-suite-model-review.yml'
+  pull_request:
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'public/creator-suite/audit/evidence-crypto-v1.mjs'
+      - 'public/creator-suite/audit/review-receipt-v1.mjs'
+      - 'lib/creator-provenance-*.mjs'
+      - 'cloudflare/node-cloud/src/creator-provenance-reviewer-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-lifecycle-v1.mjs'
+      - 'scripts/test-cloudflare-creator-provenance-model-receipt-v1.mjs'
+      - '.github/workflows/creator-suite-model-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  model-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Check model review modules
+        run: |
+          node --check public/creator-suite/audit/evidence-crypto-v1.mjs
+          node --check public/creator-suite/audit/review-receipt-v1.mjs
+          node --check cloudflare/node-cloud/src/creator-provenance-reviewer-v1.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-provenance-lifecycle-v1.mjs
+      - name: Verify structured model review and Guild-signed receipt
+        run: node scripts/test-cloudflare-creator-provenance-model-receipt-v1.mjs
