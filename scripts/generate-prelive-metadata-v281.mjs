@@ -10,6 +10,7 @@ const version = (await fs.readFile(path.join(root, 'VERSION'), 'utf8')).trim();
 const workerPath = path.join(publicDir, 'service-worker-core-v208.js');
 const shellAssetsWorkerPath = path.join(publicDir, 'service-worker-shell-assets-v1.js');
 const installerWorkerPath = path.join(publicDir, 'service-worker-installer-state-v280.js');
+const appManifestPath = path.join(publicDir, 'app', 'manifest.webmanifest');
 const offlineManifestPath = path.join(publicDir, 'app', 'offline-package-v208.json');
 const integrityPath = path.join(publicDir, 'app', 'shell-integrity-v281.json');
 const DISCOVERABLE_EXTENSION = /\.(?:html?|css|m?js|json|webmanifest|md|txt|png|webp|jpe?g|gif|svg|avif|ico|woff2?|ttf|otf)$/i;
@@ -59,6 +60,14 @@ function isCandidate(urlPath, manifest) {
   if (excludeExtensions.some(extension => urlPath.toLowerCase().endsWith(String(extension).toLowerCase()))) return false;
   return DISCOVERABLE_EXTENSION.test(urlPath);
 }
+
+// The version synchronizer intentionally owns version text, but the PWA launch
+// contract is owned here because shell integrity must hash the *final* manifest.
+// Starting from / gives even very old retained root workers a network-safe escape
+// hatch where staging can replace stale registrations before the campus opens.
+const appManifest = JSON.parse(await fs.readFile(appManifestPath, 'utf8'));
+appManifest.start_url = '/?installed=1&source=pwa-root-v431';
+const appManifestChanged = await writeJsonIfChanged(appManifestPath, appManifest);
 
 const [workerSource, shellAssetsWorkerSource, installerWorkerSource] = await Promise.all([
   fs.readFile(workerPath, 'utf8'),
@@ -121,6 +130,7 @@ const manifestChanged = await writeJsonIfChanged(offlineManifestPath, manifest);
 console.log(JSON.stringify({
   ok: true,
   version,
+  pwaManifest: { changed: appManifestChanged, startUrl: appManifest.start_url },
   shellIntegrity: { changed: integrityChanged, requiredAssetCount: requiredShellAssets.length },
   campusBudget: { changed: manifestChanged, ...manifest.preflight }
 }, null, 2));
