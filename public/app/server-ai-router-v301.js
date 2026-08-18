@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.117-server-ai-router-v301-guild-handoff';
+const VERSION='1.0.118-server-ai-router-v301-curriculum-output-budget';
 const MIDDLEWARE_ID='server-auto-v301';
 const MARKET_SESSION_KEY='civweave.node-ai-marketplace.sessions.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
 const MARKET_PREF_KEY='civweave.node-ai-marketplace.preferences.v1';
 const ROUTE='server-auto';
+const MAX_GENERATION_TOKENS=16384;
 if(globalThis.CivweaveServerAIRouterV301?.version===VERSION)return;
 let registered=false;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
@@ -59,7 +60,7 @@ function requestPayload(request={}){
     prompt:clean(request.prompt,48000)||undefined,
     responseFormat:request.responseFormat||((request.schema||request.responseSchema)?'json':'text'),
     responseSchema:clone(request.schema||request.responseSchema||null),
-    maxTokens:Math.max(32,Math.min(4096,Number(request?.config?.maxTokens||request.maxTokens||1024)||1024)),
+    maxTokens:Math.max(32,Math.min(MAX_GENERATION_TOKENS,Number(request?.config?.maxTokens||request.maxTokens||1024)||1024)),
     temperature:Math.max(0,Math.min(2,Number(request?.config?.temperature??request.temperature??0.2))),
     purpose:clean(request.purpose,160)||'interactive',
     executionProfile:clean(request.executionProfile,40)||'interactive'
