@@ -5,7 +5,8 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const dispatcher=read('public/app/fullscreen-family-v104.html');
 const realm=read('public/app/realm-console-v140.html');
 const parity=read('public/app/shared/civweave-parity-runtime.js');
-const serviceWorker=read('public/service-worker.js');
+const activeWorker=read('public/service-worker-v203.js');
+const releaseCoherence=read('public/service-worker-release-coherence-v220.js');
 const questPath=read('public/app/cerbanimo-quest-path-v266.js');
 const packs=read('public/app/cerbanimo-learning-packs-v1.js');
 const videos=read('public/app/cerbanimo-video-task-contract-v1.mjs');
@@ -24,11 +25,22 @@ assert(parity.includes('CACHE_KEY'),'A validated parity ledger must be reusable 
 assert(parity.includes("cache:force?'reload':'no-store'"),'Generated parity ledger startup must bypass a potentially wedged HTTP cache entry.');
 assert(!parity.includes("cache:force?'reload':'force-cache'"),'Generated parity ledger startup must not return to the unbounded force-cache path.');
 
-assert(serviceWorker.includes("CABINET_REVISION='direct-software-r39-cerbanimo-parity-bounded'"),'Installed PWAs must advance the cabinet cache namespace when the Cerbanimo boot runtime changes.');
-assert(serviceWorker.includes("LEDGER_HYDRATION_REVISION='direct-software-r36-bounded-parity'"),'Installed package metadata must identify the bounded parity-ledger revision.');
-assert(serviceWorker.includes("'/app/realm-console-v140.html'"),'The installed device package must include the Cerbanimo realm console.');
-assert(serviceWorker.includes("'/app/shared/civweave-parity-runtime.js','/app/shared/civweave-parity-ledger.json'"),'The installed device package must include the parity runtime and materialized ledger.');
-assert(serviceWorker.includes('civweave-static-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}'),'The device cache namespace must incorporate the cabinet revision so a cabinet hotfix refreshes installed assets.');
+assert(activeWorker.includes('cerbanimo-boot-network-first-v1'),'The installed PWA worker must rotate when the Cerbanimo boot path changes.');
+assert(activeWorker.includes("/service-worker-release-coherence-v220.js?v=release-coherence-v226"),'The active worker must retain release-coherence ownership.');
+for(const path of [
+  '/app/realm-console-v140.html',
+  '/app/realm-console-v140.js',
+  '/app/shared/civweave-parity-runtime.js',
+  '/app/shared/civweave-parity-ledger.json',
+  '/app/shared/civweave-parity-ledger.part1.b64',
+  '/app/shared/civweave-parity-ledger.part2.b64',
+  '/app/shared/civweave-parity-ledger.part3.b64',
+  '/app/shared/civweave-parity-ledger.part4.b64',
+  '/app/shared/cabinet-shells-v129.json'
+])assert(releaseCoherence.includes(`'${path}'`),`Release coherence must force ${path} through the fresh boot path.`);
+assert(releaseCoherence.includes("V220_TEXT_ASSET = /\\.(?:html?|css|m?js|json|webmanifest|txt|b64)$/i"),'Parity fallback chunks must be eligible for release-coherent text refresh.');
+assert(releaseCoherence.includes('v220FreshAsset(request, url)'),'Cerbanimo boot assets must use the release-coherent network-first path while online.');
+assert(releaseCoherence.includes("policy: 'version-pinned-html-js-css-json-txt-network-first-cached-fallback'"),'Release-coherence policy marker drifted unexpectedly.');
 
 assert(realm.includes('/app/cerbanimo-quest-path-v266.js'),'Cerbanimo must retain generated Quest-path materialization.');
 assert(questPath.includes("addEventListener('load',scheduleBoot"),'Generated Cerbanimo Quest paths must wait until the console page has finished loading.');
@@ -59,4 +71,4 @@ assert(proofs.includes("if(span.textContent!==text)span.textContent=text"),'Atta
 assert(proofs.includes("if(link.textContent!==value)link.textContent=value"),'Proof-link decoration must be idempotent.');
 assert(realm.includes('file-link-image-proof-r2'),'Cerbanimo console must cache-bust the idempotent proof runtime.');
 
-console.log('Cerbanimo load-freeze regression contract passed: installed caches refresh; parity data is bounded and recoverable; first paint wins; Quest paths, packs, and media are lazy; proof decoration converges.');
+console.log('Cerbanimo load-freeze regression contract passed: active installed worker refreshes Cerbanimo boot assets; parity data is bounded and recoverable; first paint wins; Quest paths, packs, and media are lazy; proof decoration converges.');
