@@ -7,9 +7,15 @@ const headers=Object.freeze({'cache-control':'no-store','content-type':'applicat
 const json=(value,status=200)=>Response.json(value,{status,headers});
 
 export class CivweaveCloudNode extends BaseCloudNode {
+  reviewerSafeRequest(row){
+    if(!row)return null;
+    const{deviceCredential,deviceId,creatorUserId,finding,reviewRecord,findingHistory,reviewHistory,tribunalVotes,tribunalDecision,...safe}=row;
+    return{...safe,creatorExcluded:Boolean(creatorUserId),priorFindingsWithheld:Boolean(finding||reviewRecord||findingHistory?.length||reviewHistory?.length),reviewerVotesWithheld:Boolean(tribunalVotes?.length||tribunalDecision)};
+  }
   async creatorProvenanceInternal(request,nodeId){
     const url=new URL(request.url),storage=this.state.storage;
-    if(url.pathname!=='/internal/creator-provenance/audit/requests'&&url.pathname!=='/internal/creator-provenance/audit/appeal')return super.creatorProvenanceInternal(request,nodeId);
+    const lifecycleRoute=['/internal/creator-provenance/audit/requests','/internal/creator-provenance/audit/appeal','/internal/creator-provenance/audit/human/pending'].includes(url.pathname);
+    if(!lifecycleRoute)return super.creatorProvenanceInternal(request,nodeId);
     if(!await this.authorizeProvenanceInternal(request))return json({ok:false,error:'forbidden'},403);
     try{
       if(url.pathname==='/internal/creator-provenance/audit/requests'&&request.method==='POST'){
@@ -26,6 +32,11 @@ export class CivweaveCloudNode extends BaseCloudNode {
         const evidenceReference=clean(input.evidenceReference,600)||null,filedAt=new Date().toISOString(),findingHistory=[...(Array.isArray(auditRequest.findingHistory)?auditRequest.findingHistory:[]),auditRequest.finding].filter(Boolean).slice(-16),reviewHistory=[...(Array.isArray(auditRequest.reviewHistory)?auditRequest.reviewHistory:[]),auditRequest.reviewRecord].filter(Boolean).slice(-16);
         const updated=await updateAuditRequest(storage,message.deviceId,sampleId,{status:'pending-human-review',priorityReason:'dispute',reviewLane:'human',appeal:{schema:'civweave.creator-provenance-appeal.v1',reason,evidenceReference,filedAt},appealCount:Math.max(0,Number(auditRequest.appealCount)||0)+1,appealedAt:filedAt,findingHistory,reviewHistory,tribunalVotes:[],tribunalDecision:null,reviewReason:'Creator filed a signed provenance appeal; independent Guild human review is required.',originImmutable:true});
         return json({ok:true,nodeId,status:updated.status,appeal:updated.appeal,request:this.publicReviewRequest(updated)});
+      }
+      if(url.pathname==='/internal/creator-provenance/audit/human/pending'&&request.method==='POST'){
+        const input=await request.json().catch(()=>({})),memberUserId=clean(input.memberUserId,240);if(!memberUserId)throw Object.assign(new Error('Authenticated Guild member is required for human provenance review.'),{status:401});
+        const rows=(await this.requestRows(storage)).filter(row=>row.status==='pending-human-review'&&row.creatorUserId!==memberUserId);
+        return json({ok:true,nodeId,requests:rows.map(row=>this.reviewerSafeRequest(row))});
       }
       return json({ok:false,error:'Method not allowed.'},405);
     }catch(error){return json({ok:false,error:String(error?.message||error)},Number.isSafeInteger(error?.status)?error.status:500)}
