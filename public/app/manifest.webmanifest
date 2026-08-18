@@ -3,7 +3,7 @@
   "short_name": "Civweave",
   "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/civweave-local",
-  "start_url": "/app/installed-entry-v146.html?installed=1",
+  "start_url": "/?installed=1&source=pwa-root-v431",
   "scope": "/",
   "display": "standalone",
   "display_override": [
