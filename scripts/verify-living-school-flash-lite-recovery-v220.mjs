@@ -7,6 +7,7 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const core=read('public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs');
 const controller=read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs');
 const index=read('public/app/cabinets/living-school/index.html');
+const governor=read('public/app/gemini-rate-governor-v1.js');
 
 assert.match(core,/const BATCH_SIZE=3;/,'Structured generation must batch at most three modules per Flash-Lite call.');
 assert.match(core,/purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'agentic'/,'Research\/design must explicitly select the complex Flash tier.');
@@ -32,7 +33,14 @@ assert.match(controller,/data-ls-action="discard-ls-failed-drafts"/,'Recovery UI
 assert.match(controller,/View unstructured research\/design content/,'Recovery UI must expose unstructured content.');
 assert.match(controller,/Complete the missing generated modules before the final credential gate/,'Partial schools must not unlock final credentialing.');
 
+assert.match(index,/gemini-rate-governor-v1\.js\?v=1\.0\.0-gemini-provider-budget/,'Living School must install the Gemini governor before its AI runtime.');
+assert.ok(index.indexOf('gemini-rate-governor-v1.js')<index.indexOf('family-ai-loader-v105.js'),'Gemini quota pacing must install before the model loader.');
 assert.match(index,/living-school-cleanroom-v218\.mjs\?v=flash-design-lite-recovery-v220/,'Cache busting belongs at the top-level workbench import.');
+assert.match(governor,/flash:Object\.freeze\(\{rpm:5,spacingMs:12100\}\)/,'Flash must be paced below the 5 RPM ceiling.');
+assert.match(governor,/lite:Object\.freeze\(\{rpm:15,spacingMs:4100\}\)/,'Flash-Lite must be paced below the 15 RPM ceiling.');
+assert.match(governor,/generateContent\|streamGenerateContent/,'The governor must catch Gemini generation calls, not only curriculum calls.');
+assert.match(governor,/navigator\?\.locks\?\.request/,'The governor should coordinate request slots across same-origin contexts where Web Locks are available.');
+assert.match(governor,/localStorage\.setItem\(STORAGE_KEY/,'The governor should retain a same-origin quota reservation across tabs.');
 
 const maxModules=8;
 const maxFirstPassLiteCalls=Math.ceil(maxModules/3);
