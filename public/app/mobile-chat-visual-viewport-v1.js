@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-mobile-chat-visual-viewport-v1';
+const VERSION='1.0.1-mobile-chat-visual-viewport-v1-long-thread-fit';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-mobile-chat-visual-viewport-v1-style';
 if(globalThis.CivweaveMobileChatVisualViewportV1?.version===VERSION)return;
@@ -34,7 +34,7 @@ function apply(){
   root.style.setProperty('--cw-chat-visual-top',px(value.top));
   root.style.setProperty('--cw-chat-visual-left',px(value.left));
   const chat=document.getElementById(ROOT_ID);
-  if(chat)chat.dataset.civweaveVisualViewport='v1';
+  if(chat)chat.dataset.civweaveVisualViewport='v1-long-thread-fit';
   return value;
 }
 
@@ -45,7 +45,7 @@ function schedule(){
 }
 
 function installStyle(){
-  if(document.getElementById(STYLE_ID))return;
+  document.getElementById(STYLE_ID)?.remove();
   const style=document.createElement('style');
   style.id=STYLE_ID;
   style.textContent=`
@@ -65,19 +65,40 @@ html body #${ROOT_ID}:not([hidden]):not(.is-minimized){
   margin:0!important;
   overflow:hidden!important;
   box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  contain:layout paint style!important;
+}
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized)>header,
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized)>.cw242-window-switcher,
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized)>.cw350-context,
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized)>.cw295-saved-chats,
+html body #${ROOT_ID}:not([hidden]):not(.is-minimized)>[data-persistent-form]{
+  flex:0 0 auto!important;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-log],
 html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-log]{
+  flex:1 1 0!important;
   min-height:0!important;
+  height:0!important;
+  max-height:none!important;
   overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form],
 html body #${ROOT_ID}:not([hidden]):not(.is-minimized) [data-persistent-form]{
   position:relative!important;
   z-index:2!important;
   display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
   flex:none!important;
   min-height:0!important;
+  width:100%!important;
+  margin:0!important;
 }
 }
 `;
@@ -93,6 +114,8 @@ function bind(){
   addEventListener('resize',schedule,{passive:true});
   addEventListener('orientationchange',schedule,{passive:true});
   addEventListener('pageshow',schedule,{passive:true});
+  addEventListener('civweave:guide-chat-opened',schedule);
+  addEventListener('civweave:guide-chat-state',schedule);
   document.addEventListener('focusin',event=>{if(event.target?.closest?.(`#${ROOT_ID}`))schedule()},true);
   document.addEventListener('focusout',event=>{if(event.target?.closest?.(`#${ROOT_ID}`))schedule()},true);
   return true;
@@ -101,5 +124,5 @@ function bind(){
 function start(){installStyle();bind();apply()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
-globalThis.CivweaveMobileChatVisualViewportV1=Object.freeze({version:VERSION,metrics,apply,schedule,bind,mobile,visualViewportOwned:true,composerVisibilityInvariant:true});
+globalThis.CivweaveMobileChatVisualViewportV1=Object.freeze({version:VERSION,metrics,apply,schedule,bind,mobile,visualViewportOwned:true,composerVisibilityInvariant:true,longThreadScrollOwner:true,mobileLayout:'flex-column-fixed-composer'});
 })();
