@@ -1,7 +1,7 @@
 'use strict';
 
-const REVISION='staging-pwa-rescue-worker-v434.1-transparent-navigation';
-const ROOT='/?installed=1&source=staging-rescue-worker-v434';
+const REVISION='staging-pwa-rescue-worker-v434.2-pwa-start-v436';
+const ROOT='/app/pwa-start-v436.html?installed=1&source=staging-rescue-worker-v434';
 const CAMPUS='/app/working-campus-v156.html?installed=1&version=1.0.163&source=staging-rescue-worker-v434';
 
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
@@ -30,7 +30,7 @@ self.addEventListener('fetch',event=>{
 
 self.addEventListener('message',event=>{
   if(event.data?.type!=='GET_CIVWEAVE_STAGING_RESCUE_WORKER')return;
-  const packet={type:'CIVWEAVE_STAGING_RESCUE_WORKER',revision:REVISION,root:ROOT,campus:CAMPUS,navigationPolicy:'transparent-except-version-marker'};
+  const packet={type:'CIVWEAVE_STAGING_RESCUE_WORKER',revision:REVISION,root:ROOT,campus:CAMPUS,navigationPolicy:'transparent-except-version-marker-to-pwa-start-v436'};
   try{event.ports?.[0]?.postMessage(packet)}catch{}
   try{event.source?.postMessage?.(packet)}catch{}
 });
