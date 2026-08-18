@@ -32,80 +32,42 @@
       backdrop-filter: blur(16px);
     }
     .sample { min-width: 0; }
-    .eyebrow { color: #969cab; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .eyebrow { color: #969cab; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
     .hash { margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #d8dbea; }
-    .control {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      color: #b7bdc9;
-      font-size: 12px;
-    }
+    .control { display: flex; gap: 8px; align-items: center; color: #b7bdc9; font-size: 12px; }
     .control input { width: 72px; border: 1px solid rgba(255,255,255,.16); background: #0b0d14; color: #fff; padding: 8px; }
-    button {
-      border: 1px solid rgba(255,255,255,.2);
-      background: #f2f3f7;
-      color: #090a0e;
-      padding: 9px 12px;
-      cursor: pointer;
-      font-weight: 800;
-    }
+    button { border: 1px solid rgba(255,255,255,.2); background: #f2f3f7; color: #090a0e; padding: 9px 12px; cursor: pointer; font-weight: 800; }
     button:active { transform: translateY(1px); }
-    .legend {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin-bottom: 8px;
-      font-size: 11px;
-      color: #838a9a;
-    }
+    .legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin-bottom: 7px; font-size: 10px; color: #838a9a; }
     .legend span { padding: 0 7px; }
-    .wall { display: grid; gap: 5px; }
-    .beat {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 5px;
-      min-height: 76px;
-    }
+    .wall { display: grid; gap: 4px; }
+    .beat { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; min-height: 76px; }
     .cell {
       position: relative;
       min-width: 0;
       overflow: hidden;
       padding: 8px;
-      border: 1px solid rgba(255,255,255,0.13);
+      border: 1px solid rgba(255,255,255,.13);
       isolation: isolate;
+      background-color: #10131b;
+      background-image:
+        linear-gradient(45deg, rgba(255,255,255,.055) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,.055) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,.055) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.055) 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
     }
-    .cell::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -2;
-      background: var(--rgba);
-    }
-    .cell::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.58));
-    }
-    .cell.inherited { box-shadow: inset 0 0 0 2px rgba(255,255,255,.88); }
-    .cell.outgoing { outline: 1px dashed rgba(255,255,255,.72); outline-offset: -4px; }
+    .swatch { position: absolute; inset: 0; z-index: -2; background: var(--rgba); }
+    .shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,.56)); }
+    .cell.inherited { box-shadow: inset 0 0 0 2px rgba(255,255,255,.9); }
+    .cell.outgoing { outline: 1px dashed rgba(255,255,255,.78); outline-offset: -4px; }
     .topline { display: flex; justify-content: space-between; gap: 6px; font-size: 10px; font-weight: 900; text-shadow: 0 1px 3px #000; }
     .role { font-size: 20px; line-height: 1; }
-    .bit { opacity: .82; }
+    .bit { opacity: .84; }
     .rgba { position: absolute; left: 8px; bottom: 8px; font-size: 11px; font-weight: 900; text-shadow: 0 1px 3px #000; }
     .uid { position: absolute; right: 8px; bottom: 8px; max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.82); font-size: 9px; text-align: right; text-shadow: 0 1px 3px #000; }
-    .edge {
-      position: absolute;
-      z-index: 3;
-      left: 2px;
-      top: -6px;
-      font-size: 9px;
-      color: rgba(255,255,255,.72);
-      pointer-events: none;
-    }
+    .edge { position: absolute; z-index: 3; left: 4px; top: 27px; font-size: 8px; color: rgba(255,255,255,.75); pointer-events: none; text-shadow: 0 1px 3px #000; }
     .footer { padding: 14px 2px 40px; color: #727988; font-size: 11px; line-height: 1.5; }
     @media (max-width: 760px) {
       .shell { padding: 8px; }
@@ -116,8 +78,7 @@
       .cell { padding: 5px; }
       .role { font-size: 16px; }
       .rgba { left: 5px; bottom: 5px; font-size: 8px; }
-      .uid { display: none; }
-      .legend { gap: 3px; }
+      .uid, .edge { display: none; }
     }
   </style>
 </head>
@@ -131,133 +92,89 @@
       <label class="control">beats <input id="beatCount" type="number" min="4" max="256" step="4" value="64" /></label>
       <button id="regenerate" type="button">NEW HASH</button>
     </header>
-
     <div class="legend" aria-hidden="true"><span>POSITION 1</span><span>POSITION 2</span><span>POSITION 3</span><span>POSITION 4</span></div>
     <section id="wall" class="wall" aria-live="polite"></section>
-    <div class="footer">Each position has its own UID. White inset = inherited position. Dashed inset = outgoing position. RGBA is display lineage; SHA-256 is the cryptographic sample.</div>
+    <div class="footer">Every position has a cryptographically derived UID. White inset = inherited position. Dashed inset = outgoing position. The checker field exposes the literal alpha byte instead of normalizing it.</div>
   </main>
-
 <script>
 (() => {
   'use strict';
 
-  const STRUCTURE = [
-    [1,0,0,1],
-    [0,1,1,0],
-    [0,1,1,0],
-    [1,0,0,1]
-  ];
+  const STRUCTURE = [[1,0,0,1],[0,1,1,0],[0,1,1,0],[1,0,0,1]];
   const encoder = new TextEncoder();
   const wall = document.getElementById('wall');
   const rootHashEl = document.getElementById('rootHash');
   const countInput = document.getElementById('beatCount');
   const regenerateButton = document.getElementById('regenerate');
-
   const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
 
   async function sha256(value) {
     const bytes = value instanceof Uint8Array ? value : encoder.encode(value);
     return new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
   }
-
-  async function derive(rootHex, domain) {
-    return sha256(`${rootHex}|${domain}`);
+  async function derive(rootHex, domain) { return sha256(`${rootHex}|${domain}`); }
+  function rgbaFrom(bytes) { return `#${hex(bytes.slice(0, 4))}`; }
+  function uidFrom(bytes, prefix) { return `${prefix}_${hex(bytes.slice(0, 16)).toLowerCase()}`; }
+  function rgbaCss(code) {
+    const r = parseInt(code.slice(1,3), 16), g = parseInt(code.slice(3,5), 16), b = parseInt(code.slice(5,7), 16), a = parseInt(code.slice(7,9), 16) / 255;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
   }
-
-  function rgbaFrom(bytes) {
-    // Keep alpha visible while preserving all four RGBA bytes.
-    const alpha = Math.max(bytes[3], 0x68);
-    return `#${hex(Uint8Array.from([bytes[0], bytes[1], bytes[2], alpha]))}`;
-  }
-
-  function shortUid(bytes, prefix) {
-    return `${prefix}_${hex(bytes.slice(0, 8)).toLowerCase()}`;
-  }
-
-  function colorCss(rgba) {
-    const r = parseInt(rgba.slice(1,3), 16);
-    const g = parseInt(rgba.slice(3,5), 16);
-    const b = parseInt(rgba.slice(5,7), 16);
-    const a = parseInt(rgba.slice(7,9), 16) / 255;
-    return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
-  }
-
-  async function makeColor(rootHex, markerIndex) {
-    const bytes = await derive(rootHex, `color:${markerIndex}`);
-    return {
-      markerIndex,
-      colorUid: shortUid(bytes.slice(8), 'color'),
-      rgba: rgbaFrom(bytes)
-    };
+  async function makeColor(rootHex, index) {
+    const bytes = await derive(rootHex, `color:${index}`);
+    return { colorUid: uidFrom(bytes.slice(8), 'color'), rgba: rgbaFrom(bytes) };
   }
 
   async function generateSample(beatCount) {
     const seed = crypto.getRandomValues(new Uint8Array(32));
-    const root = await sha256(seed);
-    const rootHex = hex(root);
+    const rootHex = hex(await sha256(seed));
     rootHashEl.textContent = rootHex;
     rootHashEl.title = rootHex;
 
     const colors = [];
     const getColor = async index => colors[index] || (colors[index] = await makeColor(rootHex, index));
     const beats = [];
-    let incomingIndex = 0;
-    let nextColorIndex = 1;
+    let incoming = 0;
+    let nextColor = 1;
 
     for (let beatIndex = 0; beatIndex < beatCount; beatIndex++) {
       const structure = STRUCTURE[beatIndex % STRUCTURE.length];
-      let markerIndices;
+      let markers;
       let inheritedFrom = null;
 
       if (beatIndex === 0) {
-        const a = incomingIndex;
-        const b = nextColorIndex++;
-        markerIndices = [a, b, b, a];
+        const a = incoming, b = nextColor++;
+        markers = [a,b,b,a];
       } else {
-        const middle = nextColorIndex++;
-        const outgoing = nextColorIndex++;
-        markerIndices = [incomingIndex, middle, middle, outgoing];
+        const middle = nextColor++, outgoing = nextColor++;
+        markers = [incoming,middle,middle,outgoing];
         inheritedFrom = beats[beatIndex - 1].positions[3].positionUid;
-        incomingIndex = outgoing;
+        incoming = outgoing;
       }
 
-      const recordBytes = await derive(rootHex, `record:${beatIndex}`);
-      const recordUid = shortUid(recordBytes, 'record');
+      const recordUid = uidFrom(await derive(rootHex, `record:${beatIndex}`), 'record');
       const positions = [];
-
       for (let positionIndex = 0; positionIndex < 4; positionIndex++) {
-        const color = await getColor(markerIndices[positionIndex]);
-        const positionBytes = await derive(rootHex, `position:${beatIndex}:${positionIndex}`);
+        const color = await getColor(markers[positionIndex]);
         positions.push({
-          positionUid: shortUid(positionBytes, 'pos'),
+          positionUid: uidFrom(await derive(rootHex, `position:${beatIndex}:${positionIndex}`), 'pos'),
           recordUid,
           positionIndex,
           structuralValue: structure[positionIndex],
-          structuralRole: structure[positionIndex] ? 'A' : 'B',
           colorUid: color.colorUid,
           rgba: color.rgba,
           inheritedFrom: positionIndex === 0 ? inheritedFrom : null,
           outgoing: positionIndex === 3 && beatIndex < beatCount - 1
         });
       }
-
-      // First beat's fourth position is the outgoing copy of A.
-      if (beatIndex === 0) incomingIndex = markerIndices[3];
+      if (beatIndex === 0) incoming = markers[3];
       beats.push({ beatIndex, recordUid, positions });
     }
-
     return { rootHex, beats };
   }
 
   function markerName(index) {
-    // Spreadsheet-style A..Z, AA..AZ... so huge walls remain readable.
-    let n = index + 1;
-    let name = '';
-    while (n > 0) {
-      n--;
-      name = String.fromCharCode(65 + (n % 26)) + name;
-      n = Math.floor(n / 26);
-    }
+    let n = index + 1, name = '';
+    while (n > 0) { n--; name = String.fromCharCode(65 + (n % 26)) + name; n = Math.floor(n / 26); }
     return name;
   }
 
@@ -270,45 +187,25 @@
       const row = document.createElement('div');
       row.className = 'beat';
       row.dataset.recordUid = beat.recordUid;
-
-      beat.positions.forEach((position, positionIndex) => {
+      beat.positions.forEach(position => {
         if (!markerByColor.has(position.colorUid)) markerByColor.set(position.colorUid, markerName(markerCounter++));
         const marker = markerByColor.get(position.colorUid);
         const cell = document.createElement('div');
         cell.className = `cell${position.inheritedFrom ? ' inherited' : ''}${position.outgoing ? ' outgoing' : ''}`;
-        cell.style.setProperty('--rgba', colorCss(position.rgba));
+        cell.style.setProperty('--rgba', rgbaCss(position.rgba));
         cell.title = [
           `record_uid: ${position.recordUid}`,
           `position_uid: ${position.positionUid}`,
           `structural_value: ${position.structuralValue}`,
-          `structural_role: ${position.structuralRole}`,
           `color_uid: ${position.colorUid}`,
           `rgba: ${position.rgba}`,
           position.inheritedFrom ? `inherited_from: ${position.inheritedFrom}` : 'inherited_from: —'
         ].join('\n');
-
-        if (position.inheritedFrom) {
-          const edge = document.createElement('div');
-          edge.className = 'edge';
-          edge.textContent = '↳ inherited';
-          cell.appendChild(edge);
-        }
-
-        const top = document.createElement('div');
-        top.className = 'topline';
-        top.innerHTML = `<span class="role">${marker}</span><span class="bit">${position.structuralValue}</span>`;
-        const rgba = document.createElement('div');
-        rgba.className = 'rgba';
-        rgba.textContent = position.rgba;
-        const uid = document.createElement('div');
-        uid.className = 'uid';
-        uid.textContent = position.positionUid;
-        cell.append(top, rgba, uid);
+        cell.innerHTML = `<div class="swatch"></div><div class="shade"></div><div class="topline"><span class="role">${marker}</span><span class="bit">${position.structuralValue}</span></div><div class="rgba">${position.rgba}</div><div class="uid">${position.positionUid}</div>${position.inheritedFrom ? '<div class="edge">↳ inherited</div>' : ''}`;
         row.appendChild(cell);
       });
       fragment.appendChild(row);
     }
-
     wall.replaceChildren(fragment);
   }
 
@@ -316,11 +213,8 @@
     regenerateButton.disabled = true;
     const count = Math.max(4, Math.min(256, Number(countInput.value) || 64));
     countInput.value = String(count);
-    try {
-      render(await generateSample(count));
-    } finally {
-      regenerateButton.disabled = false;
-    }
+    try { render(await generateSample(count)); }
+    finally { regenerateButton.disabled = false; }
   }
 
   regenerateButton.addEventListener('click', regenerate);
