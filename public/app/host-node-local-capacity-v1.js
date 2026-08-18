@@ -1,21 +1,30 @@
 (() => {
 'use strict';
 
-const VERSION = 'host-node-local-capacity-v3-guild-copy';
+const VERSION = 'host-node-local-capacity-v4-request-budget-safe';
 const CAPACITY_ENDPOINT = '/api/federation/capacity';
 const ADMIT_ENDPOINT = '/api/federation/residents/admit';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const RESIDENT_KEY = 'civweave.host-resident-id.v1';
 const PASSPORT_KEY = 'civweave.anarchadia.citizen-console.v139';
-const REFRESH_MS = 15_000;
+const CACHE_KEY = 'civweave.local-host-capacity.cache.v1';
+const LEASE_KEY = 'civweave.local-host-capacity.network-lease.v1';
+const FAILURE_KEY = 'civweave.local-host-capacity.failure-backoff.v1';
+const REFRESH_MS = 5 * 60 * 1000;
+const NETWORK_LEASE_MS = 60 * 1000;
+const FAILURE_BACKOFF_MS = 5 * 60 * 1000;
 const LOBBY_WAIT_MS = 10_000;
+const INSTANCE_ID = `local-capacity:${crypto.randomUUID ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
 let refreshing = false;
 let joining = false;
-let observerTimer = 0;
 let refreshTimer = 0;
 let bound = false;
 
 const el = id => document.getElementById(id);
+const parse = (value, fallback = null) => { try { return JSON.parse(value) ?? fallback; } catch { return fallback; } };
+
+function lobby() { return document.getElementById('cw-host-node-lobby'); }
+function localFederatedLobby() { return lobby()?.dataset.localFederated === 'true'; }
 
 function selectedLocalHost() {
   try { return new URL(localStorage.getItem(HOST_ENDPOINT_KEY) || '').origin === location.origin; }
@@ -43,6 +52,57 @@ function passportId() {
   }
 }
 
+function readCache() {
+  try { return parse(localStorage.getItem(CACHE_KEY), null); }
+  catch { return null; }
+}
+
+function writeCache(packet) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ packet, updatedAt: Date.now() })); }
+  catch {}
+}
+
+function failureBackoffActive(now = Date.now()) {
+  try {
+    const until = Number(localStorage.getItem(FAILURE_KEY) || 0);
+    return Number.isFinite(until) && until > now;
+  } catch { return false; }
+}
+
+function markFailureBackoff() {
+  try { localStorage.setItem(FAILURE_KEY, String(Date.now() + FAILURE_BACKOFF_MS)); }
+  catch {}
+}
+
+function clearFailureBackoff() {
+  try { localStorage.removeItem(FAILURE_KEY); }
+  catch {}
+}
+
+function acquireNetworkLease({ force = false } = {}) {
+  if (!localFederatedLobby()) return false;
+  if (document.visibilityState !== 'visible' && !force) return false;
+  const now = Date.now();
+  if (!force && failureBackoffActive(now)) return false;
+  try {
+    const current = parse(localStorage.getItem(LEASE_KEY), null);
+    if (!force && current?.owner !== INSTANCE_ID && Number(current?.expiresAt) > now) return false;
+    const next = { owner: INSTANCE_ID, expiresAt: now + NETWORK_LEASE_MS, updatedAt: now };
+    localStorage.setItem(LEASE_KEY, JSON.stringify(next));
+    const stored = parse(localStorage.getItem(LEASE_KEY), null);
+    return stored?.owner === INSTANCE_ID;
+  } catch {
+    return true;
+  }
+}
+
+function releaseNetworkLease() {
+  try {
+    const current = parse(localStorage.getItem(LEASE_KEY), null);
+    if (current?.owner === INSTANCE_ID) localStorage.removeItem(LEASE_KEY);
+  } catch {}
+}
+
 async function jsonRequest(url, options = {}) {
   const response = await fetch(url, { cache: 'no-store', ...options, headers: { accept: 'application/json', ...(options.headers || {}) } });
   const payload = await response.json().catch(() => ({}));
@@ -56,6 +116,7 @@ async function jsonRequest(url, options = {}) {
 }
 
 function renderCapacity(packet) {
+  if (!localFederatedLobby()) return false;
   const capacity = packet?.capacity || packet;
   if (!capacity?.capacityAvailable || !capacity?.slots) return false;
   const free = el('cw-host-free-slots');
@@ -73,27 +134,41 @@ function renderCapacity(packet) {
     join.dataset.mode = 'search';
     join.textContent = 'Find nearest open Guild';
   }
-  document.getElementById('cw-host-node-lobby')?.setAttribute('data-local-capacity-live', 'true');
+  lobby()?.setAttribute('data-local-capacity-live', 'true');
   return true;
 }
 
-async function refreshCapacity() {
-  if (refreshing || !document.getElementById('cw-host-node-lobby')) return null;
+function renderCachedCapacity() {
+  const cached = readCache();
+  if (!cached?.packet) return false;
+  return renderCapacity(cached.packet);
+}
+
+async function refreshCapacity({ force = false } = {}) {
+  if (refreshing || !localFederatedLobby()) return null;
+  if (!acquireNetworkLease({ force })) {
+    renderCachedCapacity();
+    return null;
+  }
   refreshing = true;
   try {
     const packet = await jsonRequest(CAPACITY_ENDPOINT);
+    clearFailureBackoff();
+    writeCache(packet);
     renderCapacity(packet);
     return packet;
-  } catch (error) {
-    const note = el('cw-host-node-note');
-    if (note && /Not published|not expose|live capacity/i.test(note.textContent || '')) note.textContent = `Local seat accounting is starting: ${error.message}`;
+  } catch {
+    markFailureBackoff();
+    renderCachedCapacity();
     return null;
   } finally {
     refreshing = false;
+    releaseNetworkLease();
   }
 }
 
 async function admitResident({ quiet = false } = {}) {
+  if (!localFederatedLobby()) throw new Error('Local Guild capacity is unavailable on this page.');
   const button = el('cw-host-node-join');
   const help = el('cw-host-node-help');
   const priorText = button?.textContent || '';
@@ -104,6 +179,8 @@ async function admitResident({ quiet = false } = {}) {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ residentId: residentId(), userId: passportId() || undefined, seatClass: 'community' }),
     });
+    clearFailureBackoff();
+    writeCache(packet);
     renderCapacity(packet);
     return packet;
   } catch (error) {
@@ -120,8 +197,8 @@ async function admitResident({ quiet = false } = {}) {
 
 async function interceptJoin(event) {
   const button = event.target?.closest?.('#cw-host-node-join');
-  const lobby = document.getElementById('cw-host-node-lobby');
-  if (!button || !lobby || lobby.dataset.localFederated !== 'true') return;
+  const currentLobby = lobby();
+  if (!button || !currentLobby || currentLobby.dataset.localFederated !== 'true') return;
   if (button.dataset.mode === 'search') return;
   event.preventDefault();
   event.stopImmediatePropagation();
@@ -130,7 +207,7 @@ async function interceptJoin(event) {
   try {
     await admitResident();
     await globalThis.CivweaveHostNodeInstallerLobbyV1?.joinHostNode?.();
-    await refreshCapacity();
+    await refreshCapacity({ force: true });
   } catch {
     // admitResident already leaves a useful status message and deliberately does not select a full host.
   } finally {
@@ -138,24 +215,8 @@ async function interceptJoin(event) {
   }
 }
 
-function observeLobby() {
-  const lobby = document.getElementById('cw-host-node-lobby');
-  if (!lobby) return false;
-  const observer = new MutationObserver(() => {
-    clearTimeout(observerTimer);
-    observerTimer = setTimeout(() => {
-      const free = el('cw-host-free-slots')?.textContent || '';
-      const paid = el('cw-host-paid-slots')?.textContent || '';
-      if (/Not published|^—$/.test(free) || /Not published|^—$/.test(paid)) refreshCapacity();
-    }, 80);
-  });
-  observer.observe(lobby, { subtree: true, childList: true, characterData: true });
-  addEventListener('pagehide', () => observer.disconnect(), { once: true });
-  return true;
-}
-
 function waitForLobby(timeoutMs = LOBBY_WAIT_MS) {
-  const existing = document.getElementById('cw-host-node-lobby');
+  const existing = lobby();
   if (existing) return Promise.resolve(existing);
   return new Promise(resolve => {
     const root = document.documentElement || document;
@@ -168,31 +229,54 @@ function waitForLobby(timeoutMs = LOBBY_WAIT_MS) {
       resolve(value);
     };
     const observer = new MutationObserver(() => {
-      const lobby = document.getElementById('cw-host-node-lobby');
-      if (lobby) finish(lobby);
+      const current = lobby();
+      if (current) finish(current);
     });
     observer.observe(root, { childList: true, subtree: true });
     const timer = setTimeout(() => finish(null), timeoutMs);
   });
 }
 
+function scheduleRefresh() {
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => {
+    if (document.visibilityState === 'visible' && localFederatedLobby()) void refreshCapacity();
+  }, REFRESH_MS);
+}
+
 async function boot() {
   if (bound) return true;
-  const lobby = await waitForLobby();
-  if (!lobby || bound) return false;
+  const currentLobby = await waitForLobby();
+  if (!currentLobby || bound) return false;
+  if (currentLobby.dataset.localFederated !== 'true') {
+    document.documentElement.dataset.civweaveLocalCapacity = 'inactive-nonlocal';
+    return false;
+  }
   bound = true;
+  document.documentElement.dataset.civweaveLocalCapacity = VERSION;
   document.addEventListener('click', interceptJoin, true);
-  observeLobby();
-  await refreshCapacity();
-  if (selectedLocalHost()) admitResident({ quiet: true }).then(refreshCapacity).catch(() => {});
-  clearInterval(refreshTimer);
-  refreshTimer = setInterval(() => { if (document.visibilityState === 'visible') refreshCapacity(); }, REFRESH_MS);
-  addEventListener('pagehide', () => clearInterval(refreshTimer), { once: true });
+  renderCachedCapacity();
+  if (document.visibilityState === 'visible') await refreshCapacity();
+  scheduleRefresh();
+  addEventListener('storage', event => { if (event.key === CACHE_KEY && localFederatedLobby()) renderCachedCapacity(); });
+  addEventListener('pagehide', () => { clearInterval(refreshTimer); releaseNetworkLease(); }, { once: true });
   return true;
 }
 
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot, { once: true });
 else boot();
 
-globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({ version: VERSION, refreshCapacity, admitResident, residentId, passportId, waitForLobby, boot });
+globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({
+  version: VERSION,
+  refreshMs: REFRESH_MS,
+  networkLeaseMs: NETWORK_LEASE_MS,
+  failureBackoffMs: FAILURE_BACKOFF_MS,
+  localFederatedLobby,
+  refreshCapacity,
+  admitResident,
+  residentId,
+  passportId,
+  waitForLobby,
+  boot,
+});
 })();
