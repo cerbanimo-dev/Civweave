@@ -16,6 +16,8 @@ const LEGACY_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-
 const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
 const SUPPORT_URL='https://www.patreon.com/c/Civweave';
+const GUILD_QUEST_EMBED_URL='/app/civweave-guild-quest-embed-v1.html?embedded=1&source=working-campus';
+const GUILD_QUEST_BROWSER_ID='cw-guild-quest-browser-v1';
 const LEGACY_CONTROL_STYLE_ID='cw-working-campus-retired-controls-v432';
 const LEGACY_CONTROL_SELECTORS=Object.freeze(['main.app>.campus','nav.bottom','main.app>.top>.mode-switch','#settings-button','#diagnostics-button','#model-chip']);
 const CAMPUS_VIEW_FEATURES=new Set(['weave','progress','library','campus']);
@@ -23,6 +25,7 @@ const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.main','#co
 const WEAVELING_INTERACTION_SELECTOR='.guide button,.guide a,.weaveling-chat-form textarea,.weaveling-chat-form button,[data-open-unified-ai-settings],[data-cw-onboarding-replay]';
 let lastInspection=null;
 let recoveryPanel=null;
+let guildQuestBrowser=null;
 let verifyFlight=null;
 let retryTimer=0;
 let unhealthySince=0;
@@ -155,6 +158,78 @@ function ensureSupportButton(){
   link.title='Support Civweave directly';
   link.style.cssText='display:inline-flex;align-items:center;justify-content:center;margin-left:auto;padding:7px 8px;font-size:11px;text-decoration:none;white-space:nowrap;';
   foot.append(link);
+  return true;
+}
+function ensureGuildQuestBrowser(){
+  const existing=document.getElementById(GUILD_QUEST_BROWSER_ID);
+  if(existing){guildQuestBrowser=existing;return true}
+  const main=document.querySelector('main.app>.main');
+  if(!main)return false;
+  if(!document.getElementById(`${GUILD_QUEST_BROWSER_ID}-style`)){
+    const style=document.createElement('style');
+    style.id=`${GUILD_QUEST_BROWSER_ID}-style`;
+    style.textContent=`
+#${GUILD_QUEST_BROWSER_ID}{position:relative;z-index:2;max-width:1180px;margin:9px auto 10px;border:1px solid var(--line,#ffffff25);border-radius:16px;background:linear-gradient(145deg,#0b1d35e8,#07111fd9);backdrop-filter:blur(16px);overflow:hidden;color:var(--ink,#f8f1df)}
+#${GUILD_QUEST_BROWSER_ID}>summary{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;cursor:pointer;list-style:none;user-select:none}
+#${GUILD_QUEST_BROWSER_ID}>summary::-webkit-details-marker{display:none}
+#${GUILD_QUEST_BROWSER_ID}>summary:focus-visible{outline:2px solid var(--mint,#8af5d2);outline-offset:-3px}
+#${GUILD_QUEST_BROWSER_ID} .cw-gqb-icon{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border:1px solid #8af5d266;border-radius:10px;background:#8af5d214;font-size:16px}
+#${GUILD_QUEST_BROWSER_ID} .cw-gqb-copy{display:grid;gap:1px;min-width:0;margin-right:auto}
+#${GUILD_QUEST_BROWSER_ID} .cw-gqb-copy strong{font:650 16px/1.15 Georgia,serif}
+#${GUILD_QUEST_BROWSER_ID} .cw-gqb-copy small{color:var(--muted,#aebbd0);font-size:10.5px;white-space:normal}
+#${GUILD_QUEST_BROWSER_ID} .cw-gqb-toggle{padding:4px 8px;border:1px solid #ffffff25;border-radius:999px;background:#ffffff0c;color:var(--muted,#aebbd0);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+#${GUILD_QUEST_BROWSER_ID}[open]>summary{border-bottom:1px solid var(--line,#ffffff25)}
+#${GUILD_QUEST_BROWSER_ID}[open] .cw-gqb-toggle{color:var(--mint,#8af5d2);border-color:#8af5d255;background:#8af5d20d}
+#${GUILD_QUEST_BROWSER_ID} .cw-gqb-body{position:relative;min-height:680px;background:#07111f88}
+#${GUILD_QUEST_BROWSER_ID} .cw-gqb-status{position:absolute;inset:0;z-index:1;display:grid;place-items:center;padding:24px;color:var(--muted,#aebbd0);text-align:center;font-size:12px;pointer-events:none}
+#${GUILD_QUEST_BROWSER_ID} iframe{position:relative;z-index:2;display:block;width:100%;min-height:680px;border:0;background:transparent}
+@media(max-width:700px){#${GUILD_QUEST_BROWSER_ID}{margin:7px auto 8px;border-radius:14px}#${GUILD_QUEST_BROWSER_ID}>summary{padding:9px 10px}#${GUILD_QUEST_BROWSER_ID} .cw-gqb-body,#${GUILD_QUEST_BROWSER_ID} iframe{min-height:620px}}
+`;
+    (document.head||document.documentElement).append(style);
+  }
+  const details=document.createElement('details');
+  details.id=GUILD_QUEST_BROWSER_ID;
+  details.dataset.civweaveGuildQuestBrowser='collapsed-lazy';
+  const summary=document.createElement('summary');
+  summary.setAttribute('aria-label','Open or close the Guild Quest browser');
+  const icon=document.createElement('span');
+  icon.className='cw-gqb-icon';
+  icon.setAttribute('aria-hidden','true');
+  icon.textContent='⌘';
+  const copy=document.createElement('span');
+  copy.className='cw-gqb-copy';
+  const title=document.createElement('strong');
+  title.textContent='Guild Quests';
+  const subtitle=document.createElement('small');
+  subtitle.textContent='Browse Guild work and shared quests only when you need it.';
+  copy.append(title,subtitle);
+  const toggle=document.createElement('span');
+  toggle.className='cw-gqb-toggle';
+  toggle.textContent='Open';
+  summary.append(icon,copy,toggle);
+  const body=document.createElement('div');
+  body.className='cw-gqb-body';
+  const status=document.createElement('div');
+  status.className='cw-gqb-status';
+  status.textContent='Guild Quest browser is sleeping until this panel is opened.';
+  const questFrame=document.createElement('iframe');
+  questFrame.title='Guild Quest Browser';
+  questFrame.loading='lazy';
+  questFrame.setAttribute('referrerpolicy','same-origin');
+  questFrame.dataset.src=GUILD_QUEST_EMBED_URL;
+  questFrame.addEventListener('load',()=>{status.hidden=true;details.dataset.civweaveGuildQuestBrowser='loaded'});
+  body.append(status,questFrame);
+  details.append(summary,body);
+  details.addEventListener('toggle',()=>{
+    toggle.textContent=details.open?'Close':'Open';
+    if(!details.open||questFrame.getAttribute('src'))return;
+    status.hidden=false;
+    status.textContent='Opening Guild Quest browser…';
+    details.dataset.civweaveGuildQuestBrowser='loading';
+    questFrame.src=questFrame.dataset.src;
+  });
+  main.insertAdjacentElement('beforebegin',details);
+  guildQuestBrowser=details;
   return true;
 }
 function preauthorizeCanonicalCampus(){
@@ -335,13 +410,14 @@ function resume(event){
   activateLanguageMode();
   removeLegacyControls();
   ensureSupportButton();
+  ensureGuildQuestBrowser();
   scheduleRequestedCampusFeature();
   if(document.documentElement)document.documentElement.dataset.civweaveBfcacheResume=event?.persisted?VERSION:'normal';
   try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,revision:REVISION,persisted:Boolean(event?.persisted)}}))}catch{}
   if(event?.persisted)void verifyOrRecover('bfcache-return');
   else scheduleVerify('pageshow',RETRY_DELAY_MS);
 }
-function scheduleInitialCheck(){removeLegacyControls();ensureSupportButton();scheduleRequestedCampusFeature();scheduleVerify('initial-paint',RETRY_DELAY_MS)}
+function scheduleInitialCheck(){removeLegacyControls();ensureSupportButton();ensureGuildQuestBrowser();scheduleRequestedCampusFeature();scheduleVerify('initial-paint',RETRY_DELAY_MS)}
 
 retireLegacyControls();
 preauthorizeCanonicalCampus();
@@ -357,6 +433,7 @@ document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'){clearRetry();return}
   removeLegacyControls();
   ensureSupportButton();
+  ensureGuildQuestBrowser();
   scheduleRequestedCampusFeature();
   const grace=interactionGraceRemaining();
   scheduleVerify('visibility-return',Math.max(RETRY_DELAY_MS,grace+40));
@@ -379,7 +456,9 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   removeLegacyControls,
   openCampusFeature,
   ensureSupportButton,
+  ensureGuildQuestBrowser,
   supportUrl:SUPPORT_URL,
+  guildQuestEmbedUrl:GUILD_QUEST_EMBED_URL,
   language:requestedLanguage,
   startupGraceMs:STARTUP_GRACE_MS,
   unhealthyHoldMs:UNHEALTHY_HOLD_MS,
@@ -388,6 +467,7 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   reloadPolicy:'sustained-failure-only-single-flight-with-interaction-grace',
   legacyNavigationPolicy:'controls-removed-before-paint-v432',
   legacyControlSelectors:[...LEGACY_CONTROL_SELECTORS],
-  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer),protectedInteractionActive,lastProtectedInteractionAt,legacyControlsRemoved,legacyControlObserverActive:Boolean(legacyControlObserver)})
+  guildQuestBrowserPolicy:'collapsed-by-default-src-assigned-on-first-expansion',
+  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),guildQuestBrowser:Boolean(guildQuestBrowser?.isConnected),guildQuestBrowserOpen:Boolean(guildQuestBrowser?.open),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer),protectedInteractionActive,lastProtectedInteractionAt,legacyControlsRemoved,legacyControlObserverActive:Boolean(legacyControlObserver)})
 });
 })();
