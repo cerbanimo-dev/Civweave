@@ -1,11 +1,14 @@
 ;(()=>{
 'use strict';
-const REVISION='boot-recovery-v426';
+const REVISION='boot-recovery-v426-semver-document-rescue-v431';
 const RECOVERY_CACHE='cwrecovery-v426';
 const RECOVERY_PATH='/app/recovery-v426.html';
 const LAUNCH_BUDGET_MS=2200;
+const STAGING_HOST='civweave-staging.pages.dev';
+const SEMVER_DOCUMENT=/^v?\d+\.\d+\.\d+\s*$/i;
 const RECOVERY_ASSETS=[RECOVERY_PATH,'/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/system-routes-v227.js','/app/working-campus-v156.html'];
 const previousStableAppEntry=stableAppEntry;
+const previousNetworkFirst=networkFirst;
 function timeout(promise,ms,label='operation'){return new Promise((resolve,reject)=>{let settled=false;const timer=setTimeout(()=>{if(settled)return;settled=true;reject(new Error(`${label} timed out after ${ms} ms`))},ms);Promise.resolve(promise).then(value=>{if(settled)return;settled=true;clearTimeout(timer);resolve(value)},error=>{if(settled)return;settled=true;clearTimeout(timer);reject(error)})})}
 function syntheticRecovery(reason='The normal launcher did not answer in time.'){
   const safe='/app/working-campus-v156.html?installed=1&recovery=safe&launch=sw-recovery-v426';
@@ -16,7 +19,33 @@ function syntheticRecovery(reason='The normal launcher did not answer in time.')
 }
 async function cachedRecoveryResponse(){try{const cache=await timeout(caches.open(RECOVERY_CACHE),500,'recovery cache open');const response=await timeout(cache.match(new Request(new URL(RECOVERY_PATH,self.location.origin).href),{ignoreSearch:true}),500,'recovery cache lookup');if(response?.ok){const headers=new Headers(response.headers);headers.set('cache-control','no-store');headers.set('x-civweave-boot-recovery',REVISION);return new Response(await response.clone().arrayBuffer(),{status:200,headers})}}catch{}return null}
 async function stageRecoveryAssets(){const cache=await caches.open(RECOVERY_CACHE);await Promise.allSettled(RECOVERY_ASSETS.map(async pathname=>{const request=new Request(new URL(pathname,self.location.origin).href,{cache:'reload',credentials:'same-origin'});const response=await timeout(fetch(request),5000,`recovery asset ${pathname}`);if(!response?.ok)throw new Error(`${pathname} returned ${response?.status||'no response'}`);await cache.put(new Request(new URL(pathname,self.location.origin).href),response.clone())}))}
+function installedEntryRequest(request,reason='semver-document-rescue'){
+  const target=new URL('/app/installed-entry-v146.html',self.location.origin);
+  target.searchParams.set('installed','1');
+  target.searchParams.set('system','civweave');
+  target.searchParams.set('recovery',reason);
+  return new Request(target.href,{method:request.method,headers:request.headers,credentials:'same-origin',cache:'no-store',redirect:'follow'});
+}
+async function looksLikeSemverDocument(response,request){
+  if(self.location.hostname!==STAGING_HOST||request.mode!=='navigate'||request.method==='HEAD'||!response?.ok)return false;
+  const url=new URL(request.url);
+  if(url.pathname!=='/VERSION'&&!url.pathname.endsWith('.html'))return false;
+  const type=String(response.headers?.get?.('content-type')||'');
+  if(type&&!/(?:text\/html|text\/plain)/i.test(type))return false;
+  try{const text=(await response.clone().text()).trim();return text.length<=64&&SEMVER_DOCUMENT.test(text)}catch{return false}
+}
 stableAppEntry=async function bootRecoveryStableAppEntry(request){try{const response=await timeout(previousStableAppEntry(request),LAUNCH_BUDGET_MS,'installed launcher');if(response&&response.status<500)return response;const cached=await cachedRecoveryResponse();return cached||syntheticRecovery(`The installed launcher returned ${response?.status||'an unusable response'}.`)}catch(error){const cached=await cachedRecoveryResponse();return cached||syntheticRecovery(error?.message||String(error))}};
+networkFirst=async function bootRecoveryNetworkFirst(request,fallbackPath='/offline.html'){
+  const response=await previousNetworkFirst(request,fallbackPath);
+  if(await looksLikeSemverDocument(response,request)){
+    const rescued=await stableAppEntry(installedEntryRequest(request,new URL(request.url).pathname==='/VERSION'?'version-document-rescue-v431':'semver-html-rescue-v431'));
+    const headers=new Headers(rescued.headers);
+    headers.set('x-civweave-semver-document-rescue','v431');
+    if(request.method==='HEAD')return new Response(null,{status:rescued.status,statusText:rescued.statusText,headers});
+    return new Response(await rescued.clone().arrayBuffer(),{status:rescued.status,statusText:rescued.statusText,headers});
+  }
+  return response;
+};
 self.addEventListener('install',event=>{event.waitUntil(stageRecoveryAssets().catch(()=>null))});
-self.CivweaveBootRecoveryV426=Object.freeze({revision:REVISION,recoveryCache:RECOVERY_CACHE,recoveryPath:RECOVERY_PATH,launchBudgetMs:LAUNCH_BUDGET_MS,policy:'paint-recovery-instead-of-native-splash-dead-end'});
+self.CivweaveBootRecoveryV426=Object.freeze({revision:REVISION,recoveryCache:RECOVERY_CACHE,recoveryPath:RECOVERY_PATH,launchBudgetMs:LAUNCH_BUDGET_MS,stagingHost:STAGING_HOST,semverDocumentRescue:true,policy:'paint-recovery-instead-of-native-splash-dead-end-plus-staging-semver-document-rescue'});
 })();
