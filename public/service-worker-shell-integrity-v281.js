@@ -1,7 +1,7 @@
 ;(() => {
 'use strict';
 
-const REVISION = 'shell-integrity-v281';
+const REVISION = 'shell-integrity-v281-required-only-install-v2';
 const INTEGRITY_URL = '/app/shell-integrity-v281.json';
 const STAGING_CACHE = `${SHELL_CACHE}-staging-v281`;
 let lastKnownGoodCache = null;
@@ -80,11 +80,16 @@ cacheShell = async function cacheShellV281() {
   const stage = await caches.open(STAGING_CACHE);
   const failures = [];
 
-  for (let index = 0; index < SHELL_ASSETS.length; index += 4) {
-    const batch = SHELL_ASSETS.slice(index, index + 4);
+  // Activation is gated only by the declared required shell. Optional AI,
+  // knowledge, media, diagnostics, Guild Quest, and human-chat assets are
+  // intentionally fetched on demand after activation. Waiting on those files
+  // here made a "lightweight" install capable of spending multiple 12-second
+  // timeout windows in the installing state on mobile devices.
+  for (let index = 0; index < REQUIRED_SHELL_ASSETS.length; index += 4) {
+    const batch = REQUIRED_SHELL_ASSETS.slice(index, index + 4);
     const results = await Promise.allSettled(batch.map(async pathname => {
-      const response = await fetchFresh(pathname, 'shell-install');
-      if (REQUIRED_SHELL_ASSETS.includes(pathname) && integrity.manifest) {
+      const response = await fetchFresh(pathname, 'shell-install-required');
+      if (integrity.manifest) {
         const expected = String(integrity.manifest.assets[pathname] || '').toLowerCase();
         const actual = await sha256(response);
         if (actual !== expected) throw new Error(`Integrity mismatch for ${pathname}.`);
@@ -96,11 +101,10 @@ cacheShell = async function cacheShellV281() {
     });
   }
 
-  const requiredFailures = failures.filter(entry => REQUIRED_SHELL_ASSETS.includes(entry.pathname));
-  if (requiredFailures.length) {
+  if (failures.length) {
     await caches.delete(STAGING_CACHE);
-    const error = new Error(`Verified app shell incomplete: ${requiredFailures.length}/${REQUIRED_SHELL_ASSETS.length} required files failed.`);
-    error.failures = requiredFailures;
+    const error = new Error(`Verified app shell incomplete: ${failures.length}/${REQUIRED_SHELL_ASSETS.length} required files failed.`);
+    error.failures = failures;
     error.integrityRevision = REVISION;
     throw error;
   }
@@ -114,7 +118,8 @@ cacheShell = async function cacheShellV281() {
   await caches.delete(STAGING_CACHE);
 
   return {
-    optionalFailures: failures.filter(entry => OPTIONAL_SHELL_ASSETS.includes(entry.pathname)),
+    optionalFailures: [],
+    optionalDeferred: OPTIONAL_SHELL_ASSETS.length,
     integrity: integrity.developmentBypass ? 'development-bypass' : 'verified',
     integrityRevision: REVISION
   };
@@ -129,6 +134,7 @@ shellStatus = async function shellStatusV281() {
     integrityRevision: REVISION,
     integrityRequired: !localDevelopmentHost(),
     lastKnownGoodCache,
+    optionalInstallPolicy: 'deferred-on-demand',
     fallbackPolicy: 'current-caches-then-last-known-good-shell'
   };
 };
@@ -152,6 +158,7 @@ self.CivweaveShellIntegrityV281 = Object.freeze({
   revision: REVISION,
   integrityUrl: INTEGRITY_URL,
   stagingCache: STAGING_CACHE,
+  optionalInstallPolicy: 'deferred-on-demand',
   fallbackPolicy: 'current-caches-then-last-known-good-shell',
   get lastKnownGoodCache() { return lastKnownGoodCache; }
 });
