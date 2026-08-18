@@ -81,6 +81,7 @@ jobs:
           node --check public/creator-suite/audit/client-init-v1.js
           node --check public/creator-suite/audit/evidence-crypto-v1.mjs
           node --check public/creator-suite/audit/review-endorsement-v1.mjs
+          node --check public/creator-suite/audit/review-receipt-v1.mjs
           node --check public/creator-suite/audit/quest-beat-v1.js
           node --check public/creator-suite/text-editor-v1.js
           node --check public/creator-suite/audio-editor-v1.js
@@ -138,17 +139,19 @@ jobs:
         run: node scripts/test-cloudflare-creator-provenance-reviewer-v1.mjs
       - name: Verify independent human tribunal
         run: node scripts/test-creator-provenance-tribunal-v1.mjs
-      - name: Verify device-endorsed Guild tribunal
+      - name: Verify device-endorsed Guild tribunal and signed review receipt
         run: node scripts/test-cloudflare-creator-provenance-human-endorsement-v1.mjs
       - name: Verify Creator audit client privacy
         run: node scripts/test-creator-audit-client-v1.mjs
+      - name: Verify public Creator provenance CORS/auth bridge
+        run: node scripts/test-creator-provenance-public-cors-v1.mjs
       - name: Verify selected-evidence browser and Guild crypto
         run: node scripts/test-creator-provenance-evidence-crypto-v1.mjs
       - name: Verify Cloudflare Guild audit storage and requests
         run: node scripts/test-cloudflare-creator-provenance-audit-v1.mjs
-      - name: Verify Cloudflare selected evidence handshake
+      - name: Verify Cloudflare selected evidence and signed deterministic review
         run: node scripts/test-cloudflare-creator-provenance-evidence-v1.mjs
-      - name: Verify signed appeal lifecycle
+      - name: Verify signed appeal lifecycle and review history
         run: node scripts/test-cloudflare-creator-provenance-appeal-v1.mjs
       - name: Verify provenance retention policy
         run: node scripts/test-creator-provenance-retention-v1.mjs
