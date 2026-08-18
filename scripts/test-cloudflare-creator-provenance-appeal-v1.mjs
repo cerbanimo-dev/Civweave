@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { CivweaveCloudNode, creatorProvenanceInternalToken } from '../cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs';
+import { CivweaveCloudNode, creatorProvenanceInternalToken } from '../cloudflare/node-cloud/src/cloud-node-provenance-lifecycle-v1.mjs';
 import { signDeviceProof } from '../public/creator-suite/audit/evidence-crypto-v1.mjs';
 
 class Storage{constructor(){this.rows=new Map();this.alarm=null}async get(key){return this.rows.get(key)}async put(key,value){if(typeof key==='object'&&value===undefined)for(const[k,v]of Object.entries(key))this.rows.set(k,v);else this.rows.set(key,value)}async list({prefix=''}={}){return new Map([...this.rows].filter(([key])=>key.startsWith(prefix)))}async delete(keys){for(const key of Array.isArray(keys)?keys:[keys])this.rows.delete(key)}async getAlarm(){return this.alarm}async setAlarm(value){this.alarm=Number(value)}}
