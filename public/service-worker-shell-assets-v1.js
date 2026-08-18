@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v8-human-chat-guild-context';
+const REVISION='shell-assets-v1-repair-v9-guild-roster-ble-mesh';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
@@ -29,6 +29,9 @@ const OPTIONAL_HUMAN_CHAT=[
   '/app/human-message-bubble-v1.js',
   '/app/human-chat-guild-context-v1.js',
   '/app/human-chat-network-v1.js',
+  '/app/guild-membership-mesh-v1.js',
+  '/app/ble-object-transport-v1.js',
+  '/app/human-chat-ble-controls-v1.js',
   '/app/civweave-private-messaging-v1.js',
   '/app/local-object-mesh-v146.js',
   '/app/shared-intention-party-chat-v1.js'
@@ -48,6 +51,8 @@ self.CivweaveShellAssetsV1=Object.freeze({
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
   optional:[...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
   humanChat:[...OPTIONAL_HUMAN_CHAT],
+  humanChatRoster:'signed-local-object-v1',
+  humanChatBle:'object-transport-v1',
   policy:'declarative-shell-assets-only-no-repair-or-message-ownership'
 });
 })();
