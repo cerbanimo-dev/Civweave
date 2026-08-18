@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-selection-audit.v3",
-  "built_at": "2026-08-18T02:06:46Z",
-  "before": 275,
-  "after": 218,
-  "rejected": 57,
+  "built_at": "2026-08-18T03:31:27Z",
+  "before": 268,
+  "after": 210,
+  "rejected": 58,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -274,15 +274,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -319,12 +317,11 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 7,
+      "records": 6,
       "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
@@ -332,8 +329,7 @@
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -664,23 +660,22 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 27,
-      "mesh_redistributable": 27,
+      "records": 21,
+      "mesh_redistributable": 21,
       "providers": {
-        "peertube": 21,
-        "wikimedia-commons": 6
+        "peertube": 21
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
         "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
         "[Language learning] How to create and edit language in LingLibre?",
         "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
-        "English Grammar — Present Perfect — Teaching Ideas — 2"
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "NFLSHS-CHINA: Using Synthetic Biology to Decode the Secrets of Youth (2025) - Team Presentation [English]"
       ]
     }
   },
@@ -973,7 +968,7 @@
         "language-learning"
       ],
       "coverage": 1.0,
-      "records": 27,
+      "records": 21,
       "available": true
     },
     "systems-decision-making": {
@@ -1227,7 +1222,21 @@
     },
     {
       "provider": "wikimedia-commons",
+      "title": "Future role of affiliates within the Wikimedia movement. How Can AffCom help – Wikimania 2025 in Nairobi, Kenya",
+      "reasons": {
+        "communication-conflict": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
       "title": "Wikimania 2026 – Communication as Community Infrastructure Growing a Wikimedia community from 25 to 100 members in two years",
+      "reasons": {
+        "communication-conflict": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "World No.1 Divorce Lawyer: If You Do This, Your Marriage Is Already Over.",
       "reasons": {
         "communication-conflict": "insufficient-automatic-instructional-evidence"
       }
@@ -1249,20 +1258,6 @@
     {
       "provider": "wikimedia-commons",
       "title": "Role of Wikipedia in education",
-      "reasons": {
-        "critical-thinking": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Iran just struck IDF base filled with soldiers as Netanyahu send appeal for ceasefire - OPTM",
-      "reasons": {
-        "critical-thinking": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "What Iran just DID...US's entire army in Arab nations is now USELESS - OPTM",
       "reasons": {
         "critical-thinking": "insufficient-automatic-instructional-evidence"
       }
@@ -1353,7 +1348,7 @@
     },
     {
       "provider": "internet-archive",
-      "title": "World Leder Fangruida Bio. 2020v. 3.3 Revision",
+      "title": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
       "reasons": {
         "logical-frameworks": "insufficient-automatic-instructional-evidence"
       }
@@ -1381,14 +1376,14 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Artificial Intelligence Pandemonium by Human Mortal Sovereign! - Bienvenido Bones Bañez Jr. Poetry in Emanations 12, International Authors, New York, United States of America 🇺🇸",
+      "title": "Agenda 21 AI Surrealmageddon Machines! - by Bienvenido Bones Bañez, Jr. In Poetry of the Emanations 12 🇺🇸👁️, International Authors, New York, United States of America 🇺🇸",
       "reasons": {
         "philosophy-ethics": "insufficient-automatic-instructional-evidence"
       }
     },
     {
       "provider": "internet-archive",
-      "title": "Agenda 21 AI Surrealmageddon Machines! - by Bienvenido Bones Bañez, Jr. In Poetry of the Emanations 12 🇺🇸👁️, International Authors, New York, United States of America 🇺🇸",
+      "title": "Artificial Intelligence Pandemonium by Human Mortal Sovereign! - Bienvenido Bones Bañez Jr. Poetry in Emanations 12, International Authors, New York, United States of America 🇺🇸",
       "reasons": {
         "philosophy-ethics": "insufficient-automatic-instructional-evidence"
       }
@@ -1451,13 +1446,6 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Generating novel images using CLIP in Python",
-      "reasons": {
-        "prompt-engineering": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "internet-archive",
       "title": "Language Tools For Creators by Paco Xander Nathan",
       "reasons": {
         "prompt-engineering": "insufficient-automatic-instructional-evidence"
@@ -1487,6 +1475,20 @@
     {
       "provider": "internet-archive",
       "title": "CLOUDS Aaron Koblin",
+      "reasons": {
+        "pseudocoding": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "CLOUDS Andres Colubri",
+      "reasons": {
+        "pseudocoding": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "CLOUDS: Pittsburgh Premiere (excerpt)",
       "reasons": {
         "pseudocoding": "insufficient-automatic-instructional-evidence"
       }

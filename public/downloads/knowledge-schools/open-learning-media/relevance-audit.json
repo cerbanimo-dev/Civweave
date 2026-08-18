@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-08-18T02:06:46Z",
-  "before": 1118,
-  "after": 507,
-  "rejected": 611,
+  "built_at": "2026-08-18T03:31:27Z",
+  "before": 1115,
+  "after": 499,
+  "rejected": 616,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -274,15 +274,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -319,12 +317,11 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 7,
+      "records": 6,
       "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
@@ -332,8 +329,7 @@
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -664,23 +660,22 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 27,
-      "mesh_redistributable": 27,
+      "records": 21,
+      "mesh_redistributable": 21,
       "providers": {
-        "peertube": 21,
-        "wikimedia-commons": 6
+        "peertube": 21
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
         "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
         "[Language learning] How to create and edit language in LingLibre?",
         "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
-        "English Grammar — Present Perfect — Teaching Ideas — 2"
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "NFLSHS-CHINA: Using Synthetic Biology to Decode the Secrets of Youth (2025) - Team Presentation [English]"
       ]
     }
   },
@@ -772,7 +767,7 @@
     },
     {
       "provider": "peertube",
-      "title": "Goldberg Variations Complete (J.S. Bach BWV 988), with score, Kimiko Ishizaka piano",
+      "title": "Menuet de Telemann (Duos pour violons)",
       "topic_slug": "arts-culture"
     },
     {
@@ -957,11 +952,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Local Models: Trust, Control, Optimization — Carter Abdallah, NVIDIA",
-      "topic_slug": "career-work-skills"
-    },
-    {
-      "provider": "peertube",
       "title": "Nextcloud Hub 26 Winter design update. 🎨 QR code login, intuitive icons, enhanced filters, and more!",
       "topic_slug": "career-work-skills"
     },
@@ -1038,6 +1028,11 @@
     {
       "provider": "peertube",
       "title": "YESTERDAY'S NEWSREEL CAREER OF CARRIER USS LEXINGTON FLYING WING SUIT RED SOX 94894b",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
+      "title": "Don't choose the wrong career in 2026",
       "topic_slug": "career-work-skills"
     },
     {
@@ -1179,6 +1174,46 @@
       "provider": "peertube",
       "title": "ShanghaiTech-China: A science popularization lecture on climate crisis (2023) [Chinese]",
       "topic_slug": "climate-environment"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "1st Cavalry Division Soldiers lead the Lithuanian Riflemen’s Union through combat training (1011544)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "4-2CR Conducts Urban Combat Training During Saber Guardian 25 (966725)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Combined Jungle Operations Training Course Phase 1 Reel (985339)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Combined Jungle Operations Training Course Teaser reel (985688)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "De l’éducation populaire à l’animation - émergence et structuration d’une offre de formation (MédiHAL 4455876)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Journées d'étude 'L'arbre qui cache la forêt'- 19 et 20 novembre 2021 INHA-Asie-Sorbonne (MédiHAL 3455589)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Les fables de Jean de La Fontaine en langue des signes (MédiHAL 4091073)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "U.S. Army Troops Participate in Mountaineering Training in Kosovo q5HW0pqUs9A",
+      "topic_slug": "communication-conflict"
     },
     {
       "provider": "peertube",
@@ -1356,6 +1391,11 @@
       "topic_slug": "communication-conflict"
     },
     {
+      "provider": "wikimedia-commons",
+      "title": "ArtAndFeminism-full-training",
+      "topic_slug": "communication-conflict"
+    },
+    {
       "provider": "peertube",
       "title": "Ambient vulnerabile",
       "topic_slug": "communication-conflict"
@@ -1439,51 +1479,6 @@
       "provider": "wikimedia-commons",
       "title": "Cours-crypto-2",
       "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Cours-crypto-3",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "How psychological and interpersonal processes are influenced by human-computer interactions",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Hydra SundaeSwap",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "How To Minicom Serial Access Pine64 A64 LTS / PineDio Gateway Example",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "How To Minicom Serial Access Pine64 A64 LTS / PineDio Gateway Example",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "DTNS 20180301",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "“ AUTOMATION - THE NEXT REVOLUTION ” 1963 NEWS FILM COMPUTERS, ROBOTS & MANUFACTURING 90004",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "“ MICROCOMPUTERS – AN INTRODUCTION ” CAMPY 1982 ANIMATED CARTOON ABOUT PERSONAL COMPUTERS 65044",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Five Signs of Severe Food Poisoning",
-      "topic_slug": "cooking-food-safety"
     }
   ]
 }

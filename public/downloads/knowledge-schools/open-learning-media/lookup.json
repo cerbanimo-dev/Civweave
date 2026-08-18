@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-08-18T02:06:46Z",
+  "built_at": "2026-08-18T03:31:27Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -4461,7 +4461,7 @@
         "provider": "peertube",
         "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
         "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
+        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
         "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -4766,7 +4766,7 @@
         "provider": "peertube",
         "provider_id": "48450782-7789-4099-b54d-5ee1e57aefb1",
         "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
-        "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early...",
+        "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early stages of lattice theory. The 1935 paper of Birkhoff I mention can be found at [https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf](https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf). The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
         "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -10868,138 +10868,6 @@
         }
       },
       {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Continuous — Teaching Ideas — 2.webm",
-        "title": "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. The TEFL lesson in this video can be found in our 140-hour online TEFL certification course.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 2841607,
-            "provider_sha1": "4cb8123a80ae5416ff295f1325cc9e110653f074",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Continuous — Teaching Ideas — 2",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Contiuous — Teaching Ideas — 3.webm",
-        "title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
-        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. . ///",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 3557521,
-            "provider_sha1": "8c650a73239f91c3e60c171fc06603b5768e4232",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
         "provider": "peertube",
         "provider_id": "7f7b757d-358e-4b92-a923-f016fa561023",
         "title": "Starting to learn Taiwanese: Language Learning Journey 1",
@@ -11087,134 +10955,6 @@
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Perfect — Teaching Ideas — 2.webm",
-        "title": "English Grammar — Present Perfect — Teaching Ideas — 2",
-        "description": "The teaching idea covered in this video is a fun group game that should generate a good deal of student talk time using the Present Perfect tense. The students will be in small groups and each student will have the question sheet with a number of pictures and word prompts. Students take turns forming their question with the aid of the prompts. The groups then give their answers using the Present Perfect. The prompts include: win/a competition, go/scuba-diving, meet/ a famous person The questions would be: Have you ever won a competition?, Have you ever been scuba-diving?, Have you ever met a famous person? Group members would answer, Yes I have...., No I haven't... After a given amount of time each group share their answers with the class. The teacher could then encourage the class to come up with their own prompts and repeat the game. One area within the EFL industry that is very popular is that of teaching individual students. A game like the activity above could be adapted for one student. There is a demand for one to one lessons particularly in the business world. These types of lessons allow the teacher to focus specifically on the particular needs and wants of one student. Another advantage for the teacher is that you are only teaching to one level. These students are usually highly motivated.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 3849512,
-            "provider_sha1": "d87575989d8e9b454e05a0d4a7875f8c2f9104ab",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Perfect — Teaching Ideas — 2",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Simple — Teaching Ideas — 1.webm",
-        "title": "English Grammar — Present Simple — Teaching Ideas — 1",
-        "description": "The teaching ideas in these ITTT videos are intended to be used in the Activate stage of a lesson. During this stage students are encouraged to use the language as freely and communicatively as possible. The focus is more on the fluency than on the accuracy of the language. When selecting any activity it is important to ensure that the timing is appropriate and that the activity is appropriate for the students' age, language levels, class size, interests and culture. The video looks at one of three teaching ideas for Present Simple. The activity is called \"Find someone who....\" Each student will be given a sheet with a number of facts/habits/routines. For example ...plays a musical instrument,.....does a lot of sport, ....has a brother and a sister. The students then mill around and interview each other asking, \"Do you play a musical instrument?\" \"Do you play a lot of sport?\" Do you have a brother and a sister?\" Students should respond using the Present Simple, \"Yes I do\",\"No I don't.\" The students record names next to the specific fact, for example, Jim plays a lot of sport. After a specified time the students will share their findings with the class.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/b/be/English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 6934862,
-            "provider_sha1": "58292eb5dc6395c157dbd1402c72d15beffea641",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Simple — Teaching Ideas — 1",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
           }
         }
       },
@@ -11345,134 +11085,6 @@
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Continuous — Structure.webm",
-        "title": "English Grammar — Present Continuous — Structure",
-        "description": "This TEFL certification video explores the structure of the present continuous tense. Tense forms have specific structures that TEFL teachers will need to know before they get a TEFL job. Even if grammar wasn't a strong point at school, our TEFL training courses will give you the lessons you need to conduct meaningful and productive EFL lessons. ///",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 3653409,
-            "provider_sha1": "28318443cccb3f7e1d2bafe833917481231a7a84",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Continuous — Structure",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Perfect — Structure — 2.webm",
-        "title": "English Grammar — Present Perfect — Structure — 2",
-        "description": "This ITTT video is the second part of a lesson looking at the structure of the Present Perfect tense. It reviews an example of the structure with a regular verb -- played. I/you/we/they have played. She/He/It has played. The video then examines some of the spelling patterns that are used with irregular verbs. For example, verbs ending with a consonant + y. cry changes to cried, try changes to tried. Another spelling pattern with irregular verbs ending with a consonant + a vowel + a consonant Shop changes to shopped, ship changes to shipped. When teaching this particular point, as with other grammar points, it is important to explain to students that there are exceptions to most rules in the English language. Where specific patterns exist we need to introduce them to our students.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 2410285,
-            "provider_sha1": "d5b798ec9e81c0524e060408e3dd2acb47b8ad2e",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Perfect — Structure — 2",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
           }
         }
       },

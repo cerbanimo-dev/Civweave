@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-08-18T02:06:46Z",
-  "before": 507,
-  "after": 275,
-  "rejected": 232,
+  "built_at": "2026-08-18T03:31:27Z",
+  "before": 499,
+  "after": 268,
+  "rejected": 231,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -274,15 +274,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -319,12 +317,11 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 7,
+      "records": 6,
       "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
@@ -332,8 +329,7 @@
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -664,23 +660,22 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 27,
-      "mesh_redistributable": 27,
+      "records": 21,
+      "mesh_redistributable": 21,
       "providers": {
-        "peertube": 21,
-        "wikimedia-commons": 6
+        "peertube": 21
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
         "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
         "[Language learning] How to create and edit language in LingLibre?",
         "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
-        "English Grammar — Present Perfect — Teaching Ideas — 2"
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "NFLSHS-CHINA: Using Synthetic Biology to Decode the Secrets of Youth (2025) - Team Presentation [English]"
       ]
     }
   },
@@ -1065,13 +1060,6 @@
     },
     {
       "provider": "peertube",
-      "title": "World No.1 Divorce Lawyer: If You Do This, Your Marriage Is Already Over.",
-      "relevance_topics": [
-        "communication-conflict"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "Cloud - Kurz erklärt",
       "relevance_topics": [
         "computing-basics"
@@ -1178,6 +1166,20 @@
     {
       "provider": "peertube",
       "title": "Tuto IA - Vera, l'appli de fact checking par simple appel ou message sur Whatsapp. Simple et top !!",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -1505,20 +1507,6 @@
       ]
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "25 Essential Chinese Phrases You NEED to Know Before Visiting China!",
-      "relevance_topics": [
-        "language-learning"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "WIKITONGUES- Freddie speaking Portuguese",
-      "relevance_topics": [
-        "language-learning"
-      ]
-    },
-    {
       "provider": "peertube",
       "title": "Catullus 40 in Latin & English; Vocabulary & Grammar Notes: Quaenam te mala mens, miselle Ravide",
       "relevance_topics": [
@@ -1722,13 +1710,6 @@
       ]
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "Give Me A Beat! Creative Commons licensing, and ethical considerations for cultural heritage collections – Wikimania 2025 in Nairobi, Kenya",
-      "relevance_topics": [
-        "music-performance"
-      ]
-    },
-    {
       "provider": "peertube",
       "title": "🔥 CRADLE OF MUSIC – Nobody’s Wife (Live in Concert) | ROCK POWER Performance 2026 🔥",
       "relevance_topics": [
@@ -1801,6 +1782,20 @@
     {
       "provider": "peertube",
       "title": "Age of Mythology EE: Campagne FR [6] Pourvu que Ça Marche",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Piola Sur - Folklore 1 (28 Abril 2022)",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Piola Sur - Folklore 2 (28 Abril 2022)",
       "relevance_topics": [
         "mythology-folklore"
       ]

@@ -1,10 +1,10 @@
 {
   "schema": "civweave.open-learning-media-title-quality-audit.v2",
-  "built_at": "2026-08-18T02:06:46Z",
-  "records_before": 218,
-  "records_after": 191,
-  "rejected_records": 27,
-  "rejected_topic_links": 30,
+  "built_at": "2026-08-18T03:31:27Z",
+  "records_before": 210,
+  "records_after": 184,
+  "rejected_records": 26,
+  "rejected_topic_links": 29,
   "rejected_samples": [
     {
       "provider": "peertube",
@@ -143,12 +143,6 @@
       "provider_id": "6b3f6f93-68f7-4165-acab-95d5a33ded75",
       "title": "Subject-Verb Agreement (Lesson 1 - Finding the subject)",
       "topic_slug": "language-learning"
-    },
-    {
-      "provider": "internet-archive",
-      "provider_id": "Systems_Thinking_",
-      "title": "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_",
-      "topic_slug": "logical-frameworks"
     },
     {
       "provider": "peertube",
@@ -451,15 +445,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -820,23 +812,21 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 15,
-      "mesh_redistributable": 15,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 6
+        "peertube": 9
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
-        "English Grammar — Present Perfect — Teaching Ideas — 2",
-        "English Grammar — Present Simple — Teaching Ideas — 1",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "English Grammar — Present Continuous — Structure",
-        "English Grammar — Present Perfect — Structure — 2"
+        "ESL - Expletive sentences (there, here, it)",
+        "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+        "ESL - Sentence Structures： Simple, Compound and Complex",
+        "ESL - Subordinating Conjunctions",
+        "ESL Writing - Summarizing and Paraphrasing"
       ]
     }
   },
@@ -1127,7 +1117,7 @@
         "language-learning"
       ],
       "coverage": 1.0,
-      "records": 15,
+      "records": 9,
       "available": true
     },
     "systems-decision-making": {
