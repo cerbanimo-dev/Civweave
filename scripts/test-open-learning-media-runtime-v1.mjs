@@ -44,12 +44,20 @@ assert(Array.isArray(revocations.record_keys));
 assert(Array.isArray(revocations.content_hashes));
 const atlasInstaller=fs.readFileSync(path.join(root,'public/app/video-atlas-installer-v1.js'),'utf8');
 assert(atlasInstaller.includes('/app/open-learning-media-installer-v1.mjs'));
+assert(atlasInstaller.includes('scheduleLazyStage'));
+assert(atlasInstaller.includes("addEventListener('civweave:pwa-installed'"));
 const mediaInstaller=fs.readFileSync(path.join(root,'public/app/open-learning-media-installer-v1.mjs'),'utf8');
 assert(mediaInstaller.includes("ROOT_ID='open-learning-media-cache'"));
 assert(mediaInstaller.includes('ensureRoot'));
 assert(mediaInstaller.includes('navigator.storage?.persist?.()'));
 assert(mediaInstaller.includes('data-media-pack'));
-assert(mediaInstaller.includes('General knowledge outage pack'));
+assert(mediaInstaller.includes('Pin general knowledge outage pack'));
+assert(mediaInstaller.includes("AUTO_RECEIPT_KEY='civweave.open-learning-media.auto-prefetch.v1'"));
+assert(mediaInstaller.includes('lazyDownloadAllAvailablePacks'));
+assert(mediaInstaller.includes("addEventListener('civweave:pwa-installed'"));
+assert(mediaInstaller.includes('automaticNetworkAllowed'));
+assert(mediaInstaller.includes('requestIdleCallback'));
+assert(mediaInstaller.includes('pack.available!==false'));
 for(const surface of ['public/app/cabinets/living-school/index.html','public/app/working-campus-v156.html']){
   const html=fs.readFileSync(path.join(root,surface),'utf8');
   assert(html.includes('/app/open-learning-media-cache-v1.mjs'),surface);
@@ -83,4 +91,4 @@ for(const slug of focus){
   minimumFocusPackBytes+=Math.min(...sizes);
 }
 assert(minimumFocusPackBytes<=POLICY_PRESETS['learning-path'].budgetBytes,`smallest five-topic focus pack ${minimumFocusPackBytes} exceeds Learning Path budget ${POLICY_PRESETS['learning-path'].budgetBytes}`);
-console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, generated-topic inference, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, requested-only serialized mesh, revocation kill switch, safe URL/MIME validation, range-aware offline playback, persistent-storage request, pack controls, and realm wiring.`);
+console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, generated-topic inference, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, requested-only serialized mesh, revocation kill switch, safe URL/MIME validation, range-aware offline playback, persistent-storage request, automatic post-install all-pack lazy queue, and realm wiring.`);
