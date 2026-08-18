@@ -25,7 +25,8 @@ assert(shared.includes('availability&&!availability.has(id)'),'Shared resolver d
 assert(shared.includes('score>=6')||shared.includes('bestScore>=6'),'Shared contract lacks a relevance threshold before fallback.');
 assert(shared.includes('youtube-nocookie.com/embed'),'Shared contract does not produce privacy-enhanced embeds.');
 assert(livingGuard.includes("CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1'"),'Living School AI harness is not attached to curriculum generation.');
-assert(livingGuard.includes('await ensureLivingSchool(output)'),'Living School AI harness does not enforce a video on generated modules.');
+assert(livingGuard.includes('await enforceSubjectVideos(output,subject)'),'Living School AI harness does not enforce the subject-gated per-module video contract.');
+assert(livingGuard.includes('await ensureLivingSchool(output,{schoolSlug})'),'Living School video guard does not finish with the shared per-module video invariant.');
 assert(livingGuard.includes('videoFallbackUrl:FALLBACK_VIDEO_URL'),'Living School AI prompt context does not carry the fallback contract.');
 assert(living.includes('installLivingSchoolVideoGenerationGuardV1'),'Living School cleanroom does not install the video generation harness.');
 assert(!living.includes('new MutationObserver'),'Living School cleanroom must remain observer-free.');
@@ -55,4 +56,4 @@ assert(availabilityMaterializer.includes('privacy_status'),'Availability materia
 assert(workflow.includes('YOUTUBE_API_KEY')&&workflow.includes('GOOGLE_API_KEY'),'Build workflow is not wired to YouTube/Google API credentials.');
 assert(workflow.includes('build-video-learning-atlas-parallel-v1.py'),'Build workflow does not use the parallel materializer.');
 assert(workflow.includes('materialize-video-learning-lookup-v1.py'),'Build workflow does not materialize the browser lookup.');
-console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, current embeddability filtering, offline lookup, Living School per-module video invariant, Cerbanimo per-task video invariant, post-install all-atlas lazy staging, and required fallback are wired.');
+console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, current embeddability filtering, offline lookup, Living School subject-gated per-module video invariant, Cerbanimo per-task video invariant, post-install all-atlas lazy staging, and required fallback are wired.');
