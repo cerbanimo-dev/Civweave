@@ -58,6 +58,20 @@ The v1 locality record is a signed community object:
 
 The existing community-object mesh remains the only replication/storage protocol. There is no second locality database.
 
+## Conflict and convergence policy
+
+The community-object mesh carries heterogeneous signed payloads, so Civweave does **not** apply a generic field-by-field CRDT merge to arbitrary records. The signed revision envelope is the convergence boundary:
+
+1. An incoming object with the same object ID and the same `revisionHash` is a duplicate.
+2. A lower numeric revision never replaces a higher local revision.
+3. A higher valid signed revision replaces a lower local revision.
+4. If two valid objects have the same object ID and numeric revision but different `revisionHash` values, they are a **fork**, not permission for last-arrival-wins overwrite.
+5. Both fork variants are preserved in the local `conflicts` store as `civweave.community-conflict.v1` evidence.
+6. The lexicographically smaller signed `revisionHash` is selected as the temporary canonical revision. Because every peer applies the same tie-break, peers converge independent of arrival order while retaining the alternate branch for inspection.
+7. The tie-break is transport convergence, not semantic approval. A capability that understands the record may resolve the fork by publishing a new, valid, higher signed revision. The generic mesh never invents a field-level merge.
+
+This prevents silent data loss and nondeterministic arrival-order state without pretending every Civweave object has CRDT-compatible semantics.
+
 ## Region chunks for connected Hub members
 
 A Region is the automatic gossip unit for a Hub-connected member.
@@ -145,7 +159,7 @@ Connectivity therefore spreads *freshness* outward from well-connected members i
 - Automatic Region membership uses the home Hub's public pin, not the roaming user's live position.
 - Encounter relevance stores no coordinates.
 - Only `public` and `federated` signed objects are ferryable through generic gateways.
-- Existing signature validation, object revision hashes, hop limits, expirations, and audience checks remain authoritative.
+- Existing signature validation, object revision hashes, deterministic fork handling, hop limits, expirations, and audience checks remain authoritative.
 - A Hub relationship does not grant access to private/direct/group objects.
 - Stale locality records naturally fall out through TTL and recency filtering rather than becoming an immortal behavioral archive.
 
@@ -163,3 +177,5 @@ Connectivity therefore spreads *freshness* outward from well-connected members i
 - Cloudflare Hub location manifest: `cloudflare/node-cloud/src/index.mjs`
 - Location regression: `scripts/test-hub-location-onboarding-v1.mjs`
 - Region/locality regression: `scripts/verify-hub-map-locality-ledger-v1.mjs`
+- Fork convergence regression: `scripts/test-local-object-mesh-conflicts-v1.mjs`
+- Fork convergence CI: `.github/workflows/verify-local-object-mesh-conflicts.yml`

@@ -9,11 +9,12 @@ It is a navigation document, not a substitute for the architectural contracts. I
 Before choosing an edit target, use this order:
 
 1. Read `AGENTS.md`.
-2. Read `docs/contracts/mobile-interface-contract.md` for interface/runtime rules.
-3. Read `docs/architecture/systems-of-practice.md` when the task affects shared behavior.
-4. Read `config/system-ownership.json` when the capability is registered there.
-5. Use this map to locate the likely implementation area.
-6. Trace the active implementation, callers, subscribers, loaders, storage keys, service-worker references, and workflows before editing.
+2. Read `config/agent-work-context.json` for the machine-readable branch, protected-path, test-first, guide-memory, mesh-conflict, and developer-tool guardrails.
+3. Read `docs/contracts/mobile-interface-contract.md` for interface/runtime rules.
+4. Read `docs/architecture/systems-of-practice.md` when the task affects shared behavior.
+5. Read `config/system-ownership.json` when the capability is registered there.
+6. Use this map to locate the likely implementation area.
+7. Trace the active implementation, callers, subscribers, loaders, storage keys, service-worker references, and workflows before editing.
 
 The repository is organized around **functional ownership**, not around screens, rooms, cabinets, realms, images, or visual placement.
 
@@ -94,6 +95,8 @@ When files disagree, use this precedence:
 8. This repository map for navigation.
 9. Older README prose, historical notes, generated packages, and release records.
 
+`config/agent-work-context.json` is an executable navigation/guardrail aid within this authority order; it does not override the canonical contracts or active owner.
+
 Presentation routing is evidence about composition. It is not permission to redefine functional ownership.
 
 ## Directory atlas
@@ -108,11 +111,11 @@ Presentation routing is evidence about composition. It is not permission to rede
 | `server/` | Stable local/dev/federated/gateway entrypoints | Keep entrypoint names stable unless the release contract requires a coordinated change. |
 | `lib/` | Shared Node/service logic | Prefer shared domain logic here over duplicating it in entrypoints. |
 | `cloudflare/` | Cloudflare Workers and hosted network services | Treat as optional network capability, not a replacement for offline-first ownership. |
-| `config/` | Declarative ownership and policy/configuration registries | Update together with the implementation/contracts they govern. |
+| `config/` | Declarative ownership, policy, and agent work-context registries | Keep `system-ownership.json` synchronized with owners and `agent-work-context.json` synchronized with branch/path/testing/memory/tool guardrails. These files describe rules; they do not override higher-authority contracts. |
 | `scripts/` | Build, release, migration, verification, packaging, maintenance | Prefer deterministic tooling; avoid runtime repair/self-patching machinery. |
 | `.github/workflows/` | CI, automation, deployment/release workflows | Keep path filters and generated-artifact expectations synchronized with source moves. |
 | `ops/triggers/` | Deliberate workflow sentinel/touch files | Sentinels belong here, never as hidden files at repository root. |
-| `tools/civweave-dev-mcp/` | Local PWA inspection/source-edit MCP bridge | Observation, reproduction, source editing, and verification only; not runtime repair. |
+| `tools/civweave-dev-mcp/` | Developer-only local PWA inspection/source-edit MCP bridge | Maintainer observation, reproduction, source editing, and verification only; never an end-user/public runtime endpoint or runtime repair path. |
 | `docs/contracts/` | Canonical architecture/behavior contracts | Architectural authority. Update deliberately when the contract itself changes. |
 | `docs/architecture/` | Current ownership and repository maps | Navigation/ownership documentation; keep synchronized with active owners and routes. |
 | `docs/operations/` | Installation/hosting/deployment guidance | Operational documentation, not application ownership. |
