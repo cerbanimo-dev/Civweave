@@ -80,6 +80,7 @@ jobs:
           node --check public/creator-suite/audit/client-v1.js
           node --check public/creator-suite/audit/client-init-v1.js
           node --check public/creator-suite/audit/evidence-crypto-v1.mjs
+          node --check public/creator-suite/audit/review-endorsement-v1.mjs
           node --check public/creator-suite/audit/quest-beat-v1.js
           node --check public/creator-suite/text-editor-v1.js
           node --check public/creator-suite/audio-editor-v1.js
@@ -131,10 +132,14 @@ jobs:
         run: node scripts/test-creator-c2pa-vendor-boundary-v1.mjs
       - name: Verify structured provenance review
         run: node scripts/test-creator-provenance-review-v1.mjs
+      - name: Verify reviewer device endorsement crypto
+        run: node scripts/test-creator-provenance-review-endorsement-v1.mjs
       - name: Verify Cloudflare provenance reviewer
         run: node scripts/test-cloudflare-creator-provenance-reviewer-v1.mjs
       - name: Verify independent human tribunal
         run: node scripts/test-creator-provenance-tribunal-v1.mjs
+      - name: Verify device-endorsed Guild tribunal
+        run: node scripts/test-cloudflare-creator-provenance-human-endorsement-v1.mjs
       - name: Verify Creator audit client privacy
         run: node scripts/test-creator-audit-client-v1.mjs
       - name: Verify selected-evidence browser and Guild crypto
