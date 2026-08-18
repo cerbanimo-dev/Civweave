@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave shell repair probe</title><style>html,body{margin:0;background:#061019;color:#eaf8ff;font:14px/1.45 system-ui}main{max-width:50rem;margin:4rem auto;padding:1rem}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#02080d;padding:1rem;border-radius:.75rem}</style></head><body><main><h1>Shell repair probe</h1><pre id="out">starting…</pre></main><script>
+(async()=>{
+const out=document.getElementById('out'); const show=v=>out.textContent=typeof v==='string'?v:JSON.stringify(v,null,2);
+const snap=w=>{try{const u=new URL(w?.scriptURL||'',location.href);return{path:u.pathname,url:u.href,state:w?.state||''}}catch{return{path:'',url:'',state:w?.state||''}}};
+const ask=(worker,type,timeout=120000)=>new Promise(resolve=>{if(!worker)return resolve({timeout:false,error:'no-worker'});const ch=new MessageChannel();const started=Date.now();const timer=setTimeout(()=>resolve({timeout:true,elapsed:Date.now()-started,type}),timeout);ch.port1.onmessage=e=>{clearTimeout(timer);resolve({timeout:false,elapsed:Date.now()-started,packet:e.data||null})};try{worker.postMessage({type},[ch.port2])}catch(error){clearTimeout(timer);resolve({timeout:false,elapsed:Date.now()-started,error:error?.message||String(error)})}});
+if(!('serviceWorker'in navigator)){show({error:'no-service-worker-support'});return}
+const reg=await navigator.serviceWorker.getRegistration('/'); const active=reg?.active||navigator.serviceWorker.controller; show({phase:'before',active:snap(active),installing:snap(reg?.installing),waiting:snap(reg?.waiting)});
+const before=await ask(active,'GET_DEVICE_PACKAGE_STATUS',8000); show({phase:'repairing',active:snap(active),before});
+const repair=await ask(active,'REPAIR_DEVICE_PACKAGE',120000); const after=await ask(active,'GET_DEVICE_PACKAGE_STATUS',8000); const current=await navigator.serviceWorker.getRegistration('/'); show({phase:'done',active:snap(active),repair,after,current:{active:snap(current?.active),installing:snap(current?.installing),waiting:snap(current?.waiting)}});
+})();
+</script></body></html>
