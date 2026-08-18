@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/service-worker-v203.js'
       - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/verify-desktop-civweave-boot-v1.mjs'
       - '.github/workflows/verify-desktop-civweave-boot-v1.yml'
   push:
@@ -12,6 +13,7 @@ on:
     paths:
       - 'public/service-worker-v203.js'
       - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/verify-desktop-civweave-boot-v1.mjs'
       - '.github/workflows/verify-desktop-civweave-boot-v1.yml'
 
@@ -28,4 +30,5 @@ jobs:
           node-version: '22'
       - run: node --check public/service-worker-v203.js
       - run: node --check public/service-worker-shell-assets-v1.js
+      - run: node --check scripts/build-service-worker-v211.mjs
       - run: node scripts/verify-desktop-civweave-boot-v1.mjs
