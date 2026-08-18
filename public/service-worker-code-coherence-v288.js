@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_CODE_COHERENCE_VERSION = '1.0.92-code-coherence-v288-language-v2';
+const CW_CODE_COHERENCE_VERSION = '1.0.92-code-coherence-v289-lifecycle-deferred';
 const CW_CODE_COHERENCE_CACHE = `civweave-code-coherence-${CW_CODE_COHERENCE_VERSION}`;
 const CW_CODE_COHERENCE_PREFIX = 'civweave-code-coherence-';
 const CW_CODE_EXTENSIONS = /\.(?:m?js|css|txt)$/i;
@@ -71,12 +71,26 @@ async function cwCodeCleanup() {
   await Promise.all(names.map(name => name.startsWith(CW_CODE_COHERENCE_PREFIX) && name !== CW_CODE_COHERENCE_CACHE ? caches.delete(name) : Promise.resolve(false)));
 }
 
+// Coherence is enforced on fetch. Warming sixteen code modules during the
+// service-worker install event made code that is not required for first paint a
+// hard dependency of PWA activation. Keep lifecycle bounded and warm only when
+// explicitly requested or when the asset is actually fetched.
 self.addEventListener('install', event => {
-  event.waitUntil(cwCodeInstall().catch(() => ({ loaded: 0, total: CW_CODE_CRITICAL.length })));
+  event.waitUntil(Promise.resolve());
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(cwCodeCleanup());
+  event.waitUntil(self.clients.claim());
+  void cwCodeCleanup().catch(() => null);
+});
+
+self.addEventListener('message', event => {
+  if (event.data?.type !== 'CIVWEAVE_WARM_CODE_COHERENCE') return;
+  event.waitUntil(cwCodeInstall().then(packet => {
+    const reply = { type: 'CIVWEAVE_CODE_COHERENCE_WARMED', version: CW_CODE_COHERENCE_VERSION, ...packet };
+    try { event.ports?.[0]?.postMessage(reply); } catch {}
+    try { event.source?.postMessage?.(reply); } catch {}
+  }));
 });
 
 self.addEventListener('fetch', event => {
@@ -115,5 +129,7 @@ self.CivweaveCodeCoherenceV288 = Object.freeze({
   version: CW_CODE_COHERENCE_VERSION,
   cache: CW_CODE_COHERENCE_CACHE,
   critical: CW_CODE_CRITICAL.slice(),
-  policy: 'network-first-current-version-cache-legacy-offline-fallback'
+  policy: 'network-first-current-version-cache-legacy-offline-fallback',
+  installPolicy: 'lifecycle-deferred-fetch-coherent',
+  warmMessage: 'CIVWEAVE_WARM_CODE_COHERENCE'
 });
