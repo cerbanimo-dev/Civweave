@@ -19,7 +19,7 @@
     if(location.origin!==STAGING_ORIGIN){globalThis.CivweaveStagingPwaRescueLoader=Promise.resolve(null);return}
     globalThis.CivweaveStagingPwaRescueLoader=new Promise(resolve=>{
       const script=document.createElement('script');
-      script.src='/staging-pwa-rescue-v431.js?v=1';
+      script.src='/staging-pwa-rescue-v431.js?v=2';
       script.onload=()=>resolve(globalThis.CivweaveStagingPwaRescueV431||null);
       script.onerror=()=>resolve(null);
       document.head.append(script);
