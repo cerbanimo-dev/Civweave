@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {buildC2paManifestIntent,C2PA_SOURCE_TYPES} from '../lib/creator-provenance-c2pa-v1.mjs';
 
-const receipt={schema:'civweave.creation-receipt-summary.v1',sessionId:'creation:c2pa-test',mediaType:'video',artifactType:'video',eventCount:4,headHash:'head-secret-safe',origin:'ai-generated',aiUsed:true,finalizedAt:'2026-08-18T18:00:00.000Z',receiptHash:'receipt-safe'};
+const receipt={schema:'civweave.creation-receipt.v1',sessionId:'creation:c2pa-test',mediaType:'video',artifactType:'video',eventCount:4,headHash:'head-secret-safe',origin:'ai-generated',aiUsed:true,summary:{origin:'ai-generated'},finalizedAt:'2026-08-18T18:00:00.000Z',receiptHash:'receipt-safe'};
 const packet={schema:'civweave.creation-packet.v1',sessionId:receipt.sessionId,mediaType:'video',artifactType:'video',eventCount:4,headHash:receipt.headHash,events:[
   {seq:1,timestamp:'2026-08-18T17:00:00.000Z',type:'video.record',actor:{kind:'human',id:'private-human-id'},payload:{content:'PRIVATE CAMERA TRANSCRIPT',contentDigest:'sha256:private-capture'}},
   {seq:2,timestamp:'2026-08-18T17:01:00.000Z',type:'media.import',actor:{kind:'external',id:'private-file-name.mov'},payload:{content:'PRIVATE IMPORT',contentDigest:'sha256:private-import'}},
@@ -18,7 +18,7 @@ assert.equal(intent.actions[0].digitalSourceType,C2PA_SOURCE_TYPES.digitalCaptur
 assert.ok(intent.actions.some(action=>action.action==='c2pa.placed'),'external material must become an ingredient placement rather than human-authored content');
 assert.ok(intent.actions.some(action=>action.digitalSourceType===C2PA_SOURCE_TYPES.compositeWithTrainedAlgorithmicMedia),'AI transforms must remain publicly distinguishable from human-only edits');
 assert.equal(intent.ingredients.length,1);assert.equal(intent.ingredients[0].relationship,'componentOf');assert.equal(intent.ingredients[0].origin,'unknown');
-assert.equal(intent.publicReceipt.sessionId,receipt.sessionId);assert.equal(intent.publicReceipt.headHash,receipt.headHash);assert.equal(intent.publicReceipt.receiptHash,receipt.receiptHash);assert.equal(intent.privateDataExcluded,true);
+assert.equal(intent.publicReceipt.schema,'civweave.creation-receipt-summary.v1','C2PA export projects the canonical receipt down to its public compact form');assert.equal(intent.publicReceipt.sessionId,receipt.sessionId);assert.equal(intent.publicReceipt.headHash,receipt.headHash);assert.equal(intent.publicReceipt.receiptHash,receipt.receiptHash);assert.equal(intent.privateDataExcluded,true);
 const serialized=JSON.stringify(intent);
 for(const secret of ['PRIVATE CAMERA TRANSCRIPT','PRIVATE IMPORT','PRIVATE PROMPT','PRIVATE CHECKPOINT','private-human-id','private-file-name.mov','provider-secret','model-secret','request-secret','sha256:private-capture','sha256:private-import'])assert.equal(serialized.includes(secret),false,`C2PA public intent leaked ${secret}`);
 assert.equal(serialized.includes(packet.events[0].timestamp),false,'per-event timestamps stay private');
@@ -28,6 +28,8 @@ assert.equal(generated.actions[0].digitalSourceType,C2PA_SOURCE_TYPES.trainedAlg
 const human=buildC2paManifestIntent({receipt:{...receipt,sessionId:'creation:human',headHash:'human-head',receiptHash:'human-receipt',mediaType:'text',artifactType:'document',origin:'human-authored',aiUsed:false},packet:{...packet,sessionId:'creation:human',headHash:'human-head',mediaType:'text',artifactType:'document',events:[{seq:1,type:'text.replace',actor:{kind:'human',id:'private'},payload:{content:'PRIVATE'}}],eventCount:1}});
 assert.equal(human.actions[0].digitalSourceType,C2PA_SOURCE_TYPES.digitalCreation);
 const unknown=buildC2paManifestIntent({receipt:{...receipt,sessionId:'creation:unknown',headHash:'unknown-head',receiptHash:'unknown-receipt',origin:'unknown',aiUsed:false},packet:{...packet,sessionId:'creation:unknown',headHash:'unknown-head',events:[{seq:1,type:'media.import',actor:{kind:'external',id:'file'},payload:{content:'PRIVATE'}}],eventCount:1}});
-assert.equal(unknown.actions[0].digitalSourceType,'http://c2pa.org/digitalsourcetype/empty','an imported component in a new project must not be relabeled as a human or AI creation');assert.equal(unknown.ingredients[0].origin,'unknown');
+assert.equal(unknown.actions[0].digitalSourceType,C2PA_SOURCE_TYPES.empty,'an imported component in a new project must not be relabeled as a human or AI creation');assert.equal(unknown.ingredients[0].origin,'unknown');
+const compact=buildC2paManifestIntent({receipt:{...receipt,schema:'civweave.creation-receipt-summary.v1'},packet});assert.equal(compact.publicReceipt.receiptHash,receipt.receiptHash,'compact transport receipts remain accepted for verification/export tooling');
+assert.throws(()=>buildC2paManifestIntent({receipt:{...receipt,headHash:'wrong-head'},packet}),/matching the finalized Civweave receipt/);
 
 console.log('Creator C2PA public mapping contract passed');
