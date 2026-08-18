@@ -13,6 +13,8 @@ on:
       - 'public/app/quest-arc-chronicle-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/creator-provenance-*.mjs'
+      - 'docs/contracts/creator-c2pa-v1.md'
+      - 'docs/vendor/creator-suite-c2pa-v1.json'
       - 'cloudflare/node-cloud/src/creator-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/cloud-node-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
@@ -34,6 +36,8 @@ on:
       - 'public/app/quest-arc-chronicle-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/creator-provenance-*.mjs'
+      - 'docs/contracts/creator-c2pa-v1.md'
+      - 'docs/vendor/creator-suite-c2pa-v1.json'
       - 'cloudflare/node-cloud/src/creator-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/cloud-node-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
@@ -119,6 +123,8 @@ jobs:
         run: node scripts/test-creator-provenance-anomaly-v1.mjs
       - name: Verify privacy-bounded C2PA intent mapping
         run: node scripts/test-creator-provenance-c2pa-v1.mjs
+      - name: Verify C2PA vendor quarantine
+        run: node scripts/test-creator-c2pa-vendor-boundary-v1.mjs
       - name: Verify structured provenance review
         run: node scripts/test-creator-provenance-review-v1.mjs
       - name: Verify Cloudflare provenance reviewer
