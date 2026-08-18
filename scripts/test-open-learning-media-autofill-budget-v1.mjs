@@ -30,7 +30,7 @@ console.log(JSON.stringify({
   availablePacks:packs.length,
   uniqueTopics:topics.length,
   downloadableTopics,
-  linkOnlyOrUnavailableTopics:skipped,
+  noAutomaticSizeDirectFileTopics:skipped,
   automaticFloorBytesUpperBound:upperBoundBytes,
   learningPathBudgetBytes:policy.budgetBytes,
   headroomBytes:policy.budgetBytes-upperBoundBytes,
