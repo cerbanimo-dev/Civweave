@@ -3,6 +3,7 @@ name: Verify Cerbanimo Load Freeze v176
 on:
   pull_request:
     paths:
+      - 'public/service-worker.js'
       - 'public/app/fullscreen-family-v104.html'
       - 'public/app/realm-console-v140.html'
       - 'public/app/shared/civweave-parity-runtime.js'
@@ -26,6 +27,7 @@ jobs:
           node-version: 22
       - name: Syntax check Cerbanimo boot runtimes
         run: |
+          node --check public/service-worker.js
           node --check public/app/shared/civweave-parity-runtime.js
           node --check public/app/cerbanimo-quest-path-v266.js
           node --check public/app/cerbanimo-learning-packs-v1.js
