@@ -115,6 +115,19 @@ function extractText(result) {
   if (result?.response != null) return JSON.stringify(result.response);
   return '';
 }
+function structuredObject(result) {
+  const candidates = [
+    result?.response,
+    result?.result?.response,
+    result?.output,
+    result?.outputJson,
+    result?.choices?.[0]?.message?.parsed,
+  ];
+  for (const candidate of candidates) {
+    if (candidate && typeof candidate === 'object' && !Array.isArray(candidate)) return candidate;
+  }
+  return null;
+}
 function boundedSchema(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   const text = JSON.stringify(value);
@@ -247,12 +260,12 @@ async function handleGenerate(request, env, nodeId) {
     const chargedQuota = Math.min(reservation.requestedNeurons, quotaActual), chargedProvider = Math.min(reservation.billingCeilingNeurons, providerActual);
     const settlement = await settle(env, reservation, chargedQuota, chargedProvider);
     const updatedStatus = await capacityPost(env, '/members/status', { nodeId, userId: session.userId });
-    const text = extractText(result), parsedOutputJson = schema || input.responseFormat === 'json' ? parseStructured(text) : null;
-    if ((schema || input.responseFormat === 'json') && !parsedOutputJson) return json({ ok: false, error: 'Cloudflare AI did not return valid structured output.', model: route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL, computeRoute: route.route, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota }, 502);
+    const text = extractText(result), nativeStructured = structuredObject(result), parsedOutputJson = schema || input.responseFormat === 'json' ? (nativeStructured || parseStructured(text)) : null;
+    if ((schema || input.responseFormat === 'json') && !parsedOutputJson) return json({ ok: false, error: 'Cloudflare AI did not return valid structured output.', model: route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL, computeRoute: route.route, diagnostics: { resultKeys: result && typeof result === 'object' ? Object.keys(result).slice(0, 20) : [], textPreview: clean(text, 1200) }, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota }, 502);
     const model = route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL;
     const provenance = generationProvenance(model, route.route, input);
     const outputJson = stampStructuredOutput(parsedOutputJson, provenance.artifact);
-    return json({ ok: true, schema: 'civweave.cloud-generation.v2', nodeId, userId: session.userId, model, computeRoute: route.route, pool: route.pool, text, outputJson, metadata: { generation: provenance.generation }, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota });
+    return json({ ok: true, schema: 'civweave.cloud-generation.v2', nodeId, userId: session.userId, model, computeRoute: route.route, pool: route.pool, text: text || (outputJson ? JSON.stringify(outputJson) : ''), outputJson, metadata: { generation: provenance.generation }, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota });
   } catch (error) { await settle(env, reservation, 0, 0).catch(() => {}); return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 502); }
 }
 
