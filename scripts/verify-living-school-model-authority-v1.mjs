@@ -21,7 +21,7 @@ assert(actions.includes('data.modelRoute=selectedCurriculumRoute(data.modelRoute
 assert(actions.includes("fields(target,['title','capability','level','count','mode','proof'])"),'The Living School workbench still submits a separate modelRoute field.');
 assert(!actions.includes('explicitly selected deterministic local compiler'),'Living School can still falsely claim the deterministic compiler was explicitly selected.');
 assert(render.includes('Follows the model selected in Civweave Settings.'),'Living School does not disclose that generation follows shared Settings.');
-assert(!render.includes('name="modelRoute"'),'Living School still renders a second model-selection control.');
+assert(!render.includes('name="modelRoute"')&&!render.includes('name=\\"modelRoute\\"'),'Living School still renders a second model-selection control.');
 assert(!entry.includes('s.settings?.modelRoute'),'Living School chat normalization still reads a stale per-school model route.');
 assert(!chat.includes('state?.settings?.modelRoute'),'Unified chat still injects a stale Living School model route into curriculum requests.');
 assert(broker.includes("selectedProvider(profile='interactive')"),'The capability broker no longer exposes the selected shared provider.');
