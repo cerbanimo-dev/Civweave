@@ -8,6 +8,7 @@ const root=path.resolve(here,'..');
 const publicDir=path.join(root,'public');
 const manifestPath=path.join(publicDir,'app','manifest.webmanifest');
 const installManifestPath=path.join(publicDir,'app','manifest-v436.webmanifest');
+const installerPath=path.join(publicDir,'app','index.html');
 const integrityPath=path.join(publicDir,'app','shell-integrity-v281.json');
 const startPath='/app/pwa-start-v436.html';
 const startUrl=`${startPath}?installed=1`;
@@ -43,6 +44,14 @@ await Promise.all([
   fs.writeFile(installManifestPath,manifestBytes)
 ]);
 
+let installer=await fs.readFile(installerPath,'utf8');
+const beforeInstaller=installer;
+installer=installer.replace(/<link rel="manifest" href="\/app\/manifest\.webmanifest\?v=[^"]+">/, '<link rel="manifest" href="/app/manifest-v436.webmanifest">');
+if(installer===beforeInstaller&&!installer.includes('href="/app/manifest-v436.webmanifest"')){
+  throw new Error('Installer manifest link was not found while finalizing pwa-start-v436.');
+}
+await fs.writeFile(installerPath,installer,'utf8');
+
 const integrity=JSON.parse(await fs.readFile(integrityPath,'utf8'));
 integrity.assets=integrity.assets&&typeof integrity.assets==='object'?integrity.assets:{};
 integrity.assets['/app/manifest.webmanifest']=crypto.createHash('sha256').update(manifestBytes).digest('hex');
@@ -56,6 +65,7 @@ console.log(JSON.stringify({
   revision:'pwa-start-v436-cache-distinct-manifest',
   startUrl:manifest.start_url,
   installManifest:'/app/manifest-v436.webmanifest',
+  installerManifestLink:'/app/manifest-v436.webmanifest',
   shortcuts:(manifest.shortcuts||[]).map(shortcut=>shortcut.url),
   integrityManifestHash:integrity.assets['/app/manifest.webmanifest'],
   integrityStartHash:integrity.assets[startPath]
