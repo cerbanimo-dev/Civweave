@@ -8,8 +8,9 @@ const [wrapper,assets]=await Promise.all([
   read('public/service-worker-shell-assets-v1.js')
 ]);
 
-assert.match(wrapper,/shell-assets-v1-repair-v10-desktop-boot/,'Installed worker must rotate to the desktop boot shell revision.');
+assert.match(wrapper,/service-worker-shell-assets-v1\.js\?v=shell-assets-v1-repair-v2/,'Installed worker must retain the release-synchronizer-compatible shell-assets import URL.');
 assert.match(wrapper,/desktop-civweave-boot-recovery-v363/,'Installed worker must declare the desktop Civweave recovery revision.');
+assert.match(assets,/const REVISION='shell-assets-v1-repair-v10-desktop-boot'/,'Shell-assets runtime must rotate to the desktop boot revision.');
 
 for(const pathname of [
   '/app/system-routes-v227.js',
