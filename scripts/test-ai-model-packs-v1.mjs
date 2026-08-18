@@ -11,6 +11,7 @@ const read=path=>readFileSync(resolve(root,path),'utf8');
 const packs=read('public/app/local-ai/model-packs-v1.js');
 const settings=read('public/app/settings-local-route-v323.js');
 const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js');
+const voice=read('public/app/guide-voice-runtime-v1.js');
 
 test('AI downloads expose exactly the three intended named pack tiers',()=>{
   for(const label of ['Minimum Spec Pack','Premier Phone Pack','Server Quality Pack'])assert.match(packs,new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
@@ -47,4 +48,11 @@ test('fresh speech models remain reusable outside voice chat',()=>{
   assert.match(specialized,/supertonic-3-tts-int8/);
   assert.match(specialized,/'speech-synthesis':freeze\(\{primary:\['supertonic-3-tts-int8'\]/);
   for(const task of ['dictation','live-captions','media-transcription','read-aloud','translation','summarization','memory-retrieval','deep-reasoning','coding'])assert.match(specialized,new RegExp(`'${task}'`));
+});
+
+test('guide voice distinguishes installed ASR weights from a missing executable runtime',()=>{
+  assert.match(voice,/installedSpeechModelStatus/);
+  assert.match(voice,/CIVWEAVE_SPEECH_EXECUTOR_UNAVAILABLE/);
+  assert.match(voice,/speech model is installed, but this build has no executable local speech-recognition runtime/i);
+  assert.match(voice,/No offline speech-recognition model or browser language pack is installed/);
 });
