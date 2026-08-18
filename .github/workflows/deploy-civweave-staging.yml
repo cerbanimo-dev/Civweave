@@ -14,7 +14,11 @@ permissions:
 
 concurrency:
   group: civweave-staging-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'deploy' }}
-  cancel-in-progress: true
+  # Finish the deployment already in progress. With rapid staging commits,
+  # cancel-in-progress starves Cloudflare indefinitely and leaves devices on
+  # stale code. GitHub keeps at most one pending run for this concurrency group,
+  # so the newest queued commit catches staging up after the current deploy.
+  cancel-in-progress: false
 
 env:
   STAGING_BRANCH: staging
