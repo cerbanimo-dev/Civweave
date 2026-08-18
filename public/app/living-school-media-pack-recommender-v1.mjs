@@ -1,6 +1,7 @@
 import media from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
+import sourcePacks from'./learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
 
-const REVISION='living-school-media-pack-recommender-v1.2-partial-seeding';
+const REVISION='living-school-media-pack-recommender-v1.3-unified-source-packs';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const STOP=new Set(['about','after','again','also','basic','basics','beginner','build','building','capability','complete','course','create','creating','curriculum','foundation','foundations','guide','guided','intro','introduction','learn','learning','lesson','module','practice','practical','skill','skills','study','teach','teaching','through','using','vocabulary','with','your']);
 const PACK_RULES=Object.freeze({
@@ -42,6 +43,9 @@ const PACK_TOPICS=Object.freeze({
   'society-rights':['civics-society','law-rights-basics','world-history','critical-thinking'],
   'technology-builder':['computing-basics','vibe-coding','pseudocoding','electronics-basics','prompt-engineering']
 });
+const TOPIC_SCHOOL_FALLBACK=Object.freeze({
+  'tarot-symbolism':'philosophy-and-religion','mythology-folklore':'history','meditation-mindfulness':'philosophy-and-religion','communication-conflict':'society-and-social-sciences','parenting-caregiving':'people','gardening-plants':'everyday-life','career-work-skills':'everyday-life','entrepreneurship-small-business':'everyday-life','music-performance':'arts','language-learning':'people','home-maintenance':'everyday-life','emergency-preparedness':'everyday-life','electronics-basics':'technology','woodworking-basics':'everyday-life','sewing-textiles':'arts','drawing-design':'arts','photography-video':'arts','statistics-data-literacy':'mathematics','climate-environment':'science','law-rights-basics':'society-and-social-sciences','personal-finance':'everyday-life','cooking-food-safety':'everyday-life','critical-thinking':'philosophy-and-religion','logical-frameworks':'philosophy-and-religion','vibe-coding':'technology','prompt-engineering':'technology','pseudocoding':'technology','computing-basics':'technology','world-history':'history','earth-geography':'geography','civics-society':'society-and-social-sciences','biology-life':'science','physics-foundations':'science','chemistry-foundations':'science','astronomy-space':'science','mathematics-foundations':'mathematics','arts-culture':'arts','health-wellness':'health-medicine-and-disease','philosophy-ethics':'philosophy-and-religion'
+});
 
 function words(value){return clean(value,18000).toLowerCase().split(/[^a-z0-9]+/).filter(word=>word.length>3&&!STOP.has(word))}
 function phraseScore(hay,phrase){const value=clean(phrase,180).toLowerCase();if(!value)return 0;if(hay.includes(value))return value.includes(' ')?12:7;return 0}
@@ -64,32 +68,38 @@ function prettySlug(slug){return slug.split('-').map(value=>value[0]?.toUpperCas
 function pendingPack(slug,lookup){
   const topics=PACK_TOPICS[slug]||[];
   const seeded=topics.filter(topic=>Array.isArray(lookup?.topics?.[topic])&&lookup.topics[topic].length);
-  return{slug,name:prettySlug(slug),description:'Expanded subject media pack. New topic lanes fill in as the Open Learning Media catalog harvests them.',topics,available:seeded.length>0,coverage:topics.length?seeded.length/topics.length:0,kind:'extension',catalogPending:true,seededTopics:seeded.length};
+  return{slug,name:prettySlug(slug),description:'Expanded subject learning pack. Foundation articles and video-link atlases can be staged now; rights-cleared local video files fill in as the media catalog harvests them.',topics,available:seeded.length>0,coverage:topics.length?seeded.length/topics.length:0,kind:'extension',catalogPending:true,seededTopics:seeded.length};
 }
 function fallbackPackRows(lookup){return Object.keys(PACK_RULES).map(slug=>pendingPack(slug,lookup))}
+function sourceSchoolSlugs(pack,lookup){return[...new Set((pack.topics||[]).map(topic=>lookup?.topic_meta?.[topic]?.school_slug||TOPIC_SCHOOL_FALLBACK[topic]).filter(Boolean))]}
 
 export async function recommendMediaPacks(query,{limit=3}={}){
   let lookup=null;try{lookup=await media.loadLookup()}catch{}
   const rows=Array.isArray(lookup?.packs)&&lookup.packs.length?[...lookup.packs]:fallbackPackRows(lookup);
   const known=new Set(rows.map(pack=>pack.slug));
   for(const slug of Object.keys(PACK_RULES))if(!known.has(slug))rows.push(pendingPack(slug,lookup));
-  return rows.map(pack=>({...pack,score:packScore(pack,query,lookup)})).filter(pack=>pack.score>0).sort((a,b)=>b.score-a.score||Number(b.coverage||0)-Number(a.coverage||0)).slice(0,Math.max(1,limit));
+  return rows.map(pack=>({...pack,sourceSchoolSlugs:sourceSchoolSlugs(pack,lookup),score:packScore(pack,query,lookup)})).filter(pack=>pack.score>0).sort((a,b)=>b.score-a.score||Number(b.coverage||0)-Number(a.coverage||0)).slice(0,Math.max(1,limit));
 }
 
-export async function downloadMediaPack(packSlug,{limitPerTopic=1,pinned=false}={}){
+export async function downloadMediaPack(packSlug,{limitPerTopic=1,pinned=false,onProgress}={}){
   const lookup=await media.loadLookup();
   const published=(lookup?.packs||[]).find(item=>item?.slug===packSlug);
   const pack=published||pendingPack(packSlug,lookup);
-  if(!Array.isArray(pack.topics)||!pack.topics.length)throw new Error('Unknown media pack.');
-  const results={};for(const topicSlug of pack.topics)results[topicSlug]=await media.prefetchTopic(topicSlug,{limit:limitPerTopic,pinned});
+  if(!Array.isArray(pack.topics)||!pack.topics.length)throw new Error('Unknown learning pack.');
+  const schoolSlugs=sourceSchoolSlugs(pack,lookup);
+  if(!schoolSlugs.length)throw new Error('This learning pack has no article/video-link school mapping yet.');
+  const sourceResult=await sourcePacks.stageLearningSourcePacks(schoolSlugs,{topicSlugs:pack.topics,onProgress});
+  const results={},mediaErrors=[];
+  for(const topicSlug of pack.topics){try{results[topicSlug]=await media.prefetchTopic(topicSlug,{limit:limitPerTopic,pinned})}catch(error){results[topicSlug]=[];mediaErrors.push({topicSlug,error:error?.message||String(error)})}}
   const flat=Object.values(results).flat(),cached=flat.filter(item=>item?.ok).length;
-  if(!cached)throw new Error('No downloadable videos for this pack are seeded in the current catalog yet.');
-  return{pack,results,cached,pending:Boolean(pack.catalogPending)};
+  if(!sourceResult?.current&&!cached)throw new Error('No article/video-link source pack or downloadable video could be staged for this subject.');
+  return{pack:{...pack,sourceSchoolSlugs:schoolSlugs},sourceResult,results,cached,pending:Boolean(pack.catalogPending),mediaErrors};
 }
 
 function button(label,action,primary=false){const node=document.createElement('button');node.type='button';node.textContent=label;node.style.cssText=`border:1px solid currentColor;border-radius:999px;padding:9px 13px;background:${primary?'rgba(255,255,255,.12)':'transparent'};color:inherit;font:inherit;font-weight:700;`;node.addEventListener('click',action);return node}
-function packLabel(pack){if(!pack.catalogPending)return pack.name;if(pack.available)return`${pack.name} · partial seed`;return`${pack.name} · catalog refresh needed`}
-function packCopy(pack){const node=document.createElement('div');const title=document.createElement('b');title.textContent=packLabel(pack);const br=document.createElement('br');const detail=document.createElement('small');detail.textContent=clean(pack.description||'',500);node.append(title,br,detail);return node}
+function packLabel(pack){const schools=pack.sourceSchoolSlugs?.length||0;if(pack.catalogPending&&!pack.available)return`${pack.name} · source pack ready`;if(pack.catalogPending)return`${pack.name} · source pack + partial local video`;return`${pack.name}${schools?` · ${schools} source school${schools===1?'':'s'}`:''}`}
+function packCopy(pack){const node=document.createElement('div');const title=document.createElement('b');title.textContent=packLabel(pack);const br=document.createElement('br');const detail=document.createElement('small');detail.textContent=`${clean(pack.description||'',420)} ${pack.sourceSchoolSlugs?.length?'Articles and matched video links download together.':''}`.trim();node.append(title,br,detail);return node}
+function progressLabel(progress){if(progress?.lane==='articles')return progress.phase==='verifying'?'Verifying articles…':'Downloading articles…';if(progress?.lane==='video-links')return progress.phase==='verifying'?'Verifying video links…':progress.phase==='sidecar'?'Updating video metadata…':'Downloading video links…';if(progress?.lane==='supplemental-articles')return`Adding ${clean(progress.record?.title,42)||'gap article'}…`;return'Downloading pack…'}
 
 export async function offerMediaPacksBeforeCurriculum(query,{limit=3}={}){
   const recommendations=await recommendMediaPacks(query,{limit});
@@ -98,14 +108,15 @@ export async function offerMediaPacksBeforeCurriculum(query,{limit=3}={}){
   const existing=document.querySelector('[data-living-school-media-pack-offer]');if(existing)existing.remove();
   const dialog=document.createElement('dialog');dialog.dataset.livingSchoolMediaPackOffer=REVISION;dialog.style.cssText='max-width:min(92vw,620px);border:1px solid currentColor;border-radius:20px;padding:0;background:#102f25;color:#f3f2df;box-shadow:0 24px 80px rgba(0,0,0,.45);';
   const body=document.createElement('div');body.style.cssText='display:grid;gap:14px;padding:20px;';
-  const title=document.createElement('strong');title.textContent='Recommended video packs';title.style.cssText='font-size:1.15rem;';body.append(title);
-  const copyNode=document.createElement('p');copyNode.textContent='Before Moss builds this curriculum, you can seed the local video shelf with packs that match the subject. This is optional; if no relevant video survives the relevance gate, Civweave will use the required fallback instead.';copyNode.style.cssText='margin:0;line-height:1.45;';body.append(copyNode);
+  const title=document.createElement('strong');title.textContent='Recommended learning packs';title.style.cssText='font-size:1.15rem;';body.append(title);
+  const copyNode=document.createElement('p');copyNode.textContent='Before Moss builds this curriculum, you can seed the matching local source packs. Each pack now saves verified foundation articles and its Video Learning Atlas together, then adds targeted gap articles and rights-cleared local video files when available. This is optional and resumable.';copyNode.style.cssText='margin:0;line-height:1.45;';body.append(copyNode);
   const list=document.createElement('div');list.style.cssText='display:grid;gap:9px;';body.append(list);
   let resolver=null;const done=new Promise(resolve=>{resolver=resolve});
   for(const pack of recommendations){
     const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid rgba(255,255,255,.2);border-radius:14px;';
     row.append(packCopy(pack));
-    const action=button(pack.available===false?'Not seeded':pack.catalogPending?'Seed':'Download',async()=>{if(pack.available===false)return;action.disabled=true;action.textContent='Downloading…';try{const result=await downloadMediaPack(pack.slug,{limitPerTopic:1});action.textContent=result.pending?`Seeded ${result.cached}`:'Downloaded'}catch(error){action.textContent='Unavailable';action.title=error.message}},true);if(pack.available===false)action.disabled=true;row.append(action);list.append(row);
+    const canStage=Boolean(pack.sourceSchoolSlugs?.length);
+    const action=button(canStage?'Download pack':'Mapping pending',async()=>{if(!canStage)return;action.disabled=true;action.textContent='Starting…';try{const result=await downloadMediaPack(pack.slug,{limitPerTopic:1,onProgress:progress=>{action.textContent=progressLabel(progress)}});const source=result.sourceResult;action.textContent=`Saved ${source.videoLinks||0} links + ${source.supplementalCached||0} gaps${result.cached?` + ${result.cached} video${result.cached===1?'':'s'}`:''}`;action.title=result.mediaErrors?.length?'Some optional direct video files were unavailable; articles and video links are still saved.':''}catch(error){action.textContent='Unavailable';action.title=error.message}},true);if(!canStage)action.disabled=true;row.append(action);list.append(row);
   }
   const actions=document.createElement('div');actions.style.cssText='display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;';
   const continueButton=button('Continue to curriculum',()=>{dialog.close();resolver?.({recommendations,shown:true});},true);actions.append(continueButton);body.append(actions);dialog.append(body);document.body.append(dialog);
