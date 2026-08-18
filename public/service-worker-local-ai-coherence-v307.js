@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v308-bootstrap-capability';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v309-lifecycle-deferred';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -86,12 +86,27 @@ async function cwLocalAICleanup() {
   )));
 }
 
+// Local AI is explicitly on-demand. Do not make service-worker installation or
+// activation depend on downloading 22 AI/settings modules or scanning old AI
+// caches. Those operations previously held Android PWA updates in "installing"
+// long enough to strand cold launch. The fetch gate below still keeps every
+// module coherent and caches it the first time the capability is actually used.
 self.addEventListener('install', event => {
-  event.waitUntil(cwLocalAIInstall().catch(() => ({ loaded: 0, total: CW_LOCAL_AI_CRITICAL.length })));
+  event.waitUntil(Promise.resolve());
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(cwLocalAICleanup());
+  event.waitUntil(self.clients.claim());
+  void cwLocalAICleanup().catch(() => null);
+});
+
+self.addEventListener('message', event => {
+  if (event.data?.type !== 'CIVWEAVE_WARM_LOCAL_AI_CODE') return;
+  event.waitUntil(cwLocalAIInstall().then(packet => {
+    const reply = { type: 'CIVWEAVE_LOCAL_AI_CODE_WARMED', version: CW_LOCAL_AI_COHERENCE_VERSION, ...packet };
+    try { event.ports?.[0]?.postMessage(reply); } catch {}
+    try { event.source?.postMessage?.(reply); } catch {}
+  }));
 });
 
 self.addEventListener('fetch', event => {
@@ -99,9 +114,6 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (!cwLocalAIEligible(request, url)) return;
 
-  // This gate is imported before the generic code and shell handlers. Owning the
-  // request here prevents query-string cache busters from being shadowed later
-  // by pathname-keyed cache-first fallbacks while preserving offline startup.
   event.stopImmediatePropagation();
   event.respondWith((async () => {
     const cache = await caches.open(CW_LOCAL_AI_COHERENCE_CACHE);
@@ -133,6 +145,8 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   critical: CW_LOCAL_AI_CRITICAL.slice(),
   extraPaths: Object.freeze([...CW_LOCAL_AI_EXTRA_PATHS]),
   policy: 'network-first-current-bytes-offline-cache-fallback',
+  installPolicy: 'lifecycle-deferred-capability-on-demand',
+  warmMessage: 'CIVWEAVE_WARM_LOCAL_AI_CODE',
   smoothFitOrchestrator: true,
   ownsBeforeGenericCodeCoherence: true,
   bootstrapCapabilityReadiness: true
