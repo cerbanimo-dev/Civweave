@@ -9,24 +9,116 @@
   <style>
     html,body{width:100%;height:100%;margin:0;background:#061019;color:#eaf8ff;font-family:system-ui,sans-serif}
     body{display:grid;place-items:center}
-    #cw-staging-root-rescue{max-width:32rem;margin:24px;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center}
+    #cw-staging-root-rescue{max-width:34rem;margin:24px;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center;line-height:1.5}
     #cw-staging-root-rescue[data-state="failed"]{border-color:#ffad8a66;color:#ffd8c8}
+    #cw-staging-root-rescue a{display:inline-flex;margin-top:12px;padding:9px 12px;border:1px solid #8de5ef66;border-radius:10px;color:#eaf8ff;text-decoration:none;font-weight:800}
   </style>
   <script>
   (()=>{
     'use strict';
+    const RELEASE_VERSION='1.0.163';
+    const WORKER_BUILD=`${RELEASE_VERSION}-lightweight-shell-v208`;
     const STAGING_ORIGIN='https://civweave-staging.pages.dev';
-    if(location.origin!==STAGING_ORIGIN){globalThis.CivweaveStagingPwaRescueLoader=Promise.resolve(null);return}
-    globalThis.CivweaveStagingPwaRescueLoader=new Promise(resolve=>{
-      const script=document.createElement('script');
-      script.src='/staging-pwa-rescue-v431.js?v=2';
-      script.onload=()=>resolve(globalThis.CivweaveStagingPwaRescueV431||null);
-      script.onerror=()=>resolve(null);
-      document.head.append(script);
+    const WORKER_URL=`/service-worker-v203.js?v=${WORKER_BUILD}&revision=staging-root-rescue-v432`;
+    const STALE_CACHE_PREFIXES=['civweave-static-','civweave-runtime-','civweave-shell-','cwboot-','cwext-','cwimg-','cwrecovery-'];
+    const PRESERVED_CACHE_PREFIXES=['civweave-offline-','civweave-model-','cwknowledge-','cwupdate-','cw-open-learning-media-'];
+    const REALM_CACHE=/^(?:living-school|cerbanimo|fellowfare|anarchadia)-/;
+    const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    const status=(message,state='working')=>{
+      try{
+        document.documentElement.dataset.civweaveStagingRescue=state;
+        const node=document.getElementById('cw-staging-root-rescue');
+        if(node){node.hidden=false;node.textContent=message;node.dataset.state=state}
+      }catch{}
+    };
+    const rootScope=registration=>{try{const scope=new URL(registration.scope);return scope.origin===location.origin&&scope.pathname==='/'}catch{return false}};
+    const workerUrl=worker=>{try{return new URL(worker?.scriptURL||'',location.href)}catch{return null}};
+    const workerPath=worker=>workerUrl(worker)?.pathname||'';
+    const workerLooksCurrent=worker=>{
+      const url=workerUrl(worker);
+      return Boolean(worker?.state==='activated'&&url?.pathname==='/service-worker-v203.js'&&url.searchParams.get('v')===WORKER_BUILD);
+    };
+    const preservedCache=name=>PRESERVED_CACHE_PREFIXES.some(prefix=>name.startsWith(prefix));
+    function askWorker(worker,type,timeoutMs=2500){
+      return new Promise(resolve=>{
+        if(!worker)return resolve(null);
+        const channel=new MessageChannel();
+        const timer=setTimeout(()=>resolve(null),timeoutMs);
+        channel.port1.onmessage=event=>{clearTimeout(timer);resolve(event.data||null)};
+        try{worker.postMessage({type},[channel.port2])}catch{clearTimeout(timer);resolve(null)}
+      });
+    }
+    async function inspectCurrentShell(){
+      const registration=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
+      const active=registration?.active||null;
+      if(!registration||!rootScope(registration))return{ok:false,reason:'no-root-registration',registration,active};
+      if(!workerLooksCurrent(active))return{ok:false,reason:'worker-url-or-state-mismatch',registration,active};
+      const [versionPacket,shellPacket]=await Promise.all([
+        askWorker(active,'GET_VERSION',2400),
+        askWorker(active,'GET_DEVICE_PACKAGE_STATUS',4200)
+      ]);
+      const versionOk=versionPacket?.type==='CIVWEAVE_VERSION'&&versionPacket.version===RELEASE_VERSION&&versionPacket.installMode==='lightweight-shell';
+      const shellOk=shellPacket?.type==='CIVWEAVE_DEVICE_PACKAGE'&&shellPacket.version===RELEASE_VERSION&&shellPacket.mode==='lightweight-shell'&&shellPacket.ready===true;
+      return{ok:Boolean(versionOk&&shellOk),reason:versionOk?shellOk?'current':'shell-incomplete':'version-contract-mismatch',registration,active};
+    }
+    async function clearStaleShellCaches(){
+      if(!('caches'in globalThis))return[];
+      const names=await caches.keys();
+      const stale=names.filter(name=>!preservedCache(name)&&(STALE_CACHE_PREFIXES.some(prefix=>name.startsWith(prefix))||REALM_CACHE.test(name)));
+      await Promise.allSettled(stale.map(name=>caches.delete(name)));
+      return stale;
+    }
+    async function unregisterRootWorkers(){
+      const registrations=await navigator.serviceWorker.getRegistrations().catch(()=>[]);
+      const root=registrations.filter(rootScope);
+      await Promise.allSettled(root.map(registration=>registration.unregister()));
+      return root.map(registration=>workerPath(registration.active||registration.waiting||registration.installing)).filter(Boolean);
+    }
+    function promote(registration){
+      const activate=worker=>{try{worker?.postMessage?.({type:'SKIP_WAITING'})}catch{}};
+      if(registration?.waiting)activate(registration.waiting);
+      const candidate=registration?.installing;
+      if(candidate){
+        if(candidate.state==='installed')activate(candidate);
+        else candidate.addEventListener('statechange',()=>{if(candidate.state==='installed')activate(candidate)});
+      }
+    }
+    async function waitForCurrentWorker(timeoutMs=18000){
+      const started=Date.now();
+      while(Date.now()-started<timeoutMs){
+        const registration=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
+        if(registration){promote(registration);if(workerLooksCurrent(registration.active))return registration}
+        await pause(180);
+      }
+      return navigator.serviceWorker.getRegistration('/').catch(()=>null);
+    }
+    async function repairStagingLaunch(){
+      if(location.origin!==STAGING_ORIGIN)return{ok:true,skipped:true,reason:'not-staging'};
+      if(!('serviceWorker'in navigator))return{ok:false,skipped:true,reason:'service-workers-unavailable'};
+      status('Checking the staging launch shell…');
+      const initial=await inspectCurrentShell().catch(error=>({ok:false,reason:error?.message||String(error)}));
+      if(initial.ok){status('Staging launch shell is current.','ready');return{ok:true,skipped:true,repaired:false,reason:'current-shell'}}
+      status('Refreshing stale staging shell data…');
+      const deletedCaches=await clearStaleShellCaches().catch(()=>[]);
+      status('Replacing the retained staging app worker…');
+      const removedWorkers=await unregisterRootWorkers().catch(()=>[]);
+      await pause(120);
+      const registration=await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
+      promote(registration);
+      await waitForCurrentWorker();
+      const final=await inspectCurrentShell().catch(error=>({ok:false,reason:error?.message||String(error)}));
+      const result={ok:Boolean(final.ok),skipped:false,repaired:true,reason:final.reason||initial.reason,deletedCaches,removedWorkers};
+      status(result.ok?'Staging launch shell refreshed.':'The staging launch shell is still activating.',result.ok?'ready':'pending');
+      return result;
+    }
+    globalThis.CivweaveInlineStagingRescueV432=Object.freeze({version:'staging-root-rescue-v432',repairStagingLaunch,inspectCurrentShell});
+    globalThis.CivweaveInlineStagingRescueReady=repairStagingLaunch().catch(error=>{
+      const result={ok:false,error:error?.message||String(error)};
+      status(`Staging launch repair could not finish: ${result.error}`,'failed');
+      return result;
     });
   })();
   </script>
-  <script src="/app/civweave-brand.js?v=1.0.163"></script>
   <script>
   (() => {
     'use strict';
@@ -42,13 +134,7 @@
     const previousCanonical=location.origin===PREVIOUS_CANONICAL_ORIGIN;
     const legacyCanonical=location.origin===LEGACY_CANONICAL_ORIGIN;
     const params=new URLSearchParams(location.search);
-    const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-    async function repairStagingLaunch(){
-      if(location.origin!==STAGING_ORIGIN)return null;
-      const rescue=await Promise.race([globalThis.CivweaveStagingPwaRescueLoader||Promise.resolve(null),wait(2500).then(()=>null)]);
-      if(!rescue?.ready)return null;
-      return Promise.race([rescue.ready,wait(16000).then(()=>({ok:false,timeout:true}))]);
-    }
+    const standalone=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
     function route(){
       if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||previousCanonical||legacyCanonical||cloudflarePreview)){
         const destination=cloudflarePreview&&previewParent&&previewParent!==PREVIOUS_CANONICAL_ORIGIN&&previewParent!==LEGACY_CANONICAL_ORIGIN?previewParent:CANONICAL_ORIGIN;
@@ -76,15 +162,26 @@
         home.searchParams.append(key,value);
       }
       if(VERSION&&!home.searchParams.has('version'))home.searchParams.set('version',VERSION);
-      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root');
+      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root-v432');
       home.hash=location.hash;
       location.replace(home.href);
     }
     (async()=>{
-      const result=await repairStagingLaunch().catch(()=>null);
+      const result=location.origin===STAGING_ORIGIN?await globalThis.CivweaveInlineStagingRescueReady:null;
       if(params.get('rescue_stay')==='1'){
         const node=document.getElementById('cw-staging-root-rescue');
-        if(node){node.hidden=false;node.textContent=result?.ok?'Staging launch shell is current.':result?.timeout?'Staging launch repair is still running.':result?.error?`Staging launch repair failed: ${result.error}`:'Staging launch rescue was not needed.';node.dataset.state=result?.ok?'ready':result?.error?'failed':'pending'}
+        if(node){
+          node.hidden=false;
+          node.dataset.state=result?.ok?'ready':result?.error?'failed':'pending';
+          node.innerHTML=result?.ok
+            ? 'Staging launch shell is current.'
+            : `Staging launch repair did not complete${result?.error?`: ${String(result.error).replace(/[<>&]/g,'')}`:'.'}<br><a href="/?rescue_stay=1&retry=${Date.now().toString(36)}">Retry launch repair</a>`;
+        }
+        return;
+      }
+      if(location.origin===STAGING_ORIGIN&&standalone()&&!result?.ok){
+        const node=document.getElementById('cw-staging-root-rescue');
+        if(node){node.hidden=false;node.dataset.state='failed';node.innerHTML='Civweave stopped before entering a stale installed shell.<br><a href="/?retry_launch=1">Retry startup</a>'}
         return;
       }
       route();
@@ -92,5 +189,5 @@
   })();
   </script>
 </head>
-<body><main id="cw-staging-root-rescue" hidden>Refreshing the staging launch shell…</main></body>
+<body><main id="cw-staging-root-rescue" hidden>Checking the staging launch shell…</main></body>
 </html>
