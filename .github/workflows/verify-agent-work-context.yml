@@ -1,0 +1,83 @@
+name: Verify Agent Work Context
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'config/agent-work-context.json'
+      - 'config/system-ownership.json'
+      - 'docs/architecture/repository-map.md'
+      - 'docs/architecture/systems-of-practice.md'
+      - 'docs/contracts/mobile-interface-contract.md'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/realm-session-integrity-v237.js'
+      - 'tools/civweave-dev-mcp/**'
+      - '.github/workflows/verify-agent-work-context.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'AGENTS.md'
+      - 'config/agent-work-context.json'
+      - 'config/system-ownership.json'
+      - 'docs/architecture/repository-map.md'
+      - 'docs/architecture/systems-of-practice.md'
+      - 'docs/contracts/mobile-interface-contract.md'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/realm-session-integrity-v237.js'
+      - 'tools/civweave-dev-mcp/**'
+      - '.github/workflows/verify-agent-work-context.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify machine-readable agent and memory-scope contracts
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const assert = (condition, message) => { if (!condition) throw new Error(message); };
+          const context = JSON.parse(fs.readFileSync('config/agent-work-context.json', 'utf8'));
+          const agents = fs.readFileSync('AGENTS.md', 'utf8');
+          const map = fs.readFileSync('docs/architecture/repository-map.md', 'utf8');
+          const core = fs.readFileSync('public/app/unified-chat-system-v1.js', 'utf8');
+          const surface = fs.readFileSync('public/app/guide-chat-surface-v350.js', 'utf8');
+          const sessions = fs.readFileSync('public/app/realm-session-integrity-v237.js', 'utf8');
+
+          assert(context.schema === 'civweave.agent-work-context.v1', 'Agent work context schema changed unexpectedly.');
+          assert(context.branchPolicy?.developmentIntegration === 'staging', 'Staging is not declared as the development integration branch.');
+          assert(context.branchPolicy?.shipping === 'main', 'Main is not declared as the shipping branch.');
+          assert(context.branchPolicy?.directShippingEdits === false, 'Direct shipping-branch edits must remain disabled by default.');
+          for (const path of context.requiredBeforeEdit || []) assert(fs.existsSync(path), `Required agent context path is missing: ${path}`);
+          assert((context.immutableSourceGlobs || []).includes('releases/**'), 'Materialized releases are not protected as immutable source.');
+          assert((context.forbiddenLivePaths || []).includes('archive/**'), 'Live archive paths are no longer forbidden.');
+          assert(context.testFirst?.requiredForBehaviorChanges === true, 'Behavior changes are no longer test-first by policy.');
+          assert(context.mcp?.endUserSurface === false && context.mcp?.publicRuntimeExposure === false, 'Developer MCP may not become an end-user/public runtime surface implicitly.');
+          assert(agents.includes('config/agent-work-context.json'), 'AGENTS.md does not require the machine-readable work context.');
+          assert(/test-first/i.test(agents), 'AGENTS.md no longer states the test-first workflow.');
+          assert(/developer-only|developer and maintainer|maintainer tool/i.test(agents), 'AGENTS.md does not keep the dev MCP explicitly developer-only.');
+          assert(map.includes('config/agent-work-context.json'), 'Repository map does not point agents to the machine-readable work context.');
+
+          const systems = ['civweave', 'living-school', 'cerbanimo', 'fellowfare', 'anarchadia'];
+          assert(Object.keys(context.guideMemoryScopes || {}).length === systems.length, 'Agent context must declare exactly five guide memory scopes.');
+          for (const system of systems) {
+            const expected = `civweave.guide-thread.${system}.v237`;
+            assert(context.guideMemoryScopes[system] === expected, `Wrong memory scope for ${system}.`);
+            assert(core.includes(`civweave.guide-thread.${'${system}'}.v237`) || core.includes('`civweave.guide-thread.${system}.v237`'), 'Unified chat no longer declares the five-folder key contract.');
+          }
+          assert(surface.includes('function historyFor(system){return(readThread(system).messages'), 'Guide surface history is no longer scoped through readThread(system).');
+          assert(surface.includes('history:historyFor(system)'), 'Guide submission no longer sends only the active guide history.');
+          assert(sessions.includes('const threadKey=system=>`civweave.guide-thread.${system}.v237`'), 'Realm session storage lost per-guide thread keys.');
+          assert(sessions.includes("append(target,{role:'handover'"), 'Cross-guide context no longer enters through an explicit handover record.');
+          assert(sessions.includes('history:historyFor(target)'), 'Handover generation is not scoped to the destination guide history.');
+          NODE
