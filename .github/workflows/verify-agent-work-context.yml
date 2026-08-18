@@ -12,6 +12,7 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/guide-provider-policy-v1.js'
       - 'tools/civweave-dev-mcp/**'
       - '.github/workflows/verify-agent-work-context.yml'
   push:
@@ -26,6 +27,7 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/realm-session-integrity-v237.js'
+      - 'public/app/guide-provider-policy-v1.js'
       - 'tools/civweave-dev-mcp/**'
       - '.github/workflows/verify-agent-work-context.yml'
   workflow_dispatch:
@@ -42,7 +44,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Verify machine-readable agent and memory-scope contracts
+      - name: Verify machine-readable agent, memory-scope, and degradation contracts
         run: |
           node <<'NODE'
           const fs = require('node:fs');
@@ -53,6 +55,7 @@ jobs:
           const core = fs.readFileSync('public/app/unified-chat-system-v1.js', 'utf8');
           const surface = fs.readFileSync('public/app/guide-chat-surface-v350.js', 'utf8');
           const sessions = fs.readFileSync('public/app/realm-session-integrity-v237.js', 'utf8');
+          const providerPolicy = fs.readFileSync('public/app/guide-provider-policy-v1.js', 'utf8');
 
           assert(context.schema === 'civweave.agent-work-context.v1', 'Agent work context schema changed unexpectedly.');
           assert(context.branchPolicy?.developmentIntegration === 'staging', 'Staging is not declared as the development integration branch.');
@@ -73,11 +76,24 @@ jobs:
           for (const system of systems) {
             const expected = `civweave.guide-thread.${system}.v237`;
             assert(context.guideMemoryScopes[system] === expected, `Wrong memory scope for ${system}.`);
-            assert(core.includes(`civweave.guide-thread.${'${system}'}.v237`) || core.includes('`civweave.guide-thread.${system}.v237`'), 'Unified chat no longer declares the five-folder key contract.');
           }
+          assert(core.includes('const MEMORY_FOLDERS=Object.freeze(Object.fromEntries(SYSTEMS.map(system=>[system,`civweave.guide-thread.${system}.v237`])));'), 'Unified chat no longer declares one memory folder per guide.');
           assert(surface.includes('function historyFor(system){return(readThread(system).messages'), 'Guide surface history is no longer scoped through readThread(system).');
           assert(surface.includes('history:historyFor(system)'), 'Guide submission no longer sends only the active guide history.');
           assert(sessions.includes('const threadKey=system=>`civweave.guide-thread.${system}.v237`'), 'Realm session storage lost per-guide thread keys.');
           assert(sessions.includes("append(target,{role:'handover'"), 'Cross-guide context no longer enters through an explicit handover record.');
           assert(sessions.includes('history:historyFor(target)'), 'Handover generation is not scoped to the destination guide history.');
+
+          const hosted = context.hostedAIDegradationPolicy || {};
+          assert(hosted.activation === 'explicit-server-auto-configuration', 'Hosted guide routing is no longer explicitly activated through server-auto configuration.');
+          assert(JSON.stringify(hosted.serverOrder) === JSON.stringify(['device-local','server-local','cloudflare-workers-ai']), 'Hosted AI server order drifted from the provider policy.');
+          assert(hosted.preserveSelectedLocalFirst === true, 'Selected local model is no longer protected as the first server-auto route.');
+          assert(hosted.hostedConsentRequired === true, 'Hosted AI consent requirement was removed from agent policy.');
+          assert(hosted.failureMustBeVisible === true && hosted.silentDeterministicMasking === false, 'Hosted route failure may not be silently masked.');
+          assert(providerPolicy.includes("const SERVER_ORDER=Object.freeze(['device-local','server-local','cloudflare-workers-ai']);"), 'Guide provider order changed without updating the policy contract.');
+          assert(providerPolicy.includes("if(!serverAutoConfigured()||!isGuideRequest(request))return request;"), 'Guide hosted routing can activate without explicit server-auto configuration.');
+          assert(providerPolicy.includes("externalConsent:true"), 'Server-auto no longer carries explicit external-consent state.');
+          assert(providerPolicy.includes('serverAutoPreservesSelectedLocal:true'), 'Provider policy no longer promises selected-local preservation.');
+          assert(providerPolicy.includes('serverAutoFailureIsExplicit:true'), 'Provider policy no longer exposes server-auto failure.');
+          assert(providerPolicy.includes('deterministicFailureMasking:false'), 'Provider policy may silently mask server-auto failure with deterministic output.');
           NODE
