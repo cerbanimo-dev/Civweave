@@ -9,6 +9,7 @@ export { CivweaveCloudNode, CivweaveAccountDirectory };
 const STAGING_COMMUNITY_SEATS = 4;
 const STAGING_PAID_TEST_SEATS = 4;
 const STAGING_MAX_MEMBERS = STAGING_COMMUNITY_SEATS + STAGING_PAID_TEST_SEATS;
+const STAGING_PUBLIC_WORKER_DOMAIN = 'cerbanimo.workers.dev';
 const clean = (value, max = 180) => String(value ?? '').trim().slice(0, max);
 
 /**
@@ -82,6 +83,14 @@ export class CivweaveCapacityAccount extends ProductionCapacityAccount {
 
 export default {
   async fetch(request, env, ctx) {
+    const pathname = new URL(request.url).pathname;
+    // Keep the staging Worker's normal NODE_DOMAIN intentionally non-routable so
+    // root /api/fabric administration is not mistaken for a node-host request.
+    // Membership checkout alone needs the real workers.dev suffix so its Stripe
+    // success/cancel URLs resolve back to this isolated staging Worker.
+    if (pathname.startsWith('/api/commerce/membership/')) {
+      return baseWorker.fetch(request, { ...env, NODE_DOMAIN: STAGING_PUBLIC_WORKER_DOMAIN }, ctx);
+    }
     return baseWorker.fetch(request, env, ctx);
   },
   async scheduled(controller, env, ctx) {
