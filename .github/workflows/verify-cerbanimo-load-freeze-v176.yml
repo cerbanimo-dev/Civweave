@@ -3,7 +3,8 @@ name: Verify Cerbanimo Load Freeze v176
 on:
   pull_request:
     paths:
-      - 'public/service-worker.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-release-coherence-v220.js'
       - 'public/app/fullscreen-family-v104.html'
       - 'public/app/realm-console-v140.html'
       - 'public/app/shared/civweave-parity-runtime.js'
@@ -14,7 +15,7 @@ on:
       - 'scripts/verify-cerbanimo-load-freeze-v176.mjs'
       - '.github/workflows/verify-cerbanimo-load-freeze-v176.yml'
   push:
-    branches: [main]
+    branches: [main, staging]
   workflow_dispatch:
 
 jobs:
@@ -27,7 +28,8 @@ jobs:
           node-version: 22
       - name: Syntax check Cerbanimo boot runtimes
         run: |
-          node --check public/service-worker.js
+          node --check public/service-worker-v203.js
+          node --check public/service-worker-release-coherence-v220.js
           node --check public/app/shared/civweave-parity-runtime.js
           node --check public/app/cerbanimo-quest-path-v266.js
           node --check public/app/cerbanimo-learning-packs-v1.js
