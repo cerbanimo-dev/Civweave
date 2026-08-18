@@ -1,10 +1,10 @@
 ;(() => {
 'use strict';
 
-const V220_REVISION = 'release-coherence-v226';
+const V220_REVISION = 'release-coherence-v227-cerbanimo-boot-r1';
 const V220_NETWORK_TIMEOUT_MS = 7000;
 const V220_VERSION_KEYS = ['v', 'version', 'revision', 'build'];
-const V220_TEXT_ASSET = /\.(?:html?|css|m?js|json|webmanifest|txt)$/i;
+const V220_TEXT_ASSET = /\.(?:html?|css|m?js|json|webmanifest|txt|b64)$/i;
 const V220_BOOT_PATHS = new Set([
   '/install-v130.js',
   '/app/index.html',
@@ -19,6 +19,15 @@ const V220_BOOT_PATHS = new Set([
   '/app/working-campus-v156.part3.txt',
   '/app/working-campus-v156.part4.txt',
   '/app/working-campus-v156.part5.txt',
+  '/app/realm-console-v140.html',
+  '/app/realm-console-v140.js',
+  '/app/shared/civweave-parity-runtime.js',
+  '/app/shared/civweave-parity-ledger.json',
+  '/app/shared/civweave-parity-ledger.part1.b64',
+  '/app/shared/civweave-parity-ledger.part2.b64',
+  '/app/shared/civweave-parity-ledger.part3.b64',
+  '/app/shared/civweave-parity-ledger.part4.b64',
+  '/app/shared/cabinet-shells-v129.json',
   '/app/release-version-v1.js',
   '/app/manifest.webmanifest'
 ]);
@@ -69,7 +78,7 @@ self.CivweaveReleaseCoherenceV220 = Object.freeze({
   networkTimeoutMs: V220_NETWORK_TIMEOUT_MS,
   versionKeys: [...V220_VERSION_KEYS],
   bootPaths: [...V220_BOOT_PATHS],
-  policy: 'version-pinned-html-js-css-json-txt-network-first-cached-fallback'
+  policy: 'version-pinned-and-cerbanimo-boot-text-network-first-cached-fallback'
 });
 
 })();
