@@ -14,7 +14,7 @@ on:
       - 'public/app/offline-package-v208.json'
       - 'lib/creator-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/creator-provenance-*.mjs'
-      - 'cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
       - 'cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs'
       - 'cloudflare/mobile-guild-edge/wrangler.jsonc'
@@ -35,7 +35,7 @@ on:
       - 'public/app/offline-package-v208.json'
       - 'lib/creator-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/creator-provenance-*.mjs'
-      - 'cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-*.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
       - 'cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs'
       - 'cloudflare/mobile-guild-edge/wrangler.jsonc'
@@ -85,9 +85,13 @@ jobs:
           node --check lib/creator-provenance-anomaly-v1.mjs
           node --check lib/creator-provenance-packet-verify-v1.mjs
           node --check lib/creator-provenance-review-v1.mjs
+          node --check lib/creator-provenance-tribunal-v1.mjs
+          node --check lib/creator-provenance-retention-v1.mjs
           node --check cloudflare/node-cloud/src/creator-provenance-audit-v1.mjs
           node --check cloudflare/node-cloud/src/creator-provenance-evidence-v1.mjs
+          node --check cloudflare/node-cloud/src/creator-provenance-reviewer-v1.mjs
           node --check cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-provenance-lifecycle-v1.mjs
           node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
           node --check cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs
       - name: Verify separate package boundary
@@ -114,12 +118,22 @@ jobs:
         run: node scripts/test-creator-provenance-anomaly-v1.mjs
       - name: Verify structured provenance review
         run: node scripts/test-creator-provenance-review-v1.mjs
+      - name: Verify Cloudflare provenance reviewer
+        run: node scripts/test-cloudflare-creator-provenance-reviewer-v1.mjs
+      - name: Verify independent human tribunal
+        run: node scripts/test-creator-provenance-tribunal-v1.mjs
+      - name: Verify Creator audit client privacy
+        run: node scripts/test-creator-audit-client-v1.mjs
       - name: Verify selected-evidence browser and Guild crypto
         run: node scripts/test-creator-provenance-evidence-crypto-v1.mjs
       - name: Verify Cloudflare Guild audit storage and requests
         run: node scripts/test-cloudflare-creator-provenance-audit-v1.mjs
       - name: Verify Cloudflare selected evidence handshake
         run: node scripts/test-cloudflare-creator-provenance-evidence-v1.mjs
+      - name: Verify signed appeal lifecycle
+        run: node scripts/test-cloudflare-creator-provenance-appeal-v1.mjs
+      - name: Verify provenance retention policy
+        run: node scripts/test-creator-provenance-retention-v1.mjs
       - name: Verify mobile Guild receipt subscriber
         run: node scripts/test-mobile-guild-provenance-forward-v1.mjs
       - name: Verify Cerbanimo Reckoning audit integration
