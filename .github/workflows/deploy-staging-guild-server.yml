@@ -124,12 +124,18 @@ jobs:
           if [ "$registered" != '1' ]; then
             operator_secret="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")"
             printf '%s\n' "$operator_secret" | npx wrangler secret put NODE_FABRIC_OPERATOR_TOKEN --config cloudflare/node-cloud/wrangler.staging.jsonc
-            curl --fail-with-body --silent --show-error \
-              -X POST "$STAGING_ORIGIN/api/fabric/nodes/$STAGING_NODE_ID" \
-              -H "authorization: Bearer $operator_secret" \
-              -H 'content-type: application/json' \
-              --data "{\"displayName\":\"Civweave Staging Guild\",\"operatorId\":\"civweave-staging-shadow\",\"publicOrigin\":\"$STAGING_ORIGIN\"}" \
-              > /tmp/staging-register.json
+            registered_ok=0
+            for attempt in $(seq 1 12); do
+              status="$(curl --silent --show-error -o /tmp/staging-register.json -w '%{http_code}' \
+                -X POST "$STAGING_ORIGIN/api/fabric/nodes/$STAGING_NODE_ID" \
+                -H "authorization: Bearer $operator_secret" \
+                -H 'content-type: application/json' \
+                --data "{\"displayName\":\"Civweave Staging Guild\",\"operatorId\":\"civweave-staging-shadow\",\"publicOrigin\":\"$STAGING_ORIGIN\"}" || true)"
+              if [ "$status" = '200' ] || [ "$status" = '201' ]; then registered_ok=1; break; fi
+              if [ "$status" != '403' ]; then cat /tmp/staging-register.json >&2 || true; fi
+              sleep 2
+            done
+            test "$registered_ok" = '1' || { echo "Staging Guild registration did not accept the newly propagated operator secret (last HTTP ${status:-unknown})."; cat /tmp/staging-register.json >&2 || true; exit 9; }
           fi
 
       - name: Verify isolated community and paid-test capacity
