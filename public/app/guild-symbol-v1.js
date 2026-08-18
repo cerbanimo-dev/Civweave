@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1.1';
+const VERSION='guild-symbol-v1.2';
 const SRC='/app/assets/guild-symbol.png';
 const STYLE_ID='cw-guild-symbol-v1-style';
 const ICON_CLASS='cw-guild-symbol-icon';
@@ -18,6 +18,8 @@ function installStyle(doc=document){
 #cw-working-campus-guilds-v243 .${ICON_CLASS}{width:1.55rem;height:1.55rem}
 #cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"]{display:inline-flex;align-items:center;gap:6px}
 #cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"] .${ICON_CLASS}{width:18px;height:18px;vertical-align:middle}
+#cw-human-message-launcher-v1 .cw-human-face{background:transparent!important;text-shadow:none!important}
+#cw-human-message-launcher-v1 .cw-human-face .${ICON_CLASS}{width:100%;height:100%;object-fit:contain;border-radius:50%;vertical-align:middle}
 `;
   (doc.head||doc.documentElement).append(style);
 }
@@ -73,10 +75,21 @@ function ensureGuildChatSymbol(control){
   return true;
 }
 
+function ensureGuildLauncher(doc=document){
+  const face=doc.querySelector?.('#cw-human-message-launcher-v1 .cw-human-face');
+  if(!face)return false;
+  const current=face.querySelector(`img.${ICON_CLASS}[src="${SRC}"]`);
+  if(current&&face.children.length===1)return true;
+  face.replaceChildren(makeIcon(doc));
+  face.dataset.cwGuildSymbol='launcher';
+  return true;
+}
+
 function enhance(doc=document){
   if(!doc?.querySelectorAll)return;
   installStyle(doc);
 
+  ensureGuildLauncher(doc);
   doc.querySelectorAll('.realm-icon.guilds,.ri.guilds,[data-realm="guild"] .realm-icon,[data-realm="guilds"] .realm-icon,#cw-guild-quest-browser-v1 .cw-gqb-icon').forEach(replaceSlot);
   doc.querySelectorAll('[data-cwh2-tab^="guild:"],[data-human-thread^="guild:"],[data-thread-id^="guild:"]').forEach(ensureGuildChatSymbol);
 
