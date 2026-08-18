@@ -5,7 +5,7 @@ import('/app/safe-mode-v1.mjs?v=safe-mode-v1')
   .then(module=>module.default?.install?.())
   .catch(error=>console.warn('[Civweave S.A.F.E.]',error));
 
-const VERSION='1.0.7-family-nav-event-driven-v178';
+const VERSION='1.0.6-family-nav-delegated-v178';
 const STATUS_KEY='civweave.family-status.v105';
 const SYSTEM_ORDER=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const SYSTEMS={
@@ -30,7 +30,6 @@ const nonSeedFellowFare=item=>!/^([tmp]|pr|ag|a|c|ev)[1-9]\d*$/.test(String(item
 
 let loaderPatched=false;
 let assistantPatched=false;
-let clickRefreshTimer=0;
 
 function detect(){
   const query=new URLSearchParams(location.search).get('system');
@@ -261,8 +260,7 @@ function validateCodeRails({code='',language='javascript',criteria=[],rules={}}=
 }
 function resultText(review){
   const lines=review.findings.slice(0,12).map(item=>`${item.level.toUpperCase()}: ${item.message}`);
-  return[`Local rail review: ${review.status.toUpperCase()}.`,...lines,review.nextAction,'MiniLM may help map code or evidence to a rail, but it does not prove correctness or generate a repair.'].join('\
-');
+  return[`Local rail review: ${review.status.toUpperCase()}.`,...lines,review.nextAction,'MiniLM may help map code or evidence to a rail, but it does not prove correctness or generate a repair.'].join('\n');
 }
 function patchAssistantBoundary(){
   const api=globalThis.CivweaveAssistantV141;
@@ -389,10 +387,6 @@ function refresh(){
     if(label)label.textContent=currentState.label;
   }
 }
-function scheduleClickRefresh(){
-  clearTimeout(clickRefreshTimer);
-  clickRefreshTimer=setTimeout(refresh,80);
-}
 function bind(){
   document.addEventListener('click',event=>{
     const target=event.target;
@@ -405,11 +399,9 @@ function bind(){
   addEventListener('storage',refresh);
   addEventListener('focus',refresh);
   addEventListener('civweave:intentions-changed',refresh);
-  addEventListener('cerbanimo:quest-engine-changed',refresh);
-  addEventListener('civweave:actions-changed',refresh);
-  addEventListener('civweave:cerbanimo-quest-path-materialized',refresh);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){markVisited(detect());refresh()}});
-  document.addEventListener('click',scheduleClickRefresh,{passive:true});
+  document.addEventListener('click',()=>setTimeout(refresh,80),{passive:true});
+  setInterval(refresh,30000);
 }
 function boot(){
   build();
