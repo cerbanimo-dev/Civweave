@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1';
+const VERSION='guild-symbol-v1.1';
 const SRC='/app/assets/guild-symbol.png';
 const STYLE_ID='cw-guild-symbol-v1-style';
 const ICON_CLASS='cw-guild-symbol-icon';
@@ -16,6 +16,8 @@ function installStyle(doc=document){
 .realm-icon.guilds .${ICON_CLASS},.ri.guilds .${ICON_CLASS}{width:100%;height:100%;max-width:2rem;max-height:2rem;vertical-align:middle}
 #cw-guild-quest-browser-v1 .cw-gqb-icon .${ICON_CLASS}{width:24px;height:24px;vertical-align:middle}
 #cw-working-campus-guilds-v243 .${ICON_CLASS}{width:1.55rem;height:1.55rem}
+#cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"]{display:inline-flex;align-items:center;gap:6px}
+#cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"] .${ICON_CLASS}{width:18px;height:18px;vertical-align:middle}
 `;
   (doc.head||doc.documentElement).append(style);
 }
@@ -59,15 +61,29 @@ function replaceLeadingFlag(node){
   return true;
 }
 
+function ensureGuildChatSymbol(control){
+  if(!control||control.dataset?.cwGuildSymbol==='1')return false;
+  const threadId=String(control.dataset?.cwh2Tab||control.dataset?.humanThread||control.dataset?.threadId||'');
+  if(!threadId.startsWith('guild:'))return false;
+  const label=String(control.textContent||'Guild chat').trim()||'Guild chat';
+  const doc=control.ownerDocument||document;
+  installStyle(doc);
+  control.replaceChildren(makeIcon(doc),doc.createTextNode(label));
+  control.dataset.cwGuildSymbol='1';
+  return true;
+}
+
 function enhance(doc=document){
   if(!doc?.querySelectorAll)return;
   installStyle(doc);
 
   doc.querySelectorAll('.realm-icon.guilds,.ri.guilds,[data-realm="guild"] .realm-icon,[data-realm="guilds"] .realm-icon,#cw-guild-quest-browser-v1 .cw-gqb-icon').forEach(replaceSlot);
+  doc.querySelectorAll('[data-cwh2-tab^="guild:"],[data-human-thread^="guild:"],[data-thread-id^="guild:"]').forEach(ensureGuildChatSymbol);
 
   doc.querySelectorAll('.mode-text,button,a,[role="button"],[role="menuitem"],summary').forEach(control=>{
     const label=String(control.getAttribute?.('aria-label')||control.textContent||'');
     if(!/\bguilds?\b/i.test(label))return;
+    if(ensureGuildChatSymbol(control))return;
     if(replaceLeadingFlag(control))return;
     const direct=[...(control.children||[])].find(child=>{
       if(child.classList?.contains(ICON_CLASS))return false;
