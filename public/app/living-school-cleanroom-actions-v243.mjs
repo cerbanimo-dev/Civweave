@@ -5,9 +5,31 @@ import {researchCapability} from './living-school-local-research-v243.mjs?v=rese
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
 const stage=(handler,name,detail={})=>{try{handler?.(name,detail)}catch{}};
 const REQUIRED_QUIZ_TYPES=['multiple-choice','multi-select','short-answer'];
+const DETERMINISTIC_ROUTE_PROVIDERS=new Set(['deterministic','semantic-local','bundled','packaged','reflex','minilm','local-reflex','manual']);
 const fallbackQuestion=question=>/-fallback-\d+$/i.test(clean(question?.id,160));
 const genuineQuizBank=module=>(Array.isArray(module?.quiz?.bank)?module.quiz.bank:[]).filter(question=>!fallbackQuestion(question));
 const sameJson=(left,right)=>{try{return JSON.stringify(left)===JSON.stringify(right)}catch{return false}};
+const parseJson=value=>{try{const parsed=JSON.parse(value||'{}');return parsed&&typeof parsed==='object'?parsed:{}}catch{return{}}};
+function sharedProviderSelection(){
+  try{
+    const provider=clean(globalThis.CivweaveAICapabilityBrokerV268?.selectedProvider?.('interactive'),120).toLowerCase();
+    if(provider)return provider;
+  }catch{}
+  try{
+    const config=globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive')||null,provider=clean(config?.provider||config?.route,120).toLowerCase();
+    if(provider)return provider;
+  }catch{}
+  try{
+    const profiles=parseJson(globalThis.localStorage?.getItem?.('civweave-model-profiles-v1')),settings=parseJson(globalThis.localStorage?.getItem?.('civweave.universal-ai.v127'));
+    const selected=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:settings;
+    return clean(selected?.provider||selected?.route,120).toLowerCase();
+  }catch{return''}
+}
+function selectedCurriculumRoute(requested=''){
+  const provider=sharedProviderSelection();
+  if(provider)return DETERMINISTIC_ROUTE_PROVIDERS.has(provider)?'deterministic':'shared';
+  return clean(requested,120).toLowerCase()==='deterministic'?'deterministic':'shared';
+}
 
 export function stripLegacyFallbackQuestions(school){
   if(!school||clean(school.generation?.provider,80).toLowerCase()==='deterministic')return{school,removed:0};
@@ -66,7 +88,6 @@ export function retireLegacyFailedSharedFallback(){
   s.progress={};
   s.activeModuleId='';
   s.visualInspection=null;
-  if(clean(s.settings?.modelRoute,120).toLowerCase()==='deterministic')s.settings={...s.settings,modelRoute:'shared'};
   persist('living-school-failed-shared-fallback-retired',{provider,error,policy:'never-persist-deterministic-substitute-for-shared-generation'});
   return true;
 }
@@ -159,6 +180,7 @@ async function completeSharedQuizBank(data,school,options={}){
   return school;
 }
 async function generateSchoolWithAtomicSharedQuiz(data,options={}){
+  data.modelRoute=selectedCurriculumRoute(data.modelRoute);
   const school=await generateSchool(data),provider=clean(school.generation?.provider,80).toLowerCase(),requestedRoute=clean(data.modelRoute,120).toLowerCase();
   stripLegacyFallbackQuestions(school);
   if(requestedRoute==='shared'&&(school.generation?.fallback||provider==='deterministic')){
@@ -177,39 +199,43 @@ async function generateSchoolWithAtomicSharedQuiz(data,options={}){
 }
 
 export async function generateCurriculumFromData(input={},options={}){
-  const current=state(),rawModelRoute=clean(input.modelRoute,120)||'shared',legacyAutoFallbackRoute=Boolean(current.school?.generation?.fallback)&&rawModelRoute.toLowerCase()==='deterministic';
+  const current=state(),callerModelRoute=clean(input.modelRoute,120)||clean(current.settings?.modelRoute,120)||'shared';
   const data={
     title:clean(input.title,240),
     capability:clean(input.capability,2400),
     level:clean(input.level,80)||'beginner',
     count:input.count||4,
     mode:clean(input.mode,80)||'guided',
-    modelRoute:legacyAutoFallbackRoute?'shared':rawModelRoute,
+    modelRoute:selectedCurriculumRoute(callerModelRoute),
     proof:clean(input.proof,3000)||'A working artifact, explanation, and independent receipt.'
   };
   if(!data.capability)throw new Error('Name an observable capability.');
   const source=clean(options.source,120)||'living-school-workbench';
   const before=state();
   before.pathContext={...(before.pathContext||{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source};
-  persist('living-school-curriculum-requested',{source,title:data.title,capability:data.capability,level:data.level,count:Number(data.count)||4,mode:data.mode,modelRoute:data.modelRoute});
+  persist('living-school-curriculum-requested',{source,title:data.title,capability:data.capability,level:data.level,count:Number(data.count)||4,mode:data.mode,callerModelRoute,modelRoute:data.modelRoute,modelRouteAuthority:'shared-model-settings'});
 
   stage(options.onStage,'researching',{capability:data.capability});
   const packet=await researchCapability(data.capability,{force:false});
   persist('living-school-research-ready',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||state().research?.sourceCount||0,reused:Boolean(packet.reused),source});
 
   stage(options.onStage,'generating',{capability:data.capability,researchMode:packet.mode});
+  const routeBeforeGeneration=data.modelRoute;
+  data.modelRoute=selectedCurriculumRoute(data.modelRoute);
+  if(routeBeforeGeneration!==data.modelRoute)persist('living-school-model-route-synchronized',{source,from:routeBeforeGeneration,to:data.modelRoute,provider:sharedProviderSelection(),authority:'shared-model-settings'});
   const s=state(),school=await generateSchoolWithAtomicSharedQuiz(data,{source,onStage:options.onStage}),old=s.school?.modules||[],nextProgress={};
   school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
   const generatedProvider=clean(school.generation?.provider,80).toLowerCase(),usedDeterministic=generatedProvider==='deterministic';
-  const actualModelRoute=usedDeterministic?'deterministic':data.modelRoute;
+  const actualModelRoute=usedDeterministic?'deterministic':'shared',generatedModel=clean(school.generation?.model,160),generatedLabel=generatedModel||clean(school.generation?.provider,120)||'the model selected in shared AI settings';
   s.school=school;
   s.activeModuleId=school.modules[0].id;
   s.progress=nextProgress;
-  s.settings={...s.settings,modelRoute:actualModelRoute,mode:data.mode};
+  const {modelRoute:_retiredModelRoute,...otherSettings}=s.settings||{};
+  s.settings={...otherSettings,mode:data.mode};
   s.visualInspection=null;
-  persist('curriculum-generated',{schoolId:school.id,researchMode:s.research?.mode||'none',sourceCount:s.sources.length,formatContract:school.generation.formatContract,fallback:Boolean(school.generation.fallback),generationError:clean(school.generation?.error,800),requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,source});
-  toast(usedDeterministic?'Moss built the curriculum with the explicitly selected deterministic local compiler.':'Moss researched first and generated the formatted curriculum with shared AI.');
-  stage(options.onStage,'complete',{schoolId:school.id,moduleCount:school.modules.length,requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,fallback:Boolean(school.generation?.fallback),deterministic:usedDeterministic});
+  persist('curriculum-generated',{schoolId:school.id,researchMode:s.research?.mode||'none',sourceCount:s.sources.length,formatContract:school.generation.formatContract,fallback:Boolean(school.generation.fallback),generationError:clean(school.generation?.error,800),callerModelRoute,requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,generationModel:generatedModel,modelRouteAuthority:'shared-model-settings',source});
+  toast(usedDeterministic?'Moss generated the curriculum with the deterministic local compiler.':`Moss researched first and generated the formatted curriculum with ${generatedLabel}.`);
+  stage(options.onStage,'complete',{schoolId:school.id,moduleCount:school.modules.length,callerModelRoute,requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,generationModel:generatedModel,modelRouteAuthority:'shared-model-settings',fallback:Boolean(school.generation?.fallback),deterministic:usedDeterministic});
   return school;
 }
 
@@ -226,7 +252,7 @@ export const actions={...legacyActions,
     else toast(`Research complete with ${String(packet.flag||packet.mode).toLowerCase()}.`);
   },
   'generate-curriculum':async target=>{
-    const data=fields(target,['title','capability','level','count','mode','modelRoute','proof']);
+    const data=fields(target,['title','capability','level','count','mode','proof']);
     if(!clean(data.capability))throw new Error('Name an observable capability.');
     busyLabel(target,state().school?'Researching before regeneration…':'Researching before generation…');
     await generateCurriculumFromData(data,{source:'living-school-workbench',onStage:name=>{if(name==='generating')target.textContent=state().school?'Regenerating curriculum…':'Generating curriculum…';if(name==='repairing-quiz')target.textContent='Completing missing AI quiz questions…'}});
