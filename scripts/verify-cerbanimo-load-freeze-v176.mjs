@@ -4,13 +4,24 @@ import assert from 'node:assert/strict';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const dispatcher=read('public/app/fullscreen-family-v104.html');
 const realm=read('public/app/realm-console-v140.html');
+const parity=read('public/app/shared/civweave-parity-runtime.js');
 const questPath=read('public/app/cerbanimo-quest-path-v266.js');
 const packs=read('public/app/cerbanimo-learning-packs-v1.js');
 const videos=read('public/app/cerbanimo-video-task-contract-v1.mjs');
 const proofs=read('public/app/cerbanimo-proof-attachments-v165.js');
 
 assert(dispatcher.includes("cerbanimo:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1'"),'Canonical dispatcher no longer points to the tested Cerbanimo console.');
-assert(realm.includes('data-build="realm-console-canonical-v242-cerbanimo-lazy-boot-r2"'),'Cerbanimo console is missing the lazy-boot build marker.');
+assert(realm.includes('data-build="realm-console-canonical-v243-parity-bounded-r1"'),'Cerbanimo console is missing the bounded parity-load build marker.');
+
+assert(realm.includes('parity-bounded-r1'),'Cerbanimo console must cache-bust the bounded parity runtime.');
+assert(parity.includes('FETCH_TIMEOUT_MS'),'Parity ledger loading must have a finite startup deadline.');
+assert(parity.includes('AbortController'),'Parity ledger loading must cancel a stalled network request when supported.');
+assert(parity.includes('Promise.race([request,deadline])'),'Parity ledger loading must not await a fetch forever.');
+assert(parity.includes('LEDGER_PART_URLS'),'Parity ledger loading must retain a static chunk fallback for generated-ledger failures.');
+assert(parity.includes("new DecompressionStream('gzip')"),'Parity chunk fallback must reconstruct the compressed source ledger in-browser.');
+assert(parity.includes('CACHE_KEY'),'A validated parity ledger must be reusable locally on later launches.');
+assert(parity.includes("cache:force?'reload':'no-store'"),'Generated parity ledger startup must bypass a potentially wedged HTTP cache entry.');
+assert(!parity.includes("cache:force?'reload':'force-cache'"),'Generated parity ledger startup must not return to the unbounded force-cache path.');
 
 assert(realm.includes('/app/cerbanimo-quest-path-v266.js'),'Cerbanimo must retain generated Quest-path materialization.');
 assert(questPath.includes("addEventListener('load',scheduleBoot"),'Generated Cerbanimo Quest paths must wait until the console page has finished loading.');
@@ -41,4 +52,4 @@ assert(proofs.includes("if(span.textContent!==text)span.textContent=text"),'Atta
 assert(proofs.includes("if(link.textContent!==value)link.textContent=value"),'Proof-link decoration must be idempotent.');
 assert(realm.includes('file-link-image-proof-r2'),'Cerbanimo console must cache-bust the idempotent proof runtime.');
 
-console.log('Cerbanimo load-freeze regression contract passed: first paint wins; Quest paths, packs, and media are lazy; proof decoration converges.');
+console.log('Cerbanimo load-freeze regression contract passed: parity data is bounded and recoverable; first paint wins; Quest paths, packs, and media are lazy; proof decoration converges.');
