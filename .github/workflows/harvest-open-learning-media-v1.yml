@@ -15,6 +15,7 @@ on:
       - scripts/harvest-open-learning-media-library-v1.py
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
+      - scripts/report-open-learning-media-pack-coverage-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
       - scripts/test-open-learning-media-packs-v1.py
       - ops/triggers/open-learning-media-harvest.trigger
@@ -48,9 +49,20 @@ jobs:
           OPEN_MEDIA_RESULTS_PER_QUERY: '6'
           OPEN_MEDIA_WORKERS: '8'
         run: |
-          set -euo pipefail
+          set -uo pipefail
           python scripts/harvest-open-learning-media-library-v1.py
+          harvest_status=$?
+          if [ "$harvest_status" -ne 0 ]; then
+            exit "$harvest_status"
+          fi
           python scripts/curate-open-learning-media-library-v1.py
+          curate_status=$?
+          if [ -f public/downloads/knowledge-schools/open-learning-media/summary.json ]; then
+            python scripts/report-open-learning-media-pack-coverage-v1.py || true
+          fi
+          if [ "$curate_status" -ne 0 ]; then
+            exit "$curate_status"
+          fi
           python scripts/filter-open-learning-media-title-quality-v1.py
 
       - name: Validate generated catalog and pack coverage before publication
