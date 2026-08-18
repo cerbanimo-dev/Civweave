@@ -68,7 +68,7 @@ jobs:
           if (config.vars?.CIVWEAVE_PAYMENT_ENVIRONMENT !== 'stripe-test') throw new Error('Staging payment environment must be stripe-test.');
           if (config.vars?.CIVWEAVE_CORE_ORIGIN !== 'https://civweave-core-staging.cerbanimo.workers.dev') throw new Error('Staging Guild must use the isolated staging money edge.');
           if (/civweave-core\.cerbanimo\.workers\.dev/.test(String(config.vars?.CIVWEAVE_CORE_ORIGIN || ''))) throw new Error('Refusing production money edge from staging.');
-          if (config.vars?.NODE_DOMAIN !== 'cerbanimo.workers.dev') throw new Error('Staging node callbacks must resolve to the staging workers.dev origin.');
+          if (config.vars?.NODE_DOMAIN !== 'nodes.civweave.invalid') throw new Error('Staging fabric routing must remain on the reserved .invalid namespace; membership return routing is overridden only in the staging entry wrapper.');
           NODE
 
       - name: Verify Cloudflare authentication
