@@ -1,6 +1,6 @@
 {
   "schema": "civweave.creator-suite-package.v1",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "name": "Civweave Creator Suite",
   "scope": "/creator-suite/",
   "entry": "/creator-suite/index.html",
@@ -36,6 +36,7 @@
     "/creator-suite/shared/mesh-provenance-v1.js",
     "/creator-suite/shared/guild-provenance-v1.js",
     "/creator-suite/audit/client-v1.js",
+    "/creator-suite/audit/client-init-v1.js",
     "/creator-suite/audit/evidence-crypto-v1.mjs",
     "/creator-suite/audit/quest-beat-v1.js",
     "/creator-suite/text-editor-v1.js",
