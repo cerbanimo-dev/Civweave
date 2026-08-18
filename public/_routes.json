@@ -1,5 +1,15 @@
 {
   "version": 1,
-  "include": ["/api/*"],
+  "include": [
+    "/api/health",
+    "/api/host-node-search",
+    "/api/host-node-status",
+    "/api/hub-map-nodes",
+    "/api/node/health",
+    "/api/ai/node/capacity",
+    "/api/ai/node/generate",
+    "/api/ai/node/manifest",
+    "/api/ai/node/session"
+  ],
   "exclude": []
 }
