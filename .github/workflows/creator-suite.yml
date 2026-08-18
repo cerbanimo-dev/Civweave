@@ -115,6 +115,10 @@ jobs:
         run: node scripts/test-creator-mesh-provenance-v1.mjs
       - name: Verify finalization anchors
         run: node scripts/test-creator-finalization-anchor-v1.mjs
+      - name: Verify import quarantine origin invariant
+        run: node scripts/test-creator-import-quarantine-v1.mjs
+      - name: Verify additive provenance disclosure badges
+        run: node scripts/test-creator-provenance-labels-v1.mjs
       - name: Verify privacy-bounded Guild sampling
         run: node scripts/test-creator-provenance-audit-sampler-v1.mjs
       - name: Verify sample-before-decrypt runner
