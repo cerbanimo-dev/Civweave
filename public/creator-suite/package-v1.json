@@ -1,6 +1,6 @@
 {
   "schema": "civweave.creator-suite-package.v1",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "name": "Civweave Creator Suite",
   "scope": "/creator-suite/",
   "entry": "/creator-suite/index.html",
@@ -31,6 +31,7 @@
     "/creator-suite/shared/ai-tools-v1.js",
     "/creator-suite/shared/provenance-vault-v1.js",
     "/creator-suite/shared/mesh-provenance-v1.js",
+    "/creator-suite/audit/quest-beat-v1.js",
     "/creator-suite/text-editor-v1.js",
     "/creator-suite/audio-editor-v1.js",
     "/creator-suite/video-editor-v1.js"
