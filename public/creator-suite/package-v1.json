@@ -1,0 +1,33 @@
+{
+  "schema": "civweave.creator-suite-package.v1",
+  "version": "0.3.0",
+  "name": "Civweave Creator Suite",
+  "scope": "/creator-suite/",
+  "entry": "/creator-suite/index.html",
+  "manifest": "/creator-suite/manifest.webmanifest",
+  "serviceWorker": "/creator-suite/service-worker.js",
+  "installation": "optional-separate-download",
+  "coreIsolation": "This package is not part of public/app/offline-package-v208.json and must remain separately downloadable.",
+  "sharedDependencies": ["/app/content-provenance-v1.js"],
+  "assets": [
+    "/creator-suite/index.html",
+    "/creator-suite/verify.html",
+    "/creator-suite/about.html",
+    "/creator-suite/manifest.webmanifest",
+    "/creator-suite/creator-suite-v1.css",
+    "/creator-suite/creator-suite-v1.js",
+    "/creator-suite/project-browser-v1.js",
+    "/creator-suite/receipt-viewer-v1.js",
+    "/creator-suite/shared/session-store-v1.js",
+    "/creator-suite/shared/crash-journal-v1.js",
+    "/creator-suite/shared/storage-preflight-v1.js",
+    "/creator-suite/shared/packet-crypto-v1.js",
+    "/creator-suite/shared/packet-codec-v1.js",
+    "/creator-suite/shared/import-provenance-v1.js",
+    "/creator-suite/shared/provenance-label-v1.js",
+    "/creator-suite/shared/ai-tools-v1.js",
+    "/creator-suite/text-editor-v1.js",
+    "/creator-suite/audio-editor-v1.js",
+    "/creator-suite/video-editor-v1.js"
+  ]
+}

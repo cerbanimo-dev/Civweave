@@ -1,0 +1,6 @@
+(()=>{
+'use strict';
+async function digestBlob(blob){const digest=await crypto.subtle.digest('SHA-256',await blob.arrayBuffer());return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('')}
+async function quarantineFile(file,details={}){if(!(file instanceof Blob))throw new TypeError('A File or Blob is required.');const provenance=globalThis.CivweaveContentProvenanceV1;if(!provenance)throw new Error('Civweave provenance owner is unavailable.');let session=provenance.createSession({mediaType:details.mediaType||String(file.type||'').split('/')[0]||'unknown',artifactType:details.artifactType||details.mediaType||'file',sourceSystem:'creator-suite'});const contentDigest=`sha256:${await digestBlob(file)}`;session=await provenance.recordEvent(session,{type:'external.import',actor:{kind:'external',id:details.actorId||'file-import'},payload:{name:String(file.name||details.name||'').slice(0,240),mimeType:String(file.type||details.mimeType||'').slice(0,160),size:file.size,contentDigest}});return{schema:'civweave.creator-import-quarantine.v1',status:'unknown-origin',session,descriptor:{name:String(file.name||details.name||''),mimeType:String(file.type||''),size:file.size,contentDigest},reason:'Imported content has no trusted creation history yet.'}}
+globalThis.CivweaveCreatorImportProvenanceV1=Object.freeze({quarantineFile,digestBlob});
+})();
