@@ -76,6 +76,57 @@ function isCandidate(urlPath, manifest) {
   return DISCOVERABLE_EXTENSION.test(urlPath);
 }
 
+// A lightweight service worker must be able to activate from the genuinely
+// required shell alone. Optional local-AI, knowledge, media, and diagnostic
+// assets used to be awaited by the install event as well. A single slow optional
+// request could therefore hold activation for many timeout windows, which is
+// especially damaging during an Android cold-start or retained-worker repair.
+const workerInstallChanged = await patchTextIfChanged(workerPath, source => replaceRequired(
+  source,
+`async function cacheShell() {
+  const cache = await caches.open(SHELL_CACHE);
+  const failures = [];
+  for (let index = 0; index < SHELL_ASSETS.length; index += 4) {
+    const batch = SHELL_ASSETS.slice(index, index + 4);
+    const results = await Promise.allSettled(batch.map(async pathname => {
+      const response = await fetchFresh(pathname, 'shell-install');
+      await cache.put(cacheKey(pathname), response.clone());
+    }));
+    results.forEach((result, offset) => {
+      if (result.status === 'rejected') failures.push({ pathname: batch[offset], message: result.reason?.message || String(result.reason) });
+    });
+  }
+  const requiredFailures = failures.filter(entry => REQUIRED_SHELL_ASSETS.includes(entry.pathname));
+  if (requiredFailures.length) {
+    const error = new Error(\`App shell incomplete: \${requiredFailures.length}/\${REQUIRED_SHELL_ASSETS.length} required files failed.\`);
+    error.failures = requiredFailures;
+    throw error;
+  }
+  return { optionalFailures: failures.filter(entry => OPTIONAL_SHELL_ASSETS.includes(entry.pathname)) };
+}`,
+`async function cacheShell() {
+  const cache = await caches.open(SHELL_CACHE);
+  const failures = [];
+  for (let index = 0; index < REQUIRED_SHELL_ASSETS.length; index += 4) {
+    const batch = REQUIRED_SHELL_ASSETS.slice(index, index + 4);
+    const results = await Promise.allSettled(batch.map(async pathname => {
+      const response = await fetchFresh(pathname, 'shell-install-required');
+      await cache.put(cacheKey(pathname), response.clone());
+    }));
+    results.forEach((result, offset) => {
+      if (result.status === 'rejected') failures.push({ pathname: batch[offset], message: result.reason?.message || String(result.reason) });
+    });
+  }
+  if (failures.length) {
+    const error = new Error(\`App shell incomplete: \${failures.length}/\${REQUIRED_SHELL_ASSETS.length} required files failed.\`);
+    error.failures = failures;
+    throw error;
+  }
+  return { optionalFailures: [], optionalDeferred: OPTIONAL_SHELL_ASSETS.length };
+}`,
+  'required-only lightweight shell installation block'
+));
+
 // Never let an apparently matching v203 registration bypass a real byte update.
 // Android can retain the registration after the PWA icon is removed, and an old
 // wrapper can have the same versioned URL as the current lightweight shell.
@@ -216,7 +267,7 @@ const manifestChanged = await writeJsonIfChanged(offlineManifestPath, manifest);
 console.log(JSON.stringify({
   ok: true,
   version,
-  installHardening: { installerRuntimeChanged, installBridgeChanged },
+  installHardening: { workerInstallChanged, installerRuntimeChanged, installBridgeChanged },
   pwaManifest: { changed: appManifestChanged, startUrl: appManifest.start_url },
   shellIntegrity: { changed: integrityChanged, requiredAssetCount: requiredShellAssets.length },
   campusBudget: { changed: manifestChanged, ...manifest.preflight }
