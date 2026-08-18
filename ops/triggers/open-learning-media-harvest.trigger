@@ -1,1 +1,1 @@
-2026-08-10T13:53:00Z general-knowledge-packs-v1 peertube-file-record harvest
+2026-08-18T00:05:00Z subject-media-packs-v2 tarot-symbolism expanded-pack harvest
