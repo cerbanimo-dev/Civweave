@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION='host-node-paid-join-v5-fantasy-membership-tiers';
+const REVISION='host-node-paid-join-v6-platform-membership';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -40,7 +40,7 @@ function ensureUi(){
   if(!box){box=document.createElement('section');box.id='cw-paid-join';box.className='cw-paid-join';box.dataset.visible='false';box.innerHTML=`
     <label>Membership<select id="cw-paid-tier"><option value="member">Wayfarer · $5/month</option><option value="maker">Artisan · $10/month</option><option value="builder">Weaver · $20/month</option><option value="steward">Beacon · $40/month</option></select></label>
     <button id="cw-paid-join-button" type="button">Join this Guild</button>
-    <p id="cw-paid-join-note">This Guild has Patron slots available but no Citizen slots. Checkout does not consume a Citizen slot.</p>`;actions.insertAdjacentElement('afterend',box);box.querySelector('#cw-paid-join-button')?.addEventListener('click',()=>void beginCheckout());}
+    <p id="cw-paid-join-note">Membership is sold by Civweave/Cerbanimo. Your selected Guildkeeper receives a contractual share of Civweave membership revenue after processing; your membership does not depend on that payout. Checkout does not consume a Citizen slot.</p>`;actions.insertAdjacentElement('afterend',box);box.querySelector('#cw-paid-join-button')?.addEventListener('click',()=>void beginCheckout());}
   return box;
 }
 function apply(){
