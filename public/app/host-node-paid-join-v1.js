@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION='host-node-paid-join-v7-staging-payment-test';
+const REVISION='host-node-paid-join-v8-staging-payment-test-stable';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -10,6 +10,7 @@ const STAGING_GUILD_ORIGIN='https://civweave-node-cloud-staging.cerbanimo.worker
 const STAGING_GUILD_ID='civweave-node-cloud-staging';
 const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
+const setText=(element,value)=>{if(element&&element.textContent!==value)element.textContent=value;};
 
 function randomToken(bytes=32){const data=crypto.getRandomValues(new Uint8Array(bytes));let binary='';for(const byte of data)binary+=String.fromCharCode(byte);return btoa(binary).replaceAll('+','-').replaceAll('/','_').replace(/=+$/g,'');}
 function selected(){
@@ -58,32 +59,32 @@ function apply(){
   const show=Boolean(origin.startsWith('https://')&&nodeId&&paid>0&&!activeSession(nodeId,origin)&&(free<1||testMode));box.dataset.visible=String(show);
   const button=document.getElementById('cw-paid-join-button'),note=document.getElementById('cw-paid-join-note');
   if(testMode&&show){
-    if(button)button.textContent='Test membership checkout';
-    if(note)note.textContent='STAGING TEST MODE · Stripe test-mode only. Civweave/Cerbanimo is the membership seller; the selected staging Guildkeeper receives the contractual revenue-share transfer after settlement.';
+    setText(button,'Test membership checkout');
+    setText(note,'STAGING TEST MODE · Stripe test-mode only. Civweave/Cerbanimo is the membership seller; the selected staging Guildkeeper receives the contractual revenue-share transfer after settlement.');
   }
-  const join=document.getElementById('cw-host-node-join');if(show&&join&&!testMode){join.dataset.mode='search';join.textContent='Find a Citizen slot';}
+  const join=document.getElementById('cw-host-node-join');if(show&&join&&!testMode){join.dataset.mode='search';setText(join,'Find a Citizen slot');}
   return true;
 }
 async function beginCheckout(){
   const{origin,nodeId}=selected(),button=document.getElementById('cw-paid-join-button'),note=document.getElementById('cw-paid-join-note');
-  if(!origin.startsWith('https://')||!nodeId){if(note)note.textContent='Choose a Cloudflare Guild before starting membership checkout.';return;}
+  if(!origin.startsWith('https://')||!nodeId){setText(note,'Choose a Cloudflare Guild before starting membership checkout.');return;}
   const testMode=stagingPaymentTest(origin,nodeId);
-  const identity=ensureIdentity(origin,nodeId),tierId=document.getElementById('cw-paid-tier')?.value||'member';if(button){button.disabled=true;button.textContent=testMode?'Opening test checkout…':'Opening checkout…';}
+  const identity=ensureIdentity(origin,nodeId),tierId=document.getElementById('cw-paid-tier')?.value||'member';if(button){button.disabled=true;setText(button,testMode?'Opening test checkout…':'Opening checkout…');}
   try{
     const endpoint=new URL('/api/commerce/membership/prejoin',origin);endpoint.searchParams.set('nodeId',nodeId);
     const response=await fetch(endpoint,{method:'POST',cache:'no-store',headers:{accept:'application/json','content-type':'application/json','x-civweave-node-id':nodeId},body:JSON.stringify({userId:identity.userId,credential:identity.credential,tierId})}),packet=await response.json().catch(()=>({}));
     if(!response.ok)throw Object.assign(new Error(packet.error||`Guild returned HTTP ${response.status}.`),{status:response.status});
     const checkoutUrl=packet?.checkout?.checkoutUrl||packet?.membership?.checkoutUrl;if(!checkoutUrl)throw new Error('The Guild did not return a membership checkout URL.');location.assign(checkoutUrl);
-  }catch(error){if(note)note.textContent=Number(error?.status)===409?'That Patron capacity just filled. Find another Guild or a Citizen slot.':`Could not start membership checkout: ${error?.message||error}`;if(button){button.disabled=false;button.textContent=testMode?'Test membership checkout':'Join this Guild';}}
+  }catch(error){setText(note,Number(error?.status)===409?'That Patron capacity just filled. Find another Guild or a Citizen slot.':`Could not start membership checkout: ${error?.message||error}`);if(button){button.disabled=false;setText(button,testMode?'Test membership checkout':'Join this Guild');}}
 }
 async function finishReturn(){
   const params=new URLSearchParams(location.search),result=params.get('membership');if(!result)return;
   const{origin,nodeId}=selected(),help=document.getElementById('cw-host-node-help');
-  if(result==='cancelled'){if(help)help.textContent='Membership checkout was canceled. No Patron slot was activated.';apply();return;}
+  if(result==='cancelled'){setText(help,'Membership checkout was canceled. No Patron slot was activated.');apply();return;}
   if(!origin||!nodeId||!globalThis.CivweaveHostNodeSessionV1?.join)return;
-  if(help)help.textContent='Membership confirmed. Finishing your Guild login…';let lastError=null;
-  for(let attempt=0;attempt<8;attempt+=1){try{await globalThis.CivweaveHostNodeSessionV1.join(origin,{nodeId,createCredential:false});if(help)help.textContent='Membership active. You are logged in to this Guild.';document.getElementById('cw-host-node-refresh')?.click();apply();return;}catch(error){lastError=error;await new Promise(resolve=>setTimeout(resolve,800+attempt*350));}}
-  if(help)help.textContent=`Membership checkout completed, but the Guild is still confirming admission: ${lastError?.message||lastError}. Your device login is saved; use Log back in to retry.`;
+  setText(help,'Membership confirmed. Finishing your Guild login…');let lastError=null;
+  for(let attempt=0;attempt<8;attempt+=1){try{await globalThis.CivweaveHostNodeSessionV1.join(origin,{nodeId,createCredential:false});setText(help,'Membership active. You are logged in to this Guild.');document.getElementById('cw-host-node-refresh')?.click();apply();return;}catch(error){lastError=error;await new Promise(resolve=>setTimeout(resolve,800+attempt*350));}}
+  setText(help,`Membership checkout completed, but the Guild is still confirming admission: ${lastError?.message||lastError}. Your device login is saved; use Log back in to retry.`);
 }
 const observer=new MutationObserver(()=>apply());observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});addEventListener('pagehide',()=>observer.disconnect(),{once:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{apply();void finishReturn();},{once:true});else{apply();void finishReturn();}
