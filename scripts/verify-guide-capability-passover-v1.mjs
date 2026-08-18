@@ -52,7 +52,7 @@ for(const snippet of [
 ])if(!passover.includes(snippet))throw new Error(`Canonical term mapping missing: ${snippet}`);
 if(!passover.includes('DIRECT_CANONICAL'))throw new Error('Canonical passover targeting no longer distinguishes the requested artifact from incidental Quest context.');
 if(!passover.includes("canonicalUserFacingTerms:true"))throw new Error('Canonical user-facing artifact language marker is missing.');
-if(!loader.includes('/app/guide-capability-passover-v1.js?v=1.1.1-canonical-targets'))throw new Error('Shared guide loader does not load the canonical-target passover revision.');
+if(!loader.includes('/app/guide-capability-passover-v1.js?v=1.1.2-target-precedence'))throw new Error('Shared guide loader does not load the target-precedence passover revision.');
 if(!loader.includes('/app/unified-chat-system-v1.js?v=1.0.4-learning-journey'))throw new Error('Shared guide loader does not load the canonical Learning Journey unified-chat revision.');
 if(!loader.includes('1.0.128-canonical-artifacts'))throw new Error('Shared guide loader does not request the canonical-artifact shared surface revision.');
 
@@ -94,9 +94,10 @@ for(const [prompt,want] of [
   ['Create an Endeavor for my Quest','quest'],
   ['Create a Manifest for my Quest','resource'],
   ['Build a productive project for this Quest','quest'],
-  ['Draft a learning plan for this Endeavor','curriculum']
+  ['Draft a learning plan for this Endeavor','curriculum'],
+  ['Create a package manifest for this app','']
 ]){
-  const got=route(prompt);if(got!==want)throw new Error(`Artifact target routing failed for “${prompt}”: expected ${want}, got ${got}`);
+  const got=route(prompt);if(got!==want)throw new Error(`Artifact target routing failed for “${prompt}”: expected ${want||'(none)'}, got ${got||'(none)'}`);
 }
 
 console.log('Guide artifact language and capability passover contract verified across chat, generation, prompts, profiles, onboarding, docs, and target-routing cases.');
