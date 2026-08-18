@@ -6,7 +6,7 @@ on:
       - staging
     paths:
       - cloudflare/core/**
-      - cloudflare/node-cloud/src/staging-entry-v1.mjs
+      - cloudflare/node-cloud/src/**
       - cloudflare/node-cloud/wrangler.staging.jsonc
       - .github/workflows/deploy-staging-money-edge.yml
   workflow_dispatch:
@@ -211,6 +211,32 @@ jobs:
           console.log(JSON.stringify({ ok: true, authority: payload.authority, providerMode: edge.providerMode, integrationDoorReady: edge.integrationDoorReady, liveReady: edge.liveReady, productionIsolation: true }, null, 2));
           NODE
 
+      - name: Bind staging Guild to isolated core trust
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp cloudflare/node-cloud/wrangler.staging.jsonc cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = 'cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc';
+          const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (config.name !== 'civweave-node-cloud-staging') throw new Error('Refusing non-staging Guild binding target.');
+          if (config.vars?.CIVWEAVE_CORE_ORIGIN !== process.env.STAGING_CORE_ORIGIN) throw new Error('Staging Guild core origin does not match isolated staging core.');
+          config.services = [{ binding: 'CORE', service: process.env.STAGING_CORE_WORKER }];
+          fs.writeFileSync(path, JSON.stringify(config, null, 2));
+          NODE
+          npx --yes wrangler@4 deploy --keep-vars --config cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc >/dev/null
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error "$STAGING_NODE_ORIGIN/api/ai/node/manifest" > /tmp/staging-public-manifest.json; then break; fi
+            sleep 2
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const envelope = JSON.parse(fs.readFileSync('/tmp/staging-public-manifest.json', 'utf8'));
+          const manifest = envelope.manifest || envelope;
+          if (manifest.nodeId !== process.env.STAGING_NODE_ID) throw new Error(`Public staging Guild callback resolved ${manifest.nodeId || 'nothing'} instead of ${process.env.STAGING_NODE_ID}.`);
+          NODE
+
       - name: Register staging Guild with test Connect account
         shell: bash
         run: |
@@ -269,6 +295,7 @@ jobs:
             echo '- Stripe mode required: **test/sandbox only**'
             echo '- Guild: `civweave-node-cloud-staging`'
             echo '- Membership model: platform charge, post-invoice Guildkeeper revenue-share transfer'
+            echo '- Guild trust binding: isolated `civweave-core-staging` only'
             echo '- Production worker, D1, webhook, and live Stripe credentials: **not touched**'
             echo '- Connected-account onboarding URLs are intentionally not written to public logs.'
           } >> "$GITHUB_STEP_SUMMARY"
