@@ -1,10 +1,11 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.149-shared-guide-surface-v236-mobile-chat-viewport';
+const VERSION='1.0.150-shared-guide-surface-v236-threadbar-long-thread-fit';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
+let threadUiRequested=false;
 function liveHead(){
   const head=document.head;
   return document.documentElement?.isConnected&&head?.isConnected?head:null;
@@ -60,12 +61,39 @@ function bindPartyActivation(){
   addEventListener('civweave:party-activate-request',onPartyRequest);
   addEventListener('civweave:shared-intention-party-use',onPartyRequest);
 }
+async function activateThreadUI(reason='guide-chat-opened'){
+  threadUiRequested=true;
+  try{
+    const orchestrator=globalThis.CivweaveExperienceOrchestratorV232;
+    if(typeof orchestrator?.ensureChatUiModules==='function'){
+      const ready=await orchestrator.ensureChatUiModules();
+      if(ready){globalThis.CivweaveSavedChatUIV295?.render?.(globalThis.CivweaveGuideChatSurfaceV350?.activeWindow?.());return true}
+    }
+  }catch{}
+  return new Promise(resolve=>{
+    const finish=()=>{try{globalThis.CivweaveSavedChatUIV295?.render?.(globalThis.CivweaveGuideChatSurfaceV350?.activeWindow?.())}catch{};resolve(Boolean(globalThis.CivweaveSavedChatUIV295))};
+    if(globalThis.CivweaveSavedChatStoreV295&&globalThis.CivweaveSavedChatUIV295){finish();return}
+    load('/app/saved-chat-store-v295.js?rev=1.0.164-thread-tabs-v352',()=>{
+      load('/app/saved-chat-ui-v295.js?rev=1.0.166-thread-tabs-v354',finish,()=>globalThis.CivweaveSavedChatUIV295?.version==='1.0.166-saved-chat-ui-v354');
+    },()=>globalThis.CivweaveSavedChatStoreV295?.version==='1.0.164-saved-chat-store-v352');
+    setTimeout(finish,1600);
+  });
+}
+function bindThreadActivation(){
+  if(document.documentElement.dataset.civweaveThreadUiBound==='true')return;
+  document.documentElement.dataset.civweaveThreadUiBound='true';
+  addEventListener('civweave:guide-chat-opened',event=>void activateThreadUI(event?.type||'guide-chat-opened'));
+  addEventListener('civweave:guide-chat-state',event=>{if(event?.detail?.open)void activateThreadUI('guide-chat-state-open')});
+  addEventListener('pageshow',()=>{if(globalThis.CivweaveGuideChatSurfaceV350?.state?.().open)void activateThreadUI('pageshow-open-chat')});
+  if(globalThis.CivweaveGuideChatSurfaceV350?.state?.().open)queueMicrotask(()=>void activateThreadUI('already-open-chat'));
+}
 function install(){
   if(!liveHead())return false;
   bindPartyActivation();
+  bindThreadActivation();
   loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
   loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
-  load('/app/mobile-chat-visual-viewport-v1.js?v=1.0.0-composer-visible',null,()=>Boolean(globalThis.CivweaveMobileChatVisualViewportV1));
+  load('/app/mobile-chat-visual-viewport-v1.js?v=1.0.1-long-thread-fit',null,()=>Boolean(globalThis.CivweaveMobileChatVisualViewportV1));
   load('/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
   load('/app/guide-generation-floor-v1.js?v=1.0.0-floor-900',null,()=>Boolean(globalThis.CivweaveGuideGenerationFloorV1));
   load('/app/minilm-decision-strip-v1.js?v=1.1.0-router-watch',null,()=>Boolean(globalThis.CivweaveMiniLMDecisionStripV1));
@@ -105,5 +133,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(()=>{install();globalThis.CivweaveSharedGuideSurfaceV236?.repairSurface?.()}));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-primary-v3',generationFloor:'guide-generation-floor-v1-900-tokens',routeDecisionStrip:'v1.1-router-watch',assistantLoader:'family-ai-loader-v105-on-demand',assistantLoaderEagerWarm:false,providerPolicy:'guide-provider-policy-v1-server-auto-local-first',failurePolicy:'guide-forward-failure-policy-v1',failureHardening:'guide-forward-failure-hardening-v1-router-stable',failureDirection:'forward-only',terminalGenerativeFallback:'automatic-server-auto',deterministicAnswerFallback:false,deterministicTerminalVisible:false,deterministicAssistantPatchRetired:true,guildRequestDeduplicated:true,plannerMaterialization:'v265-structured-and-deterministic',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'document-v265',mobileChatViewport:'visualViewport-v1-composer-visible',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.4-learning-journey',capabilityPassover:'guide-capability-passover-v1.1.3-canonical-prompt',canonicalPromptBeforeMiniLM:true,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest',artifactLanguageContract:'/config/guide-artifact-language-v1.json',passoverResubmitsOriginal:true,standardAIOnly:true,localModelStartup:'request-driven-only',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,responseRouter:'minilm-v347-primary-v3',generationFloor:'guide-generation-floor-v1-900-tokens',routeDecisionStrip:'v1.1-router-watch',assistantLoader:'family-ai-loader-v105-on-demand',assistantLoaderEagerWarm:false,providerPolicy:'guide-provider-policy-v1-server-auto-local-first',failurePolicy:'guide-forward-failure-policy-v1',failureHardening:'guide-forward-failure-hardening-v1-router-stable',failureDirection:'forward-only',terminalGenerativeFallback:'automatic-server-auto',deterministicAnswerFallback:false,deterministicTerminalVisible:false,deterministicAssistantPatchRetired:true,guildRequestDeduplicated:true,plannerMaterialization:'v265-structured-and-deterministic',partyChat:'v1-lazy',partyIdentity:'anonymous-role-only',partyAutostart:false,partyRequested:()=>partyRequested,activatePartyChat,humanMessagingAttention:'v1',humanTranslation:'en-ja-local-v1',translationPrivacy:'recipient-device-after-decryption',scrollOwnership:'mobile-flex-thread-log',mobileChatViewport:'visualViewport-v1.0.1-long-thread-fit',threadUi:'saved-chat-v354-lazy-on-open',threadUiRequested:()=>threadUiRequested,activateThreadUI,preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',launcherOwner:'guide-chat-surface-v350',avatarRuntime:'v346-visible',chatArchitecture:'one-core-five-themes-five-memory-folders',chatRuntime:'/app/unified-chat-system-v1.js',chatRuntimeVersion:'v1.0.4-learning-journey',capabilityPassover:'guide-capability-passover-v1.1.3-canonical-prompt',canonicalPromptBeforeMiniLM:true,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest',artifactLanguageContract:'/config/guide-artifact-language-v1.json',passoverResubmitsOriginal:true,standardAIOnly:true,localModelStartup:'request-driven-only',install});
 })();
