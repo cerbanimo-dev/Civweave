@@ -10,7 +10,12 @@ on:
       - 'public/app/knowledge-school-runtime-v243.mjs'
       - 'public/app/living-school-*-v243.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/ai-capability-broker-v268.js'
+      - 'public/app/gemini-task-tier-router-v213.js'
       - 'scripts/verify-regression-fixes-v243.mjs'
+      - 'scripts/verify-living-school-model-authority-v1.mjs'
       - 'package.json'
       - '.github/workflows/verify-regression-fixes-v243.yml'
   push:
@@ -23,7 +28,12 @@ on:
       - 'public/app/knowledge-school-runtime-v243.mjs'
       - 'public/app/living-school-*-v243.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/ai-capability-broker-v268.js'
+      - 'public/app/gemini-task-tier-router-v213.js'
       - 'scripts/verify-regression-fixes-v243.mjs'
+      - 'scripts/verify-living-school-model-authority-v1.mjs'
       - 'package.json'
 
 permissions:
@@ -47,6 +57,11 @@ jobs:
           node --check public/app/living-school-local-research-v243.mjs
           node --check public/app/living-school-cleanroom-actions-v243.mjs
           node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs
+          node --check public/app/unified-chat-system-v1.js
           node --check scripts/verify-regression-fixes-v243.mjs
+          node --check scripts/verify-living-school-model-authority-v1.mjs
       - name: Verify regression contracts
-        run: node scripts/verify-regression-fixes-v243.mjs
+        run: |
+          node scripts/verify-regression-fixes-v243.mjs
+          node scripts/verify-living-school-model-authority-v1.mjs
