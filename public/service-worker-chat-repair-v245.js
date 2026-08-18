@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-long-thread-fit-v362';
+const REVISION='chat-avatar-visible-v346';
 const FREEZE_REVISION='mobile-chat-main-thread-quiescence-v349';
 const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
