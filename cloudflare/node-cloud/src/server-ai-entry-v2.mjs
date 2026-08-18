@@ -61,9 +61,7 @@ function capacityStub(env) {
 }
 async function capacityPost(env, pathname, body) {
   const response = await capacityStub(env).fetch(`https://capacity.internal${pathname}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw Object.assign(new Error(payload.error || `Capacity service returned HTTP ${response.status}.`), { status: response.status });
@@ -198,11 +196,9 @@ async function handleGenerate(request, env, nodeId) {
   const input = await request.json().catch(() => ({}));
   const rows = messages(input), maxTokens = Math.max(32, Math.min(MAX_GENERATION_TOKENS, Number(input.maxTokens) || 1024));
   let schema;
-  try { schema = boundedSchema(input.responseSchema); }
-  catch (error) { return json({ ok: false, error: String(error?.message || error) }, 400); }
+  try { schema = boundedSchema(input.responseSchema); } catch (error) { return json({ ok: false, error: String(error?.message || error) }, 400); }
   let gateway;
-  try { gateway = gatewayConfig(env); }
-  catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number(error?.status) || 503); }
+  try { gateway = gatewayConfig(env); } catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number(error?.status) || 503); }
   const estimated = estimateTokens(rows, maxTokens);
   const workersEstimate = neuronsForTokens(estimated.inputTokens, estimated.outputTokens, WORKERS_INPUT_NEURONS_PER_MILLION, WORKERS_OUTPUT_NEURONS_PER_MILLION);
   const gatewayEstimate = neuronsForTokens(estimated.inputTokens, estimated.outputTokens, gateway.inputRate, gateway.outputRate);
@@ -236,10 +232,7 @@ async function handleGenerate(request, env, nodeId) {
     const settlement = await settle(env, reservation, chargedQuota, chargedProvider);
     const updatedStatus = await capacityPost(env, '/members/status', { nodeId, userId: session.userId });
     const text = extractText(result), nativeStructured = structuredObject(result), parsedOutputJson = schema || input.responseFormat === 'json' ? (nativeStructured || parseStructured(text)) : null;
-    if ((schema || input.responseFormat === 'json') && !parsedOutputJson) {
-      const diagnostics = { resultKeys: result && typeof result === 'object' ? Object.keys(result).slice(0, 20) : [], responseType: Array.isArray(result?.response) ? 'array' : typeof result?.response, textLength: text.length, textPreview: clean(text, 600) };
-      return json({ ok: false, error: 'Cloudflare AI did not return valid structured output.', code: 'CLOUDFLARE_STRUCTURED_OUTPUT_INVALID', model: route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL, computeRoute: route.route, diagnostics, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota }, 502);
-    }
+    if ((schema || input.responseFormat === 'json') && !parsedOutputJson) return json({ ok: false, error: 'Cloudflare AI did not return valid structured output.', code: 'CLOUDFLARE_STRUCTURED_OUTPUT_INVALID', model: route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL, computeRoute: route.route, diagnostics: { resultKeys: result && typeof result === 'object' ? Object.keys(result).slice(0, 20) : [], responseType: Array.isArray(result?.response) ? 'array' : typeof result?.response, textLength: text.length, textPreview: clean(text, 600) }, usage: { ...usage, chargedNeurons: chargedQuota, providerNeurons: chargedProvider }, settlement, quota: updatedStatus.quota }, 502);
     const model = route.route === 'ai-gateway-unified-billing' ? gateway.model : WORKERS_MODEL;
     const provenance = generationProvenance(model, route.route, input);
     const outputJson = stampStructuredOutput(parsedOutputJson, provenance.artifact);
