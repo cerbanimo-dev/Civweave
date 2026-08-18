@@ -8,6 +8,8 @@ on:
       - 'public/app/fullscreen-family-v104.html'
       - 'public/app/realm-console-v140.html'
       - 'public/app/shared/civweave-parity-runtime.js'
+      - 'public/app/cerbanimo-nav-stability-v1.js'
+      - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-path-v266.js'
       - 'public/app/cerbanimo-learning-packs-v1.js'
       - 'public/app/cerbanimo-video-task-contract-v1.mjs'
@@ -31,6 +33,8 @@ jobs:
           node --check public/service-worker-v203.js
           node --check public/service-worker-release-coherence-v220.js
           node --check public/app/shared/civweave-parity-runtime.js
+          node --check public/app/cerbanimo-nav-stability-v1.js
+          node --check public/app/cerbanimo-quest-engine-v144.js
           node --check public/app/cerbanimo-quest-path-v266.js
           node --check public/app/cerbanimo-learning-packs-v1.js
           node --check public/app/cerbanimo-video-task-contract-v1.mjs
