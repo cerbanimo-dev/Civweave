@@ -86,7 +86,7 @@ async function refreshWorker(releaseVersion){
   if(!('serviceWorker'in navigator))return null;
   const ui=recoveryUi();
   try{
-    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=boot-recovery-v429-shell-preflight-v1`;
+    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=boot-recovery-v429-shell-preflight-v1&compat_revision=boot-recovery-v428-launch-session-v1`;
     ui?.setStatus?.('Checking the installed app shell…');
     let registration=await bounded(navigator.serviceWorker.register(workerUrl,{scope:'/',updateViaCache:'none'}),WORKER_STEP_TIMEOUT_MS,'service worker registration');
     await bounded(registration.update(),WORKER_STEP_TIMEOUT_MS,'service worker update').catch(()=>null);
@@ -166,5 +166,5 @@ boot().catch(error=>{
   console.error('[Civweave] Installed bootstrap recovery caught a launch failure.',error);
   recoveryUi()?.showRecovery?.(`The normal startup path stopped before the campus opened: ${error?.message||error}`);
 });
-globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.163-boot-recovery-v429-shell-preflight-v1',installedDisplay,launchSession,explicitInstalled,installedLaunchAuthorized,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureLegalConsent,installerUrl,shellDestinationVerified,browserRuntimePolicy:'installed-display-or-pwa-launch-session-with-shell-preflight'});
+globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.163-boot-recovery-v429-shell-preflight-v1',installedDisplay,launchSession,explicitInstalled,installedLaunchAuthorized,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureLegalConsent,installerUrl,shellDestinationVerified,shellPreflight:true,persistentShellFallback:'working-campus-direct',browserRuntimePolicy:'installed-display-or-pwa-launch-session'});
 })();
