@@ -82,8 +82,8 @@ This preserves community continuity without allowing a cancellation to create un
 
 Cloudflare compute top-ups have a shared component:
 
-- 1% of service value is shared by default and is the enforced minimum.
-- The purchaser may voluntarily raise the community share to 2%, 3%, 4%, or 5%.
+- 5% of service value is shared by default and is the enforced minimum.
+- The purchaser may voluntarily raise the community share to 6%, 7%, 8%, 9%, or 10%.
 - The purchaser may choose **Top up the node equally**. In this mode, the full system-backed compute portion of the top-up is placed in the shared node reserve instead of the purchaser's personal compute wallet.
 
 The host and Cerbanimo portions of the existing top-up split are not reclassified as compute. Node-equal mode therefore shares the entire system compute portion, not money already designated for host compensation or Cerbanimo's service share.
@@ -92,7 +92,7 @@ Shared top-up funds enter a dedicated community top-up reserve and are amortized
 
 ## User-facing behavior
 
-The Membership & Compute surface must explain the communal effect before checkout. Cloudflare top-ups expose the 1%-5% selector and the node-equal option. Membership tiers use the names **Wayfarer**, **Artisan**, **Weaver**, and **Beacon** and explain that every $5/month contributes +2 potential free seats and +200 neurons/day to the community target, subject to the instance caps and actual funded reserves.
+The Membership & Compute surface must explain the communal effect before checkout. Cloudflare top-ups expose the 5%-10% selector and the node-equal option. Membership tiers use the names **Wayfarer**, **Artisan**, **Weaver**, and **Beacon** and explain that every $5/month contributes +2 potential free seats and +200 neurons/day to the community target, subject to the instance caps and actual funded reserves.
 
 Capacity responses expose both target and funded values so UI can distinguish aspiration from current backing:
 
