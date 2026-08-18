@@ -5,7 +5,7 @@
 // Installed packages that still request this historical filename are forwarded to the
 // current single guide surface without recreating any workspace DOM, observers, styles,
 // state ownership, or event-capture layer.
-const VERSION='1.0.163-guide-workspace-compat-v350-model-route-v2';
+const VERSION='1.0.164-guide-workspace-compat-v350-voice-v1';
 const TARGET='/app/guide-chat-surface-v350.js';
 if(globalThis.CivweaveGuideChatSurfaceV350)return;
 const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===TARGET);
