@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-08-15T07:17:31Z",
+  "built_at": "2026-08-18T07:26:56Z",
   "record_count": 37,
   "failure_count": 2,
   "failures": [
@@ -18,8 +18,8 @@
     }
   ],
   "provider_counts": {
-    "wikimedia-commons": 17,
-    "internet-archive": 5,
+    "wikimedia-commons": 16,
+    "internet-archive": 6,
     "ccmixter": 15
   },
   "records": [
@@ -549,114 +549,6 @@
     },
     {
       "schema": "civweave.open-music-track.v1",
-      "provider": "internet-archive",
-      "provider_id": "PrettyAndInvisible",
-      "playlist_id": "anarchadia",
-      "matched_query": "noise rock",
-      "title": "Pretty and Invisible",
-      "artist": "Monplaisir",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/PrettyAndInvisible",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2001%20Loved%20and%20Respected.flac",
-          "bytes": 27786047,
-          "provider_sha1": "2dcdf33fb8298369cb9bc72ba7f2edac98f273cd",
-          "provider_md5": "38442aa87d93df70b79ce9afeba0ed40",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2005%20Harsh%20and%20Soft.flac",
-          "bytes": 26092851,
-          "provider_sha1": "fb2d0749681817c426271ccd9abb1d3ac54f12c1",
-          "provider_md5": "357160bb9d2dda3d8a31ee204c1b61ce",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2002%20Far%20and%20High.flac",
-          "bytes": 22746629,
-          "provider_sha1": "d7c2eb9f5e122b8c81d9a0f18b447a4d1db8ed6a",
-          "provider_md5": "22fdcb0928182befaf1e87bb1cef4ba1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2004%20Safe%20and%20Clear.flac",
-          "bytes": 22697291,
-          "provider_sha1": "3e212da825f504c36ee3f4c24e84757dce6ba8b5",
-          "provider_md5": "17dd306de2afb708b0d870ea7b999339",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2006%20Talentuous%20and%20Shy.flac",
-          "bytes": 22488418,
-          "provider_sha1": "f222cb5b8850997b8f4058ae5be6830f6c7994ab",
-          "provider_md5": "d9d973096255ab5a5197f258ac64bfe2",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2003%20Sticky%20and%20Addictive.flac",
-          "bytes": 21063361,
-          "provider_sha1": "38131d33f269079e8c55da1abac5b80d265cc9f9",
-          "provider_md5": "37afacaa4b8b8eea5f4c186b36420887",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2008%20Pretty%20and%20Invisible.flac",
-          "bytes": 16218037,
-          "provider_sha1": "26fae85586252e3606ad9796816cbb8cc1e0a29e",
-          "provider_md5": "551923acc05188daf1548904715029a1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2007%20Sacred%20and%20Empty.flac",
-          "bytes": 7950879,
-          "provider_sha1": "6df2524543ad42d3c6ddff5b753e70eaa0168924",
-          "provider_md5": "e6ce845655c3963126095a4ff618f00c",
-          "format": "Flac",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Monplaisir",
-        "source_title": "Pretty and Invisible",
-        "source_url": "https://archive.org/details/PrettyAndInvisible",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
-        }
-      ],
-      "candidate_id": "openmusic:363054694b5d107fc22e9a80",
-      "quality_score": 78
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
       "provider": "wikimedia-commons",
       "provider_id": "File:Machinination Podcast - May 2012 (IA MachininationMachininationPodcast-May2012).mp3",
       "playlist_id": "fellowfare",
@@ -807,57 +699,6 @@
       ],
       "candidate_id": "openmusic:e917cea828b8f1ce79cf977a",
       "quality_score": 78
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Euphagus cyanocephalus - Brewer's Blackbird XC104521.mp3",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Euphagus cyanocephalus - Brewer's Blackbird XC104521",
-      "artist": "Jonathon Jongsma",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Euphagus_cyanocephalus_-_Brewer%27s_Blackbird_XC104521.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 3.0",
-        "url": "https://creativecommons.org/licenses/by-sa/3.0",
-        "evidence": "CC BY-SA 3.0 | Creative Commons Attribution-Share Alike 3.0 | cc-by-sa-3.0 | https://creativecommons.org/licenses/by-sa/3.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Euphagus_cyanocephalus_-_Brewer%27s_Blackbird_XC104521.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 140279,
-          "provider_sha1": "50fd4cbfa60633d5e88eb9dc52346ebdc73f39d9",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Jonathon Jongsma",
-        "source_title": "Euphagus cyanocephalus - Brewer's Blackbird XC104521",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Euphagus_cyanocephalus_-_Brewer%27s_Blackbird_XC104521.mp3",
-        "license": "CC BY-SA 3.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/3.0"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:38d16e986700f199b6dd9d1b",
-      "quality_score": 77
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -1015,6 +856,57 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "wikimedia-commons",
+      "provider_id": "File:Turdus merula - Common Blackbird XC446151.mp3",
+      "playlist_id": "anarchadia",
+      "matched_query": "post punk electronic",
+      "title": "Turdus merula - Common Blackbird XC446151",
+      "artist": "James Ray",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC446151.mp3",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "CC BY-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Turdus_merula_-_Common_Blackbird_XC446151.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "audio/mpeg",
+          "bytes": 4185936,
+          "provider_sha1": "21c62dd1faf3c5056166d03a101552db79b0a2e0",
+          "role": "original"
+        }
+      ],
+      "attribution": {
+        "creator": "James Ray",
+        "source_title": "Turdus merula - Common Blackbird XC446151",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC446151.mp3",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "post punk electronic"
+        }
+      ],
+      "candidate_id": "openmusic:47bad33d2d28a7f0f077b33e",
+      "quality_score": 77
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "wikimedia-commons",
       "provider_id": "File:Turdus merula - Common Blackbird XC541784.mp3",
       "playlist_id": "anarchadia",
       "matched_query": "post punk electronic",
@@ -1065,71 +957,20 @@
     },
     {
       "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Turdus merula - Common Blackbird XC561032.mp3",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Turdus merula - Common Blackbird XC561032",
-      "artist": "Olivier Grimm",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC561032.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Turdus_merula_-_Common_Blackbird_XC561032.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 9825670,
-          "provider_sha1": "7d3fa3a93294ffd224ebc224e88103629f590362",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Olivier Grimm",
-        "source_title": "Turdus merula - Common Blackbird XC561032",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC561032.mp3",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:29f06ec37d72826ac10a042e",
-      "quality_score": 77
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
       "provider": "internet-archive",
-      "provider_id": "ExperimentalTides",
-      "playlist_id": "anarchadia",
-      "matched_query": "noise rock",
-      "title": "Experimental Tides",
-      "artist": "Dusty Grimm",
+      "provider_id": "cz009_216",
+      "playlist_id": "civweave",
+      "matched_query": "post rock electronic",
+      "title": "crashzendo - Moon",
+      "artist": "crashzendo",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://archive.org/details/ExperimentalTides",
+      "source_url": "https://archive.org/details/cz009_216",
       "license": {
         "spdx": "CC-BY",
         "label": "CC-BY",
-        "url": "http://creativecommons.org/licenses/by/3.0/us/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/us/",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
@@ -1137,44 +978,76 @@
       },
       "files": [
         {
-          "url": "https://archive.org/download/ExperimentalTides/1.mp3",
-          "bytes": 3473241,
-          "provider_sha1": "7950c614a4b5dc84b148ac85e67cd0f93c1f6354",
-          "provider_md5": "85c832f1a9dabe3b834abdd8f96fed77",
+          "url": "https://archive.org/download/cz009_216/cz009_04_wandering_panasonic_spirit.mp3",
+          "bytes": 26433536,
+          "provider_sha1": "241bb8cc18e50185d16dd9a4e6e4e0256b270566",
+          "provider_md5": "9b645c52fe005b7cebcd8aa6b3029ce6",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ExperimentalTides/2.mp3",
-          "bytes": 3448477,
-          "provider_sha1": "8c1ea67fd5b1822767c6f381b80efcb3d6813887",
-          "provider_md5": "ad387332196895362f6977164af15098",
+          "url": "https://archive.org/download/cz009_216/cz009_08_technopolder_wattenmeer.mp3",
+          "bytes": 24840192,
+          "provider_sha1": "a5e2265d4aa366bbb51738aa96e8d4e06fa02bd3",
+          "provider_md5": "a7bf677c9d06c01f0d3ec1b90f15f5df",
           "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ExperimentalTides/2.ogg",
-          "bytes": 2964525,
-          "provider_sha1": "5267ceb3d21832aad5af38cc3efc8716b5af7591",
-          "provider_md5": "fa58eb0a0fd4da0f0eb1de20aa24d550",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
+          "url": "https://archive.org/download/cz009_216/cz009_06_neutrino.mp3",
+          "bytes": 16936960,
+          "provider_sha1": "35e9cb404f893007749048ab02065bd98888dc4b",
+          "provider_md5": "d894397e059fa32d09b187ec586e1655",
+          "format": "VBR MP3",
+          "role": "original"
         },
         {
-          "url": "https://archive.org/download/ExperimentalTides/1.ogg",
-          "bytes": 2744723,
-          "provider_sha1": "a3a513879bb1bc6d6cb44edd7fbf69c9719c9f53",
-          "provider_md5": "6edaf26e2b839dab0d44ccbb025762c3",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
+          "url": "https://archive.org/download/cz009_216/cz009_02_ashzen_hyperspace.mp3",
+          "bytes": 13733888,
+          "provider_sha1": "9e3536ed627cd85a065b847f025fae10680ed373",
+          "provider_md5": "9ed67dc60c30f1d8da4254ee82b848bb",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_05_fun.mp3",
+          "bytes": 12810240,
+          "provider_sha1": "f65e00e2d2860e54fdf84d62d52dcb64e5a881f4",
+          "provider_md5": "ef3605a5815ba41710c3d53acea70c11",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_03_i_was_looking_for_you.mp3",
+          "bytes": 12619776,
+          "provider_sha1": "b8839f98d904c7f94bb8f0a52dc96fa8e4efa3b5",
+          "provider_md5": "164a0bd3b30da65f89dbd4dd57d1ddb4",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_07_plunging_headfirst_into_cotton_candy_clouds.mp3",
+          "bytes": 5033984,
+          "provider_sha1": "0ac936736db8d52a33b0591c31f01b6c26adeb47",
+          "provider_md5": "0b27773748aacaefbcabea23d8206b17",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_01_fly_me_to_the_moon.mp3",
+          "bytes": 3758080,
+          "provider_sha1": "14fba93ebd4893c8c37c1c857d170cfc3e09d334",
+          "provider_md5": "ed0c2c4ef2710931c2e769bd57b64023",
+          "format": "VBR MP3",
+          "role": "original"
         }
       ],
       "attribution": {
-        "creator": "Dusty Grimm",
-        "source_title": "Experimental Tides",
-        "source_url": "https://archive.org/details/ExperimentalTides",
+        "creator": "crashzendo",
+        "source_title": "crashzendo - Moon",
+        "source_url": "https://archive.org/details/cz009_216",
         "license": "CC-BY",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/us/"
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
@@ -1183,11 +1056,11 @@
       "hash_state": "compute-sha256-on-cache",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
+          "playlist_id": "civweave",
+          "matched_query": "post rock electronic"
         }
       ],
-      "candidate_id": "openmusic:d1053bd3fca384b4be63cf2e",
+      "candidate_id": "openmusic:1a687cc2aaae2580d009eb47",
       "quality_score": 76
     },
     {
@@ -1261,96 +1134,96 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "internet-archive",
-      "provider_id": "ScumposSoundOfWork2008",
-      "playlist_id": "living-school",
-      "matched_query": "folk experimental",
-      "title": "Scumpos / Sound of Work (2008)",
-      "artist": "Scumpos (C. Schuch)",
+      "provider_id": "a-771",
+      "playlist_id": "anarchadia",
+      "matched_query": "noise rock",
+      "title": "Изразец — Izrazets (2021, FLAC, addicted label, album)",
+      "artist": "Изразец | Izrazets",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://archive.org/details/ScumposSoundOfWork2008",
+      "source_url": "https://archive.org/details/a-771",
       "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC-BY-SA",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/3.0/",
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/4.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
-        "share_alike": true
+        "share_alike": false
       },
       "files": [
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/05BlackGravitationalPulse_01.wav.mp3",
-          "bytes": 7444724,
-          "provider_sha1": "ae79905a9e8d25e024439bd6d8ad2d997c291d2f",
-          "provider_md5": "e5f56ed60feb50035e1754fa364b8bf7",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2005%20%D0%A1%D0%BA%D0%BE%D0%BB%D1%8C%D0%B7%D1%81%D0%BA%D0%B0%D1%8F%20%D0%B8%D0%B3%D1%80%D0%B0.flac",
+          "bytes": 125550565,
+          "provider_sha1": "b055e62695a01b0dfe23e45c69cf73b9e58f604d",
+          "provider_md5": "e1e84bf36954abe2d8e5fe86f0c022fd",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/07TreeOrNoTreeharpmadness.wav.mp3",
-          "bytes": 6283822,
-          "provider_sha1": "ee282728863e385bb0095530ae3022a78cf81a77",
-          "provider_md5": "2143c644543a074f98970be5f6be4d4c",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2003%20%D0%9E%D0%B6%D0%B5%D1%80%D0%B5%D0%BB%D1%8C%D0%B5.flac",
+          "bytes": 122577941,
+          "provider_sha1": "801100a1469622b23ca8714be014b21cbcca4a36",
+          "provider_md5": "dc835a526106cce4bef727779ab11312",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/14SharkInDistress.wav.mp3",
-          "bytes": 5982595,
-          "provider_sha1": "3d4df886ccfdc079c2186d239048b1170d527567",
-          "provider_md5": "d5086476a96221db44fc4e853b1068e3",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2002%20%D0%94%D1%80%D1%83%D0%B7%D1%8C%D1%8F%20c%20%D0%BF%D1%80%D0%B8%D0%B2%D0%B8%D0%BB%D0%B5%D0%B3%D0%B8%D1%8F%D0%BC%D0%B8.flac",
+          "bytes": 92781778,
+          "provider_sha1": "4180d16d9e709272b2a1116313289e62bd875715",
+          "provider_md5": "99f811d9e951d6b3fdae08c90cdd90d1",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/01OutOffWindow.wav.mp3",
-          "bytes": 5791698,
-          "provider_sha1": "94ebcd5eb5e8e3b45fd13de1f12262a2f22a98d6",
-          "provider_md5": "455a38c7c4f7d5aee8d8c102dc8d0938",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2006%20%D0%A1%D0%BC%D0%B5%D1%80%D1%82%D1%8C%20%D0%BD%D0%B0%20%D0%B4%D0%B8%D1%81%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%BA%D1%81%D1%82%D0%B5.flac",
+          "bytes": 91914090,
+          "provider_sha1": "5f3385c3c9258e0fb104a19812617926e79f1d21",
+          "provider_md5": "059838dd9e34d2ab1f5e41660d4cb0fb",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/19CuiBono.wav.mp3",
-          "bytes": 5776750,
-          "provider_sha1": "478a690a66a45f7e2cb77330e2ba0b3b9317e997",
-          "provider_md5": "8ea1e61c9080ae70dede6610a43a9035",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2004%20%D0%A2%D0%B2%D0%B0%D1%80%D1%8C.flac",
+          "bytes": 82622043,
+          "provider_sha1": "68aa6dc15dc00dcf48f40ca21329d89d6f4141ea",
+          "provider_md5": "9ba0ded4a154bef034758cb239a61087",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/08BenYoung.wav.mp3",
-          "bytes": 5630465,
-          "provider_sha1": "09e238d3630feecd07851c15ee21708c955162c7",
-          "provider_md5": "3da3e12ea6b974502623340a690720b9",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2001%20%D0%9B%D0%BE%D0%B1%D1%81%D1%82%D0%B5%D1%80.flac",
+          "bytes": 28286382,
+          "provider_sha1": "234a833472489ba5f33b9b98d9ad07d49139b1fe",
+          "provider_md5": "0ac17f9b6c0d373fc3cb5f9da1759076",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/10CalculatingStatics.wav.mp3",
-          "bytes": 4562057,
-          "provider_sha1": "3934b512185adab99a93debdeebd62aa9f736515",
-          "provider_md5": "7824861287ffeb227a26c99b3029d2ec",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2003%20%D0%9E%D0%B6%D0%B5%D1%80%D0%B5%D0%BB%D1%8C%D0%B5.mp3",
+          "bytes": 15655100,
+          "provider_sha1": "d488a5090f890b86ea4abdbfada241434d8c98b5",
+          "provider_md5": "55299ddbde78e4d17f87d06e7da80632",
           "format": "VBR MP3",
-          "role": "original"
+          "role": "derivative"
         },
         {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/18ThoughtYouCould.wav.mp3",
-          "bytes": 4556832,
-          "provider_sha1": "9eb1e105d6c50282d1d008b99517acd06c0fc77e",
-          "provider_md5": "eb12da6e019d938bdf9cb80f9ca6e132",
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2005%20%D0%A1%D0%BA%D0%BE%D0%BB%D1%8C%D0%B7%D1%81%D0%BA%D0%B0%D1%8F%20%D0%B8%D0%B3%D1%80%D0%B0.mp3",
+          "bytes": 15247330,
+          "provider_sha1": "cdca04a52457be9df678d1d1c61339a9a52a746e",
+          "provider_md5": "dbbcc687f46b005f4330ee63bc839ad1",
           "format": "VBR MP3",
-          "role": "original"
+          "role": "derivative"
         }
       ],
       "attribution": {
-        "creator": "Scumpos (C. Schuch)",
-        "source_title": "Scumpos / Sound of Work (2008)",
-        "source_url": "https://archive.org/details/ScumposSoundOfWork2008",
-        "license": "CC-BY-SA",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        "creator": "Изразец | Izrazets",
+        "source_title": "Изразец — Izrazets (2021, FLAC, addicted label, album)",
+        "source_url": "https://archive.org/details/a-771",
+        "license": "CC-BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
@@ -1359,11 +1232,227 @@
       "hash_state": "compute-sha256-on-cache",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
-          "matched_query": "folk experimental"
+          "playlist_id": "anarchadia",
+          "matched_query": "noise rock"
         }
       ],
-      "candidate_id": "openmusic:ea1f567322a760ace5f7e5bf",
+      "candidate_id": "openmusic:ab4b58e9a3ed6ba9b29c3045",
+      "quality_score": 76
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "internet-archive",
+      "provider_id": "a-758",
+      "playlist_id": "anarchadia",
+      "matched_query": "noise rock",
+      "title": "Резина — 1619 (2020, FLAC, addicted label, album)",
+      "artist": "Rezina",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/a-758",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/a-758/06%20%D0%91%D0%BB%D0%B8%D0%B6%D0%B5%20feat%20%D0%95%D0%BB%D0%B5%D0%BD%D0%B0%20%D0%92%D0%BE%D0%B9%D0%BD%D0%B0%D1%80%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F.flac",
+          "bytes": 68273895,
+          "provider_sha1": "395abafbdc82d1c2ad23e94093a589ac77148708",
+          "provider_md5": "fbb6a3bb13c7436130a2e877f1eaef87",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/07%20%D0%9F%D0%BE%D0%B4%D0%BC%D0%B5%D0%BD%D0%B0%20feat%20%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%20%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B2.flac",
+          "bytes": 57348786,
+          "provider_sha1": "69d9f85f865277c3367d39f5bd7eb6f702f39792",
+          "provider_md5": "10d36a124164f55155a942f6a88d5e92",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/03%20Economy%20of%20Shit%20feat%20Ron%20Gallipoli.flac",
+          "bytes": 52514249,
+          "provider_sha1": "13309c0e01f61a6aa106fd2cd95aad2f6ae6ef51",
+          "provider_md5": "794f6fe840aa805b15c2e266966daed7",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/05%20%D0%A4%D0%B5%D0%B2%D1%80%D0%B0%D0%BB%D1%8C%202017%20feat%20%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B5%D0%B9%20%D0%9D%D0%B8%D0%BA%D0%BE%D0%BD%D0%BE%D0%B2.flac",
+          "bytes": 50828219,
+          "provider_sha1": "1f1cda750a8db274e0a7c62be8dadaf54e93d295",
+          "provider_md5": "2bc3195ccf33acbc57135409f0b4cf19",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/04%20%D0%A0%D0%B5%D0%B7%D0%B8%D0%BD%D0%B0%20feat%20%D0%90%D0%BD%D0%B4%D1%80%D0%B5%D0%B9%20%D0%9C%D0%B0%D1%88%D0%BD%D0%B8%D0%BD.flac",
+          "bytes": 49381148,
+          "provider_sha1": "c061eef670c58499d2ca333d7d6054f540517c0d",
+          "provider_md5": "921d079b5cc850a2d522e6ebe5aaadc9",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/01%20%D0%9F%D0%BE%D0%BB%D0%BD%D0%BE%D0%BB%D1%83%D0%BD%D0%B8%D0%B5%20feat%20%D0%9E%D0%BB%D0%B5%D0%B3%20%D0%AF%D0%B3%D0%BE%D0%B4%D0%B8%D0%BD.flac",
+          "bytes": 48665107,
+          "provider_sha1": "65a239ecd80e3a155242a0908e44a4a041f8ee18",
+          "provider_md5": "fa71075ecbf6801298cae1a5b3785555",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/02%20%D0%A1%D0%B5%D1%80%D0%B4%D1%86%D0%B5%20feat%20%D0%98%D0%BB%D1%8C%D1%8F%20%D0%A7%D0%B5%D1%80%D0%B5%D0%BF%D0%BA%D0%BE-%D0%A1%D0%B0%D0%BC%D0%BE%D1%85%D0%B2%D0%B0%D0%BB%D0%BE%D0%B2.flac",
+          "bytes": 43830483,
+          "provider_sha1": "bbfc1bb921856d7b9ec8051a80d7c0d36c369925",
+          "provider_md5": "951f34e7e51d59577b9d4cbde740a120",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/09%20%D0%A3%D1%80%D0%B0%D0%BD%D0%BE%D0%B2%D1%8B%D0%B5%20%D1%81%D1%80%D0%B5%D0%B4%D1%8B%20%D1%81%D1%80%D0%B5%D0%B4%D0%B8%20feat%20%D0%AF%D0%BD%20%D0%9D%D0%B8%D0%BA%D0%B8%D1%82%D0%B8%D0%BD.flac",
+          "bytes": 40943458,
+          "provider_sha1": "22c32a3615f7bbc56faac3f29dcc4027ffbc9940",
+          "provider_md5": "c28f418d560574a9a179f1dca0b3b63f",
+          "format": "Flac",
+          "role": "original"
+        }
+      ],
+      "attribution": {
+        "creator": "Rezina",
+        "source_title": "Резина — 1619 (2020, FLAC, addicted label, album)",
+        "source_url": "https://archive.org/details/a-758",
+        "license": "CC-BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "noise rock"
+        }
+      ],
+      "candidate_id": "openmusic:01387e13d700a2d3a80ed3ad",
+      "quality_score": 76
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "internet-archive",
+      "provider_id": "BFTG_221",
+      "playlist_id": "anarchadia",
+      "matched_query": "noise rock",
+      "title": "season 1",
+      "artist": "fortnitewave",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/BFTG_221",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "CC-BY-SA",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by-sa/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/BFTG_221/16.flac",
+          "bytes": 53724209,
+          "provider_sha1": "1a182e3f281eba3f7e6891f12fee43ea41dce2dc",
+          "provider_md5": "c1b854f060d4239fe5723d03aee7618a",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/BFTG_221/72.flac",
+          "bytes": 53563498,
+          "provider_sha1": "0d8746be4ddc339f0f0e8f4e5708df1d6a3af669",
+          "provider_md5": "59521dd1243bcf9eb207ac37b4cb8259",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/BFTG_221/36.flac",
+          "bytes": 51091256,
+          "provider_sha1": "1c0c42ed2ff6e4fd3d5a38930866a4bbbc8119b9",
+          "provider_md5": "4fef147976c6c29beff423f54f12efb0",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/BFTG_221/61.flac",
+          "bytes": 45789238,
+          "provider_sha1": "66f9835f845126d822688606f934e62be67b7d67",
+          "provider_md5": "197bb383e5cfe67c8ea8c2f780858f99",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/BFTG_221/53.flac",
+          "bytes": 45788880,
+          "provider_sha1": "00ebcab01636e57adb7239af60ded4d1bb677e7f",
+          "provider_md5": "c1745823571c463252cf056a0d3d0a5c",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/BFTG_221/10.flac",
+          "bytes": 45383565,
+          "provider_sha1": "b03ecf0f5a7da648361248a9955c15f1e1019604",
+          "provider_md5": "bc0feb65224f4da008031f499d9e3834",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/BFTG_221/22.flac",
+          "bytes": 43263534,
+          "provider_sha1": "044f64c44c2a3593b2d3bef2829600a03474deaf",
+          "provider_md5": "998e51ff0395732859fc9c1955587117",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/BFTG_221/21.flac",
+          "bytes": 42865778,
+          "provider_sha1": "ca3467a2b4dde383af23c31c3e5d0ea995a0bf38",
+          "provider_md5": "07f9ede6cd32eeae69952262d8e50f23",
+          "format": "Flac",
+          "role": "original"
+        }
+      ],
+      "attribution": {
+        "creator": "fortnitewave",
+        "source_title": "season 1",
+        "source_url": "https://archive.org/details/BFTG_221",
+        "license": "CC-BY-SA",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "noise rock"
+        }
+      ],
+      "candidate_id": "openmusic:2907d935bac6865eb3145d44",
       "quality_score": 75
     },
     {
