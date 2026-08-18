@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-harvest-policy.v1",
-  "built_at": "2026-08-10T14:16:41Z",
+  "built_at": "2026-08-18T02:00:39Z",
   "principle": "Explicit redistribution evidence is required before Civweave labels media mesh-redistributable.",
   "accepted_default_licenses": [
     "PUBLIC-DOMAIN",

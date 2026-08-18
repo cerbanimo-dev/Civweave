@@ -1,24 +1,24 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T14:16:41Z",
-  "records": 153,
-  "mesh_redistributable": 105,
-  "download_candidates": 237,
+  "built_at": "2026-08-18T02:00:39Z",
+  "records": 192,
+  "mesh_redistributable": 139,
+  "download_candidates": 297,
   "providers": {
     "internet-archive": {
-      "records": 6,
+      "records": 7,
       "mesh_redistributable": 0,
       "download_candidates": 15
     },
     "peertube": {
-      "records": 103,
-      "mesh_redistributable": 61,
-      "download_candidates": 178
+      "records": 135,
+      "mesh_redistributable": 89,
+      "download_candidates": 232
     },
     "wikimedia-commons": {
-      "records": 44,
-      "mesh_redistributable": 44,
-      "download_candidates": 44
+      "records": 50,
+      "mesh_redistributable": 50,
+      "download_candidates": 50
     }
   },
   "focus_topics": {
@@ -65,20 +65,21 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 8,
+      "records": 9,
       "mesh_redistributable": 6,
       "providers": {
-        "peertube": 3,
+        "peertube": 4,
         "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
         "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Democracy in the Dark: Protecting Your Digital Rights",
+        "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
     },
@@ -86,13 +87,12 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 14,
-      "mesh_redistributable": 5,
+      "records": 13,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 14
+        "peertube": 13
       },
       "top_titles": [
-        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
         "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
@@ -101,22 +101,22 @@
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -171,20 +171,21 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -250,32 +251,34 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 2
+        "wikimedia-commons": 2,
+        "peertube": 2
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare"
       ]
     },
     "prompt-engineering": {
@@ -283,7 +286,7 @@
       "school_slug": "technology",
       "required": true,
       "records": 3,
-      "mesh_redistributable": 1,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 2,
         "internet-archive": 1
@@ -335,11 +338,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -406,21 +409,29 @@
       "name": "Career & Work Skills",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 3,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 2,
+        "internet-archive": 1
+      },
+      "top_titles": [
+        "How to Succeed in Skype Interviews in English - Job interview in English tips",
+        "Job Interview in English Lesson #1: Tell me about yourself",
+        "English For Career Development Course"
+      ]
     },
     "electronics-basics": {
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
@@ -431,13 +442,12 @@
       "name": "Woodworking Basics",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 1,
+      "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Woodworking Design Rejected! Learning Amazon's Other Content Policy",
         "1949 U.S. NAVY TRAINING FILM BENDING OAK TECHNIQUES WOODWORKING NORFOLK NAVAL SHIPYARD 95474"
       ]
     },
@@ -493,12 +503,18 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 1
+        "peertube": 7
       },
       "top_titles": [
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -533,15 +549,139 @@
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
       ]
+    },
+    "tarot-symbolism": {
+      "name": "Tarot & Symbolic Systems",
+      "school_slug": "philosophy-and-religion",
+      "required": false,
+      "records": 1,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
+      ]
+    },
+    "mythology-folklore": {
+      "name": "Mythology & Folklore",
+      "school_slug": "history",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "ESL - What are Myths？",
+        "THE SEARCH 1950s TV SHOW ARKANSAS FOLKLORE RESEARCH MARY CELESTIA PARLER 57814"
+      ]
+    },
+    "meditation-mindfulness": {
+      "name": "Meditation & Mindfulness",
+      "school_slug": "health-medicine-and-disease",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "communication-conflict": {
+      "name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "parenting-caregiving": {
+      "name": "Parenting & Caregiving",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "Parenting - Blender 2.80 Fundamentals",
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+      ]
+    },
+    "gardening-plants": {
+      "name": "Gardening & Plant Care",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "entrepreneurship-small-business": {
+      "name": "Entrepreneurship & Small Business",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 4,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 4
+      },
+      "top_titles": [
+        "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
+        "Discover Who is On your LAN: Small Business Security 101",
+        "Entrepreneurship by design",
+        "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
+      ]
+    },
+    "music-performance": {
+      "name": "Music & Performance",
+      "school_slug": "arts",
+      "required": false,
+      "records": 5,
+      "mesh_redistributable": 5,
+      "providers": {
+        "peertube": 5
+      },
+      "top_titles": [
+        "a track i made for music theory back in high school",
+        "All MINOR Scales Explained on the Piano (Music Theory)",
+        "Lecture 3. Rhythm: Fundamentals",
+        "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
+        "THEORY: Music Theory Basics Part #1 - Keys and Pitch"
+      ]
+    },
+    "language-learning": {
+      "name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "required": false,
+      "records": 15,
+      "mesh_redistributable": 15,
+      "providers": {
+        "peertube": 9,
+        "wikimedia-commons": 6
+      },
+      "top_titles": [
+        "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "English Grammar — Present Continuous — Teaching Ideas — 2",
+        "English Grammar — Present Contiuous — Teaching Ideas — 3",
+        "Starting to learn Taiwanese: Language Learning Journey 1",
+        "English Grammar — Present Perfect — Teaching Ideas — 2",
+        "English Grammar — Present Simple — Teaching Ideas — 1",
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "English Grammar — Present Continuous — Structure",
+        "English Grammar — Present Perfect — Structure — 2"
+      ]
     }
   },
-  "failures": 0,
-  "records_before_relevance_gate": 847,
-  "records_before_pedagogy_gate": 379,
-  "records_before_selection_gate": 217,
-  "rejected_by_relevance_gate": 468,
-  "rejected_by_pedagogy_gate": 162,
-  "rejected_by_selection_gate": 52,
+  "failures": 28,
+  "records_before_relevance_gate": 1117,
+  "records_before_pedagogy_gate": 506,
+  "records_before_selection_gate": 275,
+  "rejected_by_relevance_gate": 611,
+  "rejected_by_pedagogy_gate": 231,
+  "rejected_by_selection_gate": 57,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -586,20 +726,21 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 8,
+      "records": 9,
       "mesh_redistributable": 6,
       "providers": {
-        "peertube": 3,
+        "peertube": 4,
         "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
         "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Democracy in the Dark: Protecting Your Digital Rights",
+        "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
     },
@@ -607,13 +748,12 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 14,
-      "mesh_redistributable": 5,
+      "records": 13,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 14
+        "peertube": 13
       },
       "top_titles": [
-        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
         "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
@@ -622,22 +762,22 @@
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -692,20 +832,21 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -771,32 +912,34 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 2
+        "wikimedia-commons": 2,
+        "peertube": 2
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare"
       ]
     },
     "prompt-engineering": {
@@ -804,7 +947,7 @@
       "school_slug": "technology",
       "required": true,
       "records": 3,
-      "mesh_redistributable": 1,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 2,
         "internet-archive": 1
@@ -856,11 +999,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -927,21 +1070,29 @@
       "name": "Career & Work Skills",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 3,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 2,
+        "internet-archive": 1
+      },
+      "top_titles": [
+        "How to Succeed in Skype Interviews in English - Job interview in English tips",
+        "Job Interview in English Lesson #1: Tell me about yourself",
+        "English For Career Development Course"
+      ]
     },
     "electronics-basics": {
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
@@ -952,13 +1103,12 @@
       "name": "Woodworking Basics",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 1,
+      "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Woodworking Design Rejected! Learning Amazon's Other Content Policy",
         "1949 U.S. NAVY TRAINING FILM BENDING OAK TECHNIQUES WOODWORKING NORFOLK NAVAL SHIPYARD 95474"
       ]
     },
@@ -1014,12 +1164,18 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 1
+        "peertube": 7
       },
       "top_titles": [
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -1053,6 +1209,130 @@
         "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
+      ]
+    },
+    "tarot-symbolism": {
+      "name": "Tarot & Symbolic Systems",
+      "school_slug": "philosophy-and-religion",
+      "required": false,
+      "records": 1,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
+      ]
+    },
+    "mythology-folklore": {
+      "name": "Mythology & Folklore",
+      "school_slug": "history",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "ESL - What are Myths？",
+        "THE SEARCH 1950s TV SHOW ARKANSAS FOLKLORE RESEARCH MARY CELESTIA PARLER 57814"
+      ]
+    },
+    "meditation-mindfulness": {
+      "name": "Meditation & Mindfulness",
+      "school_slug": "health-medicine-and-disease",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "communication-conflict": {
+      "name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "parenting-caregiving": {
+      "name": "Parenting & Caregiving",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "Parenting - Blender 2.80 Fundamentals",
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+      ]
+    },
+    "gardening-plants": {
+      "name": "Gardening & Plant Care",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "entrepreneurship-small-business": {
+      "name": "Entrepreneurship & Small Business",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 4,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 4
+      },
+      "top_titles": [
+        "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
+        "Discover Who is On your LAN: Small Business Security 101",
+        "Entrepreneurship by design",
+        "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
+      ]
+    },
+    "music-performance": {
+      "name": "Music & Performance",
+      "school_slug": "arts",
+      "required": false,
+      "records": 5,
+      "mesh_redistributable": 5,
+      "providers": {
+        "peertube": 5
+      },
+      "top_titles": [
+        "a track i made for music theory back in high school",
+        "All MINOR Scales Explained on the Piano (Music Theory)",
+        "Lecture 3. Rhythm: Fundamentals",
+        "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
+        "THEORY: Music Theory Basics Part #1 - Keys and Pitch"
+      ]
+    },
+    "language-learning": {
+      "name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "required": false,
+      "records": 15,
+      "mesh_redistributable": 15,
+      "providers": {
+        "peertube": 9,
+        "wikimedia-commons": 6
+      },
+      "top_titles": [
+        "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "English Grammar — Present Continuous — Teaching Ideas — 2",
+        "English Grammar — Present Contiuous — Teaching Ideas — 3",
+        "Starting to learn Taiwanese: Language Learning Journey 1",
+        "English Grammar — Present Perfect — Teaching Ideas — 2",
+        "English Grammar — Present Simple — Teaching Ideas — 1",
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "English Grammar — Present Continuous — Structure",
+        "English Grammar — Present Perfect — Structure — 2"
       ]
     }
   },
@@ -1090,7 +1370,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 70,
+      "records": 69,
       "available": true
     },
     "digital-ai-literacy": {
@@ -1114,7 +1394,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 17,
+      "records": 20,
       "available": true
     },
     "practical-life": {
@@ -1136,7 +1416,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 22,
       "available": true
     },
     "maker-creative": {
@@ -1175,7 +1455,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 11,
+      "records": 17,
       "available": true
     },
     "deep-science": {
@@ -1197,7 +1477,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 30,
+      "records": 28,
       "available": true
     },
     "humanities-culture": {
@@ -1222,9 +1502,273 @@
       "coverage": 0.8333,
       "records": 26,
       "available": true
+    },
+    "tarot-symbolic-practice": {
+      "name": "Tarot & Symbolic Practice",
+      "kind": "extension",
+      "description": "Tarot history, card structure, symbolic interpretation, mythology, art, and reflective practice.",
+      "topics": [
+        "tarot-symbolism",
+        "mythology-folklore",
+        "philosophy-ethics",
+        "arts-culture"
+      ],
+      "covered_topics": [
+        "tarot-symbolism",
+        "mythology-folklore",
+        "philosophy-ethics",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "records": 12,
+      "available": true
+    },
+    "mind-body-practice": {
+      "name": "Mind & Body Practice",
+      "kind": "extension",
+      "description": "Mindfulness, meditation, health, reflective practice, and ethical self-observation.",
+      "topics": [
+        "meditation-mindfulness",
+        "health-wellness",
+        "philosophy-ethics"
+      ],
+      "covered_topics": [
+        "health-wellness",
+        "philosophy-ethics"
+      ],
+      "coverage": 0.6667,
+      "records": 7,
+      "available": true
+    },
+    "relationships-care": {
+      "name": "Relationships & Care",
+      "kind": "extension",
+      "description": "Communication, parenting, caregiving, health, ethical reflection, and evidence-aware relationship skills.",
+      "topics": [
+        "communication-conflict",
+        "parenting-caregiving",
+        "health-wellness",
+        "critical-thinking",
+        "philosophy-ethics"
+      ],
+      "covered_topics": [
+        "parenting-caregiving",
+        "health-wellness",
+        "critical-thinking",
+        "philosophy-ethics"
+      ],
+      "coverage": 0.8,
+      "records": 10,
+      "available": true
+    },
+    "garden-nature": {
+      "name": "Garden & Nature",
+      "kind": "extension",
+      "description": "Plant care, gardening, biology, ecology, climate, and observation of living systems.",
+      "topics": [
+        "gardening-plants",
+        "biology-life",
+        "climate-environment"
+      ],
+      "covered_topics": [
+        "biology-life",
+        "climate-environment"
+      ],
+      "coverage": 0.6667,
+      "records": 6,
+      "available": true
+    },
+    "career-enterprise": {
+      "name": "Career & Enterprise",
+      "kind": "extension",
+      "description": "Career development, workplace communication, entrepreneurship, and personal finance.",
+      "topics": [
+        "career-work-skills",
+        "entrepreneurship-small-business",
+        "personal-finance",
+        "communication-conflict"
+      ],
+      "covered_topics": [
+        "career-work-skills",
+        "entrepreneurship-small-business",
+        "personal-finance"
+      ],
+      "coverage": 0.75,
+      "records": 5,
+      "available": true
+    },
+    "music-performance": {
+      "name": "Music & Performance",
+      "kind": "extension",
+      "description": "Music fundamentals, performance practice, artistic interpretation, and cultural context.",
+      "topics": [
+        "music-performance",
+        "arts-culture"
+      ],
+      "covered_topics": [
+        "music-performance",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "records": 11,
+      "available": true
+    },
+    "language-communication": {
+      "name": "Language Learning",
+      "kind": "extension",
+      "description": "Second-language learning, vocabulary, grammar, listening, speaking, and practical language-acquisition exercises.",
+      "topics": [
+        "language-learning"
+      ],
+      "covered_topics": [
+        "language-learning"
+      ],
+      "coverage": 1.0,
+      "records": 15,
+      "available": true
+    },
+    "systems-decision-making": {
+      "name": "Systems & Decision Making",
+      "kind": "extension",
+      "description": "Logic, systems thinking, evidence, statistics, and structured decision making.",
+      "topics": [
+        "logical-frameworks",
+        "critical-thinking",
+        "statistics-data-literacy",
+        "mathematics-foundations"
+      ],
+      "covered_topics": [
+        "logical-frameworks",
+        "critical-thinking",
+        "statistics-data-literacy",
+        "mathematics-foundations"
+      ],
+      "coverage": 1.0,
+      "records": 25,
+      "available": true
+    },
+    "home-independence": {
+      "name": "Home & Independence",
+      "kind": "extension",
+      "description": "Home upkeep, cooking, budgeting, health, and emergency readiness for independent living.",
+      "topics": [
+        "home-maintenance",
+        "cooking-food-safety",
+        "personal-finance",
+        "health-wellness",
+        "emergency-preparedness"
+      ],
+      "covered_topics": [
+        "cooking-food-safety",
+        "personal-finance",
+        "health-wellness"
+      ],
+      "coverage": 0.6,
+      "records": 11,
+      "available": true
+    },
+    "hands-on-maker": {
+      "name": "Hands-on Maker",
+      "kind": "extension",
+      "description": "Electronics, woodworking, sewing, drawing, photography, computing, repair, and practical fabrication skills.",
+      "topics": [
+        "electronics-basics",
+        "woodworking-basics",
+        "sewing-textiles",
+        "drawing-design",
+        "photography-video",
+        "computing-basics"
+      ],
+      "covered_topics": [
+        "electronics-basics",
+        "drawing-design",
+        "photography-video",
+        "computing-basics"
+      ],
+      "coverage": 0.6667,
+      "records": 17,
+      "available": true
+    },
+    "environment-resilience": {
+      "name": "Environment & Resilience",
+      "kind": "extension",
+      "description": "Climate, geography, emergency preparedness, health, and resilient local systems.",
+      "topics": [
+        "climate-environment",
+        "earth-geography",
+        "emergency-preparedness",
+        "health-wellness"
+      ],
+      "covered_topics": [
+        "climate-environment",
+        "earth-geography",
+        "health-wellness"
+      ],
+      "coverage": 0.75,
+      "records": 13,
+      "available": true
+    },
+    "visual-storytelling": {
+      "name": "Visual Storytelling",
+      "kind": "extension",
+      "description": "Drawing, design, photography, video, visual culture, and image-based storytelling.",
+      "topics": [
+        "drawing-design",
+        "photography-video",
+        "arts-culture"
+      ],
+      "covered_topics": [
+        "drawing-design",
+        "photography-video",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "records": 14,
+      "available": true
+    },
+    "society-rights": {
+      "name": "Society & Rights",
+      "kind": "extension",
+      "description": "Civics, rights, law, history, democracy, media literacy, and social institutions.",
+      "topics": [
+        "civics-society",
+        "law-rights-basics",
+        "world-history",
+        "critical-thinking"
+      ],
+      "covered_topics": [
+        "civics-society",
+        "world-history",
+        "critical-thinking"
+      ],
+      "coverage": 0.75,
+      "records": 10,
+      "available": true
+    },
+    "technology-builder": {
+      "name": "Technology Builder",
+      "kind": "extension",
+      "description": "Computing, AI-assisted coding, algorithms, electronics, and software-building foundations.",
+      "topics": [
+        "computing-basics",
+        "vibe-coding",
+        "pseudocoding",
+        "electronics-basics",
+        "prompt-engineering"
+      ],
+      "covered_topics": [
+        "computing-basics",
+        "vibe-coding",
+        "pseudocoding",
+        "electronics-basics",
+        "prompt-engineering"
+      ],
+      "coverage": 1.0,
+      "records": 16,
+      "available": true
     }
   },
-  "pack_registry_revision": "general-knowledge-packs-v1",
+  "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
     "policy": "Registry aliases/concepts must independently support topic relevance; ambiguous one-word craft/science anchors require an instructional title signal."
@@ -1237,11 +1781,11 @@
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
-  "records_before_title_quality_gate": 165,
-  "rejected_by_title_quality_gate": 12,
-  "rejected_topic_links_by_title_quality_gate": 14,
+  "records_before_title_quality_gate": 218,
+  "rejected_by_title_quality_gate": 26,
+  "rejected_topic_links_by_title_quality_gate": 29,
   "title_quality_gate": {
-    "schema": "civweave.open-learning-media-title-quality-gate.v1",
-    "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary."
+    "schema": "civweave.open-learning-media-title-quality-gate.v2",
+    "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."
   }
 }

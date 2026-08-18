@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-learning-media-packs.v1",
-  "built_at": "2026-08-10T14:16:41Z",
-  "revision": "general-knowledge-packs-v1",
+  "built_at": "2026-08-18T02:00:39Z",
+  "revision": "subject-media-packs-v2.5",
   "default_pack": "general-knowledge",
   "packs": [
     {
@@ -121,6 +121,213 @@
         "law-rights-basics"
       ],
       "coverage": 0.8333,
+      "available": true
+    },
+    {
+      "slug": "tarot-symbolic-practice",
+      "name": "Tarot & Symbolic Practice",
+      "kind": "extension",
+      "default": false,
+      "description": "Tarot history, card structure, symbolic interpretation, mythology, art, and reflective practice.",
+      "topics": [
+        "tarot-symbolism",
+        "mythology-folklore",
+        "philosophy-ethics",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "mind-body-practice",
+      "name": "Mind & Body Practice",
+      "kind": "extension",
+      "default": false,
+      "description": "Mindfulness, meditation, health, reflective practice, and ethical self-observation.",
+      "topics": [
+        "meditation-mindfulness",
+        "health-wellness",
+        "philosophy-ethics"
+      ],
+      "coverage": 0.6667,
+      "available": true
+    },
+    {
+      "slug": "relationships-care",
+      "name": "Relationships & Care",
+      "kind": "extension",
+      "default": false,
+      "description": "Communication, parenting, caregiving, health, ethical reflection, and evidence-aware relationship skills.",
+      "topics": [
+        "communication-conflict",
+        "parenting-caregiving",
+        "health-wellness",
+        "critical-thinking",
+        "philosophy-ethics"
+      ],
+      "coverage": 0.8,
+      "available": true
+    },
+    {
+      "slug": "garden-nature",
+      "name": "Garden & Nature",
+      "kind": "extension",
+      "default": false,
+      "description": "Plant care, gardening, biology, ecology, climate, and observation of living systems.",
+      "topics": [
+        "gardening-plants",
+        "biology-life",
+        "climate-environment"
+      ],
+      "coverage": 0.6667,
+      "available": true
+    },
+    {
+      "slug": "career-enterprise",
+      "name": "Career & Enterprise",
+      "kind": "extension",
+      "default": false,
+      "description": "Career development, workplace communication, entrepreneurship, and personal finance.",
+      "topics": [
+        "career-work-skills",
+        "entrepreneurship-small-business",
+        "personal-finance",
+        "communication-conflict"
+      ],
+      "coverage": 0.75,
+      "available": true
+    },
+    {
+      "slug": "music-performance",
+      "name": "Music & Performance",
+      "kind": "extension",
+      "default": false,
+      "description": "Music fundamentals, performance practice, artistic interpretation, and cultural context.",
+      "topics": [
+        "music-performance",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "language-communication",
+      "name": "Language Learning",
+      "kind": "extension",
+      "default": false,
+      "description": "Second-language learning, vocabulary, grammar, listening, speaking, and practical language-acquisition exercises.",
+      "topics": [
+        "language-learning"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "systems-decision-making",
+      "name": "Systems & Decision Making",
+      "kind": "extension",
+      "default": false,
+      "description": "Logic, systems thinking, evidence, statistics, and structured decision making.",
+      "topics": [
+        "logical-frameworks",
+        "critical-thinking",
+        "statistics-data-literacy",
+        "mathematics-foundations"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "home-independence",
+      "name": "Home & Independence",
+      "kind": "extension",
+      "default": false,
+      "description": "Home upkeep, cooking, budgeting, health, and emergency readiness for independent living.",
+      "topics": [
+        "home-maintenance",
+        "cooking-food-safety",
+        "personal-finance",
+        "health-wellness",
+        "emergency-preparedness"
+      ],
+      "coverage": 0.6,
+      "available": true
+    },
+    {
+      "slug": "hands-on-maker",
+      "name": "Hands-on Maker",
+      "kind": "extension",
+      "default": false,
+      "description": "Electronics, woodworking, sewing, drawing, photography, computing, repair, and practical fabrication skills.",
+      "topics": [
+        "electronics-basics",
+        "woodworking-basics",
+        "sewing-textiles",
+        "drawing-design",
+        "photography-video",
+        "computing-basics"
+      ],
+      "coverage": 0.6667,
+      "available": true
+    },
+    {
+      "slug": "environment-resilience",
+      "name": "Environment & Resilience",
+      "kind": "extension",
+      "default": false,
+      "description": "Climate, geography, emergency preparedness, health, and resilient local systems.",
+      "topics": [
+        "climate-environment",
+        "earth-geography",
+        "emergency-preparedness",
+        "health-wellness"
+      ],
+      "coverage": 0.75,
+      "available": true
+    },
+    {
+      "slug": "visual-storytelling",
+      "name": "Visual Storytelling",
+      "kind": "extension",
+      "default": false,
+      "description": "Drawing, design, photography, video, visual culture, and image-based storytelling.",
+      "topics": [
+        "drawing-design",
+        "photography-video",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "society-rights",
+      "name": "Society & Rights",
+      "kind": "extension",
+      "default": false,
+      "description": "Civics, rights, law, history, democracy, media literacy, and social institutions.",
+      "topics": [
+        "civics-society",
+        "law-rights-basics",
+        "world-history",
+        "critical-thinking"
+      ],
+      "coverage": 0.75,
+      "available": true
+    },
+    {
+      "slug": "technology-builder",
+      "name": "Technology Builder",
+      "kind": "extension",
+      "default": false,
+      "description": "Computing, AI-assisted coding, algorithms, electronics, and software-building foundations.",
+      "topics": [
+        "computing-basics",
+        "vibe-coding",
+        "pseudocoding",
+        "electronics-basics",
+        "prompt-engineering"
+      ],
+      "coverage": 1.0,
       "available": true
     }
   ],
@@ -539,7 +746,8 @@
         "budgeting",
         "saving",
         "credit",
-        "personal finance"
+        "personal finance",
+        "financial literacy"
       ],
       "hints": [
         "Personal Finance",
@@ -548,10 +756,12 @@
         "saving",
         "credit",
         "financial literacy",
+        "money management",
         "budgeting",
         "saving",
         "credit",
-        "personal finance"
+        "personal finance",
+        "financial literacy"
       ],
       "required": false
     },
@@ -625,18 +835,25 @@
       "concepts": [
         "career skills",
         "interviews",
-        "workplace communication"
+        "workplace communication",
+        "resume writing",
+        "career development"
       ],
       "hints": [
         "Career & Work Skills",
         "career skills",
+        "career development",
         "job interview",
+        "interview skills",
         "resume",
+        "resume writing",
         "workplace communication",
         "workplace skills",
         "career skills",
         "interviews",
-        "workplace communication"
+        "workplace communication",
+        "resume writing",
+        "career development"
       ],
       "required": false
     },
@@ -806,6 +1023,261 @@
         "rights",
         "civil rights",
         "legal systems"
+      ],
+      "required": false
+    },
+    "tarot-symbolism": {
+      "name": "Tarot & Symbolic Systems",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "tarot",
+        "major arcana",
+        "minor arcana",
+        "card symbolism",
+        "tarot history",
+        "tarot spreads"
+      ],
+      "hints": [
+        "Tarot & Symbolic Systems",
+        "tarot",
+        "tarot cards",
+        "major arcana",
+        "minor arcana",
+        "card reading",
+        "tarot reading",
+        "cartomancy",
+        "rider waite",
+        "rider-waite",
+        "marseille tarot",
+        "tarot",
+        "major arcana",
+        "minor arcana",
+        "card symbolism",
+        "tarot history",
+        "tarot spreads"
+      ],
+      "required": false
+    },
+    "mythology-folklore": {
+      "name": "Mythology & Folklore",
+      "school_slug": "history",
+      "concepts": [
+        "mythology",
+        "folklore",
+        "symbolism",
+        "oral tradition"
+      ],
+      "hints": [
+        "Mythology & Folklore",
+        "mythology",
+        "folklore",
+        "myths",
+        "legends",
+        "symbolism",
+        "oral tradition",
+        "mythology",
+        "folklore",
+        "symbolism",
+        "oral tradition"
+      ],
+      "required": false
+    },
+    "meditation-mindfulness": {
+      "name": "Meditation & Mindfulness",
+      "school_slug": "health-medicine-and-disease",
+      "concepts": [
+        "mindfulness",
+        "meditation",
+        "attention",
+        "breathing"
+      ],
+      "hints": [
+        "Meditation & Mindfulness",
+        "mindfulness",
+        "meditation",
+        "breathing meditation",
+        "attention practice",
+        "contemplative practice",
+        "mindfulness",
+        "meditation",
+        "attention",
+        "breathing"
+      ],
+      "required": false
+    },
+    "communication-conflict": {
+      "name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "communication",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "assertive communication",
+        "repair"
+      ],
+      "hints": [
+        "Communication & Conflict",
+        "communication skills",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "non violent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "de escalation",
+        "assertive communication",
+        "difficult conversations",
+        "relationship communication",
+        "healthy communication",
+        "communication",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "assertive communication",
+        "repair"
+      ],
+      "required": false
+    },
+    "parenting-caregiving": {
+      "name": "Parenting & Caregiving",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "parenting",
+        "caregiving",
+        "child development",
+        "co-regulation"
+      ],
+      "hints": [
+        "Parenting & Caregiving",
+        "parenting",
+        "gentle parenting",
+        "caregiving",
+        "child development",
+        "family care",
+        "co-regulation",
+        "parenting",
+        "caregiving",
+        "child development",
+        "co-regulation"
+      ],
+      "required": false
+    },
+    "gardening-plants": {
+      "name": "Gardening & Plant Care",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "gardening",
+        "plant care",
+        "soil",
+        "watering",
+        "growing food"
+      ],
+      "hints": [
+        "Gardening & Plant Care",
+        "gardening",
+        "plant care",
+        "vegetable garden",
+        "soil care",
+        "growing plants",
+        "gardening",
+        "plant care",
+        "soil",
+        "watering",
+        "growing food"
+      ],
+      "required": false
+    },
+    "entrepreneurship-small-business": {
+      "name": "Entrepreneurship & Small Business",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "entrepreneurship",
+        "small business",
+        "business model",
+        "customers"
+      ],
+      "hints": [
+        "Entrepreneurship & Small Business",
+        "entrepreneurship",
+        "small business",
+        "business model",
+        "starting a business",
+        "self employment",
+        "entrepreneurship",
+        "small business",
+        "business model",
+        "customers"
+      ],
+      "required": false
+    },
+    "music-performance": {
+      "name": "Music & Performance",
+      "school_slug": "arts",
+      "concepts": [
+        "music",
+        "rhythm",
+        "melody",
+        "performance",
+        "practice"
+      ],
+      "hints": [
+        "Music & Performance",
+        "music theory",
+        "music fundamentals",
+        "performance practice",
+        "rhythm",
+        "melody",
+        "music",
+        "rhythm",
+        "melody",
+        "performance",
+        "practice"
+      ],
+      "required": false
+    },
+    "language-learning": {
+      "name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "concepts": [
+        "language learning",
+        "second language acquisition",
+        "vocabulary",
+        "grammar",
+        "listening",
+        "speaking",
+        "language practice"
+      ],
+      "hints": [
+        "Language Learning",
+        "language learning",
+        "second language",
+        "foreign language",
+        "language acquisition",
+        "second language acquisition",
+        "language course",
+        "language class",
+        "ESL",
+        "ESL lesson",
+        "English lesson",
+        "English vocabulary",
+        "English grammar",
+        "Spanish lesson",
+        "vocabulary lesson",
+        "grammar lesson",
+        "listening practice",
+        "speaking practice",
+        "language learning",
+        "second language acquisition",
+        "vocabulary",
+        "grammar",
+        "listening",
+        "speaking",
+        "language practice"
       ],
       "required": false
     }

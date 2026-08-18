@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-08-10T14:16:41Z",
-  "pack_registry_revision": "general-knowledge-packs-v1",
+  "built_at": "2026-08-18T02:00:39Z",
+  "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
     "policy": "Registry aliases/concepts must independently support topic relevance; ambiguous one-word craft/science anchors require an instructional title signal."
@@ -132,6 +132,213 @@
         "law-rights-basics"
       ],
       "coverage": 0.8333,
+      "available": true
+    },
+    {
+      "slug": "tarot-symbolic-practice",
+      "name": "Tarot & Symbolic Practice",
+      "kind": "extension",
+      "default": false,
+      "description": "Tarot history, card structure, symbolic interpretation, mythology, art, and reflective practice.",
+      "topics": [
+        "tarot-symbolism",
+        "mythology-folklore",
+        "philosophy-ethics",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "mind-body-practice",
+      "name": "Mind & Body Practice",
+      "kind": "extension",
+      "default": false,
+      "description": "Mindfulness, meditation, health, reflective practice, and ethical self-observation.",
+      "topics": [
+        "meditation-mindfulness",
+        "health-wellness",
+        "philosophy-ethics"
+      ],
+      "coverage": 0.6667,
+      "available": true
+    },
+    {
+      "slug": "relationships-care",
+      "name": "Relationships & Care",
+      "kind": "extension",
+      "default": false,
+      "description": "Communication, parenting, caregiving, health, ethical reflection, and evidence-aware relationship skills.",
+      "topics": [
+        "communication-conflict",
+        "parenting-caregiving",
+        "health-wellness",
+        "critical-thinking",
+        "philosophy-ethics"
+      ],
+      "coverage": 0.8,
+      "available": true
+    },
+    {
+      "slug": "garden-nature",
+      "name": "Garden & Nature",
+      "kind": "extension",
+      "default": false,
+      "description": "Plant care, gardening, biology, ecology, climate, and observation of living systems.",
+      "topics": [
+        "gardening-plants",
+        "biology-life",
+        "climate-environment"
+      ],
+      "coverage": 0.6667,
+      "available": true
+    },
+    {
+      "slug": "career-enterprise",
+      "name": "Career & Enterprise",
+      "kind": "extension",
+      "default": false,
+      "description": "Career development, workplace communication, entrepreneurship, and personal finance.",
+      "topics": [
+        "career-work-skills",
+        "entrepreneurship-small-business",
+        "personal-finance",
+        "communication-conflict"
+      ],
+      "coverage": 0.75,
+      "available": true
+    },
+    {
+      "slug": "music-performance",
+      "name": "Music & Performance",
+      "kind": "extension",
+      "default": false,
+      "description": "Music fundamentals, performance practice, artistic interpretation, and cultural context.",
+      "topics": [
+        "music-performance",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "language-communication",
+      "name": "Language Learning",
+      "kind": "extension",
+      "default": false,
+      "description": "Second-language learning, vocabulary, grammar, listening, speaking, and practical language-acquisition exercises.",
+      "topics": [
+        "language-learning"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "systems-decision-making",
+      "name": "Systems & Decision Making",
+      "kind": "extension",
+      "default": false,
+      "description": "Logic, systems thinking, evidence, statistics, and structured decision making.",
+      "topics": [
+        "logical-frameworks",
+        "critical-thinking",
+        "statistics-data-literacy",
+        "mathematics-foundations"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "home-independence",
+      "name": "Home & Independence",
+      "kind": "extension",
+      "default": false,
+      "description": "Home upkeep, cooking, budgeting, health, and emergency readiness for independent living.",
+      "topics": [
+        "home-maintenance",
+        "cooking-food-safety",
+        "personal-finance",
+        "health-wellness",
+        "emergency-preparedness"
+      ],
+      "coverage": 0.6,
+      "available": true
+    },
+    {
+      "slug": "hands-on-maker",
+      "name": "Hands-on Maker",
+      "kind": "extension",
+      "default": false,
+      "description": "Electronics, woodworking, sewing, drawing, photography, computing, repair, and practical fabrication skills.",
+      "topics": [
+        "electronics-basics",
+        "woodworking-basics",
+        "sewing-textiles",
+        "drawing-design",
+        "photography-video",
+        "computing-basics"
+      ],
+      "coverage": 0.6667,
+      "available": true
+    },
+    {
+      "slug": "environment-resilience",
+      "name": "Environment & Resilience",
+      "kind": "extension",
+      "default": false,
+      "description": "Climate, geography, emergency preparedness, health, and resilient local systems.",
+      "topics": [
+        "climate-environment",
+        "earth-geography",
+        "emergency-preparedness",
+        "health-wellness"
+      ],
+      "coverage": 0.75,
+      "available": true
+    },
+    {
+      "slug": "visual-storytelling",
+      "name": "Visual Storytelling",
+      "kind": "extension",
+      "default": false,
+      "description": "Drawing, design, photography, video, visual culture, and image-based storytelling.",
+      "topics": [
+        "drawing-design",
+        "photography-video",
+        "arts-culture"
+      ],
+      "coverage": 1.0,
+      "available": true
+    },
+    {
+      "slug": "society-rights",
+      "name": "Society & Rights",
+      "kind": "extension",
+      "default": false,
+      "description": "Civics, rights, law, history, democracy, media literacy, and social institutions.",
+      "topics": [
+        "civics-society",
+        "law-rights-basics",
+        "world-history",
+        "critical-thinking"
+      ],
+      "coverage": 0.75,
+      "available": true
+    },
+    {
+      "slug": "technology-builder",
+      "name": "Technology Builder",
+      "kind": "extension",
+      "default": false,
+      "description": "Computing, AI-assisted coding, algorithms, electronics, and software-building foundations.",
+      "topics": [
+        "computing-basics",
+        "vibe-coding",
+        "pseudocoding",
+        "electronics-basics",
+        "prompt-engineering"
+      ],
+      "coverage": 1.0,
       "available": true
     }
   ],
@@ -550,7 +757,8 @@
         "budgeting",
         "saving",
         "credit",
-        "personal finance"
+        "personal finance",
+        "financial literacy"
       ],
       "hints": [
         "Personal Finance",
@@ -559,10 +767,12 @@
         "saving",
         "credit",
         "financial literacy",
+        "money management",
         "budgeting",
         "saving",
         "credit",
-        "personal finance"
+        "personal finance",
+        "financial literacy"
       ],
       "required": false
     },
@@ -636,18 +846,25 @@
       "concepts": [
         "career skills",
         "interviews",
-        "workplace communication"
+        "workplace communication",
+        "resume writing",
+        "career development"
       ],
       "hints": [
         "Career & Work Skills",
         "career skills",
+        "career development",
         "job interview",
+        "interview skills",
         "resume",
+        "resume writing",
         "workplace communication",
         "workplace skills",
         "career skills",
         "interviews",
-        "workplace communication"
+        "workplace communication",
+        "resume writing",
+        "career development"
       ],
       "required": false
     },
@@ -819,6 +1036,261 @@
         "legal systems"
       ],
       "required": false
+    },
+    "tarot-symbolism": {
+      "name": "Tarot & Symbolic Systems",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "tarot",
+        "major arcana",
+        "minor arcana",
+        "card symbolism",
+        "tarot history",
+        "tarot spreads"
+      ],
+      "hints": [
+        "Tarot & Symbolic Systems",
+        "tarot",
+        "tarot cards",
+        "major arcana",
+        "minor arcana",
+        "card reading",
+        "tarot reading",
+        "cartomancy",
+        "rider waite",
+        "rider-waite",
+        "marseille tarot",
+        "tarot",
+        "major arcana",
+        "minor arcana",
+        "card symbolism",
+        "tarot history",
+        "tarot spreads"
+      ],
+      "required": false
+    },
+    "mythology-folklore": {
+      "name": "Mythology & Folklore",
+      "school_slug": "history",
+      "concepts": [
+        "mythology",
+        "folklore",
+        "symbolism",
+        "oral tradition"
+      ],
+      "hints": [
+        "Mythology & Folklore",
+        "mythology",
+        "folklore",
+        "myths",
+        "legends",
+        "symbolism",
+        "oral tradition",
+        "mythology",
+        "folklore",
+        "symbolism",
+        "oral tradition"
+      ],
+      "required": false
+    },
+    "meditation-mindfulness": {
+      "name": "Meditation & Mindfulness",
+      "school_slug": "health-medicine-and-disease",
+      "concepts": [
+        "mindfulness",
+        "meditation",
+        "attention",
+        "breathing"
+      ],
+      "hints": [
+        "Meditation & Mindfulness",
+        "mindfulness",
+        "meditation",
+        "breathing meditation",
+        "attention practice",
+        "contemplative practice",
+        "mindfulness",
+        "meditation",
+        "attention",
+        "breathing"
+      ],
+      "required": false
+    },
+    "communication-conflict": {
+      "name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "communication",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "assertive communication",
+        "repair"
+      ],
+      "hints": [
+        "Communication & Conflict",
+        "communication skills",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "non violent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "de escalation",
+        "assertive communication",
+        "difficult conversations",
+        "relationship communication",
+        "healthy communication",
+        "communication",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "assertive communication",
+        "repair"
+      ],
+      "required": false
+    },
+    "parenting-caregiving": {
+      "name": "Parenting & Caregiving",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "parenting",
+        "caregiving",
+        "child development",
+        "co-regulation"
+      ],
+      "hints": [
+        "Parenting & Caregiving",
+        "parenting",
+        "gentle parenting",
+        "caregiving",
+        "child development",
+        "family care",
+        "co-regulation",
+        "parenting",
+        "caregiving",
+        "child development",
+        "co-regulation"
+      ],
+      "required": false
+    },
+    "gardening-plants": {
+      "name": "Gardening & Plant Care",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "gardening",
+        "plant care",
+        "soil",
+        "watering",
+        "growing food"
+      ],
+      "hints": [
+        "Gardening & Plant Care",
+        "gardening",
+        "plant care",
+        "vegetable garden",
+        "soil care",
+        "growing plants",
+        "gardening",
+        "plant care",
+        "soil",
+        "watering",
+        "growing food"
+      ],
+      "required": false
+    },
+    "entrepreneurship-small-business": {
+      "name": "Entrepreneurship & Small Business",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "entrepreneurship",
+        "small business",
+        "business model",
+        "customers"
+      ],
+      "hints": [
+        "Entrepreneurship & Small Business",
+        "entrepreneurship",
+        "small business",
+        "business model",
+        "starting a business",
+        "self employment",
+        "entrepreneurship",
+        "small business",
+        "business model",
+        "customers"
+      ],
+      "required": false
+    },
+    "music-performance": {
+      "name": "Music & Performance",
+      "school_slug": "arts",
+      "concepts": [
+        "music",
+        "rhythm",
+        "melody",
+        "performance",
+        "practice"
+      ],
+      "hints": [
+        "Music & Performance",
+        "music theory",
+        "music fundamentals",
+        "performance practice",
+        "rhythm",
+        "melody",
+        "music",
+        "rhythm",
+        "melody",
+        "performance",
+        "practice"
+      ],
+      "required": false
+    },
+    "language-learning": {
+      "name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "concepts": [
+        "language learning",
+        "second language acquisition",
+        "vocabulary",
+        "grammar",
+        "listening",
+        "speaking",
+        "language practice"
+      ],
+      "hints": [
+        "Language Learning",
+        "language learning",
+        "second language",
+        "foreign language",
+        "language acquisition",
+        "second language acquisition",
+        "language course",
+        "language class",
+        "ESL",
+        "ESL lesson",
+        "English lesson",
+        "English vocabulary",
+        "English grammar",
+        "Spanish lesson",
+        "vocabulary lesson",
+        "grammar lesson",
+        "listening practice",
+        "speaking practice",
+        "language learning",
+        "second language acquisition",
+        "vocabulary",
+        "grammar",
+        "listening",
+        "speaking",
+        "language practice"
+      ],
+      "required": false
     }
   },
   "topics": {
@@ -892,7 +1364,7 @@
         "provider": "peertube",
         "provider_id": "8c8552a4-1e47-45f5-82a6-d81f6cf086df",
         "title": "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey o...",
+        "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey or refreshing the basics, this video will help you *boost your daily English communication skills*. What You’ll Learn in This Video: ✅ Pronunciation – Learn how to say \"Civilization\" easily and correctly. ✅ Meaning – Understand its definition: \"Advanced human society\" ✅ Part of Speech – See how \"Civilization\" works as a Noun in simple sentences. ✅ Synonyms & Antonyms – Explore similar and opposite words to grow your vocabulary. ✅ Real-Life Examples – Discover how to use \"Civilization\" in sentences you can actually use every day. Why Should You Learn This Word? The word \"Civilization\" is a super useful way to talk about the development and characteristics of different societies throughout history in English. It’s one of the basic words B2 learners must know to make their speech more natural and clear. By mastering it, you’ll feel more confident in conversations, writing, and even exams. Word Breakdown: • Vocabulary Level : B2 • Part of Speech : Noun • Word : Civilization • Definition : \"Advanced human society\" • Synonyms : Society, Culture, Development • Antonyms : Barbarism, Savagery, Primitivity • Example Sentences : 1. The Roman Civilization was known for its advanced engineering. 2. Contact with other civilizations broadened their cultural horizons. 3. Preserving our civilization for future generations is crucial. Tips for Beginners: 👉 Start using \"Civilization\" in your daily conversations. For example: \"The museum showcases artifacts from various civilizations.\" 👉 Compare it with similar words like \"Culture\" to understand su",
         "source_url": "https://diler.tube/videos/watch/8c8552a4-1e47-45f5-82a6-d81f6cf086df",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -934,10 +1406,11 @@
         },
         "relevance": {
           "world-history": {
-            "score": 10,
+            "score": 14,
             "evidence": [
               "world history",
-              "world history"
+              "world history",
+              "civilizations"
             ]
           }
         },
@@ -1657,89 +2130,6 @@
         }
       },
       {
-        "provider": "peertube",
-        "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "title": "Democracy in the Dark: Protecting Your Digital Rights",
-        "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://thenewoil.org/en/support/ ============================= You can also view these videos on other websites: 🎥 PeerTube: https://apertatube.net/c/thenewoil/videos 🎥 YouTube: https://youtube.com/thenewoil ⏰ Timestamps 00:00 Introduction 00:37 Disclaimer 01:23 Overview 02:13 Part 1: Why Privacy Matters to Democracy 05:35 Part 2: Protection From Targeted Ads and Disinformation 13:12 Part 3: Protection Against Doxing and Other Real-Life Threats 18:58 Part 4: Protesting ✅ Sources There were a whopping 67 sources on this episode. Check them out here: https://gitlab.com/thenewoil/content/-/blob/main/Show%20Notes/20240919-democracy #privacy #election #democracy #protesting #targetedadvertising #voting #misinformation",
-        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 446658800,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 273190887,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 164171737,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Nate Bartram",
-          "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
-          "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "civics-society": {
-            "score": 10,
-            "evidence": [
-              "democracy",
-              "democracy"
-            ]
-          }
-        },
-        "pedagogy": {
-          "civics-society": {
-            "strong_title_matches": [
-              "democracy"
-            ],
-            "strong_description_matches": [
-              "democracy"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "civics-society": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
         "provider": "wikimedia-commons",
         "provider_id": "File:An introduction to Parliament.webm",
         "title": "An introduction to Parliament",
@@ -1994,15 +2384,13 @@
             "pedagogy_score": 36
           }
         }
-      }
-    ],
-    "biology-life": [
+      },
       {
         "provider": "peertube",
-        "provider_id": "6dd957a0-fb41-4248-80e3-ac3b74c72158",
-        "title": "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-        "description": "This talk examines the engineering challenges of building foundation models for single-cell biology from a non-biologist’s perspective. Speakers: - Akram Baharlouei (Altos Labs): Machine learning engineer at Altos Labs working on foundation model...",
-        "source_url": "https://video.ut0pia.org/videos/watch/6dd957a0-fb41-4248-80e3-ac3b74c72158",
+        "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
+        "title": "Democracy in the Dark: Protecting Your Digital Rights",
+        "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://the...",
+        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC-BY",
@@ -2015,11 +2403,27 @@
         },
         "files": [
           {
-            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/6dd957a0-fb41-4248-80e3-ac3b74c72158-720-fragmented.mp4",
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
             "mime": "video/mp4",
-            "bytes": 41423487,
+            "bytes": 446658800,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 273190887,
             "resolution": "720p",
-            "fps": 25,
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 164171737,
+            "resolution": "480p",
+            "fps": 30,
             "role": "streaming-file"
           }
         ],
@@ -2027,47 +2431,43 @@
         "content_hash": null,
         "hash_state": "compute-on-cache",
         "attribution": {
-          "creator": "Bleme",
-          "source_title": "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
-          "source_url": "https://video.ut0pia.org/videos/watch/6dd957a0-fb41-4248-80e3-ac3b74c72158",
+          "creator": "Nate Bartram",
+          "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
+          "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
           "license": "Attribution",
           "license_url": ""
         },
         "relevance": {
-          "biology-life": {
-            "score": 24,
+          "civics-society": {
+            "score": 10,
             "evidence": [
-              "biology",
-              "cell biology",
-              "biology",
-              "cells"
+              "democracy",
+              "democracy"
             ]
           }
         },
         "pedagogy": {
-          "biology-life": {
+          "civics-society": {
             "strong_title_matches": [
-              "biology",
-              "cell biology"
+              "democracy"
             ],
-            "strong_description_matches": [
-              "biology",
-              "cell biology"
-            ],
+            "strong_description_matches": [],
             "educational_intent": true,
             "instructional_title": false,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 72
+            "pedagogy_score": 36
           }
         },
         "selection": {
-          "biology-life": {
+          "civics-society": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 72
+            "pedagogy_score": 36
           }
         }
-      },
+      }
+    ],
+    "biology-life": [
       {
         "provider": "peertube",
         "provider_id": "f38b2ae2-b316-489f-bfd9-f5fb8053c925",
@@ -2388,71 +2788,6 @@
       }
     ],
     "physics-foundations": [
-      {
-        "provider": "peertube",
-        "provider_id": "816a526f-039e-4b23-b3de-be75bc98bcdd",
-        "title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
-        "description": "Please Help Support This Channel:https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S A 40 minute audio recording, restored with visual aids and diagrams, given by the legendary physicist and educator Richard Feynman on the ...",
-        "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/816a526f-039e-4b23-b3de-be75bc98bcdd-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 174713047,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "sb",
-          "source_title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
-          "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "physics-foundations": {
-            "score": 10,
-            "evidence": [
-              "physics",
-              "physics"
-            ]
-          }
-        },
-        "pedagogy": {
-          "physics-foundations": {
-            "strong_title_matches": [
-              "physics"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
       {
         "provider": "wikimedia-commons",
         "provider_id": "File:Physics Of Crystals by LesBrown.webm",
@@ -4049,6 +4384,83 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+        "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
+        "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 109870045,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 66441980,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Charlotte Aten",
+          "source_title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+          "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "mathematics-foundations": {
+            "score": 20,
+            "evidence": [
+              "mathematics",
+              "algebra",
+              "algebra"
+            ]
+          }
+        },
+        "pedagogy": {
+          "mathematics-foundations": {
+            "strong_title_matches": [
+              "algebra"
+            ],
+            "strong_description_matches": [
+              "mathematics",
+              "algebra"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "mathematics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "65b65650-2b35-492d-84d7-1e516dc721a5",
         "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
@@ -4344,6 +4756,89 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "48450782-7789-4099-b54d-5ee1e57aefb1",
+        "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early...",
+        "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 127878198,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 77337120,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 37375797,
+            "resolution": "360p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Charlotte Aten",
+          "source_title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+          "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "mathematics-foundations": {
+            "score": 10,
+            "evidence": [
+              "algebra",
+              "algebra"
+            ]
+          }
+        },
+        "pedagogy": {
+          "mathematics-foundations": {
+            "strong_title_matches": [
+              "algebra"
+            ],
+            "strong_description_matches": [
+              "algebra"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "mathematics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "6a2c633d-cea5-4c61-87db-3479b4fef231",
         "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early stages of lattice theory. The 1935 paper of Birkhoff I mention can be found at [https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf](https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf). The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
@@ -4487,72 +4982,6 @@
           "mathematics-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
-        "title": "Vartika: Inside nowadays Mathematics (Part 4)",
-        "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge....",
-        "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC0",
-          "label": "Public Domain Dedication",
-          "url": "",
-          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/b356b20b-d97b-4727-acc3-3b5ee5c17bb9-450-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 67491768,
-            "resolution": "450p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "danisanti",
-          "source_title": "Vartika: Inside nowadays Mathematics (Part 4)",
-          "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
-          "license": "Public Domain Dedication",
-          "license_url": ""
-        },
-        "relevance": {
-          "mathematics-foundations": {
-            "score": 10,
-            "evidence": [
-              "mathematics"
-            ]
-          }
-        },
-        "pedagogy": {
-          "mathematics-foundations": {
-            "strong_title_matches": [
-              "mathematics"
-            ],
-            "strong_description_matches": [
-              "mathematics"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 45
-          }
-        },
-        "selection": {
-          "mathematics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 45
           }
         }
       },
@@ -5347,7 +5776,7 @@
         "provider": "peertube",
         "provider_id": "2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "title": "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat...",
+        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat, a shading and to finish with a paint-over and post-effect. This is a tutorial doesn't dive into the details, but keeps an overview of the workflow, the goal is to give an idea of the full path and to give tips on the way. I hope showing my recipe will inspire you to start a drawing to test something you'll find interesting and find your own path. **Timeline:** - 00:19 Thumbnail (or Sketch) - 00:57 Drawing - 01:41 Silhouettes - 02:26 Color Flat - 03:31 Shading - 05:46 Paint-over and post effects License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com webcomic: www.peppercarrot.com Background music by Omfgdude \"Lofi-Hip-hop\" CC-0 / Public Domain - 2018 https://opengameart.org/content/lofi-hip-hop Special thanks to @RinCat@meow.cloud on the Fediverse for saving a corrupted MP4 recording of this video. Edited with Kdenlive 21.04 appimage on Fedora 37 KDE **Support:** - Patreon: https://www.patreon.com/join/davidrevoy? - Tipeee: https://fr.tipeee.com/pepper-carrot - Paypal: https://paypal.me/davidrevoy - Liberapay: https://liberapay.com/davidrevoy/ **Follow:** - Mastodon: https://framapiaf.org/@davidrevoy - Twitter: http://twitter.com/davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ **Website:** - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/ **Alternative channel:** - Peertube: https://peertube.touhoppai.moe/accounts/shichimi/videos - Youtube: https://www.youtube.com/",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5421,9 +5850,10 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 10,
+            "score": 14,
             "evidence": [
-              "digital painting"
+              "digital painting",
+              "music"
             ]
           }
         },
@@ -5453,7 +5883,7 @@
         "provider": "peertube",
         "provider_id": "6efece70-20fa-4a68-88fe-85dad69c9ba7",
         "title": "Tutorial: Grayscale to Color - Krita Digital Painting - Character design",
-        "description": "A commented step-by-step guide and advice on how to paint an original fantasy character design from scratch in Krita. Timeline: - 00:00 Intro - 00:48 Setup - 02:05 Silhouette - 06:32 Lambert Lightning - 08:00 Grayscale painting ...",
+        "description": "A commented step-by-step guide and advice on how to paint an original fantasy character design from scratch in Krita. Timeline: - 00:00 Intro - 00:48 Setup - 02:05 Silhouette - 06:32 Lambert Lightning - 08:00 Grayscale painting - 10:30 Color - 15:10 Painting In the intro of this video I explain my interface: https://youtu.be/uYdEkOyFUn8 My brushes are here: https://youtu.be/s7rV88734pE Soundtrack: → Opening background: A Ghrà, CC-BY Damiano Baldoni opengameart.org → Intro: Fabian Measures - Hanami (CC-By) www.freemusicarchive.org www.soundcloud.com/fogheart → Background; Village Ambiance CC-BY Alexander Nakarada https://www.serpentsoundstudios.com/royalty-free-music/celtic-fantasy License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com Social Media: - Mastodon: https://framapiaf.org/@davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/6efece70-20fa-4a68-88fe-85dad69c9ba7",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5527,9 +5957,10 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 10,
+            "score": 14,
             "evidence": [
-              "digital painting"
+              "digital painting",
+              "music"
             ]
           }
         },
@@ -5559,7 +5990,7 @@
         "provider": "peertube",
         "provider_id": "4c128773-325c-4746-985e-521d2855451c",
         "title": "3 out of 5 Healthy Breakfast Lesson Plan: Nutrition Made Fun!",
-        "description": "The \"3 out of 5\" concept for a healthy breakfast can be hard to convey to children. (The \"3 out of 5\" concept is also taught in our fun, informative ‘Power up your breakfast game’ at http://bit.ly/1vnZXPE.) Looking for ideas for healthy eating les...",
+        "description": "The \"3 out of 5\" concept for a healthy breakfast can be hard to convey to children. (The \"3 out of 5\" concept is also taught in our fun, informative ‘Power up your breakfast game’ at http://bit.ly/1vnZXPE.) Looking for ideas for healthy eating lesson plans, including a lesson plan on the importance of a healthy breakfast? Look no further: this informative, fun video explains key concepts in a lively animated format kids will love. Eating breakfast is an important start to the day, and eating a balanced breakfast containing \"3 out of 5\" key food groups is really important. This fun video supplements your lesson plan with an informative easy excursion through various options for kids to have a healthy breakfast. Help kids learn to mix and match \"3 out of 5\" of key food groups such as milk and dairy, bread and grains, meat and beans and fruits and vegetables. Want even more fun, ideas or recipes? Visit us at http://www.healthyeating.org/. Visit us at www.HealthyEating.org for more information and follow our social channels! FACEBOOK: www.facebook.com/HealthyEatingCA TWITTER: www.facebook.com/HealthyEatingCA INSTAGRAM: www.instagram.com/HealthyEatingCA PINTEREST: www.pinterest.com/HealthyEatingCA",
         "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/4c128773-325c-4746-985e-521d2855451c",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5989,7 +6420,7 @@
         "provider": "peertube",
         "provider_id": "8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
         "title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://g...",
+        "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://github.com/stagfoo/joro //----------------Libraries------------------/// https://github.com/stagfoo/chumbucket https://github.com/visionmedia/page.js https://github.com/choojs/nanohtml",
         "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6219,6 +6650,154 @@
             "pedagogy_score": 48
           }
         }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+        "title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "description": "In this debut episode of The BMad Code Podcast, I sit down with Marten Angner, a 26-year UX veteran, digital product manager, and the creator of the Whiteport Design Studio (WDS), the first official community module in the BMad Method ecosystem. Marten founded Whiteport Studio in Stockholm in 2003 and has personally taught over 2,500 people how to sketch interfaces by hand. When AI hit, he went through the same panic most designers did. He tried the \"vibe coding\" tools, hated them, and went looking for something built for serious professionals. That search led him to BMad, and eventually to building the WDS. We talk about why most designers (and developers) are doing UX backwards, why the trigger map is the most valuable hour you will spend on a project, and why \"specifications are the new code\" is the shift every serious builder needs to make. If you have ever felt like AI was making you faster but dumber, this one is for you. Topics covered: - Why pixel-first design is the wrong starting point for AI-era software - The trigger map: business goals, target groups, driving forces (positive and negative) - Loss aversion, FOMO, and why fear motivates users more than benefit - Scenarios, selective ignorance, and the shortest path from natural starting point to value - Lo-fi wireframes as a tool for failing with grace - Why Figma is now an \"agent training tool,\" not a design destination - Naming every component so AI agents can actually work with your design - Specifications as the new code, and why AI agents love what developers throw away - The future role of designers as strategists and user researchers, not pixel pushers - How WDS plugs into the BMad Method to take you from product brief to working code ================================================================ LIN",
+        "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-2160-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 2187969975,
+            "resolution": "2160p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 485728739,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Bleme",
+          "source_title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+          "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 10,
+            "evidence": [
+              "vibe coding",
+              "vibe coding"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "vibe coding"
+            ],
+            "strong_description_matches": [
+              "vibe coding"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+        "title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "description": "*Note: Kenton has just released Cloudflare OS today: https://x.com/KentonVarda/status/2084990137180590572 This talk was recorded a month prior to launch.* Claude needed a strikethrough the slide app did not have, so it added one to the app. Asked to build a deck from a Google doc, it also added text centering and a box that accepts raw SVG, then generated the SVG for a diagram the app could not otherwise draw. That is Kenton Varda's argument in a single move. Software today ships from a developer to users whose feature requests die in Jira, and the escape hatch developers reach for is a plugin architecture rewrite that takes years and never lands. If a user's own agent can add the feature, the core app stays clean and nobody waits. Nothing in current infrastructure supports that. Mobile platforms will not run unsigned code, and 25 years of cloud architecture put one blessed version of every app on the developer's server. Gadgets is his answer, built on Cloudflare Workers with no containers and no database. Each gadget is a single instance of an app, one deck or one board, and sharing is implemented by the platform so the app itself cannot get access control wrong. The UI runs in a null origin iframe that can only postMessage to its parent, over a Cap'n Web RPC session to server code in a dynamic worker sandbox, so an XSS bug in vibecoded code has nothing left to leak. The whole demo ran locally on workerd, so a dead conference network cost him only the one call that needed a model. Speaker info: - https://x.com/KentonVarda - https://lanparty.house - https://github.com/cloudflare/workerd Timestamps: 0:00 - Personal AI codegen breaks cloud infrastructure 1:16 - How feature requests die today 2:35 - The plugin system rewrite trap 3:27 - What if users could add their own fe",
+        "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 89849511,
+            "resolution": "1080p",
+            "fps": 60,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 57610775,
+            "resolution": "720p",
+            "fps": 60,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Bleme",
+          "source_title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+          "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 10,
+            "evidence": [
+              "vibe coding",
+              "vibe coding"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "vibe coding"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
       }
     ],
     "prompt-engineering": [
@@ -6357,6 +6936,79 @@
           "prompt-engineering": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+        "title": "Il Prompt Engineering",
+        "description": "Esempi di prompt professionali e di applicazioni pratiche, in diverse aree professionali Area: Dummies Relatore: Lorenzo Bargnani (Invisible farm, https://www.invisiblefarm.it/)",
+        "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://video.linux.it/download/videos/6ba45fd5-b858-4b6d-9e39-7dda75036aa6-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 149932433,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.linux.it/download/videos/6ba45fd5-b858-4b6d-9e39-7dda75036aa6-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 103875374,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "LUGMan",
+          "source_title": "Il Prompt Engineering",
+          "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "prompt-engineering": {
+            "score": 10,
+            "evidence": [
+              "prompt engineering",
+              "prompt engineering"
+            ]
+          }
+        },
+        "pedagogy": {
+          "prompt-engineering": {
+            "strong_title_matches": [
+              "prompt engineering"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "prompt-engineering": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
           }
         }
       }
@@ -6712,9 +7364,116 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about Systems Thinking? Is it the same as non-linear thinking? Let’s find out together with Diana Montalion and Lisa Maria Moritz in this episode. Diana and Lisa will talk about Diana’s new book “Learning Systems Thinking: Essential Nonlinear Skills & Practices for Software Professionals”. Links * [Software Architecture Gathering](https://conferences.isaqb.org/software-architecture-gathering/) Code SATV_SAG15 for 15% off * [Diana Montalion: Learning Systems Thinking: Essential Nonlinear Skills and Practices for Software Professionals](https://amzn.to/4egWSJ7) * [Lisa Moritzs Training \"Sketchnotes in der IT\"](https://www.socreatory.com/de/trainings/sketchnotes) * [Lisa Moritz: \"Sketchnotes in der IT\"](https://amzn.to/4fDOXqA)",
+        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 1911000052,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 260879888,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 225051511,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 540467455,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 260480450,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 224646233,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Eberhard Wolff",
+          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 10,
+            "evidence": [
+              "systems thinking",
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "systems thinking"
+            ],
+            "strong_description_matches": [
+              "systems thinking"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "a4e1b73a-57fe-4460-9f0a-39d75cda843f",
         "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
-        "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing s...",
+        "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing software. In this episode, Xin Yao will give us an overview about systems thinking and her perspective on how it can help complex software efforts in large sociotechnical environments. Links * [Better Value - Sooner - Safer - Happier](https://www.soonersaferhappier.com/) * [Xin's talk at OOP](https://www.oop-konferenz.de/oop-2023-muenchen/programm/konferenzprogramm?li_fat_id=a38b29b5-feec-46ff-b5f5-e8509d883b8a#item-5814)",
         "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6979,111 +7738,6 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "logical-frameworks": {
-            "score": 10,
-            "evidence": [
-              "systems thinking",
-              "systems thinking"
-            ]
-          }
-        },
-        "pedagogy": {
-          "logical-frameworks": {
-            "strong_title_matches": [
-              "systems thinking"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "logical-frameworks": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about ...",
-        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 1911000052,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 260879888,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 225051511,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 540467455,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 260480450,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 224646233,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Eberhard Wolff",
-          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
         },
         "relevance": {
           "logical-frameworks": {
@@ -7723,8 +8377,216 @@
     ],
     "emergency-preparedness": [],
     "home-maintenance": [],
-    "career-work-skills": [],
+    "career-work-skills": [
+      {
+        "provider": "peertube",
+        "provider_id": "700aa369-e19b-4e30-b31f-ba381e297288",
+        "title": "How to Succeed in Skype Interviews in English - Job interview in English tips",
+        "description": "description…",
+        "source_url": "https://video.tedomum.net/videos/watch/700aa369-e19b-4e30-b31f-ba381e297288",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.tedomum.net/download/web-videos/700aa369-e19b-4e30-b31f-ba381e297288-360.webm",
+            "mime": "video/webm",
+            "bytes": 46365701,
+            "resolution": "360p",
+            "fps": -1,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "mlsuyt1",
+          "source_title": "How to Succeed in Skype Interviews in English - Job interview in English tips",
+          "source_url": "https://video.tedomum.net/videos/watch/700aa369-e19b-4e30-b31f-ba381e297288",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "career-work-skills": {
+            "score": 14,
+            "evidence": [
+              "job interview",
+              "interviews"
+            ]
+          }
+        },
+        "pedagogy": {
+          "career-work-skills": {
+            "strong_title_matches": [
+              "job interview"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "career-work-skills": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "9f0122a5-6bd0-4878-942b-bdcf575a5f4f",
+        "title": "Job Interview in English Lesson #1: Tell me about yourself",
+        "description": "description…",
+        "source_url": "https://video.tedomum.net/videos/watch/9f0122a5-6bd0-4878-942b-bdcf575a5f4f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.tedomum.net/download/web-videos/9f0122a5-6bd0-4878-942b-bdcf575a5f4f-360.webm",
+            "mime": "video/webm",
+            "bytes": 81462375,
+            "resolution": "360p",
+            "fps": -1,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "mlsuyt1",
+          "source_title": "Job Interview in English Lesson #1: Tell me about yourself",
+          "source_url": "https://video.tedomum.net/videos/watch/9f0122a5-6bd0-4878-942b-bdcf575a5f4f",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "career-work-skills": {
+            "score": 10,
+            "evidence": [
+              "job interview"
+            ]
+          }
+        },
+        "pedagogy": {
+          "career-work-skills": {
+            "strong_title_matches": [
+              "job interview"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "career-work-skills": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      }
+    ],
     "electronics-basics": [
+      {
+        "provider": "peertube",
+        "provider_id": "7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
+        "title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+        "description": "That's it - new soldering equipment time in my lab! My previous station (Solomon SL20) served me well for 15 years if not more, but I grew more and more impatient with having to wait until it heats up, and I work with SMT electronics pretty often, so I needed a modern iron for precise tips and a hot air station. Will this one deliver? Sure so! The intro was recorded later on after I found out I lost audio on a good part of the footage. Had this issue once before, got no idea why it's the case. Still gotta pin that pesky little bugger down... Anyway, I had some time to work with the new station, both hot air and iron, and am really satisfied with it. 0:00 Intro From the Future! 1:16 It's There 1:58 Goodbye, Solomon 4:45 New Iron 7:50 Back To The Past... Unboxing 18:00 Station Outside 20:20 Moving the Hot Air Handle Holder 24:00 Front Panel 25:30 No Warranty to Void? Take It Apart! 31:20 Grounding Check 35:08 Back Together... and Testing It! 44:17 Hot Air Test 48:00 Desoldering Station Accessories 51:45 Afterword Support me on my Patreon page at https://www.patreon.com/KeritechElectronics or via PayPal https://paypal.me/keritech Instagram - https://www.instagram.com/KeriSzafir Hackaday - https://hackaday.io/keritech #ElectronicsCreators #Keritech #Electronics",
+        "source_url": "https://makertube.net/videos/watch/7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://makertube.net/download/streaming-playlists/hls/videos/7bb03b6d-9710-4a46-a2db-021c4af7dfd8-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 1221267030,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://makertube.net/download/streaming-playlists/hls/videos/7bb03b6d-9710-4a46-a2db-021c4af7dfd8-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 659077585,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Keri Szafir",
+          "source_title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+          "source_url": "https://makertube.net/videos/watch/7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "electronics-basics": {
+            "score": 20,
+            "evidence": [
+              "electronics",
+              "soldering",
+              "electronics",
+              "soldering"
+            ]
+          }
+        },
+        "pedagogy": {
+          "electronics-basics": {
+            "strong_title_matches": [
+              "soldering"
+            ],
+            "strong_description_matches": [
+              "electronics",
+              "soldering"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 52
+          }
+        },
+        "selection": {
+          "electronics-basics": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 52
+          }
+        }
+      },
       {
         "provider": "peertube",
         "provider_id": "1122173a-fe5a-4f38-a15e-060851f179bb",
@@ -8001,81 +8863,7 @@
         }
       }
     ],
-    "woodworking-basics": [
-      {
-        "provider": "peertube",
-        "provider_id": "299634be-daa9-4367-a7d1-be64654c90f8",
-        "title": "Woodworking Design Rejected! Learning Amazon's Other Content Policy",
-        "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BE...",
-        "source_url": "https://video.fraxoweb.com/videos/watch/299634be-daa9-4367-a7d1-be64654c90f8",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC0",
-          "label": "Public Domain Dedication",
-          "url": "",
-          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/299634be-daa9-4367-a7d1-be64654c90f8-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 33531343,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/299634be-daa9-4367-a7d1-be64654c90f8-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 22983026,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Frank",
-          "source_title": "Woodworking Design Rejected! Learning Amazon's Other Content Policy",
-          "source_url": "https://video.fraxoweb.com/videos/watch/299634be-daa9-4367-a7d1-be64654c90f8",
-          "license": "Public Domain Dedication",
-          "license_url": ""
-        },
-        "relevance": {
-          "woodworking-basics": {
-            "score": 10,
-            "evidence": [
-              "woodworking",
-              "woodworking"
-            ]
-          }
-        },
-        "pedagogy": {
-          "woodworking-basics": {
-            "strong_title_matches": [
-              "woodworking"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 49
-          }
-        },
-        "selection": {
-          "woodworking-basics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 49
-          }
-        }
-      }
-    ],
+    "woodworking-basics": [],
     "sewing-textiles": [],
     "drawing-design": [
       {
@@ -8729,6 +9517,424 @@
     "statistics-data-literacy": [
       {
         "provider": "peertube",
+        "provider_id": "a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+        "title": "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "description": "We introduce sample spaces and the naive definition of probability (we'll get to the non-naive definition later). To apply the naive definition, we need to be able to count. So we introduce the multiplication rule, binomial coefficients, and the s...",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/a224e97c-f67c-4cbd-9a76-42d23fbe735e-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 175595558,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 1： Probability and Counting ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+        "title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "description": "We discuss the birthday problem (how many people do you need to have a 50% chance of there being 2 with the same birthday?), the matching problem (de Montmort), inclusion-exclusion, and properties of probability.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 215357082,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+        "title": "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "description": "We introduce conditional probability, independence of events, and Bayes' rule.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/7ec1769f-c185-4ddb-9d73-cfdb674995e9-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 240622288,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 4： Conditional Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+        "title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "description": "We continue further with conditional probability, and discuss the law of total probability, the so-called prosecutor's fallacy, a disease testing example, and the crucial distinction between independence and conditional independence.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/287bec4a-6717-4f2e-956b-09bb7db6b0d7-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 308676613,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "332961a8-c516-4604-8c7b-928d1988a465",
+        "title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "description": "We fill in the \"Bose-Einstein\" entry of the sampling table, and discuss story proofs. For example, proving Vandermonde's identity with a story is easier and more insightful than going through a tedious algebraic derivation. We then introduce the a...",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/332961a8-c516-4604-8c7b-928d1988a465-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 196752740,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 69
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 69
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
+        "title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+        "description": "We show how conditional probability sheds light on two of the most famous puzzles in statistics, both of which are often counterintuitive (at first): the Monty Hall problem and Simpson's paradox.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/5453a5e3-fd3b-4d47-85dd-de22c21ec58c-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 245719171,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics"
+            ],
+            "strong_description_matches": [
+              "statistics",
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 65
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 65
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "28780678-085f-4a41-be57-650a21a419e6",
         "title": "Quick Statistics and Visual Overview of Data in LabPlot",
         "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistic...",
@@ -8976,10 +10182,1754 @@
         }
       }
     ],
-    "law-rights-basics": []
+    "law-rights-basics": [],
+    "tarot-symbolism": [
+      {
+        "provider": "peertube",
+        "provider_id": "7c80db19-ca5d-463e-9abf-057d64b4a624",
+        "title": "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022",
+        "description": "Have you ever wondered, how does the #tarot work? This month WordcloudTarot and HappyToast are launching a New Deck: the Happy Toast deck. The easiest one to learn ever. The meanings are written on the cards. In celebration here's a five ...",
+        "source_url": "https://dalliance.network/videos/watch/7c80db19-ca5d-463e-9abf-057d64b4a624",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://dalliance.network/download/streaming-playlists/hls/videos/7c80db19-ca5d-463e-9abf-057d64b4a624-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 126776682,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "wordcloudtarot",
+          "source_title": "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022",
+          "source_url": "https://dalliance.network/videos/watch/7c80db19-ca5d-463e-9abf-057d64b4a624",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "tarot-symbolism": {
+            "score": 10,
+            "evidence": [
+              "tarot",
+              "tarot"
+            ]
+          }
+        },
+        "pedagogy": {
+          "tarot-symbolism": {
+            "strong_title_matches": [
+              "tarot"
+            ],
+            "strong_description_matches": [
+              "tarot"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "tarot-symbolism": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      }
+    ],
+    "mythology-folklore": [
+      {
+        "provider": "peertube",
+        "provider_id": "ec57d93d-6e96-45bd-8e80-49d446282db8",
+        "title": "ESL - What are Myths？",
+        "description": "What is a myth, legend and folktale?. In this video, Mr. P. will find the answers to that question. He will also explain clearly the difference between creation and heroic myths. This lesson is designed for intermediate students who wish to improv...",
+        "source_url": "https://diler.tube/videos/watch/ec57d93d-6e96-45bd-8e80-49d446282db8",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/ec57d93d-6e96-45bd-8e80-49d446282db8-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 16257148,
+            "resolution": "720p",
+            "fps": 60,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/ec57d93d-6e96-45bd-8e80-49d446282db8-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 12158342,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - What are Myths？",
+          "source_url": "https://diler.tube/videos/watch/ec57d93d-6e96-45bd-8e80-49d446282db8",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "mythology-folklore": {
+            "score": 10,
+            "evidence": [
+              "myths"
+            ]
+          }
+        },
+        "pedagogy": {
+          "mythology-folklore": {
+            "strong_title_matches": [
+              "myths"
+            ],
+            "strong_description_matches": [
+              "myths"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "mythology-folklore": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      }
+    ],
+    "meditation-mindfulness": [],
+    "communication-conflict": [],
+    "parenting-caregiving": [
+      {
+        "provider": "peertube",
+        "provider_id": "9c41ef16-447e-42fe-87b7-bb24ab3b5802",
+        "title": "Parenting - Blender 2.80 Fundamentals",
+        "description": "Blender is Free and Open Source Software Download: https://blender.org/download Manual: https://docs.blender.org/manual/en/latest/ Support core Blender development - https://fund.blender.org -- This tutorial is part of the Blender Fundame...",
+        "source_url": "https://video.blender.org/videos/watch/9c41ef16-447e-42fe-87b7-bb24ab3b5802",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 42934688,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 26202168,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 17094347,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 13414777,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/9c41ef16-447e-42fe-87b7-bb24ab3b5802-240.mp4",
+            "mime": "video/mp4",
+            "bytes": 10347126,
+            "resolution": "240p",
+            "fps": 24,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Blender",
+          "source_title": "Parenting - Blender 2.80 Fundamentals",
+          "source_url": "https://video.blender.org/videos/watch/9c41ef16-447e-42fe-87b7-bb24ab3b5802",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "parenting-caregiving": {
+            "score": 10,
+            "evidence": [
+              "parenting",
+              "parenting"
+            ]
+          }
+        },
+        "pedagogy": {
+          "parenting-caregiving": {
+            "strong_title_matches": [
+              "parenting"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "parenting-caregiving": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      }
+    ],
+    "gardening-plants": [],
+    "entrepreneurship-small-business": [
+      {
+        "provider": "peertube",
+        "provider_id": "61802aa3-a02a-419b-aafc-70a5d6861fe7",
+        "title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
+        "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and s...",
+        "source_url": "https://tube.xy-space.de/videos/watch/61802aa3-a02a-419b-aafc-70a5d6861fe7",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.xy-space.de/download/web-videos/61802aa3-a02a-419b-aafc-70a5d6861fe7-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 127302396,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.xy-space.de/download/streaming-playlists/hls/videos/61802aa3-a02a-419b-aafc-70a5d6861fe7-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 127099062,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Nashat Mostafa",
+          "source_title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
+          "source_url": "https://tube.xy-space.de/videos/watch/61802aa3-a02a-419b-aafc-70a5d6861fe7",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "entrepreneurship-small-business": {
+            "score": 10,
+            "evidence": [
+              "business model",
+              "business model"
+            ]
+          }
+        },
+        "pedagogy": {
+          "entrepreneurship-small-business": {
+            "strong_title_matches": [
+              "business model"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "entrepreneurship-small-business": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      }
+    ],
+    "music-performance": [
+      {
+        "provider": "peertube",
+        "provider_id": "ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
+        "title": "a track i made for music theory back in high school",
+        "description": "i made this track in OpenMPT back in high school for that one music theory class i took one semester i remembered it while trying to compose a theme for a stage in support mage RPG, and i think i'll remake this for the game instead of coming up...",
+        "source_url": "https://makertube.net/videos/watch/ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC0",
+          "label": "Public Domain Dedication",
+          "url": "",
+          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://makertube.net/download/streaming-playlists/hls/videos/ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 3055432,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://makertube.net/download/streaming-playlists/hls/videos/ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 2627499,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "gogolassy",
+          "source_title": "a track i made for music theory back in high school",
+          "source_url": "https://makertube.net/videos/watch/ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
+          "license": "Public Domain Dedication",
+          "license_url": ""
+        },
+        "relevance": {
+          "music-performance": {
+            "score": 14,
+            "evidence": [
+              "music theory",
+              "music"
+            ]
+          }
+        },
+        "pedagogy": {
+          "music-performance": {
+            "strong_title_matches": [
+              "music theory"
+            ],
+            "strong_description_matches": [
+              "music theory"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 57
+          }
+        },
+        "selection": {
+          "music-performance": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 57
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5fbf19f2-0e52-486b-a910-362a5e414b5d",
+        "title": "All MINOR Scales Explained on the Piano (Music Theory)",
+        "description": "I've written an entire booklet explaining all about our Minor scales lesson. Download here: https://www.patreon.com/posts/70373471?pr=true (Patreon) In this Music Theory lesson, we cover all the minor scales and how to form them on the Piano. T...",
+        "source_url": "https://peer.raise-uav.com/videos/watch/5fbf19f2-0e52-486b-a910-362a5e414b5d",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://peer.raise-uav.com/download/streaming-playlists/hls/videos/5fbf19f2-0e52-486b-a910-362a5e414b5d-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 331102912,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peer.raise-uav.com/download/streaming-playlists/hls/videos/5fbf19f2-0e52-486b-a910-362a5e414b5d-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 138333948,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "thomas",
+          "source_title": "All MINOR Scales Explained on the Piano (Music Theory)",
+          "source_url": "https://peer.raise-uav.com/videos/watch/5fbf19f2-0e52-486b-a910-362a5e414b5d",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "music-performance": {
+            "score": 14,
+            "evidence": [
+              "music theory",
+              "music"
+            ]
+          }
+        },
+        "pedagogy": {
+          "music-performance": {
+            "strong_title_matches": [
+              "music theory"
+            ],
+            "strong_description_matches": [
+              "music theory"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "music-performance": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a71715c3-bf6c-4e92-a43e-cfc42e08e6c9",
+        "title": "Lecture 3. Rhythm: Fundamentals",
+        "description": "Listening to Music (MUSI 112) In this lecture, Professor Wright explains the basic system of Western musical notation, and offers an interpretation of its advantages and disadvantages. He also discusses the fundamental principles of rhythm, ela...",
+        "source_url": "https://peer.raise-uav.com/videos/watch/a71715c3-bf6c-4e92-a43e-cfc42e08e6c9",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://peer.raise-uav.com/download/streaming-playlists/hls/videos/a71715c3-bf6c-4e92-a43e-cfc42e08e6c9-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 135588512,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "thomas",
+          "source_title": "Lecture 3. Rhythm: Fundamentals",
+          "source_url": "https://peer.raise-uav.com/videos/watch/a71715c3-bf6c-4e92-a43e-cfc42e08e6c9",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "music-performance": {
+            "score": 14,
+            "evidence": [
+              "rhythm",
+              "music",
+              "rhythm"
+            ]
+          }
+        },
+        "pedagogy": {
+          "music-performance": {
+            "strong_title_matches": [
+              "rhythm"
+            ],
+            "strong_description_matches": [
+              "rhythm"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "music-performance": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5452ab6c-2001-41a4-a30e-cbe24e28918c",
+        "title": "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
+        "description": "📚 My handwritten notes & staff notation for this lesson and all others are waiting for you on Patreon (5$) - https://www.patreon.com/posts/91628804?pr=true In this Music Theory Tutorial, I teach you 2️⃣ “tried & tested” ways to figure out chor...",
+        "source_url": "https://peer.raise-uav.com/videos/watch/5452ab6c-2001-41a4-a30e-cbe24e28918c",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://peer.raise-uav.com/download/streaming-playlists/hls/videos/5452ab6c-2001-41a4-a30e-cbe24e28918c-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 238941968,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peer.raise-uav.com/download/streaming-playlists/hls/videos/5452ab6c-2001-41a4-a30e-cbe24e28918c-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 97708728,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "thomas",
+          "source_title": "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
+          "source_url": "https://peer.raise-uav.com/videos/watch/5452ab6c-2001-41a4-a30e-cbe24e28918c",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "music-performance": {
+            "score": 14,
+            "evidence": [
+              "music theory",
+              "music"
+            ]
+          }
+        },
+        "pedagogy": {
+          "music-performance": {
+            "strong_title_matches": [
+              "music theory"
+            ],
+            "strong_description_matches": [
+              "music theory"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "music-performance": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "f0c45c99-08ca-46ae-82e9-e6276be56623",
+        "title": "THEORY: Music Theory Basics Part #1 - Keys and Pitch",
+        "description": "#Musictheroy #Sclaes #Bitwig For beginners and newcomers, the basics in “never forget format”. And all you need to know are the first letters of the alphabet. Bonus: Why is the B in Germany called H! \"Den Sound dort machen, wo er entsteht...",
+        "source_url": "https://mytube.madzel.de/videos/watch/f0c45c99-08ca-46ae-82e9-e6276be56623",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://mytube.madzel.de/download/streaming-playlists/hls/videos/f0c45c99-08ca-46ae-82e9-e6276be56623-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 20043290,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://mytube.madzel.de/download/streaming-playlists/hls/videos/f0c45c99-08ca-46ae-82e9-e6276be56623-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 25509204,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://mytube.madzel.de/download/streaming-playlists/hls/videos/f0c45c99-08ca-46ae-82e9-e6276be56623-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 22021141,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Odo Sendaidokai",
+          "source_title": "THEORY: Music Theory Basics Part #1 - Keys and Pitch",
+          "source_url": "https://mytube.madzel.de/videos/watch/f0c45c99-08ca-46ae-82e9-e6276be56623",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "music-performance": {
+            "score": 14,
+            "evidence": [
+              "music theory",
+              "music"
+            ]
+          }
+        },
+        "pedagogy": {
+          "music-performance": {
+            "strong_title_matches": [
+              "music theory"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "music-performance": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      }
+    ],
+    "language-learning": [
+      {
+        "provider": "peertube",
+        "provider_id": "dd25c9d7-09f3-4fe7-8d30-b8f573b8e5b4",
+        "title": "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "description": "Students have requested lessons on vocabulary, so in this lesson, Mr. P./Marc will delve into the difference between \"been\" and \"being.\" Both these participles can be easily confused among students of English. In this lesson, Mr. P. will explain t...",
+        "source_url": "https://diler.tube/videos/watch/dd25c9d7-09f3-4fe7-8d30-b8f573b8e5b4",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/dd25c9d7-09f3-4fe7-8d30-b8f573b8e5b4-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 52475539,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/dd25c9d7-09f3-4fe7-8d30-b8f573b8e5b4-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 14841040,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+          "source_url": "https://diler.tube/videos/watch/dd25c9d7-09f3-4fe7-8d30-b8f573b8e5b4",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 24,
+            "evidence": [
+              "English vocabulary",
+              "vocabulary lesson",
+              "vocabulary"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English vocabulary",
+              "vocabulary lesson"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 68
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 68
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Continuous — Teaching Ideas — 2.webm",
+        "title": "English Grammar — Present Continuous — Teaching Ideas — 2",
+        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. The TEFL lesson in this video can be found in our 140-hour online TEFL certification course.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 2841607,
+            "provider_sha1": "4cb8123a80ae5416ff295f1325cc9e110653f074",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Continuous — Teaching Ideas — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [
+              "English grammar"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Contiuous — Teaching Ideas — 3.webm",
+        "title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
+        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. . ///",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3557521,
+            "provider_sha1": "8c650a73239f91c3e60c171fc06603b5768e4232",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [
+              "English grammar"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "7f7b757d-358e-4b92-a923-f016fa561023",
+        "title": "Starting to learn Taiwanese: Language Learning Journey 1",
+        "description": "I recently started a language learning journey to learn Taiwanese (Tâi-gí). This is a brief overview of how I started and what I did to find resources and start studying. I also describe confusion I encountered due to the wide variety of Taiwanese...",
+        "source_url": "https://neat.tube/videos/watch/7f7b757d-358e-4b92-a923-f016fa561023",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://neat.tube/download/streaming-playlists/hls/videos/7f7b757d-358e-4b92-a923-f016fa561023-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 168083390,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://neat.tube/download/streaming-playlists/hls/videos/7f7b757d-358e-4b92-a923-f016fa561023-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 85865921,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://neat.tube/download/streaming-playlists/hls/videos/7f7b757d-358e-4b92-a923-f016fa561023-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 49438091,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://neat.tube/download/streaming-playlists/hls/videos/7f7b757d-358e-4b92-a923-f016fa561023-240-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 22288487,
+            "resolution": "240p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Benjamin Fan",
+          "source_title": "Starting to learn Taiwanese: Language Learning Journey 1",
+          "source_url": "https://neat.tube/videos/watch/7f7b757d-358e-4b92-a923-f016fa561023",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "language learning",
+              "language learning"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "language learning"
+            ],
+            "strong_description_matches": [
+              "language learning"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Perfect — Teaching Ideas — 2.webm",
+        "title": "English Grammar — Present Perfect — Teaching Ideas — 2",
+        "description": "The teaching idea covered in this video is a fun group game that should generate a good deal of student talk time using the Present Perfect tense. The students will be in small groups and each student will have the question sheet with a number of pictures and word prompts. Students take turns forming their question with the aid of the prompts. The groups then give their answers using the Present Perfect. The prompts include: win/a competition, go/scuba-diving, meet/ a famous person The questions would be: Have you ever won a competition?, Have you ever been scuba-diving?, Have you ever met a famous person? Group members would answer, Yes I have...., No I haven't... After a given amount of time each group share their answers with the class. The teacher could then encourage the class to come up with their own prompts and repeat the game. One area within the EFL industry that is very popular is that of teaching individual students. A game like the activity above could be adapted for one student. There is a demand for one to one lessons particularly in the business world. These types of lessons allow the teacher to focus specifically on the particular needs and wants of one student. Another advantage for the teacher is that you are only teaching to one level. These students are usually highly motivated.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3849512,
+            "provider_sha1": "d87575989d8e9b454e05a0d4a7875f8c2f9104ab",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Perfect — Teaching Ideas — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Simple — Teaching Ideas — 1.webm",
+        "title": "English Grammar — Present Simple — Teaching Ideas — 1",
+        "description": "The teaching ideas in these ITTT videos are intended to be used in the Activate stage of a lesson. During this stage students are encouraged to use the language as freely and communicatively as possible. The focus is more on the fluency than on the accuracy of the language. When selecting any activity it is important to ensure that the timing is appropriate and that the activity is appropriate for the students' age, language levels, class size, interests and culture. The video looks at one of three teaching ideas for Present Simple. The activity is called \"Find someone who....\" Each student will be given a sheet with a number of facts/habits/routines. For example ...plays a musical instrument,.....does a lot of sport, ....has a brother and a sister. The students then mill around and interview each other asking, \"Do you play a musical instrument?\" \"Do you play a lot of sport?\" Do you have a brother and a sister?\" Students should respond using the Present Simple, \"Yes I do\",\"No I don't.\" The students record names next to the specific fact, for example, Jim plays a lot of sport. After a specified time the students will share their findings with the class.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/b/be/English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 6934862,
+            "provider_sha1": "58292eb5dc6395c157dbd1402c72d15beffea641",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Simple — Teaching Ideas — 1",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "29bbd717-464a-420e-b5a6-5981c30aca0b",
+        "title": "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "description": "description…",
+        "source_url": "https://video.tedomum.net/videos/watch/29bbd717-464a-420e-b5a6-5981c30aca0b",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.tedomum.net/download/web-videos/29bbd717-464a-420e-b5a6-5981c30aca0b-360.webm",
+            "mime": "video/webm",
+            "bytes": 42994927,
+            "resolution": "360p",
+            "fps": -1,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "mlsuyt1",
+          "source_title": "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+          "source_url": "https://video.tedomum.net/videos/watch/29bbd717-464a-420e-b5a6-5981c30aca0b",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 18,
+            "evidence": [
+              "English grammar",
+              "vocabulary",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a9b13538-31c4-49c7-bc60-7bd64cc9b1e0",
+        "title": "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "description": "In this video, Mr. P. will give guidelines on how to give a good oral presentation in school or even at work. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts abo...",
+        "source_url": "https://diler.tube/videos/watch/a9b13538-31c4-49c7-bc60-7bd64cc9b1e0",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/a9b13538-31c4-49c7-bc60-7bd64cc9b1e0-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 17001713,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+          "source_url": "https://diler.tube/videos/watch/a9b13538-31c4-49c7-bc60-7bd64cc9b1e0",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Continuous — Structure.webm",
+        "title": "English Grammar — Present Continuous — Structure",
+        "description": "This TEFL certification video explores the structure of the present continuous tense. Tense forms have specific structures that TEFL teachers will need to know before they get a TEFL job. Even if grammar wasn't a strong point at school, our TEFL training courses will give you the lessons you need to conduct meaningful and productive EFL lessons. ///",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3653409,
+            "provider_sha1": "28318443cccb3f7e1d2bafe833917481231a7a84",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Continuous — Structure",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Perfect — Structure — 2.webm",
+        "title": "English Grammar — Present Perfect — Structure — 2",
+        "description": "This ITTT video is the second part of a lesson looking at the structure of the Present Perfect tense. It reviews an example of the structure with a regular verb -- played. I/you/we/they have played. She/He/It has played. The video then examines some of the spelling patterns that are used with irregular verbs. For example, verbs ending with a consonant + y. cry changes to cried, try changes to tried. Another spelling pattern with irregular verbs ending with a consonant + a vowel + a consonant Shop changes to shopped, ship changes to shipped. When teaching this particular point, as with other grammar points, it is important to explain to students that there are exceptions to most rules in the English language. Where specific patterns exist we need to introduce them to our students.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 2410285,
+            "provider_sha1": "d5b798ec9e81c0524e060408e3dd2acb47b8ad2e",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Perfect — Structure — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
+        "title": "ESL - Expletive sentences (there, here, it)",
+        "description": "Expletive constructions are phrases or sentences that begin with “There are,” “There is,” “It is,” “It was, \"\"Here comes,\" etc. The verb “to be” is also part of many of these uninspired sentences. In this lesson, Mr. P. will give an easy explanat...",
+        "source_url": "https://diler.tube/videos/watch/c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/c93f88b8-89ae-46e7-a440-6d2f120b2bd3-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 56546586,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/c93f88b8-89ae-46e7-a440-6d2f120b2bd3-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 30208836,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - Expletive sentences (there, here, it)",
+          "source_url": "https://diler.tube/videos/watch/c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a55993c8-ef7b-44ec-ae66-f79540df0301",
+        "title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+        "description": "In this mini-lesson, the student will learn about the eight parts of speech. Mr. P. will introduce nouns, pronouns, verbs, adjectives, prepositions, adverbs, conjunctions, and interjections with easy examples. This lesson is designed for beginne...",
+        "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/a55993c8-ef7b-44ec-ae66-f79540df0301-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 12862681,
+            "resolution": "1080p",
+            "fps": 60,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/a55993c8-ef7b-44ec-ae66-f79540df0301-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 8873042,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+          "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+        "title": "ESL - Sentence Structures： Simple, Compound and Complex",
+        "description": "In this lesson, Mr. P. will discuss three sentence types: Simple, complex and compound. He will also explain coordinating and subordinating conjunctions using them in complex and compound sentences. This lesson is designed for beginners who wish...",
+        "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 26610298,
+            "resolution": "1080p",
+            "fps": 59,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 15758913,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - Sentence Structures： Simple, Compound and Complex",
+          "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "7c3488cf-7a0c-4e67-95c5-4ce053d8039e",
+        "title": "ESL - Subordinating Conjunctions",
+        "description": "Conjunctions are words that join words and sentences together. In this lesson, Mr. P. will discuss subordinating conjunctions. They are those that are attached to dependent clauses, so they cannot stand alone to give complete thought or meaning to...",
+        "source_url": "https://diler.tube/videos/watch/7c3488cf-7a0c-4e67-95c5-4ce053d8039e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/7c3488cf-7a0c-4e67-95c5-4ce053d8039e-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 36517744,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/7c3488cf-7a0c-4e67-95c5-4ce053d8039e-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 18848674,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - Subordinating Conjunctions",
+          "source_url": "https://diler.tube/videos/watch/7c3488cf-7a0c-4e67-95c5-4ce053d8039e",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "30ad7444-5c32-455e-b548-9b0a3bba93b1",
+        "title": "ESL Writing - Summarizing and Paraphrasing",
+        "description": "In this video, Mr. P. will discuss the difference between summarizing and paraphrasing by giving easy examples taken from the book Writing - A journey by Faigley and Rubens. He will provide tips on how to improve your writing and avoid plagiarism....",
+        "source_url": "https://diler.tube/videos/watch/30ad7444-5c32-455e-b548-9b0a3bba93b1",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/30ad7444-5c32-455e-b548-9b0a3bba93b1-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 58964756,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/30ad7444-5c32-455e-b548-9b0a3bba93b1-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 23639404,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL Writing - Summarizing and Paraphrasing",
+          "source_url": "https://diler.tube/videos/watch/30ad7444-5c32-455e-b548-9b0a3bba93b1",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      }
+    ]
   },
   "title_quality_gate": {
-    "schema": "civweave.open-learning-media-title-quality-gate.v1",
-    "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary."
+    "schema": "civweave.open-learning-media-title-quality-gate.v2",
+    "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."
   }
 }
