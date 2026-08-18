@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.31-core-support-link-v1';
+const VERSION='1.0.32-creator-suite-download-v1';
 const DAY_LOGO='/app/logos/civweave-day-logo.jpg';
 const NIGHT_LOGO='/app/logos/civweave-night-logo.jpg';
 const CANONICAL_LOGO=DAY_LOGO;
@@ -11,6 +11,7 @@ const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_RUNTIME='/app/japanese-mode-v1.js?v=japanese-shell-language-v2';
 const JAPANESE_SHELL_COPY='/app/japanese-shell-copy-v1.js?v=japanese-shell-language-v2';
 const SUPPORT_URL='https://www.patreon.com/c/Civweave';
+const CREATOR_SUITE_URL='/creator-suite/';
 
 function wantsJapanese(){
   try{
@@ -61,6 +62,34 @@ function installInstallerDeliveryBridge(){
   script.async=false;
   script.dataset.civweaveHubDeliveryIntent='v1';
   document.head?.append(script);
+  return true;
+}
+
+function ensureCreatorSuiteLink(){
+  if(location.pathname!=='/app/index.html')return false;
+  if(document.querySelector('[data-civweave-creator-suite-download]'))return true;
+  const footer=document.querySelector('.quest-footer-note');
+  const main=document.querySelector('main.gateway');
+  if(!main)return false;
+  const panel=document.createElement('aside');
+  panel.dataset.civweaveCreatorSuiteDownload='';
+  panel.setAttribute('aria-label','Optional Creator Suite download');
+  panel.style.cssText='max-width:760px;margin:12px auto;padding:12px;border:1px solid #8de5ef55;border-radius:14px;background:#07151fcc;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#dffcff;';
+  const copy=document.createElement('span');
+  copy.style.cssText='display:grid;gap:3px;min-width:0;flex:1 1 360px;';
+  const title=document.createElement('strong');
+  title.textContent='Creator Suite — optional separate download';
+  const detail=document.createElement('small');
+  detail.textContent='Install the offline-first text, audio, and video workspace with tracked human/AI creation provenance. It is not bundled with Civweave core.';
+  detail.style.cssText='color:#b9cbd1;line-height:1.4;';
+  const link=document.createElement('a');
+  link.href=CREATOR_SUITE_URL;
+  link.textContent='Download Creator Suite';
+  link.setAttribute('aria-label','Open the separate Civweave Creator Suite download');
+  link.style.cssText='display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 11px;border:1px solid #8de5ef77;border-radius:10px;background:#12303a;color:#efffff;text-decoration:none;font-weight:850;white-space:nowrap;';
+  copy.append(title,detail);
+  panel.append(copy,link);
+  if(footer)footer.insertAdjacentElement('beforebegin',panel);else main.append(panel);
   return true;
 }
 
@@ -115,6 +144,7 @@ function apply(){
   installLanguageRuntime();
   bindEnglishLanguageControl();
   installInstallerDeliveryBridge();
+  ensureCreatorSuiteLink();
   ensureInstallerSupportLink();
   return true;
 }
@@ -134,6 +164,8 @@ globalThis.CivweaveBrand=Object.freeze({
   installLanguageRuntime,
   ensureEnglishLanguageControl:bindEnglishLanguageControl,
   installInstallerDeliveryBridge,
+  ensureCreatorSuiteLink,
+  creatorSuiteUrl:CREATOR_SUITE_URL,
   ensureInstallerSupportLink,
   supportUrl:SUPPORT_URL,
   logoForLocalClock,
