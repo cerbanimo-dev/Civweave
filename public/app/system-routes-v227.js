@@ -2,6 +2,8 @@
 'use strict';
 const VERSION='1.0.163';
 const REVISION='five-system-route-contract-v227';
+const SHELL_REVISION='persistent-family-shell-v1';
+const SHELL_PATH='/app/fullscreen-family-v104.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const ROUTES=Object.freeze({
   civweave:Object.freeze({id:'civweave',label:'Civweave',pathname:'/app/working-campus-v156.html',params:Object.freeze({})}),
@@ -30,7 +32,7 @@ function authorize(){
   try{globalThis.sessionStorage?.setItem('civweave.install-boundary.boot.v226','1')}catch{}
   return true;
 }
-function urlFor(id,options={}){
+function directUrlFor(id,options={}){
   const route=routeFor(id)||ROUTES.civweave;
   const origin=options.origin||globalThis.location?.origin||'https://civweave.invalid';
   const url=new URL(route.pathname,origin);
@@ -40,8 +42,35 @@ function urlFor(id,options={}){
   url.searchParams.set('version',String(options.version||VERSION));
   if(options.source)url.searchParams.set('source',String(options.source));
   if(options.weave)url.searchParams.set('weave',String(options.weave));
+  if(options.feature)url.searchParams.set('feature',String(options.feature));
   if(options.developer)url.searchParams.set('developer','1');
+  if(options.recovery)url.searchParams.set('recovery',String(options.recovery));
   return url;
+}
+function shellUrlFor(id,options={}){
+  const route=routeFor(id)||ROUTES.civweave;
+  const origin=options.origin||globalThis.location?.origin||'https://civweave.invalid';
+  const url=new URL(SHELL_PATH,origin);
+  url.searchParams.set('installed','1');
+  url.searchParams.set('system',route.id);
+  url.searchParams.set('navigation',REVISION);
+  url.searchParams.set('shell',SHELL_REVISION);
+  url.searchParams.set('version',String(options.version||VERSION));
+  if(options.source)url.searchParams.set('source',String(options.source));
+  if(options.weave)url.searchParams.set('weave',String(options.weave));
+  if(options.feature)url.searchParams.set('feature',String(options.feature));
+  if(options.developer)url.searchParams.set('developer','1');
+  if(options.recovery)url.searchParams.set('recovery',String(options.recovery));
+  return url;
+}
+function shouldUseDirect(options={}){
+  if(options.direct===true||options.shell===false)return true;
+  if(options.shell===true)return false;
+  if(typeof window==='undefined')return true;
+  return window.self!==window.top;
+}
+function urlFor(id,options={}){
+  return shouldUseDirect(options)?directUrlFor(id,options):shellUrlFor(id,options);
 }
 function navigate(id,options={}){
   authorize();
@@ -50,11 +79,10 @@ function navigate(id,options={}){
   return url.href;
 }
 function routes(){return Object.values(ROUTES)}
-const api=Object.freeze({version:VERSION,revision:REVISION,bootKey:BOOT_KEY,routeFor,routes,identify,isCanonicalPath,authorize,urlFor,navigate});
+const api=Object.freeze({version:VERSION,revision:REVISION,shellRevision:SHELL_REVISION,shellPath:SHELL_PATH,bootKey:BOOT_KEY,routeFor,routes,identify,isCanonicalPath,authorize,directUrlFor,shellUrlFor,urlFor,navigate});
 globalThis.CivweaveSystemRoutesV227=api;
 if(typeof document!=='undefined'&&identify()){
   authorize();
   document.documentElement.dataset.civweaveSystemRoute=identify();
 }
 })();
-
