@@ -1,0 +1,13 @@
+import baseWorker,{CivweaveGuildEdgeState} from './index.mjs';
+
+export {CivweaveGuildEdgeState};
+const RECEIPT_KIND='civweave.creation-receipt.v1';
+const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
+const normalizeNodeId=value=>clean(value,120).toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+function receiptGuildId(object){if(object?.kind!==RECEIPT_KIND||object?.consent!=='group'||!Array.isArray(object.audience))return'';const audience=object.audience.find(value=>String(value).startsWith('guild:'));return normalizeNodeId(String(audience||'').slice(6))}
+function nodeCloudOrigin(env,nodeId){const explicit=clean(env.CIVWEAVE_NODE_CLOUD_ORIGIN,2000);if(explicit){const value=explicit.includes('{nodeId}')?explicit.replaceAll('{nodeId}',encodeURIComponent(nodeId)):explicit;const url=new URL(value);if(url.protocol!=='https:')throw new Error('Creator provenance node-cloud origin must use HTTPS.');return url.origin}const domain=clean(env.CIVWEAVE_NODE_CLOUD_DOMAIN||'nodes.commonweave.earth',255).toLowerCase().replace(/^\.+|\.+$/g,'');if(!/^[a-z0-9.-]+$/.test(domain))throw new Error('Creator provenance node-cloud domain is invalid.');return`https://${nodeId}.${domain}`}
+async function forwardReceipt(env,object){const nodeId=receiptGuildId(object);if(!nodeId)return{forwarded:false,reason:'not-guild-receipt'};const target=new URL('/api/node/creator-provenance/receipt',nodeCloudOrigin(env,nodeId));target.searchParams.set('nodeId',nodeId);const response=await fetch(target,{method:'POST',headers:{'content-type':'application/json','x-civweave-node-id':nodeId},body:JSON.stringify({object})});if(!response.ok){const body=await response.text().catch(()=>'');throw new Error(`Guild provenance receipt forward failed (${response.status})${body?`: ${body.slice(0,300)}`:''}`)}return{forwarded:true,nodeId}}
+export default{
+  async fetch(request,env,ctx){let receipt=null;if(request.method==='POST'&&new URL(request.url).pathname==='/api/envelopes'){const input=await request.clone().json().catch(()=>null);if(input?.schema==='civweave.community-object-envelope.v1'&&input?.payload?.kind===RECEIPT_KIND)receipt=input.payload}const response=await baseWorker.fetch(request,env,ctx);if(receipt&&response.ok){const work=forwardReceipt(env,receipt).catch(error=>console.error('[Civweave] Creator provenance receipt forwarding failed',error));if(ctx?.waitUntil)ctx.waitUntil(work);else work.catch(()=>{})}return response}
+};
+export{forwardReceipt,nodeCloudOrigin,receiptGuildId};
