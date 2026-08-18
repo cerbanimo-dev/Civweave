@@ -3,37 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Civweave Cryptographic Starmap v1</title>
+  <title>Civweave Weave Starmap v1</title>
   <style>
     html,body{margin:0;min-height:100%;background:#02030a;color:#fff;font-family:system-ui,sans-serif}
     main{max-width:1100px;margin:0 auto;padding:24px}
-    h1{font-size:22px;margin:0 0 6px}
-    p{opacity:.72;margin:0 0 18px}
-    #map{height:720px}
+    h1{font-size:22px;margin:0 0 6px} p{opacity:.72;margin:0 0 18px} #map{height:720px}
     #selection{margin-top:12px;font:12px ui-monospace,monospace;opacity:.82;overflow-wrap:anywhere}
   </style>
 </head>
 <body>
   <main>
-    <h1>Cryptographic Starmap</h1>
-    <p>Each star is one four-position beat. Colored paths connect exact inherited position UIDs.</p>
+    <h1>Weave Starmap</h1>
+    <p>Each star is a Chord. Each colored path is a Stitch joining exact position UIDs.</p>
     <div id="map"></div>
     <div id="selection">Select a colored position.</div>
   </main>
   <script type="module">
-    import { createCryptographicChain } from './shared/civweave-cryptographic-map-v1.mjs';
-    import { renderCryptographicStarmap } from './cryptographic-starmap-v1.mjs';
+    import { createWeave } from './shared/civweave-cryptographic-map-v1.mjs';
+    import { renderWeaveStarmap } from './cryptographic-starmap-v1.mjs';
 
     const names = ['Spark','Call','Stakes','Counsel','Muster','Threshold','First Trial','Road of Trials','Deepening','Descent','Ordeal','Breakthrough','Claim','Homeward Road','Reckoning','Gift'];
-    const records = await createCryptographicChain(names.map((beat, index) => ({ beat, index })), {
-      namespace: 'civweave.quest-beat.demo',
-      payloadRef: (row) => row.beat,
+    const weave = await createWeave(names.map((beat, index) => ({ beat, index })), {
+      namespace: 'civweave.quest-beat.demo', payloadRef: (row) => row.beat,
     });
-    const map = renderCryptographicStarmap(document.querySelector('#map'), records);
+    const map = renderWeaveStarmap(document.querySelector('#map'), weave);
     document.querySelector('#map').addEventListener('civweave:starmap-position-select', (event) => {
-      const { position, successors } = event.detail;
-      document.querySelector('#selection').textContent = `${position.positionUid} · ${position.colorCode} · next relatives: ${successors.map((row) => row.record.recordUid).join(', ') || 'none'}`;
-      if (successors[0]) map.focusRecord(successors[0].record.recordUid);
+      const { position, stitches, successors } = event.detail;
+      document.querySelector('#selection').textContent = `${position.positionUid} · ${position.colorCode} · Stitches: ${stitches.length} · next Chords: ${successors.map((row) => row.chord.chordUid).join(', ') || 'none'}`;
+      if (successors[0]) map.focusChord(successors[0].chord.chordUid);
     });
   </script>
 </body>

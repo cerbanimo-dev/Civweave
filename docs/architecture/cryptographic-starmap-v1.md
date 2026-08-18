@@ -1,65 +1,71 @@
-# Civweave cryptographic starmap v1
+# Civweave Weave starmap v1
 
-## Contract
+## Canonical vocabulary
 
-The cryptographic map has two independent layers over the same four-position beat.
+- **Weave** — the full cryptographic chain.
+- **Chord** — one hashed four-position record on a Weave.
+- **Weaving** — creating a Seed Chord or appending later Chords.
+- **Stitch** — one explicit position-to-position inheritance edge between adjacent Chords.
+- **Seed Chord** — Chord 0, uniquely starting with both structural and color topology `ABBA`.
 
-The structural layer is the recursive binary expansion beginning:
+A Chord is intentionally named as a simultaneous four-position object rather than as a linear note.
+
+## Two independent layers
+
+The structural layer follows the recursive binary expansion:
 
 ```text
 1001 0110 0110 1001
 ABBA BAAB BAAB ABBA
 ```
 
-The color layer is a full RGBA hexadecimal overlay. The canonical chain begins conceptually:
+The color lineage is independent:
 
 ```text
-ABBA ACCD DEEF FGGH ...
+Chord 0   ABBA   ABBA   ← Seed Chord
+Chord 1   BAAB   ACCD
+Chord 2   BAAB   DEEF
+Chord 3   ABBA   FGGH
 ```
 
-The letters are explanatory only. Runtime records store full `#RRGGBBAA` values.
+The color letters are explanatory only. Runtime positions carry a cryptographic `colorUid` plus a literal full `#RRGGBBAA` display code.
 
-## Direct position identity
+## Direct position identity and Stitches
 
-Every one of the four positions in every record receives its own `positionUid`. A relationship never means “find the similar-looking color.” A child position stores `inheritedFromPositionUid`, which directly names exactly one position in its immediate predecessor record.
+Every Chord contains four positions and every position has its own `positionUid`. Color never has to be compared to infer lineage.
 
-Color is therefore a discoverability and display layer, not the cryptographic security primitive.
+Each non-seed Chord carries exactly one first-class Stitch:
 
-## Record integrity
+```text
+stitchUid
+fromChordUid
+fromPositionUid
+→
+toChordUid
+toPositionUid
+colorUid
+colorCode
+```
 
-Each record contains:
+The destination position also stores the `stitchUid`, allowing direct traversal in either direction through the Weave index.
 
-- `recordUid`
-- `recordIndex`
-- the `1001`/`0110` structural beat for that index
-- four position objects with independent UIDs
-- each position's full RGBA color code
-- at most one `inheritedFromPositionUid` per child record
-- `previousRecordUid`
-- `previousRecordHash`
-- a SHA-256 digest of the attached payload
-- a SHA-256 `recordHash` over the canonical record body
+## Chord and Weave integrity
 
-The default generator passes the predecessor's fourth position into the successor's first position, producing the simple visible `ABBA → ACCD → DEEF → FGGH` progression. The API also permits selecting a different predecessor position and/or target slot while retaining an exact UID relationship.
+Each Chord includes its own SHA-256 `chordHash`, the preceding Chord UID/hash, its four positions, and its Stitch. The Weave carries a stable `weaveUid`, `seedChordUid`, ordered Chords, and a `weaveHash` over the ordered Chord hashes.
+
+The Seed Chord is enforced as Chord 0 and must be `ABBA` structurally and `ABBA` in its color topology. Later Chords may return to structural `ABBA`, but they are never Seed Chords because their independent color lineage has advanced.
 
 ## Starmap
 
-The starmap renderer adapts the interaction model of the earlier `glaedn/Cerbanimo` project visualizer:
+The renderer adapts the interaction mechanics of the earlier `glaedn/Cerbanimo` project visualizer: SVG pan/zoom, topological levels, deterministic jitter, curved paths, separate edge/node layers, and Chords rendered over Stitches.
 
-- SVG pan and zoom
-- topological levels
-- deterministic small positional jitter for a constellation rather than a rigid table
-- curved dependency paths
-- separate path and node layers
-- nodes rendered above their links
+Each Chord appears as a star with four colored position satellites. A Stitch begins and ends on the exact position markers named by its UIDs, using the inherited full RGBA code as its visible path. Low-alpha colors preserve their literal alpha byte while an RGB ring keeps the position target discoverable.
 
-A record is drawn as a star with four colored satellite positions. The inherited path starts and ends on the exact position markers represented by the two UIDs. Its stroke uses the inherited `#RRGGBBAA` code. A low-alpha code remains selectable because the renderer preserves an opaque RGB ring around the literal-alpha core.
-
-Selecting a position dispatches `civweave:starmap-position-select` with the source record, exact position, and any direct successor positions discovered through the UID index.
+Selecting a position emits `civweave:starmap-position-select` with the Weave, Chord, position, outgoing Stitches, and directly stitched successor Chords.
 
 ## Files
 
-- `public/app/shared/civweave-cryptographic-map-v1.mjs` — chain construction, structural expansion, hashing, position UID indexing, validation.
-- `public/app/cryptographic-starmap-v1.mjs` — SVG starmap renderer.
-- `public/app/cryptographic-starmap-demo-v1.html` — isolated visual demonstration.
-- `scripts/test-cryptographic-map-v1.mjs` — structural, inheritance, UID, successor, and tamper tests.
+- `public/app/shared/civweave-cryptographic-map-v1.mjs` — Weave/Chord/Stitch construction, hashing, direct UID indexes, validation.
+- `public/app/cryptographic-starmap-v1.mjs` — SVG Weave starmap renderer.
+- `public/app/cryptographic-starmap-demo-v1.html` — isolated interactive demonstration.
+- `scripts/test-cryptographic-map-v1.mjs` — topology, Seed Chord, Stitch, direct traversal, append, and tamper tests.
