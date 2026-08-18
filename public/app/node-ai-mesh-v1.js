@@ -2,7 +2,7 @@
 'use strict';
 const VERSION='1.2.4-node-ai-mesh-v1-human-validation-neurons';
 const SERVICE_KIND='civweave.node-ai.service-advert.v1',SETTLEMENT_KIND='civweave.node-ai.settlement-batch.v1',SETTLEMENT_BATCH_SCHEMA='civweave.node-ai-mesh-settlement-batch.v1';
-const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs',SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.116-v301','/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend'],LOCALITY_GOSSIP_SCRIPT='/app/civweave-locality-gossip-v1.js?v=node-ai-mesh-v1-region-gossip';
+const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs',SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.116-v301','/app/server-ai-settings-v301.js?v=1.0.118-v306-community-share'],LOCALITY_GOSSIP_SCRIPT='/app/civweave-locality-gossip-v1.js?v=node-ai-mesh-v1-region-gossip';
 const SUPPORT_SCRIPTS=[['/app/validation-labor-rewards-v1.js?v=1.0.0','CivweaveValidationLaborRewardsV1'],['/app/human-validation-neuron-client-v1.js?v=human-validation-neurons-v1','CivweaveHumanValidationNeuronsV1'],['/app/proposal-voting-gate-v2.js?v=2.0.0','CivweaveProposalVotingGateV2'],['/app/peer-local-plan-borrow-v2.js?v=2.0.0','CivweavePeerLocalPlanBorrowV1'],['/app/peer-local-plan-borrow-ui-v1.js?v=1.0.0','CivweavePeerLocalPlanBorrowUIV1']];
 const DEFAULT_SYNC_MS=90_000,LEASE_KEY='civweave.node-ai-mesh.sync-lease.v1',INSTANCE_ID=`node-ai-mesh:${crypto.randomUUID?.()||Date.now()}`;
 let routerPromise,meshPromise,serverAiPromise,localityPromise,supportPromise,syncTimer,onlineHandler,pageHideHandler,meshUnsubscribe,gatewayUrl,activeSyncMs=DEFAULT_SYNC_MS,advertiseLocal=true;
