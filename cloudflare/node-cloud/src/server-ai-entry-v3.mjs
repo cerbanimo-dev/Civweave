@@ -5,8 +5,8 @@ const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 function sharing(input={}){
   const mode=clean(input.shareMode,40).toLowerCase()==='node-equal'?'node-equal':'personal';
   if(mode==='node-equal')return{shareMode:mode,shareBps:10000};
-  const shareBps=input.shareBps==null||String(input.shareBps).trim()===''?100:Number(input.shareBps);
-  if(!Number.isSafeInteger(shareBps)||shareBps<100||shareBps>500)throw Object.assign(new RangeError('Top-up community share must be between 1% and 5%.'),{status:400});
+  const shareBps=input.shareBps==null||String(input.shareBps).trim()===''?500:Number(input.shareBps);
+  if(!Number.isSafeInteger(shareBps)||shareBps<500||shareBps>1000)throw Object.assign(new RangeError('Top-up community share must be between 5% and 10%.'),{status:400});
   return{shareMode:mode,shareBps};
 }
 async function capacityPost(env,pathname,body){const stub=env.CAPACITY?.get(env.CAPACITY.idFromName('civweave-account'));if(!stub)throw Object.assign(new Error('Capacity binding is unavailable.'),{status:503});const response=await stub.fetch(`https://capacity.internal${pathname}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const payload=await response.json().catch(()=>({}));if(!response.ok)throw Object.assign(new Error(payload.error||`Capacity returned HTTP ${response.status}.`),{status:response.status});return payload;}
@@ -16,7 +16,7 @@ export default{async fetch(request,env,ctx){const url=new URL(request.url);
   if(url.pathname==='/api/commerce/options'&&request.method==='GET'){
     const response=await baseWorker.fetch(request,env,ctx),payload=await response.clone().json().catch(()=>null);
     if(!response.ok||!payload)return response;
-    return responseWith(response,{...payload,topup:{...(payload.topup||{}),minimumCommunityShareBps:100,maximumCommunityShareBps:500,defaultCommunityShareBps:100,communityShareModes:['personal','node-equal'],nodeEqualMeaning:'All system compute value from this top-up is shared equally through the node pool.'}});
+    return responseWith(response,{...payload,topup:{...(payload.topup||{}),minimumCommunityShareBps:500,maximumCommunityShareBps:1000,defaultCommunityShareBps:500,communityShareModes:['personal','node-equal'],nodeEqualMeaning:'All system compute value from this top-up is shared equally through the node pool.'}});
   }
   if(url.pathname==='/api/commerce/topup'&&request.method==='POST'){
     let requestedSharing;
