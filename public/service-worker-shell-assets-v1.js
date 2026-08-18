@@ -1,17 +1,10 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v10-desktop-boot';
+const REVISION='shell-assets-v1-repair-v11-persistent-nav-media';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
-  '/app/themed-system-nav-v178.js'
-];
-const REQUIRED_CIVWEAVE_BOOT=[
-  '/app/working-campus-return-guard-v425.js',
-  '/app/document-lifecycle-v221.js',
-  '/app/working-campus-home-declutter-v1.js'
-];
-const OPTIONAL_FAMILY_NAV=[
+  '/app/themed-system-nav-v178.js',
   '/app/subsystem-avatar-state-v347.js',
   '/Civweave-weaveling-sprites.png',
   '/Living-School-moss-sprites.png',
@@ -23,6 +16,11 @@ const OPTIONAL_FAMILY_NAV=[
   '/app/assets/ai/chat/kamiya-face-v255.webp',
   '/app/assets/ai/chat/rook-face-v255.webp',
   '/app/assets/ai/chat/merlin-face-v255.webp'
+];
+const REQUIRED_CIVWEAVE_BOOT=[
+  '/app/working-campus-return-guard-v425.js',
+  '/app/document-lifecycle-v221.js',
+  '/app/working-campus-home-declutter-v1.js'
 ];
 const OPTIONAL_GUILD_QUEST=[
   '/app/civweave-guild-quest-v1.html',
@@ -47,7 +45,7 @@ for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_CIVWEAVE_BOOT]){
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-for(const pathname of [...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
+for(const pathname of [...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
@@ -55,7 +53,7 @@ self.CivweaveShellAssetsV1=Object.freeze({
   revision:REVISION,
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
   requiredCivweaveBoot:[...REQUIRED_CIVWEAVE_BOOT],
-  optional:[...OPTIONAL,...OPTIONAL_FAMILY_NAV,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
+  optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
   humanChat:[...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',
