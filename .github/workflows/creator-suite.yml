@@ -6,25 +6,43 @@ on:
     paths:
       - 'public/creator-suite/**'
       - 'public/app/content-provenance-v1.js'
+      - 'public/app/host-node-session-v1.js'
       - 'public/app/local-object-mesh-v146.js'
+      - 'public/app/pocket-guild-node-v1.mjs'
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/quest-arc-chronicle-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/creator-provenance-*.mjs'
+      - 'cloudflare/node-cloud/src/creator-provenance-*.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
+      - 'cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs'
+      - 'cloudflare/mobile-guild-edge/wrangler.jsonc'
       - 'scripts/test-creator-*.mjs'
       - 'scripts/test-content-provenance-*.mjs'
+      - 'scripts/test-cloudflare-creator-*.mjs'
+      - 'scripts/test-mobile-guild-provenance-*.mjs'
       - '.github/workflows/creator-suite.yml'
   pull_request:
     paths:
       - 'public/creator-suite/**'
       - 'public/app/content-provenance-v1.js'
+      - 'public/app/host-node-session-v1.js'
       - 'public/app/local-object-mesh-v146.js'
+      - 'public/app/pocket-guild-node-v1.mjs'
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/quest-arc-chronicle-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/creator-provenance-*.mjs'
+      - 'cloudflare/node-cloud/src/creator-provenance-*.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
+      - 'cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs'
+      - 'cloudflare/mobile-guild-edge/wrangler.jsonc'
       - 'scripts/test-creator-*.mjs'
       - 'scripts/test-content-provenance-*.mjs'
+      - 'scripts/test-cloudflare-creator-*.mjs'
+      - 'scripts/test-mobile-guild-provenance-*.mjs'
       - '.github/workflows/creator-suite.yml'
 
 permissions:
@@ -38,7 +56,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - name: Check Creator Suite scripts
+      - name: Check Creator Suite and audit scripts
         run: |
           node --check public/creator-suite/service-worker.js
           node --check public/creator-suite/creator-suite-v1.js
@@ -54,13 +72,24 @@ jobs:
           node --check public/creator-suite/shared/ai-tools-v1.js
           node --check public/creator-suite/shared/provenance-vault-v1.js
           node --check public/creator-suite/shared/mesh-provenance-v1.js
+          node --check public/creator-suite/shared/guild-provenance-v1.js
+          node --check public/creator-suite/audit/client-v1.js
+          node --check public/creator-suite/audit/client-init-v1.js
+          node --check public/creator-suite/audit/evidence-crypto-v1.mjs
           node --check public/creator-suite/audit/quest-beat-v1.js
           node --check public/creator-suite/text-editor-v1.js
           node --check public/creator-suite/audio-editor-v1.js
           node --check public/creator-suite/video-editor-v1.js
           node --check lib/creator-provenance-audit-sampler-v1.mjs
+          node --check lib/creator-provenance-audit-runner-v1.mjs
           node --check lib/creator-provenance-anomaly-v1.mjs
+          node --check lib/creator-provenance-packet-verify-v1.mjs
           node --check lib/creator-provenance-review-v1.mjs
+          node --check cloudflare/node-cloud/src/creator-provenance-audit-v1.mjs
+          node --check cloudflare/node-cloud/src/creator-provenance-evidence-v1.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-provenance-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
+          node --check cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs
       - name: Verify separate package boundary
         run: node scripts/test-creator-suite-package-v1.mjs
       - name: Verify provenance kernel
@@ -71,15 +100,27 @@ jobs:
         run: node scripts/test-creator-ai-tools-v1.mjs
       - name: Verify packet compression and chunk integrity
         run: node scripts/test-creator-packet-codec-v1.mjs
+      - name: Verify exact packet chain compatibility
+        run: node scripts/test-creator-provenance-packet-verify-v1.mjs
       - name: Verify signed mesh provenance boundary
         run: node scripts/test-creator-mesh-provenance-v1.mjs
       - name: Verify finalization anchors
         run: node scripts/test-creator-finalization-anchor-v1.mjs
       - name: Verify privacy-bounded Guild sampling
         run: node scripts/test-creator-provenance-audit-sampler-v1.mjs
+      - name: Verify sample-before-decrypt runner
+        run: node scripts/test-creator-provenance-audit-runner-v1.mjs
       - name: Verify provenance-only anomaly analysis
         run: node scripts/test-creator-provenance-anomaly-v1.mjs
       - name: Verify structured provenance review
         run: node scripts/test-creator-provenance-review-v1.mjs
+      - name: Verify selected-evidence browser and Guild crypto
+        run: node scripts/test-creator-provenance-evidence-crypto-v1.mjs
+      - name: Verify Cloudflare Guild audit storage and requests
+        run: node scripts/test-cloudflare-creator-provenance-audit-v1.mjs
+      - name: Verify Cloudflare selected evidence handshake
+        run: node scripts/test-cloudflare-creator-provenance-evidence-v1.mjs
+      - name: Verify mobile Guild receipt subscriber
+        run: node scripts/test-mobile-guild-provenance-forward-v1.mjs
       - name: Verify Cerbanimo Reckoning audit integration
         run: node scripts/test-creator-audit-quest-beat-v1.mjs
