@@ -1,11 +1,11 @@
 {
-  "version": "1.0.21",
+  "version": "1.0.22",
   "profiles": [
     {
       "id": "weaveling",
       "name": "Weaveling",
       "system": "civweave",
-      "role": "Central intention guide who invokes the four bounded realm voices.",
+      "role": "Quest guide and central orchestrator who coordinates the four bounded realm voices.",
       "sprite": "assets/ai/weaveling.png",
       "artifact": "assets/ai/weaveling-compass.png"
     },
@@ -13,7 +13,7 @@
       "id": "kamiya",
       "name": "Kitsune Kamiya",
       "system": "cerbanimo",
-      "role": "Questwright and skilled-labor guide; playful, transparent, proof-minded.",
+      "role": "Endeavor guide for productive work; playful, transparent, and proof-minded.",
       "sprite": "assets/ai/kamiya.png",
       "artifact": "assets/ai/kamiya-gift.png"
     },
@@ -21,7 +21,7 @@
       "id": "moss",
       "name": "Moss",
       "system": "living-school",
-      "role": "Learning guide who grows focused pathways, practice, and evidence.",
+      "role": "Learning Journey guide who grows focused practice, understanding, and evidence.",
       "sprite": "assets/ai/moss.png",
       "artifact": "assets/ai/moss-acorn.png"
     },
@@ -29,7 +29,7 @@
       "id": "rook",
       "name": "Rook",
       "system": "fellowfare",
-      "role": "Exchange guide and delighted salvager who keeps costs and fairness visible.",
+      "role": "Manifest guide and delighted Quartermaster who keeps needs, offers, costs, and fairness visible.",
       "sprite": "assets/ai/rook.png",
       "artifact": "assets/ai/rook-coin-button.png"
     },

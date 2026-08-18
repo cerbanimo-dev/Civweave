@@ -1,0 +1,47 @@
+name: Verify Mobile Chat Visual Viewport
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/mobile-chat-visual-viewport-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/saved-chat-store-v295.js'
+      - 'public/app/saved-chat-ui-v295.js'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/verify-mobile-chat-visual-viewport-v1.mjs'
+      - '.github/workflows/verify-mobile-chat-visual-viewport-v1.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/mobile-chat-visual-viewport-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/saved-chat-store-v295.js'
+      - 'public/app/saved-chat-ui-v295.js'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/verify-mobile-chat-visual-viewport-v1.mjs'
+      - '.github/workflows/verify-mobile-chat-visual-viewport-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check mobile chat runtime syntax
+        run: |
+          node --check public/app/mobile-chat-visual-viewport-v1.js
+          node --check public/app/shared-guide-surface-v236.js
+          node --check public/app/saved-chat-store-v295.js
+          node --check public/app/saved-chat-ui-v295.js
+          node --check scripts/verify-mobile-chat-visual-viewport-v1.mjs
+      - name: Verify long-thread composer and thread controls
+        run: node scripts/verify-mobile-chat-visual-viewport-v1.mjs

@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.67-ai-capability-broker-v271-semantics';
+const VERSION='1.0.68-ai-capability-broker-v271-quest-semantics';
 if(globalThis.CivweaveAICapabilityBrokerV268?.version===VERSION)return;
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
@@ -68,7 +68,7 @@ function requirements(input={}){
   const code=Boolean(explicit.code||request.code||/\b(code|software|javascript|typescript|python|react|node|api|database|sql|debug|refactor|patch|pull request)\b/.test(text));
   const structuredOutput=Boolean(explicit.structuredOutput||request.schema||request.responseFormat==='json'||request.responseFormat==='structured');
   const vision=Boolean(explicit.vision||request.vision||request.imageInput||request.multimodal);
-  const planning=Boolean(explicit.planning||/\b(plan|planning|roadmap|milestone|architecture|work breakdown|curriculum|quest draft|reviewable weave)\b/.test(text));
+  const planning=Boolean(explicit.planning||/\b(plan|planning|roadmap|milestone|architecture|work breakdown|curriculum|quest draft|reviewable quest|reviewable weave)\b/.test(text));
   return Object.freeze({profile,requiresTools,externalResearch,code,structuredOutput,vision,planning});
 }
 function activeLocalSpec(){

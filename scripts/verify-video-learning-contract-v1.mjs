@@ -25,7 +25,8 @@ assert(shared.includes('availability&&!availability.has(id)'),'Shared resolver d
 assert(shared.includes('score>=6')||shared.includes('bestScore>=6'),'Shared contract lacks a relevance threshold before fallback.');
 assert(shared.includes('youtube-nocookie.com/embed'),'Shared contract does not produce privacy-enhanced embeds.');
 assert(livingGuard.includes("CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1'"),'Living School AI harness is not attached to curriculum generation.');
-assert(livingGuard.includes('await ensureLivingSchool(output)'),'Living School AI harness does not enforce a video on generated modules.');
+assert(livingGuard.includes('await enforceSubjectVideos(output,subject)'),'Living School AI harness does not enforce the subject-gated per-module video contract.');
+assert(livingGuard.includes('await ensureLivingSchool(output,{schoolSlug})'),'Living School video guard does not finish with the shared per-module video invariant.');
 assert(livingGuard.includes('videoFallbackUrl:FALLBACK_VIDEO_URL'),'Living School AI prompt context does not carry the fallback contract.');
 assert(living.includes('installLivingSchoolVideoGenerationGuardV1'),'Living School cleanroom does not install the video generation harness.');
 assert(!living.includes('new MutationObserver'),'Living School cleanroom must remain observer-free.');
@@ -36,9 +37,12 @@ assert(cerbanimo.includes("addEventListener('cerbanimo:quest-engine-changed'"),'
 assert(realm.includes('/app/cerbanimo-video-task-contract-v1.mjs'),'Cerbanimo realm console does not load the task video contract.');
 assert(installer.includes("CATALOG_URL='/downloads/knowledge-schools/video-atlases/catalog.json'"),'Installer does not load the Video Learning Atlas catalog.');
 assert(installer.includes("'youtube-availability-current.json'"),'Installer does not stage the current YouTube embeddability index for offline resolution.');
-assert(installer.includes("schoolList.addEventListener('change',scheduleRefresh)"),'Video atlas installer does not follow direct school checkbox changes.');
-assert(installer.includes('new MutationObserver(scheduleRefresh)'),'Video atlas installer does not recover when knowledge-school checkboxes render after atlas startup.');
-assert(installer.includes("presets?.addEventListener('click'"),'Video atlas installer does not refresh after programmatic knowledge-school preset changes.');
+assert(installer.includes("function currentRows(){return Array.isArray(catalog?.schools)?catalog.schools.filter"),'Video atlas installer still depends on selected school checkboxes instead of all published link atlases.');
+assert(installer.includes('scheduleLazyStage'),'Video atlas installer does not expose the post-install lazy staging queue.');
+assert(installer.includes("addEventListener('civweave:pwa-installed'"),'Video atlas installer does not start the lazy queue from confirmed Civweave installation.');
+assert(installer.includes("INSTALL_MARKER_KEY='civweave.pwa.installed-marker.v1'"),'Video atlas installer does not resume from the canonical installed marker.');
+assert(installer.includes('automaticNetworkAllowed'),'Video atlas installer does not respect offline, Save-Data, and very-slow-network conditions.');
+assert(installer.includes('requestIdleCallback'),'Video atlas installer is not lazy/idle scheduled.');
 assert(installPage.includes('/app/video-atlas-installer-v1.js'),'Core learning download page does not offer Video Learning Atlas bundles.');
 for(const dataset of ['thepowerfuldeez/massive-yt-edu-queue','Awiny/Howto-Interlink7M'])assert(builder.includes(dataset),`Base builder is missing ${dataset}.`);
 assert(parallelBuilder.includes('common-pile/youtube_filtered'),'Parallel builder is missing the viewer-backed open YouTube description/transcript source.');
@@ -52,4 +56,4 @@ assert(availabilityMaterializer.includes('privacy_status'),'Availability materia
 assert(workflow.includes('YOUTUBE_API_KEY')&&workflow.includes('GOOGLE_API_KEY'),'Build workflow is not wired to YouTube/Google API credentials.');
 assert(workflow.includes('build-video-learning-atlas-parallel-v1.py'),'Build workflow does not use the parallel materializer.');
 assert(workflow.includes('materialize-video-learning-lookup-v1.py'),'Build workflow does not materialize the browser lookup.');
-console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, current embeddability filtering, offline lookup, Living School per-module video invariant, Cerbanimo per-task video invariant, selection synchronization, and required fallback are wired.');
+console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, current embeddability filtering, offline lookup, Living School subject-gated per-module video invariant, Cerbanimo per-task video invariant, post-install all-atlas lazy staging, and required fallback are wired.');

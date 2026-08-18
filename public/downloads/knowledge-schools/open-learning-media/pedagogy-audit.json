@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-08-17T08:03:20Z",
-  "before": 378,
-  "after": 226,
-  "rejected": 152,
+  "built_at": "2026-08-18T02:06:46Z",
+  "before": 507,
+  "after": 275,
+  "rejected": 232,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -48,23 +48,23 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 7,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 6
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Democracy in the Dark: Protecting Your Digital Rights",
         "When Code Became a Weapon - Crypto Wars Explained",
-        "Houses of History - Explore the story of Parliament and democracy",
-        "An introduction to Parliament"
+        "Houses of History - Explore the story of Parliament and democracy"
       ]
     },
     "biology-life": {
@@ -78,8 +78,8 @@
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
@@ -102,9 +102,9 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -126,12 +126,12 @@
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "The (truly) Periodic Table",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-        "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "How to Understand Mendeleev's Periodic Table of 1869",
+        "The (truly) Periodic Table",
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series"
       ]
     },
     "astronomy-space": {
@@ -148,8 +148,8 @@
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
         "Solar System explained by simpleshow foundation",
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
+        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 2 XD99775b"
@@ -166,9 +166,9 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -257,33 +257,33 @@
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 5,
-      "mesh_redistributable": 5,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
         "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
         "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
-        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
-        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1,
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers"
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -328,11 +328,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
@@ -340,13 +340,15 @@
       "name": "Personal Finance",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 3
+        "peertube": 3,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "GnuCash for Personal Finance - Getting Started and Basics",
+        "Ifugao Youth on Saving the Environment",
         "GnuCash for Personal Finance - Split Transactions",
         "“WISE BUYING” 1950 HOME ECONOMICS FILM SHOPPING, BUDGETING AND MANAGING FINANCES XD11974"
       ]
@@ -400,10 +402,17 @@
       "name": "Career & Work Skills",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 3,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 2,
+        "internet-archive": 1
+      },
+      "top_titles": [
+        "How to Succeed in Skype Interviews in English - Job interview in English tips",
+        "Job Interview in English Lesson #1: Tell me about yourself",
+        "English For Career Development Course"
+      ]
     },
     "electronics-basics": {
       "name": "Electronics Basics",
@@ -494,10 +503,10 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 6
+        "peertube": 7
       },
       "top_titles": [
         "Lecture 1： Probability and Counting ｜ Statistics 110",
@@ -505,6 +514,7 @@
         "Lecture 4： Conditional Probability ｜ Statistics 110",
         "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
         "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -521,13 +531,105 @@
       },
       "top_titles": [
         "Welcome to Climate Change and Health – From Science to Practice",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science",
-        "Climate Change: Science, Policy, Action"
+        "Climate Change: Science, Policy, Action",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science"
       ]
     },
     "law-rights-basics": {
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
+      "required": false,
+      "records": 3,
+      "mesh_redistributable": 0,
+      "providers": {
+        "peertube": 3
+      },
+      "top_titles": [
+        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
+        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
+        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
+      ]
+    },
+    "tarot-symbolism": {
+      "name": "Tarot & Symbolic Systems",
+      "school_slug": "philosophy-and-religion",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "House of Tarot (Game Gear)",
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
+      ]
+    },
+    "mythology-folklore": {
+      "name": "Mythology & Folklore",
+      "school_slug": "history",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "ESL - What are Myths？",
+        "THE SEARCH 1950s TV SHOW ARKANSAS FOLKLORE RESEARCH MARY CELESTIA PARLER 57814"
+      ]
+    },
+    "meditation-mindfulness": {
+      "name": "Meditation & Mindfulness",
+      "school_slug": "health-medicine-and-disease",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "communication-conflict": {
+      "name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "required": false,
+      "records": 1,
+      "mesh_redistributable": 0,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "Secret Service Agent: How To Stay In Control When Someone Is Trying To Manipulate You!"
+      ]
+    },
+    "parenting-caregiving": {
+      "name": "Parenting & Caregiving",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "Parenting - Blender 2.80 Fundamentals",
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+      ]
+    },
+    "gardening-plants": {
+      "name": "Gardening & Plant Care",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 1,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "EmacsConf 2025: Gardening in Emacs: A Windows user's tale of tending, tweaking, and triumph - Mar..."
+      ]
+    },
+    "entrepreneurship-small-business": {
+      "name": "Entrepreneurship & Small Business",
+      "school_slug": "everyday-life",
       "required": false,
       "records": 4,
       "mesh_redistributable": 1,
@@ -535,10 +637,50 @@
         "peertube": 4
       },
       "top_titles": [
-        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
-        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
-        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
-        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
+        "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
+        "Discover Who is On your LAN: Small Business Security 101",
+        "Entrepreneurship by design",
+        "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
+      ]
+    },
+    "music-performance": {
+      "name": "Music & Performance",
+      "school_slug": "arts",
+      "required": false,
+      "records": 5,
+      "mesh_redistributable": 5,
+      "providers": {
+        "peertube": 5
+      },
+      "top_titles": [
+        "a track i made for music theory back in high school",
+        "All MINOR Scales Explained on the Piano (Music Theory)",
+        "Lecture 3. Rhythm: Fundamentals",
+        "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
+        "THEORY: Music Theory Basics Part #1 - Keys and Pitch"
+      ]
+    },
+    "language-learning": {
+      "name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "required": false,
+      "records": 27,
+      "mesh_redistributable": 27,
+      "providers": {
+        "peertube": 21,
+        "wikimedia-commons": 6
+      },
+      "top_titles": [
+        "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
+        "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
+        "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
+        "English Grammar — Present Continuous — Teaching Ideas — 2",
+        "English Grammar — Present Contiuous — Teaching Ideas — 3",
+        "Starting to learn Taiwanese: Language Learning Journey 1",
+        "[Language learning] How to create and edit language in LingLibre?",
+        "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
+        "English Grammar — Present Perfect — Teaching Ideas — 2"
       ]
     }
   },
@@ -628,6 +770,13 @@
       ]
     },
     {
+      "provider": "internet-archive",
+      "title": "Fangruida natural science research: 1 million years of earth human society and 100 billion years of natural universe, earth-moon-mars Samsung era 2020v1.3 (compiled by Karuri)",
+      "relevance_topics": [
+        "astronomy-space"
+      ]
+    },
+    {
       "provider": "peertube",
       "title": "5 Mind-Blowing Space Facts 🚀",
       "relevance_topics": [
@@ -651,13 +800,6 @@
     {
       "provider": "peertube",
       "title": "Our Solar System - In Time (Full Album 2016)",
-      "relevance_topics": [
-        "astronomy-space"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Fangruida natural science research: 1 million years of earth human society and 100 billion years of natural universe, earth-moon-mars Samsung era 2020v1.3 (compiled by Karuri)",
       "relevance_topics": [
         "astronomy-space"
       ]
@@ -702,6 +844,41 @@
       "title": "Cell-Free Synthetic Biology in iGEM and Beyond",
       "relevance_topics": [
         "biology-life"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Do this after your job interview in English. It's IMPORTANT.",
+      "relevance_topics": [
+        "career-work-skills"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "English job interview: What are your weaknesses?",
+      "relevance_topics": [
+        "career-work-skills"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Job Interview in English #2: Highlight your skills & experience",
+      "relevance_topics": [
+        "career-work-skills"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Success does not come from laziness.",
+      "relevance_topics": [
+        "career-work-skills"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "RESUME HISTOIRE DU MODELE DE L ATOME",
+      "relevance_topics": [
+        "career-work-skills"
       ]
     },
     {
@@ -756,6 +933,13 @@
     {
       "provider": "peertube",
       "title": "The Future of Democracy @ Horsham Skeptics in the Pub, May 2017",
+      "relevance_topics": [
+        "civics-society"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "TICTeC Show & Tell - Right to Know across Europe: impacts and lessons learned",
       "relevance_topics": [
         "civics-society"
       ]
@@ -838,6 +1022,13 @@
       ]
     },
     {
+      "provider": "internet-archive",
+      "title": "Kill Them With Hate Speech",
+      "relevance_topics": [
+        "climate-environment"
+      ]
+    },
+    {
       "provider": "peertube",
       "title": "Quatermass And The Pit (1967) predicts reaction to climate change",
       "relevance_topics": [
@@ -852,10 +1043,31 @@
       ]
     },
     {
-      "provider": "internet-archive",
-      "title": "Kill Them With Hate Speech",
+      "provider": "peertube",
+      "title": "Research Support Champions 2025: Ernest Bošković",
       "relevance_topics": [
-        "climate-environment"
+        "communication-conflict"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "The Non-Violent Communication Model",
+      "relevance_topics": [
+        "communication-conflict"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Top Harvard Professor: The Psychology Of Why People Don't Like You!",
+      "relevance_topics": [
+        "communication-conflict"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "World No.1 Divorce Lawyer: If You Do This, Your Marriage Is Already Over.",
+      "relevance_topics": [
+        "communication-conflict"
       ]
     },
     {
@@ -973,13 +1185,6 @@
     {
       "provider": "peertube",
       "title": "Fake News:l debunking; Fact checking",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "The Reformers (2023) - Trailer",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -1132,6 +1337,104 @@
       ]
     },
     {
+      "provider": "peertube",
+      "title": "6 Reasons Why Print-on-Demand Might NOT Be For you (Business Model Weaknesses) From My Experience",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Mojeek's Business Model",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Best Entrepreneurship Prize - Beyond the Winning Strategies",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "BSDCan 2024: Encouraging & enabling SMEs (small to medium enterprises) to contribute to BSD development -TomSmyth",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Business model open-source: l'exemple de Bootlin dans le monde de l'embarqué",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Cornell: Entrepreneurship (2025)",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Benjamin Bayart - Privacy comme Business Model - Clever Cloud Fest (06/02/2025)",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "SAISON 2 : Canva/business model-Logistique & assurance-études en classe",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Entrepreneurship 101 - iGEM Community",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Community gardening",
+      "relevance_topics": [
+        "gardening-plants"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Gardening with a disability #125",
+      "relevance_topics": [
+        "gardening-plants"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Illegal crops and vegetables growing by the road in Korea",
+      "relevance_topics": [
+        "gardening-plants"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Lazy Gardening Podcast, die erste Episode P001",
+      "relevance_topics": [
+        "gardening-plants"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "BURGESS FLUIDIC LAWN FEEDER 1980s TV COMMERCIALS LAWN CARE & GARDENING XD45054o",
+      "relevance_topics": [
+        "gardening-plants"
+      ]
+    },
+    {
       "provider": "wikimedia-commons",
       "title": "7 Tesla MRI of the ex vivo human brain at 100 micron resolution (100 micron MRI acquired FA25 axial)",
       "relevance_topics": [
@@ -1203,7 +1506,84 @@
     },
     {
       "provider": "wikimedia-commons",
+      "title": "25 Essential Chinese Phrases You NEED to Know Before Visiting China!",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "WIKITONGUES- Freddie speaking Portuguese",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Catullus 40 in Latin & English; Vocabulary & Grammar Notes: Quaenam te mala mens, miselle Ravide",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Catullus 41 in Latin & English with Vocabulary & Grammar notes: Ameana puella defututa",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Catullus 42 in Latin & English, Vocabulary & Grammar Notes: Adeste, hendecasyllabi, quot estis omnes",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Catullus 43 in Latin & English, Vocabulary & Grammar Notes: Salve, nec minimo puella naso",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "NFLSHS-CHINA: Unwanted Wrinkles: Using Synthetic Biology to Decode the Secrets o... (2025) - Project Promotion [English]",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Notre quartier Hackaert",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "1950s FRENCH NATIONAL RAILWAYS SOCIETE NATIONALE DES CHEMS DE FER FRANCIAS SNCF 61724",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "1970s BOEING 929 JETFOIL PROMO FILM HYDROFOIL SHIP (SWEDISH LANG.) 97204",
+      "relevance_topics": [
+        "language-learning"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
       "title": "'In defense of tribal sovereignty'- Cherokee Nation at U.S. Supreme Court",
+      "relevance_topics": [
+        "law-rights-basics"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
       "relevance_topics": [
         "law-rights-basics"
       ]
@@ -1266,345 +1646,163 @@
     },
     {
       "provider": "peertube",
-      "title": "Firefly III personal finance",
+      "title": "meditation loop",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Firefly III personal finance",
+      "title": "Meditation Aura",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "GnuCash for Personal Finance - Reconciliation",
+      "title": "My journey into transcendental meditation.",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "GnuCash for Personal Finance - Tracking Stocks and Mutual Funds",
+      "title": "“The Way” Meditation App Review",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Saving PocketBook annotations across EPUB metadata edits",
+      "title": "Respirando, Yin e Yang: Ascoltiamo il respiro",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "EmacsConf 2021: Budgeting, Project Monitoring and Invoicing with Org Mode - Adolfo Villafiorita",
+      "title": "Respirando, Yin e Yang: L'osservazione del respiro",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "EmacsConf 2021: Budgeting, Project Monitoring and Invoicing with Org Mode - Adolfo Villafiorita",
+      "title": "MEDITATION MEDICATION On the Banks of the Cumberland",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Saving a Windows 8 Tablet with Debian Linux!",
+      "title": "Jon Kabat-Zinn & Yuval Noah Harari In Conversation",
       "relevance_topics": [
-        "personal-finance"
+        "meditation-mindfulness"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Saving lives is not terrorism. I oppose genocide, I support Palestine action.",
+      "title": "Christmas music performance by Los Granaderos at Casa Rosada",
       "relevance_topics": [
-        "personal-finance"
+        "music-performance"
       ]
     },
     {
       "provider": "peertube",
-      "title": "No.1 Money Saving Experts: Do Not Buy A House! Putting Money In A Bank Makes You Poorer!",
+      "title": "Eddy's Piano Performance - \"The Sound of Music\" (The Song of Do Re Mi), and \"Skater's Waltz\"",
       "relevance_topics": [
-        "personal-finance"
+        "music-performance"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Corso di Philosophy for children (1)",
+      "title": "Stevie B - Lucifer’s Rain (Official Music Video)",
       "relevance_topics": [
-        "philosophy-ethics"
+        "music-performance"
       ]
     },
     {
       "provider": "wikimedia-commons",
-      "title": "DEBATE Religious Freedom, Conquest, Slavery & Sexual Ethics - Dr Javad T. Hashmi Vs Daniel Haqiqatjou",
+      "title": "Give Me A Beat! Creative Commons licensing, and ethical considerations for cultural heritage collections – Wikimania 2025 in Nairobi, Kenya",
       "relevance_topics": [
-        "philosophy-ethics"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Is Philosophy Stupid Richard Carrier Skepticon 6",
-      "relevance_topics": [
-        "philosophy-ethics"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "René Descartes- Meditations on First Philosophy. First Meditation.",
-      "relevance_topics": [
-        "philosophy-ethics"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "The ethics of CRISPR gene editing with Jennifer Doudna",
-      "relevance_topics": [
-        "philosophy-ethics"
+        "music-performance"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Philosophy of Free Software",
+      "title": "🔥 CRADLE OF MUSIC – Nobody’s Wife (Live in Concert) | ROCK POWER Performance 2026 🔥",
       "relevance_topics": [
-        "philosophy-ethics"
+        "music-performance"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Alternative Paradigms： Care Ethics and Feminine Ethics",
+      "title": "SALLY RAND BALLOON BUBBLE DANCE PERFORMANCE LITA BARON & GRACIE BARRIE 1940s MUSIC VIDEO XD10084",
       "relevance_topics": [
-        "philosophy-ethics"
+        "music-performance"
       ]
     },
     {
       "provider": "peertube",
-      "title": "SFSCON25 - Matthias Kirschner & Simon Phipps & Karen Sandler - Ethics and software freedom",
+      "title": "Catalyst – Institute for Creative Arts and Technology",
       "relevance_topics": [
-        "philosophy-ethics"
+        "music-performance"
       ]
     },
     {
       "provider": "peertube",
-      "title": "LZU-CHINA: Episode Seven: Safety, Ethics, and Regulation in Synthetic Biology (2023) [English]",
+      "title": "Comparative Mythology: Exploring Similarities Across Cultures",
       "relevance_topics": [
-        "philosophy-ethics"
+        "mythology-folklore"
       ]
     },
     {
       "provider": "peertube",
-      "title": "The Philosophy of William James",
+      "title": "FOLKLORE",
       "relevance_topics": [
-        "philosophy-ethics"
+        "mythology-folklore"
       ]
     },
     {
       "provider": "peertube",
-      "title": "UZurich: Dr. Anna Deplazes Zemp - Bioethics and Environmental Ethics (2024) [German]",
+      "title": "Franse folklore in het Kurhaus",
       "relevance_topics": [
-        "philosophy-ethics"
+        "mythology-folklore"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Note - I Don't Know - Official Music Video",
+      "title": "Mythology's Influence on Art, Music, and Popular Culture",
       "relevance_topics": [
-        "photography-video"
+        "mythology-folklore"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Note - I Don't Know - Teaser 1",
+      "title": "Twentse folklore",
       "relevance_topics": [
-        "photography-video"
+        "mythology-folklore"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Inkscape Developer Update 30th March 2025",
+      "title": "Age of Mythology EE: Campagne FR [4] Un Bon Plan",
       "relevance_topics": [
-        "photography-video"
+        "mythology-folklore"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Ukrainian Drones Strike Key Electricity Hub to Crimea",
+      "title": "Age of Mythology EE: Campagne FR [5] Juste assez de Corde pour se Pendre",
       "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Electricity generating exercise bike build log",
-      "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Holm Gero Hummler - ESC2017",
-      "relevance_topics": [
-        "physics-foundations"
+        "mythology-folklore"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+      "title": "Age of Mythology EE: Campagne FR [6] Pourvu que Ça Marche",
       "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "\"SIX DAYS IN JUNE\" 1967 ISRAELI DEFENSE FORCES SIX DAY WAR (SILENT FILM) 19074",
-      "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "1945 “ WINGS FOR THIS MAN ” TUSKEGEE AIRMEN 332nd FIGHTER GROUP AFRICAN AMERICAN PILOTS 24814",
-      "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "1945 “ WINGS FOR THIS MAN ” TUSKEGEE AIRMEN 332nd FIGHTER GRP. AFRICAN AMERICAN PILOTS 34360",
-      "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "MOTION PICTURE HISTORY OF THE KOREAN WAR ARMED FORCES INFO FILM 80904x",
-      "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Wings For This Man - Tuskegee Airmen, African American Airmen, Ronald Reagan 24810 HD",
-      "relevance_topics": [
-        "physics-foundations"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Lloyd algorithm on Surface",
-      "relevance_topics": [
-        "pseudocoding"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Mean Shift algorithm",
-      "relevance_topics": [
-        "pseudocoding"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Athens: PERspectives (2022) - Project Promotion [English]",
-      "relevance_topics": [
-        "pseudocoding"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Harvard: Computationally-Aided Rapid Protein Engineering (2022) - Project Promotion [English]",
-      "relevance_topics": [
-        "pseudocoding"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Tsinghua-A: Algorithm-based Antibody Drugs Design for Various Animal Species (2023) - Project Promotion [English]",
-      "relevance_topics": [
-        "pseudocoding"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Data literacy : comment former les citoyens et les agents publics à l’usage des données",
-      "relevance_topics": [
-        "statistics-data-literacy"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Vibe-Coding: HTML Quizze mit Mistral Vibe erstellen",
-      "relevance_topics": [
-        "vibe-coding"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
-      "relevance_topics": [
-        "vibe-coding"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News",
-      "relevance_topics": [
-        "vibe-coding"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Ian & Jay Space Out 2025-06-08",
-      "relevance_topics": [
-        "vibe-coding"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
-      "relevance_topics": [
-        "vibe-coding"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Vibe Coding my Toy Image Sharing App with OpenAI GPT-5",
-      "relevance_topics": [
-        "vibe-coding"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Rome didn't fall when you think it did",
-      "relevance_topics": [
-        "world-history"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "History of the World, Part II Trailer",
-      "relevance_topics": [
-        "world-history"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "PAN AM CORPORATE FILM HISTORY OF COMMUNICATIONS & IBM PANAMAC COMPUTER SYSTEM 41294",
-      "relevance_topics": [
-        "world-history"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "ITU 150 Historical Video",
-      "relevance_topics": [
-        "world-history"
+        "mythology-folklore"
       ]
     }
   ]

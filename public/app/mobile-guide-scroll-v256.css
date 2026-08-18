@@ -22,3 +22,85 @@
     touch-action: pan-y !important;
   }
 }
+
+/* Source-themed quick-launch menus.
+   The canonical rail already gives each menu an aria-label for its guide, so the
+   popup can carry the same five-source palette without creating another UI owner. */
+#cw-themed-system-nav-menu {
+  --cw-menu-accent: var(--menu-glow, #f4edf8);
+  --cw-menu-surface: #222330;
+  --cw-menu-deep: #0d111a;
+  border-color: color-mix(in srgb, var(--cw-menu-accent) 70%, #ffffff 30%) !important;
+  background:
+    radial-gradient(circle at 14% -8%, color-mix(in srgb, var(--cw-menu-accent) 30%, transparent) 0%, transparent 48%),
+    linear-gradient(160deg, color-mix(in srgb, var(--cw-menu-accent) 18%, var(--cw-menu-surface)) 0%, var(--cw-menu-deep) 100%) !important;
+  box-shadow:
+    0 22px 70px #000c,
+    0 0 32px color-mix(in srgb, var(--cw-menu-accent) 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--cw-menu-accent) 22%, #ffffff 16%) !important;
+  scrollbar-color: color-mix(in srgb, var(--cw-menu-accent) 68%, transparent) transparent;
+}
+
+#cw-themed-system-nav-menu[aria-label^="Weaveling "] {
+  --cw-menu-accent: #f4edf8;
+  --cw-menu-surface: #272634;
+  --cw-menu-deep: #0e1119;
+}
+
+#cw-themed-system-nav-menu[aria-label^="Moss "] {
+  --cw-menu-accent: #4fd7a0;
+  --cw-menu-surface: #14382e;
+  --cw-menu-deep: #071a15;
+}
+
+#cw-themed-system-nav-menu[aria-label^="Kamiya "] {
+  --cw-menu-accent: #b687ff;
+  --cw-menu-surface: #321b49;
+  --cw-menu-deep: #150a20;
+}
+
+#cw-themed-system-nav-menu[aria-label^="Rook "] {
+  --cw-menu-accent: #f1ad48;
+  --cw-menu-surface: #3d2a12;
+  --cw-menu-deep: #1d1207;
+}
+
+#cw-themed-system-nav-menu[aria-label^="Merlin "] {
+  --cw-menu-accent: #ff4f9a;
+  --cw-menu-surface: #45172f;
+  --cw-menu-deep: #200916;
+}
+
+#cw-themed-system-nav-menu .cw-nav-menu-head {
+  border-bottom-color: color-mix(in srgb, var(--cw-menu-accent) 34%, transparent) !important;
+}
+
+#cw-themed-system-nav-menu .cw-nav-menu-head img {
+  border-color: color-mix(in srgb, var(--cw-menu-accent) 76%, #ffffff 24%) !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--cw-menu-accent) 28%, transparent) !important;
+}
+
+#cw-themed-system-nav-menu .cw-nav-menu-head small {
+  color: color-mix(in srgb, var(--cw-menu-accent) 58%, #c9d4df 42%) !important;
+}
+
+#cw-themed-system-nav-menu [role="menuitem"] {
+  border-color: color-mix(in srgb, var(--cw-menu-accent) 9%, transparent) !important;
+  background: color-mix(in srgb, var(--cw-menu-accent) 7%, transparent) !important;
+}
+
+#cw-themed-system-nav-menu [role="menuitem"]:hover,
+#cw-themed-system-nav-menu [role="menuitem"]:focus-visible {
+  border-color: color-mix(in srgb, var(--cw-menu-accent) 62%, transparent) !important;
+  background: color-mix(in srgb, var(--cw-menu-accent) 15%, transparent) !important;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--cw-menu-accent) 78%, #ffffff 22%) !important;
+}
+
+#cw-themed-system-nav-menu [role="menuitem"] small {
+  color: color-mix(in srgb, var(--cw-menu-accent) 28%, #b8c4d3 72%) !important;
+}
+
+#cw-themed-system-nav-menu [role="menuitem"] i {
+  color: var(--cw-menu-accent) !important;
+  text-shadow: 0 0 9px color-mix(in srgb, var(--cw-menu-accent) 52%, transparent);
+}

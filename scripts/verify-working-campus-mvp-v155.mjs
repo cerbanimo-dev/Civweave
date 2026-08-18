@@ -26,8 +26,8 @@ const [host,html,css,loader,entry,settings,routes,onboarding,onboardingCss,offli
 ]);
 const source=sources.join(''),surface=`${html}\n${css}\n${source}`;
 for(const token of [
-  'Civweave Working Campus','What is your wish?','Aptitude and learning choice',
-  'Build reviewable weave','Activate weave','Guided rails','Free roam',
+  'Civweave Working Campus','What Quest do you want to begin?','Aptitude and learning choice',
+  'Build reviewable Quest','Activate Quest','Guided rails','Free roam',
   'civweave.working-campus.v1','civweave.intentions.v127',
   'civweave.realm-inbox.v1','civweave.context.v1',
   'civweave.active-handoff.v1','civweave.intention-weave.v1',
@@ -91,4 +91,4 @@ new vm.Script(onboarding,{filename:'new-user-onboarding-v1.js'});
 new vm.Script(familyLoader,{filename:'family-ai-loader-v105.js'});
 new vm.Script(identityGuide,{filename:'guide-identity-integrity-v216.js'});
 new vm.Script(sharedGuide,{filename:'shared-guide-surface-v236-core-v244.js'});
-console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',onboarding:'optional Hero -> Weaveling -> Moss -> Kamiya -> Rook -> Merlin sprite-led tour',onboardingPolicy:'skippable, replayable from Weaveling, solo-valid, Party/Guild encouraged, no model startup',guideLore:'Rook is Quartermaster; Guild Steward is Guildkeeper',aiSettings:'gateway-activated deterministic-default clean-room controller with explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical with recursive onboarding JS/CSS discovery and lazy visual sprites'},null,2));
+console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'intention -> aptitude -> review -> activation -> realm handoffs',onboarding:'optional Hero -> Weaveling -> Moss -> Kamiya -> Rook -> Merlin sprite-led tour',onboardingPolicy:'skippable, replayable from Weaveling, solo-valid, Party/Guild encouraged, no model startup',guideLore:'Rook is Quartermaster; Guild Steward is Guildkeeper',aiSettings:'gateway-activated deterministic-default clean-room controller with explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical with recursive onboarding JS/CSS discovery and lazy visual sprites'},null,2));

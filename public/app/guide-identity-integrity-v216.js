@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2-guide-identity-integrity-v216-v242-only';
+const VERSION='1.0.3-guide-identity-integrity-v216-canonical-artifacts';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE={
-  civweave:{name:'Weaveling',role:'central mirror and orchestrator'},
-  'living-school':{name:'Moss',role:'learning guide'},
-  cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide'},
-  fellowfare:{name:'Rook',role:'quartermaster and exchange guide'},
+  civweave:{name:'Weaveling',role:'Quest guide and central orchestrator'},
+  'living-school':{name:'Moss',role:'Learning Journey guide'},
+  cerbanimo:{name:'Kamiya',role:'Endeavor guide'},
+  fellowfare:{name:'Rook',role:'Manifest guide and quartermaster'},
   anarchadia:{name:'Merlin',role:'civic, feature-request, and automation guide'}
 };
 

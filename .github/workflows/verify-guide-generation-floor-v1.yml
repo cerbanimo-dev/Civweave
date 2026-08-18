@@ -1,0 +1,36 @@
+name: Verify Guide Generation Floor
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/guide-generation-floor-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'scripts/verify-guide-generation-floor-v1.mjs'
+      - '.github/workflows/verify-guide-generation-floor-v1.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/guide-generation-floor-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'scripts/verify-guide-generation-floor-v1.mjs'
+      - '.github/workflows/verify-guide-generation-floor-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-guide-generation-floor-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify 900-token guide floor
+        run: node scripts/verify-guide-generation-floor-v1.mjs

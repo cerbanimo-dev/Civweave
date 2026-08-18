@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.163-guide-chat-surface-v350-model-route-v2';
+const VERSION='1.0.165-guide-chat-surface-v350-themed-focus-ring';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -10,16 +10,16 @@ const RETIRED_STATE_KEY='civweave.guide-workspace.v242';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE=Object.freeze({
-  civweave:{name:'Weaveling',label:'Civweave',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling'},
-  'living-school':{name:'Moss',label:'Living School',role:'Learning guide',avatar:'/app/assets/ai/chat/moss-face-v255.webp',accent:'#59cf87',panel:'#17342c',placeholder:'Message Moss'},
-  cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/chat/kamiya-face-v255.webp',accent:'#ff54d3',panel:'#170824',placeholder:'Message Kamiya'},
-  fellowfare:{name:'Rook',label:'FellowFare',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/chat/rook-face-v255.webp',accent:'#f2a93b',panel:'#2c1b17',placeholder:'Message Rook'},
+  civweave:{name:'Weaveling',label:'Civweave',role:'Quest guide and central orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling about a Quest'},
+  'living-school':{name:'Moss',label:'Living School',role:'Learning Journey guide',avatar:'/app/assets/ai/chat/moss-face-v255.webp',accent:'#59cf87',panel:'#17342c',placeholder:'Message Moss about a Learning Journey'},
+  cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Endeavor guide',avatar:'/app/assets/ai/chat/kamiya-face-v255.webp',accent:'#ff54d3',panel:'#170824',placeholder:'Message Kamiya about an Endeavor'},
+  fellowfare:{name:'Rook',label:'FellowFare',role:'Manifest guide and Quartermaster',avatar:'/app/assets/ai/chat/rook-face-v255.webp',accent:'#f2a93b',panel:'#2c1b17',placeholder:'Message Rook about a Manifest'},
   anarchadia:{name:'Merlin',label:'Anarchadia',role:'Civic and automation guide',avatar:'/app/assets/ai/chat/merlin-face-v255.webp',accent:'#ff4f9a',panel:'#090909',placeholder:'Message Merlin'}
 });
 if(globalThis.CivweaveGuideChatSurfaceV350?.version===VERSION)return;
 
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clone=value=>{try{return typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value))}catch{return value}};
 const now=()=>new Date().toISOString();
@@ -105,7 +105,7 @@ function installStyle(){
 #${ROOT_ID} .cw242-unread{position:absolute;right:7px;top:6px;width:10px;height:10px;border:2px solid #08111d;border-radius:50%;background:var(--window-accent);box-shadow:0 0 9px var(--window-accent)}#${ROOT_ID} .cw242-unread[hidden]{display:none!important}
 #${ROOT_ID} .cw350-context{padding:7px 11px;border-bottom:1px solid #ffffff12;color:#9fb0c3;font-size:11px;background:#0002}#${ROOT_ID} [data-log]{min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}#${ROOT_ID} [data-log]:empty::before{content:'Start a conversation';margin:auto;color:#71839a;font-weight:750}
 #${ROOT_ID} article{display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;align-items:start}#${ROOT_ID} article.is-user{display:flex;justify-content:flex-end;padding-left:42px}#${ROOT_ID} article>img{width:32px;height:32px;border:1px solid var(--guide-accent);border-radius:10px;object-fit:cover}#${ROOT_ID} .cw350-bubble{max-width:88%;padding:9px 11px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff0b;white-space:pre-wrap;overflow-wrap:anywhere}#${ROOT_ID} .is-user .cw350-bubble{background:color-mix(in srgb,var(--guide-accent) 16%,#ffffff08);border-color:color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} .cw350-meta{margin-top:5px;color:#8394aa;font-size:10px}
-#${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit}#${ROOT_ID} [data-send]{min-width:76px;border:1px solid var(--guide-accent);border-radius:12px;padding:0 14px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} button{cursor:pointer}
+#${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit;caret-color:var(--guide-accent);outline:none}#${ROOT_ID} textarea:focus,#${ROOT_ID} textarea:focus-visible{border-color:var(--guide-accent)!important;outline:3px solid color-mix(in srgb,var(--guide-accent) 88%,#fff 12%)!important;outline-offset:2px;box-shadow:0 0 0 1px color-mix(in srgb,var(--guide-accent) 56%,transparent),0 0 18px color-mix(in srgb,var(--guide-accent) 30%,transparent)}#${ROOT_ID} [data-send]{min-width:76px;border:1px solid var(--guide-accent);border-radius:12px;padding:0 14px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} button{cursor:pointer}
 @media(max-width:720px){#${ROOT_ID}{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:100dvh;border:0;border-radius:0;grid-template-rows:auto auto auto minmax(0,1fr) auto}#${ROOT_ID}>header{grid-template-columns:44px minmax(0,1fr) 40px;padding-top:calc(7px + env(safe-area-inset-top))}#${ROOT_ID}>header img{width:44px;height:44px}#${ROOT_ID} .cw242-window-switcher{gap:4px;padding:7px 5px 8px}#${ROOT_ID} .cw242-window img{width:48px;height:48px;border-radius:12px}#${LAUNCHER_ID}{width:56px;height:56px}}
 @media(max-width:390px){#${ROOT_ID} .cw242-window-switcher{gap:2px;padding-left:3px;padding-right:3px}#${ROOT_ID} .cw242-window img{width:44px;height:44px}}
 `;
@@ -168,11 +168,11 @@ function render(){
 function historyFor(system){return(readThread(system).messages||[]).filter(row=>!row.pending&&['user','assistant'].includes(row.role)).slice(-16).map(row=>({role:row.role,text:clean(row.text,6000)}))}
 function deterministicReply(system,text){
   const value=clean(text,180),g=guide(system);
-  if(system==='living-school')return`Moss kept this locally. For “${value}”, identify the skill, the smallest practice step, and the evidence that would prove it.`;
-  if(system==='cerbanimo')return`Kamiya kept this locally. For “${value}”, define the concrete deliverable, what counts as done, and the first verifiable dependency.`;
-  if(system==='fellowfare')return`Rook kept this locally. For “${value}”, name the exact need or offer, timing, acceptable substitutes, and exchange boundary.`;
+  if(system==='living-school')return`Moss kept this locally. For “${value}”, identify the capability, the smallest practice step, and the evidence that would prove it before shaping a Learning Journey.`;
+  if(system==='cerbanimo')return`Kamiya kept this locally. For “${value}”, define the Endeavor's concrete deliverable, what counts as done, and the first verifiable dependency.`;
+  if(system==='fellowfare')return`Rook kept this locally. For “${value}”, name the exact need or offer, timing, acceptable substitutes, and exchange boundary for the Manifest.`;
   if(system==='anarchadia')return`Merlin kept this locally. For “${value}”, name the proposed change, who it affects, and the reversible test for success.`;
-  return`${g.name} kept this locally. For “${value}”, start with the outcome you want, then separate what must be learned, built, acquired, or agreed.`;
+  return`${g.name} kept this locally. For “${value}”, start with the Quest outcome you want, then separate what must be learned, built, acquired, or agreed.`;
 }
 function localFailure(system,selection,error){const message=clean(error?.message||error||'The selected local model did not complete.',900);return{text:`${guide(system).name} could not run the selected local model ${selection?.id||''}: ${message}`,provider:'local-model-error',model:selection?.id||'',error:message}}
 async function fallbackReply(system,text){
@@ -224,10 +224,11 @@ function start(){
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
   document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';
+  document.documentElement.dataset.civweaveGuideArtifactLanguage='canonical-v1';
   try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

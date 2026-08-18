@@ -54,7 +54,7 @@ assert(plannerIndex>=0,'Shared guide loader must guarantee the intention planner
 assert(materializationIndex>plannerIndex,'Weaveling materialization must load after the canonical planner.');
 assert(sharedCoreIndex>materializationIndex,'Shared chat must not mount before Weaveling materialization is ready.');
 
-for(const marker of ["stage:'review'","view:'weave'",'civweave:working-campus-plan-built','civweave:weave-review-ready','approvalGate','Nothing is active yet','WEAVE GENERATED · REVIEW REQUIRED'])assert(materialization.includes(marker),`Missing reviewable-weave materialization marker: ${marker}`);
+for(const marker of ["stage:'review'","view:'weave'",'civweave:working-campus-plan-built','civweave:weave-review-ready','approvalGate','Nothing is active yet','QUEST GENERATED · REVIEW REQUIRED'])assert(materialization.includes(marker),`Missing reviewable-Quest materialization marker: ${marker}`);
 assert.match(scrollCss,/#weaveling-hub-v233\{max-height:none!important;overflow:visible!important/,'Weaveling hub must relinquish nested vertical scroll ownership.');
 assert(scrollCss.includes('touch-action:pan-y'),'Weaveling modules must explicitly preserve vertical touch panning.');
 

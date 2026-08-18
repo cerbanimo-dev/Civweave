@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.57-weaveling-plan-materialization-v265';
+const VERSION='1.0.60-weaveling-plan-materialization-v265-direct-quest-copy';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const BANNER_ID='cw-weave-review-ready-v265';
@@ -42,7 +42,7 @@ function materialize(plan,{source='weaveling-shared-chat-v265'}={}){
     wish:clean(saved.wish||current.wish,8000),
     profile:saved.profile&&typeof saved.profile==='object'?clone(saved.profile):current.profile||{},
     plan:saved,
-    reviewReady:{planId:saved.id,title:clean(saved.title,220)||'Reviewable weave',at,source},
+    reviewReady:{planId:saved.id,title:clean(saved.title,220)||'Reviewable Quest',at,source},
     updatedAt:at
   };
   try{localStorage.setItem(WORKING_KEY,JSON.stringify(next))}catch{}
@@ -54,9 +54,9 @@ function materialize(plan,{source='weaveling-shared-chat-v265'}={}){
   try{dispatchEvent(new CustomEvent('civweave:weave-review-ready',{detail:{planId:saved.id,title:saved.title,source,reviewReady:true}}))}catch{}
   const toast=document.getElementById('toast');
   if(toast&&isCivweavePage()){
-    toast.textContent=`Reviewable weave ready: ${clean(saved.title,180)||'your intention path'}. Nothing is active until you approve it.`;
+    toast.textContent=`Reviewable Quest ready: ${clean(saved.title,180)||'your Quest'}. Nothing is active until you approve it.`;
     toast.hidden=false;
-    setTimeout(()=>{if(toast.textContent.startsWith('Reviewable weave ready:'))toast.hidden=true},6500);
+    setTimeout(()=>{if(toast.textContent.startsWith('Reviewable Quest ready:'))toast.hidden=true},6500);
   }
   return next;
 }
@@ -93,7 +93,7 @@ function renderReviewReady(plan){
     work.insertBefore(banner,workspace);
   }
   banner.dataset.planId=plan.id;
-  banner.innerHTML=`<div><small>WEAVE GENERATED · REVIEW REQUIRED</small><strong>${esc(clean(plan.title,220)||'Reviewable weave')}</strong><span>This is a real saved weave in REVIEW, not a chat-only outline. Nothing has been activated.</span></div><div class="cw-weave-review-actions"><button type="button" data-review-weave>Review weave</button><button type="button" data-revise-weave>Revise wish</button></div>`;
+  banner.innerHTML=`<div><small>QUEST GENERATED · REVIEW REQUIRED</small><strong>${esc(clean(plan.title,220)||'Reviewable Quest')}</strong><span>This is a real saved Quest in REVIEW, not a chat-only outline. Nothing has been activated.</span></div><div class="cw-weave-review-actions"><button type="button" data-review-weave>Review Quest</button><button type="button" data-revise-weave>Revise Quest</button></div>`;
   banner.querySelector('[data-review-weave]')?.addEventListener('click',()=>openReview(plan));
   banner.querySelector('[data-revise-weave]')?.addEventListener('click',focusRevision);
   return true;
@@ -110,8 +110,8 @@ function patchPlanner(api=globalThis.CivweaveIntentionPlanner){
       materialize(result.plan,{source:'weaveling-shared-chat-v265'});
       result.response={
         ...(result.response||{}),
-        answer:`I generated and saved the reviewable weave “${clean(result.plan.title,220)||'your intention path'}”. It is now in REVIEW on the Civweave workspace. Nothing is active yet.\n\n${clean(result.response?.answer,7000)}`.trim(),
-        choice:{...(result.response?.choice||{}),mode:'Plan',system:'civweave',nextAction:'Review the saved weave, revise it, or activate it after review.'},
+        answer:`I generated and saved the reviewable Quest “${clean(result.plan.title,220)||'your Quest'}”. It is now in REVIEW on the Civweave workspace. Nothing is active yet.\n\n${clean(result.response?.answer,7000)}`.trim(),
+        choice:{...(result.response?.choice||{}),mode:'Plan',system:'civweave',nextAction:'Review the saved Quest, revise it, or activate it after review.'},
         requiresConsent:true,
         approvalGate:{kind:'intention-activation',planId:result.item.id,state:'review',required:true,actions:['review','revise','activate']}
       };
@@ -147,7 +147,7 @@ function ensurePlanner(){
     const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===PLANNER_PATH}catch{return false}});
     if(!existing){
       const script=document.createElement('script');
-      script.src=`${PLANNER_PATH}?v=1.0.57-v265-review-materialization`;
+      script.src=`${PLANNER_PATH}?v=1.0.60-v265-direct-quest-copy`;
       script.async=false;
       document.head.append(script);
     }
@@ -172,6 +172,6 @@ function start(){
   let ticks=0;const timer=setInterval(()=>{if(globalThis.CivweaveIntentionPlanner!==patchedPlanner)patchPlanner();recoverVisibleReview();if(++ticks>=240)clearInterval(timer)},125);
 }
 
-globalThis.CivweaveWeavelingPlanMaterializationV265={version:VERSION,ensurePlanner,patchPlanner,materialize,renderReviewReady,openReview,policy:'weaveling-chat-must-materialize-before-claiming-a-reviewable-weave-v265'};
+globalThis.CivweaveWeavelingPlanMaterializationV265={version:VERSION,ensurePlanner,patchPlanner,materialize,renderReviewReady,openReview,policy:'weaveling-chat-must-materialize-before-claiming-a-reviewable-quest-v265'};
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

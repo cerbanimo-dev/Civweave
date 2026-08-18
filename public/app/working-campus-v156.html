@@ -15,47 +15,36 @@
 </head>
 <body>
 <main class="app">
-  <header class="top" aria-label="Civweave campus controls">
+  <header class="top" aria-label="Civweave">
     <button class="brand" id="brand-home" type="button">
       <img src="/app/logos/civweave-symbol.svg" alt="Civweave">
       <span class="brand-copy"><small>LOCAL WORKING CAMPUS <b class="version-chip">v1.0.163</b></small><strong>Civweave</strong></span>
     </button>
-    <div class="mode-switch" role="group" aria-label="Campus navigation mode">
-      <button class="pill active" id="guided-mode" type="button">Guided rails</button>
-      <button class="pill" id="roam-mode" type="button">Free roam</button>
-    </div>
-    <button class="pill settings-pill" id="settings-button" type="button" data-open-unified-ai-settings><span aria-hidden="true">⚙</span><span>Settings</span></button>
-    <button class="pill" id="diagnostics-button" type="button" data-open-log-diagnostics><span aria-hidden="true">◉</span><span>Diagnostics</span></button>
   </header>
-  <section class="campus" aria-label="Civweave realms">
-    <button class="realm-node" data-realm="living-school" style="--accent:var(--living)"><b class="badge" data-badge="living-school" hidden></b><span class="cw-onboarding-avatar realm-node-avatar" aria-hidden="true" style="--cw-onboarding-sheet:url('/Living-School-moss-sprites.png');--cw-onboarding-x:100%;--cw-onboarding-y:100%;width:min(58px,15vw);float:right;margin:-1px -1px 2px 6px;animation:none"></span><small>Moss</small><strong>Living School</strong><span>Learn what the intention requires.</span></button>
-    <button class="realm-node" data-realm="cerbanimo" style="--accent:var(--cerb)"><b class="badge" data-badge="cerbanimo" hidden></b><span class="cw-onboarding-avatar realm-node-avatar" aria-hidden="true" style="--cw-onboarding-sheet:url('/Cerbanimo-kamiya-sprites.png');--cw-onboarding-x:100%;--cw-onboarding-y:100%;width:min(58px,15vw);float:right;margin:-1px -1px 2px 6px;animation:none"></span><small>Kamiya</small><strong>Cerbanimo</strong><span>Turn the route into skilled work.</span></button>
-    <button class="realm-node" data-realm="fellowfare" style="--accent:var(--fare)"><b class="badge" data-badge="fellowfare" hidden></b><span class="cw-onboarding-avatar realm-node-avatar" aria-hidden="true" style="--cw-onboarding-sheet:url('/FellowFare-rook-sprites.png');--cw-onboarding-x:100%;--cw-onboarding-y:100%;width:min(58px,15vw);float:right;margin:-1px -1px 2px 6px;animation:none"></span><small>Rook</small><strong>FellowFare</strong><span>Find materials, services, and help.</span></button>
-    <button class="realm-node" data-realm="anarchadia" style="--accent:var(--an)"><b class="badge" data-badge="anarchadia" hidden></b><span class="cw-onboarding-avatar realm-node-avatar" aria-hidden="true" style="--cw-onboarding-sheet:url('/Anarchadia-merlin-sprites.png');--cw-onboarding-x:100%;--cw-onboarding-y:100%;width:min(58px,15vw);float:right;margin:-1px -1px 2px 6px;animation:none"></span><small>Merlin</small><strong>Anarchadia</strong><span>Store consent, roles, and review.</span></button>
-  </section>
   <section class="main">
     <aside class="guide">
-      <div class="guide-head"><img src="/app/assets/ai/weaveling.png" alt="Weaveling"><div><small class="muted">CENTRAL MIRROR</small><h1>Weaveling</h1><span class="muted">Wish → weave → realms</span></div></div>
+      <div class="guide-head"><img src="/app/assets/ai/weaveling.png" alt="Weaveling"><div><small class="muted">CENTRAL MIRROR</small><h1>Weaveling</h1><span class="muted">Intention → Quest → realms</span></div></div>
       <div class="conversation" id="conversation" aria-live="polite"></div>
       <form class="weaveling-chat-form" id="weaveling-chat-form">
         <label for="weaveling-chat-input">Message Weaveling</label>
-        <textarea id="weaveling-chat-input" name="message" rows="3" maxlength="8000" placeholder="Tell Weaveling your wish, ask a question, or revise the route." required></textarea>
+        <textarea id="weaveling-chat-input" name="message" rows="3" maxlength="8000" placeholder="Tell Weaveling your intention, ask a question, or revise the Quest." required></textarea>
         <button class="btn primary" id="weaveling-chat-send" type="submit">Send</button>
         <small id="weaveling-chat-status" class="muted">Local history · deterministic by default</small>
       </form>
-      <div class="guide-foot"><button class="btn" id="model-chip" type="button" data-open-unified-ai-settings>Settings</button><button class="btn" type="button" data-cw-onboarding-replay>Tour</button><button class="btn" id="export-button" type="button">Export</button></div>
+      <div class="guide-foot"><button class="btn" type="button" data-cw-onboarding-replay>Tour</button><button class="btn" id="export-button" type="button">Export Quest</button></div>
     </aside>
-    <section class="work"><header class="work-head"><b id="view-title">Your weave</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section>
+    <section class="work"><header class="work-head"><b id="view-title">Current Quest</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section>
   </section>
 </main>
-<nav class="bottom"><button class="active" data-view="weave">Weave</button><button data-view="progress">Progress</button><button data-view="library">Library</button><button data-view="campus">Campus</button></nav>
 <div class="toast" id="toast" hidden></div>
 <script src="/app/platform-experience-v160.js?v=header-v184-v106"></script>
+<script src="/app/settings-gateway-v317.js?v=settings-v324-direct-local-model-view"></script>
 <script src="/app/model-settings-controller-v173.js?v=settings-v184-package-recovery-v106"></script>
 <!-- compatibility markers: settings-v183-logs-v106 settings-v182-v106 -->
 <script src="/app/family-ai-loader-v105.js?v=deterministic-v106"></script>
 <script src="/app/merlinites-semantic-planner-v164.js?v=deterministic-v106"></script>
 <script src="/app/working-campus-v156.js?v=canonical-campus-startup-v227"></script>
+<script src="/app/working-campus-home-declutter-v1.js?v=home-declutter-v1"></script>
 <script src="/app/new-user-onboarding-v1.js?v=hero-party-guild-tour-v1"></script>
 <script id="working-campus-planner-v199">
 (()=>{
@@ -116,13 +105,13 @@ function handoffs(plan){
 function setBusy(value,message=''){
   busy=value;
   const button=document.querySelector('#build-plan');
-  if(button){button.disabled=value;button.textContent=value?'Building with local templates…':'Build reviewable weave'}
+  if(button){button.disabled=value;button.textContent=value?'Building Quest with local templates…':'Build reviewable Quest'}
   const status=document.querySelector('#weaveling-chat-status');
   if(status&&message)status.textContent=message;
 }
 function showError(error){
   const toast=document.querySelector('#toast');
-  if(toast){toast.textContent=`The reviewable weave could not be built: ${clean(error?.message||error,280)}`;toast.hidden=false;setTimeout(()=>{toast.hidden=true},5000)}
+  if(toast){toast.textContent=`The reviewable Quest could not be built: ${clean(error?.message||error,280)}`;toast.hidden=false;setTimeout(()=>{toast.hidden=true},5000)}
 }
 async function buildPlan(){
   if(busy)return;
@@ -134,10 +123,10 @@ async function buildPlan(){
     const composer=await ensurePlanner();
     for(const spec of [{kind:'learning',realm:'living-school',count:6},{kind:'project',realm:'cerbanimo',count:6}])paths.push(normalizePath(await composer.composePath({text:`${wish}\nConstraints: ${profile.constraints}\nSkill: ${profile.skill}\nLearning mode: ${profile.learning}`,kind:spec.kind,realm:spec.realm,mode:'deterministic',semantic:true,count:spec.count})));
     if(planSignals.material||planSignals.software||planSignals.game||profile.collaboration==='group')paths.push(normalizePath(await composer.composePath({text:`${wish}\nNeeded resources, access, timing, and constraints: ${profile.constraints}`,kind:'market',realm:'fellowfare',mode:'deterministic',semantic:true,count:7})));
-    const semanticUsed=paths.some(path=>path.planning?.semantic),plan={schema:'civweave.intention-weave.v1',id:uid('weave'),title:title(wish),wish,outcome:'Turn the stated wish into an editable route with visible deliverables, inspectable evidence, explicit acceptance criteria, and a clear next checkpoint.',state:'review',createdAt,updatedAt:createdAt,profile,assumptions:['The first milestone proves a complete useful slice rather than merely naming a smallest task.','Roles and commitments remain revisable before activation.','Evidence supports reflection and adjustment, not personal worth.'],paths:paths.slice(0,3),governance:governanceFor(planSignals),requiresExplicitActivation:true,planning:{version:VERSION,engine:semanticUsed?'deterministic+minilm':'deterministic-lexical',miniLMRole:'template-ranking-only',settingsBoundary:'unchanged'},rewardPolicy:globalThis.CivweaveRewardPolicyV198?.status?.()||null};
+    const semanticUsed=paths.some(path=>path.planning?.semantic),plan={schema:'civweave.intention-weave.v1',id:uid('weave'),title:title(wish),wish,outcome:'Turn the Quest goal into an editable route with visible deliverables, inspectable evidence, explicit acceptance criteria, and a clear next checkpoint.',state:'review',createdAt,updatedAt:createdAt,profile,assumptions:['The first milestone proves a complete useful slice rather than merely naming a smallest task.','Roles and commitments remain revisable before activation.','Evidence supports reflection and adjustment, not personal worth.'],paths:paths.slice(0,3),governance:governanceFor(planSignals),requiresExplicitActivation:true,planning:{version:VERSION,engine:semanticUsed?'deterministic+minilm':'deterministic-lexical',miniLMRole:'template-ranking-only',settingsBoundary:'unchanged'},rewardPolicy:globalThis.CivweaveRewardPolicyV198?.status?.()||null};
     const conversation=Array.isArray(current.conversation)?current.conversation.slice(-18):[];
-    conversation.push({role:'guide',text:`I built a reviewable weave with ${plan.paths.length} substantive paths and ${plan.paths.reduce((total,path)=>total+(path.tasks?.length||0),0)} evidence-bearing tasks. ${semanticUsed?'The installed MiniLM package ranked the template pieces locally.':'The deterministic lexical fallback ranked the same template pools.'} Nothing is active yet.`,at:createdAt});
-    localStorage.setItem(K,JSON.stringify({...current,stage:'review',view:'weave',wish,profile,plan,conversation,updatedAt:createdAt}));
+    conversation.push({role:'guide',text:`I built a reviewable Quest with ${plan.paths.length} substantive paths and ${plan.paths.reduce((total,path)=>total+(path.tasks?.length||0),0)} evidence-bearing tasks. ${semanticUsed?'The installed MiniLM package ranked the template pieces locally.':'The deterministic lexical fallback ranked the same template pools.'} Nothing is active yet.`,at:createdAt});
+    localStorage.setItem(K,JSON.stringify({...current,stage:'review',view:'quest',wish,profile,plan,conversation,updatedAt:createdAt}));
     canonical(plan);handoffs(plan);
     dispatchEvent(new CustomEvent('civweave:working-campus-plan-built',{detail:{planId:plan.id,engine:plan.planning.engine,pathCount:plan.paths.length}}));
     location.reload();
@@ -147,24 +136,6 @@ document.addEventListener('click',event=>{const button=event.target.closest?.('#
 const api=Object.freeze({version:VERSION,buildPlan,ensurePlanner,settingsBoundary:'untouched',planningScripts:PLANNING_SCRIPTS.map(([src])=>src)});
 globalThis.CivweaveWorkingCampusPlannerV199=api;
 dispatchEvent(new CustomEvent('civweave:working-campus-planner-ready',{detail:{version:VERSION,settingsBoundary:'untouched'}}));
-})();
-</script>
-<script>
-(()=>{
-  const button=document.getElementById('diagnostics-button');
-  if(!button)return;
-  button.addEventListener('click',()=>{
-    localStorage.setItem('civweave.log-level','debug');
-    const logger=globalThis.CivweaveLogV183;
-    if(!logger){location.reload();return}
-    logger.setLevel('debug');
-    logger.renderDock();
-    setTimeout(()=>{
-      const toggle=document.querySelector('[data-cw-log-toggle]');
-      const panel=document.querySelector('[data-cw-log-panel]');
-      if(panel?.hidden)toggle?.click();
-    },0);
-  });
 })();
 </script>
 <script src="/app/local-object-mesh-v146.js?v=open-media-cache-v1" defer></script>

@@ -2,6 +2,31 @@
 
 This file applies to the entire repository. Every coding agent must read it before choosing an edit target.
 
+## Machine-readable work context
+
+Before choosing an edit target, read:
+
+`config/agent-work-context.json`
+
+This file is the compact machine-readable guardrail for branch roles, authority order, immutable/materialized paths, test-first expectations, guide-memory scopes, mesh conflict policy, and the developer MCP boundary. It supplements this guide; it does not outrank the canonical contracts or active implementation.
+
+- Observe the actual checked-out branch. Treat `staging` as the development integration branch and `main` as the shipping branch unless an explicit task changes that policy.
+- Before editing a path, compare it with the context file's immutable, forbidden, and generated/materialized path rules. Do not edit `releases/**` as source except during an explicit release-materialization task.
+- For behavior changes, follow the test-first workflow below and identify the executable contract that proves the change.
+- If the machine-readable context disagrees with a higher-authority contract or current canonical implementation, fix `config/agent-work-context.json` in the same change rather than obeying stale metadata.
+
+## Repository map
+
+Before choosing an edit target, read:
+
+`docs/architecture/repository-map.md`
+
+That file is the canonical **repository navigation atlas**: it identifies the major source areas, the active installed-family route snapshot, shared capability landmarks, release/materialization boundaries, generated or historical surfaces that must not be treated as source, and the verification commands expected for common classes of work.
+
+The repository map is for navigation, not architectural authority. If it disagrees with `docs/contracts/mobile-interface-contract.md`, `docs/architecture/systems-of-practice.md`, `config/system-ownership.json`, or the active canonical implementation, those sources win and the repository map must be corrected in the same change.
+
+When a change moves the installed-family dispatcher, a canonical shared owner, a major top-level source responsibility, a stable server entrypoint, a release/materialization rule, or a generated/legacy boundary, update `docs/architecture/repository-map.md` in the same change.
+
 ## Canonical interface and runtime contract
 
 Before changing any interface, chat, shared runtime, loader, cross-system behavior, mobile interaction, or verification architecture, read:
@@ -62,15 +87,17 @@ Living School curriculum and learning tools are capabilities. They do not justif
 
 For any interface, shared-system, or cross-system task:
 
-1. Read `docs/contracts/mobile-interface-contract.md`.
-2. Read `docs/architecture/systems-of-practice.md` when the change affects shared ownership.
-3. Read `config/system-ownership.json` when the capability is registered there.
-4. Identify the canonical functional owner before editing presentation code.
-5. Search the repository for every owner, caller, subscriber, loader, registration, storage key, service-worker entry, workflow reference, and obsolete predecessor related to the capability.
-6. Trace the active route only as needed to understand how the visible UI reaches the canonical implementation.
-7. Repair or extend the existing owner. Do not add a parallel owner.
-8. If duplicated ownership already exists, consolidation is the task. Do not bridge duplicates with a third layer.
-9. If the change makes another active artifact obsolete, delete that artifact and every stale reference in the same change.
+1. Read `config/agent-work-context.json` and compare the task with its branch, path, testing, memory-scope, and tool-boundary guardrails.
+2. Read `docs/architecture/repository-map.md` to locate the current source and runtime boundaries without guessing from filenames.
+3. Read `docs/contracts/mobile-interface-contract.md`.
+4. Read `docs/architecture/systems-of-practice.md` when the change affects shared ownership.
+5. Read `config/system-ownership.json` when the capability is registered there.
+6. Identify the canonical functional owner before editing presentation code.
+7. Search the repository for every owner, caller, subscriber, loader, registration, storage key, service-worker entry, workflow reference, and obsolete predecessor related to the capability.
+8. Trace the active route only as needed to understand how the visible UI reaches the canonical implementation.
+9. Repair or extend the existing owner. Do not add a parallel owner.
+10. If duplicated ownership already exists, consolidation is the task. Do not bridge duplicates with a third layer.
+11. If the change makes another active artifact obsolete, delete that artifact and every stale reference in the same change.
 
 A visible button does not own its behavior merely because it is nearby. A realm page may expose a canonical shared control, but it may not independently intercept or reimplement that control.
 
@@ -80,9 +107,9 @@ Browser prototypes and globals must never be patched to compensate for an implem
 
 When debugging a concrete rendered surface, trace the route actually used by the current application rather than guessing from filenames or directories.
 
-`public/app/fullscreen-family-v104.html` may be used to discover current presentation entrypoints when it is still the active dispatcher, but it is not an architectural contract. Do not encode its current visual routing topology into shared-system design.
+Use `docs/architecture/repository-map.md` for the current route snapshot, then verify it against `public/app/fullscreen-family-v104.html` before editing. The dispatcher may be used to discover current presentation entrypoints when it is still active, but it is not an architectural contract. Do not encode its current visual routing topology into shared-system design.
 
-If recent commits, an active route, and an older document disagree, the canonical contract and current functional ownership win. Update or delete misleading documentation in the same change.
+If recent commits, an active route, and an older document disagree, the canonical contract and current functional ownership win. Update or delete misleading documentation in the same change, including the repository map when its route snapshot is stale.
 
 ## Source-of-truth rules
 
@@ -137,6 +164,7 @@ Git history is the archive. A replacement is not complete until the superseded a
 Treat the repository root as a control surface, not a storage location.
 
 - New general documentation belongs under `docs/`.
+- The repository atlas belongs at `docs/architecture/repository-map.md`; do not create a root-level `REPOSITORY-MAP.md` copy.
 - Release notes, audits, and planning records may live under `docs/history/` when they are genuine records rather than copies of obsolete implementations.
 - Do not create retired implementation archives.
 - Workflow touch/sentinel files belong under `ops/triggers/`, never as hidden files at `/`.
@@ -156,6 +184,18 @@ Preserve these architectural expectations unless the user explicitly changes the
 - Images, scenes, cabinets, rooms, terminals, and other visual metaphors may present functionality but never define ownership by themselves.
 - If a replacement makes an artifact obsolete, delete it and its stale references. Git history is the archive.
 
+## Test-first agent workflow
+
+For a behavior change, the default order is **contract first, implementation second**.
+
+1. Identify the smallest deterministic test, CI assertion, or end-to-end scenario that would fail before the intended behavior exists.
+2. Add or tighten that executable contract before editing the behavior owner. If an existing failing contract already proves the issue, name and reuse it rather than creating a duplicate test.
+3. Implement the change at the canonical owner.
+4. Run the narrow contract first, then the broader checks required by the affected system.
+5. Keep tests focused on observable behavior and architectural invariants. Do not add vacuous happy-path assertions merely to satisfy this rule.
+
+Documentation-only, comment-only, and mechanical generated-output changes do not require a synthetic failing test. When a defect cannot be reproduced deterministically, document the exact manual reproduction and acceptance evidence in the PR and add the closest stable contract that prevents the known regression.
+
 ## Verification
 
 Static repository-contract verification belongs in GitHub Actions, tests, linting, type checks, or review checks rather than standalone verifier files when practical.
@@ -172,7 +212,7 @@ For installer or packaged-runtime changes, run the relevant installer checks and
 npm run build:install
 ```
 
-For documentation-only changes, verify every named path against the current branch and inspect the Markdown diff.
+For documentation-only changes, verify every named path against the current branch and inspect the Markdown diff. If the change moves a route, owner, source boundary, stable server entrypoint, release rule, or generated/legacy boundary, verify `docs/architecture/repository-map.md` was updated too.
 
 A task is not complete when only a legacy or spatially duplicated copy works. Confirm the active presentation route reaches the canonical shared implementation and delete any predecessor made obsolete by the change.
 
@@ -183,7 +223,7 @@ A task is not complete when only a legacy or spatially duplicated copy works. Co
 - List the verification performed.
 - When a migration retires an old path, delete the retired active artifact and stale references in the same change, then update current pointer documentation that would otherwise mislead agents.
 
-When uncertain, return to `docs/contracts/mobile-interface-contract.md`, the ownership registry, and the active shared implementation. Do not infer architecture from scenery.
+When uncertain, return to `docs/contracts/mobile-interface-contract.md`, the ownership registry, the repository map, and the active shared implementation. Do not infer architecture from scenery.
 
 ## Long-horizon agentic pipeline mode
 
@@ -229,7 +269,7 @@ The pipeline coordinates work. It does not grant architectural authority. Human 
 
 ## Civweave Dev Tools MCP control instructions
 
-The canonical local agent bridge for direct Civweave PWA inspection and source editing is `tools/civweave-dev-mcp/`. It is an observation/interaction and source-edit boundary, not a runtime repair layer.
+The canonical local agent bridge for direct Civweave PWA inspection and source editing is `tools/civweave-dev-mcp/`. It is a **developer and maintainer tool only**: an observation/interaction and source-edit boundary, not an end-user MCP surface and not a runtime repair layer. It must never be bundled into the installed PWA, exposed as a public Civweave endpoint, or treated as the product API for user-owned external agents. A future user-facing MCP or external-agent capability requires its own canonical owner, authentication/authorization contract, privacy review, abuse boundaries, and explicit product surface.
 
 Start it against a dedicated Chromium/Opera development profile whose Chrome DevTools Protocol endpoint is bound to loopback:
 

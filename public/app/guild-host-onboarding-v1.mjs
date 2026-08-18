@@ -30,7 +30,7 @@ export function deviceCapabilities(){
   return Object.freeze({deviceClass,localMeshAvailable,recommendedRoute:recommendedHostRoute({deviceClass,localMeshAvailable}),persistentAlternatives:POCKET_NODE_POLICY.persistentAlternatives});
 }
 
-export async function completeGuildHostOnboarding({guildId,primaryOrigin=null,route='auto',enablePocketNode=true}={}){
+export async function completeGuildHostOnboarding({guildId,primaryOrigin=null,membershipKey=null,route='auto',enablePocketNode=true}={}){
   const id=clean(guildId,180);if(!id)throw new TypeError('guildId is required.');
   const origin=normalizedOrigin(primaryOrigin);
   const capabilities=deviceCapabilities();
@@ -38,7 +38,7 @@ export async function completeGuildHostOnboarding({guildId,primaryOrigin=null,ro
   const shouldEnrollPocket=enablePocketNode!==false&&selectedRoute==='pocket-node'&&capabilities.localMeshAvailable;
   let pocketNode=null,pocketNodeError=null,emergencyAiMesh=null,emergencyAiMeshError=null;
   if(shouldEnrollPocket){
-    try{pocketNode=await CivweavePocketGuildNodeV1.enroll({guildId:id,primaryOrigin:origin})}
+    try{pocketNode=await CivweavePocketGuildNodeV1.enroll({guildId:id,primaryOrigin:origin,membershipKey})}
     catch(error){pocketNodeError=String(error?.message||error)}
   }
   if(capabilities.localMeshAvailable){

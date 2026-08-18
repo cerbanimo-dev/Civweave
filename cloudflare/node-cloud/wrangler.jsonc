@@ -9,6 +9,18 @@
   "ai": {
     "binding": "AI"
   },
+  "ratelimits": [
+    {
+      "name": "GUILD_API_RATE_LIMITER",
+      "namespace_id": "41001",
+      "simple": { "limit": 60, "period": 60 }
+    },
+    {
+      "name": "GUILD_AI_RATE_LIMITER",
+      "namespace_id": "41002",
+      "simple": { "limit": 6, "period": 60 }
+    }
+  ],
   "browser": {
     "binding": "BROWSER",
     "remote": true
@@ -44,6 +56,10 @@
   // NODE_FABRIC_SESSION_SECRET
   // NODE_FABRIC_OPERATOR_TOKEN
   // NODE_FABRIC_BINDING_TOKEN
+  //
+  // Rate limiting is part of the Guild server template. Each independent
+  // Cloudflare account gets its own counters; nodeId remains part of the
+  // runtime key so multiple Guilds in one account are isolated as well.
   //
   // The ACCOUNT_DIRECTORY Durable Object stores only hashed recovery-email keys
   // and verified account locators. It never returns account existence before the

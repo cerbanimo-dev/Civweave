@@ -5,17 +5,27 @@ on:
   push:
     branches:
       - main
+      - staging
       - 'agent/open-learning-media-*'
       - 'agent/general-knowledge-video-packs-*'
     paths:
       - config/open-learning-media-packs-v1.json
+      - config/open-learning-media-pack-expansion-v2.json
+      - scripts/apply-open-learning-media-pack-expansion-v2.py
       - scripts/harvest-open-learning-media-v1.py
       - scripts/harvest-open-learning-media-library-v1.py
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
+      - scripts/filter-open-learning-media-title-quality-v2.py
+      - scripts/filter-open-learning-media-subject-collisions-v2.py
+      - scripts/report-open-learning-media-pack-coverage-v1.py
+      - scripts/report-open-learning-media-topic-candidates-v1.py
+      - scripts/report-open-learning-media-expanded-packs-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
       - scripts/test-open-learning-media-packs-v1.py
       - scripts/test-open-learning-media-runtime-v1.mjs
+      - scripts/test-open-learning-media-autofill-budget-v1.mjs
+      - scripts/verify-video-learning-contract-v1.mjs
       - scripts/finalize-open-learning-media-topic-inference-v1.py
       - scripts/fix-open-learning-media-learning-path-budget-v1.py
       - scripts/fix-open-learning-media-finalizer-idempotency-v1.py
@@ -46,14 +56,21 @@ on:
       - main
     paths:
       - config/open-learning-media-packs-v1.json
+      - config/open-learning-media-pack-expansion-v2.json
+      - scripts/apply-open-learning-media-pack-expansion-v2.py
       - scripts/harvest-open-learning-media-library-v1.py
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
+      - scripts/filter-open-learning-media-title-quality-v2.py
+      - scripts/filter-open-learning-media-subject-collisions-v2.py
       - scripts/test-open-learning-media-packs-v1.py
       - scripts/test-open-learning-media-runtime-v1.mjs
+      - scripts/test-open-learning-media-autofill-budget-v1.mjs
+      - scripts/verify-video-learning-contract-v1.mjs
       - scripts/finalize-open-learning-media-topic-inference-v1.py
       - public/app/open-learning-media-cache-v1.mjs
       - public/app/open-learning-media-installer-v1.mjs
+      - public/app/video-atlas-installer-v1.js
       - public/downloads/knowledge-schools/open-learning-media/**
       - docs/open-learning-media-packs-v1.md
       - .github/workflows/harvest-open-learning-media-v1.yml
@@ -69,15 +86,18 @@ jobs:
       - name: Syntax check Open Learning Media service
         run: |
           set -euo pipefail
-          python -m py_compile scripts/harvest-open-learning-media-v1.py scripts/harvest-open-learning-media-library-v1.py scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/test-open-learning-media-harvest-v1.py scripts/test-open-learning-media-packs-v1.py scripts/finalize-open-learning-media-topic-inference-v1.py scripts/fix-open-learning-media-learning-path-budget-v1.py scripts/fix-open-learning-media-finalizer-idempotency-v1.py scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/finalize-open-learning-media-safety-v1.py
+          python -m py_compile scripts/apply-open-learning-media-pack-expansion-v2.py scripts/harvest-open-learning-media-v1.py scripts/harvest-open-learning-media-library-v1.py scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/filter-open-learning-media-title-quality-v2.py scripts/filter-open-learning-media-subject-collisions-v2.py scripts/report-open-learning-media-pack-coverage-v1.py scripts/report-open-learning-media-topic-candidates-v1.py scripts/report-open-learning-media-expanded-packs-v1.py scripts/test-open-learning-media-harvest-v1.py scripts/test-open-learning-media-packs-v1.py scripts/finalize-open-learning-media-topic-inference-v1.py scripts/fix-open-learning-media-learning-path-budget-v1.py scripts/fix-open-learning-media-finalizer-idempotency-v1.py scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/finalize-open-learning-media-safety-v1.py
           node --check public/app/open-learning-media-cache-v1.mjs
           node --check public/app/open-learning-media-installer-v1.mjs
+          node --check public/app/video-atlas-installer-v1.js
           node --check public/app/video-learning-contract-v1.mjs
           node --check public/service-worker-core-v208.js
           node --check public/service-worker-v203.js
           node --check public/install-v130.js
           node --check public/app/installed-entry-v146.js
           node --check scripts/test-open-learning-media-runtime-v1.mjs
+          node --check scripts/test-open-learning-media-autofill-budget-v1.mjs
+          node --check scripts/verify-video-learning-contract-v1.mjs
           python scripts/finalize-open-learning-media-topic-inference-v1.py
           git diff --exit-code public/app/open-learning-media-cache-v1.mjs
 
@@ -89,8 +109,14 @@ jobs:
           python scripts/test-open-learning-media-harvest-v1.py
           python scripts/test-open-learning-media-packs-v1.py
 
+      - name: Verify all-pack autofill fits the default storage profile
+        run: node scripts/test-open-learning-media-autofill-budget-v1.mjs
+
       - name: Verify cache mesh rights and offline launch contracts
         run: node scripts/test-open-learning-media-runtime-v1.mjs
+
+      - name: Verify video atlas lazy-cache contract
+        run: node scripts/verify-video-learning-contract-v1.mjs
 
       - name: Verify existing required-video compatibility
         run: node scripts/test-video-learning-contract-v1.mjs

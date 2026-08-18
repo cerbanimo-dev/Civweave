@@ -13,11 +13,14 @@ const [mesh,architecture]=await Promise.all([
 
 for(const token of [
   "const PROTOCOL='civweave.foreground-phone-mesh.v1'",
-  'const DB_VERSION=2',
+  'const DB_VERSION=3',
   "db.createObjectStore('incoming'",
   "db.createObjectStore('acks'",
   "db.createObjectStore('transit'",
   "db.createObjectStore('priorities'",
+  "db.createObjectStore('conflicts'",
+  "const CONFLICT_SCHEMA='civweave.community-conflict.v1'",
+  "conflictPolicy:'same-revision-hash-tiebreak-preserve-both'",
   "type:'manifest'",
   "type:'want'",
   "type:'chunk'",
@@ -55,6 +58,8 @@ assert(!mesh.includes('object.hopLimit--'),'Foreground mesh mutates signed hopLi
 assert(mesh.includes("const mayRelay=object=>object.consent==='public'||object.consent==='federated'"),'Relay policy must be public/federated only.');
 assert(mesh.includes('if(!object||!mayRelay(object))continue'),'Gateway upload must exclude direct/group objects.');
 assert(mesh.includes('if(!mayRelay(object)||!intendedFor(object'),'Gateway download must exclude direct/group objects.');
+assert(mesh.includes("return{relation:'conflict',winner:incomingHash<localHash?'incoming':'local'}"),'Same-revision forks must use a deterministic signed-hash tie-break.');
+assert(mesh.includes("resolution:'deterministic-revision-hash-tiebreak'"),'Fork evidence must record its convergence rule.');
 
 for(const phrase of [
   'no Android core, native companion, Wi-Fi Direct dependency, or always-on daemon in v1',
@@ -70,6 +75,8 @@ for(const phrase of [
 console.log(JSON.stringify({
   ok:true,
   protocol:'civweave.foreground-phone-mesh.v1',
+  databaseVersion:3,
+  conflictPolicy:'same-revision-hash-tiebreak-preserve-both',
   foregroundOnly:true,
   nativeCompanion:false,
   wifiDirect:false,

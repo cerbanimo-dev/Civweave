@@ -2,12 +2,14 @@
 'use strict';
 
 const VERSION='working-campus-return-v425';
-const REVISION='guild-quest-browser-v430';
+const REVISION='legacy-controls-retired-v432';
 const RECOVERY_KEY='civweave.working-campus.return-recovery.v425';
 const RECOVERY_WINDOW_MS=30_000;
 const STARTUP_GRACE_MS=2400;
 const UNHEALTHY_HOLD_MS=900;
 const RETRY_DELAY_MS=260;
+const INTERACTION_GRACE_MS=1800;
+const INTERACTION_FAILSAFE_MS=10_000;
 const CANONICAL_PATH='/app/working-campus-v156.html';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
 const LEGACY_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
@@ -16,13 +18,22 @@ const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
 const SUPPORT_URL='https://www.patreon.com/c/Civweave';
 const GUILD_QUEST_EMBED_URL='/app/civweave-guild-quest-embed-v1.html?embedded=1&source=working-campus';
 const GUILD_QUEST_BROWSER_ID='cw-guild-quest-browser-v1';
-const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
+const LEGACY_CONTROL_STYLE_ID='cw-working-campus-retired-controls-v432';
+const LEGACY_CONTROL_SELECTORS=Object.freeze(['main.app>.campus','nav.bottom','main.app>.top>.mode-switch','#settings-button','#diagnostics-button','#model-chip']);
+const CAMPUS_VIEW_FEATURES=new Set(['weave','progress','library','campus']);
+const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.main','#conversation','#workspace'];
+const WEAVELING_INTERACTION_SELECTOR='.guide button,.guide a,.weaveling-chat-form textarea,.weaveling-chat-form button,[data-open-unified-ai-settings],[data-cw-onboarding-replay]';
 let lastInspection=null;
 let recoveryPanel=null;
 let guildQuestBrowser=null;
 let verifyFlight=null;
 let retryTimer=0;
 let unhealthySince=0;
+let protectedInteractionActive=false;
+let lastProtectedInteractionAt=0;
+let protectedInteractionFailsafeTimer=0;
+let legacyControlObserver=null;
+let legacyControlsRemoved=0;
 const bootStartedAt=Date.now();
 
 if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION&&globalThis.CivweaveWorkingCampusReturnGuardV425?.revision===REVISION)return;
@@ -30,6 +41,84 @@ if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION&&globalThi
 const now=()=>Date.now();
 const parse=value=>{try{return JSON.parse(value||'null')}catch{return null}};
 const frame=()=>new Promise(resolve=>(globalThis.requestAnimationFrame||((fn)=>setTimeout(fn,0)))(()=>resolve()));
+function installRetiredControlStyle(){
+  if(document.getElementById(LEGACY_CONTROL_STYLE_ID))return true;
+  const style=document.createElement('style');
+  style.id=LEGACY_CONTROL_STYLE_ID;
+  style.textContent=`
+main.app>.campus,nav.bottom,main.app>.top>.mode-switch,#settings-button,#diagnostics-button,#model-chip{display:none!important}
+main.app>.top{grid-template-columns:minmax(190px,1fr) auto auto!important;grid-template-areas:"brand review theme"!important}
+@media(max-width:960px){main.app>.top{grid-template-columns:minmax(180px,1fr) auto auto!important;grid-template-areas:"brand review theme"!important}}
+@media(max-width:700px){main.app>.top{grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"brand brand" "review theme"!important}}
+`;
+  (document.head||document.documentElement).append(style);
+  return true;
+}
+function removeLegacyControls(root=document){
+  const nodes=new Set();
+  for(const selector of LEGACY_CONTROL_SELECTORS){
+    if(root?.matches?.(selector))nodes.add(root);
+    root?.querySelectorAll?.(selector)?.forEach?.(node=>nodes.add(node));
+  }
+  let removed=0;
+  for(const node of nodes){if(node?.isConnected){node.remove();removed+=1}}
+  legacyControlsRemoved+=removed;
+  document.documentElement?.setAttribute('data-civweave-legacy-controls',`retired-v432:${legacyControlsRemoved}`);
+  return removed;
+}
+function retireLegacyControls(){
+  installRetiredControlStyle();
+  removeLegacyControls();
+  if(!legacyControlObserver&&document.documentElement){
+    legacyControlObserver=new MutationObserver(records=>{
+      for(const record of records)for(const node of record.addedNodes||[])removeLegacyControls(node);
+    });
+    legacyControlObserver.observe(document.documentElement,{childList:true,subtree:true});
+  }
+  return true;
+}
+function clearRequestedFeature(){
+  try{const url=new URL(location.href);if(!url.searchParams.has('feature'))return false;url.searchParams.delete('feature');history.replaceState(history.state,'',`${url.pathname}${url.search}${url.hash}`);return true}catch{return false}
+}
+function openSettingsDirect(launcher=null){
+  try{if(globalThis.CivweaveSettingsV320?.open){globalThis.CivweaveSettingsV320.open(launcher);return true}}catch{}
+  try{if(globalThis.CivweaveModelSettingsControllerV173?.open&&globalThis.CivweaveSettingsV320){globalThis.CivweaveModelSettingsControllerV173.open(launcher);return true}}catch{}
+  return false;
+}
+function openCampusFeature(feature,launcher=null){
+  const name=String(feature||'').trim();
+  if(name==='settings')return openSettingsDirect(launcher);
+  if(!CAMPUS_VIEW_FEATURES.has(name))return false;
+  try{if(globalThis.CivweaveWorkingCampusV156?.openView)return Boolean(globalThis.CivweaveWorkingCampusV156.openView(name))}catch{}
+  try{const detail={view:name,handled:false,opened:false};dispatchEvent(new CustomEvent('civweave:working-campus-view-request',{detail}));return Boolean(detail.handled||detail.opened)}catch{return false}
+}
+function closeGuideRailMenu(){try{globalThis.CivweaveFamilyNavigationV178?.closeQuickMenu?.({restoreFocus:false})}catch{}}
+function queueCampusFeature(feature,launcher=null){
+  let attempts=0;
+  const run=()=>{
+    if(openCampusFeature(feature,launcher)){closeGuideRailMenu();if(new URLSearchParams(location.search).get('feature')===feature)clearRequestedFeature();return}
+    attempts+=1;if(attempts<12)setTimeout(run,150);
+  };
+  run();
+  return true;
+}
+function interceptGuideRailShortcut(event){
+  const target=event?.target?.closest?.('#cw-themed-system-nav-menu [data-cw-nav-system="civweave"][data-cw-nav-feature]');
+  if(!target)return;
+  const feature=String(target.dataset.cwNavFeature||'');
+  if(feature!=='settings'&&!CAMPUS_VIEW_FEATURES.has(feature))return;
+  event.preventDefault();event.stopImmediatePropagation();queueCampusFeature(feature,target);
+}
+function applyRequestedCampusFeature(){
+  try{
+    if(location.pathname!==CANONICAL_PATH)return false;
+    const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();
+    if(feature!=='settings'&&!CAMPUS_VIEW_FEATURES.has(feature))return false;
+    if(openCampusFeature(feature)){clearRequestedFeature();closeGuideRailMenu();return true}
+  }catch{}
+  return false;
+}
+function scheduleRequestedCampusFeature(){for(const delay of [0,240,720,1500])setTimeout(()=>applyRequestedCampusFeature(),delay)}
 function requestedLanguage(){
   let explicit='';
   try{
@@ -74,14 +163,13 @@ function ensureSupportButton(){
 function ensureGuildQuestBrowser(){
   const existing=document.getElementById(GUILD_QUEST_BROWSER_ID);
   if(existing){guildQuestBrowser=existing;return true}
-  const campus=document.querySelector('main.app>.campus');
   const main=document.querySelector('main.app>.main');
-  if(!campus||!main)return false;
+  if(!main)return false;
   if(!document.getElementById(`${GUILD_QUEST_BROWSER_ID}-style`)){
     const style=document.createElement('style');
     style.id=`${GUILD_QUEST_BROWSER_ID}-style`;
     style.textContent=`
-#${GUILD_QUEST_BROWSER_ID}{position:relative;z-index:2;max-width:1180px;margin:0 auto 10px;border:1px solid var(--line,#ffffff25);border-radius:16px;background:linear-gradient(145deg,#0b1d35e8,#07111fd9);backdrop-filter:blur(16px);overflow:hidden;color:var(--ink,#f8f1df)}
+#${GUILD_QUEST_BROWSER_ID}{position:relative;z-index:2;max-width:1180px;margin:9px auto 10px;border:1px solid var(--line,#ffffff25);border-radius:16px;background:linear-gradient(145deg,#0b1d35e8,#07111fd9);backdrop-filter:blur(16px);overflow:hidden;color:var(--ink,#f8f1df)}
 #${GUILD_QUEST_BROWSER_ID}>summary{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;cursor:pointer;list-style:none;user-select:none}
 #${GUILD_QUEST_BROWSER_ID}>summary::-webkit-details-marker{display:none}
 #${GUILD_QUEST_BROWSER_ID}>summary:focus-visible{outline:2px solid var(--mint,#8af5d2);outline-offset:-3px}
@@ -95,7 +183,7 @@ function ensureGuildQuestBrowser(){
 #${GUILD_QUEST_BROWSER_ID} .cw-gqb-body{position:relative;min-height:680px;background:#07111f88}
 #${GUILD_QUEST_BROWSER_ID} .cw-gqb-status{position:absolute;inset:0;z-index:1;display:grid;place-items:center;padding:24px;color:var(--muted,#aebbd0);text-align:center;font-size:12px;pointer-events:none}
 #${GUILD_QUEST_BROWSER_ID} iframe{position:relative;z-index:2;display:block;width:100%;min-height:680px;border:0;background:transparent}
-@media(max-width:700px){#${GUILD_QUEST_BROWSER_ID}{margin:0 auto 8px;border-radius:14px}#${GUILD_QUEST_BROWSER_ID}>summary{padding:9px 10px}#${GUILD_QUEST_BROWSER_ID} .cw-gqb-body,#${GUILD_QUEST_BROWSER_ID} iframe{min-height:620px}}
+@media(max-width:700px){#${GUILD_QUEST_BROWSER_ID}{margin:7px auto 8px;border-radius:14px}#${GUILD_QUEST_BROWSER_ID}>summary{padding:9px 10px}#${GUILD_QUEST_BROWSER_ID} .cw-gqb-body,#${GUILD_QUEST_BROWSER_ID} iframe{min-height:620px}}
 `;
     (document.head||document.documentElement).append(style);
   }
@@ -155,6 +243,10 @@ function preauthorizeCanonicalCampus(){
 function readRecovery(){try{return parse(sessionStorage.getItem(RECOVERY_KEY))}catch{return null}}
 function writeRecovery(value){try{sessionStorage.setItem(RECOVERY_KEY,JSON.stringify(value))}catch{}}
 function clearRecovery(){try{sessionStorage.removeItem(RECOVERY_KEY)}catch{}}
+function releaseExpiredRecovery(){
+  const previous=readRecovery();
+  if(previous&&Number(previous.at)<=now()-RECOVERY_WINDOW_MS)clearRecovery();
+}
 function currentRelease(){
   const param=new URLSearchParams(location.search).get('version');
   if(/^\d+\.\d+\.\d+$/.test(param||''))return param;
@@ -189,7 +281,7 @@ function inspect(){
   const missing=REQUIRED_SELECTORS.filter(selector=>!document.querySelector(selector));
   const app=document.querySelector('main.app');
   const healthy=Boolean(document.documentElement?.isConnected&&document.body?.isConnected&&!missing.length&&computedVisible(app));
-  lastInspection={version:VERSION,revision:REVISION,healthy,missing,appVisible:computedVisible(app),visibilityState:document.visibilityState||'unknown',at:new Date().toISOString()};
+  lastInspection={version:VERSION,revision:REVISION,healthy,missing,appVisible:computedVisible(app),visibilityState:document.visibilityState||'unknown',legacyControlsRemoved,at:new Date().toISOString()};
   if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn=healthy?'healthy':'unhealthy';
   return lastInspection;
 }
@@ -234,16 +326,53 @@ function scheduleVerify(reason='settle',delay=RETRY_DELAY_MS){
   retryTimer=setTimeout(()=>{retryTimer=0;void verifyOrRecover(reason)},Math.max(0,Number(delay)||0));
   return true;
 }
+function interactionGraceRemaining(){
+  if(protectedInteractionActive)return INTERACTION_GRACE_MS;
+  if(!lastProtectedInteractionAt)return 0;
+  return Math.max(0,INTERACTION_GRACE_MS-(now()-lastProtectedInteractionAt));
+}
+function deferForProtectedInteraction(reason){
+  const remaining=interactionGraceRemaining();
+  if(!remaining)return false;
+  unhealthySince=0;
+  scheduleVerify(`${reason}-interaction-settle`,Math.max(RETRY_DELAY_MS,remaining+40));
+  if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn='interaction-settling';
+  return true;
+}
+function protectedInteractionStart(event){
+  const target=event?.target;
+  if(!target?.closest?.(WEAVELING_INTERACTION_SELECTOR))return;
+  protectedInteractionActive=true;
+  lastProtectedInteractionAt=now();
+  unhealthySince=0;
+  clearRetry();
+  if(protectedInteractionFailsafeTimer)clearTimeout(protectedInteractionFailsafeTimer);
+  protectedInteractionFailsafeTimer=setTimeout(()=>{
+    protectedInteractionFailsafeTimer=0;
+    protectedInteractionActive=false;
+    lastProtectedInteractionAt=now();
+    scheduleVerify('interaction-failsafe-release',INTERACTION_GRACE_MS);
+  },INTERACTION_FAILSAFE_MS);
+}
+function protectedInteractionEnd(){
+  if(!protectedInteractionActive)return;
+  protectedInteractionActive=false;
+  lastProtectedInteractionAt=now();
+  if(protectedInteractionFailsafeTimer){clearTimeout(protectedInteractionFailsafeTimer);protectedInteractionFailsafeTimer=0}
+  scheduleVerify('interaction-release',INTERACTION_GRACE_MS);
+}
 async function verifyOnce(reason='check'){
   if(document.visibilityState==='hidden')return{deferred:true,reason};
+  if(deferForProtectedInteraction(reason))return{deferred:true,reason,interaction:true};
   preauthorizeCanonicalCampus();
+  removeLegacyControls();
   await frame();await frame();
   let inspection=inspect();
-  if(inspection.healthy){unhealthySince=0;clearRetry();clearRecovery();return inspection}
+  if(inspection.healthy){unhealthySince=0;clearRetry();releaseExpiredRecovery();return inspection}
   forceReveal();
   await frame();
   inspection=inspect();
-  if(inspection.healthy){unhealthySince=0;clearRetry();clearRecovery();return inspection}
+  if(inspection.healthy){unhealthySince=0;clearRetry();releaseExpiredRecovery();return inspection}
   const observedAt=now();
   if(!unhealthySince)unhealthySince=observedAt;
   const startupAge=observedAt-bootStartedAt;
@@ -256,6 +385,7 @@ async function verifyOnce(reason='check'){
     if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn='settling';
     return{...inspection,deferred:true,settling:true,startupAge,unhealthyAge};
   }
+  if(deferForProtectedInteraction(reason))return{...inspection,deferred:true,interaction:true,startupAge,unhealthyAge};
   const previous=readRecovery();
   const recent=previous&&Number(previous.at)>now()-RECOVERY_WINDOW_MS;
   if(recent){renderFailSafe(reason,inspection);return{...inspection,failsafe:true}}
@@ -278,20 +408,36 @@ function holdBfCache(event){
 function resume(event){
   preauthorizeCanonicalCampus();
   activateLanguageMode();
+  removeLegacyControls();
   ensureSupportButton();
   ensureGuildQuestBrowser();
+  scheduleRequestedCampusFeature();
   if(document.documentElement)document.documentElement.dataset.civweaveBfcacheResume=event?.persisted?VERSION:'normal';
   try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,revision:REVISION,persisted:Boolean(event?.persisted)}}))}catch{}
   if(event?.persisted)void verifyOrRecover('bfcache-return');
   else scheduleVerify('pageshow',RETRY_DELAY_MS);
 }
-function scheduleInitialCheck(){ensureSupportButton();ensureGuildQuestBrowser();scheduleVerify('initial-paint',RETRY_DELAY_MS)}
+function scheduleInitialCheck(){removeLegacyControls();ensureSupportButton();ensureGuildQuestBrowser();scheduleRequestedCampusFeature();scheduleVerify('initial-paint',RETRY_DELAY_MS)}
 
+retireLegacyControls();
 preauthorizeCanonicalCampus();
 activateLanguageMode();
+document.addEventListener('click',interceptGuideRailShortcut,true);
+document.addEventListener('pointerdown',protectedInteractionStart,true);
+document.addEventListener('pointerup',protectedInteractionEnd,true);
+document.addEventListener('pointercancel',protectedInteractionEnd,true);
+document.addEventListener('contextmenu',event=>{if(event?.target?.closest?.(WEAVELING_INTERACTION_SELECTOR)){lastProtectedInteractionAt=now();scheduleVerify('interaction-contextmenu',INTERACTION_GRACE_MS)}},true);
 addEventListener('pagehide',holdBfCache,true);
 addEventListener('pageshow',resume,true);
-addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){ensureSupportButton();ensureGuildQuestBrowser();scheduleVerify('visibility-return',RETRY_DELAY_MS)}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){clearRetry();return}
+  removeLegacyControls();
+  ensureSupportButton();
+  ensureGuildQuestBrowser();
+  scheduleRequestedCampusFeature();
+  const grace=interactionGraceRemaining();
+  scheduleVerify('visibility-return',Math.max(RETRY_DELAY_MS,grace+40));
+});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleInitialCheck,{once:true});else scheduleInitialCheck();
 
 globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
@@ -306,6 +452,9 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   canonicalUrl,
   preauthorizeCanonicalCampus,
   activateLanguageMode,
+  retireLegacyControls,
+  removeLegacyControls,
+  openCampusFeature,
   ensureSupportButton,
   ensureGuildQuestBrowser,
   supportUrl:SUPPORT_URL,
@@ -313,9 +462,12 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   language:requestedLanguage,
   startupGraceMs:STARTUP_GRACE_MS,
   unhealthyHoldMs:UNHEALTHY_HOLD_MS,
+  interactionGraceMs:INTERACTION_GRACE_MS,
   installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary-v228',
-  reloadPolicy:'sustained-failure-only-single-flight',
+  reloadPolicy:'sustained-failure-only-single-flight-with-interaction-grace',
+  legacyNavigationPolicy:'controls-removed-before-paint-v432',
+  legacyControlSelectors:[...LEGACY_CONTROL_SELECTORS],
   guildQuestBrowserPolicy:'collapsed-by-default-src-assigned-on-first-expansion',
-  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),guildQuestBrowser:Boolean(guildQuestBrowser?.isConnected),guildQuestBrowserOpen:Boolean(guildQuestBrowser?.open),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer)})
+  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),guildQuestBrowser:Boolean(guildQuestBrowser?.isConnected),guildQuestBrowserOpen:Boolean(guildQuestBrowser?.open),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer),protectedInteractionActive,lastProtectedInteractionAt,legacyControlsRemoved,legacyControlObserverActive:Boolean(legacyControlObserver)})
 });
 })();

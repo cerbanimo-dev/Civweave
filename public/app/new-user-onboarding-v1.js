@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-new-user-onboarding-v1';
+const VERSION='1.0.1-new-user-onboarding-canonical-artifacts';
 const STORAGE_KEY='civweave.onboarding.hero-tour.v1';
 const ROOT_ID='cw-new-user-onboarding-v1';
 if(globalThis.CivweaveNewUserOnboardingV1?.version===VERSION)return;
@@ -20,39 +20,39 @@ const EXPRESSIONS=Object.freeze({
 
 const STEPS=Object.freeze([
   Object.freeze({
-    system:'civweave',expression:'waving',kicker:'Welcome, Hero',title:'A wish becomes a Quest.',role:'Weaveling · Civweave Commons',
+    system:'civweave',expression:'waving',kicker:'Welcome, Hero',title:'An intention becomes a Quest.',role:'Weaveling · Quest guide',
     paragraphs:[
-      'Tell me what you want to make possible. I help turn that intention into a Quest: an editable route through learning, useful work, resources, and agreements.',
-      'You can always work solo. Civweave simply makes it easier to find a Party when the road is better shared, and a Guild when you want a dependable community around the work.'
+      'Tell me what you want to make possible. I turn that intention into a Quest: an editable route that can connect learning, useful work, resources, and agreements without confusing them for the same thing.',
+      'You can always pursue a Quest solo. Civweave simply makes it easier to find a Party when the road is better shared, and a Guild when you want a dependable community around the work.'
     ],
-    connection:'Your Quest stays connected across every realm. Learning needs can go to Moss, work to Kamiya, resources to Rook, and consent or civic questions to Merlin without becoming five unrelated projects.',
-    handoff:'Moss is first. She can show you how a Hero gets ready for the work a Quest requires.',next:'Meet Moss'
+    connection:'Your Quest stays connected across every realm. Moss can create the Learning Journeys it requires, Kamiya can create its Endeavors, Rook can assemble its Manifests, and Merlin can help with consent or civic questions without turning them into five unrelated projects.',
+    handoff:'Moss is first. She can turn what the Quest asks you to learn into a Learning Journey.',next:'Meet Moss'
   }),
   Object.freeze({
-    system:'living-school',expression:'special',kicker:'Living School',title:'Learn what the Quest requires.',role:'Moss · Learning guide',
+    system:'living-school',expression:'special',kicker:'Living School',title:'Follow a Learning Journey.',role:'Moss · Learning Journey guide',
     paragraphs:[
-      'I build learning around what you are actually trying to do. Explanations, practice, projects, feedback, and demonstrated competence all serve the Quest instead of becoming homework for its own sake.',
-      'When you prove a skill here, that evidence can travel with you. A learning path can become readiness for real work rather than ending at a certificate-shaped wall.'
+      'I create Learning Journeys around what you are actually trying to become capable of doing. Explanations, practice, projects, feedback, and demonstrated competence serve the Quest instead of becoming homework for its own sake.',
+      'When you prove a skill here, that evidence can travel with you. A Learning Journey can become readiness for real work rather than ending at a certificate-shaped wall.'
     ],
-    connection:'Living School feeds capability into Cerbanimo, while FellowFare can help source learning materials and Anarchadia can preserve community rules around access, validation, and recognition.',
-    handoff:'Kamiya takes what you can do and helps turn it into accountable, useful work.',next:'Meet Kamiya'
+    connection:'A Learning Journey feeds demonstrated capability into Cerbanimo, while FellowFare can help source learning materials through a Manifest and Anarchadia can preserve community rules around access, validation, and recognition.',
+    handoff:'Kamiya takes useful work the Quest needs and shapes it into an Endeavor.',next:'Meet Kamiya'
   }),
   Object.freeze({
-    system:'cerbanimo',expression:'special',kicker:'Cerbanimo',title:'Turn capability into useful work.',role:'Kamiya · Fox engineer and Questwright',
+    system:'cerbanimo',expression:'special',kicker:'Cerbanimo',title:'Turn useful work into an Endeavor.',role:'Kamiya · Endeavor guide',
     paragraphs:[
-      'I help break a Quest into deliverables, match the work to skills, document contribution, and keep validation and credit attached to what was actually done.',
-      'A Hero may work alone, but a Party can combine different strengths around the same Quest. The goal is cooperation without making everyone endure a tiny bureaucracy just to build something together.'
+      'I create Endeavors: concrete pieces of productive work with deliverables, matched skills, clear evidence, and credit attached to what was actually done. An Endeavor may serve a Quest, but it is not the Quest itself.',
+      'A Hero may take on an Endeavor alone, or a Party can combine different strengths around it. The goal is accountable cooperation without making everyone endure a tiny bureaucracy just to build something together.'
     ],
-    connection:'Cerbanimo can pull proven skills from Living School, ask FellowFare for materials or services, and send role, consent, or governance questions to Anarchadia while the same Quest remains the thread connecting them.',
-    handoff:'Rook keeps the practical exchange layer legible, because noble intentions remain stubbornly dependent on tools, materials, time, and other humans.',next:'Meet Rook'
+    connection:'An Endeavor can pull proven skills from a Moss Learning Journey, ask Rook for a Manifest of materials or services, and send role, consent, or governance questions to Merlin while remaining attached to the Weaveling Quest it serves.',
+    handoff:'Rook keeps the practical exchange layer legible by assembling the needs and offers around the work into a Manifest.',next:'Meet Rook'
   }),
   Object.freeze({
-    system:'fellowfare',expression:'special',kicker:'FellowFare',title:'Find what the Party needs.',role:'Rook · Quartermaster and exchange guide',
+    system:'fellowfare',expression:'special',kicker:'FellowFare',title:'Assemble the Manifest.',role:'Rook · Manifest guide and Quartermaster',
     paragraphs:[
-      'I help Heroes find needs, offers, goods, services, gifts, and fair exchanges across the reachable network. A Quest can ask for resources without turning every relationship into a storefront.',
-      'What you find here can attach back to the work: a tool, a service, a supplier, a gift, or another Hero who has exactly the strange little capability your Party was missing.'
+      'I create Manifests that gather the skills, resources, materials, services, needs, and offers a Quest or Endeavor depends on. A Manifest can help the network satisfy those needs without turning every relationship into a storefront.',
+      'What a Manifest finds can attach back to the work: a tool, a service, a supplier, a gift, or another Hero who has exactly the strange little capability your Party was missing.'
     ],
-    connection:'FellowFare receives practical needs from Quests and sends fulfilled resources back into them. The exchange remains connected to Cerbanimo work, Living School capability, and the rules communities choose in Anarchadia.',
+    connection:'FellowFare sends fulfilled Manifest items back into Quests and Endeavors. The exchange remains connected to Cerbanimo work, Living School capability, and the rules communities choose in Anarchadia.',
     handoff:'Merlin guards the civic layer, where cooperation gets boundaries, consent, review, and rules that can outlive one charismatic person.',next:'Meet Merlin'
   }),
   Object.freeze({
@@ -62,7 +62,7 @@ const STEPS=Object.freeze([
       'Guildkeepers keep local infrastructure dependable and look for Heroes to join their Guild. They are caretakers of the hearth, not rulers of the Heroes gathered around it.'
     ],
     connection:'Anarchadia supplies the civic memory beneath the other realms: who agreed to what, what can change, how disputes are reviewed, and how a Guild remains governed by its people instead of by whoever happens to run the server.',
-    handoff:'That is the circuit. Find a Guild, gather a Party when it helps, begin a Quest, and move left to right only as far as the work actually needs.',next:'Begin your Quest'
+    handoff:'That is the circuit: Weaveling makes the Quest, Moss makes Learning Journeys, Kamiya makes Endeavors, Rook makes Manifests, and Merlin helps keep the cooperation governable.',next:'Begin your Quest'
   })
 ]);
 
@@ -188,6 +188,6 @@ function bindReplay(){
 }
 function boot(){createRoot();bindReplay();if(shouldAutoOpen())requestAnimationFrame(()=>requestAnimationFrame(()=>open({force:true})))}
 
-globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,bindReplay,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Guildkeeper',runtimeInjection:false,replayControl:true});
+globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,bindReplay,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Guildkeeper',artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest',runtimeInjection:false,replayControl:true});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

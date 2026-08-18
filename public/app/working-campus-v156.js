@@ -7,7 +7,7 @@ const BRAND_DAY='/app/logos/civweave-day-logo.jpg';
 const BRAND_NIGHT='/app/logos/civweave-night-logo.jpg';
 const WEB_ENTRY_REVISION='web-install-entry-v232';
 const HUB_REVISION='weaveling-hub-v233';
-const STATE_REPAIR_REVISION='working-campus-state-repair-v238';
+const STATE_REPAIR_REVISION='working-campus-state-repair-v239-current-quest';
 const HUB_SCRIPT='/app/weaveling-hub-v233.js';
 const routeScript='/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v227';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
@@ -27,7 +27,7 @@ function safeParse(value,fallback){try{return JSON.parse(value)??fallback}catch{
 function safeClone(value){try{return typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value))}catch{return null}}
 function recoveredPlan(source={},fallback={}){
   const value=source&&typeof source==='object'?source:{};
-  const title=String(value.title||value.text||fallback.title||fallback.text||fallback.wish||'Recovered weave').trim().slice(0,140)||'Recovered weave';
+  const title=String(value.title||value.text||fallback.title||fallback.text||fallback.wish||'Recovered Quest').trim().slice(0,140)||'Recovered Quest';
   const wish=String(value.wish||fallback.wish||fallback.text||title).trim();
   const paths=Array.isArray(value.paths)?value.paths.filter(Boolean).map(path=>({
     ...path,
@@ -46,7 +46,7 @@ function recoveredPlan(source={},fallback={}){
     id:value.id||fallback.id||`recovered-weave-${Date.now().toString(36)}`,
     title,
     wish,
-    outcome:String(value.outcome||fallback.outcome||'Recovered from an older local weave record. Review the route before activation.'),
+    outcome:String(value.outcome||fallback.outcome||'Recovered from an older local Quest record. Review the route before activation.'),
     state:['review','active','completed'].includes(value.state)?value.state:'review',
     createdAt:value.createdAt||fallback.createdAt||new Date().toISOString(),
     updatedAt:new Date().toISOString(),
@@ -86,13 +86,14 @@ function repairPersistedCampusState(){
     if(candidate){state.plan=safeClone(candidate.plan)||recoveredPlan(candidate.plan,candidate);state.wish=state.plan.wish||state.wish||'';state.stage=state.plan.state==='review'?'review':'active';changed=true}
     else{state.plan=null;state.stage=String(state.wish||'').trim()?'profile':'wish';changed=true}
   }
-  if(!['weave','progress','library','campus'].includes(state.view)){state.view='weave';changed=true}
+  const normalizedView=state.view==='weave'||state.view==='progress'?'quest':state.view;
+  if(!['quest','library','campus'].includes(normalizedView)){state.view='quest';changed=true}else if(state.view!==normalizedView){state.view=normalizedView;changed=true}
   if(!Array.isArray(state.conversation)){state.conversation=[];changed=true}
   if(state.stage==='active'&&(!state.plan||!Array.isArray(state.plan.paths))){state.stage=state.plan?'review':(String(state.wish||'').trim()?'profile':'wish');changed=true}
   if(ledgerChanged)try{localStorage.setItem(I,JSON.stringify(ledger.slice(0,100)))}catch{}
   if(changed)try{state.updatedAt=new Date().toISOString();localStorage.setItem(K,JSON.stringify(state))}catch{}
   document.documentElement.dataset.civweaveCampusStateRepair=STATE_REPAIR_REVISION;
-  return{changed,ledgerChanged,stage:state.stage||'wish',hasPlan:Boolean(state.plan)};
+  return{changed,ledgerChanged,stage:state.stage||'wish',view:state.view||'quest',hasPlan:Boolean(state.plan)};
 }
 function installWebEntryPrompt(){
   if(installedDisplay())return false;
@@ -243,7 +244,7 @@ async function boot(){
   if(!liveDocument())throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
   Function(source.join(''))();
   document.documentElement.dataset.civweaveCampusRuntime='ready';
-  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing'}}));
+  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing',questStatePolicy:'current-quest-single-surface'}}));
 }
 boot().catch(error=>{
   if(!active||error?.name==='AbortError')return;

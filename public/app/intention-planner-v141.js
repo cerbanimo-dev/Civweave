@@ -3,7 +3,7 @@
 
 const INTENTIONS_KEY='civweave.intentions.v127';
 const PLAN_SCHEMA='civweave.intention-weave.v1';
-const EXPLICIT_PLAN_TRIGGER=/\b(plan|roadmap|routine|program|curriculum|pathway|steps|practice schedule|daily practice|weekly practice|reviewable weave|set (?:an )?intention)\b|\bteach me\b|\bhelp me learn\b|\bcreate (?:me )?(?:a )?plan\b/i;
+const EXPLICIT_PLAN_TRIGGER=/\b(plan|roadmap|routine|program|curriculum|pathway|steps|practice schedule|daily practice|weekly practice|reviewable quest|reviewable weave|set (?:an )?intention)\b|\bteach me\b|\bhelp me learn\b|\bcreate (?:me )?(?:a )?plan\b/i;
 const WISH_TRIGGER=/\b(i want|i wish|my wish|my goal|we want|we wish|let'?s|help me)\b/i;
 const RETRY_TRIGGER=/\b(retry|try again|one more time|rebuild|build that again|redo)\b/i;
 const CORRECTION_TRIGGER=/\b(not (?:a|an|the)|instead(?: of)?|rather than|i mean|correction|change (?:it|that)|revise (?:it|that)|scratch that)\b/i;
@@ -115,7 +115,7 @@ function outcomeFor(signals){
   if(signals.restaurant&&signals.garden)return'Validate one safe, financially legible garden-to-table service cycle using produce from the user’s garden and at least one local garden partner.';
   if(signals.selfLove)return'Develop repeatable practices that increase self-kindness, self-respect, and supportive connection without treating personal worth as something that must be earned.';
   if(signals.collective&&signals.food)return'Run one maintainable shared-food cycle with explicit roles, concrete logistics, and a review date.';
-  return'Turn the stated wish into an editable route with visible evidence of progress and a clear next checkpoint.';
+  return'Turn the Quest goal into an editable route with visible evidence of progress and a clear next checkpoint.';
 }
 
 function learningPath(signals){
@@ -227,7 +227,7 @@ function skilledPath(signals){
   return{
     id:uid('skilled'),type:'skilled-labor',realm:'cerbanimo',title:'Turn the intention into practiced work',
     purpose:'Create checkpoints and visible proof rather than leaving the intention at reflection.',
-    steps:['Define the smallest observable result.','Create a short checkpoint sequence.','Complete the first checkpoint with available tools.','Review evidence and revise the remaining quest.'],
+    steps:['Define the smallest observable result.','Create a short checkpoint sequence.','Complete the first checkpoint with available tools.','Review evidence and revise the remaining Quest.'],
     completionCriteria:'A visible result exists and the next checkpoint is based on evidence.',
     evidence:['Starting-state record','Checkpoint evidence','Completion or revision note'],status:'draft'
   };
@@ -277,7 +277,7 @@ function buildPlan({text,history,context={}}={}){
       'Progress evidence is for reflection and adjustment, not for proving personal worth.'
     ],
     paths:paths.slice(0,3),governance:governanceLayer(signals),requiresExplicitActivation:true,
-    reviewOptions:['Revise the governing intention','Remove or reorder a path','Edit assumptions or completion criteria','Activate only after the weave feels usable'],
+    reviewOptions:['Revise the governing intention','Remove or reorder a path','Edit assumptions or completion criteria','Activate only after the Quest feels usable'],
     routing:{system:'civweave',room:context?.routingAnswer?.room||'civweave.quad',mode:'Plan'}
   };
 }
@@ -300,21 +300,21 @@ function restore(plan){
   if(!plan?.id)return null;
   const items=savedItems();const existing=items.find(item=>item?.id===plan.id||item?.plan?.id===plan.id);if(existing)return existing;
   const restored=structuredClone(plan);restored.state=restored.state||'review';
-  const item={id:restored.id,kind:'weave-plan',fingerprint:lower(`${restored.title}|${restored.wish}`).slice(0,500),text:restored.title||'Restored intention weave',state:restored.state,done:false,createdAt:restored.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),plan:restored};
+  const item={id:restored.id,kind:'weave-plan',fingerprint:lower(`${restored.title}|${restored.wish}`).slice(0,500),text:restored.title||'Restored Quest',state:restored.state,done:false,createdAt:restored.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),plan:restored};
   items.unshift(item);localStorage.setItem(INTENTIONS_KEY,JSON.stringify(items.slice(0,100)));dispatchChanged(items);return item;
 }
 
 function format(plan){
   const paths=(plan.paths||[]).map((path,index)=>[`${index+1}. ${path.title} · ${path.realm}`,path.purpose,`First step: ${path.steps?.[0]||'Define the first checkpoint.'}`,`Completion: ${path.completionCriteria||'Define visible completion evidence.'}`].join('\n')).join('\n\n');
   const governance=plan.governance?`\n\nConsent layer · ${plan.governance.realm}\n${plan.governance.purpose}`:'';
-  return[`I built and saved a reviewable weave for “${plan.title}.”`,'','Governing outcome',plan.outcome,'',paths,governance,'','The weave is in REVIEW. Inspect, revise, or explicitly activate it with the controls below.'].join('\n').trim();
+  return[`I built and saved a reviewable Quest for “${plan.title}.”`,'','Governing outcome',plan.outcome,'',paths,governance,'','The Quest is in REVIEW. Inspect, revise, or explicitly activate it with the controls below.'].join('\n').trim();
 }
 
 function maybeCreate({text,history,context,force=false}={}){
   if(!shouldCreate({text,history,context,force}))return null;
   const built=buildPlan({text,history,context});const item=persist(built);const plan=item.plan;
   const approvalGate={kind:'intention-activation',planId:item.id,state:item.state||'review',required:true,actions:['review','revise','activate']};
-  return{item,plan,response:{answer:format(plan),choice:{mode:'Plan',system:'civweave',room:plan.routing.room,nextAction:'Review, revise, or activate the saved weave.'},assumptions:plan.assumptions,requiresConsent:true,confidence:.97,approvalGate}};
+  return{item,plan,response:{answer:format(plan),choice:{mode:'Plan',system:'civweave',room:plan.routing.room,nextAction:'Review, revise, or activate the saved Quest.'},assumptions:plan.assumptions,requiresConsent:true,confidence:.97,approvalGate}};
 }
 
 globalThis.CivweaveIntentionPlanner={schema:PLAN_SCHEMA,triggers:{explicit:EXPLICIT_PLAN_TRIGGER,wish:WISH_TRIGGER,direct:DIRECT_INTENTION_TRIGGER,retry:RETRY_TRIGGER,correction:CORRECTION_TRIGGER},shouldCreate,activeIntentionTurns,buildPlan,maybeCreate,persist,restore,format};

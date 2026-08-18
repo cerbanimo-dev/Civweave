@@ -21,7 +21,7 @@ const GENERATION_REQUEST=/\b(generate|write|rewrite|implement|modify|change|fix|
 const VALIDATION_REQUEST=/\b(validate|verify|check|review|audit|test)\b[\s\S]{0,120}\b(code|source|submission|patch|diff|rails?|criteria)\b/i;
 
 const parse=(value,fallback)=>{try{const out=JSON.parse(value);return out==null?fallback:out}catch{return fallback}};
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const array=key=>{const value=parse(localStorage.getItem(key),[]);return Array.isArray(value)?value:[]};
 const object=key=>{const value=parse(localStorage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}};
@@ -356,6 +356,7 @@ function build(){
 
   // family-shell-v104 owns realm header/status/chat only.
   // Five-system navigation is exclusively owned by themed-system-nav-v178.
+  // Shared Settings is launched only from Weaveling's canonical quick menu.
   let head=document.getElementById('cwf104-head');
   if(!head){
     head=document.createElement('header');
@@ -363,7 +364,7 @@ function build(){
     head.className='cwf104-head';
     document.body.append(head);
   }
-  head.innerHTML=`<div class="cwf104-realm-mark" aria-hidden="true"><img src="${item.artifact}" alt=""></div><div class="cwf104-title"><small>${esc(item.place)}</small><b>${esc(item.label)}</b></div><div class="cwf104-head-state"><i class="cwf104-dot"></i><span data-cwf-current-state>Ready</span></div><button class="cwf104-chat" type="button" data-cwf-chat aria-label="Talk to Civweave with Weaveling from ${esc(item.label)}"><img src="${SYSTEMS.civweave.artifact}" alt=""></button><button class="cwf104-settings" type="button" data-open-unified-ai-settings aria-label="Open Civweave settings"><span aria-hidden="true">⚙</span></button>`;
+  head.innerHTML=`<div class="cwf104-realm-mark" aria-hidden="true"><img src="${item.artifact}" alt=""></div><div class="cwf104-title"><small>${esc(item.place)}</small><b>${esc(item.label)}</b></div><div class="cwf104-head-state"><i class="cwf104-dot"></i><span data-cwf-current-state>Ready</span></div><button class="cwf104-chat" type="button" data-cwf-chat aria-label="Talk to Civweave with Weaveling from ${esc(item.label)}"><img src="${SYSTEMS.civweave.artifact}" alt=""></button>`;
   head.querySelector('[data-cwf-chat]').onclick=()=>openChat(current);
 
   removeLegacyLaunchers();

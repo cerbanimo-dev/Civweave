@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-08-17T08:03:20Z",
-  "before": 845,
-  "after": 378,
-  "rejected": 467,
+  "built_at": "2026-08-18T02:06:46Z",
+  "before": 1118,
+  "after": 507,
+  "rejected": 611,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -48,23 +48,23 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 7,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 6
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Democracy in the Dark: Protecting Your Digital Rights",
         "When Code Became a Weapon - Crypto Wars Explained",
-        "Houses of History - Explore the story of Parliament and democracy",
-        "An introduction to Parliament"
+        "Houses of History - Explore the story of Parliament and democracy"
       ]
     },
     "biology-life": {
@@ -78,8 +78,8 @@
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
@@ -102,9 +102,9 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -126,12 +126,12 @@
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "The (truly) Periodic Table",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-        "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
+        "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "How to Understand Mendeleev's Periodic Table of 1869",
+        "The (truly) Periodic Table",
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series"
       ]
     },
     "astronomy-space": {
@@ -148,8 +148,8 @@
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
         "Solar System explained by simpleshow foundation",
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
+        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 2 XD99775b"
@@ -166,9 +166,9 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -257,33 +257,33 @@
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 5,
-      "mesh_redistributable": 5,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
         "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
         "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
-        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
-        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1,
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers"
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -328,11 +328,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
@@ -340,13 +340,15 @@
       "name": "Personal Finance",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 3
+        "peertube": 3,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "GnuCash for Personal Finance - Getting Started and Basics",
+        "Ifugao Youth on Saving the Environment",
         "GnuCash for Personal Finance - Split Transactions",
         "“WISE BUYING” 1950 HOME ECONOMICS FILM SHOPPING, BUDGETING AND MANAGING FINANCES XD11974"
       ]
@@ -400,10 +402,17 @@
       "name": "Career & Work Skills",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 3,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 2,
+        "internet-archive": 1
+      },
+      "top_titles": [
+        "How to Succeed in Skype Interviews in English - Job interview in English tips",
+        "Job Interview in English Lesson #1: Tell me about yourself",
+        "English For Career Development Course"
+      ]
     },
     "electronics-basics": {
       "name": "Electronics Basics",
@@ -494,10 +503,10 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 6
+        "peertube": 7
       },
       "top_titles": [
         "Lecture 1： Probability and Counting ｜ Statistics 110",
@@ -505,6 +514,7 @@
         "Lecture 4： Conditional Probability ｜ Statistics 110",
         "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
         "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot"
       ]
     },
@@ -521,13 +531,105 @@
       },
       "top_titles": [
         "Welcome to Climate Change and Health – From Science to Practice",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science",
-        "Climate Change: Science, Policy, Action"
+        "Climate Change: Science, Policy, Action",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science"
       ]
     },
     "law-rights-basics": {
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
+      "required": false,
+      "records": 3,
+      "mesh_redistributable": 0,
+      "providers": {
+        "peertube": 3
+      },
+      "top_titles": [
+        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
+        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
+        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
+      ]
+    },
+    "tarot-symbolism": {
+      "name": "Tarot & Symbolic Systems",
+      "school_slug": "philosophy-and-religion",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "House of Tarot (Game Gear)",
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
+      ]
+    },
+    "mythology-folklore": {
+      "name": "Mythology & Folklore",
+      "school_slug": "history",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "ESL - What are Myths？",
+        "THE SEARCH 1950s TV SHOW ARKANSAS FOLKLORE RESEARCH MARY CELESTIA PARLER 57814"
+      ]
+    },
+    "meditation-mindfulness": {
+      "name": "Meditation & Mindfulness",
+      "school_slug": "health-medicine-and-disease",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "communication-conflict": {
+      "name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "required": false,
+      "records": 1,
+      "mesh_redistributable": 0,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "Secret Service Agent: How To Stay In Control When Someone Is Trying To Manipulate You!"
+      ]
+    },
+    "parenting-caregiving": {
+      "name": "Parenting & Caregiving",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 2,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 2
+      },
+      "top_titles": [
+        "Parenting - Blender 2.80 Fundamentals",
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+      ]
+    },
+    "gardening-plants": {
+      "name": "Gardening & Plant Care",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 1,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "EmacsConf 2025: Gardening in Emacs: A Windows user's tale of tending, tweaking, and triumph - Mar..."
+      ]
+    },
+    "entrepreneurship-small-business": {
+      "name": "Entrepreneurship & Small Business",
+      "school_slug": "everyday-life",
       "required": false,
       "records": 4,
       "mesh_redistributable": 1,
@@ -535,10 +637,50 @@
         "peertube": 4
       },
       "top_titles": [
-        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
-        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
-        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
-        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
+        "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
+        "Discover Who is On your LAN: Small Business Security 101",
+        "Entrepreneurship by design",
+        "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
+      ]
+    },
+    "music-performance": {
+      "name": "Music & Performance",
+      "school_slug": "arts",
+      "required": false,
+      "records": 5,
+      "mesh_redistributable": 5,
+      "providers": {
+        "peertube": 5
+      },
+      "top_titles": [
+        "a track i made for music theory back in high school",
+        "All MINOR Scales Explained on the Piano (Music Theory)",
+        "Lecture 3. Rhythm: Fundamentals",
+        "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
+        "THEORY: Music Theory Basics Part #1 - Keys and Pitch"
+      ]
+    },
+    "language-learning": {
+      "name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "required": false,
+      "records": 27,
+      "mesh_redistributable": 27,
+      "providers": {
+        "peertube": 21,
+        "wikimedia-commons": 6
+      },
+      "top_titles": [
+        "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
+        "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
+        "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
+        "English Grammar — Present Continuous — Teaching Ideas — 2",
+        "English Grammar — Present Contiuous — Teaching Ideas — 3",
+        "Starting to learn Taiwanese: Language Learning Journey 1",
+        "[Language learning] How to create and edit language in LingLibre?",
+        "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
+        "English Grammar — Present Perfect — Teaching Ideas — 2"
       ]
     }
   },
@@ -769,13 +911,23 @@
       "topic_slug": "biology-life"
     },
     {
+      "provider": "wikimedia-commons",
+      "title": "5th Fighter Wing 73rd Anniversary Video",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "State of the Union Address (January 27, 2010) Barack Obama (WhiteHouse.gov-reedit)",
+      "topic_slug": "career-work-skills"
+    },
+    {
       "provider": "peertube",
       "title": "20260724 - MY LITTLE PONY： Career Day",
       "topic_slug": "career-work-skills"
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "Celebrating Dissent - No Longer Without You by Nazmiye Oral",
+      "provider": "peertube",
+      "title": "Résumé des 4 premières vidéos d'A.Stevens sur la démocratie directe",
       "topic_slug": "career-work-skills"
     },
     {
@@ -785,7 +937,7 @@
     },
     {
       "provider": "wikimedia-commons",
-      "title": "Discover who we are at Social Point!",
+      "title": "Scraping Data from Wikipedia Tutorial - Web Scraping in Python",
       "topic_slug": "career-work-skills"
     },
     {
@@ -795,12 +947,17 @@
     },
     {
       "provider": "peertube",
-      "title": "Interview: LA CITADELLE – Élise Zürcher (version finale)",
+      "title": "BSDCan 2024: quiz: tiny VMs for kernel development By: Rob Norris",
       "topic_slug": "career-work-skills"
     },
     {
       "provider": "peertube",
-      "title": "Interview: NAHEULVERSE – Ghislain / Tony / Ladyfae / Julien",
+      "title": "From Guidance to Growth: The Power of Mentorship for Early-Career Women in STEM",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
+      "title": "Local Models: Trust, Control, Optimization — Carter Abdallah, NVIDIA",
       "topic_slug": "career-work-skills"
     },
     {
@@ -815,17 +972,22 @@
     },
     {
       "provider": "peertube",
-      "title": "Présidentielle américaine 2024 : le résumé du 1er débat des primaires républicaines, sans Trump",
-      "topic_slug": "career-work-skills"
-    },
-    {
-      "provider": "peertube",
-      "title": "Retrouver l’étincelle : un Reboot de carrière",
+      "title": "The evolution of Software engineering",
       "topic_slug": "career-work-skills"
     },
     {
       "provider": "peertube",
       "title": "Workplace Elephant iSpring Suite",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "NREGA",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Wikimania 2023 - Room 326 - 19 August - Wikipedia Students Club - Experiment and Experience",
       "topic_slug": "career-work-skills"
     },
     {
@@ -840,7 +1002,27 @@
     },
     {
       "provider": "peertube",
+      "title": "Pub Vedic Web FB2 - SD 480p",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
       "title": "Raphaël Jakse - OpenDesk (Sovereign Workplace Government)",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
+      "title": "Résumé Art Excellence 150127 V2",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
+      "title": "Résumé film Trajectoires Mazades 2026",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
+      "title": "Résumé : Pluie et Vent sur Télumée",
       "topic_slug": "career-work-skills"
     },
     {
@@ -855,7 +1037,7 @@
     },
     {
       "provider": "peertube",
-      "title": "Ce livre résume 15 ans de recherche scientifique et 150 interviews sur la transition écologique",
+      "title": "YESTERDAY'S NEWSREEL CAREER OF CARRIER USS LEXINGTON FLYING WING SUIT RED SOX 94894b",
       "topic_slug": "career-work-skills"
     },
     {
@@ -896,11 +1078,6 @@
     {
       "provider": "peertube",
       "title": "Civils_et_militaires_1ère_GM",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "TICTeC Show & Tell - Right to Know across Europe: impacts and lessons learned",
       "topic_slug": "civics-society"
     },
     {
@@ -1004,6 +1181,216 @@
       "topic_slug": "climate-environment"
     },
     {
+      "provider": "peertube",
+      "title": "Air Defense Active Over Bryansk: Aircraft Reported",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Air Defense: Ryazan Active for Ukrainian Side Last Night",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Get Healthy - an open source, self hosted fitness tracking application",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Healthy burgers",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 10.12.25",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 17.12.25",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Negotiations Progress Slowly, War's End Possible Says Budanov",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 04.02.2026",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 11.02.2026",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Trump Believes Russia Wants Resolution as Ukraine Sticks to Stance on Territorial Discussions Amid Ongoing Conflict.",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Trump Plans Meeting, Urges Deal for Ukraine's Future",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "1. Introduction",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "[GIT] Résolution d'un conflit de fusion",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Ce que disent nos 6 émotions de base sur nos perceptions et nos besoins – présentation animée",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Comment parler du climat de manière simple et efficace | CHALEUR HUMAINE S.2 E.5",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "GESTION DE CONFLIT : et si les conflits étaient une bonne chose ?",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Healthy CDDs",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Healthy Meeting Culture in Nextcloud Hub 6",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Healthy Mind, Healthy Code",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "I like to move it STEADY BEAT | Easy Body Percussion Playalong",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Montreal And The Red Death",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Rebel Inc. - 1/5 - Licorne amère [FR][Morgân]",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Rebel Inc. - 2/5 - La corruption est juste un nombre [FR][Morgân]",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Rebel Inc. - 3/5 - Intérêts décomposés [FR][Morgân]",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Rebel Inc. - 4/5 - Des garnisons pourraves [FR][Morgân]",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Rebel Inc. - 5/5 - Saffranchir de nos responsabilités [FR][Morgân]",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Rebel Inc. Escalation - Présentation - Rebelles S.A.R.L. ! [FR][Morgân]",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Welcome to the course!",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Active gang - Manhattan Indoor Pond (Dora) - 6/20/2026, 12:00:14 PM",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Come realizzare una semplice fanzine",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Difficult merges in git - don't panic!",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Estratto: KenoMATTINA 20 gennaio 2025",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Habeebat Ajayi on courage, risk and difficult stories",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "L'incredibile profondità di Bubble Bobble raccontata nei dettagli",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Zu - 2021-06-25 Ekigunak",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Ambient vulnerabile",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Perché non videogiochi su GNU/Linux? Mini guida al gaming su GNU/Linux",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "God and the State",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Keeping Your Fiber Optic Skills Sharp: Understanding Fiber-optic communication",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "OSI Layer 6 Explained: Sharpen your Network Skills",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Mastering Science Communcation - iGEM Community",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Talking Global Problems With Kids – Yuval Noah Harari & Ian Bremmer at 92Y",
+      "topic_slug": "communication-conflict"
+    },
+    {
       "provider": "wikimedia-commons",
       "title": "Hearing on Regulating Cryptocurrency Markets",
       "topic_slug": "computing-basics"
@@ -1079,6 +1466,11 @@
       "topic_slug": "computing-basics"
     },
     {
+      "provider": "internet-archive",
+      "title": "DTNS 20180301",
+      "topic_slug": "computing-basics"
+    },
+    {
       "provider": "peertube",
       "title": "“ AUTOMATION - THE NEXT REVOLUTION ” 1963 NEWS FILM COMPUTERS, ROBOTS & MANUFACTURING 90004",
       "topic_slug": "computing-basics"
@@ -1089,259 +1481,9 @@
       "topic_slug": "computing-basics"
     },
     {
-      "provider": "internet-archive",
-      "title": "DTNS 20180301",
-      "topic_slug": "computing-basics"
-    },
-    {
       "provider": "wikimedia-commons",
       "title": "Five Signs of Severe Food Poisoning",
       "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Prevent Food Poisoning- Safety tips for handling and preparing common food",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Kitchen catch-up chaos #070 (Canning fries)",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "KITCHEN CONFIDENCE - Découverte du Kickstarter [FR]",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "KITCHEN CONFIDENCE - Mise à jour de la démo - Des menus et du stock ! [FR]",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "3d printable design kitchen scale - operation and calibration",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Cooking crêpes",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Kitchen cat",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Pressure Cooking Fun, Part 1",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Pressure Cooking Fun, Part 2",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Kitchen songs 24/7 - Improvisation(free styling)",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Cooking Boyz - Private Place Vol. 1 (Full Album 2019)",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Cooking Time!",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Worldshaper-Nanjing: Turn gutter oil to treasure (2021) - Project Promotion [English]",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Bodycam Shows Police Successfully Disarm Knife Wielding Man",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "He Kidnapped Himself",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Ben jij een digitale dinosaurus",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "N1 FITNESS PODCAST 131- Becoming A Critical Thinker - Interview with Dr. Mike Israetel",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "President Tsai responds to the live-fire military exercises China has initiated around Taiwan",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Sofie Vanthournout ESC2017",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "The Gladiator Diet How Vegetarian Athletes Stack Up",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "GSMA MISTT Digital Safety Educational Video",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "GSMA MISTT Wikipedia Educational Video (en)",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Reflection - 54830842689",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Wikimania 2021 - Education, Wikimedia Projects and Digital Literacy",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "Александра Архипова, «Как устроены паники о цифровом влиянии в прошлом и настоящем»",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "Александра Архипова, «Почему мы распространяем фейковые новости?»",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "Александра Бочавер, «В Интернете как на Диком Западе»",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "Борис Козловский, «Новые медиа и старая неправда»",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "Василий Гатов, «Постправда и фейкньюс»",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Even RUSSIA is Stunned! China FLOODS Iran With Weapons of Mass D3struction. Israel shocked!",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "LEAKED Footage: Israel’s Biggest LIE EXPOSED After Iran STRIKE!",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Lecture by Yuval Noah Harari",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "\"Dur dur d'être bébé\" 🍼 par Jordi Jordan 🍼",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "@LouisVuitton la grosse honte par Daphnéblt",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "A message from Zohran Mamdhani",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "RTS : la coupe du monde la plus mercantile de l'histoire",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "Sortir de la dépendance numérique pour atteindre une vraie indépendance.",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "peertube",
-      "title": "Team for the Planet devient mondial Team for the Planet goes global Team for the Planet se vuelve mundial Team […]",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "25th Infantry Division, Philippine partners synchronize tactics (1002344)",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Joanna Quinn- How I Animate",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "05 PrismChart: Drawing Tools 1 - Lines, Shapes & Properties",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Belt Analysis Example - Machine Component Design",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Drawing a Kirin (2022)",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Fatigue Example - Machine Component Design",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Gear Analysis Example - Machine Component Design",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Helical Gears - Machine Component Design",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Intro to Spur Gears - Machine Component Design",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Keys and Pins - Machine Component Design",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Sketching a Raptor with a Novelty Pencil",
-      "topic_slug": "drawing-design"
     }
   ]
 }

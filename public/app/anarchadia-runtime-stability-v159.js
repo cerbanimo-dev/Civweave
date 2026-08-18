@@ -1,12 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-anarchadia-runtime-stability-v159-canonical-chat-r3';
+const VERSION='1.0.6-anarchadia-runtime-stability-v159-quest-activation';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
+const QUEST_KEYS={campus:'civweave.working-campus.v1',intentions:'civweave.intentions.v127',inbox:'civweave.realm-inbox.v1',handoff:'civweave.active-handoff.v1'};
 let loaderPromise=null;
 const clean=(value,max=12000)=>String(value??'').slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
+const list=value=>Array.isArray(value)?value:[];
 function compactLegacyState(){
   const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;
   const state=parse(raw,null);if(!state||state.schema!=='civweave.anarchadia-console.v1')return;
@@ -53,10 +55,53 @@ async function askMerlin(_system,text,rows=[]){
 }
 function openGovernance(proposalId=''){location.assign(`/app/anarchadia-governance-v145.html${proposalId?`?proposal=${encodeURIComponent(proposalId)}`:''}`)}
 function openWorkbench(route='workbench'){location.assign(`/app/services/anarchadia/workbench.html?cabinet=1#${encodeURIComponent(route)}`)}
+function currentQuestPlan(){
+  const campus=parse(localStorage.getItem(QUEST_KEYS.campus),{}),campusPlan=campus?.plan;
+  if(campusPlan&&['active','completed'].includes(campusPlan.state))return campusPlan;
+  const intentions=list(parse(localStorage.getItem(QUEST_KEYS.intentions),[]));
+  return intentions.find(item=>['active','completed'].includes(item?.plan?.state||item?.state))?.plan||null;
+}
+function realmLabel(realm){return({'living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'}[realm]||String(realm||'Realm'))}
+function prepareQuestHandoff(plan,path){
+  if(!plan?.id||!path?.id)return false;
+  const inbox=list(parse(localStorage.getItem(QUEST_KEYS.inbox),[])).filter(packet=>packet?.payload?.weaveId===plan.id&&packet?.target===path.realm);
+  const handoff={target:path.realm,pathId:path.id,weaveId:plan.id,wish:plan.wish||'',plan,packets:inbox,preparedAt:new Date().toISOString(),source:'anarchadia-passport-v159'};
+  try{localStorage.setItem(QUEST_KEYS.handoff,JSON.stringify(handoff));return true}catch{return false}
+}
+function openQuestPath(plan,path){
+  if(!plan||!path||plan.state==='review')return false;
+  prepareQuestHandoff(plan,path);
+  const query=`weave=${encodeURIComponent(plan.id)}&path=${encodeURIComponent(path.id)}&source=anarchadia-passport`;
+  const realm=String(path.realm||'').toLowerCase();
+  if(realm==='anarchadia'){location.assign(`/app/services/anarchadia/workbench.html?cabinet=1&${query}#overview`);return true}
+  if(realm==='living-school'){location.assign(`/app/cabinets/living-school/index.html?cabinet=1&${query}`);return true}
+  if(realm==='cerbanimo'){location.assign(`/app/realm-console-v140.html?system=cerbanimo&cabinet=1&${query}`);return true}
+  if(realm==='fellowfare'){location.assign(`/app/fellowfare-cabinet-v144.html?cabinet=1&${query}`);return true}
+  return false;
+}
+function installQuestActionStyle(){
+  if(document.getElementById('ac-quest-action-style-v159'))return;
+  const style=document.createElement('style');style.id='ac-quest-action-style-v159';style.textContent=`#ac-passport-paths .ac-path-card .ac-quest-path-action{width:100%;min-height:38px;margin-top:10px;border:1px solid #ff4aa466;border-radius:10px;background:linear-gradient(135deg,#ff2b911f,#f6d35412);color:inherit;font:800 11px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}#ac-passport-paths .ac-path-card .ac-quest-path-action:active{transform:translateY(1px)}`;document.head.append(style);
+}
+function mountQuestPathActions(){
+  const host=document.getElementById('ac-passport-paths'),plan=currentQuestPlan();if(!host||!plan)return false;
+  const paths=list(plan.paths),cards=[...host.querySelectorAll('.ac-path-card')];if(!paths.length||!cards.length)return false;
+  installQuestActionStyle();
+  cards.forEach((card,index)=>{
+    const path=paths[index];if(!path?.id||card.querySelector('.ac-quest-path-action'))return;
+    const button=document.createElement('button');button.type='button';button.className='ac-quest-path-action';button.dataset.questPathId=path.id;button.textContent=path.realm==='anarchadia'?'Work this Anarchadia path':`Open in ${realmLabel(path.realm)}`;
+    button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openQuestPath(plan,path)});
+    card.append(button);
+  });
+  return true;
+}
 document.addEventListener('click',event=>{
   const governed=event.target.closest?.('[data-ag145-open]');if(governed){event.preventDefault();event.stopImmediatePropagation();openGovernance(governed.dataset.ag145Open||'');return}
   const workbench=event.target.closest?.('[data-anarchadia-workbench]');if(workbench){event.preventDefault();event.stopImmediatePropagation();openWorkbench(workbench.dataset.anarchadiaWorkbench||'workbench');return}
   if(event.target.closest?.('[data-cwf-chat]')&&!actualLoader()){event.preventDefault();event.stopImmediatePropagation();proxy.openChat('anarchadia',{contextSystem:'anarchadia'});return}
 },true);
-globalThis.AnarchadiaRuntimeStabilityV159={version:VERSION,loadFamily,compactLegacyState,askMerlin,settingsInputOwnership:false,settingsOwner:'settings-gateway-v317'};
+addEventListener('anarchadia:passport-rendered',()=>queueMicrotask(mountQuestPathActions));
+addEventListener('civweave:intentions-changed',()=>queueMicrotask(mountQuestPathActions));
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',()=>setTimeout(mountQuestPathActions,0),{once:true});else setTimeout(mountQuestPathActions,0);
+globalThis.AnarchadiaRuntimeStabilityV159={version:VERSION,loadFamily,compactLegacyState,askMerlin,openQuestPath,mountQuestPathActions,settingsInputOwnership:false,settingsOwner:'settings-gateway-v317'};
 })();
