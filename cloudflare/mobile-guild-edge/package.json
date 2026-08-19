@@ -1,9 +1,10 @@
 {
   "name": "civweave-mobile-guild-edge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "wrangler deploy --dry-run --outdir .wrangler-dry-run",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
@@ -12,7 +13,7 @@
   "cloudflare": {
     "bindings": {
       "CIVWEAVE_GUILD_CLAIM_TOKEN": {
-        "description": "Paste the one-time pairing code shown by Civweave after you create the Guild locally on your phone. It binds this Worker to that exact Guild; do not invent a different value."
+        "description": "Paste the one-time pairing code shown by Civweave after you create the Guild locally on your phone. It binds this Cloudflare Guild to that exact local Guild; do not invent a different value."
       }
     }
   }
