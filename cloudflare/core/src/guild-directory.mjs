@@ -2,7 +2,9 @@ const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 const now=()=>new Date().toISOString();
 
 function normalizePublicOrigin(value){
-  const url=new URL(clean(value,2000));
+  const raw=clean(value,2000);let url;
+  if(!raw)throw Object.assign(new RangeError('A public Guild Cloud origin is required.'),{status:400});
+  try{url=new URL(raw)}catch{throw Object.assign(new RangeError('Guild directory origin must be a valid HTTPS URL.'),{status:400})}
   if(url.protocol!=='https:'||url.username||url.password)throw Object.assign(new RangeError('Guild directory origin must be a credential-free HTTPS origin.'),{status:400});
   const host=url.hostname.toLowerCase().replace(/^\[|\]$/g,'').replace(/\.$/,'');
   if(!host||!host.includes('.')||/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)||host.includes(':'))throw Object.assign(new RangeError('Guild directory origin must use a public DNS hostname.'),{status:400});
