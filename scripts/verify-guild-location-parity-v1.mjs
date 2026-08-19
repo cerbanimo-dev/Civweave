@@ -9,10 +9,13 @@ const mobileEdge=read('cloudflare/mobile-guild-edge/src/index.mjs');
 const desktopSetup=read('public/host-setup.html');
 const guildMap=read('public/app/civweave-hub-map-v1.js');
 const mobileTest=read('scripts/test-mobile-guild-create-v1.mjs');
+const createStart=mobileCreate.indexOf('export async function createMobileGuild');
+const createLocation=mobileCreate.indexOf('const location=await captureGuildLocation({precise:false})',createStart);
+const createOnboarding=mobileCreate.indexOf('const onboarding=await completeGuildHostOnboarding',createStart);
 
 const checks=[
-  [mobileCreate.includes("MOBILE_GUILD_CREATE_SCHEMA='civweave.mobile-guild-create.v3'")&&mobileCreate.includes('const location=await captureGuildLocation({precise:false})'), 'mobile Guild creation captures a location as part of the v3 setup contract'],
-  [mobileCreate.indexOf('const location=await captureGuildLocation({precise:false})')<mobileCreate.indexOf('completeGuildHostOnboarding'), 'mobile location permission and capture happen before the Guild identity is created'],
+  [mobileCreate.includes("MOBILE_GUILD_CREATE_SCHEMA='civweave.mobile-guild-create.v3'")&&createLocation>=0, 'mobile Guild creation captures a location as part of the v3 setup contract'],
+  [createStart>=0&&createLocation>createStart&&createOnboarding>createLocation, 'mobile location permission and capture happen before the Guild identity is created'],
   [mobileCreate.includes('updateMobileGuildLocation')&&mobileCreate.includes("new URL('/api/fabric/location',current.primaryOrigin)")&&mobileCreate.includes("'authorization':`Bearer ${current.membershipKey}`"), 'mobile Guild location updates use the founding Guildkeeper membership credential'],
   [mobileCreate.includes("publicPrecision:precise?'precise':'rounded'")&&mobileCreate.includes('coordinateDecimals=precise?6:3'), 'mobile Guild placement remains rounded by default with explicit precise support in the shared updater'],
   [mobileEdge.includes("url.pathname==='/api/fabric/location'")&&mobileEdge.includes('await authenticate(request,guildState)')&&mobileEdge.includes('normalizeHubLocation'), 'mobile Cloudflare Guild edge authenticates and persists location updates'],
