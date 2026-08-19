@@ -132,6 +132,12 @@ assert.ok(rallySetup.includes('/api/fabric/rally-point'));
 assert.ok(rallySetup.includes('publicPlaceConfirmed:true'));
 assert.ok(rallySetup.includes('position.coords.latitude.toFixed(6)'));
 assert.ok(rallySetup.includes("'x-civweave-location-key':key"));
+assert.ok(rallySetup.includes("MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1'"));
+assert.ok(rallySetup.includes("authRoute:'guild-membership'"));
+assert.ok(rallySetup.includes("button.addEventListener('click',syncMobileGuildLocation,{capture:true})"));
+assert.ok(rallySetup.includes("import('/app/mobile-guild-create-v1.mjs?v=1.0.0-guildkeeper-location-auth')"));
+assert.ok(rallySetup.includes('module.updateMobileGuildLocation({precise})'));
+assert.ok(rallySetup.includes('This Guild was created on this device and already has'));
 
 console.log(JSON.stringify({
   ok: true,
@@ -145,6 +151,8 @@ console.log(JSON.stringify({
   desktopLocationRequired: true,
   guildMapUpdateCredentialRetained: true,
   guildkeeperUpdateKeyStoredAsHash: true,
+  mobileGuildLocationUsesFoundingCredential: true,
+  mobileGuildCreationLocationMirroredIntoSetup: true,
   guildRallyPointSchema: rally.schema,
   guildRallyPointPublicPlaceRequired: true,
   guildRallyPointOfflineCache: true,
