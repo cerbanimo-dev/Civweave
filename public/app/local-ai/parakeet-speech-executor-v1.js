@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2-parakeet-speech-executor-v1-transcription-layout';
+const VERSION='1.0.3-parakeet-speech-executor-v1-joiner-shape-contract';
 if(globalThis.CivweaveParakeetSpeechExecutorV1?.version===VERSION)return;
 
 const MODEL_ID='parakeet-tdt-0.6b-v3-int8';
@@ -177,6 +177,16 @@ function makeZeroTensor(ort,meta){
   return new ort.Tensor('float32',new Float32Array(size),dims);
 }
 function makeIntegerTensor(ort,type,values,dims){const normalized=type==='int64'?'int64':'int32';return new ort.Tensor(normalized,typedInteger(normalized,values),dims)}
+function resolveEncoderLayout(encoded,joiner){
+  if(!encoded||encoded.dims.length!==3||Number(encoded.dims[0])!==1)throw Object.assign(new Error(`Unexpected Parakeet encoder output shape: [${encoded?.dims?.join?.(', ')||''}].`),{code:'PARAKEET_ENCODER_OUTPUT_SHAPE_INVALID'});
+  const inputName=joiner?.inputNames?.[0],meta=metaByName(joiner,inputName),shape=Array.from(meta?.shape||[]),expected=Number(shape[1]),dim1=Number(encoded.dims[1]),dim2=Number(encoded.dims[2]);
+  if(Number.isFinite(expected)&&expected>0){
+    if(dim1===expected)return{layout:'BCT',channels:dim1,time:dim2,expectedChannels:expected,index:(t,c)=>c*dim2+t};
+    if(dim2===expected)return{layout:'BTC',channels:dim2,time:dim1,expectedChannels:expected,index:(t,c)=>t*dim2+c};
+    throw Object.assign(new Error(`Parakeet encoder output [${encoded.dims.join(', ')}] does not match joiner ${inputName||'encoder input'} channel width ${expected}.`),{code:'PARAKEET_ENCODER_JOINER_SHAPE_MISMATCH',encoderShape:Array.from(encoded.dims),joinerShape:shape,expectedChannels:expected});
+  }
+  return{layout:'BCT',channels:dim1,time:dim2,expectedChannels:null,index:(t,c)=>c*dim2+t};
+}
 
 class ParakeetRuntime{
   constructor({ort,encoder,decoder,joiner,tokens}){this.ort=ort;this.encoder=encoder;this.decoder=decoder;this.joiner=joiner;this.tokens=tokens;this.blank=tokens.length-1}
@@ -193,12 +203,11 @@ class ParakeetRuntime{
     const resampled=await resampleTo16k(samples,inputRate);if(resampled.length<SAMPLE_RATE/5)return'';
     const padded=appendTail(resampled),{features,frames}=computeFbank(padded),input=transposeFeatures(features,frames),lengthName=this.encoder.inputNames[1],lengthMeta=metaByName(this.encoder,lengthName);
     const encoderFeeds={};encoderFeeds[this.encoder.inputNames[0]]=new this.ort.Tensor('float32',input,[1,MEL_BINS,frames]);encoderFeeds[lengthName]=makeIntegerTensor(this.ort,lengthMeta?.type||'int64',[frames],[1]);
-    const encoderOutputs=await this.encoder.run(encoderFeeds),encoded=encoderOutputs[this.encoder.outputNames[0]],encodedLength=encoderOutputs[this.encoder.outputNames[1]];
-    if(!encoded||encoded.dims.length!==3||encoded.dims[0]!==1)throw new Error(`Unexpected Parakeet encoder output shape: [${encoded?.dims?.join?.(', ')||''}].`);
-    const time=encoded.dims[1],channels=encoded.dims[2],limit=Math.min(time,tensorLength(encodedLength,time)),ids=[];
+    const encoderOutputs=await this.encoder.run(encoderFeeds),encoded=encoderOutputs[this.encoder.outputNames[0]],encodedLength=encoderOutputs[this.encoder.outputNames[1]],layout=resolveEncoderLayout(encoded,this.joiner),time=layout.time,channels=layout.channels,limit=Math.min(time,tensorLength(encodedLength,time)),ids=[];
+    emitRuntimePhase('encoder-layout',{layout:layout.layout,encoderShape:Array.from(encoded.dims),joinerChannels:layout.expectedChannels||channels,time,channels});
     let states=this.initialStates(),prediction=await this.runDecoder(this.blank,states),t=0,tokensThisFrame=0;
     while(t<limit){
-      const frame=new Float32Array(channels);for(let c=0;c<channels;c+=1)frame[c]=Number(encoded.data[t*channels+c]);
+      const frame=new Float32Array(channels);for(let c=0;c<channels;c+=1)frame[c]=Number(encoded.data[layout.index(t,c)]);
       const joinerFeeds={};joinerFeeds[this.joiner.inputNames[0]]=new this.ort.Tensor('float32',frame,[1,channels,1]);joinerFeeds[this.joiner.inputNames[1]]=prediction.output;
       const joinerOutputs=await this.joiner.run(joinerFeeds),logits=joinerOutputs[this.joiner.outputNames[0]];if(!logits)throw new Error('Parakeet joiner returned no logits.');
       const vocabSize=this.tokens.length,outputSize=logits.data.length;if(outputSize<=vocabSize)throw new Error(`Parakeet TDT joiner has no duration logits (${outputSize} <= ${vocabSize}).`);
@@ -285,7 +294,7 @@ function register(){
   specialized.registerExecutor(MODEL_ID,executor,{kind:'speech-recognition',offline:true,modelId:MODEL_ID,runtime:'onnxruntime-web',decoder:'nemo-tdt-greedy'});return true;
 }
 
-const api=Object.freeze({version:VERSION,modelId:MODEL_ID,register,loadRuntime,executor,computeFbank,decodeTokens});
+const api=Object.freeze({version:VERSION,modelId:MODEL_ID,register,loadRuntime,executor,computeFbank,decodeTokens,resolveEncoderLayout});
 globalThis.CivweaveParakeetSpeechExecutorV1=api;
 const registered=register();
 try{dispatchEvent(new CustomEvent('civweave:parakeet-speech-executor-ready',{detail:{version:VERSION,modelId:MODEL_ID,registered}}))}catch{}
