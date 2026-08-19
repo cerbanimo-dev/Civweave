@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
-const dispatcher=read('public/app/fullscreen-family-v104.html');
+const shell=read('public/app/persistent-family-shell-v1.html');
 const realm=read('public/app/realm-console-v140.html');
 const parity=read('public/app/shared/civweave-parity-runtime.js');
 const activeWorker=read('public/service-worker-v203.js');
@@ -10,12 +10,20 @@ const releaseCoherence=read('public/service-worker-release-coherence-v220.js');
 const questPath=read('public/app/cerbanimo-quest-path-v266.js');
 const questEngine=read('public/app/cerbanimo-quest-engine-v144.js');
 const navStability=read('public/app/cerbanimo-nav-stability-v1.js');
+const taskTools=read('public/app/cerbanimo-task-tool-links-v1.mjs');
 const packs=read('public/app/cerbanimo-learning-packs-v1.js');
 const videos=read('public/app/cerbanimo-video-task-contract-v1.mjs');
 const proofs=read('public/app/cerbanimo-proof-attachments-v165.js');
 
-assert(dispatcher.includes("cerbanimo:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1'"),'Canonical dispatcher no longer points to the tested Cerbanimo console.');
-assert(realm.includes('data-build="realm-console-canonical-v247-direct-nav-no-family-poller-r1"'),'Cerbanimo console is missing the direct hot-path stability build marker.');
+assert(shell.includes("cerbanimo:'/app/realm-console-v140.html'"),'Persistent family shell no longer points Cerbanimo at the tested realm console.');
+assert(shell.includes('id="cw-family-stage"'),'Persistent family shell must retain the canonical realm stage iframe.');
+assert(realm.includes('data-build="realm-console-canonical-v248-persistent-shell-safe-boot-r1"'),'Cerbanimo console is missing the persistent-shell-safe boot marker.');
+
+const parityIndex=realm.indexOf('/app/shared/civweave-parity-runtime.js');
+const consoleIndex=realm.indexOf('/app/realm-console-v140.js');
+const optionalIndex=realm.indexOf('/app/local-first-policy-v131.js');
+assert(parityIndex>=0&&consoleIndex>=0&&optionalIndex>=0&&parityIndex<optionalIndex&&consoleIndex<optionalIndex,'Cerbanimo render-critical parity and console scripts must execute before optional deferred integrations.');
+assert(realm.includes('canonical-r3-boot-first'),'Cerbanimo console must cache-bust the render-critical boot ordering.');
 
 assert(realm.includes('parity-bounded-r1'),'Cerbanimo console must cache-bust the bounded parity runtime.');
 assert(parity.includes('FETCH_TIMEOUT_MS'),'Parity ledger loading must have a finite startup deadline.');
@@ -45,10 +53,14 @@ assert(releaseCoherence.includes('v220FreshAsset(request, url)'),'Cerbanimo boot
 assert(releaseCoherence.includes("policy: 'version-pinned-html-js-css-json-txt-network-first-cached-fallback'"),'Release-coherence policy marker drifted unexpectedly.');
 
 assert(realm.includes('/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-direct-r1'),'Cerbanimo must load the canonical five-guide navigation directly.');
-assert(realm.includes('/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r1'),'Cerbanimo must retain bounded navigation recovery.');
+assert(realm.includes('/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r2-persistent-shell-safe'),'Cerbanimo must cache-bust persistent-shell-safe navigation recovery.');
+assert(navStability.includes('canonicalPersistentShell'),'Cerbanimo navigation recovery must distinguish the canonical persistent shell from accidental embedding.');
+assert(navStability.includes("frame?.id==='cw-family-stage'"),'Cerbanimo must recognize the canonical persistent family stage.');
+assert(navStability.includes("shellRevision==='persistent-family-shell-v1'"),'Cerbanimo must recognize the live persistent family shell revision.');
+assert(navStability.includes('if(!canonicalPersistentShell&&standalone)'),'Only accidental standalone embedding may escape to the top-level realm route.');
+assert(navStability.includes('window.top.location.replace(location.href)'),'Accidental standalone embedding must retain bounded escape recovery.');
 assert(navStability.includes("[0,180,700,1800]"),'Navigation recovery must stay bounded rather than polling indefinitely.');
 assert(navStability.includes("addEventListener('pageshow',ensure)"),'Navigation recovery must remount after page lifecycle restoration.');
-assert(navStability.includes('window.top.location.replace(location.href)'),'An installed Cerbanimo surface must escape an accidental embedded route instead of silently deleting global navigation.');
 assert(!navStability.includes('setInterval'),'Navigation recovery must not use a permanent polling timer.');
 
 assert(!realm.includes('/app/family-shell-v104.js'),'Cerbanimo must not load the legacy family-shell polling runtime.');
@@ -59,6 +71,13 @@ assert(questEngine.includes("const VERSION='1.0.33-cerbanimo-v144-frame-bounded'
 assert(questEngine.includes('requestAnimationFrame(run)'),'Quest engine rerenders must yield to a browser frame instead of chaining microtasks.');
 assert(questEngine.includes("observer.observe(target,{childList:true,subtree:false})"),'Quest engine must observe only console-shell replacement, not every descendant mutation.');
 assert(!questEngine.includes("observer.observe(document.querySelector('#rc-app')||document.documentElement,{childList:true,subtree:true})"),'Quest engine must not restore the broad subtree observer that wakes on every UI mutation.');
+
+assert(realm.includes('/app/cerbanimo-task-tool-links-v1.mjs?v=task-tool-links-r2-frame-bounded'),'Cerbanimo must cache-bust bounded Creator task-tool decoration.');
+assert(taskTools.includes('function relevantMutation(records)'),'Creator task-tool decoration must filter DOM mutations before doing state work.');
+assert(taskTools.includes('requestAnimationFrame(run)'),'Creator task-tool decoration must yield to a browser frame.');
+assert(taskTools.includes("if(params.get('system')!=='cerbanimo')return"),'Creator task-tool decoration must stay off non-Cerbanimo realm-console routes.');
+assert(!taskTools.includes('new MutationObserver(schedule)'),'Creator task-tool decoration must not react to every subtree mutation.');
+assert(!taskTools.includes('queueMicrotask(()=>{queued=false;renderTaskToolLinks()})'),'Creator task-tool decoration must not create a boot-time microtask feedback loop.');
 
 assert(realm.includes('/app/cerbanimo-quest-path-v266.js'),'Cerbanimo must retain generated Quest-path materialization.');
 assert(questPath.includes("addEventListener('load',scheduleBoot"),'Generated Cerbanimo Quest paths must wait until the console page has finished loading.');
@@ -89,4 +108,4 @@ assert(proofs.includes("if(span.textContent!==text)span.textContent=text"),'Atta
 assert(proofs.includes("if(link.textContent!==value)link.textContent=value"),'Proof-link decoration must be idempotent.');
 assert(realm.includes('file-link-image-proof-r2'),'Cerbanimo console must cache-bust the idempotent proof runtime.');
 
-console.log('Cerbanimo load-freeze regression contract passed: navigation is directly owned and bounded-recoverable; the legacy family poller is absent from the Cerbanimo hot path; Quest rerenders are frame-bounded; parity remains recoverable; generated paths, packs, and media stay lazy; proof decoration converges.');
+console.log('Cerbanimo load-freeze regression contract passed: the canonical persistent shell keeps ownership of navigation; render-critical scripts run before optional integrations; parity remains bounded and recoverable; Quest/task decorators are frame-bounded; generated paths, packs, and media stay lazy; proof decoration converges.');
