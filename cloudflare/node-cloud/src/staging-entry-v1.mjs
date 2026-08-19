@@ -5,6 +5,7 @@ import baseWorker, {
 } from './server-ai-entry-v6.mjs';
 
 export { CivweaveCloudNode, CivweaveAccountDirectory };
+export const STAGING_CHARTERKEEPER_REVISION = 'charterkeeper-v1-signed-handoff';
 
 const STAGING_COMMUNITY_SEATS = 4;
 const STAGING_PAID_TEST_SEATS = 4;
@@ -18,8 +19,8 @@ const clean = (value, max = 180) => String(value ?? '').trim().slice(0, max);
  * This class runs in the civweave-node-cloud-staging Worker, whose Durable
  * Objects are separate from production. It exposes four community seats plus
  * four test-only paid-expansion seats so Stripe sandbox membership checkout,
- * settlement, and Guildkeeper revenue-share transfers can be exercised without
- * touching the production member ledger or production payment authority.
+ * settlement, Guildkeeper revenue-share transfers, and signed Charterkeeper
+ * handoffs can be exercised without touching production member or payment state.
  */
 export class CivweaveCapacityAccount extends ProductionCapacityAccount {
   async snapshot(nodeId = '') {
@@ -36,6 +37,7 @@ export class CivweaveCapacityAccount extends ProductionCapacityAccount {
       environment: 'staging',
       stagingIsolatedGuildServer: true,
       stagingPaymentMode: 'stripe-sandbox-only',
+      stagingCharterkeeperRevision: STAGING_CHARTERKEEPER_REVISION,
       memberCount,
       communityMemberCount,
       nodeMembers,
@@ -86,9 +88,8 @@ export default {
     const pathname = new URL(request.url).pathname;
     // Keep the staging Worker's normal NODE_DOMAIN intentionally non-routable so
     // root /api/fabric administration is not mistaken for a node-host request.
-    // Public membership and money-edge node callbacks need the real workers.dev
-    // suffix so Checkout returns, node proof challenges, manifests, and signed
-    // payment events resolve to this one isolated staging Guild.
+    // Public membership, Charterkeeper, and money-edge node callbacks need the
+    // real workers.dev suffix so signed proofs resolve to this isolated Guild.
     if (pathname.startsWith('/api/commerce/membership/') || pathname.startsWith('/api/ai/node/')) {
       return baseWorker.fetch(request, { ...env, NODE_DOMAIN: STAGING_PUBLIC_WORKER_DOMAIN }, ctx);
     }
