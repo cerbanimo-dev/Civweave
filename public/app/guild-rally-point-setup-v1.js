@@ -5,12 +5,73 @@ const VERSION='civweave.guild-rally-point-setup.v1';
 const LOCATION_KEY='civweave.hub-location-claim.v1';
 const LOCATION_STATE_KEY='civweave.hub-location-sync.v1';
 const RALLY_STATE_KEY='civweave.guild-rally-point.v1';
+const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
 let target=null;
 
 const clean=(value,max=600)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback=null)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const load=(key,fallback=null)=>{try{return parse(localStorage.getItem(key),fallback)}catch{return fallback}};
 const save=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
+
+function mobileGuildState(){
+  const state=load(MOBILE_GUILD_STATE_KEY,null);
+  return state?.guildId?state:null;
+}
+function mobileGuildNodeIds(state){
+  return Array.isArray(state?.cloudFabric?.starterNodes)?state.cloudFabric.starterNodes.map(node=>clean(node?.nodeId,180)).filter(Boolean):[];
+}
+function mirrorMobileGuildLocation(state){
+  const location=state?.location;
+  if(!state?.guildId||location?.schema!=='civweave.hub-location.v1'||!location?.syncedAt)return null;
+  const nodeIds=mobileGuildNodeIds(state);
+  const mirrored={
+    ...location,
+    schema:'civweave.hub-location-sync.v1',
+    guildId:state.guildId,
+    nodeCount:nodeIds.length,
+    nodeIds,
+    workerOrigin:state.primaryOrigin||null,
+    authRoute:'guild-membership',
+    updatedAt:state.updatedAt||location.syncedAt,
+  };
+  save(LOCATION_STATE_KEY,mirrored);
+  return mirrored;
+}
+function renderMobileGuildLocation(state=mobileGuildState()){
+  const mirrored=mirrorMobileGuildLocation(state);if(!mirrored)return false;
+  const card=document.getElementById('location-card'),status=document.getElementById('location-status'),button=document.getElementById('sync-location'),open=document.getElementById('open-civweave'),nodeCount=document.getElementById('location-node-count');
+  card?.classList.add('synced');
+  if(open){open.setAttribute('aria-disabled','false');open.dataset.locationReady='1'}
+  if(button){button.disabled=false;button.textContent='Update this Guild location'}
+  const precise=Number(mirrored.coordinateDecimals||3)>=5;
+  if(status)status.textContent=`This Guild was created on this device and already has ${precise?'a precise':'an approximately'} ±${mirrored.precisionMeters||100} m location. Updates from this device use the Guildkeeper credential created with the Guild.`;
+  if(nodeCount)nodeCount.textContent=state?.cloudAttached?`${mirrored.nodeIds.length||3} Guild nodes`:'Pocket Guild · this device';
+  return true;
+}
+async function syncMobileGuildLocation(event){
+  const state=mobileGuildState();if(!state?.guildId)return;
+  event?.preventDefault?.();event?.stopImmediatePropagation?.();
+  const button=document.getElementById('sync-location'),status=document.getElementById('location-status'),precise=document.getElementById('publish-precise-location')?.checked===true;
+  if(button)button.disabled=true;
+  try{
+    if(status)status.textContent='Updating this Guild with its founding Guildkeeper credential…';
+    const module=await import('/app/mobile-guild-create-v1.mjs?v=1.0.0-guildkeeper-location-auth');
+    if(typeof module.updateMobileGuildLocation!=='function')throw new Error('The mobile Guild location updater is unavailable.');
+    const updated=await module.updateMobileGuildLocation({precise});
+    if(!updated?.location?.syncedAt)throw new Error('The Guild location update did not return a synced location.');
+    mirrorMobileGuildLocation(updated);
+    renderMobileGuildLocation(updated);
+  }catch(error){if(status)status.textContent=error?.message||String(error)}
+  finally{if(button)button.disabled=false}
+}
+function installMobileGuildLocationBridge(){
+  const state=mobileGuildState();if(!state?.guildId)return;
+  renderMobileGuildLocation(state);
+  const button=document.getElementById('sync-location');
+  if(button&&!button.dataset.mobileGuildAuthBridge){button.dataset.mobileGuildAuthBridge='1';button.addEventListener('click',syncMobileGuildLocation,{capture:true})}
+  addEventListener('civweave:mobile-guild-created',event=>renderMobileGuildLocation(event?.detail||mobileGuildState()));
+  addEventListener('civweave:mobile-guild-location-updated',event=>renderMobileGuildLocation(event?.detail||mobileGuildState()));
+}
 
 function installStyles(){
   if(document.getElementById('guild-rally-point-style-v1'))return;
@@ -130,7 +191,7 @@ async function loadTarget(){
   render();
 }
 
-function boot(){installStyles();installCard();loadTarget();const locationStatus=document.getElementById('location-status');if(locationStatus)new MutationObserver(()=>render()).observe(locationStatus,{childList:true,subtree:true,characterData:true});addEventListener('focus',render);addEventListener('online',()=>loadTarget().catch(()=>{}));}
+function boot(){installStyles();installMobileGuildLocationBridge();installCard();loadTarget();const locationStatus=document.getElementById('location-status');if(locationStatus)new MutationObserver(()=>render()).observe(locationStatus,{childList:true,subtree:true,characterData:true});addEventListener('focus',()=>{renderMobileGuildLocation();render()});addEventListener('online',()=>loadTarget().catch(()=>{}));}
 
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):queueMicrotask(boot);
 })();
