@@ -1,31 +1,18 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-08-19T20:25:25Z",
-  "record_count": 22,
-  "failure_count": 2,
-  "failures": [
-    {
-      "provider": "ccmixter",
-      "playlist_id": "living-school",
-      "query": "curated:24847",
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=info&ids=24847&limit=4: 'utf-8' codec can't decode byte 0xd3 in position 5976: invalid continuation byte"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "curated:24847",
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=info&ids=24847&limit=4: 'utf-8' codec can't decode byte 0xd3 in position 5976: invalid continuation byte"
-    }
-  ],
+  "built_at": "2026-08-19T20:32:33Z",
+  "record_count": 17,
+  "failure_count": 0,
+  "failures": [],
   "provider_counts": {
-    "ccmixter": 22
+    "ccmixter": 17
   },
   "records": [
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "61065",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "living-school",
       "matched_query": "curated:61065",
       "title": "Climate Change The Dirty Water Remix",
       "artist": "J.Lang",
@@ -76,7 +63,15 @@
       "curation": "hand-seeded",
       "playlist_matches": [
         {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61065"
+        },
+        {
           "playlist_id": "cerbanimo",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "fellowfare",
           "matched_query": "curated:61065"
         }
       ],
@@ -264,80 +259,6 @@
         }
       ],
       "candidate_id": "openmusic:0d45f18990f07b6604f736f5",
-      "quality_score": 125
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "64915",
-      "playlist_id": "anarchadia",
-      "matched_query": "curated:64915",
-      "title": "Justice Come Quickly (pell)",
-      "artist": "Madam Snowflake",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/snowflake/64915",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Justice_Come_Quickly_(pell).mp3",
-          "mime": "",
-          "bytes": 3374544,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Justice_Come_Quickly_(pell).flac",
-          "mime": "",
-          "bytes": 34831985,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Justice_Come_Quickly_(pell)_1.flac",
-          "mime": "",
-          "bytes": 19200342,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Madam Snowflake",
-        "source_title": "Justice Come Quickly (pell)",
-        "source_url": "https://ccmixter.org/files/snowflake/64915",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
-      "instrumental_only": false,
-      "teeth_score": 5,
-      "themes": [
-        "justice",
-        "oppression",
-        "courage",
-        "resistance"
-      ],
-      "explicit": false,
-      "curation": "hand-seeded",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "curated:64915"
-        }
-      ],
-      "candidate_id": "openmusic:da27055ec91ebfd786186103",
       "quality_score": 125
     },
     {
@@ -612,6 +533,68 @@
         }
       ],
       "candidate_id": "openmusic:4da4ba617f0ff3d64de81d5d",
+      "quality_score": 125
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "31759",
+      "playlist_id": "anarchadia",
+      "matched_query": "curated:31759",
+      "title": "We the People",
+      "artist": "mykleanthony",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/mykleanthony/31759",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mykleanthony/mykleanthony_-_We_the_People.mp3",
+          "mime": "",
+          "bytes": 7691329,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "mykleanthony",
+        "source_title": "We the People",
+        "source_url": "https://ccmixter.org/files/mykleanthony/31759",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "oppression",
+        "collective power",
+        "peace",
+        "resistance"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:31759"
+        }
+      ],
+      "candidate_id": "openmusic:d944b702c1f51fa15cf1de4f",
       "quality_score": 125
     },
     {
@@ -1144,363 +1127,6 @@
       ],
       "candidate_id": "openmusic:534960cbcb4bc14fc3d310a3",
       "quality_score": 117
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "27821",
-      "playlist_id": "anarchadia",
-      "matched_query": "oppression truth vocals",
-      "title": "We Hold These Truths",
-      "artist": "essesq",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/essesq/27821",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/essesq/essesq_-_We_Hold_These_Truths.mp3",
-          "mime": "",
-          "bytes": 2813537,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "essesq",
-        "source_title": "We Hold These Truths",
-        "source_url": "https://ccmixter.org/files/essesq/27821",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 4,
-      "themes": [
-        "freedom",
-        "share",
-        "commons",
-        "truth"
-      ],
-      "explicit": false,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "oppression truth vocals"
-        }
-      ],
-      "candidate_id": "openmusic:af4188aab800fe008b2099c3",
-      "quality_score": 86
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "27835",
-      "playlist_id": "fellowfare",
-      "matched_query": "community sharing vocals",
-      "title": "Freedom in my Voice",
-      "artist": "SackJo22",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/SackJo22/27835",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice.mp3",
-          "mime": "",
-          "bytes": 1556942,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_4.mp3",
-          "mime": "",
-          "bytes": 1574078,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_5.mp3",
-          "mime": "",
-          "bytes": 1568227,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_6.mp3",
-          "mime": "",
-          "bytes": 1600828,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_1.mp3",
-          "mime": "",
-          "bytes": 1606679,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_2.mp3",
-          "mime": "",
-          "bytes": 1624651,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "SackJo22",
-        "source_title": "Freedom in my Voice",
-        "source_url": "https://ccmixter.org/files/SackJo22/27835",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 3,
-      "themes": [
-        "freedom",
-        "share",
-        "commons"
-      ],
-      "explicit": false,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "community sharing vocals"
-        }
-      ],
-      "candidate_id": "openmusic:38020761a3e8e95ae9ad5f9c",
-      "quality_score": 82
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "836",
-      "playlist_id": "civweave",
-      "matched_query": "freedom share vocals",
-      "title": "Language of My Reality",
-      "artist": "Colin Mutchler",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/commonsplice/836",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
-          "mime": "",
-          "bytes": 2866820,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Colin Mutchler",
-        "source_title": "Language of My Reality",
-        "source_url": "https://ccmixter.org/files/commonsplice/836",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 3,
-      "themes": [
-        "freedom",
-        "share",
-        "commons"
-      ],
-      "explicit": false,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "freedom share vocals"
-        }
-      ],
-      "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-      "quality_score": 82
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "27957",
-      "playlist_id": "civweave",
-      "matched_query": "community freedom vocals",
-      "title": "Vocal Stems- Stagnant",
-      "artist": "Kara Square",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/mindmapthat/27957",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Stagnant.mp3",
-          "mime": "",
-          "bytes": 10216002,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Kara Square",
-        "source_title": "Vocal Stems- Stagnant",
-        "source_url": "https://ccmixter.org/files/mindmapthat/27957",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 3,
-      "themes": [
-        "freedom",
-        "share",
-        "commons"
-      ],
-      "explicit": false,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "community freedom vocals"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor freedom vocals"
-        }
-      ],
-      "candidate_id": "openmusic:ea0518206be9b71cf76c0c15",
-      "quality_score": 82
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "64819",
-      "playlist_id": "anarchadia",
-      "matched_query": "solidarity rise vocals",
-      "title": "Never Again (pell)",
-      "artist": "Madam Snowflake",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/snowflake/64819",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell)_1.mp3",
-          "mime": "",
-          "bytes": 3861456,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell)_3.flac",
-          "mime": "",
-          "bytes": 16144212,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell).flac",
-          "mime": "",
-          "bytes": 11955614,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell)_1.flac",
-          "mime": "",
-          "bytes": 12550295,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Madam Snowflake",
-        "source_title": "Never Again (pell)",
-        "source_url": "https://ccmixter.org/files/snowflake/64819",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 2,
-      "themes": [
-        "solidarity",
-        "rise"
-      ],
-      "explicit": false,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "solidarity rise vocals"
-        }
-      ],
-      "candidate_id": "openmusic:ed796e7f34f3f1c84e5c5f49",
-      "quality_score": 78
     }
   ]
 }

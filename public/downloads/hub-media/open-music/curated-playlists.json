@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-curated-playlists.v1",
-  "built_at": "2026-08-19T20:25:25Z",
+  "built_at": "2026-08-19T20:32:33Z",
   "vocal_required": true,
   "instrumental_only_rejected": true,
   "playlists": [
@@ -223,57 +223,20 @@
           ],
           "explicit": false,
           "curation": "hand-seeded"
-        },
+        }
+      ]
+    },
+    {
+      "id": "living-school",
+      "name": "Living School",
+      "entries": [
         {
-          "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-          "title": "Language of My Reality",
-          "artist": "Colin Mutchler",
+          "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
           "provider": "ccmixter",
-          "provider_id": "836",
-          "source_url": "https://ccmixter.org/files/commonsplice/836",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution",
-            "url": "http://creativecommons.org/licenses/by/2.5/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
-              "mime": "",
-              "bytes": 2866820,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Colin Mutchler",
-            "source_title": "Language of My Reality",
-            "source_url": "https://ccmixter.org/files/commonsplice/836",
-            "license": "Attribution",
-            "license_url": "http://creativecommons.org/licenses/by/2.5/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 3,
-          "themes": [
-            "freedom",
-            "share",
-            "commons"
-          ],
-          "explicit": false,
-          "curation": "metadata-discovered"
-        },
-        {
-          "candidate_id": "openmusic:ea0518206be9b71cf76c0c15",
-          "title": "Vocal Stems- Stagnant",
-          "artist": "Kara Square",
-          "provider": "ccmixter",
-          "provider_id": "27957",
-          "source_url": "https://ccmixter.org/files/mindmapthat/27957",
+          "provider_id": "61065",
+          "source_url": "https://ccmixter.org/files/djlang59/61065",
           "license": {
             "spdx": "CC-BY",
             "label": "Attribution (3.0)",
@@ -286,36 +249,31 @@
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Stagnant.mp3",
+              "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
               "mime": "",
-              "bytes": 10216002,
+              "bytes": 4741999,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "Kara Square",
-            "source_title": "Vocal Stems- Stagnant",
-            "source_url": "https://ccmixter.org/files/mindmapthat/27957",
+            "creator": "J.Lang",
+            "source_title": "Climate Change The Dirty Water Remix",
+            "source_url": "https://ccmixter.org/files/djlang59/61065",
             "license": "Attribution (3.0)",
             "license_url": "http://creativecommons.org/licenses/by/3.0/"
           },
           "vocal_verified": true,
           "instrumental_only": false,
-          "teeth_score": 3,
+          "teeth_score": 5,
           "themes": [
-            "freedom",
-            "share",
-            "commons"
+            "climate",
+            "truth",
+            "accountability",
+            "future"
           ],
           "explicit": false,
-          "curation": "metadata-discovered"
-        }
-      ]
-    },
-    {
-      "id": "living-school",
-      "name": "Living School",
-      "entries": [
+          "curation": "hand-seeded"
+        },
         {
           "candidate_id": "openmusic:a0dff66c9efe6c7ac60f62fb",
           "title": "Let the Walls Come Down",
@@ -749,14 +707,20 @@
           ],
           "explicit": false,
           "curation": "hand-seeded"
-        },
+        }
+      ]
+    },
+    {
+      "id": "fellowfare",
+      "name": "FellowFare",
+      "entries": [
         {
-          "candidate_id": "openmusic:ea0518206be9b71cf76c0c15",
-          "title": "Vocal Stems- Stagnant",
-          "artist": "Kara Square",
+          "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
           "provider": "ccmixter",
-          "provider_id": "27957",
-          "source_url": "https://ccmixter.org/files/mindmapthat/27957",
+          "provider_id": "61065",
+          "source_url": "https://ccmixter.org/files/djlang59/61065",
           "license": {
             "spdx": "CC-BY",
             "label": "Attribution (3.0)",
@@ -769,36 +733,31 @@
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Stagnant.mp3",
+              "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
               "mime": "",
-              "bytes": 10216002,
+              "bytes": 4741999,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "Kara Square",
-            "source_title": "Vocal Stems- Stagnant",
-            "source_url": "https://ccmixter.org/files/mindmapthat/27957",
+            "creator": "J.Lang",
+            "source_title": "Climate Change The Dirty Water Remix",
+            "source_url": "https://ccmixter.org/files/djlang59/61065",
             "license": "Attribution (3.0)",
             "license_url": "http://creativecommons.org/licenses/by/3.0/"
           },
           "vocal_verified": true,
           "instrumental_only": false,
-          "teeth_score": 3,
+          "teeth_score": 5,
           "themes": [
-            "freedom",
-            "share",
-            "commons"
+            "climate",
+            "truth",
+            "accountability",
+            "future"
           ],
           "explicit": false,
-          "curation": "metadata-discovered"
-        }
-      ]
-    },
-    {
-      "id": "fellowfare",
-      "name": "FellowFare",
-      "entries": [
+          "curation": "hand-seeded"
+        },
         {
           "candidate_id": "openmusic:70c01ad3a2d479485b7fe223",
           "title": "Freedom in my Voice (the cover)",
@@ -990,79 +949,6 @@
           ],
           "explicit": false,
           "curation": "hand-seeded"
-        },
-        {
-          "candidate_id": "openmusic:38020761a3e8e95ae9ad5f9c",
-          "title": "Freedom in my Voice",
-          "artist": "SackJo22",
-          "provider": "ccmixter",
-          "provider_id": "27835",
-          "source_url": "https://ccmixter.org/files/SackJo22/27835",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution (3.0)",
-            "url": "http://creativecommons.org/licenses/by/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice.mp3",
-              "mime": "",
-              "bytes": 1556942,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_4.mp3",
-              "mime": "",
-              "bytes": 1574078,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_5.mp3",
-              "mime": "",
-              "bytes": 1568227,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_6.mp3",
-              "mime": "",
-              "bytes": 1600828,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_1.mp3",
-              "mime": "",
-              "bytes": 1606679,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Freedom_in_my_Voice_2.mp3",
-              "mime": "",
-              "bytes": 1624651,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "SackJo22",
-            "source_title": "Freedom in my Voice",
-            "source_url": "https://ccmixter.org/files/SackJo22/27835",
-            "license": "Attribution (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 3,
-          "themes": [
-            "freedom",
-            "share",
-            "commons"
-          ],
-          "explicit": false,
-          "curation": "metadata-discovered"
         }
       ]
     },
@@ -1070,62 +956,6 @@
       "id": "anarchadia",
       "name": "Anarchadia",
       "entries": [
-        {
-          "candidate_id": "openmusic:da27055ec91ebfd786186103",
-          "title": "Justice Come Quickly (pell)",
-          "artist": "Madam Snowflake",
-          "provider": "ccmixter",
-          "provider_id": "64915",
-          "source_url": "https://ccmixter.org/files/snowflake/64915",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution (3.0)",
-            "url": "http://creativecommons.org/licenses/by/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Justice_Come_Quickly_(pell).mp3",
-              "mime": "",
-              "bytes": 3374544,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Justice_Come_Quickly_(pell).flac",
-              "mime": "",
-              "bytes": 34831985,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Justice_Come_Quickly_(pell)_1.flac",
-              "mime": "",
-              "bytes": 19200342,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Madam Snowflake",
-            "source_title": "Justice Come Quickly (pell)",
-            "source_url": "https://ccmixter.org/files/snowflake/64915",
-            "license": "Attribution (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 5,
-          "themes": [
-            "justice",
-            "oppression",
-            "courage",
-            "resistance"
-          ],
-          "explicit": false,
-          "curation": "hand-seeded"
-        },
         {
           "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
           "title": "Mind Map This",
@@ -1221,6 +1051,50 @@
           "curation": "hand-seeded"
         },
         {
+          "candidate_id": "openmusic:d944b702c1f51fa15cf1de4f",
+          "title": "We the People",
+          "artist": "mykleanthony",
+          "provider": "ccmixter",
+          "provider_id": "31759",
+          "source_url": "https://ccmixter.org/files/mykleanthony/31759",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/mykleanthony/mykleanthony_-_We_the_People.mp3",
+              "mime": "",
+              "bytes": 7691329,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "mykleanthony",
+            "source_title": "We the People",
+            "source_url": "https://ccmixter.org/files/mykleanthony/31759",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "oppression",
+            "collective power",
+            "peace",
+            "resistance"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
           "candidate_id": "openmusic:f07b5096cec10f2b089e33e0",
           "title": "yours and mine",
           "artist": "Tomas PhUsIoN",
@@ -1311,110 +1185,6 @@
           ],
           "explicit": false,
           "curation": "hand-seeded"
-        },
-        {
-          "candidate_id": "openmusic:af4188aab800fe008b2099c3",
-          "title": "We Hold These Truths",
-          "artist": "essesq",
-          "provider": "ccmixter",
-          "provider_id": "27821",
-          "source_url": "https://ccmixter.org/files/essesq/27821",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution (3.0)",
-            "url": "http://creativecommons.org/licenses/by/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/essesq/essesq_-_We_Hold_These_Truths.mp3",
-              "mime": "",
-              "bytes": 2813537,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "essesq",
-            "source_title": "We Hold These Truths",
-            "source_url": "https://ccmixter.org/files/essesq/27821",
-            "license": "Attribution (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 4,
-          "themes": [
-            "freedom",
-            "share",
-            "commons",
-            "truth"
-          ],
-          "explicit": false,
-          "curation": "metadata-discovered"
-        },
-        {
-          "candidate_id": "openmusic:ed796e7f34f3f1c84e5c5f49",
-          "title": "Never Again (pell)",
-          "artist": "Madam Snowflake",
-          "provider": "ccmixter",
-          "provider_id": "64819",
-          "source_url": "https://ccmixter.org/files/snowflake/64819",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution (3.0)",
-            "url": "http://creativecommons.org/licenses/by/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell)_1.mp3",
-              "mime": "",
-              "bytes": 3861456,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell)_3.flac",
-              "mime": "",
-              "bytes": 16144212,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell).flac",
-              "mime": "",
-              "bytes": 11955614,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Never_Again_(pell)_1.flac",
-              "mime": "",
-              "bytes": 12550295,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Madam Snowflake",
-            "source_title": "Never Again (pell)",
-            "source_url": "https://ccmixter.org/files/snowflake/64819",
-            "license": "Attribution (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 2,
-          "themes": [
-            "solidarity",
-            "rise"
-          ],
-          "explicit": false,
-          "curation": "metadata-discovered"
         }
       ]
     }
