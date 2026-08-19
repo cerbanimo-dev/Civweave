@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-parakeet-speech-executor-v1-mobile-startup';
+const VERSION='1.0.2-parakeet-speech-executor-v1-transcription-layout';
 if(globalThis.CivweaveParakeetSpeechExecutorV1?.version===VERSION)return;
 
 const MODEL_ID='parakeet-tdt-0.6b-v3-int8';
@@ -195,10 +195,10 @@ class ParakeetRuntime{
     const encoderFeeds={};encoderFeeds[this.encoder.inputNames[0]]=new this.ort.Tensor('float32',input,[1,MEL_BINS,frames]);encoderFeeds[lengthName]=makeIntegerTensor(this.ort,lengthMeta?.type||'int64',[frames],[1]);
     const encoderOutputs=await this.encoder.run(encoderFeeds),encoded=encoderOutputs[this.encoder.outputNames[0]],encodedLength=encoderOutputs[this.encoder.outputNames[1]];
     if(!encoded||encoded.dims.length!==3||encoded.dims[0]!==1)throw new Error(`Unexpected Parakeet encoder output shape: [${encoded?.dims?.join?.(', ')||''}].`);
-    const channels=encoded.dims[1],time=encoded.dims[2],limit=Math.min(time,tensorLength(encodedLength,time)),ids=[];
+    const time=encoded.dims[1],channels=encoded.dims[2],limit=Math.min(time,tensorLength(encodedLength,time)),ids=[];
     let states=this.initialStates(),prediction=await this.runDecoder(this.blank,states),t=0,tokensThisFrame=0;
     while(t<limit){
-      const frame=new Float32Array(channels);for(let c=0;c<channels;c+=1)frame[c]=Number(encoded.data[c*time+t]);
+      const frame=new Float32Array(channels);for(let c=0;c<channels;c+=1)frame[c]=Number(encoded.data[t*channels+c]);
       const joinerFeeds={};joinerFeeds[this.joiner.inputNames[0]]=new this.ort.Tensor('float32',frame,[1,channels,1]);joinerFeeds[this.joiner.inputNames[1]]=prediction.output;
       const joinerOutputs=await this.joiner.run(joinerFeeds),logits=joinerOutputs[this.joiner.outputNames[0]];if(!logits)throw new Error('Parakeet joiner returned no logits.');
       const vocabSize=this.tokens.length,outputSize=logits.data.length;if(outputSize<=vocabSize)throw new Error(`Parakeet TDT joiner has no duration logits (${outputSize} <= ${vocabSize}).`);
@@ -247,22 +247,28 @@ async function startMicrophone(payload={}){
     const source=context.createMediaStreamSource(stream),processor=context.createScriptProcessor(4096,1,1),sink=context.createGain();sink.gain.value=0;source.connect(processor);processor.connect(sink);sink.connect(context.destination);
     let stopped=false,speaking=false,silenceSamples=0,utterance=[],utteranceSamples=0,preRoll=[],preRollSamples=0,noiseFloor=0.003,queue=Promise.resolve();
     const inputRate=context.sampleRate,preRollLimit=Math.round(inputRate*0.25),silenceLimit=Math.round(inputRate*0.65),maxUtterance=Math.round(inputRate*20),minUtterance=Math.round(inputRate*0.2),onTranscript=typeof payload.onTranscript==='function'?payload.onTranscript:()=>{};
-    const flush=()=>{
-      if(utteranceSamples<minUtterance){utterance=[];utteranceSamples=0;return}
-      const samples=concatChunks(utterance,utteranceSamples);utterance=[];utteranceSamples=0;
-      queue=queue.then(async()=>{if(stopped)return;const text=clean(await runtime.transcribe(samples,inputRate),12000);if(text)onTranscript({text,transcript:text,final:true,source:MODEL_ID,modelId:MODEL_ID})}).catch(error=>{try{dispatchEvent(new CustomEvent('civweave:guide-voice-state',{detail:{error:clean(error?.message||error,800),code:error?.code||'PARAKEET_LOCAL_TRANSCRIPTION_FAILED',source:MODEL_ID}}))}catch{}});
+    const flush=({allowStopped=false,reason='silence'}={})=>{
+      if(utteranceSamples<minUtterance){utterance=[];utteranceSamples=0;emitRuntimePhase('utterance-too-short',{reason});return}
+      const samples=concatChunks(utterance,utteranceSamples),sampleCount=utteranceSamples;utterance=[];utteranceSamples=0;
+      emitRuntimePhase('transcribing',{reason,sampleCount,durationMs:Math.round(sampleCount/inputRate*1000)});
+      queue=queue.then(async()=>{
+        if(stopped&&!allowStopped)return;
+        const text=clean(await runtime.transcribe(samples,inputRate),12000);
+        if(text){emitRuntimePhase('transcript-ready',{reason,characters:text.length});onTranscript({text,transcript:text,final:true,source:MODEL_ID,modelId:MODEL_ID})}
+        else emitRuntimePhase('transcript-empty',{reason,sampleCount});
+      }).catch(error=>{try{dispatchEvent(new CustomEvent('civweave:guide-voice-state',{detail:{error:clean(error?.message||error,800),code:error?.code||'PARAKEET_LOCAL_TRANSCRIPTION_FAILED',source:MODEL_ID}}))}catch{}});
     };
     processor.onaudioprocess=event=>{
-      if(stopped)return;const input=event.inputBuffer.getChannelData(0),chunk=Float32Array.from(input);let sum=0;for(let i=0;i<chunk.length;i+=1)sum+=chunk[i]*chunk[i];const rms=Math.sqrt(sum/Math.max(1,chunk.length)),threshold=Math.max(0.008,noiseFloor*3.25);
+      if(stopped)return;const input=event.inputBuffer.getChannelData(0),chunk=Float32Array.from(input);let sum=0;for(let i=0;i<chunk.length;i+=1)sum+=chunk[i]*chunk[i];const rms=Math.sqrt(sum/Math.max(1,chunk.length)),threshold=Math.max(0.004,noiseFloor*2.6);
       if(!speaking)noiseFloor=Math.max(0.0008,Math.min(0.02,noiseFloor*0.985+rms*0.015));
       preRoll.push(chunk);preRollSamples+=chunk.length;while(preRollSamples>preRollLimit&&preRoll.length>1)preRollSamples-=preRoll.shift().length;
-      if(!speaking&&rms>=threshold){speaking=true;silenceSamples=0;utterance=preRoll.splice(0);utteranceSamples=preRollSamples;preRollSamples=0}
+      if(!speaking&&rms>=threshold){speaking=true;silenceSamples=0;utterance=preRoll.splice(0);utteranceSamples=preRollSamples;preRollSamples=0;emitRuntimePhase('speech-detected',{rms,threshold})}
       if(!speaking)return;
       utterance.push(chunk);utteranceSamples+=chunk.length;
       if(rms<threshold*0.72)silenceSamples+=chunk.length;else silenceSamples=0;
-      if(silenceSamples>=silenceLimit||utteranceSamples>=maxUtterance){speaking=false;silenceSamples=0;flush()}
+      if(silenceSamples>=silenceLimit||utteranceSamples>=maxUtterance){speaking=false;silenceSamples=0;flush({reason:utteranceSamples>=maxUtterance?'max-duration':'silence'})}
     };
-    const session={source:MODEL_ID,modelId:MODEL_ID,stop(){if(stopped)return;stopped=true;try{processor.disconnect()}catch{}try{source.disconnect()}catch{}try{sink.disconnect()}catch{}for(const track of stream.getTracks())try{track.stop()}catch{}try{context.close()}catch{}if(currentSession===session)currentSession=null},abort(){this.stop()}};
+    const session={source:MODEL_ID,modelId:MODEL_ID,stop(){if(stopped)return;if(speaking&&utteranceSamples>=minUtterance){speaking=false;silenceSamples=0;flush({allowStopped:true,reason:'manual-stop'})}stopped=true;try{processor.disconnect()}catch{}try{source.disconnect()}catch{}try{sink.disconnect()}catch{}for(const track of stream.getTracks())try{track.stop()}catch{}try{context.close()}catch{}if(currentSession===session)currentSession=null},abort(){this.stop()}};
     currentSession=session;emitRuntimePhase('listening');return session;
   }catch(error){for(const track of stream.getTracks())try{track.stop()}catch{}try{context?.close?.()}catch{}throw error}
 }
