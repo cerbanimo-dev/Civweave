@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.119-server-ai-router-v301-mobile-guild-capacity';
+const VERSION='1.0.120-server-ai-router-v301-mobile-guild-live-bridge';
 const MIDDLEWARE_ID='server-auto-v301';
 const MARKET_SESSION_KEY='civweave.node-ai-marketplace.sessions.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
@@ -8,8 +8,10 @@ const MARKET_PREF_KEY='civweave.node-ai-marketplace.preferences.v1';
 const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
 const ROUTE='server-auto';
 const MAX_GENERATION_TOKENS=16384;
+const DEFAULT_WORKERS_AI_MODEL='@cf/zai-org/glm-4.7-flash';
 if(globalThis.CivweaveServerAIRouterV301?.version===VERSION)return;
 let registered=false;
+let mobileGuildRefreshPromise=null;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clone=value=>value==null?value:structuredClone(value);
@@ -67,12 +69,23 @@ function requestPayload(request={}){
     executionProfile:clean(request.executionProfile,40)||'interactive'
   };
 }
+function workersAiModel(request={}){
+  const candidates=[request?.config?.workersAiModel,request?.config?.cloudflareModel,request?.config?.model,request?.workersAiModel,request?.cloudflareModel,request?.model];
+  for(const candidate of candidates){const value=clean(candidate,220);if(/^@(cf|hf)\//i.test(value))return value}
+  return DEFAULT_WORKERS_AI_MODEL;
+}
+function workersAiPayload(request={}){
+  const payload=requestPayload(request),messages=[...(payload.messages||[])];
+  if(payload.system&&!messages.some(item=>item.role==='system'))messages.unshift({role:'system',content:payload.system});
+  return{...payload,messages,model:workersAiModel(request)};
+}
 function textFromOutput(value){
   if(typeof value==='string')return value;
   if(value==null)return'';
   if(typeof value?.text==='string')return value.text;
   if(typeof value?.outputText==='string')return value.outputText;
   if(typeof value?.response==='string')return value.response;
+  if(typeof value?.result?.response==='string')return value.result.response;
   try{return JSON.stringify(value)}catch{return String(value)}
 }
 function resultFor(request,{provider,model,text,outputJson=null,usage={},diagnostics=[],routeTrace=[]}={}){
@@ -123,19 +136,54 @@ async function serverLocal(request,trace){
   if(lastError)dispatchEvent(new CustomEvent('civweave:server-ai-route-failed',{detail:{route:'server-local',message:clean(lastError.message,800),at:now()}}));
   return null;
 }
-function mobileGuildCapacitySession(){
+function mobileGuildState(){
   let state=null;try{state=parse(localStorage.getItem(MOBILE_GUILD_STATE_KEY),null)}catch{}
+  return state&&typeof state==='object'&&!Array.isArray(state)?state:null;
+}
+function readyGuildNode(fabric){
+  if(!fabric||typeof fabric!=='object'||fabric.status!=='ready'||fabric.aiEnabled===false||!Array.isArray(fabric.starterNodes)||!fabric.starterNodes.length)return null;
+  return fabric.starterNodes.find(item=>item?.nodeId&&item?.publicOrigin&&clean(item.runtime,80).toLowerCase()==='cloudflare-workers-ai')||fabric.starterNodes.find(item=>item?.nodeId&&item?.publicOrigin)||null;
+}
+function refreshMobileGuildFabric(state){
+  if(mobileGuildRefreshPromise||!state?.primaryOrigin)return mobileGuildRefreshPromise;
+  let origin='';try{origin=new URL(clean(state.primaryOrigin,4000),location.href).origin}catch{return null}
+  mobileGuildRefreshPromise=fetch(`${origin}/api/guild/status`,{method:'GET',headers:{accept:'application/json'},cache:'no-store'})
+    .then(async response=>{if(!response.ok)throw new Error(`Guild status returned HTTP ${response.status}.`);return response.json()})
+    .then(status=>{
+      const current=mobileGuildState();
+      if(!current||status?.claimed!==true||!status?.infrastructure||clean(status.guildId,180)!==clean(current.guildId,180))return null;
+      const next={...current,cloudAttached:true,primaryOrigin:origin,primaryGateway:origin,cloudStage:'online',cloudFabric:status.infrastructure};
+      localStorage.setItem(MOBILE_GUILD_STATE_KEY,JSON.stringify(next));
+      try{dispatchEvent(new CustomEvent('civweave:mobile-guild-fabric-refreshed',{detail:{guildId:clean(next.guildId,180),origin,at:now()}}))}catch{}
+      return next;
+    })
+    .catch(()=>null)
+    .finally(()=>{mobileGuildRefreshPromise=null});
+  return mobileGuildRefreshPromise;
+}
+function mobileGuildCapacitySession(){
+  const state=mobileGuildState();
   if(!state?.cloudAttached||!state?.primaryOrigin||!state?.membershipKey)return null;
+  const membershipKey=clean(state.membershipKey,500),guildId=clean(state.guildId,180);
+  if(!membershipKey||!guildId)return null;
+  let origin='';try{origin=new URL(clean(state.primaryOrigin,4000),location.href).origin}catch{return null}
   const fabric=state.cloudFabric&&typeof state.cloudFabric==='object'?state.cloudFabric:null;
-  if(!fabric?.aiEnabled||fabric.status!=='ready'||!Array.isArray(fabric.starterNodes))return null;
-  const node=fabric.starterNodes.find(item=>item?.nodeId&&item?.publicOrigin&&clean(item.runtime,80).toLowerCase()==='cloudflare-workers-ai')||fabric.starterNodes.find(item=>item?.nodeId&&item?.publicOrigin);
-  if(!node)return null;
+  let node=readyGuildNode(fabric),source='mobile-guild-owned-cloud';
+  if(!node){
+    refreshMobileGuildFabric(state);
+    const explicitUnavailable=fabric&&(fabric.status==='pending'||fabric.status==='unavailable'||fabric.aiEnabled===false);
+    if(explicitUnavailable)return null;
+    const nodeId=`${guildId}-a`;
+    node={nodeId,publicOrigin:`${origin}/nodes/${encodeURIComponent(nodeId)}`,runtime:'cloudflare-workers-ai'};
+    source='mobile-guild-owned-cloud-derived';
+  }
   try{
     const nodeBase=`${clean(node.publicOrigin,4000).replace(/\/+$/,'')}/`;
     const generateUrl=new URL('api/ai/node/generate',nodeBase).href;
-    return{nodeId:clean(node.nodeId,180),token:clean(state.membershipKey,500),origin:new URL(clean(state.primaryOrigin,4000),location.href).origin,generateUrl,source:'mobile-guild-owned-cloud',guildId:clean(state.guildId,180)};
+    return{nodeId:clean(node.nodeId,180),token:membershipKey,origin,generateUrl,source,guildId};
   }catch{return null}
 }
+function isMobileGuildSession(session){return clean(session?.source,100).startsWith('mobile-guild-owned-cloud')}
 function usableCapacitySession(){
   const owned=hostAccess()?.sessionFor?.();if(owned)return owned;
   const mobile=mobileGuildCapacitySession();if(mobile)return mobile;
@@ -147,21 +195,23 @@ async function cloudflare(request,trace){
   if(!session){trace.push({route:'cloudflare-workers-ai',status:'skipped',reason:'no active Guild-owned or host-capacity session'});return null}
   const endpointUrl=session.generateUrl?new URL(session.generateUrl):new URL('/api/ai/node/generate',session.origin);
   if(!session.generateUrl)endpointUrl.searchParams.set('nodeId',session.nodeId);
-  const payload=requestPayload(request);
-  const response=await fetch(endpointUrl,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId},body:JSON.stringify({...payload,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})});
+  const payload=workersAiPayload(request);
+  const headers={'content-type':'application/json','authorization':`Bearer ${session.token}`};
+  if(!session.generateUrl)headers['x-civweave-node-id']=session.nodeId;
+  const response=await fetch(endpointUrl,{method:'POST',headers,body:JSON.stringify({...payload,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})});
   const body=await response.json().catch(()=>({}));
   if(!response.ok){
     const message=clean(body?.error||`Cloudflare Workers AI returned HTTP ${response.status}.`,1000);
-    trace.push({route:'cloudflare-workers-ai',status:'failed',nodeId:session.nodeId,source:session.source||'capacity-session',httpStatus:response.status,reason:message});
+    trace.push({route:'cloudflare-workers-ai',status:'failed',nodeId:session.nodeId,source:session.source||'capacity-session',model:payload.model,httpStatus:response.status,reason:message});
     const error=new Error(response.status===402?`${message} Open AI settings to add compute or choose a membership.`:message);error.status=response.status;throw error;
   }
   const nested=body?.result;
   const text=clean(body.text||textFromOutput(nested),5_000_000),outputJson=body.outputJson&&typeof body.outputJson==='object'?body.outputJson:null;
   if(!text&&!outputJson)throw new Error('Cloudflare Workers AI returned no output.');
-  const telemetry=session.source==='mobile-guild-owned-cloud'?{}:(hostAccess()?.recordUsage?.({nodeId:session.nodeId,chargedNeurons:Number(body?.usage?.chargedNeurons||0),quota:body.quota||null})||{});
-  trace.push({route:'cloudflare-workers-ai',status:'success',nodeId:session.nodeId,source:session.source||'capacity-session'});
-  const guildOwned=session.source==='mobile-guild-owned-cloud';
-  return resultFor(request,{provider:'cloudflare-workers-ai',model:body.model||nested?.model||'workers-ai',text:text||JSON.stringify(outputJson),outputJson,usage:{...(body.usage||{}),chargedNeurons:Number(body?.usage?.chargedNeurons||0),remainingNeurons:telemetry.remainingNeurons,approximateTurnsLeft:telemetry.approximateTurnsLeft},diagnostics:[{code:guildOwned?'GUILD_OWNED_CLOUDFLARE':'CLOUDFLARE_CAPACITY',message:guildOwned?`Used this device's paired mobile Guild Cloudflare node ${session.nodeId}.`:`Used capacity-backed Workers AI through ${session.nodeId}; lifetime credits are never spent unless explicitly allowed.`}],routeTrace:trace});
+  const guildOwned=isMobileGuildSession(session);
+  const telemetry=guildOwned?{}:(hostAccess()?.recordUsage?.({nodeId:session.nodeId,chargedNeurons:Number(body?.usage?.chargedNeurons||0),quota:body.quota||null})||{});
+  trace.push({route:'cloudflare-workers-ai',status:'success',nodeId:session.nodeId,source:session.source||'capacity-session',model:body.model||payload.model});
+  return resultFor(request,{provider:'cloudflare-workers-ai',model:body.model||nested?.model||payload.model,text:text||JSON.stringify(outputJson),outputJson,usage:{...(body.usage||{}),chargedNeurons:Number(body?.usage?.chargedNeurons||0),remainingNeurons:telemetry.remainingNeurons,approximateTurnsLeft:telemetry.approximateTurnsLeft},diagnostics:[{code:guildOwned?'GUILD_OWNED_CLOUDFLARE':'CLOUDFLARE_CAPACITY',message:guildOwned?`Used this device's paired mobile Guild Cloudflare node ${session.nodeId}.`:`Used capacity-backed Workers AI through ${session.nodeId}; lifetime credits are never spent unless explicitly allowed.`}],routeTrace:trace});
 }
 async function handle(request={}){
   if(!isServerAuto(request))return null;
@@ -181,10 +231,10 @@ async function handle(request={}){
 function register(){
   const s=spine();if(!s?.register)return false;
   s.register(MIDDLEWARE_ID,{handle},60);registered=true;
-  try{dispatchEvent(new CustomEvent('civweave:server-ai-router-ready',{detail:{version:VERSION,middleware:MIDDLEWARE_ID,priority:60,order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],guildOnly:true,at:now()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:server-ai-router-ready',{detail:{version:VERSION,middleware:MIDDLEWARE_ID,priority:60,order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],guildOnly:true,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,at:now()}}))}catch{}
   return true;
 }
-function status(){return{version:VERSION,registered,selectedRoute:selectedRoute({}),marketSessions:Object.keys(marketSessions()).length,capacitySessions:Object.keys(capacitySessions()).length,mobileGuildCapacity:Boolean(mobileGuildCapacitySession()),order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],guildOnly:true}}
-addEventListener('civweave:runtime-spine-ready',register);addEventListener('civweave:model-runtime-ready',register);addEventListener('civweave:local-model-bridge-installed',register);addEventListener('civweave:mobile-guild-attached',register);addEventListener('pageshow',register);register();
-globalThis.CivweaveServerAIRouterV301=Object.freeze({version:VERSION,route:ROUTE,register,status,isServerAuto,handle,mobileGuildCapacitySession,order:Object.freeze(['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai']),guildOnly:true});
+function status(){const mobile=mobileGuildCapacitySession();return{version:VERSION,registered,selectedRoute:selectedRoute({}),marketSessions:Object.keys(marketSessions()).length,capacitySessions:Object.keys(capacitySessions()).length,mobileGuildCapacity:Boolean(mobile),mobileGuildCapacitySource:mobile?.source||null,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],guildOnly:true}}
+addEventListener('civweave:runtime-spine-ready',register);addEventListener('civweave:model-runtime-ready',register);addEventListener('civweave:local-model-bridge-installed',register);addEventListener('civweave:mobile-guild-attached',register);addEventListener('civweave:mobile-guild-fabric-refreshed',register);addEventListener('pageshow',register);register();
+globalThis.CivweaveServerAIRouterV301=Object.freeze({version:VERSION,route:ROUTE,register,status,isServerAuto,handle,mobileGuildCapacitySession,workersAiModel,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,order:Object.freeze(['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai']),guildOnly:true});
 })();
