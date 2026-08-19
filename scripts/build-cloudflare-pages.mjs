@@ -25,6 +25,7 @@ const pocketCampusSeedPath = resolve(sourceDir, "downloads/civweave-pocket-campu
 const mapPackagePath = resolve(sourceDir, "downloads/Civweave-Map-v1.zip");
 const mapChecksumPath = resolve(sourceDir, "downloads/Civweave-Map-v1.zip.sha256");
 const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
+const onnxRuntimeStage = resolve(scriptDir, "stage-onnxruntime-web-assets.mjs");
 const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
 const transformerV4Stage = resolve(scriptDir, "stage-transformers-v4-assets.mjs");
 const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
@@ -157,6 +158,7 @@ if (existsSync(validationSafe)) {
 // These generated runtime/data lanes are independent. Build them concurrently
 // instead of serially blocking production on each network/package operation.
 await Promise.all([
+  runNodeScriptAsync(onnxRuntimeStage, "ONNX Runtime Web staging failed."),
   runNodeScriptAsync(transformerStage, "Transformers.js staging failed."),
   runNodeScriptAsync(transformerV4Stage, "Transformers.js 4.2 Gemma 4 staging failed."),
   runNodeScriptAsync(mapRuntimeStage, "Civweave Map v1 renderer staging failed."),
@@ -171,6 +173,10 @@ runNodeScript(mapPackageBuilder, "Civweave Map v1 package build failed.");
 withPortableZipFallback(() => runNodeScript(mobileInstallBuilder, "Civweave mobile/Pocket Campus package build failed."));
 
 const requiredRuntimeAssets = [
+  resolve(sourceDir, 'app/vendor/onnxruntime/ort.wasm.min.mjs'),
+  resolve(sourceDir, 'app/vendor/onnxruntime/ort-wasm-simd-threaded.mjs'),
+  resolve(sourceDir, 'app/vendor/onnxruntime/ort-wasm-simd-threaded.wasm'),
+  resolve(sourceDir, 'app/vendor/onnxruntime/stage-manifest.json'),
   resolve(sourceDir, 'app/vendor/transformers/transformers.min.js'),
   resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs'),
   resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'),
@@ -221,5 +227,5 @@ const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 const mapBytes = statSync(mapPackagePath).size;
 console.log(`Built .cloudflare-pages with mobile installer (${installerBytes} bytes), portable Civweave seed (${seedBytes} bytes), and Civweave Map v1 (${mapBytes} bytes).`);
-console.log("Cloudflare publish hot path: generated runtime/data staging parallelized; optional knowledge-school ZIP bytes externalized to immutable commit-pinned downloads.");
-console.log("All Cloudflare-hosted files are at or below 24 MiB, including the split Gemma 4 runtime and Map v1 runtimes.");
+console.log("Cloudflare publish hot path: generated runtime/data staging parallelized, including ONNX Runtime Web; optional knowledge-school ZIP bytes externalized to immutable commit-pinned downloads.");
+console.log("All Cloudflare-hosted files are at or below 24 MiB, including the Parakeet ONNX runtime, split Gemma 4 runtime, and Map v1 runtimes.");
