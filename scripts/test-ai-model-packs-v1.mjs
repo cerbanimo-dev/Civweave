@@ -10,6 +10,7 @@ const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
 const settings=read('public/app/settings-local-route-v323.js');
+const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
 const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js');
 const voice=read('public/app/guide-voice-runtime-v1.js');
 
@@ -44,6 +45,21 @@ test('large packs do not enter the legacy Cache Storage installer',()=>{
   assert.match(packs,/phase:'browser-download-required'/);
   assert.match(packs,/downloadMode:'browser'/);
   assert.match(packs,/browserManagedPackIds:BROWSER_MANAGED_PACK_IDS/);
+});
+
+test('Settings hands browser-managed packs to browser downloads instead of surfacing the guard as an error',()=>{
+  assert.match(settings,/browser-pack-download-v1\.js/);
+  assert.match(settings,/if\(p\.installMode\?\.\(packId\)==='browser'\)/);
+  assert.match(settings,/await browser\.queue\(packId/);
+  assert.match(settings,/browserPackHandoff:true/);
+  assert.match(settings,/legacyBrowserErrorRecovery:true/);
+  assert.match(settings,/status:'browser-ready'/);
+  assert.match(settings,/status==='browser-queued'/);
+  assert.match(browserPack,/civweave\.ai-pack\.browser-downloads\.v1/);
+  assert.match(browserPack,/status:'browser-queued'/);
+  assert.match(browserPack,/waiting-for-browser-downloads/);
+  assert.match(browserPack,/link\.click\(\)/);
+  assert.doesNotMatch(browserPack,/caches\.open\(/);
 });
 
 test('Local models view has pack actions without eagerly loading pack runtime',()=>{
