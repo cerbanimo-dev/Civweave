@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-parakeet-speech-executor-v1';
+const VERSION='1.0.1-parakeet-speech-executor-v1-mobile-startup';
 if(globalThis.CivweaveParakeetSpeechExecutorV1?.version===VERSION)return;
 
 const MODEL_ID='parakeet-tdt-0.6b-v3-int8';
@@ -23,6 +23,7 @@ let currentSession=null;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
+function emitRuntimePhase(phase,detail={}){try{dispatchEvent(new CustomEvent('civweave:guide-voice-state',{detail:{source:MODEL_ID,modelId:MODEL_ID,phase,...detail}}))}catch{}}
 function argmax(data,start=0,end=data.length){
   let index=start,best=-Infinity;
   for(let i=start;i<end;i+=1){const value=Number(data[i]);if(value>best){best=value;index=i}}
@@ -59,25 +60,38 @@ async function cachedResponse(cache,row){
   if(!response?.ok)throw Object.assign(new Error(`Cached Parakeet artifact ${row.path} is unavailable.`),{code:'LOCAL_MODEL_ARTIFACT_UNAVAILABLE',path:row.path});
   return response;
 }
-async function withCachedBlobUrl(cache,row,callback){
+async function cachedBytes(cache,row){
   const response=await cachedResponse(cache,row);
-  const blob=await response.blob();
-  const url=URL.createObjectURL(blob);
-  try{return await callback(url)}finally{URL.revokeObjectURL(url)}
+  try{return new Uint8Array(await response.arrayBuffer())}
+  catch(error){throw Object.assign(new Error(`Cached Parakeet artifact ${row.path} could not be read: ${clean(error?.message||error,500)}`),{code:'LOCAL_MODEL_ARTIFACT_READ_FAILED',path:row.path,cause:error})}
 }
 
+function supportsProxyWorker(){
+  if(typeof Worker!=='function'||typeof Blob!=='function'||typeof URL?.createObjectURL!=='function')return false;
+  let url='';
+  try{
+    url=URL.createObjectURL(new Blob(['self.close()'],{type:'text/javascript'}));
+    const worker=new Worker(url);worker.terminate();return true;
+  }catch{return false}
+  finally{if(url)try{URL.revokeObjectURL(url)}catch{}}
+}
 async function loadOrt(){
   const ort=await import(ORT_PATH);
-  if(!ort?.InferenceSession||!ort?.Tensor)throw new Error('Civweave ONNX Runtime did not expose the browser inference API.');
+  if(!ort?.InferenceSession||!ort?.Tensor)throw Object.assign(new Error('Civweave ONNX Runtime did not expose the browser inference API.'),{code:'PARAKEET_ONNX_RUNTIME_UNAVAILABLE'});
   if(ort.env?.wasm){
     ort.env.wasm.wasmPaths=ORT_WASM_ROOT;
     ort.env.wasm.numThreads=1;
-    ort.env.wasm.proxy=true;
+    ort.env.wasm.proxy=supportsProxyWorker();
   }
   return ort;
 }
-function sessionOptions(){return{executionProviders:['wasm'],graphOptimizationLevel:'all',executionMode:'sequential'}}
-async function createCachedSession(ort,cache,row){return withCachedBlobUrl(cache,row,url=>ort.InferenceSession.create(url,sessionOptions()))}
+function sessionOptions(row){return{executionProviders:['wasm'],graphOptimizationLevel:String(row?.path||'').startsWith('encoder.')?'basic':'all',executionMode:'sequential'}}
+async function createCachedSession(ort,cache,row){
+  emitRuntimePhase('loading-onnx-session',{artifact:row.path});
+  const bytes=await cachedBytes(cache,row);
+  try{return await ort.InferenceSession.create(bytes,sessionOptions(row))}
+  catch(error){throw Object.assign(new Error(`Parakeet ${row.path} session could not start: ${clean(error?.message||error,700)}`),{code:'PARAKEET_ONNX_SESSION_CREATE_FAILED',artifact:row.path,cause:error})}
+}
 
 function parseTokens(text){
   const tokens=[];
@@ -205,13 +219,15 @@ class ParakeetRuntime{
 async function loadRuntime(){
   if(runtimePromise)return runtimePromise;
   runtimePromise=(async()=>{
+    emitRuntimePhase('loading-model-pack');
     const {rows,cacheName}=await modelRows(),cache=await caches.open(cacheName),ort=await loadOrt();
     const tokensResponse=await cachedResponse(cache,rows.get('tokens.txt')),tokens=parseTokens(await tokensResponse.text());
     const encoder=await createCachedSession(ort,cache,rows.get('encoder.int8.onnx'));
     const decoder=await createCachedSession(ort,cache,rows.get('decoder.int8.onnx'));
     const joiner=await createCachedSession(ort,cache,rows.get('joiner.int8.onnx'));
+    emitRuntimePhase('model-ready');
     return new ParakeetRuntime({ort,encoder,decoder,joiner,tokens});
-  })().catch(error=>{runtimePromise=null;throw error});
+  })().catch(error=>{runtimePromise=null;emitRuntimePhase('model-error',{error:clean(error?.message||error,800),code:error?.code||'PARAKEET_RUNTIME_LOAD_FAILED',artifact:error?.artifact||''});throw error});
   return runtimePromise;
 }
 
@@ -219,28 +235,36 @@ function concatChunks(chunks,total){const output=new Float32Array(total);let off
 async function startMicrophone(payload={}){
   if(currentSession?.stop)currentSession.stop();
   if(!navigator.mediaDevices?.getUserMedia)throw Object.assign(new Error('Microphone capture is unavailable in this browser.'),{code:'LOCAL_MICROPHONE_UNAVAILABLE'});
-  const runtime=await loadRuntime(),stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false}),AudioCtx=globalThis.AudioContext||globalThis.webkitAudioContext;
+  const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false}),AudioCtx=globalThis.AudioContext||globalThis.webkitAudioContext;
   if(!AudioCtx){stream.getTracks().forEach(track=>track.stop());throw Object.assign(new Error('Web Audio capture is unavailable in this browser.'),{code:'LOCAL_AUDIO_RUNTIME_UNAVAILABLE'})}
-  const context=new AudioCtx(),source=context.createMediaStreamSource(stream),processor=context.createScriptProcessor(4096,1,1),sink=context.createGain();sink.gain.value=0;source.connect(processor);processor.connect(sink);sink.connect(context.destination);if(context.state==='suspended')await context.resume();
-  let stopped=false,speaking=false,silenceSamples=0,utterance=[],utteranceSamples=0,preRoll=[],preRollSamples=0,noiseFloor=0.003,queue=Promise.resolve();
-  const inputRate=context.sampleRate,preRollLimit=Math.round(inputRate*0.25),silenceLimit=Math.round(inputRate*0.65),maxUtterance=Math.round(inputRate*20),minUtterance=Math.round(inputRate*0.2),onTranscript=typeof payload.onTranscript==='function'?payload.onTranscript:()=>{};
-  const flush=()=>{
-    if(utteranceSamples<minUtterance){utterance=[];utteranceSamples=0;return}
-    const samples=concatChunks(utterance,utteranceSamples);utterance=[];utteranceSamples=0;
-    queue=queue.then(async()=>{if(stopped)return;const text=clean(await runtime.transcribe(samples,inputRate),12000);if(text)onTranscript({text,transcript:text,final:true,source:MODEL_ID,modelId:MODEL_ID})}).catch(error=>{try{dispatchEvent(new CustomEvent('civweave:guide-voice-state',{detail:{error:clean(error?.message||error,800),code:error?.code||'PARAKEET_LOCAL_TRANSCRIPTION_FAILED',source:MODEL_ID}}))}catch{}});
-  };
-  processor.onaudioprocess=event=>{
-    if(stopped)return;const input=event.inputBuffer.getChannelData(0),chunk=Float32Array.from(input);let sum=0;for(let i=0;i<chunk.length;i+=1)sum+=chunk[i]*chunk[i];const rms=Math.sqrt(sum/Math.max(1,chunk.length)),threshold=Math.max(0.008,noiseFloor*3.25);
-    if(!speaking)noiseFloor=Math.max(0.0008,Math.min(0.02,noiseFloor*0.985+rms*0.015));
-    preRoll.push(chunk);preRollSamples+=chunk.length;while(preRollSamples>preRollLimit&&preRoll.length>1)preRollSamples-=preRoll.shift().length;
-    if(!speaking&&rms>=threshold){speaking=true;silenceSamples=0;utterance=preRoll.splice(0);utteranceSamples=preRollSamples;preRollSamples=0}
-    if(!speaking)return;
-    utterance.push(chunk);utteranceSamples+=chunk.length;
-    if(rms<threshold*0.72)silenceSamples+=chunk.length;else silenceSamples=0;
-    if(silenceSamples>=silenceLimit||utteranceSamples>=maxUtterance){speaking=false;silenceSamples=0;flush()}
-  };
-  const session={source:MODEL_ID,modelId:MODEL_ID,stop(){if(stopped)return;stopped=true;if(speaking){speaking=false;flush()}try{processor.disconnect()}catch{}try{source.disconnect()}catch{}try{sink.disconnect()}catch{}for(const track of stream.getTracks())try{track.stop()}catch{}try{context.close()}catch{}if(currentSession===session)currentSession=null},abort(){this.stop()}};
-  currentSession=session;return session;
+  let context=null;
+  try{
+    context=new AudioCtx();
+    if(context.state==='suspended')await context.resume();
+    emitRuntimePhase('microphone-ready');
+    const runtime=await loadRuntime();
+    if(typeof context.createScriptProcessor!=='function')throw Object.assign(new Error('This browser does not expose a compatible local PCM capture node.'),{code:'LOCAL_AUDIO_PCM_CAPTURE_UNAVAILABLE'});
+    const source=context.createMediaStreamSource(stream),processor=context.createScriptProcessor(4096,1,1),sink=context.createGain();sink.gain.value=0;source.connect(processor);processor.connect(sink);sink.connect(context.destination);
+    let stopped=false,speaking=false,silenceSamples=0,utterance=[],utteranceSamples=0,preRoll=[],preRollSamples=0,noiseFloor=0.003,queue=Promise.resolve();
+    const inputRate=context.sampleRate,preRollLimit=Math.round(inputRate*0.25),silenceLimit=Math.round(inputRate*0.65),maxUtterance=Math.round(inputRate*20),minUtterance=Math.round(inputRate*0.2),onTranscript=typeof payload.onTranscript==='function'?payload.onTranscript:()=>{};
+    const flush=()=>{
+      if(utteranceSamples<minUtterance){utterance=[];utteranceSamples=0;return}
+      const samples=concatChunks(utterance,utteranceSamples);utterance=[];utteranceSamples=0;
+      queue=queue.then(async()=>{if(stopped)return;const text=clean(await runtime.transcribe(samples,inputRate),12000);if(text)onTranscript({text,transcript:text,final:true,source:MODEL_ID,modelId:MODEL_ID})}).catch(error=>{try{dispatchEvent(new CustomEvent('civweave:guide-voice-state',{detail:{error:clean(error?.message||error,800),code:error?.code||'PARAKEET_LOCAL_TRANSCRIPTION_FAILED',source:MODEL_ID}}))}catch{}});
+    };
+    processor.onaudioprocess=event=>{
+      if(stopped)return;const input=event.inputBuffer.getChannelData(0),chunk=Float32Array.from(input);let sum=0;for(let i=0;i<chunk.length;i+=1)sum+=chunk[i]*chunk[i];const rms=Math.sqrt(sum/Math.max(1,chunk.length)),threshold=Math.max(0.008,noiseFloor*3.25);
+      if(!speaking)noiseFloor=Math.max(0.0008,Math.min(0.02,noiseFloor*0.985+rms*0.015));
+      preRoll.push(chunk);preRollSamples+=chunk.length;while(preRollSamples>preRollLimit&&preRoll.length>1)preRollSamples-=preRoll.shift().length;
+      if(!speaking&&rms>=threshold){speaking=true;silenceSamples=0;utterance=preRoll.splice(0);utteranceSamples=preRollSamples;preRollSamples=0}
+      if(!speaking)return;
+      utterance.push(chunk);utteranceSamples+=chunk.length;
+      if(rms<threshold*0.72)silenceSamples+=chunk.length;else silenceSamples=0;
+      if(silenceSamples>=silenceLimit||utteranceSamples>=maxUtterance){speaking=false;silenceSamples=0;flush()}
+    };
+    const session={source:MODEL_ID,modelId:MODEL_ID,stop(){if(stopped)return;stopped=true;try{processor.disconnect()}catch{}try{source.disconnect()}catch{}try{sink.disconnect()}catch{}for(const track of stream.getTracks())try{track.stop()}catch{}try{context.close()}catch{}if(currentSession===session)currentSession=null},abort(){this.stop()}};
+    currentSession=session;emitRuntimePhase('listening');return session;
+  }catch(error){for(const track of stream.getTracks())try{track.stop()}catch{}try{context?.close?.()}catch{}throw error}
 }
 
 async function executor(payload={},context={}){
@@ -257,6 +281,6 @@ function register(){
 
 const api=Object.freeze({version:VERSION,modelId:MODEL_ID,register,loadRuntime,executor,computeFbank,decodeTokens});
 globalThis.CivweaveParakeetSpeechExecutorV1=api;
-register();
-try{dispatchEvent(new CustomEvent('civweave:parakeet-speech-executor-ready',{detail:{version:VERSION,modelId:MODEL_ID,registered:true}}))}catch{}
+const registered=register();
+try{dispatchEvent(new CustomEvent('civweave:parakeet-speech-executor-ready',{detail:{version:VERSION,modelId:MODEL_ID,registered}}))}catch{}
 })();
