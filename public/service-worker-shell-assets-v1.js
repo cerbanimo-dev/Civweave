@@ -1,12 +1,14 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v12-persistent-shell-route-safe';
+const REVISION='shell-assets-v1-repair-v13-lightweight-nav-media';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
   '/app/persistent-family-shell-v1.html',
   '/app/themed-system-nav-v178.js',
-  '/app/subsystem-avatar-state-v347.js',
+  '/app/subsystem-avatar-state-v347.js'
+];
+const OPTIONAL_NAV_MEDIA=[
   '/Civweave-weaveling-sprites.png',
   '/Living-School-moss-sprites.png',
   '/Cerbanimo-kamiya-sprites.png',
@@ -47,7 +49,9 @@ for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_CIVWEAVE_BOOT]){
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-for(const pathname of [...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
+for(const pathname of [...OPTIONAL,...OPTIONAL_NAV_MEDIA,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
+  const requiredIndex=REQUIRED_SHELL_ASSETS.indexOf(pathname);
+  if(requiredIndex>=0)REQUIRED_SHELL_ASSETS.splice(requiredIndex,1);
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
@@ -55,11 +59,12 @@ self.CivweaveShellAssetsV1=Object.freeze({
   revision:REVISION,
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
   requiredCivweaveBoot:[...REQUIRED_CIVWEAVE_BOOT],
-  optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
+  optionalNavigationMedia:[...OPTIONAL_NAV_MEDIA],
+  optional:[...OPTIONAL,...OPTIONAL_NAV_MEDIA,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
   humanChat:[...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',
   pwaStart:'/app/pwa-start-v436.html',
-  policy:'declarative-shell-assets-only-no-repair-or-message-ownership'
+  policy:'code-critical-shell-avatar-media-on-demand-no-repair-or-message-ownership'
 });
 })();
