@@ -13,7 +13,7 @@ assert.ok(chatOwner&&chatRevision,'System ownership must declare a revisioned ca
 new Function(installedEntry);new Function(installedLaunch);new Function(repairOnly);new Function(boundary);new Function(canonicalNavbar);
 for(const token of[
   "importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227')",
-  "importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v1')",
+  "importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v2')",
   "importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1')",
   "importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v2')",
   "importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity')",
@@ -21,7 +21,7 @@ for(const token of[
   "importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281')",
   "importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293')",
   "importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227')",
-  'working-campus-return-v425','install-only-pwa-v1','canonicalNavigationFinalPolicy:true','routeContractFirst:true','canonicalNavbar:\'network-first-v1\''
+  'working-campus-return-v425','install-only-pwa-v1','canonicalNavigationFinalPolicy:true','routeContractFirst:true',"canonicalNavbar:'network-first-v2-fail-closed-former-geometry-injectors'"
 ])assert(builder.includes(token),`Worker builder is missing ${token}.`);
 assert(!builder.includes('service-worker-shell-repair-v225.js'),'Worker builder can resurrect retired v225 repair ownership.');
 assert.equal(await exists('public/service-worker-shell-repair-v225.js'),false,'Retired v225 repair runtime must remain absent.');
@@ -48,13 +48,17 @@ assert(boundary.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-
 assert(boundary.includes('installedQueryIsAuthorization:false'),'Query parameters alone must never authorize the campus.');
 assert(!boundary.includes('civweave.pwa.installed-capability.v1'),'Shared boundary must not retain the unsafe durable runtime capability.');
 assert(boundary.includes(`canonicalPolicy:'five-system-first-class-routes-${chatRevision}-canonical-chat-owner'`),'Checked-in boundary must match canonical chat ownership.');
-assert(canonicalNavbar.includes("const PATH='/app/themed-system-nav-v178.js';"),'Canonical navbar worker must own the exact five-guide rail path.');
-assert(canonicalNavbar.includes("policy:'network-first-exact-canonical-navbar-never-stale-shell-first'"),'Canonical navbar worker must stay network-first.');
+assert(canonicalNavbar.includes("const NAV_PATH='/app/themed-system-nav-v178.js';"),'Canonical navbar worker must own the exact five-guide rail path.');
+assert(canonicalNavbar.includes("'/app/shared-guide-surface-v236-core-v244.js'"),'Canonical navbar worker must protect the former compact guide geometry injector from stale caches.');
+assert(canonicalNavbar.includes("'/app/platform-experience-v160.css'"),'Canonical navbar worker must protect the former platform geometry injector from stale caches.');
+assert(canonicalNavbar.includes("policy:'network-first-current-cache-only-never-retired-geometry-cache'"),'Canonical navbar worker must stay network-first and fail closed on old geometry.');
+assert(canonicalNavbar.includes('if(missing.length)throw new Error'),'Canonical navbar worker must warm every protected asset before installation succeeds.');
 assert(canonicalNavbar.includes('event.stopImmediatePropagation()'),'Canonical navbar worker must bypass generic cache-first handling.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-canonical-navbar-v1.js'),'Checked-in worker must load route authority first.');
 assert(wrapper.indexOf('/service-worker-canonical-navbar-v1.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Checked-in worker must register the canonical navbar lane before generic core handling.');
+assert(wrapper.includes('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v2'),'Checked-in worker lost the fail-closed navbar package.');
 assert(wrapper.includes('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v2'),'Checked-in worker lost declarative repair-v2 shell asset.');
 assert(wrapper.includes('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293'),'Checked-in worker lost v293 repair owner.');
 assert(!wrapper.includes('/service-worker-shell-repair-v225.js'),'Checked-in worker resurrected retired v225 repair owner.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v293.js'),'Checked-in worker must keep canonical navigation after explicit repair.');
-console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-five-guide-rail-v232-canonical-navbar',canonicalChatOwner:chatOwner,singleRouteAuthority:true,fiveGuideRailReleaseSync:true,builderRouteFirst:true,builderIntegrityOrder:true,shellRepairOwner:'v293',retiredV225Absent:true,updaterFirstEntry:true,installedLaunchNeverInstaller:true,pwaLaunchSession:true,queryAuthorization:false,repairOnly:true,cacheDistinctRepair:true,workingCampusReturn:'v425',canonicalNavbar:'network-first-v1'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-five-guide-rail-v232-canonical-navbar-v2',canonicalChatOwner:chatOwner,singleRouteAuthority:true,fiveGuideRailReleaseSync:true,builderRouteFirst:true,builderIntegrityOrder:true,shellRepairOwner:'v293',retiredV225Absent:true,updaterFirstEntry:true,installedLaunchNeverInstaller:true,pwaLaunchSession:true,queryAuthorization:false,repairOnly:true,cacheDistinctRepair:true,workingCampusReturn:'v425',canonicalNavbar:'network-first-v2-fail-closed'},null,2));
