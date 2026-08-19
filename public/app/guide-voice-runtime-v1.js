@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.1-guide-voice-runtime-v1-executor-diagnostics';
+const VERSION='1.1.2-guide-voice-runtime-v1-pack-runtime-on-demand';
 if(globalThis.CivweaveGuideVoiceV1?.version===VERSION)return;
 const SETTINGS_KEY='civweave.guide-voice.v1';
 const GUIDE=Object.freeze({weaveling:'civweave',moss:'living-school',kamiya:'cerbanimo',rook:'fellowfare',merlin:'anarchadia'});
@@ -12,10 +12,11 @@ const SPEECH_MODELS=Object.freeze([
   Object.freeze({id:'omnilingual-asr-300m-int8',label:'Omnilingual ASR 300M INT8',need:Object.freeze(['model.int8.onnx','tokens.txt'])}),
   Object.freeze({id:'omnilingual-asr-1b-int8',label:'Omnilingual ASR 1B INT8',need:Object.freeze(['model.int8.onnx','tokens.txt'])})
 ]);
+const MODEL_PACKS_PATH='/app/local-ai/model-packs-v1.js?v=1.0.1';
 const SPEECH_EXECUTOR_PATH='/app/local-ai/parakeet-speech-executor-v1.js?v=1.0.1';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
-let listening=false,recognition=null,sessionSource='',lastInterim='',speaking=false,executorLoad=null,lastSpecializedError=null;
+let listening=false,recognition=null,sessionSource='',lastInterim='',speaking=false,executorLoad=null,packRuntimeLoad=null,lastSpecializedError=null;
 
 function settings(){let value={};try{value=parse(localStorage.getItem(SETTINGS_KEY),{})}catch{}return{language:clean(value.language||navigator.language||'en-US',40)||'en-US',autoSpeak:value.autoSpeak!==false,continuous:value.continuous!==false}}
 function saveSettings(patch={}){const next={...settings(),...patch};try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(next))}catch{}return next}
@@ -38,7 +39,16 @@ function emitState(extra={}){const detail={version:VERSION,listening,source:sess
 function onTranscript(detail={}){const text=clean(detail.text||detail.transcript);if(!text)return;const final=detail.final!==false;lastInterim=final?'':text;try{dispatchEvent(new CustomEvent('civweave:guide-voice-transcript',{detail:{text,final,source:detail.source||sessionSource||'local-specialized'}}))}catch{}if(final)void routeTranscript(text,{final:true,allowBare:true,submit:true})}
 
 function specialized(){return globalThis.CivweaveLocalSpecializedAI||null}
+async function ensureModelPackRuntime(){
+  let packs=globalThis.CivweaveLocalModelPacksV1;
+  if(packs?.specializedStatus)return packs;
+  if(!packRuntimeLoad)packRuntimeLoad=import(MODEL_PACKS_PATH).then(()=>globalThis.CivweaveLocalModelPacksV1).catch(error=>{packRuntimeLoad=null;throw error});
+  packs=await packRuntimeLoad;
+  if(!packs?.specializedStatus)throw Object.assign(new Error('Civweave local model packs could not be loaded for offline speech.'),{code:'LOCAL_MODEL_PACK_RUNTIME_UNAVAILABLE'});
+  return packs;
+}
 async function ensureSpeechExecutor(){
+  await ensureModelPackRuntime();
   if(globalThis.CivweaveParakeetSpeechExecutorV1?.register){globalThis.CivweaveParakeetSpeechExecutorV1.register();return true}
   if(!executorLoad)executorLoad=import(SPEECH_EXECUTOR_PATH).then(()=>{globalThis.CivweaveParakeetSpeechExecutorV1?.register?.();return Boolean(globalThis.CivweaveParakeetSpeechExecutorV1)}).catch(error=>{executorLoad=null;throw error});
   return executorLoad;
@@ -49,6 +59,7 @@ async function startSpecialized(options={}){
   if(!runtime?.execute){lastSpecializedError=Object.assign(new Error('The Civweave specialized local-AI registry is not available.'),{code:'LOCAL_SPECIALIZED_REGISTRY_UNAVAILABLE'});return false}
   const language=options.language||settings().language;
   try{
+    await ensureModelPackRuntime();
     let result;
     try{result=await executeSpecializedSpeech(runtime,language)}
     catch(error){
@@ -132,7 +143,7 @@ addEventListener('civweave:local-ai-transcript',event=>onTranscript(event.detail
 addEventListener('civweave:avatar-direct-text',event=>{const detail=event.detail||{};if(!listening||detail.phase!=='response'||!clean(detail.text))return;void speak(detail.text,{guide:detail.system})});
 addEventListener('pagehide',()=>{stop();stopSpeaking()},{capture:false});
 
-const api=Object.freeze({version:VERSION,guides:GUIDE,systems:SYSTEMS,resolveAddress,routeTranscript,start,stop,toggle,speak,stopSpeaking,state,settings,saveSettings,onTranscript,installedSpeechModelStatus,ensureSpeechExecutor});
+const api=Object.freeze({version:VERSION,guides:GUIDE,systems:SYSTEMS,resolveAddress,routeTranscript,start,stop,toggle,speak,stopSpeaking,state,settings,saveSettings,onTranscript,installedSpeechModelStatus,ensureModelPackRuntime,ensureSpeechExecutor});
 globalThis.CivweaveGuideVoiceV1=api;
 try{dispatchEvent(new CustomEvent('civweave:guide-voice-ready',{detail:state()}))}catch{}
 })();
