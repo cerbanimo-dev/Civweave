@@ -1,6 +1,6 @@
-import baseWorker,{CivweaveGuildEdgeState} from './index.mjs';
+import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 
-export {CivweaveGuildEdgeState};
+export {CivweaveGuildEdgeState,CivweaveGuildCapacityState,CivweaveGuildNodeState};
 const RECEIPT_KIND='civweave.creation-receipt.v1';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const normalizeNodeId=value=>clean(value,120).toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
