@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.169-guide-chat-surface-v350-parakeet-output-shapes';
+const VERSION='1.0.170-guide-chat-surface-v350-parakeet-no-proxy-worker';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -9,8 +9,8 @@ const STATE_KEY='civweave.guide-chat-surface.v350';
 const RETIRED_STATE_KEY='civweave.guide-workspace.v242';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const SPECIALIZED_MODELS_PATH='/app/local-ai/specialized-model-capabilities-v1.js?v=1.0.0';
-const VOICE_RUNTIME_VERSION='1.1.5-guide-voice-runtime-v1-parakeet-output-shapes';
-const VOICE_RUNTIME_PATH='/app/guide-voice-runtime-v1.js?v=1.1.5';
+const VOICE_RUNTIME_VERSION='1.1.6-guide-voice-runtime-v1-parakeet-no-proxy-worker';
+const VOICE_RUNTIME_PATH='/app/guide-voice-runtime-v1.js?v=1.1.6';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE=Object.freeze({
   civweave:{name:'Weaveling',label:'Civweave',role:'Quest guide and central orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling about a Quest'},
