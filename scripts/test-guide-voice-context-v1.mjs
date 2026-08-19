@@ -149,7 +149,7 @@ test('Parakeet resolves decoder projection and recurrent states by shape rather 
   assert.equal(result.projectionName,'projection');
   assert.deepEqual(Array.from(result.output.dims),[1,640,1]);
   assert.equal(result.nextStates.length,2);
-  assert.deepEqual(result.nextStates.map(state=>Array.from(state.dims)),[[2,1,640],[2,1,640]]);
+  assert.deepEqual(Array.from(result.nextStates,state=>Array.from(state.dims)),[[2,1,640],[2,1,640]]);
 });
 
 test('Parakeet activates microphone audio before the cold ONNX model load',()=>{
