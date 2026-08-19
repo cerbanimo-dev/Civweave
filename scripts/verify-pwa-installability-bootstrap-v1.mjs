@@ -54,8 +54,11 @@ for(const asset of [
 ]){
   assert.ok(shellAssets.includes(asset),`${asset} must remain available to the shell`);
 }
+const requiredNavBlock=shellAssets.match(/const REQUIRED_FAMILY_NAV=\[[\s\S]*?\];/)?.[0]||'';
+assert.ok(requiredNavBlock,'required navigation block must exist');
 assert.ok(shellAssets.includes('const OPTIONAL_NAV_MEDIA=['),'large avatar atlases must be on-demand rather than install-critical');
-assert.ok(!/const REQUIRED_FAMILY_NAV=\[[\s\S]*Civweave-weaveling-sprites\.png/.test(shellAssets),'sprite atlases must not block service-worker installation');
+assert.ok(!requiredNavBlock.includes('Civweave-weaveling-sprites.png'),'sprite atlases must not block service-worker installation');
+assert.ok(!requiredNavBlock.includes('weaveling-face-v255.webp'),'avatar face fallbacks must not block service-worker installation');
 
 // The PWA bridge is the only effective owner of Chromium's deferred prompt.
 // install-v130 still contains a legacy listener for compatibility, so v250 must intercept
