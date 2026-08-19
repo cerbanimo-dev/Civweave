@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-browser-pack-pwa-import-v1-explicit-files';
+const VERSION='1.1.1-browser-pack-pwa-import-v1-explicit-files';
 const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.2.0-explicit-files';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
@@ -94,9 +94,9 @@ function syncCards(){
 function scheduleSync(){if(syncQueued)return;syncQueued=true;queueMicrotask(syncCards)}
 function beginQueue(packId,control){
   control.disabled=true;status('Preparing the browser-managed AI pack…');
-  ensureBridge().then(current=>current.queue(packId,{onProgress:progress=>{if(progress?.message)status(progress.message)}})).then(result=>{
-    const receipt=result.receipt||bridge()?.pending(packId),counts=bridge()?.receiptCounts?.(receipt);
-    status(`${result.pack.label}: started ${counts?.started||1}/${counts?.expected||receipt?.large?.length||1} large browser downloads. Use Download next for the remaining files; Civweave can be closed while each browser download runs.`);scheduleSync()
+  ensureBridge().then(current=>current.prepare(packId,{onProgress:progress=>{if(progress?.message)status(progress.message)}})).then(result=>{
+    const receipt=result.receipt,counts=bridge()?.receiptCounts?.(receipt);
+    status(`${result.pack.label}: ${counts?.expected||receipt?.large?.length||0} large browser downloads are required. Use Download next to start each file explicitly so Android does not drop background download requests.`);scheduleSync()
   }).catch(error=>status(String(error?.message||error),true)).finally(()=>{control.disabled=false;scheduleSync()})
 }
 function onClick(event){
