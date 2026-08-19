@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-guide-forward-failure-hardening-v1-router-stable';
+const VERSION='1.2.1-guide-forward-failure-hardening-v1-local-provider-pin';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const SERVER_ROUTER='/app/server-ai-router-v301.js?v=1.0.117-guild-only-handoff';
+const LOCAL_ROUTES=new Set(['downloaded-local','device-local']);
 const REPAIRABLE_PROVIDERS=new Set(['deterministic','deterministic-local','local-contract','guild-handoff-ready']);
 let serverRouterPromise=null,patchedAssistant=null,clickBound=false,threadBound=false,submitBound=false,installTimer=0;
 const repairing=new Set();
@@ -30,6 +31,7 @@ function currentInteractiveProvider(){
   catch{}
   try{const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{}),legacy=parse(localStorage.getItem('civweave.universal-ai.v127'),{}),active=profiles?.interactive||legacy;return clean(active?.provider||active?.route||'server-auto',80).toLowerCase()||'server-auto'}catch{return'server-auto'}
 }
+function localInteractiveConfigured(){return LOCAL_ROUTES.has(currentInteractiveProvider())}
 function installDeterministicCompatibility(){
   if(globalThis.CivweaveDeterministicModeV175){emit('civweave:legacy-deterministic-mode-present',{provider:currentInteractiveProvider()});return false}
   const route=(text,system='civweave')=>({system:validSystem(system),mode:guideMode(validSystem(system)),confidence:0,source:'deterministic-retired-cloud-fallback',evidence:[]});
@@ -62,6 +64,10 @@ function unavailableResult(args,reason,error,prior=null){
   const system=validSystem(args?.systemId),message=clean(error?.message||error||'No cloud model route completed the request.',900);
   return{...(prior&&typeof prior==='object'?prior:{}),response:{answer:`${guideName(system)} could not reach an available Guild or Cloudflare AI service for this request. Civweave did not substitute a deterministic answer.`,choice:{mode:guideMode(system),system,room:'',nextAction:'Retry when a cloud route is available, or check Guild and AI capacity in Settings.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'server-auto',provider:'server-auto-unavailable',model:'',usage:null,responseRouting:prior?.responseRouting||null,fallbackFrom:{provider:clean(prior?.provider||prior?.requestedProvider,120)||'primary-route',reason},providerRouteFailure:{code:error?.code||'CLOUD_FALLBACK_UNAVAILABLE',message}}
 }
+function localUnavailableResult(args,reason,error=null,prior=null){
+  const system=validSystem(args?.systemId),provider=currentInteractiveProvider()||'downloaded-local',message=clean(error?.message||error||prior?.fallbackFrom?.reason||reason||'Selected local model could not complete the request.',900);
+  return{...(prior&&typeof prior==='object'?prior:{}),response:{answer:`${guideName(system)} could not finish this request with the selected local AI model. Civweave kept the request on this device and did not contact a Guild or Cloudflare AI.`,choice:{mode:guideMode(system),system,room:'',nextAction:'Retry locally, choose another local model, or change the AI route in Settings if you want network processing.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:provider,provider:'local-ai-unavailable',model:clean(prior?.model,180),usage:prior?.usage||null,responseRouting:prior?.responseRouting||null,fallbackFrom:{provider,reason:message},providerRouteFailure:{code:error?.code||'LOCAL_AI_UNAVAILABLE',message},localProviderPinned:true}
+}
 async function cloudResult(args={},reason='primary-route-unavailable',prior=null){
   const system=validSystem(args.systemId),text=clean(args.text,12000);if(!text)return unavailableResult(args,reason,new Error('The request text was empty.'),prior);
   publishCloudRoute(prior?.responseRouting||null,reason);
@@ -80,16 +86,24 @@ function patchAssistant(){
   if(assistant.respond.__civweaveCloudFallbackV2){patchedAssistant=assistant;return true}
   const previousFn=assistant.respond,legacyDeterministicWrapper=Boolean(previousFn.__deterministicModeV175&&!previousFn.__civweaveCloudFallbackV1),previous=previousFn.bind(assistant);
   const respond=async args=>{
-    const request=args||{};
-    if(legacyDeterministicWrapper&&['server-auto','hosted'].includes(currentInteractiveProvider()))return cloudResult(request,'legacy-deterministic-wrapper-bypassed',null);
-    try{const result=await previous(request);return resultNeedsCloud(result)?cloudResult(request,'non-generative-result-blocked',result):result}catch(error){return cloudResult(request,`primary-route-error:${clean(error?.message||error,300)}`,null)}
+    const request=args||{},provider=currentInteractiveProvider(),localPinned=LOCAL_ROUTES.has(provider);
+    if(legacyDeterministicWrapper&&['server-auto','hosted'].includes(provider))return cloudResult(request,'legacy-deterministic-wrapper-bypassed',null);
+    try{
+      const result=await previous(request);
+      if(localPinned)return resultNeedsCloud(result)?localUnavailableResult(request,'local-provider-result-rejected',null,result):result;
+      return resultNeedsCloud(result)?cloudResult(request,'non-generative-result-blocked',result):result;
+    }catch(error){
+      if(localPinned)return localUnavailableResult(request,'local-provider-error',error,null);
+      return cloudResult(request,`primary-route-error:${clean(error?.message||error,300)}`,null);
+    }
   };
   for(const marker of ['__civweaveCloudFallbackV1','__civweaveCloudFallbackV2','__deterministicModeV175'])try{Object.defineProperty(respond,marker,{value:true,configurable:false})}catch{}
-  globalThis.CivweaveAssistantV141={...assistant,respond,__civweaveCloudFallbackV1:true,__civweaveCloudFallbackV2:true,__deterministicModeV175:true,cloudFallbackVersion:VERSION,deterministicAnswerFallback:false,automaticCloudFallback:true};
-  patchedAssistant=globalThis.CivweaveAssistantV141;emit('civweave:guide-cloud-fallback-installed',{legacyDeterministicWrapper});return true
+  globalThis.CivweaveAssistantV141={...assistant,respond,__civweaveCloudFallbackV1:true,__civweaveCloudFallbackV2:true,__deterministicModeV175:true,cloudFallbackVersion:VERSION,deterministicAnswerFallback:false,automaticCloudFallback:true,localProviderPinned:true};
+  patchedAssistant=globalThis.CivweaveAssistantV141;emit('civweave:guide-cloud-fallback-installed',{legacyDeterministicWrapper,localProviderPinned:localInteractiveConfigured()});return true
 }
 
 async function repairDeterministic(system,index){
+  if(localInteractiveConfigured())return false;
   system=validSystem(system);const key=`${system}:${index}`;if(repairing.has(key))return false;
   const api=realmApi(),thread=api?.readThread?.(system),row=thread?.messages?.[index];if(!repairableRow(row))return false;
   const requestText=precedingUser(thread.messages,index);if(!requestText)return false;repairing.add(key);
@@ -99,7 +113,7 @@ async function repairDeterministic(system,index){
     writeRow(system,index,{pending:false,text:clean(result?.response?.answer,120000),provider:clean(result?.provider,120)||'server-auto-unavailable',model:clean(result?.model,180),approvalGate:null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,forwardFailureBoundary:VERSION});return result?.provider!=='server-auto-unavailable'
   }finally{repairing.delete(key)}
 }
-function repairThread(system){system=validSystem(system);const thread=realmApi()?.readThread?.(system);if(!Array.isArray(thread?.messages))return false;thread.messages.forEach((row,index)=>{if(repairableRow(row))void repairDeterministic(system,index)});return true}
+function repairThread(system){if(localInteractiveConfigured())return false;system=validSystem(system);const thread=realmApi()?.readThread?.(system);if(!Array.isArray(thread?.messages))return false;thread.messages.forEach((row,index)=>{if(repairableRow(row))void repairDeterministic(system,index)});return true}
 function rowForButton(button){const root=document.getElementById('cw-persistent-guide-chat-v215'),article=button?.closest?.('article[data-message-role="assistant"]');if(!root||!article)return null;const system=validSystem(surface()?.activeWindow?.()),thread=realmApi()?.readThread?.(system);if(!Array.isArray(thread?.messages))return null;const articles=[...root.querySelectorAll('article[data-message-role="assistant"]')],position=articles.indexOf(article);if(position<0)return null;const indices=thread.messages.map((row,index)=>row?.role==='assistant'?index:-1).filter(index=>index>=0),index=indices[position];return Number.isInteger(index)?{system,thread,index,row:thread.messages[index]}:null}
 async function sendGuildOnce(button){const located=rowForButton(button),gate=located?.row?.approvalGate;if(!located||gate?.kind!=='guild-ai-request')return false;button.disabled=true;try{return await repairDeterministic(located.system,located.index)}finally{button.disabled=false}}
 function bindClickGuard(){if(clickBound)return;clickBound=true;document.addEventListener('click',event=>{const button=event.target?.closest?.('.cw-guild-ai-send');if(!button)return;event.preventDefault();event.stopImmediatePropagation();void sendGuildOnce(button)},true)}
@@ -110,5 +124,5 @@ installDeterministicCompatibility();
 for(const name of ['civweave:assistant-runtime-ready','civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:response-router-installed','civweave:family-ai-ready'])addEventListener(name,()=>queueMicrotask(install));
 addEventListener('pageshow',()=>queueMicrotask(install));
 install();let attempts=0;installTimer=setInterval(()=>{attempts+=1;install();if(attempts>160)clearInterval(installTimer)},250);addEventListener('pagehide',()=>clearInterval(installTimer),{once:true});
-globalThis.CivweaveGuideForwardFailureHardeningV1=Object.freeze({version:VERSION,install,deterministicRow,repairThread,repairDeterministic,sendGuildOnce,cloudResult,currentInteractiveProvider,installDeterministicCompatibility,automaticCloudFallback:true,deterministicTerminalVisible:false,deterministicAssistantPatchRetired:true,guildRequestDeduplicated:true,serverAutoRaceRepair:true});
+globalThis.CivweaveGuideForwardFailureHardeningV1=Object.freeze({version:VERSION,install,deterministicRow,repairThread,repairDeterministic,sendGuildOnce,cloudResult,localUnavailableResult,currentInteractiveProvider,localInteractiveConfigured,installDeterministicCompatibility,automaticCloudFallback:true,deterministicTerminalVisible:false,deterministicAssistantPatchRetired:true,guildRequestDeduplicated:true,serverAutoRaceRepair:true,localProviderPinned:true});
 })();
