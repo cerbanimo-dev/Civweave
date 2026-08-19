@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v15-browser-pack-pwa-import';
+const REVISION='shell-assets-v1-repair-v16-browser-pack-pwa-import-retry';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
