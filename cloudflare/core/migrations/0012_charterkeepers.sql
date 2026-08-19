@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS money_edge_charters (
   nominee_label TEXT,
   proposed_guild_name TEXT NOT NULL,
   proposed_node_id TEXT,
-  child_node_id TEXT UNIQUE,
+  child_node_id TEXT,
   child_operator_id TEXT,
   status TEXT NOT NULL DEFAULT 'nominated' CHECK(status IN ('nominated','training','ready-for-guild','handoff-pending','active','ended')),
   agreement_status TEXT NOT NULL DEFAULT 'pending-signature' CHECK(agreement_status IN ('pending-signature','accepted','revoked')),
@@ -31,6 +31,10 @@ ON money_edge_charters(charterkeeper_node_id,status,created_at DESC);
 
 CREATE INDEX IF NOT EXISTS money_edge_charters_nominee_idx
 ON money_edge_charters(nominee_user_id,status,created_at DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS money_edge_charters_one_active_child_idx
+ON money_edge_charters(child_node_id)
+WHERE child_node_id IS NOT NULL AND status='active';
 
 CREATE TABLE IF NOT EXISTS money_edge_charter_training (
   charter_id TEXT NOT NULL,
