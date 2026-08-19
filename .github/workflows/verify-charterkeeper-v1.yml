@@ -13,6 +13,7 @@ on:
       - cloudflare/core/src/territory-stewardship-with-charterkeepers-v1.mjs
       - cloudflare/core/src/money-edge-with-memberships.mjs
       - cloudflare/core/src/origin-entry.mjs
+      - cloudflare/node-cloud/src/server-ai-entry-v6.mjs
       - cloudflare/node-cloud/src/staging-entry-v1.mjs
       - lib/node-ai-live-commerce-v1.mjs
       - public/app/node-ai-charterkeeper-v1.js
@@ -29,6 +30,7 @@ on:
       - cloudflare/core/src/territory-stewardship-with-charterkeepers-v1.mjs
       - cloudflare/core/src/money-edge-with-memberships.mjs
       - cloudflare/core/src/origin-entry.mjs
+      - cloudflare/node-cloud/src/server-ai-entry-v6.mjs
       - cloudflare/node-cloud/src/staging-entry-v1.mjs
       - lib/node-ai-live-commerce-v1.mjs
       - public/app/node-ai-charterkeeper-v1.js
@@ -56,6 +58,7 @@ jobs:
           node --check cloudflare/core/src/territory-stewardship-with-charterkeepers-v1.mjs
           node --check cloudflare/core/src/money-edge-with-memberships.mjs
           node --check cloudflare/core/src/origin-entry.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
           node --check cloudflare/node-cloud/src/staging-entry-v1.mjs
           node --check lib/node-ai-live-commerce-v1.mjs
           node --check public/app/node-ai-charterkeeper-v1.js
