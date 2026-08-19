@@ -61,7 +61,7 @@ test('fresh speech models remain reusable outside voice chat',()=>{
 
 test('guide voice distinguishes installed ASR weights from a missing executable runtime',()=>{
   assert.match(voice,/installedSpeechModelStatus/);
-  assert.match(voice,/CIVWEAVE_SPEECH_EXECUTOR_UNAVAILABLE/);
-  assert.match(voice,/speech model is installed, but this build has no executable local speech-recognition runtime/i);
+  assert.match(voice,/CIVWEAVE_SPEECH_EXECUTOR_START_FAILED/);
+  assert.match(voice,/speech model is installed, but (?:its local speech session could not start|no compatible local speech-recognition session could start)/i);
   assert.match(voice,/No offline speech-recognition model or browser language pack is installed/);
 });
