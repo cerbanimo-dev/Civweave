@@ -7,6 +7,7 @@
   "vocal_policy": {
     "require_vocals": true,
     "reject_instrumental_only": true,
+    "automatic_discovery_publish": false,
     "minimum_teeth_score": 2,
     "preferred_terms": [
       "freedom", "share", "commons", "solidarity", "justice", "truth", "rights",
@@ -19,7 +20,8 @@
     {
       "id": "civweave",
       "name": "Civweave",
-      "queries": ["freedom share vocals", "creative commons vocals", "community freedom vocals", "open source vocals"],
+      "queries": [],
+      "scan_queries": ["freedom share vocals", "creative commons vocals", "community freedom vocals", "open source vocals"],
       "curated_ccmixter": [
         {"id": "28143", "title": "Mind Map This", "artist": "texasradiofish", "teeth_score": 5, "explicit": true, "themes": ["commons", "truth", "freedom", "creative rights"]},
         {"id": "28236", "title": "Freedom in my voice", "artist": "Carosone", "teeth_score": 5, "explicit": false, "themes": ["creative freedom", "reuse", "open source"]},
@@ -31,7 +33,8 @@
     {
       "id": "living-school",
       "name": "Living School",
-      "queries": ["truth choice vocals", "learn freedom vocals", "change justice vocals", "education community vocals"],
+      "queries": [],
+      "scan_queries": ["truth choice vocals", "learn freedom vocals", "change justice vocals", "education community vocals"],
       "curated_ccmixter": [
         {"id": "66038", "title": "Let the Walls Come Down", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["inclusion", "anti-hate", "belonging"]},
         {"id": "63518", "title": "Sackjo22_Indelible Choices Choices May Change II", "artist": "MalreDeszik", "teeth_score": 4, "explicit": false, "themes": ["choice", "consequence", "agency", "reflection"]},
@@ -43,7 +46,8 @@
     {
       "id": "cerbanimo",
       "name": "Cerbanimo",
-      "queries": ["labor freedom vocals", "work autonomy vocals", "rise change rock vocals", "technology power vocals"],
+      "queries": [],
+      "scan_queries": ["labor freedom vocals", "work autonomy vocals", "rise change rock vocals", "technology power vocals"],
       "curated_ccmixter": [
         {"id": "55625", "title": "This Wall", "artist": "Admiral Bob", "teeth_score": 5, "explicit": false, "themes": ["autonomy", "labor", "voice", "self-direction"]},
         {"id": "57573", "title": "Singularity", "artist": "Stefan Kartenberg", "teeth_score": 5, "explicit": false, "themes": ["automation", "corporate power", "humanity", "technology"]},
@@ -55,7 +59,8 @@
     {
       "id": "fellowfare",
       "name": "FellowFare",
-      "queries": ["mutual aid vocals", "community sharing vocals", "dignity work vocals", "sustainability consumption vocals"],
+      "queries": [],
+      "scan_queries": ["mutual aid vocals", "community sharing vocals", "dignity work vocals", "sustainability consumption vocals"],
       "curated_ccmixter": [
         {"id": "28057", "title": "Freedom in my Voice (the cover)", "artist": "ditto ditto", "teeth_score": 5, "explicit": false, "themes": ["sharing", "creative rights", "community"]},
         {"id": "61065", "title": "Climate Change The Dirty Water Remix", "artist": "J.Lang", "teeth_score": 5, "explicit": false, "themes": ["sustainability", "truth", "accountability", "future"]},
@@ -67,7 +72,8 @@
     {
       "id": "anarchadia",
       "name": "Anarchadia",
-      "queries": ["justice resistance vocals", "freedom power vocals", "solidarity rise vocals", "oppression truth vocals"],
+      "queries": [],
+      "scan_queries": ["justice resistance vocals", "freedom power vocals", "solidarity rise vocals", "oppression truth vocals"],
       "curated_ccmixter": [
         {"id": "28143", "title": "Mind Map This", "artist": "texasradiofish", "teeth_score": 5, "explicit": true, "themes": ["commons", "truth", "freedom", "creative rights"]},
         {"id": "28239", "title": "yours and mine", "artist": "Tomas PhUsIoN", "teeth_score": 5, "explicit": true, "themes": ["commons", "ownership", "collective life"]},
