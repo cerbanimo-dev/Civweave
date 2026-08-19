@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.4-parakeet-speech-executor-v1-output-shape-routing';
+const VERSION='1.0.5-parakeet-speech-executor-v1-no-proxy-worker';
 if(globalThis.CivweaveParakeetSpeechExecutorV1?.version===VERSION)return;
 
 const MODEL_ID='parakeet-tdt-0.6b-v3-int8';
@@ -75,22 +75,14 @@ async function cachedBytes(cache,row){
   catch(error){throw Object.assign(new Error(`Cached Parakeet artifact ${row.path} could not be read: ${clean(error?.message||error,500)}`),{code:'LOCAL_MODEL_ARTIFACT_READ_FAILED',path:row.path,cause:error})}
 }
 
-function supportsProxyWorker(){
-  if(typeof Worker!=='function'||typeof Blob!=='function'||typeof URL?.createObjectURL!=='function')return false;
-  let url='';
-  try{
-    url=URL.createObjectURL(new Blob(['self.close()'],{type:'text/javascript'}));
-    const worker=new Worker(url);worker.terminate();return true;
-  }catch{return false}
-  finally{if(url)try{URL.revokeObjectURL(url)}catch{}}
-}
 async function loadOrt(){
   const ort=await import(ORT_PATH);
   if(!ort?.InferenceSession||!ort?.Tensor)throw Object.assign(new Error('Civweave ONNX Runtime did not expose the browser inference API.'),{code:'PARAKEET_ONNX_RUNTIME_UNAVAILABLE'});
   if(ort.env?.wasm){
     ort.env.wasm.wasmPaths=ORT_WASM_ROOT;
     ort.env.wasm.numThreads=1;
-    ort.env.wasm.proxy=supportsProxyWorker();
+    ort.env.wasm.proxy=false;
+    emitRuntimePhase('onnx-runtime-config',{proxy:false,numThreads:1});
   }
   return ort;
 }
