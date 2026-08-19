@@ -37,7 +37,7 @@
         {"id": "63518", "title": "Sackjo22_Indelible Choices Choices May Change II", "artist": "MalreDeszik", "teeth_score": 4, "explicit": false, "themes": ["choice", "consequence", "agency", "reflection"]},
         {"id": "62674", "title": "Rosa's Story", "artist": "Radioontheshelf", "teeth_score": 4, "explicit": false, "themes": ["truth", "history", "justice", "the vulnerable"]},
         {"id": "61038", "title": "Rise Up!", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["action", "change", "resilience"]},
-        {"id": "24847", "title": "Harmony", "artist": "wellman", "teeth_score": 5, "explicit": false, "themes": ["sustainability", "greenwashing", "consumption", "change"]}
+        {"id": "61065", "title": "Climate Change The Dirty Water Remix", "artist": "J.Lang", "teeth_score": 5, "explicit": false, "themes": ["climate", "truth", "accountability", "future"]}
       ]
     },
     {
@@ -58,7 +58,7 @@
       "queries": ["mutual aid vocals", "community sharing vocals", "dignity work vocals", "sustainability consumption vocals"],
       "curated_ccmixter": [
         {"id": "28057", "title": "Freedom in my Voice (the cover)", "artist": "ditto ditto", "teeth_score": 5, "explicit": false, "themes": ["sharing", "creative rights", "community"]},
-        {"id": "24847", "title": "Harmony", "artist": "wellman", "teeth_score": 5, "explicit": false, "themes": ["sustainability", "greenwashing", "consumption", "change"]},
+        {"id": "61065", "title": "Climate Change The Dirty Water Remix", "artist": "J.Lang", "teeth_score": 5, "explicit": false, "themes": ["sustainability", "truth", "accountability", "future"]},
         {"id": "37764", "title": "Like A Sycamore", "artist": "Madam Snowflake", "teeth_score": 3, "explicit": false, "themes": ["recovery", "ecology", "gratitude", "care"]},
         {"id": "66038", "title": "Let the Walls Come Down", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["inclusion", "anti-hate", "belonging"]},
         {"id": "55625", "title": "This Wall", "artist": "Admiral Bob", "teeth_score": 5, "explicit": false, "themes": ["autonomy", "labor", "voice", "self-direction"]}
