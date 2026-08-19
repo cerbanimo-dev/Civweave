@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='1.0.7-working-campus-home-relocation-v441-browser-pack-progress';
+const VERSION='1.0.8-working-campus-home-relocation-v441-purpose-icons';
 const STYLE_ID='cw-working-campus-home-relocation-v441-style';
 const NAV_ACTIONS_ID='cw-civweave-primary-actions-v441';
 const APP_TAB='app-device';
+const MAP_SRC='/app/assets/map-symbol-v1.png';
 const BROWSER_PACK_IMPORT_SRC='/app/local-ai/browser-pack-pwa-import-v1.js?v=1.2.0-progress-and-missing-file';
 if(globalThis.CivweaveHomeRelocationV441?.version===VERSION)return;
 const isCivweave=()=>String(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||'').toLowerCase()==='civweave';
@@ -32,6 +33,7 @@ html.cw-themed-system-nav-active[data-cw-themed-current="civweave"] body{padding
 #cw-themed-system-nav #${NAV_ACTIONS_ID} button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:96px;min-height:38px;padding:7px 12px;border:1px solid #f2d88755;border-radius:10px;background:#ffffff0c;color:#fff4ce;font:850 13px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #cw-themed-system-nav #${NAV_ACTIONS_ID} button:hover,#cw-themed-system-nav #${NAV_ACTIONS_ID} button:focus-visible{border-color:#8af5d299;background:#8af5d217;outline:none}
 #cw-themed-system-nav #${NAV_ACTIONS_ID} .cw-v441-icon{font-size:17px;color:#f3d57c}
+#cw-themed-system-nav #${NAV_ACTIONS_ID} .cw-v441-map-icon{display:block;width:1.55rem;height:1.55rem;object-fit:contain;flex:0 0 1.55rem}
 #cw-settings-v320 .cw-settings-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 #cw-settings-v320 .cw-v441-app-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #cw-settings-v320 .cw-v441-app-actions button{min-height:62px;text-align:left}
@@ -56,9 +58,9 @@ function installNavActions(){
   const nav=q('#cw-themed-system-nav');if(!nav)return false;
   if(q(`#${NAV_ACTIONS_ID}`,nav))return true;
   const actions=document.createElement('div');actions.id=NAV_ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Civweave destinations');
-  actions.innerHTML='<button type="button" data-cw-v441-nav="guilds" aria-label="Open Guilds"><span class="cw-v441-icon" aria-hidden="true">✥</span><span>Guilds</span></button><button type="button" data-cw-v441-nav="map" aria-label="Open Guild Map"><span class="cw-v441-icon" aria-hidden="true">⌖</span><span>Map</span></button>';
+  actions.innerHTML=`<button type="button" data-cw-v441-nav="guilds" data-cw-civweave-nav="guilds" aria-label="Open Guilds"><span class="cw-v441-icon" aria-hidden="true">✥</span><span>Guilds</span></button><button type="button" data-cw-v441-nav="map" data-cw-civweave-nav="map" aria-label="Open Map"><img class="cw-v441-map-icon" src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button>`;
   actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-v441-nav]')?.dataset.cwV441Nav;if(action==='guilds')openGuilds();if(action==='map')openMap()});
-  nav.append(actions);nav.dataset.civweavePrimaryActions='guilds-map-v441';return true;
+  nav.append(actions);nav.dataset.civweavePrimaryActions='guilds-map-v441-purpose-icons';return true;
 }
 
 function selectAppTab(layer){
