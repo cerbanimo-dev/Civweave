@@ -1,11 +1,12 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v309-lifecycle-deferred';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v310-hard-local-guild-capacity';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/settings-gateway-v317.js',
   '/app/family-ai-loader-v105.js',
+  '/app/server-ai-router-v301.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
   '/app/experience-orchestrator-v232.js',
@@ -17,6 +18,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
 const CW_LOCAL_AI_CRITICAL = [
   '/app/settings-gateway-v317.js',
   '/app/family-ai-loader-v105.js',
+  '/app/server-ai-router-v301.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
   '/app/experience-orchestrator-v232.js',
@@ -87,7 +89,7 @@ async function cwLocalAICleanup() {
 }
 
 // Local AI is explicitly on-demand. Do not make service-worker installation or
-// activation depend on downloading 22 AI/settings modules or scanning old AI
+// activation depend on downloading AI/settings modules or scanning old AI
 // caches. Those operations previously held Android PWA updates in "installing"
 // long enough to strand cold launch. The fetch gate below still keeps every
 // module coherent and caches it the first time the capability is actually used.
