@@ -1,32 +1,79 @@
 {
   "schema": "civweave.open-music-harvest-config.v1",
   "accepted_licenses": ["PUBLIC-DOMAIN", "CC0", "CC-BY", "CC-BY-SA"],
+  "providers": ["ccmixter"],
   "daily_batch_per_playlist": 20,
+  "vocal_policy": {
+    "require_vocals": true,
+    "reject_instrumental_only": true,
+    "minimum_teeth_score": 2,
+    "preferred_terms": [
+      "freedom", "share", "commons", "solidarity", "justice", "truth", "rights",
+      "labor", "work", "choice", "dignity", "community", "mutual", "change",
+      "resistance", "rise", "oppression", "sustainability", "greenwashing", "hate",
+      "open source", "creative commons", "people", "power"
+    ]
+  },
   "playlists": [
     {
       "id": "civweave",
       "name": "Civweave",
-      "queries": ["indie electronic experimental", "art pop electronic", "ambient electronic hopeful", "post rock electronic"]
+      "queries": ["freedom share vocals", "creative commons vocals", "community freedom vocals", "open source vocals"],
+      "curated_ccmixter": [
+        {"id": "28143", "title": "Mind Map This", "artist": "texasradiofish", "teeth_score": 5, "explicit": true, "themes": ["commons", "truth", "freedom", "creative rights"]},
+        {"id": "28236", "title": "Freedom in my voice", "artist": "Carosone", "teeth_score": 5, "explicit": false, "themes": ["creative freedom", "reuse", "open source"]},
+        {"id": "28039", "title": "Freedom in our Voices", "artist": "ditto ditto", "teeth_score": 5, "explicit": false, "themes": ["creative freedom", "community", "sharing"]},
+        {"id": "28448", "title": "LISA CRISTI", "artist": "Bocrew", "teeth_score": 4, "explicit": false, "themes": ["freedom", "voice", "hip hop"]},
+        {"id": "28239", "title": "yours and mine", "artist": "Tomas PhUsIoN", "teeth_score": 5, "explicit": true, "themes": ["commons", "ownership", "collective life"]}
+      ]
     },
     {
       "id": "living-school",
       "name": "Living School",
-      "queries": ["ambient acoustic instrumental", "lofi jazz instrumental", "folk experimental", "calm electronic study"]
+      "queries": ["truth choice vocals", "learn freedom vocals", "change justice vocals", "education community vocals"],
+      "curated_ccmixter": [
+        {"id": "66038", "title": "Let the Walls Come Down", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["inclusion", "anti-hate", "belonging"]},
+        {"id": "63518", "title": "Sackjo22_Indelible Choices Choices May Change II", "artist": "MalreDeszik", "teeth_score": 4, "explicit": false, "themes": ["choice", "consequence", "agency", "reflection"]},
+        {"id": "62674", "title": "Rosa's Story", "artist": "Radioontheshelf", "teeth_score": 4, "explicit": false, "themes": ["truth", "history", "justice", "the vulnerable"]},
+        {"id": "61038", "title": "Rise Up!", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["action", "change", "resilience"]},
+        {"id": "24847", "title": "Harmony", "artist": "wellman", "teeth_score": 5, "explicit": false, "themes": ["sustainability", "greenwashing", "consumption", "change"]}
+      ]
     },
     {
       "id": "cerbanimo",
       "name": "Cerbanimo",
-      "queries": ["synthwave industrial electronic", "future funk electronic", "electro rock energetic", "cyberpunk electronic instrumental"]
+      "queries": ["labor freedom vocals", "work autonomy vocals", "rise change rock vocals", "technology power vocals"],
+      "curated_ccmixter": [
+        {"id": "55625", "title": "This Wall", "artist": "Admiral Bob", "teeth_score": 5, "explicit": false, "themes": ["autonomy", "labor", "voice", "self-direction"]},
+        {"id": "57573", "title": "Singularity", "artist": "Stefan Kartenberg", "teeth_score": 5, "explicit": false, "themes": ["automation", "corporate power", "humanity", "technology"]},
+        {"id": "61038", "title": "Rise Up!", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["action", "change", "resilience"]},
+        {"id": "64609", "title": "Things Change", "artist": "SackJo22", "teeth_score": 3, "explicit": false, "themes": ["change", "adaptation", "resilience"]},
+        {"id": "59567", "title": "Networking Not Working", "artist": "Radioontheshelf", "teeth_score": 4, "explicit": false, "themes": ["systems", "consequences", "social fracture"]}
+      ]
     },
     {
       "id": "fellowfare",
       "name": "FellowFare",
-      "queries": ["funk soul groove", "global groove instrumental", "folk funk", "jazz funk upbeat"]
+      "queries": ["mutual aid vocals", "community sharing vocals", "dignity work vocals", "sustainability consumption vocals"],
+      "curated_ccmixter": [
+        {"id": "28057", "title": "Freedom in my Voice (the cover)", "artist": "ditto ditto", "teeth_score": 5, "explicit": false, "themes": ["sharing", "creative rights", "community"]},
+        {"id": "24847", "title": "Harmony", "artist": "wellman", "teeth_score": 5, "explicit": false, "themes": ["sustainability", "greenwashing", "consumption", "change"]},
+        {"id": "37764", "title": "Like A Sycamore", "artist": "Madam Snowflake", "teeth_score": 3, "explicit": false, "themes": ["recovery", "ecology", "gratitude", "care"]},
+        {"id": "66038", "title": "Let the Walls Come Down", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["inclusion", "anti-hate", "belonging"]},
+        {"id": "55625", "title": "This Wall", "artist": "Admiral Bob", "teeth_score": 5, "explicit": false, "themes": ["autonomy", "labor", "voice", "self-direction"]}
+      ]
     },
     {
       "id": "anarchadia",
       "name": "Anarchadia",
-      "queries": ["punk experimental", "riot punk", "noise rock", "post punk electronic"]
+      "queries": ["justice resistance vocals", "freedom power vocals", "solidarity rise vocals", "oppression truth vocals"],
+      "curated_ccmixter": [
+        {"id": "28143", "title": "Mind Map This", "artist": "texasradiofish", "teeth_score": 5, "explicit": true, "themes": ["commons", "truth", "freedom", "creative rights"]},
+        {"id": "28239", "title": "yours and mine", "artist": "Tomas PhUsIoN", "teeth_score": 5, "explicit": true, "themes": ["commons", "ownership", "collective life"]},
+        {"id": "57569", "title": "The Singularity", "artist": "Aussens@iter", "teeth_score": 5, "explicit": false, "themes": ["automation", "corporate power", "humanity", "technology"]},
+        {"id": "64915", "title": "Justice Come Quickly (pell)", "artist": "Madam Snowflake", "teeth_score": 5, "explicit": false, "themes": ["justice", "oppression", "courage", "resistance"]},
+        {"id": "61038", "title": "Rise Up!", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["action", "change", "resilience"]}
+      ]
     }
   ]
 }
