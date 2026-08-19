@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-browser-pack-pwa-import-v1';
+const VERSION='1.0.1-browser-pack-pwa-import-v1-stale-bridge-upgrade';
 const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.1.0-pwa-import';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
@@ -18,13 +18,13 @@ function ensureBridge(){
   if(bridge()?.pickAndImport&&bridge()?.queue)return Promise.resolve(bridge());
   if(bridgePromise)return bridgePromise;
   bridgePromise=new Promise((resolve,reject)=>{
-    const path=new URL(BRIDGE_SRC,location.href).pathname;
-    const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);
+    const target=new URL(BRIDGE_SRC,location.href).href;
+    const exact=[...document.scripts].find(script=>script.src===target);
     const ready=()=>bridge()?.pickAndImport&&bridge()?.queue;
-    if(existing){
+    if(exact){
       if(ready()){resolve(bridge());return}
-      existing.addEventListener('load',()=>ready()?resolve(bridge()):reject(new Error('The Civweave browser-pack bridge did not become ready.')),{once:true});
-      existing.addEventListener('error',()=>reject(new Error('The Civweave browser-pack bridge could not load.')),{once:true});
+      exact.addEventListener('load',()=>ready()?resolve(bridge()):reject(new Error('The Civweave browser-pack bridge did not become ready.')),{once:true});
+      exact.addEventListener('error',()=>reject(new Error('The Civweave browser-pack bridge could not load.')),{once:true});
       return;
     }
     const script=document.createElement('script');script.src=BRIDGE_SRC;script.async=false;script.dataset.civweavePwaBrowserPackBridge='';
@@ -88,7 +88,7 @@ function beginImport(packId,control){
 }
 function beginQueue(packId,control){
   const current=bridge();
-  if(!current?.queue){
+  if(!current?.queue||!current?.pickAndImport){
     status('Preparing the browser download bridge. Tap Download pack again in a moment.');
     ensureBridge().then(syncCards,error=>status(String(error?.message||error),true));
     return;
