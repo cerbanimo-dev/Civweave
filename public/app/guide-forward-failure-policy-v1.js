@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-guide-forward-failure-policy-v1';
+const VERSION='1.0.1-guide-forward-failure-policy-v1-local-provider-pin';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const PROFILES_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
 const SERVER_ROUTER='/app/server-ai-router-v301.js?v=1.0.117-guild-only-handoff';
+const LOCAL_ROUTES=new Set(['downloaded-local','device-local']);
 const TINY_RE=/\b(?:smollm2-(?:135m|360m)|qwen3-0\.6b|gemma3-1b)\b/i;
 const FALLBACK_TEXT_RE=/(?:kept this locally\.|could not run the selected local model|selected local model did not finish|deterministic(?:-| )local|server-side ai could not complete)/i;
 let wrappedRouter=null,wrappedAssistant=null,wrappedLocalRuntime=null,serverRouterPromise=null,threadRewrite=false;
@@ -21,6 +22,7 @@ function configuredInteractive(){
 }
 function configuredRoute(){const raw=configuredInteractive();return clean(raw.provider||raw.route,80).toLowerCase()}
 function serverAutoConfigured(){return configuredRoute()==='server-auto'}
+function localConfigured(){return LOCAL_ROUTES.has(configuredRoute())}
 function guideName(system){return system==='living-school'?'Moss':system==='cerbanimo'?'Kamiya':system==='fellowfare'?'Rook':system==='anarchadia'?'Merlin':'Weaveling'}
 function guideMode(system){return system==='living-school'?'Learn':system==='cerbanimo'?'Build':system==='fellowfare'?'Acquire':system==='anarchadia'?'Govern':'Reflect'}
 
@@ -69,6 +71,10 @@ function handoffResult(args={},reason='local-or-configured-ai-unavailable'){
     context:{routingAnswer:{taskClass:'structured-artifact',artifactClass:structuredArtifact(text)||null,networkRequired:true,source:'guide-forward-failure-policy-v1'}}
   };
 }
+function localUnavailableResult(args={},reason='selected-local-model-unavailable',prior=null,error=null){
+  const system=SYSTEMS.has(args.systemId)?args.systemId:'civweave',name=guideName(system),provider=configuredRoute()||'downloaded-local',message=clean(error?.message||error||prior?.fallbackFrom?.reason||reason,900);
+  return{...(prior&&typeof prior==='object'?prior:{}),response:{answer:`${name} could not finish this request with the selected local AI model. Civweave kept the request on this device and did not contact a Guild or Cloudflare AI.`,choice:{mode:guideMode(system),system,room:prior?.context?.currentContext?.roomId||'',nextAction:'Retry locally, choose another local model, or change the AI route in Settings if you want network processing.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:provider,provider:'local-ai-unavailable',model:clean(prior?.model,180),usage:prior?.usage||null,responseRouting:prior?.responseRouting||null,fallbackFrom:{provider,reason:message},providerRouteFailure:{code:error?.code||'LOCAL_AI_UNAVAILABLE',message},localProviderPinned:true};
+}
 function deterministicResult(result){
   const provider=clean(result?.provider||result?.requestedProvider,120).toLowerCase(),answer=clean(result?.response?.answer,1600);
   return provider==='deterministic-local'||provider==='local-contract'||FALLBACK_TEXT_RE.test(answer);
@@ -84,17 +90,18 @@ function installAssistant(){
   const previous=assistant.respond.bind(assistant);
   const respond=async args=>{
     const route=await classifyForAssistant(args||{});
-    if(route?.networkRequired&&!serverAutoConfigured())return handoffResult(args,'structured-request-needs-network-ai');
+    if(route?.networkRequired&&!serverAutoConfigured()&&!localConfigured())return handoffResult(args,'structured-request-needs-network-ai');
     try{
       const result=await previous(args);
-      if(deterministicResult(result))return handoffResult(args,'deterministic-answer-blocked');
+      if(deterministicResult(result))return localConfigured()?localUnavailableResult(args,'local-generative-result-unavailable',result):handoffResult(args,'deterministic-answer-blocked');
       return result;
     }catch(error){
       if(serverAutoConfigured())throw error;
+      if(localConfigured())return localUnavailableResult(args,'local-generative-route-failed',null,error);
       return handoffResult(args,clean(error?.message||error||'generative-route-failed',900));
     }
   };
-  globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,__civweaveGuideForwardPolicyV1:true,forwardFailurePolicyVersion:VERSION,deterministicAnswerFallback:false,guildHandoffOnFailure:true});
+  globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,__civweaveGuideForwardPolicyV1:true,forwardFailurePolicyVersion:VERSION,deterministicAnswerFallback:false,guildHandoffOnFailure:true,localProviderPinned:true});
   wrappedAssistant=globalThis.CivweaveAssistantV141;
   return true;
 }
@@ -127,7 +134,7 @@ function installLocalRuntime(){
 function realmApi(){return globalThis.CivweaveRealmSessionIntegrityV237}
 function precedingUser(messages,index){for(let i=index-1;i>=0;i--)if(messages[i]?.role==='user'&&clean(messages[i].text))return clean(messages[i].text,12000);return''}
 function upgradeTerminalFailures(system){
-  if(threadRewrite||serverAutoConfigured()||!SYSTEMS.has(system))return false;
+  if(threadRewrite||serverAutoConfigured()||localConfigured()||!SYSTEMS.has(system))return false;
   const api=realmApi(),thread=api?.readThread?.(system);if(!thread||!Array.isArray(thread.messages))return false;
   let changed=false;const messages=thread.messages.map((row,index)=>{
     if(row?.role!=='assistant'||row?.provider!=='local-recovery'||row?.queueCancelled)return row;
@@ -177,5 +184,5 @@ for(const event of ['civweave:minilm-response-router-ready','civweave:assistant-
 addEventListener('civweave:realm-guide-thread-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.has(system))upgradeTerminalFailures(system);queueMicrotask(renderHandoffActions)});
 install();
 
-globalThis.CivweaveGuideForwardFailurePolicyV1=Object.freeze({version:VERSION,install,structuredArtifact,promoteRoute,handoffResult,serverAutoConfigured,sanitizedLocalRequest,upgradeTerminalFailures,renderHandoffActions,sendToGuild,deterministicAnswerFallback:false,failureDirection:'forward',terminalFallback:'explicit-guild-handoff',tinyHistoryPolicy:'latest-user-only'});
+globalThis.CivweaveGuideForwardFailurePolicyV1=Object.freeze({version:VERSION,install,structuredArtifact,promoteRoute,handoffResult,localUnavailableResult,serverAutoConfigured,localConfigured,sanitizedLocalRequest,upgradeTerminalFailures,renderHandoffActions,sendToGuild,deterministicAnswerFallback:false,failureDirection:'forward',terminalFallback:'explicit-guild-handoff',tinyHistoryPolicy:'latest-user-only',localProviderPinned:true});
 })();
