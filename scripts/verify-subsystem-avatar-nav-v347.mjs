@@ -3,16 +3,18 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [nav,mapper,release,fellowfareVerifier,platformCss]=await Promise.all([
+const [nav,mapper,release,fellowfareVerifier,platformCss,sharedGuide]=await Promise.all([
   read('public/app/themed-system-nav-v178.js'),
   read('public/app/subsystem-avatar-state-v347.js'),
   read('VERSION'),
   read('scripts/verify-fellowfare-active-v203.mjs'),
-  read('public/app/platform-experience-v160.css')
+  read('public/app/platform-experience-v160.css'),
+  read('public/app/shared-guide-surface-v236-core-v244.js')
 ]);
 const version=release.trim();
 new Function(nav);
 new Function(mapper);
+new Function(sharedGuide);
 
 const match=version.match(/^(\d+)\.(\d+)\.(\d+)$/);
 assert.ok(match,'Avatar navigation requires a semantic Civweave release version.');
@@ -42,11 +44,18 @@ assert.ok(nav.includes("geometryOwner:'canonical-tall-v1'"),'Navigation API must
 for(const retired of [
   '--cw-themed-nav-height:clamp(56px,7vw,68px)',
   '--cw-themed-nav-height:clamp(58px,14vw,64px)',
+  '--cw-themed-nav-height:clamp(52px,7vw,72px)',
+  '--cw-themed-nav-height:clamp(50px,14vw,66px)',
   'width:40px;height:40px;border-radius:12px',
   'width:36px;height:36px',
   'width:33px;height:33px'
 ])assert.ok(!nav.includes(retired),`Retired compact navbar geometry returned: ${retired}`);
 assert.doesNotMatch(platformCss,/cw-themed-system-nav|cw-themed-nav-height|cw-themed-system-avatar-wrap/,'Platform CSS must not own or override five-guide navbar geometry.');
+assert.ok(sharedGuide.includes("navigationGeometryOwner:false"),'Shared guide surface must explicitly disclaim navbar geometry ownership.');
+assert.ok(sharedGuide.includes('--cw-guide-nav-offset'),'Shared guide floating controls must use their own measured navbar offset variable.');
+assert.ok(!sharedGuide.includes("setProperty('--cw-themed-nav-height'"),'Shared guide surface must never rewrite the canonical navbar height.');
+assert.doesNotMatch(sharedGuide,/--cw-themed-nav-height\s*:/,'Shared guide surface must never declare the canonical navbar height variable.');
+assert.doesNotMatch(sharedGuide,/#cw-themed-system-nav \.cw-themed-system-link\{height:/,'Shared guide surface must never impose navbar link height.');
 
 assert.match(nav,/background-size:500% 400%,cover|background-size:500% 400%/,'Nav must crop the 5x4 avatar atlases.');
 assert.match(nav,/civweave:subsystem-avatar-state/);
@@ -81,11 +90,11 @@ assert.equal(api.status('civweave').expression,'hopeful');
 console.log(JSON.stringify({
   ok:true,
   version,
-  revision:'subsystem-avatar-nav-v347-canonical-tall-rail',
+  revision:'subsystem-avatar-nav-v347-canonical-tall-rail-single-geometry-owner',
   atlasCount:5,
   stateContract:'civweave.subsystem-avatar-state/v1',
   quiet:'sleepy',
   lonely:'shy',
   attention:'worried',
-  mobileRail:{geometryOwner:'themed-system-nav-v178',platformOverrides:false,bottomGuardPx:0,safeAreaInsideTray:true}
+  mobileRail:{geometryOwner:'themed-system-nav-v178',platformOverrides:false,sharedGuideOverrides:false,bottomGuardPx:0,safeAreaInsideTray:true}
 },null,2));
