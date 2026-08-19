@@ -1,8 +1,54 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-08-19T20:21:01Z",
+  "built_at": "2026-08-19T20:25:25Z",
   "entry_count": 22,
   "entries": [
+    {
+      "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+      "title": "Climate Change The Dirty Water Remix",
+      "artist": "J.Lang",
+      "source_url": "https://ccmixter.org/files/djlang59/61065",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "J.Lang",
+        "source_title": "Climate Change The Dirty Water Remix",
+        "source_url": "https://ccmixter.org/files/djlang59/61065",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
+          "mime": "",
+          "bytes": 4741999,
+          "role": "source-download"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "climate",
+        "truth",
+        "accountability",
+        "future"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded"
+    },
     {
       "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
       "title": "Freedom in my voice",
@@ -535,57 +581,6 @@
         "freedom",
         "voice",
         "hip hop"
-      ],
-      "explicit": false,
-      "curation": "hand-seeded"
-    },
-    {
-      "candidate_id": "openmusic:636f50226fda3a00f246fe93",
-      "title": "Networking Not Working",
-      "artist": "Radioontheshelf",
-      "source_url": "https://ccmixter.org/files/Radioontheshelf/59567",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Radioontheshelf",
-        "source_title": "Networking Not Working",
-        "source_url": "https://ccmixter.org/files/Radioontheshelf/59567",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_Networking_Not_Working_2.mp3",
-          "mime": "",
-          "bytes": 9366508,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_Networking_Not_Working.mp3",
-          "mime": "",
-          "bytes": 4938231,
-          "role": "source-download"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "vocal_verified": true,
-      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
-      "instrumental_only": false,
-      "teeth_score": 4,
-      "themes": [
-        "systems",
-        "consequences",
-        "social fracture"
       ],
       "explicit": false,
       "curation": "hand-seeded"

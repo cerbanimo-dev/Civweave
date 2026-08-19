@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-08-19T20:21:01Z",
+  "built_at": "2026-08-19T20:25:25Z",
   "record_count": 22,
   "failure_count": 2,
   "failures": [
@@ -21,6 +21,68 @@
     "ccmixter": 22
   },
   "records": [
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "61065",
+      "playlist_id": "cerbanimo",
+      "matched_query": "curated:61065",
+      "title": "Climate Change The Dirty Water Remix",
+      "artist": "J.Lang",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/djlang59/61065",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
+          "mime": "",
+          "bytes": 4741999,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "J.Lang",
+        "source_title": "Climate Change The Dirty Water Remix",
+        "source_url": "https://ccmixter.org/files/djlang59/61065",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "climate",
+        "truth",
+        "accountability",
+        "future"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61065"
+        }
+      ],
+      "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+      "quality_score": 125
+    },
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
@@ -747,73 +809,6 @@
         }
       ],
       "candidate_id": "openmusic:2d46c4b4c34c71aff58781fb",
-      "quality_score": 121
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "59567",
-      "playlist_id": "cerbanimo",
-      "matched_query": "curated:59567",
-      "title": "Networking Not Working",
-      "artist": "Radioontheshelf",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/Radioontheshelf/59567",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_Networking_Not_Working_2.mp3",
-          "mime": "",
-          "bytes": 9366508,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_Networking_Not_Working.mp3",
-          "mime": "",
-          "bytes": 4938231,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Radioontheshelf",
-        "source_title": "Networking Not Working",
-        "source_url": "https://ccmixter.org/files/Radioontheshelf/59567",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
-      "instrumental_only": false,
-      "teeth_score": 4,
-      "themes": [
-        "systems",
-        "consequences",
-        "social fracture"
-      ],
-      "explicit": false,
-      "curation": "hand-seeded",
-      "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "curated:59567"
-        }
-      ],
-      "candidate_id": "openmusic:636f50226fda3a00f246fe93",
       "quality_score": 121
     },
     {
