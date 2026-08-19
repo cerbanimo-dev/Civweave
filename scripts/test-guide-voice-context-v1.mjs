@@ -85,7 +85,8 @@ test('Parakeet speech executor registers the installed INT8 model and preserves 
   assert.match(source,/specializedStatus\(MODEL_ID\)/);
   assert.match(source,/outputSize<=vocabSize/);
   assert.match(source,/duration logits/);
-  assert.match(source,/supportsProxyWorker/);
+  assert.match(source,/ort\.env\.wasm\.proxy=false/);
+  assert.doesNotMatch(source,/supportsProxyWorker/);
   assert.match(source,/response\.arrayBuffer\(\)/);
   assert.match(source,/graphOptimizationLevel:String\(row\?\.path\|\|''\)\.startsWith\('encoder\.'\)\?'basic':'all'/);
   assert.match(source,/PARAKEET_ONNX_SESSION_CREATE_FAILED/);
@@ -171,8 +172,8 @@ test('Parakeet activates microphone audio before the cold ONNX model load',()=>{
 
 test('guide voice lazily loads the corrected Parakeet executor before specialized speech',()=>{
   const source=fs.readFileSync('public/app/guide-voice-runtime-v1.js','utf8');
-  assert.match(source,/parakeet-speech-executor-v1\.js\?v=1\.0\.4/);
-  assert.match(source,/SPEECH_EXECUTOR_VERSION='1\.0\.4-parakeet-speech-executor-v1-output-shape-routing'/);
+  assert.match(source,/parakeet-speech-executor-v1\.js\?v=1\.0\.5/);
+  assert.match(source,/SPEECH_EXECUTOR_VERSION='1\.0\.5-parakeet-speech-executor-v1-no-proxy-worker'/);
   assert.match(source,/ensureSpeechExecutor/);
   assert.match(source,/PARAKEET_EXECUTOR_VERSION_MISMATCH/);
   assert.match(source,/executeSpecializedSpeech/);
@@ -187,8 +188,8 @@ test('guide chat owns wake-address submission and version-locks corrected voice 
   assert.match(source,/data-voice/);
   assert.match(source,/submitVoiceText/);
   assert.match(source,/resolveGuideAddress/);
-  assert.match(source,/guide-voice-runtime-v1\.js\?v=1\.1\.5/);
-  assert.match(source,/VOICE_RUNTIME_VERSION='1\.1\.5-guide-voice-runtime-v1-parakeet-output-shapes'/);
+  assert.match(source,/guide-voice-runtime-v1\.js\?v=1\.1\.6/);
+  assert.match(source,/VOICE_RUNTIME_VERSION='1\.1\.6-guide-voice-runtime-v1-parakeet-no-proxy-worker'/);
   assert.match(source,/specialized-model-capabilities-v1\.js/);
   assert.match(source,/surface.*single-current-chat-surface|presentation:'single-current-chat-surface'/s);
 });
