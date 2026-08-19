@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.86-local-ai-primary-route-v283-hard-local';
+const VERSION='1.0.85-local-ai-primary-route-v283';
 if(globalThis.CivweaveLocalAIPrimaryRouteV283?.version===VERSION)return;
 const ROUTE='downloaded-local',FORM_SELECTOR='form[data-cw-cleanroom-form]',SELECTION_KEY='civweave.local-ai.selection.v266',SETTINGS_KEY='civweave.universal-ai.v127',PROFILES_KEY='civweave-model-profiles-v1';
 const parse=(value,fallback={})=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -20,5 +20,5 @@ addEventListener('civweave:model-settings-opened',()=>queueMicrotask(enhance));
 addEventListener('civweave:local-model-selection',event=>queueMicrotask(()=>{const form=document.querySelector(FORM_SELECTOR);const selected=event?.detail;if(selected?.active&&selected.id){persistLocal(selected);if(form){if(!form.dataset.cwEmbeddedFallbackRoute)form.dataset.cwEmbeddedFallbackRoute=baseRoute(form);const route=ensureOption(form);if(route)route.value=ROUTE;apply(form)}}else if(form){restoreBase(form);queueMicrotask(()=>apply(form))}}));
 addEventListener('pageshow',()=>queueMicrotask(enhance));
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>queueMicrotask(enhance),{once:true});else queueMicrotask(enhance);
-globalThis.CivweaveLocalAIPrimaryRouteV283=Object.freeze({version:VERSION,route:ROUTE,enhance,selection,label,persistLocal});
+globalThis.CivweaveLocalAIPrimaryRouteV283=Object.freeze({version:VERSION,route:ROUTE,enhance,selection,label,persistLocal,hardLocalOnly:true});
 })();
