@@ -10,6 +10,10 @@ const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
 const settings=read('public/app/settings-local-route-v323.js');
+const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
+const browserPackPwa=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
+const relocation=read('public/app/working-campus-home-relocation-v441.js');
+const shellAssets=read('public/service-worker-shell-assets-v1.js');
 const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js');
 const voice=read('public/app/guide-voice-runtime-v1.js');
 
@@ -35,6 +39,28 @@ test('server quality pack uses current executable high quality tiers and server 
   const block=packs.match(/'server-quality'[\s\S]*?\n\}\);/)?.[0]||'';
   for(const id of ['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-4b-q4f16','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-fp32','omnilingual-asr-1b-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
   assert.doesNotMatch(block,/gemma-4-12b/i);
+});
+
+test('large packs stay browser-managed inside the PWA',()=>{
+  assert.match(packs,/BROWSER_MANAGED_PACK_IDS=freeze\(\['premier-phone','server-quality'\]\)/);
+  assert.match(packs,/CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED/);
+  assert.match(settings,/browserPackDownload/);
+  assert.match(settings,/browser\.queue\(packId/);
+  assert.match(settings,/Browser downloads queued/);
+});
+
+test('browser-managed packs import finished downloads back into PWA storage',()=>{
+  assert.match(browserPack,/function importFiles\(/);
+  assert.match(browserPack,/function pickAndImport\(/);
+  assert.match(browserPack,/cache\.put\(record\.url,new Response\(file/);
+  assert.match(browserPack,/status:'ready'/);
+  assert.match(browserPackPwa,/Import finished downloads/);
+  assert.match(browserPackPwa,/settings-ai-pack-import/);
+  assert.match(browserPackPwa,/pickAndImport/);
+  assert.match(browserPackPwa,/button\[data-local-pack-download\]/);
+  assert.match(relocation,/browser-pack-pwa-import-v1\.js/);
+  assert.match(shellAssets,/browser-pack-pwa-import-v1\.js/);
+  assert.match(shellAssets,/browser-pack-download-v1\.js/);
 });
 
 test('Local models view has pack actions without eagerly loading pack runtime',()=>{
