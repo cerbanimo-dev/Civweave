@@ -1,5 +1,6 @@
 {
   "schema": "civweave.open-music-harvest-config.v1",
+  "harvest_version": 2,
   "accepted_licenses": ["PUBLIC-DOMAIN", "CC0", "CC-BY", "CC-BY-SA"],
   "providers": ["ccmixter"],
   "daily_batch_per_playlist": 20,
