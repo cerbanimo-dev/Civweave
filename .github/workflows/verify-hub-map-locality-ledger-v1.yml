@@ -8,14 +8,18 @@ on:
       - 'public/app/civweave-hub-map-v1.js'
       - 'public/app/civweave-locality-gossip-v1.js'
       - 'public/app/guild-rally-point-setup-v1.js'
+      - 'public/app/mobile-guild-create-v1.mjs'
       - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/civweave-map-v1-manifest.json'
       - 'functions/api/hub-map-nodes.ts'
       - 'public/host-setup.html'
       - 'cloudflare/node-cloud/src/index.mjs'
+      - 'cloudflare/mobile-guild-edge/src/index.mjs'
       - 'public/app/local-object-mesh-v146.js'
       - 'public/app/host-node-session-v1.js'
       - 'scripts/test-hub-location-onboarding-v1.mjs'
+      - 'scripts/test-mobile-guild-create-v1.mjs'
+      - 'scripts/verify-guild-location-parity-v1.mjs'
       - 'scripts/verify-hub-map-locality-ledger-v1.mjs'
       - 'docs/architecture/locality-gossip-ledger-v1.md'
       - '.github/workflows/verify-hub-map-locality-ledger-v1.yml'
@@ -27,14 +31,18 @@ on:
       - 'public/app/civweave-hub-map-v1.js'
       - 'public/app/civweave-locality-gossip-v1.js'
       - 'public/app/guild-rally-point-setup-v1.js'
+      - 'public/app/mobile-guild-create-v1.mjs'
       - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/civweave-map-v1-manifest.json'
       - 'functions/api/hub-map-nodes.ts'
       - 'public/host-setup.html'
       - 'cloudflare/node-cloud/src/index.mjs'
+      - 'cloudflare/mobile-guild-edge/src/index.mjs'
       - 'public/app/local-object-mesh-v146.js'
       - 'public/app/host-node-session-v1.js'
       - 'scripts/test-hub-location-onboarding-v1.mjs'
+      - 'scripts/test-mobile-guild-create-v1.mjs'
+      - 'scripts/verify-guild-location-parity-v1.mjs'
       - 'scripts/verify-hub-map-locality-ledger-v1.mjs'
       - 'docs/architecture/locality-gossip-ledger-v1.md'
       - '.github/workflows/verify-hub-map-locality-ledger-v1.yml'
@@ -56,11 +64,19 @@ jobs:
           node --check public/app/civweave-hub-map-v1.js
           node --check public/app/civweave-locality-gossip-v1.js
           node --check public/app/guild-rally-point-setup-v1.js
+          node --check public/app/mobile-guild-create-v1.mjs
           node --check public/app/node-ai-mesh-v1.js
           node --check cloudflare/node-cloud/src/index.mjs
+          node --check cloudflare/mobile-guild-edge/src/index.mjs
           node --check scripts/test-hub-location-onboarding-v1.mjs
+          node --check scripts/test-mobile-guild-create-v1.mjs
+          node --check scripts/verify-guild-location-parity-v1.mjs
           node --check scripts/verify-hub-map-locality-ledger-v1.mjs
       - name: Test Guildkeeper location and Rally Point publication
         run: node scripts/test-hub-location-onboarding-v1.mjs
+      - name: Test mobile Guild location lifecycle
+        run: node scripts/test-mobile-guild-create-v1.mjs
+      - name: Verify cross-device Guild location parity
+        run: node scripts/verify-guild-location-parity-v1.mjs
       - name: Verify end-to-end Guild Map contract
         run: node scripts/verify-hub-map-locality-ledger-v1.mjs
