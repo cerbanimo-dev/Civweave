@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v14-civweave-home-relocation';
+const REVISION='shell-assets-v1-repair-v15-browser-pack-pwa-import';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
@@ -25,7 +25,9 @@ const REQUIRED_CIVWEAVE_BOOT=[
   '/app/working-campus-return-guard-v425.js',
   '/app/document-lifecycle-v221.js',
   '/app/working-campus-home-declutter-v1.js',
-  '/app/working-campus-home-relocation-v441.js'
+  '/app/working-campus-home-relocation-v441.js',
+  '/app/local-ai/browser-pack-download-v1.js',
+  '/app/local-ai/browser-pack-pwa-import-v1.js'
 ];
 const OPTIONAL_GUILD_QUEST=[
   '/app/civweave-guild-quest-v1.html',
