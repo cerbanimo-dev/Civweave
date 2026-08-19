@@ -3,7 +3,7 @@
   "short_name": "Civweave",
   "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/civweave-local",
-  "start_url": "/?installed=1&source=pwa-root-v431",
+  "start_url": "/app/pwa-start-v436.html?installed=1&system=civweave&source=pwa-manifest-v436",
   "scope": "/",
   "display": "standalone",
   "display_override": [
@@ -72,7 +72,7 @@
   "shortcuts": [
     {
       "name": "Civweave",
-      "url": "/app/installed-entry-v146.html?installed=1&system=civweave",
+      "url": "/app/pwa-start-v436.html?installed=1&system=civweave&source=pwa-shortcut-v436",
       "icons": [
         {
           "src": "/app/logos/civweave-pwa-512-v247.png",
@@ -83,7 +83,7 @@
     },
     {
       "name": "Living School",
-      "url": "/app/installed-entry-v146.html?installed=1&system=living-school",
+      "url": "/app/pwa-start-v436.html?installed=1&system=living-school&source=pwa-shortcut-v436",
       "icons": [
         {
           "src": "/app/logos/civweave-pwa-512-v247.png",
@@ -94,7 +94,7 @@
     },
     {
       "name": "Cerbanimo",
-      "url": "/app/installed-entry-v146.html?installed=1&system=cerbanimo",
+      "url": "/app/pwa-start-v436.html?installed=1&system=cerbanimo&source=pwa-shortcut-v436",
       "icons": [
         {
           "src": "/app/logos/civweave-pwa-512-v247.png",
@@ -105,7 +105,7 @@
     },
     {
       "name": "FellowFare",
-      "url": "/app/installed-entry-v146.html?installed=1&system=fellowfare",
+      "url": "/app/pwa-start-v436.html?installed=1&system=fellowfare&source=pwa-shortcut-v436",
       "icons": [
         {
           "src": "/app/logos/civweave-pwa-512-v247.png",
@@ -116,7 +116,7 @@
     },
     {
       "name": "Anarchadia",
-      "url": "/app/installed-entry-v146.html?installed=1&system=anarchadia",
+      "url": "/app/pwa-start-v436.html?installed=1&system=anarchadia&source=pwa-shortcut-v436",
       "icons": [
         {
           "src": "/app/logos/civweave-pwa-512-v247.png",
