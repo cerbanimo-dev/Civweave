@@ -64,7 +64,8 @@ function syncCard(card,state){
     }
     if(link.getAttribute('href')!==tool.href)link.setAttribute('href',tool.href);
     if(link.textContent!==tool.label)link.textContent=tool.label;
-    link.setAttribute('aria-label',`${tool.label} for this task`);
+    const aria=`${tool.label} for this task`;
+    if(link.getAttribute('aria-label')!==aria)link.setAttribute('aria-label',aria);
   }
 }
 
@@ -81,15 +82,21 @@ let queued=false,observer=null;
 function schedule(){
   if(queued)return;
   queued=true;
-  queueMicrotask(()=>{queued=false;renderTaskToolLinks()});
+  const run=()=>{queued=false;renderTaskToolLinks()};
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(run,0);
+}
+function relevantMutation(records){
+  return records.some(record=>Array.from(record.addedNodes||[]).some(node=>node?.nodeType===1&&(node.matches?.('#cq144-root,.cq144-task')||node.querySelector?.('#cq144-root,.cq144-task'))));
 }
 function init(){
   if(typeof document==='undefined')return;
+  const params=new URLSearchParams(location.search);
+  if(params.get('system')!=='cerbanimo')return;
   try{addEventListener('cerbanimo:quest-engine-changed',schedule)}catch{}
   const start=()=>{
     if(observer)return;
     const target=document.querySelector('#rc-app')||document.documentElement;
-    observer=new MutationObserver(schedule);
+    observer=new MutationObserver(records=>{if(relevantMutation(records))schedule()});
     observer.observe(target,{childList:true,subtree:true});
     schedule();
   };
