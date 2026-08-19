@@ -1,0 +1,96 @@
+name: One-shot Guild Map runtime v2 migration
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - '.github/workflows/one-shot-guild-map-runtime-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Switch Guild Map to cache-distinct runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          wrapper=Path('public/app/hub-map-v1.html')
+          text=wrapper.read_text()
+          old="/app/civweave-hub-map-v1.js?v=guild-rally-point-v1"
+          new="/app/civweave-guild-map-runtime-v2.js?v=public-mobile-directory-v2"
+          if old not in text:
+              raise SystemExit('expected legacy Guild Map runtime reference not found')
+          wrapper.write_text(text.replace(old,new,1))
+
+          manifest_path=Path('public/app/civweave-map-v1-manifest.json')
+          manifest=json.loads(manifest_path.read_text())
+          assets=manifest.setdefault('assets',[])
+          runtime='/app/civweave-guild-map-runtime-v2.js'
+          if runtime not in assets:
+              anchor='/app/civweave-hub-map-v1.js'
+              if anchor in assets:
+                  assets.insert(assets.index(anchor)+1,runtime)
+              else:
+                  assets.append(runtime)
+          manifest['publicMobileGuildDirectory']=True
+          manifest_path.write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n')
+
+          root_sw=Path('public/service-worker.js')
+          sw=root_sw.read_text()
+          runtime_line="  '/app/civweave-guild-map-runtime-v2.js',\n"
+          anchor="  '/app/civweave-hub-map-v1.js',\n"
+          if runtime_line not in sw:
+              if anchor not in sw:
+                  raise SystemExit('Guild Map MAP_CORE anchor missing')
+              sw=sw.replace(anchor,anchor+runtime_line,1)
+          root_sw.write_text(sw)
+
+          verifier=Path('scripts/verify-hub-map-locality-ledger-v1.mjs')
+          v=verifier.read_text()
+          v=v.replace("wrapper.includes('Guild Map') && wrapper.includes('Guilds') && wrapper.includes('civweave-locality-gossip-v1.js') && wrapper.includes('civweave-hub-map-v1.js')",
+                      "wrapper.includes('Guild Map') && wrapper.includes('Guilds') && wrapper.includes('civweave-locality-gossip-v1.js') && wrapper.includes('civweave-guild-map-runtime-v2.js')")
+          v=v.replace("manifest.assets.includes('/app/civweave-hub-map-v1.js') && manifest.assets.includes('/app/civweave-locality-gossip-v1.js')",
+                      "manifest.assets.includes('/app/civweave-hub-map-v1.js') && manifest.assets.includes('/app/civweave-guild-map-runtime-v2.js') && manifest.assets.includes('/app/civweave-locality-gossip-v1.js')")
+          verifier.write_text(v)
+
+          workflow=Path('.github/workflows/verify-hub-map-locality-ledger-v1.yml')
+          w=workflow.read_text()
+          legacy="      - 'public/app/civweave-hub-map-v1.js'\n"
+          fresh="      - 'public/app/civweave-guild-map-runtime-v2.js'\n"
+          if fresh not in w:
+              w=w.replace(legacy,legacy+fresh)
+          check="          node --check public/app/civweave-hub-map-v1.js\n"
+          fresh_check="          node --check public/app/civweave-guild-map-runtime-v2.js\n"
+          if fresh_check not in w:
+              w=w.replace(check,check+fresh_check,1)
+          workflow.write_text(w)
+          PY
+
+          node --check public/app/civweave-guild-map-runtime-v2.js
+          node scripts/verify-guild-location-parity-v1.mjs
+          node scripts/verify-hub-map-locality-ledger-v1.mjs
+
+      - name: Commit migration and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git rm .github/workflows/one-shot-guild-map-runtime-v2.yml
+          git add public/app/hub-map-v1.html public/app/civweave-map-v1-manifest.json public/service-worker.js scripts/verify-hub-map-locality-ledger-v1.mjs .github/workflows/verify-hub-map-locality-ledger-v1.yml
+          git commit -m 'Use cache-distinct Guild Map public directory runtime'
+          git push origin HEAD:staging
