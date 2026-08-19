@@ -13,6 +13,7 @@ const MAP_CORE=[
   '/app/hub-map-v1.html',
   '/app/federation-finder-map-v275.html',
   '/app/civweave-hub-map-v1.js',
+  '/app/civweave-guild-map-runtime-v2.js',
   '/app/civweave-locality-gossip-v1.js',
   '/app/host-node-session-v1.js',
   '/app/civweave-map-v1-manifest.json',

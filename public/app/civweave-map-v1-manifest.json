@@ -25,7 +25,14 @@
     "networkAware": true,
     "dataSaverAware": true,
     "defaultAutomaticDownloadBytes": 100663296,
-    "peerRanking": ["viewport coverage", "zoom fit", "freshness", "signed provenance", "size", "latency"]
+    "peerRanking": [
+      "viewport coverage",
+      "zoom fit",
+      "freshness",
+      "signed provenance",
+      "size",
+      "latency"
+    ]
   },
   "nodeFreshness": {
     "staleAfterMs": 21600000,
@@ -33,11 +40,19 @@
   },
   "localityGossip": {
     "entrySchema": "civweave.locality-ledger-entry.v1",
-    "types": ["need", "offering", "idea"],
+    "types": [
+      "need",
+      "offering",
+      "idea"
+    ],
     "physicalRadiusMeters": 750,
     "physicalExchange": "foreground proximity after user enables map location",
     "virtualExchange": "Guild-member pass-by over the federated community-object gateway",
-    "relevance": ["selected Guild", "frequent partner Guilds", "recent foreground passersby"],
+    "relevance": [
+      "selected Guild",
+      "frequent partner Guilds",
+      "recent foreground passersby"
+    ],
     "offlineCopy": true
   },
   "rallyPoint": {
@@ -61,6 +76,7 @@
     "/app/hub-map-v1.html",
     "/app/federation-finder-map-v275.html",
     "/app/civweave-hub-map-v1.js",
+    "/app/civweave-guild-map-runtime-v2.js",
     "/app/civweave-locality-gossip-v1.js",
     "/app/host-node-session-v1.js",
     "/app/civweave-map-service-v275.js",
@@ -83,5 +99,6 @@
   "distribution": {
     "archive": "/downloads/Civweave-Map-v1.zip",
     "checksum": "/downloads/Civweave-Map-v1.zip.sha256"
-  }
+  },
+  "publicMobileGuildDirectory": true
 }

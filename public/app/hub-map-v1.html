@@ -157,7 +157,7 @@ function install(){
   const toggle=doc.getElementById('mobileToggle'),panel=doc.getElementById('panel');
   toggle?.addEventListener('click',()=>queueMicrotask(()=>toggle.setAttribute('aria-expanded',panel?.classList.contains('open')?'true':'false')));
   installGuildTapInteraction(win,doc).catch(error=>console.error('[Civweave Guild Map] tap interaction',error));
-  addScript(doc,'/app/host-node-session-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-hub-map-v1.js?v=guild-rally-point-v1')));
+  addScript(doc,'/app/host-node-session-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-guild-map-runtime-v2.js?v=public-mobile-directory-v2')));
 }
 frame.addEventListener('load',install,{once:true});
 })();
