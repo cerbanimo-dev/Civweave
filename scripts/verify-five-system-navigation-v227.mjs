@@ -34,22 +34,25 @@ const retiredFamilyNavAssets=[
 ];
 const campusPartPaths=[1,2,3,4,5].map(number=>`public/app/working-campus-v156.part${number}.txt`);
 
-const [routesSource,boundarySource,navSource,familyShell,workerWrapper,workerNavigation,...pages]=await Promise.all([
+const [routesSource,boundarySource,navSource,familyShell,workerWrapper,workerNavigation,canonicalNavbarWorker,platformCss,sharedGuide,...pages]=await Promise.all([
   read('public/app/system-routes-v227.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/themed-system-nav-v178.js'),
   read('public/app/family-shell-v104.js'),
   read('public/service-worker-v203.js'),
   read('public/service-worker-canonical-navigation-v227.js'),
+  read('public/service-worker-canonical-navbar-v1.js'),
+  read('public/app/platform-experience-v160.css'),
+  read('public/app/shared-guide-surface-v236-core-v244.js'),
   ...Object.values(paths).map(path=>read(`public${path}`))
 ]);
 const campusParts=(await Promise.all(campusPartPaths.map(read))).join('');
 const campusRuntime=await read('public/app/working-campus-v156.js');
 const campusPage=pages[0];
 
-for(const source of [routesSource,boundarySource,navSource,familyShell,workerNavigation,campusRuntime,campusParts])new Function(source);
+for(const source of [routesSource,boundarySource,navSource,familyShell,workerNavigation,canonicalNavbarWorker,sharedGuide,campusRuntime,campusParts])new Function(source);
 
-// Ownership and presentation: five guides, one global navigation rail.
+// Ownership and presentation: five guides, one global navigation rail and one geometry owner.
 assert.match(navSource,/CivweaveFamilyNavigationV178/,'The navigation owner must publish its ownership contract.');
 assert.match(navSource,/cw-themed-system-avatar/,'The rail must render guide avatars.');
 assert.match(navSource,/cw-themed-system-copy/,'The rail must render guide names/system labels rather than monogram-only navigation.');
@@ -61,6 +64,22 @@ assert.doesNotMatch(navSource,/cwf104-tray/,'The current navigation owner must n
 assert.match(familyShell,/familyNavigationOwner:'themed-system-nav-v178'/,'Family shell must delegate navigation ownership.');
 assert.match(familyShell,/familyNavigationOwnership:false/,'Family shell must explicitly disclaim navigation ownership.');
 assert.doesNotMatch(familyShell,/cwf104-tray|data-cwf-system|cwf104-system/,'Family shell regained retired five-system navigation DOM.');
+
+assert.ok(navSource.includes(`const VERSION='${version}-five-system-navigation-v232-canonical-rail';`),'The current rail must stay on the canonical tall geometry revision.');
+assert.ok(navSource.includes(':root{--cw-themed-nav-height:clamp(92px,10vw,100px);--cw-themed-nav-bottom-gap:0px}'),'Desktop tall rail geometry must live in the canonical nav owner.');
+assert.ok(navSource.includes('width:84px;height:84px;border-radius:20px'),'Desktop avatar geometry must stay canonical.');
+assert.ok(navSource.includes('@media(max-width:680px){:root{--cw-themed-nav-height:clamp(88px,22vw,96px);--cw-themed-nav-bottom-gap:0px}'),'Phone tall rail geometry must stay canonical.');
+assert.ok(navSource.includes('width:76px;height:76px'),'Phone avatar geometry must stay canonical.');
+assert.ok(navSource.includes('@media(max-width:430px){:root{--cw-themed-nav-height:clamp(80px,22vw,88px);--cw-themed-nav-bottom-gap:0px}'),'Narrow-phone tall rail geometry must stay canonical.');
+assert.ok(navSource.includes('width:68px;height:68px'),'Narrow-phone avatar geometry must stay canonical.');
+assert.ok(navSource.includes("geometryOwner:'canonical-tall-v1'"),'The rail API must declare the sole geometry owner.');
+for(const retired of ['clamp(56px,7vw,68px)','clamp(58px,14vw,64px)','clamp(52px,7vw,72px)','clamp(50px,14vw,66px)','width:40px;height:40px;border-radius:12px','width:36px;height:36px','width:33px;height:33px'])assert.ok(!navSource.includes(retired),`Retired compact navbar geometry returned: ${retired}`);
+assert.doesNotMatch(platformCss,/cw-themed-system-nav|cw-themed-nav-height|cw-themed-system-avatar-wrap/,'Platform CSS must not own or override family-navigation geometry.');
+assert.ok(sharedGuide.includes("navigationGeometryOwner:false"),'Shared guide surface must explicitly disclaim navbar geometry ownership.');
+assert.ok(sharedGuide.includes('--cw-guide-nav-offset'),'Shared guide floating controls must measure the rail through a separate offset variable.');
+assert.ok(!sharedGuide.includes("setProperty('--cw-themed-nav-height'"),'Shared guide surface must never rewrite the canonical navbar height.');
+assert.doesNotMatch(sharedGuide,/--cw-themed-nav-height\s*:/,'Shared guide surface must never declare the canonical navbar height.');
+assert.doesNotMatch(sharedGuide,/#cw-themed-system-nav \.cw-themed-system-link\{height:/,'Shared guide surface must never impose link height on the canonical rail.');
 
 // Settings: one shared presentation, exposed through Weaveling's quick menu instead of realm-local launchers.
 assert.match(navSource,/CivweaveSettingsV320\|\|globalThis\.CivweaveSettingsGatewayV317/,'The guide rail must invoke the canonical shared Settings API.');
@@ -146,23 +165,28 @@ assert.match(boundarySource,/const THEMED_SYSTEM_NAV='\/app\/themed-system-nav-v
 assert.match(boundarySource,/canonicalSystemCount:5/);
 assert.match(boundarySource,/canonicalPolicy:'five-system-first-class-routes-v350-canonical-chat-owner'/);
 assert.match(boundarySource,/guideWorkspaceRevision:'v350-single-current-chat-surface'/);
-for(const [system,pathname] of Object.entries(paths)){
-  assert.ok(boundarySource.includes(`['${pathname}','${system}']`),`Install boundary is missing ${system}.`);
-}
+for(const [system,pathname] of Object.entries(paths))assert.ok(boundarySource.includes(`['${pathname}','${system}']`),`Install boundary is missing ${system}.`);
 for(const page of pages)assert.match(page,/\/app\/install-boundary-v146\.js/,'A canonical system surface lost the install boundary.');
 
-// Worker navigation must preserve the canonical route graph instead of substituting the launcher.
+// Worker navigation must preserve the canonical route graph and prevent stale compact geometry from winning a race.
 const routeImport=workerWrapper.indexOf("importScripts('/app/system-routes-v227.js");
+const navGuardImport=workerWrapper.indexOf("importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v2')");
 const coreImport=workerWrapper.indexOf("importScripts('/service-worker-core-v208.js");
-assert.ok(routeImport>=0&&routeImport<coreImport,'The route contract must load before the worker core.');
-assert.ok(workerWrapper.includes('family-nav-single-owner-r1'),'The worker cache must rotate for the single navigation owner.');
+assert.ok(routeImport>=0&&routeImport<navGuardImport&&navGuardImport<coreImport,'Route authority and the fail-closed navbar lane must register before generic worker caching.');
+assert.ok(workerWrapper.includes('family-nav-single-owner-r1'),'The worker cache must retain the single navigation owner marker.');
 assert.match(workerNavigation,/exact-route-network-first-exact-route-cache-never-launcher-fallback/);
 assert.match(workerNavigation,/precacheCanonicalRoutes/);
+assert.ok(canonicalNavbarWorker.includes("const NAV_PATH='/app/themed-system-nav-v178.js';"),'Navbar guard must own the canonical rail path.');
+assert.ok(canonicalNavbarWorker.includes("'/app/shared-guide-surface-v236-core-v244.js'"),'Navbar guard must protect the former shared-guide geometry injector.');
+assert.ok(canonicalNavbarWorker.includes("'/app/platform-experience-v160.css'"),'Navbar guard must protect the former platform geometry injector.');
+assert.ok(canonicalNavbarWorker.includes("policy:'network-first-current-cache-only-never-retired-geometry-cache'"),'Navbar guard must fail closed rather than serve a retired geometry copy.');
+assert.ok(canonicalNavbarWorker.includes('if(missing.length)throw new Error'),'Navbar guard must warm all protected assets before installation can succeed.');
+assert.ok(canonicalNavbarWorker.includes('event.stopImmediatePropagation()'),'Navbar guard must bypass generic cache-first handling.');
 
 console.log(JSON.stringify({
   ok:true,
   version,
-  revision:'five-guide-rail-current-quest-settings-v229',
+  revision:'five-guide-rail-current-quest-settings-v232-scorched-earth',
   systems:Object.keys(paths),
   guides:['Weaveling','Moss','Kamiya','Rook','Merlin'],
   routeMatrix:25,
@@ -175,6 +199,11 @@ console.log(JSON.stringify({
   settingsEntry:'weaveling-hold-menu',
   canonicalChatOwner:chatOwner,
   familyNavigationOwner:familyNav.owner,
+  geometryOwner:'themed-system-nav-v178',
+  platformGeometryOwner:false,
+  sharedGuideGeometryOwner:false,
+  retiredCompactGeometryPurged:true,
+  staleGeometryCachePolicy:'network-first-current-cache-only-fail-closed',
   competingPersistentNavigationSuppressed:true,
   workingCampusRealmSwitcherSuppressed:true,
   retiredFamilyNavAssetsPurged:true,
