@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-working-campus-home-relocation-v441';
+const VERSION='1.0.1-working-campus-home-relocation-v441';
 const STYLE_ID='cw-working-campus-home-relocation-v441-style';
 const NAV_ACTIONS_ID='cw-civweave-primary-actions-v441';
 const APP_TAB='app-device';
@@ -49,7 +49,7 @@ function openGuilds(){const button=hiddenButton('cw-working-campus-guilds-v243')
 function openMap(){const button=hiddenButton('cw-working-campus-map-v243');if(button){button.click();return true}location.assign('/finder?view=map&source=civweave-navbar');return true}
 function openDownloads(){const button=hiddenButton('cw-working-campus-downloads-v243');if(button){button.click();return true}location.assign('/app/index.html?manage=downloads&source=civweave-settings');return true}
 function cycleTheme(){const button=q('main.app>header.top [data-cw160-theme]');if(button){button.click();setTimeout(syncThemeLabel,0);return true}return false}
-function syncThemeLabel(){const source=q('main.app>header.top [data-cw160-theme]'),target=q('#cw-settings-v320 [data-cw-v441-theme-label]');if(target)target.textContent=(source?.textContent||'Theme: System').trim()}
+function syncThemeLabel(){const source=q('main.app>header.top [data-cw160-theme]'),target=q('#cw-settings-v320 [data-cw-v441-theme-label]'),label=(source?.textContent||'Theme: System').trim();if(target&&target.textContent!==label)target.textContent=label}
 
 function installNavActions(){
   const nav=q('#cw-themed-system-nav');if(!nav)return false;
