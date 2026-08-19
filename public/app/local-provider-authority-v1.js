@@ -1,13 +1,17 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-local-provider-authority-v1';
+const VERSION='1.0.1-local-provider-authority-v1-gemma4-runtime-floor';
 const PROFILE_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
-const LOCAL_RUNTIME_SRC='/app/local-chat-runtime-v295.js?v=1.0.126-local-provider-authority';
+const LOCAL_RUNTIME_SRC='/app/local-chat-runtime-v295.js?v=1.0.127-gemma4-runtime-floor';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','smollm2','smollm3','qwen','browser']);
+const GEMMA4_MOBILE_IDS=new Set(['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile']);
+const GEMMA4_RUNTIME_FLOOR='4.3.0';
+const BUNDLED_TRANSFORMERS_V4='4.2.0';
+const GEMMA4_LOCAL_FALLBACK_IDS=Object.freeze(['gemma3-1b-it-q4f16','qwen3-1.7b-q4f16','qwen3-0.6b-q4f16','smollm2-360m-instruct-q4f16','smollm2-135m-instruct-q8-wasm']);
 const GUIDE=Object.freeze({
   civweave:{name:'Weaveling',mode:'Plan',role:'Quest guide and central orchestrator'},
   'living-school':{name:'Moss',mode:'Learn',role:'Learning Journey guide'},
@@ -16,7 +20,7 @@ const GUIDE=Object.freeze({
   anarchadia:{name:'Merlin',mode:'Govern',role:'civic and automation guide'}
 });
 const FALLBACK_TEXT_RE=/(?:could not finish this request with the selected local ai model|could not reach an available guild or cloudflare ai|deterministic(?:-| )local|kept this locally\.)/i;
-let localRuntimePromise=null,assistantTarget=null,serverTarget=null,installTimer=0;
+let localRuntimePromise=null,assistantTarget=null,serverTarget=null,registryTarget=null,installTimer=0;
 
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -63,20 +67,21 @@ function outputText(result){
 function setDecisionStrip(text,state='local'){
   try{const node=document.querySelector?.('#cw-persistent-guide-chat-v215 [data-minilm-decision-strip]');if(!node)return;node.dataset.state=state;const label=node.querySelector?.('span')||node;label.textContent=text}catch{}
 }
-function publishLocalRoute(system,model){
-  const detail={schema:'civweave.response-route.v1',system,taskClass:'local-guide',artifactClass:null,networkRequired:false,confidence:1,source:'local-provider-authority-v1',provider:'downloaded-local',model,localProviderPinned:true};
+function publishLocalRoute(system,model,extra={}){
+  const detail={schema:'civweave.response-route.v1',system,taskClass:'local-guide',artifactClass:null,networkRequired:false,confidence:1,source:'local-provider-authority-v1',provider:'downloaded-local',model,localProviderPinned:true,...extra};
   try{dispatchEvent(new CustomEvent('civweave:response-route',{detail}))}catch{}
   emit('civweave:local-provider-authority-route',detail);
-  setDecisionStrip(`Local route · ${model||'downloaded model'} · provider pinned`,'local');
+  setDecisionStrip(extra.localTierFallback?`Local route · ${model||'downloaded model'} · local fallback from ${extra.requestedModel||'selected model'}`:`Local route · ${model||'downloaded model'} · provider pinned`,'local');
   return detail;
 }
+function runtimeFloorError(model){return Object.assign(new Error(`${model||'The selected Gemma 4 mobile model'} uses the new Q2F16 mobile graph, which requires Transformers.js ${GEMMA4_RUNTIME_FLOOR} or newer. Civweave currently bundles Transformers.js ${BUNDLED_TRANSFORMERS_V4}. The model pack can stay installed, but this runtime cannot execute it yet. Install or select another downloaded local model until the browser runtime is upgraded.`),{code:'LOCAL_MODEL_RUNTIME_TOO_OLD',requiredRuntime:GEMMA4_RUNTIME_FLOOR,bundledRuntime:BUNDLED_TRANSFORMERS_V4,model})}
 function localFailure(args,error){
-  const system=systemFor(args),guide=guideFor(system),selected=selectedLocal(),message=clean(error?.message||error||'The selected local model did not finish.',1000),model=clean(selected?.id||configuredInteractive()?.model,240);
+  const system=systemFor(args),guide=guideFor(system),selected=selectedLocal(),message=clean(error?.message||error||'The selected local model did not finish.',1400),model=clean(selected?.id||configuredInteractive()?.model,240),runtimeFloor=error?.code==='LOCAL_MODEL_RUNTIME_TOO_OLD';
   setDecisionStrip(`Local route · ${model||'downloaded model'} · unavailable`,'error');
   emit('civweave:local-provider-authority-failed',{system,model,message,code:error?.code||'LOCAL_AI_UNAVAILABLE'});
   return{
-    response:{answer:`${guide.name} could not finish this request with the selected local AI model. Civweave kept the request on this device and did not contact a Guild or Cloudflare AI.`,choice:{mode:guide.mode,system,room:'',nextAction:'Retry locally, choose another local model, or change the AI route in Settings if you want network processing.'},assumptions:[],requiresConsent:false,confidence:1},
-    requestedProvider:'downloaded-local',provider:'local-ai-unavailable',model,usage:null,responseRouting:{schema:'civweave.response-route.v1',system,networkRequired:false,source:'local-provider-authority-v1',provider:'downloaded-local',localProviderPinned:true},fallbackFrom:{provider:'downloaded-local',reason:message},providerRouteFailure:{code:error?.code||'LOCAL_AI_UNAVAILABLE',message}
+    response:{answer:`${guide.name} could not finish this request with the selected local AI model. Civweave kept the request on this device and did not contact a Guild or Cloudflare AI.\n\nLocal runtime detail: ${message}`,choice:{mode:guide.mode,system,room:'',nextAction:runtimeFloor?'Select an already-installed compatible local model. The Gemma 4 pack can remain installed until Civweave upgrades its Transformers.js runtime.':'Retry locally, choose another local model, or change the AI route in Settings if you want network processing.'},assumptions:[],requiresConsent:false,confidence:1},
+    requestedProvider:'downloaded-local',provider:'local-ai-unavailable',model,usage:null,responseRouting:{schema:'civweave.response-route.v1',system,networkRequired:false,source:'local-provider-authority-v1',provider:'downloaded-local',localProviderPinned:true},fallbackFrom:{provider:'downloaded-local',reason:message},providerRouteFailure:{code:error?.code||'LOCAL_AI_UNAVAILABLE',message,requiredRuntime:error?.requiredRuntime||null,bundledRuntime:error?.bundledRuntime||null}
   };
 }
 function loadLocalRuntime(){
@@ -90,17 +95,64 @@ function loadLocalRuntime(){
   }).finally(()=>{localRuntimePromise=null});
   return localRuntimePromise;
 }
+function patchGemma4Registry(){
+  const registry=globalThis.CivweaveLocalModelRegistryV266;
+  if(!registry?.models||registry.__civweaveGemma4RuntimeFloorV1){registryTarget=registry||registryTarget;return Boolean(registry)}
+  const replacements=new Map();
+  for(const model of registry.models){
+    if(!GEMMA4_MOBILE_IDS.has(model?.id))continue;
+    replacements.set(model.id,Object.freeze({...model,status:'runtime-blocked',recommended:'',runtimeRequirement:Object.freeze({package:'@huggingface/transformers',minimumVersion:GEMMA4_RUNTIME_FLOOR,bundledVersion:BUNDLED_TRANSFORMERS_V4,feature:'2-bit-gather'}),reason:`This Q2F16 mobile graph requires Transformers.js ${GEMMA4_RUNTIME_FLOOR}+; Civweave currently bundles ${BUNDLED_TRANSFORMERS_V4}.`,fallbackIds:Object.freeze([...GEMMA4_LOCAL_FALLBACK_IDS])}));
+  }
+  const models=Object.freeze(registry.models.map(model=>replacements.get(model?.id)||model)),map=new Map(models.map(model=>[model.id,model]));
+  const byId=id=>map.get(id)||null;
+  const fallbacks=modelOrId=>{const model=typeof modelOrId==='string'?byId(modelOrId):byId(modelOrId?.id)||modelOrId;return (model?.fallbackIds||[]).map(byId).filter(Boolean)};
+  const installable=()=>models.filter(model=>model.installable),experimental=()=>models.filter(model=>!model.installable);
+  const runtimeModels=Object.freeze((registry.runtimeModels||models.filter(model=>model.installable&&['transformers-js-v3','transformers-js-v4'].includes(model.runtime))).map(model=>byId(model.id)||model));
+  const capable=request=>{try{return (registry.capable?.(request)||[]).map(model=>byId(model.id)||model)}catch{return[]}};
+  try{globalThis.CivweaveLocalModelRegistryV266=Object.freeze({...registry,models,runtimeModels,byId,fallbacks,installable,experimental,capable,__civweaveGemma4RuntimeFloorV1:true,gemma4MobileRuntimeFloor:GEMMA4_RUNTIME_FLOOR,gemma4MobileBundledRuntime:BUNDLED_TRANSFORMERS_V4,gemma4MobileRuntimeBlocked:true})}catch{return false}
+  registryTarget=globalThis.CivweaveLocalModelRegistryV266;
+  emit('civweave:gemma4-mobile-runtime-floor',{required:GEMMA4_RUNTIME_FLOOR,bundled:BUNDLED_TRANSFORMERS_V4,fallbackIds:[...GEMMA4_LOCAL_FALLBACK_IDS]});
+  return true;
+}
+async function installedGemma4Fallback(){
+  patchGemma4Registry();
+  const manager=globalThis.CivweaveLocalModelDownloadV266,registry=globalThis.CivweaveLocalModelRegistryV266;
+  if(!manager?.status||!registry?.byId)return null;
+  for(const id of GEMMA4_LOCAL_FALLBACK_IDS){
+    const spec=registry.byId(id);if(!spec)continue;
+    try{const status=await manager.status(id);if(status?.available)return spec}catch{}
+  }
+  return null;
+}
+async function runLocalModel(runtime,args,messages,requestedModel){
+  const generateArgs={systemPrompt:systemPrompt(systemFor(args)),messages,onToken:typeof args.onToken==='function'?args.onToken:undefined,onProgress:typeof args.onProgress==='function'?args.onProgress:undefined};
+  if(!GEMMA4_MOBILE_IDS.has(requestedModel))return{result:await runtime.generate(generateArgs),requestedModel,executedModel:requestedModel,localTierFallback:false};
+  try{await runtime.ready?.(generateArgs.onProgress)}catch(error){throw error}
+  patchGemma4Registry();
+  const fallback=await installedGemma4Fallback();
+  if(!fallback)throw runtimeFloorError(requestedModel);
+  const manager=globalThis.CivweaveLocalModelDownloadV266,original=manager?.selection?.()||selectedLocal();
+  if(!manager?.select)throw runtimeFloorError(requestedModel);
+  emit('civweave:gemma4-local-tier-fallback',{requestedModel,model:fallback.id,requiredRuntime:GEMMA4_RUNTIME_FLOOR,bundledRuntime:BUNDLED_TRANSFORMERS_V4});
+  manager.select(fallback.id);
+  try{
+    const result=await runtime.generate(generateArgs),executedModel=clean(result?.executionId||result?.id||fallback.id,240)||fallback.id;
+    return{result,requestedModel,executedModel,localTierFallback:true,fallbackReason:`${requestedModel} requires Transformers.js ${GEMMA4_RUNTIME_FLOOR}+; Civweave ${BUNDLED_TRANSFORMERS_V4} used the already-installed local fallback ${executedModel}.`};
+  }finally{
+    try{if(original?.active&&original.id)manager.select(original.id);else manager.select(null)}catch{}
+  }
+}
 async function localRespond(args={}){
-  const system=systemFor(args),guide=guideFor(system),selected=selectedLocal(),model=clean(selected?.id||configuredInteractive()?.model,240);
-  if(!selected?.id&&!model)return localFailure(args,Object.assign(new Error('No downloaded local model is selected.'),{code:'LOCAL_MODEL_NOT_SELECTED'}));
+  const system=systemFor(args),guide=guideFor(system),selected=selectedLocal(),requestedModel=clean(selected?.id||configuredInteractive()?.model,240);
+  if(!selected?.id&&!requestedModel)return localFailure(args,Object.assign(new Error('No downloaded local model is selected.'),{code:'LOCAL_MODEL_NOT_SELECTED'}));
   try{
     const runtime=await loadLocalRuntime(),history=historyRows(args),text=clean(args.text,12000),messages=[...history];
     if(text&&!(messages.at(-1)?.role==='user'&&messages.at(-1)?.content===text))messages.push({role:'user',content:text});
-    const result=await runtime.generate({systemPrompt:systemPrompt(system),messages,onToken:typeof args.onToken==='function'?args.onToken:undefined,onProgress:typeof args.onProgress==='function'?args.onProgress:undefined});
+    const run=await runLocalModel(runtime,args,messages,requestedModel),result=run.result;
     if(result?.status&&!['success','fallback'].includes(result.status))throw Object.assign(new Error(result?.error?.message||`Local provider ended with ${result.status}.`),{code:result?.error?.code||'LOCAL_MODEL_GENERATION_FAILED'});
     const answer=outputText(result);if(!answer)throw Object.assign(new Error('The selected local model returned no text.'),{code:'LOCAL_MODEL_EMPTY_RESPONSE'});
-    const route=publishLocalRoute(system,model);
-    return{response:{answer,choice:{mode:guide.mode,system,room:'',nextAction:''},assumptions:[],requiresConsent:false,confidence:.8},requestedProvider:'downloaded-local',provider:'downloaded-local',model,usage:result?.usage||null,responseRouting:route,fallbackFrom:null,context:{localProviderAuthority:{version:VERSION,pinned:true,direct:true}}};
+    const route=publishLocalRoute(system,run.executedModel,{requestedModel,localTierFallback:run.localTierFallback,localFallbackReason:run.fallbackReason||null});
+    return{response:{answer,choice:{mode:guide.mode,system,room:'',nextAction:''},assumptions:[],requiresConsent:false,confidence:.8},requestedProvider:'downloaded-local',provider:'downloaded-local',model:run.executedModel,usage:result?.usage||null,responseRouting:route,fallbackFrom:run.localTierFallback?{provider:'downloaded-local',model:requestedModel,reason:run.fallbackReason}:null,context:{localProviderAuthority:{version:VERSION,pinned:true,direct:true,requestedModel,executedModel:run.executedModel,localTierFallback:run.localTierFallback}}};
   }catch(error){return localFailure(args,error)}
 }
 function installAssistant(){
@@ -156,9 +208,9 @@ function watchWeavelingOrchestrator(){
   let value;
   try{Object.defineProperty(globalThis,key,{configurable:true,enumerable:true,get(){return value},set(next){value=guardWeavelingOrchestratorApi(next);queueMicrotask(installAssistant)}});return true}catch{return false}
 }
-function install(){watchWeavelingOrchestrator();installAssistant();installServerGuard();return true}
-for(const name of ['civweave:assistant-runtime-ready','civweave:guide-loader-reset','civweave:response-router-installed','civweave:unified-chat-system-ready','civweave:guide-capability-passover-ready','civweave:model-config-changed','civweave:local-model-runtime-ready','pageshow'])addEventListener(name,()=>queueMicrotask(install));
+function install(){watchWeavelingOrchestrator();patchGemma4Registry();installAssistant();installServerGuard();return true}
+for(const name of ['civweave:assistant-runtime-ready','civweave:guide-loader-reset','civweave:response-router-installed','civweave:unified-chat-system-ready','civweave:guide-capability-passover-ready','civweave:model-config-changed','civweave:local-model-registry-ready','civweave:local-model-runtime-ready','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;installTimer=setInterval(()=>{attempts+=1;install();if(attempts>=240)clearInterval(installTimer)},125);addEventListener('pagehide',()=>clearInterval(installTimer),{once:true});
 
-globalThis.CivweaveLocalProviderAuthorityV1=Object.freeze({version:VERSION,install,localPinned,configuredProvider,selectedLocal,localRespond,implicitGuideNetwork,watchWeavelingOrchestrator,localProviderPinned:true,directLocalGuideExecution:true,implicitGuideNetworkBlocked:true,latePlannerRewrap:true,cloudFallbackWhenLocal:false,deterministicFallbackWhenLocal:false});
+globalThis.CivweaveLocalProviderAuthorityV1=Object.freeze({version:VERSION,install,localPinned,configuredProvider,selectedLocal,localRespond,implicitGuideNetwork,watchWeavelingOrchestrator,patchGemma4Registry,installedGemma4Fallback,gemma4MobileRuntimeFloor:GEMMA4_RUNTIME_FLOOR,bundledTransformersV4:BUNDLED_TRANSFORMERS_V4,gemma4LocalFallbackIds:GEMMA4_LOCAL_FALLBACK_IDS,localProviderPinned:true,directLocalGuideExecution:true,implicitGuideNetworkBlocked:true,latePlannerRewrap:true,cloudFallbackWhenLocal:false,deterministicFallbackWhenLocal:false});
 })();
