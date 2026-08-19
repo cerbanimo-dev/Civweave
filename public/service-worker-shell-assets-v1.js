@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v21-browser-pack-import-progress';
+const REVISION='shell-assets-v1-repair-v22-mobile-campus-surface';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
@@ -26,6 +26,7 @@ const REQUIRED_CIVWEAVE_BOOT=[
   '/app/document-lifecycle-v221.js',
   '/app/working-campus-home-declutter-v1.js',
   '/app/working-campus-home-relocation-v441.js',
+  '/app/shared-tools-cleanup-v175.js',
   '/app/local-ai/browser-pack-download-v1.js',
   '/app/local-ai/browser-pack-pwa-import-v1.js'
 ];
