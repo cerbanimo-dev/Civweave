@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-policy.v1",
-  "built_at": "2026-08-18T07:26:56Z",
+  "built_at": "2026-08-19T20:21:01Z",
   "accepted_licenses": [
     "CC-BY",
     "CC-BY-SA",
@@ -23,5 +23,12 @@
     "wikimedia-commons": "machine-readable Commons license metadata",
     "internet-archive": "explicit licenseurl plus downloadable audio",
     "ccmixter": "Query API restricted to allowlisted Creative Commons/Public Domain classes plus per-result license evidence"
-  }
+  },
+  "vocal_required": true,
+  "instrumental_only_rejected": true,
+  "minimum_teeth_score": 2,
+  "selection_rule": "Every published candidate has verified vocals and lyrical substance; instrumental-only candidates are rejected.",
+  "discovery_provider_scope": [
+    "ccmixter"
+  ]
 }
