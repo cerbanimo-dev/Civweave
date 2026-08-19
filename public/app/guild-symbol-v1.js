@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1.3-purpose-icons';
+const VERSION='guild-symbol-v1.4-purpose-icons-map-lock';
 const SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
 const CHAT_SRC='/app/assets/chat-symbol-v1.png';
@@ -24,6 +24,8 @@ function installStyle(doc=document){
 #cw-guild-quest-browser-v1 .cw-gqb-icon .${ICON_CLASS}{width:24px;height:24px;vertical-align:middle}
 #cw-working-campus-guilds-v243 .${ICON_CLASS}{width:1.55rem;height:1.55rem}
 #cw-working-campus-map-v243 .${MAP_ICON_CLASS},#cw-civweave-primary-actions-v1 [data-cw-civweave-nav="map"] .${MAP_ICON_CLASS}{width:1.55rem;height:1.55rem;vertical-align:middle}
+#cw-working-campus-map-v243 .cw-civweave-nav-icon,#cw-civweave-primary-actions-v1 [data-cw-civweave-nav="map"] .cw-civweave-nav-icon{display:inline-block!important;width:1.55rem!important;height:1.55rem!important;flex:0 0 1.55rem!important;background:url('${MAP_SRC}') center/contain no-repeat!important;font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important}
+#cw-working-campus-map-v243 .cw-civweave-nav-icon>*,#cw-civweave-primary-actions-v1 [data-cw-civweave-nav="map"] .cw-civweave-nav-icon>*{display:none!important}
 #cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"]{display:inline-flex;align-items:center;gap:6px}
 #cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"] .${ICON_CLASS}{width:18px;height:18px;vertical-align:middle}
 #cw-human-message-launcher-v1 .cw-human-face{background:transparent!important;text-shadow:none!important}
