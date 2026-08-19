@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="realm-console-canonical-v247-direct-nav-no-family-poller-r1">
+<html lang="en" data-build="realm-console-canonical-v248-persistent-shell-safe-boot-r1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -20,19 +20,20 @@
 <body>
 <script src="/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v227"></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-direct-r1"></script>
-<script src="/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r1"></script>
+<script src="/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r2-persistent-shell-safe"></script>
 <main id="rc-app" class="rc-app" tabindex="-1">
   <div class="rc-loading">Opening console…</div>
 </main>
 <div id="rc-toast" class="rc-toast" hidden></div>
+<!-- Keep the two render-critical scripts ahead of optional realm integrations so an unrelated deferred asset cannot strand the console on Opening console. -->
+<script src="/app/shared/civweave-parity-runtime.js?v=parity-bounded-r1" defer></script>
+<script src="/app/realm-console-v140.js?v=canonical-r3-boot-first" defer></script>
 <script src="/app/local-first-policy-v131.js?v=1.0.4" defer></script>
 <script src="/app/platform-stability-v159.js?v=canonical-chat-r1" defer></script>
 <script src="/app/platform-experience-v160.js?v=dark-review-r1" defer></script>
 <script src="/app/local-object-mesh-v146.js?v=direct-r36" defer></script>
-<script src="/app/shared/civweave-parity-runtime.js?v=parity-bounded-r1" defer></script>
-<script src="/app/realm-console-v140.js?v=canonical-r2-single-owner-nav" defer></script>
 <script src="/app/cerbanimo-quest-engine-v144.js?v=quest-engine-r25-frame-bounded" defer></script>
-<script type="module" src="/app/cerbanimo-task-tool-links-v1.mjs?v=task-tool-links-v1"></script>
+<script type="module" src="/app/cerbanimo-task-tool-links-v1.mjs?v=task-tool-links-r2-frame-bounded"></script>
 <script src="/app/cerbanimo-quest-path-v266.js?v=quest-path-lazy-r2" defer></script>
 <script src="/app/quest-arc-chronicle-v1.js?v=quest-arc-v1" defer></script>
 <script src="/app/cerbanimo-learning-packs-v1.js?v=learning-packs-v1-lazy-r1" defer></script>
