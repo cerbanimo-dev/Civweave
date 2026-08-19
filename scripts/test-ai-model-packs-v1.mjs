@@ -69,8 +69,9 @@ test('browser-managed packs expose every large file and support incremental PWA 
   assert.match(browserPackPwa,/data-cw-browser-pack-download-next/);
   assert.match(browserPackPwa,/cw-browser-pack-file-input/);
   assert.match(browserPackPwa,/current\.importFiles\(packId,files/);
+  assert.match(browserPackPwa,/current\.prepare\(packId/);
   assert.match(browserPackPwa,/explicitBrowserFiles:true/);
-  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.1\.0-explicit-files/);
+  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.1\.1-explicit-taps/);
   assert.match(shellAssets,/browser-pack-pwa-import-v1\.js/);
   assert.match(shellAssets,/browser-pack-download-v1\.js/);
 });
