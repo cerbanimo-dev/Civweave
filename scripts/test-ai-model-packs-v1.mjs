@@ -49,16 +49,28 @@ test('large packs stay browser-managed inside the PWA',()=>{
   assert.match(settings,/Browser downloads queued/);
 });
 
-test('browser-managed packs import finished downloads back into PWA storage',()=>{
+test('browser-managed packs expose every large file and support incremental PWA import',()=>{
+  assert.match(browserPack,/const RECEIPT_VERSION=2/);
+  assert.match(browserPack,/largeBytes:/);
+  assert.match(browserPack,/function queueNext\(/);
+  assert.match(browserPack,/function retryMissing\(/);
   assert.match(browserPack,/function importFiles\(/);
-  assert.match(browserPack,/function pickAndImport\(/);
+  assert.match(browserPack,/importedKeys/);
+  assert.match(browserPack,/startedKeys/);
+  assert.match(browserPack,/partial:true/);
+  assert.match(browserPack,/explicitBrowserFiles:true/);
+  assert.match(browserPack,/partialImport:true/);
   assert.match(browserPack,/cache\.put\(record\.url,new Response\(file/);
   assert.match(browserPack,/status:'ready'/);
-  assert.match(browserPackPwa,/Import finished downloads/);
-  assert.match(browserPackPwa,/settings-ai-pack-import/);
-  assert.match(browserPackPwa,/pickAndImport/);
-  assert.match(browserPackPwa,/button\[data-local-pack-download\]/);
-  assert.match(relocation,/browser-pack-pwa-import-v1\.js/);
+  assert.doesNotMatch(browserPack,/for\(let index=0;index<receipt\.large\.length;index\+\+\)/);
+
+  assert.match(browserPackPwa,/Import downloaded files/);
+  assert.match(browserPackPwa,/Download next/);
+  assert.match(browserPackPwa,/data-cw-browser-pack-download-next/);
+  assert.match(browserPackPwa,/cw-browser-pack-file-input/);
+  assert.match(browserPackPwa,/current\.importFiles\(packId,files/);
+  assert.match(browserPackPwa,/explicitBrowserFiles:true/);
+  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.1\.0-explicit-files/);
   assert.match(shellAssets,/browser-pack-pwa-import-v1\.js/);
   assert.match(shellAssets,/browser-pack-download-v1\.js/);
 });
