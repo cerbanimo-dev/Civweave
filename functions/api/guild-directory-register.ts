@@ -23,12 +23,7 @@ function safeHttpsOrigin(value: unknown) {
   }
 }
 
-export const onRequestPost: PagesFunction = async context => {
-  const input = await context.request.json().catch(() => ({} as Record<string, unknown>));
-  const publicOrigin = safeHttpsOrigin((input as Record<string, unknown>).publicOrigin);
-  if (!publicOrigin) return reply({ ok: false, error: "A public HTTPS Guild Cloud origin is required." }, 400);
-
-  const coreOrigin = isStagingRequest(context.request) ? STAGING_CORE : PRODUCTION_CORE;
+async function proxyRegistration(coreOrigin: string, publicOrigin: string) {
   try {
     const response = await fetch(new URL("/api/guild-directory/register", coreOrigin), {
       method: "POST",
@@ -41,4 +36,15 @@ export const onRequestPost: PagesFunction = async context => {
   } catch (error) {
     return reply({ ok: false, error: "guild-directory-registration-unavailable", message: String((error as Error)?.message || error) }, 502);
   }
+}
+
+export const onRequestPost: PagesFunction = async context => {
+  const input = await context.request.json().catch(() => ({} as Record<string, unknown>));
+  const publicOrigin = safeHttpsOrigin((input as Record<string, unknown>).publicOrigin);
+  if (!publicOrigin) return reply({ ok: false, error: "A public HTTPS Guild Cloud origin is required." }, 400);
+
+  if (isStagingRequest(context.request)) {
+    return proxyRegistration(STAGING_CORE, publicOrigin);
+  }
+  return proxyRegistration(PRODUCTION_CORE, publicOrigin);
 };
