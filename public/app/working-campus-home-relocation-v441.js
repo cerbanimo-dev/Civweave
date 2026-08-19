@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-working-campus-home-relocation-v441';
+const VERSION='1.0.2-working-campus-home-relocation-v441-browser-pack-import';
 const STYLE_ID='cw-working-campus-home-relocation-v441-style';
 const NAV_ACTIONS_ID='cw-civweave-primary-actions-v441';
 const APP_TAB='app-device';
+const BROWSER_PACK_IMPORT_SRC='/app/local-ai/browser-pack-pwa-import-v1.js?v=1.0.0-pwa-import';
 if(globalThis.CivweaveHomeRelocationV441?.version===VERSION)return;
 const isCivweave=()=>String(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||'').toLowerCase()==='civweave';
 if(!isCivweave())return;
@@ -73,12 +74,18 @@ function installAppSettings(){
     q('[data-cw-v441-theme]',panel).addEventListener('click',cycleTheme);q('[data-cw-v441-downloads]',panel).addEventListener('click',openDownloads);form.append(panel)}
   syncThemeLabel();return true;
 }
-function maintain(){if(!isCivweave())return;installStyle();installNavActions();installAppSettings();syncThemeLabel()}
+function ensureBrowserPackPwaImport(){
+  if(globalThis.CivweaveBrowserPackPwaImportV1?.ensureBridge)return true;
+  if(document.querySelector('script[data-cw-v441-browser-pack-import]'))return false;
+  const script=document.createElement('script');script.src=BROWSER_PACK_IMPORT_SRC;script.async=false;script.dataset.cwV441BrowserPackImport='';
+  (document.head||document.documentElement).append(script);return true;
+}
+function maintain(){if(!isCivweave())return;installStyle();installNavActions();installAppSettings();syncThemeLabel();ensureBrowserPackPwaImport()}
 const observer=new MutationObserver(()=>maintain());
-function boot(){installStyle();maintain();observer.observe(document.documentElement,{childList:true,subtree:true});for(const delay of [80,300,900,1800,3600])setTimeout(maintain,delay)}
+function boot(){installStyle();ensureBrowserPackPwaImport();maintain();observer.observe(document.documentElement,{childList:true,subtree:true});for(const delay of [80,300,900,1800,3600])setTimeout(maintain,delay)}
 addEventListener('civweave:model-settings-opened',()=>setTimeout(installAppSettings,0));
 addEventListener('civweave:settings-ready',()=>setTimeout(installAppSettings,0));
 addEventListener('pageshow',maintain);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweaveHomeRelocationV441=Object.freeze({version:VERSION,installNavActions,installAppSettings,openGuilds,openMap,openDownloads,cycleTheme,maintain});
+globalThis.CivweaveHomeRelocationV441=Object.freeze({version:VERSION,installNavActions,installAppSettings,ensureBrowserPackPwaImport,openGuilds,openMap,openDownloads,cycleTheme,maintain});
 })();
