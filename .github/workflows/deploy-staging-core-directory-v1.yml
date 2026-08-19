@@ -1,0 +1,113 @@
+name: Deploy Staging Guild Directory Core v1
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'cloudflare/core/src/guild-directory.mjs'
+      - 'cloudflare/core/src/origin-entry.mjs'
+      - 'cloudflare/core/src/live-entry.mjs'
+      - 'cloudflare/core/wrangler.template.jsonc'
+      - 'cloudflare/core/migrations/**'
+      - '.github/workflows/deploy-staging-core-directory-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-staging-core-directory
+  cancel-in-progress: true
+
+env:
+  STAGING_CORE_WORKER: civweave-core-staging
+  STAGING_CORE_ORIGIN: https://civweave-core-staging.cerbanimo.workers.dev
+  STAGING_D1: civweave-core-staging
+
+jobs:
+  deploy:
+    name: Deploy isolated public Guild directory core
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: https://civweave-core-staging.cerbanimo.workers.dev
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify source and Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check cloudflare/core/src/guild-directory.mjs
+          node --check cloudflare/core/src/origin-entry.mjs
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          npx --yes wrangler@4 whoami
+
+      - name: Resolve isolated staging D1 and config
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 list --json > /tmp/civweave-d1.json
+          D1_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const raw=JSON.parse(fs.readFileSync('/tmp/civweave-d1.json','utf8'));
+          const rows=Array.isArray(raw)?raw:(raw.result||raw.databases||[]);
+          const row=rows.find(item=>item?.name===process.env.STAGING_D1);
+          process.stdout.write(String(row?.uuid||row?.id||row?.database_id||row?.databaseId||''));
+          NODE
+          )"
+          test -n "$D1_ID" || { echo 'Isolated staging D1 does not exist; run the staging core bootstrap once first.'; exit 3; }
+          cp cloudflare/core/wrangler.template.jsonc /tmp/civweave-core-staging-directory.jsonc
+          D1_ID="$D1_ID" node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path='/tmp/civweave-core-staging-directory.jsonc';
+          let text=fs.readFileSync(path,'utf8');
+          text=text
+            .replace('"name": "civweave-core"','"name": "civweave-core-staging"')
+            .replace('"database_name": "civweave-core"','"database_name": "civweave-core-staging"')
+            .replace('__CIVWEAVE_CORE_D1_ID__',process.env.D1_ID)
+            .replace('"NODE_DOMAIN": "nodes.commonweave.earth"','"NODE_DOMAIN": "cerbanimo.workers.dev"')
+            .replace('"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.cc"','"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave-staging.pages.dev"')
+            .replace('"CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core"','"CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core-staging"')
+            .replace('"STRIPE_CONNECT_SAMPLE_ENABLED": "false"','"STRIPE_CONNECT_SAMPLE_ENABLED": "false",\n    "CIVWEAVE_ENVIRONMENT": "staging",\n    "CIVWEAVE_PAYMENT_ENVIRONMENT": "stripe-test"');
+          text=text.replace(/\n  "r2_buckets": \[[\s\S]*?\n  \],/,'');
+          if(text.includes('"name": "civweave-core"'))throw new Error('Refusing production core target.');
+          if(text.includes('"database_name": "civweave-core"'))throw new Error('Refusing production D1 target.');
+          fs.writeFileSync(path,text);
+          NODE
+
+      - name: Apply D1 migrations and deploy isolated core
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 migrations apply "$STAGING_D1" --remote --config /tmp/civweave-core-staging-directory.jsonc
+          npx --yes wrangler@4 deploy --dry-run --config /tmp/civweave-core-staging-directory.jsonc
+          npx --yes wrangler@4 deploy --keep-vars --config /tmp/civweave-core-staging-directory.jsonc
+
+      - name: Probe Guild directory route
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            STATUS="$(curl --silent --output /tmp/guild-directory-probe.json --write-out '%{http_code}' \
+              -X POST "$STAGING_CORE_ORIGIN/api/guild-directory/register" \
+              -H 'content-type: application/json' \
+              --data '{}')"
+            if [ "$STATUS" = '400' ]; then break; fi
+            sleep 2
+          done
+          test "$STATUS" = '400' || { cat /tmp/guild-directory-probe.json || true; echo "Expected validation response from Guild directory route, got HTTP $STATUS"; exit 4; }
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const body=JSON.parse(fs.readFileSync('/tmp/guild-directory-probe.json','utf8'));
+          if(body.ok!==false||!/origin/i.test(String(body.error||'')))throw new Error('Staging core did not expose the expected Guild directory validation contract.');
+          console.log(JSON.stringify({ok:true,service:'civweave-core-staging',guildDirectoryRoute:true,stripeCredentialRequired:false},null,2));
+          NODE
