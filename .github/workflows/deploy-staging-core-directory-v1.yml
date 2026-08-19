@@ -73,8 +73,9 @@ jobs:
           fi
           test -n "$D1_ID" || { echo 'Could not resolve isolated staging D1 after creation.'; exit 3; }
           cp cloudflare/core/wrangler.template.jsonc /tmp/civweave-core-staging-directory.jsonc
-          rm -rf /tmp/migrations
+          rm -rf /tmp/migrations /tmp/src
           cp -R cloudflare/core/migrations /tmp/migrations
+          cp -R cloudflare/core/src /tmp/src
           D1_ID="$D1_ID" node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const path='/tmp/civweave-core-staging-directory.jsonc';
