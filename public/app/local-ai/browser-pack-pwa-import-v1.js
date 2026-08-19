@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-browser-pack-pwa-import-v1-stale-bridge-upgrade';
-const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.1.0-pwa-import';
+const VERSION='1.0.2-browser-pack-pwa-import-v1-retryable';
+const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.1.1-pwa-import-retry';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
 if(globalThis.CivweaveBrowserPackPwaImportV1?.version===VERSION)return;
@@ -15,12 +15,12 @@ function status(text,error=false){
   if(el){el.textContent=text;el.classList.toggle('cw-local-error',Boolean(error))}
 }
 function ensureBridge(){
-  if(bridge()?.pickAndImport&&bridge()?.queue)return Promise.resolve(bridge());
+  if(bridge()?.pickAndImport&&bridge()?.queue&&bridge()?.version?.startsWith?.('1.1.1-'))return Promise.resolve(bridge());
   if(bridgePromise)return bridgePromise;
   bridgePromise=new Promise((resolve,reject)=>{
     const target=new URL(BRIDGE_SRC,location.href).href;
     const exact=[...document.scripts].find(script=>script.src===target);
-    const ready=()=>bridge()?.pickAndImport&&bridge()?.queue;
+    const ready=()=>bridge()?.pickAndImport&&bridge()?.queue&&bridge()?.version?.startsWith?.('1.1.1-');
     if(exact){
       if(ready()){resolve(bridge());return}
       exact.addEventListener('load',()=>ready()?resolve(bridge()):reject(new Error('The Civweave browser-pack bridge did not become ready.')),{once:true});
@@ -70,7 +70,7 @@ function syncCards(){
 }
 function beginImport(packId,control){
   const current=bridge();
-  if(!current?.pickAndImport){
+  if(!current?.pickAndImport||!current?.version?.startsWith?.('1.1.1-')){
     status('Preparing the in-PWA import picker. Tap Import finished downloads again in a moment.');
     ensureBridge().then(syncCards,error=>status(String(error?.message||error),true));
     return;
@@ -88,7 +88,7 @@ function beginImport(packId,control){
 }
 function beginQueue(packId,control){
   const current=bridge();
-  if(!current?.queue||!current?.pickAndImport){
+  if(!current?.queue||!current?.pickAndImport||!current?.version?.startsWith?.('1.1.1-')){
     status('Preparing the browser download bridge. Tap Download pack again in a moment.');
     ensureBridge().then(syncCards,error=>status(String(error?.message||error),true));
     return;
