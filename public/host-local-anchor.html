@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#141126">
-<title>Create a desktop or Raspberry Pi Civweave Guild host</title>
+<title>Set up a Civweave local Guild Anchor</title>
 <link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">
 <style>
-:root{color-scheme:dark}body{margin:0;background:#07111b;color:#f4f0e7;font:16px/1.5 system-ui,-apple-system,sans-serif}main{max-width:820px;margin:auto;padding:34px 20px 80px}h1{font-size:clamp(2rem,7vw,4rem);line-height:1;margin:.2em 0}.eyebrow{color:#e6c766;font-weight:900;letter-spacing:.12em}.card{margin:20px 0;padding:20px;border:1px solid #dfc16655;border-radius:20px;background:#0e1b28}pre{overflow:auto;padding:14px;border-radius:12px;background:#02080d;color:#dff7f4}code{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.note{color:#bdcbd2}.ownership{padding:14px 16px;border:1px solid #74dfc766;border-radius:14px;background:#09251f;color:#dff7ef}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions a,.actions button{padding:11px 14px;border:1px solid #dfc16666;border-radius:11px;background:#1a2938;color:white;text-decoration:none;font-weight:800;cursor:pointer}.actions .primary{background:#604817}
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#07111b;color:#f4f0e7;font:16px/1.5 system-ui,-apple-system,sans-serif}main{max-width:900px;margin:auto;padding:34px 20px 80px}h1{font-size:clamp(2rem,7vw,4rem);line-height:1;margin:.2em 0}.eyebrow{color:#e6c766;font-weight:900;letter-spacing:.12em}.card{margin:20px 0;padding:20px;border:1px solid #dfc16655;border-radius:20px;background:#0e1b28}pre{overflow:auto;padding:14px;border-radius:12px;background:#02080d;color:#dff7f4}code{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.note{color:#bdcbd2}.ownership{padding:14px 16px;border:1px solid #74dfc766;border-radius:14px;background:#09251f;color:#dff7ef}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions a,.actions button{padding:11px 14px;border:1px solid #dfc16666;border-radius:11px;background:#1a2938;color:white;text-decoration:none;font-weight:800;cursor:pointer}.actions .primary{background:#604817}.actions .mobile{background:#173f49;border-color:#7ce9f3aa}.actions button:disabled{opacity:.55;cursor:wait}.route-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:22px 0}.route-card{padding:20px;border:1px solid #8de5ef44;border-radius:20px;background:#081924}.route-card.mobile-route{background:linear-gradient(145deg,#09232b,#10142a);border-color:#8de5ef77}.route-card h2{margin:.25em 0 .45em;font-size:1.35rem}.route-badge{display:inline-block;padding:4px 8px;border:1px solid #8de5ef55;border-radius:999px;color:#9debf4;font-size:.7rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.steps{margin:14px 0;padding-left:22px}.steps li+li{margin-top:8px}.mobile-status{margin:13px 0 0;padding:12px 14px;border:1px solid #8de5ef33;border-radius:12px;background:#05141d;color:#c6d9df}.mobile-status[data-state="ready"]{border-color:#72dfbc66;color:#c9f8e8;background:#08251f}.mobile-status[data-state="failed"]{border-color:#f0b46866;color:#ffe0b2;background:#2a1a0b}.desktop-section-title{margin-top:34px;padding-top:10px;border-top:1px solid #8de5ef22}.desktop-section-title h2{margin:.25em 0;font-size:clamp(1.5rem,4vw,2.2rem)}@media(max-width:720px){main{padding:22px 14px 70px}.route-grid{grid-template-columns:1fr}.actions>a,.actions>button{flex:1 1 100%;text-align:center}}
 </style>
 <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
 </head>
@@ -16,7 +16,7 @@
 <header class="cw-brand-lockup" aria-label="Civweave platform and Cerbanimo Guildkeeper tools">
   <div class="cw-platform-brand">
     <img class="cw-platform-logo" src="/app/logos/civweave-prismatic-wordmark-v1.png" alt="Civweave">
-    <div class="cw-platform-copy"><small>DESKTOP / PI GUILD HOST</small><h1>A root beneath the cloud</h1><p>Create or add a persistent Civweave Guild host on hardware you control.</p></div>
+    <div class="cw-platform-copy"><small>LOCAL GUILD ANCHOR</small><h1>A root beneath the cloud</h1><p>Add a Pocket Anchor on a phone or tablet, or a persistent Anchor on hardware that can stay awake.</p></div>
   </div>
   <div class="cw-steward-seal" aria-label="Cerbanimo Guildkeeper tool">
     <img class="cw-steward-logo" src="/app/logos/cerbanimo-steward-mark-v1.png" alt="Cerbanimo">
@@ -26,10 +26,44 @@
 <main>
 <section class="anchor-intro">
 <p class="eyebrow">CIVWEAVE GUILDKEEPER</p>
-<h1>Create a desktop or Raspberry Pi Guild host</h1>
-<p>Use a desktop, laptop, Raspberry Pi, NAS, or home server when you want a Guild replica that can stay awake. This machine supplies its own CPU, storage, memory, and network connection. It does not borrow compute from the Guild where you downloaded Civweave.</p>
-<p class="ownership"><strong>Cloud hosting is separate and optional.</strong> If you later add a Cloudflare public edge, its Pages project, Worker, and Durable Objects are created only in the Cloudflare account you authenticate for this Guild. A Pocket Guild can attach this persistent host later without becoming a different Guild.</p>
+<h1>Choose a local Anchor</h1>
+<p>A local Anchor gives this Guild another device-held copy of its identity and mesh state. Phones and tablets can act as opportunistic Pocket Anchors; desktops, Raspberry Pis, NAS devices, and home servers can run persistent Anchors.</p>
+<p class="ownership"><strong>These routes are complementary.</strong> A Pocket Anchor can travel with a Guildkeeper while a persistent Anchor stays awake at home or on site. Adding either route does not create a different Guild.</p>
 </section>
+
+<section class="route-grid" aria-label="Local Anchor setup routes">
+<article class="route-card mobile-route">
+<span class="route-badge">Phone / tablet · Pocket Anchor</span>
+<h2>Use this mobile device as an Anchor</h2>
+<p>Open this page on the phone or tablet you want to carry. Civweave will load its local object mesh and enroll this browser/PWA as a Pocket Node for the Guild represented by this host.</p>
+<ol class="steps">
+<li>Install or open Civweave on this device so the local storage and mesh remain available to the PWA.</li>
+<li>Tap <strong>Use this device as Pocket Anchor</strong>.</li>
+<li>Keep a persistent desktop/Pi Anchor too if you need a node that can stay awake continuously.</li>
+</ol>
+<div class="actions">
+<a class="mobile" href="/app/installed-entry-v146?installed=1&system=civweave&source=anchor-mobile">Open Civweave on this device</a>
+<button class="primary" type="button" id="prepare-pocket-anchor">Use this device as Pocket Anchor</button>
+</div>
+<p id="pocket-anchor-status" class="mobile-status" role="status" aria-live="polite">Checking this Guild and this device…</p>
+<p class="note">Mobile operating systems may suspend a PWA in the background, so a Pocket Anchor is a resilient carried replica rather than an always-running server.</p>
+</article>
+
+<article class="route-card">
+<span class="route-badge">Desktop / Pi / NAS · persistent Anchor</span>
+<h2>Run an always-available local host</h2>
+<p>Use Docker on a desktop, laptop, Raspberry Pi, NAS, or home server when you want a Guild replica that can remain online for longer periods.</p>
+<p class="note">Continue with the persistent-host directions below. A Pocket Anchor can be added before or after this setup.</p>
+<div class="actions"><a href="#persistent-anchor">Jump to desktop / Pi setup</a></div>
+</article>
+</section>
+
+<section id="persistent-anchor" class="desktop-section-title">
+<p class="eyebrow">PERSISTENT ANCHOR</p>
+<h2>Desktop, Raspberry Pi, NAS, or home server</h2>
+<p class="note">This machine supplies its own CPU, storage, memory, and network connection. It does not borrow compute from the Guild where you downloaded Civweave.</p>
+</section>
+
 <section class="card">
 <h2>1. Install prerequisites and check Docker</h2>
 <p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the machine that will stay near this Guild.</p>
@@ -69,11 +103,84 @@ node scripts/setup-cloudflare-node.mjs --host-id &lt;guild-id&gt;</code></pre>
 <p class="note">A created Stripe account is not enough: Guildkeeper revenue stays disabled until Stripe reports the connected account's transfer capability as active.</p>
 </section>
 <div class="actions"><a class="primary" href="/host-setup.html">Return to Guild setup</a><a href="/app/index.html#guild-host-title">Return to Downloads</a><button type="button" id="mark-paired">Mark this host paired</button></div>
-<p class="note">The current reminder is intentionally persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; marking the host paired dismisses it for this Guildkeeper browser.</p>
+<p class="note">The reminder is persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; preparing a Pocket Anchor or marking a persistent host paired dismisses it for this Guildkeeper browser.</p>
 </main>
 </div>
-<script>
-document.querySelector('#mark-paired')?.addEventListener('click',()=>{try{localStorage.setItem('civweave.host-steward.v1','1');localStorage.setItem('civweave.host-anchor.paired.v1','1');localStorage.removeItem('civweave.host-anchor.snooze-until.v1')}catch{};location.href='/host-setup.html'});
+<script type="module">
+import {ensurePocketMesh} from '/app/mobile-guild-create-v1.mjs';
+import {completeGuildHostOnboarding,onboardingStatus} from '/app/guild-host-onboarding-v1.mjs';
+
+const STEWARD_KEY='civweave.host-steward.v1';
+const ANCHOR_KEY='civweave.host-anchor.paired.v1';
+const SNOOZE_KEY='civweave.host-anchor.snooze-until.v1';
+const pocketButton=document.querySelector('#prepare-pocket-anchor');
+const pocketStatus=document.querySelector('#pocket-anchor-status');
+const params=new URLSearchParams(location.search);
+let guildContext=null;
+
+function savePaired(){try{localStorage.setItem(STEWARD_KEY,'1');localStorage.setItem(ANCHOR_KEY,'1');localStorage.removeItem(SNOOZE_KEY)}catch{}}
+function normalizeOrigin(value){try{return new URL(value||location.origin,location.href).origin}catch{return location.origin}}
+function fallbackGuildId(origin){try{return new URL(origin).hostname.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'guild'}catch{return 'guild'}}
+
+async function loadGuildContext(){
+  const hostOrigin=normalizeOrigin(params.get('host')||location.origin);
+  let meta=null;
+  try{const response=await fetch('/app/host-deployment-v1.json',{cache:'no-store'});if(response.ok)meta=await response.json()}catch{}
+  const guildId=String(params.get('guild')||meta?.hostId||fallbackGuildId(hostOrigin)).trim();
+  guildContext={guildId,hostOrigin,role:meta?.role||'guild'};
+  return guildContext;
+}
+
+function renderExistingPocket(){
+  const existing=onboardingStatus();
+  if(existing?.pocketNodeEnrolled&&existing.guildId===guildContext?.guildId){
+    savePaired();
+    pocketStatus.dataset.state='ready';
+    pocketStatus.textContent=`Pocket Anchor ready for ${guildContext.guildId} on this device. The local mesh can retain and exchange Guild state whenever Civweave is running.`;
+    pocketButton.textContent='Pocket Anchor ready';
+    return true;
+  }
+  return false;
+}
+
+async function preparePocketAnchor(){
+  pocketButton.disabled=true;
+  pocketStatus.dataset.state='';
+  pocketStatus.textContent='Loading Civweave local mesh on this device…';
+  try{
+    if(!guildContext)await loadGuildContext();
+    await ensurePocketMesh();
+    pocketStatus.textContent=`Enrolling this device as a Pocket Anchor for ${guildContext.guildId}…`;
+    const result=await completeGuildHostOnboarding({guildId:guildContext.guildId,primaryOrigin:null,route:'pocket-node',enablePocketNode:true});
+    if(!result?.pocketNodeEnrolled)throw new Error(result?.pocketNodeError||'Pocket Node enrollment did not complete.');
+    savePaired();
+    pocketStatus.dataset.state='ready';
+    pocketStatus.textContent=`Pocket Anchor ready for ${guildContext.guildId}. This device now carries the Guild's local mesh route; Cloudflare and persistent-host routes remain independent.`;
+    pocketButton.textContent='Pocket Anchor ready';
+  }catch(error){
+    pocketStatus.dataset.state='failed';
+    pocketStatus.textContent=error?.message||String(error);
+    pocketButton.disabled=false;
+  }
+}
+
+pocketButton?.addEventListener('click',preparePocketAnchor);
+document.querySelector('#mark-paired')?.addEventListener('click',()=>{savePaired();location.href='/host-setup.html'});
+
+try{
+  await loadGuildContext();
+  if(!renderExistingPocket()){
+    const device=String(navigator.userAgent||'');
+    const mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(device)||navigator.maxTouchPoints>1;
+    pocketStatus.textContent=mobile
+      ?`Mobile device detected. Ready to prepare a Pocket Anchor for ${guildContext.guildId}.`
+      :`This device can still use the Pocket route, but a phone or tablet is the intended carried-Anchor setup for ${guildContext.guildId}.`;
+  }
+}catch(error){
+  pocketStatus.dataset.state='failed';
+  pocketStatus.textContent=`Could not identify this Guild (${error?.message||error}). Return to Guild setup and reopen Local Anchor.`;
+  pocketButton.disabled=true;
+}
 </script>
 </body>
 </html>
