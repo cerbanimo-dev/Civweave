@@ -11,6 +11,7 @@ const workspace=read('public/app/guide-workspace-v242.js');
 const rookBridge=read('public/app/fellowfare-shared-guide-bridge-v236.js');
 const fellowfare=read('public/app/fellowfare-cabinet-v144.html');
 const nav=read('public/app/themed-system-nav-v178.js');
+const platformCss=read('public/app/platform-experience-v160.css');
 const radio=read('public/app/system-radio-agent-v233.js');
 const familyLoader=read('public/app/family-ai-loader-v105.js');
 const pkg=JSON.parse(read('package.json'));
@@ -48,12 +49,21 @@ const checks=[
     assert.doesNotMatch(fellowfare,/class="ffc144-rook"|data-ffc-rook-form|Chat with Rook/,'FellowFare must not reserve page space for a second Rook chat');
     assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);assert.match(rookBridge,/mode:'bubble-only'/);assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
   }],
-  ['radio launcher and expressive avatar nav keep their floating-layer contract',()=>{
+  ['radio launcher and expressive avatar nav keep one geometry owner',()=>{
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);
-    assert.match(nav,/--cw-themed-nav-height:clamp\(56px,7vw,72px\)/);assert.match(nav,/--cw-themed-nav-height:clamp\(60px,15vw,68px\)/);assert.match(nav,/top:4px;bottom:7px/);
+    assert.ok(nav.includes(':root{--cw-themed-nav-height:clamp(92px,10vw,100px);--cw-themed-nav-bottom-gap:0px}'),'canonical tall nav geometry missing');
+    assert.ok(nav.includes('@media(max-width:680px){:root{--cw-themed-nav-height:clamp(88px,22vw,96px);--cw-themed-nav-bottom-gap:0px}'),'canonical phone nav geometry missing');
+    assert.ok(nav.includes('@media(max-width:430px){:root{--cw-themed-nav-height:clamp(80px,22vw,88px);--cw-themed-nav-bottom-gap:0px}'),'canonical narrow-phone nav geometry missing');
+    assert.ok(nav.includes("geometryOwner:'canonical-tall-v1'"),'themed nav must declare sole geometry ownership');
+    assert.ok(guideCore.includes("navigationGeometryOwner:false"),'shared guide surface must disclaim navbar geometry ownership');
+    assert.ok(guideCore.includes('--cw-guide-nav-offset'),'floating guide controls must use a read-only measured nav offset');
+    assert.ok(!guideCore.includes("setProperty('--cw-themed-nav-height'"),'shared guide surface must not rewrite navbar height');
+    assert.doesNotMatch(guideCore,/--cw-themed-nav-height\s*:/,'shared guide surface must not declare navbar height');
+    assert.doesNotMatch(platformCss,/cw-themed-system-nav|cw-themed-nav-height|cw-themed-system-avatar-wrap/,'platform CSS must not own navbar geometry');
+    for(const retired of ['clamp(56px,7vw,68px)','clamp(58px,14vw,64px)','clamp(52px,7vw,72px)','clamp(50px,14vw,66px)'])assert.ok(!nav.includes(retired)&&!guideCore.includes(retired),`retired compact nav geometry returned: ${retired}`);
     for(const [id,asset] of [['civweave','Civweave-weaveling-sprites.png'],['living-school','Living-School-moss-sprites.png'],['cerbanimo','Cerbanimo-kamiya-sprites.png'],['fellowfare','FellowFare-rook-sprites.png'],['anarchadia','Anarchadia-merlin-sprites.png']])assert.ok(nav.includes(asset),`${id} lost expressive avatar atlas`);
     for(const [id,shade] of [['civweave','#dad7ff'],['living-school','#28412f'],['cerbanimo','#4f265f'],['fellowfare','#5a3618'],['anarchadia','#621f43']])assert.ok(nav.includes(`id:'${id}'`)&&nav.includes(`shade:'${shade}'`),`${id} lost corrected navigation tint`);
-    assert.match(nav,/background-size:500% 400%,cover/);assert.match(nav,/civweave:subsystem-avatar-state/);assert.match(nav,/civweave:avatar-expression/);
+    assert.match(nav,/background-size:500% 400%/);assert.match(nav,/civweave:subsystem-avatar-state/);assert.match(nav,/civweave:avatar-expression/);
   }],
   ['release syntax gate includes canonical shared guide runtimes',()=>{
     assert.equal(pkg.version,release);assert.match(pkg.scripts['check:syntax'],/public\/app\/shared-guide-surface-v236\.js/);assert.match(pkg.scripts['check:syntax'],/public\/app\/realm-session-integrity-v237\.js/);assert.match(pkg.scripts['check:syntax'],/public\/app\/guide-workspace-v242\.js/);assert.doesNotMatch(pkg.scripts['check:syntax'],/persistent-guide-viewport-v216|chat-single-owner-v245/);
