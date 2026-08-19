@@ -4,9 +4,12 @@ on:
   pull_request:
     paths:
       - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/local-provider-authority-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/working-campus-v156.part5.txt'
       - 'public/service-worker-v156.js'
       - 'scripts/verify-weaveling-plan-json-v190.mjs'
+      - 'scripts/verify-local-provider-authority-v1.mjs'
       - '.github/workflows/verify-weaveling-plan-json-v190.yml'
   workflow_dispatch:
 
@@ -24,6 +27,11 @@ jobs:
       - name: Syntax check structured planning files
         run: |
           node --check public/extensions/civweave-weaveling-plan-json-v190.js
+          node --check public/app/local-provider-authority-v1.js
+          node --check public/app/shared-guide-surface-v236.js
           node --check scripts/verify-weaveling-plan-json-v190.mjs
+          node --check scripts/verify-local-provider-authority-v1.mjs
       - name: Verify Gemini-authored weave and plain-language activation
         run: node scripts/verify-weaveling-plan-json-v190.mjs
+      - name: Verify downloaded-local provider authority
+        run: node scripts/verify-local-provider-authority-v1.mjs
