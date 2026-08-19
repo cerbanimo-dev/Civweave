@@ -1,0 +1,1192 @@
+{
+  "schema": "civweave.open-music-curated-playlists.v1",
+  "built_at": "2026-08-19T20:32:33Z",
+  "vocal_required": true,
+  "instrumental_only_rejected": true,
+  "playlists": [
+    {
+      "id": "civweave",
+      "name": "Civweave",
+      "entries": [
+        {
+          "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
+          "title": "Freedom in my voice",
+          "artist": "Carosone",
+          "provider": "ccmixter",
+          "provider_id": "28236",
+          "source_url": "https://ccmixter.org/files/Carosone/28236",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Carosone/Carosone_-_Freedom_in_my_voice.mp3",
+              "mime": "",
+              "bytes": 3704835,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Carosone",
+            "source_title": "Freedom in my voice",
+            "source_url": "https://ccmixter.org/files/Carosone/28236",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "creative freedom",
+            "reuse",
+            "open source"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:0d45f18990f07b6604f736f5",
+          "title": "Freedom in our Voices",
+          "artist": "ditto ditto",
+          "provider": "ccmixter",
+          "provider_id": "28039",
+          "source_url": "https://ccmixter.org/files/ditto/28039",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/ditto/ditto_-_Freedom_in_our_Voices.mp3",
+              "mime": "",
+              "bytes": 9534738,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "ditto ditto",
+            "source_title": "Freedom in our Voices",
+            "source_url": "https://ccmixter.org/files/ditto/28039",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "creative freedom",
+            "community",
+            "sharing"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
+          "title": "Mind Map This",
+          "artist": "texasradiofish",
+          "provider": "ccmixter",
+          "provider_id": "28143",
+          "source_url": "https://ccmixter.org/files/texasradiofish/28143",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/texasradiofish/texasradiofish_-_Mind_Map_This.mp3",
+              "mime": "",
+              "bytes": 10427337,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "texasradiofish",
+            "source_title": "Mind Map This",
+            "source_url": "https://ccmixter.org/files/texasradiofish/28143",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "commons",
+            "truth",
+            "freedom",
+            "creative rights"
+          ],
+          "explicit": true,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:f07b5096cec10f2b089e33e0",
+          "title": "yours and mine",
+          "artist": "Tomas PhUsIoN",
+          "provider": "ccmixter",
+          "provider_id": "28239",
+          "source_url": "https://ccmixter.org/files/phusion/28239",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/phusion/phusion_-_yours_and_mine.mp3",
+              "mime": "",
+              "bytes": 5963376,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Tomas PhUsIoN",
+            "source_title": "yours and mine",
+            "source_url": "https://ccmixter.org/files/phusion/28239",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "commons",
+            "ownership",
+            "collective life"
+          ],
+          "explicit": true,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:2d46c4b4c34c71aff58781fb",
+          "title": "LISA CRISTI",
+          "artist": "Bocrew",
+          "provider": "ccmixter",
+          "provider_id": "28448",
+          "source_url": "https://ccmixter.org/files/BOCrew/28448",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/BOCrew/BOCrew_-_LISA_CRISTI.mp3",
+              "mime": "",
+              "bytes": 1914716,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Bocrew",
+            "source_title": "LISA CRISTI",
+            "source_url": "https://ccmixter.org/files/BOCrew/28448",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "freedom",
+            "voice",
+            "hip hop"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        }
+      ]
+    },
+    {
+      "id": "living-school",
+      "name": "Living School",
+      "entries": [
+        {
+          "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
+          "provider": "ccmixter",
+          "provider_id": "61065",
+          "source_url": "https://ccmixter.org/files/djlang59/61065",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
+              "mime": "",
+              "bytes": 4741999,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "J.Lang",
+            "source_title": "Climate Change The Dirty Water Remix",
+            "source_url": "https://ccmixter.org/files/djlang59/61065",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "climate",
+            "truth",
+            "accountability",
+            "future"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:a0dff66c9efe6c7ac60f62fb",
+          "title": "Let the Walls Come Down",
+          "artist": "Stefan Kartenberg",
+          "provider": "ccmixter",
+          "provider_id": "66038",
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/66038",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Let_the_Walls_Come_Down.mp3",
+              "mime": "",
+              "bytes": 9332544,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Let_the_Walls_Come_Down_1.mp3",
+              "mime": "",
+              "bytes": 9257664,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Stefan Kartenberg",
+            "source_title": "Let the Walls Come Down",
+            "source_url": "https://ccmixter.org/files/JeffSpeed68/66038",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "inclusion",
+            "anti-hate",
+            "belonging"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:fe12a50b8cdb32fee29327ea",
+          "title": "Rise Up!",
+          "artist": "Stefan Kartenberg",
+          "provider": "ccmixter",
+          "provider_id": "61038",
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.mp3",
+              "mime": "",
+              "bytes": 9587904,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.flac",
+              "mime": "",
+              "bytes": 28018436,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Stefan Kartenberg",
+            "source_title": "Rise Up!",
+            "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "action",
+            "change",
+            "resilience"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:809f1a6c063d607b1727bca3",
+          "title": "Rosa's Story",
+          "artist": "Radioontheshelf",
+          "provider": "ccmixter",
+          "provider_id": "62674",
+          "source_url": "https://ccmixter.org/files/Radioontheshelf/62674",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_Rosa_s_Story_1.mp3",
+              "mime": "",
+              "bytes": 14142739,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Radioontheshelf",
+            "source_title": "Rosa's Story",
+            "source_url": "https://ccmixter.org/files/Radioontheshelf/62674",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "truth",
+            "history",
+            "justice",
+            "the vulnerable"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:d30b835d2a495ab650ddcdd4",
+          "title": "Sackjo22_Indelible Choices Choices May Change II",
+          "artist": "MalreDeszik",
+          "provider": "ccmixter",
+          "provider_id": "63518",
+          "source_url": "https://ccmixter.org/files/MalreDeszik/63518",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Sackjo22_Indelible_Choices_Choices_May_Change_II.mp3",
+              "mime": "",
+              "bytes": 4988700,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Sackjo22_Indelible_Choices_Choices_May_Change_II_1.mp3",
+              "mime": "",
+              "bytes": 4988316,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "MalreDeszik",
+            "source_title": "Sackjo22_Indelible Choices Choices May Change II",
+            "source_url": "https://ccmixter.org/files/MalreDeszik/63518",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "choice",
+            "consequence",
+            "agency",
+            "reflection"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        }
+      ]
+    },
+    {
+      "id": "cerbanimo",
+      "name": "Cerbanimo",
+      "entries": [
+        {
+          "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
+          "provider": "ccmixter",
+          "provider_id": "61065",
+          "source_url": "https://ccmixter.org/files/djlang59/61065",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
+              "mime": "",
+              "bytes": 4741999,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "J.Lang",
+            "source_title": "Climate Change The Dirty Water Remix",
+            "source_url": "https://ccmixter.org/files/djlang59/61065",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "climate",
+            "truth",
+            "accountability",
+            "future"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:1203b215c04a63c86d197be1",
+          "title": "Singularity",
+          "artist": "Stefan Kartenberg",
+          "provider": "ccmixter",
+          "provider_id": "57573",
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/57573",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Singularity_1.mp3",
+              "mime": "",
+              "bytes": 4271795,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Singularity.flac",
+              "mime": "",
+              "bytes": 32474761,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Stefan Kartenberg",
+            "source_title": "Singularity",
+            "source_url": "https://ccmixter.org/files/JeffSpeed68/57573",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "automation",
+            "corporate power",
+            "humanity",
+            "technology"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:4da4ba617f0ff3d64de81d5d",
+          "title": "This Wall",
+          "artist": "Admiral Bob",
+          "provider": "ccmixter",
+          "provider_id": "55625",
+          "source_url": "https://ccmixter.org/files/admiralbob77/55625",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_This_Wall_2.mp3",
+              "mime": "",
+              "bytes": 7459779,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_This_Wall.mp3",
+              "mime": "",
+              "bytes": 12319392,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Admiral Bob",
+            "source_title": "This Wall",
+            "source_url": "https://ccmixter.org/files/admiralbob77/55625",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "autonomy",
+            "labor",
+            "voice",
+            "self-direction"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:fe12a50b8cdb32fee29327ea",
+          "title": "Rise Up!",
+          "artist": "Stefan Kartenberg",
+          "provider": "ccmixter",
+          "provider_id": "61038",
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.mp3",
+              "mime": "",
+              "bytes": 9587904,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.flac",
+              "mime": "",
+              "bytes": 28018436,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Stefan Kartenberg",
+            "source_title": "Rise Up!",
+            "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "action",
+            "change",
+            "resilience"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:534960cbcb4bc14fc3d310a3",
+          "title": "Things Change",
+          "artist": "SackJo22",
+          "provider": "ccmixter",
+          "provider_id": "64609",
+          "source_url": "https://ccmixter.org/files/SackJo22/64609",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Things_Change.mp3",
+              "mime": "",
+              "bytes": 9831744,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "SackJo22",
+            "source_title": "Things Change",
+            "source_url": "https://ccmixter.org/files/SackJo22/64609",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "change",
+            "adaptation",
+            "resilience"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        }
+      ]
+    },
+    {
+      "id": "fellowfare",
+      "name": "FellowFare",
+      "entries": [
+        {
+          "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
+          "provider": "ccmixter",
+          "provider_id": "61065",
+          "source_url": "https://ccmixter.org/files/djlang59/61065",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
+              "mime": "",
+              "bytes": 4741999,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "J.Lang",
+            "source_title": "Climate Change The Dirty Water Remix",
+            "source_url": "https://ccmixter.org/files/djlang59/61065",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "climate",
+            "truth",
+            "accountability",
+            "future"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:70c01ad3a2d479485b7fe223",
+          "title": "Freedom in my Voice (the cover)",
+          "artist": "ditto ditto",
+          "provider": "ccmixter",
+          "provider_id": "28057",
+          "source_url": "https://ccmixter.org/files/ditto/28057",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/ditto/ditto_-_Freedom_in_my_Voice_(the_cover).mp3",
+              "mime": "",
+              "bytes": 8060387,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "ditto ditto",
+            "source_title": "Freedom in my Voice (the cover)",
+            "source_url": "https://ccmixter.org/files/ditto/28057",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "sharing",
+            "creative rights",
+            "community"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:4da4ba617f0ff3d64de81d5d",
+          "title": "This Wall",
+          "artist": "Admiral Bob",
+          "provider": "ccmixter",
+          "provider_id": "55625",
+          "source_url": "https://ccmixter.org/files/admiralbob77/55625",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_This_Wall_2.mp3",
+              "mime": "",
+              "bytes": 7459779,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_This_Wall.mp3",
+              "mime": "",
+              "bytes": 12319392,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Admiral Bob",
+            "source_title": "This Wall",
+            "source_url": "https://ccmixter.org/files/admiralbob77/55625",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "autonomy",
+            "labor",
+            "voice",
+            "self-direction"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:a0dff66c9efe6c7ac60f62fb",
+          "title": "Let the Walls Come Down",
+          "artist": "Stefan Kartenberg",
+          "provider": "ccmixter",
+          "provider_id": "66038",
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/66038",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Let_the_Walls_Come_Down.mp3",
+              "mime": "",
+              "bytes": 9332544,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Let_the_Walls_Come_Down_1.mp3",
+              "mime": "",
+              "bytes": 9257664,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Stefan Kartenberg",
+            "source_title": "Let the Walls Come Down",
+            "source_url": "https://ccmixter.org/files/JeffSpeed68/66038",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "inclusion",
+            "anti-hate",
+            "belonging"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:40b65af550bc0933c90424a9",
+          "title": "Like A Sycamore",
+          "artist": "Madam Snowflake",
+          "provider": "ccmixter",
+          "provider_id": "37764",
+          "source_url": "https://ccmixter.org/files/snowflake/37764",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Like_A_Sycamore.mp3",
+              "mime": "",
+              "bytes": 4771467,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/snowflake/snowflake_-_Like_A_Sycamore.flac",
+              "mime": "",
+              "bytes": 12460119,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Madam Snowflake",
+            "source_title": "Like A Sycamore",
+            "source_url": "https://ccmixter.org/files/snowflake/37764",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "recovery",
+            "ecology",
+            "gratitude",
+            "care"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        }
+      ]
+    },
+    {
+      "id": "anarchadia",
+      "name": "Anarchadia",
+      "entries": [
+        {
+          "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
+          "title": "Mind Map This",
+          "artist": "texasradiofish",
+          "provider": "ccmixter",
+          "provider_id": "28143",
+          "source_url": "https://ccmixter.org/files/texasradiofish/28143",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/texasradiofish/texasradiofish_-_Mind_Map_This.mp3",
+              "mime": "",
+              "bytes": 10427337,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "texasradiofish",
+            "source_title": "Mind Map This",
+            "source_url": "https://ccmixter.org/files/texasradiofish/28143",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "commons",
+            "truth",
+            "freedom",
+            "creative rights"
+          ],
+          "explicit": true,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:a4f43dde6f263bd73763e649",
+          "title": "The Singularity",
+          "artist": "Aussens@iter",
+          "provider": "ccmixter",
+          "provider_id": "57569",
+          "source_url": "https://ccmixter.org/files/tobias_weber/57569",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_The_Singularity.mp3",
+              "mime": "",
+              "bytes": 3597630,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_The_Singularity.flac",
+              "mime": "",
+              "bytes": 30250658,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Aussens@iter",
+            "source_title": "The Singularity",
+            "source_url": "https://ccmixter.org/files/tobias_weber/57569",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "automation",
+            "corporate power",
+            "humanity",
+            "technology"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:d944b702c1f51fa15cf1de4f",
+          "title": "We the People",
+          "artist": "mykleanthony",
+          "provider": "ccmixter",
+          "provider_id": "31759",
+          "source_url": "https://ccmixter.org/files/mykleanthony/31759",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/mykleanthony/mykleanthony_-_We_the_People.mp3",
+              "mime": "",
+              "bytes": 7691329,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "mykleanthony",
+            "source_title": "We the People",
+            "source_url": "https://ccmixter.org/files/mykleanthony/31759",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "oppression",
+            "collective power",
+            "peace",
+            "resistance"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:f07b5096cec10f2b089e33e0",
+          "title": "yours and mine",
+          "artist": "Tomas PhUsIoN",
+          "provider": "ccmixter",
+          "provider_id": "28239",
+          "source_url": "https://ccmixter.org/files/phusion/28239",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/phusion/phusion_-_yours_and_mine.mp3",
+              "mime": "",
+              "bytes": 5963376,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Tomas PhUsIoN",
+            "source_title": "yours and mine",
+            "source_url": "https://ccmixter.org/files/phusion/28239",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "commons",
+            "ownership",
+            "collective life"
+          ],
+          "explicit": true,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:fe12a50b8cdb32fee29327ea",
+          "title": "Rise Up!",
+          "artist": "Stefan Kartenberg",
+          "provider": "ccmixter",
+          "provider_id": "61038",
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.mp3",
+              "mime": "",
+              "bytes": 9587904,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.flac",
+              "mime": "",
+              "bytes": 28018436,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Stefan Kartenberg",
+            "source_title": "Rise Up!",
+            "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "action",
+            "change",
+            "resilience"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        }
+      ]
+    }
+  ]
+}

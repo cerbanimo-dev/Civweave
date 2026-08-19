@@ -4,6 +4,7 @@ import {
 } from "../_shared/staging-runtime";
 
 const CORE_DIRECTORY = "https://civweave-core.cerbanimo.workers.dev/api/nodes?limit=100";
+const STAGING_CORE_DIRECTORY = "https://civweave-core-staging.cerbanimo.workers.dev/api/nodes?limit=100";
 const FABRIC_ORIGIN = "https://civweave-node-cloud.cerbanimo.workers.dev";
 const STAGING_GUILD_SERVER_ORIGIN = "https://civweave-node-cloud-staging.cerbanimo.workers.dev";
 const STAGING_NODE_ID = "civweave-cloud";
@@ -97,6 +98,37 @@ function publicLocation(node: JsonRecord) {
   };
 }
 
+function isPublicMobileGuild(node: JsonRecord) {
+  const capabilities = Array.isArray(node?.capabilities) ? node.capabilities.map(String) : [];
+  return String(node?.runtime || "") === "cloudflare-mobile-guild-edge"
+    && capabilities.includes("public-guild-directory")
+    && Boolean(safeHttps(node?.publicOrigin))
+    && Boolean(publicLocation(node));
+}
+
+function publicMobileGuildNode(node: JsonRecord) {
+  if (!isPublicMobileGuild(node)) return null;
+  const nodeId = String(node.nodeId || "").trim();
+  if (!/^[a-z0-9-]{1,120}$/.test(nodeId)) return null;
+  const location = publicLocation(node);
+  const publicOrigin = safeHttps(node.publicOrigin);
+  if (!location || !publicOrigin) return null;
+  return {
+    schema: "civweave.hub-map-node.v1",
+    nodeId,
+    guildId: nodeId,
+    displayName: String(node.displayName || node.label || nodeId).slice(0, 180),
+    publicOrigin,
+    runtime: "cloudflare-mobile-guild-edge",
+    status: String(node.status || "active").slice(0, 40),
+    capabilities: Array.isArray(node.capabilities) ? node.capabilities.map(String).slice(0, 40) : [],
+    location,
+    updatedAt: node.updatedAt || location.syncedAt || null,
+    publicMobileGuild: true,
+    liveGuild: true,
+  };
+}
+
 function stagingLocation(nodeId: string) {
   const guild = stagingGuild(nodeId);
   if (!guild) return null;
@@ -134,10 +166,11 @@ async function liveStagingDirectory() {
     }, 500, "no-store");
   }
 
-  // Staging intentionally reads only the one live Guild identity it shadows.
-  // Never enumerate production fabric membership or manifests from this path.
-  const [directoryResult, manifestResult, stagingCapacityResult] = await Promise.all([
+  // Staging still shadows only one production fabric Guild. Independently deployed
+  // mobile Guilds are read exclusively from the isolated staging public directory.
+  const [directoryResult, stagingDirectoryResult, manifestResult, stagingCapacityResult] = await Promise.all([
     getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
+    getJson(STAGING_CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
     getJson(new URL(`/n/${encodeURIComponent(STAGING_NODE_ID)}/api/ai/node/manifest`, FABRIC_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
     getJson(new URL(`/api/fabric/capacity?nodeId=${encodeURIComponent(STAGING_NODE_ID)}`, STAGING_GUILD_SERVER_ORIGIN)).catch(() => ({ ok: false, status: 502, payload: {} })),
   ]);
@@ -154,13 +187,14 @@ async function liveStagingDirectory() {
   }
 
   const directory = Array.isArray(directoryResult.payload?.nodes) ? directoryResult.payload.nodes : [];
+  const stagingDirectory = Array.isArray(stagingDirectoryResult.payload?.nodes) ? stagingDirectoryResult.payload.nodes : [];
   const directoryNode = directory.find((node: JsonRecord) => String(node?.nodeId || "").trim() === STAGING_NODE_ID) || {};
   const manifest = manifestResult.ok ? (manifestResult.payload?.manifest || manifestResult.payload || {}) : {};
   const merged: JsonRecord = { ...directoryNode, ...manifest, nodeId: STAGING_NODE_ID };
   const location = publicLocation(merged) || stagingLocation(STAGING_NODE_ID);
   const liveOrigin = safeHttps(merged.publicOrigin) || FABRIC_ORIGIN;
 
-  const nodes = location ? [{
+  const stagingGuildNode = location ? {
     schema: "civweave.hub-map-node.v1",
     nodeId: STAGING_NODE_ID,
     displayName: guild.displayName || String(merged.displayName || merged.label || STAGING_NODE_ID).slice(0, 180),
@@ -176,7 +210,14 @@ async function liveStagingDirectory() {
     stagingShadowSeats: true,
     stagingGuildServerIsolated: true,
     productionMembershipIsolation: true,
-  }] : [];
+  } : null;
+
+  const publicMobileGuilds = stagingDirectory
+    .map((node: JsonRecord) => publicMobileGuildNode(node))
+    .filter(Boolean)
+    .filter((node: any) => node.nodeId !== STAGING_NODE_ID)
+    .slice(0, Math.max(0, MAX_NODES - (stagingGuildNode ? 1 : 0)));
+  const nodes = [...(stagingGuildNode ? [stagingGuildNode] : []), ...publicMobileGuilds];
 
   return reply({
     schema: "civweave.hub-map-directory.v1",
@@ -191,6 +232,7 @@ async function liveStagingDirectory() {
     nodes,
     source: {
       directory: directoryResult.ok ? "core-node-directory" : "unavailable",
+      mobileGuildDirectory: stagingDirectoryResult.ok ? "isolated-staging-core-public-guild-directory" : "unavailable",
       guild: manifestResult.ok ? "single-live-guild-manifest" : "unavailable",
       seats: "isolated-staging-guild-server",
     },
@@ -215,11 +257,13 @@ async function liveProductionDirectory() {
       .filter((node: JsonRecord) => /^[a-z0-9-]{1,120}$/.test(String(node?.nodeId || "")))
       .map((node: JsonRecord) => [String(node.nodeId), node]),
   );
-  const registered = [...new Set(
-    (Array.isArray(fabricResult.payload?.hostNodeIds) ? fabricResult.payload.hostNodeIds : [])
-      .map((value: unknown) => String(value || ""))
-      .filter((value: string) => /^[a-z0-9-]{1,120}$/.test(value)),
-  )].slice(0, MAX_NODES);
+  const fabricRegistered = (Array.isArray(fabricResult.payload?.hostNodeIds) ? fabricResult.payload.hostNodeIds : [])
+    .map((value: unknown) => String(value || ""))
+    .filter((value: string) => /^[a-z0-9-]{1,120}$/.test(value));
+  const mobileRegistered = directory
+    .filter((node: JsonRecord) => isPublicMobileGuild(node))
+    .map((node: JsonRecord) => String(node.nodeId));
+  const registered = [...new Set([...fabricRegistered, ...mobileRegistered])].slice(0, MAX_NODES);
 
   const manifests = await Promise.all(registered.map(async nodeId => {
     const directoryNode = directoryById.get(nodeId) || {};
@@ -233,9 +277,11 @@ async function liveProductionDirectory() {
     const liveOrigin = safeHttps(merged.publicOrigin) || FABRIC_ORIGIN;
     const location = publicLocation(merged);
     if (!location) return null;
+    const mobileGuild = isPublicMobileGuild(merged);
     return {
       schema: "civweave.hub-map-node.v1",
       nodeId,
+      ...(mobileGuild ? { guildId: nodeId, publicMobileGuild: true } : {}),
       displayName: String(merged.displayName || merged.label || nodeId).slice(0, 180),
       publicOrigin: liveOrigin,
       runtime: String(merged.runtime || "cloudflare-host-node").slice(0, 120),
@@ -254,6 +300,7 @@ async function liveProductionDirectory() {
     source: {
       directory: directoryResult.ok ? "core-node-directory" : "unavailable",
       fabric: fabricResult.ok ? "cloudflare-node-fabric" : "unavailable",
+      publicMobileGuilds: true,
     },
     privacy: {
       publicLocationsAreGuildkeeperPublished: true,

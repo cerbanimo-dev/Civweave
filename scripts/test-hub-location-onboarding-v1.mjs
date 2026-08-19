@@ -101,12 +101,18 @@ const setup = await readFile(new URL('../public/host-setup.html', import.meta.ur
 const browserScript = setup.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 assert.ok(browserScript, 'host setup inline script must exist');
 new vm.Script(browserScript, { filename: 'public/host-setup.html#inline-script' });
-assert.ok(setup.includes('Stand where the Guild lives.'));
+assert.ok(setup.includes('Stand where the Guild lives to finish setup.'));
+assert.ok(setup.includes('Every Guild needs a Guild Map location during setup.'));
+assert.ok(setup.includes('id="open-civweave"'));
+assert.ok(setup.includes('aria-disabled="true"'));
+assert.ok(setup.includes('Place this Guild on the Guild Map before entering Civweave'));
 assert.ok(setup.includes('navigator.geolocation.watchPosition'));
 assert.ok(setup.includes('publish-precise-location'));
 assert.ok(setup.includes("publicPrecision:precise?'precise':'rounded'"));
 assert.ok(setup.includes('position.coords.latitude.toFixed(coordinateDecimals)'));
 assert.ok(setup.includes("'x-civweave-location-key':claimKey"));
+assert.ok(setup.includes('workerOrigin:locationTarget.workerOrigin'));
+assert.ok(setup.includes('nodeIds:Array.isArray(result.nodeIds)'));
 assert.ok(setup.includes('Rounded placement is the default'));
 assert.ok(setup.includes('six decimal places'));
 assert.ok(setup.includes('CONNECT GUILDKEEPER PAYOUTS'));
@@ -126,17 +132,27 @@ assert.ok(rallySetup.includes('/api/fabric/rally-point'));
 assert.ok(rallySetup.includes('publicPlaceConfirmed:true'));
 assert.ok(rallySetup.includes('position.coords.latitude.toFixed(6)'));
 assert.ok(rallySetup.includes("'x-civweave-location-key':key"));
+assert.ok(rallySetup.includes("MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1'"));
+assert.ok(rallySetup.includes("authRoute:'guild-membership'"));
+assert.ok(rallySetup.includes("button.addEventListener('click',syncMobileGuildLocation,{capture:true})"));
+assert.ok(rallySetup.includes("import('/app/mobile-guild-create-v1.mjs?v=1.0.0-guildkeeper-location-auth')"));
+assert.ok(rallySetup.includes('module.updateMobileGuildLocation({precise})'));
+assert.ok(rallySetup.includes('This Guild was created on this device and already has'));
 
 console.log(JSON.stringify({
   ok: true,
-  schema: 'civweave.guild-location-onboarding.v1',
+  schema: 'civweave.guild-location-onboarding.v2',
   defaultPublicCoordinateDecimals: 3,
   defaultMinimumPublicPrecisionMeters: 100,
   precisePublicOptIn: true,
   precisePublicCoordinateDecimals: 6,
   precisePublicAccuracyMeters: precise.precisionMeters,
   exactReadingLeavesDeviceByDefault: false,
+  desktopLocationRequired: true,
+  guildMapUpdateCredentialRetained: true,
   guildkeeperUpdateKeyStoredAsHash: true,
+  mobileGuildLocationUsesFoundingCredential: true,
+  mobileGuildCreationLocationMirroredIntoSetup: true,
   guildRallyPointSchema: rally.schema,
   guildRallyPointPublicPlaceRequired: true,
   guildRallyPointOfflineCache: true,

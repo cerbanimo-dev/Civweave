@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.166-guide-chat-surface-v350-voice-addressing';
+const VERSION='1.0.167-guide-chat-surface-v350-voice-runtime-version-lock';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -9,7 +9,8 @@ const STATE_KEY='civweave.guide-chat-surface.v350';
 const RETIRED_STATE_KEY='civweave.guide-workspace.v242';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const SPECIALIZED_MODELS_PATH='/app/local-ai/specialized-model-capabilities-v1.js?v=1.0.0';
-const VOICE_RUNTIME_PATH='/app/guide-voice-runtime-v1.js?v=1.0.0';
+const VOICE_RUNTIME_VERSION='1.1.3-guide-voice-runtime-v1-parakeet-layout-fix';
+const VOICE_RUNTIME_PATH='/app/guide-voice-runtime-v1.js?v=1.1.3';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE=Object.freeze({
   civweave:{name:'Weaveling',label:'Civweave',role:'Quest guide and central orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling about a Quest'},
@@ -101,16 +102,24 @@ function resolveGuideAddress(text,{allowBare=false}={}){
 }
 function loadScript(path,ready){
   if(ready?.())return Promise.resolve(true);
-  const pathname=new URL(path,location.href).pathname,existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===pathname}catch{return false}});
-  if(existing)return new Promise((resolve,reject)=>{let elapsed=0;const timer=setInterval(()=>{elapsed+=50;if(ready?.()){clearInterval(timer);resolve(true)}else if(elapsed>=12000){clearInterval(timer);reject(new Error(`${pathname} loaded without its runtime.`))}},50)});
-  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=path;script.async=false;script.onload=()=>ready?.()?resolve(true):reject(new Error(`${pathname} loaded without its runtime.`));script.onerror=()=>reject(new Error(`Could not load ${pathname}.`));document.head.append(script)});
+  const target=new URL(path,location.href),existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).href===target.href}catch{return false}});
+  if(existing)return new Promise((resolve,reject)=>{let elapsed=0;const timer=setInterval(()=>{elapsed+=50;if(ready?.()){clearInterval(timer);resolve(true)}else if(elapsed>=12000){clearInterval(timer);reject(new Error(`${target.pathname}${target.search} loaded without its runtime.`))}},50)});
+  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=target.href;script.async=false;script.onload=()=>ready?.()?resolve(true):reject(new Error(`${target.pathname}${target.search} loaded without its runtime.`));script.onerror=()=>reject(new Error(`Could not load ${target.pathname}${target.search}.`));document.head.append(script)});
 }
 async function ensureSpecializedRegistry(){await loadScript(SPECIALIZED_MODELS_PATH,()=>globalThis.CivweaveLocalSpecializedAI);return globalThis.CivweaveLocalSpecializedAI}
 async function ensureVoiceRuntime(){
-  if(globalThis.CivweaveGuideVoiceV1)return globalThis.CivweaveGuideVoiceV1;
+  const current=globalThis.CivweaveGuideVoiceV1;
+  if(current?.version===VOICE_RUNTIME_VERSION)return current;
   if(voicePromise)return voicePromise;
+  if(current)try{current.stop?.()}catch{}
   voiceStatus='Loading offline voice…';syncChrome();
-  voicePromise=(async()=>{await ensureSpecializedRegistry();await loadScript(VOICE_RUNTIME_PATH,()=>globalThis.CivweaveGuideVoiceV1);voiceStatus='';syncChrome();return globalThis.CivweaveGuideVoiceV1})().catch(error=>{voicePromise=null;voiceStatus=clean(error?.message||error,240);syncChrome();throw error});
+  voicePromise=(async()=>{
+    await ensureSpecializedRegistry();
+    await loadScript(VOICE_RUNTIME_PATH,()=>globalThis.CivweaveGuideVoiceV1?.version===VOICE_RUNTIME_VERSION);
+    const voice=globalThis.CivweaveGuideVoiceV1;
+    if(voice?.version!==VOICE_RUNTIME_VERSION)throw new Error('Corrected offline voice runtime did not load.');
+    voiceStatus='';syncChrome();return voice;
+  })().catch(error=>{voicePromise=null;voiceStatus=clean(error?.message||error,240);syncChrome();throw error});
   return voicePromise;
 }
 async function toggleVoice(){

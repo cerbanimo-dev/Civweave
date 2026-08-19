@@ -117,36 +117,6 @@ nav { min-height: 76px; display: flex; align-items: center; justify-content: spa
 .cast h3 { margin: 0 0 3px; font: 700 25px/1.05 var(--serif); }
 .cast b { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
 .cast p { margin-top: 14px; color: #cfc6dc; font-size: 14px; }
-
-.lari-section { position: relative; isolation: isolate; }
-.lari-section::before { content: ''; position: absolute; z-index: -1; inset: 5% -18% auto 35%; height: 62%; border-radius: 50%; background: radial-gradient(circle, rgba(255,155,74,.16), rgba(255,47,207,.08) 42%, transparent 72%); filter: blur(28px); pointer-events: none; }
-.lari-hero { display: grid; grid-template-columns: 1.12fr .88fr; gap: 22px; align-items: stretch; }
-.lari-scene, .lari-profile, .lari-grid article, .lari-rule { border: 1px solid var(--line); box-shadow: var(--shadow); }
-.lari-scene { position: relative; min-height: 560px; margin: 0; overflow: hidden; border-radius: 32px; background: #08040d; }
-.lari-scene::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 90px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,155,74,.15); }
-.lari-scene > img { width: 100%; height: 100%; min-height: 560px; object-fit: cover; object-position: center; filter: saturate(1.03) contrast(1.04); }
-.lari-scene figcaption { position: absolute; z-index: 2; left: 18px; right: 18px; bottom: 18px; padding: 17px 19px; border: 1px solid rgba(255,213,90,.22); border-radius: 18px; background: rgba(8,3,17,.86); backdrop-filter: blur(14px); }
-.lari-scene figcaption strong, .lari-scene figcaption span { display: block; }
-.lari-scene figcaption strong { color: #ffe39c; font: 700 20px/1.1 var(--serif); }
-.lari-scene figcaption span { margin-top: 5px; color: #cfc2d7; font-size: 13px; }
-.lari-profile { position: relative; min-height: 560px; overflow: hidden; display: flex; align-items: flex-end; padding: 30px; border-radius: 32px; background: radial-gradient(circle at 70% 22%, rgba(255,155,74,.18), transparent 34%), radial-gradient(circle at 48% 64%, rgba(255,47,207,.17), transparent 44%), linear-gradient(155deg, #241034, #090510 72%); }
-.lari-profile::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(8,4,16,.96) 0 30%, rgba(8,4,16,.52) 54%, rgba(8,4,16,.08) 78%); }
-.lari-cutout { position: absolute; z-index: 0; width: 118%; max-width: none; right: -30%; bottom: -4%; filter: drop-shadow(0 30px 38px rgba(0,0,0,.5)); }
-.lari-profile-copy { position: relative; z-index: 2; width: min(64%, 340px); }
-.lari-profile h3 { margin: 14px 0 12px; font: 700 clamp(29px, 3.2vw, 43px)/1.02 var(--serif); letter-spacing: -.025em; }
-.lari-profile p { margin: 0; color: #d3c5dc; font-size: 14px; }
-.lari-badge { display: inline-flex; padding: 6px 10px; border: 1px solid rgba(255,155,74,.5); border-radius: 999px; color: #ffd9aa; background: rgba(255,155,74,.08); font-size: 10px; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
-.lari-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 20px; }
-.lari-grid article { padding: 28px; border-radius: 22px; background: linear-gradient(145deg, rgba(45,20,55,.78), rgba(10,5,20,.86)); }
-.lari-grid article:nth-child(odd) { border-color: rgba(255,155,74,.2); }
-.lari-grid article:nth-child(even) { border-color: rgba(255,47,207,.2); }
-.lari-grid h3 { margin: 0 0 10px; font: 700 27px/1.08 var(--serif); }
-.lari-grid p { margin: 0; color: #cec3d7; }
-.lari-rule { margin: 22px 0 0; padding: 30px 34px; border-radius: 24px; border-left: 4px solid var(--orange); background: radial-gradient(circle at 100% 50%, rgba(255,47,207,.1), transparent 34%), rgba(255,255,255,.04); color: #fff2d3; font: 700 clamp(25px, 3vw, 36px)/1.2 var(--serif); }
-.lari-rule span { display: block; margin-top: 9px; color: #d8cbe0; font: 400 17px/1.5 var(--sans); }
-.lari-disclaimer { max-width: 920px; margin: 18px 0 0; color: #a99eb8; font-size: 13px; }
-.lari-disclaimer strong { color: #d7cadd; }
-
 .realms { display: grid; gap: 24px; }
 .realm { display: grid; grid-template-columns: minmax(240px, .75fr) 1.25fr; min-height: 420px; border-radius: 30px; overflow: hidden; position: relative; }
 .realm::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 23%, transparent); border-radius: inherit; }
@@ -197,11 +167,8 @@ footer a { color: #cfc6d9; }
   .portal { width: min(580px, 86vw); }
   .cast { grid-template-columns: repeat(2, 1fr); }
   .cast article:last-child { grid-column: 1 / -1; }
-  .story-grid, .press, .guildkeepers, .lari-hero { grid-template-columns: 1fr; }
+  .story-grid, .press, .guildkeepers { grid-template-columns: 1fr; }
   .guildkeeper-lead { position: static; }
-  .lari-profile { min-height: 500px; }
-  .lari-cutout { width: 88%; right: -7%; }
-  .lari-profile-copy { width: min(52%, 390px); }
 }
 
 @media (max-width: 720px) {
@@ -219,15 +186,8 @@ footer a { color: #cfc6d9; }
   .section { padding-block: 74px; }
   .section h2, .closing h2 { font-size: clamp(38px, 12vw, 55px); }
   .intro { font-size: 17px; }
-  .cast, .economy, .duties, .lari-grid { grid-template-columns: 1fr; }
+  .cast, .economy, .duties { grid-template-columns: 1fr; }
   .cast article:last-child { grid-column: auto; }
-  .lari-scene, .lari-scene > img { min-height: 430px; }
-  .lari-profile { min-height: 470px; padding: 24px; }
-  .lari-profile::after { background: linear-gradient(0deg, rgba(8,4,16,.97) 0 36%, rgba(8,4,16,.32) 66%, rgba(8,4,16,.05)); }
-  .lari-cutout { width: 112%; right: -22%; bottom: 8%; opacity: .88; }
-  .lari-profile-copy { width: 100%; max-width: none; }
-  .lari-profile p { font-size: 13px; }
-  .lari-rule { padding: 25px; }
   .realm { grid-template-columns: 1fr; }
   .realm img { height: 300px; }
   .realm > div { padding: 30px 24px 34px; }

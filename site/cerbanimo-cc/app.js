@@ -63,27 +63,6 @@ function animateMaterializedGuides() {
     window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
   });
 }
-function applyLariMobileAlignmentFix() {
-  if (!document.querySelector('.lari-profile')) return;
-  const style = document.createElement('style');
-  style.dataset.lariMobileAlignment = 'v1';
-  style.textContent = `
-@media (max-width: 720px) {
-  .lari-profile::after {
-    background: linear-gradient(0deg, rgba(8,4,16,.98) 0 42%, rgba(8,4,16,.68) 58%, rgba(8,4,16,.14) 78%, rgba(8,4,16,.03) 100%);
-  }
-  .lari-cutout {
-    width: 148%;
-    right: -34%;
-    top: -2%;
-    bottom: auto;
-    opacity: .82;
-  }
-}
-`;
-  document.head.append(style);
-}
 
-applyLariMobileAlignmentFix();
 loadHistory();
 animateMaterializedGuides();

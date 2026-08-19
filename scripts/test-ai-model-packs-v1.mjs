@@ -9,10 +9,11 @@ const root=resolve(here,'..');
 const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
-const settings=read('public/app/settings-local-route-v325.js');
-const legacySettings=read('public/app/settings-local-route-v323.js');
+const settings=read('public/app/settings-local-route-v323.js');
 const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
-const campus=read('public/app/working-campus-v440.html');
+const browserPackPwa=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
+const relocation=read('public/app/working-campus-home-relocation-v441.js');
+const shellAssets=read('public/service-worker-shell-assets-v1.js');
 const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js');
 const voice=read('public/app/guide-voice-runtime-v1.js');
 
@@ -40,33 +41,39 @@ test('server quality pack uses current executable high quality tiers and server 
   assert.doesNotMatch(block,/gemma-4-12b/i);
 });
 
-test('large packs do not enter the legacy Cache Storage installer',()=>{
+test('large packs stay browser-managed inside the PWA',()=>{
   assert.match(packs,/BROWSER_MANAGED_PACK_IDS=freeze\(\['premier-phone','server-quality'\]\)/);
   assert.match(packs,/CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED/);
-  assert.match(packs,/if\(installMode\(item\.id\)==='browser'\)/);
-  assert.match(packs,/phase:'browser-download-required'/);
-  assert.match(packs,/downloadMode:'browser'/);
-  assert.match(packs,/browserManagedPackIds:BROWSER_MANAGED_PACK_IDS/);
+  assert.match(settings,/browserPackDownload/);
+  assert.match(settings,/browser\.queue\(packId/);
+  assert.match(settings,/Browser downloads queued/);
 });
 
-test('Working Campus loads the cache-distinct Settings route while retaining the compatibility copy',()=>{
-  assert.match(campus,/\/app\/settings-local-route-v325\.js\?v=working-campus-v440-settings-v325/);
-  assert.equal(settings,legacySettings);
-});
+test('browser-managed packs recover the final file and report streaming import progress',()=>{
+  assert.match(browserPack,/const RECEIPT_VERSION=3/);
+  assert.match(browserPack,/function unimportedRecords\(/);
+  assert.match(browserPack,/function candidateScore\(/);
+  assert.match(browserPack,/const size=Number\(file\.size\|\|0\),min=Number\(record\.minBytes\|\|0\),exact=Number\(record\.sizeBytes\|\|record\.exactBytes\|\|0\)/);
+  assert.match(browserPack,/function putFile\(record,file,onProgress\)/);
+  assert.match(browserPack,/file\.stream\(\)\.getReader\(\)/);
+  assert.match(browserPack,/phase:'copying-large'/);
+  assert.match(browserPack,/streamingImportProgress:true/);
+  assert.match(browserPack,/relaxedMinimumOnlyMatching:true/);
+  assert.match(browserPack,/partial:true/);
+  assert.match(browserPack,/status:'ready'/);
 
-test('Settings hands browser-managed packs to browser downloads instead of surfacing the guard as an error',()=>{
-  assert.match(settings,/browser-pack-download-v1\.js/);
-  assert.match(settings,/if\(p\.installMode\?\.\(packId\)==='browser'\)/);
-  assert.match(settings,/await browser\.queue\(packId/);
-  assert.match(settings,/browserPackHandoff:true/);
-  assert.match(settings,/legacyBrowserErrorRecovery:true/);
-  assert.match(settings,/status:'browser-ready'/);
-  assert.match(settings,/status==='browser-queued'/);
-  assert.match(browserPack,/civweave\.ai-pack\.browser-downloads\.v1/);
-  assert.match(browserPack,/status:'browser-queued'/);
-  assert.match(browserPack,/waiting-for-browser-downloads/);
-  assert.match(browserPack,/link\.click\(\)/);
-  assert.doesNotMatch(browserPack,/caches\.open\(/);
+  assert.match(browserPackPwa,/Import downloaded files/);
+  assert.match(browserPackPwa,/Download missing again/);
+  assert.match(browserPackPwa,/Still missing:/);
+  assert.match(browserPackPwa,/cw-browser-pack-progress-track/);
+  assert.match(browserPackPwa,/Import progress/);
+  assert.match(browserPackPwa,/current\.importFiles\(packId,files/);
+  assert.match(browserPackPwa,/current\.prepare\(packId/);
+  assert.match(browserPackPwa,/progressUi:true/);
+  assert.match(browserPackPwa,/missingFileRecovery:true/);
+  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.2\.0-progress-and-missing-file/);
+  assert.match(shellAssets,/browser-pack-pwa-import-v1\.js/);
+  assert.match(shellAssets,/browser-pack-download-v1\.js/);
 });
 
 test('Local models view has pack actions without eagerly loading pack runtime',()=>{
@@ -82,7 +89,7 @@ test('fresh speech models remain reusable outside voice chat',()=>{
   for(const task of ['dictation','live-captions','media-transcription','read-aloud','translation','summarization','memory-retrieval','deep-reasoning','coding'])assert.match(specialized,new RegExp(`'${task}'`));
 });
 
-test('guide voice distinguishes installed ASR weights from a missing executable runtime',()=>{
+test('guide voice distinguishes installed ASR weights from a failed local speech session',()=>{
   assert.match(voice,/installedSpeechModelStatus/);
   assert.match(voice,/CIVWEAVE_SPEECH_EXECUTOR_START_FAILED/);
   assert.match(voice,/speech model is installed, but (?:its local speech session could not start|no compatible local speech-recognition session could start)/i);

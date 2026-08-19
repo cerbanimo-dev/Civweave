@@ -1,14 +1,17 @@
-name: Harvest Open Music v1
+name: Harvest Open Vocal Music
 
 on:
   push:
     branches:
       - main
+      - staging
       - 'agent/canonical-playlist-hub-music-*'
     paths:
       - config/open-music-harvest-v1.json
       - scripts/harvest-open-music-v1.py
+      - scripts/harvest-open-vocal-music-v2.py
       - scripts/test-open-music-harvest-v1.py
+      - scripts/test-open-vocal-music-v2.py
       - .github/workflows/harvest-open-music-v1.yml
   schedule:
     - cron: '37 5 * * *'
@@ -18,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: open-music-harvest-v1-${{ github.ref_name }}
+  group: open-vocal-music-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -31,26 +34,28 @@ jobs:
           fetch-depth: 0
       - name: Verify the strict rights gate
         run: python scripts/test-open-music-harvest-v1.py
-      - name: Build rights-cleared lazy music references
+      - name: Verify the vocal and lyrical-substance gate
+        run: python scripts/test-open-vocal-music-v2.py
+      - name: Build rights-cleared vocal music references
         env:
           OPEN_MUSIC_RESULTS_PER_QUERY: '10'
           OPEN_MUSIC_WORKERS: '6'
-        run: python scripts/harvest-open-music-v1.py
-      - name: Commit validated daily batch and lazy manifest
+        run: python scripts/harvest-open-vocal-music-v2.py
+      - name: Commit validated vocal batch and lazy manifest
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add public/downloads/hub-media/open-music
           if git diff --cached --quiet; then
-            echo 'Open music harvest produced no catalog diff.'
+            echo 'Open vocal music harvest produced no catalog diff.'
             exit 0
           fi
           TARGET_REF="${GITHUB_REF_NAME:-main}"
           if [ "$TARGET_REF" = "main" ]; then
-            MESSAGE='Refresh rights-cleared open music batch'
+            MESSAGE='Refresh rights-cleared vocal music batch'
           else
-            MESSAGE='[CF-Pages-Skip] Refresh rights-cleared open music batch'
+            MESSAGE='[CF-Pages-Skip] Refresh rights-cleared vocal music batch'
           fi
           git commit -m "$MESSAGE"
           git pull --rebase origin "$TARGET_REF"

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.128-shared-guide-surface-v236-canonical-artifacts';
+const VERSION='1.0.128-shared-guide-surface-v236-canonical-artifacts-nav-nonowning-v1';
 const STYLE_ID='cw-shared-guide-surface-v236-style';
 const LAUNCHER_ID='cwp215-launcher';
 const CHAT_ROOT_ID='cw-persistent-guide-chat-v215';
@@ -44,15 +44,12 @@ function installStyle(){
   const style=document.createElement('style');
   style.id=STYLE_ID;
   style.textContent=`
-:root{--cw-themed-nav-height:clamp(52px,7vw,72px)!important;--cw-themed-nav-button-width:156px!important;--cw-floating-gap:12px;--cw-guide-launcher-size:60px}
+:root{--cw-guide-nav-offset:96px;--cw-floating-gap:12px;--cw-guide-launcher-size:60px}
 #cw-themed-system-nav{z-index:2147483600!important}
-#cw-radio-suggestion-v233{z-index:2147483610!important;left:max(12px,env(safe-area-inset-left))!important;right:auto!important;bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + var(--cw-floating-gap))!important;max-width:min(360px,calc(100vw - 92px))!important}
-#${LAUNCHER_ID}{z-index:2147483611!important;right:max(12px,env(safe-area-inset-right))!important;bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + var(--cw-floating-gap))!important;width:var(--cw-guide-launcher-size)!important;height:var(--cw-guide-launcher-size)!important}
-#${CHAT_ROOT_ID}{z-index:2147483612!important;bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + var(--cw-floating-gap))!important}
-html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important}
-#cw-themed-system-nav .cw-themed-system-link{height:var(--cw-themed-nav-height)!important;max-width:var(--cw-themed-nav-button-width)!important}
-#cw-themed-system-nav .cw-themed-system-link img{max-height:var(--cw-themed-nav-height)!important;object-fit:contain!important}
-@media(max-width:680px){:root{--cw-themed-nav-height:clamp(50px,14vw,66px)!important;--cw-themed-nav-button-width:132px!important;--cw-guide-launcher-size:56px}#cw-radio-suggestion-v233{max-width:calc(100vw - 86px)!important}}
+#cw-radio-suggestion-v233{z-index:2147483610!important;left:max(12px,env(safe-area-inset-left))!important;right:auto!important;bottom:calc(var(--cw-guide-nav-offset,96px) + var(--cw-floating-gap))!important;max-width:min(360px,calc(100vw - 92px))!important}
+#${LAUNCHER_ID}{z-index:2147483611!important;right:max(12px,env(safe-area-inset-right))!important;bottom:calc(var(--cw-guide-nav-offset,96px) + var(--cw-floating-gap))!important;width:var(--cw-guide-launcher-size)!important;height:var(--cw-guide-launcher-size)!important}
+#${CHAT_ROOT_ID}{z-index:2147483612!important;bottom:calc(var(--cw-guide-nav-offset,96px) + var(--cw-floating-gap))!important}
+@media(max-width:680px){:root{--cw-guide-launcher-size:56px}#cw-radio-suggestion-v233{max-width:calc(100vw - 86px)!important}}
 @media(prefers-reduced-motion:reduce){#cw-radio-suggestion-v233,#${LAUNCHER_ID}{scroll-behavior:auto!important;transition:none!important;animation-duration:.001ms!important}}
 `;
   document.head?.append(style);
@@ -79,8 +76,8 @@ async function submitInline(text){
 }
 function normalizeFloatingLayout(){
   const themed=document.getElementById('cw-themed-system-nav');
-  if(themed){const height=Math.min(72,Math.max(50,Math.round(themed.getBoundingClientRect().height||0)));if(height)document.documentElement.style.setProperty('--cw-themed-nav-height',`${height}px`)}
-  document.documentElement.dataset.civweaveFloatingContract='v236';
+  if(themed){const height=Math.max(0,Math.round(themed.getBoundingClientRect().height||0));if(height)document.documentElement.style.setProperty('--cw-guide-nav-offset',`${height}px`)}
+  document.documentElement.dataset.civweaveFloatingContract='v236-nav-nonowning-v1';
 }
 function observeNav(){
   if(!('ResizeObserver'in globalThis))return false;
@@ -111,5 +108,5 @@ function mount(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 
-globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({version:VERSION,mode:'bubble-only',sourceTruth:true,launcherOwner:'guide-chat-surface-v350',detectSystem,guideFor:system=>GUIDE[system]||null,renderTranscript,normalizeFloatingLayout,ownPageGuide,submitInline,syncInlineVisibility,setInlineInteractive,buildInline,repairSurface,removeEmbeddedGuideCards,mount});
+globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({version:VERSION,mode:'bubble-only',sourceTruth:true,launcherOwner:'guide-chat-surface-v350',navigationGeometryOwner:false,navigationOffsetVariable:'--cw-guide-nav-offset',detectSystem,guideFor:system=>GUIDE[system]||null,renderTranscript,normalizeFloatingLayout,ownPageGuide,submitInline,syncInlineVisibility,setInlineInteractive,buildInline,repairSurface,removeEmbeddedGuideCards,mount});
 })();

@@ -134,8 +134,6 @@ const rootAssets = new Map([
   ['Cerbanimo-kamiya-sprites.png', 'kamiya.png'],
   ['FellowFare-rook-sprites.png', 'rook.png'],
   ['Anarchadia-merlin-sprites.png', 'merlin.png'],
-  ['Lari the Lyrebird.png', 'lari-portrait.png'],
-  ['Lari the Lyrebird no background.png', 'lari-cutout.png'],
 ]);
 for (const [sourceName, targetName] of rootAssets) cpSync(resolve(repoRoot, sourceName), resolve(assets, targetName));
 

@@ -1,568 +1,29 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-08-19T07:27:57Z",
-  "record_count": 36,
-  "failure_count": 2,
-  "failures": [
-    {
-      "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "funk soul groove",
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=info&limit=10&search=funk+soul+groove&search_type=all&lic=sa&sort=date&ord=desc: 'utf-8' codec can't decode byte 0xd0 in position 13423: invalid continuation byte"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "anarchadia",
-      "query": "riot punk",
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=info&limit=10&search=riot+punk&search_type=all&lic=by&sort=date&ord=desc: 'utf-8' codec can't decode byte 0x85 in position 1658: invalid start byte"
-    }
-  ],
+  "built_at": "2026-08-19T20:32:33Z",
+  "record_count": 17,
+  "failure_count": 0,
+  "failures": [],
   "provider_counts": {
-    "wikimedia-commons": 16,
-    "internet-archive": 5,
-    "ccmixter": 15
+    "ccmixter": 17
   },
   "records": [
     {
       "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Blackbird slowed down.flac",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Blackbird slowed down",
-      "artist": "Drummyfish",
+      "provider": "ccmixter",
+      "provider_id": "61065",
+      "playlist_id": "living-school",
+      "matched_query": "curated:61065",
+      "title": "Climate Change The Dirty Water Remix",
+      "artist": "J.Lang",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Blackbird_slowed_down.flac",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "evidence": "CC0 | Creative Commons Zero, Public Domain Dedication | cc0 | http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Blackbird_slowed_down.flac?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/x-flac",
-          "bytes": 965186,
-          "provider_sha1": "117bb3fba2025ce754a18916bcf9d342b544a087",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Drummyfish",
-        "source_title": "Blackbird slowed down",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Blackbird_slowed_down.flac",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:569ec9ac3677c7bc12286dbb",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Common blackbird singing denoised.flac",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Common blackbird singing denoised",
-      "artist": "tinga",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Common_blackbird_singing_denoised.flac",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "evidence": "CC0 | Creative Commons Zero, Public Domain Dedication | cc0 | http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Common_blackbird_singing_denoised.flac?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/x-flac",
-          "bytes": 318784,
-          "provider_sha1": "d96cad234eacb1888658a29a85791a7edf664f7f",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "tinga",
-        "source_title": "Common blackbird singing denoised",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Common_blackbird_singing_denoised.flac",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:29631884f0f0b03de360f4d3",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Future Ruins (AI-generated music, draft of post-metal techno fusion genre).mp3",
-      "playlist_id": "civweave",
-      "matched_query": "post rock electronic",
-      "title": "Future Ruins (AI-generated music, draft of post-metal techno fusion genre)",
-      "artist": "https://aimusic.so/app",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Future_Ruins_(AI-generated_music,_draft_of_post-metal_techno_fusion_genre).mp3",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "Public domain",
-        "url": "",
-        "evidence": "Public domain | Public domain | pd |",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Future_Ruins_%28AI-generated_music%2C_draft_of_post-metal_techno_fusion_genre%29.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 5262381,
-          "provider_sha1": "0cd5793c32f5cc02be7bb2d3ca0aeee50aabe8a3",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "https://aimusic.so/app",
-        "source_title": "Future Ruins (AI-generated music, draft of post-metal techno fusion genre)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Future_Ruins_(AI-generated_music,_draft_of_post-metal_techno_fusion_genre).mp3",
-        "license": "Public domain",
-        "license_url": ""
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "post rock electronic"
-        }
-      ],
-      "candidate_id": "openmusic:84599c2fab92fc71c9a4d3c3",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:LL-Q652 (ita)-XANA000-contemporary R&B.wav",
-      "playlist_id": "civweave",
-      "matched_query": "art pop electronic",
-      "title": "LL-Q652 (ita)-XANA000-contemporary R&B",
-      "artist": "Speaker: XANA000 Recorder: XANA000",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q652_(ita)-XANA000-contemporary_R%26B.wav",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "evidence": "CC0 | Creative Commons Zero, Public Domain Dedication | cc0 | http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/1/11/LL-Q652_%28ita%29-XANA000-contemporary_R%26B.wav?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/wav",
-          "bytes": 207660,
-          "provider_sha1": "fffe7e3dd8286f139eddc06a39cdf01da427bc1a",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Speaker: XANA000 Recorder: XANA000",
-        "source_title": "LL-Q652 (ita)-XANA000-contemporary R&B",
-        "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q652_(ita)-XANA000-contemporary_R%26B.wav",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "art pop electronic"
-        }
-      ],
-      "candidate_id": "openmusic:787f97eb4b0070eee26834a1",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:LL-Q652 (ita)-XANA000-noise punk.wav",
-      "playlist_id": "anarchadia",
-      "matched_query": "punk experimental",
-      "title": "LL-Q652 (ita)-XANA000-noise punk",
-      "artist": "Speaker: XANA000 Recorder: XANA000",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q652_(ita)-XANA000-noise_punk.wav",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "evidence": "CC0 | Creative Commons Zero, Public Domain Dedication | cc0 | http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/d/d2/LL-Q652_%28ita%29-XANA000-noise_punk.wav?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/wav",
-          "bytes": 125740,
-          "provider_sha1": "f97b85045a7984f7798c051f9bedcb565760f289",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Speaker: XANA000 Recorder: XANA000",
-        "source_title": "LL-Q652 (ita)-XANA000-noise punk",
-        "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q652_(ita)-XANA000-noise_punk.wav",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "punk experimental"
-        },
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
-        }
-      ],
-      "candidate_id": "openmusic:c3d18fee25046758473b3821",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:LL-Q652 (ita)-XANA000-noise rock.wav",
-      "playlist_id": "anarchadia",
-      "matched_query": "punk experimental",
-      "title": "LL-Q652 (ita)-XANA000-noise rock",
-      "artist": "Speaker: XANA000 Recorder: XANA000",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q652_(ita)-XANA000-noise_rock.wav",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "evidence": "CC0 | Creative Commons Zero, Public Domain Dedication | cc0 | http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/a/a4/LL-Q652_%28ita%29-XANA000-noise_rock.wav?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/wav",
-          "bytes": 109356,
-          "provider_sha1": "17aef3bc01f57c086e41f5442b40a7d2791e991a",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Speaker: XANA000 Recorder: XANA000",
-        "source_title": "LL-Q652 (ita)-XANA000-noise rock",
-        "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q652_(ita)-XANA000-noise_rock.wav",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "punk experimental"
-        },
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
-        }
-      ],
-      "candidate_id": "openmusic:56f0e9bb1861c1811f67c71c",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:The Rise of the ClueBots (AI-generated music).mp3",
-      "playlist_id": "civweave",
-      "matched_query": "art pop electronic",
-      "title": "The Rise of the ClueBots (AI-generated music)",
-      "artist": "https://aimusic.so/app",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:The_Rise_of_the_ClueBots_(AI-generated_music).mp3",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "Public domain",
-        "url": "",
-        "evidence": "Public domain | Public domain | pd |",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/The_Rise_of_the_ClueBots_%28AI-generated_music%29.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 3112749,
-          "provider_sha1": "760c2e3a1800e260c18beb7bb32c227083be518b",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "https://aimusic.so/app",
-        "source_title": "The Rise of the ClueBots (AI-generated music)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:The_Rise_of_the_ClueBots_(AI-generated_music).mp3",
-        "license": "Public domain",
-        "license_url": ""
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "art pop electronic"
-        }
-      ],
-      "candidate_id": "openmusic:6115f1e5f566f027f483bff3",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:WikiWarriors (AI-generated music with Wikipedia lyrics).mp3",
-      "playlist_id": "civweave",
-      "matched_query": "art pop electronic",
-      "title": "WikiWarriors (AI-generated music with Wikipedia lyrics)",
-      "artist": "https://aimusic.so/app",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:WikiWarriors_(AI-generated_music_with_Wikipedia_lyrics).mp3",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "Public domain",
-        "url": "",
-        "evidence": "Public domain | Public domain | pd |",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/e/e4/WikiWarriors_%28AI-generated_music_with_Wikipedia_lyrics%29.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 4014189,
-          "provider_sha1": "b8200aeaec857d8eea43859ef27cf6afb628c4ec",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "https://aimusic.so/app",
-        "source_title": "WikiWarriors (AI-generated music with Wikipedia lyrics)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:WikiWarriors_(AI-generated_music_with_Wikipedia_lyrics).mp3",
-        "license": "Public domain",
-        "license_url": ""
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "art pop electronic"
-        }
-      ],
-      "candidate_id": "openmusic:b5ce115963c748abf6da00f0",
-      "quality_score": 80
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "internet-archive",
-      "provider_id": "weeping-icon-raw-wav",
-      "playlist_id": "anarchadia",
-      "matched_query": "noise rock",
-      "title": "Weeping Icon - Weeping Icon vinyl rip",
-      "artist": "Weeping Icon",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/weeping-icon-raw-wav",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20WAV.wav",
-          "bytes": 828196962,
-          "provider_sha1": "3c52fe7971736d3e20c5fdf188f0ca348226c163",
-          "provider_md5": "7992337931b1d32a2e451f5105cee9bc",
-          "format": "WAVE",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20FLAC.flac",
-          "bytes": 417207231,
-          "provider_sha1": "850c6ff47b12471900efbb2d7fa67de68276ee29",
-          "provider_md5": "c01d0d1bb55d127dbf81c8e3b11de67c",
-          "format": "24bit Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B6%20Control.mp3",
-          "bytes": 14566230,
-          "provider_sha1": "70e5fa4fa5858d94ff5d08b2d01a39cca9980f3b",
-          "provider_md5": "4c8c895d6b2af5793ba8a7f01cba1cbd",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A8%20Natural%20Selection.mp3",
-          "bytes": 10444959,
-          "provider_sha1": "6ad5a2d5d64548431b06f0b82306011d53800776",
-          "provider_md5": "0c21830fa9090d23b563b46af628b835",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B4%20Live%20Envy.mp3",
-          "bytes": 10010072,
-          "provider_sha1": "00eb8852a7a77859320bd3ef6bc23abe092e6c45",
-          "provider_md5": "2cc6b69f473b51947c4ef8ccb67a8462",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B2%20Power%20Trip.mp3",
-          "bytes": 9670233,
-          "provider_sha1": "67aca8a202fdef8145f8de4dd1cd5b3a6eb99e40",
-          "provider_md5": "1bb1a9b79383651bfa4e295622929430",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A6%20Ripe%20for%20Consumption.mp3",
-          "bytes": 8510562,
-          "provider_sha1": "f1710c5d2a180800e94bb70c3b22b5fa50fb9e89",
-          "provider_md5": "723769e5d611043c33a836a2e62406ff",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A2%20Ankles.mp3",
-          "bytes": 8414548,
-          "provider_sha1": "9e49867a806a328517d4f07a5523a185fe17a340",
-          "provider_md5": "43c5a70b3ed8a87b0b04f6ae44729566",
-          "format": "VBR MP3",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Weeping Icon",
-        "source_title": "Weeping Icon - Weeping Icon vinyl rip",
-        "source_url": "https://archive.org/details/weeping-icon-raw-wav",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
-        }
-      ],
-      "candidate_id": "openmusic:f85a4448f10370dbf3ce3807",
-      "quality_score": 78
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Machinination Podcast - May 2012 (IA MachininationMachininationPodcast-May2012).mp3",
-      "playlist_id": "fellowfare",
-      "matched_query": "folk funk",
-      "title": "Machinination Podcast - May 2012 (IA MachininationMachininationPodcast-May2012)",
-      "artist": "Machinination",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Machinination_Podcast_-_May_2012_(IA_MachininationMachininationPodcast-May2012).mp3",
+      "source_url": "https://ccmixter.org/files/djlang59/61065",
       "license": {
         "spdx": "CC-BY",
-        "label": "CC BY 2.5",
-        "url": "https://creativecommons.org/licenses/by/2.5",
-        "evidence": "CC BY 2.5 | Creative Commons Attribution 2.5 | cc-by-2.5 | https://creativecommons.org/licenses/by/2.5",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
@@ -570,50 +31,191 @@
       },
       "files": [
         {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Machinination_Podcast_-_May_2012_%28IA_MachininationMachininationPodcast-May2012%29.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 105039393,
-          "provider_sha1": "e64fcad52cab2c1f40db75d74fed57def135d0d0",
-          "role": "original"
+          "url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
+          "mime": "",
+          "bytes": 4741999,
+          "role": "source-download"
         }
       ],
       "attribution": {
-        "creator": "Machinination",
-        "source_title": "Machinination Podcast - May 2012 (IA MachininationMachininationPodcast-May2012)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Machinination_Podcast_-_May_2012_(IA_MachininationMachininationPodcast-May2012).mp3",
-        "license": "CC BY 2.5",
-        "license_url": "https://creativecommons.org/licenses/by/2.5"
+        "creator": "J.Lang",
+        "source_title": "Climate Change The Dirty Water Remix",
+        "source_url": "https://ccmixter.org/files/djlang59/61065",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
       "download_enabled": true,
       "content_hash": null,
       "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "climate",
+        "truth",
+        "accountability",
+        "future"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:61065"
+        }
+      ],
+      "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+      "quality_score": 125
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "28236",
+      "playlist_id": "civweave",
+      "matched_query": "curated:28236",
+      "title": "Freedom in my voice",
+      "artist": "Carosone",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/Carosone/28236",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Carosone/Carosone_-_Freedom_in_my_voice.mp3",
+          "mime": "",
+          "bytes": 3704835,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Carosone",
+        "source_title": "Freedom in my voice",
+        "source_url": "https://ccmixter.org/files/Carosone/28236",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "creative freedom",
+        "reuse",
+        "open source"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28236"
+        }
+      ],
+      "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
+      "quality_score": 125
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "28057",
+      "playlist_id": "fellowfare",
+      "matched_query": "curated:28057",
+      "title": "Freedom in my Voice (the cover)",
+      "artist": "ditto ditto",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/ditto/28057",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/ditto/ditto_-_Freedom_in_my_Voice_(the_cover).mp3",
+          "mime": "",
+          "bytes": 8060387,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "ditto ditto",
+        "source_title": "Freedom in my Voice (the cover)",
+        "source_url": "https://ccmixter.org/files/ditto/28057",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "sharing",
+        "creative rights",
+        "community"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
       "playlist_matches": [
         {
           "playlist_id": "fellowfare",
-          "matched_query": "folk funk"
+          "matched_query": "curated:28057"
         }
       ],
-      "candidate_id": "openmusic:435e2b8b9211db3298be31f6",
-      "quality_score": 78
+      "candidate_id": "openmusic:70c01ad3a2d479485b7fe223",
+      "quality_score": 125
     },
     {
       "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Noise Attack (ISRC USUAN1100629).mp3",
-      "playlist_id": "anarchadia",
-      "matched_query": "noise rock",
-      "title": "Noise Attack (ISRC USUAN1100629)",
-      "artist": "Kevin MacLeod",
+      "provider": "ccmixter",
+      "provider_id": "28039",
+      "playlist_id": "civweave",
+      "matched_query": "curated:28039",
+      "title": "Freedom in our Voices",
+      "artist": "ditto ditto",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Noise_Attack_(ISRC_USUAN1100629).mp3",
+      "source_url": "https://ccmixter.org/files/ditto/28039",
       "license": {
         "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
@@ -621,50 +223,60 @@
       },
       "files": [
         {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Noise_Attack_%28ISRC_USUAN1100629%29.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 6209745,
-          "provider_sha1": "b2df2530ce76429fbcf555be44bdebfab211bf04",
-          "role": "original"
+          "url": "https://ccmixter.org/content/ditto/ditto_-_Freedom_in_our_Voices.mp3",
+          "mime": "",
+          "bytes": 9534738,
+          "role": "source-download"
         }
       ],
       "attribution": {
-        "creator": "Kevin MacLeod",
-        "source_title": "Noise Attack (ISRC USUAN1100629)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Noise_Attack_(ISRC_USUAN1100629).mp3",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
+        "creator": "ditto ditto",
+        "source_title": "Freedom in our Voices",
+        "source_url": "https://ccmixter.org/files/ditto/28039",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
       "download_enabled": true,
       "content_hash": null,
       "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "creative freedom",
+        "community",
+        "sharing"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
+          "playlist_id": "civweave",
+          "matched_query": "curated:28039"
         }
       ],
-      "candidate_id": "openmusic:30066636588b685631d01f0f",
-      "quality_score": 78
+      "candidate_id": "openmusic:0d45f18990f07b6604f736f5",
+      "quality_score": 125
     },
     {
       "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Rock Noises (Antti Luode).mp3",
-      "playlist_id": "anarchadia",
-      "matched_query": "noise rock",
-      "title": "Rock Noises (Antti Luode)",
-      "artist": "Antti Luode",
+      "provider": "ccmixter",
+      "provider_id": "28143",
+      "playlist_id": "civweave",
+      "matched_query": "curated:28143",
+      "title": "Mind Map This",
+      "artist": "texasradiofish",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Rock_Noises_(Antti_Luode).mp3",
+      "source_url": "https://ccmixter.org/files/texasradiofish/28143",
       "license": {
         "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
@@ -672,305 +284,273 @@
       },
       "files": [
         {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/9/97/Rock_Noises_%28Antti_Luode%29.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 3767522,
-          "provider_sha1": "22ff1fbe1799c322bff97411e22db3653e89de6e",
-          "role": "original"
+          "url": "https://ccmixter.org/content/texasradiofish/texasradiofish_-_Mind_Map_This.mp3",
+          "mime": "",
+          "bytes": 10427337,
+          "role": "source-download"
         }
       ],
       "attribution": {
-        "creator": "Antti Luode",
-        "source_title": "Rock Noises (Antti Luode)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Rock_Noises_(Antti_Luode).mp3",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
+        "creator": "texasradiofish",
+        "source_title": "Mind Map This",
+        "source_url": "https://ccmixter.org/files/texasradiofish/28143",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
       "download_enabled": true,
       "content_hash": null,
       "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "commons",
+        "truth",
+        "freedom",
+        "creative rights"
+      ],
+      "explicit": true,
+      "curation": "hand-seeded",
       "playlist_matches": [
         {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28143"
+        },
+        {
           "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
+          "matched_query": "curated:28143"
         }
       ],
-      "candidate_id": "openmusic:e917cea828b8f1ce79cf977a",
-      "quality_score": 78
+      "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
+      "quality_score": 125
     },
     {
       "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:LL-Q1860 (eng)-Vealhurl-mad cow disease.wav",
-      "playlist_id": "fellowfare",
-      "matched_query": "folk funk",
-      "title": "LL-Q1860 (eng)-Vealhurl-mad cow disease",
-      "artist": "Speaker: Vealhurl Recorder: Vealhurl",
+      "provider": "ccmixter",
+      "provider_id": "57573",
+      "playlist_id": "cerbanimo",
+      "matched_query": "curated:57573",
+      "title": "Singularity",
+      "artist": "Stefan Kartenberg",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q1860_(eng)-Vealhurl-mad_cow_disease.wav",
+      "source_url": "https://ccmixter.org/files/JeffSpeed68/57573",
       "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
-        "share_alike": true
+        "share_alike": false
       },
       "files": [
         {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/9/9e/LL-Q1860_%28eng%29-Vealhurl-mad_cow_disease.wav?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/wav",
-          "bytes": 151084,
-          "provider_sha1": "73f80a0f4c4e864f9923ad84ec3def48f9060cc7",
-          "role": "original"
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Singularity_1.mp3",
+          "mime": "",
+          "bytes": 4271795,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Singularity.flac",
+          "mime": "",
+          "bytes": 32474761,
+          "role": "source-download"
         }
       ],
       "attribution": {
-        "creator": "Speaker: Vealhurl Recorder: Vealhurl",
-        "source_title": "LL-Q1860 (eng)-Vealhurl-mad cow disease",
-        "source_url": "https://commons.wikimedia.org/wiki/File:LL-Q1860_(eng)-Vealhurl-mad_cow_disease.wav",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        "creator": "Stefan Kartenberg",
+        "source_title": "Singularity",
+        "source_url": "https://ccmixter.org/files/JeffSpeed68/57573",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
       "download_enabled": true,
       "content_hash": null,
       "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "automation",
+        "corporate power",
+        "humanity",
+        "technology"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
       "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:57573"
+        }
+      ],
+      "candidate_id": "openmusic:1203b215c04a63c86d197be1",
+      "quality_score": 125
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "57569",
+      "playlist_id": "anarchadia",
+      "matched_query": "curated:57569",
+      "title": "The Singularity",
+      "artist": "Aussens@iter",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/tobias_weber/57569",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_The_Singularity.mp3",
+          "mime": "",
+          "bytes": 3597630,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_The_Singularity.flac",
+          "mime": "",
+          "bytes": 30250658,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Aussens@iter",
+        "source_title": "The Singularity",
+        "source_url": "https://ccmixter.org/files/tobias_weber/57569",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "automation",
+        "corporate power",
+        "humanity",
+        "technology"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:57569"
+        }
+      ],
+      "candidate_id": "openmusic:a4f43dde6f263bd73763e649",
+      "quality_score": 125
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "55625",
+      "playlist_id": "cerbanimo",
+      "matched_query": "curated:55625",
+      "title": "This Wall",
+      "artist": "Admiral Bob",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/admiralbob77/55625",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_This_Wall_2.mp3",
+          "mime": "",
+          "bytes": 7459779,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_This_Wall.mp3",
+          "mime": "",
+          "bytes": 12319392,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Admiral Bob",
+        "source_title": "This Wall",
+        "source_url": "https://ccmixter.org/files/admiralbob77/55625",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "autonomy",
+        "labor",
+        "voice",
+        "self-direction"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:55625"
+        },
         {
           "playlist_id": "fellowfare",
-          "matched_query": "folk funk"
+          "matched_query": "curated:55625"
         }
       ],
-      "candidate_id": "openmusic:85eb2b6ac47cdf6920589b17",
-      "quality_score": 77
+      "candidate_id": "openmusic:4da4ba617f0ff3d64de81d5d",
+      "quality_score": 125
     },
     {
       "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Red-winged Blackbird (Agelaius phoeniceus) - Guelph-Eramosa, Ontario 2020-05-20.mp3",
+      "provider": "ccmixter",
+      "provider_id": "31759",
       "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Red-winged Blackbird (Agelaius phoeniceus) - Guelph-Eramosa, Ontario 2020-05-20",
-      "artist": "Ryan Hodnett",
+      "matched_query": "curated:31759",
+      "title": "We the People",
+      "artist": "mykleanthony",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Red-winged_Blackbird_(Agelaius_phoeniceus)_-_Guelph-Eramosa,_Ontario_2020-05-20.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/1/17/Red-winged_Blackbird_%28Agelaius_phoeniceus%29_-_Guelph-Eramosa%2C_Ontario_2020-05-20.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 94012,
-          "provider_sha1": "6a098b44b51fdd92e5beae4dbf438817304ebe49",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Ryan Hodnett",
-        "source_title": "Red-winged Blackbird (Agelaius phoeniceus) - Guelph-Eramosa, Ontario 2020-05-20",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Red-winged_Blackbird_(Agelaius_phoeniceus)_-_Guelph-Eramosa,_Ontario_2020-05-20.mp3",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:447947efeb2a247bff615c28",
-      "quality_score": 77
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Turdus merula - Common Blackbird XC436361.mp3",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Turdus merula - Common Blackbird XC436361",
-      "artist": "Joost van Bruggen",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC436361.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Turdus_merula_-_Common_Blackbird_XC436361.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 297488,
-          "provider_sha1": "3d40241644dc2d14fdce5607f6d95d41f18abe3e",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Joost van Bruggen",
-        "source_title": "Turdus merula - Common Blackbird XC436361",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC436361.mp3",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:b6aa257cfbf0f6e421d37a0d",
-      "quality_score": 77
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Turdus merula - Common Blackbird XC446151.mp3",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Turdus merula - Common Blackbird XC446151",
-      "artist": "James Ray",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC446151.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Turdus_merula_-_Common_Blackbird_XC446151.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 4185936,
-          "provider_sha1": "21c62dd1faf3c5056166d03a101552db79b0a2e0",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "James Ray",
-        "source_title": "Turdus merula - Common Blackbird XC446151",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC446151.mp3",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:47bad33d2d28a7f0f077b33e",
-      "quality_score": 77
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Turdus merula - Common Blackbird XC541784.mp3",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Turdus merula - Common Blackbird XC541784",
-      "artist": "Benoît Van Hecke",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC541784.mp3",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Turdus_merula_-_Common_Blackbird_XC541784.mp3?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "audio/mpeg",
-          "bytes": 817043,
-          "provider_sha1": "16ba0113febcd9caf69d18b510dd8818c3a33ee7",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Benoît Van Hecke",
-        "source_title": "Turdus merula - Common Blackbird XC541784",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Turdus_merula_-_Common_Blackbird_XC541784.mp3",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:bb1a43bdfb2bf7630019d49c",
-      "quality_score": 77
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "internet-archive",
-      "provider_id": "hittheshopsong",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Hit the Shop",
-      "artist": "JML",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/hittheshopsong",
+      "source_url": "https://ccmixter.org/files/mykleanthony/31759",
       "license": {
         "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/2.5/",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
@@ -978,1088 +558,575 @@
       },
       "files": [
         {
-          "url": "https://archive.org/download/hittheshopsong/Hit_the_Shop.mp3",
-          "bytes": 3250127,
-          "provider_sha1": "4fc9837ed4586e143559259957f1a595a50b0b25",
-          "provider_md5": "72502bd4ed6736dcb549f6d16396f5db",
-          "format": "128Kbps MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/hittheshopsong/Hit_the_Shop.ogg",
-          "bytes": 1784974,
-          "provider_sha1": "2918aac1b53d80ae158a680cbac3ab7b15d2b548",
-          "provider_md5": "8714c0acdd7a472bb26ceca7836c4dbc",
-          "format": "Ogg Vorbis",
-          "role": "derivative"
-        },
-        {
-          "url": "https://archive.org/download/hittheshopsong/Hit_the_Shop_64kb.mp3",
-          "bytes": 1625779,
-          "provider_sha1": "b2c1b2f430b8f1da93bd2a47836ce57a3581a681",
-          "provider_md5": "297fd2882689d2fbc39bf1ff631429c7",
-          "format": "64Kbps MP3",
-          "role": "derivative"
+          "url": "https://ccmixter.org/content/mykleanthony/mykleanthony_-_We_the_People.mp3",
+          "mime": "",
+          "bytes": 7691329,
+          "role": "source-download"
         }
       ],
       "attribution": {
-        "creator": "JML",
-        "source_title": "Hit the Shop",
-        "source_url": "https://archive.org/details/hittheshopsong",
-        "license": "CC-BY",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+        "creator": "mykleanthony",
+        "source_title": "We the People",
+        "source_url": "https://ccmixter.org/files/mykleanthony/31759",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
       "download_enabled": true,
       "content_hash": null,
       "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "oppression",
+        "collective power",
+        "peace",
+        "resistance"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
       "playlist_matches": [
         {
           "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
+          "matched_query": "curated:31759"
         }
       ],
-      "candidate_id": "openmusic:f7ee36f3919da8a5156a7579",
-      "quality_score": 76
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "internet-archive",
-      "provider_id": "MusicManumitMusicOnlyPodcast-HappyNewYear_",
-      "playlist_id": "living-school",
-      "matched_query": "folk experimental",
-      "title": "Music Manumit Music Only Podcast - Happy New Year!",
-      "artist": "tom@lorenzosmusic.com",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-HappyNewYear_",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC-BY-SA",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-HappyNewYear_/110101musicmanumitmusiconly.ogg",
-          "bytes": 44008204,
-          "provider_sha1": "162a15f151c9dac67cefc7f94aa68f0d30ac186e",
-          "provider_md5": "bc2e340a8fb01157b16d7e0f0c050f44",
-          "format": "Ogg Vorbis",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-HappyNewYear_/110101musicmanumitmusiconly.mp3",
-          "bytes": 47504070,
-          "provider_sha1": "969e8616640467978e585067990bcc3dbf2816da",
-          "provider_md5": "ba1c087f43528f29392cb58657eb75dc",
-          "format": "VBR MP3",
-          "role": "derivative"
-        }
-      ],
-      "attribution": {
-        "creator": "tom@lorenzosmusic.com",
-        "source_title": "Music Manumit Music Only Podcast - Happy New Year!",
-        "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-HappyNewYear_",
-        "license": "CC-BY-SA",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "folk experimental"
-        }
-      ],
-      "candidate_id": "openmusic:6e3591aaedeab371a92e877e",
-      "quality_score": 75
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "internet-archive",
-      "provider_id": "ScumposSoundOfWork2008",
-      "playlist_id": "living-school",
-      "matched_query": "folk experimental",
-      "title": "Scumpos / Sound of Work (2008)",
-      "artist": "Scumpos (C. Schuch)",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/ScumposSoundOfWork2008",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC-BY-SA",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/05BlackGravitationalPulse_01.wav.mp3",
-          "bytes": 7444724,
-          "provider_sha1": "ae79905a9e8d25e024439bd6d8ad2d997c291d2f",
-          "provider_md5": "e5f56ed60feb50035e1754fa364b8bf7",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/07TreeOrNoTreeharpmadness.wav.mp3",
-          "bytes": 6283822,
-          "provider_sha1": "ee282728863e385bb0095530ae3022a78cf81a77",
-          "provider_md5": "2143c644543a074f98970be5f6be4d4c",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/14SharkInDistress.wav.mp3",
-          "bytes": 5982595,
-          "provider_sha1": "3d4df886ccfdc079c2186d239048b1170d527567",
-          "provider_md5": "d5086476a96221db44fc4e853b1068e3",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/01OutOffWindow.wav.mp3",
-          "bytes": 5791698,
-          "provider_sha1": "94ebcd5eb5e8e3b45fd13de1f12262a2f22a98d6",
-          "provider_md5": "455a38c7c4f7d5aee8d8c102dc8d0938",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/19CuiBono.wav.mp3",
-          "bytes": 5776750,
-          "provider_sha1": "478a690a66a45f7e2cb77330e2ba0b3b9317e997",
-          "provider_md5": "8ea1e61c9080ae70dede6610a43a9035",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/08BenYoung.wav.mp3",
-          "bytes": 5630465,
-          "provider_sha1": "09e238d3630feecd07851c15ee21708c955162c7",
-          "provider_md5": "3da3e12ea6b974502623340a690720b9",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/10CalculatingStatics.wav.mp3",
-          "bytes": 4562057,
-          "provider_sha1": "3934b512185adab99a93debdeebd62aa9f736515",
-          "provider_md5": "7824861287ffeb227a26c99b3029d2ec",
-          "format": "VBR MP3",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/ScumposSoundOfWork2008/18ThoughtYouCould.wav.mp3",
-          "bytes": 4556832,
-          "provider_sha1": "9eb1e105d6c50282d1d008b99517acd06c0fc77e",
-          "provider_md5": "eb12da6e019d938bdf9cb80f9ca6e132",
-          "format": "VBR MP3",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Scumpos (C. Schuch)",
-        "source_title": "Scumpos / Sound of Work (2008)",
-        "source_url": "https://archive.org/details/ScumposSoundOfWork2008",
-        "license": "CC-BY-SA",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "folk experimental"
-        }
-      ],
-      "candidate_id": "openmusic:ea1f567322a760ace5f7e5bf",
-      "quality_score": 75
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "internet-archive",
-      "provider_id": "your-heart-your-body",
-      "playlist_id": "anarchadia",
-      "matched_query": "noise rock",
-      "title": "Your Heart Your Body",
-      "artist": "Coma in Algiers",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/your-heart-your-body",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC-BY-SA",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by-sa/4.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2009%20Where's%20The%20Party-.flac",
-          "bytes": 42302905,
-          "provider_sha1": "7b1295e1d1dd10ce3766867985242a3f6378a213",
-          "provider_md5": "a5bd8053c0e06a56486c25c8946249a4",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2011%20Trojan%20Horse.flac",
-          "bytes": 27803081,
-          "provider_sha1": "bc078246691da51f750b842899ec3d41fdd15ef5",
-          "provider_md5": "d57fd6ed2e1a963af028bc2a34e8290b",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2008%20Not%20Really.flac",
-          "bytes": 26137976,
-          "provider_sha1": "d1e188f08e417ad4aa188797bdb362bbdef8d60c",
-          "provider_md5": "fc8c281ef4bf5e26bb49aa04aebc4c52",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2001%20Why%20Why%20Why.flac",
-          "bytes": 25253874,
-          "provider_sha1": "eb69a0f1c8852577bf6f61aec619fed27d16c5a3",
-          "provider_md5": "a9217b3495bab8dc57326713ae322336",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2003%20Possess%20It.flac",
-          "bytes": 24850776,
-          "provider_sha1": "24b84e2ca6f97bec0707abf0e79bf58dd81f913a",
-          "provider_md5": "e23e2a7f4fdbb9a13823f6ce4e630c72",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2005%20Something's%20Amiss.flac",
-          "bytes": 21464135,
-          "provider_sha1": "24112e3a38ac0281f3715fa41e03bd51c4c75aa8",
-          "provider_md5": "9c06f668ef7a7dfbe294503e95eee964",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2002%20Come%20Fall.flac",
-          "bytes": 20437278,
-          "provider_sha1": "487c5afd2a56395d8ac1a5a0f520e659ad11bd4a",
-          "provider_md5": "9bcfd0021225025c17bef403610a26b5",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/your-heart-your-body/Coma%20in%20Algiers%20-%20Your%20Heart%20Your%20Body%20-%2006%20Stop%20Singing.flac",
-          "bytes": 16755719,
-          "provider_sha1": "ff24dbb214ac6605d79f8edf265766d457f48254",
-          "provider_md5": "f35d6328b59dd05683057b6db763631d",
-          "format": "Flac",
-          "role": "original"
-        }
-      ],
-      "attribution": {
-        "creator": "Coma in Algiers",
-        "source_title": "Your Heart Your Body",
-        "source_url": "https://archive.org/details/your-heart-your-body",
-        "license": "CC-BY-SA",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
-        }
-      ],
-      "candidate_id": "openmusic:698a8c9ce09e5f6c3a8433e9",
-      "quality_score": 75
+      "candidate_id": "openmusic:d944b702c1f51fa15cf1de4f",
+      "quality_score": 125
     },
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
-      "provider_id": "12780",
+      "provider_id": "28239",
       "playlist_id": "civweave",
-      "matched_query": "art pop electronic",
-      "title": "Anadolu Pop Theme",
-      "artist": "murat ses",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/murat_ses/12780",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/murat_ses/murat_ses_-_Anadolu_Pop_Theme.mp3",
-          "mime": "",
-          "bytes": 2050551,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "murat ses",
-        "source_title": "Anadolu Pop Theme",
-        "source_url": "https://ccmixter.org/files/murat_ses/12780",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "art pop electronic"
-        }
-      ],
-      "candidate_id": "openmusic:cd8380d641fb1319a466ca95",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "8751",
-      "playlist_id": "fellowfare",
-      "matched_query": "folk funk",
-      "title": "B Calm Violin Track",
-      "artist": "Dimitri Artemenko",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/stringfactory/8751",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/stringfactory/stringfactory_-_B_Calm_Violin_Track_2.mp3",
-          "mime": "",
-          "bytes": 4354134,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Dimitri Artemenko",
-        "source_title": "B Calm Violin Track",
-        "source_url": "https://ccmixter.org/files/stringfactory/8751",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "folk funk"
-        }
-      ],
-      "candidate_id": "openmusic:149175bd44abb2bacf1d38ef",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "39961",
-      "playlist_id": "civweave",
-      "matched_query": "indie electronic experimental",
-      "title": "Clean",
-      "artist": "Donnie Ozone",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/donnieozone/39961",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/donnieozone/donnieozone_-_Clean.mp3",
-          "mime": "",
-          "bytes": 10406183,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Donnie Ozone",
-        "source_title": "Clean",
-        "source_url": "https://ccmixter.org/files/donnieozone/39961",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "indie electronic experimental"
-        }
-      ],
-      "candidate_id": "openmusic:13c3ed22532feb3da4d647ea",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "5777",
-      "playlist_id": "civweave",
-      "matched_query": "post rock electronic",
-      "title": "Dirtbag - MC Jack in the Box remix",
-      "artist": "MC Jack in the Box",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/mcjackinthebox/5777",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/mcjackinthebox/mcjackinthebox_-_Dirtbag_-_MC_Jack_in_the_Box_remix.mp3",
-          "mime": "",
-          "bytes": 4325713,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "MC Jack in the Box",
-        "source_title": "Dirtbag - MC Jack in the Box remix",
-        "source_url": "https://ccmixter.org/files/mcjackinthebox/5777",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "post rock electronic"
-        }
-      ],
-      "candidate_id": "openmusic:1bdcb2d3586e89e639597a2d",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "31481",
-      "playlist_id": "anarchadia",
-      "matched_query": "post punk electronic",
-      "title": "Diseased Video",
-      "artist": "PorchCat",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/PorchCat/31481",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/PorchCat/PorchCat_-_Diseased_Video.mp3",
-          "mime": "",
-          "bytes": 1107636,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "PorchCat",
-        "source_title": "Diseased Video",
-        "source_url": "https://ccmixter.org/files/PorchCat/31481",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "post punk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:12c2717c691658c525c99113",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "1978",
-      "playlist_id": "anarchadia",
-      "matched_query": "punk experimental",
-      "title": "Hey Baby!",
-      "artist": "Moe Train",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/moetrain/1978",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/moetrain/moetrain_-_Hey_Baby_.mp3",
-          "mime": "",
-          "bytes": 7240205,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Moe Train",
-        "source_title": "Hey Baby!",
-        "source_url": "https://ccmixter.org/files/moetrain/1978",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "punk experimental"
-        }
-      ],
-      "candidate_id": "openmusic:b2cfe711f24213be851125ac",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "60098",
-      "playlist_id": "civweave",
-      "matched_query": "ambient electronic hopeful",
-      "title": "I Miss You - Snowflake - Nickillus remix 2019",
-      "artist": "Nickillus",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/Nickillus/60098",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/Nickillus/Nickillus_-_I_Miss_You_-_Snowflake_-_Nickillus_remix_2019.mp3",
-          "mime": "",
-          "bytes": 6095204,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Nickillus",
-        "source_title": "I Miss You - Snowflake - Nickillus remix 2019",
-        "source_url": "https://ccmixter.org/files/Nickillus/60098",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "ambient electronic hopeful"
-        }
-      ],
-      "candidate_id": "openmusic:5c63407e760cb2b275799345",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "903",
-      "playlist_id": "living-school",
-      "matched_query": "folk experimental",
-      "title": "let the sirens play",
-      "artist": "Lycius",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/lycius/903",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/lycius/lycius_-_let_the_sirens_play.mp3",
-          "mime": "",
-          "bytes": 3786432,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Lycius",
-        "source_title": "let the sirens play",
-        "source_url": "https://ccmixter.org/files/lycius/903",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "folk experimental"
-        }
-      ],
-      "candidate_id": "openmusic:90c66f00128f0ce27f111637",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "8489",
-      "playlist_id": "cerbanimo",
-      "matched_query": "future funk electronic",
-      "title": "Metro Ride (future jazz mix)",
-      "artist": "Uncool Bob",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/revken/8489",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/revken/revken_-_Metro_Ride_(future_jazz_mix).mp3",
-          "mime": "",
-          "bytes": 8843538,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/revken/revken_-_Metro_Ride_(future_jazz_mix)_2.mp3",
-          "mime": "",
-          "bytes": 8843538,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Uncool Bob",
-        "source_title": "Metro Ride (future jazz mix)",
-        "source_url": "https://ccmixter.org/files/revken/8489",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "future funk electronic"
-        }
-      ],
-      "candidate_id": "openmusic:9d2ed7ccf0bb913421e81d3e",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "7268",
-      "playlist_id": "anarchadia",
-      "matched_query": "noise rock",
-      "title": "Noisey Mud and Plucker",
-      "artist": "PorchCat",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/PorchCat/7268",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/PorchCat/PorchCat_-_Noisey_Mud_and_Plucker.mp3",
-          "mime": "",
-          "bytes": 619459,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "PorchCat",
-        "source_title": "Noisey Mud and Plucker",
-        "source_url": "https://ccmixter.org/files/PorchCat/7268",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "noise rock"
-        }
-      ],
-      "candidate_id": "openmusic:c5a50d764550a69e3f78f730",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "892",
-      "playlist_id": "living-school",
-      "matched_query": "ambient acoustic instrumental",
-      "title": "Out There Again",
-      "artist": "teru",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/teru/892",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/teru/teru_-_Out_There_Again.mp3",
-          "mime": "",
-          "bytes": 2821346,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "teru",
-        "source_title": "Out There Again",
-        "source_url": "https://ccmixter.org/files/teru/892",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "ambient acoustic instrumental"
-        }
-      ],
-      "candidate_id": "openmusic:bc1d1646a80f3b054f7b1198",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "47797",
-      "playlist_id": "living-school",
-      "matched_query": "lofi jazz instrumental",
-      "title": "Piano Song For Goodnight",
-      "artist": "Doxent Zsigmond",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/doxent/47797",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/doxent/doxent_-_Piano_Song_For_Goodnight.mp3",
-          "mime": "",
-          "bytes": 8956909,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/doxent/doxent_-_Piano_Song_For_Goodnight.flac",
-          "mime": "",
-          "bytes": 8964185,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Doxent Zsigmond",
-        "source_title": "Piano Song For Goodnight",
-        "source_url": "https://ccmixter.org/files/doxent/47797",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "lofi jazz instrumental"
-        }
-      ],
-      "candidate_id": "openmusic:43c036ee64436f06001288e7",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "61628",
-      "playlist_id": "cerbanimo",
-      "matched_query": "cyberpunk electronic instrumental",
-      "title": "The Tire Store",
-      "artist": "Kraftamt",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/Karstenholymoly/61628",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/Karstenholymoly/Karstenholymoly_-_The_Tire_Store_1.mp3",
-          "mime": "",
-          "bytes": 13063358,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Kraftamt",
-        "source_title": "The Tire Store",
-        "source_url": "https://ccmixter.org/files/Karstenholymoly/61628",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "cyberpunk electronic instrumental"
-        }
-      ],
-      "candidate_id": "openmusic:0c98c1439fef2217319b96c8",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "70881",
-      "playlist_id": "cerbanimo",
-      "matched_query": "electro rock energetic",
-      "title": "Tiranny of War",
-      "artist": "Dreamonizer",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/Dimensional_Pulse/70881",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (3.0)",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/Dimensional_Pulse/Dimensional_Pulse_-_Tiranny_of_War_1.mp3",
-          "mime": "",
-          "bytes": 4137600,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Dreamonizer",
-        "source_title": "Tiranny of War",
-        "source_url": "https://ccmixter.org/files/Dimensional_Pulse/70881",
-        "license": "Attribution (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "electro rock energetic"
-        }
-      ],
-      "candidate_id": "openmusic:e0a641e7af1bbaedc28f864a",
-      "quality_score": 65
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "33366",
-      "playlist_id": "living-school",
-      "matched_query": "ambient acoustic instrumental",
-      "title": "Jazzed out jazzed in",
+      "matched_query": "curated:28239",
+      "title": "yours and mine",
       "artist": "Tomas PhUsIoN",
       "album": "",
       "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/phusion/33366",
+      "source_url": "https://ccmixter.org/files/phusion/28239",
       "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
-        "share_alike": true
+        "share_alike": false
       },
       "files": [
         {
-          "url": "https://ccmixter.org/content/phusion/phusion_-_Jazzed_out_jazzed_in.mp3",
+          "url": "https://ccmixter.org/content/phusion/phusion_-_yours_and_mine.mp3",
           "mime": "",
-          "bytes": 10750999,
+          "bytes": 5963376,
           "role": "source-download"
         }
       ],
       "attribution": {
         "creator": "Tomas PhUsIoN",
-        "source_title": "Jazzed out jazzed in",
-        "source_url": "https://ccmixter.org/files/phusion/33366",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        "source_title": "yours and mine",
+        "source_url": "https://ccmixter.org/files/phusion/28239",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
       },
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
       "mesh_redistributable": true,
       "download_enabled": true,
       "content_hash": null,
       "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "commons",
+        "ownership",
+        "collective life"
+      ],
+      "explicit": true,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28239"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:28239"
+        }
+      ],
+      "candidate_id": "openmusic:f07b5096cec10f2b089e33e0",
+      "quality_score": 125
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "66038",
+      "playlist_id": "living-school",
+      "matched_query": "curated:66038",
+      "title": "Let the Walls Come Down",
+      "artist": "Stefan Kartenberg",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/JeffSpeed68/66038",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Let_the_Walls_Come_Down.mp3",
+          "mime": "",
+          "bytes": 9332544,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Let_the_Walls_Come_Down_1.mp3",
+          "mime": "",
+          "bytes": 9257664,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Stefan Kartenberg",
+        "source_title": "Let the Walls Come Down",
+        "source_url": "https://ccmixter.org/files/JeffSpeed68/66038",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 4,
+      "themes": [
+        "inclusion",
+        "anti-hate",
+        "belonging"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
       "playlist_matches": [
         {
           "playlist_id": "living-school",
-          "matched_query": "ambient acoustic instrumental"
+          "matched_query": "curated:66038"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:66038"
         }
       ],
-      "candidate_id": "openmusic:7d37f372f9ec0d608ec8291a",
-      "quality_score": 64
+      "candidate_id": "openmusic:a0dff66c9efe6c7ac60f62fb",
+      "quality_score": 121
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "28448",
+      "playlist_id": "civweave",
+      "matched_query": "curated:28448",
+      "title": "LISA CRISTI",
+      "artist": "Bocrew",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/BOCrew/28448",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/BOCrew/BOCrew_-_LISA_CRISTI.mp3",
+          "mime": "",
+          "bytes": 1914716,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Bocrew",
+        "source_title": "LISA CRISTI",
+        "source_url": "https://ccmixter.org/files/BOCrew/28448",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 4,
+      "themes": [
+        "freedom",
+        "voice",
+        "hip hop"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28448"
+        }
+      ],
+      "candidate_id": "openmusic:2d46c4b4c34c71aff58781fb",
+      "quality_score": 121
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "61038",
+      "playlist_id": "living-school",
+      "matched_query": "curated:61038",
+      "title": "Rise Up!",
+      "artist": "Stefan Kartenberg",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.mp3",
+          "mime": "",
+          "bytes": 9587904,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Rise_Up_.flac",
+          "mime": "",
+          "bytes": 28018436,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Stefan Kartenberg",
+        "source_title": "Rise Up!",
+        "source_url": "https://ccmixter.org/files/JeffSpeed68/61038",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 4,
+      "themes": [
+        "action",
+        "change",
+        "resilience"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:61038"
+        }
+      ],
+      "candidate_id": "openmusic:fe12a50b8cdb32fee29327ea",
+      "quality_score": 121
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "62674",
+      "playlist_id": "living-school",
+      "matched_query": "curated:62674",
+      "title": "Rosa's Story",
+      "artist": "Radioontheshelf",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/Radioontheshelf/62674",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_Rosa_s_Story_1.mp3",
+          "mime": "",
+          "bytes": 14142739,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Radioontheshelf",
+        "source_title": "Rosa's Story",
+        "source_url": "https://ccmixter.org/files/Radioontheshelf/62674",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 4,
+      "themes": [
+        "truth",
+        "history",
+        "justice",
+        "the vulnerable"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:62674"
+        }
+      ],
+      "candidate_id": "openmusic:809f1a6c063d607b1727bca3",
+      "quality_score": 121
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "63518",
+      "playlist_id": "living-school",
+      "matched_query": "curated:63518",
+      "title": "Sackjo22_Indelible Choices Choices May Change II",
+      "artist": "MalreDeszik",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/MalreDeszik/63518",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Sackjo22_Indelible_Choices_Choices_May_Change_II.mp3",
+          "mime": "",
+          "bytes": 4988700,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Sackjo22_Indelible_Choices_Choices_May_Change_II_1.mp3",
+          "mime": "",
+          "bytes": 4988316,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "MalreDeszik",
+        "source_title": "Sackjo22_Indelible Choices Choices May Change II",
+        "source_url": "https://ccmixter.org/files/MalreDeszik/63518",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 4,
+      "themes": [
+        "choice",
+        "consequence",
+        "agency",
+        "reflection"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:63518"
+        }
+      ],
+      "candidate_id": "openmusic:d30b835d2a495ab650ddcdd4",
+      "quality_score": 121
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "37764",
+      "playlist_id": "fellowfare",
+      "matched_query": "curated:37764",
+      "title": "Like A Sycamore",
+      "artist": "Madam Snowflake",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/snowflake/37764",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Like_A_Sycamore.mp3",
+          "mime": "",
+          "bytes": 4771467,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Like_A_Sycamore.flac",
+          "mime": "",
+          "bytes": 12460119,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Madam Snowflake",
+        "source_title": "Like A Sycamore",
+        "source_url": "https://ccmixter.org/files/snowflake/37764",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "recovery",
+        "ecology",
+        "gratitude",
+        "care"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:37764"
+        }
+      ],
+      "candidate_id": "openmusic:40b65af550bc0933c90424a9",
+      "quality_score": 117
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "64609",
+      "playlist_id": "cerbanimo",
+      "matched_query": "curated:64609",
+      "title": "Things Change",
+      "artist": "SackJo22",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/SackJo22/64609",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/SackJo22/SackJo22_-_Things_Change.mp3",
+          "mime": "",
+          "bytes": 9831744,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "SackJo22",
+        "source_title": "Things Change",
+        "source_url": "https://ccmixter.org/files/SackJo22/64609",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "change",
+        "adaptation",
+        "resilience"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:64609"
+        }
+      ],
+      "candidate_id": "openmusic:534960cbcb4bc14fc3d310a3",
+      "quality_score": 117
     }
   ]
 }

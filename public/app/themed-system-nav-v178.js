@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.163-five-system-navigation-v231-hide-fallback-monogram';
+const VERSION='1.0.163-five-system-navigation-v232-canonical-rail';
 const NAV_ID='cw-themed-system-nav';
 const MENU_ID='cw-themed-system-nav-menu';
 const STYLE_ID='cw-themed-system-nav-style';
@@ -119,7 +119,8 @@ function currentSystem(){
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
-:root{--cw-themed-nav-height:clamp(56px,7vw,68px);--cw-themed-nav-bottom-gap:4px}
+/* Canonical five-guide rail geometry lives here. Do not reintroduce a compact fallback in another stylesheet. */
+:root{--cw-themed-nav-height:clamp(92px,10vw,100px);--cw-themed-nav-bottom-gap:0px}
 html{scroll-padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 16px)}
 html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 12px)!important}
 html.cw-themed-system-nav-active nav.bottom,
@@ -142,8 +143,8 @@ html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-com
 #${NAV_ID} .cw-themed-system-link.is-onboarding-highlight{z-index:4;opacity:1!important;filter:none!important;animation:cw-nav-guide-pulse 1.05s ease-in-out infinite alternate}
 #${NAV_ID} .cw-themed-system-link:focus-visible{outline:3px solid #fff8c7!important;outline-offset:-4px!important}
 #${NAV_ID} .cw-themed-system-button{box-sizing:border-box;width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:3px 7px;pointer-events:none}
-#${NAV_ID} .cw-themed-system-avatar-wrap{position:relative;flex:0 0 auto;width:40px;height:40px;border-radius:12px;padding:2px;background:linear-gradient(180deg,var(--system-shell),#ffffff99);border:1px solid var(--system-ring);box-shadow:0 2px 8px #0006;overflow:hidden}
-#${NAV_ID} .cw-themed-system-fallback,#${NAV_ID} .cw-themed-system-avatar{position:absolute;inset:2px;display:block;width:calc(100% - 4px);height:calc(100% - 4px);border-radius:9px}
+#${NAV_ID} .cw-themed-system-avatar-wrap{position:relative;flex:0 0 auto;width:84px;height:84px;border-radius:20px;padding:2px;background:linear-gradient(180deg,var(--system-shell),#ffffff99);border:1px solid var(--system-ring);box-shadow:0 2px 8px #0006;overflow:hidden}
+#${NAV_ID} .cw-themed-system-fallback,#${NAV_ID} .cw-themed-system-avatar{position:absolute;inset:2px;display:block;width:calc(100% - 4px);height:calc(100% - 4px);border-radius:18px}
 #${NAV_ID} .cw-themed-system-fallback{object-fit:cover;object-position:center;z-index:0}
 #${NAV_ID} .cw-themed-system-avatar{z-index:1;background-image:var(--system-sheet);background-size:500% 400%;background-position:calc(var(--sprite-col)*25%) calc(var(--sprite-row)*33.333333%);background-repeat:no-repeat;filter:saturate(.98) brightness(1.02);transition:transform .18s ease,filter .18s ease}
 #${NAV_ID} .cw-themed-system-link:hover .cw-themed-system-avatar,#${NAV_ID} .cw-themed-system-link.is-current .cw-themed-system-avatar{filter:saturate(1.06) brightness(1.05);transform:scale(1.04)}
@@ -155,8 +156,8 @@ html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-com
 #${MENU_ID} .cw-nav-menu-list{display:grid;gap:4px;padding-top:7px}#${MENU_ID} [role="menuitem"]{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:10px 11px;border:1px solid transparent;border-radius:10px;background:#ffffff08;color:#fff;text-align:left;cursor:pointer}#${MENU_ID} [role="menuitem"]:hover,#${MENU_ID} [role="menuitem"]:focus-visible{border-color:#f1cf7a77;background:#ffffff13;outline:0}#${MENU_ID} [role="menuitem"] span{min-width:0}#${MENU_ID} [role="menuitem"] b,#${MENU_ID} [role="menuitem"] small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${MENU_ID} [role="menuitem"] small{margin-top:2px;color:#9eacbe;font-size:10px}#${MENU_ID} [role="menuitem"] i{font-style:normal;color:#f2d57f;font-weight:900}
 #cwp215-launcher,#cw-radio-suggestion-v233{bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 10px)!important}
 @keyframes cw-nav-guide-pulse{from{transform:translateY(-2px) scale(1)}to{transform:translateY(-5px) scale(1.03)}}
-@media(max-width:680px){:root{--cw-themed-nav-height:clamp(58px,14vw,64px);--cw-themed-nav-bottom-gap:2px}#${NAV_ID}{width:calc(100vw - 6px)!important}#${NAV_ID} .cw-themed-system-button{gap:4px;padding:2px 4px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:36px;height:36px}}
-@media(max-width:430px){#${NAV_ID} .cw-themed-system-avatar-wrap{width:33px;height:33px}#${MENU_ID}{width:calc(100vw - 16px)!important;max-height:56dvh!important}}
+@media(max-width:680px){:root{--cw-themed-nav-height:clamp(88px,22vw,96px);--cw-themed-nav-bottom-gap:0px}#${NAV_ID}{bottom:0!important;height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;min-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;max-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;padding-bottom:env(safe-area-inset-bottom)!important;box-sizing:border-box!important;width:calc(100vw - 6px)!important}#${NAV_ID} .cw-themed-system-button{gap:4px;padding:2px 4px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:76px;height:76px}}
+@media(max-width:430px){:root{--cw-themed-nav-height:clamp(80px,22vw,88px);--cw-themed-nav-bottom-gap:0px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:68px;height:68px}#${MENU_ID}{width:calc(100vw - 16px)!important;max-height:56dvh!important}}
 @media(prefers-reduced-motion:reduce){#${NAV_ID} .cw-themed-system-link,#${NAV_ID} .cw-themed-system-avatar{transition:none}#${NAV_ID} .cw-themed-system-link.is-onboarding-highlight{animation:none}}
 `;
   document.head.append(style);
@@ -221,13 +222,13 @@ function mount(){
   installStyle();document.documentElement.classList.add('cw-themed-system-nav-active');document.documentElement.dataset.cwThemedCurrent=current;document.documentElement.dataset.familyNavigationOwner='themed-system-nav-v178';
   let nav=document.getElementById(NAV_ID);
   if(!nav){
-    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v306-current-quest';nav.setAttribute('aria-label','Civweave five-guide rail');
+    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v306-current-quest';nav.dataset.geometryRevision='canonical-tall-v1';nav.setAttribute('aria-label','Civweave five-guide rail');
     nav.innerHTML=SYSTEMS.map(item=>{const selected=item.id===current;return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${href(item)}" target="_top" aria-label="${item.character} · ${item.label}. Tap to open ${item.label}. Press and hold for shortcuts." aria-haspopup="menu" aria-expanded="false"${selected?' aria-current="page"':''} style="--system-glow:${item.glow};--system-shade:${item.shade};--system-label:${item.labelColor};--system-shell:${item.shell};--system-ring:${item.ring};--system-panel:${item.panel};--system-sheet:url('${SHEETS[item.id]}');--sprite-col:0;--sprite-row:0"><span class="cw-themed-system-button"><span class="cw-themed-system-avatar-wrap"><img class="cw-themed-system-fallback" src="${FALLBACK[item.id]}" alt=""><span class="cw-themed-system-avatar" role="img" aria-label="${item.character}"></span><span class="cw-themed-unread" hidden></span></span><span class="cw-themed-system-monogram" aria-hidden="true">${item.monogram}</span><span class="cw-themed-system-copy"><b>${item.character}</b><small>${item.label}</small></span></span></a>`}).join('');
     nav.addEventListener('pointerdown',event=>{const link=event.target.closest?.('a[data-system]');if(link)startHold(event,link)});nav.addEventListener('pointermove',moveHold);nav.addEventListener('pointerup',finishHold);nav.addEventListener('pointercancel',cancelHold);
     nav.addEventListener('contextmenu',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;event.preventDefault();cancelHold();suppressClickUntil=Date.now()+500;openQuickMenu(link.dataset.system,{focus:true})});
     nav.addEventListener('keydown',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;if(event.key==='ContextMenu'||event.key==='ArrowUp'||(event.key==='Enter'&&event.shiftKey)){event.preventDefault();openQuickMenu(link.dataset.system,{focus:true})}});
     nav.addEventListener('click',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;event.preventDefault();if(Date.now()<suppressClickUntil)return;closeQuickMenu({restoreFocus:false});const target=String(link.dataset.system||'');syncCurrentSelection(target);routeSystem(target)});document.body.append(nav);
-  }else nav.dataset.navigationRevision=VERSION;
+  }else{nav.dataset.navigationRevision=VERSION;nav.dataset.geometryRevision='canonical-tall-v1'}
   ensureMenu();syncChrome();for(const item of SYSTEMS)if(!linkFor(item.id)?.dataset.expression)setExpression(item.id,'neutral','boot');hydrate();void ensureStateMapper().then(hydrate);requestAnimationFrame(()=>applyRequestedFeature());return true;
 }
 function ensureMounted(){if(EMBEDDED){clearEmbedded();return false}return mount()}
@@ -249,5 +250,5 @@ addEventListener('resize',()=>{if(menu&&!menu.hidden&&menuSystem)positionMenu(li
 document.addEventListener('pointerdown',event=>{if(menu?.hidden)return;if(menu?.contains(event.target)||document.getElementById(NAV_ID)?.contains(event.target))return;closeQuickMenu({restoreFocus:false})},true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureMounted,{once:true});else ensureMounted();setTimeout(ensureMounted,120);setTimeout(ensureMounted,900);
 
-globalThis.CivweaveFamilyNavigationV178=Object.freeze({version:VERSION,owner:true,domOwner:NAV_ID,menuOwner:MENU_ID,systems:SYSTEMS.map(item=>item.id),routeContract:'system-routes-v227',interaction:'tap-system-hold-shortcuts',holdMilliseconds:HOLD_MS,currentSystem,mount,ensureMounted,syncCurrentSelection,setExpression,quickActions:system=>quickFor(system).map(action=>({...action})),openQuickMenu,closeQuickMenu,activateFeature:launchFeature,applyRequestedFeature});
+globalThis.CivweaveFamilyNavigationV178=Object.freeze({version:VERSION,owner:true,domOwner:NAV_ID,menuOwner:MENU_ID,geometryOwner:'canonical-tall-v1',systems:SYSTEMS.map(item=>item.id),routeContract:'system-routes-v227',interaction:'tap-system-hold-shortcuts',holdMilliseconds:HOLD_MS,currentSystem,mount,ensureMounted,syncCurrentSelection,setExpression,quickActions:system=>quickFor(system).map(action=>({...action})),openQuickMenu,closeQuickMenu,activateFeature:launchFeature,applyRequestedFeature});
 })();

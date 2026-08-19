@@ -7,7 +7,7 @@
 <title>Civweave Guildkeeper Setup</title>
 <link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">
 <style>
-:root{color-scheme:dark;--ink:#07111b;--panel:#0b1d28;--line:#71d9e455;--cyan:#8de5ef;--gold:#e8c96b;--paper:#f3f7f3;--muted:#b9cbd1}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 0%,#143644 0,transparent 35%),linear-gradient(160deg,#061019,#0a1b27 58%,#130d22);color:var(--paper);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:920px;margin:auto;padding:28px 20px 80px}.brand{display:flex;align-items:center;gap:15px;margin-bottom:28px}.brand img{width:66px;height:66px;object-fit:contain;border-radius:18px}.brand small,.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.13em;text-transform:uppercase}.brand h1{margin:0;font:700 clamp(2rem,7vw,4.3rem)/.95 Georgia,serif}.card{margin:18px 0;padding:22px;border:1px solid var(--line);border-radius:22px;background:#071c27e8;box-shadow:0 18px 60px #0005}.hero h2{font:700 clamp(1.8rem,5vw,3.4rem)/1.04 Georgia,serif;margin:.25em 0}.hero p,.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tile{padding:16px;border:1px solid #7ee5ff2f;border-radius:16px;background:#061720}.tile small{display:block;color:var(--cyan);font-weight:900;letter-spacing:.09em;text-transform:uppercase}.tile strong{display:block;margin-top:7px;font-size:1rem;overflow-wrap:anywhere}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.actions a,.actions button{min-height:44px;padding:10px 14px;border:1px solid #d8b86466;border-radius:12px;background:#172434;color:#fff;text-decoration:none;font-weight:850;cursor:pointer}.actions .primary{background:#6a5118;border-color:#e6c76699}.actions .campus{background:#123a42;border-color:#78e0ea88}.status{margin-top:12px;color:var(--muted)}.edge-card{border-color:#e8c96b55}.edge-card.ready{border-color:#65dfaa88}.edge-card.pending{border-color:#f2b35f88}.edge-card h2{margin:.2em 0;font:700 clamp(1.5rem,4vw,2.4rem)/1.05 Georgia,serif}.tile a{color:var(--paper);text-decoration:none}.tile a:hover{text-decoration:underline}.permission{margin-top:16px;padding:14px 16px;border:1px solid #e8c96b55;border-radius:14px;background:#2b210f66}.permission summary{cursor:pointer;font-weight:900;color:var(--gold)}.permission code{color:#fff;overflow-wrap:anywhere}.permission li+li{margin-top:7px}@media(max-width:720px){main{padding:18px 14px 70px}.grid{grid-template-columns:1fr}.brand img{width:54px;height:54px}.actions>a,.actions>button{flex:1 1 100%;text-align:center}}
+:root{color-scheme:dark;--ink:#07111b;--panel:#0b1d28;--line:#71d9e455;--cyan:#8de5ef;--gold:#e8c96b;--paper:#f3f7f3;--muted:#b9cbd1}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 0%,#143644 0,transparent 35%),linear-gradient(160deg,#061019,#0a1b27 58%,#130d22);color:var(--paper);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:920px;margin:auto;padding:28px 20px 80px}.brand{display:flex;align-items:center;gap:15px;margin-bottom:28px}.brand img{width:66px;height:66px;object-fit:contain;border-radius:18px}.brand small,.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.13em;text-transform:uppercase}.brand h1{margin:0;font:700 clamp(2rem,7vw,4.3rem)/.95 Georgia,serif}.card{margin:18px 0;padding:22px;border:1px solid var(--line);border-radius:22px;background:#071c27e8;box-shadow:0 18px 60px #0005}.hero h2{font:700 clamp(1.8rem,5vw,3.4rem)/1.04 Georgia,serif;margin:.25em 0}.hero p,.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tile{padding:16px;border:1px solid #7ee5ff2f;border-radius:16px;background:#061720}.tile small{display:block;color:var(--cyan);font-weight:900;letter-spacing:.09em;text-transform:uppercase}.tile strong{display:block;margin-top:7px;font-size:1rem;overflow-wrap:anywhere}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.actions a,.actions button{min-height:44px;padding:10px 14px;border:1px solid #d8b86466;border-radius:12px;background:#172434;color:#fff;text-decoration:none;font-weight:850;cursor:pointer}.actions .primary{background:#6a5118;border-color:#e6c76699}.actions .campus{background:#123a42;border-color:#78e0ea88}.actions a[aria-disabled="true"]{filter:saturate(.3);opacity:.48;cursor:not-allowed}.status{margin-top:12px;color:var(--muted)}.edge-card{border-color:#e8c96b55}.edge-card.ready{border-color:#65dfaa88}.edge-card.pending{border-color:#f2b35f88}.edge-card h2{margin:.2em 0;font:700 clamp(1.5rem,4vw,2.4rem)/1.05 Georgia,serif}.tile a{color:var(--paper);text-decoration:none}.tile a:hover{text-decoration:underline}.permission{margin-top:16px;padding:14px 16px;border:1px solid #e8c96b55;border-radius:14px;background:#2b210f66}.permission summary{cursor:pointer;font-weight:900;color:var(--gold)}.permission code{color:#fff;overflow-wrap:anywhere}.permission li+li{margin-top:7px}@media(max-width:720px){main{padding:18px 14px 70px}.grid{grid-template-columns:1fr}.brand img{width:54px;height:54px}.actions>a,.actions>button{flex:1 1 100%;text-align:center}}
 .actions button:disabled{cursor:not-allowed;filter:saturate(.35);opacity:.58}.edge-card h2,.location-card h2,.stripe-card h2{margin:.2em 0;font:700 clamp(1.5rem,4vw,2.4rem)/1.05 Georgia,serif}.location-card{border-color:#72dfbc66;background:linear-gradient(145deg,#08251fe8,#071c27e8)}.location-card.synced{border-color:#65dfaa}.location-note{padding:13px 15px;border-radius:14px;background:#07161f;border:1px solid #71d9e433;color:var(--muted)}.location-precision{display:flex;align-items:flex-start;gap:12px;margin-top:14px;padding:14px 15px;border-radius:14px;background:#10251f;border:1px solid #72dfbc55;cursor:pointer}.location-precision input{width:20px;height:20px;margin-top:2px;accent-color:#65dfaa;flex:0 0 auto}.location-precision strong{display:block;color:var(--paper)}.location-precision span span{display:block;margin-top:3px;color:var(--muted);font-size:.92rem}.stripe-card{border-color:#a98bff77;background:linear-gradient(145deg,#171331e8,#071c27e8)}
 </style>
 <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
@@ -36,7 +36,7 @@
 </div>
 <div class="actions">
 <a class="primary" id="anchor-link" href="/host-local-anchor.html">Set up local Anchor</a>
-<a class="campus" href="/app/installed-entry-v146?installed=1&system=civweave&source=host-setup">Open Civweave</a>
+<a class="campus" id="open-civweave" href="/app/installed-entry-v146?installed=1&system=civweave&source=host-setup" aria-disabled="true">Open Civweave</a>
 <a href="/app/index.html">Open installer / updater</a>
 <button id="mark-paired" type="button">Anchor is paired</button>
 </div>
@@ -56,17 +56,17 @@
 <p class="status" role="status">Start the local Anchor, open its operator controls, then choose <strong>Connect payouts</strong>. Guildkeeper earnings remain unavailable until Stripe reports transfer capability as active.</p>
 </section>
 <section class="card location-card" id="location-card">
-<p class="eyebrow">PLACE THIS GUILD ON THE MESH</p>
-<h2>Stand where the Guild lives.</h2>
-<p class="muted">Take this device to the physical place this Guild serves, then sync. Civweave will ask for location only after you tap the button.</p>
+<p class="eyebrow">PLACE THIS GUILD ON THE MESH · REQUIRED</p>
+<h2>Stand where the Guild lives to finish setup.</h2>
+<p class="muted">Every Guild needs a Guild Map location during setup. Take this device to the physical place this Guild serves, then sync. Civweave asks for location only after you tap the button.</p>
 <div class="grid">
 <div class="tile"><small>Permission</small><strong>Asked on tap</strong></div>
 <div class="tile"><small>Public precision</small><strong id="location-public-mode">Rounded · about 100 m or wider</strong></div>
 <div class="tile"><small>Mesh nodes</small><strong id="location-node-count">waiting for deployment…</strong></div>
 </div>
 <label class="location-precision" for="publish-precise-location"><input id="publish-precise-location" type="checkbox"><span><strong>Publish a precise public Guild pin</strong><span>Optional. Use this for public venues or sites people should be able to walk directly to. The fresh coordinate and its measured accuracy become public Guild metadata and can appear on the Guild Map.</span></span></label>
-<p class="location-note">Rounded placement is the default: the exact reading stays on this device and only an approximately 100 m site position leaves it. If you explicitly enable the precise public pin above, Civweave sends the fresh coordinate at six decimal places together with the device's measured accuracy. The first successful sync pairs this Guildkeeper browser for future location updates.</p>
-<div class="actions"><button class="primary" id="sync-location" type="button" disabled>Sync this place with the mesh</button></div>
+<p class="location-note">Rounded placement is the default: the exact reading stays on this device and only an approximately 100 m site position leaves it. If you explicitly enable the precise public pin above, Civweave sends the fresh coordinate at six decimal places together with the device's measured accuracy. The first successful sync pairs this Guildkeeper browser for future location updates, including updates made directly from the Guild Map.</p>
+<div class="actions"><button class="primary" id="sync-location" type="button" disabled>Sync this place with the mesh</button><a href="/app/hub-map-v1.html">Open Guild Map</a></div>
 <p id="location-status" class="status" role="status" aria-live="polite">Waiting for the account Worker and starter nodes…</p>
 </section>
 <section class="card edge-card" id="edge-card">
@@ -110,6 +110,7 @@ const paired=()=>{try{return localStorage.getItem(ANCHOR_KEY)==='1'}catch{return
 const anchorState=document.querySelector('#anchor-state');
 const status=document.querySelector('#host-status');
 const anchorLink=document.querySelector('#anchor-link');
+const openCivweave=document.querySelector('#open-civweave');
 const edgeCard=document.querySelector('#edge-card');
 const edgeWorker=document.querySelector('#edge-worker');
 const edgeStatus=document.querySelector('#edge-status');
@@ -132,11 +133,12 @@ function getLocationKey(){
 function savedLocationState(){try{return JSON.parse(localStorage.getItem(LOCATION_STATE_KEY)||'null')}catch{return null}}
 function renderPrecisionChoice(){if(locationPublicMode)locationPublicMode.textContent=locationPrecise?.checked?'Precise · measured GPS accuracy':'Rounded · about 100 m or wider'}
 function renderLocationState(){
-  const saved=savedLocationState();
-  locationCard?.classList.toggle('synced',Boolean(saved?.syncedAt));
-  if(saved?.syncedAt&&locationStatus){
+  const saved=savedLocationState(),ready=Boolean(saved?.syncedAt);
+  locationCard?.classList.toggle('synced',ready);
+  if(openCivweave){openCivweave.setAttribute('aria-disabled',ready?'false':'true');openCivweave.dataset.locationReady=ready?'1':'0'}
+  if(ready&&locationStatus){
     const precise=Number(saved.coordinateDecimals||3)>=5;
-    locationStatus.textContent=`Placed on ${saved.nodeCount||3} mesh nodes with ${precise?'a precise':'an approximately'} ±${saved.precisionMeters||100} m public position. Tap again while on site to update it.`;
+    locationStatus.textContent=`Placed on ${saved.nodeCount||saved.nodeIds?.length||3} mesh nodes with ${precise?'a precise':'an approximately'} ±${saved.precisionMeters||100} m public position. You can update it here or from the Guild Map while this Guildkeeper credential is present.`;
   }
 }
 function bestCurrentPosition(){
@@ -150,7 +152,7 @@ function bestCurrentPosition(){
       if(!best||position.coords.accuracy<best.coords.accuracy)best=position;
       if(locationStatus)locationStatus.textContent=`Finding the Guild site… current accuracy ±${Math.round(best.coords.accuracy)} m.`;
       if(best.coords.accuracy<=50)finish();
-    },error=>finish(new Error(error.code===1?'Location permission was not granted. Enable it for this site, then try again.':'The Guild site could not be read. Move outdoors or near a window and try again.')),{enableHighAccuracy:true,maximumAge:0,timeout:14000});
+    },error=>finish(new Error(error.code===1?'Location permission was not granted. A Guild Map location is required to finish setup. Enable it for this site, then try again.':'The Guild site could not be read. Move outdoors or near a window and try again.')),{enableHighAccuracy:true,maximumAge:0,timeout:14000});
   });
 }
 async function syncLocation(){
@@ -172,7 +174,8 @@ async function syncLocation(){
     if(locationStatus)locationStatus.textContent=precise?'Publishing the precise Guild pin to the online mesh…':'Syncing the rounded Guild site with the online mesh…';
     const response=await fetch(`${locationTarget.workerOrigin}/api/fabric/location`,{method:'POST',headers:{'content-type':'application/json','x-civweave-location-key':claimKey},body:JSON.stringify(payload)}),result=await response.json().catch(()=>({}));
     if(!response.ok||result?.ok!==true)throw new Error(result?.error||`Mesh returned HTTP ${response.status}`);
-    const state={syncedAt:result.location?.syncedAt||new Date().toISOString(),precisionMeters:result.location?.precisionMeters||100,coordinateDecimals:result.location?.coordinateDecimals||3,nodeCount:Array.isArray(result.nodeIds)?result.nodeIds.length:locationTarget.nodeIds.length};
+    const resultLocation=result.location&&typeof result.location==='object'?result.location:{};
+    const state={...resultLocation,schema:'civweave.hub-location-sync.v1',syncedAt:resultLocation.syncedAt||new Date().toISOString(),precisionMeters:resultLocation.precisionMeters||100,coordinateDecimals:resultLocation.coordinateDecimals||3,nodeCount:Array.isArray(result.nodeIds)?result.nodeIds.length:locationTarget.nodeIds.length,nodeIds:Array.isArray(result.nodeIds)?result.nodeIds:[...locationTarget.nodeIds],workerOrigin:locationTarget.workerOrigin,updatedAt:new Date().toISOString()};
     try{localStorage.setItem(LOCATION_STATE_KEY,JSON.stringify(state))}catch{}
     renderLocationState();
   }catch(error){if(locationStatus)locationStatus.textContent=error?.message||String(error)}
@@ -189,6 +192,13 @@ function renderAccountEdge(meta){
   const nodes=Array.isArray(edge?.starterNodes)?edge.starterNodes:[];
   const ready=edge?.status==='ready'&&nodes.length===3;
   locationTarget=ready&&edge?.workerOrigin?{workerOrigin:String(edge.workerOrigin).replace(/\/+$/g,''),nodeIds:nodes.map(node=>node?.nodeId).filter(Boolean)}:null;
+  if(locationTarget){
+    const saved=savedLocationState();
+    if(saved?.syncedAt&&(!saved.workerOrigin||!Array.isArray(saved.nodeIds)||!saved.nodeIds.length)){
+      try{localStorage.setItem(LOCATION_STATE_KEY,JSON.stringify({...saved,workerOrigin:locationTarget.workerOrigin,nodeIds:[...locationTarget.nodeIds],nodeCount:locationTarget.nodeIds.length,updatedAt:new Date().toISOString()}))}catch{}
+    }
+  }
+  renderLocationState();
   if(locationNodeCount)locationNodeCount.textContent=locationTarget?`${locationTarget.nodeIds.length} starter nodes ready`:'waiting for deployment…';
   if(locationButton)locationButton.disabled=!locationTarget;
   if(!locationTarget&&locationStatus)locationStatus.textContent='Finish the account Worker setup before placing this Guild on the mesh.';
@@ -211,6 +221,7 @@ renderPrecisionChoice();
 renderLocationState();
 locationPrecise?.addEventListener('change',renderPrecisionChoice);
 locationButton?.addEventListener('click',syncLocation);
+openCivweave?.addEventListener('click',event=>{if(savedLocationState()?.syncedAt)return;event.preventDefault();locationCard?.scrollIntoView?.({behavior:'smooth',block:'center'});if(locationStatus)locationStatus.textContent='Place this Guild on the Guild Map before entering Civweave. Location is a required Guild setup step.'});
 document.querySelector('#mark-paired')?.addEventListener('click',()=>{try{localStorage.setItem(ANCHOR_KEY,'1');localStorage.removeItem(SNOOZE_KEY)}catch{};renderAnchor();if(status)status.textContent='Anchor pairing acknowledgement saved for this Guildkeeper browser.'});
 (async()=>{
   try{
@@ -222,13 +233,13 @@ document.querySelector('#mark-paired')?.addEventListener('click',()=>{try{localS
     document.querySelector('#host-origin').textContent=origin;
     document.querySelector('#host-role').textContent=meta?.role==='canonical'?'canonical Civweave root':'community Guild';
     if(anchorLink)anchorLink.href=`/host-local-anchor.html?host=${encodeURIComponent(origin)}`;
-    if(status)status.textContent=meta?.localAnchorRecommended?'Guild metadata loaded. A local Anchor is strongly recommended but is not required to enter Civweave.':'Guild metadata loaded.';
+    if(status)status.textContent=meta?.localAnchorRecommended?'Guild metadata loaded. Place this Guild on the map to finish setup; a local Anchor is strongly recommended.':'Guild metadata loaded. Place this Guild on the map to finish setup.';
   }catch(error){
     renderAccountEdge({hostId:'<host-id>',accountEdge:{status:'pending'}});
     document.querySelector('#host-origin').textContent=location.origin;
     document.querySelector('#host-role').textContent='Guildkeeper';
     if(anchorLink)anchorLink.href=`/host-local-anchor.html?host=${encodeURIComponent(location.origin)}`;
-    if(status)status.textContent=`Guild metadata could not be read (${error?.message||error}). You can still open Civweave or configure the local Anchor.`;
+    if(status)status.textContent=`Guild metadata could not be read (${error?.message||error}). You can still configure the local Anchor, but Guild location remains required before setup is complete.`;
   }
 })();
 })();

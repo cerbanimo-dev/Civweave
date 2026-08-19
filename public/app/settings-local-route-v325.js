@@ -73,7 +73,7 @@ const ACTION_FILES=[
 if(globalThis.CivweaveSettingsLocalRouteV323?.version===VERSION)return;
 
 const parse=(value,fallback={})=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const manager=()=>globalThis.CivweaveLocalModelDownloadV266;
 const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
 const packManager=()=>globalThis.CivweaveLocalModelPacksV1;
@@ -82,6 +82,17 @@ let actionPromise=null,notice='',noticeError=false,navigating=false;
 
 function writable(){return !navigating&&Boolean(document.documentElement?.isConnected)}
 function selection(){try{return parse(localStorage.getItem(SELECTION_KEY),{active:false,id:null})}catch{return{active:false,id:null}}}
+function persistLocalRoute(current=selection()){
+  if(!current?.active||!current.id)return null;
+  const at=new Date().toISOString(),interactive={route:ROUTE,provider:ROUTE,model:String(current.id),endpoint:'',externalConsent:false};
+  const settings=parse(localStorage.getItem(SETTINGS_KEY),{}),profiles=parse(localStorage.getItem(PROFILES_KEY),{});
+  const stored={...settings,...interactive,consent:false,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
+  const nextProfiles={...profiles,interactive,agentic:null,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(stored));localStorage.setItem(PROFILES_KEY,JSON.stringify(nextProfiles))}catch{}
+  const detail={version:VERSION,route:ROUTE,primaryRoute:ROUTE,primaryModel:current.id,interactive,agentic:null,agenticEnabled:false,localSelection:current,localOnly:true,savedAt:at};
+  try{dispatchEvent(new CustomEvent('civweave:model-settings-saved',{detail}))}catch{}
+  return detail;
+}
 function normalizeLegacyBrowserPackErrors(packs){
   let changed=false;
   for(const id of BROWSER_PACKS){
@@ -101,9 +112,8 @@ function snapshot(){
   return{all,selection:selected,packs:normalizeLegacyBrowserPackErrors(packs)};
 }
 function savedHealth(){try{return parse(localStorage.getItem(HEALTH_KEY),{})}catch{return{}}}
-function fallbackConfig(){try{const profiles=parse(localStorage.getItem(PROFILES_KEY),{}),saved=parse(localStorage.getItem(SETTINGS_KEY),{}),interactive=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:saved;return interactive&&typeof interactive==='object'?interactive:{}}catch{return{}}}
 function selectedLabel(){const current=selection();return current.active&&current.id?String(current.id):'No downloaded model selected'}
-function panelFor(form){let panel=form.querySelector('[data-panel="downloaded-local"]');if(panel)return panel;panel=document.createElement('section');panel.className='cw-clean-panel';panel.dataset.panel='downloaded-local';panel.hidden=true;panel.innerHTML='<div><h3>Downloaded local AI</h3><p data-downloaded-local-summary></p></div><div class="cw-clean-note">Use the Local models tab to install a complete AI pack or choose an individual model. Selecting downloaded AI keeps your configured remote provider as fallback; opening Settings does not load the model runtime.</div>';const anchor=form.querySelector('[data-panel="deterministic"]');if(anchor)anchor.after(panel);else form.prepend(panel);return panel}
+function panelFor(form){let panel=form.querySelector('[data-panel="downloaded-local"]');if(panel)return panel;panel=document.createElement('section');panel.className='cw-clean-panel';panel.dataset.panel='downloaded-local';panel.hidden=true;panel.innerHTML='<div><h3>Downloaded local AI</h3><p data-downloaded-local-summary></p></div><div class="cw-clean-note">Use the Local models tab to install a complete AI pack or choose an individual model. Downloaded local AI is a hard local-only route: while it is selected, Civweave will not fall through to a Guild or cloud provider. Opening Settings does not load the model runtime.</div>';const anchor=form.querySelector('[data-panel="deterministic"]');if(anchor)anchor.after(panel);else form.prepend(panel);return panel}
 function sync(form){if(!form?.isConnected)return false;const route=form.elements?.namedItem?.('route');if(!route)return false;if(!route.querySelector(`option[value="${ROUTE}"]`)){const option=document.createElement('option');option.value=ROUTE;option.textContent='Downloaded local AI';const deterministic=route.querySelector('option[value="deterministic"]');deterministic?.after(option)||route.prepend(option)}const panel=panelFor(form),current=selection(),summary=panel.querySelector('[data-downloaded-local-summary]');if(summary)summary.textContent=current.active&&current.id?`${current.id} is selected for on-device interactive chat.`:'No downloaded model is selected yet.';const useLocal=route.value===ROUTE;panel.hidden=!useLocal;if(useLocal){form.querySelector('[data-panel="deterministic"]')?.setAttribute('hidden','');form.querySelector('[data-panel="remote"]')?.setAttribute('hidden','')}return true}
 function fmt(bytes){const b=Number(bytes||0);const via=manager()?.formatBytes?.(b);if(via)return via;return b>=1e9?`${(b/1e9).toFixed(1)} GB`:b>=1e6?`${Math.round(b/1e6)} MB`:`${Math.max(1,Math.round(b/1e3))} KB`}
 function installLocalStyle(){
@@ -214,7 +224,7 @@ async function localAction(event,panel){
     }else if(button.hasAttribute('data-local-pack-cancel')){
       await p.cancel(packId);showLocal(`${p.byId(packId).label} download paused.`);
     }else if(button.hasAttribute('data-local-pack-use')){
-      const result=await p.use(packId);globalThis.CivweaveLocalModelBridgeV266?.patch?.();showLocal(`${result.pack.label} is active · ${r.byId(result.model)?.label||result.model} handles interactive local chat.`);
+      const result=await p.use(packId);persistLocalRoute(selection());globalThis.CivweaveLocalModelBridgeV266?.patch?.();showLocal(`${result.pack.label} is active · ${r.byId(result.model)?.label||result.model} handles local-only interactive chat.`);
     }else if(button.hasAttribute('data-local-pack-remove')){
       const label=p.byId(packId).label;if(p.installMode?.(packId)==='browser')browserPackDownload()?.clear?.(packId);await p.remove(packId);showLocal(`${label} removed. Files still required by another installed pack were kept.`);
     }else if(button.hasAttribute('data-local-download')){
@@ -222,7 +232,7 @@ async function localAction(event,panel){
     }else if(button.hasAttribute('data-local-cancel')){
       await m.cancel(id);showLocal('Download cancelled.');
     }else if(button.hasAttribute('data-local-use')){
-      const verified=await m.status(id);if(!verified.available)throw new Error('The cached package did not pass integrity verification. Resume or repair it before selecting this model.');m.select(id);globalThis.CivweaveLocalModelBridgeV266?.patch?.();showLocal(`${r.byId(id)?.label||id} is now the interactive local model.`);
+      const verified=await m.status(id);if(!verified.available)throw new Error('The cached package did not pass integrity verification. Resume or repair it before selecting this model.');m.select(id);persistLocalRoute(selection());globalThis.CivweaveLocalModelBridgeV266?.patch?.();showLocal(`${r.byId(id)?.label||id} is now the local-only interactive model.`);
     }else if(button.hasAttribute('data-local-remove')){
       await m.remove(id);showLocal('Local model package removed from this device.');
     }else if(button.hasAttribute('data-local-disable')){
@@ -232,15 +242,14 @@ async function localAction(event,panel){
   }catch(error){showLocal(String(error?.message||error),true);if(writable())renderLocalModels(panel.closest('[data-cw-settings-form]'))}
 }
 function patch(form=document.querySelector('[data-cw-settings-form]')){
-  if(!form?.isConnected)return false;const route=form.elements?.namedItem?.('route');if(!route)return false;sync(form);const current=selection();if(current.active&&current.id)route.value=ROUTE;sync(form);if(form.dataset.cwLocalRouteV323==='1')return true;form.dataset.cwLocalRouteV323='1';
+  if(!form?.isConnected)return false;const route=form.elements?.namedItem?.('route');if(!route)return false;sync(form);const current=selection();if(current.active&&current.id){route.value=ROUTE;persistLocalRoute(current)}sync(form);if(form.dataset.cwLocalRouteV323==='1')return true;form.dataset.cwLocalRouteV323='1';
   route.addEventListener('change',()=>queueMicrotask(()=>sync(form)));
   form.addEventListener('submit',event=>{
     const chosen=String(route.value||''),currentSelection=selection();
     if(chosen===ROUTE){
       event.preventDefault();event.stopImmediatePropagation();const status=form.querySelector('[data-status]');
       if(!currentSelection.active||!currentSelection.id){if(status)status.textContent='Choose an AI pack or downloaded model in Local models before using Downloaded local AI.';form.querySelector('[data-settings-tab="local-models"]')?.click?.();return}
-      const fallback=fallbackConfig();if(status)status.textContent=`Downloaded local AI is active · ${currentSelection.id}. Your configured provider remains the fallback.`;
-      try{dispatchEvent(new CustomEvent('civweave:model-settings-saved',{detail:{version:VERSION,route:ROUTE,primaryRoute:ROUTE,primaryModel:currentSelection.id,interactive:fallback,agentic:null,agenticEnabled:false,localSelection:currentSelection,savedAt:new Date().toISOString()}}))}catch{}return;
+      persistLocalRoute(currentSelection);if(status)status.textContent=`Downloaded local AI is active · ${currentSelection.id}. Guild and cloud fallback are disabled for this route.`;return;
     }
     if(currentSelection.active&&currentSelection.id){try{localStorage.setItem(SELECTION_KEY,JSON.stringify({active:false,id:null,updatedAt:new Date().toISOString()}));dispatchEvent(new CustomEvent('civweave:local-model-selection',{detail:{active:false,id:null,updatedAt:new Date().toISOString()}}))}catch{}}
   },true);
@@ -256,7 +265,7 @@ addEventListener('beforeunload',()=>{navigating=true},{once:true});
 addEventListener('pageshow',()=>{navigating=false;queueMicrotask(()=>{patchVisible();rerenderVisible()})});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patchVisible,{once:true});else queueMicrotask(patchVisible);
 globalThis.CivweaveSettingsLocalRouteV323=Object.freeze({
-  version:VERSION,route:ROUTE,patch,selection,selectedLabel,renderLocalModels,ensureActionModules,catalogue:CATALOGUE,packCatalogue:PACK_CATALOGUE,
-  settingsPresentationOwnership:false,inputOwnership:false,managerDependency:false,runtimeDependency:false,cacheDependency:false,localModelsViewDirect:true,lifecycleDependency:false,registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,packRuntimeDependencyOnView:false,packCacheReadOnView:false,actionModulesOnDemand:true,browserPackHandoff:true,legacyBrowserErrorRecovery:true
+  version:VERSION,route:ROUTE,patch,selection,selectedLabel,persistLocalRoute,renderLocalModels,ensureActionModules,catalogue:CATALOGUE,packCatalogue:PACK_CATALOGUE,
+  settingsPresentationOwnership:false,inputOwnership:false,managerDependency:false,runtimeDependency:false,cacheDependency:false,localModelsViewDirect:true,lifecycleDependency:false,registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,packRuntimeDependencyOnView:false,packCacheReadOnView:false,actionModulesOnDemand:true,browserPackHandoff:true,legacyBrowserErrorRecovery:true,hardLocalOnly:true
 });
 })();
