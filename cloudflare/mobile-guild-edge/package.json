@@ -13,7 +13,7 @@
   "cloudflare": {
     "bindings": {
       "CIVWEAVE_GUILD_CLAIM_TOKEN": {
-        "description": "Paste the one-time pairing code shown by Civweave after you create the Guild locally on your phone. It binds this Cloudflare Guild to that exact local Guild; do not invent a different value."
+        "description": "REQUIRED: this field must start empty. Paste the exact one-time pairing code shown by Civweave after local Guild creation before deploying. Do not leave a sample or placeholder value."
       }
     }
   }
