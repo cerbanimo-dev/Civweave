@@ -6,15 +6,19 @@ on:
       - 'public/finder/index.html'
       - 'public/app/hub-map-v1.html'
       - 'public/app/civweave-hub-map-v1.js'
+      - 'public/app/civweave-guild-map-runtime-v2.js'
       - 'public/app/civweave-locality-gossip-v1.js'
       - 'public/app/guild-rally-point-setup-v1.js'
       - 'public/app/mobile-guild-create-v1.mjs'
       - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/civweave-map-v1-manifest.json'
+      - 'public/service-worker.js'
       - 'functions/api/hub-map-nodes.ts'
       - 'functions/api/guild-directory-register.ts'
       - 'public/host-setup.html'
       - 'cloudflare/core/src/guild-directory.mjs'
+      - 'cloudflare/core/src/guild-directory-entry.mjs'
+      - 'cloudflare/core/src/origin-entry.mjs'
       - 'cloudflare/core/src/live-entry.mjs'
       - 'cloudflare/node-cloud/src/index.mjs'
       - 'cloudflare/mobile-guild-edge/src/index.mjs'
@@ -33,15 +37,19 @@ on:
       - 'public/finder/index.html'
       - 'public/app/hub-map-v1.html'
       - 'public/app/civweave-hub-map-v1.js'
+      - 'public/app/civweave-guild-map-runtime-v2.js'
       - 'public/app/civweave-locality-gossip-v1.js'
       - 'public/app/guild-rally-point-setup-v1.js'
       - 'public/app/mobile-guild-create-v1.mjs'
       - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/civweave-map-v1-manifest.json'
+      - 'public/service-worker.js'
       - 'functions/api/hub-map-nodes.ts'
       - 'functions/api/guild-directory-register.ts'
       - 'public/host-setup.html'
       - 'cloudflare/core/src/guild-directory.mjs'
+      - 'cloudflare/core/src/guild-directory-entry.mjs'
+      - 'cloudflare/core/src/origin-entry.mjs'
       - 'cloudflare/core/src/live-entry.mjs'
       - 'cloudflare/node-cloud/src/index.mjs'
       - 'cloudflare/mobile-guild-edge/src/index.mjs'
@@ -70,11 +78,14 @@ jobs:
       - name: Syntax check Guild Map scripts
         run: |
           node --check public/app/civweave-hub-map-v1.js
+          node --check public/app/civweave-guild-map-runtime-v2.js
           node --check public/app/civweave-locality-gossip-v1.js
           node --check public/app/guild-rally-point-setup-v1.js
           node --check public/app/mobile-guild-create-v1.mjs
           node --check public/app/node-ai-mesh-v1.js
           node --check cloudflare/core/src/guild-directory.mjs
+          node --check cloudflare/core/src/guild-directory-entry.mjs
+          node --check cloudflare/core/src/origin-entry.mjs
           node --check cloudflare/core/src/live-entry.mjs
           node --check cloudflare/node-cloud/src/index.mjs
           node --check cloudflare/mobile-guild-edge/src/index.mjs
