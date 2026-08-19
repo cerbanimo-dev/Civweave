@@ -1,3 +1,3 @@
 # Paste the one-time pairing code shown by Civweave after local Guild creation.
-# Deploy to Cloudflare will prompt for this as a Worker secret.
+# Deploy to Cloudflare will prompt for this as a Worker secret before it provisions the Guild Cloud fabric.
 CIVWEAVE_GUILD_CLAIM_TOKEN=PASTE_CIVWEAVE_PAIRING_CODE_HERE
