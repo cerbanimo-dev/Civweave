@@ -25,6 +25,8 @@ async function loadClassic(src,globalName){
 export async function ensurePocketMesh(){return loadClassic('/app/local-object-mesh-v146.js','CivweaveLocalMeshV146')}
 export function createGuildId(displayName){return `${slug(displayName)}-${randomSuffix()}`}
 function normalizeEdgeOrigin(value){const url=new URL(clean(value,2000));if(url.protocol!=='https:')throw new TypeError('The Guild public edge must use HTTPS.');url.pathname='/';url.search='';url.hash='';return url.origin}
+function normalizeCloudUrl(value){try{const url=new URL(clean(value,2000));return url.protocol==='https:'?url.href.replace(/\/$/,''):null}catch{return null}}
+function normalizeCloudFabric(value,origin){if(!value||typeof value!=='object')return null;const starterNodes=Array.isArray(value.starterNodes)?value.starterNodes.slice(0,12).map(node=>{const nodeId=clean(node?.nodeId,180),publicOrigin=normalizeCloudUrl(node?.publicOrigin);if(!nodeId||!publicOrigin)return null;return Object.freeze({nodeId,publicOrigin,runtime:clean(node?.runtime,80)||'cloudflare-workers-ai'})}).filter(Boolean):[];return Object.freeze({schema:clean(value.schema,120)||'civweave.guild-cloud-fabric.v1',status:clean(value.status,40)||'unknown',capacityOrigin:normalizeCloudUrl(value.capacityOrigin)||`${origin}/api/fabric/capacity`,manifestOrigin:normalizeCloudUrl(value.manifestOrigin)||`${origin}/api/fabric/manifest`,aiEnabled:Boolean(value.aiEnabled),starterNodes})}
 function deployTemplateRef(){const explicit=clean(globalThis.CIVWEAVE_GUILD_EDGE_TEMPLATE_REF,120);if(explicit)return explicit;const host=clean(globalThis.location?.hostname,300).toLowerCase();return host.includes('staging')?'staging':'main'}
 export function cloudflareDeployUrl(){const repo=`https://github.com/cerbanimo-dev/Civweave/tree/${encodeURIComponent(deployTemplateRef())}/${MOBILE_GUILD_EDGE_TEMPLATE_PATH}`;return `https://deploy.workers.cloudflare.com/?url=${encodeURIComponent(repo)}`}
 function withCloudCredentials(input){const state=input&&typeof input==='object'?{...input}:null;if(!state)return null;if(state.cloudAttached)return state;let changed=false;if(!/^[A-Za-z0-9_-]{40,200}$/.test(state.membershipKey||'')){state.membershipKey=randomSecret();changed=true}if(!/^[A-Za-z0-9_-]{40,200}$/.test(state.cloudPairingCode||'')){state.cloudPairingCode=randomSecret();changed=true}if(state.schema!==MOBILE_GUILD_CREATE_SCHEMA){state.schema=MOBILE_GUILD_CREATE_SCHEMA;changed=true}if(!state.cloudStage){state.cloudStage='ready-to-connect';changed=true}if(changed){state.updatedAt=now();write(state)}return state}
@@ -58,20 +60,21 @@ export async function attachCloudflareEdge({primaryOrigin}={}){
   const state=withCloudCredentials(read());if(!state)throw new Error('Create the local Guild before pairing a public edge.');if(state.cloudAttached)return Object.freeze({...state,deployUrl:cloudflareDeployUrl()});
   const origin=normalizeEdgeOrigin(primaryOrigin),response=await fetch(new URL('/api/guild/claim',origin),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({guildId:state.guildId,displayName:state.displayName,foundingDeviceId:state.deviceId,claimToken:state.cloudPairingCode,membershipKey:state.membershipKey,charter:state.charter||undefined})});
   const payload=await response.json().catch(()=>({}));if(!response.ok||payload?.ok!==true)throw new Error(payload?.error||`Guild public edge returned HTTP ${response.status}.`);if(payload.guildId&&payload.guildId!==state.guildId)throw new Error('The deployed public edge belongs to a different Guild ID.');
+  const cloudFabric=normalizeCloudFabric(payload.infrastructure,origin);
   await CivweavePocketGuildNodeV1.attachPrimary(origin,{membershipKey:state.membershipKey});
   const mesh=await ensurePocketMesh(),attachedAt=now();
   const attachment=await mesh.createObject({
     id:`guild-edge:${state.guildId}`,
     revision:1,
     kind:'civweave.guild-edge-attachment.v1',
-    purpose:'Attach this Guild identity to its Guildkeeper-owned always-online public edge.',
+    purpose:'Attach this Guild identity to its Guildkeeper-owned always-online Cloudflare Guild fabric.',
     consent:'group',
     audience:[`guild:${state.guildId}`],
     publish:true,
     priority:100,
-    payload:{schema:'civweave.guild-edge-attachment.v1',guildId:state.guildId,primaryOrigin:origin,cloudProvider:'cloudflare',workerCreated:true,downloadOriginUsedAsBackend:false,charter:state.charter||null,attachedAt},
+    payload:{schema:'civweave.guild-edge-attachment.v1',guildId:state.guildId,primaryOrigin:origin,cloudProvider:'cloudflare',workerCreated:true,downloadOriginUsedAsBackend:false,cloudFabric,charter:state.charter||null,attachedAt},
   });
-  const next=Object.freeze({...state,schema:MOBILE_GUILD_CREATE_SCHEMA,cloudAttached:true,workerCreated:true,cloudStage:'online',primaryOrigin:origin,primaryGateway:payload.primaryGateway||origin,cloudPairingCode:null,edgeAttachmentObjectId:attachment.id,attachedAt,updatedAt:attachedAt});write(next);
+  const next=Object.freeze({...state,schema:MOBILE_GUILD_CREATE_SCHEMA,cloudAttached:true,workerCreated:true,cloudStage:'online',primaryOrigin:origin,primaryGateway:payload.primaryGateway||origin,cloudFabric,cloudPairingCode:null,edgeAttachmentObjectId:attachment.id,attachedAt,updatedAt:attachedAt});write(next);
   try{await CivweavePocketGuildNodeV1.syncPrimary()}catch{}
   if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(new CustomEvent('civweave:mobile-guild-cloud-attached',{detail:next}));
   return Object.freeze({...next,deployUrl:cloudflareDeployUrl()});
