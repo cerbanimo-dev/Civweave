@@ -13,6 +13,8 @@ const b64url=bytes=>{let binary='';for(const byte of bytes)binary+=String.fromCh
 const randomSecret=()=>{const bytes=new Uint8Array(32);crypto.getRandomValues(bytes);return b64url(bytes)};
 const read=()=>{try{return JSON.parse(globalThis.localStorage?.getItem(STATE_KEY)||'null')}catch{return null}};
 const write=value=>{try{globalThis.localStorage?.setItem(STATE_KEY,JSON.stringify(value));globalThis.localStorage?.setItem(STEWARD_KEY,'1')}catch{}return value};
+function urlCharterContext(){try{const params=new URLSearchParams(globalThis.location?.search||'');const charterId=clean(params.get('charter'),180);if(!charterId)return null;const route=clean(params.get('charterRoute'),40);const sourceGuildId=clean(params.get('charterSource'),180);return Object.freeze({schema:'civweave.guild-charter-provenance.v1',charterId,route:['founder-transfer','mentor-direct'].includes(route)?route:null,sourceGuildId:sourceGuildId||null,capturedAt:now()})}catch{return null}}
+function normalizeCharterContext(value){if(!value)return urlCharterContext();const charterId=clean(value.charterId||value.id,180);if(!charterId)return urlCharterContext();const route=clean(value.route,40);return Object.freeze({schema:'civweave.guild-charter-provenance.v1',charterId,route:['founder-transfer','mentor-direct'].includes(route)?route:null,sourceGuildId:clean(value.sourceGuildId||value.charterkeeperNodeId,180)||null,capturedAt:now()})}
 
 async function loadClassic(src,globalName){
   if(globalThis[globalName])return globalThis[globalName];
@@ -28,9 +30,9 @@ export function cloudflareDeployUrl(){const repo=`https://github.com/cerbanimo-d
 function withCloudCredentials(input){const state=input&&typeof input==='object'?{...input}:null;if(!state)return null;if(state.cloudAttached)return state;let changed=false;if(!/^[A-Za-z0-9_-]{40,200}$/.test(state.membershipKey||'')){state.membershipKey=randomSecret();changed=true}if(!/^[A-Za-z0-9_-]{40,200}$/.test(state.cloudPairingCode||'')){state.cloudPairingCode=randomSecret();changed=true}if(state.schema!==MOBILE_GUILD_CREATE_SCHEMA){state.schema=MOBILE_GUILD_CREATE_SCHEMA;changed=true}if(!state.cloudStage){state.cloudStage='ready-to-connect';changed=true}if(changed){state.updatedAt=now();write(state)}return state}
 export function prepareCloudflareEdge(){const state=withCloudCredentials(read());if(!state)throw new Error('Create the local Guild before connecting Cloudflare.');return Object.freeze({...state,deployUrl:cloudflareDeployUrl()})}
 
-export async function createMobileGuild({displayName,guildId=''}={}){
+export async function createMobileGuild({displayName,guildId='',charter=null}={}){
   const name=clean(displayName,120);if(!name)throw new TypeError('Give the Guild a name first.');
-  const id=clean(guildId,180)||createGuildId(name),membershipKey=randomSecret(),cloudPairingCode=randomSecret();
+  const id=clean(guildId,180)||createGuildId(name),membershipKey=randomSecret(),cloudPairingCode=randomSecret(),charterContext=normalizeCharterContext(charter);
   const mesh=await ensurePocketMesh();
   const onboarding=await completeGuildHostOnboarding({guildId:id,primaryOrigin:null,membershipKey,route:'pocket-node',enablePocketNode:true});
   if(!onboarding.pocketNodeEnrolled)throw new Error(onboarding.pocketNodeError||'This device could not enroll as the Pocket Guild host.');
@@ -44,9 +46,9 @@ export async function createMobileGuild({displayName,guildId=''}={}){
     audience:[`guild:${id}`],
     publish:true,
     priority:100,
-    payload:{schema:'civweave.guild-genesis.v1',guildId:id,displayName:name,foundingDeviceId:deviceId,hostRoute:'pocket-node',cloudAttached:false,workerCreated:false,downloadOriginUsedAsBackend:false,createdAt},
+    payload:{schema:'civweave.guild-genesis.v1',guildId:id,displayName:name,foundingDeviceId:deviceId,hostRoute:'pocket-node',cloudAttached:false,workerCreated:false,downloadOriginUsedAsBackend:false,charter:charterContext,createdAt},
   });
-  const state=Object.freeze({schema:MOBILE_GUILD_CREATE_SCHEMA,guildId:id,displayName:name,deviceId,route:'pocket-node',cloudAttached:false,workerCreated:false,cloudStage:'ready-to-connect',membershipKey,cloudPairingCode,downloadOriginUsedAsBackend:false,createdAt,updatedAt:createdAt,genesisObjectId:genesis.id});
+  const state=Object.freeze({schema:MOBILE_GUILD_CREATE_SCHEMA,guildId:id,displayName:name,deviceId,route:'pocket-node',cloudAttached:false,workerCreated:false,cloudStage:'ready-to-connect',membershipKey,cloudPairingCode,downloadOriginUsedAsBackend:false,charter:charterContext,createdAt,updatedAt:createdAt,genesisObjectId:genesis.id});
   write(state);
   if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(new CustomEvent('civweave:mobile-guild-created',{detail:state}));
   return Object.freeze({...state,deployUrl:cloudflareDeployUrl()});
@@ -54,7 +56,7 @@ export async function createMobileGuild({displayName,guildId=''}={}){
 
 export async function attachCloudflareEdge({primaryOrigin}={}){
   const state=withCloudCredentials(read());if(!state)throw new Error('Create the local Guild before pairing a public edge.');if(state.cloudAttached)return Object.freeze({...state,deployUrl:cloudflareDeployUrl()});
-  const origin=normalizeEdgeOrigin(primaryOrigin),response=await fetch(new URL('/api/guild/claim',origin),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({guildId:state.guildId,displayName:state.displayName,foundingDeviceId:state.deviceId,claimToken:state.cloudPairingCode,membershipKey:state.membershipKey})});
+  const origin=normalizeEdgeOrigin(primaryOrigin),response=await fetch(new URL('/api/guild/claim',origin),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({guildId:state.guildId,displayName:state.displayName,foundingDeviceId:state.deviceId,claimToken:state.cloudPairingCode,membershipKey:state.membershipKey,charter:state.charter||undefined})});
   const payload=await response.json().catch(()=>({}));if(!response.ok||payload?.ok!==true)throw new Error(payload?.error||`Guild public edge returned HTTP ${response.status}.`);if(payload.guildId&&payload.guildId!==state.guildId)throw new Error('The deployed public edge belongs to a different Guild ID.');
   await CivweavePocketGuildNodeV1.attachPrimary(origin,{membershipKey:state.membershipKey});
   const mesh=await ensurePocketMesh(),attachedAt=now();
@@ -67,7 +69,7 @@ export async function attachCloudflareEdge({primaryOrigin}={}){
     audience:[`guild:${state.guildId}`],
     publish:true,
     priority:100,
-    payload:{schema:'civweave.guild-edge-attachment.v1',guildId:state.guildId,primaryOrigin:origin,cloudProvider:'cloudflare',workerCreated:true,downloadOriginUsedAsBackend:false,attachedAt},
+    payload:{schema:'civweave.guild-edge-attachment.v1',guildId:state.guildId,primaryOrigin:origin,cloudProvider:'cloudflare',workerCreated:true,downloadOriginUsedAsBackend:false,charter:state.charter||null,attachedAt},
   });
   const next=Object.freeze({...state,schema:MOBILE_GUILD_CREATE_SCHEMA,cloudAttached:true,workerCreated:true,cloudStage:'online',primaryOrigin:origin,primaryGateway:payload.primaryGateway||origin,cloudPairingCode:null,edgeAttachmentObjectId:attachment.id,attachedAt,updatedAt:attachedAt});write(next);
   try{await CivweavePocketGuildNodeV1.syncPrimary()}catch{}
@@ -77,5 +79,5 @@ export async function attachCloudflareEdge({primaryOrigin}={}){
 
 export function mobileGuildStatus(){const state=read();return state?Object.freeze({...state,deployUrl:cloudflareDeployUrl()}):null}
 
-export const CivweaveMobileGuildCreateV1=Object.freeze({schema:MOBILE_GUILD_CREATE_SCHEMA,ensurePocketMesh,createGuildId,cloudflareDeployUrl,prepareCloudflareEdge,createMobileGuild,attachCloudflareEdge,mobileGuildStatus});
+export const CivweaveMobileGuildCreateV1=Object.freeze({schema:MOBILE_GUILD_CREATE_SCHEMA,ensurePocketMesh,createGuildId,cloudflareDeployUrl,prepareCloudflareEdge,createMobileGuild,attachCloudflareEdge,mobileGuildStatus,urlCharterContext});
 globalThis.CivweaveMobileGuildCreateV1=CivweaveMobileGuildCreateV1;
