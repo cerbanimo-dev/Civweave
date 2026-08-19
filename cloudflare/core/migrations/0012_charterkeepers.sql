@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS money_edge_charters (
   route TEXT NOT NULL CHECK(route IN ('founder-transfer','mentor-direct')),
   nominee_user_id TEXT NOT NULL,
   nominee_label TEXT,
+  nominee_appointment_confirmed INTEGER NOT NULL DEFAULT 0 CHECK(nominee_appointment_confirmed IN (0,1)),
   proposed_guild_name TEXT NOT NULL,
   proposed_node_id TEXT,
   child_node_id TEXT,
