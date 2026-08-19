@@ -94,6 +94,9 @@ test('Parakeet speech executor registers the installed INT8 model and preserves 
   assert.match(source,/decoder\.int8\.onnx/);
   assert.match(source,/joiner\.int8\.onnx/);
   assert.match(source,/tokens\.txt/);
+  assert.match(source,/const time=encoded\.dims\[1\],channels=encoded\.dims\[2\]/);
+  assert.match(source,/encoded\.data\[t\*channels\+c\]/);
+  assert.doesNotMatch(source,/encoded\.data\[c\*time\+t\]/);
 });
 
 test('Parakeet activates microphone audio before the cold ONNX model load',()=>{
@@ -108,13 +111,17 @@ test('Parakeet activates microphone audio before the cold ONNX model load',()=>{
   assert.ok(context<runtime,'AudioContext should be created/resumed while user activation is still fresh');
   assert.match(body,/track\.stop\(\)/);
   assert.match(body,/context\?\.close\?\.\(\)/);
+  assert.match(body,/flush\(\{allowStopped:true,reason:'manual-stop'\}\)/);
+  assert.match(body,/transcript-ready/);
+  assert.match(body,/transcript-empty/);
 });
 
-test('guide voice lazily loads the Parakeet executor before giving up on specialized speech',()=>{
+test('guide voice lazily loads the corrected Parakeet executor before specialized speech',()=>{
   const source=fs.readFileSync('public/app/guide-voice-runtime-v1.js','utf8');
-  assert.match(source,/parakeet-speech-executor-v1\.js\?v=1\.0\.1/);
+  assert.match(source,/parakeet-speech-executor-v1\.js\?v=1\.0\.2/);
+  assert.match(source,/SPEECH_EXECUTOR_VERSION='1\.0\.2-parakeet-speech-executor-v1-transcription-layout'/);
   assert.match(source,/ensureSpeechExecutor/);
-  assert.match(source,/LOCAL_SPECIALIZED_EXECUTOR_UNAVAILABLE/);
+  assert.match(source,/PARAKEET_EXECUTOR_VERSION_MISMATCH/);
   assert.match(source,/executeSpecializedSpeech/);
   assert.match(source,/CIVWEAVE_SPEECH_EXECUTOR_START_FAILED/);
   assert.match(source,/lastSpecializedError/);
