@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v18-browser-pack-pwa-import-freeze-fix';
+const REVISION='shell-assets-v1-repair-v19-browser-pack-explicit-files';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
