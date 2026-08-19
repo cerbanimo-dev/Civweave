@@ -57,7 +57,7 @@ import {
   settleTerritoryForFellowFareFee,
   reverseTerritoryForFellowFareFee,
   retryPendingTerritoryShares
-} from './territory-stewardship-v1.mjs';
+} from './territory-stewardship-with-charterkeepers-v1.mjs';
 
 export {
   moneyEdgeError,
@@ -94,10 +94,11 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
       territoryStewardship: Object.freeze({
         schema: TERRITORY_STEWARDSHIP_SCHEMA,
         policy: TERRITORY_STEWARDSHIP_POLICY,
-        sourceBoundary: 'existing-cerbanimo-share-only',
+        sourceBoundary: 'existing-cerbanimo-share-after-charterkeeper',
         hostNodeStewardCutChanged: false,
         providerCutChanged: false,
         systemReserveChanged: false,
+        charterkeeperComposition: 'one-hop-charterkeeper-first-then-territory',
         payoutBehavior: 'accrue-to-office-hold-until-agreement-and-payout-onboarding'
       }),
       commerce: Object.freeze({
@@ -113,13 +114,13 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
         serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo',
         serviceLearningHostStewardShareBpsOfFee: FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS,
         serviceLearningCerbanimoShareBpsOfFee: FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS,
-        serviceLearningCerbanimoSecondStageSplit: '50-cerbanimo-global-50-territory-stewardship',
+        serviceLearningCerbanimoSecondStageSplit: 'charterkeeper-if-active-then-50-cerbanimo-global-50-territory-stewardship',
         serviceLearningHostSettlement: 'application-fee-event-plus-balance-available-retry',
         territorySettlement: 'office-linked-transfer-or-territory-reserve',
         platformCollectsGrossSellerPayment: false,
         platformRoutesSellerProceeds: false,
         legacyLifecycleHandling: true,
-        note: 'Physical goods remain seller-direct. Services, learning, and tutoring may use fulfillment burn and/or provider-owned Stripe direct charges. The 5% FellowFare fee still gives half to the facilitating Host Steward. Only the pre-existing Cerbanimo half is subdivided equally between Cerbanimo Global and the applicable Territory Stewardship office.'
+        note: 'Physical goods remain seller-direct. Services, learning, and tutoring may use fulfillment burn and/or provider-owned Stripe direct charges. The 5% FellowFare fee still gives half to the facilitating Host Steward. An active one-hop Charterkeeper may share only the pre-existing Cerbanimo half; Territory Stewardship then operates on the remaining Cerbanimo amount.'
       })
     });
   }
