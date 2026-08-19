@@ -5,10 +5,12 @@ on:
     paths:
       - 'public/app/local-ai/model-packs-v1.js'
       - 'public/app/local-ai/browser-pack-download-v1.js'
+      - 'public/app/local-ai/browser-pack-pwa-import-v1.js'
       - 'public/app/local-ai/specialized-model-capabilities-v1.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
-      - 'public/app/working-campus-v440.html'
+      - 'public/app/working-campus-home-relocation-v441.js'
+      - 'public/service-worker-shell-assets-v1.js'
       - 'scripts/test-ai-model-packs-v1.mjs'
       - '.github/workflows/verify-ai-model-packs-v1.yml'
   push:
@@ -16,10 +18,12 @@ on:
     paths:
       - 'public/app/local-ai/model-packs-v1.js'
       - 'public/app/local-ai/browser-pack-download-v1.js'
+      - 'public/app/local-ai/browser-pack-pwa-import-v1.js'
       - 'public/app/local-ai/specialized-model-capabilities-v1.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
-      - 'public/app/working-campus-v440.html'
+      - 'public/app/working-campus-home-relocation-v441.js'
+      - 'public/service-worker-shell-assets-v1.js'
       - 'scripts/test-ai-model-packs-v1.mjs'
       - '.github/workflows/verify-ai-model-packs-v1.yml'
 
@@ -36,7 +40,10 @@ jobs:
           node-version: '22'
       - run: node --check public/app/local-ai/model-packs-v1.js
       - run: node --check public/app/local-ai/browser-pack-download-v1.js
+      - run: node --check public/app/local-ai/browser-pack-pwa-import-v1.js
       - run: node --check public/app/local-ai/specialized-model-capabilities-v1.js
       - run: node --check public/app/settings-local-route-v323.js
       - run: node --check public/app/settings-local-route-v325.js
+      - run: node --check public/app/working-campus-home-relocation-v441.js
+      - run: node --check public/service-worker-shell-assets-v1.js
       - run: node --test scripts/test-ai-model-packs-v1.mjs
