@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
-const source=await readFile(new URL('../public/app/local-provider-authority-v1.js',import.meta.url),'utf8');
+const [source,loaderSource]=await Promise.all([
+  readFile(new URL('../public/app/local-provider-authority-v1.js',import.meta.url),'utf8'),
+  readFile(new URL('../public/app/shared-guide-surface-v236.js',import.meta.url),'utf8')
+]);
 class MemoryStorage{
   constructor(seed={}){this.values=new Map(Object.entries(seed))}
   getItem(key){return this.values.has(key)?this.values.get(key):null}
@@ -13,12 +16,13 @@ const localStorage=new MemoryStorage({
   'civweave-model-profiles-v1':JSON.stringify({interactive:{provider:'downloaded-local',route:'downloaded-local',model:'smollm2-135m-instruct-q8-wasm'}}),
   'civweave.local-ai.selection.v266':JSON.stringify({active:true,id:'smollm2-135m-instruct-q8-wasm'})
 });
-let localCalls=0,assistantPriorCalls=0,serverCalls=0,localFailure=false;
+let localCalls=0,assistantPriorCalls=0,serverCalls=0,localFailure=false,decisionText='';
+const decisionNode={dataset:{},querySelector(){return null},get textContent(){return decisionText},set textContent(value){decisionText=String(value)}};
 const sandbox={
   console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,Set,Map,URL,
   localStorage,
   location:{href:'https://staging.example.test/app/working-campus-v156.html',pathname:'/app/working-campus-v156.html'},
-  document:{scripts:[],head:{append(){}},createElement(){return{}},querySelector(){return null}},
+  document:{scripts:[],head:{append(){}},createElement(){return{}},querySelector(selector){return selector.includes('data-minilm-decision-strip')?decisionNode:null}},
   CustomEvent:class{constructor(type,{detail}={}){this.type=type;this.detail=detail}},
   dispatchEvent(){return true},addEventListener(){},queueMicrotask,setTimeout,clearTimeout,
   setInterval(){return 1},clearInterval(){},
@@ -52,9 +56,14 @@ assert.equal(api.cloudFallbackWhenLocal,false);
 assert.equal(api.deterministicFallbackWhenLocal,false);
 assert.equal(api.gemma4MobileRuntimeFloor,'4.3.0');
 assert.equal(api.bundledTransformersV4,'4.2.0');
+assert.match(loaderSource,/1\.0\.158-shared-guide-surface-v236-gemma4-runtime-floor/);
+assert.match(loaderSource,/1\.0\.2-gemma4-runtime-floor/);
+assert.match(loaderSource,/existing\.dataset\.civweaveReady==='true'/,'loader must evict a loaded dependency when its readiness/version contract is stale');
 
 const prompt='Can you make a plan to teach people to love themselves?';
-const result=await sandbox.CivweaveAssistantV141.respond({text:prompt,systemId:'civweave',history:[]});
+const resultPromise=sandbox.CivweaveAssistantV141.respond({text:prompt,systemId:'civweave',history:[]});
+assert.match(decisionText,/Local route .* starting on-device/,'local provider must replace the lingering MiniLM classification strip before generation starts');
+const result=await resultPromise;
 assert.equal(localCalls,1,'downloaded-local must execute the local runtime directly');
 assert.equal(assistantPriorCalls,0,'downloaded-local must bypass prior planner/cloud wrappers');
 assert.equal(result.requestedProvider,'downloaded-local');
@@ -97,9 +106,10 @@ await sandbox.CivweaveAssistantV141.respond({text:'Activate',systemId:'civweave'
 assert.equal(assistantPriorCalls,1,'safe local app controls must still reach the existing control layer');
 assert.equal(localCalls,3,'control actions must not be sent to the local language model');
 
-// Exact regression: the new Gemma 4 Q2F16 mobile graph requires Transformers.js 4.3.0,
-// while Civweave currently vendors 4.2.0. It must stay local and use only an already-installed
-// compatible local model, never server-auto/Cloudflare.
+// Exact regression: Gemma 4 Q2F16 mobile needs Transformers.js 4.3.0, while the
+// current Civweave browser bundle is 4.2.0. The request must stay local. Prefer
+// an already-installed ordinary local model, while preserving the hidden Qwen
+// CPU compatibility model as a legitimate final local fallback candidate.
 let liveSelection={active:true,id:'gemma4-e2b-it-q2f16-mobile'};
 const registryModels=[
   {id:'gemma4-e2b-it-q2f16-mobile',label:'Gemma 4 E2B IT',runtime:'transformers-js-v4',installable:true,status:'device-test',fallbackIds:['qwen3-0.6b-q8-wasm']},
@@ -109,9 +119,10 @@ const registryModels=[
   {id:'smollm2-360m-instruct-q4f16',label:'SmolLM2 360M',runtime:'transformers-js-v3',installable:true,status:'stable',fallbackIds:[]},
   {id:'smollm2-135m-instruct-q8-wasm',label:'SmolLM2 135M',runtime:'transformers-js-v3',installable:true,status:'stable',fallbackIds:[]}
 ];
-const registryMap=new Map(registryModels.map(model=>[model.id,model]));
+const cpuModel={id:'qwen3-0.6b-q8-wasm',label:'Qwen 3 0.6B CPU compatibility',runtime:'transformers-js-v3',device:'wasm',installable:true,hidden:true,status:'stable',fallbackIds:[]};
+const registryMap=new Map([...registryModels,cpuModel].map(model=>[model.id,model]));
 sandbox.CivweaveLocalModelRegistryV266={
-  version:'test-registry',models:registryModels,runtimeModels:registryModels,
+  version:'test-registry',models:registryModels,runtimeModels:[cpuModel],
   byId:id=>registryMap.get(id)||null,
   fallbacks:modelOrId=>{const model=typeof modelOrId==='string'?registryMap.get(modelOrId):modelOrId;return(model?.fallbackIds||[]).map(id=>registryMap.get(id)).filter(Boolean)},
   installable:()=>registryModels.filter(model=>model.installable),experimental:()=>[],capable:()=>registryModels
@@ -135,8 +146,9 @@ api.install();
 const patchedGemma=sandbox.CivweaveLocalModelRegistryV266.byId('gemma4-e2b-it-q2f16-mobile');
 assert.equal(patchedGemma.status,'runtime-blocked');
 assert.equal(patchedGemma.runtimeRequirement.minimumVersion,'4.3.0');
-assert.ok(patchedGemma.fallbackIds.includes('gemma3-1b-it-q4f16'),'Gemma 4 must have a real installed-local fallback candidate');
-assert.ok(!patchedGemma.fallbackIds.includes('qwen3-0.6b-q8-wasm'),'retired/nonexistent q8 fallback ID must be removed');
+assert.ok(patchedGemma.fallbackIds.includes('gemma3-1b-it-q4f16'),'Gemma 4 must have ordinary installed-local fallback candidates');
+assert.ok(patchedGemma.fallbackIds.includes('qwen3-0.6b-q8-wasm'),'the valid hidden Qwen CPU compatibility lane must be preserved');
+assert.equal(sandbox.CivweaveLocalModelRegistryV266.byId('qwen3-0.6b-q8-wasm')?.hidden,true,'hidden CPU compatibility model must remain addressable through the patched registry');
 
 const localFallback=await sandbox.CivweaveAssistantV141.respond({text:prompt,systemId:'civweave',history:[]});
 assert.equal(localFallback.provider,'downloaded-local');
@@ -168,4 +180,4 @@ const serverAutoResult=await sandbox.CivweaveAssistantV141.respond({text:'ordina
 assert.equal(latePlannerCalls,priorLatePlannerCalls+1,'server-auto must retain the existing provider stack when local is not selected');
 assert.equal(serverAutoResult.provider,'cloudflare-workers-ai');
 
-console.log(JSON.stringify({ok:true,revision:'local-provider-authority-v1-gemma4-runtime-floor',downloadedLocalDirect:true,automaticGuideCloudBlocked:true,explicitGuildAllowed:true,localFailureStaysLocal:true,gemma4RuntimeFloor:true,gemma4InstalledLocalFallback:true,gemma4NoCloudFallback:true,serverAutoUnchanged:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-provider-authority-v1-gemma4-runtime-floor',downloadedLocalDirect:true,automaticGuideCloudBlocked:true,explicitGuildAllowed:true,localFailureStaysLocal:true,localDecisionStripImmediate:true,gemma4RuntimeFloor:true,gemma4InstalledLocalFallback:true,gemma4CpuCompatibilityPreserved:true,gemma4NoCloudFallback:true,staleAuthorityRefresh:true,serverAutoUnchanged:true},null,2));
