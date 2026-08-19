@@ -94,9 +94,24 @@ test('Parakeet speech executor registers the installed INT8 model and preserves 
   assert.match(source,/decoder\.int8\.onnx/);
   assert.match(source,/joiner\.int8\.onnx/);
   assert.match(source,/tokens\.txt/);
-  assert.match(source,/const time=encoded\.dims\[1\],channels=encoded\.dims\[2\]/);
-  assert.match(source,/encoded\.data\[t\*channels\+c\]/);
-  assert.doesNotMatch(source,/encoded\.data\[c\*time\+t\]/);
+  assert.match(source,/resolveEncoderLayout/);
+  assert.match(source,/PARAKEET_ENCODER_JOINER_SHAPE_MISMATCH/);
+});
+
+test('Parakeet uses joiner metadata to resolve raw NeMo encoder layout',()=>{
+  const ctx=runBrowserScript('public/app/local-ai/parakeet-speech-executor-v1.js');
+  const resolve=ctx.CivweaveParakeetSpeechExecutorV1.resolveEncoderLayout;
+  const bct=resolve({dims:[1,1024,55]},{inputNames:['encoder_outputs'],inputMetadata:[{name:'encoder_outputs',shape:[1,1024,1]}]});
+  assert.equal(bct.layout,'BCT');
+  assert.equal(bct.channels,1024);
+  assert.equal(bct.time,55);
+  assert.equal(bct.index(2,7),7*55+2);
+  const btc=resolve({dims:[1,55,1024]},{inputNames:['encoder_outputs'],inputMetadata:[{name:'encoder_outputs',shape:[1,1024,1]}]});
+  assert.equal(btc.layout,'BTC');
+  assert.equal(btc.channels,1024);
+  assert.equal(btc.time,55);
+  assert.equal(btc.index(2,7),2*1024+7);
+  assert.throws(()=>resolve({dims:[1,55,384]},{inputNames:['encoder_outputs'],inputMetadata:[{name:'encoder_outputs',shape:[1,1024,1]}]}),/does not match joiner/);
 });
 
 test('Parakeet activates microphone audio before the cold ONNX model load',()=>{
@@ -118,8 +133,8 @@ test('Parakeet activates microphone audio before the cold ONNX model load',()=>{
 
 test('guide voice lazily loads the corrected Parakeet executor before specialized speech',()=>{
   const source=fs.readFileSync('public/app/guide-voice-runtime-v1.js','utf8');
-  assert.match(source,/parakeet-speech-executor-v1\.js\?v=1\.0\.2/);
-  assert.match(source,/SPEECH_EXECUTOR_VERSION='1\.0\.2-parakeet-speech-executor-v1-transcription-layout'/);
+  assert.match(source,/parakeet-speech-executor-v1\.js\?v=1\.0\.3/);
+  assert.match(source,/SPEECH_EXECUTOR_VERSION='1\.0\.3-parakeet-speech-executor-v1-joiner-shape-contract'/);
   assert.match(source,/ensureSpeechExecutor/);
   assert.match(source,/PARAKEET_EXECUTOR_VERSION_MISMATCH/);
   assert.match(source,/executeSpecializedSpeech/);
@@ -129,12 +144,13 @@ test('guide voice lazily loads the corrected Parakeet executor before specialize
   assert.match(source,/artifact/);
 });
 
-test('guide chat owns wake-address submission and voice input without adding another chat owner',()=>{
+test('guide chat owns wake-address submission and version-locks corrected voice runtime',()=>{
   const source=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
   assert.match(source,/data-voice/);
   assert.match(source,/submitVoiceText/);
   assert.match(source,/resolveGuideAddress/);
-  assert.match(source,/guide-voice-runtime-v1\.js/);
+  assert.match(source,/guide-voice-runtime-v1\.js\?v=1\.1\.4/);
+  assert.match(source,/VOICE_RUNTIME_VERSION='1\.1\.4-guide-voice-runtime-v1-parakeet-joiner-shape'/);
   assert.match(source,/specialized-model-capabilities-v1\.js/);
   assert.match(source,/surface.*single-current-chat-surface|presentation:'single-current-chat-surface'/s);
 });
