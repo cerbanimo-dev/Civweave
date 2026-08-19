@@ -32,16 +32,59 @@ html,body{min-height:100%;background:#07162f}body{margin:0}main.app{min-height:1
 (()=>{
 'use strict';
 const required=['main.app','main.app>header.top','main.app>.main','#conversation','#workspace'];
-function check(){
-  const missing=required.filter(selector=>!document.querySelector(selector));
-  if(!missing.length){document.documentElement.dataset.civweaveFreshCampusPaint='healthy';return}
-  const panel=document.querySelector('#cw-v440-recovery');
-  const detail=document.querySelector('#cw-v440-recovery-detail');
-  if(detail)detail.textContent=`Missing shell pieces: ${missing.join(', ')}`;
+const modalSelector='dialog[open],#cw-new-user-onboarding-v1:not([hidden]),#cw-settings-v320:not([hidden]),#cw-persistent-guide-chat-v215:not([hidden])';
+let queued=false,firstFailureAt=0;
+function visible(node,minHeight=40){
+  if(!node?.isConnected)return false;
+  const style=getComputedStyle(node),rect=node.getBoundingClientRect();
+  return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>.01&&rect.width>=40&&rect.height>=minHeight;
+}
+function surface(){
+  const main=document.querySelector('main.app>.main'),guide=main?.querySelector('.guide'),work=main?.querySelector('.work'),workspace=document.querySelector('#workspace');
+  return{main,guide,work,workspace,healthy:Boolean(visible(main,80)&&visible(guide,60)&&visible(work,80))};
+}
+function restore(reason='check'){
+  const state=surface();
+  if(state.healthy)return true;
+  if(document.querySelector(modalSelector))return false;
+  for(const node of [state.main,state.guide,state.work].filter(Boolean)){
+    node.removeAttribute('hidden');node.removeAttribute('inert');
+    node.style.setProperty('visibility','visible','important');
+    node.style.setProperty('opacity','1','important');
+  }
+  if(state.main){state.main.style.setProperty('display','grid','important');state.main.style.setProperty('transform','none','important')}
+  for(const node of [state.guide,state.work].filter(Boolean))node.style.setProperty('display','block','important');
+  if(state.workspace&&!state.workspace.childElementCount&&globalThis.CivweaveWorkingCampusV156?.openView){try{globalThis.CivweaveWorkingCampusV156.openView('quest')}catch{}}
+  document.documentElement.dataset.civweaveFreshCampusRepair=reason;
+  return surface().healthy;
+}
+function showRecovery(detailText){
+  const panel=document.querySelector('#cw-v440-recovery'),detail=document.querySelector('#cw-v440-recovery-detail');
+  if(detail)detail.textContent=detailText;
   if(panel)panel.dataset.open='1';
   document.documentElement.dataset.civweaveFreshCampusPaint='failed';
 }
-addEventListener('DOMContentLoaded',()=>setTimeout(check,5000),{once:true});
+function check(reason='check'){
+  queued=false;
+  const missing=required.filter(selector=>!document.querySelector(selector));
+  if(missing.length){showRecovery(`Missing shell pieces: ${missing.join(', ')}`);return false}
+  if(surface().healthy){firstFailureAt=0;document.documentElement.dataset.civweaveFreshCampusPaint='healthy';return true}
+  if(document.querySelector(modalSelector)){firstFailureAt=0;document.documentElement.dataset.civweaveFreshCampusPaint='modal-deferred';setTimeout(()=>queue('modal-settle'),700);return false}
+  if(restore(reason)){firstFailureAt=0;document.documentElement.dataset.civweaveFreshCampusPaint='repaired';try{dispatchEvent(new CustomEvent('civweave:working-campus-surface-repaired',{detail:{source:'working-campus-v440',reason}}))}catch{}return true}
+  const now=Date.now();if(!firstFailureAt)firstFailureAt=now;
+  document.documentElement.dataset.civweaveFreshCampusPaint='repairing';
+  if(now-firstFailureAt<4200){setTimeout(()=>queue('repair-retry'),650);return false}
+  showRecovery('The Working Campus shell exists, but its main Quest surface is not visibly paintable.');
+  return false;
+}
+function queue(reason='mutation'){
+  if(queued)return;queued=true;requestAnimationFrame(()=>check(reason));
+}
+addEventListener('DOMContentLoaded',()=>{for(const delay of [120,650,1800,4200])setTimeout(()=>queue(`startup-${delay}`),delay)},{once:true});
+addEventListener('pageshow',()=>queue('pageshow'));
+addEventListener('civweave:working-campus-plan-built',()=>queue('plan-built'));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')queue('visibility-return')});
+document.addEventListener('pointerup',()=>setTimeout(()=>queue('post-interaction'),90),true);
 })();
 </script>
 </head>
