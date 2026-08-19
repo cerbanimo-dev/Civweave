@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.3-guide-voice-runtime-v1-parakeet-layout-fix';
+const VERSION='1.1.4-guide-voice-runtime-v1-parakeet-joiner-shape';
 if(globalThis.CivweaveGuideVoiceV1?.version===VERSION)return;
 const SETTINGS_KEY='civweave.guide-voice.v1';
 const GUIDE=Object.freeze({weaveling:'civweave',moss:'living-school',kamiya:'cerbanimo',rook:'fellowfare',merlin:'anarchadia'});
@@ -13,8 +13,8 @@ const SPEECH_MODELS=Object.freeze([
   Object.freeze({id:'omnilingual-asr-1b-int8',label:'Omnilingual ASR 1B INT8',need:Object.freeze(['model.int8.onnx','tokens.txt'])})
 ]);
 const MODEL_PACKS_PATH='/app/local-ai/model-packs-v1.js?v=1.0.1';
-const SPEECH_EXECUTOR_VERSION='1.0.2-parakeet-speech-executor-v1-transcription-layout';
-const SPEECH_EXECUTOR_PATH='/app/local-ai/parakeet-speech-executor-v1.js?v=1.0.2';
+const SPEECH_EXECUTOR_VERSION='1.0.3-parakeet-speech-executor-v1-joiner-shape-contract';
+const SPEECH_EXECUTOR_PATH='/app/local-ai/parakeet-speech-executor-v1.js?v=1.0.3';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 let listening=false,recognition=null,sessionSource='',lastInterim='',speaking=false,executorLoad=null,packRuntimeLoad=null,lastSpecializedError=null;
