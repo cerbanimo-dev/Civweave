@@ -1,4 +1,5 @@
 import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from './charterkeeper-entry-v1.mjs';
+import { registerPublicGuildEdge } from './guild-directory.mjs';
 
 export { CivweaveCoreIdentity };
 
@@ -29,6 +30,17 @@ function retiredCommerceHostFee() {
   }, 410);
 }
 
+async function publicGuildDirectoryRoute(request, env) {
+  const url = new URL(request.url);
+  if (request.method !== 'POST' || url.pathname !== '/api/guild-directory/register') return null;
+  try {
+    const input = await request.json().catch(() => ({}));
+    return json({ ok: true, registration: await registerPublicGuildEdge(env, input) }, 201);
+  } catch (error) {
+    return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 500);
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -38,6 +50,8 @@ export default {
     if (url.pathname === '/api/commerce/host-fee/policy' || url.pathname === '/api/commerce/host-fee/quote') {
       return retiredCommerceHostFee();
     }
+    const guildDirectory = await publicGuildDirectoryRoute(request, env);
+    if (guildDirectory) return guildDirectory;
     return core.fetch(request, env, ctx);
   },
   async scheduled(controller, env, ctx) {
