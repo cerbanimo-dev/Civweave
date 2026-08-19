@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-settings-local-route-v325-browser-pack-handoff';
+const VERSION='1.1.0-settings-local-route-v324-ai-model-packs';
 const ROUTE='downloaded-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
@@ -12,8 +12,6 @@ const PANEL_ID='cw-local-ai-v324';
 const STYLE_ID='cw-local-ai-v324-style';
 const DOCK_ID='cw-local-ai-download-dock-v324';
 const FOREGROUND_PHONE_MODELS=new Set(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16']);
-const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
-const LEGACY_BROWSER_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
 
 const PACK_CATALOGUE=Object.freeze([
   Object.freeze({
@@ -67,8 +65,7 @@ const ACTION_FILES=[
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true)],
   ['/app/local-ai/specialized-model-capabilities-v1.js?v=1.1.0-model-packs',()=>Boolean(globalThis.CivweaveLocalSpecializedAI?.preferredTts==='supertonic-3-tts-int8')],
-  ['/app/local-ai/model-packs-v1.js?v=1.0.1-browser-guard',()=>Boolean(globalThis.CivweaveLocalModelPacksV1?.byId&&globalThis.CivweaveLocalModelPacksV1?.install)],
-  ['/app/local-ai/browser-pack-download-v1.js?v=1.0.0-settings-v325',()=>Boolean(globalThis.CivweaveBrowserPackDownloadV1?.queue&&globalThis.CivweaveBrowserPackDownloadV1?.importUrl)]
+  ['/app/local-ai/model-packs-v1.js?v=1.0.0',()=>Boolean(globalThis.CivweaveLocalModelPacksV1?.byId&&globalThis.CivweaveLocalModelPacksV1?.install)]
 ];
 if(globalThis.CivweaveSettingsLocalRouteV323?.version===VERSION)return;
 
@@ -77,28 +74,16 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&
 const manager=()=>globalThis.CivweaveLocalModelDownloadV266;
 const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
 const packManager=()=>globalThis.CivweaveLocalModelPacksV1;
-const browserPackDownload=()=>globalThis.CivweaveBrowserPackDownloadV1;
 let actionPromise=null,notice='',noticeError=false,navigating=false;
 
 function writable(){return !navigating&&Boolean(document.documentElement?.isConnected)}
 function selection(){try{return parse(localStorage.getItem(SELECTION_KEY),{active:false,id:null})}catch{return{active:false,id:null}}}
-function normalizeLegacyBrowserPackErrors(packs){
-  let changed=false;
-  for(const id of BROWSER_PACKS){
-    const state=packs[id];if(!state)continue;
-    if(state.errorCode===LEGACY_BROWSER_ERROR||state.phase==='browser-download-required'){
-      packs[id]={...state,status:'browser-ready',phase:'browser-download-ready',percent:0,completedBytes:0,error:'',errorCode:'',downloadMode:'browser'};changed=true;
-    }
-  }
-  if(changed)try{localStorage.setItem(PACK_STATE_KEY,JSON.stringify(packs))}catch{}
-  return packs;
-}
 function snapshot(){
   const m=manager();let all,selected;
   if(m?.state&&m?.selection){all=m.state()||{};selected=m.selection()||{active:false,id:null}}
   else{try{all=parse(localStorage.getItem(DOWNLOADS_KEY),{});selected=selection()}catch{all={};selected={active:false,id:null}}}
   let packs={};try{packs=parse(localStorage.getItem(PACK_STATE_KEY),{})}catch{}
-  return{all,selection:selected,packs:normalizeLegacyBrowserPackErrors(packs)};
+  return{all,selection:selected,packs};
 }
 function savedHealth(){try{return parse(localStorage.getItem(HEALTH_KEY),{})}catch{return{}}}
 function fallbackConfig(){try{const profiles=parse(localStorage.getItem(PROFILES_KEY),{}),saved=parse(localStorage.getItem(SETTINGS_KEY),{}),interactive=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:saved;return interactive&&typeof interactive==='object'?interactive:{}}catch{return{}}}
@@ -119,7 +104,6 @@ function installLocalStyle(){
 #${PANEL_ID} .cw-local-row p,#${PANEL_ID} .cw-pack-card p{margin:.2rem 0;font-size:.9rem}
 #${PANEL_ID} .cw-local-meta{color:#b9c8e3;font-size:.78rem}
 #${PANEL_ID} .cw-local-actions{display:flex;gap:7px;flex-wrap:wrap}
-#${PANEL_ID} .cw-local-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:5px 9px;border:1px solid #ffffff33;border-radius:8px;background:#ffffff0d;color:inherit;text-decoration:none;font:inherit;font-weight:700}
 #${PANEL_ID} .cw-local-active{outline:2px solid #90efd8}
 #${PANEL_ID} .cw-local-error{color:#ffc3c3!important}
 #${PANEL_ID} .cw-progress{height:8px;margin-top:7px;border-radius:99px;overflow:hidden;background:#ffffff14}
@@ -131,22 +115,11 @@ function installLocalStyle(){
 @media(max-width:700px),(hover:none) and (pointer:coarse){#${PANEL_ID} .cw-local-row{grid-template-columns:1fr}#${DOCK_ID}{top:max(10px,calc(env(safe-area-inset-top) + 8px));right:max(10px,calc(env(safe-area-inset-right) + 8px));bottom:auto;left:max(10px,calc(env(safe-area-inset-left) + 8px));width:auto}}`;
   document.head.append(style);return true;
 }
-function statusMarkup(st,available){
-  if(!st||(!st.status&&!available))return'';
-  if(st.status==='browser-ready')return'<p class="cw-local-meta"><b>Ready for browser download</b> · Large files will use the browser download manager.</p>';
-  if(st.status==='browser-queuing')return'<p class="cw-local-meta"><b>Sending files to the browser download manager…</b></p>';
-  if(st.status==='browser-queued')return'<p class="cw-local-meta"><b>Browser downloads queued</b> · Civweave can be closed while they finish. Import the completed files afterward.</p>';
-  const percent=available?100:Math.max(0,Math.min(99,Number(st.percent||0)));return`<div class="cw-progress" style="--pct:${percent}%"><i></i></div><p class="cw-local-meta"><b>${percent}%</b>${st.status?` · ${esc(st.status)}`:''}${st.error?` · <span class="cw-local-error">${esc(st.error)}</span>`:''}</p>`;
-}
+function statusMarkup(st,available){if(!st||(!st.status&&!available))return'';const percent=available?100:Math.max(0,Math.min(99,Number(st.percent||0)));return`<div class="cw-progress" style="--pct:${percent}%"><i></i></div><p class="cw-local-meta"><b>${percent}%</b>${st.status?` · ${esc(st.status)}`:''}${st.error?` · <span class="cw-local-error">${esc(st.error)}</span>`:''}</p>`}
 function actions(model,st,available,active){if(available)return`<button type="button" data-local-use="${esc(model.id)}">${active?'Using locally':'Use locally'}</button><button type="button" data-local-remove="${esc(model.id)}">Remove</button>`;if(['downloading','finalizing'].includes(String(st.status||'')))return`<button type="button" data-local-cancel="${esc(model.id)}">Cancel</button>`;if(['paused','error','aborted','ready'].includes(String(st.status||'')))return`<button type="button" data-local-download="${esc(model.id)}">Resume</button><button type="button" data-local-remove="${esc(model.id)}">Clear</button>`;return`<button type="button" data-local-download="${esc(model.id)}">Download</button>`}
 function packActions(pack,st,active){
   const state=String(st?.status||'');
   if(state==='ready')return`<button type="button" data-local-pack-use="${esc(pack.id)}">${active?'Using pack':'Use pack'}</button><button type="button" data-local-pack-remove="${esc(pack.id)}">Remove pack</button>`;
-  if(state==='browser-queuing')return'<button type="button" disabled>Sending to browser…</button>';
-  if(state==='browser-queued'){
-    const href=`/app/index.html?source=settings-ai-pack-import&pack=${encodeURIComponent(pack.id)}#cw-ai-pack-browser-title`;
-    return`<a href="${esc(href)}" target="_blank" rel="noopener">Import finished downloads</a><button type="button" data-local-pack-download="${esc(pack.id)}">Queue again</button><button type="button" data-local-pack-remove="${esc(pack.id)}">Clear pack</button>`;
-  }
   if(['downloading','finalizing'].includes(state))return`<button type="button" data-local-pack-cancel="${esc(pack.id)}">Cancel</button>`;
   if(['paused','error','aborted'].includes(state))return`<button type="button" data-local-pack-download="${esc(pack.id)}">Resume pack</button><button type="button" data-local-pack-remove="${esc(pack.id)}">Clear pack</button>`;
   return`<button type="button" data-local-pack-download="${esc(pack.id)}">Download pack</button>`;
@@ -175,7 +148,7 @@ function renderLocalModels(layerOrForm=document.getElementById('cw-settings-v320
     return`<div class="cw-local-row${active?' cw-local-active':''}" data-model-id="${esc(model.id)}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.repo)} · ${fmt(model.estimatedBytes)} · ${esc(model.license)}${active?' · ACTIVE':''}</p><p class="cw-local-meta">Model window <b>${Number(model.contextWindowTokens||0).toLocaleString()} tokens</b> · Civweave working default <b>${Number(model.workingContextTokens||0).toLocaleString()}</b></p><p class="cw-local-meta">${healthCopy}</p>${statusMarkup(st,available)}</div><div class="cw-local-actions">${actions(model,st,available,active)}</div></div>`;
   }).join('');
   const preview=PREVIEW.map(model=>`<div class="cw-local-row"><div><b>${esc(model.label)} · preview</b><p>${esc(model.reason)}</p></div></div>`).join('');
-  panel.innerHTML=`<div><h3>AI Downloads</h3><p>Choose a complete hardware-tier pack or manage individual local models. This view reads only small saved-state records; opening it does not touch model caches, GPUs, or inference runtimes.</p></div><div class="cw-clean-note">Pack/model code loads only after an explicit Download, Resume, Use, Remove, Cancel, or Stop action. Large phone/server packs hand their large files to the browser download manager so Civweave does not need to remain open for the transfer.</div><div data-local-status role="status" class="${noticeError?'cw-local-error':''}">${esc(notice)}</div><div class="cw-pack-grid">${packCards}</div><div class="cw-local-divider"></div><details><summary><b>Individual models</b></summary><div style="display:grid;gap:8px;margin-top:10px">${rows}</div></details><details><summary>Preview models</summary><div style="display:grid;gap:8px;margin-top:10px">${preview}</div></details><div class="cw-local-actions"><button type="button" data-local-disable ${currentSelection.active?'':'hidden'}>Stop using downloaded AI</button></div>`;
+  panel.innerHTML=`<div><h3>AI Downloads</h3><p>Choose a complete hardware-tier pack or manage individual local models. This view reads only small saved-state records; opening it does not touch model caches, GPUs, or inference runtimes.</p></div><div class="cw-clean-note">Pack/model code loads only after an explicit Download, Resume, Use, Remove, Cancel, or Stop action. Models shared by multiple packs are downloaded once and retained while another installed pack still needs them.</div><div data-local-status role="status" class="${noticeError?'cw-local-error':''}">${esc(notice)}</div><div class="cw-pack-grid">${packCards}</div><div class="cw-local-divider"></div><details><summary><b>Individual models</b></summary><div style="display:grid;gap:8px;margin-top:10px">${rows}</div></details><details><summary>Preview models</summary><div style="display:grid;gap:8px;margin-top:10px">${preview}</div></details><div class="cw-local-actions"><button type="button" data-local-disable ${currentSelection.active?'':'hidden'}>Stop using downloaded AI</button></div>`;
   if(panel.dataset.cwLocalActionsBound!=='1'){panel.dataset.cwLocalActionsBound='1';panel.addEventListener('click',event=>void localAction(event,panel))}
   renderDock();return panel;
 }
@@ -186,7 +159,7 @@ function ensureScript(src,ready){
   return new Promise((resolve,reject)=>{
     const path=new URL(src,location.href).pathname,existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);
     if(existing){if(ready?.())return resolve(true);existing.addEventListener('load',()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`)),{once:true});existing.addEventListener('error',()=>reject(new Error(`${path} could not load.`)),{once:true});return}
-    const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveLocalModelAction='v325';script.onload=()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`));script.onerror=()=>reject(new Error(`${path} could not load.`));document.head.append(script);
+    const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveLocalModelAction='v324';script.onload=()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`));script.onerror=()=>reject(new Error(`${path} could not load.`));document.head.append(script);
   });
 }
 function ensureActionModules(){if(ACTION_FILES.every(([,ready])=>ready?.()))return Promise.resolve(true);if(actionPromise)return actionPromise;actionPromise=(async()=>{for(const [src,ready] of ACTION_FILES)await ensureScript(src,ready);return true})().finally(()=>{actionPromise=null});return actionPromise}
@@ -200,23 +173,15 @@ async function localAction(event,panel){
     button.disabled=true;showLocal(packId?'Preparing this AI pack action…':'Preparing this model action…');await afterPaint();await ensureActionModules();
     const m=manager(),r=registry(),p=packManager();if(!m||!r||!p)throw new Error('Local AI download action modules did not become ready.');
     if(button.hasAttribute('data-local-pack-download')){
-      const pack=p.byId(packId);
-      if(p.installMode?.(packId)==='browser'){
-        const browser=browserPackDownload();if(!browser?.queue)throw new Error('The browser AI pack download bridge did not become ready.');
-        showLocal(`Sending ${pack.label} to the browser download manager…`);
-        await browser.queue(packId,{onProgress:progress=>{if(progress?.message)showLocal(progress.message)}});
-        showLocal(`${pack.label} downloads are queued in the browser. Civweave can be closed while they finish; then choose Import finished downloads.`);
-      }else{
-        showLocal(`Downloading ${pack.label}…`);
-        await p.install(packId,{onProgress:progress=>{const state=progress?.state||p.state(packId)||{};showLocal(`${pack.label} · ${Math.max(0,Math.min(99,Number(state.percent||0)))}% · ${state.component||state.phase||'downloading'}`)}});
-        showLocal(`${pack.label} is downloaded and verified.`);
-      }
+      const pack=p.byId(packId);showLocal(`Downloading ${pack.label}…`);
+      await p.install(packId,{onProgress:progress=>{const state=progress?.state||p.state(packId)||{};showLocal(`${pack.label} · ${Math.max(0,Math.min(99,Number(state.percent||0)))}% · ${state.component||state.phase||'downloading'}`)}});
+      showLocal(`${pack.label} is downloaded and verified.`);
     }else if(button.hasAttribute('data-local-pack-cancel')){
       await p.cancel(packId);showLocal(`${p.byId(packId).label} download paused.`);
     }else if(button.hasAttribute('data-local-pack-use')){
       const result=await p.use(packId);globalThis.CivweaveLocalModelBridgeV266?.patch?.();showLocal(`${result.pack.label} is active · ${r.byId(result.model)?.label||result.model} handles interactive local chat.`);
     }else if(button.hasAttribute('data-local-pack-remove')){
-      const label=p.byId(packId).label;if(p.installMode?.(packId)==='browser')browserPackDownload()?.clear?.(packId);await p.remove(packId);showLocal(`${label} removed. Files still required by another installed pack were kept.`);
+      const label=p.byId(packId).label;await p.remove(packId);showLocal(`${label} removed. Files still required by another installed pack were kept.`);
     }else if(button.hasAttribute('data-local-download')){
       const spec=r.byId(id);if(!spec)throw new Error(`Unknown local model: ${id}`);showLocal(`Starting ${spec.label}…`);await m.start(id,{preferBackground:!foregroundDownload(CATALOGUE.find(model=>model.id===id)||spec)});showLocal(`${spec.label} download started.`);
     }else if(button.hasAttribute('data-local-cancel')){
@@ -257,6 +222,6 @@ addEventListener('pageshow',()=>{navigating=false;queueMicrotask(()=>{patchVisib
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patchVisible,{once:true});else queueMicrotask(patchVisible);
 globalThis.CivweaveSettingsLocalRouteV323=Object.freeze({
   version:VERSION,route:ROUTE,patch,selection,selectedLabel,renderLocalModels,ensureActionModules,catalogue:CATALOGUE,packCatalogue:PACK_CATALOGUE,
-  settingsPresentationOwnership:false,inputOwnership:false,managerDependency:false,runtimeDependency:false,cacheDependency:false,localModelsViewDirect:true,lifecycleDependency:false,registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,packRuntimeDependencyOnView:false,packCacheReadOnView:false,actionModulesOnDemand:true,browserPackHandoff:true,legacyBrowserErrorRecovery:true
+  settingsPresentationOwnership:false,inputOwnership:false,managerDependency:false,runtimeDependency:false,cacheDependency:false,localModelsViewDirect:true,lifecycleDependency:false,registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,packRuntimeDependencyOnView:false,packCacheReadOnView:false,actionModulesOnDemand:true
 });
 })();

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-local-ai-model-packs-v1-browser-guard';
+const VERSION='1.0.0-local-ai-model-packs-v1';
 const CACHE='civweave-specialized-model-packs-v1';
 const STATE_KEY='civweave.local-ai.packs.v1';
 const EVENT='civweave:local-model-pack-progress';
@@ -111,9 +111,6 @@ const PACKS=freeze({
   })
 });
 
-const BROWSER_MANAGED_PACK_IDS=freeze(['premier-phone','server-quality']);
-const BROWSER_INSTALL_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
-
 function save(force=false){const t=Date.now();if(!force&&t-lastSave<500)return;lastSave=t;try{localStorage.setItem(STATE_KEY,JSON.stringify(states))}catch{}}
 function set(id,patch,force=false){
   const previous=states[id]||{},next={...previous,...patch,updatedAt:now()};states[id]=next;save(force);
@@ -127,11 +124,6 @@ function set(id,patch,force=false){
 function packById(id){const found=PACKS[clean(id,120)];if(!found)throw new Error(`Unknown AI pack: ${id}`);return found}
 function specFor(id){return SPECIALIZED[id]||registry()?.byId?.(id)||null}
 function isSpecialized(id){return Boolean(SPECIALIZED[id])}
-function installMode(id){return BROWSER_MANAGED_PACK_IDS.includes(packById(id).id)?'browser':'in-app'}
-function browserInstallRequired(item){
-  const error=new Error(`${item.label} uses Civweave's browser-managed AI pack download/import path so its multi-gigabyte payload never has to pass through legacy Cache Storage.`);
-  error.name='CivweaveBrowserPackInstallRequired';error.code=BROWSER_INSTALL_ERROR;error.packId=item.id;error.downloadMode='browser';return error;
-}
 function directUrl(model,art){return `${HF}/${model.repo}/resolve/${encodeURIComponent(model.revision)}/${art.path}`}
 function assetUrl(modelId,path){const model=SPECIALIZED[clean(modelId,120)];if(!model)throw new Error(`Unknown specialized model: ${modelId}`);const art=model.artifacts.find(row=>row.path===path);if(!art)throw new Error(`Unknown asset ${path} for ${modelId}`);return directUrl(model,art)}
 async function cachedAsset(model,art){
@@ -237,11 +229,6 @@ async function installGenerative(item,id,job,progressBase,total,onProgress){
 }
 async function install(id,{onProgress}={}){
   const item=packById(id);if(jobs.has(item.id))return states[item.id];
-  if(installMode(item.id)==='browser'){
-    const error=browserInstallRequired(item);
-    report(item,{status:'error',phase:'browser-download-required',downloadMode:'browser',errorCode:error.code,error:error.message,completedBytes:0,totalBytes:item.estimatedBytes,percent:0},true);
-    throw error;
-  }
   if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable on this device.');
   const m=manager(),r=registry();if(!m?.start||!r?.byId)throw new Error('Civweave local model download modules are not ready.');
   await m.requestPersistence?.();
@@ -310,7 +297,7 @@ async function cachedResponse(modelId,path){
 function state(id){return id?states[clean(id,120)]||null:{...states}}
 function catalogue(){return Object.values(PACKS)}
 
-const api=freeze({version:VERSION,cache:CACHE,stateKey:STATE_KEY,packs:PACKS,specialized:SPECIALIZED,byId:packById,catalogue,state,status,install,start:install,cancel,remove,use,storage,assetUrl,cachedResponse,specializedStatus,componentStatus,installMode,browserManagedPackIds:BROWSER_MANAGED_PACK_IDS,browserInstallErrorCode:BROWSER_INSTALL_ERROR,progressEvent:EVENT});
+const api=freeze({version:VERSION,cache:CACHE,stateKey:STATE_KEY,packs:PACKS,specialized:SPECIALIZED,byId:packById,catalogue,state,status,install,start:install,cancel,remove,use,storage,assetUrl,cachedResponse,specializedStatus,componentStatus,progressEvent:EVENT});
 globalThis.CivweaveLocalModelPacksV1=api;
 try{dispatchEvent(new CustomEvent('civweave:local-model-packs-ready',{detail:{version:VERSION,packIds:Object.keys(PACKS),cache:CACHE}}))}catch{}
 })();
