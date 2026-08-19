@@ -25,9 +25,14 @@ assert.ok(!worker.includes('caches.open('),'bootstrap worker must not download o
 assert.ok(!worker.includes('cache.add'),'bootstrap worker must not pre-cache assets');
 
 assert.ok(bridge.includes("const INSTALLABILITY_WORKER_URL='/pwa-installability-worker-v1.js?v=desktop-installability-v1'"),'installer must point at the installability worker');
+assert.ok(bridge.includes("const INSTALLABILITY_WORKER_PATH='/pwa-installability-worker-v1.js'"),'installer must identify the bootstrap worker independently from query-string revisions');
+assert.ok(bridge.includes("const SHELL_WORKER_PATH='/service-worker-v203.js'"),'installer must identify the real Civweave shell worker');
 assert.ok(bridge.includes("navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'})"),'installer must register the bootstrap worker at root scope');
-assert.ok(bridge.includes('void ensureInstallabilityBootstrap()'),'installer must establish browser installability on entry');
-assert.ok(bridge.includes("installabilityBootstrapPolicy:'tiny-navigation-pass-through-worker-no-shell-cache'"),'installer must publish the bootstrap policy');
+assert.ok(bridge.includes('void startInstallabilityBootstrap()'),'installer must establish browser installability on entry');
+assert.ok(bridge.includes('async function retireInstallabilityBootstrap()'),'installer must explicitly retire the tiny bootstrap before shell download');
+assert.ok(bridge.includes('registration.unregister()'),'bootstrap-to-shell handoff must release the bootstrap registration');
+assert.ok(bridge.includes('await retireInstallabilityBootstrap();\n    await shell.prepareShell({manual:false});'),'user-initiated shell preparation must retire the bootstrap first');
+assert.ok(bridge.includes("installabilityBootstrapPolicy:'tiny-navigation-pass-through-worker-retired-before-shell-download'"),'installer must publish the bootstrap handoff policy');
 assert.ok(bridge.includes('eagerInstallabilityBootstrap:true'),'installer must explicitly enable tiny installability bootstrap');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'actual Civweave shell download must remain user initiated');
 assert.ok(bridge.includes('firstPaintShellWork:false'),'first paint must remain free of shell preparation');
@@ -45,11 +50,12 @@ assert.ok(installer.includes("addEventListener('beforeinstallprompt'"),'legacy l
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'desktop-pwa-installability-bootstrap-v2-single-prompt-owner',
+  revision:'desktop-pwa-installability-bootstrap-v3-shell-handoff',
   bootstrapWorker:'/pwa-installability-worker-v1.js',
   bootstrapCachesShell:false,
   rootScope:true,
   shellPreparationUserInitiated:true,
+  bootstrapRetiredBeforeShell:true,
   browserMenuInstallCompletesShell:true,
   singlePromptOwner:'pwa-install-prompt-v250'
 },null,2));
