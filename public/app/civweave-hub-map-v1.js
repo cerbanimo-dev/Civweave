@@ -1,8 +1,9 @@
 (()=>{
 'use strict';
 
-const VERSION='civweave-hub-map-v1.4.0-guildkeeper-location-update';
+const VERSION='civweave-hub-map-v1.5.0-public-mobile-directory';
 const DIRECTORY_ENDPOINT='/api/hub-map-nodes';
+const DIRECTORY_REGISTER_ENDPOINT='/api/guild-directory-register';
 const DIRECTORY_CACHE_KEY='civweave.hub-map.directory.v1';
 const DIRECTORY_BURST_KEY='civweave.hub-map.directory-burst-at.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -23,7 +24,7 @@ let booted=false;
 
 const now=()=>new Date().toISOString();
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
-const esc=value=>clean(value,5000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>clean(value,5000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const norm=value=>String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const loadCache=()=>{try{return parse(localStorage.getItem(DIRECTORY_CACHE_KEY),null)}catch{return null}};
@@ -46,7 +47,7 @@ function desktopLocationState(){try{return parse(localStorage.getItem(LOCATION_S
 function desktopLocationKey(){try{return clean(localStorage.getItem(LOCATION_KEY),240)}catch{return''}}
 function guildkeeperBrowser(){try{return localStorage.getItem(STEWARD_KEY)==='1'}catch{return false}}
 function validLocation(value){const lat=Number(value?.latitude),lon=Number(value?.longitude);return Number.isFinite(lat)&&lat>=-90&&lat<=90&&Number.isFinite(lon)&&lon>=-180&&lon<=180}
-function mobileNodeIds(state=mobileGuildState()){const ids=(state?.cloudFabric?.starterNodes||[]).map(node=>clean(node?.nodeId,180)).filter(Boolean);if(!ids.length&&state?.guildId)ids.push(clean(state.guildId,180));return ids}
+function mobileNodeIds(state=mobileGuildState()){const ids=(state?.cloudFabric?.starterNodes||[]).map(node=>clean(node?.nodeId,180)).filter(Boolean);if(state?.guildId&&!ids.includes(clean(state.guildId,180)))ids.push(clean(state.guildId,180));return ids}
 function ownedGuildkeeperForNode(node){
   if(!guildkeeperBrowser()||!node)return null;const nodeId=clean(node.nodeId,180);
   const mobile=mobileGuildState(),mobileIds=mobileNodeIds(mobile);if(mobile?.guildId&&mobile?.membershipKey&&validLocation(mobile.location)&&(mobileIds.includes(nodeId)||clean(node.guildId,180)===clean(mobile.guildId,180)||node.localOwnedMobile===true))return{route:'mobile',state:mobile,nodeIds:mobileIds};
@@ -64,10 +65,19 @@ function mergeOwnedLocations(packet){
     return node;
   });
   if(mobile?.guildId&&validLocation(mobile.location)&&!mobileFound){
-    const starter=mobile?.cloudFabric?.starterNodes?.[0]||null,nodeId=clean(starter?.nodeId||mobile.guildId,180),publicOrigin=clean(mobile.primaryOrigin||starter?.publicOrigin,1000);
+    const starter=mobile?.cloudFabric?.starterNodes?.[0]||null,nodeId=clean(mobile.guildId||starter?.nodeId,180),publicOrigin=clean(mobile.primaryOrigin||starter?.publicOrigin,1000);
     if(nodeId)nodes.push({schema:'civweave.hub-map-node.v1',nodeId,guildId:mobile.guildId,displayName:clean(mobile.displayName||mobile.guildId,180),publicOrigin,runtime:mobile.cloudAttached?'cloudflare-mobile-guild-edge':'pocket-guild-node',status:'active',capabilities:['guild-map-location','pocket-node'],location:{...mobile.location},updatedAt:mobile.updatedAt||mobile.location.syncedAt||now(),localOwnedMobile:true});
   }
   return{...packet,nodes};
+}
+async function registerOwnedMobileGuild(){
+  const mobile=mobileGuildState();if(!mobile?.cloudAttached||!mobile?.primaryOrigin||!validLocation(mobile.location)||navigator.onLine===false)return false;
+  try{
+    const response=await fetch(DIRECTORY_REGISTER_ENDPOINT,{method:'POST',cache:'no-store',headers:{'content-type':'application/json',accept:'application/json'},body:JSON.stringify({publicOrigin:mobile.primaryOrigin})}),payload=await response.json().catch(()=>({}));
+    if(!response.ok||payload?.ok!==true)throw new Error(payload?.error||payload?.message||`HTTP ${response.status}`);
+    try{localStorage.removeItem(DIRECTORY_BURST_KEY)}catch{}
+    return true;
+  }catch(error){setGossipStatus(`This Guild is local and online, but public directory registration is pending · ${error?.message||error}`);return false}
 }
 function cacheSelectedRallyPoint(node){
   const point=rallyPointFor(node);let selected={};try{selected=parse(localStorage.getItem(HOST_SELECTION_KEY),{})}catch{}
@@ -113,9 +123,10 @@ function focusHubView(){
   if(points.length===1){map.flyTo({center:points[0],zoom:9,essential:true});return}
   try{const bounds=points.reduce((box,point)=>box.extend(point),new maplibregl.LngLatBounds(points[0],points[0]));map.fitBounds(bounds,{padding:70,maxZoom:8,duration:500})}catch{}
 }
-async function loadDirectory({network=true}={}){
+async function loadDirectory({network=true,force=false}={}){
   const cached=loadCache();if(cached?.schema==='civweave.hub-map-directory.v1'&&Array.isArray(cached.nodes)){directory=mergeOwnedLocations(cached);installNodes(directory);setStatus(`Guild Map · ${directory.nodes.length} cached Guild${directory.nodes.length===1?'':'s'}`)}
-  if(!network||navigator.onLine===false||!claimDirectoryBurst())return directory;
+  if(!network||navigator.onLine===false||(!force&&!claimDirectoryBurst()))return directory;
+  if(force)claimDirectoryBurst();
   try{const response=await fetch(DIRECTORY_ENDPOINT,{cache:'no-store',headers:{accept:'application/json'}}),packet=await response.json().catch(()=>({}));if(!response.ok||packet?.ok!==true||!Array.isArray(packet.nodes))throw new Error(packet?.error||`HTTP ${response.status}`);saveCache(packet);directory=mergeOwnedLocations(packet);const count=installNodes(directory);setStatus(`Guild Map · ${count} Guildkeeper-placed Guild${count===1?'':'s'} · hourly directory sync`);dispatchEvent(new CustomEvent('civweave:hub-map-directory',{detail:{count,at:now()}}));return directory}catch(error){if(!cached)setStatus(`Guild Map directory unavailable · ${error.message}`);return directory}
 }
 function selectedHubRow(){const s=service();return s?.state?.features?.get?.(s?.state?.selectedId)||null}
@@ -139,7 +150,7 @@ async function showLedgerFor(node){
 }
 async function refreshSelectedHub(virtual=false){const node=selectedHubNode();if(!node){setGossipStatus('Select a Guild first.');return}try{setGossipStatus(virtual?'Passing by this Guild through the mesh…':'Reading cached locality ledger…');if(virtual)await gossip()?.passByHub?.(node,{physical:false});await showLedgerFor(node)}catch(error){setGossipStatus(`Guild refresh failed · ${error.message}`)}}
 function focusMyHub(){
-  try{const selected=parse(localStorage.getItem(HOST_SELECTION_KEY),{}),row=service()?.state?.features?.get?.(`hub:${selected.nodeId}`);if(row){service().state.selectedId=row.id;service().state.map?.flyTo?.({center:row.coords,zoom:10,essential:true});cacheSelectedRallyPoint(nodeById(selected.nodeId));augmentDetail();return}const mobile=mobileGuildState(),mobileId=mobileNodeIds(mobile)[0],mobileRow=mobileId?service()?.state?.features?.get?.(`hub:${mobileId}`):null;if(mobileRow){service().state.selectedId=mobileRow.id;service().state.map?.flyTo?.({center:mobileRow.coords,zoom:10,essential:true});service()?.selectFeature?.(mobileRow.id,true);augmentDetail();return}setGossipStatus('This device does not have a mapped selected Guild yet.')}catch{setGossipStatus('No selected Guild is stored on this device.')}
+  try{const selected=parse(localStorage.getItem(HOST_SELECTION_KEY),{}),row=service()?.state?.features?.get?.(`hub:${selected.nodeId}`);if(row){service().state.selectedId=row.id;service().state.map?.flyTo?.({center:row.coords,zoom:10,essential:true});cacheSelectedRallyPoint(nodeById(selected.nodeId));augmentDetail();return}const mobile=mobileGuildState(),mobileId=clean(mobile?.guildId,180)||mobileNodeIds(mobile)[0],mobileRow=mobileId?service()?.state?.features?.get?.(`hub:${mobileId}`):null;if(mobileRow){service().state.selectedId=mobileRow.id;service().state.map?.flyTo?.({center:mobileRow.coords,zoom:10,essential:true});service()?.selectFeature?.(mobileRow.id,true);augmentDetail();return}setGossipStatus('This device does not have a mapped selected Guild yet.')}catch{setGossipStatus('No selected Guild is stored on this device.')}
 }
 async function ensureSessionRuntime(){
   if(session())return session();await new Promise((resolve,reject)=>{const path='/app/host-node-session-v1.js',existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);if(existing){let ticks=0;const timer=setInterval(()=>{if(session()){clearInterval(timer);resolve()}else if(++ticks>200){clearInterval(timer);reject(new Error('Guild session runtime did not become ready.'))}},40);return}const script=document.createElement('script');script.src=`${path}?v=hub-map-v1`;script.async=false;script.onload=resolve;script.onerror=()=>reject(new Error('Could not load Guild session runtime.'));document.head.append(script)});if(!session())throw new Error('Guild session runtime is unavailable.');return session()
@@ -163,14 +174,14 @@ async function updateDesktopGuildLocation(owner,position){
   const location=result.location||{},next={...state,...location,schema:'civweave.hub-location-sync.v1',syncedAt:location.syncedAt||now(),precisionMeters:location.precisionMeters||state.precisionMeters||100,coordinateDecimals:location.coordinateDecimals??coordinateDecimals,nodeIds:Array.isArray(result.nodeIds)?result.nodeIds:owner.nodeIds,nodeCount:Array.isArray(result.nodeIds)?result.nodeIds.length:owner.nodeIds.length,workerOrigin:state.workerOrigin,updatedAt:now()};localStorage.setItem(LOCATION_STATE_KEY,JSON.stringify(next));return next;
 }
 async function updateMobileGuildLocation(owner,position){
-  const precise=Number(owner.state?.location?.coordinateDecimals||3)>=5,module=await import('/app/mobile-guild-create-v1.mjs?v=guild-map-location-v1');if(typeof module.updateMobileGuildLocation!=='function')throw new Error('Mobile Guild location updater is unavailable.');const updated=await module.updateMobileGuildLocation({position,precise});return updated.location;
+  const precise=Number(owner.state?.location?.coordinateDecimals||3)>=5,module=await import('/app/mobile-guild-create-v1.mjs?v=guild-map-location-public-v1');if(typeof module.updateMobileGuildLocation!=='function')throw new Error('Mobile Guild location updater is unavailable.');const updated=await module.updateMobileGuildLocation({position,precise});return updated.location;
 }
 function refreshOwnedLocationOnMap(nodeId){
-  const selectedId=`hub:${nodeId}`,s=service();directory=mergeOwnedLocations(directory);installNodes(directory);if(s?.state?.features?.has?.(selectedId)){s.state.selectedId=selectedId;s.selectFeature?.(selectedId,true);const row=s.state.features.get(selectedId);if(row?.coords)s.state.map?.flyTo?.({center:row.coords,zoom:11,essential:true})}queueMicrotask(augmentDetail)
+  const mobile=mobileGuildState(),resolvedNodeId=clean(mobile?.guildId,180)||nodeId,selectedId=`hub:${resolvedNodeId}`,s=service();directory=mergeOwnedLocations(directory);installNodes(directory);if(s?.state?.features?.has?.(selectedId)){s.state.selectedId=selectedId;s.selectFeature?.(selectedId,true);const row=s.state.features.get(selectedId);if(row?.coords)s.state.map?.flyTo?.({center:row.coords,zoom:11,essential:true})}queueMicrotask(augmentDetail)
 }
 async function updateSelectedGuildLocation(){
   const node=selectedHubNode(),owner=ownedGuildkeeperForNode(node);if(!node||!owner){setGossipStatus('Only the logged-in Guildkeeper for this Guild can update its map location.');return}
-  try{setGossipStatus(`Updating ${node.displayName||node.nodeId} from this device…`);const position=await bestGuildPosition();if(owner.route==='mobile')await updateMobileGuildLocation(owner,position);else await updateDesktopGuildLocation(owner,position);refreshOwnedLocationOnMap(node.nodeId);setGossipStatus(`${node.displayName||'Guild'} location updated. The Guild Map now uses the new Guildkeeper-published position.`)}catch(error){setGossipStatus(`Guild location update failed · ${error?.message||error}`)}
+  try{setGossipStatus(`Updating ${node.displayName||node.nodeId} from this device…`);const position=await bestGuildPosition();if(owner.route==='mobile')await updateMobileGuildLocation(owner,position);else await updateDesktopGuildLocation(owner,position);if(owner.route==='mobile')await registerOwnedMobileGuild();refreshOwnedLocationOnMap(node.nodeId);setGossipStatus(`${node.displayName||'Guild'} location updated. The Guild Map now uses the new Guildkeeper-published position.`)}catch(error){setGossipStatus(`Guild location update failed · ${error?.message||error}`)}
 }
 function augmentDetail(){
   if(renderingDetail)return;const detail=document.getElementById('detail'),row=selectedHubRow(),node=selectedHubNode();if(!detail||!row||!node?.nodeId)return;
@@ -206,12 +217,13 @@ async function virtualMemberRefresh(){
   try{return await gossip()?.syncRegion?.({nodes:directory.nodes||[],networkDirectory:false})}catch{return null}
 }
 function applyCachedDirectory(){return loadDirectory({network:false}).catch(()=>directory)}
+async function registerAndReload(){await registerOwnedMobileGuild();return loadDirectory({network:true,force:true})}
 function bind(){
-  document.getElementById('locate')?.addEventListener('click',startProximity,{capture:true});addEventListener('online',()=>{loadDirectory({network:true}).then(()=>virtualMemberRefresh()).catch(()=>{})});addEventListener('storage',event=>{if([DIRECTORY_CACHE_KEY,MOBILE_GUILD_KEY,LOCATION_STATE_KEY,LOCATION_KEY,STEWARD_KEY].includes(event.key))applyCachedDirectory()});addEventListener('civweave:mobile-guild-location-updated',()=>applyCachedDirectory());addEventListener('civweave:map-mesh-applied',()=>{applyCachedDirectory();activateNodeMode();augmentDetail()});addEventListener('civweave:locality-ledger-changed',()=>refreshSelectedHub(false).catch(()=>{}));addEventListener('visibilitychange',()=>{if(document.hidden)stopProximity();else if(proximityEnabled)startProximity()});addEventListener('pagehide',()=>{stopProximity();if(refreshTimer)clearInterval(refreshTimer)},{once:true});
+  document.getElementById('locate')?.addEventListener('click',startProximity,{capture:true});addEventListener('online',()=>{registerAndReload().then(()=>virtualMemberRefresh()).catch(()=>{})});addEventListener('storage',event=>{if([DIRECTORY_CACHE_KEY,MOBILE_GUILD_KEY,LOCATION_STATE_KEY,LOCATION_KEY,STEWARD_KEY].includes(event.key))applyCachedDirectory()});addEventListener('civweave:mobile-guild-created',()=>applyCachedDirectory());addEventListener('civweave:mobile-guild-cloud-attached',()=>registerAndReload().catch(()=>{}));addEventListener('civweave:mobile-guild-location-updated',()=>registerAndReload().catch(()=>{}));addEventListener('civweave:map-mesh-applied',()=>{applyCachedDirectory();activateNodeMode();augmentDetail()});addEventListener('civweave:locality-ledger-changed',()=>refreshSelectedHub(false).catch(()=>{}));addEventListener('visibilitychange',()=>{if(document.hidden)stopProximity();else if(proximityEnabled)startProximity()});addEventListener('pagehide',()=>{stopProximity();if(refreshTimer)clearInterval(refreshTimer)},{once:true});
 }
 async function boot(){
-  if(booted)return true;let ticks=0;while((!service()?.state?.map||!document.getElementById('panel'))&&ticks++<240)await new Promise(resolve=>setTimeout(resolve,50));if(!service()?.state?.map)return false;booted=true;installPanel();activateNodeMode();observeDetail();bind();await loadDirectory({network:true});await gossip()?.ensureMesh?.().catch(()=>{});virtualMemberRefresh().catch(()=>{});refreshTimer=setInterval(()=>loadDirectory({network:navigator.onLine!==false}).catch(()=>{}),REFRESH_MS);dispatchEvent(new CustomEvent('civweave:hub-map-ready',{detail:{version:VERSION,nodeCount:directory.nodes?.length||0,at:now()}}));return true
+  if(booted)return true;let ticks=0;while((!service()?.state?.map||!document.getElementById('panel'))&&ticks++<240)await new Promise(resolve=>setTimeout(resolve,50));if(!service()?.state?.map)return false;booted=true;installPanel();activateNodeMode();observeDetail();bind();await registerOwnedMobileGuild();await loadDirectory({network:true,force:true});await gossip()?.ensureMesh?.().catch(()=>{});virtualMemberRefresh().catch(()=>{});refreshTimer=setInterval(()=>loadDirectory({network:navigator.onLine!==false}).catch(()=>{}),REFRESH_MS);dispatchEvent(new CustomEvent('civweave:hub-map-ready',{detail:{version:VERSION,nodeCount:directory.nodes?.length||0,at:now()}}));return true
 }
 
-globalThis.CivweaveHubMapV1=Object.freeze({version:VERSION,boot,loadDirectory,installNodes,focusHubView,joinSelectedHub,refreshSelectedHub,updateSelectedGuildLocation,startProximity,stopProximity,selectedRallyPoint,get directory(){return cloneDirectory()}});function cloneDirectory(){return typeof structuredClone==='function'?structuredClone(directory):parse(JSON.stringify(directory),directory)}document.readyState==='loading'?addEventListener('DOMContentLoaded',()=>boot().catch(()=>{}),{once:true}):queueMicrotask(()=>boot().catch(()=>{}));
+globalThis.CivweaveHubMapV1=Object.freeze({version:VERSION,boot,loadDirectory,installNodes,focusHubView,joinSelectedHub,refreshSelectedHub,registerOwnedMobileGuild,updateSelectedGuildLocation,startProximity,stopProximity,selectedRallyPoint,get directory(){return cloneDirectory()}});function cloneDirectory(){return typeof structuredClone==='function'?structuredClone(directory):parse(JSON.stringify(directory),directory)}document.readyState==='loading'?addEventListener('DOMContentLoaded',()=>boot().catch(()=>{}),{once:true}):queueMicrotask(()=>boot().catch(()=>{}));
 })();
