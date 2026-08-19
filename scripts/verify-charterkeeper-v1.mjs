@@ -42,6 +42,7 @@ const composition = read('cloudflare/core/src/territory-stewardship-with-charter
 const money = read('cloudflare/core/src/money-edge-with-memberships.mjs');
 const origin = read('cloudflare/core/src/origin-entry.mjs');
 const proxy = read('lib/node-ai-live-commerce-v1.mjs');
+const stagingEntry = read('cloudflare/node-cloud/src/staging-entry-v1.mjs');
 const operator = read('public/app/node-ai-operator-v1.html');
 const ui = read('public/app/node-ai-charterkeeper-v1.js');
 const mobile = read('public/app/mobile-guild-create-v1.mjs');
@@ -58,6 +59,7 @@ assert.match(money, /territory-stewardship-with-charterkeepers-v1\.mjs/);
 assert.match(origin, /charterkeeper-entry-v1\.mjs/);
 assert.match(proxy, /\/api\/ai\/node\/live\/operator\/charters/);
 assert.match(proxy, /childNodeId: manifest\.nodeId/);
+assert.match(stagingEntry, /charterkeeper-v1-signed-handoff/);
 assert.match(operator, /id="charterkeeper"/);
 assert.match(operator, /node-ai-charterkeeper-v1\.js/);
 assert.match(ui, /Create, then hand off/);
@@ -74,5 +76,6 @@ console.log(JSON.stringify({
   oneHop: true,
   recursiveAncestorShares: false,
   signedSourceAndChildRoutes: true,
+  stagingGuildRebuildMarked: true,
   guildGenesisProvenance: true
 }, null, 2));
