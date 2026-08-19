@@ -4,6 +4,7 @@ import {
   NODE_MONEY_CHALLENGE_DOMAIN,
   moneyEdgeError
 } from './money-edge.mjs';
+import { registerPublicGuildEdge } from './guild-directory.mjs';
 
 export * from './index.mjs';
 
@@ -144,6 +145,13 @@ async function liveMoneyRoute(request, env) {
       cloudNodeFabricOrigin: LIVE_CIVWEAVE_NODE_FABRIC_ORIGIN,
       platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 1500)
     });
+  }
+  if (request.method === 'POST' && url.pathname === '/api/guild-directory/register') {
+    try {
+      return json({ ok: true, registration: await registerPublicGuildEdge(env, await request.json()) }, 201);
+    } catch (error) {
+      return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 500);
+    }
   }
   try {
     if (request.method === 'POST' && url.pathname === '/api/money-edge/enrollment/start') {
