@@ -66,31 +66,18 @@ jobs:
           v=v.replace("manifest.assets.includes('/app/civweave-hub-map-v1.js') && manifest.assets.includes('/app/civweave-locality-gossip-v1.js')",
                       "manifest.assets.includes('/app/civweave-hub-map-v1.js') && manifest.assets.includes('/app/civweave-guild-map-runtime-v2.js') && manifest.assets.includes('/app/civweave-locality-gossip-v1.js')")
           verifier.write_text(v)
-
-          workflow=Path('.github/workflows/verify-hub-map-locality-ledger-v1.yml')
-          w=workflow.read_text()
-          legacy="      - 'public/app/civweave-hub-map-v1.js'\n"
-          fresh="      - 'public/app/civweave-guild-map-runtime-v2.js'\n"
-          if fresh not in w:
-              w=w.replace(legacy,legacy+fresh)
-          check="          node --check public/app/civweave-hub-map-v1.js\n"
-          fresh_check="          node --check public/app/civweave-guild-map-runtime-v2.js\n"
-          if fresh_check not in w:
-              w=w.replace(check,check+fresh_check,1)
-          workflow.write_text(w)
           PY
 
           node --check public/app/civweave-guild-map-runtime-v2.js
           node scripts/verify-guild-location-parity-v1.mjs
           node scripts/verify-hub-map-locality-ledger-v1.mjs
 
-      - name: Commit migration and remove one-shot workflow
+      - name: Commit migration
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'cerbanimo-dev'
           git config user.email 'cerbanimo@gmail.com'
-          git rm .github/workflows/one-shot-guild-map-runtime-v2.yml
-          git add public/app/hub-map-v1.html public/app/civweave-map-v1-manifest.json public/service-worker.js scripts/verify-hub-map-locality-ledger-v1.mjs .github/workflows/verify-hub-map-locality-ledger-v1.yml
+          git add public/app/hub-map-v1.html public/app/civweave-map-v1-manifest.json public/service-worker.js scripts/verify-hub-map-locality-ledger-v1.mjs
           git commit -m 'Use cache-distinct Guild Map public directory runtime'
           git push origin HEAD:staging
