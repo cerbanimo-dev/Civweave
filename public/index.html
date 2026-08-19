@@ -4,143 +4,59 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#061019">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Civweave</title>
-  <link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">
   <style>
     html,body{width:100%;height:100%;margin:0;background:#061019;color:#eaf8ff;font-family:system-ui,sans-serif}
-    body{display:grid;place-items:center}
-    #cw-root-status{max-width:34rem;margin:24px;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center;line-height:1.5;overflow-wrap:anywhere}
-    #cw-root-status[data-state="failed"]{border-color:#ffad8a66;color:#ffd8c8}
-    #cw-root-status a{display:inline-flex;margin-top:12px;padding:9px 12px;border:1px solid #8de5ef66;border-radius:10px;color:#eaf8ff;text-decoration:none;font-weight:800}
-    #cw-root-status code{display:block;margin-top:10px;padding:8px;border-radius:8px;background:#02080dcc;color:#dff8ff;font:12px/1.45 ui-monospace,monospace;text-align:left;white-space:pre-wrap}
+    body{display:grid;place-items:center;padding:24px}
+    #cw-root-status{max-width:34rem;padding:18px 20px;border:1px solid #8de5ef44;border-radius:16px;background:#0a1a25;color:#cfeef5;text-align:center;line-height:1.5}
   </style>
-  <script>
-  (()=>{
-    'use strict';
-    const RELEASE_VERSION='1.0.163';
-    const WORKER_BUILD=`${RELEASE_VERSION}-lightweight-shell-v208`;
-    const STAGING_ORIGIN='https://civweave-staging.pages.dev';
-    const RESCUE_URL='/staging-pwa-rescue-worker-v434.js?v=staging-rescue-v434';
-    const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-    const workerUrl=worker=>{try{return new URL(worker?.scriptURL||'',location.href)}catch{return null}};
-    const workerPath=worker=>workerUrl(worker)?.pathname||'';
-    const rootScope=registration=>{try{const scope=new URL(registration?.scope||'');return scope.origin===location.origin&&scope.pathname==='/'}catch{return false}};
-    const snapshot=registration=>({
-      active:{path:workerPath(registration?.active),url:registration?.active?.scriptURL||'',state:registration?.active?.state||''},
-      waiting:{path:workerPath(registration?.waiting),url:registration?.waiting?.scriptURL||'',state:registration?.waiting?.state||''},
-      installing:{path:workerPath(registration?.installing),url:registration?.installing?.scriptURL||'',state:registration?.installing?.state||''}
-    });
-    const status=(message,state='working')=>{
-      try{const node=document.getElementById('cw-root-status');if(node){node.hidden=false;node.textContent=message;node.dataset.state=state}}catch{}
-    };
-    function askWorker(worker,type,timeoutMs=4000){
-      return new Promise(resolve=>{
-        if(!worker)return resolve(null);
-        const channel=new MessageChannel();
-        const timer=setTimeout(()=>resolve(null),timeoutMs);
-        channel.port1.onmessage=event=>{clearTimeout(timer);resolve(event.data||null)};
-        try{worker.postMessage({type},[channel.port2])}catch{clearTimeout(timer);resolve(null)}
-      });
-    }
-    async function currentShellReady(registration){
-      const active=registration?.active||null,url=workerUrl(active);
-      if(!active||active.state!=='activated'||url?.pathname!=='/service-worker-v203.js'||url.searchParams.get('v')!==WORKER_BUILD)return false;
-      const [versionPacket,shellPacket]=await Promise.all([
-        askWorker(active,'GET_VERSION',3000),
-        askWorker(active,'GET_DEVICE_PACKAGE_STATUS',5000)
-      ]);
-      return Boolean(versionPacket?.version===RELEASE_VERSION&&versionPacket?.installMode==='lightweight-shell'&&shellPacket?.type==='CIVWEAVE_DEVICE_PACKAGE'&&shellPacket?.ready===true);
-    }
-    async function waitForActivePath(pathname,timeoutMs=12000){
-      const started=Date.now();
-      while(Date.now()-started<timeoutMs){
-        const registration=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
-        if(workerPath(registration?.active)===pathname&&registration.active?.state==='activated')return registration;
-        try{registration?.waiting?.postMessage?.({type:'SKIP_WAITING'})}catch{}
-        await pause(120);
-      }
-      return navigator.serviceWorker.getRegistration('/').catch(()=>null);
-    }
-    async function ensureStagingLaunchLane(){
-      if(location.origin!==STAGING_ORIGIN)return{ok:true,mode:'not-staging'};
-      if(!('serviceWorker'in navigator))return{ok:false,mode:'unsupported'};
-      const existing=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
-      if(rootScope(existing)&&await currentShellReady(existing))return{ok:true,mode:'current-shell',registration:snapshot(existing)};
-
-      // Recovery is an atomic handoff: a minimal network-only worker must be
-      // fully active before the page leaves this root. Do not immediately start
-      // another service-worker replacement behind the first recovered
-      // navigation; doing so can terminate the rescue worker while it is still
-      // answering the Working Campus request and surface Chromium ERR_FAILED.
-      status('Opening a clean staging launch lane…');
-      let rescue;
-      try{rescue=await navigator.serviceWorker.register(RESCUE_URL,{scope:'/',updateViaCache:'none'})}
-      catch(error){return{ok:false,mode:'rescue-registration-failed',error:error?.message||String(error),registration:snapshot(existing)}}
-      try{rescue.waiting?.postMessage?.({type:'SKIP_WAITING'})}catch{}
-      const activeRescue=await waitForActivePath('/staging-pwa-rescue-worker-v434.js',12000);
-      if(workerPath(activeRescue?.active)!=='/staging-pwa-rescue-worker-v434.js'){
-        return{ok:false,mode:'rescue-activation-failed',registration:snapshot(activeRescue||rescue)};
-      }
-      status('Staging launch lane recovered.','ready');
-      return{ok:true,mode:'network-rescue',registration:snapshot(activeRescue)};
-    }
-    globalThis.CivweaveStagingLaunchLaneV435=Object.freeze({version:'staging-launch-lane-v435',ensure:ensureStagingLaunchLane,currentShellReady});
-    globalThis.CivweaveStagingLaunchLaneReady=ensureStagingLaunchLane().catch(error=>({ok:false,mode:'exception',error:error?.message||String(error)}));
-  })();
-  </script>
-  <script>
-  (()=>{
-    'use strict';
-    const CANONICAL_ORIGIN='https://civweave.cc';
-    const STAGING_ORIGIN='https://civweave-staging.pages.dev';
-    const PREVIOUS_CANONICAL_ORIGIN='https://civweave.pages.dev';
-    const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
-    const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
-    const localDevelopment=['localhost','127.0.0.1','::1'].includes(location.hostname);
-    const labels=location.hostname.split('.');
-    const cloudflarePreview=location.hostname.endsWith('.pages.dev')&&labels.length>3;
-    const previewParent=cloudflarePreview?`https://${labels.slice(1).join('.')}`:null;
-    const previousCanonical=location.origin===PREVIOUS_CANONICAL_ORIGIN;
-    const legacyCanonical=location.origin===LEGACY_CANONICAL_ORIGIN;
-    const params=new URLSearchParams(location.search);
-    const standalone=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
-    const esc=value=>String(value??'').replace(/[<>&]/g,character=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[character]));
-    function route(){
-      if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||previousCanonical||legacyCanonical||cloudflarePreview)){
-        const destination=cloudflarePreview&&previewParent&&previewParent!==PREVIOUS_CANONICAL_ORIGIN&&previewParent!==LEGACY_CANONICAL_ORIGIN?previewParent:CANONICAL_ORIGIN;
-        const target=new URL('/app/index.html',destination);
-        for(const [key,value] of params){if(key!=='install_origin')target.searchParams.append(key,value)}
-        if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
-        target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');
-        target.hash=location.hash;location.replace(target.href);return;
-      }
-      if(params.get('install')==='required'||params.has('installrequired')){
-        const installer=new URL('/app/index.html',location.origin);
-        for(const [key,value] of params)installer.searchParams.append(key,value);
-        installer.hash=location.hash;location.replace(installer.href);return;
-      }
-      const home=new URL('/app/working-campus-v156.html',location.origin);
-      for(const [key,value] of params){if(!['install','installrequired','next','rescue_stay'].includes(key))home.searchParams.append(key,value)}
-      if(!home.searchParams.has('version'))home.searchParams.set('version','1.0.163');
-      if(!home.searchParams.has('source'))home.searchParams.set('source','web-root-staging-lane-v435');
-      home.hash=location.hash;location.replace(home.href);
-    }
-    (async()=>{
-      const result=location.origin===STAGING_ORIGIN?await globalThis.CivweaveStagingLaunchLaneReady:{ok:true,mode:'not-staging'};
-      if(params.get('rescue_stay')==='1'){
-        const node=document.getElementById('cw-root-status');
-        if(node){node.hidden=false;node.dataset.state=result?.ok?'ready':'failed';node.innerHTML=result?.ok?`Staging launch lane ready.<code>${esc(JSON.stringify({mode:result.mode,registration:result.registration||null},null,2))}</code>`:`Staging launch recovery failed.<code>${esc(JSON.stringify(result,null,2))}</code><a href="/?rescue_stay=1&retry=${Date.now().toString(36)}">Retry launch recovery</a>`}
-        return;
-      }
-      if(location.origin===STAGING_ORIGIN&&standalone()&&!result?.ok){
-        const node=document.getElementById('cw-root-status');
-        if(node){node.hidden=false;node.dataset.state='failed';node.innerHTML=`Civweave kept the stale installed shell out of the launch path.<br><small>${esc(result?.mode||result?.error||'recovery incomplete')}</small><br><a href="/?retry_launch=1">Retry startup</a>`}
-        return;
-      }
-      route();
-    })();
-  })();
-  </script>
 </head>
-<body><main id="cw-root-status" hidden>Checking the Civweave launch path…</main></body>
+<body>
+<main id="cw-root-status">Opening Civweave…</main>
+<script>
+(()=>{
+'use strict';
+const CANONICAL_ORIGIN='https://civweave.cc';
+const STAGING_ORIGIN='https://civweave-staging.pages.dev';
+const PREVIOUS_CANONICAL_ORIGIN='https://civweave.pages.dev';
+const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
+const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
+const params=new URLSearchParams(location.search);
+const localDevelopment=['localhost','127.0.0.1','::1'].includes(location.hostname);
+const cloudflarePreview=location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length>3;
+const standalone=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+function copyParams(target,blocked=new Set()){for(const [key,value] of params)if(!blocked.has(key))target.searchParams.append(key,value);return target}
+function stableInstaller(){
+  let origin=location.origin;
+  if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||location.origin===PREVIOUS_CANONICAL_ORIGIN||location.origin===LEGACY_CANONICAL_ORIGIN||cloudflarePreview))origin=CANONICAL_ORIGIN;
+  const target=new URL('/app/index.html',origin);copyParams(target,new Set(['install_origin']));target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');return target;
+}
+function installedStart(){
+  const target=new URL('/app/pwa-start-v436.html',location.origin);
+  target.searchParams.set('installed','1');
+  target.searchParams.set('system',params.get('system')||'civweave');
+  target.searchParams.set('source','root-worker-stable-v436');
+  return target;
+}
+function workingCampus(){
+  const target=new URL('/app/working-campus-v156.html',location.origin);
+  copyParams(target,new Set(['install','installrequired','next','rescue_stay']));
+  if(!target.searchParams.has('version'))target.searchParams.set('version','1.0.163');
+  if(!target.searchParams.has('source'))target.searchParams.set('source','web-root-worker-stable-v436');
+  return target;
+}
+try{
+  if(params.get('install')==='required'||params.has('installrequired')){location.replace(stableInstaller().href);return}
+  if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||location.origin===PREVIOUS_CANONICAL_ORIGIN||location.origin===LEGACY_CANONICAL_ORIGIN||cloudflarePreview)){location.replace(stableInstaller().href);return}
+  // Existing installed copies may still have / as their baked start_url. Never
+  // register, unregister, update, or activate a worker from this root during a
+  // standalone launch; move through the dedicated static doorway instead.
+  if(standalone()||params.get('installed')==='1'){location.replace(installedStart().href);return}
+  location.replace(workingCampus().href);
+}catch(error){document.querySelector('#cw-root-status').textContent=`Civweave startup could not continue: ${error?.message||error}`}
+globalThis.CivweaveRootRouterV436=Object.freeze({version:'root-worker-stable-v436',installedStart:()=>installedStart().href,workerMutationDuringLaunch:false});
+})();
+</script>
+</body>
 </html>
