@@ -1,4 +1,4 @@
-// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v309-lifecycle-deferred + code-coherence-v289-lifecycle-deferred + retained lightweight shell core + shell-assets-v1-repair-v13-lightweight-nav-media + installed-pwa-launch-v295-entry-integrity + installer-state-machines-v280 + shell-integrity-v281-required-only-install-v2 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + offline-campus-low-pressure-v1 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + canonical-navigation-v228-lifecycle-deferred + chat-avatar-visible-v346-lifecycle-deferred + mobile-chat-main-thread-quiescence-v349 + mobile-chat-long-thread-fit-v362 + selected-local-minilm-v357 + server-auto-local-failover-v358 + guide-capability-passover-v361 + local-ai-bootstrap-capability-v359 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + guild-quest-browser-v430 + boot-recovery-v432-lifecycle-deferred + atomic-update-handoff-v427 + install-only-pwa-v1 + family-nav-single-owner-r1 + family-navigation-live-r2 + persistent-family-shell-v1 + persistent-shell-route-safe-v1 + standard-ai-isolation-v1 + cerbanimo-boot-network-first-v1 + desktop-civweave-boot-recovery-v363 + staging-installed-entry-takeover-v4-canonical-navbar + canonical-navbar-network-first-v1
+// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v309-lifecycle-deferred + code-coherence-v289-lifecycle-deferred + retained lightweight shell core + shell-assets-v1-repair-v13-lightweight-nav-media + installed-pwa-launch-v295-entry-integrity + installer-state-machines-v280 + shell-integrity-v281-required-only-install-v2 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + offline-campus-low-pressure-v1 + campus-current-completion-v250 + release-coherence-v226 + navigation-redirect-safety-v224 + canonical-navigation-v228-lifecycle-deferred + chat-avatar-visible-v346-lifecycle-deferred + mobile-chat-main-thread-quiescence-v349 + mobile-chat-long-thread-fit-v362 + selected-local-minilm-v357 + server-auto-local-failover-v358 + guide-capability-passover-v361 + local-ai-bootstrap-capability-v359 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + guild-quest-browser-v430 + boot-recovery-v432-lifecycle-deferred + atomic-update-handoff-v427 + install-only-pwa-v1 + family-nav-single-owner-r1 + family-navigation-live-r2 + persistent-family-shell-v1 + persistent-shell-route-safe-v1 + standard-ai-isolation-v1 + cerbanimo-boot-network-first-v1 + desktop-civweave-boot-recovery-v363 + staging-installed-entry-takeover-v5-canonical-navbar + canonical-navbar-network-first-v2
 // chat-open-ui-only-v351: opening the chat surface must not start avatar-expression or MiniLM work.
 // chat-party-lazy-v353: ordinary AI chat open must not start party DOM observers, mesh sessions, gateway polling, or intention-ledger decoration.
 // universal-chat-launcher-v354: every first-class realm receives the same canonical launcher; stale Anarchadia page/chat assets are purged on activation.
@@ -15,10 +15,10 @@
 // cerbanimo-boot-network-first-v1: realm console, parity runtime, parity ledger, and parity fallback chunks bypass stale runtime caches while online.
 // desktop-civweave-boot-recovery-v363: route/nav and Working Campus recovery/declutter boot scripts are required shell assets, never best-effort runtime repairs.
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
-// canonical-navbar-network-first-v1: the sole five-guide navbar bypasses stale shell/runtime copies while online and has its own warmed offline cache.
+// canonical-navbar-network-first-v2: the sole five-guide navbar and both former geometry injectors bypass stale shell/runtime copies; the worker installs only after all three current assets are warmed.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v227');
-importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v1');
+importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v2');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v219-lifecycle-deferred');
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.163-local-ai-code-coherence-v309-lifecycle-deferred');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
@@ -40,10 +40,10 @@ importScripts('/service-worker-chat-repair-v245.js?v=chat-avatar-visible-v346&pu
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
 // atomic-update-handoff-v427: updated workers normally remain waiting until the visible update controller explicitly activates them.
-// staging-installed-entry-takeover-v4-canonical-navbar: rotate the one-shot staging marker so devices carrying stale compact navbar code immediately adopt the canonical tall rail.
+// staging-installed-entry-takeover-v5-canonical-navbar: rotate the one-shot staging marker so every device adopts the fail-closed navbar package rather than any cached compact geometry.
 const V203_STAGING_RECOVERY_HOST='civweave-staging.pages.dev';
-const V203_STAGING_RECOVERY_CACHE='cwrecovery-v436-canonical-navbar';
-const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v4-canonical-navbar';
+const V203_STAGING_RECOVERY_CACHE='cwrecovery-v437-canonical-navbar';
+const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v5-canonical-navbar';
 function v203StagingRecoveryRequest(){return new Request(new URL(V203_STAGING_RECOVERY_MARKER,self.location.origin).href)}
 async function v203StagingRecoveryPending(){
   if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;
@@ -51,6 +51,6 @@ async function v203StagingRecoveryPending(){
 }
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await v203StagingRecoveryPending())await self.skipWaiting()})())});
-  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('canonical-navbar-scorched-earth-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('canonical-navbar-scorched-earth-v2-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
