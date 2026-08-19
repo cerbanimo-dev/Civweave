@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import re
 import urllib.parse
 from pathlib import Path
 from typing import Any
@@ -29,11 +28,12 @@ spec.loader.exec_module(base)
 VOCAL_MARKERS = {
     "vocal", "vocals", "female_vocals", "male_vocals", "female vocals", "male vocals",
     "acappella", "acapella", "a cappella", "pell", "spoken", "spoken_word", "spoken word",
-    "rap", "rapper", "singing", "singer", "lyrics", "lyric", "voice", "voices", "song",
+    "rap", "rapper", "singing", "singer", "lyrics", "lyric", "voice", "voices",
 }
 INSTRUMENTAL_ONLY_MARKERS = {
     "instrumental_only", "instrumental only", "no_vocals", "no vocals", "without vocals",
 }
+BASE_QUALITY_SCORE = base.quality_score
 
 
 def normalized_text(value: Any) -> str:
@@ -74,6 +74,17 @@ def teeth_score(item: dict, preferred_terms: list[str]) -> tuple[int, list[str]]
     hits = theme_hits(item, preferred_terms)
     score = min(5, len(hits))
     return score, hits
+
+
+def vocal_quality_score(record: dict) -> int:
+    score = BASE_QUALITY_SCORE(record)
+    score += 35 if record.get("curation") == "hand-seeded" else 0
+    score += 5 if record.get("vocal_verified") is True else 0
+    score += max(0, min(5, int(record.get("teeth_score") or 0))) * 4
+    return score
+
+
+base.quality_score = vocal_quality_score
 
 
 def ccmixter_rows(params: dict) -> list[dict]:
