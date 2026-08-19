@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.2-guide-voice-runtime-v1-pack-runtime-on-demand';
+const VERSION='1.1.3-guide-voice-runtime-v1-parakeet-layout-fix';
 if(globalThis.CivweaveGuideVoiceV1?.version===VERSION)return;
 const SETTINGS_KEY='civweave.guide-voice.v1';
 const GUIDE=Object.freeze({weaveling:'civweave',moss:'living-school',kamiya:'cerbanimo',rook:'fellowfare',merlin:'anarchadia'});
@@ -13,7 +13,8 @@ const SPEECH_MODELS=Object.freeze([
   Object.freeze({id:'omnilingual-asr-1b-int8',label:'Omnilingual ASR 1B INT8',need:Object.freeze(['model.int8.onnx','tokens.txt'])})
 ]);
 const MODEL_PACKS_PATH='/app/local-ai/model-packs-v1.js?v=1.0.1';
-const SPEECH_EXECUTOR_PATH='/app/local-ai/parakeet-speech-executor-v1.js?v=1.0.1';
+const SPEECH_EXECUTOR_VERSION='1.0.2-parakeet-speech-executor-v1-transcription-layout';
+const SPEECH_EXECUTOR_PATH='/app/local-ai/parakeet-speech-executor-v1.js?v=1.0.2';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 let listening=false,recognition=null,sessionSource='',lastInterim='',speaking=false,executorLoad=null,packRuntimeLoad=null,lastSpecializedError=null;
@@ -49,9 +50,11 @@ async function ensureModelPackRuntime(){
 }
 async function ensureSpeechExecutor(){
   await ensureModelPackRuntime();
-  if(globalThis.CivweaveParakeetSpeechExecutorV1?.register){globalThis.CivweaveParakeetSpeechExecutorV1.register();return true}
-  if(!executorLoad)executorLoad=import(SPEECH_EXECUTOR_PATH).then(()=>{globalThis.CivweaveParakeetSpeechExecutorV1?.register?.();return Boolean(globalThis.CivweaveParakeetSpeechExecutorV1)}).catch(error=>{executorLoad=null;throw error});
-  return executorLoad;
+  if(globalThis.CivweaveParakeetSpeechExecutorV1?.version===SPEECH_EXECUTOR_VERSION&&globalThis.CivweaveParakeetSpeechExecutorV1?.register){globalThis.CivweaveParakeetSpeechExecutorV1.register();return true}
+  if(!executorLoad)executorLoad=import(SPEECH_EXECUTOR_PATH).then(()=>{globalThis.CivweaveParakeetSpeechExecutorV1?.register?.();return globalThis.CivweaveParakeetSpeechExecutorV1?.version===SPEECH_EXECUTOR_VERSION}).catch(error=>{executorLoad=null;throw error});
+  const loaded=await executorLoad;
+  if(!loaded)throw Object.assign(new Error('The corrected Civweave Parakeet speech executor did not load.'),{code:'PARAKEET_EXECUTOR_VERSION_MISMATCH'});
+  return true;
 }
 async function executeSpecializedSpeech(runtime,language){return runtime.execute('speech-transcription',{mode:'realtime',language,onTranscript},{language})}
 async function startSpecialized(options={}){
@@ -60,13 +63,8 @@ async function startSpecialized(options={}){
   const language=options.language||settings().language;
   try{
     await ensureModelPackRuntime();
-    let result;
-    try{result=await executeSpecializedSpeech(runtime,language)}
-    catch(error){
-      if(error?.code!=='LOCAL_SPECIALIZED_EXECUTOR_UNAVAILABLE')throw error;
-      await ensureSpeechExecutor();
-      result=await executeSpecializedSpeech(runtime,language);
-    }
+    await ensureSpeechExecutor();
+    const result=await executeSpecializedSpeech(runtime,language);
     if(result?.stop||result?.session){lastSpecializedError=null;recognition=result;listening=true;sessionSource=result.source||'specialized-model';emitState();return true}
   }catch(error){lastSpecializedError=error;if(error?.code!=='LOCAL_SPECIALIZED_EXECUTOR_UNAVAILABLE')throw error}
   return false;
