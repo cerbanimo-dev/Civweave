@@ -29,6 +29,7 @@ assert.ok(bridge.includes("const INSTALLABILITY_WORKER_URL='/pwa-installability-
 assert.ok(bridge.includes("const INSTALLABILITY_WORKER_PATH='/pwa-installability-worker-v1.js'"),'installer must identify the bootstrap worker independently from query-string revisions');
 assert.ok(bridge.includes("const SHELL_WORKER_PATH='/service-worker-v203.js'"),'installer must identify the real Civweave shell worker');
 assert.ok(bridge.includes("const SHELL_HANDOFF_KEY='civweave.pwa.shell-handoff.v1'"),'installer must persist the bootstrap-to-shell navigation handoff');
+assert.ok(bridge.includes("const SHELL_HANDOFF_SCROLL_KEY='civweave.pwa.shell-handoff-scroll.v1'"),'installer must persist scroll position across the required handoff reload');
 assert.ok(bridge.includes("navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'})"),'installer must register the bootstrap worker at root scope');
 assert.ok(bridge.includes('void startInstallabilityBootstrap()'),'installer must establish browser installability on entry');
 assert.ok(bridge.includes('async function retireInstallabilityBootstrap()'),'installer must explicitly retire the tiny bootstrap before shell download');
@@ -36,9 +37,11 @@ assert.ok(bridge.includes('registration.unregister()'),'bootstrap-to-shell hando
 assert.ok(bridge.includes('async function beginNavigationHandoff'),'bootstrap retirement must be allowed to complete across a navigation boundary');
 assert.ok(bridge.includes("reloadForShellHandoff('download')")||bridge.includes("beginNavigationHandoff('download')"),'user-initiated shell preparation must navigate after retiring the bootstrap worker');
 assert.ok(bridge.includes('async function resumeShellHandoff()'),'the reloaded installer must resume the requested shell download');
+assert.ok(bridge.includes('restoreHandoffScroll()'),'the reloaded installer must restore the prior viewport instead of jumping to the page top');
 assert.ok(bridge.includes('if(shellHandoffPending())void resumeShellHandoff();else void startInstallabilityBootstrap()'),'a pending shell handoff must suppress bootstrap re-registration on reload');
 assert.ok(bridge.includes("installabilityBootstrapPolicy:'tiny-navigation-pass-through-worker-retired-across-navigation-before-shell-download'"),'installer must publish the navigation-safe bootstrap handoff policy');
 assert.ok(bridge.includes('navigationSafeShellHandoff:true'),'installer must expose the navigation-safe handoff capability');
+assert.ok(bridge.includes('preserveHandoffScroll:true'),'installer must expose scroll-preserving handoff behavior');
 assert.ok(bridge.includes('eagerInstallabilityBootstrap:true'),'installer must explicitly enable tiny installability bootstrap');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'actual Civweave shell download must remain user initiated');
 assert.ok(bridge.includes('firstPaintShellWork:false'),'first paint must remain free of shell preparation');
@@ -66,19 +69,25 @@ assert.ok(!requiredNavBlock.includes('weaveling-face-v255.webp'),'avatar face fa
 assert.ok(bridge.includes("addEventListener('beforeinstallprompt',capture,{capture:true})"),'v250 must capture beforeinstallprompt before legacy listeners');
 assert.ok(bridge.includes('event.stopImmediatePropagation()'),'v250 must stop duplicate beforeinstallprompt ownership');
 assert.ok(bridge.includes("singleOwnerPromptPolicy:'capture-stop-immediate-propagation'"),'v250 must publish its single-owner prompt contract');
-assert.ok(bridge.includes('prompt.prompt();'),'the sole prompt owner must call the native prompt from the install click');
+assert.ok(bridge.includes('function openNativeInstallPrompt(prompt,button)'),'native prompt ownership must be isolated from the click handler');
+assert.ok(bridge.includes('const opened=prompt.prompt();'),'the sole prompt owner must call the native prompt synchronously from the fresh install click');
+assert.ok(bridge.includes('Promise.resolve(prompt.userChoice).then'),'native prompt choice must be observed asynchronously instead of blocking the click handler');
+assert.ok(bridge.includes('NATIVE_PROMPT_WATCHDOG_MS'),'native prompt must have a watchdog so a stuck browser promise cannot freeze the installer state');
+assert.ok(bridge.includes('nonBlockingNativePrompt:true'),'installer must expose nonblocking native-prompt behavior');
 assert.ok(installer.includes("addEventListener('beforeinstallprompt'"),'legacy listener remains detectable until it is retired intentionally');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'desktop-pwa-installability-bootstrap-v4-navigation-shell-handoff',
+  revision:'desktop-pwa-installability-bootstrap-v5-nonblocking-native-prompt',
   bootstrapWorker:'/pwa-installability-worker-v1.js',
   bootstrapCachesShell:false,
   rootScope:true,
   shellPreparationUserInitiated:true,
   bootstrapRetiredBeforeShell:true,
   navigationSafeShellHandoff:true,
+  preservesInstallerScroll:true,
   avatarMediaInstallCritical:false,
   browserMenuInstallCompletesShell:true,
+  nativePromptNonBlocking:true,
   singlePromptOwner:'pwa-install-prompt-v250'
 },null,2));
