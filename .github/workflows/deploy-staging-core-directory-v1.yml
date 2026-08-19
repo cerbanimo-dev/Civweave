@@ -5,9 +5,8 @@ on:
     branches: [staging]
     paths:
       - 'cloudflare/core/src/guild-directory.mjs'
+      - 'cloudflare/core/src/guild-directory-entry.mjs'
       - 'cloudflare/core/src/origin-entry.mjs'
-      - 'cloudflare/core/src/live-entry.mjs'
-      - 'cloudflare/core/wrangler.template.jsonc'
       - 'cloudflare/core/migrations/**'
       - '.github/workflows/deploy-staging-core-directory-v1.yml'
   workflow_dispatch:
@@ -46,6 +45,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check cloudflare/core/src/guild-directory.mjs
+          node --check cloudflare/core/src/guild-directory-entry.mjs
           node --check cloudflare/core/src/origin-entry.mjs
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
@@ -72,26 +72,26 @@ jobs:
             D1_ID="$(resolve_d1)"
           fi
           test -n "$D1_ID" || { echo 'Could not resolve isolated staging D1 after creation.'; exit 3; }
-          cp cloudflare/core/wrangler.template.jsonc /tmp/civweave-core-staging-directory.jsonc
           rm -rf /tmp/migrations /tmp/src
           cp -R cloudflare/core/migrations /tmp/migrations
-          cp -R cloudflare/core/src /tmp/src
+          mkdir -p /tmp/src
+          cp cloudflare/core/src/guild-directory.mjs /tmp/src/guild-directory.mjs
+          cp cloudflare/core/src/guild-directory-entry.mjs /tmp/src/guild-directory-entry.mjs
           D1_ID="$D1_ID" node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const path='/tmp/civweave-core-staging-directory.jsonc';
-          let text=fs.readFileSync(path,'utf8');
-          text=text
-            .replace('"name": "civweave-core"','"name": "civweave-core-staging"')
-            .replace('"database_name": "civweave-core"','"database_name": "civweave-core-staging"')
-            .replace('__CIVWEAVE_CORE_D1_ID__',process.env.D1_ID)
-            .replace('"NODE_DOMAIN": "nodes.commonweave.earth"','"NODE_DOMAIN": "cerbanimo.workers.dev"')
-            .replace('"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.cc"','"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave-staging.pages.dev"')
-            .replace('"CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core"','"CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core-staging"')
-            .replace('"STRIPE_CONNECT_SAMPLE_ENABLED": "false"','"STRIPE_CONNECT_SAMPLE_ENABLED": "false",\n    "CIVWEAVE_ENVIRONMENT": "staging",\n    "CIVWEAVE_PAYMENT_ENVIRONMENT": "stripe-test"');
-          text=text.replace(/\n  "r2_buckets": \[[\s\S]*?\n  \],/,'');
-          if(text.includes('"name": "civweave-core"'))throw new Error('Refusing production core target.');
-          if(text.includes('"database_name": "civweave-core"'))throw new Error('Refusing production D1 target.');
-          fs.writeFileSync(path,text);
+          const config={
+            name:'civweave-core-staging',
+            main:'src/guild-directory-entry.mjs',
+            compatibility_date:'2026-08-04',
+            workers_dev:true,
+            d1_databases:[{
+              binding:'DB',
+              database_name:'civweave-core-staging',
+              database_id:process.env.D1_ID,
+              migrations_dir:'migrations'
+            }]
+          };
+          fs.writeFileSync('/tmp/civweave-core-staging-directory.jsonc',JSON.stringify(config,null,2));
           NODE
 
       - name: Apply D1 migrations and deploy isolated core
@@ -102,23 +102,28 @@ jobs:
           npx --yes wrangler@4 deploy --dry-run --config /tmp/civweave-core-staging-directory.jsonc
           npx --yes wrangler@4 deploy --keep-vars --config /tmp/civweave-core-staging-directory.jsonc
 
-      - name: Probe Guild directory route
+      - name: Probe Guild directory routes
         shell: bash
         run: |
           set -euo pipefail
-          STATUS='000'
+          HEALTH_STATUS='000'
+          REGISTER_STATUS='000'
           for attempt in $(seq 1 12); do
-            STATUS="$(curl --silent --output /tmp/guild-directory-probe.json --write-out '%{http_code}' \
+            HEALTH_STATUS="$(curl --silent --output /tmp/guild-directory-health.json --write-out '%{http_code}' "$STAGING_CORE_ORIGIN/api/health")"
+            REGISTER_STATUS="$(curl --silent --output /tmp/guild-directory-probe.json --write-out '%{http_code}' \
               -X POST "$STAGING_CORE_ORIGIN/api/guild-directory/register" \
               -H 'content-type: application/json' \
               --data '{}')"
-            if [ "$STATUS" = '400' ]; then break; fi
+            if [ "$HEALTH_STATUS" = '200' ] && [ "$REGISTER_STATUS" = '400' ]; then break; fi
             sleep 2
           done
-          test "$STATUS" = '400' || { cat /tmp/guild-directory-probe.json || true; echo "Expected validation response from Guild directory route, got HTTP $STATUS"; exit 4; }
+          test "$HEALTH_STATUS" = '200' || { cat /tmp/guild-directory-health.json || true; echo "Expected Guild directory health HTTP 200, got $HEALTH_STATUS"; exit 4; }
+          test "$REGISTER_STATUS" = '400' || { cat /tmp/guild-directory-probe.json || true; echo "Expected registration validation HTTP 400, got $REGISTER_STATUS"; exit 5; }
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
+          const health=JSON.parse(fs.readFileSync('/tmp/guild-directory-health.json','utf8'));
           const body=JSON.parse(fs.readFileSync('/tmp/guild-directory-probe.json','utf8'));
+          if(health.ok!==true||health.publicGuildDirectory!==true)throw new Error('Staging Guild directory health contract is missing.');
           if(body.ok!==false||!/origin/i.test(String(body.error||'')))throw new Error('Staging core did not expose the expected Guild directory validation contract.');
-          console.log(JSON.stringify({ok:true,service:'civweave-core-staging',guildDirectoryRoute:true,stripeCredentialRequired:false},null,2));
+          console.log(JSON.stringify({ok:true,service:'civweave-core-staging',guildDirectoryRoute:true,stripeDependency:false},null,2));
           NODE
