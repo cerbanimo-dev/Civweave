@@ -67,6 +67,41 @@ test('offline browser speech fallback requires explicit local-only recognition s
   assert.match(source,/will not send an offline voice session to a network speech service/);
 });
 
+test('Parakeet speech executor registers the installed INT8 model and preserves the NeMo TDT contract',()=>{
+  const registrations=[];
+  const ctx=runBrowserScript('public/app/local-ai/parakeet-speech-executor-v1.js',{
+    CivweaveLocalSpecializedAI:{registerExecutor:(key,executor,metadata)=>registrations.push({key,executor,metadata})}
+  });
+  const api=ctx.CivweaveParakeetSpeechExecutorV1;
+  assert.ok(api);
+  assert.equal(api.modelId,'parakeet-tdt-0.6b-v3-int8');
+  assert.equal(registrations.length,1);
+  assert.equal(registrations[0].key,'parakeet-tdt-0.6b-v3-int8');
+  assert.equal(registrations[0].metadata.runtime,'onnxruntime-web');
+  assert.equal(registrations[0].metadata.decoder,'nemo-tdt-greedy');
+  const source=fs.readFileSync('public/app/local-ai/parakeet-speech-executor-v1.js','utf8');
+  assert.match(source,/MEL_BINS=128/);
+  assert.match(source,/SAMPLE_RATE=16000/);
+  assert.match(source,/MAX_TOKENS_PER_FRAME=5/);
+  assert.match(source,/specializedStatus\(MODEL_ID\)/);
+  assert.match(source,/outputSize<=vocabSize/);
+  assert.match(source,/duration logits/);
+  assert.match(source,/ort\.env\.wasm\.proxy=true/);
+  assert.match(source,/encoder\.int8\.onnx/);
+  assert.match(source,/decoder\.int8\.onnx/);
+  assert.match(source,/joiner\.int8\.onnx/);
+  assert.match(source,/tokens\.txt/);
+});
+
+test('guide voice lazily loads the Parakeet executor before giving up on specialized speech',()=>{
+  const source=fs.readFileSync('public/app/guide-voice-runtime-v1.js','utf8');
+  assert.match(source,/parakeet-speech-executor-v1\.js/);
+  assert.match(source,/ensureSpeechExecutor/);
+  assert.match(source,/LOCAL_SPECIALIZED_EXECUTOR_UNAVAILABLE/);
+  assert.match(source,/executeSpecializedSpeech/);
+  assert.match(source,/CIVWEAVE_SPEECH_EXECUTOR_START_FAILED/);
+});
+
 test('guide chat owns wake-address submission and voice input without adding another chat owner',()=>{
   const source=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
   assert.match(source,/data-voice/);
