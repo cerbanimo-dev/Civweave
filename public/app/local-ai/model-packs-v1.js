@@ -5,8 +5,6 @@ const VERSION='1.0.1-local-ai-model-packs-v1-browser-guard';
 const CACHE='civweave-specialized-model-packs-v1';
 const STATE_KEY='civweave.local-ai.packs.v1';
 const EVENT='civweave:local-model-pack-progress';
-const BROWSER_MANAGED_PACK_IDS=freeze(['premier-phone','server-quality']);
-const BROWSER_INSTALL_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
 if(globalThis.CivweaveLocalModelPacksV1?.version===VERSION)return;
 
 const HF='https://huggingface.co';
@@ -112,6 +110,9 @@ const PACKS=freeze({
     installOrder:['qwen3-0.6b-q8-wasm','gemma4-e2b-it-q2f16-mobile','silero-vad-onnx','supertonic-3-tts-int8','parakeet-tdt-0.6b-v3-fp32','omnilingual-asr-1b-int8','gemma4-e4b-it-q2f16-mobile','qwen3-4b-q4f16']
   })
 });
+
+const BROWSER_MANAGED_PACK_IDS=freeze(['premier-phone','server-quality']);
+const BROWSER_INSTALL_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
 
 function save(force=false){const t=Date.now();if(!force&&t-lastSave<500)return;lastSave=t;try{localStorage.setItem(STATE_KEY,JSON.stringify(states))}catch{}}
 function set(id,patch,force=false){
