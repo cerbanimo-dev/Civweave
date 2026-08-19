@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-working-campus-home-relocation-v441-browser-pack-explicit-files';
+const VERSION='1.0.6-working-campus-home-relocation-v441-browser-pack-explicit-taps';
 const STYLE_ID='cw-working-campus-home-relocation-v441-style';
 const NAV_ACTIONS_ID='cw-civweave-primary-actions-v441';
 const APP_TAB='app-device';
-const BROWSER_PACK_IMPORT_SRC='/app/local-ai/browser-pack-pwa-import-v1.js?v=1.1.0-explicit-files';
+const BROWSER_PACK_IMPORT_SRC='/app/local-ai/browser-pack-pwa-import-v1.js?v=1.1.1-explicit-taps';
 if(globalThis.CivweaveHomeRelocationV441?.version===VERSION)return;
 const isCivweave=()=>String(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||'').toLowerCase()==='civweave';
 if(!isCivweave())return;
@@ -75,7 +75,7 @@ function installAppSettings(){
   syncThemeLabel();return true;
 }
 function ensureBrowserPackPwaImport(){
-  if(globalThis.CivweaveBrowserPackPwaImportV1?.ensureBridge&&globalThis.CivweaveBrowserPackPwaImportV1?.version?.startsWith?.('1.1.0-'))return true;
+  if(globalThis.CivweaveBrowserPackPwaImportV1?.ensureBridge&&globalThis.CivweaveBrowserPackPwaImportV1?.version?.startsWith?.('1.1.1-'))return true;
   const target=new URL(BROWSER_PACK_IMPORT_SRC,location.href).href;
   if([...document.scripts].some(script=>script.src===target))return false;
   const script=document.createElement('script');script.src=BROWSER_PACK_IMPORT_SRC;script.async=false;script.dataset.cwV441BrowserPackImport='';
