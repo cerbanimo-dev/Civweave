@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.2-browser-pack-pwa-import-v1-retryable';
+const VERSION='1.0.3-browser-pack-pwa-import-v1-idempotent-observer';
 const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.1.1-pwa-import-retry';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
@@ -12,7 +12,7 @@ let bridgePromise=null;
 
 function status(text,error=false){
   const el=document.querySelector('#cw-local-ai-v324 [data-local-status]');
-  if(el){el.textContent=text;el.classList.toggle('cw-local-error',Boolean(error))}
+  if(el){if(el.textContent!==text)el.textContent=text;el.classList.toggle('cw-local-error',Boolean(error))}
 }
 function ensureBridge(){
   if(bridge()?.pickAndImport&&bridge()?.queue&&bridge()?.version?.startsWith?.('1.1.1-'))return Promise.resolve(bridge());
@@ -55,16 +55,16 @@ function syncCards(){
     const packId=String(card.dataset.packId||'');if(!BROWSER_PACKS.has(packId))continue;
     const state=String(states[packId]?.status||''),actions=card.querySelector('.cw-local-actions');if(!actions)continue;
     const existing=actions.querySelector('a[href*="source=settings-ai-pack-import"]');
-    if(existing){existing.dataset.cwPwaBrowserPackImport=packId;existing.removeAttribute('target');existing.removeAttribute('rel')}
+    if(existing){if(existing.dataset.cwPwaBrowserPackImport!==packId)existing.dataset.cwPwaBrowserPackImport=packId;if(existing.hasAttribute('target'))existing.removeAttribute('target');if(existing.hasAttribute('rel'))existing.removeAttribute('rel')}
     let button=actions.querySelector('[data-cw-pwa-browser-pack-import]');
     if(state==='browser-queued'){
       if(!button){button=document.createElement('button');button.type='button';button.dataset.cwPwaBrowserPackImport=packId;button.textContent='Import finished downloads';actions.prepend(button)}
-      if(existing)existing.hidden=true;
+      if(existing&&!existing.hidden)existing.hidden=true;
       const download=actions.querySelector('button[data-local-pack-download]');
-      if(download&&download!==button)download.textContent='Queue again';
+      if(download&&download!==button&&download.textContent!=='Queue again')download.textContent='Queue again';
     }else{
-      button?.remove();
-      if(existing)existing.hidden=false;
+      if(button)button.remove();
+      if(existing&&existing.hidden)existing.hidden=false;
     }
   }
 }
