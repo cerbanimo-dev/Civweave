@@ -1,17 +1,17 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-local-provider-authority-v1-gemma4-runtime-floor';
+const VERSION='1.0.2-local-provider-authority-v1-gemma4-runtime-floor';
 const PROFILE_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
-const LOCAL_RUNTIME_SRC='/app/local-chat-runtime-v295.js?v=1.0.127-gemma4-runtime-floor';
+const LOCAL_RUNTIME_SRC='/app/local-chat-runtime-v295.js?v=1.0.128-gemma4-runtime-floor';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','smollm2','smollm3','qwen','browser']);
 const GEMMA4_MOBILE_IDS=new Set(['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile']);
 const GEMMA4_RUNTIME_FLOOR='4.3.0';
 const BUNDLED_TRANSFORMERS_V4='4.2.0';
-const GEMMA4_LOCAL_FALLBACK_IDS=Object.freeze(['gemma3-1b-it-q4f16','qwen3-1.7b-q4f16','qwen3-0.6b-q4f16','smollm2-360m-instruct-q4f16','smollm2-135m-instruct-q8-wasm']);
+const GEMMA4_LOCAL_FALLBACK_IDS=Object.freeze(['gemma3-1b-it-q4f16','qwen3-1.7b-q4f16','qwen3-0.6b-q4f16','smollm2-360m-instruct-q4f16','smollm2-135m-instruct-q8-wasm','qwen3-0.6b-q8-wasm']);
 const GUIDE=Object.freeze({
   civweave:{name:'Weaveling',mode:'Plan',role:'Quest guide and central orchestrator'},
   'living-school':{name:'Moss',mode:'Learn',role:'Learning Journey guide'},
@@ -74,7 +74,7 @@ function publishLocalRoute(system,model,extra={}){
   setDecisionStrip(extra.localTierFallback?`Local route · ${model||'downloaded model'} · local fallback from ${extra.requestedModel||'selected model'}`:`Local route · ${model||'downloaded model'} · provider pinned`,'local');
   return detail;
 }
-function runtimeFloorError(model){return Object.assign(new Error(`${model||'The selected Gemma 4 mobile model'} uses the new Q2F16 mobile graph, which requires Transformers.js ${GEMMA4_RUNTIME_FLOOR} or newer. Civweave currently bundles Transformers.js ${BUNDLED_TRANSFORMERS_V4}. The model pack can stay installed, but this runtime cannot execute it yet. Install or select another downloaded local model until the browser runtime is upgraded.`),{code:'LOCAL_MODEL_RUNTIME_TOO_OLD',requiredRuntime:GEMMA4_RUNTIME_FLOOR,bundledRuntime:BUNDLED_TRANSFORMERS_V4,model})}
+function runtimeFloorError(model){return Object.assign(new Error(`${model||'The selected Gemma 4 mobile model'} uses the Q2F16 mobile graph, which requires Transformers.js ${GEMMA4_RUNTIME_FLOOR} or newer. Civweave currently bundles Transformers.js ${BUNDLED_TRANSFORMERS_V4}. The model pack can stay installed, but this runtime cannot execute it yet. Install or select another downloaded local model until the browser runtime is upgraded.`),{code:'LOCAL_MODEL_RUNTIME_TOO_OLD',requiredRuntime:GEMMA4_RUNTIME_FLOOR,bundledRuntime:BUNDLED_TRANSFORMERS_V4,model})}
 function localFailure(args,error){
   const system=systemFor(args),guide=guideFor(system),selected=selectedLocal(),message=clean(error?.message||error||'The selected local model did not finish.',1400),model=clean(selected?.id||configuredInteractive()?.model,240),runtimeFloor=error?.code==='LOCAL_MODEL_RUNTIME_TOO_OLD';
   setDecisionStrip(`Local route · ${model||'downloaded model'} · unavailable`,'error');
@@ -103,11 +103,10 @@ function patchGemma4Registry(){
     if(!GEMMA4_MOBILE_IDS.has(model?.id))continue;
     replacements.set(model.id,Object.freeze({...model,status:'runtime-blocked',recommended:'',runtimeRequirement:Object.freeze({package:'@huggingface/transformers',minimumVersion:GEMMA4_RUNTIME_FLOOR,bundledVersion:BUNDLED_TRANSFORMERS_V4,feature:'2-bit-gather'}),reason:`This Q2F16 mobile graph requires Transformers.js ${GEMMA4_RUNTIME_FLOOR}+; Civweave currently bundles ${BUNDLED_TRANSFORMERS_V4}.`,fallbackIds:Object.freeze([...GEMMA4_LOCAL_FALLBACK_IDS])}));
   }
-  const models=Object.freeze(registry.models.map(model=>replacements.get(model?.id)||model)),map=new Map(models.map(model=>[model.id,model]));
+  const models=Object.freeze(registry.models.map(model=>replacements.get(model?.id)||model)),runtimeModels=Object.freeze(registry.runtimeModels||[]),map=new Map([...models,...runtimeModels].map(model=>[model.id,model]));
   const byId=id=>map.get(id)||null;
   const fallbacks=modelOrId=>{const model=typeof modelOrId==='string'?byId(modelOrId):byId(modelOrId?.id)||modelOrId;return (model?.fallbackIds||[]).map(byId).filter(Boolean)};
   const installable=()=>models.filter(model=>model.installable),experimental=()=>models.filter(model=>!model.installable);
-  const runtimeModels=Object.freeze((registry.runtimeModels||models.filter(model=>model.installable&&['transformers-js-v3','transformers-js-v4'].includes(model.runtime))).map(model=>byId(model.id)||model));
   const capable=request=>{try{return (registry.capable?.(request)||[]).map(model=>byId(model.id)||model)}catch{return[]}};
   try{globalThis.CivweaveLocalModelRegistryV266=Object.freeze({...registry,models,runtimeModels,byId,fallbacks,installable,experimental,capable,__civweaveGemma4RuntimeFloorV1:true,gemma4MobileRuntimeFloor:GEMMA4_RUNTIME_FLOOR,gemma4MobileBundledRuntime:BUNDLED_TRANSFORMERS_V4,gemma4MobileRuntimeBlocked:true})}catch{return false}
   registryTarget=globalThis.CivweaveLocalModelRegistryV266;
@@ -134,6 +133,7 @@ async function runLocalModel(runtime,args,messages,requestedModel){
   const manager=globalThis.CivweaveLocalModelDownloadV266,original=manager?.selection?.()||selectedLocal();
   if(!manager?.select)throw runtimeFloorError(requestedModel);
   emit('civweave:gemma4-local-tier-fallback',{requestedModel,model:fallback.id,requiredRuntime:GEMMA4_RUNTIME_FLOOR,bundledRuntime:BUNDLED_TRANSFORMERS_V4});
+  setDecisionStrip(`Local route · ${requestedModel} · using installed local fallback ${fallback.id}`,'local');
   manager.select(fallback.id);
   try{
     const result=await runtime.generate(generateArgs),executedModel=clean(result?.executionId||result?.id||fallback.id,240)||fallback.id;
@@ -145,6 +145,7 @@ async function runLocalModel(runtime,args,messages,requestedModel){
 async function localRespond(args={}){
   const system=systemFor(args),guide=guideFor(system),selected=selectedLocal(),requestedModel=clean(selected?.id||configuredInteractive()?.model,240);
   if(!selected?.id&&!requestedModel)return localFailure(args,Object.assign(new Error('No downloaded local model is selected.'),{code:'LOCAL_MODEL_NOT_SELECTED'}));
+  setDecisionStrip(`Local route · ${requestedModel||'downloaded model'} · starting on-device`,'local');
   try{
     const runtime=await loadLocalRuntime(),history=historyRows(args),text=clean(args.text,12000),messages=[...history];
     if(text&&!(messages.at(-1)?.role==='user'&&messages.at(-1)?.content===text))messages.push({role:'user',content:text});
