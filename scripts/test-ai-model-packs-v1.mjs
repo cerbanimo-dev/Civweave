@@ -37,6 +37,15 @@ test('server quality pack uses current executable high quality tiers and server 
   assert.doesNotMatch(block,/gemma-4-12b/i);
 });
 
+test('large packs do not enter the legacy Cache Storage installer',()=>{
+  assert.match(packs,/BROWSER_MANAGED_PACK_IDS=freeze\(\['premier-phone','server-quality'\]\)/);
+  assert.match(packs,/CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED/);
+  assert.match(packs,/if\(installMode\(item\.id\)==='browser'\)/);
+  assert.match(packs,/phase:'browser-download-required'/);
+  assert.match(packs,/downloadMode:'browser'/);
+  assert.match(packs,/browserManagedPackIds:BROWSER_MANAGED_PACK_IDS/);
+});
+
 test('Local models view has pack actions without eagerly loading pack runtime',()=>{
   for(const attr of ['data-local-pack-download','data-local-pack-use','data-local-pack-remove','data-local-pack-cancel'])assert.match(settings,new RegExp(attr));
   assert.match(settings,/model-packs-v1\.js/);
