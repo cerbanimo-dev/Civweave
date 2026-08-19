@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-browser-pack-download-v1-pwa-import';
+const VERSION='1.1.1-browser-pack-download-v1-pwa-import-retry';
 const PENDING_KEY='civweave.ai-pack.browser-downloads.v1';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const GENERATIVE_CACHE='civweave-model-generative-v266';
@@ -26,12 +26,12 @@ const cacheFor=kind=>kind==='specialized'?SPECIALIZED_CACHE:GENERATIVE_CACHE;
 function loadScript(src,marker,test){
   if(test())return Promise.resolve(true);
   return new Promise((resolve,reject)=>{
-    const path=new URL(src,location.href).pathname;
-    const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);
-    if(existing){
+    const target=new URL(src,location.href).href;
+    const exact=[...document.scripts].find(script=>script.src===target);
+    if(exact){
       const done=()=>test()?resolve(true):reject(new Error(`${marker} loaded without becoming ready.`));
-      existing.addEventListener('load',done,{once:true});
-      existing.addEventListener('error',()=>reject(new Error(`${marker} could not load.`)),{once:true});
+      exact.addEventListener('load',done,{once:true});
+      exact.addEventListener('error',()=>reject(new Error(`${marker} could not load.`)),{once:true});
       setTimeout(()=>{if(test())resolve(true)},0);
       return;
     }
@@ -153,25 +153,30 @@ async function importFiles(packId,files,{onProgress}={}){
   }
   const {packs:p}=await ensureCatalog(),pack=p.byId(packId);
   setPackState(pack,{status:'browser-importing',phase:'browser-importing',percent:0,completedBytes:0,totalBytes:pack.estimatedBytes,errorCode:''});
-  let imported=0;
-  for(const match of assigned.matches){
-    await putFile(match.record,match.file);imported+=1;
-    try{onProgress?.({pack,phase:'importing-large',completed:imported,total:assigned.matches.length,record:match.record,message:`Importing browser downloads · ${imported}/${assigned.matches.length}`})}catch{}
+  try{
+    let imported=0;
+    for(const match of assigned.matches){
+      await putFile(match.record,match.file);imported+=1;
+      try{onProgress?.({pack,phase:'importing-large',completed:imported,total:assigned.matches.length,record:match.record,message:`Importing browser downloads · ${imported}/${assigned.matches.length}`})}catch{}
+    }
+    const all=recordsFor(pack),small=all.filter(row=>!row.large);
+    for(let index=0;index<small.length;index++){
+      try{onProgress?.({pack,phase:'finishing-small',completed:index+1,total:small.length,record:small[index],message:`Finishing small support files · ${index+1}/${small.length}`})}catch{}
+      await fetchSmall(small[index]);
+    }
+    const incomplete=[];
+    for(const record of all)if(!(await cached(record)))incomplete.push(record);
+    if(incomplete.length)throw new Error(`${incomplete.length} pack file${incomplete.length===1?' is':'s are'} still missing after import.`);
+    const installedBytes=all.reduce((sum,row)=>sum+Number(row.expectedBytes||row.sizeBytes||row.minBytes||0),0);
+    savePending(packId,{...receipt,importedAt:now(),completed:true});
+    const state=setPackState(pack,{status:'ready',phase:'ready',percent:100,completedBytes:installedBytes||pack.estimatedBytes,totalBytes:installedBytes||pack.estimatedBytes,installedBytes:installedBytes||pack.estimatedBytes,installedAt:now(),errorCode:''});
+    try{dispatchEvent(new CustomEvent('civweave:local-model-pack-installed',{detail:{version:VERSION,id:pack.id,label:pack.label,source:'browser-import'}}))}catch{}
+    try{onProgress?.({pack,phase:'ready',completed:all.length,total:all.length,state,message:`${pack.label} is installed in Civweave local storage.`})}catch{}
+    return{pack,receipt:pending(packId),state,available:true,installedBytes};
+  }catch(error){
+    setPackState(pack,{status:'browser-queued',phase:'waiting-for-browser-downloads',percent:0,completedBytes:0,totalBytes:pack.estimatedBytes,errorCode:'CIVWEAVE_AI_PACK_BROWSER_IMPORT_FAILED'});
+    throw error;
   }
-  const all=recordsFor(pack),small=all.filter(row=>!row.large);
-  for(let index=0;index<small.length;index++){
-    try{onProgress?.({pack,phase:'finishing-small',completed:index+1,total:small.length,record:small[index],message:`Finishing small support files · ${index+1}/${small.length}`})}catch{}
-    await fetchSmall(small[index]);
-  }
-  const incomplete=[];
-  for(const record of all)if(!(await cached(record)))incomplete.push(record);
-  if(incomplete.length)throw new Error(`${incomplete.length} pack file${incomplete.length===1?' is':'s are'} still missing after import.`);
-  const installedBytes=all.reduce((sum,row)=>sum+Number(row.expectedBytes||row.sizeBytes||row.minBytes||0),0);
-  savePending(packId,{...receipt,importedAt:now(),completed:true});
-  const state=setPackState(pack,{status:'ready',phase:'ready',percent:100,completedBytes:installedBytes||pack.estimatedBytes,totalBytes:installedBytes||pack.estimatedBytes,installedBytes:installedBytes||pack.estimatedBytes,installedAt:now(),errorCode:''});
-  try{dispatchEvent(new CustomEvent('civweave:local-model-pack-installed',{detail:{version:VERSION,id:pack.id,label:pack.label,source:'browser-import'}}))}catch{}
-  try{onProgress?.({pack,phase:'ready',completed:all.length,total:all.length,state,message:`${pack.label} is installed in Civweave local storage.`})}catch{}
-  return{pack,receipt:pending(packId),state,available:true,installedBytes};
 }
 function pickAndImport(packId,{onProgress}={}){
   const input=document.createElement('input');
