@@ -44,10 +44,11 @@ async function charterkeeperRoute(request, env) {
             policy: CHARTERKEEPER_POLICY,
             trainingModules: CHARTERKEEPER_TRAINING_MODULES,
             sourceBoundary: 'existing-cerbanimo-share-only',
+            nomineeAppointment: 'source-guild-attested-existing-member-guildkeeper',
             recursiveAncestorShares: false
           })
         }),
-        authority: 'cloudflare-core',
+        authority: String(env.CIVWEAVE_MONEY_AUTHORITY || 'cloudflare-core'),
         canonical: true
       });
     }
@@ -61,7 +62,18 @@ async function charterkeeperRoute(request, env) {
     if (request.method === 'POST' && url.pathname === '/api/money-edge/charters') {
       const rawText = await request.text();
       const input = JSON.parse(rawText || '{}');
-      return json(await createCharter(edge, input, encoder.encode(rawText), request.headers.get('x-civweave-node-signature')), 201);
+      if (input.nomineeAppointmentConfirmed !== true) {
+        throw Object.assign(new Error('Charter nominee must be confirmed as an appointed Guildkeeper by the source Guild before a Charter is opened.'), { status: 409 });
+      }
+      const created = await createCharter(edge, input, encoder.encode(rawText), request.headers.get('x-civweave-node-signature'));
+      if (created?.charter?.charterId) {
+        await edge.db.prepare('UPDATE money_edge_charters SET nominee_appointment_confirmed=1 WHERE charter_id=?1')
+          .bind(created.charter.charterId).run();
+      }
+      return json({
+        ...created,
+        charter: created?.charter ? Object.freeze({ ...created.charter, nomineeAppointmentConfirmed: true }) : null
+      }, 201);
     }
 
     const action = url.pathname.match(/^\/api\/money-edge\/charters\/([^/]+)\/(training|prepare|accept|agreement|end)$/);
