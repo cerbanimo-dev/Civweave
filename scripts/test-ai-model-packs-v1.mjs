@@ -9,8 +9,10 @@ const root=resolve(here,'..');
 const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
-const settings=read('public/app/settings-local-route-v323.js');
+const settings=read('public/app/settings-local-route-v325.js');
+const legacySettings=read('public/app/settings-local-route-v323.js');
 const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
+const campus=read('public/app/working-campus-v440.html');
 const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js');
 const voice=read('public/app/guide-voice-runtime-v1.js');
 
@@ -45,6 +47,11 @@ test('large packs do not enter the legacy Cache Storage installer',()=>{
   assert.match(packs,/phase:'browser-download-required'/);
   assert.match(packs,/downloadMode:'browser'/);
   assert.match(packs,/browserManagedPackIds:BROWSER_MANAGED_PACK_IDS/);
+});
+
+test('Working Campus loads the cache-distinct Settings route while retaining the compatibility copy',()=>{
+  assert.match(campus,/\/app\/settings-local-route-v325\.js\?v=working-campus-v440-settings-v325/);
+  assert.equal(settings,legacySettings);
 });
 
 test('Settings hands browser-managed packs to browser downloads instead of surfacing the guard as an error',()=>{
