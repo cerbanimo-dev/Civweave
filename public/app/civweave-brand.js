@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.33-lud-download-entry-v1';
+const VERSION='1.0.34-ai-pack-browser-downloads-v1';
 const DAY_LOGO='/app/logos/civweave-day-logo.jpg';
 const NIGHT_LOGO='/app/logos/civweave-night-logo.jpg';
 const CANONICAL_LOGO=DAY_LOGO;
@@ -13,6 +13,7 @@ const JAPANESE_SHELL_COPY='/app/japanese-shell-copy-v1.js?v=japanese-shell-langu
 const SUPPORT_URL='https://www.patreon.com/c/Civweave';
 const LUD_MODE_URL='/app/lud/';
 const CREATOR_SUITE_URL='/creator-suite/';
+const AI_PACK_BROWSER_DOWNLOADS='/app/installer-ai-pack-downloads-v1.js?v=browser-download-manager-v1';
 
 function wantsJapanese(){
   try{
@@ -62,6 +63,17 @@ function installInstallerDeliveryBridge(){
   script.src='/app/hub-delivery-intent-v1.js?v=hub-recovery-inbound-v1';
   script.async=false;
   script.dataset.civweaveHubDeliveryIntent='v1';
+  document.head?.append(script);
+  return true;
+}
+
+function ensureAiPackBrowserDownloads(){
+  if(location.pathname!=='/app/index.html')return false;
+  if(globalThis.CivweaveInstallerAiPackDownloadsV1||document.querySelector('script[data-civweave-ai-pack-browser-loader]'))return true;
+  const script=document.createElement('script');
+  script.src=AI_PACK_BROWSER_DOWNLOADS;
+  script.async=false;
+  script.dataset.civweaveAiPackBrowserLoader='v1';
   document.head?.append(script);
   return true;
 }
@@ -173,6 +185,7 @@ function apply(){
   installLanguageRuntime();
   bindEnglishLanguageControl();
   installInstallerDeliveryBridge();
+  ensureAiPackBrowserDownloads();
   ensureLudModeLink();
   ensureCreatorSuiteLink();
   ensureInstallerSupportLink();
@@ -194,6 +207,8 @@ globalThis.CivweaveBrand=Object.freeze({
   installLanguageRuntime,
   ensureEnglishLanguageControl:bindEnglishLanguageControl,
   installInstallerDeliveryBridge,
+  ensureAiPackBrowserDownloads,
+  aiPackBrowserDownloadsUrl:AI_PACK_BROWSER_DOWNLOADS,
   ensureLudModeLink,
   ludModeUrl:LUD_MODE_URL,
   ensureCreatorSuiteLink,

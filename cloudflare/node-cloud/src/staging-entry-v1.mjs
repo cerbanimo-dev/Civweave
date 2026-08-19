@@ -5,17 +5,22 @@ import baseWorker, {
 } from './server-ai-entry-v6.mjs';
 
 export { CivweaveCloudNode, CivweaveAccountDirectory };
+export const STAGING_CHARTERKEEPER_REVISION = 'charterkeeper-v1-signed-handoff';
 
 const STAGING_COMMUNITY_SEATS = 4;
+const STAGING_PAID_TEST_SEATS = 4;
+const STAGING_MAX_MEMBERS = STAGING_COMMUNITY_SEATS + STAGING_PAID_TEST_SEATS;
+const STAGING_PUBLIC_WORKER_DOMAIN = 'cerbanimo.workers.dev';
 const clean = (value, max = 180) => String(value ?? '').trim().slice(0, max);
 
 /**
  * Isolated staging capacity authority.
  *
  * This class runs in the civweave-node-cloud-staging Worker, whose Durable
- * Objects are separate from production. It intentionally exposes only four
- * community seats and no paid-expansion seats so staging can exercise the real
- * Guild server + Workers AI path without touching the production member ledger.
+ * Objects are separate from production. It exposes four community seats plus
+ * four test-only paid-expansion seats so Stripe sandbox membership checkout,
+ * settlement, Guildkeeper revenue-share transfers, and signed Charterkeeper
+ * handoffs can be exercised without touching production member or payment state.
  */
 export class CivweaveCapacityAccount extends ProductionCapacityAccount {
   async snapshot(nodeId = '') {
@@ -24,11 +29,15 @@ export class CivweaveCapacityAccount extends ProductionCapacityAccount {
     const communityMemberCount = Math.max(0, Number(base.communityMemberCount || 0));
     const nodeMembers = Math.max(0, Number(base.nodeMembers || 0));
     const nodeCommunityMembers = Math.max(0, Number(base.nodeCommunityMembers || 0));
-    const remaining = Math.max(0, STAGING_COMMUNITY_SEATS - memberCount);
+    const paidMembers = Math.max(0, nodeMembers - nodeCommunityMembers);
+    const communityRemaining = Math.max(0, STAGING_COMMUNITY_SEATS - nodeCommunityMembers);
+    const paidRemaining = Math.max(0, STAGING_PAID_TEST_SEATS - paidMembers);
     return Object.freeze({
       ...base,
       environment: 'staging',
       stagingIsolatedGuildServer: true,
+      stagingPaymentMode: 'stripe-sandbox-only',
+      stagingCharterkeeperRevision: STAGING_CHARTERKEEPER_REVISION,
       memberCount,
       communityMemberCount,
       nodeMembers,
@@ -36,38 +45,54 @@ export class CivweaveCapacityAccount extends ProductionCapacityAccount {
       communitySeatLimit: STAGING_COMMUNITY_SEATS,
       starterCommunityLimit: STAGING_COMMUNITY_SEATS,
       maxCommunitySeats: STAGING_COMMUNITY_SEATS,
-      maxMembers: STAGING_COMMUNITY_SEATS,
-      totalSeatsRemaining: remaining,
-      paidExpansionSeatLimit: 0,
-      paidExpansionSeatsRemaining: 0,
+      maxMembers: STAGING_MAX_MEMBERS,
+      totalSeatsRemaining: Math.max(0, communityRemaining + paidRemaining),
+      paidExpansionSeatLimit: STAGING_PAID_TEST_SEATS,
+      paidExpansionSeatsRemaining: paidRemaining,
       communityOverCapacity: Math.max(0, communityMemberCount - STAGING_COMMUNITY_SEATS),
-      memberOverCapacity: Math.max(0, memberCount - STAGING_COMMUNITY_SEATS),
-      grandfatheredOverCapacity: memberCount > STAGING_COMMUNITY_SEATS,
+      memberOverCapacity: Math.max(0, memberCount - STAGING_MAX_MEMBERS),
+      grandfatheredOverCapacity: memberCount > STAGING_MAX_MEMBERS,
       stagingSeatLimit: STAGING_COMMUNITY_SEATS,
+      stagingPaidSeatLimit: STAGING_PAID_TEST_SEATS,
     });
   }
 
   async admitMember(input = {}) {
     const nodeId = clean(input.nodeId), userId = clean(input.userId);
     const seatClass = clean(input.seatClass || 'community', 40).toLowerCase();
-    if (seatClass !== 'community') {
-      throw Object.assign(new RangeError('staging-only-community-seats'), { status: 409 });
+    if (!['community', 'paid-expansion'].includes(seatClass)) {
+      throw Object.assign(new RangeError('staging-invalid-seat-class'), { status: 409 });
     }
     if (nodeId && userId) {
       const prior = await this.member(nodeId, userId);
       if (!prior) {
         const capacity = await this.snapshot(nodeId);
-        if (Number(capacity.memberCount || 0) >= STAGING_COMMUNITY_SEATS) {
-          throw Object.assign(new RangeError('staging-guild-capacity-full'), { status: 409 });
+        if (seatClass === 'community' && Number(capacity.nodeCommunityMembers || 0) >= STAGING_COMMUNITY_SEATS) {
+          throw Object.assign(new RangeError('staging-community-capacity-full'), { status: 409 });
+        }
+        const paidMembers = Math.max(0, Number(capacity.nodeMembers || 0) - Number(capacity.nodeCommunityMembers || 0));
+        if (seatClass === 'paid-expansion' && paidMembers >= STAGING_PAID_TEST_SEATS) {
+          throw Object.assign(new RangeError('staging-paid-capacity-full'), { status: 409 });
         }
       }
     }
-    return super.admitMember({ ...input, seatClass: 'community', billingStatus: 'free' });
+    if (seatClass === 'paid-expansion' && clean(input.billingStatus, 40).toLowerCase() !== 'paid') {
+      throw Object.assign(new RangeError('staging-paid-expansion-requires-paid-membership'), { status: 409 });
+    }
+    return super.admitMember({ ...input, seatClass });
   }
 }
 
 export default {
   async fetch(request, env, ctx) {
+    const pathname = new URL(request.url).pathname;
+    // Keep the staging Worker's normal NODE_DOMAIN intentionally non-routable so
+    // root /api/fabric administration is not mistaken for a node-host request.
+    // Public membership, Charterkeeper, and money-edge node callbacks need the
+    // real workers.dev suffix so signed proofs resolve to this isolated Guild.
+    if (pathname.startsWith('/api/commerce/membership/') || pathname.startsWith('/api/ai/node/')) {
+      return baseWorker.fetch(request, { ...env, NODE_DOMAIN: STAGING_PUBLIC_WORKER_DOMAIN }, ctx);
+    }
     return baseWorker.fetch(request, env, ctx);
   },
   async scheduled(controller, env, ctx) {

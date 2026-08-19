@@ -6,6 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": false,
+  "ai": { "binding": "AI" },
   "vars": {
     "CIVWEAVE_NODE_CLOUD_DOMAIN": "nodes.commonweave.earth"
   },
@@ -14,11 +15,14 @@
   },
   "durable_objects": {
     "bindings": [
-      { "name": "GUILD_STATE", "class_name": "CivweaveGuildEdgeState" }
+      { "name": "GUILD_STATE", "class_name": "CivweaveGuildEdgeState" },
+      { "name": "CAPACITY", "class_name": "CivweaveGuildCapacityState" },
+      { "name": "NODES", "class_name": "CivweaveGuildNodeState" }
     ]
   },
   "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["CivweaveGuildEdgeState"] }
+    { "tag": "v1", "new_sqlite_classes": ["CivweaveGuildEdgeState"] },
+    { "tag": "v2", "new_sqlite_classes": ["CivweaveGuildCapacityState", "CivweaveGuildNodeState"] }
   ],
   "observability": { "enabled": true }
 }

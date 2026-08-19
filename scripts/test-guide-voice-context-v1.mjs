@@ -67,6 +67,61 @@ test('offline browser speech fallback requires explicit local-only recognition s
   assert.match(source,/will not send an offline voice session to a network speech service/);
 });
 
+test('Parakeet speech executor registers the installed INT8 model and preserves the NeMo TDT contract',()=>{
+  const registrations=[];
+  const ctx=runBrowserScript('public/app/local-ai/parakeet-speech-executor-v1.js',{
+    CivweaveLocalSpecializedAI:{registerExecutor:(key,executor,metadata)=>registrations.push({key,executor,metadata})}
+  });
+  const api=ctx.CivweaveParakeetSpeechExecutorV1;
+  assert.ok(api);
+  assert.equal(api.modelId,'parakeet-tdt-0.6b-v3-int8');
+  assert.equal(registrations.length,1);
+  assert.equal(registrations[0].key,'parakeet-tdt-0.6b-v3-int8');
+  assert.equal(registrations[0].metadata.runtime,'onnxruntime-web');
+  assert.equal(registrations[0].metadata.decoder,'nemo-tdt-greedy');
+  const source=fs.readFileSync('public/app/local-ai/parakeet-speech-executor-v1.js','utf8');
+  assert.match(source,/MEL_BINS=128/);
+  assert.match(source,/SAMPLE_RATE=16000/);
+  assert.match(source,/MAX_TOKENS_PER_FRAME=5/);
+  assert.match(source,/specializedStatus\(MODEL_ID\)/);
+  assert.match(source,/outputSize<=vocabSize/);
+  assert.match(source,/duration logits/);
+  assert.match(source,/supportsProxyWorker/);
+  assert.match(source,/response\.arrayBuffer\(\)/);
+  assert.match(source,/graphOptimizationLevel:String\(row\?\.path\|\|''\)\.startsWith\('encoder\.'\)\?'basic':'all'/);
+  assert.match(source,/PARAKEET_ONNX_SESSION_CREATE_FAILED/);
+  assert.match(source,/encoder\.int8\.onnx/);
+  assert.match(source,/decoder\.int8\.onnx/);
+  assert.match(source,/joiner\.int8\.onnx/);
+  assert.match(source,/tokens\.txt/);
+});
+
+test('Parakeet activates microphone audio before the cold ONNX model load',()=>{
+  const source=fs.readFileSync('public/app/local-ai/parakeet-speech-executor-v1.js','utf8');
+  const start=source.indexOf('async function startMicrophone');
+  const body=source.slice(start,source.indexOf('\nasync function executor',start));
+  const mic=body.indexOf('navigator.mediaDevices.getUserMedia');
+  const context=body.indexOf('context=new AudioCtx()');
+  const runtime=body.indexOf('const runtime=await loadRuntime()');
+  assert.ok(mic>=0&&context>=0&&runtime>=0);
+  assert.ok(mic<runtime,'microphone permission/capture should be acquired before the long model load');
+  assert.ok(context<runtime,'AudioContext should be created/resumed while user activation is still fresh');
+  assert.match(body,/track\.stop\(\)/);
+  assert.match(body,/context\?\.close\?\.\(\)/);
+});
+
+test('guide voice lazily loads the Parakeet executor before giving up on specialized speech',()=>{
+  const source=fs.readFileSync('public/app/guide-voice-runtime-v1.js','utf8');
+  assert.match(source,/parakeet-speech-executor-v1\.js\?v=1\.0\.1/);
+  assert.match(source,/ensureSpeechExecutor/);
+  assert.match(source,/LOCAL_SPECIALIZED_EXECUTOR_UNAVAILABLE/);
+  assert.match(source,/executeSpecializedSpeech/);
+  assert.match(source,/CIVWEAVE_SPEECH_EXECUTOR_START_FAILED/);
+  assert.match(source,/lastSpecializedError/);
+  assert.match(source,/executorError/);
+  assert.match(source,/artifact/);
+});
+
 test('guide chat owns wake-address submission and voice input without adding another chat owner',()=>{
   const source=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
   assert.match(source,/data-voice/);

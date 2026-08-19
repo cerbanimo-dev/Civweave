@@ -174,13 +174,13 @@ const installerRuntimeChanged = await patchTextIfChanged(installerRuntimePath, s
 // The installability bridge previously treated *any* active root worker as good
 // enough. Retired /service-worker.js registrations must be evicted instead of
 // being blessed as install-ready; current v203 registrations get an explicit
-// update check before the browser install prompt is allowed to proceed.
-const installBridgeChanged = await patchTextIfChanged(installBridgePath, source => replaceRequired(
-  source,
-`    const existing=await navigator.serviceWorker.getRegistration('/');
+// update check before the browser install prompt is allowed to proceed. Support
+// both the older bridge layout and the newer bootstrap-to-shell handoff layout.
+const installBridgeChanged = await patchTextIfChanged(installBridgePath, source => {
+  const legacyBefore = `    const existing=await navigator.serviceWorker.getRegistration('/');
     if(existing?.active){publish('civweave:pwa-installability-bootstrap',{ready:true,worker:workerPath(existing.active),reused:true});return true}
-    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`,
-`    const existing=await navigator.serviceWorker.getRegistration('/');
+    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`;
+  const legacyAfter = `    const existing=await navigator.serviceWorker.getRegistration('/');
     const active=existing?.active||null,activePath=workerPath(active);
     if(activePath==='/service-worker-v203.js'){
       try{await existing.update();existing.waiting?.postMessage?.({type:'SKIP_WAITING'})}catch{}
@@ -194,9 +194,33 @@ const installBridgeChanged = await patchTextIfChanged(installBridgePath, source 
       await existing.unregister().catch(()=>false);
       await new Promise(resolve=>setTimeout(resolve,80));
     }
-    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`,
-  'installability active-root-worker validation block'
-));
+    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`;
+  const handoffBefore = `    const existing=await navigator.serviceWorker.getRegistration('/');
+    if(shellDownloadStarted)return false;
+    if(existing?.active){publish('civweave:pwa-installability-bootstrap',{ready:true,worker:workerPath(existing.active),reused:true});return true}
+    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`;
+  const handoffAfter = `    const existing=await navigator.serviceWorker.getRegistration('/');
+    if(shellDownloadStarted)return false;
+    const active=existing?.active||null,activePath=workerPath(active);
+    if(activePath===SHELL_WORKER_PATH){
+      try{await existing.update();existing.waiting?.postMessage?.({type:'SKIP_WAITING'})}catch{}
+      publish('civweave:pwa-installability-bootstrap',{ready:true,worker:activePath,reused:true,validatedCurrentShell:true});return true
+    }
+    if(activePath===INSTALLABILITY_WORKER_PATH){
+      publish('civweave:pwa-installability-bootstrap',{ready:true,worker:activePath,reused:true,validatedInstallabilityWorker:true});return true
+    }
+    if(existing?.active){
+      publish('civweave:pwa-installability-bootstrap',{ready:false,worker:activePath,reused:false,retiredRootWorker:true});
+      await existing.unregister().catch(()=>false);
+      await new Promise(resolve=>setTimeout(resolve,80));
+      if(shellDownloadStarted)return false;
+    }
+    await navigator.serviceWorker.register(INSTALLABILITY_WORKER_URL,{scope:'/',updateViaCache:'none'});`;
+  if (source.includes(handoffBefore)) return source.replace(handoffBefore, handoffAfter);
+  if (source.includes(legacyBefore)) return source.replace(legacyBefore, legacyAfter);
+  if (source.includes('validatedCurrentShell:true') && source.includes('retireInstallabilityBootstrap')) return source;
+  throw new Error('Could not locate installability active-root-worker validation block.');
+});
 
 // The version synchronizer intentionally owns version text, but the PWA launch
 // contract is owned here because shell integrity must hash the *final* manifest.

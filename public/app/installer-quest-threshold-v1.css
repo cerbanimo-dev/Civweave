@@ -85,23 +85,12 @@ body.cw-installer .quest-guide-sprite{
   position:relative;
   z-index:1;
   width:min(100%,204px);
-  aspect-ratio:218/196;
-  background:none;
+  aspect-ratio:1;
+  background:url('/app/weaveling-download-guide-v1.png') center/contain no-repeat;
   filter:drop-shadow(0 14px 22px rgba(0,0,0,.35)) drop-shadow(0 0 18px rgba(139,230,255,.18));
 }
 body.cw-installer .quest-guide-sprite::before{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:58%;
-  width:calc(100% - 20px);
-  aspect-ratio:6/5;
-  transform:translate(-50%,-50%);
-  background-image:url('/Civweave-weaveling-sprites.png');
-  background-repeat:no-repeat;
-  background-size:500% 400%;
-  background-position:50% 100%;
-  clip-path:inset(0 3px 12px 3px);
+  content:none;
 }
 body.cw-installer .quest-guide-label{
   position:absolute;
@@ -323,7 +312,7 @@ body.cw-installer .quest-footer-note{
   body.cw-installer .quest-opening{grid-template-columns:1fr;text-align:left}
   body.cw-installer .quest-guide{min-height:198px;padding-top:12px;padding-bottom:28px;justify-items:start;place-items:center start;padding-left:8px}
   body.cw-installer .quest-guide::before{width:152px}
-  body.cw-installer .quest-guide-sprite{width:150px;aspect-ratio:218/196}
+  body.cw-installer .quest-guide-sprite{width:150px;aspect-ratio:1}
   body.cw-installer .quest-guide-label{left:77px}
   body.cw-installer .quest-copy h2{font-size:clamp(2.2rem,11vw,3.6rem)!important}
   body.cw-installer .quest-route{

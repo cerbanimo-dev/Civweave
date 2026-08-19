@@ -1,4 +1,4 @@
-import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from './territory-host-entry-v1.mjs';
+import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from './charterkeeper-entry-v1.mjs';
 
 export { CivweaveCoreIdentity };
 

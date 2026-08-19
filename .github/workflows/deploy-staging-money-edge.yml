@@ -1,0 +1,301 @@
+name: Deploy Staging Money Edge
+
+on:
+  push:
+    branches:
+      - staging
+    paths:
+      - cloudflare/core/**
+      - cloudflare/node-cloud/src/**
+      - cloudflare/node-cloud/wrangler.staging.jsonc
+      - .github/workflows/deploy-staging-money-edge.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-staging-money-edge
+  cancel-in-progress: true
+
+env:
+  STAGING_CORE_WORKER: civweave-core-staging
+  STAGING_CORE_ORIGIN: https://civweave-core-staging.cerbanimo.workers.dev
+  STAGING_D1: civweave-core-staging
+  STAGING_NODE_ID: civweave-node-cloud-staging
+  STAGING_NODE_OPERATOR_ID: civweave-staging-shadow
+  STAGING_NODE_ORIGIN: https://civweave-node-cloud-staging.cerbanimo.workers.dev
+  STAGING_WEBHOOK_URL: https://civweave-core-staging.cerbanimo.workers.dev/api/money-edge/webhooks/stripe
+
+jobs:
+  deploy:
+    name: Deploy isolated Stripe sandbox authority
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: staging
+      url: https://civweave-core-staging.cerbanimo.workers.dev
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install core dependencies
+        run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
+
+      - name: Refuse live or production payment authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$STAGING_CORE_WORKER" = 'civweave-core-staging'
+          test "$STAGING_CORE_WORKER" != 'civweave-core'
+          test "$STAGING_D1" = 'civweave-core-staging'
+          test "$STAGING_D1" != 'civweave-core'
+          test "$STAGING_CORE_ORIGIN" = 'https://civweave-core-staging.cerbanimo.workers.dev'
+          test "$STAGING_WEBHOOK_URL" = 'https://civweave-core-staging.cerbanimo.workers.dev/api/money-edge/webhooks/stripe'
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          test -n "${STRIPE_TEST_SECRET_KEY:-}" || { echo 'Missing staging environment secret STRIPE_TEST_SECRET_KEY'; exit 3; }
+          case "$STRIPE_TEST_SECRET_KEY" in
+            sk_test_*|rk_test_*) ;;
+            sk_live_*|rk_live_*) echo 'Refusing a live Stripe key in staging'; exit 4 ;;
+            *) echo 'STRIPE_TEST_SECRET_KEY is not a Stripe test-mode server credential'; exit 4 ;;
+          esac
+
+      - name: Verify Cloudflare authentication
+        run: npx --yes wrangler@4 whoami
+
+      - name: Resolve isolated D1 and generate staging config
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 list --json > /tmp/civweave-d1.json
+          D1_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const raw = JSON.parse(fs.readFileSync('/tmp/civweave-d1.json','utf8'));
+          const rows = Array.isArray(raw) ? raw : (raw.result || raw.databases || []);
+          const row = rows.find(item => item?.name === process.env.STAGING_D1);
+          process.stdout.write(String(row?.uuid || row?.id || row?.database_id || row?.databaseId || ''));
+          NODE
+          )"
+          if [ -z "$D1_ID" ]; then
+            npx --yes wrangler@4 d1 create "$STAGING_D1"
+            npx --yes wrangler@4 d1 list --json > /tmp/civweave-d1.json
+            D1_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const raw = JSON.parse(fs.readFileSync('/tmp/civweave-d1.json','utf8'));
+          const rows = Array.isArray(raw) ? raw : (raw.result || raw.databases || []);
+          const row = rows.find(item => item?.name === process.env.STAGING_D1);
+          process.stdout.write(String(row?.uuid || row?.id || row?.database_id || row?.databaseId || ''));
+          NODE
+            )"
+          fi
+          test -n "$D1_ID" || { echo 'Could not resolve isolated staging D1'; exit 5; }
+
+          cp cloudflare/core/wrangler.template.jsonc cloudflare/core/wrangler.staging.generated.jsonc
+          D1_ID="$D1_ID" node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = 'cloudflare/core/wrangler.staging.generated.jsonc';
+          let text = fs.readFileSync(path, 'utf8');
+          text = text
+            .replace('"name": "civweave-core"', '"name": "civweave-core-staging"')
+            .replace('"database_name": "civweave-core"', '"database_name": "civweave-core-staging"')
+            .replace('__CIVWEAVE_CORE_D1_ID__', process.env.D1_ID)
+            .replace('"NODE_DOMAIN": "nodes.commonweave.earth"', '"NODE_DOMAIN": "cerbanimo.workers.dev"')
+            .replace('"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.cc"', '"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave-staging.pages.dev"')
+            .replace('"CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core"', '"CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core-staging"')
+            .replace('"STRIPE_CONNECT_SAMPLE_ENABLED": "false"', '"STRIPE_CONNECT_SAMPLE_ENABLED": "false",\n    "CIVWEAVE_ENVIRONMENT": "staging",\n    "CIVWEAVE_PAYMENT_ENVIRONMENT": "stripe-test",\n    "STRIPE_API_VERSION": "2026-06-24.dahlia"');
+          text = text.replace(/\n  "r2_buckets": \[[\s\S]*?\n  \],/, '');
+          if (text.includes('"name": "civweave-core"')) throw new Error('Generated staging config still targets production core.');
+          if (text.includes('"database_name": "civweave-core"')) throw new Error('Generated staging config still targets production D1.');
+          if (!text.includes('"CIVWEAVE_PAYMENT_ENVIRONMENT": "stripe-test"')) throw new Error('Generated staging config is missing payment isolation marker.');
+          fs.writeFileSync(path, text);
+          NODE
+
+      - name: Apply isolated D1 migrations
+        run: npx --yes wrangler@4 d1 migrations apply "$STAGING_D1" --remote --config cloudflare/core/wrangler.staging.generated.jsonc
+
+      - name: Validate and deploy staging core without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --dry-run --config cloudflare/core/wrangler.staging.generated.jsonc
+          npx --yes wrangler@4 deploy --keep-vars --config cloudflare/core/wrangler.staging.generated.jsonc
+
+      - name: Install Stripe test credential only
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' "$STRIPE_TEST_SECRET_KEY" | npx --yes wrangler@4 secret put STRIPE_SECRET_KEY --config cloudflare/core/wrangler.staging.generated.jsonc >/dev/null
+
+      - name: Ensure test-mode Stripe webhook and signing secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error -u "$STRIPE_TEST_SECRET_KEY:" \
+            -G https://api.stripe.com/v1/webhook_endpoints -d limit=100 > /tmp/stripe-test-webhooks.json
+          ENDPOINT_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/stripe-test-webhooks.json','utf8'));
+          const row = (payload.data || []).find(item => item?.url === process.env.STAGING_WEBHOOK_URL && item?.livemode === false);
+          process.stdout.write(String(row?.id || ''));
+          NODE
+          )"
+          secrets_json="$(npx --yes wrangler@4 secret list --config cloudflare/core/wrangler.staging.generated.jsonc --format json)"
+          HAS_WEBHOOK_SECRET="$(printf '%s' "$secrets_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const x=JSON.parse(s);const rows=Array.isArray(x)?x:(x.result||x.secrets||[]);process.stdout.write(rows.some(r=>(r.name||r.key)==='STRIPE_CONNECT_WEBHOOK_SECRET')?'1':'0')})")"
+
+          if [ -z "$ENDPOINT_ID" ] || [ "$HAS_WEBHOOK_SECRET" != '1' ]; then
+            if [ -n "$ENDPOINT_ID" ]; then
+              curl --fail --silent --show-error -u "$STRIPE_TEST_SECRET_KEY:" -X DELETE "https://api.stripe.com/v1/webhook_endpoints/$ENDPOINT_ID" >/dev/null
+            fi
+            curl --fail --silent --show-error -u "$STRIPE_TEST_SECRET_KEY:" \
+              -X POST https://api.stripe.com/v1/webhook_endpoints \
+              -d "url=$STAGING_WEBHOOK_URL" \
+              -d 'description=Civweave staging membership sandbox' \
+              -d 'enabled_events[]=checkout.session.completed' \
+              -d 'enabled_events[]=checkout.session.async_payment_succeeded' \
+              -d 'enabled_events[]=invoice.paid' \
+              -d 'enabled_events[]=customer.subscription.deleted' \
+              -d 'enabled_events[]=charge.refunded' \
+              -d 'enabled_events[]=charge.dispute.created' \
+              -d 'enabled_events[]=charge.dispute.funds_withdrawn' \
+              -d 'enabled_events[]=charge.dispute.funds_reinstated' \
+              > /tmp/stripe-test-webhook-created.json
+            WEBHOOK_SECRET="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/stripe-test-webhook-created.json','utf8'));
+          if (payload.livemode !== false) throw new Error('Stripe unexpectedly created a live webhook endpoint.');
+          process.stdout.write(String(payload.secret || ''));
+          NODE
+            )"
+            test -n "$WEBHOOK_SECRET" || { echo 'Stripe did not return a test webhook signing secret'; exit 6; }
+            printf '%s' "$WEBHOOK_SECRET" | npx --yes wrangler@4 secret put STRIPE_CONNECT_WEBHOOK_SECRET --config cloudflare/core/wrangler.staging.generated.jsonc >/dev/null
+          fi
+
+      - name: Publish coherent sandbox worker and verify mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --keep-vars --config cloudflare/core/wrangler.staging.generated.jsonc >/dev/null
+          for attempt in $(seq 1 15); do
+            if curl --fail --silent --show-error "$STAGING_CORE_ORIGIN/api/money-edge/status" > /tmp/staging-money-status.json; then
+              if node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/staging-money-status.json','utf8'));
+          const edge = payload.moneyEdge || payload;
+          if (edge.providerMode !== 'sandbox') process.exit(1);
+          if (edge.integrationDoorReady !== true) process.exit(1);
+          if (edge.liveReady === true) process.exit(2);
+          NODE
+              then break; fi
+            fi
+            sleep 2
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/staging-money-status.json','utf8'));
+          const edge = payload.moneyEdge || payload;
+          if (edge.providerMode !== 'sandbox') throw new Error(`Expected Stripe sandbox provider, got ${edge.providerMode || 'unknown'}.`);
+          if (edge.integrationDoorReady !== true) throw new Error(`Staging money edge has structural blockers: ${(edge.structuralBlockers || []).join(', ')}`);
+          if (edge.liveReady === true) throw new Error('Staging money edge must never report liveReady=true.');
+          console.log(JSON.stringify({ ok: true, authority: payload.authority, providerMode: edge.providerMode, integrationDoorReady: edge.integrationDoorReady, liveReady: edge.liveReady, productionIsolation: true }, null, 2));
+          NODE
+
+      - name: Bind staging Guild to isolated core trust
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp cloudflare/node-cloud/wrangler.staging.jsonc cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = 'cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc';
+          const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (config.name !== 'civweave-node-cloud-staging') throw new Error('Refusing non-staging Guild binding target.');
+          if (config.vars?.CIVWEAVE_CORE_ORIGIN !== process.env.STAGING_CORE_ORIGIN) throw new Error('Staging Guild core origin does not match isolated staging core.');
+          config.services = [{ binding: 'CORE', service: process.env.STAGING_CORE_WORKER }];
+          fs.writeFileSync(path, JSON.stringify(config, null, 2));
+          NODE
+          npx --yes wrangler@4 deploy --keep-vars --config cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc >/dev/null
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error "$STAGING_NODE_ORIGIN/api/ai/node/manifest" > /tmp/staging-public-manifest.json; then break; fi
+            sleep 2
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const envelope = JSON.parse(fs.readFileSync('/tmp/staging-public-manifest.json', 'utf8'));
+          const manifest = envelope.manifest || envelope;
+          if (manifest.nodeId !== process.env.STAGING_NODE_ID) throw new Error(`Public staging Guild callback resolved ${manifest.nodeId || 'nothing'} instead of ${process.env.STAGING_NODE_ID}.`);
+          NODE
+
+      - name: Register staging Guild with test Connect account
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=0
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error "$STAGING_NODE_ORIGIN/n/$STAGING_NODE_ID/api/ai/node/manifest" > /tmp/staging-node-manifest.json; then
+              if node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const envelope = JSON.parse(fs.readFileSync('/tmp/staging-node-manifest.json','utf8'));
+          const manifest = envelope.manifest || envelope;
+          if (manifest.nodeId !== process.env.STAGING_NODE_ID) process.exit(1);
+          if (manifest.operatorId !== process.env.STAGING_NODE_OPERATOR_ID) process.exit(1);
+          NODE
+              then ready=1; break; fi
+            fi
+            sleep 5
+          done
+          test "$ready" = '1' || { echo 'Staging Guild manifest did not become ready for money-edge enrollment'; exit 7; }
+
+          curl --fail --silent --show-error \
+            -X POST "$STAGING_CORE_ORIGIN/api/money-edge/enrollment/start" \
+            -H 'content-type: application/json' \
+            --data "{\"nodeId\":\"$STAGING_NODE_ID\",\"operatorId\":\"$STAGING_NODE_OPERATOR_ID\",\"callbackUrl\":\"$STAGING_NODE_ORIGIN\"}" \
+            > /tmp/staging-money-enrollment.json
+          GRANT="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/staging-money-enrollment.json','utf8'));
+          process.stdout.write(String(payload?.enrollment?.token || ''));
+          NODE
+          )"
+          test -n "$GRANT" || { echo 'Staging money edge did not issue an enrollment grant'; exit 8; }
+          curl --fail --silent --show-error \
+            -X POST "$STAGING_CORE_ORIGIN/api/money-edge/nodes/register" \
+            -H 'content-type: application/json' \
+            --data "{\"nodeId\":\"$STAGING_NODE_ID\",\"operatorId\":\"$STAGING_NODE_OPERATOR_ID\",\"callbackUrl\":\"$STAGING_NODE_ORIGIN\",\"enrollmentGrant\":\"$GRANT\",\"country\":\"US\"}" \
+            > /tmp/staging-money-registration.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/staging-money-registration.json','utf8'));
+          const registration = payload.registration || {};
+          if (!registration.connectedAccountId) throw new Error('Staging Guild did not receive a Stripe test connected account.');
+          if (!registration.onboardingUrl) throw new Error('Staging test connected account did not receive an onboarding link.');
+          console.log(JSON.stringify({ ok: true, nodeId: registration.nodeId, connectedAccountId: registration.connectedAccountId, onboardingRequired: true, provider: registration.operatorPayouts, productionIsolation: true }, null, 2));
+          NODE
+
+      - name: Write staging payment summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Civweave staging money edge'
+            echo
+            echo '- Worker: `civweave-core-staging`'
+            echo '- D1: `civweave-core-staging`'
+            echo '- Stripe mode required: **test/sandbox only**'
+            echo '- Guild: `civweave-node-cloud-staging`'
+            echo '- Membership model: platform charge, post-invoice Guildkeeper revenue-share transfer'
+            echo '- Guild trust binding: isolated `civweave-core-staging` only'
+            echo '- Production worker, D1, webhook, and live Stripe credentials: **not touched**'
+            echo '- Connected-account onboarding URLs are intentionally not written to public logs.'
+          } >> "$GITHUB_STEP_SUMMARY"

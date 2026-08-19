@@ -45,19 +45,30 @@ function ensureLanguageRuntime(){
   }).finally(()=>{languagePromise=null});
   return languagePromise;
 }
+function versionDisplayNode(node){
+  if(!node||node===document.documentElement||node===document.body)return false;
+  if(node.matches?.('html,body,main,header,section,article,nav,aside,form'))return false;
+  return true;
+}
 function apply(version){
   if(!/^\d+\.\d+\.\d+$/.test(version))return false;
+  // Keep release metadata on <html>, but never treat that metadata attribute as
+  // a text target. The previous implementation set data-civweave-version on
+  // <html> and then selected [data-civweave-version], which assigned
+  // documentElement.textContent and erased the entire application DOM.
+  const displays=[...document.querySelectorAll('.version,.version-chip,[data-civweave-version]')].filter(versionDisplayNode);
+  for(const node of displays)node.textContent=`v${version}`;
   document.documentElement.dataset.civweaveVersion=version;
-  for(const node of document.querySelectorAll('.version,.version-chip,[data-civweave-version]'))node.textContent=`v${version}`;
+  document.documentElement.dataset.civweaveVersionSync='structural-safe-v2';
   if(/\bv\d+\.\d+\.\d+\b/.test(document.title))document.title=document.title.replace(/\bv\d+\.\d+\.\d+\b/g,`v${version}`);
-  globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version,apply,realmMutation:false,ensureLanguageRuntime});
+  globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version,apply,realmMutation:false,ensureLanguageRuntime,structuralSafe:true});
   dispatchEvent(new CustomEvent('civweave:release-version',{detail:{version,apiVersion:API_VERSION}}));
   return true;
 }
 async function sync(){
   void ensureLanguageRuntime();
   if(canonicalRealm()){
-    globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version:'',apply,realmMutation:false,skipped:'canonical-realm',ensureLanguageRuntime,japaneseBootstrap:'preference-only'});
+    globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version:'',apply,realmMutation:false,skipped:'canonical-realm',ensureLanguageRuntime,japaneseBootstrap:'preference-only',structuralSafe:true});
     return;
   }
   try{

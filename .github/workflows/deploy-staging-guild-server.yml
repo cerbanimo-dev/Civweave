@@ -20,12 +20,15 @@ concurrency:
 env:
   STAGING_WORKER: civweave-node-cloud-staging
   STAGING_ORIGIN: https://civweave-node-cloud-staging.cerbanimo.workers.dev
-  STAGING_NODE_ID: civweave-cloud
-  STAGING_SEAT_LIMIT: "4"
+  STAGING_CORE_ORIGIN: https://civweave-core-staging.cerbanimo.workers.dev
+  STAGING_NODE_ID: civweave-node-cloud-staging
+  STAGING_COMMUNITY_SEAT_LIMIT: "4"
+  STAGING_PAID_SEAT_LIMIT: "4"
+  STAGING_MAX_MEMBERS: "8"
 
 jobs:
   deploy:
-    name: Deploy isolated four-seat Guild server
+    name: Deploy isolated Guild transaction sandbox
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
@@ -60,8 +63,12 @@ jobs:
           if (config.name !== 'civweave-node-cloud-staging') throw new Error('Refusing non-staging Worker target.');
           if (config.name === 'civweave-node-cloud') throw new Error('Refusing production Worker target.');
           if (config.main !== 'src/staging-entry-v1.mjs') throw new Error('Staging Worker must use staging-entry-v1.mjs.');
-          if (Array.isArray(config.services) && config.services.length) throw new Error('Staging Guild server must not bind production services.');
+          if (Array.isArray(config.services) && config.services.length) throw new Error('Source staging config must not statically bind services; the isolated staging core binding is attached only when that Worker exists.');
           if (config.vars?.CIVWEAVE_ENVIRONMENT !== 'staging') throw new Error('Staging environment marker is required.');
+          if (config.vars?.CIVWEAVE_PAYMENT_ENVIRONMENT !== 'stripe-test') throw new Error('Staging payment environment must be stripe-test.');
+          if (config.vars?.CIVWEAVE_CORE_ORIGIN !== 'https://civweave-core-staging.cerbanimo.workers.dev') throw new Error('Staging Guild must use the isolated staging money edge.');
+          if (/civweave-core\.cerbanimo\.workers\.dev/.test(String(config.vars?.CIVWEAVE_CORE_ORIGIN || ''))) throw new Error('Refusing production money edge from staging.');
+          if (config.vars?.NODE_DOMAIN !== 'nodes.civweave.invalid') throw new Error('Staging fabric routing must remain on the reserved .invalid namespace; public payment callbacks are overridden only in the staging entry wrapper.');
           NODE
 
       - name: Verify Cloudflare authentication
@@ -69,6 +76,25 @@ jobs:
 
       - name: Deploy isolated Worker and Durable Objects
         run: npx wrangler deploy --config cloudflare/node-cloud/wrangler.staging.jsonc
+
+      - name: Attach isolated core trust binding when available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if curl --fail --silent --show-error "$STAGING_CORE_ORIGIN/api/money-edge/status" >/tmp/staging-core-status.json 2>/dev/null; then
+            cp cloudflare/node-cloud/wrangler.staging.jsonc cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc
+            node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = 'cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc';
+          const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (config.name !== 'civweave-node-cloud-staging') throw new Error('Refusing non-staging Guild binding target.');
+          config.services = [{ binding: 'CORE', service: 'civweave-core-staging' }];
+          fs.writeFileSync(path, JSON.stringify(config, null, 2));
+          NODE
+            npx wrangler deploy --keep-vars --config cloudflare/node-cloud/wrangler.staging.bound.generated.jsonc
+          else
+            echo 'Isolated staging core does not exist yet; leaving CORE unbound until the Stripe sandbox deployment creates it.'
+          fi
 
       - name: Preserve session authority and ensure Guild shadow exists
         shell: bash
@@ -92,21 +118,27 @@ jobs:
           registered="$(node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
           const capacity = JSON.parse(readFileSync('/tmp/staging-capacity.json', 'utf8'));
-          process.stdout.write(Array.isArray(capacity.hostNodeIds) && capacity.hostNodeIds.includes('civweave-cloud') ? '1' : '0');
+          process.stdout.write(Array.isArray(capacity.hostNodeIds) && capacity.hostNodeIds.includes(process.env.STAGING_NODE_ID) ? '1' : '0');
           NODE
           )"
           if [ "$registered" != '1' ]; then
             operator_secret="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")"
             printf '%s\n' "$operator_secret" | npx wrangler secret put NODE_FABRIC_OPERATOR_TOKEN --config cloudflare/node-cloud/wrangler.staging.jsonc
-            curl --fail-with-body --silent --show-error \
-              -X POST "$STAGING_ORIGIN/api/fabric/nodes/$STAGING_NODE_ID" \
-              -H "authorization: Bearer $operator_secret" \
-              -H 'content-type: application/json' \
-              --data "{\"displayName\":\"Civweave Commons\",\"operatorId\":\"civweave-staging-shadow\",\"publicOrigin\":\"$STAGING_ORIGIN\"}" \
-              > /tmp/staging-register.json
+            registered_ok=0
+            for attempt in $(seq 1 12); do
+              status="$(curl --silent --show-error -o /tmp/staging-register.json -w '%{http_code}' \
+                -X POST "$STAGING_ORIGIN/api/fabric/nodes/$STAGING_NODE_ID" \
+                -H "authorization: Bearer $operator_secret" \
+                -H 'content-type: application/json' \
+                --data "{\"displayName\":\"Civweave Staging Guild\",\"operatorId\":\"civweave-staging-shadow\",\"publicOrigin\":\"$STAGING_ORIGIN\"}" || true)"
+              if [ "$status" = '200' ] || [ "$status" = '201' ]; then registered_ok=1; break; fi
+              if [ "$status" != '403' ]; then cat /tmp/staging-register.json >&2 || true; fi
+              sleep 2
+            done
+            test "$registered_ok" = '1' || { echo "Staging Guild registration did not accept the newly propagated operator secret (last HTTP ${status:-unknown})."; cat /tmp/staging-register.json >&2 || true; exit 9; }
           fi
 
-      - name: Verify four-seat isolated capacity
+      - name: Verify isolated community and paid-test capacity
         shell: bash
         run: |
           set -euo pipefail
@@ -117,16 +149,20 @@ jobs:
           const capacity = JSON.parse(readFileSync('/tmp/staging-capacity.json', 'utf8'));
           const manifestEnvelope = JSON.parse(readFileSync('/tmp/staging-manifest.json', 'utf8'));
           const manifest = manifestEnvelope.manifest || manifestEnvelope;
-          if (!Array.isArray(capacity.hostNodeIds) || !capacity.hostNodeIds.includes('civweave-cloud')) throw new Error('Staging Guild shadow was not registered.');
+          if (!Array.isArray(capacity.hostNodeIds) || !capacity.hostNodeIds.includes(process.env.STAGING_NODE_ID)) throw new Error('Staging Guild shadow was not registered.');
           if (capacity.environment !== 'staging' || capacity.stagingIsolatedGuildServer !== true) throw new Error('Capacity response is not staging-isolated.');
-          if (capacity.communitySeatLimit !== 4 || capacity.maxMembers !== 4) throw new Error(`Expected four staging seats, got ${capacity.communitySeatLimit}/${capacity.maxMembers}.`);
-          if (capacity.paidExpansionSeatsRemaining !== 0) throw new Error('Paid expansion must stay disabled in staging.');
-          if (manifest.nodeId !== 'civweave-cloud') throw new Error('Staging Guild manifest did not resolve civweave-cloud.');
+          if (capacity.stagingPaymentMode !== 'stripe-sandbox-only') throw new Error('Staging payment mode is not sandbox-only.');
+          if (capacity.communitySeatLimit !== Number(process.env.STAGING_COMMUNITY_SEAT_LIMIT)) throw new Error(`Expected ${process.env.STAGING_COMMUNITY_SEAT_LIMIT} community seats, got ${capacity.communitySeatLimit}.`);
+          if (capacity.paidExpansionSeatLimit !== Number(process.env.STAGING_PAID_SEAT_LIMIT)) throw new Error(`Expected ${process.env.STAGING_PAID_SEAT_LIMIT} paid test seats, got ${capacity.paidExpansionSeatLimit}.`);
+          if (capacity.maxMembers !== Number(process.env.STAGING_MAX_MEMBERS)) throw new Error(`Expected max ${process.env.STAGING_MAX_MEMBERS} staging members, got ${capacity.maxMembers}.`);
+          if (manifest.nodeId !== process.env.STAGING_NODE_ID) throw new Error(`Staging Guild manifest resolved ${manifest.nodeId || 'nothing'} instead of ${process.env.STAGING_NODE_ID}.`);
           console.log(JSON.stringify({
             ok: true,
             worker: 'civweave-node-cloud-staging',
             nodeId: manifest.nodeId,
             communitySeatLimit: capacity.communitySeatLimit,
+            paidTestSeatLimit: capacity.paidExpansionSeatLimit,
+            paidTestSeatsRemaining: capacity.paidExpansionSeatsRemaining,
             stagingMembers: capacity.nodeMembers,
             productionIsolation: true,
           }, null, 2));

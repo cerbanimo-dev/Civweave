@@ -70,12 +70,30 @@ assert.equal(prepared.cloudPairingCode,result.cloudPairingCode);
 assert.equal(prepared.membershipKey,result.membershipKey);
 assert.equal(prepared.deployUrl,cloudflareDeployUrl());
 
+const starterNodes=['northside-repair-a','northside-repair-b','northside-repair-c'].map(nodeId=>({
+  nodeId,
+  publicOrigin:`https://northside-edge.example/nodes/${nodeId}`,
+  runtime:'cloudflare-workers-ai',
+}));
 const claimCalls=[];
 globalThis.fetch=async(url,init={})=>{
   const target=new URL(String(url));
   if(target.pathname==='/api/guild/claim'&&init.method==='POST'){
     const body=JSON.parse(init.body);claimCalls.push({url:target.href,body});
-    return new Response(JSON.stringify({ok:true,claimed:true,guildId:'northside-repair',primaryOrigin:target.origin,primaryGateway:target.origin}),{status:200,headers:{'content-type':'application/json'}});
+    return new Response(JSON.stringify({
+      ok:true,
+      claimed:true,
+      guildId:'northside-repair',
+      primaryOrigin:target.origin,
+      primaryGateway:target.origin,
+      infrastructure:{
+        schema:'civweave.guild-cloud-fabric.v1',
+        status:'ready',
+        capacityOrigin:`${target.origin}/api/fabric/capacity`,
+        aiEnabled:true,
+        starterNodes,
+      },
+    }),{status:200,headers:{'content-type':'application/json'}});
   }
   throw new Error(`Unexpected fetch in mobile Guild test: ${target.href}`);
 };
@@ -92,6 +110,9 @@ assert.equal(attached.workerCreated,true);
 assert.equal(attached.cloudStage,'online');
 assert.equal(attached.primaryOrigin,'https://northside-edge.example');
 assert.equal(attached.cloudPairingCode,null);
+assert.equal(attached.cloudFabric.status,'ready');
+assert.equal(attached.cloudFabric.aiEnabled,true);
+assert.deepEqual(attached.cloudFabric.starterNodes.map(node=>node.nodeId),['northside-repair-a','northside-repair-b','northside-repair-c']);
 assert.equal(CivweavePocketGuildNodeV1.status().primaryOrigin,'https://northside-edge.example/');
 assert.equal(CivweavePocketGuildNodeV1.state().membershipKey,result.membershipKey);
 
@@ -100,6 +121,8 @@ assert.ok(attachment,'Cloudflare pairing must create a signed Guild edge attachm
 assert.equal(attachment.payload.guildId,'northside-repair');
 assert.equal(attachment.payload.primaryOrigin,'https://northside-edge.example');
 assert.equal(attachment.payload.workerCreated,true);
+assert.equal(attachment.payload.cloudFabric.status,'ready');
+assert.equal(attachment.payload.cloudFabric.starterNodes.length,3);
 assert.deepEqual(attachment.audience,['guild:northside-repair']);
 assert.ok(!JSON.stringify(attachment).includes(result.membershipKey),'The edge attachment object must not publish the synchronization key.');
 
@@ -109,23 +132,41 @@ assert.equal(saved.workerCreated,true);
 assert.equal(saved.cloudAttached,true);
 assert.equal(saved.downloadOriginUsedAsBackend,false);
 assert.equal(saved.cloudPairingCode,null);
+assert.equal(saved.cloudFabric.status,'ready');
+assert.equal(saved.cloudFabric.starterNodes.length,3);
 assert.ok(!JSON.stringify(saved).includes('guild-A.example'));
 
 const templateSource=readFileSync(new URL('../cloudflare/mobile-guild-edge/src/index.mjs',import.meta.url),'utf8');
+const templateEntry=readFileSync(new URL('../cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs',import.meta.url),'utf8');
 const templateConfig=readFileSync(new URL('../cloudflare/mobile-guild-edge/wrangler.jsonc',import.meta.url),'utf8');
 const templatePackage=readFileSync(new URL('../cloudflare/mobile-guild-edge/package.json',import.meta.url),'utf8');
 const templateSecrets=readFileSync(new URL('../cloudflare/mobile-guild-edge/.dev.vars.example',import.meta.url),'utf8');
 assert.match(templateSource,/\/api\/guild\/claim/);
 assert.match(templateSource,/\/api\/envelopes/);
+assert.match(templateSource,/\/api\/fabric\/capacity/);
+assert.match(templateSource,/\/api\/fabric\/manifest/);
+assert.match(templateSource,/\/nodes\//);
 assert.match(templateSource,/membershipKeyHash/);
 assert.match(templateSource,/crypto\.subtle\.verify/);
+assert.match(templateSource,/CivweaveGuildCapacityState/);
+assert.match(templateSource,/CivweaveGuildNodeState/);
+assert.match(templateSource,/env\.AI\.run/);
+assert.match(templateSource,/Civweave Guild Cloud is online/);
 assert.doesNotMatch(templateSource,/from ['"]\.\.\//,'Deploy template must not import outside its subdirectory.');
+assert.match(templateEntry,/CivweaveGuildCapacityState/);
+assert.match(templateEntry,/CivweaveGuildNodeState/);
 assert.match(templateConfig,/CivweaveGuildEdgeState/);
+assert.match(templateConfig,/CivweaveGuildCapacityState/);
+assert.match(templateConfig,/CivweaveGuildNodeState/);
 assert.match(templateConfig,/GUILD_STATE/);
+assert.match(templateConfig,/CAPACITY/);
+assert.match(templateConfig,/NODES/);
+assert.match(templateConfig,/"ai"\s*:/);
 assert.match(templatePackage,/CIVWEAVE_GUILD_CLAIM_TOKEN/);
+assert.match(templatePackage,/"build"\s*:\s*"wrangler deploy --dry-run/);
 assert.match(templateSecrets,/CIVWEAVE_GUILD_CLAIM_TOKEN=/);
 
 CivweavePocketGuildNodeV1.stopPrimarySync();
 CivweaveEmergencyAiMeshV1.stop();
 
-console.log(JSON.stringify({ok:true,schema:'civweave.mobile-guild-create.test.v2',guildId:result.guildId,route:result.route,localFirst:true,cloudAttached:true,workerCreated:true,downloadOriginInherited:false,genesisObject:true,edgeAttachmentObject:true,deployTemplate:true}));
+console.log(JSON.stringify({ok:true,schema:'civweave.mobile-guild-create.test.v3',guildId:result.guildId,route:result.route,localFirst:true,cloudAttached:true,workerCreated:true,downloadOriginInherited:false,genesisObject:true,edgeAttachmentObject:true,deployTemplate:true,fullCloudFabric:true,starterNodes:3,workersAi:true}));

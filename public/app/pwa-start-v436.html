@@ -16,22 +16,22 @@
   <small>Installed Civweave</small>
   <h1>Opening the Commons…</h1>
   <div class="pulse" aria-hidden="true"></div>
-  <p id="status">Starting the Working Campus without changing the app worker during launch.</p>
-  <a id="recover" href="/?installed=1&source=pwa-start-v436-recovery">Open startup recovery</a>
+  <p id="status">Opening a cache-distinct Working Campus without touching the app worker.</p>
+  <a id="recover" href="/app/working-campus-v440.html?installed=1&version=1.0.163&source=pwa-start-recovery">Open fresh campus directly</a>
 </main>
 <script>
 (()=>{
 'use strict';
 const VERSION='1.0.163';
-const START_REVISION='pwa-start-v436';
+const START_REVISION='pwa-start-v440-cache-distinct-campus';
 const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
 const params=new URLSearchParams(location.search);
 const status=document.querySelector('#status');
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
-function rememberLaunch(){try{sessionStorage.setItem(LAUNCH_SESSION_KEY,'1');sessionStorage.setItem(BOOT_KEY,'1')}catch{}}
+function rememberLaunch(){try{sessionStorage.setItem(LAUNCH_SESSION_KEY,'1');sessionStorage.setItem(BOOT_KEY,'1');sessionStorage.removeItem('civweave.working-campus.return-recovery.v425')}catch{}}
 function installer(){const url=new URL('/app/index.html',location.origin);url.searchParams.set('install','required');url.searchParams.set('source',START_REVISION+'-browser');return url}
-function campus(){const url=new URL('/app/working-campus-v156.html',location.origin);url.searchParams.set('installed','1');url.searchParams.set('version',VERSION);url.searchParams.set('source',START_REVISION);const system=params.get('system');if(system)url.searchParams.set('system',system);return url}
+function campus(){const url=new URL('/app/working-campus-v440.html',location.origin);url.searchParams.set('installed','1');url.searchParams.set('version',VERSION);url.searchParams.set('source',START_REVISION);const system=params.get('system');if(system)url.searchParams.set('system',system);return url}
 function fail(message){document.documentElement.dataset.cwPwaStart='recovery';if(status)status.textContent=message}
 try{
   if(!installedDisplay()){
@@ -40,11 +40,11 @@ try{
   }
   rememberLaunch();
   const destination=campus();
-  const watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open startup recovery.'),5000);
+  const watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open the cache-distinct campus directly.'),5000);
   addEventListener('pagehide',()=>clearTimeout(watchdog),{once:true});
   location.replace(destination.href);
 }catch(error){fail(`Startup could not continue: ${error?.message||error}`)}
-globalThis.CivweavePwaStartV436=Object.freeze({version:VERSION,revision:START_REVISION,installedDisplay,rememberLaunch,campus});
+globalThis.CivweavePwaStartV436=Object.freeze({version:VERSION,revision:START_REVISION,installedDisplay,rememberLaunch,campus,freshCampusPath:'/app/working-campus-v440.html',cacheDistinctReleaseVersion:'/app/release-version-v2.js'});
 })();
 </script>
 </body>
