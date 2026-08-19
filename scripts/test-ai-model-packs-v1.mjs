@@ -49,29 +49,29 @@ test('large packs stay browser-managed inside the PWA',()=>{
   assert.match(settings,/Browser downloads queued/);
 });
 
-test('browser-managed packs expose every large file and support incremental PWA import',()=>{
-  assert.match(browserPack,/const RECEIPT_VERSION=2/);
-  assert.match(browserPack,/largeBytes:/);
-  assert.match(browserPack,/function queueNext\(/);
-  assert.match(browserPack,/function retryMissing\(/);
-  assert.match(browserPack,/function importFiles\(/);
-  assert.match(browserPack,/importedKeys/);
-  assert.match(browserPack,/startedKeys/);
+test('browser-managed packs recover the final file and report streaming import progress',()=>{
+  assert.match(browserPack,/const RECEIPT_VERSION=3/);
+  assert.match(browserPack,/function unimportedRecords\(/);
+  assert.match(browserPack,/function candidateScore\(/);
+  assert.match(browserPack,/const size=Number\(file\.size\|\|0\),min=Number\(record\.minBytes\|\|0\),exact=Number\(record\.sizeBytes\|\|record\.exactBytes\|\|0\)/);
+  assert.match(browserPack,/function putFile\(record,file,onProgress\)/);
+  assert.match(browserPack,/file\.stream\(\)\.getReader\(\)/);
+  assert.match(browserPack,/phase:'copying-large'/);
+  assert.match(browserPack,/streamingImportProgress:true/);
+  assert.match(browserPack,/relaxedMinimumOnlyMatching:true/);
   assert.match(browserPack,/partial:true/);
-  assert.match(browserPack,/explicitBrowserFiles:true/);
-  assert.match(browserPack,/partialImport:true/);
-  assert.match(browserPack,/cache\.put\(record\.url,new Response\(file/);
   assert.match(browserPack,/status:'ready'/);
-  assert.doesNotMatch(browserPack,/for\(let index=0;index<receipt\.large\.length;index\+\+\)/);
 
   assert.match(browserPackPwa,/Import downloaded files/);
-  assert.match(browserPackPwa,/Download next/);
-  assert.match(browserPackPwa,/data-cw-browser-pack-download-next/);
-  assert.match(browserPackPwa,/cw-browser-pack-file-input/);
+  assert.match(browserPackPwa,/Download missing again/);
+  assert.match(browserPackPwa,/Still missing:/);
+  assert.match(browserPackPwa,/cw-browser-pack-progress-track/);
+  assert.match(browserPackPwa,/Import progress/);
   assert.match(browserPackPwa,/current\.importFiles\(packId,files/);
   assert.match(browserPackPwa,/current\.prepare\(packId/);
-  assert.match(browserPackPwa,/explicitBrowserFiles:true/);
-  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.1\.1-explicit-taps/);
+  assert.match(browserPackPwa,/progressUi:true/);
+  assert.match(browserPackPwa,/missingFileRecovery:true/);
+  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.2\.0-progress-and-missing-file/);
   assert.match(shellAssets,/browser-pack-pwa-import-v1\.js/);
   assert.match(shellAssets,/browser-pack-download-v1\.js/);
 });
