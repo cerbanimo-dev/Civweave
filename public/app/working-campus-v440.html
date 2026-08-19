@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-civweave-system="civweave" data-build="working-campus-v440-cache-distinct-recovery" data-package-recovery="v440">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07162f">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>Civweave Working Campus · v1.0.163</title>
+<script>
+(()=>{
+'use strict';
+try{
+  sessionStorage.setItem('civweave.pwa.launch-session.v1','1');
+  sessionStorage.setItem('civweave.install-boundary.boot.v228','1');
+  sessionStorage.removeItem('civweave.working-campus.return-recovery.v425');
+}catch{}
+document.documentElement.dataset.civweaveFreshCampus='working-campus-v440';
+})();
+</script>
+<script src="/app/japanese-mode-v1.js?v=japanese-shell-language-v2"></script>
+<script src="/app/japanese-shell-copy-v1.js?v=japanese-shell-language-v2"></script>
+<script src="/app/document-lifecycle-v221.js?v=document-lifecycle-v222"></script>
+<link rel="stylesheet" href="/app/working-campus-v156.css?v=working-campus-v440">
+<link rel="stylesheet" href="/app/system-interface-v157.css?v=working-campus-v440">
+<link rel="stylesheet" href="/app/platform-experience-v160.css?v=working-campus-v440">
+<link rel="stylesheet" href="/app/new-user-onboarding-v1.css?v=working-campus-v440">
+<style>
+html,body{min-height:100%;background:#07162f}body{margin:0}main.app{min-height:100vh}
+#cw-v440-recovery{position:fixed;inset:14px;z-index:2147483647;display:none;place-items:center;padding:20px;background:#07111ff5;color:#fff;font:15px/1.45 system-ui,sans-serif}#cw-v440-recovery[data-open="1"]{display:grid}#cw-v440-recovery>div{width:min(620px,100%);padding:20px;border:1px solid #8af5d277;border-radius:18px;background:#0d1830;box-shadow:0 18px 60px #000b}#cw-v440-recovery h1{margin:0 0 8px;font:700 24px/1.15 Georgia,serif}#cw-v440-recovery p{color:#dbe7ee}#cw-v440-recovery a{display:inline-flex;padding:10px 13px;border:1px solid #8af5d299;border-radius:10px;background:#17394a;color:#fff;text-decoration:none;font-weight:800}
+</style>
+<script>
+(()=>{
+'use strict';
+const required=['main.app','main.app>header.top','main.app>.main','#conversation','#workspace'];
+function check(){
+  const missing=required.filter(selector=>!document.querySelector(selector));
+  if(!missing.length){document.documentElement.dataset.civweaveFreshCampusPaint='healthy';return}
+  const panel=document.querySelector('#cw-v440-recovery');
+  const detail=document.querySelector('#cw-v440-recovery-detail');
+  if(detail)detail.textContent=`Missing shell pieces: ${missing.join(', ')}`;
+  if(panel)panel.dataset.open='1';
+  document.documentElement.dataset.civweaveFreshCampusPaint='failed';
+}
+addEventListener('DOMContentLoaded',()=>setTimeout(check,5000),{once:true});
+})();
+</script>
+</head>
+<body>
+<main class="app">
+  <header class="top" aria-label="Civweave">
+    <button class="brand" id="brand-home" type="button">
+      <img src="/app/logos/civweave-symbol.svg" alt="Civweave">
+      <span class="brand-copy"><small>LOCAL WORKING CAMPUS <b class="version-chip">v1.0.163</b></small><strong>Civweave</strong></span>
+    </button>
+  </header>
+  <section class="main">
+    <aside class="guide">
+      <div class="guide-head"><img src="/app/assets/ai/weaveling.png" alt="Weaveling"><div><small class="muted">CENTRAL MIRROR</small><h1>Weaveling</h1><span class="muted">Intention → Quest → realms</span></div></div>
+      <div class="conversation" id="conversation" aria-live="polite"></div>
+      <form class="weaveling-chat-form" id="weaveling-chat-form">
+        <label for="weaveling-chat-input">Message Weaveling</label>
+        <textarea id="weaveling-chat-input" name="message" rows="3" maxlength="8000" placeholder="Tell Weaveling your intention, ask a question, or revise the Quest." required></textarea>
+        <button class="btn primary" id="weaveling-chat-send" type="submit">Send</button>
+        <small id="weaveling-chat-status" class="muted">Local history · deterministic by default</small>
+      </form>
+      <div class="guide-foot"><button class="btn" type="button" data-cw-onboarding-replay>Tour</button><button class="btn" id="export-button" type="button">Export Quest</button></div>
+    </aside>
+    <section class="work"><header class="work-head"><b id="view-title">Current Quest</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+<section id="cw-v440-recovery" role="alert"><div><h1>Civweave could not paint the fresh campus.</h1><p id="cw-v440-recovery-detail">The cache-distinct Working Campus did not finish rendering.</p><p>This page will not reload itself or enter the old recovery loop.</p><a href="/app/working-campus-v440.html?installed=1&version=1.0.163&retry=1">Retry fresh campus</a></div></section>
+<script src="/app/system-routes-v227.js?v=working-campus-v440"></script>
+<script src="/app/release-version-v2.js?v=working-campus-v440"></script>
+<script src="/app/platform-experience-v160.js?v=working-campus-v440"></script>
+<script src="/app/settings-gateway-v317.js?v=working-campus-v440"></script>
+<script src="/app/settings-local-route-v323.js?v=working-campus-v440"></script>
+<script src="/app/model-settings-controller-v173.js?v=working-campus-v440"></script>
+<script src="/app/mobile-ai-hardening-v302.js?v=working-campus-v440"></script>
+<script src="/app/family-ai-loader-v105.js?v=working-campus-v440"></script>
+<script src="/app/merlinites-semantic-planner-v164.js?v=working-campus-v440"></script>
+<script src="/app/working-campus-v156.js?v=working-campus-v440"></script>
+<script src="/app/working-campus-home-declutter-v1.js?v=working-campus-v440"></script>
+<script src="/app/guild-symbol-v1.js?v=working-campus-v440"></script>
+<script src="/app/new-user-onboarding-v1.js?v=working-campus-v440"></script>
+<script src="/app/guide-chat-surface-v350.js?v=working-campus-v440"></script>
+<script src="/app/working-campus-topbar-v243.js?v=working-campus-v440"></script>
+<script src="/app/themed-system-nav-v178.js?v=working-campus-v440"></script>
+<script src="/app/campus-background-download-v241.js?v=working-campus-v440"></script>
+<script src="/app/shared-review-surface-v234.js?v=working-campus-v440"></script>
+<script src="/app/shared-guide-surface-v236.js?v=working-campus-v440"></script>
+<script src="/app/local-object-mesh-v146.js?v=working-campus-v440" defer></script>
+<script type="module" src="/app/open-learning-media-cache-v1.mjs?v=working-campus-v440"></script>
+</body>
+</html>
