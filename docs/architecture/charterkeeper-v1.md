@@ -8,10 +8,18 @@ A **Charterkeeper** is a Guildkeeper who helps a new Guild come into existence a
 
 Charterkeeping has two supported routes:
 
-1. **Founder transfer** — the Charterkeeper prepares/creates the new Guild, trains an appointed Guildkeeper, then the child Guild accepts the handoff.
-2. **Mentor direct** — the Charterkeeper nominates and trains a future Guildkeeper, who creates the new Guild directly and then accepts the Charter relationship from that Guild.
+1. **Founder transfer** — the Charterkeeper prepares/creates the new Guild, trains an already-appointed Guildkeeper from the source Guild, then the child Guild accepts the handoff.
+2. **Mentor direct** — the Charterkeeper nominates an existing source-Guild member, Civweave formally appoints that member as a Guildkeeper, trains them, and the new Guildkeeper creates the child Guild directly before accepting the Charter relationship from that Guild.
 
 A Charter is a one-hop relationship between one source Guild and one child Guild. Charterkeeper revenue does not recurse through ancestors or create downstream commission chains.
+
+## Appointment gate
+
+A Charter nominee is not merely a text field. Civweave uses the existing Guildkeeper governance store, which already requires an appointed Guildkeeper to be an existing Guild member.
+
+For `founder-transfer`, Charter creation is blocked unless the nominee is already an appointed Guildkeeper in the source Guild. For `mentor-direct`, the Charterkeeper console first asks the source Guild to appoint the nominee; the appointment fails if the nominee is not already a Guild member. Only after this succeeds does the source Guild sign the Charter request with `nomineeAppointmentConfirmed=true`.
+
+The canonical money edge refuses a new Charter without that signed source-Guild appointment attestation and records the confirmation on the Charter row. This keeps appointment semantics consistent even if the UI is bypassed.
 
 ## Training and handoff
 
@@ -25,7 +33,7 @@ A Charter begins in `nominated` state. Before activation, the nominee must compl
 
 The source Charterkeeper Guild records completion. Completion alone does not activate revenue sharing. The proposed child Guild must exist as a separately registered Guild and sign its own acceptance with that Guild's money-edge identity. This provides a cryptographic handoff instead of treating a founder's declaration as sufficient.
 
-Only one Charterkeeper relationship may be active for a child Guild at a time. Either the source Charterkeeper Guild or the child Guild may end the Charter.
+Only one Charterkeeper relationship may be active for a child Guild at a time. The uniqueness constraint applies only to active Charters, so a legitimately ended Charter does not permanently prevent the child Guild from establishing a later Charterkeeper relationship. Either the source Charterkeeper Guild or the child Guild may end the Charter.
 
 ## Continued Charterkeeper eligibility
 
@@ -60,8 +68,10 @@ Charterkeeper settlements are linked to the underlying source transaction and ar
 
 ## Safety invariants
 
+- the nominee must be a real appointed Guildkeeper in the source Guild before the Charter opens;
 - no recursive/downline Charterkeeper commissions;
 - one active Charterkeeper per child Guild;
+- ended Charters do not permanently lock a child Guild;
 - multiple child Guilds per source Charterkeeper Guild are allowed;
 - child Guild acceptance is required before revenue participation begins;
 - Charterkeeper source-Guild control is rechecked at settlement time;
