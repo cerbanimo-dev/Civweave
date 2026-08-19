@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.3-parakeet-speech-executor-v1-joiner-shape-contract';
+const VERSION='1.0.4-parakeet-speech-executor-v1-output-shape-routing';
 if(globalThis.CivweaveParakeetSpeechExecutorV1?.version===VERSION)return;
 
 const MODEL_ID='parakeet-tdt-0.6b-v3-int8';
@@ -41,6 +41,15 @@ function typedInteger(type,values){
 }
 function product(values){return values.reduce((total,value)=>total*value,1)}
 function concreteShape(shape=[]){return Array.from(shape,dimension=>Number.isFinite(Number(dimension))&&Number(dimension)>0?Number(dimension):1)}
+function sameShape(a=[],b=[]){const left=Array.from(a,Number),right=Array.from(b,Number);return left.length===right.length&&left.every((value,index)=>value===right[index])}
+function isIntegerTensor(tensor){return /^u?int(8|16|32|64)$/.test(String(tensor?.type||''))}
+function outputEntries(session,outputs){
+  const rows=[],seen=new Set();
+  for(const name of session?.outputNames||[]){const tensor=outputs?.[name];if(tensor){rows.push({name,tensor});seen.add(name)}}
+  for(const [name,tensor] of Object.entries(outputs||{}))if(tensor&&!seen.has(name))rows.push({name,tensor});
+  return rows;
+}
+function outputSummary(rows){return rows.map(row=>`${row.name}:[${Array.from(row.tensor?.dims||[]).join(',')}]/${row.tensor?.type||'?'}`)}
 
 async function modelRows(){
   const packs=globalThis.CivweaveLocalModelPacksV1;
@@ -187,6 +196,30 @@ function resolveEncoderLayout(encoded,joiner){
   }
   return{layout:'BCT',channels:dim1,time:dim2,expectedChannels:null,index:(t,c)=>c*dim2+t};
 }
+function resolveEncoderOutputs(outputs,encoder,joiner){
+  const rows=outputEntries(encoder,outputs),inputName=joiner?.inputNames?.[0],meta=metaByName(joiner,inputName),expected=Number(meta?.shape?.[1]);
+  const candidates=rows.filter(row=>{const dims=Array.from(row.tensor?.dims||[],Number);return dims.length===3&&dims[0]===1&&(!Number.isFinite(expected)||expected<=0||dims[1]===expected||dims[2]===expected)});
+  if(!candidates.length)throw Object.assign(new Error(`Parakeet encoder produced no acoustic tensor compatible with joiner width ${Number.isFinite(expected)&&expected>0?expected:'unknown'}. Outputs: ${outputSummary(rows).join('; ')}`),{code:'PARAKEET_ENCODER_ACOUSTIC_OUTPUT_UNAVAILABLE',outputs:outputSummary(rows),expectedChannels:expected});
+  candidates.sort((a,b)=>product(Array.from(b.tensor.dims,Number))-product(Array.from(a.tensor.dims,Number)));
+  const acoustic=candidates[0],length=rows.find(row=>row!==acoustic&&isIntegerTensor(row.tensor)&&row.tensor?.data?.length===1)||rows.find(row=>row!==acoustic&&/length/i.test(row.name));
+  return{encoded:acoustic.tensor,encodedLength:length?.tensor||null,encodedName:acoustic.name,lengthName:length?.name||'',outputs:outputSummary(rows)};
+}
+function tensorMatchesMeta(tensor,meta){
+  const dims=Array.from(tensor?.dims||[],Number),shape=Array.from(meta?.shape||[]);
+  if(dims.length!==shape.length)return false;
+  return dims.every((value,index)=>{const expected=Number(shape[index]);return !Number.isFinite(expected)||expected<=0||expected===value});
+}
+function resolveDecoderOutputs(outputs,decoder,joiner,states=[]){
+  const rows=outputEntries(decoder,outputs),joinerName=joiner?.inputNames?.[1],joinerMeta=metaByName(joiner,joinerName);
+  let projection=rows.find(row=>!isIntegerTensor(row.tensor)&&tensorMatchesMeta(row.tensor,joinerMeta));
+  if(!projection){const width=Number(joinerMeta?.shape?.[1]);projection=rows.find(row=>{const dims=Array.from(row.tensor?.dims||[],Number);return !isIntegerTensor(row.tensor)&&dims.length===3&&dims[0]===1&&Number.isFinite(width)&&width>0&&dims.includes(width)})}
+  if(!projection)throw Object.assign(new Error(`Parakeet decoder produced no tensor compatible with joiner ${joinerName||'decoder input'}. Outputs: ${outputSummary(rows).join('; ')}`),{code:'PARAKEET_DECODER_PROJECTION_UNAVAILABLE',outputs:outputSummary(rows)});
+  const remaining=rows.filter(row=>row!==projection&&!isIntegerTensor(row.tensor)),nextStates=[];
+  for(const state of states){const index=remaining.findIndex(row=>sameShape(row.tensor?.dims||[],state?.dims||[]));if(index<0)break;nextStates.push(remaining.splice(index,1)[0].tensor)}
+  if(nextStates.length!==states.length)throw Object.assign(new Error(`Parakeet decoder recurrent-state outputs do not match its ${states.length} state inputs. Outputs: ${outputSummary(rows).join('; ')}`),{code:'PARAKEET_DECODER_STATE_OUTPUT_MISMATCH',outputs:outputSummary(rows),expectedStates:states.map(state=>Array.from(state?.dims||[]))});
+  return{output:projection.tensor,nextStates,projectionName:projection.name,outputs:outputSummary(rows)};
+}
+function resolveJoinerLogits(outputs,joiner){const rows=outputEntries(joiner,outputs).filter(row=>!isIntegerTensor(row.tensor));rows.sort((a,b)=>Number(b.tensor?.data?.length||0)-Number(a.tensor?.data?.length||0));if(!rows[0])throw new Error('Parakeet joiner returned no logits.');return rows[0].tensor}
 
 class ParakeetRuntime{
   constructor({ort,encoder,decoder,joiner,tokens}){this.ort=ort;this.encoder=encoder;this.decoder=decoder;this.joiner=joiner;this.tokens=tokens;this.blank=tokens.length-1}
@@ -195,21 +228,20 @@ class ParakeetRuntime{
     const feeds={},targetName=this.decoder.inputNames[0],lengthName=this.decoder.inputNames[1],targetMeta=metaByName(this.decoder,targetName),lengthMeta=metaByName(this.decoder,lengthName);
     feeds[targetName]=makeIntegerTensor(this.ort,targetMeta?.type||'int32',[token],[1,1]);feeds[lengthName]=makeIntegerTensor(this.ort,lengthMeta?.type||'int32',[1],[1]);
     for(let i=2;i<this.decoder.inputNames.length;i+=1)feeds[this.decoder.inputNames[i]]=states[i-2];
-    const outputs=await this.decoder.run(feeds),decoderOutput=outputs[this.decoder.outputNames[0]],nextStates=this.decoder.outputNames.slice(2).map(name=>outputs[name]);
-    if(!decoderOutput||nextStates.some(state=>!state))throw new Error('Parakeet decoder returned incomplete recurrent state.');
-    return{output:decoderOutput,nextStates};
+    const outputs=await this.decoder.run(feeds),resolved=resolveDecoderOutputs(outputs,this.decoder,this.joiner,states);
+    return{output:resolved.output,nextStates:resolved.nextStates};
   }
   async transcribe(samples,inputRate=SAMPLE_RATE){
     const resampled=await resampleTo16k(samples,inputRate);if(resampled.length<SAMPLE_RATE/5)return'';
     const padded=appendTail(resampled),{features,frames}=computeFbank(padded),input=transposeFeatures(features,frames),lengthName=this.encoder.inputNames[1],lengthMeta=metaByName(this.encoder,lengthName);
     const encoderFeeds={};encoderFeeds[this.encoder.inputNames[0]]=new this.ort.Tensor('float32',input,[1,MEL_BINS,frames]);encoderFeeds[lengthName]=makeIntegerTensor(this.ort,lengthMeta?.type||'int64',[frames],[1]);
-    const encoderOutputs=await this.encoder.run(encoderFeeds),encoded=encoderOutputs[this.encoder.outputNames[0]],encodedLength=encoderOutputs[this.encoder.outputNames[1]],layout=resolveEncoderLayout(encoded,this.joiner),time=layout.time,channels=layout.channels,limit=Math.min(time,tensorLength(encodedLength,time)),ids=[];
-    emitRuntimePhase('encoder-layout',{layout:layout.layout,encoderShape:Array.from(encoded.dims),joinerChannels:layout.expectedChannels||channels,time,channels});
+    const encoderOutputs=await this.encoder.run(encoderFeeds),resolvedEncoder=resolveEncoderOutputs(encoderOutputs,this.encoder,this.joiner),encoded=resolvedEncoder.encoded,layout=resolveEncoderLayout(encoded,this.joiner),time=layout.time,channels=layout.channels,limit=Math.min(time,tensorLength(resolvedEncoder.encodedLength,time)),ids=[];
+    emitRuntimePhase('encoder-layout',{layout:layout.layout,encoderOutput:resolvedEncoder.encodedName,encoderShape:Array.from(encoded.dims),joinerChannels:layout.expectedChannels||channels,time,channels});
     let states=this.initialStates(),prediction=await this.runDecoder(this.blank,states),t=0,tokensThisFrame=0;
     while(t<limit){
       const frame=new Float32Array(channels);for(let c=0;c<channels;c+=1)frame[c]=Number(encoded.data[layout.index(t,c)]);
       const joinerFeeds={};joinerFeeds[this.joiner.inputNames[0]]=new this.ort.Tensor('float32',frame,[1,channels,1]);joinerFeeds[this.joiner.inputNames[1]]=prediction.output;
-      const joinerOutputs=await this.joiner.run(joinerFeeds),logits=joinerOutputs[this.joiner.outputNames[0]];if(!logits)throw new Error('Parakeet joiner returned no logits.');
+      const joinerOutputs=await this.joiner.run(joinerFeeds),logits=resolveJoinerLogits(joinerOutputs,this.joiner);
       const vocabSize=this.tokens.length,outputSize=logits.data.length;if(outputSize<=vocabSize)throw new Error(`Parakeet TDT joiner has no duration logits (${outputSize} <= ${vocabSize}).`);
       const token=argmax(logits.data,0,vocabSize),skip=argmax(logits.data,vocabSize,outputSize);
       let advance=skip;
@@ -294,7 +326,7 @@ function register(){
   specialized.registerExecutor(MODEL_ID,executor,{kind:'speech-recognition',offline:true,modelId:MODEL_ID,runtime:'onnxruntime-web',decoder:'nemo-tdt-greedy'});return true;
 }
 
-const api=Object.freeze({version:VERSION,modelId:MODEL_ID,register,loadRuntime,executor,computeFbank,decodeTokens,resolveEncoderLayout});
+const api=Object.freeze({version:VERSION,modelId:MODEL_ID,register,loadRuntime,executor,computeFbank,decodeTokens,resolveEncoderLayout,resolveEncoderOutputs,resolveDecoderOutputs});
 globalThis.CivweaveParakeetSpeechExecutorV1=api;
 const registered=register();
 try{dispatchEvent(new CustomEvent('civweave:parakeet-speech-executor-ready',{detail:{version:VERSION,modelId:MODEL_ID,registered}}))}catch{}
