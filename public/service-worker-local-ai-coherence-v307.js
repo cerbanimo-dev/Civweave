@@ -1,10 +1,11 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v310-hard-local-guild-capacity';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v311-hard-local-settings-guild-capacity';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/settings-gateway-v317.js',
+  '/app/settings-local-route-v325.js',
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/local-chat-runtime-v295.js',
@@ -17,6 +18,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
 ]);
 const CW_LOCAL_AI_CRITICAL = [
   '/app/settings-gateway-v317.js',
+  '/app/settings-local-route-v325.js',
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/local-chat-runtime-v295.js',
