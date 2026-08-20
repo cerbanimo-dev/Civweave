@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-direct-shell-all-systems';
+const VERSION='1.0.1-direct-shell-all-systems';
 const NAV_ID='cw-themed-system-nav';
 const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
@@ -14,6 +14,7 @@ function installStyle(){
   const style=document.createElement('style');
   style.id=STYLE_ID;
   style.textContent=`
+html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 58px)!important}
 #${NAV_ID} #${ACTIONS_ID}{position:absolute;z-index:6;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);display:flex!important;align-items:center;justify-content:center;gap:7px;padding:5px;border:1px solid #d6ab4f66;border-radius:14px;background:linear-gradient(180deg,#1a1320f2,#100d17f2);box-shadow:0 5px 16px #0008;white-space:nowrap;pointer-events:auto}
 #${NAV_ID} #${ACTIONS_ID} button{all:unset;box-sizing:border-box;display:inline-flex!important;align-items:center;justify-content:center;gap:7px;min-width:96px;min-height:38px;padding:7px 12px;border:1px solid #f2d88755;border-radius:10px;background:#ffffff0c;color:#fff4ce;font:850 13px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #${NAV_ID} #${ACTIONS_ID} button:hover,#${NAV_ID} #${ACTIONS_ID} button:focus-visible{border-color:#8af5d299;background:#8af5d217;outline:none}
