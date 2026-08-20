@@ -7,6 +7,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const installerBridge = read('public/app/installer-repair-only-v2.js');
 const legacyAlias = read('public/app/installer-online-fallback-v225.js');
 const lobby = read('public/app/host-node-installer-lobby-v1.js');
+const statusSelection = read('public/app/host-node-status-selection-v1.js');
 const status = read('functions/api/host-node-status.ts');
 const search = read('functions/api/host-node-search.ts');
 const access = read('public/app/host-node-session-v1.js');
@@ -31,6 +32,10 @@ const checks = [
   [lobby.includes('<option value="free">Citizen only</option>') && lobby.includes('<option value="paid">Patron only</option>') && lobby.includes('<option value="both">Citizen or Patron</option>'), 'nearest search maps Citizen and Patron labels onto unchanged capacity filter values'],
   [lobby.includes("slotCount('free')") && lobby.includes('slots?.paid'), 'Citizen and Patron copy leaves underlying free/paid capacity contract unchanged'],
   [access.includes('civweave.host-node.credentials.v1') && access.includes('civweave.host-capacity.sessions.v1'), 'Guild login keeps persistent device credentials separate from tab-scoped capacity sessions'],
+  [statusSelection.includes("cloudflare-mobile-guild-edge") && statusSelection.includes("mobile-selection"), 'legacy Mobile Guilds use explicit device-selection compatibility instead of a nonexistent capacity login'],
+  [statusSelection.includes("stopImmediatePropagation") && statusSelection.includes("Use this Guild"), 'legacy Mobile Guild join clicks are intercepted before the dead session request and give visible feedback'],
+  [statusSelection.includes("predates Citizen/Patron login") && statusSelection.includes("Upgrade the Guild Worker"), 'legacy Mobile Guild selection explains that real member admission requires a Worker upgrade'],
+  [statusSelection.includes("civweave.host-node.selection.v1") && statusSelection.includes("federation-finder.physical-node-endpoint"), 'legacy Mobile Guild compatibility stores the same canonical Guild selection keys'],
   [search.includes('MAX_CAPACITY_PROBES = 24') && search.includes('exactLocationStored: false'), 'nearest search is bounded and does not retain exact device location'],
   [lobby.includes('will not invent capacity numbers'), 'local runtime reports unavailable membership capacity explicitly rather than fabricating slots'],
   [status.includes('/api/ai/node/capacity'), 'status proxy consumes Cloudflare capacity contract'],
