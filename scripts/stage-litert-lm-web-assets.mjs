@@ -13,6 +13,15 @@ const UTILS_PACKAGE='@litertjs/wasm-utils';
 const UTILS_VERSION='2.5.3';
 const SCHEMA='civweave.litert-lm-web-stage.v1';
 const MAX_CLOUDFLARE_ASSET_BYTES=24*1024*1024;
+// LiteRT-LM 0.14 ships two Asyncify fallback binaries around 31 MB each.
+// Cloudflare Pages rejects either file because its per-asset ceiling is 24 MiB.
+// Civweave's Gemma 4 fast lane is explicitly Chromium/JSPI + WebGPU; browsers
+// without JSPI fail the fast-lane capability probe and retain the existing ONNX
+// compatibility path. Do not stage the oversized fallbacks into Pages output.
+const CLOUDFLARE_OMITTED_WASM=Object.freeze([
+  'wasm/litertlm_wasm_asyncify_internal.wasm',
+  'wasm/litertlm_wasm_compat_asyncify_internal.wasm'
+]);
 const destination=path.join(root,'public','app','vendor','litert-lm');
 const manifestPath=path.join(destination,'stage-manifest.json');
 const force=process.argv.includes('--force');
@@ -29,11 +38,12 @@ async function packAndExtract(npm,spec,temp,label){const packDir=path.join(temp,
 async function walk(directory){const rows=[];for(const entry of await fsp.readdir(directory,{withFileTypes:true})){const target=path.join(directory,entry.name);if(entry.isDirectory())rows.push(...await walk(target));else if(entry.isFile())rows.push(target)}return rows}
 function browserRelative(from,to){let value=path.relative(path.dirname(from),to).split(path.sep).join('/');if(!value.startsWith('.'))value=`./${value}`;return value}
 async function rewriteBareImports(coreDist,utilsEntry){let rewrites=0;for(const file of await walk(coreDist)){if(!/\.m?js$/i.test(file))continue;let text=await fsp.readFile(file,'utf8');const relative=browserRelative(file,utilsEntry),before=text;text=text.replace(/(['"])@litertjs\/wasm-utils\1/g,(_,quote)=>`${quote}${relative}${quote}`);if(text!==before){rewrites+=(before.match(/(['"])@litertjs\/wasm-utils\1/g)||[]).length;await fsp.writeFile(file,text,'utf8')}if(/(?:from\s*|import\s*\()(['"])(?:@litertjs\/wasm-utils)\1/.test(text))throw new Error(`Bare wasm-utils import remained in ${path.relative(coreDist,file)}.`)}return rewrites}
+async function omitPagesIncompatibleFallbacks(){const omitted=[];for(const relative of CLOUDFLARE_OMITTED_WASM){const target=path.join(destination,...relative.split('/'));if(!await exists(target))continue;const stat=await fsp.stat(target);omitted.push({path:relative,bytes:stat.size,reason:'cloudflare-pages-asset-limit; chromium-jspi fast lane does not require asyncify fallback'});await fsp.rm(target,{force:true})}return omitted}
 async function fileInventory(){const rows=[];for(const file of await walk(destination)){if(file===manifestPath)continue;const stat=await fsp.stat(file);rows.push({path:path.relative(destination,file).split(path.sep).join('/'),bytes:stat.size})}return rows}
-async function staged(){if(!await exists(manifestPath))return false;try{const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));if(manifest.schema!==SCHEMA||manifest.corePackage!==CORE_PACKAGE||manifest.coreVersion!==CORE_VERSION||manifest.utilsPackage!==UTILS_PACKAGE||manifest.utilsVersion!==UTILS_VERSION)return false;if(manifest.maxCloudflareAssetBytes!==MAX_CLOUDFLARE_ASSET_BYTES||!Array.isArray(manifest.fileInventory))return false;const required=['dist/index.js','wasm','wasm-utils/dist/index.js'];if(!(await Promise.all(required.map(name=>exists(path.join(destination,name))))).every(Boolean))return false;return !manifest.fileInventory.some(row=>Number(row.bytes)>MAX_CLOUDFLARE_ASSET_BYTES)}catch{return false}}
+async function staged(){if(!await exists(manifestPath))return false;try{const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));if(manifest.schema!==SCHEMA||manifest.corePackage!==CORE_PACKAGE||manifest.coreVersion!==CORE_VERSION||manifest.utilsPackage!==UTILS_PACKAGE||manifest.utilsVersion!==UTILS_VERSION)return false;if(manifest.maxCloudflareAssetBytes!==MAX_CLOUDFLARE_ASSET_BYTES||!Array.isArray(manifest.fileInventory)||manifest.requiresJspi!==true||manifest.browserProfile!=='chromium-jspi-webgpu')return false;const required=['dist/index.js','wasm','wasm-utils/dist/index.js'];if(!(await Promise.all(required.map(name=>exists(path.join(destination,name))))).every(Boolean))return false;if((await Promise.all(CLOUDFLARE_OMITTED_WASM.map(name=>exists(path.join(destination,...name.split('/')))))).some(Boolean))return false;return !manifest.fileInventory.some(row=>Number(row.bytes)>MAX_CLOUDFLARE_ASSET_BYTES)}catch{return false}}
 
 async function main(){
-  if(!force&&await staged()){console.log(`[Civweave] LiteRT-LM Web ${CORE_VERSION} runtime is already staged.`);return}
+  if(!force&&await staged()){console.log(`[Civweave] LiteRT-LM Web ${CORE_VERSION} Chromium/JSPI runtime is already staged.`);return}
   const temp=await fsp.mkdtemp(path.join(os.tmpdir(),'civweave-litert-lm-'));
   try{
     const npm=process.platform==='win32'?'npm.cmd':'npm';
@@ -46,17 +56,18 @@ async function main(){
     await fsp.cp(coreDist,path.join(destination,'dist'),{recursive:true,force:true});
     await fsp.cp(coreWasm,path.join(destination,'wasm'),{recursive:true,force:true});
     await fsp.cp(utilsDist,path.join(destination,'wasm-utils','dist'),{recursive:true,force:true});
+    const omittedFiles=await omitPagesIncompatibleFallbacks();
     const stagedCoreDist=path.join(destination,'dist'),utilsEntry=path.join(destination,'wasm-utils','dist','index.js');
     if(!await exists(utilsEntry))throw new Error('Staged @litertjs/wasm-utils entry is missing.');
     const rewrittenBareImports=await rewriteBareImports(stagedCoreDist,utilsEntry);
     const inventory=await fileInventory(),oversized=inventory.filter(row=>row.bytes>MAX_CLOUDFLARE_ASSET_BYTES);
-    if(oversized.length)throw new Error(`LiteRT-LM Web ${CORE_VERSION} contains ${oversized.length} file(s) above Cloudflare Pages' 24 MiB asset limit:\n${oversized.map(row=>`- ${row.path}: ${row.bytes} bytes`).join('\n')}\nSplit or externalize these runtime assets before enabling this stage.`);
+    if(oversized.length)throw new Error(`LiteRT-LM Web ${CORE_VERSION} still contains ${oversized.length} file(s) above Cloudflare Pages' 24 MiB asset limit after removing the Chromium-unused Asyncify fallbacks:\n${oversized.map(row=>`- ${row.path}: ${row.bytes} bytes`).join('\n')}`);
     const wasmFiles=inventory.map(row=>row.path).filter(name=>name.startsWith('wasm/'));
     if(!wasmFiles.some(name=>/\.wasm$/i.test(name))||!wasmFiles.some(name=>/\.m?js$/i.test(name)))throw new Error('LiteRT-LM staged WASM directory is incomplete.');
     const files=inventory.map(row=>row.path);
-    await fsp.writeFile(manifestPath,`${JSON.stringify({schema:SCHEMA,corePackage:CORE_PACKAGE,coreVersion:CORE_VERSION,utilsPackage:UTILS_PACKAGE,utilsVersion:UTILS_VERSION,entry:'/app/vendor/litert-lm/dist/index.js',wasmRoot:'/app/vendor/litert-lm/wasm/',backend:'webgpu-gpu-artisan',selfHosted:true,rewrittenBareImports,wasmFiles,files,fileInventory:inventory,maxCloudflareAssetBytes:MAX_CLOUDFLARE_ASSET_BYTES,stagedAt:new Date().toISOString()},null,2)}\n`,'utf8');
+    await fsp.writeFile(manifestPath,`${JSON.stringify({schema:SCHEMA,corePackage:CORE_PACKAGE,coreVersion:CORE_VERSION,utilsPackage:UTILS_PACKAGE,utilsVersion:UTILS_VERSION,entry:'/app/vendor/litert-lm/dist/index.js',wasmRoot:'/app/vendor/litert-lm/wasm/',backend:'webgpu-gpu-artisan',browserProfile:'chromium-jspi-webgpu',requiresJspi:true,selfHosted:true,rewrittenBareImports,omittedFiles,wasmFiles,files,fileInventory:inventory,maxCloudflareAssetBytes:MAX_CLOUDFLARE_ASSET_BYTES,stagedAt:new Date().toISOString()},null,2)}\n`,'utf8');
     const totalBytes=inventory.reduce((sum,row)=>sum+row.bytes,0);
-    console.log(`[Civweave] Staged self-hosted LiteRT-LM Web ${CORE_VERSION}: ${files.length} files, ${wasmFiles.length} WASM runtime files, ${totalBytes} bytes total, max asset ${Math.max(...inventory.map(row=>row.bytes))} bytes, ${rewrittenBareImports} bare import rewrite(s).`);
+    console.log(`[Civweave] Staged self-hosted LiteRT-LM Web ${CORE_VERSION} Chromium/JSPI runtime: ${files.length} files, ${wasmFiles.length} WASM runtime files, ${totalBytes} bytes total, max asset ${Math.max(...inventory.map(row=>row.bytes))} bytes, ${omittedFiles.length} Asyncify fallback omission(s), ${rewrittenBareImports} bare import rewrite(s).`);
   }finally{await fsp.rm(temp,{recursive:true,force:true})}
 }
 main().catch(error=>{if(soft){console.warn(`[Civweave] LiteRT-LM Web staging skipped: ${error?.message||error}`);return}console.error(error);process.exitCode=1});
