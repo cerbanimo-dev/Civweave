@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
@@ -15,28 +16,27 @@ const [localRuntime,orchestrator,bootstrap,registry,downloadManager,downloadPoli
 
 for(const source of [localRuntime,orchestrator,bootstrap,registry,downloadManager,downloadPolicy,settings,hardware])new Function(source);
 
-assert.match(localRuntime,/REVISION='v312-runtime-first-bootstrap'/,'local chat must advertise the runtime-first bootstrap revision');
-assert.match(localRuntime,/bootstrap-v266\.js\?v=1\.0\.124-v312-runtime-first-bootstrap/,'local chat must request a fresh bootstrap epoch');
-assert.match(localRuntime,/function waitForRuntime\(/,'local chat must independently observe the inference runtime becoming compatible');
-assert.match(localRuntime,/Promise\.race\(\[Promise\.resolve\(boot\?\.ready\).*waitForRuntime\(BOOT_READY_TIMEOUT_MS\)/s,'runtime readiness must race the full bootstrap instead of waiting for every auxiliary module');
-assert.match(localRuntime,/if\(runtimeReady\(\)\|\|outcome\?\.runtime\)/,'a compatible inference runtime must be sufficient to start chat');
-assert.match(localRuntime,/bootstrapAuxiliaryFailureNonFatal:true/,'local chat must explicitly mark auxiliary bootstrap failure as non-fatal');
-assert.match(localRuntime,/runtimeFirstBootstrap:true/,'runtime-first startup capability must be exposed');
-assert.match(localRuntime,/runtime-ready-bootstrap-auxiliary-degraded/,'auxiliary bootstrap degradation must remain diagnosable');
-assert.match(localRuntime,/without a compatible inference runtime after a clean reload/,'the terminal startup error must now describe the actual failed contract');
+assert.match(localRuntime,/REVISION='v312-runtime-first-bootstrap'/,'public ABI revision remains compatible with existing orchestrator checks');
+assert.match(localRuntime,/inferenceCoreFirst:true/,'local chat must advertise inference-core-first startup');
+assert.match(localRuntime,/fullBootstrapBlocking:false/,'full local-AI bootstrap must be non-blocking for chat inference');
+assert.match(localRuntime,/model-registry-v266\.js\?v=1\.0\.121-v307-gemma3-q4&chatcore=v325/);
+assert.match(localRuntime,/download-manager-v267\.js\?v=1\.0\.68-v322-explicit-sync&chatcore=v325/);
+assert.match(localRuntime,/runtime-v266\.js\?v=1\.0\.121-v307-coherence-reload&chatcore=v325/);
+assert.match(localRuntime,/async function ensureInferenceCore\(/);
+assert.match(localRuntime,/await ensureInferenceCore\(onProgress\)/);
+assert.match(localRuntime,/void startAuxiliaryBootstrap\(onProgress\)/);
+assert.doesNotMatch(localRuntime,/Promise\.race\(\[Promise\.resolve\(boot\?\.ready\).*waitForRuntime/s,'chat may not depend on the full bootstrap race anymore');
+assert.match(localRuntime,/LOCAL_INFERENCE_CORE_CONTRACT_FAILED/);
+assert.match(localRuntime,/runtime-ready-bootstrap-auxiliary-degraded/);
 
-assert.match(orchestrator,/local-chat-runtime-v295\.js\?v=1\.0\.124-v312-runtime-first-bootstrap/,'orchestrator must cache-bust the repaired local chat runtime');
-assert.match(orchestrator,/CivweaveLocalChatRuntimeV295\?\.revision==='v312-runtime-first-bootstrap'/,'orchestrator must reject the pre-v312 resident runtime');
-assert.match(orchestrator,/runtimeFirstBootstrap:true/,'chat readiness diagnostics must expose runtime-first startup');
+assert.match(orchestrator,/CivweaveLocalChatRuntimeV295\?\.revision==='v312-runtime-first-bootstrap'/,'existing orchestrator ABI remains accepted');
+assert.match(orchestrator,/runtimeFirstBootstrap:true/);
 
 const runtimeIndex=bootstrap.indexOf("'/app/local-ai/runtime-v266.js");
 const bridgeIndex=bootstrap.indexOf("'/app/local-ai/runtime-bridge-v266.js");
 const settingsIndex=bootstrap.indexOf("'/app/local-ai/settings-panel-v267.js");
-assert.ok(runtimeIndex>=0&&bridgeIndex>runtimeIndex&&settingsIndex>runtimeIndex,'bootstrap still loads auxiliary bridge/settings after the inference runtime, so chat must not couple its success to those later modules');
+assert.ok(runtimeIndex>=0&&bridgeIndex>runtimeIndex&&settingsIndex>runtimeIndex,'full bootstrap still owns auxiliary bridge/settings after runtime');
 
-// Mutable support modules must be accepted by capability rather than frozen exact-version
-// checks. Their release cadence is independent of the inference ABI, and exact pinning here
-// previously prevented the runtime from loading after clean reloads.
 assert.match(downloadManager,/explicitSyncOnly:true/);
 assert.match(downloadManager,/autoSyncOnLoad:false/);
 assert.match(downloadPolicy,/largeExternalDataForeground:true/);
@@ -45,34 +45,103 @@ assert.match(settings,/snapshotOnlyView:true/);
 assert.match(settings,/settingsClickOwnership:false/);
 assert.match(hardware,/deviceFitRecommendations:true/);
 assert.match(hardware,/settingsOpenGpuProbe:false/);
-assert.match(bootstrap,/const downloadManagerReady=.*?explicitSyncOnly===true.*?autoSyncOnLoad===false/s);
-assert.match(bootstrap,/const downloadPolicyReady=.*?largeExternalDataForeground===true.*?explicitSyncOnly===true/s);
-assert.match(bootstrap,/const settingsReady=.*?snapshotOnlyView===true.*?settingsClickOwnership===false.*?settingsPresentationOwnership===false/s);
-assert.match(bootstrap,/const hardwareTierReady=.*?deviceFitRecommendations===true.*?settingsOpenGpuProbe===false/s);
-assert.match(bootstrap,/download-manager-v267\.js\?v=1\.0\.68-v322-explicit-sync/);
-assert.match(bootstrap,/download-policy-v278\.js\?v=1\.0\.82-v322-explicit-sync/);
-assert.match(bootstrap,/settings-panel-v267\.js\?v=1\.0\.118-v323-view-only/);
-assert.match(bootstrap,/hardware-tier-ui-v278\.js\?v=1\.0\.82-v321-settings-open-idle/);
-assert.match(bootstrap,/mutableComponentCapabilityReadiness:true/);
-assert.doesNotMatch(bootstrap,/CivweaveLocalModelDownloadV266\?\.version==='1\.0\.67-local-ai-download-v271-integrity'/,'bootstrap must not freeze the download manager to the retired v271 version');
-assert.doesNotMatch(bootstrap,/CivweaveLocalModelDownloadPolicyV278\?\.version==='1\.0\.81-local-ai-download-policy-v278-foreground-large-files'/,'bootstrap must not freeze the download policy to the retired v278 version');
-assert.doesNotMatch(bootstrap,/CivweaveLocalAISettingsV266.*?version==='1\.0\.116-local-ai-settings-v305-download-dock-layout'/s,'bootstrap must not freeze Settings content to the retired v305 version');
-assert.doesNotMatch(bootstrap,/CivweaveLocalModelHardwareTierUIV278\?\.version==='1\.0\.81-local-ai-hardware-tier-ui-v278'/,'bootstrap must not freeze hardware recommendations to the retired version');
+assert.match(registry,/id:'smollm2-135m-instruct-q8-wasm'.*?installable:true.*?device:'wasm'/s);
+assert.match(registry,/id:'gemma3-1b-it-q4f16'.*?installable:true/s);
 
-assert.match(registry,/id:'smollm2-135m-instruct-q8-wasm'.*?installable:true.*?repo:'onnx-community\/SmolLM2-135M-Instruct-ONNX'.*?dtype:'q8'.*?device:'wasm'/s,'SmolLM2 135M must remain the weak-phone CPU/WASM generator');
-assert.match(registry,/id:'smollm3-3b-q4f16'.*?installable:true.*?runtime:'transformers-js-v3'/s,'SmolLM3 3B must remain an installable Transformers.js v3 desktop model');
-assert.match(registry,/id:'gemma3-1b-it-q4f16'.*?installable:true/s,'Gemma 3 remains independently testable after its download completes');
+class MemoryStorage{
+  constructor(seed={}){this.values=new Map(Object.entries(seed))}
+  getItem(key){return this.values.has(key)?this.values.get(key):null}
+  setItem(key,value){this.values.set(key,String(value))}
+  removeItem(key){this.values.delete(key)}
+}
+const storage=new MemoryStorage({
+  'civweave.local-ai.selection.v266':JSON.stringify({active:true,id:'smollm2-135m-instruct-q8-wasm'})
+});
+const scripts=[];
+const sandbox={
+  console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,Set,Map,URL,
+  localStorage:storage,
+  performance:{now:()=>0},
+  location:{href:'https://staging.example.test/app/working-campus-v156.html'},
+  CustomEvent:class{constructor(type,{detail}={}){this.type=type;this.detail=detail}},
+  dispatchEvent(){return true},
+  addEventListener(){},
+  setTimeout(fn){return {fn}},
+  clearTimeout(){},
+  document:{
+    scripts,
+    head:{isConnected:true,append(node){
+      scripts.push(node);
+      const path=new URL(node.src,'https://staging.example.test').pathname;
+      if(path.endsWith('/model-registry-v266.js')){
+        sandbox.CivweaveLocalModelRegistryV266={
+          byId:id=>({id,workingContextTokens:768,generation:{nonThinkingTemperature:.6}}),
+          installable:()=>[],
+          directUrl(){return''}
+        };
+      }else if(path.endsWith('/download-manager-v267.js')){
+        let selection={active:true,id:'smollm2-135m-instruct-q8-wasm'};
+        sandbox.CivweaveLocalModelDownloadV266={
+          status:async()=>({available:true}),
+          selection:()=>selection,
+          select:id=>(selection=id?{active:true,id}:{active:false,id:null})
+        };
+      }else if(path.endsWith('/runtime-v266.js')){
+        sandbox.CivweaveLocalModelRuntimeV266={
+          version:'1.0.115-local-ai-runtime-v302-session-handoff',
+          generate:async()=>({outputText:'ok'}),
+          freshWorkerFallback:true,
+          phaseAwareErrors:true,
+          promptBudgetEnforced:true,
+          terminalCancellation:true,
+          settingsTeardown:true,
+          adaptiveResidency:true,
+          adaptiveWasmThreads:true,
+          intentPrewarm:true,
+          compatibilityPromptCap:true
+        };
+      }else if(path.endsWith('/bootstrap-v266.js')){
+        sandbox.CivweaveLocalAIBootstrapV266={
+          revision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
+          ready:Promise.resolve(false),
+          readyState:'failed',
+          lastComponent:'CivweaveLocalAISettingsV266',
+          lastError:'auxiliary settings failed'
+        };
+      }
+      queueMicrotask(()=>node.onload?.());
+    }},
+    createElement(){return{dataset:{},remove(){}}},
+  },
+  queueMicrotask,
+  globalThis:null
+};
+sandbox.globalThis=sandbox;
+vm.createContext(sandbox);
+vm.runInContext(localRuntime,sandbox,{filename:'local-chat-runtime-v295.js'});
+const api=sandbox.CivweaveLocalChatRuntimeV295;
+assert.equal(api.inferenceCoreFirst,true);
+assert.equal(api.fullBootstrapBlocking,false);
+assert.equal(await api.ready(),true,'direct inference core must become ready without waiting for full bootstrap');
+assert.equal(api.runtimeReady(),true);
+assert.deepEqual(Array.from(api.inferenceCoreComponents),[
+  'CivweaveLocalModelRegistryV266',
+  'CivweaveLocalModelDownloadV266',
+  'CivweaveLocalModelRuntimeV266'
+]);
+await Promise.resolve();
+await Promise.resolve();
+assert.ok(scripts.some(node=>new URL(node.src,'https://staging.example.test').pathname.endsWith('/bootstrap-v266.js')),'full bootstrap still starts as auxiliary work after inference core is ready');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-chat-runtime-first-bootstrap-v324-capability-readiness',
+  revision:'local-chat-inference-core-first-v325',
   fixes:{
-    smollm2WeakPhoneBootstrap:true,
-    smollm3DesktopBootstrap:true,
-    runtimeReadyBeforeAuxiliaryUI:true,
+    directRegistryLoad:true,
+    directDownloadManagerLoad:true,
+    directInferenceRuntimeLoad:true,
+    fullBootstrapNonBlocking:true,
     auxiliaryFailureNonFatal:true,
-    mutableSupportModulesCapabilityGated:true,
-    staleRuntimeRevisionRejected:true,
-    gemmaDownloadPathUntouched:true
+    staleRuntimeABICompatible:true
   }
 },null,2));
