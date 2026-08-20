@@ -35,10 +35,12 @@ assert.match(loader,/gemma4CompatibleQ4:true/);
 assert.match(loader,/gemma4CompatibleModelId:'gemma4-e2b-it-q4f16'/);
 assert.match(loader,/gemma4Q2RuntimeBlocked:true/);
 
-assert.match(serviceWorker,/local-ai-code-v313-gemma4-q4/);
+assert.match(serviceWorker,/CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v\d+-[^']+'/,'local AI coherence may advance while preserving Gemma compatibility');
 assert.ok((serviceWorker.match(/'\/app\/local-chat-bounded-recovery-v1\.js'/g)||[]).length>=2,'Gemma compatibility code must be eligible and warmable in the local-AI coherence cache');
 assert.ok((serviceWorker.match(/'\/app\/shared-guide-surface-v236\.js'/g)||[]).length>=2,'the guide loader itself must use current-code coherence');
 assert.match(serviceWorker,/gemma4CompatibleQ4Coherent: true/);
+assert.match(serviceWorker,/gemma4E4BQ4Coherent: true/,'current Gemma coherence must retain the E4B Q4 deep lane');
+assert.match(serviceWorker,/gemma4IndependentQ4UseCoherent: true/,'current Gemma coherence must retain independent E2B/E4B use');
 
 class MemoryStorage{
   constructor(seed={}){this.values=new Map(Object.entries(seed))}
@@ -133,7 +135,7 @@ assert.equal(serverCalls,0,'Gemma compatibility and bounded recovery must never 
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-chat-bounded-recovery-v1-gemma4-q4',
+  revision:'local-chat-bounded-recovery-v1-gemma4-q4-current-coherence',
   transformersJsVersionDistinguished:true,
   gemma4Q2RuntimeBlocked:true,
   gemma4Q4CompatibleLane:true,
