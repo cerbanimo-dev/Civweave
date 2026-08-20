@@ -23,7 +23,7 @@ let request=before({purpose:'civweave-guide-response-v141',config:{maxTokens:96,
 request=before({purpose:'civweave-guide-response-v141',config:{provider:'downloaded-local',route:'downloaded-local',maxTokens:900,stream:false},capabilityRequirements:{planning:true,structuredOutput:true},task:{text:'Make me a plan to create a community garden',requirements:{planning:true,structuredOutput:true}},messages:[{role:'system',content:'You are Weaveling.'},{role:'user',content:'Make me a plan to create a community garden'}]});
 assert.equal(request.config.maxTokens,1800);assert.equal(request.config.stream,true);assert.equal(request.__civweaveGuidePlanningContract,true);assert.equal(request.__civweaveGuideLocalExecutionContract,true);assert.match(request.messages[0].content,/produce the plan now/i);assert.match(request.messages[0].content,/do not say that the local AI model is incapable/i);
 request=before({purpose:'civweave-weaveling-intention-json-v190',executionProfile:'interactive',config:{provider:'downloaded-local',route:'downloaded-local',model:'gemma4-e2b-it-q4f16',stream:false},context:{guide:{system:'civweave'},userMessage:'Make me a plan to create a community garden'},messages:[{role:'system',content:'You are Weaveling.'},{role:'user',content:'Create the reviewable weave.'}],schema:{type:'object'}});
-assert.equal(api.weavelingStructuredPlanRequest(request),true);assert.equal(request.config.maxTokens,2400,'Weaveling structured local planning must get the larger budget');assert.equal(request.config.stream,true,'Weaveling structured local planning must stream');assert.equal(request.capabilityRequirements.planning,true);assert.equal(request.capabilityRequirements.structuredOutput,true);assert.equal(request.__civweaveGuidePlatformPlanning,'civweave-reviewable-weave-v1');assert.match(request.messages[0].content,/never replace the requested plan with commentary about model capability/i);
+assert.equal(api.weavelingStructuredPlanRequest(request),true);assert.equal(request.config.maxTokens,2400);assert.equal(request.config.stream,true);assert.equal(request.capabilityRequirements.planning,true);assert.equal(request.capabilityRequirements.structuredOutput,true);assert.equal(request.__civweaveGuidePlatformPlanning,'civweave-reviewable-weave-v1');assert.match(request.messages[0].content,/never replace the requested plan with commentary about model capability/i);
 request=before({purpose:'civweave-guide-response-v141',config:{provider:'downloaded-local',maxTokens:900,stream:false},context:{guide:{system:'living-school'}},task:{text:'I want to learn Tarot.'},messages:[{role:'system',content:'You are Moss.'},{role:'user',content:'I want to learn Tarot.'}]});
 assert.equal(request.artifactKind,'learning-path');assert.equal(request.__civweaveGuidePlatformPlanning,'living-school-learning-journey-v1');assert.equal(request.config.maxTokens,1800);assert.equal(request.config.stream,true);
 let delegated=0,platformRuns=0;
@@ -42,11 +42,15 @@ assert.ok(streamSource.includes('visibleWeavelingPlan'),'structured Weaveling pl
 assert.ok(streamSource.includes('function patchAssistant()'),'local-provider assistant bypass is not connected to the token renderer');
 assert.ok(streamSource.includes('localAuthorityTokenBridge:true'),'local-provider token bridge diagnostic is missing');
 assert.ok(streamSource.includes("dispatchEvent(new CustomEvent('civweave:model-event'"),'local assistant tokens are not published to the canonical model-event stream');
-assert.ok(localRuntimeSource.includes("maxNewTokens=1024"),'local chat runtime does not expose a long-output default');
+assert.ok(localRuntimeSource.includes('taskAwareOutputBudget:true'),'local chat runtime does not use task-aware output budgeting');
+assert.ok(localRuntimeSource.includes('planningOutputTokens:1800'),'local planning budget is below the planning floor');
+assert.ok(localRuntimeSource.includes('weavelingPlanningOutputTokens:2400'),'Weaveling local planning budget is below its planning floor');
 assert.ok(localRuntimeSource.includes('maxOutputTokens:4096'),'local chat runtime does not expose its long-output ceiling');
+assert.ok(localRuntimeSource.includes('localExecutionContractV2:true'),'local bypass path does not enforce deterministic capability authority');
+assert.match(localRuntimeSource,/never say that the local AI model cannot handle the request/i);
 assert.ok(!localRuntimeSource.includes('tps*30,48,128'),'retired 30-second/128-token truncation budget returned');
 assert.ok(!/maxNewTokens\s*=.*128/.test(localRuntimeSource),'local chat runtime still hard-caps output at 128 tokens');
 assert.ok(loaderSource.includes('/app/guide-generation-floor-v1.js'),'shared guide loader is not delivering the generation floor');
-assert.ok(loaderSource.includes('/app/local-chat-runtime-v295.js?v=1.0.118-streaming-long-output'),'shared guide loader is not cache-busting the long-output local runtime');
+assert.ok(loaderSource.includes('/app/local-chat-runtime-v295.js?v=1.0.119-task-aware-streaming'),'shared guide loader is not cache-busting the task-aware local runtime');
 assert.ok(loaderSource.includes('/app/guide-stream-thinking-v249.js?v=1.0.121-local-authority'),'shared guide loader is not delivering the local-authority token bridge');
-console.log('PASS local guide long-output authority, Weaveling/Moss platform planning, plan recovery, and visible v350 token streaming are active.');
+console.log('PASS local guide task-aware long output, capability authority, platform planning, and visible v350 token streaming are active.');
