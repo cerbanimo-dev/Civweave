@@ -91,6 +91,16 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
 const finite=value=>Number.isFinite(Number(value))&&Number(value)>=0?Math.floor(Number(value)):null;
 function normalizedOrigin(value){try{const url=new URL(clean(value,2000));return url.protocol==='https:'&&!url.username&&!url.password?url.origin:''}catch{return''}}
+function capacitySessions(){
+  try{
+    const rows=globalThis.CivweaveHostNodeSessionV1?.publicStatus?.()?.sessions;
+    if(Array.isArray(rows))return rows;
+  }catch{}
+  try{
+    const stored=parse(globalThis.sessionStorage?.getItem(HOST_SESSION_KEY),{});
+    return stored&&typeof stored==='object'?Object.values(stored):[];
+  }catch{return[]}
+}
 function selectedGuildRecord(){
   let saved={};
   try{saved=parse(globalThis.localStorage?.getItem(HOST_SELECTION_KEY),{})||{}}catch{}
@@ -112,16 +122,6 @@ function selectedGuildRecord(){
     session,
   });
 }
-function capacitySessions(){
-  try{
-    const rows=globalThis.CivweaveHostNodeSessionV1?.publicStatus?.()?.sessions;
-    if(Array.isArray(rows))return rows;
-  }catch{}
-  try{
-    const stored=parse(globalThis.sessionStorage?.getItem(HOST_SESSION_KEY),{});
-    return stored&&typeof stored==='object'?Object.values(stored):[];
-  }catch{return[]}
-}
 function latestGuideUsage(){
   const active=clean(globalThis.CivweaveGuideChatSurfaceV350?.state?.()?.activeSystem,80);
   const systems=[...new Set([active,...GUIDE_SYSTEMS].filter(Boolean))];
@@ -141,11 +141,12 @@ function guildUsageSnapshot(){
   const api=globalThis.CivweaveHostNodeSessionV1;
   let telemetry=selected.session?.telemetry||null;
   if(!telemetry)try{telemetry=api?.telemetryFor?.(selected.nodeId||selected.origin)||null}catch{}
-  if(!telemetry)telemetry=latestGuideUsage();
+  if(!telemetry&&selected.session)telemetry=latestGuideUsage();
   const remainingNeurons=finite(telemetry?.remainingNeurons);
   let approximateTurnsLeft=finite(telemetry?.approximateTurnsLeft);
-  const average=finite(telemetry?.averageNeuronsPerTurn)||DEFAULT_NEURONS_PER_CONVERSATION;
-  if(approximateTurnsLeft==null&&remainingNeurons!=null)approximateTurnsLeft=Math.max(0,Math.floor(remainingNeurons/Math.max(1,average)));
+  const measuredAverage=Number(telemetry?.averageNeuronsPerTurn);
+  const average=Number.isFinite(measuredAverage)&&measuredAverage>0?measuredAverage:DEFAULT_NEURONS_PER_CONVERSATION;
+  if(approximateTurnsLeft==null&&remainingNeurons!=null)approximateTurnsLeft=Math.max(0,Math.floor(remainingNeurons/average));
   return Object.freeze({
     revision:CHAT_USAGE_REVISION,
     guild:selected.displayName,
@@ -222,8 +223,8 @@ function installGuildChatUsage(){
   addEventListener('storage',event=>{if([HOST_SELECTION_KEY,HOST_ENDPOINT_KEY].includes(event.key))void refreshGuildUsage({network:true})});
   addEventListener('pageshow',()=>void refreshGuildUsage({network:true}));
   addEventListener('pagehide',()=>observer.disconnect(),{once:true});
-  const api=Object.freeze({revision:CHAT_USAGE_REVISION,snapshot:guildUsageSnapshot,render:renderGuildUsage,refresh:refreshGuildUsage});
-  globalThis.CivweaveGuildChatUsageV1=api;
+  const usageApi=Object.freeze({revision:CHAT_USAGE_REVISION,snapshot:guildUsageSnapshot,render:renderGuildUsage,refresh:refreshGuildUsage});
+  globalThis.CivweaveGuildChatUsageV1=usageApi;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>void refreshGuildUsage({network:true}),{once:true});else queueMicrotask(()=>void refreshGuildUsage({network:true}));
   return true;
 }
