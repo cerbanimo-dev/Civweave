@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-direct-shell-all-systems';
+const VERSION='1.0.2-direct-shell-all-systems-chat-icon';
 const NAV_ID='cw-themed-system-nav';
 const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
 const GUILD_SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
+const CHAT_SRC='/app/assets/chat-symbol-v1.png';
 const GUILD_RUNTIME_SRC='/app/guild-symbol-v1.js?v=guild-symbol-v1.5-standalone-guild-search-card';
 let guildRuntimePromise=null;
 
@@ -19,6 +20,8 @@ html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-he
 #${NAV_ID} #${ACTIONS_ID} button{all:unset;box-sizing:border-box;display:inline-flex!important;align-items:center;justify-content:center;gap:7px;min-width:96px;min-height:38px;padding:7px 12px;border:1px solid #f2d88755;border-radius:10px;background:#ffffff0c;color:#fff4ce;font:850 13px/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #${NAV_ID} #${ACTIONS_ID} button:hover,#${NAV_ID} #${ACTIONS_ID} button:focus-visible{border-color:#8af5d299;background:#8af5d217;outline:none}
 #${NAV_ID} #${ACTIONS_ID} img{display:block;width:1.55rem;height:1.55rem;object-fit:contain;flex:0 0 1.55rem}
+#cw-human-message-launcher-v1 .cw-human-face{font-size:0!important;color:transparent!important;text-shadow:none!important;background-color:#25283d!important;background-image:url('${CHAT_SRC}')!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
+#cw-human-message-launcher-v1 .cw-human-face>img{display:none!important}
 @media(max-width:700px){#${NAV_ID} #${ACTIONS_ID}{bottom:calc(100% + 2px);gap:5px;padding:4px}#${NAV_ID} #${ACTIONS_ID} button{min-width:86px;min-height:36px;padding:6px 10px;font-size:12px}}
 `;
   (document.head||document.documentElement).append(style);
@@ -59,12 +62,12 @@ function ensureMounted(){
   actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild and map');
   actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button>`;
   actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}});
-  nav.append(actions);nav.dataset.persistentActions='guilds-map-all-systems-v1';return true;
+  nav.append(actions);nav.dataset.persistentActions='guilds-map-all-systems-v2';return true;
 }
 
 const observer=new MutationObserver(()=>ensureMounted());
 function boot(){ensureMounted();observer.observe(document.documentElement,{childList:true,subtree:true});for(const delay of [80,300,900,1800])setTimeout(ensureMounted,delay)}
 addEventListener('pageshow',ensureMounted);addEventListener('focus',ensureMounted);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap});
+globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,chatIcon:CHAT_SRC});
 })();
