@@ -22,7 +22,7 @@ const sandbox={
   console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,Set,Map,URL,
   localStorage,
   location:{href:'https://staging.example.test/app/working-campus-v156.html',pathname:'/app/working-campus-v156.html'},
-  document:{scripts:[],head:{append(){}},createElement(){return{}},querySelector(selector){return selector.includes('data-minilm-decision-strip')?decisionNode:null}},
+  document:{scripts:[],head:{isConnected:true,append(){}},createElement(){return{dataset:{},remove(){}}},querySelector(selector){return selector.includes('data-minilm-decision-strip')?decisionNode:null}},
   CustomEvent:class{constructor(type,{detail}={}){this.type=type;this.detail=detail}},
   dispatchEvent(){return true},addEventListener(){},queueMicrotask,setTimeout,clearTimeout,
   setInterval(){return 1},clearInterval(){},
@@ -30,6 +30,10 @@ const sandbox={
 };
 sandbox.globalThis=sandbox;
 sandbox.CivweaveLocalChatRuntimeV295={
+  revision:'v312-runtime-first-bootstrap',
+  inferenceCoreFirst:true,
+  fullBootstrapBlocking:false,
+  async ready(){return true},
   async generate(request){
     localCalls+=1;
     assert.match(request.systemPrompt,/downloaded local AI model/);
@@ -54,10 +58,14 @@ assert.equal(api.localPinned(),true);
 assert.equal(api.localProviderPinned,true);
 assert.equal(api.cloudFallbackWhenLocal,false);
 assert.equal(api.deterministicFallbackWhenLocal,false);
+assert.equal(api.inferenceCoreFirst,true);
+assert.equal(api.staleLocalRuntimeEvicted,true);
 assert.equal(api.gemma4MobileRuntimeFloor,'4.3.0');
 assert.equal(api.bundledTransformersV4,'4.2.0');
-assert.match(loaderSource,/1\.0\.158-shared-guide-surface-v236-gemma4-runtime-floor/);
-assert.match(loaderSource,/1\.0\.2-gemma4-runtime-floor/);
+assert.match(loaderSource,/1\.0\.159-shared-guide-surface-v236-inference-core-first/);
+assert.match(loaderSource,/1\.0\.3-inference-core-first/);
+assert.match(loaderSource,/inferenceCoreFirst:true/);
+assert.match(loaderSource,/fullLocalBootstrapBlocking:false/);
 assert.match(loaderSource,/existing\.dataset\.civweaveReady==='true'/,'loader must evict a loaded dependency when its readiness/version contract is stale');
 
 const prompt='Can you make a plan to teach people to love themselves?';
@@ -106,10 +114,6 @@ await sandbox.CivweaveAssistantV141.respond({text:'Activate',systemId:'civweave'
 assert.equal(assistantPriorCalls,1,'safe local app controls must still reach the existing control layer');
 assert.equal(localCalls,3,'control actions must not be sent to the local language model');
 
-// Exact regression: Gemma 4 Q2F16 mobile needs Transformers.js 4.3.0, while the
-// current Civweave browser bundle is 4.2.0. The request must stay local. Prefer
-// an already-installed ordinary local model, while preserving the hidden Qwen
-// CPU compatibility model as a legitimate final local fallback candidate.
 let liveSelection={active:true,id:'gemma4-e2b-it-q2f16-mobile'};
 const registryModels=[
   {id:'gemma4-e2b-it-q2f16-mobile',label:'Gemma 4 E2B IT',runtime:'transformers-js-v4',installable:true,status:'device-test',fallbackIds:['qwen3-0.6b-q8-wasm']},
@@ -146,9 +150,9 @@ api.install();
 const patchedGemma=sandbox.CivweaveLocalModelRegistryV266.byId('gemma4-e2b-it-q2f16-mobile');
 assert.equal(patchedGemma.status,'runtime-blocked');
 assert.equal(patchedGemma.runtimeRequirement.minimumVersion,'4.3.0');
-assert.ok(patchedGemma.fallbackIds.includes('gemma3-1b-it-q4f16'),'Gemma 4 must have ordinary installed-local fallback candidates');
-assert.ok(patchedGemma.fallbackIds.includes('qwen3-0.6b-q8-wasm'),'the valid hidden Qwen CPU compatibility lane must be preserved');
-assert.equal(sandbox.CivweaveLocalModelRegistryV266.byId('qwen3-0.6b-q8-wasm')?.hidden,true,'hidden CPU compatibility model must remain addressable through the patched registry');
+assert.ok(patchedGemma.fallbackIds.includes('gemma3-1b-it-q4f16'));
+assert.ok(patchedGemma.fallbackIds.includes('qwen3-0.6b-q8-wasm'));
+assert.equal(sandbox.CivweaveLocalModelRegistryV266.byId('qwen3-0.6b-q8-wasm')?.hidden,true);
 
 const localFallback=await sandbox.CivweaveAssistantV141.respond({text:prompt,systemId:'civweave',history:[]});
 assert.equal(localFallback.provider,'downloaded-local');
@@ -158,7 +162,7 @@ assert.equal(localFallback.response.answer,'Fallback local answer from gemma3-1b
 assert.equal(localFallback.fallbackFrom?.provider,'downloaded-local');
 assert.equal(localFallback.fallbackFrom?.model,'gemma4-e2b-it-q2f16-mobile');
 assert.match(localFallback.fallbackFrom?.reason||'',/Transformers\.js 4\.3\.0/);
-assert.equal(sandbox.CivweaveLocalModelDownloadV266.selection().id,'gemma4-e2b-it-q2f16-mobile','temporary local fallback must restore the Hero-selected model after generation');
+assert.equal(sandbox.CivweaveLocalModelDownloadV266.selection().id,'gemma4-e2b-it-q2f16-mobile');
 assert.equal(serverCalls,1,'Gemma 4 compatibility fallback must never contact the server router');
 
 sandbox.CivweaveLocalModelDownloadV266.status=async()=>({available:false});
@@ -180,4 +184,20 @@ const serverAutoResult=await sandbox.CivweaveAssistantV141.respond({text:'ordina
 assert.equal(latePlannerCalls,priorLatePlannerCalls+1,'server-auto must retain the existing provider stack when local is not selected');
 assert.equal(serverAutoResult.provider,'cloudflare-workers-ai');
 
-console.log(JSON.stringify({ok:true,revision:'local-provider-authority-v1-gemma4-runtime-floor',downloadedLocalDirect:true,automaticGuideCloudBlocked:true,explicitGuildAllowed:true,localFailureStaysLocal:true,localDecisionStripImmediate:true,gemma4RuntimeFloor:true,gemma4InstalledLocalFallback:true,gemma4CpuCompatibilityPreserved:true,gemma4NoCloudFallback:true,staleAuthorityRefresh:true,serverAutoUnchanged:true},null,2));
+console.log(JSON.stringify({
+  ok:true,
+  revision:'local-provider-authority-v1-inference-core-first',
+  downloadedLocalDirect:true,
+  automaticGuideCloudBlocked:true,
+  explicitGuildAllowed:true,
+  localFailureStaysLocal:true,
+  localDecisionStripImmediate:true,
+  inferenceCoreFirst:true,
+  staleLocalRuntimeEvicted:true,
+  gemma4RuntimeFloor:true,
+  gemma4InstalledLocalFallback:true,
+  gemma4CpuCompatibilityPreserved:true,
+  gemma4NoCloudFallback:true,
+  staleAuthorityRefresh:true,
+  serverAutoUnchanged:true
+},null,2));
