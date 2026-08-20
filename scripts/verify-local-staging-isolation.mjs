@@ -34,6 +34,7 @@ const guardedProductionFiles = new Map([
     'civweave-core.cerbanimo.workers.dev',
   ])],
   ['functions/api/host-node-status.ts', new Set([
+    'civweave-core.cerbanimo.workers.dev',
     'civweave-node-cloud.cerbanimo.workers.dev',
     'civweave-host-node.onrender.com',
   ])],
