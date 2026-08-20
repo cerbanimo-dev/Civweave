@@ -1,11 +1,11 @@
 // GENERATED: direct five-system routes + Guild login runtime + local AI coherence + lifecycle-deferred caches + canonical persistent five-guide rail + Guild/Map actions on every system + no iframe family shell.
-// direct-page-shell-v1: each realm is the top-level document. The retired family iframe wrapper is not part of the package.
-// direct-shell-retirement-v1: cached iframe-shell routes are purged and redirected to direct system pages before generic cache handling.
+// persistent-single-shell-v1: all five system contexts live in the installed Working Campus shell. Retired realm entrypoints are context redirects, not separate app documents.
+// direct-shell-retirement-v1: cached iframe-shell routes are purged before generic cache handling.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail on all five systems.
 // guild-login-runtime-v1: Guild join clicks wait for the canonical capacity-session runtime instead of failing a bootstrap race.
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
 'use strict';
-importScripts('/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v228-direct-shell');
+importScripts('/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v229-single-shell-context');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v4-direct-shell-actions');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v219-lifecycle-deferred');
