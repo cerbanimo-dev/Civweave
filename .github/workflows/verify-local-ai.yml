@@ -9,12 +9,14 @@ on:
       - 'public/app/local-ai/settings-panel-v267.js'
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/gemma4-pack-extension-v1.js'
       - 'public/app/local-ai/package-revision-guard-v307.js'
       - 'public/app/local-chat-runtime-v295.js'
       - 'public/app/local-chat-bounded-recovery-v1.js'
       - 'public/app/local-chat-owner-v295.js'
       - 'public/app/experience-orchestrator-v232.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/model-settings-controller-v173.js'
       - 'public/app/working-campus-v440.html'
       - 'public/app/document-lifecycle-v221.js'
       - 'public/app/fast-interactive-runtime-v192.js'
@@ -31,6 +33,7 @@ on:
       - 'scripts/verify-local-ai-smooth-fit-v314.mjs'
       - 'scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs'
       - 'scripts/verify-local-chat-bounded-recovery-v1.mjs'
+      - 'scripts/verify-gemma4-pack-extension-v1.mjs'
       - '.github/workflows/verify-local-ai.yml'
   push:
     branches: [main, staging]
@@ -41,12 +44,14 @@ on:
       - 'public/app/local-ai/settings-panel-v267.js'
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/gemma4-pack-extension-v1.js'
       - 'public/app/local-ai/package-revision-guard-v307.js'
       - 'public/app/local-chat-runtime-v295.js'
       - 'public/app/local-chat-bounded-recovery-v1.js'
       - 'public/app/local-chat-owner-v295.js'
       - 'public/app/experience-orchestrator-v232.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/model-settings-controller-v173.js'
       - 'public/app/working-campus-v440.html'
       - 'public/app/document-lifecycle-v221.js'
       - 'public/app/fast-interactive-runtime-v192.js'
@@ -63,6 +68,7 @@ on:
       - 'scripts/verify-local-ai-smooth-fit-v314.mjs'
       - 'scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs'
       - 'scripts/verify-local-chat-bounded-recovery-v1.mjs'
+      - 'scripts/verify-gemma4-pack-extension-v1.mjs'
       - '.github/workflows/verify-local-ai.yml'
   workflow_dispatch:
 
@@ -90,12 +96,14 @@ jobs:
           node --check public/app/local-ai/settings-panel-v267.js
           node --check public/app/local-ai/bootstrap-v266.js
           node --check public/app/local-ai/model-registry-v266.js
+          node --check public/app/local-ai/gemma4-pack-extension-v1.js
           node --check public/app/local-ai/package-revision-guard-v307.js
           node --check public/app/local-chat-runtime-v295.js
           node --check public/app/local-chat-bounded-recovery-v1.js
           node --check public/app/local-chat-owner-v295.js
           node --check public/app/experience-orchestrator-v232.js
           node --check public/app/shared-guide-surface-v236.js
+          node --check public/app/model-settings-controller-v173.js
           node --check public/app/document-lifecycle-v221.js
           node --check public/app/family-ai-loader-v105.js
           node --check public/service-worker-local-ai-coherence-v307.js
@@ -109,6 +117,7 @@ jobs:
           node --check scripts/verify-local-ai-smooth-fit-v314.mjs
           node --check scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs
           node --check scripts/verify-local-chat-bounded-recovery-v1.mjs
+          node --check scripts/verify-gemma4-pack-extension-v1.mjs
       - name: Verify local AI contracts
         run: |
           node scripts/verify-local-ai-bootstrap-coherence-v307.mjs
@@ -117,4 +126,5 @@ jobs:
           node scripts/verify-local-ai-lifecycle-v313.mjs
           node scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs
           node scripts/verify-local-chat-bounded-recovery-v1.mjs
+          node scripts/verify-gemma4-pack-extension-v1.mjs
           node scripts/verify-local-ai-smooth-fit-v314.mjs
