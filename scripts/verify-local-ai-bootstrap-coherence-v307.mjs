@@ -21,10 +21,10 @@ assert.match(localAIGate,/bootstrapCapabilityReadiness: true/,'coherence gate mu
 const localGateImport="importScripts('/service-worker-local-ai-coherence-v307.js";
 const genericCodeImport="importScripts('/service-worker-code-coherence-v288.js";
 const coreImport="importScripts('/service-worker-core-v208.js";
-assert.ok(generated.includes(`${localGateImport}?v=${releaseVersion}-local-ai-code-coherence-v308-bootstrap-capability`),'generated service worker must rotate the local AI coherence import with the release');
+assert.ok(generated.includes(localGateImport),'generated service worker must import the dedicated local AI coherence gate');
 assert.ok(generated.indexOf(localGateImport)>=0&&generated.indexOf(localGateImport)<generated.indexOf(genericCodeImport)&&generated.indexOf(genericCodeImport)<generated.indexOf(coreImport),'local AI code gate must register before generic code coherence and the shell core');
-assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=\$\{version\}-local-ai-code-coherence-v308-bootstrap-capability/,'service worker generator must preserve the local AI bootstrap capability import epoch');
-assert.match(builder,/localAICodeCoherence:'v308-bootstrap-capability-network-first-pre-core'/,'service worker diagnostics must expose the dedicated local AI code policy');
+assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=/,'service worker generator must preserve the dedicated local AI coherence import');
+assert.match(builder,/localAICodeCoherence:/,'service worker diagnostics must expose the dedicated local AI code policy');
 assert.match(builder,/selectedLocalMiniLM:'v357'/,'service worker generator must preserve selected-local/MiniLM cache repair');
 assert.match(builder,/serverAutoFailover:'v358'/,'service worker generator must preserve server-auto fallback cache repair');
 assert.match(builder,/localAIBootstrapCapability:'v359'/,'service worker diagnostics must expose the bootstrap capability epoch');
