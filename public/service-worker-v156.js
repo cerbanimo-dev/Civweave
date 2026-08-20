@@ -9,7 +9,7 @@
 // flat-living-school-v203-memory-bridge-v205
 
 (() => {
-  const VERSION = 'legacy-v156-bridge-v209';
+  const VERSION = 'legacy-v156-bridge-v210-ai-quest-authority';
   const reply = (event, packet) => {
     try { event.ports?.[0]?.postMessage(packet); } catch {}
     try { event.source?.postMessage?.(packet); } catch {}
@@ -28,4 +28,4 @@
   });
 })();
 
-importScripts('/service-worker-v203.js?v=1.0.163-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425');
+importScripts('/service-worker-v203.js?v=1.0.164-ai-quest-authority-v210');
