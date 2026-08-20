@@ -1,9 +1,10 @@
-name: Verify Weaveling Community Garden and LiteRT Fast Lane
+name: Verify Weaveling Project Quests and LiteRT Fast Lane
 
 on:
   push:
     paths:
       - 'public/app/local-guide-control-bypass-v1.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
@@ -18,6 +19,7 @@ on:
   pull_request:
     paths:
       - 'public/app/local-guide-control-bypass-v1.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
@@ -44,5 +46,5 @@ jobs:
           node-version: '22'
       - name: Pack and stage pinned LiteRT web runtime
         run: node scripts/stage-litert-lm-web-assets.mjs --force
-      - name: Verify planner and fast-lane contracts
+      - name: Verify AI Quest routing and fast-lane contracts
         run: node scripts/verify-weaveling-community-garden-litert-v1.mjs
