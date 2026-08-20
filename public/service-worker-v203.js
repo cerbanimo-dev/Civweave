@@ -43,7 +43,7 @@ importScripts('/service-worker-chat-repair-v245.js?v=chat-avatar-visible-v346&pu
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
 // atomic-update-handoff-v427: updated workers normally remain waiting until the visible update controller explicitly activates them.
-// staging-installed-entry-takeover-v8-guild-login-runtime: rotate the one-shot staging marker so every staging install immediately adopts the current Guild login/session runtime.
+// staging-installed-entry-takeover-v8-guild-login-runtime: keep the one-shot staging refresh, but never seize a visible installer during the native desktop install gesture.
 const V203_STAGING_RECOVERY_HOST='civweave-staging.pages.dev';
 const V203_STAGING_RECOVERY_CACHE='cwrecovery-v440-guild-login-runtime';
 const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v8-guild-login-runtime';
@@ -52,8 +52,24 @@ async function v203StagingRecoveryPending(){
   if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;
   try{return !(await (await caches.open(V203_STAGING_RECOVERY_CACHE)).match(v203StagingRecoveryRequest()))}catch{return true}
 }
+async function v203VisibleInstallerClient(){
+  try{
+    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    return windows.some(client=>{
+      if(client.visibilityState!=='visible')return false;
+      try{
+        const url=new URL(client.url);
+        return url.origin===self.location.origin&&(url.pathname==='/app/'||url.pathname==='/app/index.html');
+      }catch{return false}
+    });
+  }catch{return false}
+}
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
-  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await v203StagingRecoveryPending())await self.skipWaiting()})())});
+  self.addEventListener('install',event=>{event.waitUntil((async()=>{
+    if(!(await v203StagingRecoveryPending()))return;
+    if(await v203VisibleInstallerClient())return;
+    await self.skipWaiting();
+  })())});
   self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('guild-login-runtime-v1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
