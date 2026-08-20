@@ -1,0 +1,50 @@
+(()=>{
+'use strict';
+const VERSION='1.0.0-litert-gemma4-fast-runtime-v1';
+const FAST_ID='gemma4-e2b-it-litert-web';
+const LEGACY_Q4_ID='gemma4-e2b-it-q4f16';
+const MODEL_CACHE='civweave-model-generative-v266';
+const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.14.0-civweave-v1';
+const WASM_ROOT='/app/vendor/litert-lm/wasm/';
+const ENGINE_CONTEXT_TOKENS=4096;
+if(globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===VERSION)return;
+let modulePromise=null,enginePromise=null,engine=null,wrapped=null,generationActive=false,lastMetrics=null;
+const now=()=>performance.now();
+const clean=(value,max=200000)=>String(value??'').slice(0,max);
+const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
+const selected=()=>{try{return globalThis.CivweaveLocalModelDownloadV266?.selection?.()||null}catch{return null}};
+const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
+const manager=()=>globalThis.CivweaveLocalModelDownloadV266;
+async function fastStatus(){try{return await manager()?.status?.(FAST_ID)}catch{return{available:false}}}
+function modelUrl(){const spec=registry()?.byId?.(FAST_ID);if(!spec)throw new Error('The LiteRT Gemma 4 model specification is not registered.');const artifact=spec.artifacts?.find?.(row=>row.required)||spec.artifacts?.[0];if(!artifact)throw new Error('The LiteRT Gemma 4 model artifact is not registered.');return{spec,artifact,url:registry().directUrl(spec,artifact.path)}}
+async function modelStream(){if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable for the LiteRT Gemma 4 model.');const {url}=modelUrl(),cache=await caches.open(MODEL_CACHE),response=await cache.match(url);if(!response?.ok||!response.body)throw Object.assign(new Error('Gemma 4 LiteRT Fast is not downloaded yet. Install the 2.0 GB performance upgrade from local model downloads first.'),{code:'LITERT_GEMMA4_NOT_INSTALLED'});return response.body}
+async function loadModule(){if(modulePromise)return modulePromise;modulePromise=import(MODULE_URL).then(async mod=>{if(!mod?.Engine||!mod?.Backend)throw new Error('The staged LiteRT-LM module is missing Engine or Backend.');if(typeof mod.getOrLoadGlobalLiteRtLm==='function')await mod.getOrLoadGlobalLiteRtLm(WASM_ROOT);else if(typeof mod.loadLiteRtLm==='function')await mod.loadLiteRtLm(WASM_ROOT);else throw new Error('The staged LiteRT-LM module cannot initialize its local WASM runtime.');return mod}).catch(error=>{modulePromise=null;throw error});return modulePromise}
+async function createEngine(){const mod=await loadModule();if(!navigator.gpu)throw Object.assign(new Error('Gemma 4 LiteRT Fast requires WebGPU.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});const stream=await modelStream(),started=now();emit('civweave:litert-gemma4-progress',{phase:'loading-model',model:FAST_ID,backend:'webgpu-gpu-artisan'});const value=await mod.Engine.create({model:stream,backend:mod.Backend.GPU_ARTISAN,mainExecutorSettings:{maxNumTokens:ENGINE_CONTEXT_TOKENS,advancedSettings:{enable_speculative_decoding:true,hint_kernel_batch_size:4,gpu_context_low_priority:false}},benchmarkEnabled:true},'Civweave local assistant');engine=value;emit('civweave:litert-gemma4-progress',{phase:'model-ready',model:FAST_ID,backend:'webgpu-gpu-artisan',loadMs:Math.round(now()-started),maxNumTokens:ENGINE_CONTEXT_TOKENS,speculativeDecoding:true});return value}
+async function ensureEngine(){if(engine)return engine;if(enginePromise)return enginePromise;enginePromise=createEngine().catch(error=>{engine=null;throw error}).finally(()=>{enginePromise=null});return enginePromise}
+function messageText(value){if(typeof value==='string')return clean(value,12000);return clean(value?.content??value?.text??'',12000)}
+function normalizedMessages(systemPrompt,messages=[]){const rows=[];const system=clean(systemPrompt,12000).trim();if(system)rows.push({role:'system',content:system});for(const row of (Array.isArray(messages)?messages:[]).slice(-10)){const role=/^(assistant|model)$/i.test(String(row?.role||''))?'assistant':'user',content=messageText(row).trim();if(content)rows.push({role,content})}let chars=rows.reduce((sum,row)=>sum+row.content.length,0);while(rows.length>2&&chars>16000){const removed=rows.splice(rows[0]?.role==='system'?1:0,1)[0];chars-=removed?.content?.length||0}return rows}
+function chunkText(chunk){if(!chunk)return'';if(typeof chunk==='string')return chunk;if(typeof chunk.content==='string')return chunk.content;if(Array.isArray(chunk.content))return chunk.content.map(part=>clean(part?.text??part?.content??'',12000)).join('');return clean(chunk.text??chunk.delta??'',12000)}
+function benchmarkMetrics(info){if(!info||typeof info!=='object')return{};const keys=['timeToFirstTokenInSecond','time_to_first_token','lastPrefillTokenCount','prefillTokenCount','lastPrefillTokensPerSec','prefillTokensPerSecond','lastDecodeTokenCount','decodeTokenCount','lastDecodeTokensPerSec','decodeTokensPerSecond','totalInitTimeInSecond'];const out={};for(const key of keys)if(info[key]!=null)out[key]=info[key];for(const [key,value] of Object.entries(info))if((/decode|prefill|token|init/i.test(key))&&(typeof value==='number'||typeof value==='string'))out[key]=value;return out}
+async function runFast(args={}){
+  if(generationActive)throw Object.assign(new Error('The LiteRT Gemma 4 engine is already generating.'),{code:'LOCAL_MODEL_BUSY'});generationActive=true;const started=now();let chat=null,firstTokenAt=0,index=0,text='';
+  try{
+    const status=await fastStatus();if(!status?.available)throw Object.assign(new Error('Gemma 4 LiteRT Fast is not installed.'),{code:'LITERT_GEMMA4_NOT_INSTALLED'});
+    const activeEngine=await ensureEngine(),rows=normalizedMessages(args.systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,index)=>index!==latestIndex):rows;
+    const maxOutputTokens=Math.max(64,Math.min(2048,Number(args.maxNewTokens)||1024));
+    chat=await activeEngine.createConversation({sessionConfig:{maxOutputTokens,samplerParams:{k:64,p:.95,temperature:1}},preface:{messages:preface},prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true});
+    emit('civweave:litert-gemma4-progress',{phase:'generating',model:FAST_ID,backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:ENGINE_CONTEXT_TOKENS});
+    const stream=chat.sendMessageStreaming(latest);
+    for await(const chunk of stream){const piece=chunkText(chunk);if(!piece)continue;if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:FAST_ID,backend:'litert-webgpu'})}catch{}}
+    let benchmark={};try{benchmark=benchmarkMetrics(await chat.getBenchmarkInfo())}catch{}
+    const completed=now(),generationMs=Math.round(completed-started),ttftMs=firstTokenAt?Math.round(firstTokenAt-started):null,decodeSeconds=Math.max(.001,(completed-(firstTokenAt||started))/1000),approxTokens=Math.max(1,Math.round(text.length/3.7)),measuredApproxTokensPerSecond=Number((approxTokens/decodeSeconds).toFixed(2));
+    const metrics={runtime:'litert-lm-web-0.14.0',backend:'webgpu-gpu-artisan',model:FAST_ID,generationMs,ttftMs,maxNumTokens:ENGINE_CONTEXT_TOKENS,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,speculativeDecoding:true,...benchmark};lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
+    return{status:'success',outputText:text.trim(),text:text.trim(),model:{id:FAST_ID,repo:'litert-community/gemma-4-E2B-it-litert-lm',runtime:'litert-lm-web'},backend:'webgpu',streamed:Boolean(args.onToken),metrics,executionId:FAST_ID,usage:null};
+  }finally{generationActive=false;if(chat)try{await chat.delete()}catch{}}
+}
+async function shouldAccelerate(){const pick=selected();if(!pick?.active||![FAST_ID,LEGACY_Q4_ID].includes(pick.id))return false;if(pick.id===FAST_ID)return true;return Boolean((await fastStatus())?.available)}
+function install(){const api=globalThis.CivweaveLocalChatRuntimeV295;if(!api?.generate)return false;if(api.__civweaveLiteRTGemma4FastV1===VERSION){wrapped=api;return true}const base=api,generate=async args=>{const pick=selected();if(!pick?.active||![FAST_ID,LEGACY_Q4_ID].includes(pick.id))return base.generate(args);let accelerate=false;try{accelerate=await shouldAccelerate()}catch{}if(!accelerate){if(pick.id===FAST_ID)throw Object.assign(new Error('Gemma 4 LiteRT Fast is selected but its optimized model file is not installed.'),{code:'LITERT_GEMMA4_NOT_INSTALLED'});return base.generate(args)}try{return await runFast(args)}catch(error){emit('civweave:litert-gemma4-fallback',{model:FAST_ID,selectedModel:pick.id,message:String(error?.message||error)});if(pick.id===LEGACY_Q4_ID)return base.generate(args);throw error}};const next=Object.freeze({...base,generate,__civweaveLiteRTGemma4FastV1:VERSION,litertGemma4Fast:true,litertModelId:FAST_ID,legacyAcceleratedModelId:LEGACY_Q4_ID});try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}wrapped=next;emit('civweave:litert-gemma4-fast-runtime-ready',{model:FAST_ID,transparentFor:LEGACY_Q4_ID});return true}
+async function unload(){try{await engine?.delete?.()}catch{}engine=null;enginePromise=null;lastMetrics=null;return true}
+for(const name of ['civweave:local-model-runtime-ready','civweave:gemma4-litert-fast-extension-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
+install();
+globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,fastModelId:FAST_ID,legacyQ4Id:LEGACY_Q4_ID,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,engineContextTokens:ENGINE_CONTEXT_TOKENS,install,runFast,fastStatus,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineLoading:Boolean(enginePromise),generationActive,lastMetrics})});
+})();
