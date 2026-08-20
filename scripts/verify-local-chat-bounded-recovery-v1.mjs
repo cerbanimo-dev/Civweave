@@ -3,13 +3,15 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [source,loader,campus]=await Promise.all([
+const [source,loader,campus,serviceWorker]=await Promise.all([
   read('public/app/local-chat-bounded-recovery-v1.js'),
   read('public/app/shared-guide-surface-v236.js'),
-  read('public/app/working-campus-v440.html')
+  read('public/app/working-campus-v440.html'),
+  read('public/service-worker-local-ai-coherence-v307.js')
 ]);
 new Function(source);
 new Function(loader);
+new Function(serviceWorker);
 
 assert.match(source,/1\.0\.0-local-chat-bounded-recovery-v1/);
 assert.match(source,/if\(recovering\)return 120000/,'Gemma 4 recovery attempts must not inherit the old 15-minute floor');
@@ -25,6 +27,9 @@ assert.ok(recoveryIndex>=0&&authorityIndex>recoveryIndex,'bounded recovery watch
 assert.match(loader,/1\.0\.160-shared-guide-surface-v236-bounded-local-recovery/);
 assert.match(loader,/boundedLocalFallbackRecovery:true/);
 assert.match(campus,/shared-guide-surface-v236\.js\?v=working-campus-v440-local-recovery-v326/,'Working Campus must cache-bust the shared loader carrying bounded recovery');
+assert.match(serviceWorker,/local-ai-code-v312-bounded-local-recovery/);
+assert.ok((serviceWorker.match(/'\/app\/local-chat-bounded-recovery-v1\.js'/g)||[]).length>=2,'bounded recovery must be both eligible and warmable in the local-AI coherence cache');
+assert.match(serviceWorker,/boundedLocalRecoveryCoherent: true/);
 
 class MemoryStorage{
   constructor(seed={}){this.values=new Map(Object.entries(seed))}
@@ -104,5 +109,6 @@ console.log(JSON.stringify({
   healthAwareInstalledFallbacks:true,
   registryRestored:true,
   noServerFallback:true,
-  campusCacheBust:true
+  campusCacheBust:true,
+  pwaCoherenceCache:true
 },null,2));
