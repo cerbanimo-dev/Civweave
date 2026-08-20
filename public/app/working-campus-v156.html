@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-civweave-system="civweave" data-build="working-campus-v199-template-planner" data-previous-build="working-campus-v184-v106" data-earlier-build="working-campus-v183-v106" data-settings-diagnostics="cwlog" data-package-recovery="v184">
+<html lang="en" data-civweave-system="civweave" data-build="working-campus-v199-ai-quest-authority" data-previous-build="working-campus-v199-template-planner" data-earlier-build="working-campus-v184-v106" data-settings-diagnostics="cwlog" data-package-recovery="v184">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -29,7 +29,7 @@
         <label for="weaveling-chat-input">Message Weaveling</label>
         <textarea id="weaveling-chat-input" name="message" rows="3" maxlength="8000" placeholder="Tell Weaveling your intention, ask a question, or revise the Quest." required></textarea>
         <button class="btn primary" id="weaveling-chat-send" type="submit">Send</button>
-        <small id="weaveling-chat-status" class="muted">Local history · deterministic by default</small>
+        <small id="weaveling-chat-status" class="muted">AI generation follows your selected model route</small>
       </form>
       <div class="guide-foot"><button class="btn" type="button" data-cw-onboarding-replay>Tour</button><button class="btn" id="export-button" type="button">Export Quest</button></div>
     </aside>
@@ -50,93 +50,32 @@
 <script id="working-campus-planner-v199">
 (()=>{
 'use strict';
-const VERSION='1.0.163-working-campus-planner-v199';
+const VERSION='1.1.0-working-campus-planner-v199-ai-request-only';
 const K='civweave.working-campus.v1';
-const I='civweave.intentions.v127';
-const Q='civweave.realm-inbox.v1';
-const PLANNING_SCRIPTS=[
-  ['/app/reward-policy-v198.js?v=working-campus-r1',()=>globalThis.CivweaveRewardPolicyV198],
-  ['/app/context-plan-composer-v198.js?v=working-campus-r1',()=>globalThis.CivweaveContextPlanComposerV198]
-];
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
-const now=()=>new Date().toISOString();
-const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-const clone=value=>typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value));
-const title=value=>clean(value).replace(/^(i want|i wish|we want|please|help me|let'?s)\s+(to\s+)?/i,'').replace(/[.!?]+$/,'').trim().replace(/^./,character=>character.toUpperCase()).slice(0,120)||'Move this intention forward';
-let planningPromise=null;
-let busy=false;
-function loadScript(src,ready){
-  if(ready?.())return Promise.resolve(true);
-  const path=new URL(src,location.href).pathname;
-  const existing=[...document.scripts].find(script=>script.src&&new URL(script.src).pathname===path);
-  if(existing)return new Promise((resolve,reject)=>{let ticks=0;const timer=setInterval(()=>{if(ready?.()){clearInterval(timer);resolve(true)}else if(++ticks>240){clearInterval(timer);reject(new Error(`${path} loaded without becoming ready.`))}},50)});
-  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.onload=()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without its runtime.`));script.onerror=()=>reject(new Error(`Could not load ${path}.`));document.head.append(script)});
-}
-async function ensurePlanner(){
-  if(globalThis.CivweaveRewardPolicyV198&&globalThis.CivweaveContextPlanComposerV198)return globalThis.CivweaveContextPlanComposerV198;
-  if(!planningPromise)planningPromise=(async()=>{for(const [src,ready] of PLANNING_SCRIPTS)await loadScript(src,ready);return globalThis.CivweaveContextPlanComposerV198})().catch(error=>{planningPromise=null;throw error});
-  return planningPromise;
-}
-function signals(text){
-  const value=clean(text).toLowerCase();
-  return{material:/material|resource|tool|equipment|budget|buy|borrow|trade|supply|transport|vendor|inventory/.test(value),software:/app|site|software|code|pwa|platform|interface/.test(value),game:/game|gameplay|player|sprite|mechanic/.test(value),group:/friend|team|group|community|together|collaborat|\bwe\b|\bour\b/.test(value),governance:/consent|agreement|rule|policy|vote|role|approval|boundary/.test(value)};
-}
 function profileFromForm(existing={}){
-  return{skill:document.querySelector('#skill-level')?.value||existing.skill||'new',learning:document.querySelector('#learning-mode')?.value||existing.learning||'practice',collaboration:document.querySelector('#collaboration-mode')?.value||existing.collaboration||'solo',hours:document.querySelector('#weekly-hours')?.value||existing.hours||'3-5',constraints:clean(document.querySelector('#constraints')?.value||existing.constraints)};
+  return{skill:document.querySelector('#skill-level')?.value||existing.skill||'new',learning:document.querySelector('#learning-mode')?.value||existing.learning||'practice',collaboration:document.querySelector('#collaboration-mode')?.value||existing.collaboration||'solo',hours:document.querySelector('#weekly-hours')?.value||existing.hours||'3-5',constraints:clean(document.querySelector('#constraints')?.value||existing.constraints,3000)};
 }
-function normalizePath(path){
-  const tasks=Array.isArray(path.tasks)?path.tasks:[];
-  return{...path,status:'ready',progress:[],steps:tasks.length?tasks.map(task=>`${task.title} — ${task.deliverable}`):path.steps||[]};
-}
-function governanceFor(planSignals){
-  return{realm:'anarchadia',title:planSignals.group||planSignals.governance?'Participation and consent agreement':'Personal passport entry',purpose:'Store the intention, boundaries, roles, and review date without turning them into an obligation.',agreements:['Keep activation explicit.','Preserve the right to revise or stop.','Require consent before spending, publishing, voting, or assigning work.','Set a review date.']};
-}
-function canonical(plan){
-  const list=parse(localStorage.getItem(I),[]),item={id:plan.id,kind:'weave-plan',text:plan.title,state:plan.state,done:false,createdAt:plan.createdAt,updatedAt:plan.updatedAt,plan:clone(plan)},index=list.findIndex(entry=>entry.id===item.id);
-  if(index<0)list.unshift(item);else list[index]=item;
-  localStorage.setItem(I,JSON.stringify(list.slice(0,100)));
-}
-function handoffs(plan){
-  const packets=plan.paths.map(path=>({id:uid('handoff'),schema:'civweave.handoff.v1',source:'civweave',target:path.realm,kind:path.type,title:path.title,status:'review',payload:{weaveId:plan.id,wish:plan.wish,path,profile:plan.profile,manualReviewRequired:true},createdAt:now()}));
-  packets.push({id:uid('handoff'),schema:'civweave.handoff.v1',source:'civweave',target:'anarchadia',kind:'intention-passport',title:plan.governance.title,status:'review',payload:{weaveId:plan.id,wish:plan.wish,governance:plan.governance,manualReviewRequired:true},createdAt:now()});
-  const old=parse(localStorage.getItem(Q),[]).filter(entry=>entry.payload?.weaveId!==plan.id);
-  localStorage.setItem(Q,JSON.stringify([...packets,...old].slice(0,120)));
-}
-function setBusy(value,message=''){
-  busy=value;
-  const button=document.querySelector('#build-plan');
-  if(button){button.disabled=value;button.textContent=value?'Building Quest with local templates…':'Build reviewable Quest'}
-  const status=document.querySelector('#weaveling-chat-status');
-  if(status&&message)status.textContent=message;
-}
-function showError(error){
-  const toast=document.querySelector('#toast');
-  if(toast){toast.textContent=`The reviewable Quest could not be built: ${clean(error?.message||error,280)}`;toast.hidden=false;setTimeout(()=>{toast.hidden=true},5000)}
+function setStatus(message){const status=document.querySelector('#weaveling-chat-status');if(status)status.textContent=message}
+function showError(error){const toast=document.querySelector('#toast');if(toast){toast.textContent=`AI Quest generation could not start: ${clean(error?.message||error,280)}`;toast.hidden=false;setTimeout(()=>{toast.hidden=true},5000)}}
+function questRequest(current,profile){
+  const wish=clean(current?.wish,6000);if(!wish)return'';
+  const details=[`Generate a reviewable Quest for this intention: ${wish}`,`Current skill level: ${profile.skill}.`,`Learning mode: ${profile.learning}.`,`Collaboration: ${profile.collaboration}.`,`Weekly availability: ${profile.hours}.`,profile.constraints?`Additional context and constraints: ${profile.constraints}`:''].filter(Boolean);
+  return details.join('\n');
 }
 async function buildPlan(){
-  if(busy)return;
-  const current=parse(localStorage.getItem(K),{}),wish=clean(current.wish);
-  if(!wish)return;
-  const profile=profileFromForm(current.profile||{}),planSignals=signals(wish),createdAt=now(),paths=[];
-  setBusy(true,'Deterministic templates are being ranked. MiniLM remains advisory and only runs when its local package is already available.');
-  try{
-    const composer=await ensurePlanner();
-    for(const spec of [{kind:'learning',realm:'living-school',count:6},{kind:'project',realm:'cerbanimo',count:6}])paths.push(normalizePath(await composer.composePath({text:`${wish}\nConstraints: ${profile.constraints}\nSkill: ${profile.skill}\nLearning mode: ${profile.learning}`,kind:spec.kind,realm:spec.realm,mode:'deterministic',semantic:true,count:spec.count})));
-    if(planSignals.material||planSignals.software||planSignals.game||profile.collaboration==='group')paths.push(normalizePath(await composer.composePath({text:`${wish}\nNeeded resources, access, timing, and constraints: ${profile.constraints}`,kind:'market',realm:'fellowfare',mode:'deterministic',semantic:true,count:7})));
-    const semanticUsed=paths.some(path=>path.planning?.semantic),plan={schema:'civweave.intention-weave.v1',id:uid('weave'),title:title(wish),wish,outcome:'Turn the Quest goal into an editable route with visible deliverables, inspectable evidence, explicit acceptance criteria, and a clear next checkpoint.',state:'review',createdAt,updatedAt:createdAt,profile,assumptions:['The first milestone proves a complete useful slice rather than merely naming a smallest task.','Roles and commitments remain revisable before activation.','Evidence supports reflection and adjustment, not personal worth.'],paths:paths.slice(0,3),governance:governanceFor(planSignals),requiresExplicitActivation:true,planning:{version:VERSION,engine:semanticUsed?'deterministic+minilm':'deterministic-lexical',miniLMRole:'template-ranking-only',settingsBoundary:'unchanged'},rewardPolicy:globalThis.CivweaveRewardPolicyV198?.status?.()||null};
-    const conversation=Array.isArray(current.conversation)?current.conversation.slice(-18):[];
-    conversation.push({role:'guide',text:`I built a reviewable Quest with ${plan.paths.length} substantive paths and ${plan.paths.reduce((total,path)=>total+(path.tasks?.length||0),0)} evidence-bearing tasks. ${semanticUsed?'The installed MiniLM package ranked the template pieces locally.':'The deterministic lexical fallback ranked the same template pools.'} Nothing is active yet.`,at:createdAt});
-    localStorage.setItem(K,JSON.stringify({...current,stage:'review',view:'quest',wish,profile,plan,conversation,updatedAt:createdAt}));
-    canonical(plan);handoffs(plan);
-    dispatchEvent(new CustomEvent('civweave:working-campus-plan-built',{detail:{planId:plan.id,engine:plan.planning.engine,pathCount:plan.paths.length}}));
-    location.reload();
-  }catch(error){setBusy(false,'The planner stayed local and did not change model settings.');showError(error);throw error}
+  const current=parse(localStorage.getItem(K),{}),profile=profileFromForm(current.profile||{}),message=questRequest(current,profile);if(!message)throw new Error('Tell Weaveling what you want to do before generating a Quest.');
+  const form=document.querySelector('#weaveling-chat-form'),input=document.querySelector('#weaveling-chat-input');if(!form||!input)throw new Error('Weaveling chat is not ready yet.');
+  input.value=message;setStatus('Sending this Quest request to the selected AI model…');
+  const submit=new Event('submit',{bubbles:true,cancelable:true}),cancelled=!form.dispatchEvent(submit);if(!cancelled)throw new Error('The Weaveling AI authoring runtime is still loading. Try again in a moment.');
+  return true;
 }
-document.addEventListener('click',event=>{const button=event.target.closest?.('#build-plan');if(!button)return;event.preventDefault();event.stopImmediatePropagation();buildPlan().catch(error=>console.error('[Civweave] Working Campus planner failed.',error))},true);
-const api=Object.freeze({version:VERSION,buildPlan,ensurePlanner,settingsBoundary:'untouched',planningScripts:PLANNING_SCRIPTS.map(([src])=>src)});
-globalThis.CivweaveWorkingCampusPlannerV199=api;
-dispatchEvent(new CustomEvent('civweave:working-campus-planner-ready',{detail:{version:VERSION,settingsBoundary:'untouched'}}));
+function syncButton(){const button=document.querySelector('#build-plan');if(button){button.textContent='Generate Quest with AI';button.dataset.questAuthoring='ai-required'}}
+document.addEventListener('click',event=>{const button=event.target.closest?.('#build-plan');if(!button)return;event.preventDefault();event.stopImmediatePropagation();void buildPlan().catch(error=>{showError(error);setStatus('No Quest was created. AI generation is required.')})},true);
+addEventListener('civweave:guide-workspace-ready',syncButton);addEventListener('pageshow',syncButton);new MutationObserver(syncButton).observe(document.documentElement,{subtree:true,childList:true});syncButton();
+globalThis.CivweaveWorkingCampusPlannerV199=Object.freeze({version:VERSION,buildPlan,aiQuestOnly:true,deterministicQuestCreation:false,persistenceAuthority:false});
+try{dispatchEvent(new CustomEvent('civweave:working-campus-planner-ready',{detail:{version:VERSION,aiQuestOnly:true,deterministicQuestCreation:false}}))}catch{}
 })();
 </script>
 <script src="/app/local-object-mesh-v146.js?v=open-media-cache-v1" defer></script>
