@@ -4,7 +4,8 @@
 const VERSION='1.0.0-guide-generation-floor-v1';
 const MIDDLEWARE_ID='guide-generation-floor-v1';
 const FLOOR_TOKENS=900;
-const PLANNING_CONTRACT='When the user asks for a plan, produce the plan now rather than announcing that you will plan it. The answer must be concrete and usable: state the objective, mark important assumptions or constraints, give an ordered sequence of phases or steps, name the people or roles involved, identify materials or resources and important dependencies or risks, define how success will be checked, and end with an immediate next action. Use reasonable explicit assumptions when details are missing instead of stopping at a generic preamble. Do not claim the plan was saved as a Civweave Quest or activated unless application context explicitly says that happened.';
+const PLANNING_FLOOR_TOKENS=1800;
+const PLANNING_CONTRACT='When the user asks for a plan, produce the plan now rather than announcing that you will plan it. The answer must be concrete and usable: state the objective, mark important assumptions or constraints, give at least six ordered steps for a practical project unless fewer steps are genuinely sufficient, name the people or roles involved, identify materials or resources and important dependencies or risks, define how success will be checked, and end with an immediate next action. Complete every sentence and every list item; never stop on a setup phrase or unfinished thought. Use reasonable explicit assumptions when details are missing instead of stopping at a generic preamble. Do not claim the plan was saved as a Civweave Quest or activated unless application context explicitly says that happened.';
 let registeredSpine=null;
 
 function guideRequest(request={}){
@@ -24,6 +25,12 @@ function planningRequest(request={}){
   return /\b(plan|planning|roadmap|step[- ]by[- ]step|steps to|how (?:do|can|should) (?:i|we)|organize|launch|create|build|start|set up)\b/i.test(text);
 }
 
+function localGuideRequest(request={}){
+  if(!guideRequest(request))return false;
+  const config=request.config||{},provider=String(config.provider||config.route||request.provider||request.route||'').trim().toLowerCase();
+  return /^(?:downloaded-local|generative-local|browser)$/.test(provider);
+}
+
 function injectPlanningContract(request={}){
   if(!planningRequest(request)||request.__civweaveGuidePlanningContract==='v1')return request;
   const messages=Array.isArray(request.messages)?request.messages.map(row=>({...row})):[];
@@ -36,11 +43,12 @@ function injectPlanningContract(request={}){
 
 function enforce(request={}){
   if(!guideRequest(request))return request;
-  const config={...(request.config||{})};
+  const planning=planningRequest(request),localStreaming=localGuideRequest(request),floorTokens=planning?PLANNING_FLOOR_TOKENS:FLOOR_TOKENS,config={...(request.config||{})};
   const current=Math.max(0,Number(config.maxTokens||config.max_tokens||request.maxTokens||0)||0);
-  config.maxTokens=Math.max(FLOOR_TOKENS,current);
-  config.generationBudgetFloorTokens=FLOOR_TOKENS;
-  return injectPlanningContract({...request,config,__civweaveGuideGenerationFloorTokens:FLOOR_TOKENS});
+  config.maxTokens=Math.max(floorTokens,current);
+  config.generationBudgetFloorTokens=floorTokens;
+  if(localStreaming)config.stream=true;
+  return injectPlanningContract({...request,config,__civweaveGuideGenerationFloorTokens:floorTokens,__civweaveGuideLocalStreaming:localStreaming});
 }
 
 function register(){
@@ -50,10 +58,10 @@ function register(){
   spine.register(MIDDLEWARE_ID,{before(request){
     const next=enforce(request||{});
     if(next===request)return request;
-    return {request:next,state:{floorTokens:FLOOR_TOKENS,planningContract:Boolean(next.__civweaveGuidePlanningContract)}};
+    return {request:next,state:{floorTokens:Number(next.__civweaveGuideGenerationFloorTokens||FLOOR_TOKENS),planningContract:Boolean(next.__civweaveGuidePlanningContract),localStreaming:Boolean(next.__civweaveGuideLocalStreaming)}};
   }},-1000);
   registeredSpine=spine;
-  try{dispatchEvent(new CustomEvent('civweave:guide-generation-floor-ready',{detail:{version:VERSION,floorTokens:FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,planningContract:true}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:guide-generation-floor-ready',{detail:{version:VERSION,floorTokens:FLOOR_TOKENS,planningFloorTokens:PLANNING_FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,planningContract:true,localGuideStreaming:true}}))}catch{}
   return true;
 }
 
@@ -65,15 +73,18 @@ register();
 globalThis.CivweaveGuideGenerationFloorV1=Object.freeze({
   version:VERSION,
   floorTokens:FLOOR_TOKENS,
+  planningFloorTokens:PLANNING_FLOOR_TOKENS,
   middleware:MIDDLEWARE_ID,
   priority:-1000,
   guideRequest,
   planningRequest,
+  localGuideRequest,
   injectPlanningContract,
   planningContract:PLANNING_CONTRACT,
   enforce,
   register,
   styleOnlyLengthClassification:true,
   planningContractV1:true,
+  localGuideStreaming:true,
 });
 })();
