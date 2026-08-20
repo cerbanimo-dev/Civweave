@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061019">
+<title>Opening Civweave</title>
+<script>
+(()=>{
+  'use strict';
+  const routes={
+    civweave:'/app/working-campus-v156.html',
+    'living-school':'/app/cabinets/living-school/index.html',
+    cerbanimo:'/app/realm-console-v140.html',
+    fellowfare:'/app/fellowfare-cabinet-v144.html',
+    anarchadia:'/app/anarchadia-console-v139.html'
+  };
+  const here=new URL(location.href);
+  const system=String(here.searchParams.get('system')||'civweave').toLowerCase();
+  const target=new URL(routes[system]||routes.civweave,location.origin);
+  target.searchParams.set('installed','1');
+  target.searchParams.set('navigation','five-system-route-contract-v228-direct-shell');
+  target.searchParams.set('source','retired-fullscreen-family-route');
+  location.replace(target.href);
+})();
+</script>
+</head>
+<body></body>
+</html>
