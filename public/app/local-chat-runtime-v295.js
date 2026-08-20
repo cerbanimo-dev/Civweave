@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.117-local-chat-runtime-v305-mobile-bootstrap-recovery';
+const VERSION='1.0.118-local-chat-runtime-v305-streaming-long-output';
 const REVISION='v312-runtime-first-bootstrap';
 const SEL='civweave.local-ai.selection.v266';
 const HEALTH='civweave.local-ai.health.v286';
@@ -47,13 +47,14 @@ function health(id){
   const all=globalThis.CivweaveLocalModelTestPulseV269?.health?.()||parse(localStorage.getItem(HEALTH),{});
   return all?.[id]||{};
 }
-function budget(id){
+function budget(id,requestedMaxTokens=0){
   const m=health(id).metrics||{};
   const tps=Math.max(0,Number(m.tokensPerSecond||m.benchmarkTokensPerSecond||0));
-  const maxNewTokens=tps?Math.round(clamp(tps*30,48,128)):64;
+  const explicit=Math.max(0,Number(requestedMaxTokens||0));
+  const maxNewTokens=Math.round(clamp(explicit||1024,256,4096));
   const cold=Math.max(0,Number(m.coldStartMs||0));
   const timeoutMs=Math.round(clamp(Math.max(90000,cold*1.5+60000),90000,180000));
-  return{maxNewTokens,timeoutMs,tps,coldStartMs:cold};
+  return{maxNewTokens,timeoutMs,tps,coldStartMs:cold,requestedMaxTokens:explicit||1024};
 }
 function runtimeReady(){
   const runtime=globalThis.CivweaveLocalModelRuntimeV266;
@@ -226,13 +227,13 @@ function idleLimit(phase){
   if(p==='generating'||p==='preparing-prompt')return 120000;
   return 150000;
 }
-async function generate({systemPrompt,messages,onToken,onProgress}){
+async function generate({systemPrompt,messages,onToken,onProgress,maxNewTokens=1024}){
   const pick=selected();
   if(!pick)throw Object.assign(new Error('No downloaded local model is selected.'),{code:'LOCAL_MODEL_NOT_SELECTED'});
   await ready(onProgress);
   const runtime=globalThis.CivweaveLocalModelRuntimeV266;
   const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(pick.id)||runtime.activeSpec?.()||{};
-  const b=budget(pick.id);
+  const b=budget(pick.id,maxNewTokens);
   const absoluteMs=Math.round(clamp(Math.max(900000,b.timeoutMs,Number(spec.healthTimeoutMs||0)),300000,900000));
   let idleTimer=0,hardTimer=0,watchReject=null,lastPhase='starting',stalled=false;
   const arm=phase=>{
@@ -289,6 +290,9 @@ globalThis.CivweaveLocalChatRuntimeV295=Object.freeze({
   downloadedLocalDirect:true,
   thinkingDisabled:true,
   streaming:true,
+  longOutputBudget:true,
+  defaultOutputTokens:1024,
+  maxOutputTokens:4096,
   boundedRecovery:true,
   boundedStartup:true,
   startupProgress:true,
