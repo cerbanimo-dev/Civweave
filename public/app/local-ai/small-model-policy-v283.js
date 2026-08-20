@@ -9,13 +9,13 @@ function profile(spec={},request={}){
   const purpose=purposeText(request),structured=Boolean(request.schema||request.responseFormat==='json'||request.responseFormat==='structured'),code=/code|patch|diff|program|script|implementation|refactor/.test(purpose),agentic=String(request.executionProfile||'interactive')==='agentic';
   const fallbackBudget=Number(spec.estimatedBytes||0)<=1_650_000_000?4096:2048;
   const promptTokenBudget=Math.max(768,Number(spec.workingContextTokens||fallbackBudget));
-  const explicit=Number(request.config?.maxTokens||request.maxTokens||0);
-  const defaultSlice=structured||code||agentic?384:256;
-  const initialSlice=clamp(explicit?Math.min(explicit,defaultSlice):defaultSlice,64,512);
+  const explicit=Number(request.config?.maxTokens||request.maxTokens||0),extendedStructured=Boolean(structured&&explicit>=1800);
+  const defaultSlice=extendedStructured?512:(structured||code||agentic?384:256);
+  const initialSlice=clamp(explicit?Math.min(explicit,defaultSlice):defaultSlice,64,extendedStructured?768:512);
   const continuationSlice=defaultSlice;
-  const defaultTotal=structured||code||agentic?1536:1024;
+  const defaultTotal=extendedStructured?Math.min(explicit,2048):(structured||code||agentic?1536:1024);
   const totalMax=clamp(explicit?Math.min(explicit,defaultTotal):defaultTotal,initialSlice,4096);
-  return Object.freeze({promptTokenBudget,initialSlice,continuationSlice,totalMax,maxPasses:4,structured,code,agentic});
+  return Object.freeze({promptTokenBudget,initialSlice,continuationSlice,totalMax,maxPasses:4,structured,code,agentic,extendedStructured});
 }
 function structure(textValue){
   const source=text(textValue),stack=[];let quoted=false,escaped=false;
@@ -77,7 +77,7 @@ function mergeContinuation(baseValue,nextValue){
   return base+next;
 }
 function continuationMessages(messages,partial,options={}){const rows=Array.isArray(messages)?messages.slice():[];rows.push({role:'assistant',content:text(partial)});rows.push({role:'user',content:continuationPrompt(options)});return rows}
-const api=Object.freeze({version:VERSION,profile,structure,looksAbrupt,parseStructured,structuredAnswer,guideEnvelope,guideAnswerIncomplete,validateCompletion,continuationPrompt,mergeContinuation,continuationMessages,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true});
+const api=Object.freeze({version:VERSION,profile,structure,looksAbrupt,parseStructured,structuredAnswer,guideEnvelope,guideAnswerIncomplete,validateCompletion,continuationPrompt,mergeContinuation,continuationMessages,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true,extendedStructuredBudget:true});
 globalThis.CivweaveLocalSmallModelPolicyV283=api;
-try{dispatchEvent(new CustomEvent('civweave:local-small-model-policy-ready',{detail:{version:VERSION,tokenBudgeting:true,adaptiveOutput:true,continuationValidation:true,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true}}))}catch{}
+try{dispatchEvent(new CustomEvent('civweave:local-small-model-policy-ready',{detail:{version:VERSION,tokenBudgeting:true,adaptiveOutput:true,continuationValidation:true,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true,extendedStructuredBudget:true}}))}catch{}
 })();
