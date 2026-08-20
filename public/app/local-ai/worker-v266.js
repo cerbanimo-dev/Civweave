@@ -1,4 +1,5 @@
 'use strict';
+const WORKER_REVISION='1.0.126-v315-gemma4-template-logits';
 const CACHE='civweave-model-generative-v266';
 const RUNTIME_CACHE='civweave-local-runtime-v287';
 const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
@@ -9,12 +10,13 @@ let hfRuntime=null,tokenizer=null,model=null,loaded=null,loading=null;
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
 const now=()=>performance.now();
 const post=(id,type,payload={})=>self.postMessage({id,type,...payload});
-const phase=(id,name,started,detail={})=>post(id,'progress',{progress:{phase:name,elapsedMs:Math.round(now()-started),...detail}});
+const phase=(id,name,started,detail={})=>post(id,'progress',{progress:{phase:name,elapsedMs:Math.round(now()-started),workerRevision:WORKER_REVISION,...detail}});
 const artifactFor=(spec,path)=>spec?.artifacts?.find?.(row=>row?.path===path)||null;
 const revisionFor=(spec,path)=>artifactFor(spec,path)?.revision||spec.revision;
 const remoteUrl=(spec,path)=>`https://huggingface.co/${spec.repo}/resolve/${encodeURIComponent(revisionFor(spec,path))}/${path}`;
 const runtimeAsset=spec=>spec?.runtimeAsset||TRANSFORMERS_V3;
 const wasmRoot=spec=>spec?.wasmRoot||WASM_V3;
+const isGemma4=spec=>/gemma[-_ ]?4/i.test(`${spec?.id||''} ${spec?.repo||''} ${spec?.label||''}`);
 function requestUrl(input){try{return typeof input==='string'?input:input?.url||String(input)}catch{return String(input||'')}}
 function cacheAdapter(cache,spec){
   const localPrefix=`/models/${spec.repo}/`,repoPrefix=`https://huggingface.co/${spec.repo}/resolve/`;
@@ -85,7 +87,8 @@ function runtimeProfile(hf,spec){
     forceSingleThread,
     wasmSimd:Boolean(wasm?.simd),
     workerInference:true,
-    threadedWasmEligible:Boolean(isolated&&wasmThreads>1)
+    threadedWasmEligible:Boolean(isolated&&wasmThreads>1),
+    workerRevision:WORKER_REVISION
   };
 }
 function annotate(error,stage,spec){const value=error instanceof Error?error:new Error(clean(error,1000));if(!value.phase)value.phase=stage;if(!value.model)value.model=spec?.id||'';if(!value.modelLabel)value.modelLabel=spec?.label||spec?.id||'';if(!value.backend)value.backend=spec?.device||'';return value}
@@ -117,6 +120,44 @@ async function configureRuntime(hf,cache,spec){
 }
 function progressReporter(id,name,started,base={}){let high=0;return value=>{const p=value||{},raw=Number(p.progress_total??p.progress),detail={...base,...p};if(Number.isFinite(raw)&&raw>=0){const pct=Math.max(0,Math.min(100,raw<=1?raw*100:raw));high=Math.max(high,pct);detail.artifactProgress=Number.isFinite(Number(p.progress))?Number(p.progress):null;detail.progress=high;detail.progressOverall=high}if(!detail.artifact&&p.file)detail.artifact=p.file;phase(id,name,started,detail)}}
 function externalDataSetting(spec){const rows=(spec?.artifacts||[]).filter(row=>/\.onnx_data$/i.test(String(row?.path||'')));return rows.length===1?true:false}
+function repairGemma4ChatTemplate(spec){
+  if(!isGemma4(spec)||typeof tokenizer?.chat_template!=='string')return{gemma4:false,patched:false,canonical:false};
+  const current=tokenizer.chat_template;
+  if(/not\s+enable_thinking\s*\|\s*default\(false\)/i.test(current)&&current.includes('<|channel>thought\\n<channel|>'))return{gemma4:true,patched:false,canonical:true};
+  const marker='{%- if add_generation_prompt -%}',modelTurn="{{- '<|turn>model\\n' -}}",start=current.lastIndexOf(marker);
+  if(start<0)return{gemma4:true,patched:false,canonical:false,reason:'generation-prompt-marker-missing'};
+  const tail=current.slice(start),outerEnd=tail.lastIndexOf('{%- endif -%}');
+  if(!tail.includes(modelTurn)||outerEnd<0)return{gemma4:true,patched:false,canonical:false,reason:'generation-prompt-shape-unrecognized'};
+  const insertion="{%- if not enable_thinking | default(false) -%}\n{{- '<|channel>thought\\n<channel|>' -}}\n{%- endif -%}\n";
+  try{tokenizer.chat_template=current.slice(0,start)+tail.slice(0,outerEnd)+insertion+tail.slice(outerEnd);return{gemma4:true,patched:true,canonical:true}}catch{return{gemma4:true,patched:false,canonical:false,reason:'template-not-writable'}}
+}
+function forceNextTokenLogits(feeds){
+  if(!hfRuntime?.Tensor||!feeds||typeof feeds!=='object')return feeds;
+  try{
+    const present=feeds.num_logits_to_keep,raw=present?.data?.[0];
+    if(present&&raw!==0&&raw!==0n&&String(raw)!=='0')return feeds;
+    return{...feeds,num_logits_to_keep:new hfRuntime.Tensor('int64',[1n],[])};
+  }catch{return feeds}
+}
+function patchGemma4LogitsSessions(root,spec){
+  if(!isGemma4(spec)||!root||!hfRuntime?.Tensor)return[];
+  const seen=new Set(),patched=[];
+  const visit=(value,path,depth)=>{
+    if(!value||typeof value!=='object'||seen.has(value)||depth>5)return;
+    seen.add(value);
+    try{
+      if(typeof value.run==='function'&&Array.isArray(value.inputNames)&&value.inputNames.includes('num_logits_to_keep')&&!value.__cwGemma4NextLogitV1){
+        const original=value.run.bind(value);
+        value.run=(feeds,...args)=>original(forceNextTokenLogits(feeds),...args);
+        try{Object.defineProperty(value,'__cwGemma4NextLogitV1',{value:true,configurable:true})}catch{value.__cwGemma4NextLogitV1=true}
+        patched.push(path||'session');
+      }
+    }catch{}
+    if(value.sessions&&typeof value.sessions==='object')for(const [key,session] of Object.entries(value.sessions))visit(session,`${path}.sessions.${key}`,depth+1);
+    for(const key of ['model','decoder','language_model','text_model'])if(value[key])visit(value[key],`${path}.${key}`,depth+1);
+  };
+  visit(root,'model',0);return patched;
+}
 const promptTokenCount=inputs=>Number(inputs?.input_ids?.dims?.at?.(-1)||inputs?.input_ids?.tolist?.()?.[0]?.length||0);
 const generatedIds=(sequences,count)=>{try{return sequences?.tolist?.()?.[0]?.slice(count)||[]}catch{return[]}};
 function makeStreamer(id,requested,timing){if(!hfRuntime?.TextStreamer||!tokenizer)return null;return new hfRuntime.TextStreamer(tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:text=>{const value=clean(text,12000);if(!value)return;timing.decoded+=value;if(requested)post(id,'token',{token:{text:value,index:timing.index++}})},token_callback_function:tokens=>{if(!timing.firstTokenAt)timing.firstTokenAt=now();timing.generatedTokens+=Math.max(1,tokens?.length||1)}})}
@@ -129,6 +170,7 @@ async function warmBenchmark(id,started,profile){
   const streamer=makeStreamer(id,false,timing);
   const options={...inputs,max_new_tokens:10,min_new_tokens:10,do_sample:false,use_cache:true,return_dict_in_generate:true};
   if(streamer)options.streamer=streamer;
+  if(isGemma4(loaded)&&hfRuntime?.Tensor)options.num_logits_to_keep=new hfRuntime.Tensor('int64',[1n],[]);
   const output=await model.generate(options);
   const completed=now(),ids=generatedIds(output?.sequences,promptTokens),tokens=ids.length||timing.generatedTokens||10;
   const benchmarkMs=Math.max(1,Math.round(completed-benchmarkStarted));
@@ -140,7 +182,7 @@ async function warmBenchmark(id,started,profile){
 async function unload(){try{await model?.dispose?.()}catch{}tokenizer=null;model=null;loaded=null;hfRuntime=null}
 async function ensure(spec,id,{benchmark=false}={}){
   const key=`${spec.id}:${spec.runtime||'transformers-js-v3'}:${spec.device||'wasm'}:${spec.dtype||''}:${spec.textOnly?'text':''}`;
-  if(loaded?.key===key&&tokenizer&&model){if(benchmark&&!loaded.benchmark)loaded.benchmark=await warmBenchmark(id,now(),loaded);return{coldStart:false,coldStartMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,backend:loaded.backend,gpu:loaded.gpu,...loaded.runtime,...(loaded.benchmark||{})}};
+  if(loaded?.key===key&&tokenizer&&model){if(benchmark&&!loaded.benchmark)loaded.benchmark=await warmBenchmark(id,now(),loaded);return{coldStart:false,coldStartMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,backend:loaded.backend,gpu:loaded.gpu,...loaded.runtime,gemma4ChatTemplate:loaded.gemma4ChatTemplate,gemma4LogitsSessions:loaded.gemma4LogitsSessions,...(loaded.benchmark||{})}};
   if(loading)return loading;
   loading=(async()=>{
     if(loaded?.key&&loaded.key!==key)await unload();
@@ -151,19 +193,21 @@ async function ensure(spec,id,{benchmark=false}={}){
     phase(id,'checking-backend',started,{model:spec.id,requestedBackend:spec.device||'wasm',requiresShaderF16:Boolean(spec.requiresShaderF16)});const profile=await atStage('checking-backend',spec,()=>backendProfile(spec));
     phase(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend,gpu:profile.gpu});const tokenizerStarted=now();
     tokenizer=await atStage('loading-tokenizer',spec,()=>hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:progressReporter(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend})}));
-    const tokenizerLoadMs=Math.round(now()-tokenizerStarted);
+    const tokenizerLoadMs=Math.round(now()-tokenizerStarted),gemma4ChatTemplate=repairGemma4ChatTemplate(spec);
+    if(isGemma4(spec))phase(id,'gemma4-chat-template',started,{model:spec.id,backend:profile.backend,...gemma4ChatTemplate});
     phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly),progress:0,progressOverall:0});const modelStarted=now();
     const modelOptions={revision:spec.revision,device:spec.device||profile.backend,dtype:spec.dtype,progress_callback:progressReporter(id,'loading-model',started,{model:spec.id,backend:profile.backend})};
     const externalData=externalDataSetting(spec);if(externalData)modelOptions.use_external_data_format=externalData;
     if(spec.textOnly)modelOptions.textOnly=true;
     model=await atStage('loading-model',spec,()=>hf.AutoModelForCausalLM.from_pretrained(spec.repo,modelOptions));
-    const modelLoadMs=Math.round(now()-modelStarted);
+    const modelLoadMs=Math.round(now()-modelStarted),gemma4LogitsSessions=patchGemma4LogitsSessions(model,spec);
+    if(isGemma4(spec))phase(id,'gemma4-next-logit-patch',started,{model:spec.id,backend:profile.backend,patchedSessions:gemma4LogitsSessions,nextTokenLogitsOnly:true});
     const warmupMs=0;
-    loaded={key,id:spec.id,repo:spec.repo,revision:spec.revision,backend:profile.backend,dtype:spec.dtype,gpu:profile.gpu,runtime,benchmark:null};
+    loaded={key,id:spec.id,repo:spec.repo,revision:spec.revision,label:spec.label,backend:profile.backend,dtype:spec.dtype,gpu:profile.gpu,runtime,benchmark:null,gemma4ChatTemplate,gemma4LogitsSessions};
     const benchmarkResult=benchmark?await warmBenchmark(id,started,profile):null;
     loaded.benchmark=benchmarkResult;
     const coldStartMs=Math.round(now()-started);
-    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,externalDataFormat:Boolean(externalData),...(benchmarkResult||{})};
+    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,externalDataFormat:Boolean(externalData),gemma4ChatTemplate,gemma4LogitsSessions,nextTokenLogitsOnly:Boolean(isGemma4(spec)),...(benchmarkResult||{})};
     phase(id,'model-ready',started,{model:spec.id,progress:100,progressOverall:100,...metrics});
     return metrics;
   })().catch(async error=>{await unload();throw error}).finally(()=>{loading=null});
@@ -172,7 +216,7 @@ async function ensure(spec,id,{benchmark=false}={}){
 function parseJsonLoose(text){const source=clean(text).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();for(let start=0;start<source.length;start++){if(source[start]!=='{'&&source[start]!=='[')continue;const open=source[start],close=open==='{'?'}':']';let depth=0,quoted=false,escaped=false;for(let i=start;i<source.length;i++){const c=source[i];if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue}if(c==='"'){quoted=true;continue}if(c===open)depth++;else if(c===close&&--depth===0){try{return JSON.parse(source.slice(start,i+1))}catch{break}}}}return null}
 function prepareInputs(message,id,started,spec){
   const source=Array.isArray(message.messages)?message.messages.filter(row=>row&&typeof row.content==='string'):[],messages=source.map(row=>({...row})),budget=Math.max(0,Number(message.promptTokenBudget||0));
-  const tokenize=()=>tokenizer.apply_chat_template(messages,{add_generation_prompt:true,tokenize:true,return_dict:true,enable_thinking:Boolean(message.thinking)});
+  const tokenize=()=>tokenizer.apply_chat_template(messages,{add_generation_prompt:true,tokenize:true,return_dict:true,enable_thinking:Boolean(message.thinking),preserve_thinking:false});
   let inputs=tokenize(),tokens=promptTokenCount(inputs),removed=0;
   while(budget&&tokens>budget&&messages.length>2){messages.splice(1,1);removed++;inputs=tokenize();tokens=promptTokenCount(inputs)}
   if(removed)phase(id,'trimming-context',started,{model:spec.id,backend:spec.device||'',removedMessages:removed,promptTokens:tokens,promptTokenBudget:budget});
@@ -189,11 +233,13 @@ async function generate(message,id){
   if(window&&promptTokens+maxNewTokens>window){const error=new Error(`Prompt is ${promptTokens.toLocaleString()} tokens and asks for ${maxNewTokens.toLocaleString()} output tokens, beyond ${spec.label}'s ${window.toLocaleString()}-token model window.`);error.code='LOCAL_MODEL_CONTEXT_EXCEEDED';throw error}
   if(working&&promptTokens>working)phase(id,'context-warning',requestStarted,{model:spec.id,promptTokens,workingContextTokens:working,contextWindowTokens:window});
   const timing={firstTokenAt:0,generatedTokens:0,index:0,decoded:''},generationStarted=now(),streamer=makeStreamer(id,Boolean(message.stream),timing),temperature=Math.max(.01,Math.min(2,Number(message.temperature??.7)));
-  currentPhase='generating';phase(id,currentPhase,requestStarted,{model:spec.id,backend:load.backend,streaming:Boolean(message.stream),thinking:Boolean(message.thinking),promptTokens,maxNewTokens,contextWindowTokens:window,workingContextTokens:working,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,wasmThreads:load.wasmThreads,crossOriginIsolated:load.crossOriginIsolated,wasmSimd:load.wasmSimd,runtime:load.runtime});
-  const options={...inputs,max_new_tokens:maxNewTokens,do_sample:true,temperature,top_k:Number(spec.generation?.topK||20),use_cache:true,return_dict_in_generate:true};if(streamer)options.streamer=streamer;
+  currentPhase='generating';phase(id,currentPhase,requestStarted,{model:spec.id,backend:load.backend,streaming:Boolean(message.stream),thinking:Boolean(message.thinking),promptTokens,maxNewTokens,contextWindowTokens:window,workingContextTokens:working,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,wasmThreads:load.wasmThreads,crossOriginIsolated:load.crossOriginIsolated,wasmSimd:load.wasmSimd,runtime:load.runtime,gemma4ChatTemplate:load.gemma4ChatTemplate,gemma4LogitsSessions:load.gemma4LogitsSessions,nextTokenLogitsOnly:Boolean(isGemma4(spec))});
+  const options={...inputs,max_new_tokens:maxNewTokens,do_sample:true,temperature,top_k:Number(spec.generation?.topK||20),top_p:Number(spec.generation?.topP??.95),use_cache:true,return_dict_in_generate:true};
+  if(isGemma4(spec)&&hfRuntime?.Tensor)options.num_logits_to_keep=new hfRuntime.Tensor('int64',[1n],[]);
+  if(streamer)options.streamer=streamer;
   const output=await model.generate(options),completed=now(),ids=generatedIds(output?.sequences,promptTokens);let text='';try{text=clean(tokenizer.decode(ids,{skip_special_tokens:true})).trim()}catch{}if(!text)text=clean(timing.decoded).trim();
   const tokenCount=ids.length||timing.generatedTokens,generationMs=Math.round(completed-generationStarted),ttftMs=timing.firstTokenAt?Math.round(timing.firstTokenAt-generationStarted):null,decodeMs=Math.max(1,completed-(timing.firstTokenAt||generationStarted)),tokensPerSecond=tokenCount?Number((tokenCount/(decodeMs/1000)).toFixed(2)):0;
-  return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true}};
+  return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true,nextTokenLogitsOnly:Boolean(isGemma4(spec)),workerRevision:WORKER_REVISION}};
   }catch(error){throw annotate(error,currentPhase,spec)}
 }
 self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){await unload();post(id,'done',{result:{shutdown:true}});return}if(message.type==='prewarm'){post(id,'done',{result:await prewarm(message,id)});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);post(id,'done',{result:await generate(message,id)})}catch(error){const stage=error?.code==='LOCAL_MODEL_CONTEXT_EXCEEDED'?'context check':error?.phase||'inference',detail={message:friendlyError(error,message.spec,stage),name:error?.name||'Error',code:error?.code||'LOCAL_MODEL_FAILED',phase:error?.phase||stage,model:error?.model||message.spec?.id||'',modelLabel:error?.modelLabel||message.spec?.label||message.spec?.id||'',backend:error?.backend||message.spec?.device||'',rawMessage:clean(error?.message||error,1000),stack:clean(error?.stack,4000),sessionReleased:true};await unload();post(id,'error',{error:detail})}});
