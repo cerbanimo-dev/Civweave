@@ -3,11 +3,13 @@
 // direct-shell-retirement-v1: cached iframe-shell routes are purged before generic cache handling.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail on all five systems.
 // family-nav-single-owner-r1: themed-system-nav-v178 remains the sole five-system navigation owner.
+// staging-navigation-runtime-recovery-v1: purge cached single-shell navigation code and refresh controlled staging clients onto the direct-route runtime.
 // guild-login-runtime-v1: Guild join clicks wait for the canonical capacity-session runtime instead of failing a bootstrap race.
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.164-direct-first-class-routes-v1');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v4-direct-shell-actions');
+importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v1');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v219-lifecycle-deferred');
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.166-local-ai-code-v321-ai-quest-authority');
