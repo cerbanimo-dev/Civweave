@@ -27,7 +27,8 @@ const paths=[
 for(const path of paths)syntax(path);
 
 const control=file('public/app/local-guide-control-bypass-v1.js');
-includes(control,'1.4.0-local-guide-control-bypass-v1-ai-quest-lazy-route','Quest route control');
+includes(control,'1.4.1-local-guide-control-bypass-v1-ai-quest-lazy-route','Quest route control');
+includes(control,"ORCHESTRATOR_VERSION='1.2.0-weaveling-plan-json-v190-ai-quest-intent'",'Quest route control');
 includes(control,'__cwWeavelingAIQuestRequiredV1','Quest route control');
 includes(control,'likelyQuestIntent','Quest route control');
 includes(control,'ensureOrchestrator','Quest route control');
@@ -102,10 +103,11 @@ for(const [a,b] of [
   ['local-guide-control-bypass-v1.js','guide-stream-thinking-v249.js']
 ])before(loader,a,b,'shared guide loader');
 includes(loader,'1.2.0-ai-quest-intent','shared guide loader');
-includes(loader,'1.4.0-ai-quest-lazy-route','shared guide loader');
+includes(loader,'1.4.1-ai-quest-lazy-route','shared guide loader');
 includes(loader,'aiQuestAuthoringRequired:true','shared guide loader');
 includes(loader,'structuredQuestOrchestratorSerialized:true','shared guide loader');
 includes(loader,'questIntentGreetingSafe:true','shared guide loader');
+includes(loader,'questOrchestratorRevisionPinned:true','shared guide loader');
 includes(loader,"questCustomizationOwner:'selected-ai-model'",'shared guide loader');
 includes(loader,'deterministicQuestFallback:false','shared guide loader');
 includes(loader,"gemma4LiteRTFastModelId:'gemma4-e2b-it-litert-web'",'shared guide loader');
