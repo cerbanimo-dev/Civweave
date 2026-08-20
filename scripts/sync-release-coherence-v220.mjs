@@ -14,15 +14,12 @@ const guideChatCanonicalPolicy=`five-system-first-class-routes-${guideChatRevisi
 const guideChatWorkspaceRevision=`${guideChatRevision}-single-current-chat-surface`;
 const guideChatOwnershipPolicy=`${guideChatRevision}-single-current-surface-five-private-ledgers-handover-only-cross-realm`;
 const revision='release-coherence-v226';
-const chatRevision='chat-convergence-v250';
-const chatCachePurgeRevision='chat-convergence-v251-legacy-purge';
-const installedEntryRevision='boot-recovery-v428-launch-session-v1';
 const activeChatRepairRevision='chat-avatar-visible-v346';
+const installedEntryRevision='boot-recovery-v429-direct-shell';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
 const boundaryRevision='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';
-const boundaryRuntimeRevision='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';
-const routeRevision='five-system-route-contract-v227';
+const routeRevision='five-system-route-contract-v228-direct-shell';
 const offlineRevision='offline-campus-current-graph-v280';
 const offlinePolicy='resumable-pause-v280';
 const retiredChatPaths=[
@@ -39,53 +36,68 @@ await patch('public/app/index.html',source=>{
   if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns installer registration.');
   if(source.includes('open-online-campus-v225')||source.includes('Browser fallback'))throw new Error('Installer must not expose anonymous browser runtime fallback.');
   if(!source.includes('/app/pwa-install-prompt-v250.js'))throw new Error('Installer must retain the current install bridge.');
-  if(source.includes('/app/pwa-install-prompt-v249.js'))throw new Error('Installer must not restore the stale-cache-prone v249 install bridge.');
-  if(!source.includes('/app/installer-repair-only-v2.js'))throw new Error('Installer must retain the cache-distinct repair-only bridge v2.');
-  if(source.includes('/app/installer-repair-only-v1.js'))throw new Error('Installer must not restore the stale shell-cached v1 repair bridge.');
+  if(!source.includes('/app/installer-repair-only-v2.js'))throw new Error('Installer must retain the current repair-only bridge.');
   return source;
 });
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed entry fallback release version');
   source=replaceRequired(source,/version:'\d+\.\d+\.\d+(-[^']+)'/,`version:'${version}$1'`,'installed entry exported release version');
-  if(!source.includes("updateViaCache:'none'"))throw new Error('Installed entry must bypass HTTP cache when checking the active worker.');
-  if(!/await\s+(?:bounded\()?registration\.update\(\)/.test(source))throw new Error('Installed entry must explicitly request a worker update before routing.');
-  if(!source.includes("candidate.postMessage({type:'SKIP_WAITING'})"))throw new Error('Installed entry must activate a waiting worker before routing.');
-  if(!source.includes(`revision=${installedEntryRevision}`))throw new Error('Installed entry does not register the current PWA-launch-session boot-recovery worker revision.');
-  if(!source.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session'"))throw new Error('Installed entry must require installed display or a PWA launch session.');
-  if(!source.includes("const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'"))throw new Error('Installed entry lost the PWA launch-session key.');
-  if(!source.includes('async function installedLaunchAuthorized()'))throw new Error('Installed entry must await installed launch authorization.');
+  for(const token of ["updateViaCache:'none'","candidate.postMessage({type:'SKIP_WAITING'})",`revision=${installedEntryRevision}`,"browserRuntimePolicy:'installed-display-or-pwa-launch-session'","const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'",'async function installedLaunchAuthorized()',"iframeShell:false"])if(!source.includes(token))throw new Error(`Installed entry direct-shell contract is missing ${token}.`);
+  if(source.includes('persistent-family-shell-v1.html')||source.includes('cw-family-stage'))throw new Error('Installed entry must not revive the retired iframe shell.');
   return source;
 });
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'install-boundary version');
-  if(!source.includes(`const REVISION='${boundaryRuntimeRevision}';`))throw new Error('Install boundary must retain the install-only browser boundary revision.');
-  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228-install-only-pwa-v1`;'))throw new Error('Install boundary must derive the install-only browser-safe experience cache identity from the requested release.');
-  for(const token of ["['/app/working-campus-v156.html','civweave']","['/app/cabinets/living-school/index.html','living-school']","['/app/realm-console-v140.html','cerbanimo']","['/app/fellowfare-cabinet-v144.html','fellowfare']","['/app/anarchadia-console-v139.html','anarchadia']","root.dataset.civweaveCanonicalCore='only'",`const GUIDE_WORKSPACE='${guideChatPath}';`,`canonicalPolicy:'${guideChatCanonicalPolicy}'`,`guideWorkspaceRevision:'${guideChatWorkspaceRevision}'`,`guideSurfaceOwnershipPolicy:'${guideChatOwnershipPolicy}'`,"navigationLifecycleRevision:'v424-head-capture-bfcache-resume'","const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'","function allowed(){return installedDisplay()||launchSession()||developer()}","browserRuntimePolicy:'installed-display-or-pwa-launch-session'",'installedQueryIsAuthorization:false','canonicalSystemCount:5','canonicalAutoScripts:0'])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
-  if(source.includes('function allowed(){return installedDisplay()||developer()||embedded()}'))throw new Error('Embedded browser documents must not authorize Civweave runtime.');
-  if(source.includes('civweave.pwa.installed-capability.v1'))throw new Error('A durable localStorage installed capability can reopen browser runtime and must stay retired.');
-  const start=source.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=source.indexOf('];',start),experience=source.slice(start,end);
-  if(!experience.includes('GUIDE_WORKSPACE'))throw new Error('Canonical system experience must boot the guide-chat owner from system ownership.');
-  for(const retired of ['PERSISTENT_GUIDE_CHAT_SCRIPT','PERSISTENT_GUIDE_VIEWPORT_SCRIPT','/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js'])if(source.includes(retired))throw new Error(`Release coherence must not resurrect ${retired}.`);
-  if(source.includes('function startAdditions()'))throw new Error('Canonical boundary still contains delayed automatic additions.');
+  if(!source.includes(`const REVISION='${boundaryRevision}';`))throw new Error('Install boundary must retain the install-only browser boundary revision.');
+  for(const token of ["['/app/working-campus-v156.html','civweave']","['/app/cabinets/living-school/index.html','living-school']","['/app/realm-console-v140.html','cerbanimo']","['/app/fellowfare-cabinet-v144.html','fellowfare']","['/app/anarchadia-console-v139.html','anarchadia']","root.dataset.civweaveCanonicalCore='only'",`const GUIDE_WORKSPACE='${guideChatPath}';`,`canonicalPolicy:'${guideChatCanonicalPolicy}'`,`guideWorkspaceRevision:'${guideChatWorkspaceRevision}'`,`guideSurfaceOwnershipPolicy:'${guideChatOwnershipPolicy}'`,"const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'",'installedQueryIsAuthorization:false','canonicalSystemCount:5'])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
   return source;
 });
-await patch('public/app/system-routes-v227.js',source=>{source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'five-system route version');if(!source.includes(`const REVISION='${routeRevision}';`))throw new Error('Five-system route contract revision drifted.');return source});
+await patch('public/app/system-routes-v227.js',source=>{
+  source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'five-system route version');
+  if(!source.includes(`const REVISION='${routeRevision}';`))throw new Error('Five-system direct route contract revision drifted.');
+  for(const token of ["const SHELL_PATH=''","function shouldUseDirect(){return true}","const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js"])if(!source.includes(token))throw new Error(`Direct route contract is missing ${token}.`);
+  return source;
+});
 await patch('public/app/working-campus-v156.html',source=>{
   const lifecycleScript=`<script src="/app/document-lifecycle-v221.js?v=${lifecycleRevision}"></script>`;
   if(source.includes('/app/document-lifecycle-v221.js'))source=source.replace(/<script src="\/app\/document-lifecycle-v221\.js\?v=[^"]+"><\/script>/,lifecycleScript);else source=source.replace('<script src="/app/install-boundary-v146.js',`${lifecycleScript}\n<script src="/app/install-boundary-v146.js`);
   source=replaceRequired(source,/\/app\/install-boundary-v146\.js\?v=[^"]+/,`/app/install-boundary-v146.js?v=${boundaryRevision}`,'Working Campus boundary revision');
-  source=replaceRequired(source,/\/app\/working-campus-v156\.js\?v=[^"]+/,`/app/working-campus-v156.js?v=${campusRevision}`,'Working Campus loader revision');return source;
+  source=replaceRequired(source,/\/app\/working-campus-v156\.js\?v=[^"]+/,`/app/working-campus-v156.js?v=${campusRevision}`,'Working Campus loader revision');
+  return source;
 });
-await patch('public/service-worker-core-v208.js',source=>{if(!source.includes("'/app/document-lifecycle-v221.js'"))source=source.replace("  '/app/installed-entry-v146.js',\n","  '/app/installed-entry-v146.js',\n  '/app/document-lifecycle-v221.js',\n");if(!source.includes("event.waitUntil(cacheShell());"))source=replaceRequired(source,/self\.addEventListener\('install', event => \{\n  event\.waitUntil\(\(async \(\) => \{\n    await cacheShell\(\);\n    await self\.skipWaiting\(\);\n  \}\)\(\)\);\n\}\);/,"self.addEventListener('install', event => {\n  event.waitUntil(cacheShell());\n});",'service-worker non-interrupting core install policy');return source});
+await patch('public/service-worker-core-v208.js',source=>{
+  if(!source.includes("'/app/document-lifecycle-v221.js'"))source=source.replace("  '/app/installed-entry-v146.js',\n","  '/app/installed-entry-v146.js',\n  '/app/document-lifecycle-v221.js',\n");
+  if(!source.includes("event.waitUntil(cacheShell());"))source=replaceRequired(source,/self\.addEventListener\('install', event => \{\n  event\.waitUntil\(\(async \(\) => \{\n    await cacheShell\(\);\n    await self\.skipWaiting\(\);\n  \}\)\(\)\);\n\}\);/,"self.addEventListener('install', event => {\n  event.waitUntil(cacheShell());\n});",'service-worker non-interrupting core install policy');
+  return source;
+});
 await patch('public/service-worker.js',source=>{for(const retired of retiredRootCorePaths)source=source.replaceAll(`,'${retired}'`,'').replaceAll(`'${retired}',`,'');for(const retired of retiredRootCorePaths)if(source.includes(`'${retired}'`))throw new Error(`Root portable worker still requires retired runtime ${retired}.`);return source});
 await patch('public/extensions/civweave-additions-v156.js',source=>{if(!source.includes('let civweaveAdditionsNavigating=false;'))source=source.replace("let readyPromise=null,activeTab='mesh',noticeTimer=null;","let readyPromise=null,activeTab='mesh',noticeTimer=null;\nlet civweaveAdditionsNavigating=false;\naddEventListener('pagehide',()=>{civweaveAdditionsNavigating=true},{once:true});\naddEventListener('beforeunload',()=>{civweaveAdditionsNavigating=true},{once:true});");source=source.replace('document.head.append(script)',"(()=>{const head=document.head;if(civweaveAdditionsNavigating||!head){resolve(false);return}head.append(script)})()");source=source.replace('document.body.append(tools)','document.body?.append(tools)').replace('document.body.append(dialog)','document.body?.append(dialog)').replace("}catch(error){console.error('[Civweave additions]',error)}","}catch(error){if(civweaveAdditionsNavigating||document.hidden||!document.documentElement?.isConnected)return;console.error('[Civweave additions]',error)}");return source});
 
 const wrapper=await readFile(path.join(root,'public/service-worker-v203.js'),'utf8');
-for(const token of [`/app/system-routes-v227.js?v=${version}-${routeRevision}`,`/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`,'/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v2','/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293',`/service-worker-offline-v211-override.js?v=${offlineRevision}&policy=${offlinePolicy}`,'/service-worker-shell-integrity-v281.js?v=shell-integrity-v281',`/service-worker-release-coherence-v220.js?v=${revision}`,'/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',`/service-worker-chat-repair-v245.js?v=${activeChatRepairRevision}&purge=${activeChatRepairRevision}`,"self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
-if(wrapper.includes('/service-worker-shell-repair-v225.js'))throw new Error('Retired v225 shell repair owner returned to the active worker wrapper.');
-if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v293.js'))throw new Error('Canonical navigation must remain after the explicit shell repair owner.');
+for(const token of [
+  `/app/system-routes-v227.js?v=${version}-${routeRevision}`,
+  `/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1`,
+  '/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v23-direct-shell-actions',
+  '/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1',
+  '/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293',
+  `/service-worker-offline-v211-override.js?v=${offlineRevision}&policy=${offlinePolicy}`,
+  '/service-worker-offline-low-pressure-v1.js?v=offline-campus-low-pressure-v1',
+  '/service-worker-shell-integrity-v281.js?v=shell-integrity-v281',
+  `/service-worker-release-coherence-v220.js?v=${revision}`,
+  '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',
+  `/service-worker-chat-repair-v245.js?v=${activeChatRepairRevision}&purge=${activeChatRepairRevision}`,
+  'staging-installed-entry-takeover-v10-direct-shell-retirement'
+])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
+if(wrapper.includes('/app/persistent-family-shell-v1.html')||wrapper.includes('/app/fullscreen-family-v104.html'))throw new Error('The active worker wrapper must not import a retired iframe shell.');
+if(wrapper.indexOf('/service-worker-direct-shell-retirement-v1.js')>wrapper.indexOf('/service-worker-core-v208.js'))throw new Error('The retired iframe route guard must register before generic core fetch handling.');
+
+const actions=await readFile(path.join(root,'public/app/persistent-shell-actions-v1.js'),'utf8');
+for(const token of ["guilds-map-all-systems-v2","/app/assets/guild-symbol.png","/app/assets/map-symbol-v1.png","/app/assets/chat-symbol-v1.png"])if(!actions.includes(token))throw new Error(`Persistent shell actions are missing ${token}.`);
+const retirement=await readFile(path.join(root,'public/service-worker-direct-shell-retirement-v1.js'),'utf8');
+for(const token of ["'/app/persistent-family-shell-v1.html'","'/app/fullscreen-family-v104.html'",'purgeRetiredEntries','evacuateRetiredClients','event.stopImmediatePropagation()'])if(!retirement.includes(token))throw new Error(`Direct-shell retirement guard is missing ${token}.`);
+
 const chatRepair=await readFile(path.join(root,'public/service-worker-chat-repair-v245.js'),'utf8');if(!chatRepair.includes(`const REVISION='${activeChatRepairRevision}';`))throw new Error('Chat cache repair revision drifted.');for(const retired of retiredChatPaths)if(!chatRepair.includes(`'${retired}'`))throw new Error(`Chat cache repair does not purge retired runtime ${retired}.`);
 const override=await readFile(path.join(root,'public/service-worker-release-coherence-v220.js'),'utf8');for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',pwaLaunchSession:'v1',installerRegistrationOwner:'install-v130.js',installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',shellRepairOwner:'v293',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:guideChatOwner,navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,directShell:true,iframeShell:false,persistentActions:'guilds-map-all-systems-v2-chat-icon',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:guideChatOwner,changed},null,2));
