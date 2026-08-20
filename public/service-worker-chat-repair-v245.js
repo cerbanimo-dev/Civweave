@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='guild-neuron-runtime-v1';
+const REVISION='moss-local-learning-plan-v2';
 const FREEZE_REVISION='mobile-chat-main-thread-quiescence-v349';
 const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
@@ -22,6 +22,7 @@ const TRANSLATION_WORKER_PATH='/app/local-ai/translation-worker-v1.js';
 const TRANSLATION_CACHE='civweave-translation-runtime-v1';
 const CRITICAL_RUNTIME_PATHS=new Set([
   '/app/shared-guide-surface-v236.js',
+  '/app/unified-chat-system-v1.js',
   '/app/minilm-response-router-v347.js',
   '/app/minilm-decision-strip-v1.js',
   '/app/server-ai-router-v301.js'
@@ -69,7 +70,7 @@ async function cacheHumanMessageRuntime(){return cacheRuntime(HUMAN_BUBBLE_PATH,
 async function cacheTranslationRuntime(){const runtime=await cacheRuntime(TRANSLATION_PATH,TRANSLATION_CACHE,TRANSLATION_REVISION,'translation');const worker=await cacheRuntime(TRANSLATION_WORKER_PATH,TRANSLATION_CACHE,TRANSLATION_REVISION,'translation worker');return{ok:Boolean(runtime.ok&&worker.ok),revision:TRANSLATION_REVISION,runtime,worker}}
 async function repairAndPackage(){const purge=await purgeChatRuntimeCaches(),party=await cachePartyRuntime(),humanBubble=await cacheHumanMessageRuntime(),translation=await cacheTranslationRuntime();return{...purge,party,humanBubble,translation}}
 
-// Keep activation bounded, but always evict the four small runtime files whose
+// Keep activation bounded, but always evict the five small runtime files whose
 // stale copies can strand the visible chat UI on an obsolete router/tracker.
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{await purgeCriticalChatRuntimeCaches();await self.clients.claim()})());
