@@ -8,6 +8,7 @@ const STRIP_ATTR='data-minilm-decision-strip';
 const LABEL_ATTR='data-minilm-label';
 const TRACKER_ATTR='data-guild-neuron-tracker';
 const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
+const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
 const MINILM_ROUTER_SRC='/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary';
 const SERVER_ROUTER_SRC='/app/server-ai-router-v301.js?v=1.0.121-guild-telemetry';
 let pendingTimer=0;
@@ -40,16 +41,35 @@ function parse(value,fallback=null){try{return JSON.parse(value)??fallback}catch
 function floorFinite(value){const n=Number(value);return Number.isFinite(n)&&n>=0?Math.floor(n):null}
 function mobileGuildState(){try{const value=parse(localStorage.getItem(MOBILE_GUILD_STATE_KEY),null);return value&&typeof value==='object'&&!Array.isArray(value)?value:null}catch{return null}}
 function hostSession(){try{return globalThis.CivweaveHostNodeSessionV1?.sessionFor?.()||null}catch{return null}}
+function hostPublicSession(){
+  try{
+    const api=globalThis.CivweaveHostNodeSessionV1,status=api?.publicStatus?.(),selected=api?.selectedOrigin?.()||'',sessions=Array.isArray(status?.sessions)?status.sessions:[];
+    return sessions.find(row=>row?.active&&selected&&row.origin===selected)||sessions.find(row=>row?.active)||null;
+  }catch{return null}
+}
 function mobileGuildSession(){try{return globalThis.CivweaveServerAIRouterV301?.mobileGuildCapacitySession?.()||null}catch{return null}}
+function joinedCapacitySession(){
+  const canonical=hostPublicSession();if(canonical?.nodeId)return canonical;
+  try{
+    const rows=parse(sessionStorage.getItem(CAPACITY_SESSION_KEY),'{}'),values=Object.values(rows&&typeof rows==='object'&&!Array.isArray(rows)?rows:{}),preferred=String(document.documentElement?.dataset?.civweaveNodeId||'');
+    const active=values.filter(row=>row?.nodeId&&row?.token&&row?.origin&&(!row.expiresAt||Date.parse(row.expiresAt)>Date.now()));
+    return active.find(row=>preferred&&String(row.nodeId)===preferred)||active[0]||null;
+  }catch{return null}
+}
 function guildContext(){
-  const host=hostSession();if(host)return{kind:'host-session',nodeId:String(host.nodeId||''),guildId:String(host.guildId||''),session:host};
-  const mobile=mobileGuildSession();if(mobile)return{kind:'mobile-guild-capacity',nodeId:String(mobile.nodeId||''),guildId:String(mobile.guildId||''),session:mobile};
+  const host=hostSession();if(host?.nodeId)return{kind:'host-session',nodeId:String(host.nodeId||''),guildId:String(host.guildId||''),session:host};
+  const mobile=mobileGuildSession();if(mobile?.nodeId||mobile?.guildId)return{kind:'mobile-guild-capacity',nodeId:String(mobile.nodeId||''),guildId:String(mobile.guildId||''),session:mobile};
+  const joined=joinedCapacitySession();if(joined?.nodeId)return{kind:'joined-guild-capacity',nodeId:String(joined.nodeId||''),guildId:String(joined.guildId||''),session:joined};
   const state=mobileGuildState();if(state?.guildId)return{kind:'mobile-guild-state',nodeId:String(state?.cloudFabric?.starterNodes?.[0]?.nodeId||''),guildId:String(state.guildId),session:null};
+  const nodeId=String(document.documentElement?.dataset?.civweaveNodeId||''),origin=String(document.documentElement?.dataset?.civweaveGuildOrigin||'');
+  if(nodeId)return{kind:'human-chat-guild-context',nodeId,guildId:'',session:{nodeId,origin}};
   return null;
 }
 function trackerTelemetry(context){
   if(!context)return null;
-  if(context.kind==='host-session')try{return globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.(context.nodeId)||globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.()||null}catch{return null}
+  if(['host-session','joined-guild-capacity','human-chat-guild-context'].includes(context.kind)){
+    try{const telemetry=globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.(context.nodeId)||globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.();if(telemetry)return telemetry}catch{}
+  }
   try{return globalThis.CivweaveServerAIRouterV301?.guildTelemetry?.(context.guildId||context.nodeId)||globalThis.CivweaveServerAIRouterV301?.guildTelemetry?.()||null}catch{return null}
 }
 function trackerText(){
@@ -65,7 +85,7 @@ function ensureStripParts(node){
   let tracker=node.querySelector(`[${TRACKER_ATTR}]`);if(!tracker){tracker=document.createElement('span');tracker.setAttribute(TRACKER_ATTR,'');tracker.setAttribute('aria-label','Guild neuron and conversation tracker');tracker.hidden=true;node.append(tracker)}
   return{label,tracker}
 }
-function renderTracker(node){if(!node)return false;const{tracker}=ensureStripParts(node),text=trackerText(),visible=Boolean(text);if(tracker.textContent!==text)tracker.textContent=text;if(tracker.hidden===visible)tracker.hidden=!visible;node.dataset.guildTelemetry=visible?'visible':'hidden';return visible}
+function renderTracker(node){if(!node)return false;const{tracker}=ensureStripParts(node),text=trackerText(),visible=Boolean(text);if(tracker.textContent!==text)tracker.textContent=text;if(tracker.hidden===visible)tracker.hidden=!visible;node.dataset.guildTelemetry=visible?'visible':'hidden';node.dataset.guildContext=guildContext()?.kind||'none';return visible}
 function strip(){
   const root=document.getElementById(ROOT_ID);if(!root)return null;
   let node=root.querySelector(`[${STRIP_ATTR}]`);if(node){ensureStripParts(node);renderTracker(node);return node}
@@ -107,11 +127,11 @@ function install(){installStyle();strip();initialStatus();refreshTracker();if(!t
 addEventListener('civweave:response-route',onResponseRoute);
 addEventListener('civweave:experience-orchestrator',onOrchestrator);
 addEventListener('civweave:minilm-response-router-ready',()=>{if(readinessTimer){clearInterval(readinessTimer);readinessTimer=0}setStatus('MiniLM · ready · awaiting next message','pending')});
-for(const eventName of ['civweave:host-node-session-ready','civweave:capacity-session-ready','civweave:host-node-logged-in','civweave:host-node-health','civweave:ai-neuron-usage','civweave:guild-ai-telemetry','civweave:capacity-session-cleared','civweave:mobile-guild-attached','civweave:mobile-guild-fabric-refreshed','civweave:mobile-guild-directory-registered'])addEventListener(eventName,()=>queueMicrotask(refreshTracker));
+for(const eventName of ['civweave:host-node-session-ready','civweave:capacity-session-ready','civweave:host-node-logged-in','civweave:host-node-health','civweave:ai-neuron-usage','civweave:guild-ai-telemetry','civweave:capacity-session-cleared','civweave:mobile-guild-attached','civweave:mobile-guild-fabric-refreshed','civweave:mobile-guild-directory-registered','civweave:human-chat-guild-context'])addEventListener(eventName,()=>queueMicrotask(refreshTracker));
 addEventListener('submit',onSubmit,true);
 addEventListener('pageshow',()=>queueMicrotask(install));
 addEventListener('pagehide',()=>{clearTimers();if(readinessTimer)clearInterval(readinessTimer);if(trackerTimer)clearInterval(trackerTimer);readinessTimer=0;trackerTimer=0},{once:true});
 new MutationObserver(()=>strip()).observe(document.documentElement,{childList:true,subtree:true});
 install();
-globalThis.CivweaveMiniLMDecisionStripV1=Object.freeze({version:VERSION,install,lastDecision:()=>lastDecision,refreshTracker,guildContext,visibleDecision:true,guildNeuronTracker:true,trackerPlacement:'same-horizontal-strip',guildResolver:'host-session-or-mobile-guild-state',guildTelemetry:'host-session-or-server-router',routerSelfHeal:true,serverRouterVersion:'1.0.121',actualRouteEventsOnly:true,noPreviewClassification:true,slowRouteWarningMs:2200,missingRouteErrorMs:12000});
+globalThis.CivweaveMiniLMDecisionStripV1=Object.freeze({version:VERSION,install,lastDecision:()=>lastDecision,refreshTracker,guildContext,visibleDecision:true,guildNeuronTracker:true,trackerPlacement:'same-horizontal-strip',guildResolver:'host-or-mobile-or-joined-capacity-or-human-context',guildTelemetry:'host-session-or-server-router',routerSelfHeal:true,serverRouterVersion:'1.0.121',actualRouteEventsOnly:true,noPreviewClassification:true,slowRouteWarningMs:2200,missingRouteErrorMs:12000});
 })();
