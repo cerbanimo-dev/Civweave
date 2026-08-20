@@ -1,4 +1,4 @@
-name: One-shot Kamido Guild Worker resident sessions v1
+name: One-shot Kamido Guild Worker cleanup v1
 
 on:
   push:
@@ -10,86 +10,49 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  cleanup:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       WORKER_NAME: civweave-guild-cloud
-      WORKER_ORIGIN: https://civweave-guild-cloud.new-new-york-84759cba63.workers.dev
+      ACCIDENTAL_ORIGIN: https://civweave-guild-cloud.cerbanimo.workers.dev
+      KAMIDO_ORIGIN: https://civweave-guild-cloud.new-new-york-84759cba63.workers.dev
       EXPECTED_GUILD_ID: kamido-356e5z30
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Refuse the wrong Cloudflare target
+      - name: Prove the Cerbanimo-account Worker is the unclaimed accidental deployment
         shell: bash
         run: |
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}"
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
-          test "$WORKER_NAME" = 'civweave-guild-cloud'
-          status="$(curl -fsS "$WORKER_ORIGIN/api/guild/status")"
-          node -e 'const s=JSON.parse(process.argv[1]); if(s.claimed!==true||s.guildId!==process.env.EXPECTED_GUILD_ID) process.exit(2)' "$status"
-
-      - name: Build deployment config that preserves the existing claim secret
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync } from 'node:fs';
-          const path = 'cloudflare/mobile-guild-edge/wrangler.jsonc';
-          const config = JSON.parse(readFileSync(path, 'utf8'));
-          delete config.secrets;
-          writeFileSync('cloudflare/mobile-guild-edge/wrangler.kamido.json', JSON.stringify(config, null, 2));
-          NODE
-
-      - name: Compile Mobile Guild Worker
-        run: npx --yes wrangler@4 deploy --config cloudflare/mobile-guild-edge/wrangler.kamido.json --name "$WORKER_NAME" --dry-run --outdir /tmp/civweave-guild-cloud-dry-run
-
-      - name: Deploy resident-session Worker without replacing secrets
-        run: npx --yes wrangler@4 deploy --config cloudflare/mobile-guild-edge/wrangler.kamido.json --name "$WORKER_NAME" --keep-vars
-
-      - name: Verify claimed Guild, capacity and login route
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --input-type=module <<'NODE'
-          const origin = process.env.WORKER_ORIGIN;
-          const guildId = process.env.EXPECTED_GUILD_ID;
-          let last = 'not checked';
-          for (let attempt = 1; attempt <= 12; attempt += 1) {
-            try {
-              const bust = `${Date.now()}-${attempt}`;
-              const [statusResponse, capacityResponse, loginResponse] = await Promise.all([
-                fetch(`${origin}/api/guild/status?verify=${bust}`, { headers: { 'cache-control': 'no-cache' } }),
-                fetch(`${origin}/api/fabric/capacity?verify=${bust}`, { headers: { 'cache-control': 'no-cache' } }),
-                fetch(`${origin}/api/ai/node/session?nodeId=${encodeURIComponent(guildId)}&verify=${bust}`, { headers: { 'cache-control': 'no-cache' } }),
-              ]);
-              const status = await statusResponse.json().catch(() => ({}));
-              const capacity = await capacityResponse.json().catch(() => ({}));
-              const login = await loginResponse.json().catch(() => ({}));
-              if (
-                statusResponse.ok && status.claimed === true && status.guildId === guildId &&
-                capacityResponse.ok && capacity.capacityAvailable === true &&
-                capacity.residentSessionSchema === 'civweave.mobile-guild-capacity-session.v1' &&
-                Number.isFinite(Number(capacity.slots?.free)) &&
-                loginResponse.status === 401 && /capacity session/i.test(String(login.error || ''))
-              ) {
-                console.log(JSON.stringify({ ok: true, guildId, capacity, unauthenticatedLoginStatus: loginResponse.status }));
-                process.exit(0);
-              }
-              last = JSON.stringify({ status: statusResponse.status, statusBody: status, capacity: capacityResponse.status, capacityBody: capacity, login: loginResponse.status, loginBody: login });
-            } catch (error) {
-              last = String(error?.stack || error);
-            }
-            await new Promise(resolve => setTimeout(resolve, 5000));
+          accidental="$(curl -fsS "$ACCIDENTAL_ORIGIN/api/guild/status")"
+          kamido="$(curl -fsS "$KAMIDO_ORIGIN/api/guild/status")"
+          node --input-type=module - "$accidental" "$kamido" <<'NODE'
+          const accidental = JSON.parse(process.argv[2]);
+          const kamido = JSON.parse(process.argv[3]);
+          if (accidental.claimed !== false || accidental.guildId != null || Number(accidental.storedEnvelopes || 0) !== 0) {
+            throw new Error('Refusing to delete: the Cerbanimo-account Worker is no longer the empty accidental deployment.');
           }
-          console.error(`Kamido Worker verification failed: ${last}`);
-          process.exit(3);
+          if (kamido.claimed !== true || kamido.guildId !== process.env.EXPECTED_GUILD_ID) {
+            throw new Error('Refusing cleanup: the real Kamido Worker identity changed.');
+          }
           NODE
+
+      - name: Delete only the accidental Cerbanimo-account Worker
+        run: npx --yes wrangler@4 delete --config cloudflare/mobile-guild-edge/wrangler.jsonc --name "$WORKER_NAME" --force
+
+      - name: Verify Kamido was untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl -fsS "$KAMIDO_ORIGIN/api/guild/status?verify=post-wrong-account-cleanup")"
+          node -e 'const s=JSON.parse(process.argv[1]); if(s.claimed!==true||s.guildId!==process.env.EXPECTED_GUILD_ID) process.exit(2)' "$status"
+          if curl -fsS "$ACCIDENTAL_ORIGIN/api/guild/status?verify=deleted" >/dev/null 2>&1; then
+            echo 'Accidental Cerbanimo-account Worker still responds.' >&2
+            exit 3
+          fi
