@@ -33,19 +33,24 @@ for(const pathname of requiredLocalAIPaths){
   assert.ok(repair.includes(`'${pathname}'`),`cache repair lost local AI dependency ${pathname}`);
 }
 
-const canonicalImport="importScripts('/service-worker-chat-repair-v245.js?v=chat-avatar-visible-v346&purge=chat-avatar-visible-v346&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-css-dvh-v349&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358');";
-assert.ok(generated.includes(canonicalImport),'generated service worker must preserve the current chat/local-AI repair import identity');
-assert.ok(builder.includes(canonicalImport),'service worker generator must preserve the current chat/local-AI repair import identity');
-assert.match(generated,/local-ai-code-coherence-v308-bootstrap-capability/,'generated parent worker must carry the active local AI bootstrap-capability coherence epoch');
-assert.match(builder,/localAICodeCoherence:'v308-bootstrap-capability-network-first-pre-core'/,'service worker generator must report the active local AI code-coherence epoch');
+const chatRepairImport="importScripts('/service-worker-chat-repair-v245.js?v=";
+assert.ok(generated.includes(chatRepairImport),'generated service worker must import the current chat/local-AI repair worker');
+assert.ok(builder.includes(chatRepairImport),'service worker generator must preserve the chat/local-AI repair import');
+for(const marker of ['chat-avatar-visible-v346','selected-local-minilm-v357','server-auto-local-failover-v358']){
+  assert.ok(generated.includes(marker),`generated worker lost chat/local-AI marker ${marker}`);
+  assert.ok(builder.includes(marker),`service worker generator lost chat/local-AI marker ${marker}`);
+}
+assert.match(generated,/service-worker-local-ai-coherence-v307\.js\?v=/,'generated parent worker must carry the dedicated local AI coherence gate');
+assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=/,'service worker generator must carry the dedicated local AI coherence gate');
+assert.match(builder,/localAICodeCoherence:/,'service worker generator must report the active local AI code-coherence policy');
 assert.match(builder,/localAIBootstrapCapability:'v359'/,'service worker generator must report the bootstrap capability repair epoch');
 assert.match(installedEntry,/updateViaCache:'none'/,'installed worker registration must bypass HTTP cache so the changed parent worker fetches current imported repair code');
 assert.ok(installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'),'installed entry must explicitly perform a bounded update check for the changed parent worker');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-cache-coherence-v359-bootstrap-capability',
-  localAICodeCoherence:'v308-bootstrap-capability-network-first-pre-core',
+  revision:'local-ai-cache-coherence-current-import-contract',
+  localAICodeCoherence:'dedicated-network-first-current-epoch',
   chatContract:'chat-avatar-visible-v346',
   selectedLocalMiniLM:'v357',
   serverAutoFailover:'v358',
