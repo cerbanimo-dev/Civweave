@@ -28,6 +28,7 @@ const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
 const onnxRuntimeStage = resolve(scriptDir, "stage-onnxruntime-web-assets.mjs");
 const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
 const transformerV4Stage = resolve(scriptDir, "stage-transformers-v4-assets.mjs");
+const liteRtLmStage = resolve(scriptDir, "stage-litert-lm-web-assets.mjs");
 const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
 const federationDataStage = resolve(scriptDir, "stage-federation-finder-data-v274.mjs");
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
@@ -161,6 +162,7 @@ await Promise.all([
   runNodeScriptAsync(onnxRuntimeStage, "ONNX Runtime Web staging failed."),
   runNodeScriptAsync(transformerStage, "Transformers.js staging failed."),
   runNodeScriptAsync(transformerV4Stage, "Transformers.js 4.2 Gemma 4 staging failed."),
+  runNodeScriptAsync(liteRtLmStage, "LiteRT-LM WebGPU staging failed."),
   runNodeScriptAsync(mapRuntimeStage, "Civweave Map v1 renderer staging failed."),
   runNodeScriptAsync(federationDataStage, "Federation Finder atlas staging failed."),
   runNodeScriptAsync(parityMaterializer, "Civweave parity ledger materialization failed."),
@@ -184,6 +186,9 @@ const requiredRuntimeAssets = [
   resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.mjs'),
   resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm.part0'),
   resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm.part1'),
+  resolve(sourceDir, 'app/vendor/litert-lm/dist/index.js'),
+  resolve(sourceDir, 'app/vendor/litert-lm/wasm-utils/dist/index.js'),
+  resolve(sourceDir, 'app/vendor/litert-lm/stage-manifest.json'),
   resolve(sourceDir, 'app/vendor/maplibre-v5.13.0/maplibre-gl.js'),
   resolve(sourceDir, 'app/vendor/maplibre-v5.13.0/maplibre-gl.css'),
   resolve(sourceDir, 'app/vendor/pmtiles-v4.4.1/pmtiles.js'),
@@ -227,5 +232,5 @@ const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 const mapBytes = statSync(mapPackagePath).size;
 console.log(`Built .cloudflare-pages with mobile installer (${installerBytes} bytes), portable Civweave seed (${seedBytes} bytes), and Civweave Map v1 (${mapBytes} bytes).`);
-console.log("Cloudflare publish hot path: generated runtime/data staging parallelized, including ONNX Runtime Web; optional knowledge-school ZIP bytes externalized to immutable commit-pinned downloads.");
-console.log("All Cloudflare-hosted files are at or below 24 MiB, including the Parakeet ONNX runtime, split Gemma 4 runtime, and Map v1 runtimes.");
+console.log("Cloudflare publish hot path: generated runtime/data staging parallelized, including ONNX Runtime Web and self-hosted LiteRT-LM WebGPU; optional knowledge-school ZIP bytes externalized to immutable commit-pinned downloads.");
+console.log("All Cloudflare-hosted files are at or below 24 MiB, including the Parakeet ONNX runtime, split Gemma 4 runtime, LiteRT-LM Web runtime, and Map v1 runtimes.");
