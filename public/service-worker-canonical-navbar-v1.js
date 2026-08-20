@@ -1,15 +1,17 @@
 'use strict';
 (()=>{
-const VERSION='canonical-navbar-network-first-v3-stage-guard';
+const VERSION='canonical-navbar-network-first-v4-direct-shell-actions';
 const NAV_PATH='/app/themed-system-nav-v178.js';
 const PATHS=Object.freeze([
+  '/app/system-routes-v227.js',
   NAV_PATH,
+  '/app/persistent-shell-actions-v1.js',
   '/app/subsystem-avatar-state-v347.js',
   '/app/shared-guide-surface-v236-core-v244.js',
   '/app/platform-experience-v160.css'
 ]);
 const PATH_SET=new Set(PATHS);
-const CACHE='cw-nav-canonical-v3';
+const CACHE='cw-nav-canonical-v4';
 const FETCH_TIMEOUT_MS=10000;
 function valid(response,path){
   if(!response?.ok)return false;
@@ -72,5 +74,5 @@ self.addEventListener('fetch',event=>{
   event.stopImmediatePropagation();
   event.respondWith(responseFor(request,url.pathname));
 });
-self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-current-cache-only-never-retired-geometry-cache-plus-stage-guard',warm});
+self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-direct-system-pages-with-persistent-guild-map-actions',warm});
 })();
