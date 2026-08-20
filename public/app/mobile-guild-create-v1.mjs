@@ -60,10 +60,19 @@ function directoryRegisterUrl(){try{const origin=clean(globalThis.location?.orig
 function writeDirectoryStatus(value,state=read()){
   const packet=Object.freeze({schema:'civweave.mobile-guild-directory-status.v1',guildId:state?.guildId||null,publicOrigin:state?.primaryOrigin||null,ok:Boolean(value?.ok),status:clean(value?.status,80)||'pending',error:value?.error?clean(value.error,600):null,registration:value?.registration||null,updatedAt:now()});
   try{globalThis.localStorage?.setItem(DIRECTORY_STATUS_KEY,JSON.stringify(packet))}catch{}
-  const node=globalThis.document?.getElementById?.('mobile-guild-cloud-status');
+  const node=globalThis.document?.getElementById?.('mobile-guild-cloud-status'),button=globalThis.document?.getElementById?.('attach-mobile-guild-edge');
   if(node&&state?.cloudAttached){
+    const needsLocation=packet.status==='location-required';
     node.dataset.state=packet.ok?'ready':'failed';
-    node.textContent=packet.ok?`Guild online and published to the Guild Map. ${state.primaryOrigin||''}`.trim():`Guild online, but Guild Map listing is pending: ${packet.error||'directory publication did not complete.'}`;
+    node.textContent=packet.ok
+      ?`Guild online and published to the Guild Map. ${state.primaryOrigin||''}`.trim()
+      :needsLocation
+        ?'Guild online. Set this older Guild’s approximate Guild Map location on the founding phone to publish it.'
+        :`Guild online, but Guild Map listing is pending: ${packet.error||'directory publication did not complete.'}`;
+    if(button){
+      button.disabled=packet.ok;
+      button.textContent=packet.ok?'Public edge paired':needsLocation?'Set Guild Map location':'Retry Guild Map publish';
+    }
   }
   try{globalThis.dispatchEvent?.(new CustomEvent('civweave:mobile-guild-directory-status',{detail:packet}))}catch{}
   return packet;
@@ -82,8 +91,10 @@ async function historicalDirectoryProofs(current,mesh){
   return rows.slice(0,12);
 }
 export async function registerMobileGuildDirectory(input=read()){
-  const current=input&&typeof input==='object'?input:read();if(!current?.cloudAttached||!current?.primaryOrigin||!current?.location)return Object.freeze({ok:false,status:'not-public-yet'});
-  const endpoint=directoryRegisterUrl();if(!endpoint)return Object.freeze({ok:false,status:'browser-route-unavailable'});
+  const current=input&&typeof input==='object'?input:read();
+  if(!current?.cloudAttached||!current?.primaryOrigin){const result=Object.freeze({ok:false,status:'not-public-yet'});writeDirectoryStatus(result,current);return result}
+  if(!current.location){const result=Object.freeze({ok:false,status:'location-required',error:'A Guild Map location is required before this Guild can be published.'});writeDirectoryStatus(result,current);return result}
+  const endpoint=directoryRegisterUrl();if(!endpoint){const result=Object.freeze({ok:false,status:'browser-route-unavailable',error:'The Guild directory route is unavailable in this browser context.'});writeDirectoryStatus(result,current);return result}
   const mesh=await ensurePocketMesh();let proof=null,freshProofError=null;
   try{proof=await directoryRegistrationProof(current,mesh)}catch(error){freshProofError=String(error?.message||error)}
   const historicalProofs=await historicalDirectoryProofs(current,mesh);
@@ -125,7 +136,11 @@ export async function createMobileGuild({displayName,guildId='',charter=null}={}
 }
 
 export async function attachCloudflareEdge({primaryOrigin}={}){
-  let state=withCloudCredentials(read());if(!state)throw new Error('Create the local Guild before pairing a public edge.');if(state.cloudAttached){await registerDirectoryBestEffort(state);return Object.freeze({...state,deployUrl:cloudflareDeployUrl()})}
+  let state=withCloudCredentials(read());if(!state)throw new Error('Create the local Guild before pairing a public edge.');
+  if(state.cloudAttached){
+    if(!state.location){const migrated=await updateMobileGuildLocation({precise:false});setTimeout(()=>{const current=read();if(current?.location)void registerDirectoryBestEffort(current)},0);return migrated}
+    await registerDirectoryBestEffort(state);setTimeout(()=>void registerDirectoryBestEffort(read()),0);return Object.freeze({...state,deployUrl:cloudflareDeployUrl()})
+  }
   if(!state.location){state=await updateMobileGuildLocation({precise:false})}
   const origin=normalizeEdgeOrigin(primaryOrigin),response=await fetch(new URL('/api/guild/claim',origin),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({guildId:state.guildId,displayName:state.displayName,foundingDeviceId:state.deviceId,claimToken:state.cloudPairingCode,membershipKey:state.membershipKey,charter:state.charter||undefined,location:state.location})});
   const payload=await response.json().catch(()=>({}));if(!response.ok||payload?.ok!==true)throw new Error(payload?.error||`Guild public edge returned HTTP ${response.status}.`);if(payload.guildId&&payload.guildId!==state.guildId)throw new Error('The deployed public edge belongs to a different Guild ID.');
@@ -140,14 +155,27 @@ export async function attachCloudflareEdge({primaryOrigin}={}){
 
 export function mobileGuildStatus(){const state=read();return state?Object.freeze({...state,deployUrl:cloudflareDeployUrl()}):null}
 
+async function geolocationPermissionState(){try{return clean((await globalThis.navigator?.permissions?.query?.({name:'geolocation'}))?.state,40)||'prompt'}catch{return'prompt'}}
 function selfHealPublicDirectory(){
-  const eligible=()=>{const state=read();return state?.cloudAttached&&state?.primaryOrigin&&state?.location?state:null};
+  const eligible=()=>{const state=read();return state?.cloudAttached&&state?.primaryOrigin?state:null};
   if(!eligible())return false;
-  const run=()=>{const state=eligible();if(state)void registerDirectoryBestEffort(state)};
-  const schedule=()=>[250,2500,8000].forEach(delay=>setTimeout(run,delay));
+  let running=false;
+  const run=async()=>{
+    const state=eligible();if(!state||running)return;running=true;
+    try{
+      if(!state.location){
+        if(await geolocationPermissionState()==='granted'){
+          try{await updateMobileGuildLocation({precise:false});return}catch(error){writeDirectoryStatus({ok:false,status:'location-required',error:String(error?.message||error)},state);return}
+        }
+        writeDirectoryStatus({ok:false,status:'location-required',error:'Set this Guild’s approximate map location on the founding phone to publish it.'},state);return;
+      }
+      await registerDirectoryBestEffort(state);
+    }finally{running=false}
+  };
+  const schedule=()=>[250,2500,8000].forEach(delay=>setTimeout(()=>void run(),delay));
   if(typeof document!=='undefined'&&document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
-  globalThis.addEventListener?.('pageshow',()=>setTimeout(run,250));
-  globalThis.addEventListener?.('online',()=>setTimeout(run,250));
+  globalThis.addEventListener?.('pageshow',()=>setTimeout(()=>void run(),250));
+  globalThis.addEventListener?.('online',()=>setTimeout(()=>void run(),250));
   return true;
 }
 
