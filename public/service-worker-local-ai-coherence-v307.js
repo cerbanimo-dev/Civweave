@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v312-guild-discovery-coherence';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v312-bounded-local-recovery';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -9,6 +9,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/local-chat-runtime-v295.js',
+  '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
   '/app/experience-orchestrator-v232.js',
   '/app/ai-capability-broker-v268.js',
@@ -25,6 +26,7 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/local-chat-runtime-v295.js',
+  '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
   '/app/experience-orchestrator-v232.js',
   '/app/ai-capability-broker-v268.js',
@@ -159,5 +161,6 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   smoothFitOrchestrator: true,
   ownsBeforeGenericCodeCoherence: true,
   bootstrapCapabilityReadiness: true,
-  guildDiscoveryCoherent: true
+  guildDiscoveryCoherent: true,
+  boundedLocalRecoveryCoherent: true
 });
