@@ -5,6 +5,10 @@ on:
     paths:
       - 'public/app/guide-generation-floor-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/guide-stream-thinking-v249.js'
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/local-ai/worker-v266.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
       - 'scripts/verify-guide-generation-floor-v1.mjs'
       - '.github/workflows/verify-guide-generation-floor-v1.yml'
   push:
@@ -12,6 +16,10 @@ on:
     paths:
       - 'public/app/guide-generation-floor-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/guide-stream-thinking-v249.js'
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/local-ai/worker-v266.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
       - 'scripts/verify-guide-generation-floor-v1.mjs'
       - '.github/workflows/verify-guide-generation-floor-v1.yml'
   workflow_dispatch:
@@ -32,5 +40,5 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Verify 900-token guide floor
+      - name: Verify guide generation and local inference
         run: node scripts/verify-guide-generation-floor-v1.mjs
