@@ -1,11 +1,12 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v314-legacy-mobile-guild-location';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v315-gemma4-pack-core';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/settings-gateway-v317.js',
   '/app/settings-local-route-v325.js',
+  '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/shared-guide-surface-v236.js',
@@ -24,6 +25,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
 const CW_LOCAL_AI_CRITICAL = [
   '/app/settings-gateway-v317.js',
   '/app/settings-local-route-v325.js',
+  '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/shared-guide-surface-v236.js',
@@ -40,6 +42,7 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/mobile-guild-create-v1.mjs',
   '/app/local-ai/bootstrap-v266.js',
   '/app/local-ai/model-registry-v266.js',
+  '/app/local-ai/gemma4-pack-extension-v1.js',
   '/app/local-ai/download-manager-v267.js',
   '/app/local-ai/package-revision-guard-v307.js',
   '/app/local-ai/download-policy-v278.js',
@@ -167,5 +170,7 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   legacyMobileGuildLocationCoherent: true,
   boundedLocalRecoveryCoherent: true,
   sharedGuideCurrentBytes: true,
-  gemma4CompatibleQ4Coherent: true
+  gemma4CompatibleQ4Coherent: true,
+  gemma4PackCoreCoherent: true,
+  gemma4Q2OptionalExtensionCoherent: true
 });
