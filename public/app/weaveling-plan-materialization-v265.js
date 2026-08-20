@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-weaveling-plan-materialization-v265-ai-only';
+const VERSION='1.1.1-weaveling-plan-materialization-v265-ai-only-quarantine';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
+const QUARANTINE_KEY='civweave.quest-quarantine.v1';
 const BANNER_ID='cw-weave-review-ready-v265';
 const PLANNER_PATH='/app/intention-planner-v141.js';
 const NON_AI_PROVIDER_RE=/^(?:deterministic(?:-local)?|local-contract|bundled|packaged|reflex|minilm|local-reflex|manual|unknown)?$/i;
@@ -17,7 +18,7 @@ const clean=(value,max=8000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clone=value=>{try{return typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value))}catch{return value}};
 const now=()=>new Date().toISOString();
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
 function emit(type,detail={}){try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:now(),...detail}}))}catch{}}
 function aiAuthoredPlan(plan){
@@ -32,6 +33,31 @@ function aiAuthoredResult(result){
 function rejectUnauthorized(plan,source='unknown'){
   emit('civweave:quest-ai-authority-rejected',{planId:clean(plan?.id,180),title:clean(plan?.title,220),source,authoring:clone(plan?.authoring||null)});
   return null;
+}
+function quarantineUnverifiedReviewQuests(){
+  const at=now(),quarantined=[];
+  let rows=parse(localStorage.getItem(INTENTIONS_KEY),[]);if(!Array.isArray(rows))rows=[];
+  const kept=rows.filter(row=>{
+    const plan=row?.plan,state=clean(row?.state||plan?.state,40).toLowerCase();
+    if(row?.kind==='weave-plan'&&plan&&state==='review'&&!aiAuthoredPlan(plan)){
+      quarantined.push({...clone(row),quarantinedAt:at,quarantineReason:'missing-ai-authoring-provenance'});return false;
+    }
+    return true;
+  });
+  if(kept.length!==rows.length)try{localStorage.setItem(INTENTIONS_KEY,JSON.stringify(kept.slice(0,100)))}catch{}
+  let current=parse(localStorage.getItem(WORKING_KEY),{}),workspaceChanged=false;
+  if(current?.stage==='review'&&current?.plan&&!aiAuthoredPlan(current.plan)){
+    quarantined.push({kind:'working-campus-review',plan:clone(current.plan),quarantinedAt:at,quarantineReason:'missing-ai-authoring-provenance'});
+    current={...current,plan:null,reviewReady:null,stage:clean(current.wish)?'profile':'wish',view:'quest',updatedAt:at};workspaceChanged=true;
+    try{localStorage.setItem(WORKING_KEY,JSON.stringify(current))}catch{}
+  }
+  if(quarantined.length){
+    let prior=parse(localStorage.getItem(QUARANTINE_KEY),[]);if(!Array.isArray(prior))prior=[];
+    const seen=new Set();const combined=[...quarantined,...prior].filter(row=>{const key=clean(row?.id||row?.plan?.id||`${row?.kind}:${row?.quarantinedAt}`,240);if(!key||seen.has(key))return false;seen.add(key);return true}).slice(0,100);
+    try{localStorage.setItem(QUARANTINE_KEY,JSON.stringify(combined))}catch{}
+    emit('civweave:quest-review-quarantined',{count:quarantined.length,workspaceChanged,reason:'missing-ai-authoring-provenance'});
+  }
+  return{count:quarantined.length,workspaceChanged};
 }
 function isCivweavePage(){
   const route=globalThis.CivweaveSystemRoutesV227?.identify?.(location.pathname);
@@ -123,16 +149,16 @@ function waitForPlanner(timeout=10000){
 function ensurePlanner(){
   if(globalThis.CivweaveIntentionPlanner){patchPlanner();return Promise.resolve(globalThis.CivweaveIntentionPlanner)}
   if(readyPromise)return readyPromise;
-  readyPromise=(async()=>{const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===PLANNER_PATH}catch{return false}});if(!existing){const script=document.createElement('script');script.src=`${PLANNER_PATH}?v=1.1.0-ai-quest-only`;script.async=false;document.head.append(script)}const api=await waitForPlanner();patchPlanner(api);return globalThis.CivweaveIntentionPlanner||api})().catch(error=>{readyPromise=null;console.warn('[Civweave] Weaveling planner readiness failed:',error);throw error});return readyPromise;
+  readyPromise=(async()=>{const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===PLANNER_PATH}catch{return false}});if(!existing){const script=document.createElement('script');script.src=`${PLANNER_PATH}?v=1.1.1-ai-quest-only`;script.async=false;document.head.append(script)}const api=await waitForPlanner();patchPlanner(api);return globalThis.CivweaveIntentionPlanner||api})().catch(error=>{readyPromise=null;console.warn('[Civweave] Weaveling planner readiness failed:',error);throw error});return readyPromise;
 }
 function recoverVisibleReview(){const current=parse(localStorage.getItem(WORKING_KEY),{}),plan=current?.stage==='review'?current.plan:null;if(aiAuthoredPlan(plan))renderReviewReady(plan)}
 function start(){
-  ensurePlanner().catch(()=>{});patchAssistant();recoverVisibleReview();
-  for(const name of ['civweave:guide-loader-reset','civweave:guide-workspace-ready','civweave:assistant-runtime-ready','civweave:local-provider-authority-installed','civweave:local-guide-control-bypass-ready','pageshow'])addEventListener(name,()=>queueMicrotask(()=>{ensurePlanner().then(patchPlanner).catch(()=>{});patchAssistant();recoverVisibleReview()}));
+  quarantineUnverifiedReviewQuests();ensurePlanner().catch(()=>{});patchAssistant();recoverVisibleReview();
+  for(const name of ['civweave:guide-loader-reset','civweave:guide-workspace-ready','civweave:assistant-runtime-ready','civweave:local-provider-authority-installed','civweave:local-guide-control-bypass-ready','pageshow'])addEventListener(name,()=>queueMicrotask(()=>{quarantineUnverifiedReviewQuests();ensurePlanner().then(patchPlanner).catch(()=>{});patchAssistant();recoverVisibleReview()}));
   addEventListener('civweave:intentions-changed',recoverVisibleReview);
   let ticks=0;const timer=setInterval(()=>{if(globalThis.CivweaveIntentionPlanner!==patchedPlanner||globalThis.CivweaveIntentionPlanner?.__cwQuestAIOnlyV265!==VERSION)patchPlanner();if(globalThis.CivweaveAssistantV141?.respond!==patchedAssistant)patchAssistant();recoverVisibleReview();if(++ticks>=240)clearInterval(timer)},125);
 }
 
-globalThis.CivweaveWeavelingPlanMaterializationV265={version:VERSION,ensurePlanner,patchPlanner,patchAssistant,materialize,renderReviewReady,openReview,aiAuthoredPlan,aiAuthoredResult,sanitizeAssistantResult,policy:'new-quests-require-ai-authored-structured-json-v265',deterministicQuestCreation:false,aiQuestOnly:true};
+globalThis.CivweaveWeavelingPlanMaterializationV265={version:VERSION,ensurePlanner,patchPlanner,patchAssistant,materialize,renderReviewReady,openReview,aiAuthoredPlan,aiAuthoredResult,sanitizeAssistantResult,quarantineUnverifiedReviewQuests,policy:'new-quests-require-ai-authored-structured-json-v265',deterministicQuestCreation:false,aiQuestOnly:true,legacyReviewQuarantine:true};
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
