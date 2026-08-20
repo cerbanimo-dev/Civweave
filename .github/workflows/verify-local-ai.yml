@@ -10,6 +10,8 @@ on:
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
       - 'public/app/local-ai/gemma4-pack-extension-v1.js'
+      - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
+      - 'public/app/local-ai/gemma4-dual-q4-actions-v1.js'
       - 'public/app/local-ai/package-revision-guard-v307.js'
       - 'public/app/local-chat-runtime-v295.js'
       - 'public/app/local-chat-bounded-recovery-v1.js'
@@ -45,6 +47,8 @@ on:
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
       - 'public/app/local-ai/gemma4-pack-extension-v1.js'
+      - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
+      - 'public/app/local-ai/gemma4-dual-q4-actions-v1.js'
       - 'public/app/local-ai/package-revision-guard-v307.js'
       - 'public/app/local-chat-runtime-v295.js'
       - 'public/app/local-chat-bounded-recovery-v1.js'
@@ -97,6 +101,8 @@ jobs:
           node --check public/app/local-ai/bootstrap-v266.js
           node --check public/app/local-ai/model-registry-v266.js
           node --check public/app/local-ai/gemma4-pack-extension-v1.js
+          node --check public/app/local-ai/gemma4-e4b-q4-extension-v1.js
+          node --check public/app/local-ai/gemma4-dual-q4-actions-v1.js
           node --check public/app/local-ai/package-revision-guard-v307.js
           node --check public/app/local-chat-runtime-v295.js
           node --check public/app/local-chat-bounded-recovery-v1.js
