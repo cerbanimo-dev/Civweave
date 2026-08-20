@@ -1,5 +1,74 @@
 const $ = (selector) => document.querySelector(selector);
 
+function installViewportContainment() {
+  const style = document.createElement('style');
+  style.dataset.civweaveViewportGuard = 'true';
+  style.textContent = `
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    @supports (overflow: clip) {
+      html, body { overflow-x: clip; }
+    }
+    .lari-section { overflow-x: hidden; }
+    @supports (overflow: clip) {
+      .lari-section { overflow-x: clip; }
+    }
+    @media (max-width: 720px) {
+      .shell {
+        width: calc(100% - 24px);
+        max-width: 100%;
+      }
+      .hero,
+      .stats,
+      .section,
+      .closing,
+      footer,
+      .story-grid,
+      .lari-hero,
+      .realms,
+      .economy,
+      .guildkeepers,
+      .press,
+      .cast,
+      .duties {
+        min-width: 0;
+        max-width: 100%;
+      }
+      .hero > *,
+      .stats > *,
+      .story-grid > *,
+      .lari-hero > *,
+      .realms > *,
+      .economy > *,
+      .guildkeepers > *,
+      .press > *,
+      .cast > *,
+      .duties > * {
+        min-width: 0;
+      }
+      .portal {
+        width: min(580px, calc(100vw - 24px));
+        max-width: 100%;
+      }
+      .portal-note {
+        right: 0;
+        max-width: calc(100vw - 48px);
+      }
+      .section h2,
+      .closing h2,
+      .intro,
+      .lede {
+        max-width: 100%;
+      }
+    }
+  `;
+  document.head.append(style);
+}
+
+installViewportContainment();
+
 const isJapanese = document.documentElement.lang.toLowerCase().startsWith('ja');
 const locale = isJapanese ? 'ja-JP' : undefined;
 const year = $('#year');
