@@ -1,15 +1,17 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-subsystem-avatar-state-v347';
+const VERSION='1.0.1-subsystem-avatar-state-v347-persistent-stage-guard';
 const KEY='civweave.subsystem-avatar-state.v347';
 const EVENT='civweave:subsystem-avatar-state';
 const INPUT='civweave:subsystem-state';
+const STAGE_ID='cw-family-stage';
 const QUIET_MS=20*60*1000,LONELY_MS=2*60*60*1000;
 const SYSTEMS=Object.freeze(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const MAP=Object.freeze({neutral:'neutral',healthy:'happy',good:'happy',ready:'happy',online:'happy',synced:'happy',recovered:'happy',quiet:'sleepy',idle:'sleepy',stale:'sleepy',offline:'sleepy',lonely:'shy',attention:'worried','needs-attention':'worried',warning:'worried',degraded:'worried',error:'worried',critical:'worried',failed:'sad',failure:'sad',blocked:'confused',conflict:'confused',uncertain:'confused',thinking:'thinking',syncing:'thinking',loading:'thinking',indexing:'thinking',waiting:'curious',active:'determined',working:'determined',busy:'determined',sending:'determined',new:'surprised',changed:'surprised',unread:'curious',discovery:'curious',available:'curious',complete:'proud',completed:'proud',success:'cheering',celebrating:'cheering'});
 const PRIORITY=Object.freeze({critical:5,error:5,failed:5,failure:5,attention:4,'needs-attention':4,warning:4,degraded:4,blocked:4,conflict:4,unread:3,new:3,changed:3,discovery:3,available:3,thinking:2,syncing:2,loading:2,indexing:2,waiting:2,active:2,working:2,busy:2,sending:2,complete:2,completed:2,success:2,celebrating:2,healthy:1,good:1,ready:1,online:1,synced:1,recovered:1});
 if(globalThis.CivweaveSubsystemAvatarStateV347?.version===VERSION)return;
 const timers=new Map();
+const stageTimers=new Set();
 const clean=(v,n=400)=>String(v??'').replace(/\s+/g,' ').trim().slice(0,n),clone=v=>v==null?v:typeof structuredClone==='function'?structuredClone(v):JSON.parse(JSON.stringify(v));
 function system(v){const raw=clean(v,80).toLowerCase(),id=raw==='commons'||raw==='civweave-commons'?'civweave':raw==='living school'||raw==='living_school'?'living-school':raw;return SYSTEMS.includes(id)?id:''}
 function pageSystem(){return system(globalThis.CivweaveSystemRoutesV227?.identify?.(location?.pathname||'')||document?.documentElement?.dataset?.civweaveSystemRoute||document?.documentElement?.dataset?.civweaveSystem)||'civweave'}
@@ -28,7 +30,37 @@ function pulse(sys,s,options={}){return set(sys,s,{...options,force:options.forc
 function touch(sys,options={}){const id=system(sys||pageSystem()),cur=status(id),at=Date.now();if(cur&&(cur.sticky||Number(cur.priority||0)>=4)){const store=read();store[id]={...cur,lastActivityAt:at};write(store);return clone(store[id])}return set(id,options.state||'active',{...options,source:options.source||'activity',lastActivityAt:at,force:true,ttlMs:options.ttlMs||90000})}
 function sweepQuiet(){const at=Date.now();for(const [id,row] of Object.entries(all())){if(row.sticky||Number(row.priority||0)>=3)continue;const age=at-Number(row.lastActivityAt||row.updatedAt||at);if(age>=LONELY_MS&&row.state!=='lonely')set(id,'lonely',{source:'quiet-watch',reason:'No meaningful subsystem activity for a while.',lastActivityAt:row.lastActivityAt,force:true,ttlMs:6*60*60*1000});else if(age>=QUIET_MS&&!['quiet','lonely'].includes(row.state))set(id,'quiet',{source:'quiet-watch',reason:'Subsystem has gone quiet.',lastActivityAt:row.lastActivityAt,force:true,ttlMs:60*60*1000})}}
 function reconcileMesh(target=''){const mesh=globalThis.CivweaveSystemsMeshV251;if(!mesh)return false;for(const id of(target?[system(target)].filter(Boolean):SYSTEMS)){let rows=[];try{rows=mesh.projectionInbox?.(id)||[]}catch{}if(rows.length)set(id,'needs-attention',{source:'systems-mesh',reason:`${rows.length} projection${rows.length===1?'':'s'} waiting for review.`,sticky:true,force:true,context:{projectionCount:rows.length}});else{const cur=status(id);if(cur?.source==='systems-mesh'&&cur.sticky)clear(id,{source:'systems-mesh',reason:'Projection inbox is clear.'})}}return true}
+function stageNodeVisible(node,minHeight=40){if(!node?.isConnected)return false;try{const style=node.ownerDocument.defaultView.getComputedStyle(node),rect=node.getBoundingClientRect();return style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>.01&&rect.width>=40&&rect.height>=minHeight}catch{return false}}
+function activeShellSystem(){return system(globalThis.CivweavePersistentFamilyShellV1?.system||new URLSearchParams(location.search).get('system')||'civweave')||'civweave'}
+function repairPersistentStage(reason='check'){
+  const frame=document.getElementById(STAGE_ID);if(!frame||activeShellSystem()!=='civweave')return false;
+  let doc,win;try{doc=frame.contentDocument;win=frame.contentWindow}catch{return false}if(!doc||!win)return false;
+  const main=doc.querySelector('main.app>.main'),guide=main?.querySelector('.guide'),work=main?.querySelector('.work'),workspace=doc.getElementById('workspace');
+  if(!main||!guide||!work)return false;
+  if(stageNodeVisible(main,80)&&stageNodeVisible(guide,60)&&stageNodeVisible(work,80))return true;
+  if(doc.querySelector('dialog[open],#cw-new-user-onboarding-v1:not([hidden]),#cw-settings-v320:not([hidden]),#cw-persistent-guide-chat-v215:not([hidden])'))return false;
+  for(const node of [main,guide,work]){node.removeAttribute('hidden');node.removeAttribute('inert');node.style.setProperty('visibility','visible','important');node.style.setProperty('opacity','1','important')}
+  main.style.setProperty('display','grid','important');main.style.setProperty('transform','none','important');guide.style.setProperty('display','block','important');work.style.setProperty('display','block','important');
+  if(workspace&&!workspace.childElementCount&&win.CivweaveWorkingCampusV156?.openView){try{win.CivweaveWorkingCampusV156.openView('quest')}catch{}}
+  doc.documentElement.dataset.civweavePersistentStageRepair=`${VERSION}:${reason}`;
+  try{dispatchEvent(new CustomEvent('civweave:persistent-family-stage-repaired',{detail:{version:VERSION,system:'civweave',reason}}))}catch{}
+  return stageNodeVisible(main,80)&&stageNodeVisible(guide,60)&&stageNodeVisible(work,80);
+}
+function schedulePersistentStageGuard(reason='schedule'){
+  if(!document.getElementById(STAGE_ID))return false;
+  for(const delay of [0,80,240,700,1600,3200]){const timer=setTimeout(()=>{stageTimers.delete(timer);repairPersistentStage(`${reason}-${delay}`)},delay);stageTimers.add(timer)}
+  return true;
+}
+function installPersistentStageGuard(){
+  const frame=document.getElementById(STAGE_ID);if(!frame)return false;
+  if(frame.dataset.civweaveStageGuard!==VERSION){frame.dataset.civweaveStageGuard=VERSION;frame.addEventListener('load',()=>schedulePersistentStageGuard('frame-load'))}
+  addEventListener('civweave:persistent-family-stage-ready',()=>schedulePersistentStageGuard('stage-ready'));
+  addEventListener('civweave:system-route-changed',()=>schedulePersistentStageGuard('route-change'));
+  addEventListener('pageshow',()=>schedulePersistentStageGuard('pageshow'));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedulePersistentStageGuard('visibility-return')});
+  schedulePersistentStageGuard('boot');return true;
+}
 function bind(){addEventListener(INPUT,e=>{const d=e.detail||{};set(d.system||pageSystem(),d.state||d.status||'neutral',d)});addEventListener('civweave:subsystem-activity',e=>{const d=e.detail||{};touch(d.system||pageSystem(),d)});addEventListener('civweave:subsystem-clear',e=>{const d=e.detail||{};clear(d.system||pageSystem(),d)});addEventListener('civweave:systems-mesh:outbox',e=>{const d=e.detail?.draft;if(d?.sourceSystem)pulse(d.sourceSystem,'working',{source:'systems-mesh',reason:'Sharing a system event.'})});addEventListener('civweave:systems-mesh:projection-candidate',e=>{const p=e.detail?.projection;if(p?.targetSystem)set(p.targetSystem,'needs-attention',{source:'systems-mesh',reason:'New projection waiting for review.',sticky:true,force:true,context:{projectionId:p.projectionId,projectionType:p.projectionType}})});addEventListener('civweave:systems-mesh:projection-decision',e=>{const p=e.detail?.projection,d=e.detail?.decision?.decision;if(!p?.targetSystem)return;d==='accepted'?pulse(p.targetSystem,'completed',{source:'systems-mesh',reason:'Projection accepted.'}):d==='deferred'?set(p.targetSystem,'waiting',{source:'systems-mesh',reason:'Projection deferred.',sticky:true,force:true}):pulse(p.targetSystem,'determined',{source:'systems-mesh',reason:'Projection reviewed.'});setTimeout(()=>reconcileMesh(p.targetSystem),50)});for(const name of['civweave:capacity-session-ready','civweave:host-node-logged-in','civweave:host-node-health'])addEventListener(name,()=>pulse('civweave','healthy',{source:'host-node',reason:'Hub connection is healthy.',ttlMs:15000}));addEventListener('civweave:capacity-session-cleared',()=>set('civweave','offline',{source:'host-node',reason:'Hub session is not active.',force:true,ttlMs:12*60*60*1000}));addEventListener('online',()=>pulse(pageSystem(),'recovered',{source:'connectivity',reason:'Network connection restored.'}));addEventListener('offline',()=>set(pageSystem(),'offline',{source:'connectivity',reason:'This subsystem is offline.',force:true,sticky:true}));addEventListener('civweave:chat-model-failed',e=>set(e.detail?.system||pageSystem(),'needs-attention',{source:'chat-runtime',reason:'The local chat model needs attention.',force:true,ttlMs:20*60*1000}))}
-function boot(){bind();for(const row of Object.values(all())){expire(row);emit(row)}reconcileMesh();sweepQuiet();const sweep=setInterval(sweepQuiet,60000);addEventListener('pagehide',()=>{clearInterval(sweep);for(const t of timers.values())clearTimeout(t);timers.clear()},{once:true});globalThis.CivweaveSubsystemAvatarStateV347=Object.freeze({version:VERSION,event:EVENT,inputEvent:INPUT,systems:SYSTEMS,quietAfterMs:QUIET_MS,lonelyAfterMs:LONELY_MS,system,state,expressionFor,set,clear,pulse,touch,status,all,reconcileMesh,sweepQuiet});try{dispatchEvent(new CustomEvent('civweave:subsystem-avatar-state-ready',{detail:{version:VERSION,event:EVENT,inputEvent:INPUT,systems:SYSTEMS.slice()}}))}catch{}}
+function boot(){bind();installPersistentStageGuard();for(const row of Object.values(all())){expire(row);emit(row)}reconcileMesh();sweepQuiet();const sweep=setInterval(sweepQuiet,60000);addEventListener('pagehide',()=>{clearInterval(sweep);for(const t of timers.values())clearTimeout(t);timers.clear();for(const t of stageTimers)clearTimeout(t);stageTimers.clear()},{once:true});globalThis.CivweaveSubsystemAvatarStateV347=Object.freeze({version:VERSION,event:EVENT,inputEvent:INPUT,systems:SYSTEMS,quietAfterMs:QUIET_MS,lonelyAfterMs:LONELY_MS,system,state,expressionFor,set,clear,pulse,touch,status,all,reconcileMesh,sweepQuiet,repairPersistentStage,schedulePersistentStageGuard});try{dispatchEvent(new CustomEvent('civweave:subsystem-avatar-state-ready',{detail:{version:VERSION,event:EVENT,inputEvent:INPUT,systems:SYSTEMS.slice()}}))}catch{}}
 if(document?.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
