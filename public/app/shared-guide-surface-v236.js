@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.162-shared-guide-surface-v236-guide-stream-refresh';
+const VERSION='1.0.163-shared-guide-surface-v236-local-planner-stream-repair';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -98,7 +98,7 @@ function install(){
   loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
   load('/app/mobile-chat-visual-viewport-v1.js?v=1.0.1-long-thread-fit',null,()=>Boolean(globalThis.CivweaveMobileChatVisualViewportV1));
   load('/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
-  load('/app/guide-generation-floor-v1.js?v=1.2.0-streaming-platform-planning',null,()=>globalThis.CivweaveGuideGenerationFloorV1?.version==='1.2.0-guide-generation-floor-v1-streaming-platform-planning');
+  load('/app/guide-generation-floor-v1.js?v=1.3.0-local-planner-authority',null,()=>globalThis.CivweaveGuideGenerationFloorV1?.version==='1.3.0-guide-generation-floor-v1-local-planner-authority');
   load('/app/minilm-decision-strip-v1.js?v=1.1.0-router-watch',null,()=>Boolean(globalThis.CivweaveMiniLMDecisionStripV1));
   load('/app/family-ai-loader-v105.js?v=1.0.132-standard-ai-lazy-local',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
@@ -106,7 +106,7 @@ function install(){
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
   load('/app/local-chat-bounded-recovery-v1.js?v=1.1.0-gemma4-q4',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.1.0-local-chat-bounded-recovery-v1-gemma4-q4'&&globalThis.CivweaveLocalChatBoundedRecoveryV1?.gemma4CompatibleQ4===true);
   load('/app/local-provider-authority-v1.js?v=1.0.3-inference-core-first',null,()=>globalThis.CivweaveLocalProviderAuthorityV1?.version==='1.0.3-local-provider-authority-v1-inference-core-first');
-  load('/app/guide-stream-thinking-v249.js?v=1.0.119-global-model-events',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.119-guide-stream-thinking-v249-global-model-events');
+  load('/app/guide-stream-thinking-v249.js?v=1.0.120-canonical-v350',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.120-guide-stream-thinking-v249-canonical-v350');
   load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
     load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.57-v257',null,()=>Boolean(globalThis.CivweaveGeminiInteractionsV159));
   },()=>Boolean(globalThis.CivweaveGeminiDeviceDirectV257));
@@ -146,7 +146,7 @@ addEventListener('pageshow',()=>queueMicrotask(()=>{install();globalThis.Civweav
 globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   version:VERSION,
   responseRouter:'minilm-v347-primary-v3',
-  generationFloor:'guide-generation-floor-v1-900-tokens-1800-planning',
+  generationFloor:'guide-generation-floor-v1-local-planner-authority',
   routeDecisionStrip:'v1.1-router-watch',
   assistantLoader:'family-ai-loader-v105-on-demand',
   assistantLoaderEagerWarm:false,
@@ -199,7 +199,7 @@ globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   threadUiRequested:()=>threadUiRequested,
   activateThreadUI,
   preloadedDependencyReadyCheck:true,
-  streamThinking:'v249-global-model-events',
+  streamThinking:'v249-canonical-v350',
   navigationLifecycle:'v424',
   surfaceMode:'bubble-only',
   launcherOwner:'guide-chat-surface-v350',
