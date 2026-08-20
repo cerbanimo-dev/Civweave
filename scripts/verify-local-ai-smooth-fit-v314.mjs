@@ -119,7 +119,7 @@ assert.match(bootstrap,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?
 assert.match(bootstrap,/deviceFitRecommendations===true/);
 assert.match(bootstrap,/smoothFitRuntime:true/);
 assert.match(bootstrap,/componentCompatibility:'capability-contract-v324'/);
-assert.match(wrapper,/smoothFitRuntime===true/);
+assert.match(wrapper,/inferenceCoreFirst:true/,'chat wrapper must preserve inference-core-first startup');
 assert.match(wrapper,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?intentPrewarm===true/s,'low-level runtime capability may remain; UI callers are separately forbidden');
 
 // Local-AI code assets are kept coherent ahead of generic shell caches.
@@ -142,5 +142,5 @@ console.log(JSON.stringify({
   settingsView:'saved-state-only-actions-lazy-v323',
   settingsDecoration:'bounded-idempotent-observer',
   weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',
-  coherence:'orchestrator-network-first-bootstrap-capability-v308'
+  coherence:'orchestrator-network-first-current-local-ai-epoch'
 },null,2));
