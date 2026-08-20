@@ -1,9 +1,10 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v315-gemma4-pack-core';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v316-guild-chat-usage';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
+  '/app/system-routes-v227.js',
   '/app/settings-gateway-v317.js',
   '/app/settings-local-route-v325.js',
   '/app/model-settings-controller-v173.js',
@@ -23,6 +24,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/mobile-guild-create-v1.mjs'
 ]);
 const CW_LOCAL_AI_CRITICAL = [
+  '/app/system-routes-v227.js',
   '/app/settings-gateway-v317.js',
   '/app/settings-local-route-v325.js',
   '/app/model-settings-controller-v173.js',
@@ -168,6 +170,7 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   bootstrapCapabilityReadiness: true,
   guildDiscoveryCoherent: true,
   legacyMobileGuildLocationCoherent: true,
+  guildChatUsageCoherent: true,
   boundedLocalRecoveryCoherent: true,
   sharedGuideCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true,
