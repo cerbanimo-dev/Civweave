@@ -7,11 +7,15 @@ import {
 
 const NODE_DOMAIN = "nodes.commonweave.earth";
 const CENTRAL_FABRIC_HOST = "civweave-node-cloud.cerbanimo.workers.dev";
+const CORE_DIRECTORY = "https://civweave-core.cerbanimo.workers.dev/api/nodes?limit=100";
+const STAGING_CORE_DIRECTORY = "https://civweave-core-staging.cerbanimo.workers.dev/api/nodes?limit=100";
 const STAGING_GUILD_SERVER_ORIGIN = "https://civweave-node-cloud-staging.cerbanimo.workers.dev";
 const LEGACY_HOSTS = new Set(["civweave-host-node.onrender.com"]);
 const COMMUNITY_SEATS_PER_FREE_NODE = 6;
 const SURVIVAL_FLOOR_NEURONS = 25;
 const INCLUDED_POOL_BPS = 9_000;
+
+type JsonRecord = Record<string, any>;
 
 function hostOrigin(value: string | null): URL | null {
   if (!value) return null;
@@ -42,7 +46,7 @@ function requestedNodeId(value: string | null): string | null {
   return /^[a-z0-9-]{1,120}$/.test(nodeId) ? nodeId : null;
 }
 
-async function getJson(url: URL) {
+async function getJson(url: URL | string) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5_000);
   try {
@@ -55,6 +59,63 @@ async function getJson(url: URL) {
     return { ok: response.ok, status: response.status, payload };
   } finally {
     clearTimeout(timer);
+  }
+}
+
+function safeHttpsOrigin(value: unknown) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" && !url.username && !url.password ? url.origin : "";
+  } catch {
+    return "";
+  }
+}
+
+async function directoryMobileGuild(directoryUrl: string, nodeId: string | null, origin: string) {
+  if (!nodeId || !origin) return null;
+  const directory = await getJson(directoryUrl).catch(() => ({ ok: false, status: 502, payload: {} }));
+  if (!directory.ok) return null;
+  const rows = Array.isArray(directory.payload?.nodes) ? directory.payload.nodes : [];
+  const row = rows.find((candidate: JsonRecord) => String(candidate?.nodeId || "") === nodeId);
+  if (!row || String(row.runtime || "") !== "cloudflare-mobile-guild-edge") return null;
+  const capabilities = Array.isArray(row.capabilities) ? row.capabilities.map(String) : [];
+  if (!capabilities.includes("public-guild-directory") || safeHttpsOrigin(row.publicOrigin) !== origin) return null;
+  return row;
+}
+
+async function mobileGuildStatus(target: URL, nodeId: string, directoryRow: JsonRecord, extra: JsonRecord = {}) {
+  try {
+    const [statusResult, capacityResult] = await Promise.all([
+      getJson(new URL("/api/guild/status", target)),
+      getJson(new URL("/api/fabric/capacity", target)),
+    ]);
+    const status = statusResult.payload || {}, capacity = capacityResult.payload || {};
+    if (!statusResult.ok || status?.ok !== true || status?.claimed !== true || String(status.guildId || "") !== nodeId) {
+      return reply({ ok: false, error: "mobile-guild-status-unavailable", hostOrigin: target.origin, nodeId, guildStatus: statusResult.status, ...extra }, 502);
+    }
+    if (!capacityResult.ok || capacity?.status !== "ready" || !Array.isArray(capacity?.starterNodes) || capacity.starterNodes.length < 3) {
+      return reply({ ok: false, error: "mobile-guild-fabric-unavailable", hostOrigin: target.origin, nodeId, capacityStatus: capacityResult.status, ...extra }, 502);
+    }
+    return reply({
+      schema: "civweave.host-node-status.v1",
+      ok: true,
+      kind: "cloudflare-mobile-guild-edge",
+      hostOrigin: target.origin,
+      nodeId,
+      displayName: String(status.displayName || directoryRow.displayName || nodeId),
+      runtime: "cloudflare-mobile-guild-edge",
+      status: "online",
+      health: { ok: true, connections: null, updatedAt: status.updatedAt || capacity.updatedAt || directoryRow.updatedAt || null },
+      slots: null,
+      capacityAvailable: false,
+      capacityMessage: "This Mobile Guild is online and discoverable. Its current Worker does not publish Citizen/Patron seat accounting yet, so Civweave will not invent slot numbers.",
+      publicMobileGuild: true,
+      starterNodeCount: capacity.starterNodes.length,
+      aiEnabled: capacity.aiEnabled === true,
+      ...extra,
+    });
+  } catch (error) {
+    return reply({ ok: false, error: "mobile-guild-status-fetch-failed", hostOrigin: target.origin, nodeId, message: String((error as Error)?.message || error), ...extra }, 502);
   }
 }
 
@@ -99,12 +160,15 @@ async function stagingStatus(request: Request) {
   const requestUrl = new URL(request.url);
   const target = hostOrigin(requestUrl.searchParams.get("host"));
   if (!target) return reply({ ok: false, error: "host-node-not-allowed" }, 400);
+  const nodeId = requestedNodeId(requestUrl.searchParams.get("node"));
+  const mobile = await directoryMobileGuild(STAGING_CORE_DIRECTORY, nodeId, target.origin);
+  if (mobile && nodeId) return mobileGuildStatus(target, nodeId, mobile, { environment: "staging", productionIsolation: true, stagingMobileDirectory: true });
+
   const pagesOrigin = requestOrigin(request);
   if (target.origin !== pagesOrigin && target.origin !== STAGING_GUILD_SERVER_ORIGIN) {
     return stagingProductionTargetBlocked(request, target.origin);
   }
 
-  const nodeId = requestedNodeId(requestUrl.searchParams.get("node"));
   const guild = stagingGuild(nodeId);
   if (!guild) return reply({
     ok: false,
@@ -182,12 +246,14 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   const requestUrl = new URL(context.request.url);
   const origin = hostOrigin(requestUrl.searchParams.get("host"));
-  if (!origin || !allowedHost(origin)) {
-    return reply({ ok: false, error: "host-node-not-allowed" }, 400);
-  }
+  const requestedNode = requestedNodeId(requestUrl.searchParams.get("node"));
+  if (!origin) return reply({ ok: false, error: "host-node-not-allowed" }, 400);
+  const mobile = await directoryMobileGuild(CORE_DIRECTORY, requestedNode, origin.origin);
+  if (mobile && requestedNode) return mobileGuildStatus(origin, requestedNode, mobile);
+  if (!allowedHost(origin)) return reply({ ok: false, error: "host-node-not-allowed" }, 400);
 
   const centralFabric = origin.hostname.toLowerCase() === CENTRAL_FABRIC_HOST;
-  const nodeId = nodeIdForHost(origin.hostname) || (centralFabric ? requestedNodeId(requestUrl.searchParams.get("node")) : null);
+  const nodeId = nodeIdForHost(origin.hostname) || (centralFabric ? requestedNode : null);
   try {
     if (nodeId) {
       const manifestUrl = new URL(centralFabric ? `/n/${nodeId}/api/ai/node/manifest` : "/api/ai/node/manifest", origin);
