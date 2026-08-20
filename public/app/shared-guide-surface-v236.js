@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.160-shared-guide-surface-v236-bounded-local-recovery';
+const VERSION='1.0.161-shared-guide-surface-v236-gemma4-q4';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -104,7 +104,7 @@ function install(){
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
   load('/app/guide-forward-failure-policy-v1.js?v=1.0.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
-  load('/app/local-chat-bounded-recovery-v1.js?v=1.0.0-bounded-local-recovery',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.0.0-local-chat-bounded-recovery-v1');
+  load('/app/local-chat-bounded-recovery-v1.js?v=1.1.0-gemma4-q4',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.1.0-local-chat-bounded-recovery-v1-gemma4-q4'&&globalThis.CivweaveLocalChatBoundedRecoveryV1?.gemma4CompatibleQ4===true);
   load('/app/local-provider-authority-v1.js?v=1.0.3-inference-core-first',null,()=>globalThis.CivweaveLocalProviderAuthorityV1?.version==='1.0.3-local-provider-authority-v1-inference-core-first');
   load('/app/guide-stream-thinking-v249.js?v=1.0.118-v249-navigation-lifecycle-v424',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
   load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
@@ -154,7 +154,7 @@ globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   failurePolicy:'guide-forward-failure-policy-v1-local-provider-pin',
   failureHardening:'guide-forward-failure-hardening-v1-local-provider-pin',
   providerAuthority:'local-provider-authority-v1-inference-core-first',
-  localFallbackRecovery:'bounded-local-recovery-v1',
+  localFallbackRecovery:'bounded-local-recovery-v1-gemma4-q4',
   boundedLocalFallbackRecovery:true,
   stallReasonPreserved:true,
   fifteenMinuteChatFloorRetired:true,
@@ -169,7 +169,11 @@ globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   fullLocalBootstrapBlocking:false,
   gemma4MobileRuntimeFloor:'4.3.0',
   bundledTransformersV4:'4.2.0',
-  gemma4LocalFallbackOnly:true,
+  gemma4Q2RuntimeBlocked:true,
+  gemma4CompatibleQ4:true,
+  gemma4CompatibleModelId:'gemma4-e2b-it-q4f16',
+  gemma4CompatibleModelRevision:'9f4bef82ea6e296bc69f8a2f5939f73af81b07a6',
+  gemma4Q2FallbackLocalOnly:true,
   staleAuthorityRefresh:true,
   plannerMaterialization:'v265-structured-and-deterministic',
   partyChat:'v1-lazy',
