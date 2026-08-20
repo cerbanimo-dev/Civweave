@@ -1,9 +1,10 @@
 (() => {
 'use strict';
 
-const VERSION = 'host-node-local-capacity-v4-request-budget-safe';
+const VERSION = 'host-node-local-capacity-v5-guild-login-runtime-bootstrap';
 const CAPACITY_ENDPOINT = '/api/federation/capacity';
 const ADMIT_ENDPOINT = '/api/federation/residents/admit';
+const SESSION_RUNTIME_PATH = '/app/host-node-session-v1.js?v=guild-login-runtime-ready-v1';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const RESIDENT_KEY = 'civweave.host-resident-id.v1';
 const PASSPORT_KEY = 'civweave.anarchadia.citizen-console.v139';
@@ -14,17 +15,60 @@ const REFRESH_MS = 5 * 60 * 1000;
 const NETWORK_LEASE_MS = 60 * 1000;
 const FAILURE_BACKOFF_MS = 5 * 60 * 1000;
 const LOBBY_WAIT_MS = 10_000;
+const SESSION_RUNTIME_WAIT_MS = 8_000;
 const INSTANCE_ID = `local-capacity:${crypto.randomUUID ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
 let refreshing = false;
 let joining = false;
 let refreshTimer = 0;
 let bound = false;
+let runtimeGuardBound = false;
+let sessionRuntimePromise = null;
 
 const el = id => document.getElementById(id);
 const parse = (value, fallback = null) => { try { return JSON.parse(value) ?? fallback; } catch { return fallback; } };
 
 function lobby() { return document.getElementById('cw-host-node-lobby'); }
 function localFederatedLobby() { return lobby()?.dataset.localFederated === 'true'; }
+function sessionRuntime() { return typeof globalThis.CivweaveHostNodeSessionV1?.join === 'function' ? globalThis.CivweaveHostNodeSessionV1 : null; }
+
+function waitForSessionRuntime(timeoutMs = SESSION_RUNTIME_WAIT_MS) {
+  const current = sessionRuntime();
+  if (current) return Promise.resolve(current);
+  return new Promise((resolve, reject) => {
+    const started = Date.now();
+    const tick = () => {
+      const runtime = sessionRuntime();
+      if (runtime) { resolve(runtime); return; }
+      if (Date.now() - started >= timeoutMs) { reject(new Error('The Guild login runtime did not finish loading.')); return; }
+      setTimeout(tick, 50);
+    };
+    tick();
+  });
+}
+
+function ensureSessionRuntime() {
+  const current = sessionRuntime();
+  if (current) return Promise.resolve(current);
+  if (sessionRuntimePromise) return sessionRuntimePromise;
+  sessionRuntimePromise = (async () => {
+    let script = [...document.scripts].find(node => {
+      try { return new URL(node.src, location.href).pathname === '/app/host-node-session-v1.js'; }
+      catch { return false; }
+    });
+    if (!script) {
+      script = document.createElement('script');
+      script.src = SESSION_RUNTIME_PATH;
+      script.async = false;
+      script.dataset.civweaveGuildLoginRuntime = 'v1';
+      document.head.append(script);
+    }
+    return waitForSessionRuntime();
+  })().catch(error => {
+    sessionRuntimePromise = null;
+    throw error;
+  });
+  return sessionRuntimePromise;
+}
 
 function selectedLocalHost() {
   try { return new URL(localStorage.getItem(HOST_ENDPOINT_KEY) || '').origin === location.origin; }
@@ -187,6 +231,32 @@ async function admitResident({ quiet = false } = {}) {
   }
 }
 
+async function interceptSessionRuntimeJoin(event) {
+  const button = event.target?.closest?.('#cw-host-node-join');
+  const currentLobby = lobby();
+  if (!button || !currentLobby || currentLobby.dataset.localFederated === 'true') return;
+  if (button.dataset.mode === 'search' || sessionRuntime()) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  if (joining) return;
+  joining = true;
+  const help = el('cw-host-node-help');
+  const priorText = button.textContent || 'Join & log in';
+  button.disabled = true;
+  button.textContent = 'Loading Guild login…';
+  try {
+    await ensureSessionRuntime();
+    button.disabled = false;
+    await globalThis.CivweaveHostNodeInstallerLobbyV1?.joinHostNode?.();
+  } catch (error) {
+    if (help) help.textContent = `Civweave could not load the Guild login runtime: ${error?.message || error}`;
+    button.disabled = false;
+    button.textContent = priorText;
+  } finally {
+    joining = false;
+  }
+}
+
 async function interceptJoin(event) {
   const button = event.target?.closest?.('#cw-host-node-join');
   const currentLobby = lobby();
@@ -237,13 +307,18 @@ function scheduleRefresh() {
 }
 
 async function boot() {
-  if (bound) return true;
   const currentLobby = await waitForLobby();
-  if (!currentLobby || bound) return false;
-  if (currentLobby.dataset.localFederated !== 'true') {
-    document.documentElement.dataset.civweaveLocalCapacity = 'inactive-nonlocal';
-    return false;
+  if (!currentLobby) return false;
+  if (!runtimeGuardBound) {
+    runtimeGuardBound = true;
+    document.addEventListener('click', interceptSessionRuntimeJoin, true);
+    void ensureSessionRuntime().catch(() => null);
   }
+  if (currentLobby.dataset.localFederated !== 'true') {
+    document.documentElement.dataset.civweaveLocalCapacity = 'inactive-nonlocal-runtime-ready';
+    return true;
+  }
+  if (bound) return true;
   bound = true;
   document.documentElement.dataset.civweaveLocalCapacity = VERSION;
   document.addEventListener('click', interceptJoin, true);
@@ -263,7 +338,9 @@ globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({
   refreshMs: REFRESH_MS,
   networkLeaseMs: NETWORK_LEASE_MS,
   failureBackoffMs: FAILURE_BACKOFF_MS,
+  sessionRuntimePath: SESSION_RUNTIME_PATH,
   localFederatedLobby,
+  ensureSessionRuntime,
   refreshCapacity,
   admitResident,
   residentId,
