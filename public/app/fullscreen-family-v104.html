@@ -15,6 +15,12 @@ body{position:fixed;inset:0;padding:0!important}
 #cw-themed-system-nav .cw-themed-system-avatar{position:relative;overflow:hidden;background:none!important}
 #cw-themed-system-nav .cw-shell-sprite{position:absolute;display:block;max-width:none!important;width:500%;height:400%;left:calc(var(--sprite-col,0) * -100%);top:calc(var(--sprite-row,0) * -100%);object-fit:fill;pointer-events:none;user-select:none}
 #cw-themed-system-nav .cw-shell-sprite.is-fallback{width:100%;height:100%;left:0;top:0;object-fit:cover}
+/* The persistent shell owns only the family rail. Chat launchers belong to the embedded system frame. */
+body>#cwp215-launcher,
+body>#cw-human-message-launcher-v1,
+body>#cw-persistent-guide-chat-v215,
+body>#cw-human-chat-standalone-v1,
+body>#cw-human-chat-network-v1{display:none!important;pointer-events:none!important}
 </style>
 <script src="/app/install-boundary-v146.js"></script>
 <script src="/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v227"></script>
@@ -135,12 +141,13 @@ function repairAvatars(){
 }
 function setup(){
   const shellFrame=frame();if(!shellFrame)return;
+  document.documentElement.dataset.civweaveShellSurfaceOwner='navigation-only';
   shellHistory(activeSystem,'replace');
   shellFrame.addEventListener('load',()=>{shellFrame.setAttribute('aria-busy','false');removeEmbeddedRail();consumePendingFeature();try{dispatchEvent(new CustomEvent('civweave:persistent-family-stage-ready',{detail:{system:activeSystem,shell:SHELL_REVISION}}))}catch{}});
   shellFrame.src=directUrl(activeSystem,pendingFeature).href;
   const observer=new MutationObserver(()=>{if(repairAvatars())observer.disconnect()});observer.observe(document.body,{childList:true,subtree:true});
   repairAvatars();setTimeout(repairAvatars,120);setTimeout(repairAvatars,800);
-  try{dispatchEvent(new CustomEvent('civweave:persistent-family-shell-ready',{detail:{system:activeSystem,shell:SHELL_REVISION}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:persistent-family-shell-ready',{detail:{system:activeSystem,shell:SHELL_REVISION,surfaceOwner:'navigation-only'}}))}catch{}
 }
 document.addEventListener('click',event=>{
   const quick=event.target.closest?.('#cw-themed-system-nav-menu [data-cw-nav-feature]');
@@ -152,7 +159,7 @@ document.addEventListener('click',event=>{
 },true);
 addEventListener('popstate',()=>{const system=requested();if(system!==activeSystem)navigate(system,{historyMode:'none',force:true});else syncNavigation(system)});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
-globalThis.CivweavePersistentFamilyShellV1=Object.freeze({revision:SHELL_REVISION,get system(){return activeSystem},navigate:(system,options={})=>navigate(system,options),frame:()=>frame(),repairAvatars});
+globalThis.CivweavePersistentFamilyShellV1=Object.freeze({revision:SHELL_REVISION,get system(){return activeSystem},navigate:(system,options={})=>navigate(system,options),frame:()=>frame(),repairAvatars,surfaceOwner:'navigation-only'});
 })();
 </script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v227"></script>
