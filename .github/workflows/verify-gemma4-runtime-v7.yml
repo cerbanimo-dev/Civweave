@@ -1,0 +1,42 @@
+name: Verify Gemma 4 Runtime v7
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'scripts/stage-transformers-v4-assets.mjs'
+      - 'scripts/verify-gemma4-runtime-v7.mjs'
+      - 'public/app/vendor/transformers-v4/transformers.min.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/app/guide-stream-thinking-v249.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - '.github/workflows/verify-gemma4-runtime-v7.yml'
+  pull_request:
+    paths:
+      - 'scripts/stage-transformers-v4-assets.mjs'
+      - 'scripts/verify-gemma4-runtime-v7.mjs'
+      - 'public/app/vendor/transformers-v4/transformers.min.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/app/guide-stream-thinking-v249.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - '.github/workflows/verify-gemma4-runtime-v7.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-gemma4-runtime-v7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify Gemma 4 runtime v7
+        run: node scripts/verify-gemma4-runtime-v7.mjs
