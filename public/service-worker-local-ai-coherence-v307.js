@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v318-guild-login-runtime';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v319-gemma-stream-finalization';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -11,6 +11,9 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/shared-guide-surface-v236.js',
+  '/app/guide-stream-thinking-v249.js',
+  '/app/local-provider-authority-v1.js',
+  '/app/local-guide-control-bypass-v1.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
@@ -33,6 +36,9 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
   '/app/shared-guide-surface-v236.js',
+  '/app/guide-stream-thinking-v249.js',
+  '/app/local-provider-authority-v1.js',
+  '/app/local-guide-control-bypass-v1.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
@@ -176,6 +182,9 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   guildLoginRuntimeCoherent: true,
   boundedLocalRecoveryCoherent: true,
   sharedGuideCurrentBytes: true,
+  guideStreamCurrentBytes: true,
+  localProviderAuthorityCurrentBytes: true,
+  localGuideControlCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true,
   gemma4PackCoreCoherent: true,
   gemma4E4BQ4Coherent: true,
