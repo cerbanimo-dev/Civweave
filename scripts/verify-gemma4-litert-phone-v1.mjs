@@ -43,19 +43,30 @@ assert.match(runtime,/maxOutputTokens:2800/);
 assert.match(extension,/topK:64,topP:\.95,nonThinkingTemperature:1/);
 assert.match(runtime,/samplerParams:\{k:64,p:\.95,temperature:1\}/);
 
-// MTP/speculative decoding is intentionally not claimed until the vendored LiteRT
-// runtime is upgraded and verified on real Android WebGPU hardware.
-assert.match(runtime,/webBindingSpeculativeDecodingConfigured:false/);
-assert.doesNotMatch(runtime,/speculativeDecoding:\s*true/);
+// Match LiteRT-LM v0.14's official Web GPU_ARTISAN MTP configuration. If a
+// device rejects the submodel path, runtime creation must retry without MTP.
+assert.match(runtime,/num_output_candidates:1/);
+assert.match(runtime,/wait_for_weight_uploads:true/);
+assert.match(runtime,/num_decode_steps_per_sync:1/);
+assert.match(runtime,/sequence_batch_size:0/);
+assert.match(runtime,/supported_lora_ranks:\[\]/);
+assert.match(runtime,/max_top_k:64/);
+assert.match(runtime,/enable_decode_logits:false/);
+assert.match(runtime,/enable_external_embeddings:false/);
+assert.match(runtime,/use_submodel:Boolean\(useSubmodel\)/);
+assert.match(runtime,/instantiateEngine\(mod,profile,true\)/);
+assert.match(runtime,/instantiateEngine\(mod,profile,false\)/);
+assert.match(runtime,/civweave:litert-gemma4-mtp-fallback/);
+assert.match(runtime,/webBindingSpeculativeDecodingConfigured:engineUsesMtp/);
 
 console.log(JSON.stringify({
   ok:true,
-  profile:'gemma4-12gb-android-litert-dual-v1',
+  profile:'gemma4-12gb-android-litert-dual-mtp-v1',
   fastModel:'gemma4-e2b-it-litert-web',
   deepModel:'gemma4-e4b-it-litert-web',
   contextTokens:4096,
   maxOutputTokens:{e2b:2400,e4b:2800},
   engineResidency:'one-at-a-time',
   compatibilityFallback:'existing ONNX Q4/Q2',
-  speculativeDecoding:'disabled-until-runtime-upgrade-and-device-benchmark'
+  mtp:'requested-with-safe-non-mtp-engine-fallback'
 },null,2));
