@@ -1,14 +1,20 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-local-chat-bounded-recovery-v1';
+const VERSION='1.1.0-local-chat-bounded-recovery-v1-gemma4-q4';
 const KEY='CivweaveLocalChatRuntimeV295';
+const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const SEL='civweave.local-ai.selection.v266';
 const PROFILES='civweave-model-profiles-v1';
 const LEGACY='civweave.universal-ai.v127';
 const HEALTH='civweave.local-ai.health.v286';
+const GEMMA4_Q4_ID='gemma4-e2b-it-q4f16';
+const GEMMA4_Q4_REVISION='9f4bef82ea6e296bc69f8a2f5939f73af81b07a6';
+const GEMMA4_RUNTIME_FLOOR='4.3.0';
+const BUNDLED_TRANSFORMERS_V4='4.2.0';
 const GEMMA4_IDS=new Set(['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile']);
 const RECOVERY_IDS=Object.freeze([
+  GEMMA4_Q4_ID,
   'smollm2-360m-instruct-q4f16',
   'qwen3-0.6b-q4f16',
   'gemma3-1b-it-q4f16',
@@ -18,6 +24,7 @@ const RECOVERY_IDS=Object.freeze([
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
 const clean=(value,max=240)=>String(value??'').trim().slice(0,max);
+const artifact=(path,minBytes,required,sizeBytes=0)=>Object.freeze({path,minBytes,required,revision:'',sizeBytes:Math.max(0,Number(sizeBytes)||0)});
 
 function selected(){
   try{const live=globalThis.CivweaveLocalModelDownloadV266?.selection?.();if(live?.active&&live.id)return live}catch{}
@@ -49,6 +56,8 @@ function recoveryCandidates(registry,pick){
     const A=healthScore(a),B=healthScore(b);
     if(A.ok!==B.ok)return B.ok-A.ok;
     if(A.ok&&B.ok&&A.tps!==B.tps)return B.tps-A.tps;
+    if(a.id===GEMMA4_Q4_ID&&b.id!==GEMMA4_Q4_ID)return -1;
+    if(b.id===GEMMA4_Q4_ID&&a.id!==GEMMA4_Q4_ID)return 1;
     return A.bytes-B.bytes;
   });
 }
@@ -68,6 +77,151 @@ function setDecisionStrip(text,state='local'){
 function emit(type,detail={}){
   try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}
 }
+function gemma4Q4Spec(registry){
+  const mobile=registry?.byId?.('gemma4-e2b-it-q2f16-mobile')||registry?.models?.find?.(row=>row?.id==='gemma4-e2b-it-q2f16-mobile')||{};
+  const capabilities=mobile.capabilities||Object.freeze({interactive:true,structuredOutput:true,agenticReasoning:true,code:true,tools:false,externalResearch:false,vision:false,audio:false,multimodal:false});
+  const generation=mobile.generation||Object.freeze({topK:64,nonThinkingTemperature:1,thinkingTemperature:1,thinkingSupported:true});
+  const wasmChunks=Object.freeze([...(mobile.wasmChunks||[])]);
+  return Object.freeze({
+    ...mobile,
+    id:GEMMA4_Q4_ID,
+    label:'Gemma 4 E2B IT · Q4F16',
+    tier:'Gemma 4 Compatible',
+    hardwareTier:'10+ GB RAM · WebGPU fp16',
+    status:'device-test',
+    installable:true,
+    recommended:'phone-fast',
+    provider:'huggingface',
+    repo:'onnx-community/gemma-4-E2B-it-ONNX',
+    revision:GEMMA4_Q4_REVISION,
+    task:'text-generation',
+    dtype:'q4f16',
+    device:'webgpu',
+    runtime:'transformers-js-v4',
+    runtimeAsset:mobile.runtimeAsset||'/app/vendor/transformers-v4/transformers.min.js',
+    wasmRoot:mobile.wasmRoot||'/app/vendor/transformers-v4/wasm/',
+    wasmChunks,
+    textOnly:true,
+    requiresShaderF16:true,
+    estimatedBytes:3_135_000_000,
+    license:'Apache-2.0',
+    sourceModel:'google/gemma-4-E2B-it',
+    preferBackground:true,
+    contextWindowTokens:128_000,
+    workingContextTokens:8_192,
+    healthTimeoutMs:900_000,
+    generation,
+    fallbackIds:Object.freeze(['gemma3-1b-it-q4f16','qwen3-1.7b-q4f16','qwen3-0.6b-q4f16','smollm2-360m-instruct-q4f16','smollm2-135m-instruct-q8-wasm','qwen3-0.6b-q8-wasm']),
+    capabilities,
+    compatibility:Object.freeze({
+      bundledTransformersVersion:BUNDLED_TRANSFORMERS_V4,
+      avoidsFeature:'2-bit-gather',
+      source:'onnx-community/gemma-4-E2B-it-ONNX',
+      sourceRevision:GEMMA4_Q4_REVISION
+    }),
+    artifacts:Object.freeze([
+      artifact('config.json',6_000,true,16_300),
+      artifact('tokenizer.json',18_000_000,true,19_400_000),
+      artifact('tokenizer_config.json',10_000,true,18_800),
+      artifact('generation_config.json',100,true,238),
+      artifact('chat_template.jinja',10_000,true,16_300),
+      artifact('onnx/decoder_model_merged_q4f16.onnx',500_000,true,673_231),
+      artifact('onnx/decoder_model_merged_q4f16.onnx_data',1_400_000_000,true,1_520_000_000),
+      artifact('onnx/embed_tokens_q4f16.onnx',5_000,true,5_620),
+      artifact('onnx/embed_tokens_q4f16.onnx_data',1_500_000_000,true,1_590_000_000)
+    ])
+  });
+}
+function patchGemma4CompatibleLane(registry){
+  if(!registry?.models||!registry?.byId)return registry;
+  if(registry.__civweaveGemma4CompatibleQ4V1)return registry;
+  const compatible=gemma4Q4Spec(registry);
+  const q2Reason=`This mobile Q2F16 pack requires Transformers.js ${GEMMA4_RUNTIME_FLOOR}+ for 2-bit gather. Civweave currently bundles ${BUNDLED_TRANSFORMERS_V4}. Keep the pack installed for the future runtime, or use ${compatible.label} now.`;
+  const replacements=new Map();
+  for(const model of registry.models){
+    if(!GEMMA4_IDS.has(model?.id))continue;
+    replacements.set(model.id,Object.freeze({
+      ...model,
+      status:'runtime-blocked',
+      recommended:'',
+      compatibleReplacementId:GEMMA4_Q4_ID,
+      runtimeRequirement:Object.freeze({
+        package:'@huggingface/transformers',
+        minimumVersion:GEMMA4_RUNTIME_FLOOR,
+        bundledVersion:BUNDLED_TRANSFORMERS_V4,
+        feature:'2-bit-gather'
+      }),
+      reason:q2Reason,
+      fallbackIds:Object.freeze([GEMMA4_Q4_ID,...(model.fallbackIds||[]).filter(id=>id!==GEMMA4_Q4_ID)])
+    }));
+  }
+  const models=[];
+  let inserted=false;
+  for(const model of registry.models){
+    if(model?.id===GEMMA4_Q4_ID)continue;
+    if(!inserted&&model?.id==='gemma4-e2b-it-q2f16-mobile'){models.push(compatible);inserted=true}
+    models.push(replacements.get(model?.id)||model);
+  }
+  if(!inserted)models.push(compatible);
+  const frozenModels=Object.freeze(models);
+  const runtimeModels=Object.freeze([...(registry.runtimeModels||[])]);
+  const map=new Map([...frozenModels,...runtimeModels].map(model=>[model.id,model]));
+  const byId=id=>map.get(id)||null;
+  const fallbacks=modelOrId=>{
+    const model=typeof modelOrId==='string'?byId(modelOrId):byId(modelOrId?.id)||modelOrId;
+    return (model?.fallbackIds||[]).map(byId).filter(Boolean);
+  };
+  const installable=()=>frozenModels.filter(model=>model.installable);
+  const experimental=()=>frozenModels.filter(model=>!model.installable);
+  const capable=request=>{
+    let rows=[];
+    try{rows=(registry.capable?.(request)||[]).map(model=>byId(model.id)||model).filter(Boolean)}catch{}
+    if(!rows.some(model=>model.id===GEMMA4_Q4_ID))rows.push(compatible);
+    return rows;
+  };
+  const patched=Object.freeze({
+    ...registry,
+    models:frozenModels,
+    runtimeModels,
+    byId,
+    fallbacks,
+    installable,
+    experimental,
+    capable,
+    __civweaveGemma4CompatibleQ4V1:true,
+    gemma4CompatibleQ4:true,
+    gemma4CompatibleModelId:GEMMA4_Q4_ID,
+    gemma4Q2RuntimeBlocked:true,
+    gemma4Q2RequiredTransformers:GEMMA4_RUNTIME_FLOOR,
+    bundledTransformersV4:BUNDLED_TRANSFORMERS_V4
+  });
+  emit('civweave:gemma4-compatible-lane-ready',{
+    model:GEMMA4_Q4_ID,
+    revision:GEMMA4_Q4_REVISION,
+    q2RuntimeBlocked:true,
+    requiredTransformers:GEMMA4_RUNTIME_FLOOR,
+    bundledTransformers:BUNDLED_TRANSFORMERS_V4
+  });
+  return patched;
+}
+function installRegistryWatcher(){
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis,REGISTRY_KEY);
+  if(descriptor&&!descriptor.configurable){
+    try{
+      const current=globalThis[REGISTRY_KEY],patched=patchGemma4CompatibleLane(current);
+      if(patched!==current)globalThis[REGISTRY_KEY]=patched;
+    }catch{}
+    return Boolean(globalThis[REGISTRY_KEY]?.gemma4CompatibleQ4);
+  }
+  let value=patchGemma4CompatibleLane(globalThis[REGISTRY_KEY]);
+  try{
+    Object.defineProperty(globalThis,REGISTRY_KEY,{configurable:true,enumerable:true,get(){return value},set(next){value=patchGemma4CompatibleLane(next)}});
+    return true;
+  }catch{
+    try{globalThis[REGISTRY_KEY]=patchGemma4CompatibleLane(globalThis[REGISTRY_KEY])}catch{}
+    return Boolean(globalThis[REGISTRY_KEY]?.gemma4CompatibleQ4);
+  }
+}
 function patchRegistryForRecovery(registry,pick,recovering){
   if(!recovering||!registry?.fallbacks||!registry?.byId)return{registry,patched:null};
   const ordered=recoveryCandidates(registry,pick);
@@ -80,7 +234,7 @@ function patchRegistryForRecovery(registry,pick,recovering){
   };
   const patched=Object.freeze({...registry,fallbacks,__civweaveBoundedRecoveryV1:true});
   try{globalThis.CivweaveLocalModelRegistryV266=patched}catch{return{registry,patched:null}}
-  return{registry,patched};
+  return{registry,patched:globalThis.CivweaveLocalModelRegistryV266};
 }
 function restoreRegistry(original,patched){
   if(!patched)return;
@@ -181,10 +335,10 @@ function coreGenerate(base){
 }
 function wrap(runtime){
   if(!runtime||typeof runtime!=='object')return runtime;
-  if(runtime.__civweaveBoundedRecoveryV1)return runtime;
+  if(runtime.__civweaveBoundedRecoveryV1&&runtime.gemma4CompatibleQ4===true)return runtime;
   if(typeof runtime.generate!=='function'||typeof runtime.ready!=='function')return runtime;
-  const wrapped=Object.freeze({...runtime,generate:coreGenerate(runtime),__civweaveBoundedRecoveryV1:true,boundedFallbackRecovery:true,stallReasonPreserved:true,fifteenMinuteChatFloorRetired:true,localRecoveryAttemptMaxMs:300000,localRecoveryTotalMaxMs:600000});
-  emit('civweave:local-chat-bounded-recovery-installed',{revision:runtime.revision||'',runtimeVersion:runtime.version||''});
+  const wrapped=Object.freeze({...runtime,generate:coreGenerate(runtime),__civweaveBoundedRecoveryV1:true,boundedFallbackRecovery:true,stallReasonPreserved:true,fifteenMinuteChatFloorRetired:true,localRecoveryAttemptMaxMs:300000,localRecoveryTotalMaxMs:600000,gemma4CompatibleQ4:true,gemma4CompatibleModelId:GEMMA4_Q4_ID});
+  emit('civweave:local-chat-bounded-recovery-installed',{revision:runtime.revision||'',runtimeVersion:runtime.version||'',gemma4CompatibleModelId:GEMMA4_Q4_ID});
   return wrapped;
 }
 function installWatcher(){
@@ -203,8 +357,25 @@ function installWatcher(){
   }
 }
 
+installRegistryWatcher();
 installWatcher();
-for(const name of ['pageshow','civweave:local-model-runtime-ready','civweave:local-ai-ready','civweave:assistant-runtime-ready'])addEventListener(name,()=>queueMicrotask(installWatcher));
+for(const name of ['pageshow','civweave:local-model-registry-ready','civweave:local-model-runtime-ready','civweave:local-ai-ready','civweave:assistant-runtime-ready'])addEventListener(name,()=>queueMicrotask(()=>{installRegistryWatcher();installWatcher()}));
 
-globalThis.CivweaveLocalChatBoundedRecoveryV1=Object.freeze({version:VERSION,wrap,installWatcher,boundedFallbackRecovery:true,stallReasonPreserved:true,fifteenMinuteChatFloorRetired:true,localOnly:true});
+globalThis.CivweaveLocalChatBoundedRecoveryV1=Object.freeze({
+  version:VERSION,
+  wrap,
+  installWatcher,
+  installRegistryWatcher,
+  patchGemma4CompatibleLane,
+  boundedFallbackRecovery:true,
+  stallReasonPreserved:true,
+  fifteenMinuteChatFloorRetired:true,
+  gemma4CompatibleQ4:true,
+  gemma4CompatibleModelId:GEMMA4_Q4_ID,
+  gemma4CompatibleRevision:GEMMA4_Q4_REVISION,
+  gemma4Q2RuntimeBlocked:true,
+  gemma4Q2RequiredTransformers:GEMMA4_RUNTIME_FLOOR,
+  bundledTransformersV4:BUNDLED_TRANSFORMERS_V4,
+  localOnly:true
+});
 })();
