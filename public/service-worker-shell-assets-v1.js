@@ -1,11 +1,11 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v22-mobile-campus-surface';
+const REVISION='shell-assets-v1-repair-v23-direct-shell-actions';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
-  '/app/persistent-family-shell-v1.html',
   '/app/themed-system-nav-v178.js',
+  '/app/persistent-shell-actions-v1.js',
   '/app/subsystem-avatar-state-v347.js'
 ];
 const OPTIONAL_NAV_MEDIA=[
@@ -69,6 +69,6 @@ self.CivweaveShellAssetsV1=Object.freeze({
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',
   pwaStart:'/app/pwa-start-v436.html',
-  policy:'code-critical-shell-avatar-media-on-demand-no-repair-or-message-ownership'
+  policy:'direct-system-pages-with-canonical-persistent-rail-actions'
 });
 })();
