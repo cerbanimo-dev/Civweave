@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 const VERSION='1.0.163';
-const REVISION='five-system-route-contract-v227';
-const SHELL_REVISION='persistent-family-shell-v1';
-const SHELL_PATH='/app/persistent-family-shell-v1.html';
+const REVISION='five-system-route-contract-v228-direct-shell';
+const SHELL_REVISION='direct-page-shell-v1';
+const SHELL_PATH='';
+const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.0-direct-shell';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const CHAT_USAGE_REVISION='guild-chat-usage-v1';
 const HOST_SELECTION_KEY='civweave.host-node.selection.v1';
@@ -54,31 +55,9 @@ function directUrlFor(id,options={}){
   if(options.recovery)url.searchParams.set('recovery',String(options.recovery));
   return url;
 }
-function shellUrlFor(id,options={}){
-  const route=routeFor(id)||ROUTES.civweave;
-  const origin=options.origin||globalThis.location?.origin||'https://civweave.invalid';
-  const url=new URL(SHELL_PATH,origin);
-  url.searchParams.set('installed','1');
-  url.searchParams.set('system',route.id);
-  url.searchParams.set('navigation',REVISION);
-  url.searchParams.set('shell',SHELL_REVISION);
-  url.searchParams.set('version',String(options.version||VERSION));
-  if(options.source)url.searchParams.set('source',String(options.source));
-  if(options.weave)url.searchParams.set('weave',String(options.weave));
-  if(options.feature)url.searchParams.set('feature',String(options.feature));
-  if(options.developer)url.searchParams.set('developer','1');
-  if(options.recovery)url.searchParams.set('recovery',String(options.recovery));
-  return url;
-}
-function shouldUseDirect(options={}){
-  if(options.direct===true||options.shell===false)return true;
-  if(options.shell===true)return false;
-  if(typeof window==='undefined')return true;
-  return window.self!==window.top;
-}
-function urlFor(id,options={}){
-  return shouldUseDirect(options)?directUrlFor(id,options):shellUrlFor(id,options);
-}
+function shellUrlFor(id,options={}){return directUrlFor(id,options)}
+function shouldUseDirect(){return true}
+function urlFor(id,options={}){return directUrlFor(id,options)}
 function navigate(id,options={}){
   authorize();
   const url=urlFor(id,options);
@@ -86,6 +65,13 @@ function navigate(id,options={}){
   return url.href;
 }
 function routes(){return Object.values(ROUTES)}
+function ensurePersistentShellActions(){
+  if(typeof document==='undefined')return false;
+  if(globalThis.CivweavePersistentShellActionsV1?.ensureMounted){globalThis.CivweavePersistentShellActionsV1.ensureMounted();return true}
+  const target=new URL(PERSISTENT_ACTIONS_SRC,globalThis.location?.href||'https://civweave.invalid').href;
+  if([...document.scripts].some(script=>script.src===target||String(script.src||'').includes('/app/persistent-shell-actions-v1.js'))){return false}
+  const script=document.createElement('script');script.src=PERSISTENT_ACTIONS_SRC;script.async=false;script.dataset.civweavePersistentShellActions='v1';(document.head||document.documentElement).append(script);return true;
+}
 
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
@@ -229,11 +215,13 @@ function installGuildChatUsage(){
   return true;
 }
 
-const api=Object.freeze({version:VERSION,revision:REVISION,shellRevision:SHELL_REVISION,shellPath:SHELL_PATH,bootKey:BOOT_KEY,routeFor,routes,identify,isCanonicalPath,authorize,directUrlFor,shellUrlFor,urlFor,navigate,guildUsageRevision:CHAT_USAGE_REVISION,guildUsageSnapshot,renderGuildUsage,refreshGuildUsage});
+const api=Object.freeze({version:VERSION,revision:REVISION,shellRevision:SHELL_REVISION,shellPath:SHELL_PATH,bootKey:BOOT_KEY,routeFor,routes,identify,isCanonicalPath,authorize,directUrlFor,shellUrlFor,shouldUseDirect,urlFor,navigate,ensurePersistentShellActions,guildUsageRevision:CHAT_USAGE_REVISION,guildUsageSnapshot,renderGuildUsage,refreshGuildUsage});
 globalThis.CivweaveSystemRoutesV227=api;
 if(typeof document!=='undefined'&&identify()){
   authorize();
   document.documentElement.dataset.civweaveSystemRoute=identify();
+  document.documentElement.dataset.civweaveDirectShell='true';
+  ensurePersistentShellActions();
   installGuildChatUsage();
 }
 })();
