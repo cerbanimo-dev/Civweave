@@ -41,6 +41,8 @@ assert.ok(streamSource.includes('.cw350-bubble,.cw237-bubble'),'stream renderer 
 assert.ok(streamSource.includes('visibleWeavelingPlan'),'structured Weaveling planning has no visible stream projection');
 assert.ok(streamSource.includes('function patchAssistant()'),'local-provider assistant bypass is not connected to the token renderer');
 assert.ok(streamSource.includes('localAuthorityTokenBridge:true'),'local-provider token bridge diagnostic is missing');
+assert.ok(streamSource.includes('wrapperOwnershipStable:true'),'stream wrapper can still be displaced by local-provider authority');
+assert.ok(streamSource.includes("__civweaveLocalProviderAuthorityV1"),'stream wrapper is not preserving local-provider authority ownership');
 assert.ok(streamSource.includes("dispatchEvent(new CustomEvent('civweave:model-event'"),'local assistant tokens are not published to the canonical model-event stream');
 assert.ok(localRuntimeSource.includes('taskAwareOutputBudget:true'),'local chat runtime does not use task-aware output budgeting');
 assert.ok(localRuntimeSource.includes('planningOutputTokens:1800'),'local planning budget is below the planning floor');
@@ -52,5 +54,5 @@ assert.ok(!localRuntimeSource.includes('tps*30,48,128'),'retired 30-second/128-t
 assert.ok(!/maxNewTokens\s*=.*128/.test(localRuntimeSource),'local chat runtime still hard-caps output at 128 tokens');
 assert.ok(loaderSource.includes('/app/guide-generation-floor-v1.js'),'shared guide loader is not delivering the generation floor');
 assert.ok(loaderSource.includes('/app/local-chat-runtime-v295.js?v=1.0.119-task-aware-streaming'),'shared guide loader is not cache-busting the task-aware local runtime');
-assert.ok(loaderSource.includes('/app/guide-stream-thinking-v249.js?v=1.0.121-local-authority'),'shared guide loader is not delivering the local-authority token bridge');
-console.log('PASS local guide task-aware long output, capability authority, platform planning, and visible v350 token streaming are active.');
+assert.ok(loaderSource.includes('/app/guide-stream-thinking-v249.js?v=1.0.122-stable-local-authority'),'shared guide loader is not delivering the stable local-authority token bridge');
+console.log('PASS local guide task-aware long output, capability authority, stable wrapper ownership, platform planning, and visible v350 token streaming are active.');
