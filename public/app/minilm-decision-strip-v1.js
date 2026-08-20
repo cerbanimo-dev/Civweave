@@ -1,14 +1,19 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-minilm-decision-strip-guild-neuron-tracker';
+const VERSION='1.3.0-minilm-decision-strip-guild-resolver-telemetry';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-minilm-decision-strip-v1-style';
 const STRIP_ATTR='data-minilm-decision-strip';
 const LABEL_ATTR='data-minilm-label';
 const TRACKER_ATTR='data-guild-neuron-tracker';
+const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
+const MINILM_ROUTER_SRC='/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary';
+const SERVER_ROUTER_SRC='/app/server-ai-router-v301.js?v=1.0.121-guild-telemetry';
 let pendingTimer=0;
 let hardTimer=0;
+let readinessTimer=0;
+let trackerTimer=0;
 let lastDecision=null;
 
 function clearTimers(){clearTimeout(pendingTimer);clearTimeout(hardTimer);pendingTimer=0;hardTimer=0}
@@ -25,22 +30,35 @@ function installStyle(){
 #${ROOT_ID} [${STRIP_ATTR}][data-state="fallback"]::before{background:#e3a35c;box-shadow:0 0 9px #e3a35caa}
 #${ROOT_ID} [${STRIP_ATTR}][data-state="error"]::before{background:#ff6b7a;box-shadow:0 0 9px #ff6b7aaa}
 #${ROOT_ID} [${STRIP_ATTR}] [${LABEL_ATTR}]{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#${ROOT_ID} [${STRIP_ATTR}] [${TRACKER_ATTR}]{flex:0 0 auto;max-width:48%;min-width:0;padding-left:8px;border-left:1px solid #ffffff1f;color:#8df0c6;font-weight:850;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#${ROOT_ID} [${STRIP_ATTR}] [${TRACKER_ATTR}]{flex:0 0 auto;max-width:52%;min-width:0;padding-left:8px;border-left:1px solid #ffffff1f;color:#8df0c6;font-weight:850;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #${ROOT_ID} [${STRIP_ATTR}] [${TRACKER_ATTR}][hidden]{display:none!important}
-@media(max-width:720px){#${ROOT_ID}{grid-template-rows:auto auto auto auto minmax(0,1fr) auto!important}#${ROOT_ID} [${STRIP_ATTR}]{padding:5px 8px;font-size:9px;gap:5px}#${ROOT_ID} [${STRIP_ATTR}] [${TRACKER_ATTR}]{max-width:54%;padding-left:6px}}
+@media(max-width:720px){#${ROOT_ID}{grid-template-rows:auto auto auto auto minmax(0,1fr) auto!important}#${ROOT_ID} [${STRIP_ATTR}]{padding:5px 8px;font-size:9px;gap:5px}#${ROOT_ID} [${STRIP_ATTR}] [${TRACKER_ATTR}]{max-width:58%;padding-left:6px}}
 `;
   document.head?.append(style);
 }
+function parse(value,fallback=null){try{return JSON.parse(value)??fallback}catch{return fallback}}
 function floorFinite(value){const n=Number(value);return Number.isFinite(n)&&n>=0?Math.floor(n):null}
-function guildSession(){try{return globalThis.CivweaveHostNodeSessionV1?.sessionFor?.()||null}catch{return null}}
+function mobileGuildState(){try{const value=parse(localStorage.getItem(MOBILE_GUILD_STATE_KEY),null);return value&&typeof value==='object'&&!Array.isArray(value)?value:null}catch{return null}}
+function hostSession(){try{return globalThis.CivweaveHostNodeSessionV1?.sessionFor?.()||null}catch{return null}}
+function mobileGuildSession(){try{return globalThis.CivweaveServerAIRouterV301?.mobileGuildCapacitySession?.()||null}catch{return null}}
+function guildContext(){
+  const host=hostSession();if(host)return{kind:'host-session',nodeId:String(host.nodeId||''),guildId:String(host.guildId||''),session:host};
+  const mobile=mobileGuildSession();if(mobile)return{kind:'mobile-guild-capacity',nodeId:String(mobile.nodeId||''),guildId:String(mobile.guildId||''),session:mobile};
+  const state=mobileGuildState();if(state?.guildId)return{kind:'mobile-guild-state',nodeId:String(state?.cloudFabric?.starterNodes?.[0]?.nodeId||''),guildId:String(state.guildId),session:null};
+  return null;
+}
+function trackerTelemetry(context){
+  if(!context)return null;
+  if(context.kind==='host-session')try{return globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.(context.nodeId)||globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.()||null}catch{return null}
+  try{return globalThis.CivweaveServerAIRouterV301?.guildTelemetry?.(context.guildId||context.nodeId)||globalThis.CivweaveServerAIRouterV301?.guildTelemetry?.()||null}catch{return null}
+}
 function trackerText(){
-  const session=guildSession();if(!session)return'';
-  let telemetry=null;try{telemetry=globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.(session.nodeId)||globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.()||null}catch{}
-  const remaining=floorFinite(telemetry?.remainingNeurons),charged=floorFinite(telemetry?.chargedNeurons),average=Number(telemetry?.averageNeuronsPerTurn);
+  const context=guildContext();if(!context)return'';
+  const telemetry=trackerTelemetry(context),remaining=floorFinite(telemetry?.remainingNeurons),charged=floorFinite(telemetry?.chargedNeurons),average=Number(telemetry?.averageNeuronsPerTurn);
   let conversations=floorFinite(telemetry?.approximateTurnsLeft);if(conversations===null&&remaining!==null&&Number.isFinite(average)&&average>0)conversations=Math.max(0,Math.floor(remaining/average));
   const neuronText=remaining!==null?`${remaining.toLocaleString()} neurons left`:charged!==null&&charged>0?`${charged.toLocaleString()} neurons last turn`:'neurons syncing';
   const conversationText=conversations!==null?`≈${conversations.toLocaleString()} conversations left`:'conversations syncing';
-  return`${neuronText} · ${conversationText}`
+  return`${neuronText} · ${conversationText}`;
 }
 function ensureStripParts(node){
   let label=node.querySelector(`[${LABEL_ATTR}]`);if(!label){label=node.querySelector('span:not(['+TRACKER_ATTR+'])')||document.createElement('span');label.setAttribute(LABEL_ATTR,'');if(!label.isConnected)node.prepend(label)}
@@ -69,21 +87,31 @@ function onOrchestrator(event){
   if(detail.type==='MINILM_ROUTE_FAILED'){clearTimers();setStatus(`MiniLM route · failed · ${String(detail.message||'classifier unavailable')}`,'error');return}
   if(detail.type==='MINILM_LOCAL_FAST_PATH'||detail.type==='MINILM_CANONICAL_ROUTE')publish({taskClass:detail.taskClass,artifactClass:detail.artifactClass||null,networkRequired:Boolean(detail.networkRequired),lengthClass:detail.lengthClass,source:detail.routeSource||'minilm-orchestrator'})
 }
+function exactScript(src){const target=new URL(src,location.href).href;return[...document.scripts].find(script=>{try{return new URL(script.src,location.href).href===target}catch{return false}})||null}
+function appendScript(src,marker){const script=document.createElement('script');script.src=src;script.async=false;script.dataset[marker]='true';document.head?.append(script);return script}
+function ensureMiniLMRouter(){if(globalThis.CivweaveResponseRouterV347?.classify)return true;if(!exactScript(MINILM_ROUTER_SRC))appendScript(MINILM_ROUTER_SRC,'civweaveMiniLMRouterRepair');return false}
+function currentServerRouter(){return globalThis.CivweaveServerAIRouterV301}
+function serverRouterCurrent(){return String(currentServerRouter()?.version||'').startsWith('1.0.121-')}
+function ensureServerRouter(){if(serverRouterCurrent())return true;const exact=exactScript(SERVER_ROUTER_SRC);if(!exact)appendScript(SERVER_ROUTER_SRC,'civweaveServerRouterRepair');else if(exact.dataset.civweaveRepairRetried!=='true'){exact.dataset.civweaveRepairRetried='true';setTimeout(()=>{if(!serverRouterCurrent())appendScript(`${SERVER_ROUTER_SRC}&repair=1`,'civweaveServerRouterRepair')},700)}return false}
+function watchReadiness(){
+  clearInterval(readinessTimer);let attempts=0;readinessTimer=setInterval(()=>{attempts+=1;ensureServerRouter();if(ensureMiniLMRouter()){clearInterval(readinessTimer);readinessTimer=0;const node=strip();if(node?.dataset.state==='pending'&&node.querySelector(`[${LABEL_ATTR}]`)?.textContent?.includes('router loading'))setStatus('MiniLM · ready · awaiting next message','pending');return}if(attempts>=40){clearInterval(readinessTimer);readinessTimer=0;setStatus('MiniLM · router unavailable','error')}},250)
+}
 function onSubmit(event){
   const form=event.target instanceof HTMLFormElement?event.target:null;if(!form?.matches?.(`#${ROOT_ID} [data-persistent-form]`))return;
   clearTimers();setStatus('MiniLM route · classifying…','pending');
   pendingTimer=setTimeout(()=>setStatus('MiniLM route · classification still in progress…','pending'),2200);
   hardTimer=setTimeout(()=>setStatus('MiniLM route · response router has not emitted a decision','error'),12000)
 }
-function initialStatus(){if(globalThis.CivweaveResponseRouterV347?.classify)setStatus('MiniLM · ready · awaiting next message','pending');else setStatus('MiniLM · router loading…','pending')}
-function install(){installStyle();strip();initialStatus();refreshTracker()}
+function initialStatus(){ensureServerRouter();if(ensureMiniLMRouter())setStatus('MiniLM · ready · awaiting next message','pending');else{setStatus('MiniLM · router loading…','pending');watchReadiness()}}
+function install(){installStyle();strip();initialStatus();refreshTracker();if(!trackerTimer)trackerTimer=setInterval(refreshTracker,1500)}
 addEventListener('civweave:response-route',onResponseRoute);
 addEventListener('civweave:experience-orchestrator',onOrchestrator);
-addEventListener('civweave:minilm-response-router-ready',()=>setStatus('MiniLM · ready · awaiting next message','pending'));
-for(const eventName of ['civweave:host-node-session-ready','civweave:capacity-session-ready','civweave:host-node-logged-in','civweave:host-node-health','civweave:ai-neuron-usage','civweave:capacity-session-cleared'])addEventListener(eventName,()=>queueMicrotask(refreshTracker));
+addEventListener('civweave:minilm-response-router-ready',()=>{if(readinessTimer){clearInterval(readinessTimer);readinessTimer=0}setStatus('MiniLM · ready · awaiting next message','pending')});
+for(const eventName of ['civweave:host-node-session-ready','civweave:capacity-session-ready','civweave:host-node-logged-in','civweave:host-node-health','civweave:ai-neuron-usage','civweave:guild-ai-telemetry','civweave:capacity-session-cleared','civweave:mobile-guild-attached','civweave:mobile-guild-fabric-refreshed','civweave:mobile-guild-directory-registered'])addEventListener(eventName,()=>queueMicrotask(refreshTracker));
 addEventListener('submit',onSubmit,true);
 addEventListener('pageshow',()=>queueMicrotask(install));
+addEventListener('pagehide',()=>{clearTimers();if(readinessTimer)clearInterval(readinessTimer);if(trackerTimer)clearInterval(trackerTimer);readinessTimer=0;trackerTimer=0},{once:true});
 new MutationObserver(()=>strip()).observe(document.documentElement,{childList:true,subtree:true});
 install();
-globalThis.CivweaveMiniLMDecisionStripV1=Object.freeze({version:VERSION,install,lastDecision:()=>lastDecision,refreshTracker,visibleDecision:true,guildNeuronTracker:true,trackerPlacement:'same-horizontal-strip',actualRouteEventsOnly:true,noPreviewClassification:true,slowRouteWarningMs:2200,missingRouteErrorMs:12000});
+globalThis.CivweaveMiniLMDecisionStripV1=Object.freeze({version:VERSION,install,lastDecision:()=>lastDecision,refreshTracker,guildContext,visibleDecision:true,guildNeuronTracker:true,trackerPlacement:'same-horizontal-strip',guildResolver:'host-session-or-mobile-guild-state',guildTelemetry:'host-session-or-server-router',routerSelfHeal:true,serverRouterVersion:'1.0.121',actualRouteEventsOnly:true,noPreviewClassification:true,slowRouteWarningMs:2200,missingRouteErrorMs:12000});
 })();
