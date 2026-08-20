@@ -1,0 +1,48 @@
+name: Verify Weaveling Community Garden and LiteRT Fast Lane
+
+on:
+  push:
+    paths:
+      - 'public/app/local-guide-control-bypass-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/service-worker-local-ai-coherence-v307.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/verify-weaveling-community-garden-litert-v1.mjs'
+      - '.github/workflows/verify-weaveling-community-garden-litert-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/local-guide-control-bypass-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/service-worker-local-ai-coherence-v307.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/verify-weaveling-community-garden-litert-v1.mjs'
+      - '.github/workflows/verify-weaveling-community-garden-litert-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pack and stage pinned LiteRT web runtime
+        run: node scripts/stage-litert-lm-web-assets.mjs --force
+      - name: Verify planner and fast-lane contracts
+        run: node scripts/verify-weaveling-community-garden-litert-v1.mjs
