@@ -1,0 +1,46 @@
+name: Verify Gemma 4 LiteRT Phone
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'scripts/verify-gemma4-litert-phone-v1.mjs'
+      - '.github/workflows/verify-gemma4-litert-phone.yml'
+  push:
+    branches: [main, staging]
+    paths:
+      - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'scripts/verify-gemma4-litert-phone-v1.mjs'
+      - '.github/workflows/verify-gemma4-litert-phone.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-gemma4-litert-phone-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check Gemma 4 LiteRT syntax
+        run: |
+          node --check public/app/local-ai/gemma4-litert-fast-extension-v1.js
+          node --check public/app/local-ai/litert-gemma4-fast-runtime-v1.js
+          node --check scripts/stage-litert-lm-web-assets.mjs
+          node --check scripts/verify-gemma4-litert-phone-v1.mjs
+      - name: Stage Cloudflare-compatible Chromium LiteRT runtime
+        run: node scripts/stage-litert-lm-web-assets.mjs --force
+      - name: Verify 12 GB phone profile
+        run: node scripts/verify-gemma4-litert-phone-v1.mjs
