@@ -4,7 +4,12 @@ on:
     paths:
       - 'public/app/themed-system-nav-v178.js'
       - 'public/app/subsystem-avatar-state-v347.js'
+      - 'public/app/persistent-system-context-v1.js'
+      - 'public/app/shared-guide-surface-v236-core-v244.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/family-ai-loader-v105.js'
       - 'scripts/verify-subsystem-avatar-nav-v347.mjs'
+      - 'scripts/verify-persistent-system-context-v1.mjs'
       - '.github/workflows/verify-subsystem-avatar-nav-v347.yml'
   workflow_dispatch:
 jobs:
@@ -16,3 +21,4 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/verify-subsystem-avatar-nav-v347.mjs
+      - run: node scripts/verify-persistent-system-context-v1.mjs

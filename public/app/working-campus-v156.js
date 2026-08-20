@@ -9,7 +9,7 @@ const WEB_ENTRY_REVISION='web-install-entry-v232';
 const HUB_REVISION='weaveling-hub-v233';
 const STATE_REPAIR_REVISION='working-campus-state-repair-v239-current-quest';
 const HUB_SCRIPT='/app/weaveling-hub-v233.js';
-const routeScript='/app/system-routes-v227.js?v=1.0.163-five-system-route-contract-v227';
+const routeScript='/app/system-routes-v227.js?v=1.0.164-single-shell-context';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const required=['conversation','weaveling-chat-form','weaveling-chat-input','workspace','view-title','state-label'];
 const controller=new AbortController();
@@ -178,26 +178,26 @@ function installDiagnosticsPolicy(){
   if(button){button.hidden=!enabled;button.setAttribute('aria-hidden',enabled?'false':'true')}
   return enabled;
 }
-function installCivweaveChatLauncherOwnership(){
-  const own=()=>{
-    try{return globalThis.CivweavePersistentGuideChatV215?.switchGuide?.('civweave')||false}catch{return false}
-  };
+function selectedGuide(){
+  const context=globalThis.CivweavePersistentSystemContextV1?.selected?.();
+  if(context)return context;
+  const active=globalThis.CivweavePersistentGuideChatV215?.state?.().activeSystem;
+  return active||'civweave';
+}
+function installPersistentChatLauncherOwnership(){
+  const own=()=>{const system=selectedGuide();try{return globalThis.CivweavePersistentGuideChatV215?.switchGuide?.(system)||false}catch{return false}};
   addEventListener('civweave:persistent-guide-chat-ready',()=>own());
+  addEventListener('civweave:system-context-changed',()=>own());
   document.addEventListener('click',event=>{
-    const target=event.target instanceof Element?event.target:null;
-    if(!target)return;
+    const target=event.target instanceof Element?event.target:null;if(!target)return;
     if(target.closest('#cwp215-launcher')){
-      const chat=globalThis.CivweavePersistentGuideChatV215;
-      if(!chat?.open)return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      chat.open({guide:'civweave'});
-      return;
+      const chat=globalThis.CivweavePersistentGuideChatV215;if(!chat?.open)return;
+      event.preventDefault();event.stopImmediatePropagation();chat.open({guide:selectedGuide()});return;
     }
     if(target.closest('#cw-persistent-guide-chat-v215 [data-close]'))queueMicrotask(own);
   },true);
   own();
-  document.documentElement.dataset.civweaveChatLauncherOwner='civweave-v235';
+  document.documentElement.dataset.civweaveChatLauncherOwner='persistent-system-context-v1';
 }
 function installHeaderHitSafety(){
   let style=document.getElementById('cw-working-campus-hit-safety-v238');
@@ -205,10 +205,10 @@ function installHeaderHitSafety(){
   document.documentElement.dataset.civweaveHeaderHitSafety='v238';
 }
 function ensureRouteContract(){
-  if(globalThis.CivweaveSystemRoutesV227){globalThis.CivweaveSystemRoutesV227.authorize();return Promise.resolve(true)}
+  if(globalThis.CivweaveSystemRoutesV227){globalThis.CivweaveSystemRoutesV227.authorize();globalThis.CivweaveSystemRoutesV227.ensurePersistentSystemContext?.();return Promise.resolve(true)}
   return new Promise((resolve,reject)=>{
     const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname==='/app/system-routes-v227.js');
-    const ready=()=>{if(globalThis.CivweaveSystemRoutesV227){globalThis.CivweaveSystemRoutesV227.authorize();resolve(true)}else reject(new Error('The five-system route contract loaded without becoming ready.'))};
+    const ready=()=>{if(globalThis.CivweaveSystemRoutesV227){globalThis.CivweaveSystemRoutesV227.authorize();globalThis.CivweaveSystemRoutesV227.ensurePersistentSystemContext?.();resolve(true)}else reject(new Error('The five-system route contract loaded without becoming ready.'))};
     if(existing){existing.addEventListener('load',ready,{once:true});existing.addEventListener('error',()=>reject(new Error('The five-system route contract could not load.')),{once:true});return}
     const script=document.createElement('script');script.src=routeScript;script.async=false;script.onload=ready;script.onerror=()=>reject(new Error('The five-system route contract could not load.'));document.head.append(script);
   });
@@ -223,34 +223,22 @@ function ensureHub(){
   });
 }
 async function fetchPart(pathname){
-  const url=new URL(pathname,location.origin);
-  url.searchParams.set('revision',REVISION);
-  const response=await fetch(url,{cache:'no-store',signal:controller.signal,redirect:'follow',headers:{'x-civweave-package':'working-campus-v227'}});
-  if(!response.ok)throw new Error(`Working Campus source ${pathname} returned ${response.status}`);
-  return response.text();
+  const url=new URL(pathname,location.origin);url.searchParams.set('revision',REVISION);
+  const response=await fetch(url,{cache:'no-store',signal:controller.signal,redirect:'follow',headers:{'x-civweave-package':'working-campus-v227'}});if(!response.ok)throw new Error(`Working Campus source ${pathname} returned ${response.status}`);return response.text();
 }
 async function boot(){
   if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true,signal:controller.signal}));
-  installBrandPresentation();
-  installDiagnosticsPolicy();
-  installHeaderHitSafety();
-  repairPersistedCampusState();
-  installCivweaveChatLauncherOwnership();
-  installWebEntryPrompt();
+  installBrandPresentation();installDiagnosticsPolicy();installHeaderHitSafety();repairPersistedCampusState();installWebEntryPrompt();
   if(!campusReady())throw new Error(`Working Campus DOM contract is incomplete: ${missingRequired().join(', ')||'campus root'}.`);
-  await ensureHub();
   await ensureRouteContract();
+  installPersistentChatLauncherOwnership();
+  await ensureHub();
   const source=await Promise.all(parts.map(fetchPart));
   if(!liveDocument())throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
-  Function(source.join(''))();
-  document.documentElement.dataset.civweaveCampusRuntime='ready';
-  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing',questStatePolicy:'current-quest-single-surface'}}));
+  Function(source.join(''))();document.documentElement.dataset.civweaveCampusRuntime='ready';
+  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-single-shell-context',questStatePolicy:'current-quest-single-surface'}}));
 }
 boot().catch(error=>{
-  if(!active||error?.name==='AbortError')return;
-  console.error('[Civweave] Working Campus failed to start.',error);
-  const node=document.querySelector('#workspace');
-  if(node)node.innerHTML=`<section class="card"><h2>Working Campus could not start</h2><p>${String(error.message||error)}</p><button class="btn" onclick="location.reload()">Retry</button></section>`;
+  if(!active||error?.name==='AbortError')return;console.error('[Civweave] Working Campus failed to start.',error);const node=document.querySelector('#workspace');if(node)node.innerHTML=`<section class="card"><h2>Working Campus could not start</h2><p>${String(error.message||error)}</p><button class="btn" onclick="location.reload()">Retry</button></section>`;
 });
 })();
-
