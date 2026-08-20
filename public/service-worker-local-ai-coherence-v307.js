@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v316-guild-chat-usage';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v317-gemma4-dual-q4';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -45,6 +45,8 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/local-ai/bootstrap-v266.js',
   '/app/local-ai/model-registry-v266.js',
   '/app/local-ai/gemma4-pack-extension-v1.js',
+  '/app/local-ai/gemma4-e4b-q4-extension-v1.js',
+  '/app/local-ai/gemma4-dual-q4-actions-v1.js',
   '/app/local-ai/download-manager-v267.js',
   '/app/local-ai/package-revision-guard-v307.js',
   '/app/local-ai/download-policy-v278.js',
@@ -105,10 +107,6 @@ async function cwLocalAICleanup() {
   )));
 }
 
-// Local AI and Guild discovery code are explicitly on-demand. Do not make
-// service-worker installation or activation depend on warming these modules.
-// The fetch gate below keeps current code network-first and preserves an
-// offline fallback after each capability is used once.
 self.addEventListener('install', event => {
   event.waitUntil(Promise.resolve());
 });
@@ -175,5 +173,7 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   sharedGuideCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true,
   gemma4PackCoreCoherent: true,
+  gemma4E4BQ4Coherent: true,
+  gemma4IndependentQ4UseCoherent: true,
   gemma4Q2OptionalExtensionCoherent: true
 });
