@@ -19,7 +19,7 @@ const installedEntryRevision='boot-recovery-v429-direct-shell';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
 const boundaryRevision='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';
-const routeRevision='five-system-route-contract-v228-direct-shell';
+const routeRevision='five-system-route-contract-v229-single-shell-context';
 const offlineRevision='offline-campus-current-graph-v280';
 const offlinePolicy='resumable-pause-v280';
 const retiredChatPaths=[
@@ -55,8 +55,8 @@ await patch('public/app/install-boundary-v146.js',source=>{
 });
 await patch('public/app/system-routes-v227.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'five-system route version');
-  if(!source.includes(`const REVISION='${routeRevision}';`))throw new Error('Five-system direct route contract revision drifted.');
-  for(const token of ["const SHELL_PATH=''","function shouldUseDirect(){return true}","const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js"])if(!source.includes(token))throw new Error(`Direct route contract is missing ${token}.`);
+  if(!source.includes(`const REVISION='${routeRevision}';`))throw new Error('Five-system single-shell route contract revision drifted.');
+  for(const token of ["const SHELL_PATH='/app/working-campus-v156.html'","const PERSISTENT_CONTEXT_SRC='/app/persistent-system-context-v1.js","function shouldUseDirect(){return true}","singlePersistentShell:true","navigationReloadOnSystemSwitch:false","const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js"])if(!source.includes(token))throw new Error(`Single-shell route contract is missing ${token}.`);
   return source;
 });
 await patch('public/app/working-campus-v156.html',source=>{
@@ -100,4 +100,4 @@ for(const token of ["'/app/persistent-family-shell-v1.html'","'/app/fullscreen-f
 const chatRepair=await readFile(path.join(root,'public/service-worker-chat-repair-v245.js'),'utf8');if(!chatRepair.includes(`const REVISION='${activeChatRepairRevision}';`))throw new Error('Chat cache repair revision drifted.');for(const retired of retiredChatPaths)if(!chatRepair.includes(`'${retired}'`))throw new Error(`Chat cache repair does not purge retired runtime ${retired}.`);
 const override=await readFile(path.join(root,'public/service-worker-release-coherence-v220.js'),'utf8');for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
-console.log(JSON.stringify({ok:true,version,revision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,directShell:true,iframeShell:false,persistentActions:'guilds-map-all-systems-v2-chat-icon',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:guideChatOwner,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,directShell:true,singlePersistentShell:true,iframeShell:false,persistentActions:'guilds-map-all-systems-v2-chat-icon',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:guideChatOwner,changed},null,2));
