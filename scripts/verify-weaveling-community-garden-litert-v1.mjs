@@ -111,21 +111,36 @@ includes(loader,'deterministicQuestFallback:false','shared guide loader');
 includes(loader,"gemma4LiteRTFastModelId:'gemma4-e2b-it-litert-web'",'shared guide loader');
 
 const extension=file('public/app/local-ai/gemma4-litert-fast-extension-v1.js');
-includes(extension,"REVISION='73d35ec36cf24347ab4eec1a46f0aafbb9c3a89d'",'LiteRT model extension');
-includes(extension,'ARTIFACT_BYTES=2_008_432_640','LiteRT model extension');
-includes(extension,"artifactSha256:'3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5'",'LiteRT model extension');
+includes(extension,"id:'gemma4-e2b-it-litert-web'",'LiteRT model extension');
+includes(extension,"id:'gemma4-e4b-it-litert-web'",'LiteRT model extension');
+includes(extension,"revision:'73d35ec36cf24347ab4eec1a46f0aafbb9c3a89d'",'LiteRT E2B model extension');
+includes(extension,"revision:'4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4'",'LiteRT E4B model extension');
+includes(extension,'artifactBytes:2_008_432_640','LiteRT E2B model extension');
+includes(extension,'artifactBytes:2_969_059_328','LiteRT E4B model extension');
+includes(extension,"sha256:'3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5'",'LiteRT E2B model extension');
+includes(extension,"sha256:'3904d826d5dddd25ea173e85204caec09e68ba038116e9b992b69cbdc94f57a0'",'LiteRT E4B model extension');
 includes(extension,"RUNTIME_CACHE='civweave-litert-lm-runtime-v1'",'LiteRT model extension');
 includes(extension,'primeRuntime','LiteRT model extension');
-includes(extension,'Download 2.0 GB fast upgrade','LiteRT model extension');
-includes(extension,'Nothing downloads until you choose it','LiteRT model extension');
+includes(extension,'Gemma 4 · 12 GB phone performance profile','LiteRT model extension');
+includes(extension,'Install both','LiteRT model extension');
 includes(extension,'transparentAcceleration:true','LiteRT model extension');
+includes(extension,'dualModelAcceleration:true','LiteRT model extension');
+includes(extension,'oneEngineAtATime:true','LiteRT model extension');
 
 const fast=file('public/app/local-ai/litert-gemma4-fast-runtime-v1.js');
-includes(fast,"FAST_ID='gemma4-e2b-it-litert-web'",'LiteRT fast runtime');
+includes(fast,"'gemma4-e2b-it-litert-web'",'LiteRT fast runtime');
+includes(fast,"'gemma4-e4b-it-litert-web'",'LiteRT fast runtime');
 includes(fast,'mod.Backend.GPU_ARTISAN','LiteRT fast runtime');
-includes(fast,'ENGINE_CONTEXT_TOKENS=4096','LiteRT fast runtime');
+includes(fast,'contextTokens:4096','LiteRT fast runtime');
 includes(fast,"runtime:'litert-lm-web-0.14.0'",'LiteRT fast runtime');
-includes(fast,'if(pick.id===LEGACY_Q4_ID)return base.generate(args)','LiteRT fast runtime fallback');
+includes(fast,"'gemma4-e2b-it-q2f16-mobile'",'LiteRT E2B alias');
+includes(fast,"'gemma4-e4b-it-q2f16-mobile'",'LiteRT E4B alias');
+includes(fast,'return base.generate(args)','LiteRT fast runtime fallback');
+includes(fast,'use_submodel:Boolean(useSubmodel)','LiteRT MTP runtime');
+includes(fast,'supportsJspi','LiteRT JSPI capability gate');
+includes(fast,"capability:'webassembly-jspi'",'LiteRT JSPI capability gate');
+includes(fast,'jspiRequired:true','LiteRT JSPI capability gate');
+includes(fast,'oneEngineAtATime:true','LiteRT phone memory policy');
 assert(!fast.includes('enable_speculative_decoding:true'),'Unsupported native speculative-decoding setting leaked into the web runtime.');
 assert(!fast.includes('hint_kernel_batch_size'),'Unsupported native hint-kernel setting leaked into the web runtime.');
 
@@ -155,6 +170,11 @@ includes(stage,"UTILS_VERSION='2.5.3'",'LiteRT stage');
 includes(stage,"SCHEMA='civweave.litert-lm-web-stage.v1'",'LiteRT stage');
 includes(stage,'MAX_CLOUDFLARE_ASSET_BYTES=24*1024*1024','LiteRT stage');
 includes(stage,'rewriteBareImports','LiteRT stage');
+includes(stage,'litertlm_wasm_asyncify_internal.wasm','LiteRT Pages omission');
+includes(stage,'litertlm_wasm_compat_asyncify_internal.wasm','LiteRT Pages omission');
+includes(stage,'omitPagesIncompatibleFallbacks','LiteRT Pages omission');
+includes(stage,"browserProfile:'chromium-jspi-webgpu'",'LiteRT stage');
+includes(stage,'requiresJspi:true','LiteRT stage');
 
 const build=file('scripts/build-cloudflare-pages.mjs');
 includes(build,'stage-litert-lm-web-assets.mjs','Cloudflare build');
@@ -166,9 +186,12 @@ if(existsSync(manifestPath)){
   const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));
   assert(manifest.schema==='civweave.litert-lm-web-stage.v1','Staged LiteRT manifest has the wrong schema.');
   assert(manifest.coreVersion==='0.14.0','Staged LiteRT manifest has the wrong core version.');
+  assert(manifest.browserProfile==='chromium-jspi-webgpu','Staged LiteRT manifest is not pinned to the Chromium/JSPI WebGPU profile.');
+  assert(manifest.requiresJspi===true,'Staged LiteRT manifest must require JSPI.');
+  assert(Array.isArray(manifest.omittedFiles)&&manifest.omittedFiles.length===2,'Staged LiteRT manifest must record the two omitted Asyncify fallbacks.');
   assert(Array.isArray(manifest.fileInventory)&&manifest.fileInventory.length>0,'Staged LiteRT manifest has no file inventory.');
   const oversized=manifest.fileInventory.filter(row=>Number(row.bytes)>24*1024*1024);
   assert(oversized.length===0,`Staged LiteRT assets exceed Cloudflare limit: ${JSON.stringify(oversized)}`);
 }
 
-console.log('PASS garden and greeting-prefixed basement-arcade intent both route to AI structured Quest authoring, deterministic Quest creation is forbidden, and the LiteRT WebGPU fast lane remains offline/cache/build coherent.');
+console.log('PASS garden and greeting-prefixed basement-arcade intent route to AI structured Quest authoring, deterministic Quest creation is forbidden, and the dual Gemma 4 LiteRT MTP/JSPI fast lane remains offline/cache/build coherent.');
