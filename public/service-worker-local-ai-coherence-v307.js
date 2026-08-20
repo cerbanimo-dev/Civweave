@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v320-litert-gemma4-fast';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v321-ai-quest-authority';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LITERT_VENDOR_PREFIX = '/app/vendor/litert-lm/';
@@ -13,9 +13,14 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/server-ai-router-v301.js',
   '/app/shared-guide-surface-v236.js',
   '/app/guide-stream-thinking-v249.js',
+  '/app/guide-forward-failure-policy-v1.js',
+  '/app/guide-forward-failure-hardening-v1.js',
   '/app/local-provider-authority-v1.js',
   '/app/local-guide-control-bypass-v1.js',
   '/app/intention-planner-v141.js',
+  '/app/weaveling-plan-materialization-v265.js',
+  '/extensions/civweave-weaveling-plan-json-v190.js',
+  '/app/working-campus-v156.part5.txt',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
@@ -39,9 +44,14 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/server-ai-router-v301.js',
   '/app/shared-guide-surface-v236.js',
   '/app/guide-stream-thinking-v249.js',
+  '/app/guide-forward-failure-policy-v1.js',
+  '/app/guide-forward-failure-hardening-v1.js',
   '/app/local-provider-authority-v1.js',
   '/app/local-guide-control-bypass-v1.js',
   '/app/intention-planner-v141.js',
+  '/app/weaveling-plan-materialization-v265.js',
+  '/extensions/civweave-weaveling-plan-json-v190.js',
+  '/app/working-campus-v156.part5.txt',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
@@ -86,8 +96,9 @@ function cwLocalAIEligible(request, url) {
   if (url.pathname.startsWith(CW_LITERT_VENDOR_PREFIX)) {
     return /\.(?:m?js|wasm|json)$/i.test(url.pathname);
   }
+  if (CW_LOCAL_AI_EXTRA_PATHS.has(url.pathname)) return true;
   if (!/\.m?js$/i.test(url.pathname)) return false;
-  return url.pathname.startsWith('/app/local-ai/') || CW_LOCAL_AI_EXTRA_PATHS.has(url.pathname);
+  return url.pathname.startsWith('/app/local-ai/');
 }
 
 function cwLocalAIValid(response) {
@@ -196,6 +207,10 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   localProviderAuthorityCurrentBytes: true,
   localGuideControlCurrentBytes: true,
   intentionPlannerCurrentBytes: true,
+  questAIOrchestratorCurrentBytes: true,
+  questAIMaterializerCurrentBytes: true,
+  workingCampusQuestSyncCurrentBytes: true,
+  forwardFailureQuestBoundaryCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true,
   gemma4PackCoreCoherent: true,
   gemma4LiteRTFastCodeCoherent: true,
