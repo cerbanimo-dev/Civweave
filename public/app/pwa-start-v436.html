@@ -16,35 +16,65 @@
   <small>Installed Civweave</small>
   <h1>Opening the Commons…</h1>
   <div class="pulse" aria-hidden="true"></div>
-  <p id="status">Opening a cache-distinct Working Campus without touching the app worker.</p>
+  <p id="status">Refreshing the app shell, then opening the Working Campus.</p>
   <a id="recover" href="/app/working-campus-v440.html?installed=1&version=1.0.163&source=pwa-start-recovery">Open fresh campus directly</a>
 </main>
 <script>
 (()=>{
 'use strict';
 const VERSION='1.0.163';
-const START_REVISION='pwa-start-v440-cache-distinct-campus';
+const START_REVISION='pwa-start-v441-navigation-runtime-refresh';
 const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
+const SHELL_WORKER_PATH='/service-worker-v203.js';
+const SHELL_WORKER_URL='/service-worker-v203.js?v=1.0.163&revision=staging-navigation-runtime-recovery-v1';
+const WORKER_SETTLE_MS=2200;
 const params=new URLSearchParams(location.search);
 const status=document.querySelector('#status');
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+const workerPath=worker=>{try{return new URL(worker?.scriptURL||'',location.href).pathname}catch{return''}};
 function rememberLaunch(){try{sessionStorage.setItem(LAUNCH_SESSION_KEY,'1');sessionStorage.setItem(BOOT_KEY,'1');sessionStorage.removeItem('civweave.working-campus.return-recovery.v425')}catch{}}
 function installer(){const url=new URL('/app/index.html',location.origin);url.searchParams.set('install','required');url.searchParams.set('source',START_REVISION+'-browser');return url}
 function campus(){const url=new URL('/app/working-campus-v440.html',location.origin);url.searchParams.set('installed','1');url.searchParams.set('version',VERSION);url.searchParams.set('source',START_REVISION);const system=params.get('system');if(system)url.searchParams.set('system',system);return url}
 function fail(message){document.documentElement.dataset.cwPwaStart='recovery';if(status)status.textContent=message}
-try{
+async function refreshShellWorker(){
+  if(!('serviceWorker'in navigator))return false;
+  let registration=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
+  const controllerBefore=workerPath(navigator.serviceWorker.controller);
+  const controllerChange=new Promise(resolve=>{
+    let done=false;
+    const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(value)};
+    const timer=setTimeout(()=>finish(false),WORKER_SETTLE_MS);
+    navigator.serviceWorker.addEventListener('controllerchange',()=>finish(true),{once:true});
+  });
+  if(!registration||workerPath(registration.active)!==SHELL_WORKER_PATH){
+    registration=await navigator.serviceWorker.register(SHELL_WORKER_URL,{scope:'/',updateViaCache:'none'});
+  }else{
+    await registration.update();
+  }
+  try{registration.waiting?.postMessage({type:'SKIP_WAITING'})}catch{}
+  if(registration.installing||registration.waiting||controllerBefore!==SHELL_WORKER_PATH)await controllerChange;
+  return workerPath(navigator.serviceWorker.controller)===SHELL_WORKER_PATH;
+}
+async function launch(){
   if(!installedDisplay()){
     location.replace(installer().href);
     return;
   }
   rememberLaunch();
+  try{
+    if(status)status.textContent='Refreshing the navigation runtime…';
+    await refreshShellWorker();
+  }catch(error){
+    console.warn('[Civweave PWA start] Shell worker refresh failed; continuing with network-first campus recovery.',error);
+  }
   const destination=campus();
-  const watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open the cache-distinct campus directly.'),5000);
+  const watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open the fresh campus directly.'),5000);
   addEventListener('pagehide',()=>clearTimeout(watchdog),{once:true});
   location.replace(destination.href);
-}catch(error){fail(`Startup could not continue: ${error?.message||error}`)}
-globalThis.CivweavePwaStartV436=Object.freeze({version:VERSION,revision:START_REVISION,installedDisplay,rememberLaunch,campus,freshCampusPath:'/app/working-campus-v440.html',cacheDistinctReleaseVersion:'/app/release-version-v2.js'});
+}
+launch().catch(error=>fail(`Startup could not continue: ${error?.message||error}`));
+globalThis.CivweavePwaStartV436=Object.freeze({version:VERSION,revision:START_REVISION,installedDisplay,rememberLaunch,campus,refreshShellWorker,shellWorkerPath:SHELL_WORKER_PATH,freshCampusPath:'/app/working-campus-v440.html',cacheDistinctReleaseVersion:'/app/release-version-v2.js'});
 })();
 </script>
 </body>
