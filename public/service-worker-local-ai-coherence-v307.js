@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v313-gemma4-q4';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v314-legacy-mobile-guild-location';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -164,6 +164,7 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   ownsBeforeGenericCodeCoherence: true,
   bootstrapCapabilityReadiness: true,
   guildDiscoveryCoherent: true,
+  legacyMobileGuildLocationCoherent: true,
   boundedLocalRecoveryCoherent: true,
   sharedGuideCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true
