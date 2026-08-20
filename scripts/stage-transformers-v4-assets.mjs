@@ -13,23 +13,31 @@ const ORT_VERSION='1.26.0-dev.20260416-b7804b056c';
 const ORT_MJS='ort-wasm-simd-threaded.jsep.mjs';
 const ORT_WASM='ort-wasm-simd-threaded.jsep.wasm';
 const CHUNK_BYTES=16*1024*1024;
+const STAGE_SCHEMA='civweave.transformers-stage.v7';
+const GEMMA4_LOGITS_BACKPORT='huggingface-transformers-js-pr-1681';
 const destination=path.join(root,'public','app','vendor','transformers-v4');
 const backendDestination=path.join(destination,'wasm');
 const manifestPath=path.join(destination,'stage-manifest.json');
 const force=process.argv.includes('--force');
 const soft=process.argv.includes('--soft');
 const chunkName=index=>`${ORT_WASM}.part${index}`;
+const GEMMA4_LOGITS_BUG=/(\.inputNames\.includes\("num_logits_to_keep"\)&&![A-Za-z_$][\w$]*\.num_logits_to_keep&&\([A-Za-z_$][\w$]*\.num_logits_to_keep=new [A-Za-z_$][\w$]*\("int64",)\[0n\](,\[\]\)\))/g;
 
 async function exists(target){try{await fsp.access(target);return true}catch{return false}}
 async function staged(){
   if(!await exists(manifestPath))return false;
   try{
     const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));
-    if(manifest.schema!=='civweave.transformers-stage.v6'||manifest.purpose!=='gemma4-mobile-browser-runtime-only')return false;
+    if(manifest.schema!==STAGE_SCHEMA||manifest.purpose!=='gemma4-mobile-browser-runtime-only')return false;
     if(manifest.package!==PACKAGE||manifest.version!==VERSION||manifest.backendPackage!==ORT_PACKAGE||manifest.backendVersion!==ORT_VERSION)return false;
+    if(manifest.gemma4NumLogitsBackport!==GEMMA4_LOGITS_BACKPORT)return false;
     if(!Array.isArray(manifest.wasmChunks)||manifest.wasmChunks.length<2)return false;
     const required=[path.join(destination,'transformers.min.js'),path.join(backendDestination,ORT_MJS),...manifest.wasmChunks.map(name=>path.join(backendDestination,name))];
-    return (await Promise.all(required.map(exists))).every(Boolean);
+    if(!(await Promise.all(required.map(exists))).every(Boolean))return false;
+    const bundle=await fsp.readFile(path.join(destination,'transformers.min.js'),'utf8');
+    if(bundle.includes('num_logits_to_keep')&&GEMMA4_LOGITS_BUG.test(bundle))return false;
+    GEMMA4_LOGITS_BUG.lastIndex=0;
+    return bundle.includes('num_logits_to_keep')&&bundle.includes('[1n]');
   }catch{return false}
 }
 function run(command,args,options={}){
@@ -115,6 +123,17 @@ async function packAndExtract(npm,spec,temp,folder){
   await extractNpmTgz(archive,extractDir);
   const packageRoot=path.join(extractDir,'package');if(!await exists(packageRoot))throw new Error(`${spec} archive did not contain package/.`);return packageRoot;
 }
+function backportGemma4NextTokenLogits(source){
+  GEMMA4_LOGITS_BUG.lastIndex=0;
+  const matches=[...source.matchAll(GEMMA4_LOGITS_BUG)];
+  GEMMA4_LOGITS_BUG.lastIndex=0;
+  if(matches.length!==1)throw new Error(`Expected exactly one Transformers.js 4.2.0 Gemma num_logits_to_keep=0 decoder site; found ${matches.length}. Refusing an ambiguous runtime patch.`);
+  const patched=source.replace(GEMMA4_LOGITS_BUG,'$1[1n]$2');
+  GEMMA4_LOGITS_BUG.lastIndex=0;
+  if(GEMMA4_LOGITS_BUG.test(patched))throw new Error('Gemma num_logits_to_keep=0 decoder site survived the runtime backport.');
+  GEMMA4_LOGITS_BUG.lastIndex=0;
+  return patched;
+}
 async function splitWasm(source){
   const bytes=await fsp.readFile(source),names=[];
   for(let offset=0,index=0;offset<bytes.length;offset+=CHUNK_BYTES,index++){
@@ -127,7 +146,7 @@ async function splitWasm(source){
 }
 
 async function main(){
-  if(!force&&await staged()){console.log(`[Civweave] Transformers.js ${VERSION} + ONNX Runtime Web ${ORT_VERSION} minimal Gemma 4 runtime is already staged.`);return}
+  if(!force&&await staged()){console.log(`[Civweave] Transformers.js ${VERSION} + ONNX Runtime Web ${ORT_VERSION} minimal Gemma 4 runtime is already staged with ${GEMMA4_LOGITS_BACKPORT}.`);return}
   const temp=await fsp.mkdtemp(path.join(os.tmpdir(),'civweave-transformers-v4-'));
   try{
     const npm=process.platform==='win32'?'npm.cmd':'npm';
@@ -144,7 +163,8 @@ async function main(){
     let entrySource=null;
     for(const name of candidates){const candidate=path.join(source,name);if(await exists(candidate)){entrySource=candidate;break}}
     if(!entrySource)throw new Error(`Transformers.js ${VERSION} was packed, but no browser entry was found in dist/.`);
-    await fsp.copyFile(entrySource,path.join(destination,'transformers.min.js'));
+    const entryText=await fsp.readFile(entrySource,'utf8');
+    await fsp.writeFile(path.join(destination,'transformers.min.js'),backportGemma4NextTokenLogits(entryText),'utf8');
 
     const mjsSource=path.join(ortSource,ORT_MJS),wasmSource=path.join(ortSource,ORT_WASM);
     if(!await exists(mjsSource)||!await exists(wasmSource))throw new Error(`${ORT_PACKAGE}@${ORT_VERSION} does not contain the required WebGPU JSEP runtime pair.`);
@@ -153,10 +173,11 @@ async function main(){
 
     const stagedFiles=['transformers.min.js',`wasm/${ORT_MJS}`,...split.names.map(name=>`wasm/${name}`)];
     await fsp.writeFile(manifestPath,JSON.stringify({
-      schema:'civweave.transformers-stage.v6',package:PACKAGE,version:VERSION,backendPackage:ORT_PACKAGE,backendVersion:ORT_VERSION,purpose:'gemma4-mobile-browser-runtime-only',
+      schema:STAGE_SCHEMA,package:PACKAGE,version:VERSION,backendPackage:ORT_PACKAGE,backendVersion:ORT_VERSION,purpose:'gemma4-mobile-browser-runtime-only',
+      gemma4NumLogitsBackport:GEMMA4_LOGITS_BACKPORT,gemma4NumLogitsToKeep:1,
       entry:'/app/vendor/transformers-v4/transformers.min.js',backendRoot:'/app/vendor/transformers-v4/wasm/',backendFiles:[ORT_MJS,...split.names],wasmSource:ORT_WASM,wasmBytes:split.bytes,wasmChunks:split.names,wasmChunkBytes:CHUNK_BYTES,stagedFiles,copied:stagedFiles.length,stagedAt:new Date().toISOString()
     },null,2));
-    console.log(`[Civweave] Staged minimal Transformers.js ${VERSION} browser runtime with ONNX Runtime Web ${ORT_VERSION}: ${stagedFiles.length} files, ${split.names.length} WASM chunks (${split.bytes} bytes total).`);
+    console.log(`[Civweave] Staged minimal Transformers.js ${VERSION} browser runtime with ONNX Runtime Web ${ORT_VERSION}: ${stagedFiles.length} files, ${split.names.length} WASM chunks (${split.bytes} bytes total), ${GEMMA4_LOGITS_BACKPORT} applied.`);
   }finally{await fsp.rm(temp,{recursive:true,force:true})}
 }
 
