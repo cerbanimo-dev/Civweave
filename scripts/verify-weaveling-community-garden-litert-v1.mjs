@@ -27,9 +27,11 @@ const paths=[
 for(const path of paths)syntax(path);
 
 const control=file('public/app/local-guide-control-bypass-v1.js');
-includes(control,'1.3.1-local-guide-control-bypass-v1-ai-quest-route','Quest route control');
+includes(control,'1.4.0-local-guide-control-bypass-v1-ai-quest-lazy-route','Quest route control');
 includes(control,'__cwWeavelingAIQuestRequiredV1','Quest route control');
-includes(control,"findLayer(current,'__weavelingPlanJsonV190')",'Quest route control');
+includes(control,'likelyQuestIntent','Quest route control');
+includes(control,'ensureOrchestrator','Quest route control');
+includes(control,'orchestrator.createModelPlan','Quest route control');
 includes(control,'aiQuestAuthoringRequired:true','Quest route control');
 includes(control,'deterministicQuestCreation:false','Quest route control');
 assert(!control.includes('platformPlan('),'Control layer must not author a deterministic platform Quest.');
@@ -37,16 +39,29 @@ assert(!control.includes('specializeCommunityGarden'),'Hard-coded community-gard
 assert(!control.includes('localGenerationSkipped:true'),'Quest routing must not advertise skipped AI generation.');
 
 const orchestrator=file('public/extensions/civweave-weaveling-plan-json-v190.js');
-includes(orchestrator,'1.1.0-weaveling-plan-json-v190-ai-required-local-transport','Quest orchestrator');
+includes(orchestrator,'1.2.0-weaveling-plan-json-v190-ai-quest-intent','Quest orchestrator');
 includes(orchestrator,'localStructuredTransport','Quest orchestrator');
 includes(orchestrator,"provider:'downloaded-local'",'Quest orchestrator');
 includes(orchestrator,"mode:'model-structured-json'",'Quest orchestrator');
 includes(orchestrator,'aiGenerated:true','Quest orchestrator');
 includes(orchestrator,'deterministicQuestFallback:false','Quest orchestrator');
+includes(orchestrator,'stripGreeting','Quest orchestrator');
+includes(orchestrator,'COLLECTIVE_PROJECT_RE','Quest orchestrator');
 includes(orchestrator,"Nothing was created or saved",'Quest orchestrator');
 includes(orchestrator,"Every title, purpose, step, completion criterion, evidence item, and governance agreement must be specific to this user's request",'Quest customization prompt');
+includes(orchestrator,'Your job is to design the user\'s Quest for them.','Quest capability prompt');
 assert(!orchestrator.includes('fallback:()=>planner.buildPlan'),'Structured Quest request still carries deterministic planner fallback.');
 assert(!orchestrator.includes("provider==='deterministic'?'deterministic-fallback'"),'Quest normalization still permits deterministic authorship.');
+
+const intentSandbox={console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,globalThis:null};
+intentSandbox.globalThis=intentSandbox;
+vm.runInNewContext(orchestrator,intentSandbox,{filename:'civweave-weaveling-plan-json-v190.js'});
+const intentApi=intentSandbox.CivweaveWeavelingPlanJsonV190;
+const gardenPhrase='I want to make a community garden with my friends';
+const arcadePhrase='Hello me and my friends create a basement arcade business';
+assert(intentApi?.planIntent?.(gardenPhrase,[],{})===true,'Community-garden phrasing is not recognized as Quest intent.');
+assert(intentApi?.planIntent?.(arcadePhrase,[],{})===true,'Greeting-prefixed basement-arcade phrasing is not recognized as Quest intent.');
+assert(intentApi?.stripGreeting?.(arcadePhrase).startsWith('me and my friends'),'Greeting stripping damaged the actual arcade request.');
 
 let structuredCalls=0,localCalls=0;
 const sandbox={
@@ -55,20 +70,25 @@ const sandbox={
   addEventListener:()=>{},dispatchEvent:()=>{},CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}}
 };
 sandbox.globalThis=sandbox;
-const structured=async()=>{structuredCalls++;return{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16',plan:{title:'AI community garden Quest'},questAuthoring:{aiGenerated:true}}};
-structured.__weavelingPlanJsonV190=true;
 const localProvider=async()=>{localCalls++;return{provider:'downloaded-local',response:{answer:'ordinary local chat'}}};
 localProvider.__civweaveLocalProviderAuthorityV1=true;
 localProvider.__civweaveLocalProviderAuthorityVersion='1.0.3-local-provider-authority-v1-inference-core-first';
-localProvider.__prior=structured;
+localProvider.__prior=async()=>({provider:'deterministic-control'});
 sandbox.CivweaveAssistantV141={respond:localProvider};
-sandbox.CivweaveWeavelingPlanJsonV190={planIntent:text=>/community garden/i.test(text),install:()=>true};
+sandbox.CivweaveWeavelingPlanJsonV190={
+  version:'1.2.0-weaveling-plan-json-v190-ai-quest-intent',
+  planIntent:text=>/community garden|basement arcade/i.test(text),
+  createModelPlan:async args=>{structuredCalls++;return{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16',plan:{title:/arcade/i.test(args.text)?'AI basement arcade Quest':'AI community garden Quest'},questAuthoring:{aiGenerated:true}}},
+  install:()=>true
+};
 vm.runInNewContext(control,sandbox,{filename:'local-guide-control-bypass-v1.js'});
-const phrase='I want to make a community garden with my friends';
-const routed=await sandbox.CivweaveAssistantV141.respond({systemId:'civweave',text:phrase,history:[]});
-assert(structuredCalls===1,'Exact community-garden phrase did not route into AI structured Quest authoring.');
-assert(localCalls===0,'Exact community-garden phrase fell through to ordinary local chat instead of Quest authoring.');
-assert(routed?.questAuthoring?.aiGenerated===true,'Community-garden Quest route did not preserve AI authoring provenance.');
+const routedGarden=await sandbox.CivweaveAssistantV141.respond({systemId:'civweave',text:gardenPhrase,history:[]});
+const routedArcade=await sandbox.CivweaveAssistantV141.respond({systemId:'civweave',text:arcadePhrase,history:[]});
+assert(structuredCalls===2,'One or more project phrases did not route into AI structured Quest authoring.');
+assert(localCalls===0,'A project phrase fell through to ordinary local chat instead of Quest authoring.');
+assert(routedGarden?.questAuthoring?.aiGenerated===true,'Community-garden Quest route did not preserve AI authoring provenance.');
+assert(routedArcade?.questAuthoring?.aiGenerated===true,'Basement-arcade Quest route did not preserve AI authoring provenance.');
+assert(/basement arcade/i.test(routedArcade?.plan?.title||''),'Basement-arcade request was not handed to the structured authoring route.');
 
 const loader=file('public/app/shared-guide-surface-v236.js');
 for(const [a,b] of [
@@ -81,8 +101,11 @@ for(const [a,b] of [
   ['civweave-weaveling-plan-json-v190.js','local-guide-control-bypass-v1.js'],
   ['local-guide-control-bypass-v1.js','guide-stream-thinking-v249.js']
 ])before(loader,a,b,'shared guide loader');
+includes(loader,'1.2.0-ai-quest-intent','shared guide loader');
+includes(loader,'1.4.0-ai-quest-lazy-route','shared guide loader');
 includes(loader,'aiQuestAuthoringRequired:true','shared guide loader');
 includes(loader,'structuredQuestOrchestratorSerialized:true','shared guide loader');
+includes(loader,'questIntentGreetingSafe:true','shared guide loader');
 includes(loader,"questCustomizationOwner:'selected-ai-model'",'shared guide loader');
 includes(loader,'deterministicQuestFallback:false','shared guide loader');
 includes(loader,"gemma4LiteRTFastModelId:'gemma4-e2b-it-litert-web'",'shared guide loader');
@@ -148,4 +171,4 @@ if(existsSync(manifestPath)){
   assert(oversized.length===0,`Staged LiteRT assets exceed Cloudflare limit: ${JSON.stringify(oversized)}`);
 }
 
-console.log('PASS exact community-garden intent routes to AI structured Quest authoring, deterministic Quest creation is forbidden, and the explicit LiteRT WebGPU fast lane remains offline/cache/build coherent.');
+console.log('PASS garden and greeting-prefixed basement-arcade intent both route to AI structured Quest authoring, deterministic Quest creation is forbidden, and the LiteRT WebGPU fast lane remains offline/cache/build coherent.');
