@@ -44,7 +44,15 @@ jobs:
           NODE
 
       - name: Delete only the accidental Cerbanimo-account Worker
-        run: npx --yes wrangler@4 delete --config cloudflare/mobile-guild-edge/wrangler.jsonc --name "$WORKER_NAME" --force
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -sS -X DELETE \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$WORKER_NAME")"
+          echo "$response"
+          node -e 'const p=JSON.parse(process.argv[1]); if(p.success!==true) process.exit(2)' "$response"
 
       - name: Verify Kamido was untouched
         shell: bash
