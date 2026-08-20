@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.118-local-chat-runtime-v305-streaming-long-output';
+const VERSION='1.0.119-local-chat-runtime-v305-task-aware-streaming';
 const REVISION='v312-runtime-first-bootstrap';
 const SEL='civweave.local-ai.selection.v266';
 const HEALTH='civweave.local-ai.health.v286';
@@ -9,6 +9,7 @@ const BOOT='/app/local-ai/bootstrap-v266.js?v=1.0.130-v325-inference-core-first'
 const BOOT_REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
 const CORE_LOAD_TIMEOUT_MS=18000;
 const BOOT_READY_TIMEOUT_MS=45000;
+const LOCAL_EXECUTION_CONTRACT='Civweave already selected this downloaded local model after deterministic capability routing. Complete the user task directly. Do not evaluate, disclaim, or speculate about your own model capability, and never say that the local AI model cannot handle the request. If the runtime genuinely cannot execute, Civweave reports that outside the generated answer. Use reasonable explicit assumptions when details are missing rather than refusing a normal planning, learning, building, exchange, or civic task.';
 const CORE=Object.freeze([
   Object.freeze({
     name:'CivweaveLocalModelRegistryV266',
@@ -56,6 +57,8 @@ function budget(id,requestedMaxTokens=0){
   const timeoutMs=Math.round(clamp(Math.max(90000,cold*1.5+60000),90000,180000));
   return{maxNewTokens,timeoutMs,tps,coldStartMs:cold,requestedMaxTokens:explicit||1024};
 }
+function planningRequest(messages=[]){const text=[...(Array.isArray(messages)?messages:[])].reverse().find(row=>row?.role==='user')?.content||'';return /\b(plan|planning|roadmap|steps?|create|build|start|set up|organize|launch|learning journey|curriculum|course|quest|endeavor|manifest)\b/i.test(String(text))}
+function outputBudget(systemPrompt,messages,requested=0){const explicit=Math.max(0,Number(requested||0));if(explicit)return explicit;if(!planningRequest(messages))return 1024;return /\bWeaveling\b/.test(String(systemPrompt||''))?2400:1800}
 function runtimeReady(){
   const runtime=globalThis.CivweaveLocalModelRuntimeV266;
   return Boolean(
@@ -129,25 +132,14 @@ async function ensureInferenceCore(onProgress){
       try{
         for(let index=0;index<CORE.length;index++){
           const component=CORE[index];
-          onProgress?.({
-            phase:'loading-runtime',
-            stage:'inference-core',
-            component:component.name,
-            componentIndex:index+1,
-            componentCount:CORE.length,
-            attempt:attempt+1,
-            progress:index/CORE.length
-          });
+          onProgress?.({phase:'loading-runtime',stage:'inference-core',component:component.name,componentIndex:index+1,componentCount:CORE.length,attempt:attempt+1,progress:index/CORE.length});
           await loadCoreComponent(component,attempt);
         }
         if(!runtimeReady())throw Object.assign(new Error('The inference core loaded, but the local model runtime still does not satisfy the chat contract.'),{code:'LOCAL_INFERENCE_CORE_CONTRACT_FAILED',component:'CivweaveLocalModelRuntimeV266',phase:'loading-runtime'});
         onProgress?.({phase:'loading-runtime',stage:'inference-core-ready',progress:1,inferenceCoreFirst:true});
         return true;
       }catch(error){
-        if(attempt===0){
-          onProgress?.({phase:'loading-runtime',stage:'recovering-inference-core',component:error?.component||'',message:String(error?.message||error),attempt:1});
-          continue;
-        }
+        if(attempt===0){onProgress?.({phase:'loading-runtime',stage:'recovering-inference-core',component:error?.component||'',message:String(error?.message||error),attempt:1});continue}
         throw error;
       }
     }
@@ -158,168 +150,47 @@ async function ensureInferenceCore(onProgress){
 function reportAuxiliaryBootstrap(boot,onProgress){
   Promise.resolve(boot?.ready).then(full=>{
     if(full)return;
-    const detail={
-      phase:'loading-runtime',
-      stage:'runtime-ready-bootstrap-auxiliary-degraded',
-      runtimeReady:runtimeReady(),
-      bootstrapFullReady:false,
-      bootstrapComponent:boot?.lastComponent||'',
-      bootstrapMessage:boot?.lastError||'',
-      revision:REVISION
-    };
+    const detail={phase:'loading-runtime',stage:'runtime-ready-bootstrap-auxiliary-degraded',runtimeReady:runtimeReady(),bootstrapFullReady:false,bootstrapComponent:boot?.lastComponent||'',bootstrapMessage:boot?.lastError||'',revision:REVISION};
     try{onProgress?.(detail)}catch{}
     try{dispatchEvent(new CustomEvent('civweave:local-ai-auxiliary-bootstrap-degraded',{detail}))}catch{}
   }).catch(()=>{});
 }
 function startAuxiliaryBootstrap(onProgress){
   const existing=globalThis.CivweaveLocalAIBootstrapV266;
-  if(existing?.revision===BOOT_REVISION&&existing?.ready){
-    reportAuxiliaryBootstrap(existing,onProgress);
-    return Promise.resolve(existing);
-  }
+  if(existing?.revision===BOOT_REVISION&&existing?.ready){reportAuxiliaryBootstrap(existing,onProgress);return Promise.resolve(existing)}
   if(auxiliaryBootstrapFlight)return auxiliaryBootstrapFlight;
   auxiliaryBootstrapFlight=new Promise(resolve=>{
     const script=document.createElement('script');
-    const finish=()=>{
-      const boot=globalThis.CivweaveLocalAIBootstrapV266;
-      if(boot?.ready)reportAuxiliaryBootstrap(boot,onProgress);
-      resolve(boot||null);
-    };
-    script.src=`${BOOT}&aux=1&ts=${Date.now()}`;
-    script.async=false;
-    script.dataset.civweaveLocalChatBootstrap='v325-auxiliary';
-    script.onload=finish;
-    script.onerror=()=>resolve(null);
-    const head=document.head;
-    if(!head?.isConnected){resolve(null);return}
-    head.append(script);
-    setTimeout(finish,BOOT_READY_TIMEOUT_MS);
+    const finish=()=>{const boot=globalThis.CivweaveLocalAIBootstrapV266;if(boot?.ready)reportAuxiliaryBootstrap(boot,onProgress);resolve(boot||null)};
+    script.src=`${BOOT}&aux=1&ts=${Date.now()}`;script.async=false;script.dataset.civweaveLocalChatBootstrap='v325-auxiliary';script.onload=finish;script.onerror=()=>resolve(null);
+    const head=document.head;if(!head?.isConnected){resolve(null);return}head.append(script);setTimeout(finish,BOOT_READY_TIMEOUT_MS);
   }).finally(()=>{auxiliaryBootstrapFlight=null});
   return auxiliaryBootstrapFlight;
 }
 async function ready(onProgress){
-  if(runtimeReady()){
-    void startAuxiliaryBootstrap(onProgress);
-    return true;
-  }
-  const started=performance.now();
-  onProgress?.({phase:'loading-runtime',stage:'inference-core-start',elapsedMs:0,timeoutMs:CORE_LOAD_TIMEOUT_MS*CORE.length,inferenceCoreFirst:true});
+  if(runtimeReady()){void startAuxiliaryBootstrap(onProgress);return true}
+  const started=performance.now();onProgress?.({phase:'loading-runtime',stage:'inference-core-start',elapsedMs:0,timeoutMs:CORE_LOAD_TIMEOUT_MS*CORE.length,inferenceCoreFirst:true});
   try{
     await ensureInferenceCore(onProgress);
     if(!runtimeReady())throw Object.assign(new Error('The local inference core did not become compatible.'),{code:'LOCAL_INFERENCE_CORE_UNAVAILABLE',phase:'loading-runtime'});
-    onProgress?.({phase:'loading-runtime',stage:'ready',elapsedMs:performance.now()-started,progress:1,inferenceCoreFirst:true,bootstrapRequired:false});
-    void startAuxiliaryBootstrap(onProgress);
-    return true;
-  }catch(error){
-    const component=String(error?.component||'local inference core');
-    const message=String(error?.message||error);
-    throw Object.assign(
-      new Error(`The local inference core could not start at ${component}: ${message}`),
-      {code:error?.code||'LOCAL_INFERENCE_CORE_UNAVAILABLE',phase:error?.phase||'loading-runtime',component,cause:error}
-    );
-  }
+    onProgress?.({phase:'loading-runtime',stage:'ready',elapsedMs:performance.now()-started,progress:1,inferenceCoreFirst:true,bootstrapRequired:false});void startAuxiliaryBootstrap(onProgress);return true;
+  }catch(error){const component=String(error?.component||'local inference core'),message=String(error?.message||error);throw Object.assign(new Error(`The local inference core could not start at ${component}: ${message}`),{code:error?.code||'LOCAL_INFERENCE_CORE_UNAVAILABLE',phase:error?.phase||'loading-runtime',component,cause:error})}
 }
-function idleLimit(phase){
-  const p=String(phase||'');
-  if(p==='loading-model')return 240000;
-  if(p==='loading-tokenizer'||p==='warming-model'||p==='benchmarking-model')return 150000;
-  if(p.includes('download')||p==='backend-fallback'||p==='backend-quarantined')return 360000;
-  if(p==='generating'||p==='preparing-prompt')return 120000;
-  return 150000;
-}
-async function generate({systemPrompt,messages,onToken,onProgress,maxNewTokens=1024}){
-  const pick=selected();
-  if(!pick)throw Object.assign(new Error('No downloaded local model is selected.'),{code:'LOCAL_MODEL_NOT_SELECTED'});
+function idleLimit(phase){const p=String(phase||'');if(p==='loading-model')return 240000;if(p==='loading-tokenizer'||p==='warming-model'||p==='benchmarking-model')return 150000;if(p.includes('download')||p==='backend-fallback'||p==='backend-quarantined')return 360000;if(p==='generating'||p==='preparing-prompt')return 120000;return 150000}
+async function generate({systemPrompt,messages,onToken,onProgress,maxNewTokens=0}){
+  const pick=selected();if(!pick)throw Object.assign(new Error('No downloaded local model is selected.'),{code:'LOCAL_MODEL_NOT_SELECTED'});
   await ready(onProgress);
-  const runtime=globalThis.CivweaveLocalModelRuntimeV266;
-  const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(pick.id)||runtime.activeSpec?.()||{};
-  const b=budget(pick.id,maxNewTokens);
+  const runtime=globalThis.CivweaveLocalModelRuntimeV266,spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(pick.id)||runtime.activeSpec?.()||{},requestedOutput=outputBudget(systemPrompt,messages,maxNewTokens),b=budget(pick.id,requestedOutput),effectiveSystemPrompt=`${String(systemPrompt||'').trim()}\n\nCivweave downloaded-local execution contract v2. ${LOCAL_EXECUTION_CONTRACT}`.trim();
   const absoluteMs=Math.round(clamp(Math.max(900000,b.timeoutMs,Number(spec.healthTimeoutMs||0)),300000,900000));
   let idleTimer=0,hardTimer=0,watchReject=null,lastPhase='starting',stalled=false;
-  const arm=phase=>{
-    lastPhase=String(phase||lastPhase||'working');
-    clearTimeout(idleTimer);
-    idleTimer=setTimeout(()=>{
-      stalled=true;
-      try{runtime.shutdown?.({reason:'chat-stage-stalled'})}catch{}
-      watchReject?.(Object.assign(new Error(`Local model stopped because ${lastPhase} made no progress for ${Math.round(idleLimit(lastPhase)/1000)} seconds.`),{code:'LOCAL_CHAT_STAGE_STALLED',phase:lastPhase}));
-    },idleLimit(lastPhase));
-  };
+  const arm=phase=>{lastPhase=String(phase||lastPhase||'working');clearTimeout(idleTimer);idleTimer=setTimeout(()=>{stalled=true;try{runtime.shutdown?.({reason:'chat-stage-stalled'})}catch{}watchReject?.(Object.assign(new Error(`Local model stopped because ${lastPhase} made no progress for ${Math.round(idleLimit(lastPhase)/1000)} seconds.`),{code:'LOCAL_CHAT_STAGE_STALLED',phase:lastPhase}))},idleLimit(lastPhase))};
   const watchdog=new Promise((_,reject)=>{watchReject=reject;arm('starting')});
-  const progress=p=>{
-    arm(p?.phase||lastPhase);
-    try{onProgress?.({...p,watchdogMs:idleLimit(p?.phase||lastPhase),absoluteTimeoutMs:absoluteMs,runtimeFallbackOwned:Boolean(runtime?.stalledWebGPUFallback)})}catch{}
-  };
+  const progress=p=>{arm(p?.phase||lastPhase);try{onProgress?.({...p,watchdogMs:idleLimit(p?.phase||lastPhase),absoluteTimeoutMs:absoluteMs,runtimeFallbackOwned:Boolean(runtime?.stalledWebGPUFallback),outputBudgetTokens:b.maxNewTokens})}catch{}};
   const token=t=>{arm('generating');try{onToken?.(t)}catch{}};
-  const request=runtime.generate({
-    messages:[{role:'system',content:systemPrompt},...messages],
-    maxNewTokens:b.maxNewTokens,
-    promptTokenBudget:Math.min(1024,Math.max(640,Number(spec.workingContextTokens||1024))),
-    temperature:spec.generation?.nonThinkingTemperature??.7,
-    thinking:false,
-    timeoutMs:absoluteMs,
-    stream:true,
-    executionProfile:'interactive',
-    onToken:token,
-    onProgress:progress
-  });
-  const hardTimeout=new Promise((_,reject)=>{
-    hardTimer=setTimeout(()=>{
-      stalled=true;
-      try{runtime.shutdown?.({reason:'chat-absolute-timeout'})}catch{}
-      reject(Object.assign(new Error(`Local interactive generation exceeded its ${Math.round(absoluteMs/1000)} second overall recovery budget.`),{code:'LOCAL_CHAT_ABSOLUTE_TIMEOUT',phase:lastPhase}));
-    },absoluteMs+2000);
-  });
-  try{
-    return await Promise.race([request,watchdog,hardTimeout]);
-  }catch(error){
-    if(stalled||error?.code==='LOCAL_MODEL_TIMEOUT'||error?.code==='LOCAL_CHAT_STAGE_STALLED'||error?.code==='LOCAL_CHAT_ABSOLUTE_TIMEOUT'){
-      try{runtime.shutdown?.({reason:error?.code||'chat-recovery'})}catch{}
-    }
-    throw error;
-  }finally{
-    clearTimeout(idleTimer);
-    clearTimeout(hardTimer);
-    watchReject=null;
-  }
+  const request=runtime.generate({messages:[{role:'system',content:effectiveSystemPrompt},...messages],maxNewTokens:b.maxNewTokens,promptTokenBudget:Math.min(1024,Math.max(640,Number(spec.workingContextTokens||1024))),temperature:spec.generation?.nonThinkingTemperature??.7,thinking:false,timeoutMs:absoluteMs,stream:true,executionProfile:'interactive',onToken:token,onProgress:progress});
+  const hardTimeout=new Promise((_,reject)=>{hardTimer=setTimeout(()=>{stalled=true;try{runtime.shutdown?.({reason:'chat-absolute-timeout'})}catch{}reject(Object.assign(new Error(`Local interactive generation exceeded its ${Math.round(absoluteMs/1000)} second overall recovery budget.`),{code:'LOCAL_CHAT_ABSOLUTE_TIMEOUT',phase:lastPhase}))},absoluteMs+2000)});
+  try{return await Promise.race([request,watchdog,hardTimeout])}catch(error){if(stalled||error?.code==='LOCAL_MODEL_TIMEOUT'||error?.code==='LOCAL_CHAT_STAGE_STALLED'||error?.code==='LOCAL_CHAT_ABSOLUTE_TIMEOUT'){try{runtime.shutdown?.({reason:error?.code||'chat-recovery'})}catch{}}throw error}finally{clearTimeout(idleTimer);clearTimeout(hardTimer);watchReject=null}
 }
 
-globalThis.CivweaveLocalChatRuntimeV295=Object.freeze({
-  version:VERSION,
-  revision:REVISION,
-  downloadedLocalDirect:true,
-  thinkingDisabled:true,
-  streaming:true,
-  longOutputBudget:true,
-  defaultOutputTokens:1024,
-  maxOutputTokens:4096,
-  boundedRecovery:true,
-  boundedStartup:true,
-  startupProgress:true,
-  inferenceCoreFirst:true,
-  inferenceCoreComponents:Object.freeze(CORE.map(row=>row.name)),
-  fullBootstrapBlocking:false,
-  bootstrapAuxiliaryFailureNonFatal:true,
-  runtimeFirstBootstrap:true,
-  stageAwareWatchdog:true,
-  runtimeOwnedWebGPUFallback:true,
-  progressExtendsColdStart:true,
-  coldStartBenchmarkOptOut:true,
-  windowsWebGPUGrace:true,
-  freshWorkerFallback:true,
-  phaseAwareErrors:true,
-  promptBudgetEnforced:true,
-  terminalCancellation:true,
-  settingsTeardown:true,
-  smoothFitRuntime:true,
-  adaptiveResidency:true,
-  adaptiveWasmThreads:true,
-  intentPrewarm:true,
-  selected,
-  budget,
-  runtimeReady,
-  ensureInferenceCore,
-  ready,
-  generate
-});
+globalThis.CivweaveLocalChatRuntimeV295=Object.freeze({version:VERSION,revision:REVISION,downloadedLocalDirect:true,thinkingDisabled:true,streaming:true,longOutputBudget:true,taskAwareOutputBudget:true,defaultOutputTokens:1024,planningOutputTokens:1800,weavelingPlanningOutputTokens:2400,maxOutputTokens:4096,localExecutionContractV2:true,boundedRecovery:true,boundedStartup:true,startupProgress:true,inferenceCoreFirst:true,inferenceCoreComponents:Object.freeze(CORE.map(row=>row.name)),fullBootstrapBlocking:false,bootstrapAuxiliaryFailureNonFatal:true,runtimeFirstBootstrap:true,stageAwareWatchdog:true,runtimeOwnedWebGPUFallback:true,progressExtendsColdStart:true,coldStartBenchmarkOptOut:true,windowsWebGPUGrace:true,freshWorkerFallback:true,phaseAwareErrors:true,promptBudgetEnforced:true,terminalCancellation:true,settingsTeardown:true,smoothFitRuntime:true,adaptiveResidency:true,adaptiveWasmThreads:true,intentPrewarm:true,selected,budget,outputBudget,runtimeReady,ensureInferenceCore,ready,generate});
 })();
