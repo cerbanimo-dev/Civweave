@@ -16,6 +16,11 @@ const policy=context.CivweaveLocalSmallModelPolicyV283;assert.ok(policy);
 assert.equal(policy.profile({workingContextTokens:4096},{purpose:'interactive'}).initialSlice,256);
 assert.equal(policy.profile({workingContextTokens:4096},{purpose:'code-generation'}).initialSlice,384);
 assert.equal(policy.profile({workingContextTokens:4096},{purpose:'interactive'}).totalMax,1024);
+const extendedStructured=policy.profile({workingContextTokens:4096},{purpose:'civweave-guide-response-v141',responseFormat:'json',config:{maxTokens:1800}});
+assert.equal(extendedStructured.extendedStructured,true,'1800-token structured guide requests should enter the extended local budget');
+assert.equal(extendedStructured.initialSlice,512,'extended structured requests should not remain on the old 384-token slice');
+assert.equal(extendedStructured.continuationSlice,512);
+assert.equal(extendedStructured.totalMax,1800,'the planning budget should survive the local small-model policy instead of being silently reduced to 1536');
 assert.equal(policy.validateCompletion({completion:{nearTokenLimit:true}},'A sentence.',{}).reason,'token-limit');
 assert.equal(policy.validateCompletion({},'{"answer":',{structured:true,jsonValid:false}).reason,'open-structure');
 assert.equal(policy.validateCompletion({},'This ends with and',{}).reason,'abrupt-text');
@@ -32,6 +37,7 @@ assert.match(policy.continuationPrompt({structured:true}),/complete corrected JS
 assert.match(policy.continuationPrompt({structured:true}),/full plan rather than a preamble or partial list/);
 assert.equal(policy.structuredAnswerCompletionValidation,true);
 assert.equal(policy.guideAnswerCompletionValidation,true);
+assert.equal(policy.extendedStructuredBudget,true);
 assert.ok(runtimeSource.includes("VERSION='1.0.115-local-ai-runtime-v302-session-handoff'")&&runtimeSource.includes("LEGACY_VERSION='1.0.87-local-ai-runtime-v287-gemma4-mobile'")&&runtimeSource.includes("REVISION='1.0.88-local-ai-runtime-v283-small-model-fast-path'")&&runtimeSource.includes('promptTokenBudget,temperature:requestOptions.temperature')&&runtimeSource.includes('smallModelFastPath:true')&&runtimeSource.includes('freshWorkerFallback:true')&&runtimeSource.includes('phaseAwareErrors:true')&&runtimeSource.includes('promptBudgetEnforced:true')&&runtimeSource.includes('compatibilityPromptCap:true')&&runtimeSource.includes('adaptiveWasmThreads:true'));
 assert.ok(runtimeSource.includes('compatibility?Math.min(512')&&runtimeSource.includes('compatibility?Math.min(48'),'Small-model compatibility lane must bound prompt and output work.');
 assert.ok(bridgeSource.includes("REVISION='1.0.88-local-ai-bridge-v283-small-model-fast-path'")&&bridgeSource.includes('continuation-requested')&&bridgeSource.includes('completionFor(run,slice)')&&bridgeSource.includes('LOCAL_CONTINUATION_VALIDATOR')&&bridgeSource.includes('promptTokenBudget:profile.promptTokenBudget'));
@@ -41,4 +47,4 @@ assert.ok(bootstrapSource.includes('/app/browser-tool-v1.js')&&bootstrapSource.i
 assert.ok(!bootstrapSource.includes("CivweaveLocalModelRuntimeV266?.version==='1.0.86-local-ai-runtime-v286-wasm-performance'"),'Bootstrap regressed to an exact implementation-version pin.');
 assert.ok(primarySource.includes("ROUTE='downloaded-local'")&&primarySource.includes('Embedded local AI (downloaded model)')&&primarySource.includes('capability fallback'));
 assert.ok(workerSource.includes('wasm.numThreads=wasmThreads')&&workerSource.includes('wasm.simd=true')&&workerSource.includes('use_cache:true')&&workerSource.includes('benchmarkTokensPerSecond')&&workerSource.includes("message.type==='prewarm'"));
-console.log(JSON.stringify({ok:true,revision:'small-model-fast-path-v324-guide-completion',features:{embeddedLocalPrimary:true,adaptiveOutputSlices:true,clippingValidation:true,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true,boundedContinuation:true,streamedContinuation:true,thinkingProfilesPreserved:true,wasmPerformancePreserved:true,adaptiveWasmThreads:true,compatibilityPromptCap:true,intentPrewarm:true,stalledWebGPUFallback:true,webgpuSessionQuarantine:true,freshWorkerFallback:true,promptBudgetEnforced:true,boundedStartup:true,coherenceReload:true,packageRevisionGuard:true,delegatedBrowserTools:true,componentCompatibility:'capability-contract-v324'}},null,2));
+console.log(JSON.stringify({ok:true,revision:'small-model-fast-path-v324-guide-completion',features:{embeddedLocalPrimary:true,adaptiveOutputSlices:true,extendedStructuredBudget:true,clippingValidation:true,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true,boundedContinuation:true,streamedContinuation:true,thinkingProfilesPreserved:true,wasmPerformancePreserved:true,adaptiveWasmThreads:true,compatibilityPromptCap:true,intentPrewarm:true,stalledWebGPUFallback:true,webgpuSessionQuarantine:true,freshWorkerFallback:true,promptBudgetEnforced:true,boundedStartup:true,coherenceReload:true,packageRevisionGuard:true,delegatedBrowserTools:true,componentCompatibility:'capability-contract-v324'}},null,2));
