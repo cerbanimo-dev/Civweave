@@ -1,6 +1,6 @@
 const $ = (selector) => document.querySelector(selector);
 
-const MOBILE_VIEWPORT_FIX = '2026-08-20-v3';
+const MOBILE_VIEWPORT_FIX = '2026-08-20-v4';
 
 function resetHorizontalScroll() {
   if (window.scrollX !== 0) window.scrollTo(0, window.scrollY);
@@ -115,6 +115,11 @@ function installViewportContainment() {
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
+      }
+      .lari-cutout {
+        top: 0 !important;
+        bottom: auto !important;
+        transform: none !important;
       }
     }
   `;
