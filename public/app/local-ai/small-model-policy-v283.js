@@ -29,19 +29,42 @@ function structure(textValue){
   const fences=(source.match(/```/g)||[]).length;
   return{openBrackets:stack.length,openQuote:quoted,openFence:Boolean(fences%2),incomplete:Boolean(stack.length||quoted||fences%2)};
 }
-function looksAbrupt(textValue){const s=text(textValue).trim();if(!s)return true;return /(?:[,;:\\([{]|\b(?:and|or|because|therefore|with|to|of|the|a|an))\s*$/i.test(s)}
+function looksAbrupt(textValue){const s=text(textValue).trim();if(!s)return true;return /(?:[,;:\\([{]|(?:[-*]\s*)|\b(?:and|or|because|therefore|with|to|of|the|a|an))\s*$/i.test(s)}
+function parseStructured(textValue){
+  const source=text(textValue).trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+  try{const value=JSON.parse(source);return value&&typeof value==='object'?value:null}catch{return null}
+}
+function structuredAnswer(textValue){
+  const value=parseStructured(textValue);
+  if(!value||Array.isArray(value))return'';
+  for(const candidate of [value.answer,value.text,value.message]){
+    if(typeof candidate==='string'&&candidate.trim())return candidate.trim();
+  }
+  return'';
+}
 function validateCompletion(run={},textValue='',options={}){
-  const s=structure(textValue),completion=run.completion||{},near=Boolean(completion.nearTokenLimit||completion.completionReason==='length'),structured=Boolean(options.structured),jsonValid=options.jsonValid!==false,abrupt=looksAbrupt(textValue);
+  const s=structure(textValue),completion=run.completion||{},near=Boolean(completion.nearTokenLimit||completion.completionReason==='length'),structured=Boolean(options.structured),jsonValid=options.jsonValid!==false,abrupt=looksAbrupt(textValue),answer=structured&&jsonValid?structuredAnswer(textValue):'';
   if(near)return{clipped:true,reason:'token-limit',structure:s};
   if(s.incomplete)return{clipped:true,reason:'open-structure',structure:s};
+  if(structured&&jsonValid&&answer&&looksAbrupt(answer))return{clipped:true,reason:'structured-answer-abrupt',structure:s};
   if(structured&&!jsonValid&&abrupt)return{clipped:true,reason:'structured-abrupt',structure:s};
   if(!structured&&abrupt)return{clipped:true,reason:'abrupt-text',structure:s};
   return{clipped:false,reason:'complete',structure:s};
 }
-function continuationPrompt({structured=false}={}){return structured?'Continue exactly where the previous response stopped. Do not restart or repeat any earlier text. Finish only the incomplete structured output and close every open structure.':'Continue exactly where the previous response stopped. Do not restart, summarize, or repeat any earlier text. Finish only the incomplete answer.'}
-function mergeContinuation(baseValue,nextValue){const base=text(baseValue),next=text(nextValue);if(!next)return base;if(!base)return next;if(next.startsWith(base))return next;if(base.endsWith(next))return base;const max=Math.min(600,base.length,next.length);for(let n=max;n>=4;n--)if(base.slice(-n)===next.slice(0,n))return base+next.slice(n);return base+next}
+function continuationPrompt({structured=false}={}){return structured?'Return one complete corrected JSON object replacing the previous structured response. Preserve fields that were already complete, finish any incomplete answer or value, and close every structure. Return JSON only; do not explain the correction.':'Continue exactly where the previous response stopped. Do not restart, summarize, or repeat any earlier text. Finish only the incomplete answer.'}
+function mergeContinuation(baseValue,nextValue){
+  const base=text(baseValue),next=text(nextValue);
+  if(!next)return base;if(!base)return next;
+  const nextJson=parseStructured(next),baseLooksStructured=/^\s*[\[{]/.test(base);
+  if(nextJson&&baseLooksStructured)return next;
+  if(next.startsWith(base))return next;
+  if(base.endsWith(next))return base;
+  const max=Math.min(600,base.length,next.length);
+  for(let n=max;n>=4;n--)if(base.slice(-n)===next.slice(0,n))return base+next.slice(n);
+  return base+next;
+}
 function continuationMessages(messages,partial,options={}){const rows=Array.isArray(messages)?messages.slice():[];rows.push({role:'assistant',content:text(partial)});rows.push({role:'user',content:continuationPrompt(options)});return rows}
-const api=Object.freeze({version:VERSION,profile,structure,validateCompletion,continuationPrompt,mergeContinuation,continuationMessages});
+const api=Object.freeze({version:VERSION,profile,structure,looksAbrupt,parseStructured,structuredAnswer,validateCompletion,continuationPrompt,mergeContinuation,continuationMessages,structuredAnswerCompletionValidation:true});
 globalThis.CivweaveLocalSmallModelPolicyV283=api;
-try{dispatchEvent(new CustomEvent('civweave:local-small-model-policy-ready',{detail:{version:VERSION,tokenBudgeting:true,adaptiveOutput:true,continuationValidation:true}}))}catch{}
+try{dispatchEvent(new CustomEvent('civweave:local-small-model-policy-ready',{detail:{version:VERSION,tokenBudgeting:true,adaptiveOutput:true,continuationValidation:true,structuredAnswerCompletionValidation:true}}))}catch{}
 })();
