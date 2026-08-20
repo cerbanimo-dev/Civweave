@@ -9,6 +9,7 @@ const file=relative=>readFileSync(resolve(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const includes=(text,needle,label)=>assert(text.includes(needle),`${label} is missing ${needle}`);
 const syntax=relative=>{const result=spawnSync(process.execPath,['--check',resolve(root,relative)],{encoding:'utf8'});assert(result.status===0,`${relative} failed node --check:\n${result.stderr||result.stdout}`)};
+class MemoryStorage{constructor(){this.values=new Map()}getItem(key){return this.values.has(key)?this.values.get(key):null}setItem(key,value){this.values.set(key,String(value))}removeItem(key){this.values.delete(key)}}
 
 for(const path of [
   'public/app/weaveling-plan-materialization-v265.js',
@@ -29,21 +30,23 @@ assert(!campus.includes("civweave-weaveling-plan-json-v190.js?v=1.0.7-v190"),'Wo
 assert(!/function syncPlanResult\(result\)\{if\(!result\?\.plan\)return;/.test(campus),'Working Campus still blindly accepts any result.plan.');
 
 const materialization=file('public/app/weaveling-plan-materialization-v265.js');
-includes(materialization,'1.1.0-weaveling-plan-materialization-v265-ai-only','Quest materializer');
+includes(materialization,'1.1.1-weaveling-plan-materialization-v265-ai-only-quarantine','Quest materializer');
 includes(materialization,'function aiAuthoredPlan(plan)','Quest materializer');
 includes(materialization,"authoring?.aiGenerated===true",'Quest materializer');
 includes(materialization,"authoring?.mode==='model-structured-json'",'Quest materializer');
 includes(materialization,"QUEST_AI_AUTHORING_REQUIRED",'Quest materializer');
 includes(materialization,"const maybeCreate=options=>",'Quest materializer');
-includes(materialization,"return null",'Quest materializer');
 includes(materialization,'sanitizeAssistantResult','Quest materializer');
+includes(materialization,'quarantineUnverifiedReviewQuests','Quest materializer');
+includes(materialization,"QUARANTINE_KEY='civweave.quest-quarantine.v1'",'Quest materializer');
 includes(materialization,'deterministicQuestCreation:false','Quest materializer');
 assert(!materialization.includes('materialize(result.plan,{source:\'weaveling-shared-chat-v265\'})'),'Deterministic maybeCreate materialization wrapper is still present.');
 assert(!materialization.includes('I generated and saved the reviewable Quest “${clean(result.plan.title'),'Old deterministic Quest-generated claim is still present.');
 
+const storage=new MemoryStorage();
 const sandbox={
   console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,
-  localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},
+  localStorage:storage,
   location:{pathname:'/app/working-campus-v156.html'},
   document:{readyState:'loading',documentElement:{dataset:{}},getElementById:()=>null,querySelector:()=>null,head:{append:()=>{}}},
   addEventListener:()=>{},dispatchEvent:()=>{},CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},
@@ -53,8 +56,8 @@ sandbox.globalThis=sandbox;
 vm.runInNewContext(materialization,sandbox,{filename:'weaveling-plan-materialization-v265.js'});
 const guard=sandbox.CivweaveWeavelingPlanMaterializationV265;
 assert(guard?.aiQuestOnly===true,'AI-only Quest materializer did not initialize.');
-const deterministicPlan={id:'det-1',title:'Auto Quest',wish:'Make something',authoring:{mode:'deterministic-fallback',aiGenerated:false,provider:'deterministic'}};
-const aiPlan={id:'ai-1',title:'AI Quest',wish:'Make something',authoring:{mode:'model-structured-json',aiGenerated:true,provider:'downloaded-local',model:'gemma4-e2b-it-q4f16'}};
+const deterministicPlan={id:'det-1',title:'Auto Quest',wish:'Make something',state:'review',authoring:{mode:'deterministic-fallback',aiGenerated:false,provider:'deterministic'}};
+const aiPlan={id:'ai-1',title:'AI Quest',wish:'Make something',state:'review',authoring:{mode:'model-structured-json',aiGenerated:true,provider:'downloaded-local',model:'gemma4-e2b-it-q4f16'}};
 assert(guard.aiAuthoredPlan(deterministicPlan)===false,'Deterministic Quest passed AI provenance check.');
 assert(guard.aiAuthoredPlan(aiPlan)===true,'Valid AI-authored Quest failed provenance check.');
 const leaked=guard.sanitizeAssistantResult({provider:'server-auto-unavailable',plan:deterministicPlan,planItemId:'det-1',response:{answer:'Weaveling could not reach an available Guild or Cloudflare AI service for this request. Civweave did not substitute a deterministic answer.'}});
@@ -62,6 +65,23 @@ assert(leaked.plan===null&&leaked.planItemId===null,'Cloud failure retained a le
 assert(leaked.questAuthoring?.questCreated===false,'Cloud failure did not expose no-Quest provenance.');
 const accepted=guard.sanitizeAssistantResult({provider:'downloaded-local',model:'gemma4-e2b-it-q4f16',plan:aiPlan,questAuthoring:{aiGenerated:true},response:{answer:'AI Quest ready'}});
 assert(accepted.plan===aiPlan,'AI-authored Quest was incorrectly stripped.');
+
+storage.setItem('civweave.intentions.v127',JSON.stringify([
+  {id:'det-1',kind:'weave-plan',state:'review',plan:deterministicPlan},
+  {id:'ai-1',kind:'weave-plan',state:'review',plan:aiPlan},
+  {id:'legacy-active',kind:'weave-plan',state:'active',plan:{...deterministicPlan,id:'legacy-active',state:'active'}}
+]));
+storage.setItem('civweave.working-campus.v1',JSON.stringify({wish:'Make something',stage:'review',view:'quest',plan:deterministicPlan,reviewReady:{planId:'det-1'}}));
+const quarantine=guard.quarantineUnverifiedReviewQuests();
+const remaining=JSON.parse(storage.getItem('civweave.intentions.v127')||'[]');
+const quarantined=JSON.parse(storage.getItem('civweave.quest-quarantine.v1')||'[]');
+const working=JSON.parse(storage.getItem('civweave.working-campus.v1')||'{}');
+assert(quarantine.count>=2&&quarantine.workspaceChanged===true,'Unverified REVIEW Quest quarantine did not run.');
+assert(!remaining.some(row=>row.id==='det-1'),'Unverified REVIEW Quest remained in the active ledger.');
+assert(remaining.some(row=>row.id==='ai-1'),'Valid AI-authored REVIEW Quest was quarantined.');
+assert(remaining.some(row=>row.id==='legacy-active'),'Historical active Quest was incorrectly quarantined.');
+assert(quarantined.some(row=>row.id==='det-1'||row.plan?.id==='det-1'),'Unverified REVIEW Quest was removed without quarantine retention.');
+assert(working.plan==null&&working.reviewReady==null&&working.stage!=='review','Working Campus retained the stale auto-generated REVIEW Quest.');
 
 let persisted=0,restored=0,legacyMaybeCalls=0;
 sandbox.CivweaveIntentionPlanner={
@@ -99,4 +119,4 @@ includes(rootWorker,"'/extensions/civweave-weaveling-plan-json-v190.js'",'root s
 const legacyWorker=file('public/service-worker-v156.js');
 includes(legacyWorker,'legacy-v156-bridge-v210-ai-quest-authority','legacy service worker bridge');
 
-console.log('PASS failed/non-AI routes cannot create, persist, materialize, restore, or synchronize a Quest; valid structured AI Quests remain allowed.');
+console.log('PASS failed/non-AI routes cannot create, persist, materialize, restore, or synchronize a Quest; stale unverified REVIEW Quests are quarantined; valid structured AI Quests remain allowed.');
