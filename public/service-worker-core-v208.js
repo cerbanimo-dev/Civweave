@@ -23,7 +23,6 @@ const REQUIRED_SHELL_ASSETS = [
   '/app/legal-consent-v1.js',
   '/legal/civweave-legal-release-v1.json',
   '/app/document-lifecycle-v221.js',
-  '/app/fullscreen-family-v104.html',
   '/app/logos/civweave-icon-192.png',
   '/app/logos/civweave-icon-512.png',
   '/app/logos/civweave-pwa-192-v247.png',
@@ -87,9 +86,7 @@ const DISCOVERABLE_EXTENSION = /\.(?:html?|css|m?js|json|webmanifest|md|txt|png|
 const IMAGE_EXTENSION = /\.(?:png|webp|jpe?g|gif|svg|avif|ico)$/i;
 const COMPAT_ENTRY_PATHS = new Set([
   '/app/installed-entry-v146.html',
-  '/app/installed-entry-v146',
-  '/app/fullscreen-family-v104.html',
-  '/app/fullscreen-family-v104'
+  '/app/installed-entry-v146'
 ]);
 
 const WORKER_PATHS = new Set([
@@ -576,7 +573,6 @@ self.addEventListener('message', event => {
     event.waitUntil(caches.delete(OFFLINE_CACHE).then(() => offlineStatus()).then(packet => post(event, packet)));
     return;
   }
-  // Compatibility replies for older installer/status panels. These layers are now on-demand.
   if (type === 'GET_SHARED_IMAGE_STATUS') {
     post(event, { type: 'CIVWEAVE_SHARED_IMAGE_STATUS', version: BUILD, mode: 'on-demand', ready: true, present: 0, total: 0, missing: [] });
     return;
