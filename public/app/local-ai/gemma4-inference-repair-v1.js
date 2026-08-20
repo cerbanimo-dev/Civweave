@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.2-gemma4-inference-repair-v1-runtime-v7';
+const VERSION='1.0.3-gemma4-inference-repair-v1-onnx-only';
 const EXPECTED_WORKER_REVISION='1.0.126-v315-gemma4-template-logits';
 const RUNTIME_WORKER_URL='/app/local-ai/worker-v266.js?v=1.0.125-v314-smooth-fit';
 const WORKER_PATH='/app/local-ai/worker-v266.js';
@@ -9,12 +9,13 @@ const V4_MANIFEST_PATH='/app/vendor/transformers-v4/stage-manifest.json';
 const V4_STAGE_SCHEMA='civweave.transformers-stage.v7';
 const V4_BACKPORT='huggingface-transformers-js-pr-1681';
 const GEMMA4_RE=/gemma4|gemma-4/i;
+const LITERT_RE=/litert/i;
 const STALE_LOGITS_RE=/inputNames\.includes\("num_logits_to_keep"\)[^;]{0,220}\[0n\]/;
 if(globalThis.CivweaveGemma4InferenceRepairV1?.version===VERSION)return;
 let wrapped=null,refreshFlight=null,refreshDone=false;
 const selected=()=>{try{return globalThis.CivweaveLocalModelDownloadV266?.selection?.()||null}catch{return null}};
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
-function activeGemma4(){const pick=selected();return Boolean(pick?.active&&GEMMA4_RE.test(String(pick.id||'')))}
+function activeGemma4(){const pick=selected(),id=String(pick?.id||''),spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(id);return Boolean(pick?.active&&GEMMA4_RE.test(id)&&!LITERT_RE.test(`${id} ${spec?.runtime||''}`))}
 async function fetchText(path,label){const fresh=new URL(path,location.href);fresh.searchParams.set('cwGemma4Repair',`${Date.now()}-${Math.random().toString(36).slice(2,8)}`);const response=await fetch(fresh.href,{cache:'no-store',credentials:'same-origin'});if(!response.ok)throw new Error(`${label} refresh returned HTTP ${response.status}.`);return{response,text:await response.text()}}
 async function freshWorkerSource(){
   const target=new URL(RUNTIME_WORKER_URL,location.href),fresh=new URL(target.href);fresh.searchParams.set('cwWorkerRepair',`${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
@@ -60,11 +61,11 @@ function patch(){
   const api=globalThis.CivweaveLocalChatRuntimeV295;if(!api?.generate)return false;
   if(api.gemma4InferenceRepairV1===VERSION){wrapped=api;return true}
   const base=api,generate=async args=>{if(activeGemma4())await refreshWorkerAsset();return base.generate(args)};
-  const next=Object.freeze({...base,generate,gemma4InferenceRepairV1:VERSION,gemma4WorkerRevision:EXPECTED_WORKER_REVISION,gemma4ChatTemplateRepair:true,gemma4NextTokenLogitsOnly:true,gemma4UpstreamLogitsBackport:true,gemma4RuntimeStageSchema:V4_STAGE_SCHEMA});
+  const next=Object.freeze({...base,generate,gemma4InferenceRepairV1:VERSION,gemma4WorkerRevision:EXPECTED_WORKER_REVISION,gemma4ChatTemplateRepair:true,gemma4NextTokenLogitsOnly:true,gemma4UpstreamLogitsBackport:true,gemma4RuntimeStageSchema:V4_STAGE_SCHEMA,transformersRepairScope:'onnx-only'});
   try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}
-  wrapped=next;emit('civweave:gemma4-inference-repair-installed',{workerRevision:EXPECTED_WORKER_REVISION,runtimeStageSchema:V4_STAGE_SCHEMA});return true;
+  wrapped=next;emit('civweave:gemma4-inference-repair-installed',{workerRevision:EXPECTED_WORKER_REVISION,runtimeStageSchema:V4_STAGE_SCHEMA,scope:'onnx-only'});return true;
 }
 for(const name of ['civweave:local-model-runtime-ready','civweave:assistant-runtime-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(patch));
 patch();
-globalThis.CivweaveGemma4InferenceRepairV1=Object.freeze({version:VERSION,expectedWorkerRevision:EXPECTED_WORKER_REVISION,runtimeWorkerUrl:RUNTIME_WORKER_URL,workerPath:WORKER_PATH,v4BundlePath:V4_BUNDLE_PATH,v4ManifestPath:V4_MANIFEST_PATH,v4StageSchema:V4_STAGE_SCHEMA,v4Backport:V4_BACKPORT,patch,refreshWorkerAsset,verifyPatchedV4Runtime,activeGemma4,state:()=>Object.freeze({installed:Boolean(wrapped),refreshDone,refreshing:Boolean(refreshFlight)})});
+globalThis.CivweaveGemma4InferenceRepairV1=Object.freeze({version:VERSION,expectedWorkerRevision:EXPECTED_WORKER_REVISION,runtimeWorkerUrl:RUNTIME_WORKER_URL,workerPath:WORKER_PATH,v4BundlePath:V4_BUNDLE_PATH,v4ManifestPath:V4_MANIFEST_PATH,v4StageSchema:V4_STAGE_SCHEMA,v4Backport:V4_BACKPORT,patch,refreshWorkerAsset,verifyPatchedV4Runtime,activeGemma4,transformersRepairScope:'onnx-only',state:()=>Object.freeze({installed:Boolean(wrapped),refreshDone,refreshing:Boolean(refreshFlight)})});
 })();
