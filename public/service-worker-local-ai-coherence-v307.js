@@ -1,16 +1,19 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v321-ai-quest-authority';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v322-ai-quest-source-authority';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LITERT_VENDOR_PREFIX = '/app/vendor/litert-lm/';
+const CW_LOCAL_AI_HTML_PATHS = new Set(['/app/working-campus-v156.html']);
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
+  '/app/working-campus-v156.html',
   '/app/system-routes-v227.js',
   '/app/settings-gateway-v317.js',
   '/app/settings-local-route-v325.js',
   '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
+  '/app/server-ai-output-normalizer-v1.js',
   '/app/shared-guide-surface-v236.js',
   '/app/guide-stream-thinking-v249.js',
   '/app/guide-forward-failure-policy-v1.js',
@@ -36,12 +39,14 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/host-node-session-v1.js'
 ]);
 const CW_LOCAL_AI_CRITICAL = [
+  '/app/working-campus-v156.html',
   '/app/system-routes-v227.js',
   '/app/settings-gateway-v317.js',
   '/app/settings-local-route-v325.js',
   '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
   '/app/server-ai-router-v301.js',
+  '/app/server-ai-output-normalizer-v1.js',
   '/app/shared-guide-surface-v236.js',
   '/app/guide-stream-thinking-v249.js',
   '/app/guide-forward-failure-policy-v1.js',
@@ -93,25 +98,26 @@ function cwLocalAIKey(pathname) {
 function cwLocalAIEligible(request, url) {
   if (!['GET', 'HEAD'].includes(request.method)) return false;
   if (url.origin !== self.location.origin) return false;
-  if (url.pathname.startsWith(CW_LITERT_VENDOR_PREFIX)) {
-    return /\.(?:m?js|wasm|json)$/i.test(url.pathname);
-  }
+  if (url.pathname.startsWith(CW_LITERT_VENDOR_PREFIX)) return /\.(?:m?js|wasm|json)$/i.test(url.pathname);
   if (CW_LOCAL_AI_EXTRA_PATHS.has(url.pathname)) return true;
   if (!/\.m?js$/i.test(url.pathname)) return false;
   return url.pathname.startsWith('/app/local-ai/');
 }
 
-function cwLocalAIValid(response) {
+function cwLocalAIValid(response, pathname = '') {
   if (!response?.ok) return false;
-  return !/text\/html/i.test(String(response.headers.get('content-type') || ''));
+  const type = String(response.headers.get('content-type') || '');
+  if (CW_LOCAL_AI_HTML_PATHS.has(pathname)) return /text\/html/i.test(type);
+  return !/text\/html/i.test(type);
 }
 
 async function cwLocalAIFetch(pathnameOrRequest) {
   const request = typeof pathnameOrRequest === 'string'
     ? new Request(new URL(pathnameOrRequest, self.location.origin).href, { method: 'GET', cache: 'no-store', credentials: 'same-origin' })
     : new Request(pathnameOrRequest, { cache: 'no-store' });
+  const pathname = new URL(request.url).pathname;
   const response = await fetch(request);
-  if (!cwLocalAIValid(response)) throw new Error(`${new URL(request.url).pathname} returned an invalid local-AI code response.`);
+  if (!cwLocalAIValid(response, pathname)) throw new Error(`${pathname} returned an invalid current-code response.`);
   return response;
 }
 
@@ -122,30 +128,16 @@ async function cwLocalAIInstall() {
     await cache.put(cwLocalAIKey(pathname), response.clone());
     return pathname;
   }));
-  return {
-    loaded: results.filter(result => result.status === 'fulfilled').length,
-    total: CW_LOCAL_AI_CRITICAL.length
-  };
+  return { loaded: results.filter(result => result.status === 'fulfilled').length, total: CW_LOCAL_AI_CRITICAL.length };
 }
 
 async function cwLocalAICleanup() {
   const names = await caches.keys();
-  await Promise.all(names.map(name => (
-    name.startsWith(CW_LOCAL_AI_COHERENCE_PREFIX) && name !== CW_LOCAL_AI_COHERENCE_CACHE
-      ? caches.delete(name)
-      : Promise.resolve(false)
-  )));
+  await Promise.all(names.map(name => name.startsWith(CW_LOCAL_AI_COHERENCE_PREFIX) && name !== CW_LOCAL_AI_COHERENCE_CACHE ? caches.delete(name) : Promise.resolve(false)));
 }
 
-self.addEventListener('install', event => {
-  event.waitUntil(Promise.resolve());
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-  void cwLocalAICleanup().catch(() => null);
-});
-
+self.addEventListener('install', event => { event.waitUntil(Promise.resolve()); });
+self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); void cwLocalAICleanup().catch(() => null); });
 self.addEventListener('message', event => {
   if (event.data?.type !== 'CIVWEAVE_WARM_LOCAL_AI_CODE') return;
   event.waitUntil(cwLocalAIInstall().then(packet => {
@@ -156,31 +148,19 @@ self.addEventListener('message', event => {
 });
 
 self.addEventListener('fetch', event => {
-  const request = event.request;
-  const url = new URL(request.url);
+  const request = event.request, url = new URL(request.url);
   if (!cwLocalAIEligible(request, url)) return;
-
   event.stopImmediatePropagation();
   event.respondWith((async () => {
-    const cache = await caches.open(CW_LOCAL_AI_COHERENCE_CACHE);
-    const key = cwLocalAIKey(url.pathname);
+    const cache = await caches.open(CW_LOCAL_AI_COHERENCE_CACHE), key = cwLocalAIKey(url.pathname);
     try {
       const response = await cwLocalAIFetch(request);
       if (request.method === 'GET') await cache.put(key, response.clone());
-      return request.method === 'HEAD'
-        ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers })
-        : response;
+      return request.method === 'HEAD' ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers }) : response;
     } catch {
       const cached = await cache.match(key, { ignoreSearch: true }) || await caches.match(key, { ignoreSearch: true });
-      if (cwLocalAIValid(cached)) {
-        return request.method === 'HEAD'
-          ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers })
-          : cached;
-      }
-      return new Response(`Civweave current code unavailable: ${url.pathname}`, {
-        status: 503,
-        headers: { 'content-type': 'text/plain; charset=utf-8' }
-      });
+      if (cwLocalAIValid(cached, url.pathname)) return request.method === 'HEAD' ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers }) : cached;
+      return new Response(`Civweave current code unavailable: ${url.pathname}`, { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
   })());
 });
@@ -190,6 +170,7 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   cache: CW_LOCAL_AI_COHERENCE_CACHE,
   critical: CW_LOCAL_AI_CRITICAL.slice(),
   extraPaths: Object.freeze([...CW_LOCAL_AI_EXTRA_PATHS]),
+  htmlPaths: Object.freeze([...CW_LOCAL_AI_HTML_PATHS]),
   liteRtVendorPrefix: CW_LITERT_VENDOR_PREFIX,
   policy: 'network-first-current-bytes-offline-cache-fallback',
   installPolicy: 'lifecycle-deferred-capability-on-demand',
@@ -209,8 +190,10 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   intentionPlannerCurrentBytes: true,
   questAIOrchestratorCurrentBytes: true,
   questAIMaterializerCurrentBytes: true,
+  workingCampusQuestPageCurrentBytes: true,
   workingCampusQuestSyncCurrentBytes: true,
   forwardFailureQuestBoundaryCurrentBytes: true,
+  serverAIOutputNormalizerCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true,
   gemma4PackCoreCoherent: true,
   gemma4LiteRTFastCodeCoherent: true,
