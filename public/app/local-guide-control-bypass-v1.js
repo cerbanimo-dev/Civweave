@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.4.0-local-guide-control-bypass-v1-ai-quest-lazy-route';
+const VERSION='1.4.1-local-guide-control-bypass-v1-ai-quest-lazy-route';
+const ORCHESTRATOR_VERSION='1.2.0-weaveling-plan-json-v190-ai-quest-intent';
 const ORCHESTRATOR_SRC='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.0-ai-quest-intent';
 if(globalThis.CivweaveLocalGuideControlBypassV1?.version===VERSION)return;
 let patched=null,timer=0,orchestratorPromise=null;
@@ -26,20 +27,20 @@ function likelyQuestIntent(args={}){
   return false;
 }
 function questContext(args={}){return{currentContext:{systemId:'civweave',roomId:'civweave.quad'},guide:{system:'civweave',name:'Weaveling'},routingAnswer:{system:'civweave',room:'civweave.quad',mode:'Plan'},...(args.context||{})}}
+function currentOrchestrator(){const api=globalThis.CivweaveWeavelingPlanJsonV190;return api?.version===ORCHESTRATOR_VERSION&&api?.createModelPlan&&api?.planIntent?api:null}
 function questIntent(args={}){
   if(!likelyQuestIntent(args))return false;
-  const orchestrator=globalThis.CivweaveWeavelingPlanJsonV190;
-  if(!orchestrator?.planIntent)return true;
+  const orchestrator=currentOrchestrator();
+  if(!orchestrator)return true;
   try{return Boolean(orchestrator.planIntent(clean(args.text),Array.isArray(args.history)?args.history:[],questContext(args)))}catch{return true}
 }
 async function ensureOrchestrator(){
-  const ready=globalThis.CivweaveWeavelingPlanJsonV190;
-  if(ready?.createModelPlan&&ready?.planIntent)return ready;
+  const ready=currentOrchestrator();if(ready)return ready;
   if(orchestratorPromise)return orchestratorPromise;
   orchestratorPromise=new Promise((resolve,reject)=>{
-    const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname==='/extensions/civweave-weaveling-plan-json-v190.js'}catch{return false}});
-    const finish=()=>{const api=globalThis.CivweaveWeavelingPlanJsonV190;if(api?.createModelPlan&&api?.planIntent)resolve(api);else reject(new Error('The structured Weaveling Quest authoring module loaded without its AI authoring contract.'))};
-    if(existing){existing.addEventListener('load',finish,{once:true});setTimeout(finish,0);return}
+    const finish=()=>{const api=currentOrchestrator();if(api)resolve(api);else reject(new Error(`The structured Weaveling Quest authoring module did not provide ${ORCHESTRATOR_VERSION}.`))};
+    const exact=[...document.scripts].find(script=>{try{const url=new URL(script.src,location.href);return url.pathname==='/extensions/civweave-weaveling-plan-json-v190.js'&&url.searchParams.get('v')==='1.2.0-ai-quest-intent'}catch{return false}});
+    if(exact){exact.addEventListener('load',finish,{once:true});exact.addEventListener('error',()=>reject(new Error('The structured Weaveling Quest authoring module failed to load.')),{once:true});setTimeout(()=>{if(currentOrchestrator())finish()},0);return}
     const head=document.head;if(!head?.isConnected){reject(new Error('The structured Weaveling Quest authoring module could not mount.'));return}
     const script=document.createElement('script');script.src=ORCHESTRATOR_SRC;script.async=false;script.onload=finish;script.onerror=()=>reject(new Error('The structured Weaveling Quest authoring module failed to load.'));head.append(script);
   }).finally(()=>{orchestratorPromise=null});
@@ -73,10 +74,10 @@ function patch(){
   try{api.respond=respond}catch{}
   if(api.respond!==respond){try{globalThis.CivweaveAssistantV141={...api,respond}}catch{return false}}
   patched=globalThis.CivweaveAssistantV141?.respond||respond;
-  try{dispatchEvent(new CustomEvent('civweave:local-guide-control-bypass-ready',{detail:{version:VERSION,controls:['test','greeting','ack','identity'],aiQuestAuthoringRequired:true,structuredQuestRoute:true,lazyOrchestrator:true,deterministicQuestCreation:false}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:local-guide-control-bypass-ready',{detail:{version:VERSION,controls:['test','greeting','ack','identity'],aiQuestAuthoringRequired:true,structuredQuestRoute:true,lazyOrchestrator:true,orchestratorVersion:ORCHESTRATOR_VERSION,deterministicQuestCreation:false}}))}catch{}
   return true
 }
 for(const name of ['civweave:local-provider-authority-installed','civweave:assistant-runtime-ready','civweave:guide-loader-reset','civweave:unified-chat-system-ready','civweave:guide-capability-passover-ready','pageshow'])addEventListener(name,()=>queueMicrotask(patch));
 patch();let attempts=0;timer=setInterval(()=>{attempts+=1;patch();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
-globalThis.CivweaveLocalGuideControlBypassV1=Object.freeze({version:VERSION,patch,controlKind,systemFor,stripGreeting,likelyQuestIntent,questIntent,ensureOrchestrator,aiQuestAuthoringRequired:true,structuredQuestRoute:true,lazyOrchestrator:true,deterministicQuestCreation:false,state:()=>Object.freeze({installed:Boolean(patched),orchestratorLoading:Boolean(orchestratorPromise)})});
+globalThis.CivweaveLocalGuideControlBypassV1=Object.freeze({version:VERSION,orchestratorVersion:ORCHESTRATOR_VERSION,patch,controlKind,systemFor,stripGreeting,likelyQuestIntent,questIntent,ensureOrchestrator,aiQuestAuthoringRequired:true,structuredQuestRoute:true,lazyOrchestrator:true,deterministicQuestCreation:false,state:()=>Object.freeze({installed:Boolean(patched),orchestratorLoading:Boolean(orchestratorPromise),orchestratorReady:Boolean(currentOrchestrator())})});
 })();
