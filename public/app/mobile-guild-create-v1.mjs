@@ -56,7 +56,15 @@ export function bestGuildLocation(){
 }
 export async function captureGuildLocation({precise=false,position=null}={}){return publicLocationFromPosition(position||await bestGuildLocation(),{precise})}
 
-function directoryRegisterUrl(){try{const origin=clean(globalThis.location?.origin,1000);if(!/^https?:\/\//i.test(origin))return null;return new URL(DIRECTORY_REGISTER_PATH,origin)}catch{return null}}
+function directoryRegisterUrl(){
+  try{
+    const hostname=clean(globalThis.location?.hostname,300).toLowerCase(),origin=clean(globalThis.location?.origin,1000);
+    if(!hostname||!/^https?:\/\//i.test(origin))return null;
+    if(['localhost','127.0.0.1','::1','[::1]'].includes(hostname))return new URL(DIRECTORY_REGISTER_PATH,origin);
+    const coreOrigin=hostname.includes('staging')?'https://civweave-core-staging.cerbanimo.workers.dev':'https://civweave-core.cerbanimo.workers.dev';
+    return new URL('/api/guild-directory/register',coreOrigin);
+  }catch{return null}
+}
 function writeDirectoryStatus(value,state=read()){
   const packet=Object.freeze({schema:'civweave.mobile-guild-directory-status.v1',guildId:state?.guildId||null,publicOrigin:state?.primaryOrigin||null,ok:Boolean(value?.ok),status:clean(value?.status,80)||'pending',error:value?.error?clean(value.error,600):null,registration:value?.registration||null,updatedAt:now()});
   try{globalThis.localStorage?.setItem(DIRECTORY_STATUS_KEY,JSON.stringify(packet))}catch{}
