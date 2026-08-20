@@ -8,7 +8,7 @@ const [extension,runtime,stageRuntime]=await Promise.all([
   read('scripts/stage-litert-lm-web-assets.mjs')
 ]);
 
-for(const source of [extension,runtime,stageRuntime])new Function(source.replace(/^#!.*\n/,''));
+for(const source of [extension,runtime])new Function(source);
 
 // Exact, pinned Web-optimized Gemma 4 artifacts for the 12 GB Android profile.
 assert.match(extension,/gemma4-e2b-it-litert-web/);
