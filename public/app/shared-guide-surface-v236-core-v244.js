@@ -1,10 +1,11 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.128-shared-guide-surface-v236-canonical-artifacts-nav-nonowning-v1';
+const VERSION='1.0.129-shared-guide-surface-v236-persistent-system-context';
 const STYLE_ID='cw-shared-guide-surface-v236-style';
 const LAUNCHER_ID='cwp215-launcher';
 const CHAT_ROOT_ID='cw-persistent-guide-chat-v215';
+const CONTEXT_SRC='/app/persistent-system-context-v1.js?v=1.0.1';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
@@ -38,7 +39,12 @@ function detectSystem(){
   if(document.documentElement.hasAttribute('data-living-school-cabinet'))return'living-school';
   return FALLBACK_PATHS.get(location.pathname)||'';
 }
-
+function ensureSystemContext(){
+  if(globalThis.CivweavePersistentSystemContextV1?.owner)return true;
+  const path=new URL(CONTEXT_SRC,location.href).pathname;
+  if([...document.scripts].some(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}}))return false;
+  const script=document.createElement('script');script.src=CONTEXT_SRC;script.async=false;script.dataset.civweaveSystemContext='v1';script.onload=()=>{try{globalThis.CivweavePersistentSystemContextV1?.applyPending?.('shared-guide-context-load')}catch{}};document.head?.append(script);return false;
+}
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
   const style=document.createElement('style');
@@ -64,15 +70,16 @@ function canonicalSurface(){
   return api?.canonicalOwner?api:null;
 }
 function ownPageGuide(){
-  const api=canonicalSurface();
-  if(!api||!currentSystem)return false;
-  try{api.switchGuide?.(currentSystem,{open:false});return true}catch{return false}
+  // Compatibility name only. The physical page no longer owns the active guide.
+  // The persistent system-context layer keeps the selected guide sticky until the user changes it.
+  return Boolean(canonicalSurface());
 }
 async function submitInline(text){
   const value=clean(text,8000),api=canonicalSurface();
   if(!value||typeof api?.submitText!=='function')return false;
-  api.switchGuide?.(currentSystem,{open:false});
-  return (await api.submitText(value,currentSystem))!==false;
+  const active=globalThis.CivweavePersistentSystemContextV1?.selected?.()||api.state?.().activeSystem||currentSystem;
+  if(SYSTEMS.includes(active))api.switchGuide?.(active,{open:false});
+  return (await api.submitText(value,active))!==false;
 }
 function normalizeFloatingLayout(){
   const themed=document.getElementById('cw-themed-system-nav');
@@ -90,16 +97,19 @@ function repairSurface(){
   currentSystem=detectSystem()||currentSystem;
   const api=canonicalSurface();
   try{api?.ensureLauncher?.()}catch{}
-  ownPageGuide();observeNav();normalizeFloatingLayout();
+  ensureSystemContext();
+  try{globalThis.CivweavePersistentSystemContextV1?.applyPending?.('shared-guide-repair')}catch{}
+  observeNav();normalizeFloatingLayout();
   return Boolean(api);
 }
 function mount(){
   if(mounted)return;
   mounted=true;
   currentSystem=detectSystem();if(!currentSystem)return;
-  installStyle();repairSurface();
+  installStyle();ensureSystemContext();repairSurface();
   addEventListener('civweave:persistent-guide-chat-ready',repairSurface);
   addEventListener('civweave:guide-chat-ready',repairSurface);
+  addEventListener('civweave:system-context-changed',()=>{observeNav();normalizeFloatingLayout()});
   addEventListener('pageshow',repairSurface);
   addEventListener('resize',normalizeFloatingLayout,{passive:true});
   document.documentElement.dataset.civweaveGuideSurface=VERSION;
@@ -108,5 +118,5 @@ function mount(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 
-globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({version:VERSION,mode:'bubble-only',sourceTruth:true,launcherOwner:'guide-chat-surface-v350',navigationGeometryOwner:false,navigationOffsetVariable:'--cw-guide-nav-offset',detectSystem,guideFor:system=>GUIDE[system]||null,renderTranscript,normalizeFloatingLayout,ownPageGuide,submitInline,syncInlineVisibility,setInlineInteractive,buildInline,repairSurface,removeEmbeddedGuideCards,mount});
+globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({version:VERSION,mode:'bubble-only',sourceTruth:true,launcherOwner:'guide-chat-surface-v350',navigationGeometryOwner:false,navigationOffsetVariable:'--cw-guide-nav-offset',pageGuideOwnership:false,persistentSystemContext:true,detectSystem,guideFor:system=>GUIDE[system]||null,renderTranscript,normalizeFloatingLayout,ownPageGuide,submitInline,syncInlineVisibility,setInlineInteractive,buildInline,repairSurface,removeEmbeddedGuideCards,mount});
 })();
