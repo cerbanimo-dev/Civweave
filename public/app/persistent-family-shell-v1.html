@@ -22,8 +22,8 @@ body{position:fixed;inset:0;padding:0!important}
 (()=>{
 'use strict';
 const SHELL_REVISION='persistent-family-shell-v1';
-const EMBEDDED_CHROME_STYLE_ID='cw-persistent-shell-embedded-chrome-boundary';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
+const EMBEDDED_CHAT_IDS=['cwp215-launcher','cw-human-message-launcher-v1','cw-persistent-guide-chat-v215','cw-human-chat-standalone-v1','cw-human-chat-network-v1'];
 const SPRITES=Object.freeze({
   civweave:'/Civweave-weaveling-sprites.png',
   'living-school':'/Living-School-moss-sprites.png',
@@ -43,6 +43,8 @@ const requested=()=>SYSTEMS.has(params().get('system'))?params().get('system'):'
 let activeSystem=requested();
 let pendingFeature=String(params().get('feature')||'');
 let featureAttempts=0;
+let embeddedChromeObserver=null;
+let embeddedChromeDocument=null;
 function frame(){return document.getElementById('cw-family-stage')}
 function routeApi(){return globalThis.CivweaveSystemRoutesV227||null}
 function routeOptions(feature=''){
@@ -67,15 +69,24 @@ function syncNavigation(system){
   globalThis.CivweaveFamilyNavigationV178?.syncCurrentSelection?.(system);
   try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,shell:SHELL_REVISION}}))}catch{}
 }
+function deleteEmbeddedChatUi(doc){
+  let removed=0;
+  for(const id of EMBEDDED_CHAT_IDS){const node=doc.getElementById(id);if(node){node.remove();removed+=1}}
+  return removed;
+}
 function constrainEmbeddedChrome(){
   try{
     const doc=frame()?.contentDocument;if(!doc)return;
     doc.getElementById('cw-themed-system-nav')?.remove();doc.getElementById('cw-themed-system-nav-menu')?.remove();doc.getElementById('cw-themed-system-nav-style')?.remove();
     doc.documentElement.classList.remove('cw-themed-system-nav-active');delete doc.documentElement.dataset.cwThemedCurrent;doc.body?.style.removeProperty('padding-bottom');
     doc.documentElement.dataset.civweavePersistentShellChild='true';
-    let style=doc.getElementById(EMBEDDED_CHROME_STYLE_ID);
-    if(!style){style=doc.createElement('style');style.id=EMBEDDED_CHROME_STYLE_ID;style.textContent='#cwp215-launcher,#cw-human-message-launcher-v1,#cw-persistent-guide-chat-v215,#cw-human-chat-standalone-v1,#cw-human-chat-network-v1{display:none!important;pointer-events:none!important}';(doc.head||doc.documentElement).append(style)}
-    for(const id of ['cwp215-launcher','cw-human-message-launcher-v1'])doc.getElementById(id)?.remove();
+    deleteEmbeddedChatUi(doc);
+    if(embeddedChromeDocument!==doc){
+      embeddedChromeObserver?.disconnect?.();
+      embeddedChromeDocument=doc;
+      embeddedChromeObserver=new MutationObserver(()=>deleteEmbeddedChatUi(doc));
+      embeddedChromeObserver.observe(doc.documentElement,{childList:true,subtree:true});
+    }
   }catch{}
 }
 function reveal(doc,target){
@@ -86,7 +97,7 @@ function activateFeature(system,feature){
   if(!feature)return true;
   const shellFrame=frame();let win,doc;try{win=shellFrame?.contentWindow;doc=shellFrame?.contentDocument}catch{return false}if(!win||!doc)return false;
   if(feature==='chat'){
-    const chat=globalThis.CivweaveGuideChatSurfaceV350||globalThis.CivweavePersistentGuideChatV215||win.CivweaveGuideChatSurfaceV350||win.CivweavePersistentGuideChatV215;try{return Boolean(chat?.open?.({guide:system,focus:true}))}catch{return false}
+    const chat=globalThis.CivweaveGuideChatSurfaceV350||globalThis.CivweavePersistentGuideChatV215;try{return Boolean(chat?.open?.({guide:system,focus:true}))}catch{return false}
   }
   if(system==='civweave'){
     if(feature==='settings'){const settings=win.CivweaveSettingsV320||win.CivweaveSettingsGatewayV317;try{if(settings?.open){settings.open(doc.activeElement);return true}}catch{}return false}
@@ -141,7 +152,7 @@ function repairAvatars(){
 function setup(){
   const shellFrame=frame();if(!shellFrame)return;
   shellHistory(activeSystem,'replace');
-  shellFrame.addEventListener('load',()=>{shellFrame.setAttribute('aria-busy','false');constrainEmbeddedChrome();setTimeout(constrainEmbeddedChrome,80);setTimeout(constrainEmbeddedChrome,600);consumePendingFeature();try{dispatchEvent(new CustomEvent('civweave:persistent-family-stage-ready',{detail:{system:activeSystem,shell:SHELL_REVISION,chatOwner:'persistent-shell'}}))}catch{}});
+  shellFrame.addEventListener('load',()=>{shellFrame.setAttribute('aria-busy','false');constrainEmbeddedChrome();consumePendingFeature();try{dispatchEvent(new CustomEvent('civweave:persistent-family-stage-ready',{detail:{system:activeSystem,shell:SHELL_REVISION,chatOwner:'persistent-shell'}}))}catch{}});
   shellFrame.src=directUrl(activeSystem,pendingFeature).href;
   const observer=new MutationObserver(()=>{if(repairAvatars())observer.disconnect()});observer.observe(document.body,{childList:true,subtree:true});
   repairAvatars();setTimeout(repairAvatars,120);setTimeout(repairAvatars,800);
@@ -156,8 +167,9 @@ document.addEventListener('click',event=>{
   event.preventDefault();event.stopImmediatePropagation();link.focus?.({preventScroll:true});navigate(String(link.dataset.system||'civweave'));
 },true);
 addEventListener('popstate',()=>{const system=requested();if(system!==activeSystem)navigate(system,{historyMode:'none',force:true});else syncNavigation(system)});
+addEventListener('pagehide',()=>embeddedChromeObserver?.disconnect?.(),{once:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
-globalThis.CivweavePersistentFamilyShellV1=Object.freeze({revision:SHELL_REVISION,get system(){return activeSystem},navigate:(system,options={})=>navigate(system,options),frame:()=>frame(),repairAvatars,constrainEmbeddedChrome,chatOwner:'persistent-shell'});
+globalThis.CivweavePersistentFamilyShellV1=Object.freeze({revision:SHELL_REVISION,get system(){return activeSystem},navigate:(system,options={})=>navigate(system,options),frame:()=>frame(),repairAvatars,constrainEmbeddedChrome,deleteEmbeddedChatUi,chatOwner:'persistent-shell'});
 })();
 </script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v227"></script>
