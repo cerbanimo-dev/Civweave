@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.8-working-campus-home-relocation-v441-purpose-icons';
+const VERSION='1.0.9-working-campus-home-relocation-v441-separate-guild-search';
 const STYLE_ID='cw-working-campus-home-relocation-v441-style';
 const NAV_ACTIONS_ID='cw-civweave-primary-actions-v441';
 const APP_TAB='app-device';
@@ -48,7 +48,12 @@ html[data-civweave-system="civweave"] main.app>header.top[data-hub-session="true
 }
 
 function hiddenButton(id){return document.getElementById(id)}
-function openGuilds(){const button=hiddenButton('cw-working-campus-guilds-v243');if(button){button.click();return true}location.assign('/finder?view=guilds&source=civweave-navbar');return true}
+function openGuilds(){
+  const finder=globalThis.CivweaveGuildSymbolV1?.openNearbyGuilds;
+  if(typeof finder==='function'){void finder();return true}
+  const button=hiddenButton('cw-working-campus-guilds-v243');if(button){button.click();return true}
+  location.assign('/app/index.html?manage=guilds&source=civweave-navbar#cw-host-node-lobby');return true
+}
 function openMap(){const button=hiddenButton('cw-working-campus-map-v243');if(button){button.click();return true}location.assign('/finder?view=map&source=civweave-navbar');return true}
 function openDownloads(){const button=hiddenButton('cw-working-campus-downloads-v243');if(button){button.click();return true}location.assign('/app/index.html?manage=downloads&source=civweave-settings');return true}
 function cycleTheme(){const button=q('main.app>header.top [data-cw160-theme]');if(button){button.click();setTimeout(syncThemeLabel,0);return true}return false}
@@ -60,7 +65,7 @@ function installNavActions(){
   const actions=document.createElement('div');actions.id=NAV_ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Civweave destinations');
   actions.innerHTML=`<button type="button" data-cw-v441-nav="guilds" data-cw-civweave-nav="guilds" aria-label="Open Guilds"><span class="cw-v441-icon" aria-hidden="true">✥</span><span>Guilds</span></button><button type="button" data-cw-v441-nav="map" data-cw-civweave-nav="map" aria-label="Open Map"><img class="cw-v441-map-icon" src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button>`;
   actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-v441-nav]')?.dataset.cwV441Nav;if(action==='guilds')openGuilds();if(action==='map')openMap()});
-  nav.append(actions);nav.dataset.civweavePrimaryActions='guilds-map-v441-purpose-icons';return true;
+  nav.append(actions);nav.dataset.civweavePrimaryActions='guilds-search-map-v441';return true;
 }
 
 function selectAppTab(layer){
