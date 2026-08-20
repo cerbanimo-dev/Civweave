@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en" data-civweave-system="living-school" data-living-school-runtime="cleanroom-v218" data-living-school-revision="flash-design-lite-recovery-v220">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#092b23">
+  <title>Living School</title>
+  <script src="/app/gemini-rate-governor-v1.js?v=1.0.0-gemini-provider-budget"></script>
+  <link rel="preload" as="image" href="/app/assets/ai/moss.png">
+  <link rel="preload" as="image" href="/app/assets/ai/weaveling-compass.png">
+  <script src="/app/themed-system-nav-v178.js?v=family-nav-single-owner-r1" defer></script>
+  <script src="/app/japanese-mode-v1.js?v=japanese-mode-v1" defer></script>
+  <script src="/app/system-radio-agent-v233.js?v=living-school-radio-entry-v233" defer></script>
+  <script src="/app/radio-track-suggestions-v240.js?v=living-school-radio-entry-v241" defer></script>
+  <script src="/app/install-boundary-v146.js"></script>
+  <script src="/app/cw-reward-ledger-v2.js?v=basic-value-v1"></script>
+  <script src="/app/civweave-basic-value-v1.js?v=acorn-scale-v2"></script>
+  <script src="/app/cw-reward-receivers-v2.js?v=basic-value-v1"></script>
+  <script src="/app/civweave-basic-value-model-v1.js?v=acorn-scale-v2"></script>
+  <link rel="stylesheet" href="/app/family-shell-v104.css?v=cleanroom-v218.1">
+  <link rel="stylesheet" href="/app/platform-stability-v159.css?v=cleanroom-v218.1">
+  <link rel="stylesheet" href="/app/platform-experience-v160.css?v=1.0.107-go-live-v300">
+  <link rel="stylesheet" href="/app/mobile-regression-v170.css?v=cleanroom-v218.1">
+  <link rel="stylesheet" href="/app/mobile-guide-scroll-v256.css?v=living-school-v256">
+  <link rel="stylesheet" href="/app/cabinets/living-school/living-school-cleanroom-v218.css?v=research-first-v218.1-v256">
+  <style>
+    .lsc218-loading{margin-top:clamp(24px,5vh,56px)!important;padding:clamp(20px,3vw,32px)!important}
+    .lsc218-loading p{color:#dce7d0!important;max-width:680px;margin:.55rem auto 0}
+    .lsc304-boot-detail{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:18px auto 0;max-width:720px}
+    .lsc304-boot-detail span{padding:6px 9px;border:1px solid #65d49244;border-radius:999px;background:#65d4920d;color:#dff8e8;font-size:.76rem;font-weight:750}
+    .lsc304-boot-error{border-color:#ff9b8788!important;background:linear-gradient(145deg,#3d211df4,#171d19f4)!important}
+    .lsc304-boot-error small{color:#ffb3a3!important}.lsc304-boot-error h1{font-size:clamp(1.55rem,4vw,2.45rem)}
+    .lsc304-boot-error code{display:block;max-width:760px;margin:14px auto;padding:10px 12px;border-radius:10px;background:#020b08aa;color:#ffd8cf;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .lsc304-boot-retry{margin-top:15px;border:1px solid #83e4ad;border-radius:12px;padding:10px 16px;background:#1d533f;color:#fff7d8;font-weight:850;cursor:pointer}
+    .lsc218-header>button{white-space:nowrap}
+    @media(max-width:560px){.lsc304-boot-detail{display:grid;grid-template-columns:1fr}.lsc304-boot-detail span{text-align:center}.lsc218-loading{margin-top:16px!important}}
+  </style>
+</head>
+<body>
+  <main class="lsc218-app" id="living-school-app">
+    <header class="lsc218-header">
+      <div class="lsc218-brand">
+        <img src="/app/assets/ai/moss.png" alt="Moss">
+        <div><small>WORKBENCH</small><strong>Learning Workbench</strong></div>
+      </div>
+      <div class="lsc218-progress" aria-label="Learning progress" title="Learning progress">
+        <span id="lsc218-progress-label">0%</span>
+        <i><b id="lsc218-progress-bar"></b></i>
+      </div>
+    </header>
+
+    <section id="living-school-root" class="lsc218-root" aria-live="polite">
+      <article class="lsc218-loading" role="status">
+        <small>WORKBENCH STARTUP</small>
+        <h1>Opening Living School</h1>
+        <p>Starting the learning state and renderer. AI models load only when a learning action actually needs them.</p>
+        <div class="lsc304-boot-detail" aria-label="Startup stages">
+          <span>State engine</span><span>Curriculum renderer</span><span>Interaction controller</span>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="lsc218-toast" class="lsc218-toast" role="status" hidden></div>
+
+  <script src="/app/local-first-policy-v131.js?v=cleanroom-v218.1" defer></script>
+  <script src="/app/platform-stability-v159.js?v=cleanroom-v218.1" defer></script>
+  <script src="/app/platform-experience-v160.js?v=cleanroom-v218.1" defer></script>
+  <script src="/app/family-ai-loader-v105.js?v=cleanroom-v218.1-v256" defer></script>
+  <script src="/app/family-shell-v104.js?v=family-nav-delegated-r1" defer></script>
+  <script src="/app/local-object-mesh-v146.js?v=open-media-cache-v1" defer></script>
+  <script type="module" src="/app/open-learning-media-cache-v1.mjs?v=open-media-cache-v1"></script>
+  <script type="module">
+  const host=document.getElementById('living-school-app')||document.body;
+  if(!document.getElementById('living-school-root')){
+    const root=document.createElement('section');
+    root.id='living-school-root';
+    root.className='lsc218-root';
+    root.setAttribute('aria-live','polite');
+    host?.append(root);
+  }
+  const root=document.getElementById('living-school-root');
+  let bootComplete=false;
+  const cleanMessage=value=>String(value?.message||value||'Unknown startup error').trim().slice(0,1800);
+  const showBootFailure=(error,timedOut=false)=>{
+    if(bootComplete||!root)return;
+    const message=cleanMessage(error);
+    document.documentElement.dataset.livingSchoolWorkbench=timedOut?'timeout':'failed';
+    root.innerHTML=`<article class="lsc218-loading lsc304-boot-error" role="alert"><small>STARTUP RECOVERY</small><h1>Living School did not finish opening</h1><p>The surrounding Civweave shell is still running. Retry only the Living School workbench instead of reinstalling the app.</p><code>${message.replace(/[&<>]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[char]))}</code><button class="lsc304-boot-retry" type="button" data-ls-bootstrap-retry>Retry Living School</button></article>`;
+    root.querySelector('[data-ls-bootstrap-retry]')?.addEventListener('click',()=>location.reload(),{once:true});
+  };
+  const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
+  try{
+    document.documentElement.dataset.livingSchoolWorkbench='loading';
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=flash-design-lite-recovery-v220');
+    bootComplete=true;
+    clearTimeout(watchdog);
+    document.documentElement.dataset.livingSchoolWorkbench='ready';
+    import('/app/living-school-learning-packs-v1.mjs?v=learning-packs-v1').catch(error=>console.warn('[Living School learning packs]',error));
+  }catch(error){
+    clearTimeout(watchdog);
+    console.error('[Living School bootstrap]',error);
+    showBootFailure(error,false);
+  }
+  </script>
+</body>
+</html>
