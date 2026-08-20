@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-gemma4-dual-q4-actions-v1';
+const VERSION='1.1.0-gemma4-dual-q4-actions-v1-retry-import';
 const PREMIER='premier-phone';
 const E2='gemma4-e2b-it-q4f16';
 const E4='gemma4-e4b-it-q4f16';
@@ -81,7 +81,7 @@ function recordForModel(model,artifact){
 async function ensureActionModules(){
   if(typeof settings()?.ensureActionModules==='function')await settings().ensureActionModules();
   deep()?.activate?.();
-  if(!bridge()?.receiptFor||!bridge()?.recordsFor||!manager()?.status||!registry()?.byId||!packs()?.byId)throw new Error('The local Gemma 4 download modules did not become ready.');
+  if(!bridge()?.receiptFor||!bridge()?.recordsFor||!bridge()?.retryMissing||!bridge()?.pickAndImport||!manager()?.status||!registry()?.byId||!packs()?.byId)throw new Error('The local Gemma 4 download modules did not become ready.');
   return true;
 }
 
@@ -120,6 +120,14 @@ async function prepareCurrentReceipt(packId=PREMIER,{onProgress}={}){
   return{pack,receipt,state};
 }
 
+function pendingSummary(){
+  const b=bridge(),receipt=b?.pending?.(PREMIER)||null;
+  if(!receipt)return{receipt:null,missing:[],startedMissing:[],unstartedMissing:[],imported:0,total:0};
+  const missing=b.unimportedRecords(receipt),started=new Set(receipt.startedKeys||[]);
+  const startedMissing=missing.filter(row=>started.has(row.key)),unstartedMissing=missing.filter(row=>!started.has(row.key));
+  return{receipt,missing,startedMissing,unstartedMissing,imported:(receipt.importedKeys||[]).length,total:(receipt.large||[]).length};
+}
+
 async function finishCurrentPack(packId=PREMIER,{onProgress}={}){
   const prepared=await prepareCurrentReceipt(packId,{onProgress}),{pack,receipt}=prepared,b=bridge();
   const missingLarge=b.unimportedRecords(receipt);
@@ -145,13 +153,40 @@ async function advanceCore({onProgress}={}){
   await ensureActionModules();
   const e2=await finishModel(E2,{onProgress}).catch(error=>({available:false,error,missingLarge:[]}));
   const e4=await finishModel(E4,{onProgress}).catch(error=>({available:false,error,missingLarge:[]}));
-  const prepared=await prepareCurrentReceipt(PREMIER,{onProgress}),missing=bridge().unimportedRecords(prepared.receipt);
+  const prepared=await prepareCurrentReceipt(PREMIER,{onProgress}),b=bridge(),missing=b.unimportedRecords(prepared.receipt);
   if(missing.length){
-    const next=await bridge().queueNext(PREMIER,{onProgress});
-    return{available:false,needsDownloads:true,next,missing,e2Available:Boolean(e2.available),e4Available:Boolean(e4.available)};
+    const started=new Set(prepared.receipt.startedKeys||[]),startedMissing=missing.filter(row=>started.has(row.key)),unstartedMissing=missing.filter(row=>!started.has(row.key));
+    if(!unstartedMissing.length)return{available:false,needsDownloads:true,needsImport:true,retryAvailable:true,missing,startedMissing,e2Available:Boolean(e2.available),e4Available:Boolean(e4.available)};
+    const next=await b.queueNext(PREMIER,{onProgress});
+    return{available:false,needsDownloads:true,next,missing,startedMissing,unstartedMissing,e2Available:Boolean(e2.available),e4Available:Boolean(e4.available)};
   }
   const finished=await finishCurrentPack(PREMIER,{onProgress});
   return{...finished,e2Available:true,e4Available:true};
+}
+
+async function retryMissingDownload({onProgress}={}){
+  await ensureActionModules();
+  await prepareCurrentReceipt(PREMIER,{onProgress});
+  const b=bridge(),reset=b.retryMissing(PREMIER);
+  if(!reset)throw new Error('There is no pending Gemma 4 browser download to retry.');
+  const next=await b.queueNext(PREMIER,{onProgress});
+  if(next?.record)return{...next,retried:true};
+  return{...next,retried:false};
+}
+
+async function importDownloadedFiles({onProgress}={}){
+  await ensureActionModules();
+  await prepareCurrentReceipt(PREMIER,{onProgress});
+  const result=await bridge().pickAndImport(PREMIER,{onProgress});
+  if(result?.cancelled)return result;
+  const e2=await finishModel(E2,{onProgress}).catch(()=>({available:false}));
+  const e4=await finishModel(E4,{onProgress}).catch(()=>({available:false}));
+  const summary=pendingSummary();
+  if(!summary.missing.length){
+    const finished=await finishCurrentPack(PREMIER,{onProgress});
+    return{...result,...finished,e2Available:Boolean(e2.available),e4Available:Boolean(e4.available)};
+  }
+  return{...result,e2Available:Boolean(e2.available),e4Available:Boolean(e4.available),missing:summary.missing};
 }
 
 async function useModel(modelId){
@@ -165,20 +200,45 @@ async function useModel(modelId){
 }
 
 function directActionContainer(card){return[...card.children].find(node=>node.classList?.contains('cw-local-actions'))||null}
+let observedCard=null,cardObserver=null,observerQueued=false;
+function ensureCardObserver(card){
+  if(typeof MutationObserver!=='function'||observedCard===card)return;
+  try{cardObserver?.disconnect?.()}catch{}
+  observedCard=card;
+  cardObserver=new MutationObserver(()=>{
+    if(observerQueued)return;observerQueued=true;
+    queueMicrotask(()=>{observerQueued=false;decorateSettings()});
+  });
+  cardObserver.observe(card,{childList:true,subtree:true});
+}
+function controlsComplete(actions,{e2Ready,e4Ready,startedCount,unstartedCount}){
+  if(e2Ready&&!actions.querySelector(`[data-gemma4-use-model="${E2}"]`))return false;
+  if(e4Ready&&!actions.querySelector(`[data-gemma4-use-model="${E4}"]`))return false;
+  if(startedCount&&(!actions.querySelector('[data-gemma4-import-downloaded]')||!actions.querySelector('[data-gemma4-retry-missing]')))return false;
+  if(unstartedCount&&!actions.querySelector('[data-gemma4-core-advance]'))return false;
+  return true;
+}
 function decorateSettings(){
   const panel=document.getElementById('cw-local-ai-v324'),card=panel?.querySelector?.(`[data-pack-id="${PREMIER}"]`);if(!card)return false;
+  ensureCardObserver(card);
   const actions=directActionContainer(card);if(!actions)return false;
-  const state=downloads(),selected=selection(),e2Ready=state[E2]?.status==='ready',e4Ready=state[E4]?.status==='ready';
-  const signature=[e2Ready,e4Ready,selected.active?selected.id:'',packStateMap()[PREMIER]?.status||''].join('|');
-  if(actions.dataset.gemma4DualQ4Signature===signature)return true;
+  const state=downloads(),selected=selection(),e2Ready=state[E2]?.status==='ready',e4Ready=state[E4]?.status==='ready',pending=pendingSummary();
+  const startedCount=pending.startedMissing.length,unstartedCount=pending.unstartedMissing.length,missingCount=pending.missing.length;
+  const signature=[e2Ready,e4Ready,selected.active?selected.id:'',packStateMap()[PREMIER]?.status||'',pending.imported,pending.total,startedCount,unstartedCount].join('|');
+  if(actions.dataset.gemma4DualQ4Signature===signature&&controlsComplete(actions,{e2Ready,e4Ready,startedCount,unstartedCount}))return true;
   const buttons=[];
   if(e2Ready)buttons.push(`<button type="button" data-gemma4-use-model="${E2}">${selected.active&&selected.id===E2?'Using E2B':'Use E2B'}</button>`);
   if(e4Ready)buttons.push(`<button type="button" data-gemma4-use-model="${E4}">${selected.active&&selected.id===E4?'Using E4B':'Use E4B'}</button>`);
-  if(!e2Ready||!e4Ready)buttons.push(`<button type="button" data-gemma4-core-advance>${e2Ready&&!e4Ready?'Continue E4B Q4F16 core':'Complete Q4F16 core'}</button>`);
-  if(e2Ready&&e4Ready)buttons.push('<button type="button" data-local-pack-remove="premier-phone">Remove pack</button>');
+  if(startedCount){
+    buttons.push('<button type="button" data-gemma4-import-downloaded>Import downloaded files</button>');
+    buttons.push(`<button type="button" data-gemma4-retry-missing>Retry missing download${missingCount===1?'':'s'}</button>`);
+  }
+  if(unstartedCount||(!missingCount&&(!e2Ready||!e4Ready)))buttons.push(`<button type="button" data-gemma4-core-advance>${e2Ready&&!e4Ready?'Continue E4B Q4F16 core':'Complete Q4F16 core'}</button>`);
+  if(e2Ready&&e4Ready&&!missingCount)buttons.push('<button type="button" data-local-pack-remove="premier-phone">Remove pack</button>');
   actions.innerHTML=buttons.join('');actions.dataset.gemma4DualQ4Signature=signature;
   let note=card.querySelector('[data-gemma4-runnable-note]');if(!note){note=document.createElement('p');note.className='cw-local-meta';note.dataset.gemma4RunnableNote='';actions.before(note)}
-  if(e2Ready&&e4Ready)note.textContent='Both Gemma 4 Q4F16 lanes are runnable. Choose E2B for the fast lane or E4B for deeper local work.';
+  if(startedCount)note.textContent=`${e2Ready?'E2B Q4F16 is runnable now. ':''}${startedCount} browser download${startedCount===1?' was':'s were'} started but not imported. Import a completed file, or retry it if the browser download was partial or cancelled.`;
+  else if(e2Ready&&e4Ready)note.textContent='Both Gemma 4 Q4F16 lanes are runnable. Choose E2B for the fast lane or E4B for deeper local work.';
   else if(e2Ready)note.textContent='E2B Q4F16 is runnable now. You can use it immediately while E4B Q4F16 is completed separately.';
   else if(e4Ready)note.textContent='E4B Q4F16 is runnable now. E2B Q4F16 still needs its remaining core files.';
   else note.textContent='Existing imported Gemma 4 files will be reused. Complete core only downloads or repairs files that are still missing.';
@@ -187,7 +247,7 @@ function decorateSettings(){
 
 let decorateTimer=0;
 function scheduleDecorate(){
-  clearTimeout(decorateTimer);const waits=[0,50,160,420,900];let index=0;
+  clearTimeout(decorateTimer);const waits=[0,50,160,420,900,1800];let index=0;
   const run=()=>{decorateSettings();index+=1;if(index<waits.length)decorateTimer=setTimeout(run,waits[index])};
   decorateTimer=setTimeout(run,waits[0]);
 }
@@ -195,14 +255,37 @@ async function handleCore(button){
   button.disabled=true;statusLine('Checking the Gemma 4 Q4F16 core and reusing files already on this device…');
   try{
     const result=await advanceCore({onProgress:progress=>{if(progress?.message)statusLine(progress.message)}});
-    if(result.e2Available&&!result.e4Available)statusLine('Gemma 4 E2B Q4F16 is ready to use now. The next E4B Q4F16 browser file has been started.');
+    if(result.needsImport)statusLine('A Gemma 4 browser download was started but has not been imported. Import the completed file, or use Retry missing download if it was partial or cancelled.');
+    else if(result.e2Available&&!result.e4Available&&result.next?.record)statusLine('Gemma 4 E2B Q4F16 is ready to use now. The next E4B Q4F16 browser file has been started.');
     else if(result.available)statusLine('Gemma 4 E2B and E4B Q4F16 are both ready to use locally.');
     else if(result.needsDownloads)statusLine('Existing Gemma 4 files were kept. The next missing Q4F16 core file has been started in the browser.');
+  }catch(error){statusLine(String(error?.message||error),true)}finally{button.disabled=false;scheduleDecorate()}
+}
+async function handleImport(button){
+  button.disabled=true;statusLine('Choose the completed Gemma 4 file from your browser downloads.');
+  try{
+    const result=await importDownloadedFiles({onProgress:progress=>{if(progress?.message)statusLine(progress.message)}});
+    if(result?.cancelled)statusLine('Import cancelled. Your existing local files were left unchanged.');
+    else if(result?.available)statusLine('Gemma 4 E2B and E4B Q4F16 are ready locally.');
+    else if(result?.missing?.length)statusLine(`Imported the completed file. ${result.missing.length} large Gemma 4 file${result.missing.length===1?' remains':'s remain'}.`);
+    else statusLine('Imported the completed Gemma 4 browser file.');
+  }catch(error){statusLine(String(error?.message||error),true)}finally{button.disabled=false;scheduleDecorate()}
+}
+async function handleRetry(button){
+  button.disabled=true;statusLine('Resetting the stuck browser-download marker and starting the missing Gemma 4 file again…');
+  try{
+    const result=await retryMissingDownload({onProgress:progress=>{if(progress?.message)statusLine(progress.message)}});
+    if(result?.record)statusLine(`Restarted ${result.record.label} · ${result.record.basename}. When it finishes, use Import downloaded files.`);
+    else statusLine('No unimported Gemma 4 browser file remains to retry.');
   }catch(error){statusLine(String(error?.message||error),true)}finally{button.disabled=false;scheduleDecorate()}
 }
 function onWindowClick(event){
   const use=event.target?.closest?.('[data-gemma4-use-model]');
   if(use){event.preventDefault();event.stopImmediatePropagation();const id=String(use.dataset.gemma4UseModel||'');use.disabled=true;void useModel(id).catch(error=>statusLine(String(error?.message||error),true)).finally(()=>{use.disabled=false;scheduleDecorate()});return}
+  const imported=event.target?.closest?.('[data-gemma4-import-downloaded]');
+  if(imported){event.preventDefault();event.stopImmediatePropagation();void handleImport(imported);return}
+  const retry=event.target?.closest?.('[data-gemma4-retry-missing]');
+  if(retry){event.preventDefault();event.stopImmediatePropagation();void handleRetry(retry);return}
   const core=event.target?.closest?.('[data-gemma4-core-advance],[data-gemma4-core-complete]');
   if(core){event.preventDefault();event.stopImmediatePropagation();void handleCore(core);return}
 }
@@ -213,7 +296,8 @@ scheduleDecorate();
 
 globalThis.CivweaveGemma4DualQ4ActionsV1=freeze({
   version:VERSION,primaryModel:E2,deepModel:E4,packId:PREMIER,
-  ensureActionModules,finishModel,prepareCurrentReceipt,finishCurrentPack,advanceCore,useModel,decorateSettings,scheduleDecorate,
-  preservesExistingLargeFiles:true,partialCoreUsable:true,e2UsableBeforeE4:true,smallFileRecovery:true,fullPackReinstallRequired:false,mutationObserver:false
+  ensureActionModules,finishModel,prepareCurrentReceipt,finishCurrentPack,advanceCore,retryMissingDownload,importDownloadedFiles,useModel,decorateSettings,scheduleDecorate,pendingSummary,
+  preservesExistingLargeFiles:true,partialCoreUsable:true,e2UsableBeforeE4:true,smallFileRecovery:true,fullPackReinstallRequired:false,
+  stuckBrowserDownloadRetry:true,browserImportAction:true,startedIsNotCompleted:true,mutationObserverGuarded:true
 });
 })();
