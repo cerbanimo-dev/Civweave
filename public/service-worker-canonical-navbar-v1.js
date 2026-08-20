@@ -1,14 +1,15 @@
 'use strict';
 (()=>{
-const VERSION='canonical-navbar-network-first-v2';
+const VERSION='canonical-navbar-network-first-v3-stage-guard';
 const NAV_PATH='/app/themed-system-nav-v178.js';
 const PATHS=Object.freeze([
   NAV_PATH,
+  '/app/subsystem-avatar-state-v347.js',
   '/app/shared-guide-surface-v236-core-v244.js',
   '/app/platform-experience-v160.css'
 ]);
 const PATH_SET=new Set(PATHS);
-const CACHE='cw-nav-canonical-v2';
+const CACHE='cw-nav-canonical-v3';
 const FETCH_TIMEOUT_MS=10000;
 function valid(response,path){
   if(!response?.ok)return false;
@@ -44,7 +45,6 @@ async function responseFor(request,path){
   }
   const canonical=await ownCached(path);
   if(canonical)return request.method==='HEAD'?head(canonical):canonical;
-  // Fail closed. Never resurrect any shell/runtime cached copy of the retired compact rail or its former geometry injectors.
   return unavailable(path,request.method);
 }
 async function warm(){
@@ -72,5 +72,5 @@ self.addEventListener('fetch',event=>{
   event.stopImmediatePropagation();
   event.respondWith(responseFor(request,url.pathname));
 });
-self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-current-cache-only-never-retired-geometry-cache',warm});
+self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-current-cache-only-never-retired-geometry-cache-plus-stage-guard',warm});
 })();
