@@ -1,16 +1,18 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1.4-purpose-icons-map-lock';
+const VERSION='guild-symbol-v1.5-standalone-guild-search-card';
 const SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
 const CHAT_SRC='/app/assets/chat-symbol-v1.png';
-const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=working-campus-nearby-guilds-v1';
+const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=working-campus-nearby-guilds-v2';
 const STYLE_ID='cw-guild-symbol-v1-style';
 const ICON_CLASS='cw-guild-symbol-icon';
 const MAP_ICON_CLASS='cw-map-symbol-icon';
 const CHAT_ICON_CLASS='cw-chat-symbol-icon';
 const GUILD_OVERLAY_ID='cw-nearby-guilds-overlay-v1';
+const GUILD_CARD_ID='cw-nearby-guilds-card-v1';
+const GUILD_MOUNT_ID='cw-nearby-guilds-mount-v1';
 let queued=false;
 let guildFinderPromise=null;
 
@@ -23,19 +25,25 @@ function installStyle(doc=document){
 .realm-icon.guilds .${ICON_CLASS},.ri.guilds .${ICON_CLASS}{width:100%;height:100%;max-width:2rem;max-height:2rem;vertical-align:middle}
 #cw-guild-quest-browser-v1 .cw-gqb-icon .${ICON_CLASS}{width:24px;height:24px;vertical-align:middle}
 #cw-working-campus-guilds-v243 .${ICON_CLASS}{width:1.55rem;height:1.55rem}
-#cw-working-campus-map-v243 .${MAP_ICON_CLASS},#cw-civweave-primary-actions-v1 [data-cw-civweave-nav="map"] .${MAP_ICON_CLASS}{width:1.55rem;height:1.55rem;vertical-align:middle}
-#cw-working-campus-map-v243 .cw-civweave-nav-icon,#cw-civweave-primary-actions-v1 [data-cw-civweave-nav="map"] .cw-civweave-nav-icon{display:inline-block!important;width:1.55rem!important;height:1.55rem!important;flex:0 0 1.55rem!important;background:url('${MAP_SRC}') center/contain no-repeat!important;font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important}
-#cw-working-campus-map-v243 .cw-civweave-nav-icon>*,#cw-civweave-primary-actions-v1 [data-cw-civweave-nav="map"] .cw-civweave-nav-icon>*{display:none!important}
+#cw-working-campus-map-v243 .${MAP_ICON_CLASS},[data-cw-civweave-nav="map"] .${MAP_ICON_CLASS}{width:1.55rem;height:1.55rem;vertical-align:middle}
+#cw-working-campus-map-v243 .cw-civweave-nav-icon,[data-cw-civweave-nav="map"] .cw-civweave-nav-icon{display:inline-block!important;width:1.55rem!important;height:1.55rem!important;flex:0 0 1.55rem!important;background:url('${MAP_SRC}') center/contain no-repeat!important;font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important}
+#cw-working-campus-map-v243 .cw-civweave-nav-icon>*,[data-cw-civweave-nav="map"] .cw-civweave-nav-icon>*{display:none!important}
 #cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"]{display:inline-flex;align-items:center;gap:6px}
 #cw-human-chat-standalone-surface-v2 .cwh2-tabs [data-cwh2-tab^="guild:"] .${ICON_CLASS}{width:18px;height:18px;vertical-align:middle}
 #cw-human-message-launcher-v1 .cw-human-face{background:transparent!important;text-shadow:none!important}
 #cw-human-message-launcher-v1 .cw-human-face .${CHAT_ICON_CLASS}{width:100%;height:100%;object-fit:contain;border-radius:50%;vertical-align:middle}
 #${GUILD_OVERLAY_ID}[hidden]{display:none!important}
-#${GUILD_OVERLAY_ID}{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:max(14px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#020611d8;backdrop-filter:blur(10px);overflow:auto}
-#${GUILD_OVERLAY_ID} .cw-nearby-guilds-shell{position:relative;width:min(920px,100%);max-height:calc(100dvh - 28px);overflow:auto;border-radius:24px;box-shadow:0 28px 80px #000d}
-#${GUILD_OVERLAY_ID} .cw-nearby-guilds-close{position:sticky;z-index:5;top:8px;float:right;margin:8px 8px -52px 0;width:42px;height:42px;border:1px solid #ffffff38;border-radius:999px;background:#07131fee;color:#fff;font:800 24px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px #0008}
-#${GUILD_OVERLAY_ID} .cw-host-node-lobby{margin:0!important;max-width:none!important}
-@media(max-width:640px){#${GUILD_OVERLAY_ID}{place-items:end center;padding:0}#${GUILD_OVERLAY_ID} .cw-nearby-guilds-shell{width:100%;max-height:calc(100dvh - max(10px,env(safe-area-inset-top)));border-radius:24px 24px 0 0}#${GUILD_OVERLAY_ID} .cw-host-node-lobby{border-radius:24px 24px 0 0!important}}
+#${GUILD_OVERLAY_ID}{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:start center;padding:max(18px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#020611b8;backdrop-filter:blur(8px);overflow:auto}
+#${GUILD_OVERLAY_ID} .cw-nearby-guilds-shell{position:relative;width:min(920px,100%);margin:auto 0;max-height:calc(100dvh - 36px);overflow:auto}
+#${GUILD_CARD_ID}{position:relative;isolation:isolate;width:100%;border:1px solid #8af5d25c;border-radius:24px;background:linear-gradient(160deg,#071827f8,#10142af8);box-shadow:0 28px 80px #000d;overflow:hidden}
+#${GUILD_CARD_ID} .cw-nearby-guilds-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px 12px;border-bottom:1px solid #8af5d22f;background:#081b27e8;color:#effffb}
+#${GUILD_CARD_ID} .cw-nearby-guilds-card-head strong{display:block;font:850 16px/1.15 system-ui,sans-serif}
+#${GUILD_CARD_ID} .cw-nearby-guilds-card-head small{display:block;margin-top:4px;color:#b7d8d1;font:500 12px/1.3 system-ui,sans-serif}
+#${GUILD_OVERLAY_ID} .cw-nearby-guilds-close{flex:0 0 42px;width:42px;height:42px;border:1px solid #ffffff38;border-radius:999px;background:#07131fee;color:#fff;font:800 24px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px #0008}
+#${GUILD_MOUNT_ID}{position:relative;z-index:2;padding:12px}
+#${GUILD_MOUNT_ID} .cw-host-node-lobby{margin:0!important;max-width:none!important;position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
+#${GUILD_MOUNT_ID} #cw-host-node-search{position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
+@media(max-width:640px){#${GUILD_OVERLAY_ID}{place-items:end center;padding:max(10px,env(safe-area-inset-top)) 0 0}#${GUILD_OVERLAY_ID} .cw-nearby-guilds-shell{width:100%;max-height:calc(100dvh - max(10px,env(safe-area-inset-top)));margin:0}#${GUILD_CARD_ID}{border-radius:24px 24px 0 0}#${GUILD_MOUNT_ID}{padding:8px}}
 `;
   (doc.head||doc.documentElement).append(style);
 }
@@ -143,10 +151,11 @@ function ensureNearbyGuildsOverlay(){
   overlay=document.createElement('section');
   overlay.id=GUILD_OVERLAY_ID;
   overlay.hidden=true;
+  overlay.dataset.surface='guild-search-card';
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label','Find nearby Civweave Guilds');
-  overlay.innerHTML='<div class="cw-nearby-guilds-shell"><button class="cw-nearby-guilds-close" type="button" aria-label="Close nearby Guilds">×</button></div>';
+  overlay.innerHTML=`<div class="cw-nearby-guilds-shell"><section id="${GUILD_CARD_ID}" aria-label="Nearby Guild search"><header class="cw-nearby-guilds-card-head"><div><strong>Find nearby Guilds</strong><small>Guild search is separate from the Guild Map.</small></div><button class="cw-nearby-guilds-close" type="button" aria-label="Close nearby Guilds">×</button></header><div id="${GUILD_MOUNT_ID}"></div></section></div>`;
   overlay.querySelector('.cw-nearby-guilds-close')?.addEventListener('click',()=>closeNearbyGuilds('button'));
   overlay.addEventListener('click',event=>{if(event.target===overlay)closeNearbyGuilds('backdrop')});
   overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closeNearbyGuilds('escape')}});
@@ -196,12 +205,14 @@ async function openNearbyGuilds(){
     api.showSearch?.(true);
     const lobby=document.getElementById('cw-host-node-lobby');
     if(!lobby)throw new Error('Nearby Guild finder card was not created.');
-    const shell=overlay.querySelector('.cw-nearby-guilds-shell');
-    if(lobby.parentElement!==shell)shell.append(lobby);
+    const mount=overlay.querySelector(`#${GUILD_MOUNT_ID}`);
+    if(!mount)throw new Error('Nearby Guild finder mount was not created.');
+    if(lobby.parentElement!==mount)mount.append(lobby);
     lobby.dataset.openedFrom='working-campus-guilds-nav';
+    lobby.dataset.surface='standalone-guild-search-card';
     overlay.hidden=false;
     requestAnimationFrame(()=>document.getElementById('cw-host-node-search-run')?.focus?.({preventScroll:true}));
-    try{dispatchEvent(new CustomEvent('civweave:nearby-guilds-opened',{detail:{source:'working-campus-nav'}}))}catch{}
+    try{dispatchEvent(new CustomEvent('civweave:nearby-guilds-opened',{detail:{source:'working-campus-nav',surface:'standalone-guild-search-card'}}))}catch{}
     return true;
   }catch(error){
     console.warn('[Civweave] Nearby Guild finder could not open in place.',error);
