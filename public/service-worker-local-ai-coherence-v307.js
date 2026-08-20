@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v317-gemma4-dual-q4';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v318-guild-login-runtime';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -21,7 +21,9 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/document-lifecycle-v221.js',
   '/app/guild-symbol-v1.js',
   '/app/working-campus-home-relocation-v441.js',
-  '/app/mobile-guild-create-v1.mjs'
+  '/app/mobile-guild-create-v1.mjs',
+  '/app/host-node-local-capacity-v1.js',
+  '/app/host-node-session-v1.js'
 ]);
 const CW_LOCAL_AI_CRITICAL = [
   '/app/system-routes-v227.js',
@@ -42,6 +44,8 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/guild-symbol-v1.js',
   '/app/working-campus-home-relocation-v441.js',
   '/app/mobile-guild-create-v1.mjs',
+  '/app/host-node-local-capacity-v1.js',
+  '/app/host-node-session-v1.js',
   '/app/local-ai/bootstrap-v266.js',
   '/app/local-ai/model-registry-v266.js',
   '/app/local-ai/gemma4-pack-extension-v1.js',
@@ -169,6 +173,7 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   guildDiscoveryCoherent: true,
   legacyMobileGuildLocationCoherent: true,
   guildChatUsageCoherent: true,
+  guildLoginRuntimeCoherent: true,
   boundedLocalRecoveryCoherent: true,
   sharedGuideCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true,
