@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-gemma4-pack-extension-v1';
+const VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
 const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const PACKS_KEY='CivweaveLocalModelPacksV1';
 const SETTINGS_KEY='CivweaveSettingsLocalRouteV323';
@@ -84,11 +84,12 @@ function q4Spec(registry){
     ])
   });
 }
+
 function extensionSpec(model){
   if(!model)return null;
   return freeze({
     ...model,
-    installable:false,
+    installable:true,
     recommended:'',
     status:'optional-extension',
     packRole:'optional-extension',
@@ -98,6 +99,7 @@ function extensionSpec(model){
     reason:'Optional Q2F16 mobile extension. Keep it installed if desired; Civweave uses the Q4F16 Gemma 4 core until the browser runtime supports this graph.'
   });
 }
+
 function patchRegistry(registry){
   if(!registry?.byId||!Array.isArray(registry.models))return registry;
   if(registry.__civweaveGemma4PackCoreV1)return registry;
@@ -119,7 +121,8 @@ function patchRegistry(registry){
     return (model?.fallbackIds||[]).map(byId).filter(Boolean);
   };
   const capable=request=>{
-    let rows=[];try{rows=(registry.capable?.(request)||[]).map(model=>byId(model.id)||model).filter(model=>model&&!Q2_IDS.includes(model.id))}catch{}
+    let rows=[];
+    try{rows=(registry.capable?.(request)||[]).map(model=>byId(model.id)||model).filter(model=>model&&!Q2_IDS.includes(model.id))}catch{}
     if(!rows.some(model=>model.id===Q4_ID))rows.push(core);
     return rows;
   };
@@ -138,6 +141,7 @@ function patchRegistry(registry){
     gemma4Q2CoreRequired:false
   });
 }
+
 function watchGlobal(key,patch,marker){
   const descriptor=Object.getOwnPropertyDescriptor(globalThis,key);
   if(descriptor&&!descriptor.configurable){
@@ -172,19 +176,23 @@ function corePack(base){
     optionalExtensions:EXTENSIONS
   });
 }
+
 function legacyPackNeedsCore(){
   const packs=packStates(),downloads=downloadsState(),state=packs[PREMIER]||{},q4=downloads[Q4_ID]||{};
   return Boolean((state.installedAt||state.status==='ready')&&q4.status!=='ready');
 }
+
 function migrationPack(base){
   const core=corePack(base);
   return freeze({...core,label:'Premier Phone Pack · Gemma 4 core update',estimatedBytes:Q4_BYTES,generative:freeze([Q4_ID]),specialized:freeze([]),installOrder:freeze([Q4_ID]),migrationOnly:true});
 }
+
 function writePackState(patch){
   const rows=packStates();rows[PREMIER]={...(rows[PREMIER]||{}),...patch,updatedAt:new Date().toISOString()};
   try{localStorage.setItem(PACK_STATE_KEY,JSON.stringify(rows))}catch{}
   return rows[PREMIER];
 }
+
 async function coreStatus(api,base){
   const pack=corePack(base),components=[];
   for(const id of pack.installOrder){
@@ -195,6 +203,7 @@ async function coreStatus(api,base){
   if(available)writePackState({status:'ready',phase:'ready',percent:100,installedBytes,installedAt:packStates()[PREMIER]?.installedAt||new Date().toISOString(),error:'',primaryModel:Q4_ID});
   return{id:PREMIER,label:pack.label,available,installed:available,components,installedBytes,state:packStates()[PREMIER]||null};
 }
+
 function patchPackManager(api){
   if(!api?.byId||api.__civweaveGemma4PackCoreV1)return api;
   const baseById=api.byId.bind(api),baseStatus=api.status?.bind(api),baseUse=api.use?.bind(api),baseRemove=api.remove?.bind(api),baseCatalogue=api.catalogue?.bind(api);
@@ -203,9 +212,11 @@ function patchPackManager(api){
   const status=async id=>id===PREMIER?coreStatus(api,basePremier):baseStatus(id);
   const use=async id=>{
     if(id!==PREMIER)return baseUse(id);
-    const checked=await coreStatus(api,basePremier);if(!checked.available)throw new Error('Premier Phone Pack needs its Gemma 4 Q4F16 core before it can be used. Choose Complete core download; your Q2F16 extension files will be kept.');
+    const checked=await coreStatus(api,basePremier);
+    if(!checked.available)throw new Error('Premier Phone Pack needs its Gemma 4 Q4F16 core before it can be used. Choose Complete core download; your Q2F16 extension files will be kept.');
     const m=manager(),q4=await m.status(Q4_ID),fallback=await m.status('qwen3-0.6b-q8-wasm');
-    const selected=q4.available?Q4_ID:(fallback.available?'qwen3-0.6b-q8-wasm':'');if(!selected)throw new Error('Premier Phone Pack has no runnable interactive model available.');
+    const selected=q4.available?Q4_ID:(fallback.available?'qwen3-0.6b-q8-wasm':'');
+    if(!selected)throw new Error('Premier Phone Pack has no runnable interactive model available.');
     m.select(selected);writePackState({status:'ready',selectedModel:selected,lastUsedAt:new Date().toISOString(),primaryModel:Q4_ID});
     try{dispatchEvent(new CustomEvent('civweave:local-model-pack-selected',{detail:{version:VERSION,id:PREMIER,label:basePremier.label,model:selected}}))}catch{}
     return{pack:corePack(basePremier),model:selected};
@@ -217,7 +228,10 @@ function patchPackManager(api){
     try{dispatchEvent(new CustomEvent('civweave:local-model-pack-removed',{detail:{version:VERSION,id:PREMIER,label:basePremier.label,optionalExtensionsKept:true}}))}catch{}
     return true;
   };
-  const catalogue=()=>{const rows=baseCatalogue?baseCatalogue():Object.values(api.packs||{});return rows.map(row=>row?.id===PREMIER?corePack(row):row)};
+  const catalogue=()=>{
+    const rows=baseCatalogue?baseCatalogue():Object.values(api.packs||{});
+    return rows.map(row=>row?.id===PREMIER?corePack(row):row);
+  };
   const packs={...(api.packs||{}),[PREMIER]:corePack(basePremier)};
   return freeze({...api,packs:freeze(packs),byId,status,use,remove,catalogue,__civweaveGemma4PackCoreV1:true,gemma4CoreModel:Q4_ID,q2OptionalExtensions:Q2_IDS});
 }
@@ -229,34 +243,43 @@ async function ensureActionModules(){
   watchGlobal(PACKS_KEY,patchPackManager,'__civweaveGemma4PackCoreV1');
   return Boolean(manager()&&globalThis[REGISTRY_KEY]);
 }
+
 async function extensionStatus(id){
   await ensureActionModules();
   try{return await manager().status(id)}catch{return{available:false,state:downloadsState()[id]||null}}
 }
+
 async function extensionDownload(id){
   if(!Q2_IDS.includes(id))return false;
   await ensureActionModules();
-  const spec=globalThis[REGISTRY_KEY]?.byId?.(id);if(!spec)throw new Error(`The optional ${id} extension is not registered.`);
+  const spec=globalThis[REGISTRY_KEY]?.byId?.(id);
+  if(!spec)throw new Error(`The optional ${id} extension is not registered.`);
   await manager().start(id,{preferBackground:true});
   return true;
 }
+
 async function extensionRemove(id){
   if(!Q2_IDS.includes(id))return false;
   await ensureActionModules();
   const selected=manager().selection?.();
   if(selected?.active&&selected.id===id){
     const q4=await manager().status(Q4_ID).catch(()=>({available:false}));
-    manager().select(q4.available?Q4_ID:null);
+    const fallback=await manager().status('qwen3-0.6b-q8-wasm').catch(()=>({available:false}));
+    if(q4.available)manager().select(Q4_ID);
+    else if(fallback.available)manager().select('qwen3-0.6b-q8-wasm');
   }
   await manager().remove(id);
   return true;
 }
+
 async function completeCore(){
   await ensureActionModules();
-  const b=browser();if(!b?.queue)throw new Error('The browser AI pack download bridge is not ready.');
+  const b=browser();
+  if(!b?.queue)throw new Error('The browser AI pack download bridge is not ready.');
   if(legacyPackNeedsCore())writePackState({status:'browser-ready',phase:'gemma4-q4-core-required',percent:0,error:'',errorCode:'',coreMigration:true});
   return b.queue(PREMIER);
 }
+
 function extensionStateCopy(id){
   const state=downloadsState()[id]||{};
   if(state.status==='ready')return'Installed · optional extension parked until its browser runtime is supported.';
@@ -264,45 +287,113 @@ function extensionStateCopy(id){
   if(state.status==='paused'||state.status==='error')return`${state.status} · ${state.error||'resume when ready'}`;
   return'Not installed · optional.';
 }
+
+function decorationSignature(){
+  const downloads=downloadsState(),packs=packStates();
+  return JSON.stringify({
+    q4:downloads[Q4_ID]?.status||'',
+    e2:downloads[Q2_E2]?.status||'',
+    e4:downloads[Q2_E4]?.status||'',
+    pack:packs[PREMIER]?.status||'',
+    installedAt:packs[PREMIER]?.installedAt||''
+  });
+}
+
 function decorateSettings(){
-  const panel=document.getElementById('cw-local-ai-v324');if(!panel)return false;
-  for(const id of Q2_IDS){const row=panel.querySelector(`[data-model-id="${id}"]`);if(row)row.hidden=true}
-  const card=panel.querySelector(`[data-pack-id="${PREMIER}"]`);if(!card)return false;
+  const panel=document.getElementById('cw-local-ai-v324');
+  if(!panel)return false;
+  const card=panel.querySelector(`[data-pack-id="${PREMIER}"]`);
+  if(!card)return false;
+  const signature=decorationSignature();
+  if(card.dataset.gemma4PackDecoration===signature)return true;
+
+  for(const id of Q2_IDS){
+    const row=panel.querySelector(`[data-model-id="${id}"]`);
+    if(row)row.hidden=true;
+  }
+
   const paragraphs=[...card.children].filter(node=>node.tagName==='P');
   if(paragraphs[0])paragraphs[0].textContent='Gemma 4 E2B Q4F16 is the required runnable core. Q2F16 mobile weights are optional extensions and are never required to use the pack.';
   if(paragraphs[1])paragraphs[1].innerHTML='<b>Target:</b> 12 GB RAM · modern Android-class WebGPU';
   if(paragraphs[2])paragraphs[2].innerHTML='<b>Storage:</b> ~5.0 GB core · Q2F16 extensions +2.3 GB / +3.4 GB';
   if(paragraphs[3])paragraphs[3].textContent='Gemma 4 E2B Q4F16 core · Qwen 3 0.6B CPU fallback · Silero · Parakeet INT8 · Omnilingual 300M INT8 · Supertonic 3';
+
   let extension=card.querySelector('[data-gemma4-q2-extensions]');
-  if(!extension){extension=document.createElement('div');extension.dataset.gemma4Q2Extensions='';extension.className='cw-clean-note';const actions=card.querySelector('.cw-local-actions');actions?.before(extension)||card.append(extension)}
+  if(!extension){
+    extension=document.createElement('div');
+    extension.dataset.gemma4Q2Extensions='';
+    extension.className='cw-clean-note';
+    const actions=card.querySelector('.cw-local-actions');
+    actions?.before(extension)||card.append(extension);
+  }
   extension.innerHTML=`<b>Optional Q2F16 mobile extension</b>${EXTENSIONS.map(row=>`<p class="cw-local-meta">${esc(row.label)} · ${(row.bytes/1e9).toFixed(1)} GB · ${esc(extensionStateCopy(row.id))}</p><div class="cw-local-actions">${downloadsState()[row.id]?.status==='ready'?`<button type="button" data-gemma4-extension-remove="${row.id}">Remove extension</button>`:`<button type="button" data-gemma4-extension-download="${row.id}">Add extension</button>`}</div>`).join('')}`;
+
   const q4State=downloadsState()[Q4_ID]||{};
   if(legacyPackNeedsCore()&&q4State.status!=='ready'){
-    const actions=card.querySelector('.cw-local-actions:last-child');
+    const actions=[...card.querySelectorAll('.cw-local-actions')].find(node=>!node.closest('[data-gemma4-q2-extensions]'));
     if(actions)actions.innerHTML='<button type="button" data-gemma4-core-complete>Complete Q4F16 core</button>';
-    let note=card.querySelector('[data-gemma4-core-note]');if(!note){note=document.createElement('p');note.dataset.gemma4CoreNote='';note.className='cw-local-meta';extension.before(note)}
+    let note=card.querySelector('[data-gemma4-core-note]');
+    if(!note){
+      note=document.createElement('p');
+      note.dataset.gemma4CoreNote='';
+      note.className='cw-local-meta';
+      extension.before(note);
+    }
     note.textContent='Your existing Q2F16 files are being kept as optional extensions. Complete the Q4F16 core; no deletion or full-pack reinstall is required.';
+  }else{
+    card.querySelector('[data-gemma4-core-note]')?.remove();
   }
+
+  card.dataset.gemma4PackDecoration=signature;
   return true;
 }
-async function onClick(event){
-  const button=event.target?.closest?.('[data-gemma4-core-complete],[data-gemma4-extension-download],[data-gemma4-extension-remove]');if(!button)return;
-  event.preventDefault();event.stopImmediatePropagation();button.disabled=true;
+
+let decorateTimer=0;
+function scheduleDecorate(){
+  clearTimeout(decorateTimer);
+  const attempts=[0,60,180,420];
+  let index=0;
+  const run=()=>{
+    decorateSettings();
+    index+=1;
+    if(index<attempts.length)decorateTimer=setTimeout(run,attempts[index]);
+  };
+  decorateTimer=setTimeout(run,attempts[0]);
+}
+
+async function handleGemmaButton(button){
+  button.disabled=true;
   try{
     if(button.hasAttribute('data-gemma4-core-complete'))await completeCore();
     else if(button.dataset.gemma4ExtensionDownload)await extensionDownload(button.dataset.gemma4ExtensionDownload);
     else if(button.dataset.gemma4ExtensionRemove)await extensionRemove(button.dataset.gemma4ExtensionRemove);
-  }catch(error){try{dispatchEvent(new CustomEvent('civweave:local-model-pack-extension-error',{detail:{version:VERSION,message:String(error?.message||error)}}))}catch{};console.warn('[Civweave Gemma 4 pack]',error)}
-  finally{button.disabled=false;setTimeout(decorateSettings,50)}
+  }catch(error){
+    try{dispatchEvent(new CustomEvent('civweave:local-model-pack-extension-error',{detail:{version:VERSION,message:String(error?.message||error)}}))}catch{}
+    console.warn('[Civweave Gemma 4 pack]',error);
+  }finally{
+    button.disabled=false;
+    scheduleDecorate();
+  }
+}
+
+function onDocumentClick(event){
+  const gemma=event.target?.closest?.('[data-gemma4-core-complete],[data-gemma4-extension-download],[data-gemma4-extension-remove]');
+  if(gemma){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void handleGemmaButton(gemma);
+    return;
+  }
+  if(event.target?.closest?.('[data-settings-tab="local-models"]'))scheduleDecorate();
 }
 
 watchGlobal(REGISTRY_KEY,patchRegistry,'__civweaveGemma4PackCoreV1');
 watchGlobal(PACKS_KEY,patchPackManager,'__civweaveGemma4PackCoreV1');
-document.addEventListener('click',onClick,true);
-const observer=new MutationObserver(()=>queueMicrotask(decorateSettings));
-if(document.documentElement)observer.observe(document.documentElement,{childList:true,subtree:true});
-for(const name of ['civweave:settings-opened','civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-removed','civweave:local-model-pack-progress','pageshow'])addEventListener(name,()=>queueMicrotask(decorateSettings));
-queueMicrotask(decorateSettings);
+document.addEventListener('click',onDocumentClick,true);
+for(const name of ['civweave:settings-opened','civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-removed','civweave:local-model-pack-progress','pageshow']){
+  addEventListener(name,scheduleDecorate);
+}
+scheduleDecorate();
 
 globalThis.CivweaveGemma4PackExtensionV1=freeze({
   version:VERSION,
@@ -316,9 +407,12 @@ globalThis.CivweaveGemma4PackExtensionV1=freeze({
   extensionRemove,
   completeCore,
   decorateSettings,
+  scheduleDecorate,
   existingQ2Preserved:true,
   q2Optional:true,
   q4RequiredCore:true,
-  fullReinstallRequired:false
+  fullReinstallRequired:false,
+  renderLoopSafe:true,
+  mutationObserver:false
 });
 })();
