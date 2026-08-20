@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.163-shared-guide-surface-v236-local-planner-stream-repair';
+const VERSION='1.0.164-shared-guide-surface-v236-local-stream-authority';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -105,8 +105,9 @@ function install(){
   load('/app/guide-forward-failure-policy-v1.js?v=1.0.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
   load('/app/local-chat-bounded-recovery-v1.js?v=1.1.0-gemma4-q4',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.1.0-local-chat-bounded-recovery-v1-gemma4-q4'&&globalThis.CivweaveLocalChatBoundedRecoveryV1?.gemma4CompatibleQ4===true);
+  load('/app/local-chat-runtime-v295.js?v=1.0.118-streaming-long-output',null,()=>globalThis.CivweaveLocalChatRuntimeV295?.version==='1.0.118-local-chat-runtime-v305-streaming-long-output');
   load('/app/local-provider-authority-v1.js?v=1.0.3-inference-core-first',null,()=>globalThis.CivweaveLocalProviderAuthorityV1?.version==='1.0.3-local-provider-authority-v1-inference-core-first');
-  load('/app/guide-stream-thinking-v249.js?v=1.0.120-canonical-v350',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.120-guide-stream-thinking-v249-canonical-v350');
+  load('/app/guide-stream-thinking-v249.js?v=1.0.121-local-authority',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.121-guide-stream-thinking-v249-local-authority');
   load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
     load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.57-v257',null,()=>Boolean(globalThis.CivweaveGeminiInteractionsV159));
   },()=>Boolean(globalThis.CivweaveGeminiDeviceDirectV257));
@@ -154,6 +155,7 @@ globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   failurePolicy:'guide-forward-failure-policy-v1-local-provider-pin',
   failureHardening:'guide-forward-failure-hardening-v1-local-provider-pin',
   providerAuthority:'local-provider-authority-v1-inference-core-first',
+  localChatRuntime:'v295-streaming-long-output',
   localFallbackRecovery:'bounded-local-recovery-v1-gemma4-q4',
   boundedLocalFallbackRecovery:true,
   stallReasonPreserved:true,
@@ -199,7 +201,7 @@ globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   threadUiRequested:()=>threadUiRequested,
   activateThreadUI,
   preloadedDependencyReadyCheck:true,
-  streamThinking:'v249-canonical-v350',
+  streamThinking:'v249-local-authority-token-bridge',
   navigationLifecycle:'v424',
   surfaceMode:'bubble-only',
   launcherOwner:'guide-chat-surface-v350',
@@ -213,7 +215,7 @@ globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   artifactLanguageContract:'/config/guide-artifact-language-v1.json',
   passoverResubmitsOriginal:true,
   standardAIOnly:true,
-  localModelStartup:'request-driven-only',
+  localModelStartup:'request-driven-runtime-only',
   install
 });
 })();
