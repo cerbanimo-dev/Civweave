@@ -6,6 +6,7 @@ const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
 const GUILD_SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
+// Human chat owns its own launcher image at /app/assets/chat-symbol-v1.png; this runtime does not paint or replace it.
 const GUILD_RUNTIME_SRC='/app/guild-symbol-v1.js?v=guild-symbol-v1.5-standalone-guild-search-card';
 let guildRuntimePromise=null;
 
