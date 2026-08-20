@@ -1,22 +1,19 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-direct-shell-retired-route-shim';
+const VERSION='1.0.5-direct-routes';
 const NAV_ID='cw-themed-system-nav';
 const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
 const GUILD_SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
-const SHELL_PATH='/app/working-campus-v156.html';
 const CONTEXT_KEY='civweave.pending-system-context.v1';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
+// Only truly retired shell URLs belong here. The five canonical realm URLs are
+// first-class destinations and must never be capture-intercepted by this tray.
 const RETIRED_PATHS=Object.freeze({
-  '/app/realm-console-v140.html':'cerbanimo',
-  '/app/fellowfare-cabinet-v144.html':'fellowfare',
-  '/app/anarchadia-console-v139.html':'anarchadia',
-  '/app/cabinets/living-school/index.html':'living-school',
-  '/app/fullscreen-family-v104.html':'civweave'
+  '/app/fullscreen-family-v104.html':'civweave',
+  '/app/persistent-family-shell-v1.html':'civweave'
 });
-// Human chat owns its own launcher image at /app/assets/chat-symbol-v1.png; this runtime does not paint or replace it.
 const GUILD_RUNTIME_SRC='/app/guild-symbol-v1.js?v=guild-symbol-v1.5-standalone-guild-search-card';
 let guildRuntimePromise=null;
 let legacyRouteBound=false;
@@ -43,43 +40,42 @@ function rememberContext(system){
 }
 function legacySystemFor(value){
   let url;try{url=new URL(String(value||''),location.href)}catch{return''}
-  let system=RETIRED_PATHS[url.pathname]||'';
-  if(url.pathname==='/app/realm-console-v140.html'||url.pathname==='/app/fullscreen-family-v104.html'){
-    const explicit=String(url.searchParams.get('system')||'').toLowerCase();
-    if(SYSTEMS.has(explicit))system=explicit;
-  }
-  return SYSTEMS.has(system)?system:'';
+  const system=RETIRED_PATHS[url.pathname]||'';
+  if(!system)return'';
+  const explicit=String(url.searchParams.get('system')||url.searchParams.get('context')||'').toLowerCase();
+  return SYSTEMS.has(explicit)?explicit:system;
 }
-function switchLegacyRoute(system,source='retired-realm-link'){
+function switchLegacyRoute(system,source='retired-shell-link'){
   if(!SYSTEMS.has(system))return false;
   rememberContext(system);
-  try{if(globalThis.CivweaveSystemRoutesV227?.navigate){globalThis.CivweaveSystemRoutesV227.navigate(system,{source});return true}}catch{}
-  try{if(globalThis.CivweavePersistentSystemContextV1?.switchContext?.(system,{source,open:null,focus:false}))return true}catch{}
   try{
-    if(location.pathname===SHELL_PATH){
-      const next=new URL(location.href);next.searchParams.delete('system');if(system==='civweave')next.searchParams.delete('context');else next.searchParams.set('context',system);history.replaceState(history.state,'',`${next.pathname}${next.search}${next.hash}`);dispatchEvent(new CustomEvent('civweave:system-context-request',{detail:{system,source,navigationReload:false}}));return true;
-    }
+    const routes=globalThis.CivweaveSystemRoutesV227;
+    if(routes?.navigate){routes.navigate(system,{source});return true}
   }catch{}
-  const target=new URL(SHELL_PATH,location.origin);if(system!=='civweave')target.searchParams.set('context',system);target.searchParams.set('installed','1');location.assign(target.href);return true;
+  const fallback={
+    civweave:'/app/working-campus-v156.html',
+    'living-school':'/app/cabinets/living-school/index.html?cabinet=1',
+    cerbanimo:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1',
+    fellowfare:'/app/fellowfare-cabinet-v144.html?cabinet=1',
+    anarchadia:'/app/anarchadia-console-v139.html?cabinet=1'
+  }[system];
+  const target=new URL(fallback||'/app/working-campus-v156.html',location.origin);
+  target.searchParams.set('installed','1');
+  target.searchParams.set('source',source);
+  location.assign(target.href);
+  return true;
 }
-function normalizeLegacyShellQuery(){
-  if(location.pathname!==SHELL_PATH)return false;
-  try{
-    const url=new URL(location.href),explicit=String(url.searchParams.get('system')||'').toLowerCase();
-    if(!SYSTEMS.has(explicit)||explicit==='civweave')return false;
-    rememberContext(explicit);url.searchParams.delete('system');url.searchParams.set('context',explicit);history.replaceState(history.state,'',`${url.pathname}${url.search}${url.hash}`);return true;
-  }catch{return false}
-}
-function interceptLegacyRoute(event){
+function interceptRetiredShellRoute(event){
   if(event.defaultPrevented||event.button!=null&&event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
   const link=event.target?.closest?.('a[href]');if(!link)return;
   const system=legacySystemFor(link.href);if(!system)return;
-  event.preventDefault();event.stopImmediatePropagation();switchLegacyRoute(system,'retired-realm-link');
+  event.preventDefault();event.stopImmediatePropagation();switchLegacyRoute(system,'retired-shell-link');
 }
 function bindLegacyRoutes(){
-  normalizeLegacyShellQuery();
   if(legacyRouteBound)return true;
-  legacyRouteBound=true;document.addEventListener('click',interceptLegacyRoute,true);return true;
+  legacyRouteBound=true;
+  document.addEventListener('click',interceptRetiredShellRoute,true);
+  return true;
 }
 
 function guildFallback(){
@@ -90,7 +86,6 @@ function guildFallback(){
   location.assign(`${target.pathname}${target.search}${target.hash}`);
   return true;
 }
-
 function ensureGuildRuntime(){
   if(globalThis.CivweaveGuildSymbolV1?.openNearbyGuilds)return Promise.resolve(globalThis.CivweaveGuildSymbolV1);
   if(guildRuntimePromise)return guildRuntimePromise;
@@ -102,7 +97,6 @@ function ensureGuildRuntime(){
   }).catch(error=>{guildRuntimePromise=null;throw error});
   return guildRuntimePromise;
 }
-
 async function openGuilds(){
   try{const api=await ensureGuildRuntime();await api.openNearbyGuilds();return true}catch(error){console.warn('[Civweave] Persistent Guild action fell back to the Guild lobby.',error);return guildFallback()}
 }
@@ -117,12 +111,12 @@ function ensureMounted(){
   actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild and map');
   actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button>`;
   actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}});
-  nav.append(actions);nav.dataset.persistentActions='guilds-map-all-systems-v2';return true;
+  nav.append(actions);nav.dataset.persistentActions='guilds-map-all-systems-v3-direct-routes';return true;
 }
 
 const observer=new MutationObserver(()=>ensureMounted());
 function boot(){bindLegacyRoutes();ensureMounted();observer.observe(document.documentElement,{childList:true,subtree:true});for(const delay of [80,300,900,1800])setTimeout(ensureMounted,delay)}
-addEventListener('pageshow',()=>{bindLegacyRoutes();ensureMounted()});addEventListener('focus',ensureMounted);
+addEventListener('pageshow',ensureMounted);addEventListener('focus',ensureMounted);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,legacySystemFor,switchLegacyRoute,normalizeLegacyShellQuery,retiredRealmEntrypoints:false});
+globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,legacySystemFor,switchLegacyRoute,retiredRealmEntrypoints:false,canonicalRealmInterception:false});
 })();
