@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.167-shared-guide-surface-v236-gemma4-perf-stream';
+const VERSION='1.0.168-shared-guide-surface-v236-gemma4-perf-stream';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -27,7 +27,7 @@ function install(){
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
   load('/app/local-chat-bounded-recovery-v1.js?v=1.1.0-gemma4-q4',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.1.0-local-chat-bounded-recovery-v1-gemma4-q4'&&globalThis.CivweaveLocalChatBoundedRecoveryV1?.gemma4CompatibleQ4===true);
   load('/app/local-chat-runtime-v295.js?v=1.0.119-task-aware-streaming',()=>{
-    load('/app/local-ai/gemma4-inference-repair-v1.js?v=1.0.0-template-logits-v315',null,()=>globalThis.CivweaveGemma4InferenceRepairV1?.version==='1.0.0-gemma4-inference-repair-v1');
+    load('/app/local-ai/gemma4-inference-repair-v1.js?v=1.0.1-all-worker-variants',null,()=>globalThis.CivweaveGemma4InferenceRepairV1?.version==='1.0.1-gemma4-inference-repair-v1');
   },()=>globalThis.CivweaveLocalChatRuntimeV295?.version==='1.0.119-local-chat-runtime-v305-task-aware-streaming');
   load('/app/local-provider-authority-v1.js?v=1.0.3-inference-core-first',null,()=>globalThis.CivweaveLocalProviderAuthorityV1?.version==='1.0.3-local-provider-authority-v1-inference-core-first');
   load('/app/guide-stream-thinking-v249.js?v=1.0.123-raf-local-authority',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.123-guide-stream-thinking-v249-raf-local-authority');
