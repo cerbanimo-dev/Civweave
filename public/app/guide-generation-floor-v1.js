@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-guide-generation-floor-v1-streaming-platform-planning';
+const VERSION='1.2.0-guide-generation-floor-v1-streaming-platform-planning';
 const MIDDLEWARE_ID='guide-generation-floor-v1';
 const FLOOR_TOKENS=900;
 const PLANNING_FLOOR_TOKENS=1800;
@@ -29,6 +29,14 @@ function requestText(request={}){
 function learningIntentRequest(request={}){
   if(!guideRequest(request)||systemFor(request)!=='living-school')return false;
   return /\b(?:learn|learning|study|studying|practice|practise|master|mastering|train|training|course|curriculum|lesson plan|study plan|skill tree)\b/i.test(requestText(request));
+}
+
+function learningGoalText(value=''){
+  const text=String(value||'').trim();
+  if(!text)return false;
+  return /\b(?:i\s+(?:want|need|plan|hope|intend|would\s+like|['’]?d\s+like)\s+to|my\s+goal\s+is\s+to|i(?:['’]?m|\s+am)\s+(?:trying|ready)\s+to|help\s+me(?:\s+to)?|can\s+you\s+help\s+me(?:\s+to)?)\s+(?:learn|study|master|practice|practise|train|understand)\b/i.test(text)
+    || /^\s*(?:learn|study|master|practice|practise|train)\b/i.test(text)
+    || /\bteach\s+me\b/i.test(text);
 }
 
 function planningRequest(request={}){
@@ -79,6 +87,26 @@ function enforce(request={}){
   return injectPlanningContract(next);
 }
 
+function installLivingSchoolPlatformPlanner(){
+  const assistant=globalThis.CivweaveAssistantV141,unified=globalThis.CivweaveUnifiedChatSystemV1,current=assistant?.respond;
+  if(!assistant||typeof current!=='function'||typeof unified?.runLivingSchoolCurriculum!=='function')return false;
+  let cursor=current,depth=0;
+  while(typeof cursor==='function'&&depth<16){if(cursor.__cwMossLearningGoalPlannerV1)return true;cursor=cursor.__prior;depth+=1}
+  const original=current.bind(assistant);
+  const respond=async options=>{
+    const input=options||{},system=String(input.systemId||unified.activeTheme?.()||'').trim().toLowerCase(),text=String(input.text||'').trim(),history=Array.isArray(input.history)?input.history:[];
+    if(system==='living-school'&&(unified.curriculumIntent?.(text,history)||learningGoalText(text))){
+      return unified.runLivingSchoolCurriculum({...input,systemId:'living-school'});
+    }
+    return original(input);
+  };
+  respond.__cwMossLearningGoalPlannerV1=true;
+  respond.__prior=current;
+  for(const key of ['__cwUnifiedChatSystemV1','__weavelingPlanJsonV190','__guideIdentityIntegrityV216','__cwGuideCapabilityPassoverV1','__deterministicModeV175'])if(current[key])respond[key]=current[key];
+  try{assistant.respond=respond}catch{return false}
+  return assistant.respond===respond;
+}
+
 function register(){
   const spine=globalThis.CivweaveFastInteractiveV192;
   if(!spine?.register)return false;
@@ -89,14 +117,15 @@ function register(){
     return {request:next,state:{floorTokens:Number(next.__civweaveGuideGenerationFloorTokens||FLOOR_TOKENS),planningContract:Boolean(next.__civweaveGuidePlanningContract),localStreaming:Boolean(next.__civweaveGuideLocalStreaming),platformPlanning:next.__civweaveGuidePlatformPlanning||null}};
   }},-1000);
   registeredSpine=spine;
-  try{dispatchEvent(new CustomEvent('civweave:guide-generation-floor-ready',{detail:{version:VERSION,floorTokens:FLOOR_TOKENS,planningFloorTokens:PLANNING_FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,planningContract:true,localGuideStreaming:true,platformPlanning:true}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:guide-generation-floor-ready',{detail:{version:VERSION,floorTokens:FLOOR_TOKENS,planningFloorTokens:PLANNING_FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,planningContract:true,localGuideStreaming:true,platformPlanning:true,mossLearningGoalPlanner:true}}))}catch{}
   return true;
 }
 
-addEventListener('civweave:runtime-spine-ready',register);
-addEventListener('civweave:model-runtime-ready',register);
-addEventListener('pageshow',register);
+for(const name of ['civweave:runtime-spine-ready','civweave:model-runtime-ready'])addEventListener(name,register);
+for(const name of ['civweave:assistant-runtime-ready','civweave:unified-chat-system-ready','civweave:guide-capability-passover-ready','civweave:guide-loader-reset'])addEventListener(name,()=>queueMicrotask(installLivingSchoolPlatformPlanner));
+addEventListener('pageshow',()=>{register();queueMicrotask(installLivingSchoolPlatformPlanner)});
 register();
+queueMicrotask(installLivingSchoolPlatformPlanner);
 
 globalThis.CivweaveGuideGenerationFloorV1=Object.freeze({
   version:VERSION,
@@ -108,10 +137,12 @@ globalThis.CivweaveGuideGenerationFloorV1=Object.freeze({
   systemFor,
   requestText,
   learningIntentRequest,
+  learningGoalText,
   planningRequest,
   localGuideRequest,
   applyPlatformPlanningContext,
   injectPlanningContract,
+  installLivingSchoolPlatformPlanner,
   planningContract:PLANNING_CONTRACT,
   enforce,
   register,
@@ -119,5 +150,6 @@ globalThis.CivweaveGuideGenerationFloorV1=Object.freeze({
   planningContractV1:true,
   localGuideStreaming:true,
   platformPlanning:true,
+  mossLearningGoalPlanner:true,
 });
 })();
