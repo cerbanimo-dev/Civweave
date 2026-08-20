@@ -26,10 +26,21 @@ assert.match(actions,/smallFileRecovery:true/);
 assert.match(actions,/preservesExistingLargeFiles:true/);
 assert.match(actions,/data-gemma4-use-model/);
 assert.match(actions,/prepareCurrentReceipt/);
+assert.match(actions,/stuckBrowserDownloadRetry:true/);
+assert.match(actions,/browserImportAction:true/);
+assert.match(actions,/startedIsNotCompleted:true/);
+assert.match(actions,/data-gemma4-import-downloaded/);
+assert.match(actions,/data-gemma4-retry-missing/);
+assert.match(actions,/retryMissingDownload/);
+assert.match(actions,/importDownloadedFiles/);
+assert.match(actions,/bridge\(\)\.retryMissing|b\.retryMissing/);
+assert.match(actions,/bridge\(\)\.pickAndImport/);
+assert.match(actions,/if\(!unstartedMissing\.length\)return\{available:false,needsDownloads:true,needsImport:true,retryAvailable:true/);
 assert.match(controller,/gemma4-e4b-q4-extension-v1\.js\?v=1\.0\.0-e4b-q4-deep/);
 assert.match(controller,/gemma4-pack-extension-v1\.js\?v=1\.0\.1-render-safe/);
-assert.match(controller,/gemma4-dual-q4-actions-v1\.js\?v=1\.0\.0-independent-use/);
-assert.match(coherence,/local-ai-code-v317-gemma4-dual-q4/);
+assert.match(controller,/gemma4-dual-q4-actions-v1\.js\?v=1\.1\.0-retry-import/);
+assert.match(controller,/gemma4BrowserRetry:true/);
+assert.match(controller,/gemma4BrowserImport:true/);
 assert.match(coherence,/gemma4-e4b-q4-extension-v1\.js/);
 assert.match(coherence,/gemma4-dual-q4-actions-v1\.js/);
 assert.match(coherence,/gemma4IndependentQ4UseCoherent: true/);
@@ -112,6 +123,9 @@ console.log(JSON.stringify({
   deepModel:patchedPack.deepModel,
   q2Required:false,
   independentUse:true,
+  browserRetry:true,
+  browserImport:true,
+  startedIsNotCompleted:true,
   existingQ2Preserved:true,
   fullReinstallRequired:false,
   pwaCoherent:true
