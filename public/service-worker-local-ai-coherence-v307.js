@@ -1,8 +1,9 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v319-gemma-stream-finalization';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v320-litert-gemma4-fast';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
+const CW_LITERT_VENDOR_PREFIX = '/app/vendor/litert-lm/';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/system-routes-v227.js',
   '/app/settings-gateway-v317.js',
@@ -14,6 +15,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/guide-stream-thinking-v249.js',
   '/app/local-provider-authority-v1.js',
   '/app/local-guide-control-bypass-v1.js',
+  '/app/intention-planner-v141.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
@@ -39,6 +41,7 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/guide-stream-thinking-v249.js',
   '/app/local-provider-authority-v1.js',
   '/app/local-guide-control-bypass-v1.js',
+  '/app/intention-planner-v141.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-bounded-recovery-v1.js',
   '/app/local-chat-owner-v295.js',
@@ -55,6 +58,9 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/local-ai/bootstrap-v266.js',
   '/app/local-ai/model-registry-v266.js',
   '/app/local-ai/gemma4-pack-extension-v1.js',
+  '/app/local-ai/gemma4-litert-fast-extension-v1.js',
+  '/app/local-ai/gemma4-inference-repair-v1.js',
+  '/app/local-ai/litert-gemma4-fast-runtime-v1.js',
   '/app/local-ai/gemma4-e4b-q4-extension-v1.js',
   '/app/local-ai/gemma4-dual-q4-actions-v1.js',
   '/app/local-ai/download-manager-v267.js',
@@ -77,6 +83,9 @@ function cwLocalAIKey(pathname) {
 function cwLocalAIEligible(request, url) {
   if (!['GET', 'HEAD'].includes(request.method)) return false;
   if (url.origin !== self.location.origin) return false;
+  if (url.pathname.startsWith(CW_LITERT_VENDOR_PREFIX)) {
+    return /\.(?:m?js|wasm|json)$/i.test(url.pathname);
+  }
   if (!/\.m?js$/i.test(url.pathname)) return false;
   return url.pathname.startsWith('/app/local-ai/') || CW_LOCAL_AI_EXTRA_PATHS.has(url.pathname);
 }
@@ -170,6 +179,7 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   cache: CW_LOCAL_AI_COHERENCE_CACHE,
   critical: CW_LOCAL_AI_CRITICAL.slice(),
   extraPaths: Object.freeze([...CW_LOCAL_AI_EXTRA_PATHS]),
+  liteRtVendorPrefix: CW_LITERT_VENDOR_PREFIX,
   policy: 'network-first-current-bytes-offline-cache-fallback',
   installPolicy: 'lifecycle-deferred-capability-on-demand',
   warmMessage: 'CIVWEAVE_WARM_LOCAL_AI_CODE',
@@ -185,8 +195,13 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   guideStreamCurrentBytes: true,
   localProviderAuthorityCurrentBytes: true,
   localGuideControlCurrentBytes: true,
+  intentionPlannerCurrentBytes: true,
   gemma4CompatibleQ4Coherent: true,
   gemma4PackCoreCoherent: true,
+  gemma4LiteRTFastCodeCoherent: true,
+  gemma4InferenceRepairCoherent: true,
+  liteRtVendorRuntimeNetworkFirst: true,
+  liteRtVendorRuntimeEagerInstall: false,
   gemma4E4BQ4Coherent: true,
   gemma4IndependentQ4UseCoherent: true,
   gemma4Q2OptionalExtensionCoherent: true
