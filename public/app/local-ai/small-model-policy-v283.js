@@ -42,16 +42,29 @@ function structuredAnswer(textValue){
   }
   return'';
 }
+function guideEnvelope(value){
+  if(!value||Array.isArray(value)||typeof value!=='object'||typeof value.answer!=='string')return false;
+  return ['choice','assumptions','requiresConsent','confidence','questDraft'].filter(key=>Object.prototype.hasOwnProperty.call(value,key)).length>=2;
+}
+function guideAnswerIncomplete(textValue){
+  const value=parseStructured(textValue),answer=value&&guideEnvelope(value)?structuredAnswer(textValue):'';
+  if(!answer)return false;
+  if(looksAbrupt(answer))return true;
+  const words=answer.split(/\s+/).filter(Boolean).length;
+  if(words<16)return false;
+  return !/[.!?…]["')\]}]*\s*$/.test(answer);
+}
 function validateCompletion(run={},textValue='',options={}){
-  const s=structure(textValue),completion=run.completion||{},near=Boolean(completion.nearTokenLimit||completion.completionReason==='length'),structured=Boolean(options.structured),jsonValid=options.jsonValid!==false,abrupt=looksAbrupt(textValue),answer=structured&&jsonValid?structuredAnswer(textValue):'';
+  const s=structure(textValue),completion=run.completion||{},near=Boolean(completion.nearTokenLimit||completion.completionReason==='length'),structured=Boolean(options.structured),jsonValid=options.jsonValid!==false,abrupt=looksAbrupt(textValue),answer=structured&&jsonValid?structuredAnswer(textValue):'',guideIncomplete=structured&&jsonValid?guideAnswerIncomplete(textValue):false;
   if(near)return{clipped:true,reason:'token-limit',structure:s};
   if(s.incomplete)return{clipped:true,reason:'open-structure',structure:s};
   if(structured&&jsonValid&&answer&&looksAbrupt(answer))return{clipped:true,reason:'structured-answer-abrupt',structure:s};
+  if(structured&&jsonValid&&guideIncomplete)return{clipped:true,reason:'structured-guide-answer-incomplete',structure:s};
   if(structured&&!jsonValid&&abrupt)return{clipped:true,reason:'structured-abrupt',structure:s};
   if(!structured&&abrupt)return{clipped:true,reason:'abrupt-text',structure:s};
   return{clipped:false,reason:'complete',structure:s};
 }
-function continuationPrompt({structured=false}={}){return structured?'Return one complete corrected JSON object replacing the previous structured response. Preserve fields that were already complete, finish any incomplete answer or value, and close every structure. Return JSON only; do not explain the correction.':'Continue exactly where the previous response stopped. Do not restart, summarize, or repeat any earlier text. Finish only the incomplete answer.'}
+function continuationPrompt({structured=false}={}){return structured?'Return one complete corrected JSON object replacing the previous structured response. Preserve fields that were already complete, finish any incomplete answer or value, and close every structure. The answer must be semantically complete and end on a complete sentence; if the user asked for a plan, include the full plan rather than a preamble or partial list. Return JSON only; do not explain the correction.':'Continue exactly where the previous response stopped. Do not restart, summarize, or repeat any earlier text. Finish only the incomplete answer.'}
 function mergeContinuation(baseValue,nextValue){
   const base=text(baseValue),next=text(nextValue);
   if(!next)return base;if(!base)return next;
@@ -64,7 +77,7 @@ function mergeContinuation(baseValue,nextValue){
   return base+next;
 }
 function continuationMessages(messages,partial,options={}){const rows=Array.isArray(messages)?messages.slice():[];rows.push({role:'assistant',content:text(partial)});rows.push({role:'user',content:continuationPrompt(options)});return rows}
-const api=Object.freeze({version:VERSION,profile,structure,looksAbrupt,parseStructured,structuredAnswer,validateCompletion,continuationPrompt,mergeContinuation,continuationMessages,structuredAnswerCompletionValidation:true});
+const api=Object.freeze({version:VERSION,profile,structure,looksAbrupt,parseStructured,structuredAnswer,guideEnvelope,guideAnswerIncomplete,validateCompletion,continuationPrompt,mergeContinuation,continuationMessages,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true});
 globalThis.CivweaveLocalSmallModelPolicyV283=api;
-try{dispatchEvent(new CustomEvent('civweave:local-small-model-policy-ready',{detail:{version:VERSION,tokenBudgeting:true,adaptiveOutput:true,continuationValidation:true,structuredAnswerCompletionValidation:true}}))}catch{}
+try{dispatchEvent(new CustomEvent('civweave:local-small-model-policy-ready',{detail:{version:VERSION,tokenBudgeting:true,adaptiveOutput:true,continuationValidation:true,structuredAnswerCompletionValidation:true,guideAnswerCompletionValidation:true}}))}catch{}
 })();
