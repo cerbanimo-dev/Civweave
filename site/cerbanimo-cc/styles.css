@@ -224,7 +224,7 @@ footer a { color: #cfc6d9; }
   .lari-scene, .lari-scene > img { min-height: 430px; }
   .lari-profile { min-height: 470px; padding: 24px; }
   .lari-profile::after { background: linear-gradient(0deg, rgba(8,4,16,.97) 0 36%, rgba(8,4,16,.32) 66%, rgba(8,4,16,.05)); }
-  .lari-cutout { width: 112%; right: -12%; bottom: 16%; opacity: .88; }
+  .lari-cutout { width: 112%; right: -12%; bottom: calc(16% + 250px); opacity: .88; }
   .lari-profile-copy { width: 100%; max-width: none; }
   .lari-profile p { font-size: 13px; }
   .lari-rule { padding: 25px; }
