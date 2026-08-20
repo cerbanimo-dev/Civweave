@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v311-hard-local-settings-guild-capacity';
+const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v312-guild-discovery-coherence';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
@@ -14,7 +14,10 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/ai-capability-broker-v268.js',
   '/app/fast-interactive-runtime-v192.js',
   '/app/mobile-ai-hardening-v302.js',
-  '/app/document-lifecycle-v221.js'
+  '/app/document-lifecycle-v221.js',
+  '/app/guild-symbol-v1.js',
+  '/app/working-campus-home-relocation-v441.js',
+  '/app/mobile-guild-create-v1.mjs'
 ]);
 const CW_LOCAL_AI_CRITICAL = [
   '/app/settings-gateway-v317.js',
@@ -28,6 +31,9 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/fast-interactive-runtime-v192.js',
   '/app/mobile-ai-hardening-v302.js',
   '/app/document-lifecycle-v221.js',
+  '/app/guild-symbol-v1.js',
+  '/app/working-campus-home-relocation-v441.js',
+  '/app/mobile-guild-create-v1.mjs',
   '/app/local-ai/bootstrap-v266.js',
   '/app/local-ai/model-registry-v266.js',
   '/app/local-ai/download-manager-v267.js',
@@ -50,7 +56,7 @@ function cwLocalAIKey(pathname) {
 function cwLocalAIEligible(request, url) {
   if (!['GET', 'HEAD'].includes(request.method)) return false;
   if (url.origin !== self.location.origin) return false;
-  if (!/\.js$/i.test(url.pathname)) return false;
+  if (!/\.m?js$/i.test(url.pathname)) return false;
   return url.pathname.startsWith('/app/local-ai/') || CW_LOCAL_AI_EXTRA_PATHS.has(url.pathname);
 }
 
@@ -90,11 +96,10 @@ async function cwLocalAICleanup() {
   )));
 }
 
-// Local AI is explicitly on-demand. Do not make service-worker installation or
-// activation depend on downloading AI/settings modules or scanning old AI
-// caches. Those operations previously held Android PWA updates in "installing"
-// long enough to strand cold launch. The fetch gate below still keeps every
-// module coherent and caches it the first time the capability is actually used.
+// Local AI and Guild discovery code are explicitly on-demand. Do not make
+// service-worker installation or activation depend on warming these modules.
+// The fetch gate below keeps current code network-first and preserves an
+// offline fallback after each capability is used once.
 self.addEventListener('install', event => {
   event.waitUntil(Promise.resolve());
 });
@@ -135,7 +140,7 @@ self.addEventListener('fetch', event => {
           ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers })
           : cached;
       }
-      return new Response(`Civweave local-AI code unavailable: ${url.pathname}`, {
+      return new Response(`Civweave current code unavailable: ${url.pathname}`, {
         status: 503,
         headers: { 'content-type': 'text/plain; charset=utf-8' }
       });
@@ -153,5 +158,6 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   warmMessage: 'CIVWEAVE_WARM_LOCAL_AI_CODE',
   smoothFitOrchestrator: true,
   ownsBeforeGenericCodeCoherence: true,
-  bootstrapCapabilityReadiness: true
+  bootstrapCapabilityReadiness: true,
+  guildDiscoveryCoherent: true
 });
