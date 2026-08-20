@@ -2,12 +2,13 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [extension,runtime]=await Promise.all([
+const [extension,runtime,stageRuntime]=await Promise.all([
   read('public/app/local-ai/gemma4-litert-fast-extension-v1.js'),
-  read('public/app/local-ai/litert-gemma4-fast-runtime-v1.js')
+  read('public/app/local-ai/litert-gemma4-fast-runtime-v1.js'),
+  read('scripts/stage-litert-lm-web-assets.mjs')
 ]);
 
-for(const source of [extension,runtime])new Function(source);
+for(const source of [extension,runtime,stageRuntime])new Function(source.replace(/^#!.*\n/,''));
 
 // Exact, pinned Web-optimized Gemma 4 artifacts for the 12 GB Android profile.
 assert.match(extension,/gemma4-e2b-it-litert-web/);
@@ -59,14 +60,31 @@ assert.match(runtime,/instantiateEngine\(mod,profile,false\)/);
 assert.match(runtime,/civweave:litert-gemma4-mtp-fallback/);
 assert.match(runtime,/webBindingSpeculativeDecodingConfigured:engineUsesMtp/);
 
+// Pages cannot ship LiteRT's >24 MiB Asyncify fallback binaries. The phone
+// fast lane therefore requires Chromium's standardized JSPI path; unsupported
+// browsers take the existing ONNX fallback before LiteRT is loaded.
+assert.match(runtime,/WebAssembly\?\.Suspending/);
+assert.match(runtime,/WebAssembly\?\.promising/);
+assert.match(runtime,/capability:'webassembly-jspi'/);
+assert.match(runtime,/jspiRequired:true/);
+assert.match(stageRuntime,/litertlm_wasm_asyncify_internal\.wasm/);
+assert.match(stageRuntime,/litertlm_wasm_compat_asyncify_internal\.wasm/);
+assert.match(stageRuntime,/omitPagesIncompatibleFallbacks/);
+assert.match(stageRuntime,/browserProfile:'chromium-jspi-webgpu'/);
+assert.match(stageRuntime,/requiresJspi:true/);
+assert.match(stageRuntime,/MAX_CLOUDFLARE_ASSET_BYTES=24\*1024\*1024/);
+
 console.log(JSON.stringify({
   ok:true,
-  profile:'gemma4-12gb-android-litert-dual-mtp-v1',
+  profile:'gemma4-12gb-android-litert-dual-mtp-jspi-v1',
   fastModel:'gemma4-e2b-it-litert-web',
   deepModel:'gemma4-e4b-it-litert-web',
   contextTokens:4096,
   maxOutputTokens:{e2b:2400,e4b:2800},
   engineResidency:'one-at-a-time',
   compatibilityFallback:'existing ONNX Q4/Q2',
-  mtp:'requested-with-safe-non-mtp-engine-fallback'
+  mtp:'requested-with-safe-non-mtp-engine-fallback',
+  webRuntime:'chromium-jspi-webgpu',
+  pagesAssetLimitMiB:24,
+  asyncifyFallbacks:'excluded-from-pages-output'
 },null,2));
