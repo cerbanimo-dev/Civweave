@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
@@ -14,12 +15,14 @@ on:
       - 'public/service-worker.js'
       - 'scripts/stage-litert-lm-web-assets.mjs'
       - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/verify-weaveling-plan-json-v190.mjs'
       - 'scripts/verify-weaveling-community-garden-litert-v1.mjs'
       - '.github/workflows/verify-weaveling-community-garden-litert-v1.yml'
   pull_request:
     paths:
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/unified-chat-system-v1.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
@@ -29,6 +32,7 @@ on:
       - 'public/service-worker.js'
       - 'scripts/stage-litert-lm-web-assets.mjs'
       - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/verify-weaveling-plan-json-v190.mjs'
       - 'scripts/verify-weaveling-community-garden-litert-v1.mjs'
       - '.github/workflows/verify-weaveling-community-garden-litert-v1.yml'
 
@@ -46,5 +50,7 @@ jobs:
           node-version: '22'
       - name: Pack and stage pinned LiteRT web runtime
         run: node scripts/stage-litert-lm-web-assets.mjs --force
+      - name: Verify AI-required Quest authoring
+        run: node scripts/verify-weaveling-plan-json-v190.mjs
       - name: Verify AI Quest routing and fast-lane contracts
         run: node scripts/verify-weaveling-community-garden-litert-v1.mjs
