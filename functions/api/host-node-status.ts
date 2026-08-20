@@ -83,6 +83,16 @@ async function directoryMobileGuild(directoryUrl: string, nodeId: string | null,
   return row;
 }
 
+function mobileGuildPublishedSlots(capacity: JsonRecord) {
+  if (capacity?.capacityAvailable !== true) return null;
+  const free = finiteWhole(capacity?.slots?.free ?? capacity?.communitySeatsRemaining);
+  if (free == null) return null;
+  return {
+    free,
+    paid: finiteWhole(capacity?.slots?.paid ?? capacity?.paidExpansionSeatsRemaining) ?? 0,
+  };
+}
+
 async function mobileGuildStatus(target: URL, nodeId: string, directoryRow: JsonRecord, extra: JsonRecord = {}) {
   try {
     const [statusResult, capacityResult] = await Promise.all([
@@ -96,6 +106,7 @@ async function mobileGuildStatus(target: URL, nodeId: string, directoryRow: Json
     if (!capacityResult.ok || capacity?.status !== "ready" || !Array.isArray(capacity?.starterNodes) || capacity.starterNodes.length < 3) {
       return reply({ ok: false, error: "mobile-guild-fabric-unavailable", hostOrigin: target.origin, nodeId, capacityStatus: capacityResult.status, ...extra }, 502);
     }
+    const slots = mobileGuildPublishedSlots(capacity);
     return reply({
       schema: "civweave.host-node-status.v1",
       ok: true,
@@ -106,9 +117,22 @@ async function mobileGuildStatus(target: URL, nodeId: string, directoryRow: Json
       runtime: "cloudflare-mobile-guild-edge",
       status: "online",
       health: { ok: true, connections: null, updatedAt: status.updatedAt || capacity.updatedAt || directoryRow.updatedAt || null },
-      slots: null,
-      capacityAvailable: false,
-      capacityMessage: "This Mobile Guild is online and discoverable. Its current Worker does not publish Citizen/Patron seat accounting yet, so Civweave will not invent slot numbers.",
+      slots,
+      capacityAvailable: Boolean(slots),
+      capacityMessage: slots
+        ? "This Mobile Guild publishes live Citizen capacity and resident neuron accounting."
+        : "This Mobile Guild is online and discoverable. Its current Worker does not publish Citizen/Patron seat accounting yet, so Civweave will not invent slot numbers.",
+      capacity: slots ? {
+        workersPlan: capacity.workersPlan || "free",
+        memberCount: finiteWhole(capacity.memberCount),
+        nodeMembers: finiteWhole(capacity.nodeMembers),
+        communityMemberCount: finiteWhole(capacity.communityMemberCount),
+        nodeCommunityMembers: finiteWhole(capacity.nodeCommunityMembers),
+        activePaidMembers: finiteWhole(capacity.activePaidMembers),
+        includedDailyNeurons: finiteWhole(capacity.includedDailyNeurons),
+        dailyRemainingNeurons: finiteWhole(capacity.dailyRemainingNeurons),
+        residentSessionSchema: String(capacity.residentSessionSchema || "") || null,
+      } : undefined,
       publicMobileGuild: true,
       starterNodeCount: capacity.starterNodes.length,
       aiEnabled: capacity.aiEnabled === true,
