@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.159-shared-guide-surface-v236-inference-core-first';
+const VERSION='1.0.160-shared-guide-surface-v236-bounded-local-recovery';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -104,6 +104,7 @@ function install(){
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
   load('/app/guide-forward-failure-policy-v1.js?v=1.0.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
+  load('/app/local-chat-bounded-recovery-v1.js?v=1.0.0-bounded-local-recovery',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.0.0-local-chat-bounded-recovery-v1');
   load('/app/local-provider-authority-v1.js?v=1.0.3-inference-core-first',null,()=>globalThis.CivweaveLocalProviderAuthorityV1?.version==='1.0.3-local-provider-authority-v1-inference-core-first');
   load('/app/guide-stream-thinking-v249.js?v=1.0.118-v249-navigation-lifecycle-v424',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
   load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
@@ -153,6 +154,10 @@ globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({
   failurePolicy:'guide-forward-failure-policy-v1-local-provider-pin',
   failureHardening:'guide-forward-failure-hardening-v1-local-provider-pin',
   providerAuthority:'local-provider-authority-v1-inference-core-first',
+  localFallbackRecovery:'bounded-local-recovery-v1',
+  boundedLocalFallbackRecovery:true,
+  stallReasonPreserved:true,
+  fifteenMinuteChatFloorRetired:true,
   failureDirection:'forward-only',
   terminalGenerativeFallback:'automatic-server-auto-unless-local-pinned',
   deterministicAnswerFallback:false,
