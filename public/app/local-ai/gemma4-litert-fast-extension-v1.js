@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-gemma4-litert-fast-extension-v1-offline-runtime';
+const VERSION='1.0.2-gemma4-litert-fast-extension-v1-upgrade-card';
 const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const FAST_ID='gemma4-e2b-it-litert-web';
 const LEGACY_Q4_ID='gemma4-e2b-it-q4f16';
@@ -11,10 +11,12 @@ const ARTIFACT_BYTES=2_008_432_640;
 const RUNTIME_ROOT='/app/vendor/litert-lm/';
 const RUNTIME_MANIFEST=`${RUNTIME_ROOT}stage-manifest.json`;
 const RUNTIME_CACHE='civweave-litert-lm-runtime-v1';
+const UPGRADE_ID='cw-gemma4-litert-fast-upgrade-v1';
 if(globalThis.CivweaveGemma4LiteRTFastExtensionV1?.version===VERSION)return;
 const freeze=value=>Object.freeze(value);
-let primeFlight=null,primed=false;
+let primeFlight=null,primed=false,uiObserver=null;
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,id:FAST_ID,at:new Date().toISOString(),...detail}}))}catch{}};
+const fmt=bytes=>`${(Number(bytes||0)/1e9).toFixed(1)} GB`;
 function fastSpec(registry){
   const legacy=registry?.byId?.(LEGACY_Q4_ID)||registry?.byId?.('gemma4-e2b-it-q2f16-mobile')||{};
   return freeze({...legacy,id:FAST_ID,label:'Gemma 4 E2B IT · LiteRT Fast',tier:'Gemma 4 Fast',hardwareTier:'8+ GB RAM · WebGPU · optimized LiteRT-LM',status:'device-test',installable:true,recommended:'phone-fast',provider:'huggingface',repo:REPO,revision:REVISION,task:'text-generation',dtype:'litert-web',device:'webgpu',runtime:'litert-lm-web',runtimeAsset:'/app/vendor/litert-lm/dist/index.js',wasmRoot:'/app/vendor/litert-lm/wasm/',wasmChunks:freeze([]),textOnly:true,requiresShaderF16:false,estimatedBytes:ARTIFACT_BYTES,license:'Apache-2.0',sourceModel:'google/gemma-4-E2B-it',preferBackground:true,contextWindowTokens:128_000,workingContextTokens:4_096,healthTimeoutMs:600_000,generation:freeze({topK:64,topP:.95,nonThinkingTemperature:1,thinkingTemperature:1,thinkingSupported:true}),capabilities:legacy.capabilities||freeze({interactive:true,structuredOutput:true,agenticReasoning:true,code:true,tools:false,externalResearch:false,vision:false,audio:false,multimodal:false}),fallbackIds:freeze([LEGACY_Q4_ID,'gemma3-1b-it-q4f16','qwen3-1.7b-q4f16','qwen3-0.6b-q4f16','qwen3-0.6b-q8-wasm']),accelerationFor:LEGACY_Q4_ID,optimizedRuntime:'google-litert-lm-webgpu',artifactSha256:'3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5',artifacts:freeze([freeze({path:ARTIFACT,minBytes:2_000_000_000,required:true,revision:REVISION,sizeBytes:ARTIFACT_BYTES})])});
@@ -36,9 +38,19 @@ async function primeRuntime({force=false}={}){if(primed&&!force)return true;if(p
 async function download({onProgress}={}){if(!watch())throw new Error('The local model registry is not ready.');const downloadManager=globalThis.CivweaveLocalModelDownloadV266;if(!downloadManager?.start)throw new Error('The local model download manager is not ready.');const result=await downloadManager.start(FAST_ID,{onProgress,preferBackground:true});const current=await status();if(current?.available)void primeRuntime().catch(()=>null);return result}
 async function remove(){primed=false;try{await caches.delete(RUNTIME_CACHE)}catch{}return globalThis.CivweaveLocalModelDownloadV266?.remove?.(FAST_ID)}
 function maybePrime(event){const detail=event?.detail||{},state=detail.state||detail;if(detail.id!==FAST_ID&&state.id!==FAST_ID)return;if(String(state.status||detail.status||'')==='ready'||detail.type==='ready')void primeRuntime().catch(()=>null)}
-watch();
-for(const name of ['civweave:local-model-runtime-ready','civweave:guide-loader-reset','civweave:settings-local-route-ready','pageshow'])addEventListener(name,()=>queueMicrotask(watch));
-addEventListener('civweave:local-model-download-progress',maybePrime);addEventListener('civweave:local-model-downloaded',event=>{if(event?.detail?.id===FAST_ID)void primeRuntime().catch(()=>null)});
-try{dispatchEvent(new CustomEvent('civweave:gemma4-litert-fast-extension-ready',{detail:{version:VERSION,id:FAST_ID,bytes:ARTIFACT_BYTES,revision:REVISION,explicitDownload:true,offlineRuntimePriming:true}}))}catch{}
-globalThis.CivweaveGemma4LiteRTFastExtensionV1=freeze({version:VERSION,id:FAST_ID,legacyQ4Id:LEGACY_Q4_ID,repo:REPO,revision:REVISION,artifact:ARTIFACT,artifactBytes:ARTIFACT_BYTES,artifactSha256:'3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5',runtimeVersion:'0.14.0',runtimeCache:RUNTIME_CACHE,watch,patchRegistry,status,download,remove,primeRuntime,explicitDownload:true,transparentAcceleration:true,offlineRuntimePriming:true,state:()=>freeze({primed,priming:Boolean(primeFlight)})});
+async function renderUpgradeCard(){
+  const panel=document.getElementById('cw-local-ai-v324');if(!panel?.isConnected)return false;
+  let card=document.getElementById(UPGRADE_ID);if(!card){card=document.createElement('article');card.id=UPGRADE_ID;card.className='cw-local-row';card.dataset.modelId=FAST_ID;const details=panel.querySelector('details');details?panel.insertBefore(card,details):panel.append(card)}
+  const checked=await status(),state=checked?.state||{},ready=Boolean(checked?.available),busy=['downloading','finalizing'].includes(String(state.status||'')),percent=Math.max(0,Math.min(100,Number(state.percent||0)));
+  card.innerHTML=`<div><b>Gemma 4 E2B · LiteRT Fast performance upgrade</b><p>Purpose-built WebGPU runtime for Gemma 4. Download: ${fmt(ARTIFACT_BYTES)}. Your existing ONNX Gemma 4 stays installed as the compatibility fallback.</p><p class="cw-local-meta">${ready?'READY · existing Gemma 4 Q4 chats automatically use the LiteRT fast lane.':busy?`${String(state.status||'downloading').toUpperCase()} · ${percent}%`:'Optional. Nothing downloads until you choose it.'}</p></div><div class="cw-local-actions">${ready?'<button type="button" data-litert-fast-remove>Remove fast upgrade</button>':`<button type="button" data-litert-fast-download ${busy?'disabled':''}>${busy?'Downloading…':'Download 2.0 GB fast upgrade'}</button>`}</div>`;
+  card.querySelector('[data-litert-fast-download]')?.addEventListener('click',async event=>{const button=event.currentTarget;button.disabled=true;button.textContent='Starting download…';try{await download();await renderUpgradeCard()}catch(error){button.disabled=false;button.textContent='Retry fast upgrade';emit('civweave:gemma4-litert-upgrade-ui-error',{message:String(error?.message||error)})}});
+  card.querySelector('[data-litert-fast-remove]')?.addEventListener('click',async event=>{const button=event.currentTarget;button.disabled=true;try{await remove();await renderUpgradeCard()}catch{button.disabled=false}});
+  return true;
+}
+function bindUpgradeUi(){if(uiObserver)return;const root=document.documentElement||document;if(typeof MutationObserver==='function'){uiObserver=new MutationObserver(()=>{if(document.getElementById('cw-local-ai-v324')&&!document.getElementById(UPGRADE_ID))queueMicrotask(()=>void renderUpgradeCard())});uiObserver.observe(root,{childList:true,subtree:true})}queueMicrotask(()=>void renderUpgradeCard())}
+watch();bindUpgradeUi();
+for(const name of ['civweave:local-model-runtime-ready','civweave:guide-loader-reset','civweave:settings-local-route-ready','pageshow'])addEventListener(name,()=>{queueMicrotask(watch);queueMicrotask(()=>void renderUpgradeCard())});
+addEventListener('civweave:local-model-download-progress',event=>{maybePrime(event);const detail=event?.detail||{};if(detail.id===FAST_ID)queueMicrotask(()=>void renderUpgradeCard())});addEventListener('civweave:local-model-downloaded',event=>{if(event?.detail?.id===FAST_ID){void primeRuntime().catch(()=>null);queueMicrotask(()=>void renderUpgradeCard())}});
+try{dispatchEvent(new CustomEvent('civweave:gemma4-litert-fast-extension-ready',{detail:{version:VERSION,id:FAST_ID,bytes:ARTIFACT_BYTES,revision:REVISION,explicitDownload:true,offlineRuntimePriming:true,settingsUpgradeCard:true}}))}catch{}
+globalThis.CivweaveGemma4LiteRTFastExtensionV1=freeze({version:VERSION,id:FAST_ID,legacyQ4Id:LEGACY_Q4_ID,repo:REPO,revision:REVISION,artifact:ARTIFACT,artifactBytes:ARTIFACT_BYTES,artifactSha256:'3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5',runtimeVersion:'0.14.0',runtimeCache:RUNTIME_CACHE,watch,patchRegistry,status,download,remove,primeRuntime,renderUpgradeCard,bindUpgradeUi,explicitDownload:true,transparentAcceleration:true,offlineRuntimePriming:true,settingsUpgradeCard:true,state:()=>freeze({primed,priming:Boolean(primeFlight),upgradeCard:Boolean(document.getElementById(UPGRADE_ID))})});
 })();
