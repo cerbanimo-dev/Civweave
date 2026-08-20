@@ -4,7 +4,7 @@
 // the lightweight v203 worker became canonical. Android can retain a site's
 // service-worker registration and CacheStorage after the PWA icon is removed,
 // so this path must never contain a frozen historical app shell.
-const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v5-nav-hide-fallback-text';
+const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v6-direct-shell-retirement';
 
 // Compatibility-only package metadata consumed by build-mobile-install-kit.mjs.
 // Runtime ownership belongs entirely to service-worker-v203.js below.
@@ -36,7 +36,7 @@ const MAP_CORE=[
 const CORE=[
   '/index.html','/install-v130.css','/install-v130.js','/offline.html',
   '/app/manifest.webmanifest','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/local-object-mesh-v146.js','/app/local-first-policy-v131.js',
-  '/app/fullscreen-family-v104.html','/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt','/app/family-shell-v104.css','/app/family-shell-v104.js','/app/family-ai-loader-v105.js','/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js',
+  '/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt','/app/family-shell-v104.css','/app/family-shell-v104.js','/app/family-ai-loader-v105.js','/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js',
   '/app/model-settings-controller-v173.js','/app/unified-ai-settings-v175.js','/app/deterministic-mode-v175.js','/app/settings-delegation-v175.js','/app/shared-tools-cleanup-v175.js','/app/model-settings-v133.css','/app/shared/civweave-model-runtime.js','/app/safe-mode-v1.mjs',
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js','/app/cerbanimo-quest-engine-v144.css','/app/cerbanimo-quest-engine-v144.js','/app/cerbanimo-ai-validator-v156.js',
   '/app/cabinets/living-school/index.html','/app/cabinets/living-school/living-school-cabinet-v151.css','/app/cabinets/living-school/living-school-cabinet-v151.mjs','/app/services/living-school/modules/rubric-engine.mjs','/app/services/living-school/modules/project-gate.mjs','/app/services/living-school/modules/cerbanimo-bridge.mjs',
@@ -75,4 +75,4 @@ self.addEventListener('activate',event=>{
   event.waitUntil(self.clients.claim());
 });
 
-importScripts('/service-worker-v203.js?v=root-worker-bridge-v5-nav-hide-fallback-text');
+importScripts('/service-worker-v203.js?v=root-worker-bridge-v6-direct-shell-retirement');
