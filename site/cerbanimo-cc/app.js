@@ -1,25 +1,43 @@
 const $ = (selector) => document.querySelector(selector);
 
+const MOBILE_VIEWPORT_FIX = '2026-08-20-v3';
+
+function resetHorizontalScroll() {
+  if (window.scrollX !== 0) window.scrollTo(0, window.scrollY);
+}
+
 function installViewportContainment() {
+  document.documentElement.dataset.mobileViewportFix = MOBILE_VIEWPORT_FIX;
   const style = document.createElement('style');
-  style.dataset.civweaveViewportGuard = 'true';
+  style.dataset.civweaveViewportGuard = MOBILE_VIEWPORT_FIX;
   style.textContent = `
-    html, body {
-      max-width: 100%;
+    html,
+    body {
+      width: 100%;
+      max-width: 100vw;
       overflow-x: hidden;
     }
     @supports (overflow: clip) {
-      html, body { overflow-x: clip; }
+      html,
+      body { overflow-x: clip; }
     }
-    .lari-section { overflow-x: hidden; }
+    body > * {
+      max-width: 100vw;
+    }
+    .lari-section {
+      overflow-x: hidden;
+    }
     @supports (overflow: clip) {
       .lari-section { overflow-x: clip; }
     }
     @media (max-width: 720px) {
       .shell {
-        width: calc(100% - 24px);
-        max-width: 100%;
+        width: auto !important;
+        max-width: none !important;
+        margin-left: 12px !important;
+        margin-right: 12px !important;
       }
+      .nav-wrap,
       .hero,
       .stats,
       .section,
@@ -33,8 +51,19 @@ function installViewportContainment() {
       .press,
       .cast,
       .duties {
-        min-width: 0;
-        max-width: 100%;
+        min-width: 0 !important;
+        max-width: 100% !important;
+      }
+      .hero,
+      .story-grid,
+      .lari-hero,
+      .realms,
+      .economy,
+      .guildkeepers,
+      .press,
+      .cast,
+      .duties {
+        grid-template-columns: minmax(0, 1fr) !important;
       }
       .hero > *,
       .stats > *,
@@ -46,25 +75,55 @@ function installViewportContainment() {
       .press > *,
       .cast > *,
       .duties > * {
-        min-width: 0;
+        min-width: 0 !important;
+        max-width: 100% !important;
+      }
+      .hero-copy,
+      .hero-art,
+      .hero h1,
+      .hero h1 span,
+      .eyebrow,
+      .lede,
+      .intro,
+      .actions {
+        width: 100%;
+        max-width: 100% !important;
+      }
+      .hero h1 {
+        font-size: clamp(44px, 13.5vw, 60px) !important;
+        overflow-wrap: normal;
+        word-break: normal;
+      }
+      .hero h1 span {
+        overflow-wrap: normal;
+        word-break: normal;
+      }
+      .btn {
+        max-width: 100%;
       }
       .portal {
-        width: min(580px, calc(100vw - 24px));
-        max-width: 100%;
+        width: min(100%, 360px) !important;
+        max-width: 100% !important;
       }
       .portal-note {
-        right: 0;
-        max-width: calc(100vw - 48px);
+        right: 0 !important;
+        left: auto !important;
+        width: min(320px, calc(100% - 16px)) !important;
+        max-width: calc(100% - 16px) !important;
       }
-      .section h2,
-      .closing h2,
-      .intro,
-      .lede {
-        max-width: 100%;
+      .lari-section::before {
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
       }
     }
   `;
   document.head.append(style);
+
+  requestAnimationFrame(resetHorizontalScroll);
+  window.setTimeout(resetHorizontalScroll, 80);
+  window.addEventListener('pageshow', resetHorizontalScroll);
+  window.addEventListener('resize', resetHorizontalScroll, { passive: true });
 }
 
 installViewportContainment();
