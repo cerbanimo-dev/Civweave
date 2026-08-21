@@ -23,6 +23,7 @@ on:
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
+      - 'scripts/test-mobile-guild-auto-update-v1.mjs'
       - 'scripts/test-emergency-ai-mesh-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
   push:
@@ -49,6 +50,7 @@ on:
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
+      - 'scripts/test-mobile-guild-auto-update-v1.mjs'
       - 'scripts/test-emergency-ai-mesh-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
 jobs:
@@ -71,6 +73,8 @@ jobs:
       - run: node --check cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs
       - run: node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
       - run: node --check cloudflare/mobile-guild-edge/src/index.mjs
+      - run: node --check cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs
+      - run: node --check cloudflare/mobile-guild-edge/.civweave/sync-upstream.mjs
       - name: Install mobile Guild edge deployment dependencies
         run: npm install --prefix cloudflare/mobile-guild-edge --no-audit --no-fund
       - name: Dry-run standalone mobile Guild edge deployment
@@ -80,5 +84,6 @@ jobs:
       - run: node scripts/test-guild-host-resilience-v1.mjs
       - run: node scripts/test-guild-host-onboarding-v1.mjs
       - run: node scripts/test-mobile-guild-create-v1.mjs
+      - run: node scripts/test-mobile-guild-auto-update-v1.mjs
       - run: node scripts/test-emergency-ai-mesh-v1.mjs
       - run: node scripts/test-guildkeeper-capacity-v1.mjs
