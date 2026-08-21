@@ -90,3 +90,4 @@ includes(deep,"E4_Q4='gemma4-e4b-it-q4f16'",'E4B registration');
 includes(deep,'__civweaveGemma4E4BQ4V1:true','E4B registration');
 
 console.log('PASS Gemma 4 phone path keeps E2B/E4B registered, prefers LiteRT when installed, and continues with the downloaded Q4 compatibility runtime when the optional LiteRT performance binary is absent.');
+// verification trigger: optional LiteRT fallback
