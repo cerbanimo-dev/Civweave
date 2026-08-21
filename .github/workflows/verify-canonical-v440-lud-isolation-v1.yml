@@ -1,0 +1,47 @@
+name: Verify canonical v440 and Lud HUD isolation
+
+on:
+  push:
+    paths:
+      - public/app/system-routes-v227.js
+      - public/app/five-system-direct-navigation-v1.js
+      - public/app/pwa-start-v436.html
+      - public/app/working-campus-v440.html
+      - public/app/server-ai-output-normalizer-v1.js
+      - public/app/unified-chat-system-v1.js
+      - public/app/lud-game-ui-v1.js
+      - public/app/merlinites-shell-fix-v166.css
+      - public/app/civweave-brand.js
+      - public/service-worker-canonical-navbar-v1.js
+      - public/service-worker-canonical-home-v1.js
+      - public/service-worker-v203.js
+      - scripts/verify-canonical-v440-lud-isolation-v1.mjs
+      - .github/workflows/verify-canonical-v440-lud-isolation-v1.yml
+  pull_request:
+    paths:
+      - public/app/system-routes-v227.js
+      - public/app/five-system-direct-navigation-v1.js
+      - public/app/pwa-start-v436.html
+      - public/app/working-campus-v440.html
+      - public/app/server-ai-output-normalizer-v1.js
+      - public/app/unified-chat-system-v1.js
+      - public/app/lud-game-ui-v1.js
+      - public/app/merlinites-shell-fix-v166.css
+      - public/app/civweave-brand.js
+      - public/service-worker-canonical-navbar-v1.js
+      - public/service-worker-canonical-home-v1.js
+      - public/service-worker-v203.js
+      - scripts/verify-canonical-v440-lud-isolation-v1.mjs
+      - .github/workflows/verify-canonical-v440-lud-isolation-v1.yml
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-canonical-v440-lud-isolation-v1.mjs

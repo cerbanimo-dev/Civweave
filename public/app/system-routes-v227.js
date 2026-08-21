@@ -1,19 +1,21 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.165';
-const REVISION='five-system-route-contract-v228-direct-owner';
-const SHELL_REVISION='direct-first-class-routes-v2';
-const SHELL_PATH='/app/working-campus-v156.html';
-const FRESH_SHELL_PATH='/app/working-campus-v440.html';
-const DIRECT_NAV_SRC='/app/five-system-direct-navigation-v1.js?v=1.0.0-five-system-direct-navigation';
+const VERSION='1.0.166';
+const REVISION='five-system-route-contract-v229-v440-home';
+const SHELL_REVISION='direct-first-class-routes-v3-v440-home';
+const LEGACY_SHELL_PATH='/app/working-campus-v156.html';
+const SHELL_PATH='/app/working-campus-v440.html';
+const FRESH_SHELL_PATH=SHELL_PATH;
+const DIRECT_NAV_SRC='/app/five-system-direct-navigation-v1.js?v=1.0.1-five-system-direct-navigation-v440-home';
+const SERVER_AI_OUTPUT_NORMALIZER_SRC='/app/server-ai-output-normalizer-v1.js?v=1.0.0';
 const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.5-direct-routes';
 const PERSISTENT_CONTEXT_SRC='/app/persistent-system-context-v1.js?v=1.0.3-direct-routes';
 const GUILD_USAGE_SRC='/app/guild-chat-usage-v1.js?v=1.0.0';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const CONTEXT_KEY='civweave.pending-system-context.v1';
 const ROUTES=Object.freeze({
-  civweave:Object.freeze({id:'civweave',label:'Civweave',pathname:'/app/working-campus-v156.html',params:Object.freeze({})}),
+  civweave:Object.freeze({id:'civweave',label:'Civweave',pathname:SHELL_PATH,params:Object.freeze({})}),
   'living-school':Object.freeze({id:'living-school',label:'Living School',pathname:'/app/cabinets/living-school/index.html',params:Object.freeze({cabinet:'1'})}),
   cerbanimo:Object.freeze({id:'cerbanimo',label:'Cerbanimo',pathname:'/app/realm-console-v140.html',params:Object.freeze({system:'cerbanimo',cabinet:'1'})}),
   fellowfare:Object.freeze({id:'fellowfare',label:'FellowFare',pathname:'/app/fellowfare-cabinet-v144.html',params:Object.freeze({cabinet:'1'})}),
@@ -21,7 +23,7 @@ const ROUTES=Object.freeze({
 });
 const SYSTEM_IDS=Object.freeze(Object.keys(ROUTES));
 const PATH_TO_ID=new Map(Object.values(ROUTES).map(route=>[route.pathname,route.id]));
-PATH_TO_ID.set(FRESH_SHELL_PATH,'civweave');
+PATH_TO_ID.set(LEGACY_SHELL_PATH,'civweave');
 PATH_TO_ID.set('/app/civweave-guild-quest-v1.html','civweave');
 if(globalThis.CivweaveSystemRoutesV227?.version===VERSION&&globalThis.CivweaveSystemRoutesV227?.revision===REVISION)return;
 
@@ -78,7 +80,7 @@ function legacyRequestedSystem(value=globalThis.location?.href||''){
   try{
     const url=new URL(String(value),globalThis.location?.origin||'https://civweave.invalid');
     const pathname=normalizePathname(url.pathname);
-    if(pathname!==SHELL_PATH&&pathname!==FRESH_SHELL_PATH)return'';
+    if(pathname!==LEGACY_SHELL_PATH&&pathname!==SHELL_PATH)return'';
     const requested=String(url.searchParams.get('context')||url.searchParams.get('system')||'').toLowerCase();
     return SYSTEM_IDS.includes(requested)?requested:'';
   }catch{return''}
@@ -90,6 +92,7 @@ function ensureScript(src,ready,name){
   const script=document.createElement('script');script.src=src;script.async=false;if(name)script.dataset[name]='v1';(document.head||document.documentElement).append(script);return true;
 }
 function ensureDirectNavigation(){return ensureScript(DIRECT_NAV_SRC,()=>Boolean(globalThis.CivweaveFiveSystemDirectNavigationV1),'civweaveFiveSystemDirectNavigation')}
+function ensureServerAIOutputNormalizer(){return ensureScript(SERVER_AI_OUTPUT_NORMALIZER_SRC,()=>Boolean(globalThis.CivweaveServerAIOutputNormalizerV1),'civweaveServerAIOutputNormalizer')}
 function ensurePersistentShellActions(){if(globalThis.CivweavePersistentShellActionsV1?.ensureMounted){globalThis.CivweavePersistentShellActionsV1.ensureMounted();return true}return ensureScript(PERSISTENT_ACTIONS_SRC,()=>Boolean(globalThis.CivweavePersistentShellActionsV1),'civweavePersistentShellActions')}
 function ensurePersistentSystemContext(){return ensureScript(PERSISTENT_CONTEXT_SRC,()=>Boolean(globalThis.CivweavePersistentSystemContextV1?.owner),'civweavePersistentSystemContext')}
 function ensureGuildUsage(){return ensureScript(GUILD_USAGE_SRC,()=>Boolean(globalThis.CivweaveGuildChatUsageV1),'civweaveGuildUsage')}
@@ -97,7 +100,7 @@ function guildUsageSnapshot(){return globalThis.CivweaveGuildChatUsageV1?.snapsh
 function renderGuildUsage(){return Boolean(globalThis.CivweaveGuildChatUsageV1?.render?.())}
 async function refreshGuildUsage(options){ensureGuildUsage();return await globalThis.CivweaveGuildChatUsageV1?.refresh?.(options)||guildUsageSnapshot()}
 
-const api=Object.freeze({version:VERSION,revision:REVISION,shellRevision:SHELL_REVISION,shellPath:SHELL_PATH,freshShellPath:FRESH_SHELL_PATH,bootKey:BOOT_KEY,contextKey:CONTEXT_KEY,systems:SYSTEM_IDS,routeFor,routes,identify,isCanonicalPath,authorize,directUrlFor,shellUrlFor,shouldUseDirect,urlFor,navigate,rememberContext,legacyRequestedSystem,ensureDirectNavigation,ensurePersistentShellActions,ensurePersistentSystemContext,ensureGuildUsage,guildUsageRevision:'guild-chat-usage-v1',guildUsageSnapshot,renderGuildUsage,refreshGuildUsage,singlePersistentShell:false,legacyRealmEntrypoints:true,navigationReloadOnSystemSwitch:true,directNavigationOwner:'five-system-direct-navigation-v1'});
+const api=Object.freeze({version:VERSION,revision:REVISION,shellRevision:SHELL_REVISION,shellPath:SHELL_PATH,freshShellPath:FRESH_SHELL_PATH,legacyShellPath:LEGACY_SHELL_PATH,bootKey:BOOT_KEY,contextKey:CONTEXT_KEY,systems:SYSTEM_IDS,routeFor,routes,identify,isCanonicalPath,authorize,directUrlFor,shellUrlFor,shouldUseDirect,urlFor,navigate,rememberContext,legacyRequestedSystem,ensureDirectNavigation,ensureServerAIOutputNormalizer,ensurePersistentShellActions,ensurePersistentSystemContext,ensureGuildUsage,guildUsageRevision:'guild-chat-usage-v1',guildUsageSnapshot,renderGuildUsage,refreshGuildUsage,singlePersistentShell:false,legacyRealmEntrypoints:true,navigationReloadOnSystemSwitch:true,directNavigationOwner:'five-system-direct-navigation-v1',serverAIOutputNormalizer:'server-ai-output-normalizer-v1'});
 globalThis.CivweaveSystemRoutesV227=api;
 if(typeof document!=='undefined'&&isCanonicalPath(globalThis.location?.href||globalThis.location?.pathname||'')){
   authorize();
@@ -114,6 +117,7 @@ if(typeof document!=='undefined'&&isCanonicalPath(globalThis.location?.href||glo
   }
   if(current)rememberContext(current);
   ensureDirectNavigation();
+  ensureServerAIOutputNormalizer();
   ensurePersistentShellActions();ensurePersistentSystemContext();ensureGuildUsage();
 }
 })();

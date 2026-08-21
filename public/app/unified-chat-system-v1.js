@@ -176,7 +176,7 @@ function normalizePlanModule(item,index){
 function normalizeModelPlan(value,request,existingPlan=null,route={}){
   if(!value||typeof value!=='object')throw new Error('The selected AI did not return a structured Learning Journey plan.');
   const modules=(Array.isArray(value.modules)?value.modules:Array.isArray(value.milestones)?value.milestones:Array.isArray(value.stages)?value.stages:[]).map(normalizePlanModule).filter(Boolean).slice(0,8);
-  if(modules.length<2)throw new Error('The selected AI returned too little high-level structure to review.');
+  if(modules.length<3)throw new Error('The selected AI returned too little high-level structure to review.');
   const level=['beginner','intermediate','advanced'].includes(clean(value.level,80).toLowerCase())?clean(value.level,80).toLowerCase():request.level;
   const mode=['guided','just-in-time','browse'].includes(clean(value.mode,80).toLowerCase())?clean(value.mode,80).toLowerCase():request.mode;
   const title=clean(value.title,240)||request.title,capability=clean(value.capability||value.goal,2400)||request.capability,proof=clean(value.proof||value.completionEvidence||value.demonstration,3000)||request.proof;

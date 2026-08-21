@@ -1,5 +1,6 @@
 // GENERATED: direct five-system routes + Guild login runtime + local AI coherence + lifecycle-deferred caches + canonical five-guide rail + Guild/Map actions on every system + no iframe family shell.
-// direct-first-class-routes-v2: each system owns its canonical page; guide/chat context cannot substitute for realm navigation.
+// direct-first-class-routes-v3: Civweave v440 and each realm own their canonical page; guide/chat context cannot substitute for navigation.
+// canonical-home-v1: v440 home is validated before generic worker caching and can never fall back to the retired v156 shell.
 // five-system-pages-v1: exact realm navigation is validated before generic worker caching and can never substitute Civweave home HTML.
 // navigation-runtime-recovery-v2: stale navigation code/pages are purged without reloading or redirecting open clients.
 // direct-shell-retirement-v1: cached iframe-shell routes are purged before generic cache handling.
@@ -8,8 +9,9 @@
 // guild-login-runtime-v1: Guild join clicks wait for the canonical capacity-session runtime instead of failing a bootstrap race.
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
 'use strict';
-importScripts('/app/system-routes-v227.js?v=1.0.165-five-system-route-contract-v228-direct-owner');
-importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v6-direct-navigation-owner');
+importScripts('/app/system-routes-v227.js?v=1.0.166-five-system-route-contract-v229-v440-home');
+importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v7-v440-home');
+importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-v440-exact-owner');
 importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-exact-realm-owner');
 importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v2-purge-only');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');

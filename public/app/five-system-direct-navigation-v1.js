@@ -1,10 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-five-system-direct-navigation';
+const VERSION='1.0.1-five-system-direct-navigation-v440-home';
 const NAV_ID='cw-themed-system-nav';
 const CONTEXT_KEY='civweave.pending-system-context.v1';
+const CANONICAL_HOME='/app/working-campus-v440.html';
 const ROUTES=Object.freeze({
-  civweave:['/app/working-campus-v156.html',{}],
+  civweave:[CANONICAL_HOME,{}],
   'living-school':['/app/cabinets/living-school/index.html',{cabinet:'1'}],
   cerbanimo:['/app/realm-console-v140.html',{system:'cerbanimo',cabinet:'1'}],
   fellowfare:['/app/fellowfare-cabinet-v144.html',{cabinet:'1'}],
@@ -44,5 +45,5 @@ document.addEventListener('click',intercept,true);
 const observer=new MutationObserver(()=>rewrite());
 function install(){rewrite();observer.observe(document.documentElement,{childList:true,subtree:true});addEventListener('pageshow',rewrite);addEventListener('focus',rewrite);return true}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
-globalThis.CivweaveFiveSystemDirectNavigationV1=Object.freeze({version:VERSION,targetFor,rewrite,install,policy:'capture-direct-canonical-system-navigation-no-guide-context-no-shell-substitution'});
+globalThis.CivweaveFiveSystemDirectNavigationV1=Object.freeze({version:VERSION,canonicalHome:CANONICAL_HOME,targetFor,rewrite,install,policy:'capture-direct-canonical-system-navigation-v440-home-no-guide-context-no-shell-substitution'});
 })();
