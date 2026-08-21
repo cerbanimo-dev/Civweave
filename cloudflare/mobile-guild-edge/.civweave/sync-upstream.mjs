@@ -56,6 +56,7 @@ function mergeWrangler(){
 }
 mergeWrangler();
 
+const appliedAt=new Date().toISOString();
 const lock={
   schema:'civweave.guild-cloud-auto-update-lock.v1',
   channel:String(sourceConfig.channel||'main'),
@@ -63,7 +64,9 @@ const lock={
   sourcePath:String(sourceConfig.sourcePath||'cloudflare/mobile-guild-edge'),
   upstreamCommit:upstreamCommit||null,
   upstreamTree:upstreamTree||null,
-  appliedAt:new Date().toISOString(),
+  appliedAt,
 };
+const heartbeat={schema:'civweave.guild-cloud-auto-update-heartbeat.v1',channel:lock.channel,upstreamTree:lock.upstreamTree,checkedAt:appliedAt};
 writeFileSync(join(repoRoot,'civweave-update-lock.json'),`${JSON.stringify(lock,null,2)}\n`,'utf8');
+writeFileSync(join(repoRoot,'civweave-update-heartbeat.json'),`${JSON.stringify(heartbeat,null,2)}\n`,'utf8');
 console.log(JSON.stringify({ok:true,schema:lock.schema,channel:lock.channel,upstreamCommit:lock.upstreamCommit,upstreamTree:lock.upstreamTree}));
