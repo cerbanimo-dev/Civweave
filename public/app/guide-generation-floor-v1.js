@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.1-guide-generation-floor-v1-local-structured-fallback';
+const VERSION='1.3.0-guide-generation-floor-v1-local-planner-authority';
+const REVISION='1.3.1-local-structured-fallback';
 const MIDDLEWARE_ID='guide-generation-floor-v1';
 const FLOOR_TOKENS=900;
 const PLANNING_FLOOR_TOKENS=1800;
@@ -123,11 +124,11 @@ function register(){
   const spine=globalThis.CivweaveFastInteractiveV192;if(!spine?.register)return false;if(registeredSpine===spine)return true;
   spine.register(MIDDLEWARE_ID,{before(request){const next=enforce(request||{});if(next===request)return request;return{request:next,state:{floorTokens:Number(next.__civweaveGuideGenerationFloorTokens||FLOOR_TOKENS),planningContract:Boolean(next.__civweaveGuidePlanningContract),localExecutionContract:Boolean(next.__civweaveGuideLocalExecutionContract),localStreaming:Boolean(next.__civweaveGuideLocalStreaming),localStructuredPlan:Boolean(next.__civweaveLocalStructuredPlan),platformPlanning:next.__civweaveGuidePlatformPlanning||null}}}},-1000);
   registeredSpine=spine;
-  try{dispatchEvent(new CustomEvent('civweave:guide-generation-floor-ready',{detail:{version:VERSION,floorTokens:FLOOR_TOKENS,planningFloorTokens:PLANNING_FLOOR_TOKENS,weavelingPlanFloorTokens:WEAVELING_PLAN_FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,planningContract:true,localExecutionContract:true,localGuideStreaming:true,localStructuredPlan:true,platformPlanning:true,mossLearningGoalPlanner:true,weavelingPlannerRecovery:true,weavelingUnavailablePacketRecovery:true}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:guide-generation-floor-ready',{detail:{version:VERSION,revision:REVISION,floorTokens:FLOOR_TOKENS,planningFloorTokens:PLANNING_FLOOR_TOKENS,weavelingPlanFloorTokens:WEAVELING_PLAN_FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,planningContract:true,localExecutionContract:true,localGuideStreaming:true,localStructuredPlan:true,platformPlanning:true,mossLearningGoalPlanner:true,weavelingPlannerRecovery:true,weavelingUnavailablePacketRecovery:true}}))}catch{}
   return true;
 }
 for(const name of ['civweave:runtime-spine-ready','civweave:model-runtime-ready'])addEventListener(name,register);
 for(const name of ['civweave:assistant-runtime-ready','civweave:unified-chat-system-ready','civweave:guide-capability-passover-ready','civweave:guide-loader-reset','civweave:guide-chat-opened'])addEventListener(name,()=>queueMicrotask(installPlatformGuideGuards));
 addEventListener('pageshow',()=>{register();queueMicrotask(installPlatformGuideGuards)});register();queueMicrotask(installPlatformGuideGuards);
-globalThis.CivweaveGuideGenerationFloorV1=Object.freeze({version:VERSION,floorTokens:FLOOR_TOKENS,planningFloorTokens:PLANNING_FLOOR_TOKENS,weavelingPlanFloorTokens:WEAVELING_PLAN_FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,guideRequest,purposeFor,weavelingStructuredPlanRequest,systemFor,requestText,learningIntentRequest,learningGoalText,planningRequest,localGuideRequest,applyPlatformPlanningContext,injectExecutionContracts,installPlatformGuideGuards,recoverWeavelingPlan,weavelingGenerationUnavailable,planningContract:PLANNING_CONTRACT,localExecutionContract:LOCAL_EXECUTION_CONTRACT,enforce,register,styleOnlyLengthClassification:true,planningContractV1:true,localExecutionContractV1:true,localGuideStreaming:true,localStructuredPlan:true,platformPlanning:true,mossLearningGoalPlanner:true,weavelingPlannerRecovery:true,weavelingUnavailablePacketRecovery:true});
+globalThis.CivweaveGuideGenerationFloorV1=Object.freeze({version:VERSION,revision:REVISION,floorTokens:FLOOR_TOKENS,planningFloorTokens:PLANNING_FLOOR_TOKENS,weavelingPlanFloorTokens:WEAVELING_PLAN_FLOOR_TOKENS,middleware:MIDDLEWARE_ID,priority:-1000,guideRequest,purposeFor,weavelingStructuredPlanRequest,systemFor,requestText,learningIntentRequest,learningGoalText,planningRequest,localGuideRequest,applyPlatformPlanningContext,injectExecutionContracts,installPlatformGuideGuards,recoverWeavelingPlan,weavelingGenerationUnavailable,planningContract:PLANNING_CONTRACT,localExecutionContract:LOCAL_EXECUTION_CONTRACT,enforce,register,styleOnlyLengthClassification:true,planningContractV1:true,localExecutionContractV1:true,localGuideStreaming:true,localStructuredPlan:true,platformPlanning:true,mossLearningGoalPlanner:true,weavelingPlannerRecovery:true,weavelingUnavailablePacketRecovery:true});
 })();
