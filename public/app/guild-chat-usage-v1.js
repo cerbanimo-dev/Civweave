@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-guild-chat-usage-v1';
-const REVISION='guild-chat-usage-v1';
+const VERSION='1.0.1-guild-chat-usage-v1-mobile-session-upgrade';
+const REVISION='guild-chat-usage-v1-mobile-session-upgrade';
 const HOST_SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
 const HOST_SESSION_KEY='civweave.host-capacity.sessions.v1';
@@ -66,15 +66,15 @@ function render(){
 async function refresh({network=true}={}){
   const selected=selectedGuildRecord();render();if(!network||!selected.hasGuild)return snapshot();const api=globalThis.CivweaveHostNodeSessionV1;if(!api)return snapshot();
   let session=null;try{session=api.sessionFor?.(selected.nodeId||selected.origin)||null}catch{}
-  if(!session&&selected.loginMode!=='legacy-mobile-selection'&&api.ensureSelected)try{session=await api.ensureSelected()}catch{}
+  if(!session&&api.ensureSelected)try{session=await api.ensureSelected()}catch{}
   if(session&&api.status)try{await api.status(selected.nodeId||selected.origin)}catch{}
-  render();return snapshot();
+  render();const value=snapshot();try{dispatchEvent(new CustomEvent('civweave:guild-chat-usage-refreshed',{detail:value}))}catch{}return value;
 }
 function install(){
   if(typeof document==='undefined')return false;ensureStyle();let queued=false;const queue=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;render()})};
   const observer=typeof MutationObserver==='function'?new MutationObserver(queue):null;observer?.observe(document.documentElement,{childList:true,subtree:true});
   const liveEvents=['civweave:guide-chat-ready','civweave:guide-chat-state','civweave:host-node-selected','civweave:legacy-mobile-guild-selected','civweave:host-node-session-ready','civweave:host-node-logged-in','civweave:capacity-session-ready','civweave:host-node-health','civweave:ai-neuron-usage','civweave:capacity-session-cleared'];
-  for(const name of liveEvents)addEventListener(name,()=>{queue();if(name==='civweave:host-node-session-ready'||name==='civweave:host-node-selected')void refresh({network:true})});
+  for(const name of liveEvents)addEventListener(name,()=>{queue();if(name==='civweave:host-node-session-ready'||name==='civweave:host-node-selected'||name==='civweave:legacy-mobile-guild-selected')void refresh({network:true})});
   addEventListener('storage',event=>{if([HOST_SELECTION_KEY,HOST_ENDPOINT_KEY].includes(event.key))void refresh({network:true})});addEventListener('pageshow',()=>void refresh({network:true}));addEventListener('pagehide',()=>observer?.disconnect(),{once:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>void refresh({network:true}),{once:true});else queueMicrotask(()=>void refresh({network:true}));return true;
 }
