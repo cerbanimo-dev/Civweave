@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-gemma4-phone-performance-core-v1-registry-authority';
+const VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority';
 const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const PACKS_KEY='CivweaveLocalModelPacksV1';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
@@ -207,15 +207,32 @@ function watchPacks(){
     return Boolean(globalThis[PACKS_KEY]?.__civweaveGemma4PhonePerformanceCoreV1);
   }
 }
-function activate(){
+function applyAuthority(){
   const registryReady=watchRegistry();
   const packsReady=watchPacks();
+  return{registryReady,packsReady,ready:Boolean(registryReady&&packsReady)};
+}
+let authorityTimer=0;
+function scheduleAuthorityReassert(){
+  clearTimeout(authorityTimer);
+  const waits=[0,30,120,320,700,1150,1500];let index=0;
+  const run=()=>{
+    const state=applyAuthority();
+    index+=1;
+    if(index<waits.length)authorityTimer=setTimeout(run,waits[index]);
+    else emit('civweave:gemma4-phone-performance-authority-stable',{...state,resumeSafe:true});
+  };
+  queueMicrotask(run);
+}
+function activate(){
+  const state=applyAuthority();
   try{deepExtension()?.scheduleDecorate?.()}catch{}
   try{fastExtension()?.bindUpgradeUi?.()}catch{}
   scheduleDecorate();
+  scheduleAuthorityReassert();
   const registry=globalThis[REGISTRY_KEY],missing=registry?.gemma4PhonePerformanceRegistryMissing||[];
-  emit('civweave:gemma4-phone-performance-authority',{registryReady,packsReady,registryComplete:Boolean(registry?.gemma4PhonePerformanceRegistryComplete),missing});
-  return Boolean(registryReady&&packsReady);
+  emit('civweave:gemma4-phone-performance-authority',{...state,registryComplete:Boolean(registry?.gemma4PhonePerformanceRegistryComplete),missing,resumeSafe:true});
+  return state.ready;
 }
 async function completePerformanceCore(){
   activate();
@@ -229,7 +246,7 @@ function selectedLegacyNeedsPerformance(){
   return Boolean(pick?.active&&[LEGACY_E2,LEGACY_E4].includes(pick.id)&&existingPremier()&&missingFastIds().includes(pick.id===LEGACY_E4?FAST_E4:FAST_E2));
 }
 function assertSelectedPerformance(){
-  activate();
+  applyAuthority();
   const registry=globalThis[REGISTRY_KEY],registryMissing=registry?.gemma4PhonePerformanceRegistryMissing||[];
   if(registryMissing.length)throw Object.assign(new Error(`Gemma 4 phone runtime registration is incomplete: ${registryMissing.join(', ')}.`),{code:'LOCAL_PHONE_MODEL_REGISTRY_INCOMPLETE',missingModels:[...registryMissing]});
   if(!selectedLegacyNeedsPerformance())return true;
@@ -269,7 +286,7 @@ function onClick(event){
   void completePerformanceCore().catch(error=>emit('civweave:gemma4-phone-performance-error',{message:String(error?.message||error)})).finally(()=>{button.disabled=false;scheduleDecorate()});
 }
 document.addEventListener('click',onClick,true);
-for(const name of ['civweave:settings-opened','civweave:settings-local-route-ready','civweave:local-model-runtime-ready','civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-pack-progress','civweave:local-model-pack-selected','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>{activate();scheduleDecorate()});
+for(const name of ['civweave:settings-opened','civweave:settings-local-route-ready','civweave:local-model-runtime-ready','civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-pack-progress','civweave:local-model-pack-selected','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>{scheduleAuthorityReassert();scheduleDecorate()});
 activate();
 
 globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
@@ -283,6 +300,8 @@ globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
   watchRegistry,
   patchPackManager,
   watchPacks,
+  applyAuthority,
+  scheduleAuthorityReassert,
   activate,
   completePerformanceCore,
   decorateSettings,
@@ -292,6 +311,7 @@ globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
   optimizedRuntime:'google-litert-lm-webgpu',
   registryAuthority:true,
   packAuthority:true,
+  resumeSafeAuthority:true,
   oneEngineAtATime:true,
   explicitMigration:true
 });
