@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import {cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
-import {dirname, join, resolve} from 'node:path';
+import {cpSync,existsSync,mkdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
+import {dirname,join,resolve} from 'node:path';
 
 const args=process.argv.slice(2);
 const valueFor=flag=>{const index=args.indexOf(flag);return index>=0?args[index+1]||'':''};
@@ -10,6 +10,7 @@ const upstreamCommit=valueFor('--commit');
 const upstreamTree=valueFor('--tree');
 const repoRoot=resolve(process.cwd());
 if(!sourceRoot||!existsSync(sourceRoot))throw new Error('A valid --source directory is required.');
+if(sourceRoot===repoRoot)throw new Error('The upstream source must be separate from the Guildkeeper repository.');
 
 const readJson=path=>JSON.parse(readFileSync(path,'utf8'));
 const sourceConfig=readJson(join(sourceRoot,'civweave-update.json'));
@@ -28,7 +29,8 @@ function copyManaged(relative){
   mkdirSync(dirname(target),{recursive:true});
   cpSync(source,target,{recursive:true,preserveTimestamps:false});
 }
-for(const path of sourceConfig.managedPaths)copyManaged(path);
+const managedPaths=[...sourceConfig.managedPaths].map(safeRelative).sort((left,right)=>Number(left==='.civweave')-Number(right==='.civweave'));
+for(const path of managedPaths)copyManaged(path);
 
 function stripJsonc(text){
   let out='',inString=false,escaped=false;
