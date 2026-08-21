@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.16-model-settings-controller-v173-gemma4-current-phone-pack';
+const VERSION='1.0.17-model-settings-controller-v173-gemma4-browser-pack-coherence';
 const GEMMA4_DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
 const GEMMA4_DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
 const GEMMA4_PACK_VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
@@ -13,6 +13,8 @@ const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-author
 const GEMMA4_PHONE_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.2.0-resume-authority';
 const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
 const GEMMA4_Q2_RETIRE_SRC='/app/local-ai/gemma4-q2-retirement-v1.js?v=1.0.0-q2-retirement';
+const GEMMA4_BROWSER_PACK_VERSION='1.0.0-gemma4-browser-pack-coherence-v1';
+const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.0-browser-pack-coherence';
 if(globalThis.CivweaveModelSettingsControllerV173?.version===VERSION)return;
 const canonical=()=>globalThis.CivweaveSettingsV320||null;
 function open(launcher){return canonical()?.open?.(launcher)||null}
@@ -45,11 +47,13 @@ function ensureGemma4Pack(){
   const fastReady=()=>globalThis.CivweaveGemma4LiteRTFastExtensionV1?.version===GEMMA4_FAST_VERSION;
   const phoneReady=()=>globalThis.CivweaveGemma4PhonePerformanceCoreV1?.version===GEMMA4_PHONE_VERSION;
   const retireReady=()=>globalThis.CivweaveGemma4Q2RetirementV1?.version===GEMMA4_Q2_RETIRE_VERSION;
-  if(packReady()&&deepReady()&&actionsReady()&&fastReady()&&phoneReady()&&retireReady()){
+  const browserPackReady=()=>globalThis.CivweaveGemma4BrowserPackCoherenceV1?.version===GEMMA4_BROWSER_PACK_VERSION;
+  if(packReady()&&deepReady()&&actionsReady()&&fastReady()&&phoneReady()&&retireReady()&&browserPackReady()){
     globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();
     globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
     globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
     globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
+    globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
     return true;
   }
   if(packLoadPromise)return true;
@@ -59,11 +63,13 @@ function ensureGemma4Pack(){
     .then(()=>loadScript(GEMMA4_FAST_SRC,fastReady,'gemma4-litert-current-mobile-models'))
     .then(()=>loadScript(GEMMA4_PHONE_SRC,phoneReady,'gemma4-current-phone-pack-authority'))
     .then(()=>loadScript(GEMMA4_Q2_RETIRE_SRC,retireReady,'gemma4-q2-retirement'))
+    .then(()=>loadScript(GEMMA4_BROWSER_PACK_SRC,browserPackReady,'gemma4-browser-pack-coherence'))
     .then(()=>{
       globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();
       globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
       globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
       globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
+      globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
       return true;
     })
     .catch(error=>{console.warn('[Civweave] Gemma 4 current phone pack failed to load.',error);return false})
@@ -91,6 +97,8 @@ const api=Object.freeze({
   gemma4RenderLoopSafe:true,
   gemma4BrowserRetry:true,
   gemma4BrowserImport:true,
+  gemma4BrowserManagedLiteRT:true,
+  gemma4MidrangeUsesLiteRT:true,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
 globalThis.CivweaveModelSettingsControllerV173=api;
@@ -101,6 +109,7 @@ globalThis.CivweaveModelSettingsControllerBootstrapV173=Object.freeze({
   gemma4Actions:GEMMA4_ACTIONS_SRC,gemma4ActionsVersion:GEMMA4_ACTIONS_VERSION,
   gemma4FastExtension:GEMMA4_FAST_SRC,gemma4FastVersion:GEMMA4_FAST_VERSION,
   gemma4PhoneAuthority:GEMMA4_PHONE_SRC,gemma4PhoneVersion:GEMMA4_PHONE_VERSION,
-  gemma4Q2Retirement:GEMMA4_Q2_RETIRE_SRC,gemma4Q2RetirementVersion:GEMMA4_Q2_RETIRE_VERSION
+  gemma4Q2Retirement:GEMMA4_Q2_RETIRE_SRC,gemma4Q2RetirementVersion:GEMMA4_Q2_RETIRE_VERSION,
+  gemma4BrowserPackCoherence:GEMMA4_BROWSER_PACK_SRC,gemma4BrowserPackCoherenceVersion:GEMMA4_BROWSER_PACK_VERSION
 });
 })();
