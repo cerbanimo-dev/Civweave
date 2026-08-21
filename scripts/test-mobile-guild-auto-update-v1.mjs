@@ -16,6 +16,7 @@ assert.equal(config.sourceRepository,'cerbanimo-dev/Civweave');
 assert.equal(config.sourcePath,'cloudflare/mobile-guild-edge');
 assert.ok(['main','staging'].includes(config.channel),`Unexpected Civweave Guild Cloud update channel: ${config.channel}`);
 assert.equal(config.checkIntervalHours,6);
+assert.equal(config.schedulerHeartbeatDays,30);
 for(const path of ['src','.civweave','.github/workflows/civweave-auto-update.yml','package.json','civweave-update.json'])assert.ok(config.managedPaths.includes(path),`Managed update path missing: ${path}`);
 for(const key of ['main','compatibility_date','ai','durable_objects','migrations'])assert.ok(config.wranglerManagedKeys.includes(key),`Managed Wrangler key missing: ${key}`);
 for(const key of ['name','account_id','workers_dev','routes','route'])assert.ok(config.wranglerPreservedKeys.includes(key),`Preserved Wrangler key missing: ${key}`);
@@ -26,12 +27,15 @@ assert.match(workflow,/contents:\s*write/);
 assert.match(workflow,/git clone[^\n]+--sparse/);
 assert.match(workflow,/rev-parse \"HEAD:\$\{SOURCE_PATH\}\"/);
 assert.match(workflow,/sync-upstream\.mjs/);
+assert.match(workflow,/schedulerHeartbeatDays/);
+assert.match(workflow,/civweave-update-heartbeat\.json/);
 assert.match(workflow,/git push/);
 assert.doesNotMatch(workflow,/CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID/);
 assert.doesNotMatch(workflow,/wrangler\s+deploy/);
 assert.match(updater,/wranglerManagedKeys/);
 assert.match(updater,/wranglerPreservedKeys/);
 assert.match(updater,/civweave-update-lock\.json/);
+assert.match(updater,/civweave-update-heartbeat\.json/);
 
 const scratch=mkdtempSync(join(tmpdir(),'civweave-guild-auto-update-'));
 try{
@@ -51,6 +55,7 @@ try{
   const merged=JSON.parse(readFileSync(wranglerPath,'utf8'));
   const canonical=JSON.parse(readFileSync(join(templateRoot,'wrangler.jsonc'),'utf8'));
   const lock=JSON.parse(readFileSync(join(guildRepo,'civweave-update-lock.json'),'utf8'));
+  const heartbeat=JSON.parse(readFileSync(join(guildRepo,'civweave-update-heartbeat.json'),'utf8'));
 
   assert.equal(merged.name,'kamido-guild-cloud');
   assert.equal(merged.account_id,'guildkeeper-account');
@@ -64,6 +69,10 @@ try{
   assert.equal(lock.channel,config.channel);
   assert.equal(lock.upstreamCommit,'deadbeef');
   assert.equal(lock.upstreamTree,'feedface');
+  assert.equal(heartbeat.schema,'civweave.guild-cloud-auto-update-heartbeat.v1');
+  assert.equal(heartbeat.channel,config.channel);
+  assert.equal(heartbeat.upstreamTree,'feedface');
+  assert.equal(heartbeat.checkedAt,lock.appliedAt);
 }finally{rmSync(scratch,{recursive:true,force:true});}
 
-console.log(JSON.stringify({ok:true,schema:'civweave.mobile-guild-auto-update.test.v1',channel:config.channel,intervalHours:config.checkIntervalHours,preservesGuildkeeperDeployment:true,requiresManualCloudflareUpdate:false}));
+console.log(JSON.stringify({ok:true,schema:'civweave.mobile-guild-auto-update.test.v1',channel:config.channel,intervalHours:config.checkIntervalHours,heartbeatDays:config.schedulerHeartbeatDays,preservesGuildkeeperDeployment:true,requiresManualCloudflareUpdate:false}));
