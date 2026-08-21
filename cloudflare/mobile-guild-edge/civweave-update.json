@@ -1,0 +1,35 @@
+{
+  "schema": "civweave.guild-cloud-auto-update.v1",
+  "sourceRepository": "cerbanimo-dev/Civweave",
+  "sourcePath": "cloudflare/mobile-guild-edge",
+  "channel": "staging",
+  "checkIntervalHours": 6,
+  "managedPaths": [
+    "src",
+    ".civweave",
+    ".github/workflows/civweave-auto-update.yml",
+    "package.json",
+    "README.md",
+    ".gitignore",
+    ".dev.vars.example",
+    "civweave-update.json"
+  ],
+  "wranglerManagedKeys": [
+    "main",
+    "compatibility_date",
+    "compatibility_flags",
+    "ai",
+    "durable_objects",
+    "migrations",
+    "observability"
+  ],
+  "wranglerPreservedKeys": [
+    "name",
+    "account_id",
+    "workers_dev",
+    "preview_urls",
+    "routes",
+    "route",
+    "placement"
+  ]
+}
