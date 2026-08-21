@@ -38,10 +38,20 @@ const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 const githubRepo = process.env.GITHUB_REPOSITORY || 'cerbanimo-dev/Civweave';
 
-// Keep only cheap deterministic synchronizers in the deploy path. Expensive
-// verification belongs in CI before merge, not in the CDN publish job.
-await import('./sync-release-version-assets.mjs');
-await import('./sync-release-coherence-v220.mjs');
+// Staging is source-of-truth integration. The legacy release synchronizers still
+// encode the retired v229 single-shell navigation contract and mutate/throw on
+// the direct five-system graph. Never let those production-release mutators
+// rewrite staging before the Pages package is copied. Production keeps its
+// existing release synchronization path until that pipeline is migrated too.
+const stagingBuild = process.env.STAGING_BRANCH === 'staging'
+  || process.env.CF_PAGES_BRANCH === 'staging'
+  || process.env.GITHUB_REF_NAME === 'staging';
+if (stagingBuild) {
+  console.log('[Civweave] Staging source is authoritative; skipping retired single-shell release synchronizers.');
+} else {
+  await import('./sync-release-version-assets.mjs');
+  await import('./sync-release-coherence-v220.mjs');
+}
 await import('./generate-prelive-metadata-v281.mjs');
 await import('./generate-asset-lockboard-catalog-v239.mjs');
 
