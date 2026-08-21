@@ -7,10 +7,10 @@
 // direct-shell-retirement-v1: cached iframe-shell routes are purged before generic cache handling.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail on all five systems.
 // family-nav-single-owner-r1: themed-system-nav-v178 remains the sole visual five-system navigation rail.
-// guild-login-runtime-v1: Guild join clicks wait for the canonical capacity-session runtime instead of failing a bootstrap race.
+// guild-login-runtime-v2: Guild join and chat balance resolve the current capacity-session runtime and live quota.
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
 'use strict';
-importScripts('/app/system-routes-v227.js?v=1.0.166-five-system-route-contract-v229-v440-home');
+importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v229-v440-home-live-guild-balance');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v8-v440-home-css-isolation');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
 importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-v440-exact-owner');
@@ -33,7 +33,7 @@ importScripts('/service-worker-campus-completion-v246.js?v=campus-current-comple
 importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224-direct-system-pages-v2');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227-direct-routes-v1');
-importScripts('/service-worker-chat-repair-v245.js?v=weaveling-local-structured-fallback-v3&purge=weaveling-local-structured-fallback-v3&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361');
+importScripts('/service-worker-chat-repair-v245.js?v=guild-live-balance-v2&purge=guild-live-balance-v2&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
 // atomic-update-handoff-v427: updated workers normally remain waiting until the visible update controller explicitly activates them.
