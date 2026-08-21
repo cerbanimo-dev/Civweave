@@ -44,18 +44,27 @@ before(phone,'const registryReady=watchRegistry();','const packsReady=watchPacks
 before(phone,'const state=applyAuthority();','scheduleAuthorityReassert();','phone authority activation');
 
 const repair=read(repairPath);
-includes(repair,"VERSION='1.0.8-gemma4-inference-repair-v1-resume-safe-authority'",'Gemma repair');
+includes(repair,"VERSION='1.0.9-gemma4-inference-repair-v1-optional-litert'",'Gemma repair');
 includes(repair,"const DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1'",'Gemma repair');
 includes(repair,"const PHONE_AUTH_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority'",'Gemma repair');
 includes(repair,"const PHONE_AUTH_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.2.0-resume-authority'",'Gemma repair');
 includes(repair,"if(typeof base.ready==='function')await base.ready(args?.onProgress);",'Gemma repair');
 includes(repair,'await ensurePhoneAuthority();','Gemma repair');
+includes(repair,'checkSelectedPerformance(args?.onProgress);','Gemma repair');
+includes(repair,"if(error?.code!=='LOCAL_PHONE_PERFORMANCE_CORE_REQUIRED')throw error;",'Gemma repair optional LiteRT guard');
+includes(repair,"stage:'gemma4-litert-optional-missing'",'Gemma repair optional LiteRT warning');
+includes(repair,'nonFatal:true','Gemma repair optional LiteRT warning');
+includes(repair,"compatibilityRuntime:'transformers-v4-onnx'",'Gemma repair compatibility runtime');
+includes(repair,'gemma4PhonePerformanceCoreRequired:false','Gemma repair');
+includes(repair,'gemma4PhonePerformanceCoreOptional:true','Gemma repair');
+includes(repair,'gemma4LegacyCompatibilityFallback:true','Gemma repair');
 includes(repair,'phoneAuthorityAfterInferenceCore:true','Gemma repair');
 includes(repair,'phoneAuthorityResumeSafe:true','Gemma repair');
 includes(repair,'gemma4DeepRegistrationGuaranteed:true','Gemma repair');
 includes(repair,'gemma4PhoneRegistryAuthority:true','Gemma repair');
 before(repair,"if(typeof base.ready==='function')await base.ready(args?.onProgress);",'await ensurePhoneAuthority();','Gemma repair generation bootstrap');
-before(repair,'await ensurePhoneAuthority();','assertSelectedPerformance?.();','Gemma repair generation authority');
+before(repair,'await ensurePhoneAuthority();','checkSelectedPerformance(args?.onProgress);','Gemma repair generation authority');
+before(repair,'checkSelectedPerformance(args?.onProgress);','if(activeGemma4())await refreshWorkerAsset();','Gemma repair compatibility fallback');
 
 const fastExtension=read(fastExtensionPath);
 includes(fastExtension,"VERSION='1.1.0-gemma4-litert-fast-extension-v1-dual-phone'",'LiteRT extension');
@@ -71,6 +80,8 @@ includes(fastRuntime,"'gemma4-e2b-it-q4f16'",'LiteRT E2B alias');
 includes(fastRuntime,"'gemma4-e4b-it-q4f16'",'LiteRT E4B alias');
 includes(fastRuntime,'mod.Backend.GPU_ARTISAN','LiteRT runtime');
 includes(fastRuntime,'supportsJspi','LiteRT runtime');
+includes(fastRuntime,'if(!target){','LiteRT runtime');
+includes(fastRuntime,'return base.generate(args);','LiteRT Q4 compatibility fallback');
 includes(fastRuntime,'oneEngineAtATime:true','LiteRT runtime');
 
 const deep=read(deepPath);
@@ -78,4 +89,4 @@ includes(deep,"VERSION='1.0.0-gemma4-e4b-q4-extension-v1'",'E4B registration');
 includes(deep,"E4_Q4='gemma4-e4b-it-q4f16'",'E4B registration');
 includes(deep,'__civweaveGemma4E4BQ4V1:true','E4B registration');
 
-console.log('PASS Gemma 4 phone path keeps E2B/E4B and both LiteRT models in one resume-safe registry authority, installs that authority after inference-core bootstrap, and makes the LiteRT pair the 12 GB phone performance core without silent ONNX fallback.');
+console.log('PASS Gemma 4 phone path keeps E2B/E4B registered, prefers LiteRT when installed, and continues with the downloaded Q4 compatibility runtime when the optional LiteRT performance binary is absent.');
