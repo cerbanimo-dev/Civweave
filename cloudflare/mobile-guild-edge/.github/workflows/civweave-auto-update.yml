@@ -71,8 +71,30 @@ jobs:
           node --check src/creator-provenance-entry.mjs
           git diff --check
 
+      - name: Keep the automatic updater scheduler alive
+        id: heartbeat
+        if: steps.upstream.outputs.needed == 'false'
+        shell: bash
+        env:
+          UPSTREAM_TREE: ${{ steps.upstream.outputs.tree }}
+        run: |
+          set -euo pipefail
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs=require('fs');
+          const config=JSON.parse(fs.readFileSync('civweave-update.json','utf8'));
+          const days=Math.max(7,Number(config.schedulerHeartbeatDays||30));
+          let prior=null;try{prior=JSON.parse(fs.readFileSync('civweave-update-heartbeat.json','utf8'))}catch{}
+          const at=Date.parse(prior?.checkedAt||'');
+          const due=!Number.isFinite(at)||Date.now()-at>=days*24*60*60*1000;
+          if(due){
+            const next={schema:'civweave.guild-cloud-auto-update-heartbeat.v1',channel:config.channel,upstreamTree:process.env.UPSTREAM_TREE||null,checkedAt:new Date().toISOString()};
+            fs.writeFileSync('civweave-update-heartbeat.json',`${JSON.stringify(next,null,2)}\n`);
+          }
+          process.stdout.write(`needed=${due?'true':'false'}\n`);
+          NODE
+
       - name: Publish the update into this Guildkeeper repository
-        if: steps.upstream.outputs.needed == 'true'
+        if: steps.upstream.outputs.needed == 'true' || steps.heartbeat.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -80,5 +102,9 @@ jobs:
           git config user.name "Civweave Guild Cloud Updater"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Civweave Guild Cloud auto-update ${{ steps.upstream.outputs.tree }}"
+          if [ "${{ steps.upstream.outputs.needed }}" = "true" ]; then
+            git commit -m "Civweave Guild Cloud auto-update ${{ steps.upstream.outputs.tree }}"
+          else
+            git commit -m "Civweave Guild Cloud updater heartbeat"
+          fi
           git push
