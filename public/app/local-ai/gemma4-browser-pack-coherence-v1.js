@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-gemma4-browser-pack-coherence-v1';
+const VERSION='1.0.1-gemma4-browser-pack-coherence-v1-status-sync';
 const PREMIER='premier-phone';
 const FAST_E2='gemma4-e2b-it-litert-web';
 const FAST_E4='gemma4-e4b-it-litert-web';
@@ -68,6 +68,13 @@ async function prepareCurrentPack(onProgress){
   try{pwa()?.scheduleSync?.()}catch{}
   return{current,result,receipt:current.pending(PREMIER)||result.receipt};
 }
+async function syncFastStatus(){
+  const m=manager(),states=[];
+  if(m?.status){for(const id of FAST_IDS){try{states.push(await m.status(id))}catch{states.push(null)}}}
+  activateAuthority();try{pwa()?.scheduleSync?.()}catch{}scheduleDecorate();
+  emit('civweave:gemma4-browser-import-status-synced',{ready:FAST_IDS.filter((id,index)=>states[index]?.available),postImport:true});
+  return states;
+}
 async function startModelDownload(id,button){
   if(!FAST_IDS.includes(id))return false;
   button.disabled=true;showError('');
@@ -81,6 +88,7 @@ async function startModelDownload(id,button){
       button.textContent='Select downloaded file…';
       const result=await current.pickAndImport(PREMIER,{onProgress:progress=>{if(progress?.message)button.textContent=progress.message}});
       if(result?.cancelled){button.disabled=false;button.textContent=`Import ${fmt(row.expectedBytes||row.sizeBytes)}`;return false}
+      await syncFastStatus();
     }else{
       dispatchBrowserDownload(current,row);button.textContent='Browser download started';
     }
@@ -96,8 +104,8 @@ async function startPair(button){
     const next=current.nextRecord(PREMIER);
     if(next){dispatchBrowserDownload(current,next);button.textContent='Browser download started';scheduleDecorate();return true}
     const missing=current.unimportedRecords(receipt);
-    if(missing.length){button.textContent='Select downloaded files…';const result=await current.pickAndImport(PREMIER,{onProgress:progress=>{if(progress?.message)button.textContent=progress.message}});if(result?.cancelled){button.disabled=false;button.textContent='Import downloaded files';return false}scheduleDecorate();return true}
-    button.textContent='Current models ready';scheduleDecorate();return true;
+    if(missing.length){button.textContent='Select downloaded files…';const result=await current.pickAndImport(PREMIER,{onProgress:progress=>{if(progress?.message)button.textContent=progress.message}});if(result?.cancelled){button.disabled=false;button.textContent='Import downloaded files';return false}await syncFastStatus();scheduleDecorate();return true}
+    await syncFastStatus();button.textContent='Current models ready';scheduleDecorate();return true;
   }catch(error){
     const message=String(error?.message||error);showError(message);emit('civweave:gemma4-browser-download-error',{pair:true,message});button.disabled=false;button.textContent='Try browser download';return false;
   }
@@ -134,9 +142,10 @@ function onClick(event){
 }
 
 document.addEventListener('click',onClick,true);
-for(const name of ['civweave:settings-opened','civweave:model-settings-opened','civweave:settings-local-route-ready','civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-downloaded','civweave:local-model-removed','civweave:guide-loader-reset','pageshow'])addEventListener(name,scheduleDecorate);
+for(const name of ['civweave:settings-opened','civweave:model-settings-opened','civweave:settings-local-route-ready','civweave:local-model-pack-progress','civweave:local-model-downloaded','civweave:local-model-removed','civweave:guide-loader-reset','pageshow'])addEventListener(name,scheduleDecorate);
+addEventListener('civweave:local-model-pack-installed',event=>{if(event?.detail?.id===PREMIER)void syncFastStatus();else scheduleDecorate()});
 if(typeof MutationObserver==='function'&&document.documentElement){observer=new MutationObserver(scheduleDecorate);observer.observe(document.documentElement,{childList:true,subtree:true})}
 scheduleDecorate();
 
-globalThis.CivweaveGemma4BrowserPackCoherenceV1=freeze({version:VERSION,packId:PREMIER,currentModels:FAST_IDS,activateAuthority,ensureBridge,prepareCurrentPack,startModelDownload,startPair,decoratePremier,decorateProfile,scheduleDecorate,browserManagedLiteRT:true,legacyCacheDownloadDisabled:true,midrangeUsesLiteRT:true,q4CompatibilityPreserved:true});
+globalThis.CivweaveGemma4BrowserPackCoherenceV1=freeze({version:VERSION,packId:PREMIER,currentModels:FAST_IDS,activateAuthority,ensureBridge,prepareCurrentPack,syncFastStatus,startModelDownload,startPair,decoratePremier,decorateProfile,scheduleDecorate,browserManagedLiteRT:true,legacyCacheDownloadDisabled:true,midrangeUsesLiteRT:true,q4CompatibilityPreserved:true,postImportStatusSync:true});
 })();
