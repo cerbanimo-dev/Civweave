@@ -7,6 +7,7 @@ on:
       - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
       - 'public/app/local-ai/gemma4-inference-repair-v1.js'
       - 'public/app/local-ai/gemma4-q2-retirement-v1.js'
+      - 'public/app/local-ai/gemma4-browser-pack-coherence-v1.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
@@ -20,6 +21,7 @@ on:
       - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
       - 'public/app/local-ai/gemma4-inference-repair-v1.js'
       - 'public/app/local-ai/gemma4-q2-retirement-v1.js'
+      - 'public/app/local-ai/gemma4-browser-pack-coherence-v1.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
@@ -50,6 +52,7 @@ jobs:
           node --check public/app/local-ai/gemma4-phone-performance-core-v1.js
           node --check public/app/local-ai/gemma4-inference-repair-v1.js
           node --check public/app/local-ai/gemma4-q2-retirement-v1.js
+          node --check public/app/local-ai/gemma4-browser-pack-coherence-v1.js
           node --check public/app/local-ai/gemma4-litert-fast-extension-v1.js
           node --check public/app/local-ai/litert-gemma4-fast-runtime-v1.js
           node --check public/app/local-ai/gemma4-e4b-q4-extension-v1.js
