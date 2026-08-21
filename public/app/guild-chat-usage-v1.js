@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-guild-chat-usage-v1-mobile-session-upgrade';
+const VERSION='1.0.2-guild-chat-usage-v1-mobile-session-upgrade';
 const REVISION='guild-chat-usage-v1-mobile-session-upgrade';
 const HOST_SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -65,9 +65,9 @@ function render(){
 }
 async function refresh({network=true}={}){
   const selected=selectedGuildRecord();render();if(!network||!selected.hasGuild)return snapshot();const api=globalThis.CivweaveHostNodeSessionV1;if(!api)return snapshot();
-  let session=null;try{session=api.sessionFor?.(selected.nodeId||selected.origin)||null}catch{}
+  let session=null;try{session=api.sessionFor?.(selected.nodeId)||api.sessionFor?.(selected.origin)||null}catch{}
   if(!session&&api.ensureSelected)try{session=await api.ensureSelected()}catch{}
-  if(session&&api.status)try{await api.status(selected.nodeId||selected.origin)}catch{}
+  if(session&&api.status)try{await api.status(session.nodeId||session.origin||selected.origin)}catch{}
   render();const value=snapshot();try{dispatchEvent(new CustomEvent('civweave:guild-chat-usage-refreshed',{detail:value}))}catch{}return value;
 }
 function install(){
