@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.0-minilm-decision-strip-guild-resolver-telemetry';
+const VERSION='1.3.1-minilm-decision-strip-live-guild-balance';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-minilm-decision-strip-v1-style';
 const STRIP_ATTR='data-minilm-decision-strip';
@@ -11,10 +11,14 @@ const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
 const MINILM_ROUTER_SRC='/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary';
 const SERVER_ROUTER_SRC='/app/server-ai-router-v301.js?v=1.0.121-guild-telemetry';
+const HOST_SESSION_SRC='/app/host-node-session-v1.js?v=1.0.137-mobile-guild-quota';
+const GUILD_USAGE_SRC='/app/guild-chat-usage-v1.js?v=1.0.2-mobile-session-upgrade';
 let pendingTimer=0;
 let hardTimer=0;
 let readinessTimer=0;
 let trackerTimer=0;
+let usageRefreshPromise=null;
+let usageRefreshAt=0;
 let lastDecision=null;
 
 function clearTimers(){clearTimeout(pendingTimer);clearTimeout(hardTimer);pendingTimer=0;hardTimer=0}
@@ -58,15 +62,44 @@ function joinedCapacitySession(){
 }
 function guildContext(){
   const host=hostSession();if(host?.nodeId)return{kind:'host-session',nodeId:String(host.nodeId||''),guildId:String(host.guildId||''),session:host};
-  const mobile=mobileGuildSession();if(mobile?.nodeId||mobile?.guildId)return{kind:'mobile-guild-capacity',nodeId:String(mobile.nodeId||''),guildId:String(mobile.guildId||''),session:mobile};
   const joined=joinedCapacitySession();if(joined?.nodeId)return{kind:'joined-guild-capacity',nodeId:String(joined.nodeId||''),guildId:String(joined.guildId||''),session:joined};
+  const mobile=mobileGuildSession();if(mobile?.nodeId||mobile?.guildId)return{kind:'mobile-guild-capacity',nodeId:String(mobile.nodeId||''),guildId:String(mobile.guildId||''),session:mobile};
   const state=mobileGuildState();if(state?.guildId)return{kind:'mobile-guild-state',nodeId:String(state?.cloudFabric?.starterNodes?.[0]?.nodeId||''),guildId:String(state.guildId),session:null};
   const nodeId=String(document.documentElement?.dataset?.civweaveNodeId||''),origin=String(document.documentElement?.dataset?.civweaveGuildOrigin||'');
   if(nodeId)return{kind:'human-chat-guild-context',nodeId,guildId:'',session:{nodeId,origin}};
   return null;
 }
+function sharedUsageSnapshot(){
+  try{
+    const value=globalThis.CivweaveGuildChatUsageV1?.snapshot?.();
+    if(value?.known)return{remainingNeurons:value.remainingNeurons,approximateTurnsLeft:value.approximateTurnsLeft,averageNeuronsPerTurn:null,source:value.source||'guild-chat-usage'};
+  }catch{}
+  return null;
+}
+function exactPathScript(src){const path=new URL(src,location.href).pathname;return[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}})||null}
+function ensureBalanceRuntime(){
+  const hostVersion=String(globalThis.CivweaveHostNodeSessionV1?.version||'');
+  if(!hostVersion.startsWith('1.0.137-')){
+    const prior=exactPathScript(HOST_SESSION_SRC);if(!prior||prior.dataset.civweaveBalanceRepair!=='true'){const script=document.createElement('script');script.src=`${HOST_SESSION_SRC}&repair=${Date.now()}`;script.async=false;script.dataset.civweaveBalanceRepair='true';document.head?.append(script)}
+  }
+  const usageVersion=String(globalThis.CivweaveGuildChatUsageV1?.version||'');
+  if(!usageVersion.startsWith('1.0.2-')){
+    const prior=exactPathScript(GUILD_USAGE_SRC);if(!prior||prior.dataset.civweaveBalanceRepair!=='true'){const script=document.createElement('script');script.src=`${GUILD_USAGE_SRC}&repair=${Date.now()}`;script.async=false;script.dataset.civweaveBalanceRepair='true';document.head?.append(script)}
+  }
+}
+function requestGuildUsageRefresh({force=false}={}){
+  ensureBalanceRuntime();
+  const api=globalThis.CivweaveGuildChatUsageV1;
+  if(!api?.refresh)return null;
+  const now=Date.now();if(usageRefreshPromise||(!force&&now-usageRefreshAt<15000))return usageRefreshPromise;
+  usageRefreshAt=now;
+  usageRefreshPromise=Promise.resolve(api.refresh({network:true})).catch(()=>null).finally(()=>{usageRefreshPromise=null;queueMicrotask(refreshTracker)});
+  return usageRefreshPromise;
+}
 function trackerTelemetry(context){
   if(!context)return null;
+  const shared=sharedUsageSnapshot();if(shared)return shared;
+  if(context.session?.telemetry)return context.session.telemetry;
   if(['host-session','joined-guild-capacity','human-chat-guild-context'].includes(context.kind)){
     try{const telemetry=globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.(context.nodeId)||globalThis.CivweaveHostNodeSessionV1?.telemetryFor?.();if(telemetry)return telemetry}catch{}
   }
@@ -76,6 +109,7 @@ function trackerText(){
   const context=guildContext();if(!context)return'';
   const telemetry=trackerTelemetry(context),remaining=floorFinite(telemetry?.remainingNeurons),charged=floorFinite(telemetry?.chargedNeurons),average=Number(telemetry?.averageNeuronsPerTurn);
   let conversations=floorFinite(telemetry?.approximateTurnsLeft);if(conversations===null&&remaining!==null&&Number.isFinite(average)&&average>0)conversations=Math.max(0,Math.floor(remaining/average));
+  if(remaining===null||conversations===null)requestGuildUsageRefresh();
   const neuronText=remaining!==null?`${remaining.toLocaleString()} neurons left`:charged!==null&&charged>0?`${charged.toLocaleString()} neurons last turn`:'neurons syncing';
   const conversationText=conversations!==null?`≈${conversations.toLocaleString()} conversations left`:'conversations syncing';
   return`${neuronText} · ${conversationText}`;
@@ -123,15 +157,15 @@ function onSubmit(event){
   hardTimer=setTimeout(()=>setStatus('MiniLM route · response router has not emitted a decision','error'),12000)
 }
 function initialStatus(){ensureServerRouter();if(ensureMiniLMRouter())setStatus('MiniLM · ready · awaiting next message','pending');else{setStatus('MiniLM · router loading…','pending');watchReadiness()}}
-function install(){installStyle();strip();initialStatus();refreshTracker();if(!trackerTimer)trackerTimer=setInterval(refreshTracker,1500)}
+function install(){installStyle();ensureBalanceRuntime();strip();initialStatus();refreshTracker();requestGuildUsageRefresh({force:true});if(!trackerTimer)trackerTimer=setInterval(refreshTracker,1500)}
 addEventListener('civweave:response-route',onResponseRoute);
 addEventListener('civweave:experience-orchestrator',onOrchestrator);
 addEventListener('civweave:minilm-response-router-ready',()=>{if(readinessTimer){clearInterval(readinessTimer);readinessTimer=0}setStatus('MiniLM · ready · awaiting next message','pending')});
-for(const eventName of ['civweave:host-node-session-ready','civweave:capacity-session-ready','civweave:host-node-logged-in','civweave:host-node-health','civweave:ai-neuron-usage','civweave:guild-ai-telemetry','civweave:capacity-session-cleared','civweave:mobile-guild-attached','civweave:mobile-guild-fabric-refreshed','civweave:mobile-guild-directory-registered','civweave:human-chat-guild-context'])addEventListener(eventName,()=>queueMicrotask(refreshTracker));
+for(const eventName of ['civweave:host-node-session-ready','civweave:capacity-session-ready','civweave:host-node-logged-in','civweave:host-node-health','civweave:ai-neuron-usage','civweave:guild-ai-telemetry','civweave:guild-chat-usage-refreshed','civweave:capacity-session-cleared','civweave:host-node-selected','civweave:legacy-mobile-guild-selected','civweave:mobile-guild-attached','civweave:mobile-guild-fabric-refreshed','civweave:mobile-guild-directory-registered','civweave:human-chat-guild-context'])addEventListener(eventName,()=>{queueMicrotask(refreshTracker);if(eventName==='civweave:host-node-selected'||eventName==='civweave:legacy-mobile-guild-selected'||eventName==='civweave:host-node-session-ready')requestGuildUsageRefresh({force:true})});
 addEventListener('submit',onSubmit,true);
 addEventListener('pageshow',()=>queueMicrotask(install));
 addEventListener('pagehide',()=>{clearTimers();if(readinessTimer)clearInterval(readinessTimer);if(trackerTimer)clearInterval(trackerTimer);readinessTimer=0;trackerTimer=0},{once:true});
 new MutationObserver(()=>strip()).observe(document.documentElement,{childList:true,subtree:true});
 install();
-globalThis.CivweaveMiniLMDecisionStripV1=Object.freeze({version:VERSION,install,lastDecision:()=>lastDecision,refreshTracker,guildContext,visibleDecision:true,guildNeuronTracker:true,trackerPlacement:'same-horizontal-strip',guildResolver:'host-or-mobile-or-joined-capacity-or-human-context',guildTelemetry:'host-session-or-server-router',routerSelfHeal:true,serverRouterVersion:'1.0.121',actualRouteEventsOnly:true,noPreviewClassification:true,slowRouteWarningMs:2200,missingRouteErrorMs:12000});
+globalThis.CivweaveMiniLMDecisionStripV1=Object.freeze({version:VERSION,install,lastDecision:()=>lastDecision,refreshTracker,guildContext,requestGuildUsageRefresh,visibleDecision:true,guildNeuronTracker:true,trackerPlacement:'same-horizontal-strip',guildResolver:'host-or-joined-or-mobile-capacity-or-human-context',guildTelemetry:'live-guild-usage-or-host-session-or-server-router',routerSelfHeal:true,balanceRuntimeSelfHeal:true,serverRouterVersion:'1.0.121',hostSessionVersion:'1.0.137',guildUsageVersion:'1.0.2',actualRouteEventsOnly:true,noPreviewClassification:true,slowRouteWarningMs:2200,missingRouteErrorMs:12000});
 })();
