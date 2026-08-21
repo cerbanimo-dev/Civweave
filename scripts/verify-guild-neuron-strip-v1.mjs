@@ -78,7 +78,7 @@ assert.match(localCapacity, /SESSION_RUNTIME_VERSION = '1\.0\.137-'/);
 assert.match(localCapacity, /repair=\$\{Date\.now\(\)\}/);
 
 assert.match(chatRepair, /REVISION='guild-live-balance-v2'/);
-for (const path of ['minilm-decision-strip-v1.js','server-ai-router-v301.js','guild-chat-usage-v1.js','host-node-session-v1.js','host-node-local-capacity-v1.js','system-routes-v227.js']) assert.match(chatRepair, new RegExp(path.replaceAll('.', '\\.')));
+for (const path of ['minilm-decision-strip-v1.js','server-ai-router-v301.js','guild-chat-usage-v1.js','host-node-session-v1.js','host-node-local-capacity-v1.js','system-routes-v227.js']) assert.ok(chatRepair.includes(path), `chat repair must purge ${path}`);
 assert.match(chatRepair, /function purgeCriticalChatRuntimeCaches/);
 assert.match(chatRepair, /activation-targeted-critical-purge-explicit-full-repair/);
 assert.match(worker, /system-routes-v227\.js\?v=1\.0\.167-five-system-route-contract-v229-v440-home-live-guild-balance/);
