@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-gemma4-phone-performance-core-v1';
+const VERSION='1.1.0-gemma4-phone-performance-core-v1-registry-authority';
+const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const PACKS_KEY='CivweaveLocalModelPacksV1';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
@@ -25,6 +26,7 @@ const downloads=()=>parse(localStorage.getItem(DOWNLOADS_KEY),{});
 const packStates=()=>parse(localStorage.getItem(PACK_STATE_KEY),{});
 const manager=()=>globalThis.CivweaveLocalModelDownloadV266;
 const browser=()=>globalThis.CivweaveBrowserPackDownloadV1;
+const packExtension=()=>globalThis.CivweaveGemma4PackExtensionV1;
 const fastExtension=()=>globalThis.CivweaveGemma4LiteRTFastExtensionV1;
 const deepExtension=()=>globalThis.CivweaveGemma4E4BQ4ExtensionV1;
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
@@ -41,6 +43,47 @@ function existingPremier(){
 }
 function savedReady(id){return downloads()?.[id]?.status==='ready'}
 function missingFastIds(){return [FAST_E2,FAST_E4].filter(id=>!savedReady(id))}
+
+function layeredRegistry(registry){
+  let base=registry;
+  try{base=packExtension()?.patchRegistry?.(base)||base}catch{}
+  try{base=deepExtension()?.patchRegistry?.(base)||base}catch{}
+  try{base=fastExtension()?.patchRegistry?.(base)||base}catch{}
+  return base;
+}
+function patchRegistry(registry){
+  const base=layeredRegistry(registry);
+  if(!base?.byId||!Array.isArray(base.models))return base;
+  if(base.__civweaveGemma4PhonePerformanceRegistryV1)return base;
+  const missing=[LEGACY_E2,LEGACY_E4,FAST_E2,FAST_E4].filter(id=>!base.byId(id));
+  return freeze({
+    ...base,
+    __civweaveGemma4PhonePerformanceRegistryV1:true,
+    gemma4PhonePerformanceRegistry:true,
+    gemma4PhonePerformanceRegistryComplete:missing.length===0,
+    gemma4PhonePerformanceRegistryMissing:freeze(missing),
+    gemma4PhonePrimaryModel:FAST_E2,
+    gemma4PhoneDeepModel:FAST_E4,
+    gemma4LegacyFastAlias:LEGACY_E2,
+    gemma4LegacyDeepAlias:LEGACY_E4
+  });
+}
+function watchRegistry(){
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis,REGISTRY_KEY);
+  if(descriptor&&!descriptor.configurable){
+    try{const current=globalThis[REGISTRY_KEY],next=patchRegistry(current);if(next!==current)globalThis[REGISTRY_KEY]=next}catch{}
+    return Boolean(globalThis[REGISTRY_KEY]?.__civweaveGemma4PhonePerformanceRegistryV1);
+  }
+  let value=patchRegistry(globalThis[REGISTRY_KEY]);
+  try{
+    Object.defineProperty(globalThis,REGISTRY_KEY,{configurable:true,enumerable:true,get(){return value},set(next){value=patchRegistry(next)}});
+    return true;
+  }catch{
+    try{globalThis[REGISTRY_KEY]=patchRegistry(globalThis[REGISTRY_KEY])}catch{}
+    return Boolean(globalThis[REGISTRY_KEY]?.__civweaveGemma4PhonePerformanceRegistryV1);
+  }
+}
+
 function performanceOrder(base){
   const order=[...(base?.installOrder||[])].filter(id=>id&&!RETIRED_PHONE_CORE.has(id));
   const at=order.indexOf(FALLBACK);
@@ -87,7 +130,7 @@ function migrationPack(base){
 }
 function layeredBase(api){
   let base=api;
-  try{base=globalThis.CivweaveGemma4PackExtensionV1?.patchPackManager?.(base)||base}catch{}
+  try{base=packExtension()?.patchPackManager?.(base)||base}catch{}
   try{base=deepExtension()?.patchPackManager?.(base)||base}catch{}
   return base;
 }
@@ -165,11 +208,14 @@ function watchPacks(){
   }
 }
 function activate(){
-  try{fastExtension()?.watch?.()}catch{}
-  try{deepExtension()?.activate?.()}catch{}
-  const ready=watchPacks();
+  const registryReady=watchRegistry();
+  const packsReady=watchPacks();
+  try{deepExtension()?.scheduleDecorate?.()}catch{}
+  try{fastExtension()?.bindUpgradeUi?.()}catch{}
   scheduleDecorate();
-  return ready;
+  const registry=globalThis[REGISTRY_KEY],missing=registry?.gemma4PhonePerformanceRegistryMissing||[];
+  emit('civweave:gemma4-phone-performance-authority',{registryReady,packsReady,registryComplete:Boolean(registry?.gemma4PhonePerformanceRegistryComplete),missing});
+  return Boolean(registryReady&&packsReady);
 }
 async function completePerformanceCore(){
   activate();
@@ -183,6 +229,9 @@ function selectedLegacyNeedsPerformance(){
   return Boolean(pick?.active&&[LEGACY_E2,LEGACY_E4].includes(pick.id)&&existingPremier()&&missingFastIds().includes(pick.id===LEGACY_E4?FAST_E4:FAST_E2));
 }
 function assertSelectedPerformance(){
+  activate();
+  const registry=globalThis[REGISTRY_KEY],registryMissing=registry?.gemma4PhonePerformanceRegistryMissing||[];
+  if(registryMissing.length)throw Object.assign(new Error(`Gemma 4 phone runtime registration is incomplete: ${registryMissing.join(', ')}.`),{code:'LOCAL_PHONE_MODEL_REGISTRY_INCOMPLETE',missingModels:[...registryMissing]});
   if(!selectedLegacyNeedsPerformance())return true;
   const pick=manager()?.selection?.(),target=pick?.id===LEGACY_E4?FAST_E4:FAST_E2;
   throw Object.assign(new Error(`${pick?.id===LEGACY_E4?'Gemma 4 E4B':'Gemma 4 E2B'} is selected, but its LiteRT phone-performance model is not installed. Open Local models and choose Complete phone performance core.`),{code:'LOCAL_PHONE_PERFORMANCE_CORE_REQUIRED',selectedModel:pick?.id,requiredModel:target,missingModels:missingFastIds()});
@@ -220,7 +269,7 @@ function onClick(event){
   void completePerformanceCore().catch(error=>emit('civweave:gemma4-phone-performance-error',{message:String(error?.message||error)})).finally(()=>{button.disabled=false;scheduleDecorate()});
 }
 document.addEventListener('click',onClick,true);
-for(const name of ['civweave:settings-opened','civweave:settings-local-route-ready','civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-pack-progress','civweave:local-model-pack-selected','pageshow'])addEventListener(name,()=>{activate();scheduleDecorate()});
+for(const name of ['civweave:settings-opened','civweave:settings-local-route-ready','civweave:local-model-runtime-ready','civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-pack-progress','civweave:local-model-pack-selected','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>{activate();scheduleDecorate()});
 activate();
 
 globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
@@ -230,6 +279,8 @@ globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
   deepModel:FAST_E4,
   legacyModels:freeze([LEGACY_E2,LEGACY_E4,Q2_E2,Q2_E4]),
   performanceBytes:freeze({...FAST_BYTES}),
+  patchRegistry,
+  watchRegistry,
   patchPackManager,
   watchPacks,
   activate,
@@ -239,6 +290,8 @@ globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
   selectedLegacyNeedsPerformance,
   assertSelectedPerformance,
   optimizedRuntime:'google-litert-lm-webgpu',
+  registryAuthority:true,
+  packAuthority:true,
   oneEngineAtATime:true,
   explicitMigration:true
 });
