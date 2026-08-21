@@ -1,0 +1,108 @@
+name: Verify Cerbanimo production live
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: cerbanimo-production-live-monitor
+  cancel-in-progress: true
+
+jobs:
+  verify-live:
+    name: Confirm Cloudflare serves current main
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      PAGES_ORIGIN: https://cerbanimo-cc.pages.dev
+      PUBLIC_ORIGIN: https://cerbanimo.cc
+      STATUS_CONTEXT: cerbanimo/production-live
+
+    steps:
+      - name: Mark production verification pending
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const endpoint = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+              Accept: 'application/vnd.github+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Waiting for Cloudflare Pages production'
+            })
+          });
+          if (!response.ok) throw new Error(`Could not create pending status: HTTP ${response.status}`);
+          NODE
+
+      - name: Wait for both Cloudflare origins to serve this commit
+        id: verify
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -u
+          for attempt in $(seq 1 60); do
+            bust="${GITHUB_SHA}-${attempt}-$(date +%s)"
+            pages_json="$(curl -fsS --max-time 15 -H 'Cache-Control: no-cache' "${PAGES_ORIGIN}/history.json?verify=${bust}" 2>/dev/null || true)"
+            public_json="$(curl -fsS --max-time 15 -H 'Cache-Control: no-cache' "${PUBLIC_ORIGIN}/history.json?verify=${bust}" 2>/dev/null || true)"
+            pages_sha="$(printf '%s' "$pages_json" | jq -r '.latestCommit // empty' 2>/dev/null || true)"
+            public_sha="$(printf '%s' "$public_json" | jq -r '.latestCommit // empty' 2>/dev/null || true)"
+
+            echo "attempt=${attempt} pages=${pages_sha:-missing} public=${public_sha:-missing} expected=${GITHUB_SHA}"
+
+            if [ "$pages_sha" = "$GITHUB_SHA" ] && [ "$public_sha" = "$GITHUB_SHA" ]; then
+              echo "Cloudflare Pages and cerbanimo.cc are both live at ${GITHUB_SHA}."
+              exit 0
+            fi
+
+            sleep 10
+          done
+
+          echo "Timed out waiting for Cloudflare production to serve ${GITHUB_SHA}."
+          exit 1
+
+      - name: Report production verification status
+        if: always()
+        shell: bash
+        env:
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const success = process.env.VERIFY_OUTCOME === 'success';
+          const endpoint = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+              Accept: 'application/vnd.github+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              state: success ? 'success' : 'failure',
+              context: process.env.STATUS_CONTEXT,
+              description: success
+                ? 'Cloudflare Pages and cerbanimo.cc serve this commit'
+                : 'Cloudflare production did not reach this commit in time'
+            })
+          });
+          if (!response.ok) throw new Error(`Could not report production status: HTTP ${response.status}`);
+          NODE
+
+      - name: Fail if production verification failed
+        if: steps.verify.outcome != 'success'
+        shell: bash
+        run: exit 1
