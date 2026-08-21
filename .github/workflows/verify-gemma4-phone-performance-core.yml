@@ -1,3 +1,4 @@
+# Temporary PR probe: exercises this verifier against the current staging runtime.
 name: Verify Gemma 4 Phone Performance Core
 
 on:
