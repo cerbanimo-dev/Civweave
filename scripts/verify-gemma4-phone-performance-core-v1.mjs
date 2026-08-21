@@ -1,3 +1,4 @@
+// PR-trigger marker: validate Q2 retirement migration on the current staging snapshot.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
