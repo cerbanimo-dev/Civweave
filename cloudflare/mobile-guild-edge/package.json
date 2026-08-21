@@ -1,6 +1,6 @@
 {
   "name": "civweave-mobile-guild-edge",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,6 +15,11 @@
       "CIVWEAVE_GUILD_CLAIM_TOKEN": {
         "description": "REQUIRED: this field must start empty. Paste the exact one-time pairing code shown by Civweave after local Guild creation before deploying. Do not leave a sample or placeholder value."
       }
+    },
+    "civweaveAutoUpdate": {
+      "schema": "civweave.guild-cloud-auto-update.v1",
+      "managedBy": "Guildkeeper-owned Git repository + Cloudflare Workers Builds",
+      "manualCloudflareCredentialsRequiredAfterInstall": false
     }
   }
 }
