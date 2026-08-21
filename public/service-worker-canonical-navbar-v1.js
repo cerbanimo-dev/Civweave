@@ -1,21 +1,23 @@
 'use strict';
 (()=>{
-const VERSION='canonical-navbar-network-first-v7-v440-home';
+const VERSION='canonical-navbar-network-first-v8-v440-home-css-isolation';
 const NAV_PATH='/app/themed-system-nav-v178.js';
 const DIRECT_NAV_PATH='/app/five-system-direct-navigation-v1.js';
 const OUTPUT_NORMALIZER_PATH='/app/server-ai-output-normalizer-v1.js';
+const MERLINITES_STYLE_PATH='/app/merlinites-shell-fix-v166.css';
 const PATHS=Object.freeze([
   '/app/system-routes-v227.js',
   NAV_PATH,
   DIRECT_NAV_PATH,
   OUTPUT_NORMALIZER_PATH,
+  MERLINITES_STYLE_PATH,
   '/app/persistent-shell-actions-v1.js',
   '/app/subsystem-avatar-state-v347.js',
   '/app/shared-guide-surface-v236-core-v244.js',
   '/app/platform-experience-v160.css'
 ]);
 const PATH_SET=new Set(PATHS);
-const CACHE='cw-nav-canonical-v7';
+const CACHE='cw-nav-canonical-v8';
 const FETCH_TIMEOUT_MS=10000;
 function valid(response,path){
   if(!response?.ok)return false;
@@ -78,5 +80,5 @@ self.addEventListener('fetch',event=>{
   event.stopImmediatePropagation();
   event.respondWith(responseFor(request,url.pathname));
 });
-self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,directNavigationPath:DIRECT_NAV_PATH,outputNormalizerPath:OUTPUT_NORMALIZER_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-direct-system-pages-v440-home-plus-direct-click-owner-no-canonical-realm-interception',warm});
+self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,directNavigationPath:DIRECT_NAV_PATH,outputNormalizerPath:OUTPUT_NORMALIZER_PATH,merlinitesStylePath:MERLINITES_STYLE_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-direct-system-pages-v440-home-plus-current-shell-css-no-canonical-realm-interception',warm});
 })();

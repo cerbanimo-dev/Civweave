@@ -13,6 +13,7 @@ on:
       - public/app/merlinites-shell-fix-v166.css
       - public/app/civweave-brand.js
       - public/service-worker-canonical-navbar-v1.js
+      - public/service-worker-legacy-home-redirect-v1.js
       - public/service-worker-canonical-home-v1.js
       - public/service-worker-v203.js
       - scripts/verify-canonical-v440-lud-isolation-v1.mjs
@@ -29,6 +30,7 @@ on:
       - public/app/merlinites-shell-fix-v166.css
       - public/app/civweave-brand.js
       - public/service-worker-canonical-navbar-v1.js
+      - public/service-worker-legacy-home-redirect-v1.js
       - public/service-worker-canonical-home-v1.js
       - public/service-worker-v203.js
       - scripts/verify-canonical-v440-lud-isolation-v1.mjs

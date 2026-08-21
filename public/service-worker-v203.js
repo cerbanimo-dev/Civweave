@@ -1,5 +1,6 @@
 // GENERATED: direct five-system routes + Guild login runtime + local AI coherence + lifecycle-deferred caches + canonical five-guide rail + Guild/Map actions on every system + no iframe family shell.
 // direct-first-class-routes-v3: Civweave v440 and each realm own their canonical page; guide/chat context cannot substitute for navigation.
+// legacy-home-redirect-v1: explicit navigation to retired v156 migrates to v440 without reloading unrelated open clients.
 // canonical-home-v1: v440 home is validated before generic worker caching and can never fall back to the retired v156 shell.
 // five-system-pages-v1: exact realm navigation is validated before generic worker caching and can never substitute Civweave home HTML.
 // navigation-runtime-recovery-v2: stale navigation code/pages are purged without reloading or redirecting open clients.
@@ -10,7 +11,8 @@
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.166-five-system-route-contract-v229-v440-home');
-importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v7-v440-home');
+importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v8-v440-home-css-isolation');
+importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
 importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-v440-exact-owner');
 importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-exact-realm-owner');
 importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v2-purge-only');

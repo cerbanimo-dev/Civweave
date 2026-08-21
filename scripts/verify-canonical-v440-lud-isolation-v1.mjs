@@ -16,6 +16,7 @@ for(const path of [
   'public/app/unified-chat-system-v1.js',
   'public/app/lud-game-ui-v1.js',
   'public/service-worker-canonical-navbar-v1.js',
+  'public/service-worker-legacy-home-redirect-v1.js',
   'public/service-worker-canonical-home-v1.js',
   'public/service-worker-v203.js'
 ])syntax(path);
@@ -37,17 +38,26 @@ includes(start,"civweave:['/app/working-campus-v440.html',{}]",'PWA start');
 includes(start,"canonicalCampusPath:'/app/working-campus-v440.html'",'PWA start');
 includes(start,"freshCampusPath:'/app/working-campus-v440.html'",'PWA start');
 
+const legacy=file('public/service-worker-legacy-home-redirect-v1.js');
+includes(legacy,"const LEGACY='/app/working-campus-v156.html'",'legacy home redirect');
+includes(legacy,"const CANONICAL='/app/working-campus-v440.html'",'legacy home redirect');
+includes(legacy,"request.mode!=='navigate'",'legacy home redirect');
+includes(legacy,'explicit-legacy-navigation-redirect-only-no-client-reload','legacy home redirect');
+
 const home=file('public/service-worker-canonical-home-v1.js');
 includes(home,"const PATH='/app/working-campus-v440.html'",'canonical home worker');
 includes(home,'exact-network-first-validated-v440-home-never-legacy-substitution','canonical home worker');
 includes(home,'refused to substitute a legacy campus','canonical home worker');
 
 const navbar=file('public/service-worker-canonical-navbar-v1.js');
-includes(navbar,"const CACHE='cw-nav-canonical-v7'",'canonical navbar worker');
+includes(navbar,"const CACHE='cw-nav-canonical-v8'",'canonical navbar worker');
 includes(navbar,"const OUTPUT_NORMALIZER_PATH='/app/server-ai-output-normalizer-v1.js'",'canonical navbar worker');
+includes(navbar,"const MERLINITES_STYLE_PATH='/app/merlinites-shell-fix-v166.css'",'canonical navbar worker');
 
 const sw=file('public/service-worker-v203.js');
+includes(sw,"service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440",'v203 worker');
 includes(sw,"service-worker-canonical-home-v1.js?v=canonical-home-v1-v440-exact-owner",'v203 worker');
+includes(sw,"canonical-navbar-network-first-v8-v440-home-css-isolation",'v203 worker');
 includes(sw,"system-routes-v227.js?v=1.0.166-five-system-route-contract-v229-v440-home",'v203 worker');
 
 const v440=file('public/app/working-campus-v440.html');
@@ -65,7 +75,7 @@ includes(sharedShell,'Lud symbolic HUD identity belongs to public/app/lud-game-u
 
 const lud=file('public/app/lud-game-ui-v1.js');
 includes(lud,"const HUD_ID='cw-lud-hud-nav'",'Lud HUD');
-includes(lud,"data-lud-hud-system",'Lud HUD');
+includes(lud,'data-lud-hud-system','Lud HUD');
 includes(lud,'data:image/svg+xml;base64','Lud HUD');
 includes(lud,"kind:'learning-module'",'Lud HUD');
 includes(lud,"kind:'quest'",'Lud HUD');
@@ -76,4 +86,4 @@ includes(brand,'function ensureLudModeLink()','downloads page brand runtime');
 includes(brand,'ensureLudModeLink();','downloads page brand runtime');
 includes(brand,"link.textContent='Download Lud Mode'",'downloads page brand runtime');
 
-console.log('PASS v440 is canonical, Moss enforces its schema floor, Lud symbols stay in Lud HUD, and the Downloads page retains its Lud Mode link.');
+console.log('PASS v440 is canonical, legacy v156 migrates, Moss enforces its schema floor, Lud symbols stay in Lud HUD, and the Downloads page retains its Lud Mode link.');
