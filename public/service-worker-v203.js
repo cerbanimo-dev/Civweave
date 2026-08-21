@@ -21,7 +21,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
 importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v23-direct-shell-actions');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v24-navbar-actions-refresh');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
@@ -33,7 +33,7 @@ importScripts('/service-worker-campus-completion-v246.js?v=campus-current-comple
 importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224-direct-system-pages-v2');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227-direct-routes-v1');
-importScripts('/service-worker-chat-repair-v245.js?v=moss-local-learning-plan-v2&purge=moss-local-learning-plan-v2&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361');
+importScripts('/service-worker-chat-repair-v245.js?v=weaveling-local-structured-fallback-v3&purge=weaveling-local-structured-fallback-v3&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
 // atomic-update-handoff-v427: updated workers normally remain waiting until the visible update controller explicitly activates them.
