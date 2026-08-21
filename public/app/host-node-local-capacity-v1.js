@@ -1,10 +1,11 @@
 (() => {
 'use strict';
 
-const VERSION = 'host-node-local-capacity-v5-guild-login-runtime-bootstrap';
+const VERSION = 'host-node-local-capacity-v6-live-guild-quota';
 const CAPACITY_ENDPOINT = '/api/federation/capacity';
 const ADMIT_ENDPOINT = '/api/federation/residents/admit';
-const SESSION_RUNTIME_PATH = '/app/host-node-session-v1.js?v=guild-login-runtime-ready-v1';
+const SESSION_RUNTIME_PATH = '/app/host-node-session-v1.js?v=1.0.137-mobile-guild-quota';
+const SESSION_RUNTIME_VERSION = '1.0.137-';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const RESIDENT_KEY = 'civweave.host-resident-id.v1';
 const PASSPORT_KEY = 'civweave.anarchadia.citizen-console.v139';
@@ -29,7 +30,10 @@ const parse = (value, fallback = null) => { try { return JSON.parse(value) ?? fa
 
 function lobby() { return document.getElementById('cw-host-node-lobby'); }
 function localFederatedLobby() { return lobby()?.dataset.localFederated === 'true'; }
-function sessionRuntime() { return typeof globalThis.CivweaveHostNodeSessionV1?.join === 'function' ? globalThis.CivweaveHostNodeSessionV1 : null; }
+function sessionRuntime() {
+  const runtime = globalThis.CivweaveHostNodeSessionV1;
+  return typeof runtime?.join === 'function' && String(runtime?.version || '').startsWith(SESSION_RUNTIME_VERSION) ? runtime : null;
+}
 
 function waitForSessionRuntime(timeoutMs = SESSION_RUNTIME_WAIT_MS) {
   const current = sessionRuntime();
@@ -51,17 +55,15 @@ function ensureSessionRuntime() {
   if (current) return Promise.resolve(current);
   if (sessionRuntimePromise) return sessionRuntimePromise;
   sessionRuntimePromise = (async () => {
-    let script = [...document.scripts].find(node => {
+    const existing = [...document.scripts].find(node => {
       try { return new URL(node.src, location.href).pathname === '/app/host-node-session-v1.js'; }
       catch { return false; }
     });
-    if (!script) {
-      script = document.createElement('script');
-      script.src = SESSION_RUNTIME_PATH;
-      script.async = false;
-      script.dataset.civweaveGuildLoginRuntime = 'v1';
-      document.head.append(script);
-    }
+    const script = document.createElement('script');
+    script.src = `${SESSION_RUNTIME_PATH}${existing ? `&repair=${Date.now()}` : ''}`;
+    script.async = false;
+    script.dataset.civweaveGuildLoginRuntime = 'v2-live-quota';
+    document.head.append(script);
     return waitForSessionRuntime();
   })().catch(error => {
     sessionRuntimePromise = null;
@@ -339,6 +341,7 @@ globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({
   networkLeaseMs: NETWORK_LEASE_MS,
   failureBackoffMs: FAILURE_BACKOFF_MS,
   sessionRuntimePath: SESSION_RUNTIME_PATH,
+  sessionRuntimeVersion: SESSION_RUNTIME_VERSION,
   localFederatedLobby,
   ensureSessionRuntime,
   refreshCapacity,
