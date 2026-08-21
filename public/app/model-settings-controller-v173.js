@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.17-model-settings-controller-v173-gemma4-browser-pack-coherence';
+const VERSION='1.0.18-model-settings-controller-v173-gemma4-browser-status-sync';
 const GEMMA4_DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
 const GEMMA4_DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
 const GEMMA4_PACK_VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
@@ -13,8 +13,8 @@ const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-author
 const GEMMA4_PHONE_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.2.0-resume-authority';
 const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
 const GEMMA4_Q2_RETIRE_SRC='/app/local-ai/gemma4-q2-retirement-v1.js?v=1.0.0-q2-retirement';
-const GEMMA4_BROWSER_PACK_VERSION='1.0.0-gemma4-browser-pack-coherence-v1';
-const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.0-browser-pack-coherence';
+const GEMMA4_BROWSER_PACK_VERSION='1.0.1-gemma4-browser-pack-coherence-v1-status-sync';
+const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync';
 if(globalThis.CivweaveModelSettingsControllerV173?.version===VERSION)return;
 const canonical=()=>globalThis.CivweaveSettingsV320||null;
 function open(launcher){return canonical()?.open?.(launcher)||null}
@@ -99,6 +99,7 @@ const api=Object.freeze({
   gemma4BrowserImport:true,
   gemma4BrowserManagedLiteRT:true,
   gemma4MidrangeUsesLiteRT:true,
+  gemma4PostImportStatusSync:true,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
 globalThis.CivweaveModelSettingsControllerV173=api;
