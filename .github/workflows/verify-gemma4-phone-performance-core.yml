@@ -1,0 +1,50 @@
+name: Verify Gemma 4 Phone Performance Core
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
+      - 'scripts/verify-gemma4-phone-performance-core-v1.mjs'
+      - '.github/workflows/verify-gemma4-phone-performance-core.yml'
+  push:
+    branches: [main, staging]
+    paths:
+      - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
+      - 'scripts/verify-gemma4-phone-performance-core-v1.mjs'
+      - '.github/workflows/verify-gemma4-phone-performance-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-gemma4-phone-performance-core-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Parse phone runtime modules
+        run: |
+          node --check public/app/local-ai/gemma4-phone-performance-core-v1.js
+          node --check public/app/local-ai/gemma4-inference-repair-v1.js
+          node --check public/app/local-ai/gemma4-litert-fast-extension-v1.js
+          node --check public/app/local-ai/litert-gemma4-fast-runtime-v1.js
+          node --check public/app/local-ai/gemma4-e4b-q4-extension-v1.js
+          node --check scripts/verify-gemma4-phone-performance-core-v1.mjs
+      - name: Verify Gemma 4 phone authority contracts
+        run: node scripts/verify-gemma4-phone-performance-core-v1.mjs
