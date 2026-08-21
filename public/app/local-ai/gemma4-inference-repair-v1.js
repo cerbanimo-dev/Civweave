@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.3-gemma4-inference-repair-v1-onnx-only';
+const VERSION='1.0.4-gemma4-inference-repair-v1-phone-authority';
 const EXPECTED_WORKER_REVISION='1.0.126-v315-gemma4-template-logits';
 const RUNTIME_WORKER_URL='/app/local-ai/worker-v266.js?v=1.0.125-v314-smooth-fit';
 const WORKER_PATH='/app/local-ai/worker-v266.js';
@@ -8,14 +8,50 @@ const V4_BUNDLE_PATH='/app/vendor/transformers-v4/transformers.min.js';
 const V4_MANIFEST_PATH='/app/vendor/transformers-v4/stage-manifest.json';
 const V4_STAGE_SCHEMA='civweave.transformers-stage.v7';
 const V4_BACKPORT='huggingface-transformers-js-pr-1681';
+const DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
+const DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
+const PHONE_AUTH_VERSION='1.0.0-gemma4-phone-performance-core-v1';
+const PHONE_AUTH_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.0.0-phone-performance-core';
 const GEMMA4_RE=/gemma4|gemma-4/i;
 const LITERT_RE=/litert/i;
 const STALE_LOGITS_RE=/inputNames\.includes\("num_logits_to_keep"\)[^;]{0,220}\[0n\]/;
 if(globalThis.CivweaveGemma4InferenceRepairV1?.version===VERSION)return;
-let wrapped=null,refreshFlight=null,refreshDone=false;
+let wrapped=null,refreshFlight=null,refreshDone=false,phoneAuthorityFlight=null;
 const selected=()=>{try{return globalThis.CivweaveLocalModelDownloadV266?.selection?.()||null}catch{return null}};
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
 function activeGemma4(){const pick=selected(),id=String(pick?.id||''),spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(id);return Boolean(pick?.active&&GEMMA4_RE.test(id)&&!LITERT_RE.test(`${id} ${spec?.runtime||''}`))}
+function loadScript(src,ready,label){
+  if(ready())return Promise.resolve(true);
+  return new Promise((resolve,reject)=>{
+    const target=new URL(src,location.href),path=target.pathname;
+    let script=[...(document.scripts||[])].find(node=>{try{return new URL(node.src,location.href).pathname===path}catch{return false}});
+    const finish=()=>ready()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`));
+    if(script){
+      script.addEventListener('load',finish,{once:true});
+      script.addEventListener('error',()=>reject(new Error(`${label} could not load.`)),{once:true});
+      queueMicrotask(()=>{if(ready())resolve(true)});
+      return;
+    }
+    script=document.createElement('script');script.src=src;script.async=false;
+    script.onload=finish;script.onerror=()=>reject(new Error(`${label} could not load.`));
+    const head=document.head;if(!head?.isConnected){reject(new Error(`${label} could not mount because the document is leaving.`));return}head.append(script);
+  });
+}
+async function ensurePhoneAuthority(){
+  const phoneReady=()=>globalThis.CivweaveGemma4PhonePerformanceCoreV1?.version===PHONE_AUTH_VERSION;
+  const deepReady=()=>globalThis.CivweaveGemma4E4BQ4ExtensionV1?.version===DEEP_VERSION;
+  if(phoneReady()){
+    try{globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.()}catch{}
+    return true;
+  }
+  if(phoneAuthorityFlight)return phoneAuthorityFlight;
+  phoneAuthorityFlight=loadScript(DEEP_SRC,deepReady,'Gemma 4 E4B deep registration')
+    .then(()=>{globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();return loadScript(PHONE_AUTH_SRC,phoneReady,'Gemma 4 phone performance authority')})
+    .then(()=>{globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();emit('civweave:gemma4-phone-authority-ready',{deepModel:'gemma4-e4b-it-q4f16',fastModel:'gemma4-e2b-it-litert-web',deepFastModel:'gemma4-e4b-it-litert-web'});return true})
+    .catch(error=>{emit('civweave:gemma4-phone-authority-failed',{message:String(error?.message||error)});throw error})
+    .finally(()=>{phoneAuthorityFlight=null});
+  return phoneAuthorityFlight;
+}
 async function fetchText(path,label){const fresh=new URL(path,location.href);fresh.searchParams.set('cwGemma4Repair',`${Date.now()}-${Math.random().toString(36).slice(2,8)}`);const response=await fetch(fresh.href,{cache:'no-store',credentials:'same-origin'});if(!response.ok)throw new Error(`${label} refresh returned HTTP ${response.status}.`);return{response,text:await response.text()}}
 async function freshWorkerSource(){
   const target=new URL(RUNTIME_WORKER_URL,location.href),fresh=new URL(target.href);fresh.searchParams.set('cwWorkerRepair',`${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
@@ -60,12 +96,17 @@ async function refreshWorkerAsset({force=false}={}){
 function patch(){
   const api=globalThis.CivweaveLocalChatRuntimeV295;if(!api?.generate)return false;
   if(api.gemma4InferenceRepairV1===VERSION){wrapped=api;return true}
-  const base=api,generate=async args=>{if(activeGemma4())await refreshWorkerAsset();return base.generate(args)};
-  const next=Object.freeze({...base,generate,gemma4InferenceRepairV1:VERSION,gemma4WorkerRevision:EXPECTED_WORKER_REVISION,gemma4ChatTemplateRepair:true,gemma4NextTokenLogitsOnly:true,gemma4UpstreamLogitsBackport:true,gemma4RuntimeStageSchema:V4_STAGE_SCHEMA,transformersRepairScope:'onnx-only'});
+  const base=api,generate=async args=>{
+    await ensurePhoneAuthority();
+    globalThis.CivweaveGemma4PhonePerformanceCoreV1?.assertSelectedPerformance?.();
+    if(activeGemma4())await refreshWorkerAsset();
+    return base.generate(args);
+  };
+  const next=Object.freeze({...base,generate,gemma4InferenceRepairV1:VERSION,gemma4WorkerRevision:EXPECTED_WORKER_REVISION,gemma4ChatTemplateRepair:true,gemma4NextTokenLogitsOnly:true,gemma4UpstreamLogitsBackport:true,gemma4RuntimeStageSchema:V4_STAGE_SCHEMA,gemma4PhoneAuthority:true,gemma4DeepRegistrationGuaranteed:true,gemma4PhonePerformanceCoreRequired:true,transformersRepairScope:'onnx-only'});
   try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}
-  wrapped=next;emit('civweave:gemma4-inference-repair-installed',{workerRevision:EXPECTED_WORKER_REVISION,runtimeStageSchema:V4_STAGE_SCHEMA,scope:'onnx-only'});return true;
+  wrapped=next;emit('civweave:gemma4-inference-repair-installed',{workerRevision:EXPECTED_WORKER_REVISION,runtimeStageSchema:V4_STAGE_SCHEMA,scope:'onnx-only',phoneAuthority:true});return true;
 }
-for(const name of ['civweave:local-model-runtime-ready','civweave:assistant-runtime-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(patch));
-patch();
-globalThis.CivweaveGemma4InferenceRepairV1=Object.freeze({version:VERSION,expectedWorkerRevision:EXPECTED_WORKER_REVISION,runtimeWorkerUrl:RUNTIME_WORKER_URL,workerPath:WORKER_PATH,v4BundlePath:V4_BUNDLE_PATH,v4ManifestPath:V4_MANIFEST_PATH,v4StageSchema:V4_STAGE_SCHEMA,v4Backport:V4_BACKPORT,patch,refreshWorkerAsset,verifyPatchedV4Runtime,activeGemma4,transformersRepairScope:'onnx-only',state:()=>Object.freeze({installed:Boolean(wrapped),refreshDone,refreshing:Boolean(refreshFlight)})});
+for(const name of ['civweave:local-model-runtime-ready','civweave:assistant-runtime-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(()=>{patch();void ensurePhoneAuthority().catch(()=>null)}));
+patch();void ensurePhoneAuthority().catch(()=>null);
+globalThis.CivweaveGemma4InferenceRepairV1=Object.freeze({version:VERSION,expectedWorkerRevision:EXPECTED_WORKER_REVISION,runtimeWorkerUrl:RUNTIME_WORKER_URL,workerPath:WORKER_PATH,v4BundlePath:V4_BUNDLE_PATH,v4ManifestPath:V4_MANIFEST_PATH,v4StageSchema:V4_STAGE_SCHEMA,v4Backport:V4_BACKPORT,patch,refreshWorkerAsset,verifyPatchedV4Runtime,ensurePhoneAuthority,activeGemma4,gemma4PhoneAuthority:true,gemma4DeepRegistrationGuaranteed:true,gemma4PhonePerformanceCoreRequired:true,transformersRepairScope:'onnx-only',state:()=>Object.freeze({installed:Boolean(wrapped),refreshDone,refreshing:Boolean(refreshFlight),phoneAuthorityReady:globalThis.CivweaveGemma4PhonePerformanceCoreV1?.version===PHONE_AUTH_VERSION,phoneAuthorityLoading:Boolean(phoneAuthorityFlight)})});
 })();
