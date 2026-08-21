@@ -62,3 +62,5 @@ jobs:
         run: node scripts/verify-gemma4-phone-performance-core-v1.mjs
       - name: Verify Gemma 4 settings migration
         run: node scripts/verify-gemma4-settings-migration-v1.mjs
+
+# verification trigger: post-import ready state
