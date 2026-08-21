@@ -4,6 +4,7 @@
   "sourcePath": "cloudflare/mobile-guild-edge",
   "channel": "staging",
   "checkIntervalHours": 6,
+  "schedulerHeartbeatDays": 30,
   "managedPaths": [
     "src",
     ".civweave",
