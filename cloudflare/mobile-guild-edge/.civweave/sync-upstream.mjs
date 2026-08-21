@@ -45,6 +45,14 @@ function stripJsonc(text){
   return out;
 }
 function parseJsonc(path){return JSON.parse(stripJsonc(readFileSync(path,'utf8')))}
+function mergePackage(){
+  const sourcePath=join(sourceRoot,'package.json'),targetPath=join(repoRoot,'package.json');
+  if(!existsSync(sourcePath)||!existsSync(targetPath))return;
+  const upstream=readJson(sourcePath),current=readJson(targetPath),merged={...current};
+  for(const key of sourceConfig.packageManagedKeys||[])if(Object.prototype.hasOwnProperty.call(upstream,key))merged[key]=upstream[key];
+  for(const key of sourceConfig.packagePreservedKeys||[])if(Object.prototype.hasOwnProperty.call(current,key))merged[key]=current[key];
+  writeFileSync(targetPath,`${JSON.stringify(merged,null,2)}\n`,'utf8');
+}
 function mergeWrangler(){
   const sourcePath=join(sourceRoot,'wrangler.jsonc'),targetPath=join(repoRoot,'wrangler.jsonc');
   if(!existsSync(sourcePath)||!existsSync(targetPath))return;
@@ -54,6 +62,7 @@ function mergeWrangler(){
   for(const key of sourceConfig.wranglerPreservedKeys||[])if(Object.prototype.hasOwnProperty.call(current,key))merged[key]=current[key];
   writeFileSync(targetPath,`${JSON.stringify(merged,null,2)}\n`,'utf8');
 }
+mergePackage();
 mergeWrangler();
 
 const appliedAt=new Date().toISOString();
