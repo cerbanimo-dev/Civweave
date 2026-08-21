@@ -9,7 +9,7 @@
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.165-five-system-route-contract-v228-direct-owner');
-importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v5-direct-realm-actions');
+importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v6-direct-navigation-owner');
 importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-exact-realm-owner');
 importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v2-purge-only');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');
