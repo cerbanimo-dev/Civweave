@@ -9,11 +9,21 @@
     "src",
     ".civweave",
     ".github/workflows/civweave-auto-update.yml",
-    "package.json",
     "README.md",
     ".gitignore",
     ".dev.vars.example",
     "civweave-update.json"
+  ],
+  "packageManagedKeys": [
+    "version",
+    "private",
+    "type",
+    "scripts",
+    "devDependencies",
+    "cloudflare"
+  ],
+  "packagePreservedKeys": [
+    "name"
   ],
   "wranglerManagedKeys": [
     "main",
