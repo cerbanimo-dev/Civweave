@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v23-direct-shell-actions';
+const REVISION='shell-assets-v1-repair-v24-navbar-actions-refresh';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
