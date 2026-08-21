@@ -1,17 +1,19 @@
 'use strict';
 (()=>{
-const VERSION='canonical-navbar-network-first-v5-direct-realm-actions';
+const VERSION='canonical-navbar-network-first-v6-direct-navigation-owner';
 const NAV_PATH='/app/themed-system-nav-v178.js';
+const DIRECT_NAV_PATH='/app/five-system-direct-navigation-v1.js';
 const PATHS=Object.freeze([
   '/app/system-routes-v227.js',
   NAV_PATH,
+  DIRECT_NAV_PATH,
   '/app/persistent-shell-actions-v1.js',
   '/app/subsystem-avatar-state-v347.js',
   '/app/shared-guide-surface-v236-core-v244.js',
   '/app/platform-experience-v160.css'
 ]);
 const PATH_SET=new Set(PATHS);
-const CACHE='cw-nav-canonical-v5';
+const CACHE='cw-nav-canonical-v6';
 const FETCH_TIMEOUT_MS=10000;
 function valid(response,path){
   if(!response?.ok)return false;
@@ -74,5 +76,5 @@ self.addEventListener('fetch',event=>{
   event.stopImmediatePropagation();
   event.respondWith(responseFor(request,url.pathname));
 });
-self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-direct-system-pages-no-canonical-realm-click-interception',warm});
+self.CivweaveCanonicalNavbarV1=Object.freeze({version:VERSION,path:NAV_PATH,directNavigationPath:DIRECT_NAV_PATH,paths:[...PATHS],cache:CACHE,policy:'network-first-direct-system-pages-plus-direct-click-owner-no-canonical-realm-interception',warm});
 })();
