@@ -1,3 +1,4 @@
+// PR-trigger marker: validate Local Models migration entry point.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
