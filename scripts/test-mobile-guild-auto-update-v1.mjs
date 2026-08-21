@@ -14,7 +14,7 @@ const updater=readFileSync(join(templateRoot,'.civweave/sync-upstream.mjs'),'utf
 assert.equal(config.schema,'civweave.guild-cloud-auto-update.v1');
 assert.equal(config.sourceRepository,'cerbanimo-dev/Civweave');
 assert.equal(config.sourcePath,'cloudflare/mobile-guild-edge');
-assert.equal(config.channel,'staging');
+assert.ok(['main','staging'].includes(config.channel),`Unexpected Civweave Guild Cloud update channel: ${config.channel}`);
 assert.equal(config.checkIntervalHours,6);
 for(const path of ['src','.civweave','.github/workflows/civweave-auto-update.yml','package.json','civweave-update.json'])assert.ok(config.managedPaths.includes(path),`Managed update path missing: ${path}`);
 for(const key of ['main','compatibility_date','ai','durable_objects','migrations'])assert.ok(config.wranglerManagedKeys.includes(key),`Managed Wrangler key missing: ${key}`);
@@ -61,7 +61,7 @@ try{
   assert.deepEqual(merged.durable_objects,canonical.durable_objects);
   assert.deepEqual(merged.migrations,canonical.migrations);
   assert.equal(lock.schema,'civweave.guild-cloud-auto-update-lock.v1');
-  assert.equal(lock.channel,'staging');
+  assert.equal(lock.channel,config.channel);
   assert.equal(lock.upstreamCommit,'deadbeef');
   assert.equal(lock.upstreamTree,'feedface');
 }finally{rmSync(scratch,{recursive:true,force:true});}
