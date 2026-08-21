@@ -1,15 +1,17 @@
 // GENERATED: direct five-system routes + Guild login runtime + local AI coherence + lifecycle-deferred caches + canonical five-guide rail + Guild/Map actions on every system + no iframe family shell.
-// direct-first-class-routes-v1: each system owns its canonical page; guide/chat context can switch in place without hijacking realm navigation.
+// direct-first-class-routes-v2: each system owns its canonical page; guide/chat context cannot substitute for realm navigation.
+// five-system-pages-v1: exact realm navigation is validated before generic worker caching and can never substitute Civweave home HTML.
+// navigation-runtime-recovery-v2: stale navigation code/pages are purged without reloading or redirecting open clients.
 // direct-shell-retirement-v1: cached iframe-shell routes are purged before generic cache handling.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail on all five systems.
-// family-nav-single-owner-r1: themed-system-nav-v178 remains the sole five-system navigation owner.
-// staging-navigation-runtime-recovery-v1: purge cached single-shell navigation code and refresh controlled staging clients onto the direct-route runtime.
+// family-nav-single-owner-r1: themed-system-nav-v178 remains the sole visual five-system navigation rail.
 // guild-login-runtime-v1: Guild join clicks wait for the canonical capacity-session runtime instead of failing a bootstrap race.
 // lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
 'use strict';
-importScripts('/app/system-routes-v227.js?v=1.0.164-direct-first-class-routes-v1');
+importScripts('/app/system-routes-v227.js?v=1.0.165-five-system-route-contract-v228-direct-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v5-direct-realm-actions');
-importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v1');
+importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-exact-realm-owner');
+importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v2-purge-only');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v219-lifecycle-deferred');
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
