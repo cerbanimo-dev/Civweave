@@ -2,17 +2,30 @@ import * as core from './cabinets/living-school/living-school-cleanroom-core-v21
 import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=source-links-v260';
 
 const RESEARCHER='living-school-cleanroom-research-v218.1';
+const RELEVANCE_REVISION='living-school-subject-coverage-v264';
+const QUERY_STOPWORDS=new Set(['this','that','with','from','into','before','after','their','what','when','where','should','could','would','make','create','write','learn','each','project','projects','lead','leader','foundational','fundamentals','knowledge','strategy','strategies','equip','equipped','objective','capability','beginner','guided']);
 const keyFor=value=>core.clean(value,1200).toLowerCase().replace(/\s+/g,' ').slice(0,500);
-const queryWords=value=>[...new Set(keyFor(value).replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=4&&!['this','that','with','from','into','before','after','their','what','when','where','should','could','would'].includes(word)))].slice(0,12);
+const queryWords=value=>[...new Set(keyFor(value).replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=4&&!QUERY_STOPWORDS.has(word)))].slice(0,12);
 const metadataBoundary=/(?:20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z|https?:\/\/\S+|\b[0-9a-f]{40,}\b|W\/"[^"\n]+"|(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+\d{2}\s+[A-Z][a-z]{2}\s+20\d{2}\s+\d{2}:\d{2}:\d{2}\s+GMT)/gi;
 const validHttp=value=>{try{return['http:','https:'].includes(new URL(value).protocol)}catch{return false}};
 const normalizeUse=value=>['core','supporting','counterpoint','example'].includes(core.clean(value,80).toLowerCase())?core.clean(value,80).toLowerCase():'supporting';
 const normalizeQuality=value=>['authoritative','practitioner','community','commercial','contested'].includes(core.clean(value,80).toLowerCase())?core.clean(value,80).toLowerCase():'supporting';
 
+function tokenOccurrences(text,token){let count=0,from=0;while(count<12){const index=text.indexOf(token,from);if(index<0)break;count+=1;from=index+token.length}return count;}
+function subjectRelevant(title,notes,capability){
+  const tokens=queryWords(capability);if(!tokens.length)return false;
+  const titleText=core.clean(title,500).toLowerCase(),body=core.clean(notes,5000).toLowerCase(),text=`${titleText} ${body}`;
+  const matched=tokens.filter(token=>text.includes(token)),required=tokens.length>=4?3:Math.min(2,tokens.length);
+  if(matched.length<required)return false;
+  const titleHits=matched.filter(token=>titleText.includes(token)).length,occurrences=matched.reduce((sum,token)=>sum+tokenOccurrences(text,token),0),symbolNoise=(body.match(/[!+%#`{}\\]/g)||[]).length;
+  if(symbolNoise>18&&titleHits===0)return false;
+  if(titleHits===0&&occurrences<Math.max(4,required+1))return false;
+  return true;
+}
 function readableScore(text,tokens){
   const normalized=String(text||'').toLowerCase(),words=normalized.match(/[a-z]{2,}/g)||[];
   if(words.length<18)return -Infinity;
-  const relevant=tokens.reduce((score,token)=>score+(normalized.includes(token)?80:0),0);
+  const relevant=tokens.reduce((score,token)=>score+(normalized.includes(token)?80:0),0;
   const letters=(text.match(/[A-Za-z]/g)||[]).length,odd=(text.match(/[^\x20-\x7E\u00A0-\u024F]/g)||[]).length;
   return relevant+Math.min(words.length,180)+letters/40-odd*12;
 }
@@ -33,7 +46,7 @@ function sanitizePassage(value,capability){
 function sanitizeRows(capability,rows){
   const seen=new Set(),cleaned=[];
   for(const row of Array.isArray(rows)?rows:[]){
-    const notes=sanitizePassage(row?.notes,capability);if(!notes)continue;
+    const notes=sanitizePassage(row?.notes,capability),title=core.clean(row?.articleTitle||row?.title,320);if(!notes||!subjectRelevant(title,notes,capability))continue;
     const fingerprint=notes.toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,260);
     if(seen.has(fingerprint))continue;seen.add(fingerprint);
     cleaned.push({...row,notes});
@@ -68,7 +81,7 @@ function localPacket(capability,rows){
     linkProvenance:core.clean(row.linkProvenance,120)||''
   }));
   const linked=sources.filter(source=>source.url).length;
-  return{mode:'local-downloaded',summary:`Retrieved ${sources.length} clean, deduplicated passages from downloaded knowledge schools on this device${linked?`, with ${linked} canonical article link${linked===1?'':'s'}`:''}.`,sources,provider:'local-knowledge-school',model:'dependency-free cached SQLite passage search · canonical source metadata · sanitized passage view',flag:'DOWNLOADED LOCAL SOURCES',reason:''};
+  return{mode:'local-downloaded',summary:`Retrieved ${sources.length} subject-relevant, clean, deduplicated passages from downloaded knowledge schools on this device${linked?`, with ${linked} canonical article link${linked===1?'':'s'}`:''}.`,sources,provider:'local-knowledge-school',model:'dependency-free cached SQLite passage search · canonical source metadata · subject-coverage filter · sanitized passage view',flag:'DOWNLOADED LOCAL SOURCES',reason:''};
 }
 
 async function runtimeReady(){
@@ -117,7 +130,7 @@ function unavailablePacket(capability,error){return{mode:'research-unavailable',
 function applyPacket(s,capability,packet){
   const key=keyFor(capability),manual=(s.sources||[]).filter(source=>source?.researchedBy!==RESEARCHER),researchSources=packet.sources||[];
   s.sources=[...manual,...researchSources].slice(0,40);
-  s.research={capability:key,mode:packet.mode,summary:packet.summary,flag:packet.flag,provider:packet.provider,model:packet.model,reason:packet.reason||'',sourceCount:researchSources.length,completedAt:core.now(),synthesis:packet.synthesis||null};
+  s.research={capability:key,mode:packet.mode,summary:packet.summary,flag:packet.flag,provider:packet.provider,model:packet.model,reason:packet.reason||'',sourceCount:researchSources.length,relevanceRevision:RELEVANCE_REVISION,completedAt:core.now(),synthesis:packet.synthesis||null};
   return packet;
 }
 
@@ -125,7 +138,7 @@ export async function researchCapability(capability,{force=false}={}){
   const normalized=core.clean(capability,1200);
   if(!normalized)throw new Error('Name an observable capability before researching.');
   const s=core.state(),key=keyFor(normalized),cacheableModes=new Set(['live-agentic','local-synthesized','local-downloaded']);
-  if(!force&&s.research?.capability===key&&cacheableModes.has(s.research?.mode)){
+  if(!force&&s.research?.capability===key&&s.research?.relevanceRevision===RELEVANCE_REVISION&&cacheableModes.has(s.research?.mode)){
     const sources=(s.sources||[]).filter(source=>source?.researchedBy===RESEARCHER&&source?.researchCapability===key);
     if(sources.length&&!sources.some(source=>/[\uFFFD\u0000-\u001f]|[0-9a-f]{48,}/i.test(source.notes||'')))return{...s.research,sources,reused:true};
   }
