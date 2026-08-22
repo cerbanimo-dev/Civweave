@@ -1,12 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='159.6-gemini-structured-contracts-v264';
+const VERSION='159.7-gemini-research-fallback-generatecontent-v265';
 const RUNTIME_NAME='CivweaveModelRuntime';
 const API_REVISION='2026-05-20';
 const DEFAULT_API_BASE='https://generativelanguage.googleapis.com/v1beta';
 const ACTIVE_STATUSES=new Set(['in_progress','queued','running']);
 const TERMINAL_FAILURES=new Set(['failed','cancelled','incomplete','requires_action']);
 const LIVING_SCHOOL_STRUCTURE_PURPOSE='living-school-structure-single-v221';
+const LIVING_SCHOOL_RESEARCH_FALLBACK_PURPOSE='living-school-training-data-research-fallback-v260';
 const LIVING_SCHOOL_ECONOMY_KEYS=new Set(['xp','price','prices','pricing','reward','rewards','ledger','currency','currencies','payout','payouts','coin','coins','acorn','acorns','button','buttons','credit','credits','grant','grants','bonus','bonuses','wage','wages','laborvalue','labourvalue']);
 const REQUIRED_QUIZ_TYPES=['multiple-choice','multi-select','short-answer'];
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
@@ -67,6 +68,7 @@ function errorMessage(payload,response){return clean(payload?.error?.message||pa
 async function readJson(response){const text=await response.text();if(!text)return{};try{return JSON.parse(text)}catch{throw Object.assign(new Error('Gemini returned invalid JSON.'),{code:'INVALID_PROVIDER_JSON',status:response.status,diagnostic:text.slice(0,1200)})}}
 function normalizeUrl(value){try{const url=new URL(clean(value,2400));url.hash='';return url.href}catch{return''}}
 function livingSchoolStructureRequest(request){return clean(request?.purpose,160)===LIVING_SCHOOL_STRUCTURE_PURPOSE}
+function livingSchoolResearchFallbackRequest(request){return clean(request?.purpose,160)===LIVING_SCHOOL_RESEARCH_FALLBACK_PURPOSE}
 function sourceAllowlist(request){
   const sources=Array.isArray(request?.context?.sources)?request.context.sources:[];
   return sources.map(source=>({id:clean(source?.id,180),title:clean(source?.title,320),url:normalizeUrl(source?.url),notes:clean(source?.notes,5000)})).filter(source=>source.id);
@@ -234,6 +236,7 @@ function wrap(original){
     const normalized=request||{};
     if(!shouldUse(original,normalized))return original.generate(normalized);
     const prepared=prepareLivingSchoolRequest(normalized);
+    if(livingSchoolResearchFallbackRequest(prepared))return original.generate(prepared);
     let result=await generateWithInteractions(original,prepared);
     const blocked=['MISSING_API_KEY','REMOTE_CONSENT_REQUIRED'];
     if(result.status==='provider-error'&&!blocked.includes(result.error?.code)&&!prepared.signal?.aborted)result=await generateWithGenerateContent(original,prepared,result);
