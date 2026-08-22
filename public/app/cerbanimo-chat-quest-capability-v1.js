@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-cerbanimo-chat-quest-capability-v1-v2-loader';
+const VERSION='1.2.0-cerbanimo-chat-quest-capability-v1-v2-transient-failover-loader';
 const TARGET='/app/cerbanimo-chat-quest-capability-v2.js';
-const TARGET_VERSION='2.0.0-recoverable-json';
+const TARGET_VERSION='2.1.0-transient-provider-failover';
 if(globalThis.CivweaveCerbanimoChatQuestCapabilityV1?.version===VERSION)return;
 let promise=null;
 function existing(){return globalThis.CivweaveCerbanimoChatQuestCapabilityV2||null}
