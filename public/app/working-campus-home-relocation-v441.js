@@ -1,13 +1,15 @@
 (()=>{
 'use strict';
-const VERSION='1.0.11-working-campus-home-relocation-v441-direct-shell';
+const VERSION='1.0.12-working-campus-home-relocation-v441-navbar-actions-restore';
 const STYLE_ID='cw-working-campus-home-relocation-v441-style';
 const APP_TAB='app-device';
 const BROWSER_PACK_IMPORT_SRC='/app/local-ai/browser-pack-pwa-import-v1.js?v=1.2.0-progress-and-missing-file';
+const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.6-v440-navbar-actions-restore';
 if(globalThis.CivweaveHomeRelocationV441?.version===VERSION)return;
 const isCivweave=()=>String(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||'').toLowerCase()==='civweave';
 if(!isCivweave())return;
 const q=(s,r=document)=>r?.querySelector?.(s)||null;
+let persistentActionsLoading=false;
 
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
@@ -46,10 +48,21 @@ function installAppSettings(){
   syncThemeLabel();return true;
 }
 function ensureBrowserPackPwaImport(){if(globalThis.CivweaveBrowserPackPwaImportV1?.ensureBridge&&globalThis.CivweaveBrowserPackPwaImportV1?.version?.startsWith?.('1.2.0-'))return true;const target=new URL(BROWSER_PACK_IMPORT_SRC,location.href).href;if([...document.scripts].some(script=>script.src===target))return false;const script=document.createElement('script');script.src=BROWSER_PACK_IMPORT_SRC;script.async=false;script.dataset.cwV441BrowserPackImport='';(document.head||document.documentElement).append(script);return true}
-function maintain(){if(!isCivweave())return;installStyle();installAppSettings();syncThemeLabel();ensureBrowserPackPwaImport()}
+function ensurePersistentActions(){
+  const api=globalThis.CivweavePersistentShellActionsV1;
+  if(api?.ensureMounted){api.ensureMounted();return true}
+  const existing=[...document.scripts].find(script=>String(script.src||'').includes('/app/persistent-shell-actions-v1.js'));
+  if(existing||persistentActionsLoading){setTimeout(()=>globalThis.CivweavePersistentShellActionsV1?.ensureMounted?.(),120);return false}
+  persistentActionsLoading=true;
+  const script=document.createElement('script');script.src=PERSISTENT_ACTIONS_SRC;script.async=false;script.dataset.cwV441PersistentActions='';
+  script.onload=()=>{persistentActionsLoading=false;globalThis.CivweavePersistentShellActionsV1?.ensureMounted?.()};
+  script.onerror=()=>{persistentActionsLoading=false};
+  (document.head||document.documentElement).append(script);return false;
+}
+function maintain(){if(!isCivweave())return;installStyle();installAppSettings();syncThemeLabel();ensureBrowserPackPwaImport();ensurePersistentActions()}
 const observer=new MutationObserver(()=>maintain());
-function boot(){installStyle();ensureBrowserPackPwaImport();maintain();observer.observe(document.documentElement,{childList:true,subtree:true});for(const delay of [80,300,900,1800,3600])setTimeout(maintain,delay)}
+function boot(){installStyle();ensureBrowserPackPwaImport();ensurePersistentActions();maintain();observer.observe(document.documentElement,{childList:true,subtree:true});for(const delay of [80,300,900,1800,3600])setTimeout(maintain,delay)}
 addEventListener('civweave:model-settings-opened',()=>setTimeout(installAppSettings,0));addEventListener('civweave:settings-ready',()=>setTimeout(installAppSettings,0));addEventListener('pageshow',maintain);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweaveHomeRelocationV441=Object.freeze({version:VERSION,installAppSettings,ensureBrowserPackPwaImport,openDownloads,cycleTheme,maintain});
+globalThis.CivweaveHomeRelocationV441=Object.freeze({version:VERSION,installAppSettings,ensureBrowserPackPwaImport,ensurePersistentActions,openDownloads,cycleTheme,maintain});
 })();

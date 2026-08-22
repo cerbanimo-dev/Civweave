@@ -16,8 +16,8 @@ import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-at
 
 const RECOVERY_SCHEMA='civweave.living-school-generation-recovery.v1';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
-const STRUCTURE_PURPOSE='living-school-structure-batch-v220';
-const BATCH_SIZE=3;
+const STRUCTURE_PURPOSE='living-school-structure-single-v221';
+const BATCH_SIZE=1;
 const REQUIRED_QUIZ_TYPES=['multiple-choice','multi-select','short-answer'];
 
 async function runtimeReady(){
@@ -145,26 +145,48 @@ function candidateRows(result,text,targets){
   return rows;
 }
 function compactSources(sources){return sources.map(source=>({id:source.id,title:source.title,provenance:source.provenanceFlag||source.provenance,notes:clean(source.notes,2600)}));}
+function structureSchema(index){
+  const string={type:'string'},strings={type:'array',minItems:1,items:string};
+  return{
+    type:'object',required:['moduleIndex','module'],properties:{
+      moduleIndex:{type:'integer',enum:[index+1]},
+      module:{type:'object',required:['title','summary','objective','relevance','estimatedEffort','artifact','prerequisites','completionCriteria','learningObjectives','concepts','lessonBlocks','visualization','practice','quiz','badge','xp','navigation','cerbanimoQuest'],properties:{
+        title:string,summary:string,objective:string,relevance:string,estimatedEffort:string,artifact:string,
+        prerequisites:strings,completionCriteria:strings,learningObjectives:strings,
+        concepts:{type:'array',minItems:1,items:{type:'object',required:['term','definition'],properties:{term:string,definition:string}}},
+        lessonBlocks:{type:'array',minItems:3,items:{type:'object',required:['heading','content','sourceIds','provenance'],properties:{id:string,heading:string,content:string,sourceIds:{type:'array',items:string},provenance:string}}},
+        visualization:{type:'object',required:['title','caption','items'],properties:{type:string,title:string,caption:string,items:{type:'array',minItems:1,items:{type:'object',required:['label','detail'],properties:{label:string,detail:string}}}}},
+        practice:{type:'object',required:['prompt','steps','deliverable','rubric','completionCriteria'],properties:{prompt:string,steps:strings,deliverable:string,rubric:{type:'array',minItems:1,items:{type:'object',required:['criterion','weight'],properties:{criterion:string,weight:{type:'number'}}}},completionCriteria:string}},
+        quiz:{type:'object',required:['questionsPerAttempt','bank','remediation'],properties:{questionsPerAttempt:{type:'integer'},passScore:{type:'number'},bank:{type:'array',minItems:5,items:{type:'object',required:['type','prompt'],properties:{id:string,type:{type:'string',enum:REQUIRED_QUIZ_TYPES},prompt:string,options:{type:'array',items:string},answer:{},explanation:string,concepts:{type:'array',items:string},rubric:{type:'array',items:{type:'object',properties:{id:string,label:string,points:{type:'number'},role:string,required:{type:'boolean'}}}},minWords:{type:'number'},maxWords:{type:'number'},provenance:string}}},remediation:string}},
+        badge:{type:'object',required:['title','description'],properties:{title:string,description:string}},
+        xp:{type:'object',required:['domain','amount'],properties:{domain:string,amount:{type:'number'}}},
+        navigation:{type:'object',required:['entry'],properties:{entry:string,next:string}},
+        cerbanimoQuest:{type:'object',required:['title','brief','proof'],properties:{title:string,brief:string,proof:string}}
+      }}
+    }
+  };
+}
 async function structureBatch(runtime,config,data,count,design,sources,targets){
-  const smallConfig={...tierConfig(config,'small'),maxTokens:Math.max(Number(config.maxTokens)||0,12288),temperature:Math.min(Number(config.temperature)||0.2,0.3)};
+  const index=targets[0];
+  const smallConfig={...tierConfig(config,'small'),maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)};
   const context={
-    capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,requestedModuleNumbers:targets.map(index=>index+1),proofContract:data.proof,
+    capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,requestedModuleNumbers:[index+1],proofContract:data.proof,
     designPacket:clean(design.content,32000),sources:compactSources(sources),
     constraints:[
       'This is a formatting/construction pass. Do not perform new research or invent facts.',
       'Use the supplied design packet as the instructional authority and preserve its source mapping.',
-      'Return one complete JSON object per requested module. Do not wrap the objects in an array and do not use Markdown fences.',
-      'Each line/object must have exactly two top-level properties: moduleIndex (1-based) and module.',
-      'Every module must contain at least 3 substantive lesson blocks, a visualization, practice rubric, a complete mixed quiz bank, badge, XP, navigation, and Cerbanimo quest.',
+      `Return exactly one complete JSON object for module ${index+1}.`,
+      'The object must have exactly two top-level properties: moduleIndex (1-based) and module.',
+      'The module must contain at least 3 substantive lesson blocks, a visualization, practice rubric, a complete mixed quiz bank, badge, XP, navigation, and Cerbanimo quest.',
       'Use only supplied SOURCE_ID values. If a statement is not source-backed, use provenance generated-unverified rather than inventing a citation.',
       'Do not include a video URL. Civweave resolves the required relevant video locally after the module validates.'
     ]
   };
   const result=await runtime.generate({
-    purpose:STRUCTURE_PURPOSE,taskTier:'small',executionProfile:'interactive',config:smallConfig,context,
+    purpose:STRUCTURE_PURPOSE,taskTier:'small',executionProfile:'interactive',config:smallConfig,context,schema:structureSchema(index),maxRepairAttempts:2,
     messages:[
-      {role:'system',content:'You are Moss’s lightweight Living School formatter. Convert supplied researched instructional content into complete application modules without adding new research. Output only standalone JSON objects, one per requested module, with moduleIndex and module properties.'},
-      {role:'user',content:`Construct modules ${targets.map(index=>index+1).join(', ')} of ${count}. Preserve the educational substance of the design packet. Each module must be complete enough to use immediately; do not insert placeholders or generic scaffold text.`}
+      {role:'system',content:'You are Moss’s lightweight Living School formatter. Convert supplied researched instructional content into one complete application module without adding new research. Return only the schema-matching JSON object with moduleIndex and module properties.'},
+      {role:'user',content:`Construct module ${index+1} of ${count}. Preserve the educational substance of the design packet. The module must be complete enough to use immediately; do not insert placeholders or generic scaffold text.`}
     ]
   });
   return{result,text:resultText(result),route:actualRoute(result,smallConfig)};
@@ -204,7 +226,7 @@ function moduleReport(count,completed,failures,prior=[]){
 }
 function candidateSchool(data,count,modules,design,route,requestId){
   const current=state(),ordered=[...modules].sort((a,b)=>generationIndex(a)-generationIndex(b));
-  return{id:uid('school'),title:clean(data.title||data.capability,180)||'Untitled learning path',capability:clean(data.capability,1200),level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof,2400),createdAt:now(),updatedAt:now(),requestedModuleCount:count,modules:ordered,generation:{provider:route.provider||'shared',model:route.model||'',generatedAt:now(),fallback:false,partial:ordered.length<count,completedModuleCount:ordered.length,failedModuleCount:count-ordered.length,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-flash-design-lite-batches-v220',requestId,designProvider:design.provider,designModel:design.model}};
+  return{id:uid('school'),title:clean(data.title||data.capability,180)||'Untitled learning path',capability:clean(data.capability,1200),level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof,2400),createdAt:now(),updatedAt:now(),requestedModuleCount:count,modules:ordered,generation:{provider:route.provider||'shared',model:route.model||'',generatedAt:now(),fallback:false,partial:ordered.length<count,completedModuleCount:ordered.length,failedModuleCount:count-ordered.length,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-flash-design-lite-single-v221',requestId,designProvider:design.provider,designModel:design.model}};
 }
 function recoveryStatus(completed,count){return completed>=count?'complete':completed>0?'partial':'failed';}
 
@@ -222,13 +244,13 @@ export async function generateSchool(data){
     const school=candidateSchool(request,count,modules,design,route,requestId),completedCount=modules.length,failedCount=count-completedCount;
     const report={schema:RECOVERY_SCHEMA,requestId,status:recoveryStatus(completedCount,count),request,requestedCount:count,completedCount,failedCount,structureAttempt:1,researchAttempt:1,createdAt:now(),updatedAt:now(),unstructured:{...design},modules:moduleReport(count,pass.completed,pass.failures),batches:pass.batches,history:[historyEntry(1,count,completedCount,failedCount)],candidate:{...copy(school),modules:copy(modules)}};
     saveRecovery(report,'living-school-generation-first-pass-reported');
-    if(!modules.length)return{...fallback,generation:{...fallback.generation,fallback:true,error:pass.failures.map(row=>`module ${row.index+1}: ${row.issues.join('; ')}`).join(' | ').slice(0,1800)||'No structured modules completed.',formatContract:'living-school-flash-design-lite-batches-v220',requestId,recoveryAvailable:true}};
+    if(!modules.length)return{...fallback,generation:{...fallback.generation,fallback:true,error:pass.failures.map(row=>`module ${row.index+1}: ${row.issues.join('; ')}`).join(' | ').slice(0,1800)||'No structured modules completed.',formatContract:'living-school-flash-design-lite-single-v221',requestId,recoveryAvailable:true}};
     return school;
   }catch(error){
     const design={status:'unavailable',content:sourcePacketText(current,sources),provider:'none',model:'none',generatedAt:now(),source:'existing-research-packet',error:clean(error?.message||error,1200)};
     const report={schema:RECOVERY_SCHEMA,requestId,status:'failed',request,requestedCount:count,completedCount:0,failedCount:count,structureAttempt:0,researchAttempt:1,createdAt:now(),updatedAt:now(),unstructured:design,modules:Array.from({length:count},(_,index)=>({index,status:'failed',issues:[clean(error?.message||error,1200)],raw:'',provider:'',model:'',at:now()})),batches:[],history:[historyEntry(0,count,0,count,'generation setup')],candidate:null};
     saveRecovery(report,'living-school-generation-first-pass-failed');
-    return{...fallback,generation:{...fallback.generation,fallback:true,error:clean(error?.message||error,1800),formatContract:'living-school-flash-design-lite-batches-v220',requestId,recoveryAvailable:true}};
+    return{...fallback,generation:{...fallback.generation,fallback:true,error:clean(error?.message||error,1800),formatContract:'living-school-flash-design-lite-single-v221',requestId,recoveryAvailable:true}};
   }
 }
 
@@ -250,7 +272,7 @@ export async function regenerateLivingSchoolStructure(){
   const pass=await runStructurePass(runtime,config,report.request,report.requestedCount,design,sources,targets);
   const candidate=report.candidate&&typeof report.candidate==='object'?copy(report.candidate):candidateSchool(report.request,report.requestedCount,[],design,{provider:'shared',model:''},report.requestId);
   const moduleMap=new Map((candidate.modules||[]).map((module,index)=>[generationIndex(module,index),module]));for(const row of pass.completed)moduleMap.set(row.index,row.module);
-  candidate.modules=[...moduleMap.entries()].sort((a,b)=>a[0]-b[0]).map(([,module])=>module);candidate.updatedAt=now();candidate.generation={...(candidate.generation||{}),provider:pass.completed[0]?.provider||candidate.generation?.provider||'shared',model:pass.completed[0]?.model||candidate.generation?.model||'',partial:candidate.modules.length<report.requestedCount,completedModuleCount:candidate.modules.length,failedModuleCount:Math.max(0,report.requestedCount-candidate.modules.length),generatedAt:now(),requestId:report.requestId,formatContract:'living-school-flash-design-lite-batches-v220'};
+  candidate.modules=[...moduleMap.entries()].sort((a,b)=>a[0]-b[0]).map(([,module])=>module);candidate.updatedAt=now();candidate.generation={...(candidate.generation||{}),provider:pass.completed[0]?.provider||candidate.generation?.provider||'shared',model:pass.completed[0]?.model||candidate.generation?.model||'',partial:candidate.modules.length<report.requestedCount,completedModuleCount:candidate.modules.length,failedModuleCount:Math.max(0,report.requestedCount-candidate.modules.length),generatedAt:now(),requestId:report.requestId,formatContract:'living-school-flash-design-lite-single-v221'};
   const nextModules=moduleReport(report.requestedCount,pass.completed,pass.failures,report.modules),completedCount=nextModules.filter(row=>row.status==='complete').length,failedCount=report.requestedCount-completedCount,nextAttempt=Number(report.structureAttempt||0)+1;
   report.modules=nextModules;report.batches=[...(report.batches||[]),...pass.batches].slice(-16);report.completedCount=completedCount;report.failedCount=failedCount;report.status=recoveryStatus(completedCount,report.requestedCount);report.structureAttempt=nextAttempt;report.updatedAt=now();report.candidate={...copy(candidate),modules:copy(candidate.modules)};report.history=[...(report.history||[]),historyEntry(nextAttempt,report.requestedCount,completedCount,failedCount,'structured retry')].slice(-20);
   const priorProgress=copy(current.progress||{});current.school=candidate;current.progress=Object.fromEntries(candidate.modules.map(module=>[module.id,priorProgress[module.id]||progressFor(module.id)]));if(!candidate.modules.some(module=>module.id===current.activeModuleId))current.activeModuleId=candidate.modules[0]?.id||'';current.visualInspection=null;

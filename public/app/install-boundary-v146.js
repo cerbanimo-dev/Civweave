@@ -20,6 +20,8 @@ const MOBILE_AI_HARDENING='/app/mobile-ai-hardening-v302.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js';
 const GUIDE_WORKSPACE='/app/guide-chat-surface-v350.js';
+const SERVER_AI_OUTPUT_NORMALIZER='/app/server-ai-output-normalizer-v1.js';
+const CERBANIMO_CHAT_QUEST='/app/cerbanimo-chat-quest-capability-v1.js';
 const WORKING_CAMPUS_TOPBAR='/app/working-campus-topbar-v243.js';
 const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
 const CAMPUS_BACKGROUND_DOWNLOAD='/app/campus-background-download-v241.js';
@@ -51,8 +53,8 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION];
-const SYSTEM_EXPERIENCE_SCRIPTS=[SETTINGS_GATEWAY,SETTINGS_LOCAL_ROUTE,MOBILE_AI_HARDENING,EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT,RADIO_SAFE_STATIONS,RADIO_TRACK_SUGGESTIONS,CANONICAL_PLAYLISTS,RADIO_PLAYLIST_GOVERNANCE,SYSTEMS_MESH_RUNTIME,HOST_NODE_SESSION,NODE_AI_MESH_RUNTIME,QUEST_VEIL_MESH,QUEST_VEIL_LEDGER_GATE,QUEST_VEIL,GUIDE_IDENTITY_SCRIPT,REALM_SESSION_INTEGRITY,GUIDE_WORKSPACE,WORKING_CAMPUS_TOPBAR,THEMED_SYSTEM_NAV,CAMPUS_BACKGROUND_DOWNLOAD,SHARED_REVIEW_SURFACE,SHARED_GUIDE_SURFACE];
-const COMPATIBILITY_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,SETTINGS_GATEWAY,SETTINGS_LOCAL_ROUTE,'/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js','/app/deterministic-mode-v175.js',HOST_NODE_SESSION,MOBILE_AI_HARDENING,'/app/gemini-task-tier-router-v213.js',GUIDE_IDENTITY_SCRIPT,REALM_SESSION_INTEGRITY,GUIDE_WORKSPACE,'/extensions/civweave-antigravity-live-source-guard-v167.js','/extensions/civweave-device-credentials-v160.js','/extensions/civweave-additions-v156.js','/app/shared-tools-cleanup-v175.js','/extensions/civweave-proof-progress-v158.js','/extensions/civweave-gemini-interactions-v159.js',THEMED_SYSTEM_NAV,SHARED_GUIDE_SURFACE,PWA_UPDATE_SCRIPT];
+const SYSTEM_EXPERIENCE_SCRIPTS=[SETTINGS_GATEWAY,SETTINGS_LOCAL_ROUTE,MOBILE_AI_HARDENING,EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT,RADIO_SAFE_STATIONS,RADIO_TRACK_SUGGESTIONS,CANONICAL_PLAYLISTS,RADIO_PLAYLIST_GOVERNANCE,SYSTEMS_MESH_RUNTIME,HOST_NODE_SESSION,NODE_AI_MESH_RUNTIME,QUEST_VEIL_MESH,QUEST_VEIL_LEDGER_GATE,QUEST_VEIL,GUIDE_IDENTITY_SCRIPT,REALM_SESSION_INTEGRITY,GUIDE_WORKSPACE,SERVER_AI_OUTPUT_NORMALIZER,CERBANIMO_CHAT_QUEST,WORKING_CAMPUS_TOPBAR,THEMED_SYSTEM_NAV,CAMPUS_BACKGROUND_DOWNLOAD,SHARED_REVIEW_SURFACE,SHARED_GUIDE_SURFACE];
+const COMPATIBILITY_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,SETTINGS_GATEWAY,SETTINGS_LOCAL_ROUTE,'/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js','/app/deterministic-mode-v175.js',HOST_NODE_SESSION,MOBILE_AI_HARDENING,'/app/gemini-task-tier-router-v213.js',GUIDE_IDENTITY_SCRIPT,REALM_SESSION_INTEGRITY,GUIDE_WORKSPACE,SERVER_AI_OUTPUT_NORMALIZER,CERBANIMO_CHAT_QUEST,'/extensions/civweave-antigravity-live-source-guard-v167.js','/extensions/civweave-device-credentials-v160.js','/extensions/civweave-additions-v156.js','/app/shared-tools-cleanup-v175.js','/extensions/civweave-proof-progress-v158.js','/extensions/civweave-gemini-interactions-v159.js',THEMED_SYSTEM_NAV,SHARED_GUIDE_SURFACE,PWA_UPDATE_SCRIPT];
 function ensureKeyboardViewportPolicy(){
   const meta=document.querySelector('meta[name="viewport"]');
   if(!meta)return false;

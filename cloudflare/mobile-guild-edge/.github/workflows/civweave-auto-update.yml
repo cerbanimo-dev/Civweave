@@ -1,0 +1,110 @@
+name: Civweave Guild Cloud auto-update
+
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: civweave-guild-cloud-auto-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out this Guild Cloud
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Read Civweave update channel
+        id: config
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs=require('fs');
+          const config=JSON.parse(fs.readFileSync('civweave-update.json','utf8'));
+          if(config.schema!=='civweave.guild-cloud-auto-update.v1')throw new Error('Invalid Civweave update manifest.');
+          for(const [key,value] of Object.entries({repository:config.sourceRepository,path:config.sourcePath,channel:config.channel})){
+            if(!value||!/^[A-Za-z0-9._\/-]+$/.test(String(value)))throw new Error(`Unsafe ${key} in Civweave update manifest.`);
+            process.stdout.write(`${key}=${value}\n`);
+          }
+          NODE
+
+      - name: Fetch the current Civweave Guild Cloud release
+        id: upstream
+        shell: bash
+        env:
+          SOURCE_REPOSITORY: ${{ steps.config.outputs.repository }}
+          SOURCE_PATH: ${{ steps.config.outputs.path }}
+          SOURCE_CHANNEL: ${{ steps.config.outputs.channel }}
+        run: |
+          set -euo pipefail
+          UPSTREAM="$RUNNER_TEMP/civweave-upstream"
+          git clone --quiet --depth=1 --filter=blob:none --sparse --branch "$SOURCE_CHANNEL" "https://github.com/${SOURCE_REPOSITORY}.git" "$UPSTREAM"
+          git -C "$UPSTREAM" sparse-checkout set "$SOURCE_PATH"
+          COMMIT="$(git -C "$UPSTREAM" rev-parse HEAD)"
+          TREE="$(git -C "$UPSTREAM" rev-parse "HEAD:${SOURCE_PATH}")"
+          CURRENT="$(node -e "try{process.stdout.write(JSON.parse(require('fs').readFileSync('civweave-update-lock.json','utf8')).upstreamTree||'')}catch{}")"
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+          echo "tree=$TREE" >> "$GITHUB_OUTPUT"
+          echo "source=$UPSTREAM/$SOURCE_PATH" >> "$GITHUB_OUTPUT"
+          if [ "$CURRENT" = "$TREE" ]; then echo "needed=false" >> "$GITHUB_OUTPUT"; else echo "needed=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Apply upstream release without replacing Guild identity or Cloudflare ownership
+        if: steps.upstream.outputs.needed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .civweave/sync-upstream.mjs \
+            --source "${{ steps.upstream.outputs.source }}" \
+            --commit "${{ steps.upstream.outputs.commit }}" \
+            --tree "${{ steps.upstream.outputs.tree }}"
+          node --check src/index.mjs
+          node --check src/creator-provenance-entry.mjs
+          git diff --check
+
+      - name: Keep the automatic updater scheduler alive
+        id: heartbeat
+        if: steps.upstream.outputs.needed == 'false'
+        shell: bash
+        env:
+          UPSTREAM_TREE: ${{ steps.upstream.outputs.tree }}
+        run: |
+          set -euo pipefail
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs=require('fs');
+          const config=JSON.parse(fs.readFileSync('civweave-update.json','utf8'));
+          const days=Math.max(7,Number(config.schedulerHeartbeatDays||30));
+          let prior=null;try{prior=JSON.parse(fs.readFileSync('civweave-update-heartbeat.json','utf8'))}catch{}
+          const at=Date.parse(prior?.checkedAt||'');
+          const due=!Number.isFinite(at)||Date.now()-at>=days*24*60*60*1000;
+          if(due){
+            const next={schema:'civweave.guild-cloud-auto-update-heartbeat.v1',channel:config.channel,upstreamTree:process.env.UPSTREAM_TREE||null,checkedAt:new Date().toISOString()};
+            fs.writeFileSync('civweave-update-heartbeat.json',`${JSON.stringify(next,null,2)}\n`);
+          }
+          process.stdout.write(`needed=${due?'true':'false'}\n`);
+          NODE
+
+      - name: Publish the update into this Guildkeeper repository
+        if: steps.upstream.outputs.needed == 'true' || steps.heartbeat.outputs.needed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain)" ]; then exit 0; fi
+          git config user.name "Civweave Guild Cloud Updater"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if [ "${{ steps.upstream.outputs.needed }}" = "true" ]; then
+            git commit -m "Civweave Guild Cloud auto-update ${{ steps.upstream.outputs.tree }}"
+          else
+            git commit -m "Civweave Guild Cloud updater heartbeat"
+          fi
+          git push

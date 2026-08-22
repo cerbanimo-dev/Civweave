@@ -1,0 +1,31 @@
+name: Verify selected provider authority
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/selected-provider-authority-v1.js'
+      - 'public/app/assistant-output-sanitizer-v1.js'
+      - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'scripts/verify-selected-provider-authority-output-v1.mjs'
+      - '.github/workflows/verify-selected-provider-authority-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/selected-provider-authority-v1.js'
+      - 'public/app/assistant-output-sanitizer-v1.js'
+      - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'scripts/verify-selected-provider-authority-output-v1.mjs'
+      - '.github/workflows/verify-selected-provider-authority-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-selected-provider-authority-output-v1.mjs

@@ -4,7 +4,7 @@
 // the lightweight v203 worker became canonical. Android can retain a site's
 // service-worker registration and CacheStorage after the PWA icon is removed,
 // so this path must never contain a frozen historical app shell.
-const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v10-ai-quest-source-authority';
+const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v20-selected-provider-authority-staging-activation';
 
 // Compatibility-only package metadata consumed by build-mobile-install-kit.mjs.
 // Runtime ownership belongs entirely to service-worker-v203.js below.
@@ -39,7 +39,7 @@ const CORE=[
   '/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt',
   '/app/system-routes-v227.js','/app/persistent-system-context-v1.js','/app/themed-system-nav-v178.js','/app/persistent-shell-actions-v1.js','/app/subsystem-avatar-state-v347.js',
   '/app/guide-chat-surface-v350.js','/app/shared-guide-surface-v236.js','/app/guide-generation-floor-v1.js','/app/guide-stream-thinking-v249.js','/app/local-guide-control-bypass-v1.js','/app/weaveling-plan-materialization-v265.js','/extensions/civweave-weaveling-plan-json-v190.js',
-  '/app/server-ai-router-v301.js','/app/server-ai-output-normalizer-v1.js',
+  '/app/server-ai-router-v301.js','/app/server-ai-output-normalizer-v1.js','/app/selected-provider-authority-v1.js','/app/assistant-output-sanitizer-v1.js','/app/cerbanimo-chat-quest-capability-v1.js','/app/cerbanimo-chat-quest-capability-v2.js','/app/cerbanimo-chat-quest-capability-v3.js',
   '/app/local-chat-runtime-v295.js','/app/local-provider-authority-v1.js','/app/local-ai/gemma4-inference-repair-v1.js','/app/local-ai/gemma4-litert-fast-extension-v1.js','/app/local-ai/litert-gemma4-fast-runtime-v1.js','/app/local-ai/model-registry-v266.js','/app/local-ai/download-manager-v267.js','/app/local-ai/runtime-v266.js','/app/local-ai/worker-v266.js',
   '/app/family-shell-v104.css','/app/family-shell-v104.js','/app/family-ai-loader-v105.js','/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js',
   '/app/model-settings-controller-v173.js','/app/unified-ai-settings-v175.js','/app/deterministic-mode-v175.js','/app/settings-delegation-v175.js','/app/shared-tools-cleanup-v175.js','/app/model-settings-v133.css','/app/shared/civweave-model-runtime.js','/app/safe-mode-v1.mjs',
@@ -75,4 +75,4 @@ const CORE=[
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',event=>{event.waitUntil(self.clients.claim());});
 
-importScripts('/service-worker-v203.js?v=root-worker-bridge-v10-ai-quest-source-authority');
+importScripts('/service-worker-v203.js?v=root-worker-bridge-v20-selected-provider-authority-staging-activation');

@@ -1,0 +1,52 @@
+name: Verify Kamiya Quest chat
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/cerbanimo-chat-quest-capability-v1.js'
+      - 'public/app/cerbanimo-chat-quest-capability-v2.js'
+      - 'public/app/cerbanimo-chat-quest-capability-v3.js'
+      - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/realm-console-v140.html'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
+      - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-http503-failover-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-malformed-json-repair-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-gemini-provider-authority-v1.mjs'
+      - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/cerbanimo-chat-quest-capability-v1.js'
+      - 'public/app/cerbanimo-chat-quest-capability-v2.js'
+      - 'public/app/cerbanimo-chat-quest-capability-v3.js'
+      - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/realm-console-v140.html'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
+      - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-http503-failover-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-malformed-json-repair-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-gemini-provider-authority-v1.mjs'
+      - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs
+      - run: node scripts/verify-cerbanimo-kamiya-http503-failover-v1.mjs
+      - run: node scripts/verify-cerbanimo-kamiya-malformed-json-repair-v1.mjs
+      - run: node scripts/verify-cerbanimo-kamiya-gemini-provider-authority-v1.mjs

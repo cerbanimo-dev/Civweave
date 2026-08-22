@@ -6,6 +6,8 @@ const SESSION_SCHEMA='civweave.mobile-guild-capacity-session.v1';
 const LOGIN_SCHEMA='civweave.host-node-login.v1';
 const DAILY_INCLUDED_NEURONS=900;
 const COMMUNITY_SEAT_LIMIT=6;
+const MAX_RESIDENTS=28;
+const PATRON_SEAT_LIMIT=MAX_RESIDENTS-COMMUNITY_SEAT_LIMIT;
 const SESSION_TTL_MS=30*24*60*60*1000;
 const DEFAULT_AI_MODEL='@cf/zai-org/glm-4.7-flash';
 const MAX_GENERATION_TOKENS=4096;
@@ -55,8 +57,8 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
   }
   status(){
     this.ensureResidentTables();
-    const base=this.baseStatus(),memberCount=Number([...this.sql.exec('SELECT COUNT(DISTINCT user_id) AS count FROM resident_members')][0]?.count||0),communityMemberCount=memberCount,used=Number([...this.sql.exec('SELECT COALESCE(SUM(neurons),0) AS neurons FROM resident_usage WHERE day=?',dayKey())][0]?.neurons||0),free=Math.max(0,COMMUNITY_SEAT_LIMIT-communityMemberCount),dailyCeilingNeurons=memberCount*DAILY_INCLUDED_NEURONS;
-    return{...base,capacityAvailable:true,workersPlan:'free',memberCount,communityMemberCount,nodeCommunityMembers:communityMemberCount,communitySeatLimit:COMMUNITY_SEAT_LIMIT,communitySeatsRemaining:free,paidExpansionSeatLimit:0,paidExpansionSeatsRemaining:0,maxMembers:COMMUNITY_SEAT_LIMIT,includedDailyNeurons:DAILY_INCLUDED_NEURONS,dailyCeilingNeurons,dailyUsedNeurons:used,dailyRemainingNeurons:Math.max(0,dailyCeilingNeurons-used),slots:{free,paid:0},residentSessionSchema:SESSION_SCHEMA};
+    const base=this.baseStatus(),memberCount=Number([...this.sql.exec('SELECT COUNT(DISTINCT user_id) AS count FROM resident_members')][0]?.count||0),communityMemberCount=Number([...this.sql.exec("SELECT COUNT(DISTINCT user_id) AS count FROM resident_members WHERE seat_class='community'")][0]?.count||0),paidExpansionCount=Number([...this.sql.exec("SELECT COUNT(DISTINCT user_id) AS count FROM resident_members WHERE seat_class='paid-expansion'")][0]?.count||0),used=Number([...this.sql.exec('SELECT COALESCE(SUM(neurons),0) AS neurons FROM resident_usage WHERE day=?',dayKey())][0]?.neurons||0),totalRemaining=Math.max(0,MAX_RESIDENTS-memberCount),free=Math.min(totalRemaining,Math.max(0,COMMUNITY_SEAT_LIMIT-communityMemberCount)),paid=Math.min(totalRemaining,Math.max(0,PATRON_SEAT_LIMIT-paidExpansionCount)),dailyCeilingNeurons=memberCount*DAILY_INCLUDED_NEURONS;
+    return{...base,capacityAvailable:true,workersPlan:'free',memberCount,communityMemberCount,nodeCommunityMembers:communityMemberCount,paidExpansionCount,activePaidMembers:paidExpansionCount,communitySeatLimit:COMMUNITY_SEAT_LIMIT,communitySeatsRemaining:free,paidExpansionSeatLimit:PATRON_SEAT_LIMIT,paidExpansionSeatsRemaining:paid,maxMembers:MAX_RESIDENTS,totalSeatsRemaining:totalRemaining,includedDailyNeurons:DAILY_INCLUDED_NEURONS,dailyCeilingNeurons,dailyUsedNeurons:used,dailyRemainingNeurons:Math.max(0,dailyCeilingNeurons-used),slots:{free,paid},residentSessionSchema:SESSION_SCHEMA};
   }
   async joinResident({requestedNodeId,userId,credentialHash,origin}={}){
     this.ensureResidentTables();

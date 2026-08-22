@@ -27,6 +27,21 @@ The starter nodes are logical Cloudflare nodes inside the Guildkeeper-owned Work
 
 Civweave records the resulting `civweave.guild-cloud-fabric.v1` manifest in local Guild state and in the signed Guild edge-attachment object. The one-time pairing code is then discarded locally.
 
+## Automatic updates
+
+Deploy to Cloudflare creates a Guildkeeper-owned Git repository and connects it to Cloudflare Workers Builds. This template includes a Civweave updater workflow in that repository.
+
+- Every six hours, the updater checks the configured Civweave release channel.
+- It compares the upstream `cloudflare/mobile-guild-edge` tree hash, so unrelated Civweave commits do not cause redeployments.
+- When the Guild Cloud template changes, it synchronizes Civweave-managed source files into the Guildkeeper-owned repository and commits the update with the repository's built-in GitHub Actions credential.
+- Cloudflare Workers Builds sees that commit and deploys the new Worker version automatically.
+- The updater preserves the Guildkeeper repository's Worker name, account-specific Wrangler settings, routes, and existing Durable Object state. Canonical Worker code, Durable Object class declarations/migrations, compatibility settings, and Workers AI bindings remain update-managed.
+- No Cloudflare API token, Account ID, Wrangler command, GitHub secret, or manual Worker redeploy is part of normal Guildkeeping.
+
+`civweave-update.json` defines the upstream release channel and the boundary between Civweave-managed files and Guildkeeper-owned deployment configuration. `civweave-update-lock.json` is written only when a new upstream template tree is applied.
+
+Existing Guild Clouds created before this updater was added require one final bootstrap deployment to install the updater. After that migration, future Guild Cloud releases follow the automatic path.
+
 ## Public/status routes
 
 - `GET /` — human-readable deployment and pairing status.
@@ -57,5 +72,6 @@ Workers AI generation requires a `model` plus `input`, `messages`, or `prompt`. 
 - Every stored community object is validated against its payload hash, revision hash, origin fingerprint, and ECDSA P-256 signature.
 - The shared Guild lane accepts public/federated objects and `group` objects addressed to this Guild. It rejects private/direct objects.
 - Removing the Cloudflare deployment removes hosted capacity, not the locally canonical Guild genesis or its device-owned identity.
+- Automatic updates modify the Guildkeeper-owned deployment repository, not the local Guild identity or its Durable Object records.
 
 A desktop, Raspberry Pi, NAS, or other persistent local Anchor can be attached later without changing the Guild identity. A replacement Cloudflare account can likewise be paired around the same local Guild identity rather than becoming its source of truth.

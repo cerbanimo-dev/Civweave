@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='moss-local-learning-plan-v2';
+const REVISION='guild-live-balance-v2';
 const FREEZE_REVISION='mobile-chat-main-thread-quiescence-v349';
 const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
@@ -12,6 +12,7 @@ const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const MODEL_ROUTE_REVISION='selected-local-minilm-v357';
 const SERVER_AUTO_FAILOVER_REVISION='server-auto-local-failover-v358';
 const GUIDE_ROUTE_REVISION='guide-capability-passover-v361';
+const CERBANIMO_QUEST_CHAT_REVISION='kamiya-quest-chat-v3-recoverable-json';
 const THREAD_TABS_REVISION='saved-tabs-contained-v354';
 const PARTY_PATH='/app/shared-intention-party-chat-v1.js';
 const PARTY_CACHE='civweave-party-v1';
@@ -24,11 +25,19 @@ const CRITICAL_RUNTIME_PATHS=new Set([
   '/app/shared-guide-surface-v236.js',
   '/app/unified-chat-system-v1.js',
   '/app/minilm-response-router-v347.js',
+  '/app/guide-generation-floor-v1.js',
   '/app/minilm-decision-strip-v1.js',
-  '/app/server-ai-router-v301.js'
+  '/app/server-ai-router-v301.js',
+  '/app/server-ai-output-normalizer-v1.js',
+  '/app/cerbanimo-chat-quest-capability-v1.js',
+  '/app/cerbanimo-chat-quest-capability-v2.js',
+  '/app/guild-chat-usage-v1.js',
+  '/app/host-node-session-v1.js',
+  '/app/host-node-local-capacity-v1.js',
+  '/app/system-routes-v227.js'
 ]);
 const CHAT_PATHS=new Set([
-  '/app/manifest.webmanifest','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/mobile-ai-hardening-v302.js','/app/mobile-chat-visual-viewport-v1.js','/app/realm-console-v140.html','/app/anarchadia-console-v139.html','/app/family-ai-loader-v105.js','/app/assistant-runtime-v141.js','/app/platform-stability-v159.js','/app/experience-orchestrator-v232.js','/app/realm-session-integrity-v237.js','/app/guide-workspace-v242.js','/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/guide-capability-passover-v1.js','/app/chat-fullscreen-v295.js','/app/saved-chat-store-v295.js','/app/saved-chat-ui-v295.js','/app/shared-guide-surface-v236.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/human-message-bubble-v1.js','/app/local-ai/translation-packs-v1.js','/app/local-ai/translation-worker-v1.js','/app/shared-chat-face-icons-v255.js','/app/avatar-expression-director-v345.js','/app/minilm-context-router-v344.js','/app/minilm-response-router-v347.js','/app/minilm-decision-strip-v1.js','/app/server-ai-router-v301.js','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js','/Civweave-weaveling-sprites.png','/Living-School-moss-sprites.png','/Cerbanimo-kamiya-sprites.png','/FellowFare-rook-sprites.png','/Anarchadia-merlin-sprites.png','/app/regression-fixes-v243.js','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt','/app/working-campus-topbar-v243.js','/app/working-campus-v156.css','/app/working-campus-v156.html','/app/new-user-onboarding-v1.js','/app/new-user-onboarding-v1.css','/app/local-chat-runtime-v295.js','/app/local-chat-owner-v295.js','/app/ai-capability-broker-v268.js','/app/fast-interactive-runtime-v192.js','/app/local-ai/bootstrap-v266.js','/app/local-ai/model-registry-v266.js','/app/local-ai/download-manager-v267.js','/app/local-ai/download-policy-v278.js','/app/local-ai/metadata-repair-v276.js','/app/local-ai/small-model-policy-v283.js','/app/local-ai/runtime-v266.js','/app/local-ai/runtime-bridge-v266.js','/app/local-ai/settings-panel-v267.js','/app/local-ai/primary-route-v283.js','/app/local-ai/hardware-tier-ui-v278.js','/app/local-ai/worker-v266.js','/app/local-ai/test-pulse-v269.js'
+  '/app/manifest.webmanifest','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/mobile-ai-hardening-v302.js','/app/mobile-chat-visual-viewport-v1.js','/app/realm-console-v140.html','/app/anarchadia-console-v139.html','/app/family-ai-loader-v105.js','/app/assistant-runtime-v141.js','/app/platform-stability-v159.js','/app/experience-orchestrator-v232.js','/app/realm-session-integrity-v237.js','/app/guide-workspace-v242.js','/app/guide-chat-surface-v350.js','/app/unified-chat-system-v1.js','/app/guide-capability-passover-v1.js','/app/guide-generation-floor-v1.js','/app/chat-fullscreen-v295.js','/app/saved-chat-store-v295.js','/app/saved-chat-ui-v295.js','/app/shared-guide-surface-v236.js','/app/shared-guide-surface-v236-core-v244.js','/app/shared-intention-party-chat-v1.js','/app/human-message-bubble-v1.js','/app/local-ai/translation-packs-v1.js','/app/local-ai/translation-worker-v1.js','/app/shared-chat-face-icons-v255.js','/app/avatar-expression-director-v345.js','/app/minilm-context-router-v344.js','/app/minilm-response-router-v347.js','/app/minilm-decision-strip-v1.js','/app/server-ai-router-v301.js','/app/server-ai-output-normalizer-v1.js','/app/cerbanimo-chat-quest-capability-v1.js','/app/cerbanimo-chat-quest-capability-v2.js','/app/guild-chat-usage-v1.js','/app/host-node-session-v1.js','/app/host-node-local-capacity-v1.js','/app/system-routes-v227.js','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js','/Civweave-weaveling-sprites.png','/Living-School-moss-sprites.png','/Cerbanimo-kamiya-sprites.png','/FellowFare-rook-sprites.png','/Anarchadia-merlin-sprites.png','/app/regression-fixes-v243.js','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt','/app/working-campus-topbar-v243.js','/app/working-campus-v156.css','/app/working-campus-v156.html','/app/new-user-onboarding-v1.js','/app/new-user-onboarding-v1.css','/app/local-chat-runtime-v295.js','/app/local-chat-owner-v295.js','/app/ai-capability-broker-v268.js','/app/fast-interactive-runtime-v192.js','/app/local-ai/bootstrap-v266.js','/app/local-ai/model-registry-v266.js','/app/local-ai/download-manager-v267.js','/app/local-ai/download-policy-v278.js','/app/local-ai/metadata-repair-v276.js','/app/local-ai/small-model-policy-v283.js','/app/local-ai/runtime-v266.js','/app/local-ai/runtime-bridge-v266.js','/app/local-ai/settings-panel-v267.js','/app/local-ai/primary-route-v283.js','/app/local-ai/hardware-tier-ui-v278.js','/app/local-ai/worker-v266.js','/app/local-ai/test-pulse-v269.js'
 ]);
 const RETIRED_CHAT_PATHS=new Set(['/app/guide-chat-v153.js','/app/cabinet-home-v142.js','/app/cabinet-home-v142.css','/app/cabinet-surfaces-v143.js','/app/cabinet-surfaces-v143.css','/app/sharing-library-v143.js','/app/persistent-guide-chat-v214.js','/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/chat-single-owner-v245.js']);
 const PURGE_PATHS=new Set([...CHAT_PATHS,...RETIRED_CHAT_PATHS]);
@@ -54,7 +63,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,mobileViewportRevision:MOBILE_VIEWPORT_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,threadTabsRevision:THREAD_TABS_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,mobileViewportRevision:MOBILE_VIEWPORT_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,cerbanimoQuestChatRevision:CERBANIMO_QUEST_CHAT_REVISION,threadTabsRevision:THREAD_TABS_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
 async function cacheRuntime(path,cacheName,revision,label){
   try{
@@ -70,7 +79,7 @@ async function cacheHumanMessageRuntime(){return cacheRuntime(HUMAN_BUBBLE_PATH,
 async function cacheTranslationRuntime(){const runtime=await cacheRuntime(TRANSLATION_PATH,TRANSLATION_CACHE,TRANSLATION_REVISION,'translation');const worker=await cacheRuntime(TRANSLATION_WORKER_PATH,TRANSLATION_CACHE,TRANSLATION_REVISION,'translation worker');return{ok:Boolean(runtime.ok&&worker.ok),revision:TRANSLATION_REVISION,runtime,worker}}
 async function repairAndPackage(){const purge=await purgeChatRuntimeCaches(),party=await cachePartyRuntime(),humanBubble=await cacheHumanMessageRuntime(),translation=await cacheTranslationRuntime();return{...purge,party,humanBubble,translation}}
 
-// Keep activation bounded, but always evict the five small runtime files whose
+// Keep activation bounded, but always evict the small runtime files whose
 // stale copies can strand the visible chat UI on an obsolete router/tracker.
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{await purgeCriticalChatRuntimeCaches();await self.clients.claim()})());
@@ -83,5 +92,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,mobileViewportRevision:MOBILE_VIEWPORT_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,threadTabsRevision:THREAD_TABS_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,criticalPaths:[...CRITICAL_RUNTIME_PATHS],paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purgeCritical:purgeCriticalChatRuntimeCaches,purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanMessage:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime,lifecyclePolicy:'activation-targeted-critical-purge-explicit-full-repair'});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,mobileViewportRevision:MOBILE_VIEWPORT_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,modelRouteRevision:MODEL_ROUTE_REVISION,serverAutoFailoverRevision:SERVER_AUTO_FAILOVER_REVISION,guideRouteRevision:GUIDE_ROUTE_REVISION,cerbanimoQuestChatRevision:CERBANIMO_QUEST_CHAT_REVISION,threadTabsRevision:THREAD_TABS_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,criticalPaths:[...CRITICAL_RUNTIME_PATHS],paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purgeCritical:purgeCriticalChatRuntimeCaches,purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanMessage:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime,lifecyclePolicy:'activation-targeted-critical-purge-explicit-full-repair'});
 })();
