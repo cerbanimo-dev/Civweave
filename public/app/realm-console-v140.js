@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.30';
+const VERSION='1.0.31';
 const STORE_KEY='civweave.realm-console.v140';
 const WORKFLOW_KEY='civweave.cabinet-workflow.v129';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -35,7 +35,7 @@ function toast(message){const node=$('#rc-toast');node.textContent=message;node.
 function systemFor(id){return ledger.index.systems.get(id)||ledger.systems.find(item=>item.id===id)||ledger.systems[0]}
 function roomFor(system,id){return system.rooms.find(item=>item.id===id)||system.rooms[0]}
 function capsFor(system,room){return ledger.capabilities.filter(item=>item.system===system.id&&item.room===room.id)}
-function route(next,{replace=false}={}){state={...state,...next};const query=new URLSearchParams({system:state.systemId,embed:'1'});if(state.roomId)query.set('room',state.roomId);if(state.capabilityId)query.set('capability',state.capabilityId);history[replace?'replaceState':'pushState'](state,'',`/app/realm-console-v140.html?${query}`);render()}
+function route(next,{replace=false}={}){state={...state,...next};const query=new URLSearchParams(location.search);query.set('system',state.systemId);query.delete('room');query.delete('capability');if(window.self===window.top){query.delete('embed');if(query.get('civweave')==='1')query.delete('civweave')}else query.set('embed','1');if(state.roomId)query.set('room',state.roomId);if(state.capabilityId)query.set('capability',state.capabilityId);history[replace?'replaceState':'pushState'](state,'',`/app/realm-console-v140.html?${query}`);render()}
 function current(){const system=systemFor(state.systemId),room=roomFor(system,state.roomId),capability=state.capabilityId?ledger.index.capabilities.get(state.capabilityId):null;return{system,room,capability,theme:SYSTEMS[system.id]||SYSTEMS.civweave}}
 function records(id){const value=readStore().records[id];return Array.isArray(value)?value:[]}
 function addRecord(capability,data,status='active'){const record={id:uid(capability.id.split('.').at(-1)),capabilityId:capability.id,system:capability.system,room:capability.room,label:capability.label,status,createdAt:now(),updatedAt:now(),data};mutate(store=>{if(!Array.isArray(store.records[capability.id]))store.records[capability.id]=[];store.records[capability.id].unshift(record);store.receipts.unshift({id:uid('receipt'),kind:'capability-record',time:now(),detail:{capabilityId:capability.id,recordId:record.id,status}})});return record}
