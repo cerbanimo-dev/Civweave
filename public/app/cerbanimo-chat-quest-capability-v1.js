@@ -1,28 +1,39 @@
 (()=>{
 'use strict';
-const VERSION='1.3.0-cerbanimo-chat-quest-capability-v1-v2-malformed-json-loader';
-const TARGET='/app/cerbanimo-chat-quest-capability-v2.js';
-const TARGET_VERSION='2.2.0-malformed-json-repair-r1-from-2.1.0-transient-provider-failover';
+const VERSION='1.4.0-cerbanimo-chat-quest-capability-v1-v3-provider-authority-loader';
+const V2='/app/cerbanimo-chat-quest-capability-v2.js';
+const V2_VERSION='2.2.0-malformed-json-repair-r1-from-2.1.0-transient-provider-failover';
+const V3='/app/cerbanimo-chat-quest-capability-v3.js';
+const V3_VERSION='3.0.0-gemini-provider-authority-r1';
 if(globalThis.CivweaveCerbanimoChatQuestCapabilityV1?.version===VERSION)return;
 let promise=null;
-function existing(){return globalThis.CivweaveCerbanimoChatQuestCapabilityV2||null}
-function load(){
-  const ready=existing();if(ready){ready.install?.();return Promise.resolve(ready)}
-  if(promise)return promise;
-  promise=new Promise((resolve,reject)=>{
-    const found=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===TARGET}catch{return false}});
-    const finish=()=>{const api=existing();if(!api){promise=null;reject(new Error('Cerbanimo Endeavor authoring v2 loaded without its runtime.'));return}api.install?.();resolve(api)};
-    if(found){found.addEventListener('load',finish,{once:true});setTimeout(()=>existing()?finish():(promise=null),1800);return}
-    const script=document.createElement('script');script.src=`${TARGET}?v=${TARGET_VERSION}`;script.async=false;script.onload=finish;script.onerror=()=>{promise=null;reject(new Error('Could not load Cerbanimo Endeavor authoring v2.'))};document.head?.append(script);
+function find(path){return[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}})}
+function loadScript(path,version,ready,label){
+  if(ready())return Promise.resolve(ready());
+  return new Promise((resolve,reject)=>{
+    const existing=find(path),finish=()=>{const api=ready();if(!api){reject(new Error(`${label} loaded without its runtime.`));return}resolve(api)};
+    if(existing){existing.addEventListener('load',finish,{once:true});setTimeout(()=>ready()?finish():reject(new Error(`${label} did not become ready.`)),1800);return}
+    const script=document.createElement('script');script.src=`${path}?v=${version}`;script.async=false;script.onload=finish;script.onerror=()=>reject(new Error(`Could not load ${label}.`));document.head?.append(script);
   });
+}
+async function load(){
+  if(promise)return promise;
+  promise=(async()=>{
+    const legacy=await loadScript(V2,V2_VERSION,()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2,'Cerbanimo Endeavor authoring v2');
+    legacy.install?.();
+    await new Promise(resolve=>setTimeout(resolve,280));
+    const authority=await loadScript(V3,V3_VERSION,()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV3,'Cerbanimo Endeavor provider authority v3');
+    authority.install?.();
+    return authority;
+  })().catch(error=>{promise=null;throw error});
   return promise;
 }
-function install(){void load().catch(error=>{try{console.warn('[Civweave] Cerbanimo Endeavor v2 did not attach:',error)}catch{}});return true}
+function install(){void load().catch(error=>{try{console.warn('[Civweave] Cerbanimo Endeavor provider authority did not attach:',error)}catch{}});return true}
 for(const name of ['civweave:unified-chat-system-ready','civweave:assistant-runtime-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,install);
 install();
 globalThis.CivweaveCerbanimoChatQuestCapabilityV1=Object.freeze({
-  version:VERSION,target:TARGET,targetVersion:TARGET_VERSION,compatibilityLoader:true,install,load,
-  questIntent:text=>Boolean(existing()?.questIntent?.(text)),
-  state:()=>({loaded:Boolean(existing()),targetVersion:existing()?.version||''})
+  version:VERSION,target:V3,targetVersion:V3_VERSION,legacyTarget:V2,legacyVersion:V2_VERSION,compatibilityLoader:true,providerAuthority:'selected-provider',install,load,
+  questIntent:text=>Boolean(globalThis.CivweaveCerbanimoChatQuestCapabilityV3?.questIntent?.(text)||globalThis.CivweaveCerbanimoChatQuestCapabilityV2?.questIntent?.(text)),
+  state:()=>({loaded:Boolean(globalThis.CivweaveCerbanimoChatQuestCapabilityV3),targetVersion:globalThis.CivweaveCerbanimoChatQuestCapabilityV3?.version||'',legacyLoaded:Boolean(globalThis.CivweaveCerbanimoChatQuestCapabilityV2)})
 });
 })();
