@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-living-school-runtime-route-v330';
+const VERSION='1.0.1-living-school-runtime-route-v330-provider-safe';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const LOCAL_SYNTHESIS_PURPOSE='living-school-local-source-synthesis-v260';
@@ -20,12 +20,13 @@ function managedPurpose(request={}){
 }
 function prepare(request={}){
   if(lower(request.purpose)!==DESIGN_PURPOSE||!GROUNDED_RESEARCH_MODES.has(lower(request?.context?.research?.mode)))return request;
+  const config={...(request.config||{})},provider=lower(config.provider||config.route||config.engine),gemini=provider==='gemini';
   return{
     ...request,
     taskTier:'small',
     executionProfile:'interactive',
-    config:{...(request.config||{}),provider:'gemini',route:'gemini',model:SMALL_MODEL},
-    context:{...(request.context||{}),livingSchoolGroundedDesign:true,groundedDesignModel:SMALL_MODEL},
+    config:gemini?{...config,provider:'gemini',route:'gemini',model:SMALL_MODEL}:config,
+    context:{...(request.context||{}),livingSchoolGroundedDesign:true,...(gemini?{groundedDesignModel:SMALL_MODEL}:{})},
     messages:[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:'The research/evidence pass is already complete. This is a lightweight instructional-design synthesis pass. Use only the supplied source packet and SOURCE_ID values. Do not perform new research, invent sources, or author Civweave economy/reward metadata.'}]
   };
 }
@@ -76,8 +77,7 @@ function validateStructure(result,request){
 }
 async function routedGenerate(outer,spine,request={}){
   if(!managedPurpose(request))return outer.generate(request);
-  const prepared=prepare(request);
-  const result=await spine.generate(prepared);
+  const prepared=prepare(request),result=await spine.generate(prepared);
   return validateStructure(result,prepared);
 }
 function install(){
@@ -88,11 +88,11 @@ function install(){
   const bridge=Object.freeze({...current,__livingSchoolRuntimeRouteV330:VERSION,generate:request=>routedGenerate(current,spine,request)});
   try{Object.defineProperty(globalThis,'CivweaveModelRuntime',{configurable:true,enumerable:true,writable:true,value:bridge})}catch{try{globalThis.CivweaveModelRuntime=bridge}catch{return false}}
   activeBridge=bridge;
-  try{dispatchEvent(new CustomEvent('civweave:living-school-runtime-route-ready',{detail:{version:VERSION,managed:[LOCAL_SYNTHESIS_PURPOSE,RESEARCH_FALLBACK_PURPOSE,DESIGN_PURPOSE,STRUCTURE_PURPOSE],model:SMALL_MODEL,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-runtime-route-ready',{detail:{version:VERSION,managed:[LOCAL_SYNTHESIS_PURPOSE,RESEARCH_FALLBACK_PURPOSE,DESIGN_PURPOSE,STRUCTURE_PURPOSE],geminiGroundedModel:SMALL_MODEL,at:new Date().toISOString()}}))}catch{}
   return true;
 }
 function scheduleInstall(){queueMicrotask(()=>{install();setTimeout(install,0);setTimeout(install,120)})}
 for(const event of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:gemini-interactions-ready','civweave:assistant-runtime-ready','pageshow'])addEventListener?.(event,scheduleInstall);
 scheduleInstall();
-globalThis.CivweaveLivingSchoolRuntimeRouteV1=Object.freeze({version:VERSION,install,managedPurpose,prepare,get bridge(){return activeBridge},get outer(){return activeOuter},model:SMALL_MODEL});
+globalThis.CivweaveLivingSchoolRuntimeRouteV1=Object.freeze({version:VERSION,install,managedPurpose,prepare,get bridge(){return activeBridge},get outer(){return activeOuter},geminiGroundedModel:SMALL_MODEL});
 })();
