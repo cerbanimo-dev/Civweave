@@ -4,7 +4,7 @@
 // the lightweight v203 worker became canonical. Android can retain a site's
 // service-worker registration and CacheStorage after the PWA icon is removed,
 // so this path must never contain a frozen historical app shell.
-const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v17-kamiya-gemini-provider-authority';
+const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v18-kamiya-gemini-provider-authority-gate';
 
 // Compatibility-only package metadata consumed by build-mobile-install-kit.mjs.
 // Runtime ownership belongs entirely to service-worker-v203.js below.
@@ -75,4 +75,4 @@ const CORE=[
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',event=>{event.waitUntil(self.clients.claim());});
 
-importScripts('/service-worker-v203.js?v=root-worker-bridge-v17-kamiya-gemini-provider-authority');
+importScripts('/service-worker-v203.js?v=root-worker-bridge-v18-kamiya-gemini-provider-authority-gate');
