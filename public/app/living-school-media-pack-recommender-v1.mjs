@@ -1,7 +1,7 @@
 import media from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
 import sourcePacks from'./learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
 
-const REVISION='living-school-media-pack-recommender-v1.3-unified-source-packs';
+const REVISION='living-school-media-pack-recommender-v1.4-agriculture-aliases';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const STOP=new Set(['about','after','again','also','basic','basics','beginner','build','building','capability','complete','course','create','creating','curriculum','foundation','foundations','guide','guided','intro','introduction','learn','learning','lesson','module','practice','practical','skill','skills','study','teach','teaching','through','using','vocabulary','with','your']);
 const PACK_RULES=Object.freeze({
@@ -15,7 +15,7 @@ const PACK_RULES=Object.freeze({
   'tarot-symbolic-practice':['tarot','tarot cards','major arcana','minor arcana','arcana','card reading','divination','cartomancy','symbolism','rider waite','rider-waite','marseille tarot'],
   'mind-body-practice':['mindfulness','meditation','breathing','attention','contemplative','self reflection','wellness'],
   'relationships-care':['parenting','gentle parenting','caregiving','child development','communication','conflict','active listening','relationships','family care'],
-  'garden-nature':['gardening','garden','plant care','plants','soil','vegetable garden','growing food','horticulture'],
+  'garden-nature':['urban agriculture','agriculture','community garden','gardening','garden','farming','farm','crop','crops','food growing','plant care','plants','soil','vegetable garden','growing food','horticulture','irrigation'],
   'career-enterprise':['career','workplace','resume','interview','business','entrepreneurship','small business','self employment','finance','communication'],
   'music-performance':['music','music theory','performance','rhythm','melody','instrument','singing'],
   'language-communication':['language learning','second language','vocabulary','grammar','listening','speaking','communication'],
