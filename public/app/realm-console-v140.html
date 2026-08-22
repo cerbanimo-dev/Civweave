@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="realm-console-canonical-v251-universal-navbar-only-r1">
+<html lang="en" data-build="realm-console-canonical-v252-universal-nav-single-owner-r1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -32,22 +32,22 @@ if(next.searchParams.get('civweave')==='1'){next.searchParams.delete('civweave')
 if(changed)history.replaceState(history.state,'',`${next.pathname}${next.search}${next.hash}`);
 })();
 </script>
-<!-- Cerbanimo owns no realm-local bottom navigation. The existing universal five-system navbar is the only bottom navigation owner. -->
+<!-- Cerbanimo owns no realm-local navigation. Suppress duplicate global nav/context observers before route bootstrap; themed-system-nav-v178 remains the sole navbar owner. -->
+<script src="/app/cerbanimo-universal-nav-single-owner-v1.js?v=1.0.0"></script>
 <script src="/app/shared/civweave-parity-runtime.js?v=parity-bounded-r1" defer></script>
 <script src="/app/realm-console-v140.js?v=canonical-r5-universal-navbar-only" defer></script>
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v229-v440-home-live-guild-balance" defer></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-universal-top-level-r1" defer></script>
+<script src="/app/universal-nav-media-stability-v1.js?v=1.0.0-canonical-ai-portraits" defer></script>
 <script src="/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r4-universal-navbar-only" defer></script>
 <script src="/app/local-first-policy-v131.js?v=1.0.4" defer></script>
 <script src="/app/platform-stability-v159.js?v=canonical-chat-r1" defer></script>
 <script src="/app/platform-experience-v160.js?v=dark-review-r1" defer></script>
 <script src="/app/local-object-mesh-v146.js?v=direct-r36" defer></script>
 <script src="/app/cerbanimo-quest-engine-v144.js?v=quest-engine-r25-frame-bounded" defer></script>
-<script type="module" src="/app/cerbanimo-task-tool-links-v1.mjs?v=task-tool-links-r2-frame-bounded"></script>
 <script src="/app/cerbanimo-quest-path-v266.js?v=quest-path-lazy-r2" defer></script>
 <script src="/app/quest-arc-chronicle-v1.js?v=quest-arc-v1" defer></script>
 <script src="/app/cerbanimo-learning-packs-v1.js?v=learning-packs-v1-lazy-r1" defer></script>
-<script type="module" src="/app/cerbanimo-video-task-contract-v1.mjs?v=video-atlas-lazy-r1"></script>
 <script src="/app/cerbanimo-proof-attachments-v165.js?v=file-link-image-proof-r2" defer></script>
 <script src="/app/merlinites-semantic-planner-v164.js?v=merlinites-r1" defer></script>
 <script src="/app/local-rails-validator-v170.js?v=local-rails-r1" defer></script>
