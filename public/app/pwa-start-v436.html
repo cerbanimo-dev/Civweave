@@ -23,11 +23,11 @@
 (()=>{
 'use strict';
 const VERSION='1.0.163';
-const START_REVISION='pwa-start-v444-canonical-v440-home';
+const START_REVISION='pwa-start-v445-bounded-realm-navigation';
 const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
 const SHELL_WORKER_PATH='/service-worker-v203.js';
-const SHELL_WORKER_URL='/service-worker-v203.js?v=1.0.163&revision=canonical-home-v1-v440-exact-owner';
+const SHELL_WORKER_URL='/service-worker-v203.js?v=1.0.163&revision=bounded-realm-navigation-r2';
 const WORKER_SETTLE_MS=2200;
 const params=new URLSearchParams(location.search);
 const status=document.querySelector('#status');
@@ -64,7 +64,7 @@ async function refreshShellWorker(){
 async function launch(){
   if(!installedDisplay()){location.replace(installer().href);return}
   rememberLaunch();
-  try{if(status)status.textContent='Refreshing the five-system navigation runtime…';await refreshShellWorker()}catch(error){console.warn('[Civweave PWA start] Shell worker refresh failed; continuing to the exact requested system.',error)}
+  try{if(status)status.textContent='Refreshing bounded system navigation…';await refreshShellWorker()}catch(error){console.warn('[Civweave PWA start] Shell worker refresh failed; continuing to the exact requested system.',error)}
   const target=destination(),watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open Civweave directly.'),5000);addEventListener('pagehide',()=>clearTimeout(watchdog),{once:true});location.replace(target.href);
 }
 launch().catch(error=>fail(`Startup could not continue: ${error?.message||error}`));
