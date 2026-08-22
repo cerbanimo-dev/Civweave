@@ -1,12 +1,12 @@
 import {searchSupplementalArticles} from './learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
 
-const VERSION='1.0.37-knowledge-school-runtime-v243-source-pack-gaps';
+const VERSION='1.0.38-knowledge-school-runtime-v243-relevance-filter';
 const INSTALLER='/app/knowledge-school-seeds-v1.js?v=local-reader-r2';
 const seedCache=new Map();
 let installerPromise=null;
 
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
-const words=value=>[...new Set(clean(value,1800).toLowerCase().replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=3&&!['the','and','for','with','from','into','that','this','about','make','create','write','learn','each','one'].includes(word)))].sort((a,b)=>b.length-a.length).slice(0,10);
+const words=value=>[...new Set(clean(value,1800).toLowerCase().replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=3&&!['the','and','for','with','from','into','that','this','about','make','create','write','learn','each','one','project','projects','lead','leader','foundational','knowledge','strategy','strategies','equip','equipped','objective','capability'].includes(word)))].sort((a,b)=>b.length-a.length).slice(0,10);
 const validHttp=value=>{try{return['http:','https:'].includes(new URL(value).protocol)}catch{return false}};
 const normalizeUrl=value=>{try{const url=new URL(clean(value,2400));url.hash='';return['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}};
 
@@ -149,13 +149,13 @@ export async function searchDownloadedKnowledge(capability,{limit=10,maxSchools=
     try{
       const bundle=await databaseBundle(slug),passages=findPassages(bundle.bytes,tokens,{limit:Math.max(6,limit)});
       for(const passage of passages){
-        const nearby=canonicalNearHit(bundle.bytes,passage.hit,bundle.metadata),matched=nearby||bestMetadataForPassage(passage.text,tokens,bundle.metadata),title=clean(matched?.title,320)||`${record.school_name} downloaded reference`,url=normalizeUrl(matched?.url);
-        results.push({title,url,notes:passage.text,score:passage.score,schoolSlug:slug,schoolName:record.school_name,table:'sqlite-byte-search',articleTitle:title,canonicalUrl:url,linkProvenance:url?(nearby?'archive-canonical-near-passage':'archive-manifest-title-match'):'unresolved'});
+        const semantic=bestMetadataForPassage(passage.text,tokens,bundle.metadata),nearby=canonicalNearHit(bundle.bytes,passage.hit,bundle.metadata),matched=semantic||nearby,title=clean(matched?.title,320)||`${record.school_name} downloaded reference`,url=normalizeUrl(matched?.url);
+        results.push({title,url,notes:passage.text,score:passage.score,schoolSlug:slug,schoolName:record.school_name,table:'sqlite-byte-search',articleTitle:title,canonicalUrl:url,linkProvenance:url?(semantic?'archive-manifest-title-match':'archive-canonical-near-passage'):'unresolved'});
       }
     }catch(error){console.warn('[Knowledge School local reader]',slug,error)}
     if(results.length>=limit*3)break;
   }
-  const seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const key=(item.canonicalUrl||item.url||item.notes).toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,220);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
+  const minimumMatches=tokens.length>=4?2:1,seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const relevanceText=`${item.title||''} ${item.notes||''}`.toLowerCase(),matches=tokens.reduce((count,token)=>count+(relevanceText.includes(token)?1:0),0);if(matches<minimumMatches)return false;const key=(item.canonicalUrl||item.url||item.notes).toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,220);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
 }
 
 export function clearKnowledgeSchoolDatabaseCache(){seedCache.clear()}
