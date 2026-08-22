@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='159.3-gemini-structured-contracts-v261';
+const VERSION='159.4-gemini-structured-contracts-v262';
 const RUNTIME_NAME='CivweaveModelRuntime';
 const API_REVISION='2026-05-20';
 const DEFAULT_API_BASE='https://generativelanguage.googleapis.com/v1beta';
@@ -92,7 +92,7 @@ function prepareLivingSchoolRequest(request){
     }
   }
   const messages=Array.isArray(request.messages)?request.messages.map(message=>({...message})):[];
-  messages.push({role:'system',content:'Living School economy boundary: do not output XP, prices, Acorn grants, Button values, currency amounts, bonuses, payouts, or ledger decisions. The Civweave application attaches deterministic rewards after the curriculum module passes validation. Provenance boundary: use only supplied SOURCE_ID values; do not add a free-form bibliography, invented attribution, or any URL that is not in the supplied source allowlist.'});
+  messages.push({role:'system',content:'Living School economy boundary: do not output XP, prices, Acorn grants, Button values, currency amounts, bonuses, payouts, wages, labor values, or ledger decisions. The Civweave application attaches deterministic rewards after the curriculum module passes validation. Provenance boundary: use only supplied SOURCE_ID values; do not add a free-form bibliography, invented attribution, or any URL or named source that is not in the supplied source allowlist.'});
   return{...request,schema,messages,context:{...(request.context||{}),sourceAllowlist:allow.map(source=>({id:source.id,title:source.title,url:source.url}))}};
 }
 function collectStrings(value,out=[]){
@@ -100,6 +100,13 @@ function collectStrings(value,out=[]){
   if(Array.isArray(value)){for(const item of value)collectStrings(item,out);return out}
   if(isObject(value))for(const child of Object.values(value))collectStrings(child,out);
   return out;
+}
+function allowlistedName(name,allow,knownText){
+  const normalized=clean(name,160).replace(/^[\s"'“”‘’]+|[\s"'“”‘’,:]+$/g,'').trim().toLowerCase();
+  if(!normalized)return true;
+  if(/^(?:the )?(?:source packet|provided source|supplied source|local source|downloaded source|source material)/.test(normalized))return true;
+  if(knownText.includes(normalized))return true;
+  return allow.some(source=>{const title=source.title.toLowerCase();return title&&((normalized.length>=4&&title.includes(normalized))||(title.length>=4&&normalized.includes(title)))});
 }
 function livingSchoolProvenanceIssues(module,request){
   const allow=sourceAllowlist(request),knownIds=new Set(allow.map(source=>source.id)),knownUrls=new Set(allow.map(source=>source.url).filter(Boolean)),knownText=allow.map(source=>`${source.title} ${source.notes}`).join(' ').toLowerCase(),issues=[];
@@ -113,12 +120,10 @@ function livingSchoolProvenanceIssues(module,request){
     const urlPattern=/https?:\/\/[^\s)\]}>"']+/gi;let urlMatch;
     while((urlMatch=urlPattern.exec(text))){const url=normalizeUrl(urlMatch[0].replace(/[.,;:!?]+$/,''));if(url&&!knownUrls.has(url))issues.push(`text references URL outside the source allowlist: ${url}`)}
     const attributionPattern=/(?:according to|guidance from|research from|research by|study by|report by|published by|sourced from|cited by)\s+([^.;\n]{2,120})/gi;let attribution;
-    while((attribution=attributionPattern.exec(text))){
-      const name=clean(attribution[1],120).replace(/[,:].*$/,'').trim().toLowerCase();
-      if(!name||/^(?:the )?(?:source packet|provided source|supplied source|local source)/.test(name))continue;
-      if(!knownText.includes(name)&&!allow.some(source=>name.includes(source.title.toLowerCase())||source.title.toLowerCase().includes(name)))issues.push(`text contains unsupported source attribution: ${clean(attribution[1],120)}`);
-    }
-    if(/\b(?:Acorn(?:s)?|Button(?:s)?|XP)\b.{0,48}\b(?:grant|bonus|award|value|price|reward|payout|\d+)/i.test(text))issues.push('model-authored Civweave economy decision detected');
+    while((attribution=attributionPattern.exec(text)))if(!allowlistedName(attribution[1],allow,knownText))issues.push(`text contains unsupported source attribution: ${clean(attribution[1],120)}`);
+    const namedClaimPattern=/\b([A-Z][A-Za-z&.'’\-]*(?:\s+[A-Z][A-Za-z&.'’\-]*){0,5})\s+(?:recommends?|states?|reports?|finds?|notes?|says?|advises?|guides?|publishes?|concludes?)\b/g;let namedClaim;
+    while((namedClaim=namedClaimPattern.exec(text)))if(!allowlistedName(namedClaim[1],allow,knownText))issues.push(`text contains unsupported named-source claim: ${clean(namedClaim[1],120)}`);
+    if(/\b(?:Acorn(?:s)?|Button(?:s)?|XP)\b.{0,48}\b(?:grant|bonus|award|value|price|reward|payout|\d+)/i.test(text)||/\b(?:price|pricing|cost|fee|wage|labor value|labour value|payout|grant|bonus|reward)\b.{0,32}(?:\$\s*\d|\d+(?:\.\d+)?\s*(?:USD|dollars?|Acorns?|Buttons?))/i.test(text))issues.push('model-authored Civweave economy decision detected');
   }
   return[...new Set(issues)].slice(0,20);
 }
@@ -190,7 +195,7 @@ async function generateWithGenerateContent(original,request,interactionFailure){
     const system=systemText(messages),contents=messages.filter(item=>item?.role!=='system').map(item=>({role:item?.role==='assistant'?'model':'user',parts:[{text:clean(item?.content,48000)}]})).filter(item=>item.parts[0].text);
     if(!contents.length)contents.push({role:'user',parts:[{text:'Respond helpfully.'}]});
     const generationConfig={temperature:Number.isFinite(Number(config.temperature))?Number(config.temperature):0.2,maxOutputTokens:Number(config.maxTokens||4096)};
-    if(request.schema){generationConfig.responseMimeType='application/json';generationConfig.responseSchema=request.schema}
+    if(request.schema)generationConfig.responseFormat={text:{mimeType:'application/json',schema:request.schema}};
     const body={contents,generationConfig,...(system?{systemInstruction:{parts:[{text:system}]}}:{})};
     const url=generateContentUrl(config),requestHeaders={'content-type':'application/json','accept':'application/json','x-goog-api-key':config.apiKey,...(isObject(config.headers)?config.headers:{})};
     const response=await fetch(url,{method:'POST',headers:requestHeaders,body:JSON.stringify(body),signal:controller.signal,cache:'no-store'}),payload=await readJson(response);
