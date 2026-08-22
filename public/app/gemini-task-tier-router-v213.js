@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.69-gemini-task-tier-router-v323-living-school-repair-lite';
+const VERSION='1.0.70-gemini-task-tier-router-v324-living-school-boundaries';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const COMPLEX_MODEL='gemini-3.7-flash';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -8,6 +8,7 @@ const PROFILES_KEY='civweave-model-profiles-v1';
 const NOTICE_ID='cw-gemini-task-tier-notice-v213';
 const STYLE_ID='cw-gemini-task-tier-style-v213';
 const MIDDLEWARE_ID='gemini-task-tier-v271';
+const LIVING_SCHOOL_DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const LIVING_SCHOOL_FLASH_LITE_PURPOSES=new Set([
   'living-school-structure-single-v221',
   'living-school-module-depth-expansion-v262',
@@ -65,6 +66,43 @@ function effectiveConfig(runtime,request,profile){
   return{...stored,...requested};
 }
 function isGemini(runtime,request,profile){const config=effectiveConfig(runtime,request,profile);return providerName(config.provider||config.route||config.engine)==='gemini';}
+function appendSystemBoundary(request,text){
+  const messages=Array.isArray(request?.messages)?request.messages.map(message=>({...message})):[];
+  messages.push({role:'system',content:text});
+  return{...request,messages};
+}
+function prepareLivingSchoolDesign(request){
+  if(lower(request?.purpose)!==LIVING_SCHOOL_DESIGN_PURPOSE)return request;
+  return appendSystemBoundary(request,'Living School design boundary: produce instructional design only. Do not invent or recommend Acorn pricing, Button labor values, XP amounts, grants, bonuses, payouts, wages, currency values, curriculum valuation, or any ledger/economy metadata. Civweave attaches rewards after validated curriculum storage. Provenance boundary: use only the supplied source packet and SOURCE_ID values. Do not invent a bibliography, author, publication, URL, study, law, date, or named source that is not present in the supplied source material.');
+}
+function designEconomyViolation(result,request){
+  if(lower(request?.purpose)!==LIVING_SCHOOL_DESIGN_PURPOSE||result?.status!=='success')return result;
+  const text=clean(result?.outputText||result?.text||result?.output||'',64000);
+  if(!text)return result;
+  const contaminated=/\b(?:Acorns?|Buttons?|XP|curriculum\s+(?:package\s+)?valuation|labor\s+worth|labour\s+worth|skill\s+ledger|value\s+accounting|completion\s+grant|wage\s+valuation)\b/i.test(text);
+  if(!contaminated)return result;
+  return{...result,status:'invalid-response',outputText:'',outputJson:undefined,error:{code:'LIVING_SCHOOL_DESIGN_ECONOMY_BOUNDARY',message:'Living School rejected the research/design packet because the model authored economy or reward metadata. No additional 3.7 repair call was made.'},diagnostics:[...(result.diagnostics||[]),'Living School design packet failed the application-owned economy boundary.']};
+}
+function installGenerateContentEnumCompatibility(){
+  if(globalThis.__civweaveGeminiGenerateContentEnumV1||typeof globalThis.fetch!=='function')return false;
+  const nativeFetch=globalThis.fetch.bind(globalThis);
+  const patchedFetch=async(input,init)=>{
+    try{
+      const url=typeof input==='string'?input:clean(input?.url,3000);
+      if(/generativelanguage\.googleapis\.com\/v1(?:beta)?\/models\/[^/]+:generateContent(?:\?|$)/i.test(url)&&typeof init?.body==='string'){
+        const body=parse(init.body,null),format=body?.generationConfig?.responseFormat?.text;
+        if(format?.mimeType==='application/json'){
+          format.mimeType='APPLICATION_JSON';
+          return nativeFetch(input,{...init,body:JSON.stringify(body)});
+        }
+      }
+    }catch{}
+    return nativeFetch(input,init);
+  };
+  globalThis.fetch=patchedFetch;
+  globalThis.__civweaveGeminiGenerateContentEnumV1=true;
+  return true;
+}
 function migrateStoredGeminiPolicy(){
   try{
     const saved=parse(localStorage.getItem(SETTINGS_KEY),{}),profiles=parse(localStorage.getItem(PROFILES_KEY),{}),interactive=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:saved;
@@ -119,16 +157,21 @@ function patchSettings(){
 function middleware(){
   return{
     before(request,ctx){
-      const decision=classify(ctx.baseRuntime||globalThis.CivweaveModelRuntime,request),profile=decision.tier==='complex'?'agentic':'interactive';
-      if(!isGemini(ctx.baseRuntime||globalThis.CivweaveModelRuntime,request,profile))return request;
+      const prepared=prepareLivingSchoolDesign(request),decision=classify(ctx.baseRuntime||globalThis.CivweaveModelRuntime,prepared),profile=decision.tier==='complex'?'agentic':'interactive';
+      if(!isGemini(ctx.baseRuntime||globalThis.CivweaveModelRuntime,prepared,profile))return prepared;
       migrateGeminiProfiles(ctx.baseRuntime||globalThis.CivweaveModelRuntime);
-      const model=decision.tier==='complex'?COMPLEX_MODEL:SMALL_MODEL,meta=disclose(decision,model,request);
-      return{...request,executionProfile:profile,taskTier:decision.tier,capabilityRequirements:decision.requirements,config:{...(request.config||{}),provider:'gemini',route:'gemini',model},__civweaveGeminiRouting:meta};
+      const model=decision.tier==='complex'?COMPLEX_MODEL:SMALL_MODEL,meta=disclose(decision,model,prepared);
+      return{...prepared,executionProfile:profile,taskTier:decision.tier,capabilityRequirements:decision.requirements,config:{...(prepared.config||{}),provider:'gemini',route:'gemini',model},__civweaveGeminiRouting:meta};
     },
-    after(result,request){const meta=request?.__civweaveGeminiRouting;if(!meta||!result||typeof result!=='object')return result;return{...result,taskRouting:meta};}
+    after(result,request){
+      const bounded=designEconomyViolation(result,request),meta=request?.__civweaveGeminiRouting;
+      if(!meta||!bounded||typeof bounded!=='object')return bounded;
+      return{...bounded,taskRouting:meta};
+    }
   };
 }
 function install(){
+  installGenerateContentEnumCompatibility();
   const spine=globalThis.CivweaveFastInteractiveV192;
   if(!spine?.register)return false;
   migrateGeminiProfiles(spine.base?.()||globalThis.CivweaveModelRuntime);
@@ -140,6 +183,7 @@ addEventListener?.('civweave:runtime-spine-ready',install);
 addEventListener?.('civweave:model-settings-saved',()=>{migrateStoredGeminiPolicy();patchSettings();queueMicrotask(install)});
 addEventListener?.('civweave:model-settings-opened',()=>queueMicrotask(patchSettings));
 if(typeof document!=='undefined'){document.addEventListener('change',event=>{if(event.target?.name==='route')queueMicrotask(patchSettings)});document.addEventListener('submit',event=>{if(event.target?.matches?.('[data-cw-cleanroom-form]'))patchSettings()},true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',patchSettings,{once:true});else patchSettings();}
+installGenerateContentEnumCompatibility();
 migrateStoredGeminiPolicy();install();
 globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID,canonicalSettingsPresentation:true});
 })();
