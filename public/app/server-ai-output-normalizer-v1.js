@@ -1,9 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-server-ai-output-normalizer-v1';
+const VERSION='1.1.0-server-ai-output-normalizer-v1-provider-authority';
 const MIDDLEWARE_ID='server-auto-v301';
+const AUTHORITY='/app/selected-provider-authority-v1.js';
+const AUTHORITY_VERSION='1.0.0-selected-provider-authority-v1';
+const SANITIZER='/app/assistant-output-sanitizer-v1.js';
+const SANITIZER_VERSION='1.0.0-assistant-output-sanitizer-v1';
 if(globalThis.CivweaveServerAIOutputNormalizerV1?.version===VERSION)return;
-let patchedHandle=null,timer=0;
+let patchedHandle=null,timer=0,dependencyPromise=null;
 const clean=(value,max=5000000)=>String(value??'').trim().slice(0,max);
 function completionText(value,depth=0){
   if(depth>5||value==null)return'';
@@ -50,10 +54,30 @@ function patch(){
   const next=Object.freeze({...api,handle,register:()=>register(handle),outputEnvelopeNormalization:true,outputNormalizerVersion:VERSION});
   try{globalThis.CivweaveServerAIRouterV301=next}catch{return false}
   patchedHandle=handle;register(handle);
-  try{dispatchEvent(new CustomEvent('civweave:server-ai-output-normalizer-ready',{detail:{version:VERSION,middleware:MIDDLEWARE_ID,openAICompletionEnvelope:true,reasoningVisible:false}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:server-ai-output-normalizer-ready',{detail:{version:VERSION,middleware:MIDDLEWARE_ID,openAICompletionEnvelope:true,reasoningVisible:false,selectedProviderAuthority:true,finalAssistantSanitizer:true}}))}catch{}
   return true;
 }
-for(const name of ['civweave:server-ai-router-ready','civweave:runtime-spine-ready','civweave:model-runtime-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(patch));
-patch();let attempts=0;timer=setInterval(()=>{attempts+=1;patch();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
-globalThis.CivweaveServerAIOutputNormalizerV1=Object.freeze({version:VERSION,patch,completionText,normalizeModelResult,normalizePacket,state:()=>({installed:Boolean(patchedHandle),middleware:MIDDLEWARE_ID}),reasoningVisible:false});
+function find(path){return[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}})}
+function load(path,version,ready,label){
+  if(ready())return Promise.resolve(true);
+  return new Promise((resolve,reject)=>{
+    const existing=find(path),finish=()=>ready()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`));
+    if(existing){existing.addEventListener('load',finish,{once:true});setTimeout(finish,1800);return}
+    const script=document.createElement('script');script.src=`${path}?v=${encodeURIComponent(version)}`;script.async=false;script.onload=finish;script.onerror=()=>reject(new Error(`${label} could not load.`));document.head?.append(script);
+  });
+}
+function ensureDependencies(){
+  if(globalThis.CivweaveSelectedProviderAuthorityV1?.version===AUTHORITY_VERSION&&globalThis.CivweaveAssistantOutputSanitizerV1?.version===SANITIZER_VERSION){globalThis.CivweaveSelectedProviderAuthorityV1.install?.();globalThis.CivweaveAssistantOutputSanitizerV1.install?.();return Promise.resolve(true)}
+  if(dependencyPromise)return dependencyPromise;
+  dependencyPromise=load(AUTHORITY,AUTHORITY_VERSION,()=>globalThis.CivweaveSelectedProviderAuthorityV1?.version===AUTHORITY_VERSION,'selected provider authority')
+    .then(()=>{globalThis.CivweaveSelectedProviderAuthorityV1?.install?.();return load(SANITIZER,SANITIZER_VERSION,()=>globalThis.CivweaveAssistantOutputSanitizerV1?.version===SANITIZER_VERSION,'assistant output sanitizer')})
+    .then(()=>{globalThis.CivweaveAssistantOutputSanitizerV1?.install?.();patch();return true})
+    .catch(error=>{try{console.warn('[Civweave] AI boundary guards did not attach:',error)}catch{};return false})
+    .finally(()=>{dependencyPromise=null});
+  return dependencyPromise;
+}
+function install(){patch();void ensureDependencies();return true}
+for(const name of ['civweave:server-ai-router-ready','civweave:runtime-spine-ready','civweave:model-runtime-ready','civweave:assistant-runtime-ready','civweave:model-config-changed','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
+install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
+globalThis.CivweaveServerAIOutputNormalizerV1=Object.freeze({version:VERSION,patch,install,ensureDependencies,completionText,normalizeModelResult,normalizePacket,state:()=>({installed:Boolean(patchedHandle),middleware:MIDDLEWARE_ID,authority:Boolean(globalThis.CivweaveSelectedProviderAuthorityV1),sanitizer:Boolean(globalThis.CivweaveAssistantOutputSanitizerV1)}),reasoningVisible:false,selectedProviderAuthority:true,finalAssistantSanitizer:true});
 })();
