@@ -28,7 +28,7 @@ assert(index.includes('living-school-cleanroom-v218.css?v=research-first-v218.1'
 for(const retired of ['id="room"','data-room','ls-tray','ls-drawer','id="actions"','id="moss"','id="compass"','living-school-bootstrap-v194.js','living-school-flat-loader','living-school-workbench','living-school-interactions','living-school-paths','living-school-two-agent-relay','living-school-mutation-guard'])assert(!index.includes(retired),`Canonical HTML still contains retired surface token ${retired}.`);
 
 const cabinetFiles=(await readdir(cabinetDir)).filter(name=>/\.(?:js|mjs)$/.test(name));
-const activeFiles=new Set(['living-school-cleanroom-v218.mjs','living-school-cleanroom-core-v218.mjs','living-school-cleanroom-render-v218.mjs','living-school-cleanroom-actions-v218.mjs']);
+const activeFiles=new Set(['living-school-cleanroom-v218.mjs','living-school-cleanroom-core-v218.mjs','living-school-cleanroom-core-v218-base.mjs','living-school-cleanroom-core-v219.mjs','living-school-cleanroom-render-v218.mjs','living-school-cleanroom-actions-v218.mjs']);
 let listenerCount=0;
 const forbidden=[
   ['room map',/\bconst\s+rooms\b|\bfunction\s+room\s*\(|\bstate\.room\b/],
