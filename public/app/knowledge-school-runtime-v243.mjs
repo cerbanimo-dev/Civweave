@@ -1,6 +1,6 @@
 import {searchSupplementalArticles} from './learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
 
-const VERSION='1.0.38-knowledge-school-runtime-v243-relevance-filter';
+const VERSION='1.0.39-knowledge-school-runtime-v243-subject-threshold';
 const INSTALLER='/app/knowledge-school-seeds-v1.js?v=local-reader-r2';
 const seedCache=new Map();
 let installerPromise=null;
@@ -155,7 +155,7 @@ export async function searchDownloadedKnowledge(capability,{limit=10,maxSchools=
     }catch(error){console.warn('[Knowledge School local reader]',slug,error)}
     if(results.length>=limit*3)break;
   }
-  const minimumMatches=tokens.length>=4?2:1,seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const relevanceText=`${item.title||''} ${item.notes||''}`.toLowerCase(),matches=tokens.reduce((count,token)=>count+(relevanceText.includes(token)?1:0),0);if(matches<minimumMatches)return false;const key=(item.canonicalUrl||item.url||item.notes).toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,220);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
+  const minimumMatches=tokens.length>=2?2:1,seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const relevanceText=`${item.title||''} ${item.notes||''}`.toLowerCase(),matches=tokens.reduce((count,token)=>count+(relevanceText.includes(token)?1:0),0);if(matches<minimumMatches)return false;const key=(item.canonicalUrl||item.url||item.notes).toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,220);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
 }
 
 export function clearKnowledgeSchoolDatabaseCache(){seedCache.clear()}
