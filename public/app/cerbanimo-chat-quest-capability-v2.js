@@ -52,6 +52,12 @@ function resultErrorStatus(result){
   }
   const match=resultErrorMessage(result).match(/\bHTTP\s*(\d{3})\b/i);return match?Number(match[1]):0;
 }
+function providerErrorResult(error,config={}){
+  const provider=clean(config.provider||config.route,120).toLowerCase(),model=clean(config.model,240).toLowerCase(),message=clean(error?.message||error,6000);
+  let status=0;for(const candidate of [error?.status,error?.statusCode,error?.status_code,error?.code,error?.cause?.status,error?.cause?.statusCode]){const value=Number(candidate);if(Number.isInteger(value)&&value>=100&&value<=599){status=value;break}}
+  if(!status){const match=message.match(/\bHTTP\s*(\d{3})\b/i);if(match)status=Number(match[1])}
+  return{status:'provider-error',requested:{provider,model},actual:{provider,model},error:{status:status||undefined,code:clean(error?.code,120)||'PROVIDER_EXCEPTION',message}};
+}
 function geminiQuotaFailure(result,config={}){
   if(!result||typeof result!=='object'||resultProvider(result,config)!=='gemini')return false;
   const status=resultErrorStatus(result),message=resultErrorMessage(result);
@@ -85,10 +91,12 @@ async function cloudflareAfterGemini(runtime,request,config,geminiResult,models)
   return{...result,geminiFailover:geminiMeta,geminiQuotaFailover:geminiMeta,providerFailover:meta,diagnostics,error:{...(result?.error||{}),code:'ENDEAVOR_PROVIDER_FAILOVER_EXHAUSTED',message:`Gemini was temporarily unavailable (${geminiDetail}). Cloudflare Workers AI fallback also failed: ${cloudflareDetail}`}};
 }
 async function generateQuestModel(runtime,request,config,{direct=false,startModel=''}={}){
-  const base=globalThis.CivweaveFastInteractiveV192?.base?.(),initialModel=clean(startModel||config?.model,240).toLowerCase();
+  const base=globalThis.CivweaveFastInteractiveV192?.base?.(),initialModel=clean(startModel||config?.model,240).toLowerCase(),initialConfig=direct?{...(config||{}),provider:'gemini',route:'gemini',model:initialModel}:config;
   let result;
-  if(direct&&base?.generate)result=await base.generate({...request,executionProfile:'interactive',config:{...(config||{}),provider:'gemini',route:'gemini',model:initialModel},__civweaveGeminiQuotaFailover:true});
-  else result=await runtime.generate(request);
+  try{
+    if(direct&&base?.generate)result=await base.generate({...request,executionProfile:'interactive',config:initialConfig,__civweaveGeminiQuotaFailover:true});
+    else result=await runtime.generate(request);
+  }catch(error){result=providerErrorResult(error,initialConfig)}
   if(!geminiTransientFailure(result,config))return result;
   const actualStart=resultModel(result,{...config,model:initialModel})||initialModel,priorModels=Array.isArray(result?.geminiFailover?.models)?result.geminiFailover.models:Array.isArray(result?.geminiQuotaFailover?.models)?result.geminiQuotaFailover.models:[],models=priorModels.length?[...priorModels]:[actualStart];
   let current=result,currentModel=models.at(-1)||actualStart,next=nextGeminiModel(currentModel);
@@ -96,8 +104,9 @@ async function generateQuestModel(runtime,request,config,{direct=false,startMode
     while(next){
       models.push(next);
       try{dispatchEvent(new CustomEvent('civweave:gemini-transient-failover-attempt',{detail:{schema:'civweave.gemini-transient-failover-attempt.v3',purpose:'cerbanimo-endeavor-authoring-v2',fromModel:currentModel,toModel:next,triggerStatus:resultErrorStatus(current)||null,at:now()}}))}catch{}
-      current=await base.generate({...request,executionProfile:'interactive',config:{...(config||{}),provider:'gemini',route:'gemini',model:next},__civweaveGeminiQuotaFailover:true});
-      if(!geminiTransientFailure(current,{...config,provider:'gemini',route:'gemini',model:next}))return attachFailover(current,models,okStatus(current),result);
+      const nextConfig={...(config||{}),provider:'gemini',route:'gemini',model:next};
+      try{current=await base.generate({...request,executionProfile:'interactive',config:nextConfig,__civweaveGeminiQuotaFailover:true})}catch(error){current=providerErrorResult(error,nextConfig)}
+      if(!geminiTransientFailure(current,nextConfig))return attachFailover(current,models,okStatus(current),result);
       currentModel=next;next=nextGeminiModel(currentModel);
     }
   }
@@ -190,5 +199,5 @@ async function handler(request,next){const text=clean(request?.text,12000);if(!t
 function install(){const chat=globalThis.CivweaveUnifiedChatSystemV1;if(!chat?.registerCapability)return false;chat.registerCapability('cerbanimo',handler);installed=true;try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-capability-ready',{detail:{version:VERSION,system:'cerbanimo',structuredEndeavorAuthoring:true,transportSchema:'json-object',applicationValidation:true,boundedRepair:1,geminiQuotaChain:GEMINI_QUOTA_CHAIN,geminiTransientStatuses:[429,500,502,503,504],providerFallback:CLOUDFLARE_FALLBACK}}))}catch{}return true}
 for(const name of ['civweave:unified-chat-system-ready','civweave:guide-loader-reset','civweave:assistant-runtime-ready','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(installed||attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
-globalThis.CivweaveCerbanimoChatQuestCapabilityV2=Object.freeze({version:VERSION,install,handler,createEndeavor,questIntent:text=>QUEST_INTENT.test(clean(text,12000)),completionText,resultObject,normalizeQuestPlan,geminiQuotaFailure,geminiTransientFailure,nextGeminiModel,resultErrorStatus,transportSchema:TRANSPORT_SCHEMA,geminiQuotaChain:GEMINI_QUOTA_CHAIN,providerFallback:CLOUDFLARE_FALLBACK,state:()=>({installed})});
+globalThis.CivweaveCerbanimoChatQuestCapabilityV2=Object.freeze({version:VERSION,install,handler,createEndeavor,questIntent:text=>QUEST_INTENT.test(clean(text,12000)),completionText,resultObject,normalizeQuestPlan,geminiQuotaFailure,geminiTransientFailure,nextGeminiModel,resultErrorStatus,providerErrorResult,transportSchema:TRANSPORT_SCHEMA,geminiQuotaChain:GEMINI_QUOTA_CHAIN,providerFallback:CLOUDFLARE_FALLBACK,state:()=>({installed})});
 })();
