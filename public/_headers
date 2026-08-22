@@ -1,7 +1,8 @@
 /*
   Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: unsafe-none
-  Cross-Origin-Resource-Policy: cross-origin
+  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Resource-Policy: same-origin
+  Permissions-Policy: cross-origin-isolated=(self)
   X-Content-Type-Options: nosniff
   Referrer-Policy: same-origin
 
