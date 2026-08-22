@@ -1,9 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-assistant-output-sanitizer-v1';
-let assistantTarget=null,serverTarget=null,timer=0;
+const VERSION='1.0.1-assistant-output-sanitizer-v1-wrapper-resilient';
+let timer=0;
 if(globalThis.CivweaveAssistantOutputSanitizerV1?.version===VERSION)return;
-const clean=(value,max=5000000)=>String(value??'').trim().slice(0,max);
 function parseJson(value){try{return JSON.parse(value)}catch{return null}}
 function completionContent(value,depth=0){
   if(depth>6||value==null)return'';
@@ -42,8 +41,7 @@ function sanitizePacket(packet){
   if(next.response&&typeof next.response==='object'){
     const response={...next.response};
     if(typeof response.answer==='string'){
-      const parsed=parseJson(response.answer.trim());
-      if(openAIEnvelope(parsed)){const content=completionContent(parsed);if(content)response.answer=content}
+      const parsed=parseJson(response.answer.trim());if(openAIEnvelope(parsed)){const content=completionContent(parsed);if(content)response.answer=content}
     }else if(openAIEnvelope(response.answer))response.answer=completionContent(response.answer);
     delete response.reasoning;delete response.reasoning_content;next.response=response;
   }
@@ -51,19 +49,20 @@ function sanitizePacket(packet){
 }
 function patchAssistant(){
   const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)return false;
-  if(assistant.__civweaveAssistantOutputSanitizerV1){assistantTarget=assistant;return true}if(assistantTarget===assistant)return true;
+  if(assistant.respond.__cwAssistantOutputSanitizerV1===VERSION)return true;
   const previous=assistant.respond.bind(assistant),respond=async args=>sanitizePacket(await previous(args));
-  try{Object.defineProperty(respond,'__prior',{value:previous})}catch{}
-  globalThis.CivweaveAssistantV141={...assistant,respond,__civweaveAssistantOutputSanitizerV1:true,assistantOutputSanitizerVersion:VERSION};assistantTarget=globalThis.CivweaveAssistantV141;return true;
+  respond.__cwAssistantOutputSanitizerV1=VERSION;try{Object.defineProperty(respond,'__prior',{value:previous})}catch{}
+  globalThis.CivweaveAssistantV141={...assistant,respond,__civweaveAssistantOutputSanitizerV1:true,assistantOutputSanitizerVersion:VERSION};return true;
 }
 function patchServer(){
   const api=globalThis.CivweaveServerAIRouterV301;if(!api?.handle)return false;
-  if(api.__civweaveAssistantOutputSanitizerV1){serverTarget=api;return true}if(serverTarget===api)return true;
+  if(api.handle.__cwAssistantOutputSanitizerV1===VERSION)return true;
   const previous=api.handle.bind(api),handle=async request=>sanitizePacket(await previous(request||{}));
-  globalThis.CivweaveServerAIRouterV301=Object.freeze({...api,handle,__civweaveAssistantOutputSanitizerV1:true,assistantOutputSanitizerVersion:VERSION});serverTarget=globalThis.CivweaveServerAIRouterV301;return true;
+  handle.__cwAssistantOutputSanitizerV1=VERSION;handle.__prior=api.handle;
+  globalThis.CivweaveServerAIRouterV301=Object.freeze({...api,handle,__civweaveAssistantOutputSanitizerV1:true,assistantOutputSanitizerVersion:VERSION});return true;
 }
 function install(){patchAssistant();patchServer();return true}
-for(const name of ['civweave:assistant-runtime-ready','civweave:server-ai-router-ready','civweave:response-router-installed','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
+for(const name of ['civweave:assistant-runtime-ready','civweave:server-ai-router-ready','civweave:response-router-installed','civweave:guide-loader-reset','civweave:guide-provider-policy-assistant','civweave:selected-provider-authority-enforced','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
 globalThis.CivweaveAssistantOutputSanitizerV1=Object.freeze({version:VERSION,install,completionContent,openAIEnvelope,sanitizeModelResult,sanitizePacket,reasoningVisible:false,rawCompletionEnvelopeVisible:false});
 })();
