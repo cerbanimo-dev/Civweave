@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-cerbanimo-universal-nav-single-owner';
+const VERSION='1.0.1-cerbanimo-universal-nav-single-owner';
 const params=new URLSearchParams(location.search);
 const active=window.self===window.top&&location.pathname==='/app/realm-console-v140.html'&&String(params.get('system')||'cerbanimo').toLowerCase()==='cerbanimo';
 if(!active)return;
 
-// Cerbanimo already has the universal themed-system-nav-v178 rail. Prevent the
-// route bootstrap from installing three additional navigation/context owners
-// that watch the whole document and compete for the same taps and DOM changes.
+// themed-system-nav-v178 owns system switching on Cerbanimo. Suppress the two
+// redundant whole-page navigation/context owners. Persistent Guild/Map actions
+// remain available through their separately bounded universal action runtime.
 if(!globalThis.CivweaveFiveSystemDirectNavigationV1){
   globalThis.CivweaveFiveSystemDirectNavigationV1=Object.freeze({
     version:VERSION,
@@ -16,7 +16,7 @@ if(!globalThis.CivweaveFiveSystemDirectNavigationV1){
     rewrite:()=>false,
     navigationLocked:()=>false,
     navigationTarget:()=>'',
-    policy:'universal-navbar-is-the-only-navigation-owner'
+    policy:'universal-navbar-is-the-only-system-navigation-owner'
   });
 }
 if(!globalThis.CivweavePersistentSystemContextV1){
@@ -29,14 +29,6 @@ if(!globalThis.CivweavePersistentSystemContextV1){
     bindNav:()=>true,
     syncSelection:()=>true,
     policy:'cerbanimo-direct-page-does-not-install-a-second-nav-context-observer'
-  });
-}
-if(!globalThis.CivweavePersistentShellActionsV1){
-  globalThis.CivweavePersistentShellActionsV1=Object.freeze({
-    version:VERSION,
-    owner:'themed-system-nav-v178',
-    ensureMounted:()=>true,
-    policy:'universal-navbar-remains-single-owner-on-cerbanimo'
   });
 }
 document.documentElement.dataset.cerbanimoUniversalNavOwner='themed-system-nav-v178';
