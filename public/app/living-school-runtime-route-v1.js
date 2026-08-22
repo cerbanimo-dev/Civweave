@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-living-school-runtime-route-v330-provider-safe';
+const VERSION='1.1.0-living-school-runtime-route-v331-grounding';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const LOCAL_SYNTHESIS_PURPOSE='living-school-local-source-synthesis-v260';
@@ -21,13 +21,14 @@ function managedPurpose(request={}){
 function prepare(request={}){
   if(lower(request.purpose)!==DESIGN_PURPOSE||!GROUNDED_RESEARCH_MODES.has(lower(request?.context?.research?.mode)))return request;
   const config={...(request.config||{})},provider=lower(config.provider||config.route||config.engine),gemini=provider==='gemini';
+  const boundary='The research/evidence pass is already complete. This is a lightweight instructional-design synthesis pass. Use only the supplied source packet and SOURCE_ID values. Do not perform new research, invent sources, or author Civweave economy/reward metadata. A SOURCE_ID may be attached only to a claim actually supported by that source passage; topical similarity is not evidence. If the source packet lacks evidence for part of the requested capability, label that material GENERATED-UNVERIFIED and do not attach a SOURCE_ID. Do not output video URLs, YouTube URLs, or media links. Provide only a short plain-text VIDEO SEARCH TOPIC for each module; Civweave resolves media locally after the module validates.';
   return{
     ...request,
     taskTier:'small',
     executionProfile:'interactive',
     config:gemini?{...config,provider:'gemini',route:'gemini',model:SMALL_MODEL}:config,
     context:{...(request.context||{}),livingSchoolGroundedDesign:true,...(gemini?{groundedDesignModel:SMALL_MODEL}:{})},
-    messages:[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:'The research/evidence pass is already complete. This is a lightweight instructional-design synthesis pass. Use only the supplied source packet and SOURCE_ID values. Do not perform new research, invent sources, or author Civweave economy/reward metadata.'}]
+    messages:[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:boundary}]
   };
 }
 function sourceAllowlist(request={}){
@@ -55,6 +56,14 @@ function allowlistedName(name,allow,knownText){
   if(knownText.includes(normalized))return true;
   return allow.some(source=>{const title=source.title.toLowerCase();return title&&((normalized.length>=4&&title.includes(normalized))||(title.length>=4&&normalized.includes(title)))});
 }
+function sanitizeGroundedDesign(result,request){
+  if(lower(request.purpose)!==DESIGN_PURPOSE||result?.status!=='success'||!clean(result?.outputText,64000))return result;
+  const allowed=new Set(sourceAllowlist(request).map(source=>normalizeUrl(source.url)).filter(Boolean));let changed=false,text=clean(result.outputText,64000);
+  text=text.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/gi,(match,label,url)=>{const normalized=normalizeUrl(url);if(normalized&&allowed.has(normalized))return match;changed=true;return clean(label,500)});
+  text=text.replace(/https?:\/\/[^\s)\]}>"']+/gi,raw=>{const trimmed=raw.replace(/[.,;:!?]+$/,''),normalized=normalizeUrl(trimmed);if(normalized&&allowed.has(normalized))return raw;changed=true;return''});
+  text=text.replace(/[ \t]+\n/g,'\n').replace(/ {2,}/g,' ').trim();
+  return{...result,outputText:text,diagnostics:[...(result.diagnostics||[]),...(changed?['Living School removed media/external URLs that were not part of the supplied research source allowlist.']:[])]};
+}
 function provenanceIssues(module,request){
   const allow=sourceAllowlist(request),knownIds=new Set(allow.map(source=>source.id)),knownUrls=new Set(allow.map(source=>normalizeUrl(source.url)).filter(Boolean)),knownText=allow.map(source=>`${source.title} ${source.notes}`).join(' ').toLowerCase(),issues=[];
   for(const [index,block] of (Array.isArray(module?.lessonBlocks)?module.lessonBlocks:[]).entries())for(const sourceId of Array.isArray(block?.sourceIds)?block.sourceIds:[]){const id=clean(sourceId,180);if(id&&!knownIds.has(id))issues.push(`lesson block ${index+1} cites unknown SOURCE_ID ${id}`)}
@@ -77,22 +86,23 @@ function validateStructure(result,request){
 }
 async function routedGenerate(outer,spine,request={}){
   if(!managedPurpose(request))return outer.generate(request);
-  const prepared=prepare(request),result=await spine.generate(prepared);
+  const prepared=prepare(request);let result=await spine.generate(prepared);
+  result=sanitizeGroundedDesign(result,prepared);
   return validateStructure(result,prepared);
 }
 function install(){
   const spine=globalThis.CivweaveFastInteractiveV192?.proxy?.(),current=globalThis.CivweaveModelRuntime;
   if(!spine?.generate||!current?.generate)return false;
-  if(current.__livingSchoolRuntimeRouteV330===VERSION)return true;
+  if(current.__livingSchoolRuntimeRouteV331===VERSION)return true;
   activeOuter=current;
-  const bridge=Object.freeze({...current,__livingSchoolRuntimeRouteV330:VERSION,generate:request=>routedGenerate(current,spine,request)});
+  const bridge=Object.freeze({...current,__livingSchoolRuntimeRouteV331:VERSION,generate:request=>routedGenerate(current,spine,request)});
   try{Object.defineProperty(globalThis,'CivweaveModelRuntime',{configurable:true,enumerable:true,writable:true,value:bridge})}catch{try{globalThis.CivweaveModelRuntime=bridge}catch{return false}}
   activeBridge=bridge;
-  try{dispatchEvent(new CustomEvent('civweave:living-school-runtime-route-ready',{detail:{version:VERSION,managed:[LOCAL_SYNTHESIS_PURPOSE,RESEARCH_FALLBACK_PURPOSE,DESIGN_PURPOSE,STRUCTURE_PURPOSE],geminiGroundedModel:SMALL_MODEL,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-runtime-route-ready',{detail:{version:VERSION,managed:[LOCAL_SYNTHESIS_PURPOSE,RESEARCH_FALLBACK_PURPOSE,DESIGN_PURPOSE,STRUCTURE_PURPOSE],geminiGroundedModel:SMALL_MODEL,groundingBoundary:true,mediaUrlAllowlist:true,at:new Date().toISOString()}}))}catch{}
   return true;
 }
 function scheduleInstall(){queueMicrotask(()=>{install();setTimeout(install,0);setTimeout(install,120)})}
 for(const event of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:gemini-interactions-ready','civweave:assistant-runtime-ready','pageshow'])addEventListener?.(event,scheduleInstall);
 scheduleInstall();
-globalThis.CivweaveLivingSchoolRuntimeRouteV1=Object.freeze({version:VERSION,install,managedPurpose,prepare,get bridge(){return activeBridge},get outer(){return activeOuter},geminiGroundedModel:SMALL_MODEL});
+globalThis.CivweaveLivingSchoolRuntimeRouteV1=Object.freeze({version:VERSION,install,managedPurpose,prepare,sanitizeGroundedDesign,get bridge(){return activeBridge},get outer(){return activeOuter},geminiGroundedModel:SMALL_MODEL});
 })();
