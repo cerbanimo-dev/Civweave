@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='159.4-gemini-structured-contracts-v262';
+const VERSION='159.5-gemini-structured-contracts-v263';
 const RUNTIME_NAME='CivweaveModelRuntime';
 const API_REVISION='2026-05-20';
 const DEFAULT_API_BASE='https://generativelanguage.googleapis.com/v1beta';
@@ -8,6 +8,7 @@ const ACTIVE_STATUSES=new Set(['in_progress','queued','running']);
 const TERMINAL_FAILURES=new Set(['failed','cancelled','incomplete','requires_action']);
 const LIVING_SCHOOL_STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const LIVING_SCHOOL_ECONOMY_KEYS=new Set(['xp','price','prices','pricing','reward','rewards','ledger','currency','currencies','payout','payouts','coin','coins','acorn','acorns','button','buttons','credit','credits','grant','grants','bonus','bonuses','wage','wages','laborvalue','labourvalue']);
+const REQUIRED_QUIZ_TYPES=['multiple-choice','multi-select','short-answer'];
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
 const isObject=value=>Boolean(value&&typeof value==='object'&&!Array.isArray(value));
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
@@ -92,7 +93,7 @@ function prepareLivingSchoolRequest(request){
     }
   }
   const messages=Array.isArray(request.messages)?request.messages.map(message=>({...message})):[];
-  messages.push({role:'system',content:'Living School economy boundary: do not output XP, prices, Acorn grants, Button values, currency amounts, bonuses, payouts, wages, labor values, or ledger decisions. The Civweave application attaches deterministic rewards after the curriculum module passes validation. Provenance boundary: use only supplied SOURCE_ID values; do not add a free-form bibliography, invented attribution, or any URL or named source that is not in the supplied source allowlist.'});
+  messages.push({role:'system',content:'Living School economy boundary: do not output XP, prices, Acorn grants, Button values, currency amounts, bonuses, payouts, wages, labor values, or ledger decisions. The Civweave application attaches deterministic rewards only after the curriculum content passes validation. Provenance boundary: use only supplied SOURCE_ID values; do not add a free-form bibliography, invented attribution, or any URL or named source that is not in the supplied source allowlist.'});
   return{...request,schema,messages,context:{...(request.context||{}),sourceAllowlist:allow.map(source=>({id:source.id,title:source.title,url:source.url}))}};
 }
 function collectStrings(value,out=[]){
@@ -100,6 +101,25 @@ function collectStrings(value,out=[]){
   if(Array.isArray(value)){for(const item of value)collectStrings(item,out);return out}
   if(isObject(value))for(const child of Object.values(value))collectStrings(child,out);
   return out;
+}
+function livingSchoolContentIssues(module){
+  const issues=[];
+  if(!isObject(module))return['module object missing'];
+  for(const key of ['title','summary','objective','relevance','estimatedEffort','artifact'])if(!clean(module[key],120))issues.push(`${key} missing`);
+  for(const key of ['prerequisites','completionCriteria','learningObjectives','concepts'])if(!Array.isArray(module[key])||!module[key].length)issues.push(`${key} missing`);
+  const blocks=Array.isArray(module.lessonBlocks)?module.lessonBlocks:[];
+  if(blocks.length<3)issues.push(`lessonBlocks ${blocks.length}/3 minimum`);
+  else for(const [index,block] of blocks.entries())if(!clean(block?.heading,80)||clean(block?.content,20000).length<240)issues.push(`lesson block ${index+1} is too thin`);
+  const visual=module.visualization;if(!isObject(visual)||!clean(visual.title,80)||!Array.isArray(visual.items)||!visual.items.length)issues.push('visualization incomplete');
+  const practice=module.practice;if(!isObject(practice)||!clean(practice.prompt,120)||!Array.isArray(practice.steps)||!practice.steps.length||!Array.isArray(practice.rubric)||!practice.rubric.length||!clean(practice.deliverable,120)||!clean(practice.completionCriteria,120))issues.push('practice contract incomplete');
+  const quiz=isObject(module.quiz)?module.quiz:{},bank=Array.isArray(quiz.bank)?quiz.bank:[],attemptCount=Math.max(3,Math.min(5,Number(quiz.questionsPerAttempt||3)||3)),types=new Set(bank.map(question=>clean(question?.type,80).toLowerCase()));
+  if(bank.length<attemptCount+2)issues.push(`quiz bank ${bank.length}/${attemptCount+2} minimum`);
+  const missingTypes=REQUIRED_QUIZ_TYPES.filter(type=>!types.has(type));if(missingTypes.length)issues.push(`quiz missing ${missingTypes.join(', ')}`);
+  if(!clean(quiz.remediation,120))issues.push('quiz remediation missing');
+  if(!clean(module.badge?.title,80)||!clean(module.badge?.description,120))issues.push('badge incomplete');
+  if(!clean(module.navigation?.entry,80))issues.push('navigation entry missing');
+  if(!clean(module.cerbanimoQuest?.title,80)||!clean(module.cerbanimoQuest?.brief,120)||!clean(module.cerbanimoQuest?.proof,120))issues.push('Cerbanimo quest incomplete');
+  return issues.slice(0,24);
 }
 function allowlistedName(name,allow,knownText){
   const normalized=clean(name,160).replace(/^[\s"'“”‘’]+|[\s"'“”‘’,:]+$/g,'').trim().toLowerCase();
@@ -131,11 +151,11 @@ function enforceLivingSchoolResult(result,request){
   if(!livingSchoolStructureRequest(request)||result?.status!=='success')return result;
   const output=isObject(result?.outputJson)?clone(result.outputJson):null,module=isObject(output?.module)?output.module:null;
   if(!output||!module)return{...result,status:'invalid-response',outputText:'',outputJson:undefined,structured:{...(result.structured||{}),requested:true,valid:false,errors:[...((result.structured?.errors)||[]),'Living School structured output did not contain one module object.']},error:{code:'LIVING_SCHOOL_STRUCTURED_OUTPUT_INVALID',message:'Living School rejected the Gemini response before storage because it did not contain one parseable module object.'}};
-  const cleanedModule=stripEconomyKeys(module),issues=livingSchoolProvenanceIssues(cleanedModule,request);
-  if(issues.length)return{...result,status:'invalid-response',outputText:'',outputJson:undefined,structured:{...(result.structured||{}),requested:true,valid:false,errors:[...((result.structured?.errors)||[]),...issues]},error:{code:'LIVING_SCHOOL_PROVENANCE_REJECTED',message:`Living School rejected the Gemini module before storage: ${issues.join('; ')}`}};
+  const cleanedModule=stripEconomyKeys(module),issues=[...livingSchoolContentIssues(cleanedModule),...livingSchoolProvenanceIssues(cleanedModule,request)];
+  if(issues.length)return{...result,status:'invalid-response',outputText:'',outputJson:undefined,structured:{...(result.structured||{}),requested:true,valid:false,errors:[...((result.structured?.errors)||[]),...issues]},error:{code:'LIVING_SCHOOL_MODULE_REJECTED',message:`Living School rejected the Gemini module before storage: ${issues.join('; ')}`}};
   cleanedModule.xp={domain:clean(request?.context?.capability,120)||'learning',amount:20};
   output.module=cleanedModule;
-  return{...result,outputJson:output,outputText:JSON.stringify(output),diagnostics:[...(result.diagnostics||[]),'Living School provenance allowlist passed; deterministic XP attached by Civweave after provider output validation.']};
+  return{...result,outputJson:output,outputText:JSON.stringify(output),diagnostics:[...(result.diagnostics||[]),'Living School content and provenance validators passed; deterministic XP attached by Civweave after validation.']};
 }
 async function requestInteraction(url,config,body,signal){
   const response=await fetch(url,{method:'POST',headers:headers(config),body:JSON.stringify(body),signal,cache:'no-store'});
