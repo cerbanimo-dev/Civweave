@@ -21,9 +21,9 @@ const [index,runtime,core,renderSource,actionsSource,css,serviceIndex,serviceMan
 ]);
 
 assert(index.includes('data-living-school-runtime="cleanroom-v218"'),'Living School is not marked as the clean-room runtime.');
-assert(index.includes('data-living-school-revision="research-first-v218.1"'),'The research-first curriculum revision is not exposed.');
+assert(index.includes('data-living-school-revision="structured-single-v221"'),'The structured single-module curriculum revision is not exposed.');
 assert(index.includes('id="living-school-root"'),'The canonical continuous surface is missing.');
-assert(index.includes('living-school-cleanroom-v218.mjs?v=research-first-v218.1'),'The research-first runtime cache revision is not loaded.');
+assert(index.includes('living-school-cleanroom-v218.mjs?v=structured-single-v221'),'The structured single-module runtime cache revision is not loaded.');
 assert(index.includes('living-school-cleanroom-v218.css?v=research-first-v218.1'),'The research-first stylesheet cache revision is not loaded.');
 for(const retired of ['id="room"','data-room','ls-tray','ls-drawer','id="actions"','id="moss"','id="compass"','living-school-bootstrap-v194.js','living-school-flat-loader','living-school-workbench','living-school-interactions','living-school-paths','living-school-two-agent-relay','living-school-mutation-guard'])assert(!index.includes(retired),`Canonical HTML still contains retired surface token ${retired}.`);
 
@@ -139,7 +139,7 @@ for(const name of ['index.inline.js','interface-surfaces.js','living-displays.js
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'living-school-cleanroom-v218.1-research-first-curriculum',
+  revision:'living-school-cleanroom-v221-structured-single',
   pageEventListeners:listenerCount,
   canonicalHandler:'handleLivingSchoolClick',
   continuousSurface:true,
