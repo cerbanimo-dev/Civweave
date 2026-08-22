@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.1.0-cerbanimo-chat-quest-capability-v2-transient-provider-failover';
+const VERSION='2.2.0-cerbanimo-chat-quest-capability-v2-malformed-json-repair';
 const TRANSPORT_SCHEMA=Object.freeze({type:'object'});
 const GEMINI_QUOTA_CHAIN=Object.freeze(['gemini-3.7-flash','gemini-3.5-flash','gemini-3.1-flash-lite']);
 const CLOUDFLARE_FALLBACK=Object.freeze({provider:'cloudflare-workers-ai',route:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'});
@@ -37,6 +37,17 @@ function resultObject(result){
   const text=completionText(result).replace(/<think>[\s\S]*?<\/think>/gi,'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
   const parsed=parse(text,null);
   return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:null;
+}
+function recoverableStructuredResult(result){
+  if(okStatus(result)||result?.recoverablePayload)return true;
+  return String(result?.status||'').toLowerCase()==='invalid-response'&&Boolean(completionText(result));
+}
+function validationDetails(result){const errors=Array.isArray(result?.structured?.errors)?result.structured.errors:[];return errors.map(item=>clean(item,320)).filter(Boolean).slice(0,4)}
+function malformedJsonResult(result){
+  if(String(result?.status||'').toLowerCase()!=='invalid-response')return false;
+  const detail=[...validationDetails(result),clean(result?.error?.message,1200)].join(' ');
+  if(/(?:not valid JSON|Unterminated string|Unexpected end|Unexpected token|Expected .*JSON|JSON.*position|end of JSON)/i.test(detail))return true;
+  const text=completionText(result);return Boolean(text)&&!parse(text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''),null);
 }
 function selectedConfig(){
   try{const config=globalThis.CivweaveAssistantV141?.selectedConfig?.();if(config&&(config.provider||config.route||config.model))return config}catch{}
@@ -83,7 +94,7 @@ async function cloudflareAfterGemini(runtime,request,config,geminiResult,models)
   let result;
   try{result=await runtime.generate({...request,executionProfile:'interactive',config:fallbackConfig,__civweaveGeminiProviderFailover:true})}
   catch(error){result={status:'provider-error',requested:{provider:CLOUDFLARE_FALLBACK.provider,model:CLOUDFLARE_FALLBACK.model},actual:{provider:CLOUDFLARE_FALLBACK.provider,model:CLOUDFLARE_FALLBACK.model},error:{code:'CLOUDFLARE_FALLBACK_EXCEPTION',message:clean(error?.message||error,1200)}}}
-  const success=okStatus(result)||Boolean(result?.recoverablePayload),meta=providerFailoverMeta(models,geminiResult,success),geminiMeta=geminiResult?.geminiFailover||geminiResult?.geminiQuotaFailover||failoverMeta(models,false,geminiResult);
+  const success=recoverableStructuredResult(result),meta=providerFailoverMeta(models,geminiResult,success),geminiMeta=geminiResult?.geminiFailover||geminiResult?.geminiQuotaFailover||failoverMeta(models,false,geminiResult);
   try{dispatchEvent(new CustomEvent('civweave:endeavor-provider-failover',{detail:meta}))}catch{}
   const diagnostics=[...(Array.isArray(result?.diagnostics)?result.diagnostics:[]),`Provider failover: Gemini → Cloudflare Workers AI${success?' succeeded.':' failed.'}`];
   if(success)return{...result,geminiFailover:geminiMeta,geminiQuotaFailover:geminiMeta,providerFailover:meta,diagnostics,fallback:{...(result?.fallback||{}),used:true,provider:CLOUDFLARE_FALLBACK.provider,reason:'gemini-transient-provider-failover',fromProvider:'gemini',model:CLOUDFLARE_FALLBACK.model}};
@@ -128,32 +139,36 @@ function normalizeQuestPlan(value){
   if(!title||!objective||!description)throw new Error('The selected AI returned an incomplete Endeavor header.');
   return{title,objective,description,workUnits,assumptions};
 }
-function validationDetails(result){const errors=Array.isArray(result?.structured?.errors)?result.structured.errors:[];return errors.map(item=>clean(item,260)).filter(Boolean).slice(0,4)}
 function packet(answer,nextAction='',extra={}){
   return{response:{answer,choice:{mode:'Build',system:'cerbanimo',room:'',nextAction},assumptions:Array.isArray(extra.assumptions)?extra.assumptions:[],requiresConsent:false,confidence:1},provider:extra.provider||'cerbanimo-endeavor-capability',model:extra.model||'',action:extra.action||null,context:{guide:{system:'cerbanimo',name:'Kamiya'},capability:'endeavor-authoring',canonicalArtifact:'Endeavor'},fallbackFrom:null};
 }
 function requestContext(request={}){
   const history=(Array.isArray(request.history)?request.history:[]).slice(-8).map(row=>({role:clean(row?.role,40),text:clean(row?.text||row?.content,1200)})).filter(row=>row.text);
-  return{schema:'civweave.cerbanimo.endeavor-authoring-request.v2',objective:clean(request.text,5000),recentConversation:history,constraints:['Return one executable Cerbanimo Endeavor, not advice or a tutorial.','Use 3 to 12 concrete work units in dependency order.','Every work unit must include title, result, proof, and acceptanceCriteria.','Do not claim that any real-world work has already happened.','Make reasonable assumptions when details are missing and list them.','Return one JSON object only.']};
+  return{schema:'civweave.cerbanimo.endeavor-authoring-request.v2',objective:clean(request.text,5000),recentConversation:history,constraints:['Return one executable Cerbanimo Endeavor, not advice or a tutorial.','Use 3 to 6 concise work units in dependency order; prefer 5.','Every work unit must include title, result, proof, and acceptanceCriteria.','Keep title under 90 characters, result under 260, proof under 220, acceptanceCriteria under 220, and description under 500.','Do not claim that any real-world work has already happened.','Make reasonable assumptions when details are missing and list them.','Return one complete JSON object only.']};
 }
 function modelRequest(context,config,purpose='cerbanimo-endeavor-authoring-v2',messages=null){
-  return{purpose,executionProfile:'interactive',config,schema:TRANSPORT_SCHEMA,responseFormat:'json',maxRepairAttempts:0,context,task:{schema:'civweave.ai-task.v2',kind:'quest-authoring',systemId:'cerbanimo',complexity:'routine',requirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:true,structuredOutput:true,vision:false,complexity:false}},capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,planning:true,structuredOutput:true},messages:messages||[{role:'system',content:'You are Kamiya, Cerbanimo’s Endeavor guide. Convert the Hero’s request into one executable Endeavor. Return exactly one JSON object. Required top-level fields: title, objective, description, workUnits, assumptions. workUnits must contain 3 to 12 objects, each with title, result, proof, acceptanceCriteria. Do not return prose, markdown, or a roadmap outside the JSON object.'},{role:'user',content:`Create the Cerbanimo Endeavor from this request:\n${JSON.stringify(context)}`}]};
+  return{purpose,executionProfile:'interactive',config,schema:TRANSPORT_SCHEMA,responseFormat:'json',maxRepairAttempts:0,context,task:{schema:'civweave.ai-task.v2',kind:'quest-authoring',systemId:'cerbanimo',complexity:'routine',requirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:true,structuredOutput:true,vision:false,complexity:false}},capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,planning:true,structuredOutput:true},messages:messages||[{role:'system',content:'You are Kamiya, Cerbanimo’s Endeavor guide. Convert the Hero’s request into one executable Endeavor. Return exactly one complete JSON object. Required top-level fields: title, objective, description, workUnits, assumptions. Use 3 to 6 concise workUnits, preferably 5; each must contain title, result, proof, acceptanceCriteria. Keep strings concise so the JSON always closes cleanly. Do not return prose, markdown, or a roadmap outside the JSON object.'},{role:'user',content:`Create the Cerbanimo Endeavor from this request:\n${JSON.stringify(context)}`}]};
 }
 function repairMessages(context,result,error){
-  const candidate=resultObject(result)||completionText(result)||'';
-  return[{role:'system',content:'Repair a Cerbanimo Endeavor JSON object. Return exactly one JSON object and nothing else. Required fields: title, objective, description, workUnits, assumptions. workUnits must contain 3 to 12 objects with title, result, proof, acceptanceCriteria. Preserve the Hero’s objective. Do not invent completed real-world work.'},{role:'user',content:`Hero request:\n${clean(context.objective,5000)}\n\nThe previous candidate was rejected because: ${clean(error?.message||error,800)}\n\nCandidate to repair:\n${clean(typeof candidate==='string'?candidate:JSON.stringify(candidate),18000)}`}];
+  const malformed=malformedJsonResult(result),candidate=resultObject(result)||completionText(result)||'';
+  if(malformed)return[{role:'system',content:'Regenerate a Cerbanimo Endeavor from scratch because the previous JSON was malformed or truncated. Do not continue or quote the broken fragment. Return exactly one complete JSON object and nothing else. Required fields: title, objective, description, workUnits, assumptions. Use exactly 5 concise workUnits, each with title, result, proof, acceptanceCriteria. Keep every string short enough that the object closes well within the output limit. Preserve the Hero’s objective and do not invent completed real-world work.'},{role:'user',content:`Hero request:\n${clean(context.objective,5000)}\n\nBuild a fresh complete Endeavor JSON object. The previous output was discarded because it did not close as valid JSON.`}];
+  return[{role:'system',content:'Repair a Cerbanimo Endeavor JSON object. Return exactly one complete JSON object and nothing else. Required fields: title, objective, description, workUnits, assumptions. workUnits must contain 3 to 6 concise objects with title, result, proof, acceptanceCriteria. Preserve the Hero’s objective. Do not invent completed real-world work.'},{role:'user',content:`Hero request:\n${clean(context.objective,5000)}\n\nThe previous candidate was rejected because: ${clean(error?.message||error,800)}\n\nCandidate to repair:\n${clean(typeof candidate==='string'?candidate:JSON.stringify(candidate),12000)}`}];
 }
 async function planFromResult(runtime,result,request,config,context){
   try{return{plan:normalizeQuestPlan(resultObject(result)),result,repaired:false}}catch(firstError){
     const provider=resultProvider(result,config),model=resultModel(result,config)||clean(config.model,240).toLowerCase();
     if(!model)return{error:firstError,result};
-    const repairConfig={...config,provider:provider||config.provider,route:provider||config.route,model,stream:false,maxTokens:Math.min(2400,Math.max(1200,Number(config.maxTokens)||1600)),temperature:.1};
+    const repairConfig={...config,provider:provider||config.provider,route:provider||config.route,model,stream:false,maxTokens:Math.min(3600,Math.max(2400,Number(config.maxTokens)||2400)),temperature:.05};
     const repairRequest=modelRequest(context,repairConfig,'cerbanimo-endeavor-authoring-repair-v2',repairMessages(context,result,firstError));
     let repaired;
     if(provider==='gemini')repaired=await generateQuestModel(runtime,repairRequest,repairConfig,{direct:true,startModel:model});
     else repaired=await runtime.generate(repairRequest);
-    if(!okStatus(repaired)&&!repaired?.recoverablePayload)return{error:new Error(validationDetails(repaired).join('; ')||repaired?.error?.message||`The repair model ended with ${repaired?.status||'an error'}.`),result:repaired};
-    try{return{plan:normalizeQuestPlan(resultObject(repaired)),result:repaired,repaired:true}}catch(secondError){return{error:secondError,result:repaired}}
+    if(!recoverableStructuredResult(repaired))return{error:new Error(validationDetails(repaired).join('; ')||repaired?.error?.message||`The repair model ended with ${repaired?.status||'an error'}.`),result:repaired};
+    try{return{plan:normalizeQuestPlan(resultObject(repaired)),result:repaired,repaired:true}}catch(secondError){
+      const detail=validationDetails(repaired).join('; ');
+      if(malformedJsonResult(repaired)&&detail)return{error:new Error(`The repair model also returned malformed JSON: ${detail}`),result:repaired};
+      return{error:secondError,result:repaired};
+    }
   }
 }
 async function ensureQuestEngine(){
@@ -168,10 +183,10 @@ async function createEndeavor(request={}){
   try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();config=selectedConfig()||config}catch(error){return packet(`I could not start Endeavor generation. Nothing was created or saved.\n\nGeneration detail: ${clean(error?.message||error,900)}`,'Retry after the selected AI runtime is ready.',{provider:'cerbanimo-endeavor-model-error',model:clean(config?.model,240)})}
   const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate||!config)return packet('I could not start Endeavor generation because the selected AI runtime is unavailable. Nothing was created or saved.','Retry after the selected AI runtime is ready.',{provider:'cerbanimo-endeavor-model-unavailable',model:clean(config?.model,240)});
-  const requestedProvider=clean(config.provider||config.route,120).toLowerCase(),planConfig={...config,maxTokens:Math.min(2400,Math.max(1200,Number(config.maxTokens)||1600)),temperature:Math.min(.3,Math.max(.1,Number(config.temperature)||.2)),stream:false},context=requestContext(request);
+  const requestedProvider=clean(config.provider||config.route,120).toLowerCase(),planConfig={...config,maxTokens:Math.min(3200,Math.max(2200,Number(config.maxTokens)||2200)),temperature:Math.min(.25,Math.max(.05,Number(config.temperature)||.15)),stream:false},context=requestContext(request);
   try{
     const requestPacket=modelRequest(context,planConfig),initial=await generateQuestModel(runtime,requestPacket,planConfig);
-    if(!okStatus(initial)&&!initial?.recoverablePayload){
+    if(!recoverableStructuredResult(initial)){
       const detail=validationDetails(initial).join('; ');
       throw new Error(detail||initial?.error?.message||`The selected AI ended with ${initial?.status||'an error'}.`);
     }
@@ -186,18 +201,18 @@ async function createEndeavor(request={}){
     const quest=engine.createQuestFromInput({title:plan.title,objective:plan.objective,description,steps:plan.workUnits.map(unit=>`${unit.title}: ${unit.result}`),acceptanceCriteria:plan.workUnits.map(unit=>`${unit.title} — ${unit.acceptanceCriteria}`),proofRequirements:plan.workUnits.map(unit=>`${unit.title} — ${unit.proof}`),source:'kamiya-chat-ai-quest',sourceActionId,sequential:true});
     if(Array.isArray(quest?.tasks))quest.tasks.forEach((task,index)=>{const criterion=clean(plan.workUnits[index]?.acceptanceCriteria,1200);if(criterion)task.acceptanceCriteria=[criterion]});
     const geminiFailover=result?.geminiFailover||result?.geminiQuotaFailover||initial?.geminiFailover||initial?.geminiQuotaFailover||null,providerFailover=result?.providerFailover||initial?.providerFailover||null;
-    quest.authoring={mode:'model-json-application-validated',aiGenerated:true,provider,model,transportSchema:'json-object',applicationValidator:'cerbanimo-endeavor-v2',repaired:Boolean(normalized.repaired),geminiFailover,geminiQuotaFailover:geminiFailover,providerFailover,createdAt:now()};
+    quest.authoring={mode:'model-json-application-validated',aiGenerated:true,provider,model,transportSchema:'json-object',applicationValidator:'cerbanimo-endeavor-v2',repaired:Boolean(normalized.repaired),repairReason:normalized.repaired?(malformedJsonResult(initial)?'malformed-json':'application-validation'):'',geminiFailover,geminiQuotaFailover:geminiFailover,providerFailover,createdAt:now()};
     const added=engine.addQuest(quest,{activate:true});
     if(added?.ok===false)throw new Error(added.error||added.reason||'Cerbanimo rejected the generated Endeavor.');
     const saved=added?.quest||quest,count=Array.isArray(saved.tasks)?saved.tasks.length:plan.workUnits.length,first=clean(saved.tasks?.[0]?.title||plan.workUnits[0]?.title,220);
-    try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-created',{detail:{questId:saved.id,title:saved.title,taskCount:count,provider,model,sourceActionId,repaired:Boolean(normalized.repaired),geminiFailover,geminiQuotaFailover:geminiFailover,providerFailover}}))}catch{}
-    const notes=[];if(geminiFailover?.models?.length>1)notes.push(`Gemini failover: ${geminiFailover.models.join(' → ')}`);if(providerFailover?.success)notes.push(`Provider failover: Gemini → Cloudflare Workers AI (${providerFailover.toModel})`);if(normalized.repaired)notes.push('structured output repaired once before validation');
+    try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-created',{detail:{questId:saved.id,title:saved.title,taskCount:count,provider,model,sourceActionId,repaired:Boolean(normalized.repaired),repairReason:quest.authoring.repairReason,geminiFailover,geminiQuotaFailover:geminiFailover,providerFailover}}))}catch{}
+    const notes=[];if(geminiFailover?.models?.length>1)notes.push(`Gemini failover: ${geminiFailover.models.join(' → ')}`);if(providerFailover?.success)notes.push(`Provider failover: Gemini → Cloudflare Workers AI (${providerFailover.toModel})`);if(normalized.repaired)notes.push(malformedJsonResult(initial)?'truncated JSON regenerated once before validation':'structured output repaired once before validation');
     return packet(`Endeavor created: “${clean(saved.title||plan.title,240)}”\n\n${count} work unit${count===1?'':'s'} are active in Cerbanimo, each with a proof gate and completion criteria.${notes.length?`\n\n${notes.join(' · ')}`:''}${plan.assumptions.length?`\n\nAssumptions recorded: ${plan.assumptions.join('; ')}`:''}`,first?`Start: ${first}`:'Open the Workboard to begin.',{provider,model,assumptions:plan.assumptions,action:{kind:'cerbanimo-quest-created',system:'cerbanimo',state:'active',questId:saved.id||'',title:saved.title||plan.title,taskCount:count,source:'kamiya-chat-ai-quest',canonicalArtifact:'Endeavor'}});
   }catch(error){return packet(`I could not create the Endeavor. Nothing was saved.\n\nGeneration detail: ${clean(error?.message||error,1200)}`,'Retry the Endeavor or choose another AI model.',{provider:requestedProvider||'cerbanimo-endeavor-generation-error',model:clean(config?.model,240)})}
 }
 async function handler(request,next){const text=clean(request?.text,12000);if(!text||TEST.test(text)||!QUEST_INTENT.test(text))return next(request);return createEndeavor(request)}
-function install(){const chat=globalThis.CivweaveUnifiedChatSystemV1;if(!chat?.registerCapability)return false;chat.registerCapability('cerbanimo',handler);installed=true;try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-capability-ready',{detail:{version:VERSION,system:'cerbanimo',structuredEndeavorAuthoring:true,transportSchema:'json-object',applicationValidation:true,boundedRepair:1,geminiQuotaChain:GEMINI_QUOTA_CHAIN,geminiTransientStatuses:[429,500,502,503,504],providerFallback:CLOUDFLARE_FALLBACK}}))}catch{}return true}
+function install(){const chat=globalThis.CivweaveUnifiedChatSystemV1;if(!chat?.registerCapability)return false;chat.registerCapability('cerbanimo',handler);installed=true;try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-capability-ready',{detail:{version:VERSION,system:'cerbanimo',structuredEndeavorAuthoring:true,transportSchema:'json-object',applicationValidation:true,boundedRepair:1,malformedJsonRecovery:true,geminiQuotaChain:GEMINI_QUOTA_CHAIN,geminiTransientStatuses:[429,500,502,503,504],providerFallback:CLOUDFLARE_FALLBACK}}))}catch{}return true}
 for(const name of ['civweave:unified-chat-system-ready','civweave:guide-loader-reset','civweave:assistant-runtime-ready','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(installed||attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
-globalThis.CivweaveCerbanimoChatQuestCapabilityV2=Object.freeze({version:VERSION,install,handler,createEndeavor,questIntent:text=>QUEST_INTENT.test(clean(text,12000)),completionText,resultObject,normalizeQuestPlan,geminiQuotaFailure,geminiTransientFailure,nextGeminiModel,resultErrorStatus,providerErrorResult,transportSchema:TRANSPORT_SCHEMA,geminiQuotaChain:GEMINI_QUOTA_CHAIN,providerFallback:CLOUDFLARE_FALLBACK,state:()=>({installed})});
+globalThis.CivweaveCerbanimoChatQuestCapabilityV2=Object.freeze({version:VERSION,install,handler,createEndeavor,questIntent:text=>QUEST_INTENT.test(clean(text,12000)),completionText,resultObject,normalizeQuestPlan,recoverableStructuredResult,malformedJsonResult,geminiQuotaFailure,geminiTransientFailure,nextGeminiModel,resultErrorStatus,providerErrorResult,transportSchema:TRANSPORT_SCHEMA,geminiQuotaChain:GEMINI_QUOTA_CHAIN,providerFallback:CLOUDFLARE_FALLBACK,state:()=>({installed})});
 })();
