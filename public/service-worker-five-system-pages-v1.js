@@ -1,7 +1,8 @@
 'use strict';
 (()=>{
-const VERSION='five-system-pages-v1-exact-realm-owner';
+const VERSION='five-system-pages-v1-bounded-realm-navigation-r2';
 const CACHE='cw-five-system-pages-v1';
+const NETWORK_TIMEOUT_MS=1800;
 const PATHS=Object.freeze({
   '/app/cabinets/living-school/index.html':{system:'living-school',markers:['data-civweave-system="living-school"','Opening Living School']},
   '/app/realm-console-v140.html':{system:'cerbanimo',markers:['Civweave Realm Console','/app/realm-console-v140.js']},
@@ -18,15 +19,24 @@ async function validated(response,pathname){
   const headers=new Headers(response.headers);headers.delete('content-length');headers.delete('content-encoding');headers.delete('location');headers.set('cache-control','no-store');headers.set('x-civweave-five-system-pages',VERSION);headers.set('x-civweave-system',spec.system);
   return new Response(text,{status:response.status,statusText:response.statusText,headers});
 }
-async function exact(request,pathname){
+async function cached(pathname){
+  try{return await validated(await(await caches.open(CACHE)).match(pathname,{ignoreSearch:true}),pathname)}catch{return null}
+}
+async function fresh(request,pathname){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),NETWORK_TIMEOUT_MS);
   try{
-    const fresh=await fetch(new Request(request,{cache:'no-store',redirect:'follow'}));
-    const checked=await validated(fresh,pathname);
-    if(checked){if(request.method==='GET')await(await caches.open(CACHE)).put(pathname,checked.clone());return request.method==='HEAD'?new Response(null,{status:checked.status,headers:checked.headers}):checked}
-  }catch{}
-  const cached=await(await caches.open(CACHE)).match(pathname,{ignoreSearch:true});
-  const checked=await validated(cached,pathname);
-  if(checked)return request.method==='HEAD'?new Response(null,{status:checked.status,headers:checked.headers}):checked;
+    const response=await fetch(new Request(request,{cache:'no-store',redirect:'follow',signal:controller.signal}));
+    return await validated(response,pathname);
+  }catch{return null}
+  finally{clearTimeout(timer)}
+}
+async function exact(request,pathname){
+  const cachedPromise=cached(pathname);
+  const checked=await fresh(request,pathname);
+  if(checked){if(request.method==='GET')await(await caches.open(CACHE)).put(pathname,checked.clone());return request.method==='HEAD'?new Response(null,{status:checked.status,headers:checked.headers}):checked}
+  const fallback=await cachedPromise;
+  if(fallback)return request.method==='HEAD'?new Response(null,{status:fallback.status,headers:fallback.headers}):fallback;
   return new Response(`${PATHS[pathname].system} is unavailable. Civweave refused to substitute the home page for this realm.`,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-five-system-pages':VERSION,'x-civweave-system':PATHS[pathname].system}});
 }
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith('cw-five-system-pages-')&&name!==CACHE).map(name=>caches.delete(name)))})()));
@@ -36,5 +46,5 @@ self.addEventListener('fetch',event=>{
   if(url.origin!==self.location.origin||!PATH_SET.has(url.pathname))return;
   event.stopImmediatePropagation();event.respondWith(exact(request,url.pathname));
 });
-self.CivweaveFiveSystemPagesV1=Object.freeze({version:VERSION,cache:CACHE,paths:[...PATH_SET],policy:'exact-network-first-validated-realm-html-never-home-substitution'});
+self.CivweaveFiveSystemPagesV1=Object.freeze({version:VERSION,cache:CACHE,paths:[...PATH_SET],networkTimeoutMs:NETWORK_TIMEOUT_MS,policy:'exact-network-first-bounded-realm-html-cached-fallback-never-home-substitution'});
 })();
