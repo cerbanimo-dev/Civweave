@@ -14,6 +14,7 @@ on:
       - 'public/service-worker.js'
       - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
       - 'scripts/verify-cerbanimo-kamiya-http503-failover-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-malformed-json-repair-v1.mjs'
       - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
   pull_request:
     paths:
@@ -27,6 +28,7 @@ on:
       - 'public/service-worker.js'
       - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
       - 'scripts/verify-cerbanimo-kamiya-http503-failover-v1.mjs'
+      - 'scripts/verify-cerbanimo-kamiya-malformed-json-repair-v1.mjs'
       - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
 
 permissions:
@@ -42,3 +44,4 @@ jobs:
           node-version: '22'
       - run: node scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs
       - run: node scripts/verify-cerbanimo-kamiya-http503-failover-v1.mjs
+      - run: node scripts/verify-cerbanimo-kamiya-malformed-json-repair-v1.mjs
