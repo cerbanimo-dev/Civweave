@@ -1,8 +1,9 @@
 (()=>{
 'use strict';
-const VERSION='2.0.0-cerbanimo-chat-quest-capability-v2-recoverable-json';
+const VERSION='2.1.0-cerbanimo-chat-quest-capability-v2-transient-provider-failover';
 const TRANSPORT_SCHEMA=Object.freeze({type:'object'});
 const GEMINI_QUOTA_CHAIN=Object.freeze(['gemini-3.7-flash','gemini-3.5-flash','gemini-3.1-flash-lite']);
+const CLOUDFLARE_FALLBACK=Object.freeze({provider:'cloudflare-workers-ai',route:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'});
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','smollm2','smollm3','qwen','browser']);
 const QUEST_INTENT=/\b(?:help\s+(?:me|us)\s+|(?:i|we)\s+(?:want|need|would\s+like|plan|intend|aim)\s+to\s+|please\s+)?(?:build|create|make|start|organize|launch|open|set\s*up|form|develop|design|run|establish|put\s+together|implement|complete|finish|deliver|ship|repair|fix|restore|migrate|deploy)\b/i;
 const TEST=/^\s*(?:test|testing|ping|check|mic check)\s*[.!?]*\s*$/i;
@@ -44,37 +45,64 @@ function selectedConfig(){
 }
 function resultProvider(result,config={}){return clean(result?.actual?.provider||result?.requested?.provider||result?.provider||config.provider||config.route,120).toLowerCase()}
 function resultModel(result,config={}){return clean(result?.actual?.model||result?.requested?.model||result?.model||config.model,240).toLowerCase()}
+function resultErrorMessage(result){return clean(result?.error?.message||result?.error||result?.diagnostic||result?.fallbackFrom?.reason||'',6000)}
+function resultErrorStatus(result){
+  for(const candidate of [result?.error?.status,result?.error?.code,result?.statusCode,result?.status_code,result?.error?.raw?.error?.code,result?.error?.details?.code]){
+    const value=Number(candidate);if(Number.isInteger(value)&&value>=100&&value<=599)return value;
+  }
+  const match=resultErrorMessage(result).match(/\bHTTP\s*(\d{3})\b/i);return match?Number(match[1]):0;
+}
 function geminiQuotaFailure(result,config={}){
   if(!result||typeof result!=='object'||resultProvider(result,config)!=='gemini')return false;
-  const status=Number(result?.error?.status??result?.statusCode??result?.status_code??0),message=clean(result?.error?.message||result?.error||result?.diagnostic||'',6000);
+  const status=resultErrorStatus(result),message=resultErrorMessage(result);
   return status===429||/\b(?:HTTP\s*429|RESOURCE_EXHAUSTED|quota exceeded|quota failure|rate[- ]?limit(?:ed|ing)?)\b/i.test(message);
 }
+function geminiTransientFailure(result,config={}){
+  if(!result||typeof result!=='object'||resultProvider(result,config)!=='gemini')return false;
+  const status=resultErrorStatus(result),message=resultErrorMessage(result);
+  return geminiQuotaFailure(result,config)||[500,502,503,504].includes(status)||/\b(?:HTTP\s*(?:500|502|503|504)|UNAVAILABLE|high demand|temporar(?:y|ily) unavailable|service unavailable|overloaded|backend error|upstream error)\b/i.test(message);
+}
 function nextGeminiModel(model){const index=GEMINI_QUOTA_CHAIN.indexOf(clean(model,240).toLowerCase());return index>=0&&index<GEMINI_QUOTA_CHAIN.length-1?GEMINI_QUOTA_CHAIN[index+1]:''}
-function failoverMeta(models,success){return{schema:'civweave.gemini-quota-failover.v2',purpose:'cerbanimo-endeavor-authoring-v2',models:models.filter(Boolean),fromModel:models[0]||'',toModel:models.at(-1)||'',success:Boolean(success),at:now()}}
-function attachFailover(result,models,success){
-  if(models.length<2)return result;
-  const meta=failoverMeta(models,success),message=`Gemini quota failover: ${meta.models.join(' → ')}${success?' succeeded.':' stopped without a valid model result.'}`;
-  try{dispatchEvent(new CustomEvent('civweave:gemini-quota-failover',{detail:meta}))}catch{}
-  return{...result,geminiQuotaFailover:meta,diagnostics:[...(Array.isArray(result?.diagnostics)?result.diagnostics:[]),message],fallback:{...(result?.fallback||{}),used:success||Boolean(result?.fallback?.used),provider:'gemini',reason:'quota-model-failover',fromModel:meta.fromModel,model:meta.toModel}};
+function failoverMeta(models,success,triggerResult=null){return{schema:'civweave.gemini-transient-failover.v3',purpose:'cerbanimo-endeavor-authoring-v2',models:models.filter(Boolean),fromModel:models[0]||'',toModel:models.at(-1)||'',success:Boolean(success),triggerStatus:resultErrorStatus(triggerResult)||null,triggerMessage:resultErrorMessage(triggerResult)||'',at:now()}}
+function attachFailover(result,models,success,triggerResult=result){
+  if(models.length<2&&!triggerResult)return result;
+  const meta=failoverMeta(models,success,triggerResult),message=`Gemini transient failover: ${meta.models.join(' → ')}${success?' succeeded.':' exhausted without a valid model result.'}`;
+  try{dispatchEvent(new CustomEvent('civweave:gemini-transient-failover',{detail:meta}))}catch{}
+  return{...result,geminiFailover:meta,geminiQuotaFailover:meta,diagnostics:[...(Array.isArray(result?.diagnostics)?result.diagnostics:[]),message],fallback:{...(result?.fallback||{}),used:success||Boolean(result?.fallback?.used),provider:'gemini',reason:'transient-model-failover',fromModel:meta.fromModel,model:meta.toModel}};
+}
+function providerFailoverMeta(models,triggerResult,success){return{schema:'civweave.cross-provider-failover.v1',purpose:'cerbanimo-endeavor-authoring-v2',fromProvider:'gemini',fromModels:models.filter(Boolean),toProvider:CLOUDFLARE_FALLBACK.provider,toModel:CLOUDFLARE_FALLBACK.model,triggerStatus:resultErrorStatus(triggerResult)||null,triggerMessage:resultErrorMessage(triggerResult)||'',success:Boolean(success),at:now()}}
+async function cloudflareAfterGemini(runtime,request,config,geminiResult,models){
+  const fallbackConfig={...(config||{}),...CLOUDFLARE_FALLBACK,workersAiModel:CLOUDFLARE_FALLBACK.model,cloudflareModel:CLOUDFLARE_FALLBACK.model,stream:false};
+  try{dispatchEvent(new CustomEvent('civweave:endeavor-provider-failover-attempt',{detail:providerFailoverMeta(models,geminiResult,false)}))}catch{}
+  let result;
+  try{result=await runtime.generate({...request,executionProfile:'interactive',config:fallbackConfig,__civweaveGeminiProviderFailover:true})}
+  catch(error){result={status:'provider-error',requested:{provider:CLOUDFLARE_FALLBACK.provider,model:CLOUDFLARE_FALLBACK.model},actual:{provider:CLOUDFLARE_FALLBACK.provider,model:CLOUDFLARE_FALLBACK.model},error:{code:'CLOUDFLARE_FALLBACK_EXCEPTION',message:clean(error?.message||error,1200)}}}
+  const success=okStatus(result)||Boolean(result?.recoverablePayload),meta=providerFailoverMeta(models,geminiResult,success),geminiMeta=geminiResult?.geminiFailover||geminiResult?.geminiQuotaFailover||failoverMeta(models,false,geminiResult);
+  try{dispatchEvent(new CustomEvent('civweave:endeavor-provider-failover',{detail:meta}))}catch{}
+  const diagnostics=[...(Array.isArray(result?.diagnostics)?result.diagnostics:[]),`Provider failover: Gemini → Cloudflare Workers AI${success?' succeeded.':' failed.'}`];
+  if(success)return{...result,geminiFailover:geminiMeta,geminiQuotaFailover:geminiMeta,providerFailover:meta,diagnostics,fallback:{...(result?.fallback||{}),used:true,provider:CLOUDFLARE_FALLBACK.provider,reason:'gemini-transient-provider-failover',fromProvider:'gemini',model:CLOUDFLARE_FALLBACK.model}};
+  const cloudflareDetail=resultErrorMessage(result)||`ended with ${result?.status||'an error'}`,geminiDetail=resultErrorMessage(geminiResult)||'temporary Gemini capacity failure';
+  return{...result,geminiFailover:geminiMeta,geminiQuotaFailover:geminiMeta,providerFailover:meta,diagnostics,error:{...(result?.error||{}),code:'ENDEAVOR_PROVIDER_FAILOVER_EXHAUSTED',message:`Gemini was temporarily unavailable (${geminiDetail}). Cloudflare Workers AI fallback also failed: ${cloudflareDetail}`}};
 }
 async function generateQuestModel(runtime,request,config,{direct=false,startModel=''}={}){
   const base=globalThis.CivweaveFastInteractiveV192?.base?.(),initialModel=clean(startModel||config?.model,240).toLowerCase();
   let result;
   if(direct&&base?.generate)result=await base.generate({...request,executionProfile:'interactive',config:{...(config||{}),provider:'gemini',route:'gemini',model:initialModel},__civweaveGeminiQuotaFailover:true});
   else result=await runtime.generate(request);
-  if(!geminiQuotaFailure(result,config))return result;
-  const actualStart=resultModel(result,{...config,model:initialModel})||initialModel,models=[actualStart];
-  if(!base?.generate)return attachFailover(result,models,false);
-  let current=result,currentModel=actualStart,next=nextGeminiModel(currentModel);
-  while(next){
-    models.push(next);
-    try{dispatchEvent(new CustomEvent('civweave:gemini-quota-failover-attempt',{detail:{schema:'civweave.gemini-quota-failover-attempt.v2',purpose:'cerbanimo-endeavor-authoring-v2',fromModel:currentModel,toModel:next,at:now()}}))}catch{}
-    current=await base.generate({...request,executionProfile:'interactive',config:{...(config||{}),provider:'gemini',route:'gemini',model:next},__civweaveGeminiQuotaFailover:true});
-    if(!geminiQuotaFailure(current,{...config,provider:'gemini',route:'gemini',model:next}))return attachFailover(current,models,okStatus(current));
-    currentModel=next;next=nextGeminiModel(currentModel);
+  if(!geminiTransientFailure(result,config))return result;
+  const actualStart=resultModel(result,{...config,model:initialModel})||initialModel,priorModels=Array.isArray(result?.geminiFailover?.models)?result.geminiFailover.models:Array.isArray(result?.geminiQuotaFailover?.models)?result.geminiQuotaFailover.models:[],models=priorModels.length?[...priorModels]:[actualStart];
+  let current=result,currentModel=models.at(-1)||actualStart,next=nextGeminiModel(currentModel);
+  if(base?.generate){
+    while(next){
+      models.push(next);
+      try{dispatchEvent(new CustomEvent('civweave:gemini-transient-failover-attempt',{detail:{schema:'civweave.gemini-transient-failover-attempt.v3',purpose:'cerbanimo-endeavor-authoring-v2',fromModel:currentModel,toModel:next,triggerStatus:resultErrorStatus(current)||null,at:now()}}))}catch{}
+      current=await base.generate({...request,executionProfile:'interactive',config:{...(config||{}),provider:'gemini',route:'gemini',model:next},__civweaveGeminiQuotaFailover:true});
+      if(!geminiTransientFailure(current,{...config,provider:'gemini',route:'gemini',model:next}))return attachFailover(current,models,okStatus(current),result);
+      currentModel=next;next=nextGeminiModel(currentModel);
+    }
   }
-  const meta=failoverMeta(models,false);
-  return{...attachFailover(current,models,false),geminiQuotaFailover:meta,error:{...(current?.error||{}),code:'GEMINI_QUOTA_CHAIN_EXHAUSTED',message:`Gemini quota is currently exhausted across ${models.join(' → ')}.`}};
+  const exhausted=attachFailover(current,models,false,current);
+  return cloudflareAfterGemini(runtime,request,config,exhausted,models);
 }
 function normalizeUnit(item,index){
   if(!item||typeof item!=='object')return null;
@@ -148,18 +176,19 @@ async function createEndeavor(request={}){
     const description=[plan.description,plan.assumptions.length?`Assumptions:\n${plan.assumptions.map(item=>`- ${item}`).join('\n')}`:''].filter(Boolean).join('\n\n');
     const quest=engine.createQuestFromInput({title:plan.title,objective:plan.objective,description,steps:plan.workUnits.map(unit=>`${unit.title}: ${unit.result}`),acceptanceCriteria:plan.workUnits.map(unit=>`${unit.title} — ${unit.acceptanceCriteria}`),proofRequirements:plan.workUnits.map(unit=>`${unit.title} — ${unit.proof}`),source:'kamiya-chat-ai-quest',sourceActionId,sequential:true});
     if(Array.isArray(quest?.tasks))quest.tasks.forEach((task,index)=>{const criterion=clean(plan.workUnits[index]?.acceptanceCriteria,1200);if(criterion)task.acceptanceCriteria=[criterion]});
-    quest.authoring={mode:'model-json-application-validated',aiGenerated:true,provider,model,transportSchema:'json-object',applicationValidator:'cerbanimo-endeavor-v2',repaired:Boolean(normalized.repaired),geminiQuotaFailover:result?.geminiQuotaFailover||initial?.geminiQuotaFailover||null,createdAt:now()};
+    const geminiFailover=result?.geminiFailover||result?.geminiQuotaFailover||initial?.geminiFailover||initial?.geminiQuotaFailover||null,providerFailover=result?.providerFailover||initial?.providerFailover||null;
+    quest.authoring={mode:'model-json-application-validated',aiGenerated:true,provider,model,transportSchema:'json-object',applicationValidator:'cerbanimo-endeavor-v2',repaired:Boolean(normalized.repaired),geminiFailover,geminiQuotaFailover:geminiFailover,providerFailover,createdAt:now()};
     const added=engine.addQuest(quest,{activate:true});
     if(added?.ok===false)throw new Error(added.error||added.reason||'Cerbanimo rejected the generated Endeavor.');
-    const saved=added?.quest||quest,count=Array.isArray(saved.tasks)?saved.tasks.length:plan.workUnits.length,first=clean(saved.tasks?.[0]?.title||plan.workUnits[0]?.title,220),failover=result?.geminiQuotaFailover||initial?.geminiQuotaFailover;
-    try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-created',{detail:{questId:saved.id,title:saved.title,taskCount:count,provider,model,sourceActionId,repaired:Boolean(normalized.repaired),geminiQuotaFailover:failover||null}}))}catch{}
-    const notes=[];if(failover?.models?.length>1)notes.push(`Gemini failover: ${failover.models.join(' → ')}`);if(normalized.repaired)notes.push('structured output repaired once before validation');
+    const saved=added?.quest||quest,count=Array.isArray(saved.tasks)?saved.tasks.length:plan.workUnits.length,first=clean(saved.tasks?.[0]?.title||plan.workUnits[0]?.title,220);
+    try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-created',{detail:{questId:saved.id,title:saved.title,taskCount:count,provider,model,sourceActionId,repaired:Boolean(normalized.repaired),geminiFailover,geminiQuotaFailover:geminiFailover,providerFailover}}))}catch{}
+    const notes=[];if(geminiFailover?.models?.length>1)notes.push(`Gemini failover: ${geminiFailover.models.join(' → ')}`);if(providerFailover?.success)notes.push(`Provider failover: Gemini → Cloudflare Workers AI (${providerFailover.toModel})`);if(normalized.repaired)notes.push('structured output repaired once before validation');
     return packet(`Endeavor created: “${clean(saved.title||plan.title,240)}”\n\n${count} work unit${count===1?'':'s'} are active in Cerbanimo, each with a proof gate and completion criteria.${notes.length?`\n\n${notes.join(' · ')}`:''}${plan.assumptions.length?`\n\nAssumptions recorded: ${plan.assumptions.join('; ')}`:''}`,first?`Start: ${first}`:'Open the Workboard to begin.',{provider,model,assumptions:plan.assumptions,action:{kind:'cerbanimo-quest-created',system:'cerbanimo',state:'active',questId:saved.id||'',title:saved.title||plan.title,taskCount:count,source:'kamiya-chat-ai-quest',canonicalArtifact:'Endeavor'}});
   }catch(error){return packet(`I could not create the Endeavor. Nothing was saved.\n\nGeneration detail: ${clean(error?.message||error,1200)}`,'Retry the Endeavor or choose another AI model.',{provider:requestedProvider||'cerbanimo-endeavor-generation-error',model:clean(config?.model,240)})}
 }
 async function handler(request,next){const text=clean(request?.text,12000);if(!text||TEST.test(text)||!QUEST_INTENT.test(text))return next(request);return createEndeavor(request)}
-function install(){const chat=globalThis.CivweaveUnifiedChatSystemV1;if(!chat?.registerCapability)return false;chat.registerCapability('cerbanimo',handler);installed=true;try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-capability-ready',{detail:{version:VERSION,system:'cerbanimo',structuredEndeavorAuthoring:true,transportSchema:'json-object',applicationValidation:true,boundedRepair:1,geminiQuotaChain:GEMINI_QUOTA_CHAIN}}))}catch{}return true}
+function install(){const chat=globalThis.CivweaveUnifiedChatSystemV1;if(!chat?.registerCapability)return false;chat.registerCapability('cerbanimo',handler);installed=true;try{dispatchEvent(new CustomEvent('civweave:cerbanimo-chat-quest-capability-ready',{detail:{version:VERSION,system:'cerbanimo',structuredEndeavorAuthoring:true,transportSchema:'json-object',applicationValidation:true,boundedRepair:1,geminiQuotaChain:GEMINI_QUOTA_CHAIN,geminiTransientStatuses:[429,500,502,503,504],providerFallback:CLOUDFLARE_FALLBACK}}))}catch{}return true}
 for(const name of ['civweave:unified-chat-system-ready','civweave:guide-loader-reset','civweave:assistant-runtime-ready','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(installed||attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
-globalThis.CivweaveCerbanimoChatQuestCapabilityV2=Object.freeze({version:VERSION,install,handler,createEndeavor,questIntent:text=>QUEST_INTENT.test(clean(text,12000)),completionText,resultObject,normalizeQuestPlan,geminiQuotaFailure,nextGeminiModel,transportSchema:TRANSPORT_SCHEMA,geminiQuotaChain:GEMINI_QUOTA_CHAIN,state:()=>({installed})});
+globalThis.CivweaveCerbanimoChatQuestCapabilityV2=Object.freeze({version:VERSION,install,handler,createEndeavor,questIntent:text=>QUEST_INTENT.test(clean(text,12000)),completionText,resultObject,normalizeQuestPlan,geminiQuotaFailure,geminiTransientFailure,nextGeminiModel,resultErrorStatus,transportSchema:TRANSPORT_SCHEMA,geminiQuotaChain:GEMINI_QUOTA_CHAIN,providerFallback:CLOUDFLARE_FALLBACK,state:()=>({installed})});
 })();
