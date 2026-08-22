@@ -16,7 +16,7 @@ const [designSource,compilerSource,curatorSource,generationGuard,quizGuard,actio
   read('public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs')
 ]);
 
-for(const token of ['SUBJECT MASTERY FIRST','authentic task','plausible subject-matter misconceptions','structureQualityIssues'])assert(generationGuard.includes(token),`Generation guard is missing pedagogy contract token: ${token}`);
+for(const token of ['SUBJECT MASTERY FIRST','authentic use','plausible subject-matter misconceptions','structureQualityIssues'])assert(generationGuard.includes(token),`Generation guard is missing pedagogy contract token: ${token}`);
 for(const token of ['subjectMasteryRequired:true','genericAssessmentRejected:true','plausibleDistractorsRequired:true'])assert(quizGuard.includes(token),`Quiz guard is missing subject-mastery enforcement: ${token}`);
 for(const token of ['Assessment authoring boundary','Why It Matters','Practice Steps','**Lesson Block 1: Specific heading.**','Do not repeat concept definitions as lesson prose'])assert(designSource.includes(token),`Grounded design prompt is missing required authoring guidance: ${token}`);
 assert(!compilerSource.includes('Learning application (GENERATED-UNVERIFIED): connect this point to the module objective'),'Compiler still contains the repetitive generic learning-application filler.');
