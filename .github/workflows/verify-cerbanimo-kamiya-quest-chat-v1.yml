@@ -10,6 +10,8 @@ on:
       - 'public/app/install-boundary-v146.js'
       - 'public/app/realm-console-v140.html'
       - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
       - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
       - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
   pull_request:
@@ -20,6 +22,8 @@ on:
       - 'public/app/install-boundary-v146.js'
       - 'public/app/realm-console-v140.html'
       - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
       - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
       - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
 
