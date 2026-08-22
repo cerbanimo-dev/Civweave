@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-cerbanimo-chat-quest-capability-v1';
+const VERSION='1.0.1-cerbanimo-chat-quest-capability-v1';
 const QUEST_SCHEMA=Object.freeze({
   type:'object',
   required:['title','objective','description','workUnits','assumptions'],
@@ -92,7 +92,7 @@ async function createQuest(request={}){
     const sourceActionId=`kamiya-chat:${Date.now().toString(36)}:${Math.random().toString(36).slice(2,8)}`;
     const description=[plan.description,plan.assumptions.length?`Assumptions:\n${plan.assumptions.map(item=>`- ${item}`).join('\n')}`:''].filter(Boolean).join('\n\n');
     const quest=engine.createQuestFromInput({title:plan.title,objective:plan.objective,description,steps:plan.workUnits.map(unit=>`${unit.title}: ${unit.result}`),acceptanceCriteria:plan.workUnits.map(unit=>`${unit.title} — ${unit.acceptanceCriteria}`),proofRequirements:plan.workUnits.map(unit=>`${unit.title} — ${unit.proof}`),source:'kamiya-chat-ai-quest',sourceActionId,sequential:true});
-    quest.authoring={mode:'model-structured-json',aiGenerated:true,provider,model,createdAt:now()};
+    if(Array.isArray(quest?.tasks))quest.tasks.forEach((task,index)=>{const criterion=clean(plan.workUnits[index]?.acceptanceCriteria,1200);if(criterion)task.acceptanceCriteria=[criterion]});
     const added=engine.addQuest(quest,{activate:true});
     if(added?.ok===false)throw new Error(added.error||added.reason||'Cerbanimo rejected the generated Quest.');
     const saved=added?.quest||quest,count=Array.isArray(saved.tasks)?saved.tasks.length:plan.workUnits.length,first=clean(saved.tasks?.[0]?.title||plan.workUnits[0]?.title,220);
