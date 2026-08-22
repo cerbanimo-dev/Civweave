@@ -16,7 +16,7 @@ const source=read(capabilityPath),normalizer=read(normalizerPath),realm=read(rea
 assert(realm.includes('/app/server-ai-output-normalizer-v1.js?v=1.0.0'),'Cerbanimo console does not load provider-envelope normalization.');
 assert(realm.includes('/app/cerbanimo-chat-quest-capability-v1.js?v=1.0.0'),'Cerbanimo console does not load the Kamiya Quest capability.');
 assert(realm.indexOf('server-ai-output-normalizer-v1.js')<realm.indexOf('family-ai-loader-v105.js'),'Provider-envelope normalizer must be installed before the model loader can answer.');
-for(const token of ["chat.registerCapability('cerbanimo',handler)",'responseFormat:\'json\'','schema:QUEST_SCHEMA','createQuestFromInput','addQuest(quest,{activate:true})',"source:'kamiya-chat-ai-quest'",'proofRequirements','acceptanceCriteria'])assert(source.includes(token),`Kamiya Quest capability is missing ${token}`);
+for(const token of ["chat.registerCapability('cerbanimo',handler)","responseFormat:'json'",'schema:QUEST_SCHEMA','createQuestFromInput','addQuest(quest,{activate:true})',"source:'kamiya-chat-ai-quest'",'proofRequirements','acceptanceCriteria'])assert(source.includes(token),`Kamiya Quest capability is missing ${token}`);
 for(const token of ['choices?.[0]?.message','reasoningVisible:false','WORKERS_AI_ENVELOPE_NORMALIZED'])assert(normalizer.includes(token),`Server AI output normalizer is missing ${token}`);
 
 let registeredHandler=null,added=null;
