@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.70-gemini-task-tier-router-v324-living-school-boundaries';
+const VERSION='1.0.71-gemini-task-tier-router-v325-living-school-boundaries';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const COMPLEX_MODEL='gemini-3.7-flash';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -83,26 +83,6 @@ function designEconomyViolation(result,request){
   if(!contaminated)return result;
   return{...result,status:'invalid-response',outputText:'',outputJson:undefined,error:{code:'LIVING_SCHOOL_DESIGN_ECONOMY_BOUNDARY',message:'Living School rejected the research/design packet because the model authored economy or reward metadata. No additional 3.7 repair call was made.'},diagnostics:[...(result.diagnostics||[]),'Living School design packet failed the application-owned economy boundary.']};
 }
-function installGenerateContentEnumCompatibility(){
-  if(globalThis.__civweaveGeminiGenerateContentEnumV1||typeof globalThis.fetch!=='function')return false;
-  const nativeFetch=globalThis.fetch.bind(globalThis);
-  const patchedFetch=async(input,init)=>{
-    try{
-      const url=typeof input==='string'?input:clean(input?.url,3000);
-      if(/generativelanguage\.googleapis\.com\/v1(?:beta)?\/models\/[^/]+:generateContent(?:\?|$)/i.test(url)&&typeof init?.body==='string'){
-        const body=parse(init.body,null),format=body?.generationConfig?.responseFormat?.text;
-        if(format?.mimeType==='application/json'){
-          format.mimeType='APPLICATION_JSON';
-          return nativeFetch(input,{...init,body:JSON.stringify(body)});
-        }
-      }
-    }catch{}
-    return nativeFetch(input,init);
-  };
-  globalThis.fetch=patchedFetch;
-  globalThis.__civweaveGeminiGenerateContentEnumV1=true;
-  return true;
-}
 function migrateStoredGeminiPolicy(){
   try{
     const saved=parse(localStorage.getItem(SETTINGS_KEY),{}),profiles=parse(localStorage.getItem(PROFILES_KEY),{}),interactive=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:saved;
@@ -171,7 +151,6 @@ function middleware(){
   };
 }
 function install(){
-  installGenerateContentEnumCompatibility();
   const spine=globalThis.CivweaveFastInteractiveV192;
   if(!spine?.register)return false;
   migrateGeminiProfiles(spine.base?.()||globalThis.CivweaveModelRuntime);
@@ -183,7 +162,6 @@ addEventListener?.('civweave:runtime-spine-ready',install);
 addEventListener?.('civweave:model-settings-saved',()=>{migrateStoredGeminiPolicy();patchSettings();queueMicrotask(install)});
 addEventListener?.('civweave:model-settings-opened',()=>queueMicrotask(patchSettings));
 if(typeof document!=='undefined'){document.addEventListener('change',event=>{if(event.target?.name==='route')queueMicrotask(patchSettings)});document.addEventListener('submit',event=>{if(event.target?.matches?.('[data-cw-cleanroom-form]'))patchSettings()},true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',patchSettings,{once:true});else patchSettings();}
-installGenerateContentEnumCompatibility();
 migrateStoredGeminiPolicy();install();
 globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID,canonicalSettingsPresentation:true});
 })();
