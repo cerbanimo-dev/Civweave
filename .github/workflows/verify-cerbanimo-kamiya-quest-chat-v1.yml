@@ -6,14 +6,18 @@ on:
     paths:
       - 'public/app/cerbanimo-chat-quest-capability-v1.js'
       - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'public/app/install-boundary-v146.js'
       - 'public/app/realm-console-v140.html'
+      - 'public/service-worker-chat-repair-v245.js'
       - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
       - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
   pull_request:
     paths:
       - 'public/app/cerbanimo-chat-quest-capability-v1.js'
       - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'public/app/install-boundary-v146.js'
       - 'public/app/realm-console-v140.html'
+      - 'public/service-worker-chat-repair-v245.js'
       - 'scripts/verify-cerbanimo-kamiya-quest-chat-v1.mjs'
       - '.github/workflows/verify-cerbanimo-kamiya-quest-chat-v1.yml'
 
