@@ -1,12 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-selected-provider-authority-v1';
+const VERSION='1.0.1-selected-provider-authority-v1-wrapper-resilient';
 const PROFILE_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','smollm2','smollm3','qwen','browser']);
 const NETWORK_PROVIDERS=new Set(['server-auto','cloudflare-workers-ai','workers-ai','cloudflare']);
-let runtimeTarget=null,assistantTarget=null,serverTarget=null,timer=0;
+let timer=0;
 if(globalThis.CivweaveSelectedProviderAuthorityV1?.version===VERSION)return;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -57,25 +57,27 @@ function blockedServerResult(request,auth){
 function emit(type,detail={}){try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}}
 function patchRuntime(){
   const runtime=globalThis.CivweaveModelRuntime;if(!runtime?.generate)return false;
-  if(runtime.__civweaveSelectedProviderAuthorityV1){runtimeTarget=runtime;return true}if(runtimeTarget===runtime)return true;
+  if(runtime.generate.__cwSelectedProviderAuthorityV1===VERSION)return true;
   const previous=runtime.generate.bind(runtime),generate=async request=>{const normalized=enforceConfig(request||{});if(normalized!==request)emit('civweave:selected-provider-authority-enforced',{purpose:clean(request?.purpose,200),selected:authority().kind,blockedRoute:routeOf(request?.config||{})});return previous(normalized)};
-  try{Object.defineProperty(generate,'__prior',{value:previous})}catch{}
-  globalThis.CivweaveModelRuntime={...runtime,generate,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION};runtimeTarget=globalThis.CivweaveModelRuntime;return true;
+  generate.__cwSelectedProviderAuthorityV1=VERSION;try{Object.defineProperty(generate,'__prior',{value:previous})}catch{}
+  globalThis.CivweaveModelRuntime={...runtime,generate,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION};return true;
 }
 function patchAssistant(){
   const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)return false;
-  if(assistant.__civweaveSelectedProviderAuthorityV1){assistantTarget=assistant;return true}if(assistantTarget===assistant)return true;
-  const previousSelected=typeof assistant.selectedConfig==='function'?assistant.selectedConfig.bind(assistant):()=>({}),selectedConfig=()=>{const auth=authority(),prior=previousSelected()||{};if(auth.kind==='open')return prior;if(auth.kind==='gemini')return{...prior,...auth.config,provider:'gemini',route:'gemini',model:clean(auth.config.model,240)||clean(prior.model,240)||'gemini-3.1-flash-lite'};const local=auth.local;return{...prior,...auth.config,provider:LOCAL_PROVIDERS.has(auth.route)?auth.route:'downloaded-local',route:LOCAL_PROVIDERS.has(auth.route)?auth.route:'downloaded-local',model:clean(local?.id||auth.config.model||prior.model,240)}};
-  globalThis.CivweaveAssistantV141={...assistant,selectedConfig,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION};assistantTarget=globalThis.CivweaveAssistantV141;return true;
+  if(assistant.selectedConfig?.__cwSelectedProviderAuthorityV1===VERSION)return true;
+  const previousSelected=typeof assistant.selectedConfig==='function'?assistant.selectedConfig.bind(assistant):()=>({}),selectedConfig=()=>{const auth=authority(),prior=previousSelected()||{};if(auth.kind==='open')return prior;if(auth.kind==='gemini')return{...prior,...auth.config,provider:'gemini',route:'gemini',model:clean(auth.config.model,240)||clean(prior.model,240)||'gemini-3.1-flash-lite'};const local=auth.local,route=LOCAL_PROVIDERS.has(auth.route)?auth.route:'downloaded-local';return{...prior,...auth.config,provider:route,route,model:clean(local?.id||auth.config.model||prior.model,240)}};
+  selectedConfig.__cwSelectedProviderAuthorityV1=VERSION;
+  globalThis.CivweaveAssistantV141={...assistant,selectedConfig,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION};return true;
 }
 function patchServer(){
   const api=globalThis.CivweaveServerAIRouterV301;if(!api?.handle)return false;
-  if(api.__civweaveSelectedProviderAuthorityV1){serverTarget=api;return true}if(serverTarget===api)return true;
+  if(api.handle.__cwSelectedProviderAuthorityV1===VERSION)return true;
   const previous=api.handle.bind(api),handle=async request=>{const auth=authority();if(auth.kind!=='open'&&interactive(request||{})&&!explicitNetwork(request||{})){emit('civweave:selected-provider-authority-blocked-server',{selected:auth.kind,purpose:clean(request?.purpose,200)});return blockedServerResult(request||{},auth)}return previous(request||{})};
-  globalThis.CivweaveServerAIRouterV301=Object.freeze({...api,handle,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION});serverTarget=globalThis.CivweaveServerAIRouterV301;return true;
+  handle.__cwSelectedProviderAuthorityV1=VERSION;handle.__prior=api.handle;
+  globalThis.CivweaveServerAIRouterV301=Object.freeze({...api,handle,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION});return true;
 }
 function install(){patchRuntime();patchAssistant();patchServer();return true}
-for(const name of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:assistant-runtime-ready','civweave:server-ai-router-ready','civweave:model-config-changed','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
+for(const name of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:assistant-runtime-ready','civweave:server-ai-router-ready','civweave:model-config-changed','civweave:guide-loader-reset','civweave:guide-provider-policy-runtime','civweave:guide-provider-policy-assistant','civweave:local-provider-authority-ready','civweave:response-router-installed','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
 globalThis.CivweaveSelectedProviderAuthorityV1=Object.freeze({version:VERSION,install,authority,persistedInteractive,enforceConfig,explicitNetwork,selectedLocal,providerAuthority:'persisted-user-selection-first',crossProviderFallbackWithoutConsent:false,neuronSpendRequiresSelectedOrExplicitNetwork:true});
 })();
