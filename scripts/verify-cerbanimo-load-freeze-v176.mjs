@@ -11,8 +11,8 @@ const realmNavigationWorker=read('public/service-worker-five-system-pages-v1.js'
 const directShellRetirement=read('public/service-worker-direct-shell-retirement-v1.js');
 
 assert(realm.includes('data-build="realm-console-canonical-v251-universal-navbar-only-r1"'),'Cerbanimo console is missing the universal-navbar-only build marker.');
-assert(realm.includes('<style id="rc-universal-nav-only">.rc-bottom{display:none!important}</style>'),'Cerbanimo must never expose its legacy realm-local bottom navigation.');
-assert(!realm.includes('html.cw-themed-system-nav-active .rc-bottom{display:none!important}'),'Cerbanimo must not make its legacy bottom bar conditional on universal-nav readiness.');
+assert(realm.includes('<style id="rc-universal-nav-only">.rc-bottom{display:none!important}</style>'),'Cerbanimo must never expose legacy realm-local bottom navigation from stale cached runtime code.');
+assert(!realm.includes('html.cw-themed-system-nav-active .rc-bottom{display:none!important}'),'Cerbanimo must not make a realm-local bottom bar conditional on universal-nav readiness.');
 assert(realm.includes('Cerbanimo owns no realm-local bottom navigation. The existing universal five-system navbar is the only bottom navigation owner.'),'Cerbanimo must document universal navbar ownership explicitly.');
 const mainIndex=realm.indexOf('<main id="rc-app"');
 const normalizeIndex=realm.indexOf('id="rc-universal-nav-route-normalization"');
@@ -26,7 +26,9 @@ assert(realm.includes("next.searchParams.get('civweave')==='1'"),'Cerbanimo must
 assert(realm.includes('/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-universal-top-level-r1" defer'),'Cerbanimo must mount the existing universal five-system navbar, not a realm-specific substitute.');
 assert(realm.includes('/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r4-universal-navbar-only" defer'),'Cerbanimo universal-navbar recovery must remain deferred and non-blocking.');
 
-assert(consoleRuntime.includes("const VERSION='1.0.31'"),'Cerbanimo realm console runtime must retain the direct-route interaction fix.');
+assert(consoleRuntime.includes("const VERSION='1.0.32'"),'Cerbanimo realm console runtime must include the universal-navbar-only revision.');
+assert(!consoleRuntime.includes('function bottomNav('),'Cerbanimo runtime must not define a realm-local bottom navbar.');
+assert(!consoleRuntime.includes('class=\"rc-bottom\"'),'Cerbanimo runtime must not render a realm-local bottom navbar.');
 assert(consoleRuntime.includes('const query=new URLSearchParams(location.search)'),'Internal Cerbanimo routing must preserve the current canonical launch context.');
 assert(consoleRuntime.includes("query.delete('embed')"),'Top-level Cerbanimo interactions must remove stale iframe markers.');
 assert(consoleRuntime.includes("query.get('civweave')==='1'"),'Top-level Cerbanimo interactions must recognize and remove the retired pseudo-embed marker.');
@@ -34,7 +36,7 @@ assert(!consoleRuntime.includes("new URLSearchParams({system:state.systemId,embe
 
 assert(navStability.includes("const VERSION='1.0.5-cerbanimo-universal-navbar-only'"),'Cerbanimo navigation recovery must expose the universal-navbar-only revision.');
 assert(navStability.includes("navOwner:'universal-five-system-navbar'"),'Cerbanimo must identify the universal five-system navbar as its sole navigation owner.');
-assert(navStability.includes("document.querySelectorAll('.rc-bottom').forEach(node=>node.remove())"),'Cerbanimo recovery must remove any legacy local bottom bar produced by stale runtime code.');
+assert(navStability.includes("document.querySelectorAll('.rc-bottom').forEach(node=>node.remove())"),'Cerbanimo recovery must remove any realm-local bottom bar produced by stale runtime code.');
 assert(navStability.includes("const NAV_SRC='/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-universal-top-level-r1'"),'Cerbanimo recovery must remount the existing universal navbar component.');
 assert(navStability.includes('function cleanDirectUrl()'),'Cerbanimo navigation recovery must normalize legacy route markers before remounting the universal navbar.');
 assert(navStability.includes("[0,180,700,1800]"),'Cerbanimo navigation recovery must remain bounded.');
@@ -55,4 +57,4 @@ assert(questEngine.includes("if(typeof requestAnimationFrame==='function'&&!docu
 assert(questEngine.includes("observer.observe(target,{childList:true,subtree:false})"),'Quest engine must observe only console-shell replacement, not every descendant mutation.');
 assert(!questEngine.includes("observer.observe(document.querySelector('#rc-app')||document.documentElement,{childList:true,subtree:true})"),'Quest engine must not restore the broad subtree observer that can wake on every UI mutation.');
 
-console.log('Cerbanimo regression contract passed: exact realm navigation is bounded, stale route markers are normalized before boot, and the universal five-system navbar is the sole visible bottom navigation owner.');
+console.log('Cerbanimo regression contract passed: exact realm navigation is bounded, stale route markers are normalized before boot, and the universal five-system navbar is the sole bottom navigation owner.');
