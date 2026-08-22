@@ -1,11 +1,20 @@
 import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=subject-links-v265';
+import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=subject-links-v266';
 
 const RESEARCHER='living-school-cleanroom-research-v218.1';
-const RELEVANCE_REVISION='living-school-subject-coverage-v265';
+const RELEVANCE_REVISION='living-school-subject-coverage-v266';
 const QUERY_STOPWORDS=new Set(['this','that','with','from','into','before','after','their','what','when','where','should','could','would','make','create','write','learn','each','project','projects','lead','leader','foundational','fundamentals','knowledge','strategy','strategies','equip','equipped','objective','capability','beginner','guided']);
+const SEMANTIC_QUERY_GROUPS=[
+  {match:/\b(?:urban\s+agricultur\w*|agricultur\w*|farm\w*|crop\w*|garden\w*|horticultur\w*|soil|irrigat\w*|food\s+grow\w*|growing\s+food|planting|vegetable\w*)\b/i,terms:['agriculture','garden','gardening','horticulture','farming','farm','crop','crops','soil','irrigation','plant','plants','vegetable']},
+  {match:/\b(?:community\s+(?:engagement|organizing|organisation|organization|outreach)|stakeholder\w*|volunteer\w*|participat\w*|coalition\w*|neighbou?rhood\w*|resident\s+engagement)\b/i,terms:['community','engagement','organizing','participation','stakeholder','volunteer','outreach','coalition','residents','neighborhood']},
+  {match:/\b(?:climate|environment\w*|sustainab\w*|ecolog\w*|conservation)\b/i,terms:['climate','environment','environmental','ecology','sustainability','conservation']},
+  {match:/\b(?:communicat\w*|conflict\w*|active\s+listen\w*|facilitat\w*)\b/i,terms:['communication','conflict','listening','facilitation']}
+];
 const keyFor=value=>core.clean(value,1200).toLowerCase().replace(/\s+/g,' ').slice(0,500);
-const queryWords=value=>[...new Set(keyFor(value).replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=4&&!QUERY_STOPWORDS.has(word)))].slice(0,12);
+const literalQueryWords=value=>[...new Set(keyFor(value).replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=4&&!QUERY_STOPWORDS.has(word)))];
+function semanticQueryTerms(value){const text=keyFor(value),terms=[];for(const group of SEMANTIC_QUERY_GROUPS)if(group.match.test(text))terms.push(...group.terms);return[...new Set(terms)];}
+const queryWords=value=>[...new Set([...literalQueryWords(value),...semanticQueryTerms(value)])].slice(0,24);
+function researchSearchQuery(value){const original=core.clean(value,1200),lower=keyFor(value),aliases=semanticQueryTerms(value).filter(term=>!lower.includes(term));return core.clean([original,...aliases].join(' '),1800);}
 const metadataBoundary=/(?:20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z|https?:\/\/\S+|\b[0-9a-f]{40,}\b|W\/"[^"\n]+"|(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+\d{2}\s+[A-Z][a-z]{2}\s+20\d{2}\s+\d{2}:\d{2}:\d{2}\s+GMT)/gi;
 const validHttp=value=>{try{return['http:','https:'].includes(new URL(value).protocol)}catch{return false}};
 const normalizeUse=value=>['core','supporting','counterpoint','example'].includes(core.clean(value,80).toLowerCase())?core.clean(value,80).toLowerCase():'supporting';
@@ -82,7 +91,7 @@ function localPacket(capability,rows){
     linkProvenance:core.clean(row.linkProvenance,120)||''
   }));
   const linked=sources.filter(source=>source.url).length;
-  return{mode:'local-downloaded',summary:`Retrieved ${sources.length} subject-relevant, clean, deduplicated passages from downloaded knowledge schools on this device${linked?`, with ${linked} canonical article link${linked===1?'':'s'}`:''}.`,sources,provider:'local-knowledge-school',model:'dependency-free cached SQLite passage search · canonical source metadata · component-aware subject filter · sanitized passage view',flag:'DOWNLOADED LOCAL SOURCES',reason:''};
+  return{mode:'local-downloaded',summary:`Retrieved ${sources.length} subject-relevant, clean, deduplicated passages from downloaded knowledge schools on this device${linked?`, with ${linked} canonical article link${linked===1?'':'s'}`:''}.`,sources,provider:'local-knowledge-school',model:'dependency-free cached SQLite passage search · canonical source metadata · semantic subject expansion · sanitized passage view',flag:'DOWNLOADED LOCAL SOURCES',reason:''};
 }
 
 async function runtimeReady(){
@@ -175,8 +184,9 @@ export async function researchCapability(capability,{force=false}={}){
   let liveError;
   try{return applyPacket(s,normalized,await researchLive(normalized))}catch(error){liveError=error}
 
-  let rows=[];
-  try{rows=await searchDownloadedKnowledge(normalized,{limit:16,maxSchools:5})}catch(error){console.warn('[Living School downloaded research]',error)}
+  let rows=[];const localSearchQuery=researchSearchQuery(normalized);
+  try{rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5})}catch(error){console.warn('[Living School downloaded research]',error)}
+  core.persist('living-school-local-research-query',{capability:normalized,searchQuery:localSearchQuery,aliases:semanticQueryTerms(normalized),resultCount:rows.length,relevanceRevision:RELEVANCE_REVISION});
   if(rows.length){
     let packet=localPacket(normalized,rows);
     if(packet.sources.length){
