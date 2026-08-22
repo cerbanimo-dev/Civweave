@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-living-school-gemini-structured-v329';
-const ID='living-school-gemini-structured-v329';
+const VERSION='1.1.0-living-school-gemini-structured-v331';
+const ID='living-school-gemini-structured-v331';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const POST_FALLBACK_DESIGN_PURPOSE='living-school-post-fallback-design-lite-v329';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
@@ -75,77 +75,67 @@ function validate(value,schema,path='$',errors=[],depth=0){
   else if(type==='boolean'&&typeof value!=='boolean')errors.push(`${path} must be a boolean.`);
   return errors;
 }
-function endpoint(config){
-  let base=clean(config?.endpoint||DEFAULT_BASE,2048).replace(/\/+$/,'').replace(/\/interactions(?:\/.*)?$/,'');
-  if(!/^https:\/\/generativelanguage\.googleapis\.com\/v1(?:beta)?$/i.test(base))base=DEFAULT_BASE;
-  return`${base}/models/${encodeURIComponent(config.model||SMALL_MODEL)}:generateContent`;
+function usage(value={}){return{inputTokens:Number(value.inputTokens||0)||0,outputTokens:Number(value.outputTokens||0)||0,totalTokens:Number(value.totalTokens||0)||0,costCents:Number(value.costCents||0)||0,remainingCents:Number(value.remainingCents||0)||0};}
+function resultBase(request,config){return{schema:'civweave-model-result-1.0',requestId:request.requestId||`living-school-${Date.now().toString(36)}`,purpose:clean(request.purpose,160),requested:{provider:'gemini',model:config.model,endpoint:config.endpoint||DEFAULT_BASE,executionProfile:request.executionProfile||'interactive'},actual:{provider:'gemini',model:config.model},diagnostics:[`Living School used ${VERSION} with the standard Gemini Interactions transport.`]};}
+function boundaryMessages(request,extra){return[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:extra}];}
+async function interactionPost(baseRuntime,config,request,messages,schema){
+  const transport=globalThis.CivweaveGeminiInteractionsV159?.generateWithInteractions;
+  if(typeof transport!=='function')throw Object.assign(new Error('The standard Gemini Interactions transport is unavailable.'),{code:'GEMINI_INTERACTIONS_UNAVAILABLE'});
+  const result=await transport(baseRuntime,{...request,executionProfile:'interactive',config:{...(request.config||{}),...config,provider:'gemini',route:'gemini',model:SMALL_MODEL},messages,schema});
+  const output=clean(result?.outputText,5000000);
+  if(!output)throw Object.assign(new Error(clean(result?.error?.message||`Gemini Interactions ended with ${result?.status||'no output'}.`,2400)),{code:result?.error?.code||'GEMINI_INTERACTIONS_NO_OUTPUT',status:result?.error?.status});
+  return{output,result};
 }
-function messages(request){
-  const rows=Array.isArray(request.messages)?request.messages:[];
-  const system=rows.filter(row=>row?.role==='system').map(row=>clean(row.content,48000)).filter(Boolean).join('\n\n');
-  const contents=rows.filter(row=>row?.role!=='system').map(row=>({role:row?.role==='assistant'?'model':'user',parts:[{text:clean(row?.content,48000)}]})).filter(row=>row.parts[0].text);
-  if(!contents.length)contents.push({role:'user',parts:[{text:'Continue.'}]});
-  return{system,contents};
-}
-async function post(config,request,rows,schema){
-  const generationConfig={temperature:Number.isFinite(Number(config.temperature))?Number(config.temperature):0.2,maxOutputTokens:Math.max(1,Number(config.maxTokens||request?.config?.maxTokens||4096))};
-  if(schema){generationConfig.responseMimeType='application/json';generationConfig.responseJsonSchema=schema;}
-  const body={contents:rows.contents,generationConfig,...(rows.system?{systemInstruction:{parts:[{text:rows.system}]}}:{})};
-  const response=await fetch(endpoint(config),{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':config.apiKey,...(isObject(config.headers)?config.headers:{})},body:JSON.stringify(body),signal:request.signal,cache:'no-store'});
-  const text=await response.text();let payload={};try{payload=text?JSON.parse(text):{}}catch{throw Object.assign(new Error('Gemini returned invalid transport JSON.'),{code:'INVALID_PROVIDER_JSON',status:response.status});}
-  if(!response.ok)throw Object.assign(new Error(clean(payload?.error?.message||`Gemini generateContent returned HTTP ${response.status}.`,2400)),{code:payload?.error?.code||'GEMINI_GENERATE_CONTENT_HTTP_ERROR',status:response.status});
-  const output=(Array.isArray(payload?.candidates)?payload.candidates:[]).flatMap(candidate=>Array.isArray(candidate?.content?.parts)?candidate.content.parts:[]).map(part=>typeof part?.text==='string'?part.text:'').filter(Boolean).join('');
-  if(!output)throw new Error('Gemini generateContent returned no text output.');
-  return{output,payload};
-}
-function usage(payload){const source=payload?.usageMetadata||payload?.usage||{};return{inputTokens:Number(source.promptTokenCount||source.input_tokens||0)||0,outputTokens:Number(source.candidatesTokenCount||source.output_tokens||0)||0,totalTokens:Number(source.totalTokenCount||source.total_tokens||0)||0,costCents:0,remainingCents:0};}
-function resultBase(request,config){return{schema:'civweave-model-result-1.0',requestId:request.requestId||`living-school-${Date.now().toString(36)}`,purpose:clean(request.purpose,160),requested:{provider:'gemini',model:config.model,endpoint:config.endpoint||DEFAULT_BASE,executionProfile:request.executionProfile||'interactive'},actual:{provider:'gemini',model:config.model},diagnostics:[`Living School used ${VERSION} for the post-research Gemini construction pass.`]};}
-async function generateStructured(request,config){
-  const schema=prepareStructureSchema(request),base=resultBase(request,config),baseRows=messages({...request,messages:[...(request.messages||[]),{role:'system',content:'Living School construction boundary: do not output XP, Acorns, Buttons, prices, payouts, wages, bonuses, grants, labor values, currency values, or ledger metadata. Civweave attaches deterministic XP after content validation. Use only supplied SOURCE_ID values.'}]});
-  let rows=baseRows,attempt=0,lastText='',outputJson=null,errors=[];const maxAttempts=Math.max(0,Math.min(2,Number(request.maxRepairAttempts??2)));
+async function generateStructured(request,config,baseRuntime){
+  const schema=prepareStructureSchema(request),base=resultBase(request,config),boundary='Living School construction boundary: do not output XP, Acorns, Buttons, prices, payouts, wages, bonuses, grants, labor values, currency values, or ledger metadata. Civweave attaches deterministic XP after content validation. Use only supplied SOURCE_ID values. Do not output video URLs or media links; Civweave resolves module media locally after validation.';
+  const originalMessages=boundaryMessages(request,boundary);
+  let messages=originalMessages,attempt=0,lastText='',outputJson=null,errors=[],lastResult=null;const maxAttempts=Math.max(0,Math.min(2,Number(request.maxRepairAttempts??2)));
   while(true){
-    const {output,payload}=await post(config,request,rows,schema);lastText=output;
+    const {output,result}=await interactionPost(baseRuntime,config,request,messages,schema);lastText=output;lastResult=result;
     try{outputJson=parseJsonLoose(output);errors=validate(outputJson,schema);}catch(error){errors=[error?.message||'Invalid JSON.'];outputJson=null;}
     if(!errors.length){
       if(!isObject(outputJson?.module))errors=['$.module must be an object.'];
       else{
         outputJson.module.xp={domain:clean(request?.context?.capability,120)||'learning',amount:20};
-        return{...base,status:'success',outputText:JSON.stringify(outputJson),outputJson,usage:usage(payload),stream:{requested:false,used:false},structured:{requested:true,valid:true,repairAttempts:attempt},fallback:{used:false}};
+        return{...base,status:'success',outputText:JSON.stringify(outputJson),outputJson,usage:usage(lastResult?.usage),stream:{requested:false,used:false},structured:{requested:true,valid:true,repairAttempts:attempt},fallback:{used:false},actual:{provider:'gemini',model:lastResult?.actual?.model||SMALL_MODEL},diagnostics:[...base.diagnostics,`Structured module passed after ${attempt} repair attempt${attempt===1?'':'s'}.`]};
       }
     }
-    if(attempt>=maxAttempts)return{...base,status:'invalid-response',outputText:lastText,recoverablePayload:outputJson,usage:usage(payload),stream:{requested:false,used:false},structured:{requested:true,valid:false,repairAttempts:attempt,errors:errors.slice(0,24)},fallback:{used:false},error:{code:'INVALID_STRUCTURED_OUTPUT',message:`Living School module JSON did not satisfy the required contract: ${errors.slice(0,6).join('; ')}`}};
+    if(attempt>=maxAttempts)return{...base,status:'invalid-response',outputText:lastText,recoverablePayload:outputJson,usage:usage(lastResult?.usage),stream:{requested:false,used:false},structured:{requested:true,valid:false,repairAttempts:attempt,errors:errors.slice(0,24)},fallback:{used:false},error:{code:'INVALID_STRUCTURED_OUTPUT',message:`Living School module JSON did not satisfy the required contract: ${errors.slice(0,6).join('; ')}`}};
     attempt++;
-    rows=messages({messages:[...(request.messages||[]),{role:'assistant',content:lastText},{role:'user',content:`Correct the preceding module JSON. Return only one schema-matching JSON object. Fix these validation issues:\n- ${errors.slice(0,12).join('\n- ')}`}]});
+    messages=[...originalMessages,{role:'assistant',content:lastText},{role:'user',content:`Correct the preceding module JSON. Return only one schema-matching JSON object. Preserve the supplied SOURCE_ID values, do not add media URLs, and fix these validation issues:\n- ${errors.slice(0,12).join('\n- ')}`}];
   }
 }
-async function generateDesign(request,config){
-  const rows=messages({...request,messages:[...(request.messages||[]),{role:'system',content:'Do not discuss or restate Civweave rewards, XP, Acorns, Buttons, prices, grants, payouts, wages, currency, labor valuation, or ledger policy. Produce instructional design content only.'}]});
-  const {output,payload}=await post(config,request,rows,null),base=resultBase(request,config);
-  return{...base,status:'success',outputText:output,usage:usage(payload),stream:{requested:false,used:false},structured:{requested:false,valid:true,repairAttempts:0},fallback:{used:false}};
+async function generateDesign(request,config,baseRuntime){
+  const messages=boundaryMessages(request,'Do not discuss or restate Civweave rewards, XP, Acorns, Buttons, prices, grants, payouts, wages, currency, labor valuation, or ledger policy. Produce instructional design content only. Do not output video URLs or media links; provide plain-text video-search topics only.');
+  const {output,result}=await interactionPost(baseRuntime,config,request,messages,null),base=resultBase(request,config);
+  return{...base,status:'success',outputText:output,usage:usage(result?.usage),stream:{requested:false,used:false},structured:{requested:false,valid:true,repairAttempts:0},fallback:{used:false},actual:{provider:'gemini',model:result?.actual?.model||SMALL_MODEL}};
 }
 function provider(request){return clean(request?.config?.provider||request?.config?.route,80).toLowerCase();}
 function postFallbackDesign(request){return clean(request?.purpose,180)===DESIGN_PURPOSE&&clean(request?.context?.research?.mode,120).toLowerCase()==='model-derived-unverified';}
 function install(){
   const spine=globalThis.CivweaveFastInteractiveV192;if(!spine?.register)return false;
+  spine.unregister?.('living-school-gemini-structured-v329');
   spine.unregister?.(ID);
   spine.register(ID,{
     before(request){
       if(!postFallbackDesign(request))return request;
       return{...request,purpose:POST_FALLBACK_DESIGN_PURPOSE,taskTier:'small',executionProfile:'interactive',config:{...(request.config||{}),provider:'gemini',route:'gemini',model:SMALL_MODEL},context:{...(request.context||{}),livingSchoolOriginalPurpose:DESIGN_PURPOSE,postFallbackDesign:true}};
     },
-    async handle(request){
+    async handle(request,ctx){
       const structure=clean(request?.purpose,180)===STRUCTURE_PURPOSE,design=clean(request?.purpose,180)===POST_FALLBACK_DESIGN_PURPOSE;
       if((!structure&&!design)||provider(request)!=='gemini')return{handled:false};
       const config={...(request.config||{}),model:SMALL_MODEL};
       if(!config.apiKey||!config.externalConsent)return{handled:false};
-      try{return{handled:true,result:structure?await generateStructured(request,config):await generateDesign(request,config)}}catch(error){return{handled:true,result:{...resultBase(request,config),status:'provider-error',outputText:'',usage:{},stream:{requested:false,used:false},structured:{requested:Boolean(structure),valid:false,repairAttempts:0},fallback:{used:false},error:{code:clean(error?.code||'LIVING_SCHOOL_GEMINI_GENERATION_FAILED',120),message:clean(error?.message||error,2400),status:error?.status}}}};
+      const baseRuntime=ctx?.baseRuntime||spine.base?.();
+      try{return{handled:true,result:structure?await generateStructured(request,config,baseRuntime):await generateDesign(request,config,baseRuntime)}}catch(error){return{handled:true,result:{...resultBase(request,config),status:'provider-error',outputText:'',usage:{},stream:{requested:false,used:false},structured:{requested:Boolean(structure),valid:false,repairAttempts:0},fallback:{used:false},error:{code:clean(error?.code||'LIVING_SCHOOL_GEMINI_GENERATION_FAILED',120),message:clean(error?.message||error,2400),status:error?.status}}}};
     }
   },90);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-gemini-structured-ready',{detail:{version:VERSION,middleware:ID,model:SMALL_MODEL,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-gemini-structured-ready',{detail:{version:VERSION,middleware:ID,model:SMALL_MODEL,transport:'gemini-interactions',at:new Date().toISOString()}}))}catch{}
   return true;
 }
 addEventListener?.('civweave:runtime-spine-ready',()=>queueMicrotask(install));
 addEventListener?.('civweave:gemini-task-router-ready',()=>queueMicrotask(install));
+addEventListener?.('civweave:gemini-interactions-ready',()=>queueMicrotask(install));
 install();
-globalThis.CivweaveLivingSchoolGeminiStructuredV1=Object.freeze({version:VERSION,install,middlewareId:ID,model:SMALL_MODEL});
+globalThis.CivweaveLivingSchoolGeminiStructuredV1=Object.freeze({version:VERSION,install,middlewareId:ID,model:SMALL_MODEL,transport:'gemini-interactions'});
 })();
