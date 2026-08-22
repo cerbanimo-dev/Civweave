@@ -66,13 +66,14 @@ for(const token of ['delete next.room','delete next.currentRoom','delete next.la
 assert(core.includes('You are Moss')||core.includes('Moss performing'),'Moss does not own Living School curriculum generation.');
 
 for(const token of [
+  'actions as legacyActions',
   'researchCapability',
   'generateSchoolWithAtomicSharedQuiz',
   'stripLegacyFallbackQuestions(school)',
   'completeSharedQuizBank',
   'quizNeeds',
   "'research-sources':",
-  "'evaluate-assessment':"
+  'export const actions={...legacyActions'
 ])assert(actionsSource.includes(token),`Canonical action layer is missing ${token}.`);
 
 for(const token of [
@@ -93,7 +94,8 @@ for(const token of ['extractArticleMetadata','canonicalNearHit','bestMetadataFor
 
 const actionTokens=new Set([...index.matchAll(/data-ls-action="([^"]+)"/g),...renderSource.matchAll(/data-ls-action=\\?"([^"\\]+)\\?"/g)].map(match=>match[1]));
 assert(actionTokens.size>=18,'The clean-room surface lost expected direct actions.');
-for(const action of actionTokens)assert(actionsSource.includes(`'${action}':`),`Action ${action} is rendered without a canonical handler.`);
+const legacyActionSource=await read('public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs');
+for(const action of actionTokens)assert(actionsSource.includes(`'${action}':`)||legacyActionSource.includes(`'${action}':`),`Action ${action} is rendered without an active or inherited canonical handler.`);
 assert(!/<button(?![^>]*type="button")[^>]*data-ls-action/i.test(index+renderSource),'Every actionable button must be explicitly non-submitting.');
 for(const token of ['.lsc218-root','touch-action:manipulation','.lsc218-research-status','.lsc218-contract-grid','.lsc218-visual','.lsc218-question','.lsc218-provenance'])assert(css.includes(token),`The clean-room interaction styling is missing ${token}.`);
 
