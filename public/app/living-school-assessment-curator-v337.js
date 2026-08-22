@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-living-school-assessment-curator-v337';
+const VERSION='1.0.1-living-school-assessment-curator-v337';
 const ID='living-school-assessment-curator-v337';
 const PURPOSE='living-school-structure-single-v221';
 const COMPILER='grounded-design-compiler-v336+assessment-curator-v337';
@@ -8,7 +8,7 @@ const clean=(value,max=64000)=>String(value??'').trim().slice(0,max);
 const strip=value=>clean(value,8000).replace(/\*\*/g,'').replace(/__+/g,'').replace(/`+/g,'').replace(/\s+/g,' ').trim();
 const sentence=value=>{const text=strip(value),match=text.match(/^(.+?[.!?])(?:\s|$)/);return clean(match?.[1]||text,700)};
 const cap=value=>{const text=strip(value);return text?text[0].toUpperCase()+text.slice(1):text};
-const ACTION=/^(?:identify|compare|contrast|distinguish|choose|select|diagnose|calculate|plan|design|explain|apply|classify|categorize|describe|map|draft|create|develop|prioritize|recommend|decide|match|outline|name|define|evaluate)\b/i;
+const ACTION=/^(?:identify|compare|contrast|distinguish|choose|select|diagnose|calculate|plan|design|explain|apply|classify|categorize|describe|map|draft|create|develop|prioritize|recommend|decide|match|outline|name|define|evaluate|translate|synthesize|integrate|analyze|analyse|interpret|construct|formulate|propose|justify|organize|organise|adapt)\b/i;
 const META=/\b(?:learner(?:'s|’s)?\s+(?:ability|understanding|knowledge)|this\s+module|the\s+module|lesson\s+blocks?|module\s+objective|learning\s+objective|assessment\s+intent|curriculum|rubric|source\s+packet|what\s+was\s+taught|as\s+taught\s+in)\b/i;
 function directAssessment(raw,objective,title){
   let text=strip(raw)
@@ -20,7 +20,7 @@ function directAssessment(raw,objective,title){
   text=text.replace(/^understand\s+/i,'Explain ').replace(/^demonstrate\s+(?:an\s+)?understanding\s+of\s+/i,'Explain ');
   if(!ACTION.test(text))text=`Explain ${text||title}`;
   text=cap(text).replace(/[.!?]+$/,'');
-  if(/^(?:categorize|classify|compare|contrast|distinguish|choose|select|recommend|decide|diagnose|plan|design|apply|evaluate)\b/i.test(text)&&!/\b(?:why|reason|justify|explain)\b/i.test(text))text+=' and explain your reasoning';
+  if(/^(?:categorize|classify|compare|contrast|distinguish|choose|select|recommend|decide|diagnose|plan|design|apply|evaluate|translate|synthesize|integrate|analyze|analyse|interpret|propose)\b/i.test(text)&&!/\b(?:why|reason|justify|explain)\b/i.test(text))text+=' and explain your reasoning';
   return`${text}.`;
 }
 function curateQuiz(module,index,assessment,exercise){
