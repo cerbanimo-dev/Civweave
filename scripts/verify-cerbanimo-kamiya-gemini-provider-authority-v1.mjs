@@ -60,4 +60,14 @@ assert(added,'Endeavor was not created after the second Flash-Lite repair.');
 assert.equal(added.options.activate,true);assert.equal(added.quest.authoring.provider,'gemini');assert.equal(added.quest.authoring.crossProviderFailover,false);assert.equal(added.quest.authoring.repairAttempts,2);
 assert.equal(response.provider,'gemini');assert.equal(response.model,'gemini-3.1-flash-lite');assert.equal(calls.length,3);assert(calls.every(call=>call.provider==='gemini'));assert.equal(calls[1].schema,true);assert.equal(calls[2].schema,false);assert(!calls.some(call=>String(call.provider).includes('cloudflare')));
 assert.match(response.response.answer,/Endeavor created:/);assert.doesNotMatch(response.response.answer,/Cloudflare|Workers AI|neurons/i);
-console.log('PASS Gemini-selected Endeavor stays on Gemini, retries Flash-Lite twice with progressively tighter repair instructions, and never consumes Workers AI neurons.');
+
+const outageCalls=[];
+const unavailable=model=>({status:'provider-error',actual:{provider:'gemini',model},requested:{provider:'gemini',model},error:{status:503,message:'Gemini returned HTTP 503: UNAVAILABLE high demand'}});
+context.CivweaveFastInteractiveV192.base=()=>({generate:async request=>{outageCalls.push({provider:request.config.provider,model:request.config.model});return unavailable(request.config.model)}});
+const outage=await context.CivweaveCerbanimoChatQuestCapabilityV3.generateGeminiOnly({generate:async request=>{outageCalls.push({provider:request.config.provider,model:'gemini-3.7-flash'});return unavailable('gemini-3.7-flash')}},{purpose:'test',executionProfile:'interactive',config:{provider:'gemini',route:'gemini',model:'gemini-3.7-flash'}},{provider:'gemini',route:'gemini',model:'gemini-3.7-flash'});
+assert.equal(outage.error.code,'GEMINI_ONLY_CHAIN_EXHAUSTED');
+assert.deepEqual(outageCalls.map(call=>call.model),['gemini-3.7-flash','gemini-3.5-flash','gemini-3.1-flash-lite']);
+assert(outageCalls.every(call=>call.provider==='gemini'),'Gemini outage path crossed providers.');
+assert.match(outage.error.message,/No neuron-backed provider was used/);assert.doesNotMatch(outage.error.message,/Cloudflare|Workers AI/i);
+
+console.log('PASS Gemini-selected Endeavor stays on Gemini, retries Flash-Lite twice with progressively tighter repair instructions, and neither malformed JSON nor provider outages can consume Workers AI neurons.');
