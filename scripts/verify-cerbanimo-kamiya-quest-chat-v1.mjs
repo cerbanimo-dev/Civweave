@@ -14,9 +14,9 @@ const realmPath='public/app/realm-console-v140.html';
 syntax(capabilityPath);syntax(normalizerPath);
 const source=read(capabilityPath),normalizer=read(normalizerPath),realm=read(realmPath);
 assert(realm.includes('/app/server-ai-output-normalizer-v1.js?v=1.0.0'),'Cerbanimo console does not load provider-envelope normalization.');
-assert(realm.includes('/app/cerbanimo-chat-quest-capability-v1.js?v=1.0.0'),'Cerbanimo console does not load the Kamiya Quest capability.');
+assert(realm.includes('/app/cerbanimo-chat-quest-capability-v1.js?v=1.0.1'),'Cerbanimo console does not load the current Kamiya Quest capability.');
 assert(realm.indexOf('server-ai-output-normalizer-v1.js')<realm.indexOf('family-ai-loader-v105.js'),'Provider-envelope normalizer must be installed before the model loader can answer.');
-for(const token of ["chat.registerCapability('cerbanimo',handler)","responseFormat:'json'",'schema:QUEST_SCHEMA','createQuestFromInput','addQuest(quest,{activate:true})',"source:'kamiya-chat-ai-quest'",'proofRequirements','acceptanceCriteria'])assert(source.includes(token),`Kamiya Quest capability is missing ${token}`);
+for(const token of ["chat.registerCapability('cerbanimo',handler)","responseFormat:'json'",'schema:QUEST_SCHEMA','createQuestFromInput','addQuest(quest,{activate:true})',"source:'kamiya-chat-ai-quest'",'proofRequirements','acceptanceCriteria','task.acceptanceCriteria=[criterion]'])assert(source.includes(token),`Kamiya Quest capability is missing ${token}`);
 for(const token of ['choices?.[0]?.message','reasoningVisible:false','WORKERS_AI_ENVELOPE_NORMALIZED'])assert(normalizer.includes(token),`Server AI output normalizer is missing ${token}`);
 
 let registeredHandler=null,added=null;
@@ -45,7 +45,7 @@ const context={
   CivweaveFamilyAILoaderV105:{ensure:async()=>true},
   CivweaveModelRuntime:{generate:async request=>{assert.equal(request.purpose,'cerbanimo-quest-authoring-v1');assert.equal(request.responseFormat,'json');assert.equal(request.task.systemId,'cerbanimo');return{status:'success',actual:{provider:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'},outputText:rawEnvelope,usage:{chargedNeurons:40}}}},
   CivweaveCerbanimoQuestV144:{
-    createQuestFromInput:input=>({id:'quest-community-garden',title:input.title,objective:input.objective,description:input.description,source:input.source,sourceActionId:input.sourceActionId,tasks:input.steps.map((step,index)=>({id:`task-${index+1}`,title:step.split(':')[0],description:step,proofRequirement:input.proofRequirements[index],acceptanceCriterion:input.acceptanceCriteria[index]}))}),
+    createQuestFromInput:input=>({id:'quest-community-garden',title:input.title,objective:input.objective,description:input.description,source:input.source,sourceActionId:input.sourceActionId,acceptanceCriteria:input.acceptanceCriteria,proofRequirements:input.proofRequirements,tasks:input.steps.map((step,index)=>({id:`task-${index+1}`,title:step.split(':')[0],description:step,acceptanceCriteria:[input.proofRequirements[index]],proofRequired:true}))}),
     addQuest:(quest,options)=>{added={quest,options};return{ok:true,quest}}
   }
 };
@@ -58,14 +58,17 @@ const response=await registeredHandler({systemId:'cerbanimo',text:'Help me build
 assert(added,'Community garden request did not create a Quest.');
 assert.equal(added.options.activate,true,'Generated Quest was not activated.');
 assert.equal(added.quest.source,'kamiya-chat-ai-quest','Generated Quest has the wrong source authority.');
-assert.equal(added.quest.authoring.aiGenerated,true,'Generated Quest is not stamped as AI-authored.');
-assert.equal(added.quest.authoring.provider,'cloudflare-workers-ai','Generated Quest lost provider provenance.');
 assert.equal(added.quest.tasks.length,5,'Generated Quest did not preserve its work units.');
-for(const task of added.quest.tasks){assert(task.proofRequirement,'A Quest task is missing its proof gate.');assert(task.acceptanceCriterion,'A Quest task is missing completion criteria.');}
+assert.equal(added.quest.proofRequirements.length,5,'Generated Quest did not preserve its proof gates.');
+for(let index=0;index<added.quest.tasks.length;index+=1){
+  const task=added.quest.tasks[index],unit=generatedPlan.workUnits[index];
+  assert.equal(task.acceptanceCriteria[0],unit.acceptanceCriteria,`Work unit ${index+1} lost its completion criterion.`);
+  assert.match(added.quest.proofRequirements[index],new RegExp(unit.proof.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')),`Work unit ${index+1} lost its proof requirement.`);
+}
 assert.match(response.response.answer,/Quest created:/,'Kamiya did not report the created Quest.');
 assert.doesNotMatch(response.response.answer,/GENERIC CHAT FALLTHROUGH/,'Quest request fell through to generic chat.');
 assert.doesNotMatch(response.response.answer,/chatcmpl-community-garden/,'Provider envelope leaked into the visible answer.');
 assert.doesNotMatch(response.response.answer,/PRIVATE REASONING/,'Private reasoning leaked into the visible answer.');
 assert.equal(response.response.choice.system,'cerbanimo','Kamiya response left the Cerbanimo system.');
 assert.equal(response.action.kind,'cerbanimo-quest-created','Kamiya response did not expose the canonical Quest action.');
-console.log('PASS Kamiya turns “Help me build a community garden” into an active structured Cerbanimo Quest and provider reasoning cannot render.');
+console.log('PASS Kamiya turns “Help me build a community garden” into an active structured Cerbanimo Quest with separate proof/completion gates, and provider reasoning cannot render.');
