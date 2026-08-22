@@ -1,11 +1,20 @@
-const REVISION='living-school-quiz-contract-guard-v263';
+const REVISION='living-school-quiz-contract-guard-v264-pedagogy';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
 const REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v263';
 const REQUIRED_TYPES=['multiple-choice','multi-select','short-answer'];
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
+const STOP_WORDS=new Set(['about','after','again','against','also','another','before','being','between','could','each','from','have','into','module','should','their','there','these','they','this','those','through','using','what','when','where','which','while','with','would','your','learner','learning','practice','exercise','artifact','objective','capability']);
+const ALWAYS_META=[/best demonstrates completion/i,/demonstrates completion of (?:the|this) module/i,/skip (?:the )?practice/i,/confidence alone/i,/invent(?:ed)? (?:a )?citation/i,/ignore (?:the )?module objective/i,/unrelated artifact/i,/assessment intent/i,/connect this point to the module objective/i];
+const PROCESS_META=[/reviewable learning evidence/i,/reviewable evidence/i,/generated-unverified/i,/source-backed versus generated/i,/replace supplied evidence/i];
 
 function promptKey(question){return clean(question?.prompt,2400).toLowerCase().replace(/\s+/g,' ')}
 function typeOf(question){return clean(question?.type,80).toLowerCase()}
+function words(value){return new Set(clean(value,24000).toLowerCase().replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=4&&!STOP_WORDS.has(word)))}
+function researchSubject(module){return /research|source|evidence|provenance|verification|fact.?check|citation/i.test([module?.title,module?.objective,...(Array.isArray(module?.learningObjectives)?module.learningObjectives:[]),...(Array.isArray(module?.concepts)?module.concepts.map(row=>row?.term):[])].filter(Boolean).join(' '))}
+function metaText(value,module){const text=clean(value,12000);if(ALWAYS_META.some(pattern=>pattern.test(text)))return true;return !researchSubject(module)&&PROCESS_META.some(pattern=>pattern.test(text))}
+function subjectAnchors(module){return words([module?.title,module?.objective,...(Array.isArray(module?.learningObjectives)?module.learningObjectives:[]),...(Array.isArray(module?.concepts)?module.concepts.map(row=>row?.term):[])].filter(Boolean).join(' '))}
+function questionText(question){return[question?.prompt,...(Array.isArray(question?.options)?question.options:[]),question?.explanation,...(Array.isArray(question?.concepts)?question.concepts:[])].filter(Boolean).join(' ')}
+function subjectGrounded(question,module){const anchors=subjectAnchors(module);if(!anchors.size)return true;const tokens=words(questionText(question));for(const anchor of anchors)if(tokens.has(anchor))return true;return false}
 function rubricRows(question){
   return (Array.isArray(question?.rubric)?question.rubric:[]).map((row,index)=>({
     id:clean(row?.id,80)||`criterion-${index+1}`,
@@ -15,19 +24,25 @@ function rubricRows(question){
     required:row?.required!==false
   })).filter(row=>row.label&&Number.isFinite(row.points)&&row.points>0);
 }
-function validQuestion(question){
+function validQuestion(question,module){
   const type=typeOf(question),prompt=clean(question?.prompt,2400);
-  if(!REQUIRED_TYPES.includes(type)||!prompt)return false;
+  if(!REQUIRED_TYPES.includes(type)||!prompt||metaText(questionText(question),module)||!subjectGrounded(question,module))return false;
   const options=(Array.isArray(question?.options)?question.options:[]).map(value=>clean(value,400)).filter(Boolean);
-  if(type==='multiple-choice')return options.length>=2&&Boolean(clean(question?.answer,1200));
-  if(type==='multi-select')return options.length>=2&&Array.isArray(question?.answer)&&question.answer.map(value=>clean(value,400)).filter(Boolean).length>0;
+  if(type==='multiple-choice'){
+    const answer=clean(question?.answer,1200);
+    return options.length>=2&&Boolean(answer)&&options.includes(answer);
+  }
+  if(type==='multi-select'){
+    const answers=Array.isArray(question?.answer)?question.answer.map(value=>clean(value,400)).filter(Boolean):[];
+    return options.length>=2&&answers.length>0&&answers.every(answer=>options.includes(answer));
+  }
   if(type==='short-answer')return rubricRows(question).length>=2;
   return false;
 }
-function validRows(output,moduleId){
-  const rows=Array.isArray(output?.modules)?output.modules:[];
+function validRows(output,module){
+  const moduleId=clean(module?.moduleId,180),rows=Array.isArray(output?.modules)?output.modules:[];
   const row=rows.find(item=>clean(item?.moduleId,180)===moduleId)||rows[0];
-  return (Array.isArray(row?.questions)?row.questions:[]).filter(validQuestion);
+  return (Array.isArray(row?.questions)?row.questions:[]).filter(question=>validQuestion(question,module));
 }
 function missingTypes(module,questions){
   const have=new Set(questions.map(typeOf));
@@ -54,14 +69,17 @@ function compactModule(module){return{
 }}
 function repairPrompt(module,type,attempt){
   const contract=type==='short-answer'
-    ? 'Return one short-answer question. It MUST include rubric with 2-5 criterion objects. Every criterion MUST include id, label, points, role, and required. A prose answer, explanation, or concepts list is NOT a substitute for rubric.'
+    ? 'Return one short-answer question. It MUST include rubric with 2-5 criterion objects. Every criterion MUST include id, label, points, role, and required. Score subject accuracy, explanation, comparison, reasoning, or application—not generic evidence compliance.'
     : type==='multi-select'
-      ? 'Return one multi-select question with at least two options and a non-empty answer array containing the correct option labels exactly as written.'
-      : 'Return one multiple-choice question with at least two options and one non-empty answer string exactly matching the correct option label.';
+      ? 'Return one multi-select question with at least two plausible subject-matter options and a non-empty answer array containing the correct option labels exactly as written.'
+      : 'Return one multiple-choice question with at least two plausible subject-matter options and one non-empty answer string exactly matching the correct option label.';
   return[
     `Repair exactly one missing ${type} question for Living School module ${clean(module?.moduleId,180)}.`,
     contract,
-    'The question must test the supplied module content, not generic learning-process boilerplate.',
+    'Test a fact, concept, relationship, mechanism, distinction, or applied judgment actually taught in MODULE MATERIAL.',
+    'Make the prompt self-contained and name or clearly invoke the actual subject or one of its concepts.',
+    'For distractors, use plausible domain misconceptions—not silly choices that merely violate the learning workflow.',
+    'Never ask which action demonstrates completion. Never use skipping practice, confidence alone, invented citations, ignoring the objective, unrelated artifacts, or reviewable-evidence compliance as distractors.',
     'Do not repeat or lightly paraphrase any existing question.',
     'Return exactly one module and exactly one question in the required JSON shape.',
     `Attempt ${attempt}.`,
@@ -77,14 +95,14 @@ async function repairOne(baseGenerate,request,module,type,attempt){
     config,
     schema:repairSchema(clean(module?.moduleId,180),type),
     maxRepairAttempts:2,
-    context:{capability:request?.context?.capability,level:request?.context?.level,proofContract:request?.context?.proofContract,quizContractRepair:true,module:compactModule(module),requiredType:type,requirements:['Return exactly one valid question.','Obey the type-specific schema exactly.','Do not invent curriculum content outside the supplied module.']},
+    context:{capability:request?.context?.capability,level:request?.context?.level,proofContract:request?.context?.proofContract,quizContractRepair:true,module:compactModule(module),requiredType:type,requirements:['Return exactly one valid question.','Obey the type-specific schema exactly.','Test subject mastery, not module-completion behavior.','Do not invent curriculum content outside the supplied module.']},
     messages:[
-      {role:'system',content:'You are Moss repairing one malformed or missing Living School quiz question. Return strict JSON only. The schema is a hard persistence contract, not a suggestion.'},
+      {role:'system',content:'You are Moss repairing one malformed, generic, or missing Living School quiz question. Return strict JSON only. The schema and subject-mastery contract are hard persistence requirements.'},
       {role:'user',content:repairPrompt(module,type,attempt)}
     ]
   });
   if(result?.status!=='success')return null;
-  const question=validRows(result.outputJson,clean(module?.moduleId,180))[0];
+  const question=validRows(result.outputJson,module)[0];
   return question&&typeOf(question)===type?question:null;
 }
 
@@ -94,14 +112,14 @@ async function enforceQuizContract(baseGenerate,request,initial){
   if(!modules.length)return initial;
   const initialRows=Array.isArray(initial?.outputJson?.modules)?initial.outputJson.modules:[];
   const combined=[];
-  let latest=initial,repairCalls=0;
+  let latest=initial,repairCalls=0,rejectedGeneric=0;
   for(const module of modules){
     const moduleId=clean(module?.moduleId,180),target=targetCount(module);
     const row=initialRows.find(item=>clean(item?.moduleId,180)===moduleId)||initialRows[0];
     const seen=new Set((Array.isArray(module?.existingQuestions)?module.existingQuestions:[]).map(promptKey).filter(Boolean));
     const questions=[];
     for(const question of (Array.isArray(row?.questions)?row.questions:[])){
-      if(!validQuestion(question))continue;
+      if(!validQuestion(question,module)){rejectedGeneric+=1;continue}
       const key=promptKey(question);if(!key||seen.has(key))continue;
       seen.add(key);questions.push(question);
     }
@@ -118,11 +136,11 @@ async function enforceQuizContract(baseGenerate,request,initial){
     }
     combined.push({moduleId,questions:questions.slice(0,Math.max(target,questions.length))});
   }
-  return{...latest,status:'success',outputJson:{modules:combined},outputText:JSON.stringify({modules:combined}),livingSchoolQuizContract:{revision:REVISION,repairCalls,validatesBeforeCounting:true}};
+  return{...latest,status:'success',outputJson:{modules:combined},outputText:JSON.stringify({modules:combined}),livingSchoolQuizContract:{revision:REVISION,repairCalls,rejectedGeneric,validatesBeforeCounting:true,subjectMasteryRequired:true}};
 }
 
 export async function installLivingSchoolQuizContractGuardV263(){
-  if(globalThis.CivweaveLivingSchoolQuizContractGuardV263?.installed)return globalThis.CivweaveLivingSchoolQuizContractGuardV263;
+  if(globalThis.CivweaveLivingSchoolQuizContractGuardV263?.installed&&globalThis.CivweaveLivingSchoolQuizContractGuardV263?.revision===REVISION)return globalThis.CivweaveLivingSchoolQuizContractGuardV263;
   const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate)throw new Error('The shared model runtime is unavailable for the Living School quiz contract guard.');
   if(runtime.livingSchoolQuizContractGuardRevision===REVISION)return runtime;
@@ -130,7 +148,7 @@ export async function installLivingSchoolQuizContractGuardV263(){
   const generate=async request=>request?.purpose===QUIZ_PURPOSE?enforceQuizContract(baseGenerate,request,await baseGenerate(request)):baseGenerate(request);
   const wrapped=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),livingSchoolQuizContractGuardRevision:REVISION});
   globalThis.CivweaveModelRuntime=wrapped;
-  const api=Object.freeze({installed:true,revision:REVISION,validatesBeforeCounting:true,shortAnswerRubricRequired:true,typeSpecificRecoverySchema:true});
+  const api=Object.freeze({installed:true,revision:REVISION,validatesBeforeCounting:true,shortAnswerRubricRequired:true,typeSpecificRecoverySchema:true,subjectMasteryRequired:true,genericAssessmentRejected:true,plausibleDistractorsRequired:true});
   globalThis.CivweaveLivingSchoolQuizContractGuardV263=api;
   try{dispatchEvent(new CustomEvent('civweave:living-school-quiz-contract-ready',{detail:api}))}catch{}
   return api;
