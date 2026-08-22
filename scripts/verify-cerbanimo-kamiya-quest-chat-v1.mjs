@@ -10,12 +10,16 @@ const read=path=>fs.readFileSync(resolve(root,path),'utf8');
 const syntax=path=>{const result=spawnSync(process.execPath,['--check',resolve(root,path)],{encoding:'utf8'});assert.equal(result.status,0,`${path} failed node --check:\n${result.stderr||result.stdout}`)};
 const capabilityPath='public/app/cerbanimo-chat-quest-capability-v1.js';
 const normalizerPath='public/app/server-ai-output-normalizer-v1.js';
+const boundaryPath='public/app/install-boundary-v146.js';
 const realmPath='public/app/realm-console-v140.html';
-syntax(capabilityPath);syntax(normalizerPath);
-const source=read(capabilityPath),normalizer=read(normalizerPath),realm=read(realmPath);
+const workerPath='public/service-worker-chat-repair-v245.js';
+for(const path of [capabilityPath,normalizerPath,boundaryPath,workerPath])syntax(path);
+const source=read(capabilityPath),normalizer=read(normalizerPath),boundary=read(boundaryPath),realm=read(realmPath),worker=read(workerPath);
 assert(realm.includes('/app/server-ai-output-normalizer-v1.js?v=1.0.0'),'Cerbanimo console does not load provider-envelope normalization.');
 assert(realm.includes('/app/cerbanimo-chat-quest-capability-v1.js?v=1.0.1'),'Cerbanimo console does not load the current Kamiya Quest capability.');
 assert(realm.indexOf('server-ai-output-normalizer-v1.js')<realm.indexOf('family-ai-loader-v105.js'),'Provider-envelope normalizer must be installed before the model loader can answer.');
+for(const token of ["const SERVER_AI_OUTPUT_NORMALIZER='/app/server-ai-output-normalizer-v1.js'","const CERBANIMO_CHAT_QUEST='/app/cerbanimo-chat-quest-capability-v1.js'",'GUIDE_WORKSPACE,SERVER_AI_OUTPUT_NORMALIZER,CERBANIMO_CHAT_QUEST'])assert(boundary.includes(token),`Global system experience loader is missing ${token}`);
+for(const path of ['/app/server-ai-output-normalizer-v1.js','/app/cerbanimo-chat-quest-capability-v1.js'])assert(worker.includes(`'${path}'`),`Chat cache repair does not purge ${path}`);
 for(const token of ["chat.registerCapability('cerbanimo',handler)","responseFormat:'json'",'schema:QUEST_SCHEMA','createQuestFromInput','addQuest(quest,{activate:true})',"source:'kamiya-chat-ai-quest'",'proofRequirements','acceptanceCriteria','task.acceptanceCriteria=[criterion]'])assert(source.includes(token),`Kamiya Quest capability is missing ${token}`);
 for(const token of ['choices?.[0]?.message','reasoningVisible:false','WORKERS_AI_ENVELOPE_NORMALIZED'])assert(normalizer.includes(token),`Server AI output normalizer is missing ${token}`);
 
@@ -63,7 +67,7 @@ assert.equal(added.quest.proofRequirements.length,5,'Generated Quest did not pre
 for(let index=0;index<added.quest.tasks.length;index+=1){
   const task=added.quest.tasks[index],unit=generatedPlan.workUnits[index];
   assert.equal(task.acceptanceCriteria[0],unit.acceptanceCriteria,`Work unit ${index+1} lost its completion criterion.`);
-  assert.match(added.quest.proofRequirements[index],new RegExp(unit.proof.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')),`Work unit ${index+1} lost its proof requirement.`);
+  assert(added.quest.proofRequirements[index].includes(unit.proof),`Work unit ${index+1} lost its proof requirement.`);
 }
 assert.match(response.response.answer,/Quest created:/,'Kamiya did not report the created Quest.');
 assert.doesNotMatch(response.response.answer,/GENERIC CHAT FALLTHROUGH/,'Quest request fell through to generic chat.');
@@ -71,4 +75,4 @@ assert.doesNotMatch(response.response.answer,/chatcmpl-community-garden/,'Provid
 assert.doesNotMatch(response.response.answer,/PRIVATE REASONING/,'Private reasoning leaked into the visible answer.');
 assert.equal(response.response.choice.system,'cerbanimo','Kamiya response left the Cerbanimo system.');
 assert.equal(response.action.kind,'cerbanimo-quest-created','Kamiya response did not expose the canonical Quest action.');
-console.log('PASS Kamiya turns “Help me build a community garden” into an active structured Cerbanimo Quest with separate proof/completion gates, and provider reasoning cannot render.');
+console.log('PASS Kamiya turns “Help me build a community garden” into an active structured Cerbanimo Quest with separate proof/completion gates, provider reasoning cannot render, and the capability is loaded across the shared five-guide surface.');
