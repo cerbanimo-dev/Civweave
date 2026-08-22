@@ -25,7 +25,7 @@ function subjectRelevant(title,notes,capability){
 function readableScore(text,tokens){
   const normalized=String(text||'').toLowerCase(),words=normalized.match(/[a-z]{2,}/g)||[];
   if(words.length<18)return -Infinity;
-  const relevant=tokens.reduce((score,token)=>score+(normalized.includes(token)?80:0),0;
+  const relevant=tokens.reduce((score,token)=>score+(normalized.includes(token)?80:0),0);
   const letters=(text.match(/[A-Za-z]/g)||[]).length,odd=(text.match(/[^\x20-\x7E\u00A0-\u024F]/g)||[]).length;
   return relevant+Math.min(words.length,180)+letters/40-odd*12;
 }
