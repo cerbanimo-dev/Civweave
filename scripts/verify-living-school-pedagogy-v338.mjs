@@ -18,7 +18,7 @@ const [designSource,compilerSource,curatorSource,generationGuard,quizGuard,actio
 
 for(const token of ['SUBJECT MASTERY FIRST','authentic task','plausible subject-matter misconceptions','structureQualityIssues'])assert(generationGuard.includes(token),`Generation guard is missing pedagogy contract token: ${token}`);
 for(const token of ['subjectMasteryRequired:true','genericAssessmentRejected:true','plausibleDistractorsRequired:true'])assert(quizGuard.includes(token),`Quiz guard is missing subject-mastery enforcement: ${token}`);
-for(const token of ['Assessment authoring boundary','Why It Matters','Practice Steps','Do not repeat concept definitions as lesson prose'])assert(designSource.includes(token),`Grounded design prompt is missing required authoring guidance: ${token}`);
+for(const token of ['Assessment authoring boundary','Why It Matters','Practice Steps','**Lesson Block 1: Specific heading.**','Do not repeat concept definitions as lesson prose'])assert(designSource.includes(token),`Grounded design prompt is missing required authoring guidance: ${token}`);
 assert(!compilerSource.includes('Learning application (GENERATED-UNVERIFIED): connect this point to the module objective'),'Compiler still contains the repetitive generic learning-application filler.');
 assert(!compilerSource.includes('Which action best demonstrates completion of the module practice?'),'Compiler still contains the meta module-completion assessment.');
 for(const token of ['LIVING_SCHOOL_DESIGN_LESSON_BLOCK_TOO_THIN','noGenericLessonPadding:true',"SCAFFOLD_PROVENANCE='deterministic-compiler'"])assert(compilerSource.includes(token),`Compiler is missing anti-filler behavior: ${token}`);
@@ -55,11 +55,11 @@ Concepts:
 - Cultivation intent — The primary reason plants are grown, such as household use, community use, aesthetics, or production.
 - Scale — The amount of space, labor, and output involved in a growing project.
 - Production focus — A priority on reliable food output rather than primarily decorative or leisure goals.
-Lesson Block 1: Cultivation Intent
+**Lesson Block 1: Cultivation Intent.**
 ${paragraph('Cultivation intent','a project designed for household enjoyment makes different choices from one expected to supply regular produce')} SOURCE_ID: ${sourceId}
-Lesson Block 2: Scale and Labor
+**Lesson Block 2: Scale and Labor.**
 ${paragraph('Scale and labor','larger or more production-focused sites require recurring labor, scheduling, and realistic yield expectations')} SOURCE_ID: ${sourceId}
-Lesson Block 3: Matching Site to Purpose
+**Lesson Block 3: Matching Site to Purpose.**
 ${paragraph('Matching site to purpose','a site should be judged against the actual goal instead of treated as suitable merely because plants can grow there')} SOURCE_ID: ${sourceId}
 Exercise: Classify three proposed urban sites as leisure/aesthetic or production-focused and justify each classification from purpose, scale, and labor needs.
 Practice Steps:
@@ -92,4 +92,4 @@ assert(!curated.bank.some(question=>/best demonstrates completion|skip the pract
 const thinDesign=design.replace(paragraph('Cultivation intent','a project designed for household enjoyment makes different choices from one expected to supply regular produce'),'Gardening can have different goals.');
 assert.throws(()=>compiler.compile({...request,context:{...request.context,designPacket:thinDesign}}),error=>error?.code==='LIVING_SCHOOL_DESIGN_LESSON_BLOCK_TOO_THIN','Thin AI-authored lessons are padded or accepted instead of rejected.');
 
-console.log(JSON.stringify({ok:true,revision:'living-school-pedagogy-v338',subjectMasteryPrompt:true,noCompilerPadding:true,noMetaCompletionQuiz:true,temporaryQuizScaffolding:true,aiQuizBeforePersistence:true,thinLessonRejected:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'living-school-pedagogy-v338',subjectMasteryPrompt:true,compilerFormatAligned:true,noCompilerPadding:true,noMetaCompletionQuiz:true,temporaryQuizScaffolding:true,aiQuizBeforePersistence:true,thinLessonRejected:true},null,2));
