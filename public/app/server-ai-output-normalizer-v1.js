@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-server-ai-output-normalizer-v1-provider-authority';
+const VERSION='1.1.1-server-ai-output-normalizer-v1-provider-authority-r2';
 const MIDDLEWARE_ID='server-auto-v301';
 const AUTHORITY='/app/selected-provider-authority-v1.js';
-const AUTHORITY_VERSION='1.0.0-selected-provider-authority-v1';
+const AUTHORITY_VERSION='1.0.1-selected-provider-authority-v1-wrapper-resilient';
 const SANITIZER='/app/assistant-output-sanitizer-v1.js';
-const SANITIZER_VERSION='1.0.0-assistant-output-sanitizer-v1';
+const SANITIZER_VERSION='1.0.1-assistant-output-sanitizer-v1-wrapper-resilient';
 if(globalThis.CivweaveServerAIOutputNormalizerV1?.version===VERSION)return;
 let patchedHandle=null,timer=0,dependencyPromise=null;
 const clean=(value,max=5000000)=>String(value??'').trim().slice(0,max);
@@ -77,7 +77,7 @@ function ensureDependencies(){
   return dependencyPromise;
 }
 function install(){patch();void ensureDependencies();return true}
-for(const name of ['civweave:server-ai-router-ready','civweave:runtime-spine-ready','civweave:model-runtime-ready','civweave:assistant-runtime-ready','civweave:model-config-changed','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
+for(const name of ['civweave:server-ai-router-ready','civweave:runtime-spine-ready','civweave:model-runtime-ready','civweave:assistant-runtime-ready','civweave:model-config-changed','civweave:guide-loader-reset','civweave:guide-provider-policy-runtime','civweave:guide-provider-policy-assistant','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
 globalThis.CivweaveServerAIOutputNormalizerV1=Object.freeze({version:VERSION,patch,install,ensureDependencies,completionText,normalizeModelResult,normalizePacket,state:()=>({installed:Boolean(patchedHandle),middleware:MIDDLEWARE_ID,authority:Boolean(globalThis.CivweaveSelectedProviderAuthorityV1),sanitizer:Boolean(globalThis.CivweaveAssistantOutputSanitizerV1)}),reasoningVisible:false,selectedProviderAuthority:true,finalAssistantSanitizer:true});
 })();
