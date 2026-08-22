@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='159.5-gemini-structured-contracts-v263';
+const VERSION='159.6-gemini-structured-contracts-v264';
 const RUNTIME_NAME='CivweaveModelRuntime';
 const API_REVISION='2026-05-20';
 const DEFAULT_API_BASE='https://generativelanguage.googleapis.com/v1beta';
@@ -215,7 +215,7 @@ async function generateWithGenerateContent(original,request,interactionFailure){
     const system=systemText(messages),contents=messages.filter(item=>item?.role!=='system').map(item=>({role:item?.role==='assistant'?'model':'user',parts:[{text:clean(item?.content,48000)}]})).filter(item=>item.parts[0].text);
     if(!contents.length)contents.push({role:'user',parts:[{text:'Respond helpfully.'}]});
     const generationConfig={temperature:Number.isFinite(Number(config.temperature))?Number(config.temperature):0.2,maxOutputTokens:Number(config.maxTokens||4096)};
-    if(request.schema)generationConfig.responseFormat={text:{mimeType:'application/json',schema:request.schema}};
+    if(request.schema)generationConfig.responseFormat={text:{mimeType:'APPLICATION_JSON',schema:request.schema}};
     const body={contents,generationConfig,...(system?{systemInstruction:{parts:[{text:system}]}}:{})};
     const url=generateContentUrl(config),requestHeaders={'content-type':'application/json','accept':'application/json','x-goog-api-key':config.apiKey,...(isObject(config.headers)?config.headers:{})};
     const response=await fetch(url,{method:'POST',headers:requestHeaders,body:JSON.stringify(body),signal:controller.signal,cache:'no-store'}),payload=await readJson(response);
