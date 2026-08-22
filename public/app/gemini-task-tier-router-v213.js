@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.71-gemini-task-tier-router-v325-living-school-boundaries';
+const VERSION='1.0.72-gemini-task-tier-router-v326-living-school-maintenance-lite';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const COMPLEX_MODEL='gemini-3.7-flash';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -10,6 +10,8 @@ const STYLE_ID='cw-gemini-task-tier-style-v213';
 const MIDDLEWARE_ID='gemini-task-tier-v271';
 const LIVING_SCHOOL_DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const LIVING_SCHOOL_FLASH_LITE_PURPOSES=new Set([
+  'living-school-local-source-synthesis-v260',
+  'living-school-training-data-research-fallback-v260',
   'living-school-structure-single-v221',
   'living-school-module-depth-expansion-v262',
   'living-school-quiz-delta-completion-v258',
@@ -46,7 +48,7 @@ function capabilityRequirements(request={}){
 function livingSchoolFlashLitePurpose(request={}){return LIVING_SCHOOL_FLASH_LITE_PURPOSES.has(lower(request.purpose));}
 function classify(runtime,request={}){
   const requirements=capabilityRequirements(request);
-  if(livingSchoolFlashLitePurpose(request))return{tier:'small',reason:'Living School repair/fill maintenance',requirements};
+  if(livingSchoolFlashLitePurpose(request))return{tier:'small',reason:'Living School lightweight synthesis/repair/fill',requirements};
   const explicit=explicitTier(request);
   if(explicit)return{tier:explicit,reason:explicit==='complex'?'explicit complex-task request':'explicit lightweight request',requirements};
   if(requirements.profile==='agentic'||requirements.requiresTools)return{tier:'complex',reason:'agentic or tool-using flow',requirements};
