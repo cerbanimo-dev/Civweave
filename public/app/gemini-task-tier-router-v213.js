@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.68-gemini-task-tier-router-v322-canonical-settings';
+const VERSION='1.0.69-gemini-task-tier-router-v323-living-school-repair-lite';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const COMPLEX_MODEL='gemini-3.7-flash';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -8,6 +8,12 @@ const PROFILES_KEY='civweave-model-profiles-v1';
 const NOTICE_ID='cw-gemini-task-tier-notice-v213';
 const STYLE_ID='cw-gemini-task-tier-style-v213';
 const MIDDLEWARE_ID='gemini-task-tier-v271';
+const LIVING_SCHOOL_FLASH_LITE_PURPOSES=new Set([
+  'living-school-structure-single-v221',
+  'living-school-module-depth-expansion-v262',
+  'living-school-quiz-delta-completion-v258',
+  'living-school-quiz-question-contract-repair-v263'
+]);
 let noticeTimer=null;
 if(globalThis.CivweaveGeminiTaskTierRouterV213?.version===VERSION)return;
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
@@ -36,9 +42,11 @@ function capabilityRequirements(request={}){
   const profile=generic.profile==='agentic'||request.agentic===true||request.background===true?'agentic':'interactive';
   return Object.freeze({...generic,profile,planning,externalResearch:research,code});
 }
+function livingSchoolFlashLitePurpose(request={}){return LIVING_SCHOOL_FLASH_LITE_PURPOSES.has(lower(request.purpose));}
 function classify(runtime,request={}){
-  const explicit=explicitTier(request);
   const requirements=capabilityRequirements(request);
+  if(livingSchoolFlashLitePurpose(request))return{tier:'small',reason:'Living School repair/fill maintenance',requirements};
+  const explicit=explicitTier(request);
   if(explicit)return{tier:explicit,reason:explicit==='complex'?'explicit complex-task request':'explicit lightweight request',requirements};
   if(requirements.profile==='agentic'||requirements.requiresTools)return{tier:'complex',reason:'agentic or tool-using flow',requirements};
   if(requirements.externalResearch)return{tier:'complex',reason:'research and source synthesis',requirements};
