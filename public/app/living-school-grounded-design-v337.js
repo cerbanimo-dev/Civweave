@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-living-school-grounded-design-v338-pedagogy';
+const VERSION='1.1.1-living-school-grounded-design-v338-pedagogy';
 const ID='living-school-grounded-design-v337';
 const DESIGN='living-school-research-grounded-curriculum-v218.1';
 const GROUNDED='living-school-grounded-design-lite-v337';
@@ -20,7 +20,7 @@ const ASSESSMENT_CONTRACT=[
   'Good: "A vacant urban lot has limited space and poor weather protection. Choose an appropriate controlled-environment approach and explain why it fits the site."'
 ].join(' ');
 const FORMAT_CONTRACT=[
-  'Use this exact instructional-design shape for every module so the compiler can preserve the teaching without inventing filler:',
+  'Use this exact instructional-design shape for every module so the compiler can preserve the teaching without inventing filler. Keep the labels and bold Lesson Block heading syntax exactly as shown:',
   '## Module N: Specific subject title',
   'Objective: one observable subject skill.',
   'Why It Matters: 1-3 sentences explaining a real consequence, decision, or use of this knowledge. Do not mention the curriculum, module machinery, evidence workflow, or Civweave.',
@@ -28,11 +28,11 @@ const FORMAT_CONTRACT=[
   '- Term — concise definition that is not copied verbatim from a lesson block.',
   '- Term — concise definition.',
   '- Term — concise definition.',
-  'Lesson Block 1: Specific heading',
+  '**Lesson Block 1: Specific heading.**',
   'Teach the idea in substantive prose. Explain definitions, mechanisms, distinctions, examples, tradeoffs, mistakes, or consequences as appropriate. Aim for at least 250 characters of useful teaching per lesson block. Attach supplied source IDs only to claims they support; use GENERATED-UNVERIFIED only for unsupported inference.',
-  'Lesson Block 2: Specific heading',
+  '**Lesson Block 2: Specific heading.**',
   'Teach a distinct idea rather than restating Lesson Block 1.',
-  'Lesson Block 3: Specific heading',
+  '**Lesson Block 3: Specific heading.**',
   'Teach a distinct idea and connect it to realistic use.',
   'Exercise: one authentic task that applies the subject in a concrete situation.',
   'Practice Steps:',
