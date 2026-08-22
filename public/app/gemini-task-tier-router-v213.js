@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.73-gemini-task-tier-router-v327-living-school-research-fallback-35';
+const VERSION='1.0.74-gemini-task-tier-router-v328-living-school-post-fallback-lite';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const RESEARCH_FALLBACK_MODEL='gemini-3.5-flash';
 const COMPLEX_MODEL='gemini-3.7-flash';
@@ -47,10 +47,12 @@ function capabilityRequirements(request={}){
   return Object.freeze({...generic,profile,planning,externalResearch:research,code});
 }
 function livingSchoolResearchFallbackPurpose(request={}){return lower(request.purpose)===LIVING_SCHOOL_RESEARCH_FALLBACK_PURPOSE;}
+function livingSchoolPostFallbackDesign(request={}){return lower(request.purpose)===LIVING_SCHOOL_DESIGN_PURPOSE&&lower(request?.context?.research?.mode)==='model-derived-unverified';}
 function livingSchoolFlashLitePurpose(request={}){return LIVING_SCHOOL_FLASH_LITE_PURPOSES.has(lower(request.purpose));}
 function classify(runtime,request={}){
   const requirements=capabilityRequirements(request);
   if(livingSchoolResearchFallbackPurpose(request))return{tier:'small',reason:'Living School first research fallback',requirements};
+  if(livingSchoolPostFallbackDesign(request))return{tier:'small',reason:'Living School post-fallback design pass',requirements};
   if(livingSchoolFlashLitePurpose(request))return{tier:'small',reason:'Living School lightweight synthesis/repair/fill',requirements};
   const explicit=explicitTier(request);
   if(explicit)return{tier:explicit,reason:explicit==='complex'?'explicit complex-task request':'explicit lightweight request',requirements};
@@ -135,7 +137,7 @@ function patchSettings(){
   if(canonicalV322){note?.remove();return}
   if(gemini&&remote){
     let legacyNote=note;
-    if(!legacyNote){legacyNote=document.createElement('div');legacyNote.id='cw-gemini-routing-note-v213';legacyNote.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Living School may use Gemini 3.5 Flash for the first research fallback, while planning, primary research, code generation, and agentic work use Gemini 3.7 Flash.</span>';remote.insertBefore(legacyNote,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}
+    if(!legacyNote){legacyNote=document.createElement('div');legacyNote.id='cw-gemini-routing-note-v213';legacyNote.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Living School may use Gemini 3.5 Flash for the first research fallback; every later design, synthesis, structure, repair, and fill call after that fallback uses Flash-Lite. Planning, primary research, code generation, and agentic work use Gemini 3.7 Flash.</span>';remote.insertBefore(legacyNote,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}
     legacyNote.hidden=false;
   }else if(note)note.hidden=true;
 }
