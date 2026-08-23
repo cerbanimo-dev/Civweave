@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="realm-console-canonical-v253-staging-current-worker-r1">
+<html lang="en" data-build="realm-console-canonical-v254-shared-navbar-r1" data-civweave-system="cerbanimo">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -15,48 +15,31 @@
 <link rel="stylesheet" href="/app/platform-stability-v159.css?v=canonical-chat-r1">
 <link rel="stylesheet" href="/app/platform-experience-v160.css?v=1.0.107-go-live-v300">
 <link rel="stylesheet" href="/app/mobile-regression-v170.css?v=mobile-r170">
-<style id="rc-universal-nav-only">.rc-bottom{display:none!important}</style>
 </head>
 <body>
 <main id="rc-app" class="rc-app" tabindex="-1">
   <div class="rc-loading">Opening console…</div>
 </main>
 <div id="rc-toast" class="rc-toast" hidden></div>
-<script id="rc-universal-nav-route-normalization">
+<script id="rc-direct-route-normalization">
 (()=>{
 'use strict';
 if(window.self!==window.top)return;
 const next=new URL(location.href);let changed=false;
 if(next.searchParams.has('embed')){next.searchParams.delete('embed');changed=true}
 if(next.searchParams.get('civweave')==='1'){next.searchParams.delete('civweave');changed=true}
+if(next.searchParams.get('system')!=='cerbanimo'){next.searchParams.set('system','cerbanimo');changed=true}
 if(changed)history.replaceState(history.state,'',`${next.pathname}${next.search}${next.hash}`);
 })();
 </script>
-<script id="rc-staging-current-worker-refresh">
-(()=>{
-'use strict';
-if(window.self!==window.top||location.hostname!=='civweave-staging.pages.dev'||!('serviceWorker' in navigator))return;
-const REFRESH_KEY='civweave.staging.current-worker.v14';let changed=false;
-navigator.serviceWorker.addEventListener('controllerchange',()=>{
-  if(changed)return;changed=true;
-  if(sessionStorage.getItem(REFRESH_KEY)==='1'){sessionStorage.removeItem(REFRESH_KEY);return}
-  sessionStorage.setItem(REFRESH_KEY,'1');location.reload();
-});
-navigator.serviceWorker.getRegistration('/').then(async registration=>{
-  if(!registration)return;
-  try{await registration.update()}catch{}
-  registration.waiting?.postMessage({type:'SKIP_WAITING'});
-}).catch(()=>{});
-})();
-</script>
-<!-- Cerbanimo owns no realm-local navigation. Suppress duplicate global nav/context observers before route bootstrap; themed-system-nav-v178 remains the sole navbar owner. -->
-<script src="/app/cerbanimo-universal-nav-single-owner-v1.js?v=1.0.1"></script>
+
+<!-- Canonical shared Civweave navigation. Cerbanimo does not own a navbar implementation. -->
+<script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v229-v440-home-live-guild-balance"></script>
+<script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail"></script>
+<script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer"></script>
+
 <script src="/app/shared/civweave-parity-runtime.js?v=parity-bounded-r1" defer></script>
-<script src="/app/realm-console-v140.js?v=canonical-r5-universal-navbar-only" defer></script>
-<script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v229-v440-home-live-guild-balance" defer></script>
-<script src="/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-universal-top-level-r1" defer></script>
-<script src="/app/universal-nav-media-stability-v1.js?v=1.0.0-canonical-ai-portraits-bounded" defer></script>
-<script src="/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r4-universal-navbar-only" defer></script>
+<script src="/app/realm-console-v140.js?v=canonical-r6-shared-navbar" defer></script>
 <script src="/app/local-first-policy-v131.js?v=1.0.4" defer></script>
 <script src="/app/platform-stability-v159.js?v=canonical-chat-r1" defer></script>
 <script src="/app/platform-experience-v160.js?v=dark-review-r1" defer></script>
