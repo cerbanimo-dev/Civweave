@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="realm-console-canonical-v252-universal-nav-single-owner-r1">
+<html lang="en" data-build="realm-console-canonical-v253-staging-current-worker-r1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -32,13 +32,30 @@ if(next.searchParams.get('civweave')==='1'){next.searchParams.delete('civweave')
 if(changed)history.replaceState(history.state,'',`${next.pathname}${next.search}${next.hash}`);
 })();
 </script>
+<script id="rc-staging-current-worker-refresh">
+(()=>{
+'use strict';
+if(window.self!==window.top||location.hostname!=='civweave-staging.pages.dev'||!('serviceWorker' in navigator))return;
+const REFRESH_KEY='civweave.staging.current-worker.v14';let changed=false;
+navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(changed)return;changed=true;
+  if(sessionStorage.getItem(REFRESH_KEY)==='1'){sessionStorage.removeItem(REFRESH_KEY);return}
+  sessionStorage.setItem(REFRESH_KEY,'1');location.reload();
+});
+navigator.serviceWorker.getRegistration('/').then(async registration=>{
+  if(!registration)return;
+  try{await registration.update()}catch{}
+  registration.waiting?.postMessage({type:'SKIP_WAITING'});
+}).catch(()=>{});
+})();
+</script>
 <!-- Cerbanimo owns no realm-local navigation. Suppress duplicate global nav/context observers before route bootstrap; themed-system-nav-v178 remains the sole navbar owner. -->
-<script src="/app/cerbanimo-universal-nav-single-owner-v1.js?v=1.0.0"></script>
+<script src="/app/cerbanimo-universal-nav-single-owner-v1.js?v=1.0.1"></script>
 <script src="/app/shared/civweave-parity-runtime.js?v=parity-bounded-r1" defer></script>
 <script src="/app/realm-console-v140.js?v=canonical-r5-universal-navbar-only" defer></script>
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v229-v440-home-live-guild-balance" defer></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-universal-top-level-r1" defer></script>
-<script src="/app/universal-nav-media-stability-v1.js?v=1.0.0-canonical-ai-portraits" defer></script>
+<script src="/app/universal-nav-media-stability-v1.js?v=1.0.0-canonical-ai-portraits-bounded" defer></script>
 <script src="/app/cerbanimo-nav-stability-v1.js?v=nav-stability-r4-universal-navbar-only" defer></script>
 <script src="/app/local-first-policy-v131.js?v=1.0.4" defer></script>
 <script src="/app/platform-stability-v159.js?v=canonical-chat-r1" defer></script>
