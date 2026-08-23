@@ -1,8 +1,8 @@
 'use strict';
 (()=>{
-const VERSION='five-system-pages-v1-bounded-realm-navigation-r3-staging-freshness';
-const CACHE='cw-five-system-pages-v2';
-const NETWORK_TIMEOUT_MS=5000;
+const VERSION='five-system-pages-v1-bounded-realm-navigation-r2';
+const CACHE='cw-five-system-pages-v1';
+const NETWORK_TIMEOUT_MS=1800;
 const PATHS=Object.freeze({
   '/app/cabinets/living-school/index.html':{system:'living-school',markers:['data-civweave-system="living-school"','Opening Living School']},
   '/app/realm-console-v140.html':{system:'cerbanimo',markers:['Civweave Realm Console','/app/realm-console-v140.js']},
@@ -46,5 +46,5 @@ self.addEventListener('fetch',event=>{
   if(url.origin!==self.location.origin||!PATH_SET.has(url.pathname))return;
   event.stopImmediatePropagation();event.respondWith(exact(request,url.pathname));
 });
-self.CivweaveFiveSystemPagesV1=Object.freeze({version:VERSION,cache:CACHE,paths:[...PATH_SET],networkTimeoutMs:NETWORK_TIMEOUT_MS,policy:'exact-network-first-five-second-freshness-window-cached-fallback-never-home-substitution'});
+self.CivweaveFiveSystemPagesV1=Object.freeze({version:VERSION,cache:CACHE,paths:[...PATH_SET],networkTimeoutMs:NETWORK_TIMEOUT_MS,policy:'exact-network-first-bounded-realm-html-cached-fallback-never-home-substitution'});
 })();
