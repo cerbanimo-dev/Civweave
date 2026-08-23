@@ -14,7 +14,7 @@ importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v8-v440-home-css-isolation');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
 importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-v440-exact-owner');
-importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-bounded-realm-navigation-r3-staging-freshness');
+importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-bounded-realm-navigation-r2');
 importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v2-purge-only');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v219-lifecycle-deferred');
@@ -37,10 +37,10 @@ importScripts('/service-worker-chat-repair-v245.js?v=guild-live-balance-v2&purge
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
 // atomic-update-handoff-v427: updated workers normally remain waiting until the visible update controller explicitly activates them.
-// staging-installed-entry-takeover-v14-universal-nav-stability: one-shot staging activation for the current Cerbanimo navbar/interaction repair without interrupting a visible installer.
+// staging-installed-entry-takeover-v15-shared-navbar: one-shot staging activation for the direct shared-navbar Cerbanimo build without interrupting a visible installer.
 const V203_STAGING_RECOVERY_HOST='civweave-staging.pages.dev';
-const V203_STAGING_RECOVERY_CACHE='cwrecovery-v446-universal-nav-stability';
-const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v14-universal-nav-stability';
+const V203_STAGING_RECOVERY_CACHE='cwrecovery-v447-shared-navbar';
+const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v15-shared-navbar';
 function v203StagingRecoveryRequest(){return new Request(new URL(V203_STAGING_RECOVERY_MARKER,self.location.origin).href)}
 async function v203StagingRecoveryPending(){
   if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;
@@ -64,6 +64,6 @@ if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
     if(await v203VisibleInstallerClient())return;
     await self.skipWaiting();
   })())});
-  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('universal-nav-stability-r1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('shared-navbar-r1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
