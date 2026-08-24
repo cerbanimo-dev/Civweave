@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.0-living-school-active-run-ui-v1-generation-rail';
+const VERSION='1.3.0-living-school-active-run-ui-v1-session-owned-routes';
 const GENERATE='[data-ls-action="generate-curriculum"]';
 const REPORT='#lsc220-generation-recovery';
 const PACK_DIALOG='dialog[data-living-school-media-pack-offer]';
@@ -9,6 +9,7 @@ const RAIL_ID='lsc-living-school-generation-run-rail';
 const STYLE_ID='lsc-living-school-generation-run-style';
 const ROUTING_NOTICE_ID='cw-gemini-task-tier-notice-v213';
 const ROUTE_EVENT='civweave:gemini-task-tier-selected';
+const ROUTE_COMPLETE_EVENT='civweave:gemini-task-tier-completed';
 const STAGE_EVENT='civweave:living-school-curriculum-stage';
 let queued=false;
 let packOfferToken=0;
@@ -16,8 +17,6 @@ let wasRunning=false;
 let session=null;
 let selectedRun=-1;
 let runTimer=0;
-let lastRouteSignature='';
-let lastRouteAt=0;
 const nowMs=()=>Date.now();
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 function active(button){
@@ -26,6 +25,7 @@ function active(button){
   return button.getAttribute('aria-busy')==='true'||(button.disabled&&/researching|generating|regenerating|completing/i.test(label));
 }
 function isLivingSchoolPurpose(value){return /^living-school-/.test(clean(value,220).toLowerCase())}
+function generationSessionActive(){return session?.status==='running'||active(document.querySelector(GENERATE))||document.documentElement.dataset.livingSchoolGenerationActive==='true'}
 function formatElapsed(ms){const seconds=Math.max(0,Math.floor((Number(ms)||0)/1000)),minutes=Math.floor(seconds/60),rest=seconds%60;return`${minutes}:${String(rest).padStart(2,'0')}`}
 function modelLabel(model,tier=''){
   const value=clean(model,180).toLowerCase();
@@ -38,13 +38,17 @@ function modelLabel(model,tier=''){
 function purposeLabel(purpose){
   const value=clean(purpose,220).toLowerCase();
   if(value.includes('research-grounded-curriculum'))return'Curriculum design';
+  if(value.includes('grounded-design-lite'))return'Grounded design synthesis';
   if(value.includes('training-data-research-fallback'))return'Research fallback';
   if(value.includes('local-source-synthesis'))return'Source synthesis';
+  if(value.includes('safe-admission-review'))return'S.A.F.E. admission review';
+  if(value.includes('media')&&value.includes('review'))return'Media review';
+  if(value.includes('video')&&value.includes('admission'))return'Video admission review';
   if(value.includes('structure-single'))return'Module structure';
   if(value.includes('module-depth-expansion'))return'Lesson expansion';
   if(value.includes('quiz-delta-completion'))return'Quiz completion';
   if(value.includes('quiz-question-contract-repair'))return'Quiz repair';
-  return clean(value.replace(/^living-school-/,'').replace(/-v\d+(?:\.\d+)?$/,'').replace(/-/g,' '),80)||'Living School generation';
+  return clean(value.replace(/^living-school-/,'').replace(/^civweave-/,'').replace(/-v\d+(?:\.\d+)?$/,'').replace(/-/g,' '),96)||'Generation support call';
 }
 function phaseLabel(stage){
   const value=clean(stage,120).toLowerCase();
@@ -61,6 +65,7 @@ function installRailStyle(){
   if(document.getElementById(STYLE_ID))return;
   const style=document.createElement('style');style.id=STYLE_ID;
   style.textContent=`
+html[data-living-school-generation-active="true"] #${ROUTING_NOTICE_ID},html[data-living-school-run-rail-active="true"] #${ROUTING_NOTICE_ID}{display:none!important}
 #${RAIL_ID}{margin-top:14px;padding:13px 14px;border:1px solid rgba(111,226,163,.35);border-radius:14px;background:linear-gradient(145deg,rgba(5,34,27,.96),rgba(5,21,24,.95));box-shadow:inset 0 1px 0 rgba(255,255,255,.035);color:#e9f7ed}
 #${RAIL_ID}[hidden]{display:none!important}
 #${RAIL_ID} .lsc-run-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -111,9 +116,9 @@ function updateElapsedOnly(){
 }
 function finishSession(status='complete'){
   if(!session||session.status!=='running')return;
-  const activeRun=session.runs.findLast?.(run=>run.status==='active')||[...session.runs].reverse().find(run=>run.status==='active');
-  if(activeRun){activeRun.status=status==='stopped'?'failed':'complete';activeRun.endedAt=nowMs()}
-  session.status=status;session.endedAt=nowMs();
+  const end=nowMs();
+  for(const run of session.runs)if(run.status==='active'){run.status=status==='stopped'?'failed':'complete';run.endedAt=end}
+  session.status=status;session.endedAt=end;
   if(status==='complete')session.phase='Curriculum ready';
   else if(status==='partial')session.phase='Partial curriculum generated';
   else if(status==='ended')session.phase='Generation finished';
@@ -123,12 +128,13 @@ function finishSession(status='complete'){
 }
 function runDetailMarkup(run){
   if(!run)return session?.status==='running'?'Waiting for the first model call…':'No provider calls were recorded.';
-  const status=run.status==='active'?`running · ${formatElapsed(nowMs()-run.startedAt)}`:run.status==='failed'?'failed':'complete';
-  return`<strong>${modelLabel(run.model,run.tier)}</strong> · ${purposeLabel(run.purpose)} · ${status}`;
+  const status=run.status==='active'?`running · ${formatElapsed(nowMs()-run.startedAt)}`:run.status==='failed'?`failed${run.errorCode?` · ${clean(run.errorCode,80)}`:''}`:`complete · ${formatElapsed((run.endedAt||run.startedAt)-run.startedAt)}`;
+  const nested=run.nested?' · nested':'';
+  return`<strong>${modelLabel(run.model,run.tier)}</strong> · ${purposeLabel(run.purpose)}${nested} · ${status}`;
 }
 function summaryMarkup(){
-  const runs=session?.runs||[],complex=runs.filter(run=>run.tier==='complex').length,lite=runs.length-complex;
-  const parts=[];if(complex)parts.push(`${complex} 3.7 design${complex===1?'':' calls'}`);if(lite)parts.push(`${lite} Lite/follow-up${lite===1?'':' calls'}`);parts.push(`${runs.length} model call${runs.length===1?'':'s'}`);
+  const runs=session?.runs||[],complex=runs.filter(run=>run.tier==='complex').length,lite=runs.length-complex,activeCount=runs.filter(run=>run.status==='active').length;
+  const parts=[];if(complex)parts.push(`${complex} 3.7/complex call${complex===1?'':'s'}`);if(lite)parts.push(`${lite} Lite/follow-up${lite===1?'':' calls'}`);parts.push(`${runs.length} model call${runs.length===1?'':'s'}`);if(activeCount)parts.push(`${activeCount} active`);
   return parts.join(' · ');
 }
 function renderRail(){
@@ -136,24 +142,29 @@ function renderRail(){
   if(!session){rail.hidden=true;return}
   rail.hidden=false;
   const runs=session.runs||[],picked=runs[selectedRun>=0&&selectedRun<runs.length?selectedRun:runs.length-1]||null;
-  rail.innerHTML=`<div class="lsc-run-head"><b>Generation run</b><span class="lsc-run-time">${formatElapsed((session.endedAt||nowMs())-session.startedAt)}</span></div><div class="lsc-run-phase">${clean(session.phase,180)}</div><div class="lsc-run-dots" role="list" aria-label="Model calls">${runs.map((run,index)=>`<button type="button" class="lsc-run-dot ${run.tier==='complex'?'is-complex':'is-lite'} is-${run.status}${index===(selectedRun>=0?selectedRun:runs.length-1)?' is-selected':''}" data-lsc-run-index="${index}" role="listitem" aria-label="Run ${index+1}: ${modelLabel(run.model,run.tier)}, ${purposeLabel(run.purpose)}, ${run.status}"></button>`).join('')}</div><div class="lsc-run-detail">${runDetailMarkup(picked)}</div><div class="lsc-run-summary">${summaryMarkup()}</div><div class="lsc-run-legend"><span><i class="lsc-run-key is-big"></i>3.7 / complex design</span><span><i class="lsc-run-key"></i>Lite / follow-up</span></div>`;
+  rail.innerHTML=`<div class="lsc-run-head"><b>Generation run</b><span class="lsc-run-time">${formatElapsed((session.endedAt||nowMs())-session.startedAt)}</span></div><div class="lsc-run-phase">${clean(session.phase,180)}</div><div class="lsc-run-dots" role="list" aria-label="Model calls">${runs.map((run,index)=>`<button type="button" class="lsc-run-dot ${run.tier==='complex'?'is-complex':'is-lite'} is-${run.status}${index===(selectedRun>=0?selectedRun:runs.length-1)?' is-selected':''}" data-lsc-run-index="${index}" role="listitem" aria-label="Run ${index+1}: ${modelLabel(run.model,run.tier)}, ${purposeLabel(run.purpose)}, ${run.status}"></button>`).join('')}</div><div class="lsc-run-detail">${runDetailMarkup(picked)}</div><div class="lsc-run-summary">${summaryMarkup()}</div><div class="lsc-run-legend"><span><i class="lsc-run-key is-big"></i>3.7 / complex</span><span><i class="lsc-run-key"></i>Lite / follow-up</span></div>`;
   const dots=rail.querySelector('.lsc-run-dots');if(dots)dots.scrollLeft=dots.scrollWidth;
 }
 function updatePhaseOnly(value){const next=clean(value,180);if(!session||!next||session.phase===next)return;session.phase=next;const node=document.getElementById(RAIL_ID)?.querySelector?.('.lsc-run-phase');if(node)node.textContent=next}
 function suppressRoutingNotice(){
   const hide=()=>{const notice=document.getElementById(ROUTING_NOTICE_ID);if(notice)notice.hidden=true};
-  queueMicrotask(hide);setTimeout(hide,0);
+  queueMicrotask(hide);setTimeout(hide,0);setTimeout(hide,32);
 }
 function onRouteSelected(event){
-  const detail=event?.detail||{};if(!isLivingSchoolPurpose(detail.purpose))return;
-  suppressRoutingNotice();
-  const signature=[clean(detail.purpose,220),clean(detail.model,180),clean(detail.tier,40),clean(detail.reason,220)].join('|'),time=nowMs();
-  if(signature===lastRouteSignature&&time-lastRouteAt<350)return;
-  lastRouteSignature=signature;lastRouteAt=time;
-  beginSession(session?.phase||'Generating curriculum');
-  const previous=[...session.runs].reverse().find(run=>run.status==='active');if(previous){previous.status='complete';previous.endedAt=time}
-  const run={index:session.runs.length,tier:clean(detail.tier,40)==='complex'?'complex':'small',model:clean(detail.model,180),purpose:clean(detail.purpose,220),reason:clean(detail.reason,220),startedAt:time,endedAt:0,status:'active'};
+  const detail=event?.detail||{};
+  if(!generationSessionActive()&&!isLivingSchoolPurpose(detail.purpose))return;
+  suppressRoutingNotice();beginSession(session?.phase||'Generating curriculum');
+  const callId=clean(detail.callId,180)||`legacy-${clean(detail.purpose,120)}-${clean(detail.model,80)}-${clean(detail.at,60)}`;
+  const existing=session.runs.find(run=>run.callId===callId);
+  if(existing){selectedRun=existing.index;renderRail();return}
+  const time=Number(detail.startedAtMs)||nowMs();
+  const run={index:session.runs.length,callId,tier:clean(detail.tier,40)==='complex'?'complex':'small',model:clean(detail.model,180),purpose:clean(detail.purpose,220),reason:clean(detail.reason,220),startedAt:time,endedAt:0,status:'active',nested:!isLivingSchoolPurpose(detail.purpose),errorCode:''};
   session.runs.push(run);selectedRun=run.index;renderRail();
+}
+function onRouteCompleted(event){
+  const detail=event?.detail||{},callId=clean(detail.callId,180);if(!session||!callId)return;
+  const run=session.runs.find(item=>item.callId===callId);if(!run)return;
+  const status=clean(detail.status,80).toLowerCase();run.status=['success','fallback'].includes(status)?'complete':'failed';run.endedAt=Number(detail.completedAtMs)||nowMs();run.errorCode=clean(detail.errorCode,160);renderRail();
 }
 function onStage(event){
   const detail=event?.detail||{},stage=clean(detail.stage,120);if(!stage)return;
@@ -171,6 +182,7 @@ function sync(){
   }
   const root=document.documentElement,next=running?'true':'false';
   if(root.dataset.livingSchoolGenerationActive!==next)root.dataset.livingSchoolGenerationActive=next;
+  if(running)suppressRoutingNotice();
   if(running&&!wasRunning)beginSession('Preparing generation');
   if(running&&session?.status==='running'){
     const label=clean(button?.textContent,240).toLowerCase();
@@ -240,10 +252,11 @@ function install(){
   observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-busy','disabled']});
   installPackOfferAuthority();installRailStyle();
   addEventListener(ROUTE_EVENT,onRouteSelected);
+  addEventListener(ROUTE_COMPLETE_EVENT,onRouteCompleted);
   addEventListener(STAGE_EVENT,onStage);
   document.addEventListener('click',event=>{const dot=event.target?.closest?.('[data-lsc-run-index]');if(!dot)return;selectedRun=Number(dot.dataset.lscRunIndex);const rail=document.getElementById(RAIL_ID),run=session?.runs?.[selectedRun];rail?.querySelectorAll?.('.lsc-run-dot').forEach(node=>node.classList.toggle('is-selected',Number(node.dataset.lscRunIndex)===selectedRun));const detail=rail?.querySelector?.('.lsc-run-detail');if(detail)detail.innerHTML=runDetailMarkup(run)},true);
   sync();return true;
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',install,{once:true});else install();
-globalThis.CivweaveLivingSchoolActiveRunUIV1=Object.freeze({version:VERSION,sync,renderRail,onRouteSelected,onStage,canonicalFoundationReady,suppressRedundantPackOffer,get session(){return session}});
+globalThis.CivweaveLivingSchoolActiveRunUIV1=Object.freeze({version:VERSION,sync,renderRail,onRouteSelected,onRouteCompleted,onStage,canonicalFoundationReady,suppressRedundantPackOffer,get session(){return session}});
 })();
