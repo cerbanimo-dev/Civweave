@@ -6,7 +6,7 @@
 // direct-shell-retirement-v1: only retired legacy shells are purged; the current persistent-system-shell-v1 is not retired.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail across all five systems.
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
-// lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
+// shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v9-shared-rail');
@@ -19,7 +19,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
 importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v24-navbar-actions-refresh');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v25-persistent-navbar-required');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
@@ -34,15 +34,15 @@ importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-sys
 importScripts('/service-worker-chat-repair-v245.js?v=guild-live-balance-v2&purge=guild-live-balance-v2&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361&endeavor=kamiya-provider-authority-v7&provider=selected-provider-authority-v1&sanitize=assistant-output-sanitizer-v1');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
-// staging-installed-entry-takeover-v18-persistent-system-shell: one-shot activation so installed staging immediately enters the persistent navbar shell.
+// staging-installed-entry-takeover-v19-persistent-navbar-assets: one-shot activation for the persistent shell plus required sprite media.
 const V203_STAGING_RECOVERY_HOST='civweave-staging.pages.dev';
-const V203_STAGING_RECOVERY_CACHE='cwrecovery-v450-persistent-system-shell';
-const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v18-persistent-system-shell';
+const V203_STAGING_RECOVERY_CACHE='cwrecovery-v451-persistent-navbar-assets';
+const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v19-persistent-navbar-assets';
 function v203StagingRecoveryRequest(){return new Request(new URL(V203_STAGING_RECOVERY_MARKER,self.location.origin).href)}
 async function v203StagingRecoveryPending(){if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;try{return !(await(await caches.open(V203_STAGING_RECOVERY_CACHE)).match(v203StagingRecoveryRequest()))}catch{return true}}
 async function v203VisibleInstallerClient(){try{const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});return windows.some(client=>{if(client.visibilityState!=='visible')return false;try{const url=new URL(client.url);return url.origin===self.location.origin&&(url.pathname==='/app/'||url.pathname==='/app/index.html')}catch{return false}})}catch{return false}}
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(!(await v203StagingRecoveryPending()))return;if(await v203VisibleInstallerClient())return;await self.skipWaiting()})())});
-  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('persistent-system-shell-r1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('persistent-navbar-assets-r1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
