@@ -1,5 +1,6 @@
 const ORIGIN=location.origin;
 const NATIVE=Boolean(document.querySelector('[data-fellowfare-native-host]'));
+const BRIDGE_PEER=NATIVE?window:parent;
 const LEGACY_KEY='fellowfare.mvp.state.v3';
 const V2_KEY='fellowfare.marketplace.v2';
 const routeButton=route=>document.querySelector(`[data-route="${CSS.escape(route)}"]`);
@@ -27,10 +28,10 @@ function consumeExchangeImport(message){
   const threads=message?.bundle?.entities?.threads;
   if(!Array.isArray(threads)||!threads.length)return;
   const imported=threads.map(importLegacyThread).filter(Boolean);
-  parent.postMessage({type:'civweave:exchange-import-receipt',status:'reviewed',detail:`Imported ${imported.length} reviewed FellowFare listing${imported.length===1?'':'s'} into the live marketplace.`,automaticEffect:false},ORIGIN);
+  BRIDGE_PEER.postMessage({type:'civweave:exchange-import-receipt',status:'reviewed',detail:`Imported ${imported.length} reviewed FellowFare listing${imported.length===1?'':'s'} into the live marketplace.`,automaticEffect:false},ORIGIN);
 }
 addEventListener('message',event=>{
-  if(event.origin!==ORIGIN||event.source!==parent||!event.data||typeof event.data!=='object')return;
+  if(event.origin!==ORIGIN||event.source!==BRIDGE_PEER||!event.data||typeof event.data!=='object')return;
   if(event.data.type==='fellowfare:cabinet-command'){command(String(event.data.command||'market'),event.data.payload||{});return}
   if(event.data.type==='civweave:exchange-import'){consumeExchangeImport(event.data);return}
 });
@@ -42,5 +43,5 @@ addEventListener('DOMContentLoaded',()=>{
   document.body.classList.add(NATIVE?'ff-market-native':'ff-cabinet-embedded');
   const hash=location.hash.slice(1);if(!['market','loom','assemblies','inbox','profile'].includes(hash))history.replaceState(null,'','#market');
   globalThis.CivweaveFellowFareMarketplaceV2?.render?.(location.hash.slice(1)||'market');
-  parent.postMessage({type:'fellowfare:cabinet-ready',version:'2.0.0-live-market',capabilities:['products','services','learning-modules','tutoring','resources','needs','collectives','listings','orders','proposals','agreements','assemblies','canonical-acorns','canonical-buttons','commerce-receipts','usd-money-edge-status','portable-market-data']},ORIGIN);
+  BRIDGE_PEER.postMessage({type:'fellowfare:cabinet-ready',version:'2.0.0-live-market',capabilities:['products','services','learning-modules','tutoring','resources','needs','collectives','listings','orders','proposals','agreements','assemblies','canonical-acorns','canonical-buttons','commerce-receipts','usd-money-edge-status','portable-market-data']},ORIGIN);
 },{once:true});
