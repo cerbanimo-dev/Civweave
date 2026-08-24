@@ -1,0 +1,26 @@
+name: Verify persistent shell chrome owner
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/persistent-system-shell-v1.js
+      - public/app/persistent-system-shell-v1.html
+      - scripts/verify-persistent-system-shell-chrome-owner-v1.mjs
+      - .github/workflows/verify-persistent-system-shell-chrome-owner-v1.yml
+  pull_request:
+    paths:
+      - public/app/persistent-system-shell-v1.js
+      - public/app/persistent-system-shell-v1.html
+      - scripts/verify-persistent-system-shell-chrome-owner-v1.mjs
+      - .github/workflows/verify-persistent-system-shell-chrome-owner-v1.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-persistent-system-shell-chrome-owner-v1.mjs
