@@ -9,7 +9,7 @@ const json=async relative=>JSON.parse(await read(relative));
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const includes=(source,tokens,label)=>{for(const token of tokens)assert(source.includes(token),`${label} is missing ${token}`)};
 
-const [articles,videos,supplemental,mediaRegistry,runtime,installer,recommender,videoShim]=await Promise.all([
+const [articles,videos,supplemental,mediaRegistry,runtime,installer,recommender,videoShim,activeRun,rootWorker,worker203]=await Promise.all([
   json('public/downloads/knowledge-schools/catalog.json'),
   json('public/downloads/knowledge-schools/video-atlases/catalog.json'),
   json('public/downloads/knowledge-schools/supplemental-articles-v1.json'),
@@ -17,7 +17,10 @@ const [articles,videos,supplemental,mediaRegistry,runtime,installer,recommender,
   read('public/app/learning-source-pack-runtime-v1.mjs'),
   read('public/app/knowledge-school-installer-v1.js'),
   read('public/app/living-school-media-pack-recommender-v1.mjs'),
-  read('public/app/video-atlas-installer-v1.js')
+  read('public/app/video-atlas-installer-v1.js'),
+  read('public/app/living-school-active-run-ui-v1.js'),
+  read('public/service-worker.js'),
+  read('public/service-worker-v203.js')
 ]);
 assert(articles.schema==='civweave.knowledge-school-catalog.v1','Unexpected article catalog schema.');
 assert(videos.schema==='civweave.video-learning-atlas.catalog.v1','Unexpected video atlas schema.');
@@ -34,6 +37,10 @@ includes(runtime,["VIDEO_CACHE_NAME='cw-video-learning-atlas-v1'","VIDEO_MIRROR_
 includes(installer,['learning-source-pack-runtime-v1.mjs','foundation articles','video links','gap articles','Download ${needed.length} learning pack','removeLearningSourcePacks'],'knowledge installer');
 includes(recommender,['living-school-media-pack-recommender-v1.6-foundation-ready-dedupe','Recommended learning packs','stageLearningSourcePacks','sourceSchoolSlugs','Articles and matched video links download together.','learningSourcePackStatus','alreadyDownloaded','foundationReady','sourcePackCurrent','updateAvailable','pendingRecommendations','skippedAlreadyDownloaded','Finish pack'],'Living School pack recommender');
 assert(recommender.includes("states.every(row=>row.articleCurrent===true||row.current===true)"),'Living School must treat already-saved foundation article schools as curriculum-ready even when optional media can refresh.');
+includes(activeRun,['1.1.0-living-school-active-run-ui-v1-source-pack-authority','CivweaveKnowledgeSchools','store.status()','sourceSchoolSlugs','foundation-ready-primary','Continue to curriculum','living-school-media-pack-recommendations'],'Living School source-pack authority guard');
+assert(activeRun.includes("slugs.every(slug=>bySlug.get(slug)?.current===true)"),'The pre-curriculum guard must use the canonical saved foundation-school status rather than optional media completeness.');
+includes(rootWorker,['root-worker-bridge-v21-learning-source-pack-authority','service-worker-v203.js?v=root-worker-bridge-v21-learning-source-pack-authority'],'root service-worker bridge');
+includes(worker203,['staging-installed-entry-takeover-v21-learning-source-pack-authority','cwrecovery-v453-learning-source-pack-authority','v203PurgeLivingSchoolSourceStatusAssets','/app/living-school-active-run-ui-v1.js','/app/living-school-media-pack-recommender-v1.mjs','/app/learning-source-pack-runtime-v1.mjs','/app/knowledge-school-seeds-v1.js'],'staging Living School source-state cache recovery');
 includes(videoShim,['video-atlas-installer-v2-unified-source-pack-shim','learning-source-pack-runtime-v1.mjs','CivweaveVideoAtlasPacksV2'],'video-atlas compatibility shim');
 assert(!videoShim.includes('video-atlas-panel'),'The legacy standalone video-atlas panel is still present.');
-console.log(JSON.stringify({schoolPacks:articleSlugs.size,foundationArticles:articles.schools.reduce((sum,row)=>sum+Number(row.counts?.articles||0),0),videoLinks:videos.schools.reduce((sum,row)=>sum+Number(row.count||0),0),supplementalGapArticles:supplemental.articles.length,sourcePackRuntime:'v1',downloadOfferDedupe:'foundation-ready',standaloneVideoPanel:false},null,2));
+console.log(JSON.stringify({schoolPacks:articleSlugs.size,foundationArticles:articles.schools.reduce((sum,row)=>sum+Number(row.counts?.articles||0),0),videoLinks:videos.schools.reduce((sum,row)=>sum+Number(row.count||0),0),supplementalGapArticles:supplemental.articles.length,sourcePackRuntime:'v1',downloadOfferDedupe:'canonical-foundation-authority',stagingCacheRecovery:'v21',standaloneVideoPanel:false},null,2));
