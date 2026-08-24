@@ -1,11 +1,15 @@
 'use strict';
 (()=>{
-const REVISION='living-school-cleanroom-v219-pedagogy-guard-fresh';
+const REVISION='living-school-cleanroom-v220-runtime-guards-fresh';
 const CANONICAL='/app/cabinets/living-school/index.html';
 const FRESH_PREFIX='/app/cabinets/living-school/living-school-cleanroom-';
 const GENERATION_GUARD='/app/living-school-generation-guard-v262.mjs';
 const QUIZ_GUARD='/app/living-school-quiz-contract-guard-v263.mjs';
 const SAFE_POLICY='/app/safe-mode-v1.mjs';
+const ROUTE_LOCK='/app/living-school-route-lock-v1.js';
+const GENERATION_BUDGET='/app/living-school-generation-budget-v1.js';
+const ACTIVE_RUN_UI='/app/living-school-active-run-ui-v1.js';
+const FRESH_RUNTIME_PATHS=new Set([GENERATION_GUARD,QUIZ_GUARD,SAFE_POLICY,ROUTE_LOCK,GENERATION_BUDGET,ACTIVE_RUN_UI]);
 const SERVICE_PREFIX='/app/services/living-school/';
 const RETIRED_PATHS=new Set([
   '/app/cabinets/living-school/living-school-bootstrap-v194.js',
@@ -39,7 +43,7 @@ async function evictRetired(){
     const keys=await cache.keys();
     await Promise.all(keys.map(request=>{
       const pathname=new URL(request.url).pathname;
-      if(pathname===CANONICAL||pathname===GENERATION_GUARD||pathname===QUIZ_GUARD||pathname===SAFE_POLICY||pathname.startsWith(FRESH_PREFIX)||pathname.startsWith(SERVICE_PREFIX)||RETIRED_PATHS.has(pathname))return cache.delete(request);
+      if(pathname===CANONICAL||FRESH_RUNTIME_PATHS.has(pathname)||pathname.startsWith(FRESH_PREFIX)||pathname.startsWith(SERVICE_PREFIX)||RETIRED_PATHS.has(pathname))return cache.delete(request);
       return false;
     }));
   }
@@ -78,7 +82,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Response.redirect(new URL(CANONICAL,self.location.origin),302));
     return;
   }
-  if(url.pathname===CANONICAL||url.pathname===GENERATION_GUARD||url.pathname===QUIZ_GUARD||url.pathname===SAFE_POLICY||url.pathname.startsWith(FRESH_PREFIX)){
+  if(url.pathname===CANONICAL||FRESH_RUNTIME_PATHS.has(url.pathname)||url.pathname.startsWith(FRESH_PREFIX)){
     event.stopImmediatePropagation();
     event.respondWith(fresh(request));
     return;
@@ -88,5 +92,5 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Promise.resolve(retiredResponse(url.pathname)));
   }
 });
-self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,quizGuard:QUIZ_GUARD,safePolicy:SAFE_POLICY,retired:[...RETIRED_PATHS],lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
+self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,quizGuard:QUIZ_GUARD,safePolicy:SAFE_POLICY,routeLock:ROUTE_LOCK,generationBudget:GENERATION_BUDGET,activeRunUI:ACTIVE_RUN_UI,retired:[...RETIRED_PATHS],lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
 })();
