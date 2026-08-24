@@ -1,17 +1,19 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r1" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r2-full-height-stage" data-civweave-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07131e">
 <title>Civweave</title>
 <style>
+:root{--cw-persistent-nav-space:calc(clamp(92px,10vw,100px) + env(safe-area-inset-bottom))}
 html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#07131e}
 body{padding:0!important}
-#cw-persistent-system-stage{position:fixed;inset:0 0 calc(clamp(92px,10vw,100px) + env(safe-area-inset-bottom)) 0;width:100%;height:auto;border:0;background:#07131e;display:block}
-#cw-persistent-system-loading{position:fixed;z-index:20;inset:0 0 calc(clamp(92px,10vw,100px) + env(safe-area-inset-bottom)) 0;display:grid;place-items:center;pointer-events:none;background:#07131e;color:#9edcff;font:800 17px/1.2 system-ui,sans-serif;letter-spacing:.08em;transition:opacity .16s ease}
+/* iframe is a replaced element: height:auto uses its intrinsic ~150px height instead of stretching between top/bottom. Give the persistent content stage an explicit viewport height so the parent shell background can never appear as a dark card beneath realm content. */
+#cw-persistent-system-stage{position:fixed;left:0;right:0;top:0;bottom:auto;width:100%;height:calc(100vh - var(--cw-persistent-nav-space));height:calc(100dvh - var(--cw-persistent-nav-space));min-height:0;border:0;background:#07131e;display:block}
+#cw-persistent-system-loading{position:fixed;z-index:20;left:0;right:0;top:0;bottom:auto;height:calc(100vh - var(--cw-persistent-nav-space));height:calc(100dvh - var(--cw-persistent-nav-space));display:grid;place-items:center;pointer-events:none;background:#07131e;color:#9edcff;font:800 17px/1.2 system-ui,sans-serif;letter-spacing:.08em;transition:opacity .16s ease}
 #cw-persistent-system-loading[hidden]{display:none}
-#cw-persistent-system-error{position:fixed;z-index:30;left:16px;right:16px;bottom:calc(clamp(92px,10vw,100px) + env(safe-area-inset-bottom) + 14px);display:none;padding:12px 14px;border:1px solid #ffb86677;border-radius:12px;background:#17111df2;color:#fff;font:14px/1.4 system-ui,sans-serif}
+#cw-persistent-system-error{position:fixed;z-index:30;left:16px;right:16px;bottom:calc(var(--cw-persistent-nav-space) + 14px);display:none;padding:12px 14px;border:1px solid #ffb86677;border-radius:12px;background:#17111df2;color:#fff;font:14px/1.4 system-ui,sans-serif}
 #cw-persistent-system-error[data-open="1"]{display:block}
 </style>
 <script>
