@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='living-school-cleanroom-v223-local-research-fresh';
+const REVISION='living-school-cleanroom-v224-response-router-fresh';
 const CANONICAL='/app/cabinets/living-school/index.html';
 const FRESH_PREFIX='/app/cabinets/living-school/living-school-cleanroom-';
 const GENERATION_GUARD='/app/living-school-generation-guard-v262.mjs';
@@ -15,7 +15,8 @@ const GROUNDED_DESIGN='/app/living-school-grounded-design-v337.js';
 const GENERATION_BUDGET='/app/living-school-generation-budget-v2.js';
 const ACTIVE_RUN_UI='/app/living-school-active-run-ui-v1.js';
 const GEMINI_ROUTER='/app/gemini-task-tier-router-v213.js';
-const FRESH_RUNTIME_PATHS=new Set([GENERATION_GUARD,QUIZ_GUARD,VIDEO_GUARD,MEDIA_RECOMMENDER,LOCAL_RESEARCH,SAFE_POLICY,ROUTE_LOCK,RUNTIME_ROUTE,GROUNDED_DESIGN,GENERATION_BUDGET,ACTIVE_RUN_UI,GEMINI_ROUTER]);
+const RESPONSE_ROUTER='/app/minilm-response-router-v347.js';
+const FRESH_RUNTIME_PATHS=new Set([GENERATION_GUARD,QUIZ_GUARD,VIDEO_GUARD,MEDIA_RECOMMENDER,LOCAL_RESEARCH,SAFE_POLICY,ROUTE_LOCK,RUNTIME_ROUTE,GROUNDED_DESIGN,GENERATION_BUDGET,ACTIVE_RUN_UI,GEMINI_ROUTER,RESPONSE_ROUTER]);
 const SERVICE_PREFIX='/app/services/living-school/';
 const RETIRED_PATHS=new Set([
   '/app/cabinets/living-school/living-school-bootstrap-v194.js',
@@ -98,5 +99,5 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Promise.resolve(retiredResponse(url.pathname)));
   }
 });
-self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,quizGuard:QUIZ_GUARD,videoGuard:VIDEO_GUARD,mediaRecommender:MEDIA_RECOMMENDER,localResearch:LOCAL_RESEARCH,safePolicy:SAFE_POLICY,routeLock:ROUTE_LOCK,runtimeRoute:RUNTIME_ROUTE,groundedDesign:GROUNDED_DESIGN,generationBudget:GENERATION_BUDGET,activeRunUI:ACTIVE_RUN_UI,geminiRouter:GEMINI_ROUTER,retired:[...RETIRED_PATHS],lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
+self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,quizGuard:QUIZ_GUARD,videoGuard:VIDEO_GUARD,mediaRecommender:MEDIA_RECOMMENDER,localResearch:LOCAL_RESEARCH,safePolicy:SAFE_POLICY,routeLock:ROUTE_LOCK,runtimeRoute:RUNTIME_ROUTE,groundedDesign:GROUNDED_DESIGN,generationBudget:GENERATION_BUDGET,activeRunUI:ACTIVE_RUN_UI,geminiRouter:GEMINI_ROUTER,responseRouter:RESPONSE_ROUTER,retired:[...RETIRED_PATHS],lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
 })();
