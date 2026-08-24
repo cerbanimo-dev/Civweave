@@ -1,7 +1,7 @@
 import media from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
 import sourcePacks from'./learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
 
-const REVISION='living-school-media-pack-recommender-v1.4-agriculture-aliases';
+const REVISION='living-school-media-pack-recommender-v1.5-download-state-dedupe';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const STOP=new Set(['about','after','again','also','basic','basics','beginner','build','building','capability','complete','course','create','creating','curriculum','foundation','foundations','guide','guided','intro','introduction','learn','learning','lesson','module','practice','practical','skill','skills','study','teach','teaching','through','using','vocabulary','with','your']);
 const PACK_RULES=Object.freeze({
@@ -73,6 +73,19 @@ function pendingPack(slug,lookup){
 function fallbackPackRows(lookup){return Object.keys(PACK_RULES).map(slug=>pendingPack(slug,lookup))}
 function sourceSchoolSlugs(pack,lookup){return[...new Set((pack.topics||[]).map(topic=>lookup?.topic_meta?.[topic]?.school_slug||TOPIC_SCHOOL_FALLBACK[topic]).filter(Boolean))]}
 
+async function annotateDownloadState(recommendations){
+  let status=[];
+  try{status=await sourcePacks.learningSourcePackStatus()}catch(error){console.warn('[Living School pack status]',error);return recommendations.map(pack=>({...pack,alreadyDownloaded:false,partiallyDownloaded:false}))}
+  const bySlug=new Map((Array.isArray(status)?status:[]).map(row=>[row.school_slug,row]));
+  return recommendations.map(pack=>{
+    const slugs=Array.isArray(pack.sourceSchoolSlugs)?pack.sourceSchoolSlugs:[];
+    const states=slugs.map(slug=>bySlug.get(slug)).filter(Boolean);
+    const alreadyDownloaded=Boolean(slugs.length&&states.length===slugs.length&&states.every(row=>row.current===true));
+    const partiallyDownloaded=Boolean(!alreadyDownloaded&&states.some(row=>row.staged===true||row.articleCurrent===true||row.videoCurrent===true||Number(row.supplementalCached||0)>0));
+    return{...pack,alreadyDownloaded,partiallyDownloaded};
+  });
+}
+
 export async function recommendMediaPacks(query,{limit=3}={}){
   let lookup=null;try{lookup=await media.loadLookup()}catch{}
   const rows=Array.isArray(lookup?.packs)&&lookup.packs.length?[...lookup.packs]:fallbackPackRows(lookup);
@@ -102,21 +115,22 @@ function packCopy(pack){const node=document.createElement('div');const title=doc
 function progressLabel(progress){if(progress?.lane==='articles')return progress.phase==='verifying'?'Verifying articles…':'Downloading articles…';if(progress?.lane==='video-links')return progress.phase==='verifying'?'Verifying video links…':progress.phase==='sidecar'?'Updating video metadata…':'Downloading video links…';if(progress?.lane==='supplemental-articles')return`Adding ${clean(progress.record?.title,42)||'gap article'}…`;return'Downloading pack…'}
 
 export async function offerMediaPacksBeforeCurriculum(query,{limit=3}={}){
-  const recommendations=await recommendMediaPacks(query,{limit});
+  const recommendations=await annotateDownloadState(await recommendMediaPacks(query,{limit}));
+  const pendingRecommendations=recommendations.filter(pack=>!pack.alreadyDownloaded);
   try{dispatchEvent(new CustomEvent('civweave:living-school-media-pack-recommendations',{detail:{revision:REVISION,query:clean(query,2000),recommendations}}))}catch{}
-  if(typeof document==='undefined'||!recommendations.length)return{recommendations,shown:false};
+  if(typeof document==='undefined'||!pendingRecommendations.length)return{recommendations,shown:false,skippedAlreadyDownloaded:recommendations.filter(pack=>pack.alreadyDownloaded).map(pack=>pack.slug)};
   const existing=document.querySelector('[data-living-school-media-pack-offer]');if(existing)existing.remove();
   const dialog=document.createElement('dialog');dialog.dataset.livingSchoolMediaPackOffer=REVISION;dialog.style.cssText='max-width:min(92vw,620px);border:1px solid currentColor;border-radius:20px;padding:0;background:#102f25;color:#f3f2df;box-shadow:0 24px 80px rgba(0,0,0,.45);';
   const body=document.createElement('div');body.style.cssText='display:grid;gap:14px;padding:20px;';
   const title=document.createElement('strong');title.textContent='Recommended learning packs';title.style.cssText='font-size:1.15rem;';body.append(title);
-  const copyNode=document.createElement('p');copyNode.textContent='Before Moss builds this curriculum, you can seed the matching local source packs. Each pack now saves verified foundation articles and its Video Learning Atlas together, then adds targeted gap articles and rights-cleared local video files when available. This is optional and resumable.';copyNode.style.cssText='margin:0;line-height:1.45;';body.append(copyNode);
+  const copyNode=document.createElement('p');copyNode.textContent='Before Moss builds this curriculum, you can seed the matching local source packs. Packs already saved and current on this device are skipped automatically. Remaining packs save verified foundation articles and their Video Learning Atlas together, then add targeted gap articles and rights-cleared local video files when available. This is optional and resumable.';copyNode.style.cssText='margin:0;line-height:1.45;';body.append(copyNode);
   const list=document.createElement('div');list.style.cssText='display:grid;gap:9px;';body.append(list);
   let resolver=null;const done=new Promise(resolve=>{resolver=resolve});
-  for(const pack of recommendations){
+  for(const pack of pendingRecommendations){
     const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid rgba(255,255,255,.2);border-radius:14px;';
     row.append(packCopy(pack));
     const canStage=Boolean(pack.sourceSchoolSlugs?.length);
-    const action=button(canStage?'Download pack':'Mapping pending',async()=>{if(!canStage)return;action.disabled=true;action.textContent='Starting…';try{const result=await downloadMediaPack(pack.slug,{limitPerTopic:1,onProgress:progress=>{action.textContent=progressLabel(progress)}});const source=result.sourceResult;action.textContent=`Saved ${source.videoLinks||0} links + ${source.supplementalCached||0} gaps${result.cached?` + ${result.cached} video${result.cached===1?'':'s'}`:''}`;action.title=result.mediaErrors?.length?'Some optional direct video files were unavailable; articles and video links are still saved.':''}catch(error){action.textContent='Unavailable';action.title=error.message}},true);if(!canStage)action.disabled=true;row.append(action);list.append(row);
+    const action=button(canStage?(pack.partiallyDownloaded?'Finish pack':'Download pack'):'Mapping pending',async()=>{if(!canStage)return;action.disabled=true;action.textContent='Starting…';try{const result=await downloadMediaPack(pack.slug,{limitPerTopic:1,onProgress:progress=>{action.textContent=progressLabel(progress)}});const source=result.sourceResult;action.textContent=`Saved ${source.videoLinks||0} links + ${source.supplementalCached||0} gaps${result.cached?` + ${result.cached} video${result.cached===1?'':'s'}`:''}`;action.title=result.mediaErrors?.length?'Some optional direct video files were unavailable; articles and video links are still saved.':''}catch(error){action.textContent='Unavailable';action.title=error.message}},true);if(!canStage)action.disabled=true;row.append(action);list.append(row);
   }
   const actions=document.createElement('div');actions.style.cssText='display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;';
   const continueButton=button('Continue to curriculum',()=>{dialog.close();resolver?.({recommendations,shown:true});},true);actions.append(continueButton);body.append(actions);dialog.append(body);document.body.append(dialog);
