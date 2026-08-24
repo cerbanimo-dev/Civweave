@@ -30,6 +30,14 @@ assert.match(nav,/cerbanimo'.*glow:'#bb79ff'.*shade:'#4f265f'/s,'Kamiya button m
 assert.match(nav,/anarchadia'.*glow:'#ff3d96'.*shade:'#621f43'/s,'Merlin button must be magenta\/pink.');
 assert.match(nav,/civweave'.*panel:'linear-gradient\(135deg,#fbf8ff/s,'Weaveling button must be pearl\/rainbow.');
 
+// Updates are signaled by a bright platform-colored backlight behind the sprite, never by notification bubbles.
+for(const [system,color] of Object.entries({civweave:'#fff8ff','living-school':'#9cff73',cerbanimo:'#c77dff',fellowfare:'#ffc04d',anarchadia:'#ff4ba3'}))assert.match(nav,new RegExp(`${system.replaceAll('-','\\-')}'.*update:'${color}'`,'s'),`${system} must keep its update backlight color.`);
+assert.doesNotMatch(nav,/cw-themed-unread/,'Notification bubbles must not return to the five-guide rail.');
+assert.match(nav,/data-has-update=\\?"true\\?"/,'Unread guide state must drive a platform update state on the guide control.');
+assert.match(nav,/--system-update/,'Guide update backlights must use the platform-specific update color.');
+assert.match(nav,/cw-themed-system-avatar-wrap::after/,'The update indicator must live directly behind the guide sprite.');
+assert.ok(nav.includes("updateSignalRevision='sprite-backlight-v1'"),'The rail must declare the sprite-backlight update signal revision.');
+
 // Scorched-earth geometry contract: the desired tall five-guide rail is the only navbar geometry left.
 assert.ok(nav.includes(':root{--cw-themed-nav-height:clamp(92px,10vw,100px);--cw-themed-nav-bottom-gap:0px}'),'Canonical desktop rail height must live in the navigation owner.');
 assert.ok(nav.includes('width:84px;height:84px;border-radius:20px'),'Canonical desktop avatar geometry must live in the navigation owner.');
@@ -93,6 +101,7 @@ console.log(JSON.stringify({
   revision:'subsystem-avatar-nav-v347-canonical-tall-rail-single-geometry-owner',
   atlasCount:5,
   stateContract:'civweave.subsystem-avatar-state/v1',
+  updateSignal:'sprite-backlight-v1',
   quiet:'sleepy',
   lonely:'shy',
   attention:'worried',
