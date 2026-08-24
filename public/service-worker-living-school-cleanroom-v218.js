@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='living-school-cleanroom-v221-batched-safe-pack-authority';
+const REVISION='living-school-cleanroom-v222-batched-safe-pack-authority-immediate';
 const CANONICAL='/app/cabinets/living-school/index.html';
 const FRESH_PREFIX='/app/cabinets/living-school/living-school-cleanroom-';
 const GENERATION_GUARD='/app/living-school-generation-guard-v262.mjs';
@@ -64,7 +64,7 @@ async function fresh(request){
 // Clean-room routing is enforced on every relevant fetch. Scanning every cache
 // during both install and activate made Living School cleanup a global PWA boot
 // dependency. Keep lifecycle bounded; cleanup is now explicit/background work.
-self.addEventListener('install',event=>event.waitUntil(Promise.resolve()));
+self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate',event=>{
   event.waitUntil(self.clients.claim());
   void evictRetired().catch(()=>null);
