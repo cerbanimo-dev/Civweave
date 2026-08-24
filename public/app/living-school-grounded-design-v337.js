@@ -1,9 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-living-school-grounded-design-v338-pedagogy';
+const VERSION='1.2.0-living-school-grounded-design-v339-single-strong';
 const ID='living-school-grounded-design-v337';
 const DESIGN='living-school-research-grounded-curriculum-v218.1';
-const GROUNDED='living-school-grounded-design-lite-v337';
 const MODES=new Set(['live-agentic','local-synthesized','local-downloaded','manual-sources','model-derived-unverified']);
 const ECONOMY=/\b(?:Acorns?|Buttons?|XP|curriculum\s+(?:package\s+)?valuation|labor\s+worth|labour\s+worth|skill\s+ledger|completion\s+grant|reward\s+contract|wage\s+valuation|ledger\s+metadata|payouts?|wages?|currency\s+values?|bonuses?|grants?)\b/i;
 const clean=(value,max=64000)=>String(value??'').trim().slice(0,max);
@@ -50,21 +49,21 @@ function install(){
   spine.register(ID,{
     before(request){
       if(lower(request?.purpose)!==DESIGN||!MODES.has(lower(request?.context?.research?.mode)))return request;
-      const messages=[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:`The research/evidence pass is complete. Produce instructional design only. Never output Civweave economy or reward metadata. Do not output Acorns, Buttons, XP, grants, payouts, wages, pricing, labor valuation, currency values, ledger metadata, or a reward contract. Use a SOURCE_ID only for claims actually supported by that source passage. Unsupported material must be marked GENERATED-UNVERIFIED with no SOURCE_ID. Do not output media URLs; provide only plain-text video search topics. ${ASSESSMENT_CONTRACT}\n\n${FORMAT_CONTRACT}`}];
-      return{...request,purpose:GROUNDED,taskTier:'small',executionProfile:'interactive',messages,context:{...(request.context||{}),livingSchoolOriginalPurpose:DESIGN,livingSchoolGroundedDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,pedagogyFormatContract:'subject-mastery-v1'}};
+      const messages=[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:`The research/evidence pass is complete. This is the single strong instructional-design pass for this curriculum run. Produce instructional design only. Never output Civweave economy or reward metadata. Do not output Acorns, Buttons, XP, grants, payouts, wages, pricing, labor valuation, currency values, ledger metadata, or a reward contract. Use a SOURCE_ID only for claims actually supported by that source passage. Unsupported material must be marked GENERATED-UNVERIFIED with no SOURCE_ID. Do not output media URLs; provide only plain-text video search topics. ${ASSESSMENT_CONTRACT}\n\n${FORMAT_CONTRACT}`}];
+      return{...request,purpose:DESIGN,taskTier:'complex',executionProfile:'interactive',messages,context:{...(request.context||{}),livingSchoolOriginalPurpose:DESIGN,livingSchoolGroundedDesign:true,livingSchoolSingleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,pedagogyFormatContract:'subject-mastery-v1'}};
     },
     after(result,request){
-      if(lower(request?.purpose)!==GROUNDED||result?.status!=='success')return result;
+      if(lower(request?.purpose)!==DESIGN||result?.status!=='success')return result;
       const raw=clean(result?.outputText||result?.text||result?.output||'');if(!raw)return result;
       const bounded=sanitize(raw);
       if(!bounded.text)return{...result,status:'invalid-response',outputText:'',outputJson:undefined,error:{code:'LIVING_SCHOOL_GROUNDED_DESIGN_EMPTY_AFTER_BOUNDARY',message:'Living School removed provider-authored economy metadata and no instructional design remained.'}};
-      return{...result,outputText:bounded.text,diagnostics:[...(result.diagnostics||[]),'Living School required learner-facing subject-matter assessment wording and a compiler-safe subject-mastery design format.',...(bounded.removed?[`Living School removed ${bounded.removed} provider-authored economy/reward line${bounded.removed===1?'':'s'} before storing grounded design.`]:[])]};
+      return{...result,outputText:bounded.text,diagnostics:[...(result.diagnostics||[]),'Living School kept the single strong design pass on the canonical curriculum-design purpose and required learner-facing subject-matter assessment wording.',...(bounded.removed?[`Living School removed ${bounded.removed} provider-authored economy/reward line${bounded.removed===1?'':'s'} before storing grounded design.`]:[])]};
     }
   },170);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-grounded-design-ready',{detail:{version:VERSION,purpose:GROUNDED,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,pedagogyFormatContract:'subject-mastery-v1',at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-grounded-design-ready',{detail:{version:VERSION,purpose:DESIGN,singleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,pedagogyFormatContract:'subject-mastery-v1',at:new Date().toISOString()}}))}catch{}
   return true;
 }
 for(const event of ['civweave:runtime-spine-ready','civweave:gemini-task-router-ready','civweave:living-school-runtime-route-ready'])addEventListener?.(event,()=>queueMicrotask(install));
 install();
-globalThis.CivweaveLivingSchoolGroundedDesignV337=Object.freeze({version:VERSION,install,purpose:GROUNDED,sanitize,assessmentContract:ASSESSMENT_CONTRACT,formatContract:FORMAT_CONTRACT});
+globalThis.CivweaveLivingSchoolGroundedDesignV337=Object.freeze({version:VERSION,install,purpose:DESIGN,sanitize,assessmentContract:ASSESSMENT_CONTRACT,formatContract:FORMAT_CONTRACT,singleStrongDesign:true});
 })();
