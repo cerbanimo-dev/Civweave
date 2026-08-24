@@ -5,9 +5,13 @@ on:
     paths:
       - 'public/service-worker-v203.js'
       - 'public/service-worker-canonical-navbar-v1.js'
+      - 'public/service-worker-canonical-home-v1.js'
+      - 'public/service-worker-shell-assets-v1.js'
       - 'public/service-worker-release-coherence-v220.js'
       - 'public/service-worker-five-system-pages-v1.js'
       - 'public/service-worker-direct-shell-retirement-v1.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/persistent-system-shell-v1.js'
       - 'public/app/system-routes-v227.js'
       - 'public/app/realm-console-v140.html'
       - 'public/app/realm-console-v140.js'
@@ -16,7 +20,6 @@ on:
       - 'public/app/persistent-shell-actions-v1.js'
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-path-v266.js'
-      - 'public/app/cerbanimo-learning-packs-v1.js'
       - 'public/app/cerbanimo-proof-attachments-v165.js'
       - 'scripts/verify-cerbanimo-load-freeze-v176.mjs'
       - 'scripts/verify-cerbanimo-universal-nav-stability-v1.mjs'
@@ -33,13 +36,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Syntax check shared navigation and Cerbanimo boot runtimes
+      - name: Syntax check persistent shell and Cerbanimo runtimes
         run: |
           node --check public/service-worker-v203.js
           node --check public/service-worker-canonical-navbar-v1.js
+          node --check public/service-worker-canonical-home-v1.js
+          node --check public/service-worker-shell-assets-v1.js
           node --check public/service-worker-release-coherence-v220.js
           node --check public/service-worker-five-system-pages-v1.js
           node --check public/service-worker-direct-shell-retirement-v1.js
+          node --check public/app/persistent-system-shell-v1.js
           node --check public/app/system-routes-v227.js
           node --check public/app/realm-console-v140.js
           node --check public/app/shared/civweave-parity-runtime.js
@@ -47,9 +53,8 @@ jobs:
           node --check public/app/persistent-shell-actions-v1.js
           node --check public/app/cerbanimo-quest-engine-v144.js
           node --check public/app/cerbanimo-quest-path-v266.js
-          node --check public/app/cerbanimo-learning-packs-v1.js
           node --check public/app/cerbanimo-proof-attachments-v165.js
           node --check scripts/verify-cerbanimo-universal-nav-stability-v1.mjs
           node --check scripts/verify-cerbanimo-load-freeze-v176.mjs
-      - name: Verify Cerbanimo shared-navbar stability contract
+      - name: Verify persistent navbar and Cerbanimo freeze boundary
         run: node scripts/verify-cerbanimo-load-freeze-v176.mjs
