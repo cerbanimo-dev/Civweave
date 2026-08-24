@@ -1,10 +1,10 @@
 {
   "schema": "civweave.open-learning-media-title-quality-audit.v2",
-  "built_at": "2026-08-18T03:31:27Z",
+  "built_at": "2026-08-24T08:10:18Z",
   "records_before": 210,
   "records_after": 184,
   "rejected_records": 26,
-  "rejected_topic_links": 29,
+  "rejected_topic_links": 28,
   "rejected_samples": [
     {
       "provider": "peertube",
@@ -19,6 +19,12 @@
       "topic_slug": "astronomy-space"
     },
     {
+      "provider": "peertube",
+      "provider_id": "23bf384b-62ed-4bc9-8ffe-3f7a2b2acd5d",
+      "title": "How To Create Space Themed Graphics With Inkscape (March 2011 TasLUG talk)",
+      "topic_slug": "astronomy-space"
+    },
+    {
       "provider": "wikimedia-commons",
       "provider_id": "File:Properties of Hydrogen - Chemistry for All - FuseSchool.webm",
       "title": "Properties of Hydrogen - Chemistry for All - FuseSchool",
@@ -29,12 +35,6 @@
       "provider_id": "180e1cc6-1334-472b-835a-1590e87452ba",
       "title": "MIT-MAHE: Central Dogma Animation for High School (2023) [English]",
       "topic_slug": "biology-life"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Mendeleev and the Periodic Table - Chemistry for All - The Fuse School.webm",
-      "title": "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-      "topic_slug": "physics-foundations"
     },
     {
       "provider": "wikimedia-commons",
@@ -98,18 +98,6 @@
     },
     {
       "provider": "peertube",
-      "provider_id": "6063f531-1c36-430b-af13-a57238640202",
-      "title": "[Language learning] How to create and edit language in LingLibre?",
-      "topic_slug": "language-learning"
-    },
-    {
-      "provider": "peertube",
-      "provider_id": "729eefb9-ccf9-4e2e-a70f-aef6e7e3de8e",
-      "title": "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
-      "topic_slug": "language-learning"
-    },
-    {
-      "provider": "peertube",
       "provider_id": "6ba15e59-d5f8-4419-87a0-c4b5bceb4720",
       "title": "NFLSHS-CHINA: Using Synthetic Biology to Decode the Secrets of Youth (2025) - Team Presentation [English]",
       "topic_slug": "language-learning"
@@ -155,6 +143,12 @@
       "provider_id": "File:Ifugao Youth on Saving the Environment.webm",
       "title": "Ifugao Youth on Saving the Environment",
       "topic_slug": "personal-finance"
+    },
+    {
+      "provider": "peertube",
+      "provider_id": "6eff51be-a6ea-4868-8572-dd30a6027745",
+      "title": "juneteeth 2026 part1 introduction chat and arcus chroma",
+      "topic_slug": "philosophy-ethics"
     },
     {
       "provider": "peertube",
@@ -225,17 +219,16 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 6,
+      "records": 8,
+      "mesh_redistributable": 5,
       "providers": {
         "peertube": 4,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "Democracy in the Dark: Protecting Your Digital Rights",
@@ -253,8 +246,8 @@
         "peertube": 13
       },
       "top_titles": [
-        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
         "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
@@ -269,14 +262,15 @@
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 5,
-      "mesh_redistributable": 1,
+      "records": 6,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 4,
-        "wikimedia-commons": 1
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -299,22 +293,22 @@
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
-        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series"
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
+        "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
       ]
     },
     "astronomy-space": {
       "name": "Astronomy & Space",
       "school_slug": "science",
       "required": true,
-      "records": 7,
+      "records": 6,
       "mesh_redistributable": 4,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "wikimedia-commons": 2
       },
       "top_titles": [
@@ -323,7 +317,6 @@
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System",
-        "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 2 XD99775b"
       ]
     },
@@ -338,9 +331,9 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -411,47 +404,45 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
-        "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
+        "The Philosophy of Antifa"
       ]
     },
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "wikimedia-commons": 2,
-        "peertube": 2
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
-        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
-        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
-        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare"
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -488,16 +479,13 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 4,
-        "peertube": 2
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence"
@@ -661,10 +649,10 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 7,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 7
+        "peertube": 9
       },
       "top_titles": [
         "Lecture 1： Probability and Counting ｜ Statistics 110",
@@ -673,7 +661,9 @@
         "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
         "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
-        "Quick Statistics and Visual Overview of Data in LabPlot"
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Lecture 11： The Poisson distribution ｜ Statistics 110",
+        "Lecture 10： Expectation Continued ｜ Statistics 110"
       ]
     },
     "climate-environment": {
@@ -748,10 +738,15 @@
       "name": "Communication & Conflict",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 2,
+      "mesh_redistributable": 2,
+      "providers": {
+        "wikimedia-commons": 2
+      },
+      "top_titles": [
+        "Wikipedia to enhance student communication skills - Wikimedia Australia",
+        "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership"
+      ]
     },
     "parenting-caregiving": {
       "name": "Parenting & Caregiving",
@@ -779,13 +774,16 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 1,
+      "records": 6,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 4
+        "peertube": 5,
+        "wikimedia-commons": 1
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
+        "Partners in Safety- An Insurance and Small Business Perspective",
         "Discover Who is On your LAN: Small Business Security 101",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
@@ -801,10 +799,10 @@
         "peertube": 5
       },
       "top_titles": [
+        "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
         "a track i made for music theory back in high school",
         "All MINOR Scales Explained on the Piano (Music Theory)",
         "Lecture 3. Rhythm: Fundamentals",
-        "The TWO Goto Techniques for Harmonising ANYTHING - Chords Music Theory Tutorial",
         "THEORY: Music Theory Basics Part #1 - Keys and Pitch"
       ]
     },
@@ -864,7 +862,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 69,
+      "records": 67,
       "available": true
     },
     "digital-ai-literacy": {
@@ -888,7 +886,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 20,
+      "records": 16,
       "available": true
     },
     "practical-life": {
@@ -910,7 +908,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 22,
+      "records": 24,
       "available": true
     },
     "maker-creative": {
@@ -949,7 +947,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 17,
+      "records": 18,
       "available": true
     },
     "deep-science": {
@@ -994,7 +992,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8333,
-      "records": 26,
+      "records": 24,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -1014,7 +1012,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 11,
       "available": true
     },
     "mind-body-practice": {
@@ -1031,7 +1029,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.6667,
-      "records": 7,
+      "records": 6,
       "available": true
     },
     "relationships-care": {
@@ -1046,12 +1044,13 @@
         "philosophy-ethics"
       ],
       "covered_topics": [
+        "communication-conflict",
         "health-wellness",
         "critical-thinking",
         "philosophy-ethics"
       ],
-      "coverage": 0.6,
-      "records": 9,
+      "coverage": 0.8,
+      "records": 10,
       "available": true
     },
     "garden-nature": {
@@ -1084,10 +1083,11 @@
       "covered_topics": [
         "career-work-skills",
         "entrepreneurship-small-business",
-        "personal-finance"
+        "personal-finance",
+        "communication-conflict"
       ],
-      "coverage": 0.75,
-      "records": 5,
+      "coverage": 1.0,
+      "records": 9,
       "available": true
     },
     "music-performance": {
@@ -1235,7 +1235,7 @@
         "critical-thinking"
       ],
       "coverage": 0.75,
-      "records": 10,
+      "records": 9,
       "available": true
     },
     "technology-builder": {
@@ -1257,7 +1257,7 @@
         "prompt-engineering"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 14,
       "available": true
     }
   }
