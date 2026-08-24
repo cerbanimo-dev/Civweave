@@ -65,7 +65,7 @@ function defaultSchool(data,count){
 }
 
 async function generateDesignPacket(runtime,config,data,count,sources,previous=''){
-  const current=state(),fallbackText=sourcePacketText(current,sources);
+  const current=state(),sourcePacket=sourcePacketText(current,sources);
   const context={
     capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,proofContract:data.proof,
     sources,research:current.research||{},previousPacket:clean(previous,12000),
@@ -74,26 +74,28 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
       `Plan exactly ${count} numbered modules with a coherent progression.`,
       'Use only supplied SOURCE_ID values when grounding claims; never invent citations, URLs, quotations, dates, or access claims.',
       'For every module include teaching points, cautions or uncertainty, practical work, assessment intent, and a concise video-search topic.',
-      'Write enough substantive instructional guidance that a lightweight formatter can construct the final lessons without doing new research.',
+      'Write enough substantive instructional guidance that the local compiler can construct the final lessons without doing new research.',
       'Return readable Markdown/plain text, not JSON.'
     ]
   };
   const request={
-    purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'agentic',
+    purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',
     config:{...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)},
     context,
     messages:[
       {role:'system',content:'You are Moss performing the research synthesis and instructional design pass for Living School. Produce a substantive human-readable teaching and curriculum design packet. Do not serialize the final application schema and do not return JSON.'},
-      {role:'user',content:`Build the research-backed design packet for “${data.capability}”. Organize it as modules 1 through ${count}. The next pass is a lightweight formatter, so make the educational content, source mapping, exercises, assessment intent, and video topic for each module explicit.`}
+      {role:'user',content:`Build the research-backed design packet for “${data.capability}”. Organize it as modules 1 through ${count}. The next pass is a local compiler, so make the educational content, source mapping, exercises, assessment intent, and video topic for each module explicit.`}
     ]
   };
   try{
     const result=await runtime.generate(request),route=actualRoute(result,request.config),text=resultText(result);
-    if(result?.status!=='success'||!text)throw new Error(result?.error?.message||result?.error||'The research/design model returned no usable packet.');
-    return{status:'complete',content:clean(text,32000),provider:route.provider,model:route.model,generatedAt:now(),source:'flash-design-pass',error:''};
+    if(result?.status!=='success'||!text){
+      return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-failed',sourcePacket,error:clean(result?.error?.message||result?.error||`The research/design model ended with ${result?.status||'an error'}.`,1200)};
+    }
+    return{status:'complete',content:clean(text,32000),provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-pass',error:'',sourcePacket:''};
   }catch(error){
-    if(!fallbackText)throw error;
-    return{status:'source-packet-only',content:clean(fallbackText,32000),provider:'source-packet',model:'no additional synthesis',generatedAt:now(),source:'existing-research-packet',error:clean(error?.message||error,1200)};
+    const route=actualRoute(null,request.config);
+    return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-failed',sourcePacket,error:clean(error?.message||error,1200)};
   }
 }
 
@@ -226,9 +228,13 @@ function moduleReport(count,completed,failures,prior=[]){
 }
 function candidateSchool(data,count,modules,design,route,requestId){
   const current=state(),ordered=[...modules].sort((a,b)=>generationIndex(a)-generationIndex(b));
-  return{id:uid('school'),title:clean(data.title||data.capability,180)||'Untitled learning path',capability:clean(data.capability,1200),level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof,2400),createdAt:now(),updatedAt:now(),requestedModuleCount:count,modules:ordered,generation:{provider:route.provider||'shared',model:route.model||'',generatedAt:now(),fallback:false,partial:ordered.length<count,completedModuleCount:ordered.length,failedModuleCount:count-ordered.length,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-flash-design-lite-single-v221',requestId,designProvider:design.provider,designModel:design.model}};
+  return{id:uid('school'),title:clean(data.title||data.capability,180)||'Untitled learning path',capability:clean(data.capability,1200),level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof,2400),createdAt:now(),updatedAt:now(),requestedModuleCount:count,modules:ordered,generation:{provider:route.provider||'shared',model:route.model||'',generatedAt:now(),fallback:false,partial:ordered.length<count,completedModuleCount:ordered.length,failedModuleCount:count-ordered.length,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-strong-design-local-compile-v341',requestId,designProvider:design.provider,designModel:design.model}};
 }
 function recoveryStatus(completed,count){return completed>=count?'complete':completed>0?'partial':'failed';}
+function designFailureReport(requestId,request,count,design){
+  const message=clean(design?.error||'The Gemini 3.7 curriculum design pass did not complete.',1600);
+  return{schema:RECOVERY_SCHEMA,requestId,status:'failed',request,requestedCount:count,completedCount:0,failedCount:count,structureAttempt:0,researchAttempt:1,createdAt:now(),updatedAt:now(),unstructured:{...design},modules:Array.from({length:count},(_,index)=>({index,status:'blocked',issues:[`Curriculum design did not complete, so local module compilation was not attempted. ${message}`],raw:'',provider:design?.provider||'',model:design?.model||'',at:now()})),batches:[],history:[historyEntry(0,count,0,count,'strong design failed')],candidate:null};
+}
 
 export async function generateSchool(data){
   const current=state(),capability=clean(data.capability,1200),count=clip(data.count,1,8),fallback=defaultSchool(data,count);
@@ -239,18 +245,22 @@ export async function generateSchool(data){
     if(!config)throw new Error('Shared model configuration is unavailable.');
     const provider=providerName(config);if(deterministicProvider(provider))throw new Error('The selected shared route cannot generate full curriculum content.');
     const design=await generateDesignPacket(runtime,config,request,count,sources);
+    if(design.status!=='complete'){
+      const report=designFailureReport(requestId,request,count,design);saveRecovery(report,'living-school-generation-design-failed');
+      return{...fallback,generation:{...fallback.generation,fallback:true,error:clean(design.error||'Gemini 3.7 curriculum design did not complete.',1800),formatContract:'living-school-strong-design-local-compile-v341',requestId,recoveryAvailable:true,designFailed:true}};
+    }
     const pass=await runStructurePass(runtime,config,request,count,design,sources,Array.from({length:count},(_,index)=>index));
     const modules=pass.completed.map(row=>row.module),route=pass.completed[0]?{provider:pass.completed[0].provider,model:pass.completed[0].model}:actualRoute(null,tierConfig(config,'small'));
     const school=candidateSchool(request,count,modules,design,route,requestId),completedCount=modules.length,failedCount=count-completedCount;
     const report={schema:RECOVERY_SCHEMA,requestId,status:recoveryStatus(completedCount,count),request,requestedCount:count,completedCount,failedCount,structureAttempt:1,researchAttempt:1,createdAt:now(),updatedAt:now(),unstructured:{...design},modules:moduleReport(count,pass.completed,pass.failures),batches:pass.batches,history:[historyEntry(1,count,completedCount,failedCount)],candidate:{...copy(school),modules:copy(modules)}};
     saveRecovery(report,'living-school-generation-first-pass-reported');
-    if(!modules.length)return{...fallback,generation:{...fallback.generation,fallback:true,error:pass.failures.map(row=>`module ${row.index+1}: ${row.issues.join('; ')}`).join(' | ').slice(0,1800)||'No structured modules completed.',formatContract:'living-school-flash-design-lite-single-v221',requestId,recoveryAvailable:true}};
+    if(!modules.length)return{...fallback,generation:{...fallback.generation,fallback:true,error:pass.failures.map(row=>`module ${row.index+1}: ${row.issues.join('; ')}`).join(' | ').slice(0,1800)||'No structured modules completed.',formatContract:'living-school-strong-design-local-compile-v341',requestId,recoveryAvailable:true}};
     return school;
   }catch(error){
-    const design={status:'unavailable',content:sourcePacketText(current,sources),provider:'none',model:'none',generatedAt:now(),source:'existing-research-packet',error:clean(error?.message||error,1200)};
-    const report={schema:RECOVERY_SCHEMA,requestId,status:'failed',request,requestedCount:count,completedCount:0,failedCount:count,structureAttempt:0,researchAttempt:1,createdAt:now(),updatedAt:now(),unstructured:design,modules:Array.from({length:count},(_,index)=>({index,status:'failed',issues:[clean(error?.message||error,1200)],raw:'',provider:'',model:'',at:now()})),batches:[],history:[historyEntry(0,count,0,count,'generation setup')],candidate:null};
+    const design={status:'failed',content:'',provider:'none',model:'none',generatedAt:now(),source:'generation-setup-failed',sourcePacket:sourcePacketText(current,sources),error:clean(error?.message||error,1200)};
+    const report=designFailureReport(requestId,request,count,design);report.history=[historyEntry(0,count,0,count,'generation setup failed')];
     saveRecovery(report,'living-school-generation-first-pass-failed');
-    return{...fallback,generation:{...fallback.generation,fallback:true,error:clean(error?.message||error,1800),formatContract:'living-school-flash-design-lite-single-v221',requestId,recoveryAvailable:true}};
+    return{...fallback,generation:{...fallback.generation,fallback:true,error:clean(error?.message||error,1800),formatContract:'living-school-strong-design-local-compile-v341',requestId,recoveryAvailable:true,designFailed:true}};
   }
 }
 
@@ -259,7 +269,10 @@ export async function regenerateLivingSchoolResearch(){
   const runtime=await runtimeReady(),config=runtime.readSharedConfig?.('interactive');if(!config)throw new Error('Shared model configuration is unavailable.');
   const sources=sourceRows(current),previous=report.unstructured?.content||'',design=await generateDesignPacket(runtime,config,report.request,report.requestedCount,sources,previous);
   report.unstructured=design;report.researchAttempt=Number(report.researchAttempt||0)+1;report.updatedAt=now();
-  report.history=[...(report.history||[]),{attempt:report.researchAttempt,label:'research/design regenerated',requestedCount:report.requestedCount,completedCount:report.completedCount,failedCount:report.failedCount,at:now()}].slice(-20);
+  if(design.status!=='complete'){
+    report.status='failed';report.structureAttempt=Number(report.structureAttempt||0);report.completedCount=0;report.failedCount=report.requestedCount;report.modules=Array.from({length:report.requestedCount},(_,index)=>({index,status:'blocked',issues:[`Curriculum design did not complete, so local module compilation is still blocked. ${clean(design.error,1200)}`],raw:'',provider:design.provider||'',model:design.model||'',at:now()}));
+  }
+  report.history=[...(report.history||[]),{attempt:report.researchAttempt,label:design.status==='complete'?'strong design regenerated':'strong design retry failed',requestedCount:report.requestedCount,completedCount:report.completedCount,failedCount:report.failedCount,at:now()}].slice(-20);
   saveRecovery(report,'living-school-generation-research-regenerated');return copy(report);
 }
 
@@ -268,13 +281,13 @@ export async function regenerateLivingSchoolStructure(){
   const targets=(report.modules||[]).filter(row=>row.status!=='complete').map(row=>Number(row.index)).filter(Number.isInteger);
   if(!targets.length)return current.school;
   const runtime=await runtimeReady(),config=runtime.readSharedConfig?.('interactive');if(!config)throw new Error('Shared model configuration is unavailable.');
-  const sources=sourceRows(current),design=report.unstructured;if(!design?.content)throw new Error('The unstructured research/design packet is unavailable. Regenerate it first.');
+  const sources=sourceRows(current),design=report.unstructured;if(design?.status!=='complete'||!design?.content)throw new Error('A successful Gemini 3.7 curriculum design packet is required before local module compilation. Regenerate research/design first.');
   const pass=await runStructurePass(runtime,config,report.request,report.requestedCount,design,sources,targets);
   const candidate=report.candidate&&typeof report.candidate==='object'?copy(report.candidate):candidateSchool(report.request,report.requestedCount,[],design,{provider:'shared',model:''},report.requestId);
   const moduleMap=new Map((candidate.modules||[]).map((module,index)=>[generationIndex(module,index),module]));for(const row of pass.completed)moduleMap.set(row.index,row.module);
-  candidate.modules=[...moduleMap.entries()].sort((a,b)=>a[0]-b[0]).map(([,module])=>module);candidate.updatedAt=now();candidate.generation={...(candidate.generation||{}),provider:pass.completed[0]?.provider||candidate.generation?.provider||'shared',model:pass.completed[0]?.model||candidate.generation?.model||'',partial:candidate.modules.length<report.requestedCount,completedModuleCount:candidate.modules.length,failedModuleCount:Math.max(0,report.requestedCount-candidate.modules.length),generatedAt:now(),requestId:report.requestId,formatContract:'living-school-flash-design-lite-single-v221'};
+  candidate.modules=[...moduleMap.entries()].sort((a,b)=>a[0]-b[0]).map(([,module])=>module);candidate.updatedAt=now();candidate.generation={...(candidate.generation||{}),provider:pass.completed[0]?.provider||candidate.generation?.provider||'shared',model:pass.completed[0]?.model||candidate.generation?.model||'',partial:candidate.modules.length<report.requestedCount,completedModuleCount:candidate.modules.length,failedModuleCount:Math.max(0,report.requestedCount-candidate.modules.length),generatedAt:now(),requestId:report.requestId,formatContract:'living-school-strong-design-local-compile-v341'};
   const nextModules=moduleReport(report.requestedCount,pass.completed,pass.failures,report.modules),completedCount=nextModules.filter(row=>row.status==='complete').length,failedCount=report.requestedCount-completedCount,nextAttempt=Number(report.structureAttempt||0)+1;
-  report.modules=nextModules;report.batches=[...(report.batches||[]),...pass.batches].slice(-16);report.completedCount=completedCount;report.failedCount=failedCount;report.status=recoveryStatus(completedCount,report.requestedCount);report.structureAttempt=nextAttempt;report.updatedAt=now();report.candidate={...copy(candidate),modules:copy(candidate.modules)};report.history=[...(report.history||[]),historyEntry(nextAttempt,report.requestedCount,completedCount,failedCount,'structured retry')].slice(-20);
+  report.modules=nextModules;report.batches=[...(report.batches||[]),...pass.batches].slice(-16);report.completedCount=completedCount;report.failedCount=failedCount;report.status=recoveryStatus(completedCount,report.requestedCount);report.structureAttempt=nextAttempt;report.updatedAt=now();report.candidate={...copy(candidate),modules:copy(candidate.modules)};report.history=[...(report.history||[]),historyEntry(nextAttempt,report.requestedCount,completedCount,failedCount,'local structured retry')].slice(-20);
   const priorProgress=copy(current.progress||{});current.school=candidate;current.progress=Object.fromEntries(candidate.modules.map(module=>[module.id,priorProgress[module.id]||progressFor(module.id)]));if(!candidate.modules.some(module=>module.id===current.activeModuleId))current.activeModuleId=candidate.modules[0]?.id||'';current.visualInspection=null;
   saveRecovery(report,'living-school-generation-structured-retried');persist('living-school-partial-curriculum-updated',{requestId:report.requestId,status:report.status,completedCount,failedCount,structureAttempt:nextAttempt});return current.school;
 }
