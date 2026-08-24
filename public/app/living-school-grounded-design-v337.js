@@ -1,10 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.3.0-living-school-grounded-design-v340-long-form';
+const VERSION='1.4.0-living-school-grounded-design-v341-effort-hours';
 const ID='living-school-grounded-design-v337';
 const DESIGN='living-school-research-grounded-curriculum-v218.1';
 const MODES=new Set(['live-agentic','local-synthesized','local-downloaded','manual-sources','model-derived-unverified']);
-const ECONOMY=/\b(?:Acorns?|Buttons?|XP|curriculum\s+(?:package\s+)?valuation|labor\s+worth|labour\s+worth|skill\s+ledger|completion\s+grant|reward\s+contract|wage\s+valuation|ledger\s+metadata|payouts?|wages?|currency\s+values?|bonuses?|grants?)\b/i;
+// This sanitizer is application-side only. The model is not told Civweave currency/reward names.
+const ECONOMY=/\b(?:Acorns?|Buttons?|XP|curriculum\s+(?:package\s+)?valuation|labor\s+worth|labour\s+worth|skill\s+ledger|completion\s+grant|reward\s+contract|wage\s+valuation|ledger\s+metadata|payouts?|wages?|currency\s+values?|bonuses?|grants?|prices?|pricing|monetary\s+value|compensation)\b/i;
 const clean=(value,max=64000)=>String(value??'').trim().slice(0,max);
 const lower=value=>clean(value,220).toLowerCase();
 function sanitize(text){const rows=clean(text).split(/\r?\n/),kept=[];let removed=0;for(const row of rows){if(ECONOMY.test(row)){removed++;continue}kept.push(row)}return{text:kept.join('\n').replace(/\n{3,}/g,'\n\n').trim(),removed}}
@@ -25,13 +26,15 @@ const LONG_FORM_CONTRACT=[
   'Develop the teaching: explain definitions and mechanisms, make meaningful distinctions, work through concrete examples, discuss tradeoffs and common mistakes or failure modes, and state practical consequences where the source material supports them.',
   'Do not compress later modules merely to fit the response. Keep all requested modules comparably developed.',
   'When the supplied sources do not support a detail that would improve the explanation, either omit it or clearly mark the instructional inference GENERATED-UNVERIFIED; never manufacture a source-backed fact to create length.',
-  'Use bullets only for compact Concepts or Practice Steps. The actual Lesson Block teaching must be prose.'
+  'Use bullets only for compact Concepts or Practice Steps. The actual Lesson Block teaching must be prose.',
+  'Estimate learner/labor effort in hours for each module. This is a time estimate only, used by the application to compare workload across learning paths; do not convert those hours into any monetary, exchange, reward, compensation, or ledger value.'
 ].join(' ');
 const FORMAT_CONTRACT=[
   'Use this exact instructional-design shape for every module so the compiler can preserve the teaching without inventing filler. Keep the labels and bold Lesson Block heading syntax exactly as shown:',
   '## Module N: Specific subject title',
   'Objective: one observable subject skill.',
   'Why It Matters: 1-3 sentences explaining a real consequence, decision, or use of this knowledge. Do not mention the curriculum, module machinery, evidence workflow, or Civweave.',
+  'Estimated Effort: a realistic learner/labor time estimate in hours, such as 1.5-2 hours. Estimate time only; do not attach any value, price, reward, compensation, or currency to it.',
   'Concepts:',
   '- Term — concise definition that is not copied verbatim from a lesson block.',
   '- Term — concise definition.',
@@ -58,21 +61,21 @@ function install(){
   spine.register(ID,{
     before(request){
       if(lower(request?.purpose)!==DESIGN||!MODES.has(lower(request?.context?.research?.mode)))return request;
-      const messages=[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:`The research/evidence pass is complete. This is the single strong instructional-design pass for this curriculum run. Produce instructional design only. Never output Civweave economy or reward metadata. Do not output Acorns, Buttons, XP, grants, payouts, wages, pricing, labor valuation, currency values, ledger metadata, or a reward contract. Use a SOURCE_ID only for claims actually supported by that source passage. Unsupported material must be marked GENERATED-UNVERIFIED with no SOURCE_ID. Do not output media URLs; provide only plain-text video search topics. ${LONG_FORM_CONTRACT} ${ASSESSMENT_CONTRACT}\n\n${FORMAT_CONTRACT}`}];
-      return{...request,purpose:DESIGN,taskTier:'complex',executionProfile:'interactive',messages,context:{...(request.context||{}),livingSchoolOriginalPurpose:DESIGN,livingSchoolGroundedDesign:true,livingSchoolSingleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,longFormInstructionRequired:true,pedagogyFormatContract:'subject-mastery-long-form-v1'}};
+      const messages=[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:`The research/evidence pass is complete. This is the single strong instructional-design pass for this curriculum run. Produce instructional design only. Estimate learner/labor effort in hours, but do not produce any monetary, exchange, compensation, reward, pricing, payout, or ledger valuation metadata. Use a SOURCE_ID only for claims actually supported by that source passage. Unsupported material must be marked GENERATED-UNVERIFIED with no SOURCE_ID. Do not output media URLs; provide only plain-text video search topics. ${LONG_FORM_CONTRACT} ${ASSESSMENT_CONTRACT}\n\n${FORMAT_CONTRACT}`}];
+      return{...request,purpose:DESIGN,taskTier:'complex',executionProfile:'interactive',messages,context:{...(request.context||{}),livingSchoolOriginalPurpose:DESIGN,livingSchoolGroundedDesign:true,livingSchoolSingleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,longFormInstructionRequired:true,effortHoursRequired:true,effortHoursAreNonValuation:true,pedagogyFormatContract:'subject-mastery-long-form-v2'}};
     },
     after(result,request){
       if(lower(request?.purpose)!==DESIGN||result?.status!=='success')return result;
       const raw=clean(result?.outputText||result?.text||result?.output||'');if(!raw)return result;
       const bounded=sanitize(raw);
-      if(!bounded.text)return{...result,status:'invalid-response',outputText:'',outputJson:undefined,error:{code:'LIVING_SCHOOL_GROUNDED_DESIGN_EMPTY_AFTER_BOUNDARY',message:'Living School removed provider-authored economy metadata and no instructional design remained.'}};
-      return{...result,outputText:bounded.text,diagnostics:[...(result.diagnostics||[]),'Living School kept the single strong design pass on the canonical curriculum-design purpose and required long-form, learner-facing subject-matter teaching.',...(bounded.removed?[`Living School removed ${bounded.removed} provider-authored economy/reward line${bounded.removed===1?'':'s'} before storing grounded design.`]:[])]};
+      if(!bounded.text)return{...result,status:'invalid-response',outputText:'',outputJson:undefined,error:{code:'LIVING_SCHOOL_GROUNDED_DESIGN_EMPTY_AFTER_BOUNDARY',message:'Living School removed provider-authored valuation metadata and no instructional design remained.'}};
+      return{...result,outputText:bounded.text,diagnostics:[...(result.diagnostics||[]),'Living School kept the single strong design pass on the canonical curriculum-design purpose, required long-form subject teaching, and allowed effort hours only as non-valued workload metadata.',...(bounded.removed?[`Living School removed ${bounded.removed} provider-authored valuation/reward line${bounded.removed===1?'':'s'} before storing grounded design.`]:[])]};
     }
   },170);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-grounded-design-ready',{detail:{version:VERSION,purpose:DESIGN,singleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,longFormInstructionRequired:true,pedagogyFormatContract:'subject-mastery-long-form-v1',at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-grounded-design-ready',{detail:{version:VERSION,purpose:DESIGN,singleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,longFormInstructionRequired:true,effortHoursRequired:true,effortHoursAreNonValuation:true,pedagogyFormatContract:'subject-mastery-long-form-v2',at:new Date().toISOString()}}))}catch{}
   return true;
 }
 for(const event of ['civweave:runtime-spine-ready','civweave:gemini-task-router-ready','civweave:living-school-runtime-route-ready'])addEventListener?.(event,()=>queueMicrotask(install));
 install();
-globalThis.CivweaveLivingSchoolGroundedDesignV337=Object.freeze({version:VERSION,install,purpose:DESIGN,sanitize,assessmentContract:ASSESSMENT_CONTRACT,longFormContract:LONG_FORM_CONTRACT,formatContract:FORMAT_CONTRACT,singleStrongDesign:true});
+globalThis.CivweaveLivingSchoolGroundedDesignV337=Object.freeze({version:VERSION,install,purpose:DESIGN,sanitize,assessmentContract:ASSESSMENT_CONTRACT,longFormContract:LONG_FORM_CONTRACT,formatContract:FORMAT_CONTRACT,singleStrongDesign:true,effortHoursRequired:true,effortHoursAreNonValuation:true});
 })();
