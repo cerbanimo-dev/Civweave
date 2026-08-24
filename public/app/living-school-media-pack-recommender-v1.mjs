@@ -1,7 +1,7 @@
 import media from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
 import sourcePacks from'./learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
 
-const REVISION='living-school-media-pack-recommender-v1.6-foundation-ready-dedupe';
+const REVISION='living-school-media-pack-recommender-v1.7-canonical-foundation-authority';
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const STOP=new Set(['about','after','again','also','basic','basics','beginner','build','building','capability','complete','course','create','creating','curriculum','foundation','foundations','guide','guided','intro','introduction','learn','learning','lesson','module','practice','practical','skill','skills','study','teach','teaching','through','using','vocabulary','with','your']);
 const PACK_RULES=Object.freeze({
@@ -72,20 +72,25 @@ function pendingPack(slug,lookup){
 }
 function fallbackPackRows(lookup){return Object.keys(PACK_RULES).map(slug=>pendingPack(slug,lookup))}
 function sourceSchoolSlugs(pack,lookup){return[...new Set((pack.topics||[]).map(topic=>lookup?.topic_meta?.[topic]?.school_slug||TOPIC_SCHOOL_FALLBACK[topic]).filter(Boolean))]}
+async function canonicalFoundationStatus(){
+  const store=globalThis.CivweaveKnowledgeSchools;
+  if(!store?.status)return[];
+  try{return await store.status()}catch(error){console.warn('[Living School canonical school status]',error);return[]}
+}
 
 async function annotateDownloadState(recommendations){
-  let status=[];
-  try{status=await sourcePacks.learningSourcePackStatus()}catch(error){console.warn('[Living School pack status]',error);return recommendations.map(pack=>({...pack,alreadyDownloaded:false,partiallyDownloaded:false}))}
+  let status=[],authority='unified',statusError=null;
+  try{status=await sourcePacks.learningSourcePackStatus()}catch(error){statusError=error;console.warn('[Living School pack status]',error);authority='canonical-articles';status=await canonicalFoundationStatus()}
   const bySlug=new Map((Array.isArray(status)?status:[]).map(row=>[row.school_slug,row]));
   return recommendations.map(pack=>{
     const slugs=Array.isArray(pack.sourceSchoolSlugs)?pack.sourceSchoolSlugs:[];
     const states=slugs.map(slug=>bySlug.get(slug)).filter(Boolean);
     const hasEverySchool=Boolean(slugs.length&&states.length===slugs.length);
-    const sourcePackCurrent=Boolean(hasEverySchool&&states.every(row=>row.current===true));
-    const foundationReady=Boolean(hasEverySchool&&states.every(row=>row.articleCurrent===true||row.current===true));
+    const sourcePackCurrent=Boolean(authority==='unified'&&hasEverySchool&&states.every(row=>row.current===true));
+    const foundationReady=Boolean(hasEverySchool&&states.every(row=>authority==='unified'?(row.articleCurrent===true||row.current===true):row.current===true));
     const alreadyDownloaded=sourcePackCurrent||foundationReady;
-    const partiallyDownloaded=Boolean(!alreadyDownloaded&&states.some(row=>row.staged===true||row.articleCurrent===true||row.videoCurrent===true||Number(row.supplementalCached||0)>0));
-    return{...pack,alreadyDownloaded,partiallyDownloaded,foundationReady,sourcePackCurrent,updateAvailable:Boolean(alreadyDownloaded&&!sourcePackCurrent)};
+    const partiallyDownloaded=Boolean(!alreadyDownloaded&&states.some(row=>row.staged===true||row.articleCurrent===true||row.videoCurrent===true||row.current===true||Number(row.supplementalCached||0)>0));
+    return{...pack,alreadyDownloaded,partiallyDownloaded,foundationReady,sourcePackCurrent,updateAvailable:Boolean(alreadyDownloaded&&!sourcePackCurrent),downloadStateKnown:hasEverySchool,downloadStateAuthority:hasEverySchool?authority:'unknown',downloadStateError:statusError?clean(statusError?.message||statusError,500):''};
   });
 }
 
@@ -119,14 +124,16 @@ function progressLabel(progress){if(progress?.lane==='articles')return progress.
 
 export async function offerMediaPacksBeforeCurriculum(query,{limit=3}={}){
   const recommendations=await annotateDownloadState(await recommendMediaPacks(query,{limit}));
-  const pendingRecommendations=recommendations.filter(pack=>!pack.alreadyDownloaded);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-media-pack-recommendations',{detail:{revision:REVISION,query:clean(query,2000),recommendations}}))}catch{}
-  if(typeof document==='undefined'||!pendingRecommendations.length)return{recommendations,shown:false,skippedAlreadyDownloaded:recommendations.filter(pack=>pack.alreadyDownloaded).map(pack=>pack.slug)};
+  const pendingRecommendations=recommendations.filter(pack=>pack.downloadStateKnown&& !pack.alreadyDownloaded);
+  const skippedAlreadyDownloaded=recommendations.filter(pack=>pack.alreadyDownloaded).map(pack=>pack.slug);
+  const skippedUnknownAuthority=recommendations.filter(pack=>!pack.downloadStateKnown).map(pack=>pack.slug);
+  try{dispatchEvent(new CustomEvent('civweave:living-school-media-pack-recommendations',{detail:{revision:REVISION,query:clean(query,2000),recommendations,skippedAlreadyDownloaded,skippedUnknownAuthority}}))}catch{}
+  if(typeof document==='undefined'||!pendingRecommendations.length)return{recommendations,shown:false,skippedAlreadyDownloaded,skippedUnknownAuthority};
   const existing=document.querySelector('[data-living-school-media-pack-offer]');if(existing)existing.remove();
   const dialog=document.createElement('dialog');dialog.dataset.livingSchoolMediaPackOffer=REVISION;dialog.style.cssText='max-width:min(92vw,620px);border:1px solid currentColor;border-radius:20px;padding:0;background:#102f25;color:#f3f2df;box-shadow:0 24px 80px rgba(0,0,0,.45);';
   const body=document.createElement('div');body.style.cssText='display:grid;gap:14px;padding:20px;';
   const title=document.createElement('strong');title.textContent='Recommended learning packs';title.style.cssText='font-size:1.15rem;';body.append(title);
-  const copyNode=document.createElement('p');copyNode.textContent='Before Moss builds this curriculum, you can seed the matching local source packs. If the foundation article sources are already saved on this device, Moss skips this prompt instead of asking you to refresh optional video-link or local-video material again. Remaining packs save verified foundation articles and their Video Learning Atlas together, then add targeted gap articles and rights-cleared local video files when available. This is optional and resumable.';copyNode.style.cssText='margin:0;line-height:1.45;';body.append(copyNode);
+  const copyNode=document.createElement('p');copyNode.textContent='Before Moss builds this curriculum, you can seed matching local source packs that are not already present on this device. Saved foundation articles are authoritative: optional video-link updates never cause the same pack to be offered again. If Civweave cannot verify local download state, it skips this optional prompt instead of assuming a redownload is needed.';copyNode.style.cssText='margin:0;line-height:1.45;';body.append(copyNode);
   const list=document.createElement('div');list.style.cssText='display:grid;gap:9px;';body.append(list);
   let resolver=null;const done=new Promise(resolve=>{resolver=resolve});
   for(const pack of pendingRecommendations){
@@ -136,9 +143,9 @@ export async function offerMediaPacksBeforeCurriculum(query,{limit=3}={}){
     const action=button(canStage?(pack.partiallyDownloaded?'Finish pack':'Download pack'):'Mapping pending',async()=>{if(!canStage)return;action.disabled=true;action.textContent='Starting…';try{const result=await downloadMediaPack(pack.slug,{limitPerTopic:1,onProgress:progress=>{action.textContent=progressLabel(progress)}});const source=result.sourceResult;action.textContent=`Saved ${source.videoLinks||0} links + ${source.supplementalCached||0} gaps${result.cached?` + ${result.cached} video${result.cached===1?'':'s'}`:''}`;action.title=result.mediaErrors?.length?'Some optional direct video files were unavailable; articles and video links are still saved.':''}catch(error){action.textContent='Unavailable';action.title=error.message}},true);if(!canStage)action.disabled=true;row.append(action);list.append(row);
   }
   const actions=document.createElement('div');actions.style.cssText='display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;';
-  const continueButton=button('Continue to curriculum',()=>{dialog.close();resolver?.({recommendations,shown:true});},true);actions.append(continueButton);body.append(actions);dialog.append(body);document.body.append(dialog);
-  dialog.addEventListener('cancel',event=>{event.preventDefault();dialog.close();resolver?.({recommendations,shown:true})},{once:true});dialog.addEventListener('close',()=>setTimeout(()=>dialog.remove(),0),{once:true});
-  try{dialog.showModal()}catch{return{recommendations,shown:false}}
+  const continueButton=button('Continue to curriculum',()=>{dialog.close();resolver?.({recommendations,shown:true,skippedAlreadyDownloaded,skippedUnknownAuthority});},true);actions.append(continueButton);body.append(actions);dialog.append(body);document.body.append(dialog);
+  dialog.addEventListener('cancel',event=>{event.preventDefault();dialog.close();resolver?.({recommendations,shown:true,skippedAlreadyDownloaded,skippedUnknownAuthority})},{once:true});dialog.addEventListener('close',()=>setTimeout(()=>dialog.remove(),0),{once:true});
+  try{dialog.showModal()}catch{return{recommendations,shown:false,skippedAlreadyDownloaded,skippedUnknownAuthority}}
   return done;
 }
 
