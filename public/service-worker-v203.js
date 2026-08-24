@@ -1,5 +1,6 @@
 // GENERATED: one persistent five-system shell + shared canonical rail + Guild/Map actions + direct realm content inside the shell.
 // persistent-system-shell-v1: the universal navbar is top-level and survives system changes; only the content stage changes.
+// persistent-stage-viewport-r1: the iframe stage has explicit dynamic viewport height so intrinsic iframe sizing cannot expose the parent shell as a dark card.
 // canonical-home-v1: top-level home navigation enters the persistent shell; embedded home remains the validated v440 campus.
 // five-system-pages-v1: top-level realm navigation enters the persistent shell; embedded realm content remains bounded and validated.
 // navigation-runtime-recovery-v2: stale navigation code/pages are purged without reloading or redirecting open clients.
@@ -34,15 +35,15 @@ importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-sys
 importScripts('/service-worker-chat-repair-v245.js?v=guild-live-balance-v2&purge=guild-live-balance-v2&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361&endeavor=kamiya-provider-authority-v7&provider=selected-provider-authority-v1&sanitize=assistant-output-sanitizer-v1');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
-// staging-installed-entry-takeover-v19-persistent-navbar-assets: one-shot activation for the persistent shell plus required sprite media.
+// staging-installed-entry-takeover-v20-persistent-stage-viewport: one-shot activation for the full-height persistent content stage.
 const V203_STAGING_RECOVERY_HOST='civweave-staging.pages.dev';
-const V203_STAGING_RECOVERY_CACHE='cwrecovery-v451-persistent-navbar-assets';
-const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v19-persistent-navbar-assets';
+const V203_STAGING_RECOVERY_CACHE='cwrecovery-v452-persistent-stage-viewport';
+const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v20-persistent-stage-viewport';
 function v203StagingRecoveryRequest(){return new Request(new URL(V203_STAGING_RECOVERY_MARKER,self.location.origin).href)}
 async function v203StagingRecoveryPending(){if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;try{return !(await(await caches.open(V203_STAGING_RECOVERY_CACHE)).match(v203StagingRecoveryRequest()))}catch{return true}}
 async function v203VisibleInstallerClient(){try{const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});return windows.some(client=>{if(client.visibilityState!=='visible')return false;try{const url=new URL(client.url);return url.origin===self.location.origin&&(url.pathname==='/app/'||url.pathname==='/app/index.html')}catch{return false}})}catch{return false}}
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(!(await v203StagingRecoveryPending()))return;if(await v203VisibleInstallerClient())return;await self.skipWaiting()})())});
-  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('persistent-navbar-assets-r1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('persistent-stage-viewport-r1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
