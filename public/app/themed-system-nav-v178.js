@@ -84,6 +84,7 @@ const QUICK=Object.freeze({
 });
 
 const explicitState=new Map();
+const spriteLoaders=new Map();
 let statePromise=null;
 let menu=null;
 let menuSystem='';
@@ -137,12 +138,15 @@ html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-com
 #${NAV_ID} .cw-themed-system-link{all:unset;box-sizing:border-box;position:relative!important;min-width:0!important;width:100%!important;height:100%!important;display:grid!important;place-items:center!important;border-right:1px solid #d6ab4f38!important;background:color-mix(in srgb,var(--system-shade) 38%,#17131c)!important;box-shadow:inset 0 1px 0 #f6dda044,inset 0 -1px 0 #765018!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;overflow:hidden!important;opacity:.82!important;filter:saturate(.82) brightness(.9)!important;transition:opacity .16s ease,filter .16s ease,transform .16s ease,box-shadow .16s ease!important}
 #${NAV_ID} .cw-themed-system-link:first-child{border-radius:13px 0 0 13px!important}#${NAV_ID} .cw-themed-system-link:last-child{border-right:0!important;border-radius:0 13px 13px 0!important}
 #${NAV_ID} .cw-themed-system-link::before{content:"";position:absolute;z-index:-1;inset:3px 2px;border-radius:11px;opacity:.16;background:var(--system-panel);box-shadow:inset 0 0 10px var(--system-glow),0 0 12px var(--system-glow)}
+#${NAV_ID} .cw-themed-system-link::after{content:"";position:absolute;z-index:0;inset:6px 5px;border-radius:11px;opacity:0;pointer-events:none;background:radial-gradient(ellipse at 28% 68%,color-mix(in srgb,var(--system-glow) 42%,transparent) 0 8%,transparent 48%),radial-gradient(ellipse at 72% 35%,color-mix(in srgb,var(--system-glow) 30%,transparent) 0 7%,transparent 45%),linear-gradient(180deg,color-mix(in srgb,var(--system-shade) 34%,transparent),transparent 76%);filter:blur(10px) saturate(1.16);transform:scale(.94);transition:opacity .28s ease,transform .34s ease}
+#${NAV_ID} .cw-themed-system-link[data-sprite-ready="true"]::after{opacity:.74;transform:scale(1.03)}
+#${NAV_ID} .cw-themed-system-link[data-sprite-ready="true"].is-current::after{opacity:.92}
 #${NAV_ID} .cw-themed-system-link.is-current{z-index:2;opacity:1!important;filter:none!important;transform:translateY(-3px)!important;box-shadow:inset 0 0 0 2px var(--system-ring),0 -4px 13px color-mix(in srgb,var(--system-glow) 68%,transparent),0 4px 12px #0008!important}
 #${NAV_ID} .cw-themed-system-link.is-current::before{opacity:.92}
 #${NAV_ID} .cw-themed-system-link.is-menu-open{z-index:3;opacity:1!important;filter:none!important;box-shadow:inset 0 0 0 2px #fff2b5,0 -4px 15px color-mix(in srgb,var(--system-glow) 72%,transparent)!important}
 #${NAV_ID} .cw-themed-system-link.is-onboarding-highlight{z-index:4;opacity:1!important;filter:none!important;animation:cw-nav-guide-pulse 1.05s ease-in-out infinite alternate}
 #${NAV_ID} .cw-themed-system-link:focus-visible{outline:3px solid #fff8c7!important;outline-offset:-4px!important}
-#${NAV_ID} .cw-themed-system-button{box-sizing:border-box;width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:3px 7px;pointer-events:none}
+#${NAV_ID} .cw-themed-system-button{box-sizing:border-box;position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:3px 7px;pointer-events:none}
 #${NAV_ID} .cw-themed-system-avatar-wrap{position:relative;flex:0 0 auto;width:84px;height:84px;border-radius:20px;padding:2px;background:linear-gradient(180deg,var(--system-shell),#ffffff99);border:1px solid var(--system-ring);box-shadow:0 2px 8px #0006;overflow:hidden}
 #${NAV_ID} .cw-themed-system-fallback,#${NAV_ID} .cw-themed-system-avatar{position:absolute;inset:2px;display:block;width:calc(100% - 4px);height:calc(100% - 4px);border-radius:18px}
 #${NAV_ID} .cw-themed-system-fallback{object-fit:cover;object-position:center;z-index:0}
@@ -158,7 +162,7 @@ html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-com
 @keyframes cw-nav-guide-pulse{from{transform:translateY(-2px) scale(1)}to{transform:translateY(-5px) scale(1.03)}}
 @media(max-width:680px){:root{--cw-themed-nav-height:clamp(88px,22vw,96px);--cw-themed-nav-bottom-gap:0px}#${NAV_ID}{bottom:0!important;height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;min-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;max-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;padding-bottom:env(safe-area-inset-bottom)!important;box-sizing:border-box!important;width:calc(100vw - 6px)!important}#${NAV_ID} .cw-themed-system-button{gap:4px;padding:2px 4px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:76px;height:76px}}
 @media(max-width:430px){:root{--cw-themed-nav-height:clamp(80px,22vw,88px);--cw-themed-nav-bottom-gap:0px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:68px;height:68px}#${MENU_ID}{width:calc(100vw - 16px)!important;max-height:56dvh!important}}
-@media(prefers-reduced-motion:reduce){#${NAV_ID} .cw-themed-system-link,#${NAV_ID} .cw-themed-system-avatar{transition:none}#${NAV_ID} .cw-themed-system-link.is-onboarding-highlight{animation:none}}
+@media(prefers-reduced-motion:reduce){#${NAV_ID} .cw-themed-system-link,#${NAV_ID} .cw-themed-system-link::after,#${NAV_ID} .cw-themed-system-avatar{transition:none}#${NAV_ID} .cw-themed-system-link.is-onboarding-highlight{animation:none}}
 `;
   document.head.append(style);
 }
@@ -167,6 +171,18 @@ function ensureStateMapper(){
   statePromise=new Promise(resolve=>{const existing=Array.from(document.scripts||[]).find(node=>String(node.src||'').includes('/app/subsystem-avatar-state-v347.js'));if(existing){existing.addEventListener('load',()=>resolve(globalThis.CivweaveSubsystemAvatarStateV347||null),{once:true});existing.addEventListener('error',()=>resolve(null),{once:true});return}const script=document.createElement('script');script.src=STATE_MAPPER;script.async=false;script.dataset.cwSubsystemAvatarState='v347';script.onload=()=>resolve(globalThis.CivweaveSubsystemAvatarStateV347||null);script.onerror=()=>resolve(null);document.head?.append(script)});return statePromise;
 }
 function linkFor(system){return document.querySelector(`#${NAV_ID} .cw-themed-system-link[data-system="${system}"]`)}
+function armSpriteFog(system){
+  const link=linkFor(system),src=SHEETS[system];if(!link||!src)return false;
+  const resolved=new URL(src,location.href).href,existing=spriteLoaders.get(system);
+  if(existing?.src===resolved&&existing.complete&&existing.naturalWidth>0){link.dataset.spriteReady='true';return true}
+  link.dataset.spriteReady='loading';
+  const image=new Image();image.decoding='async';
+  const ready=()=>{const live=linkFor(system);if(live)live.dataset.spriteReady='true'};
+  const failed=()=>{const live=linkFor(system);if(live)live.dataset.spriteReady='false'};
+  image.onload=ready;image.onerror=failed;image.src=src;spriteLoaders.set(system,image);
+  if(image.complete)setTimeout(()=>image.naturalWidth>0?ready():failed(),0);
+  return true;
+}
 function listFor(system){return globalThis.CivweaveAvatarExpressionDirectorV343?.expressions?.[system]||EX[system]||EX.civweave}
 function setExpression(system,expression='neutral',source='default',reason=''){
   const link=linkFor(system);if(!link)return false;const list=listFor(system),name=list.includes(String(expression))?String(expression):'neutral',index=Math.max(0,list.indexOf(name));
@@ -222,14 +238,14 @@ function mount(){
   installStyle();document.documentElement.classList.add('cw-themed-system-nav-active');document.documentElement.dataset.cwThemedCurrent=current;document.documentElement.dataset.familyNavigationOwner='themed-system-nav-v178';
   let nav=document.getElementById(NAV_ID);
   if(!nav){
-    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v306-current-quest';nav.dataset.geometryRevision='canonical-tall-v1';nav.setAttribute('aria-label','Civweave five-guide rail');
+    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v306-current-quest';nav.dataset.geometryRevision='canonical-tall-v1';nav.dataset.spriteFogRevision='load-aware-v1';nav.setAttribute('aria-label','Civweave five-guide rail');
     nav.innerHTML=SYSTEMS.map(item=>{const selected=item.id===current;return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${href(item)}" target="_top" aria-label="${item.character} · ${item.label}. Tap to open ${item.label}. Press and hold for shortcuts." aria-haspopup="menu" aria-expanded="false"${selected?' aria-current="page"':''} style="--system-glow:${item.glow};--system-shade:${item.shade};--system-label:${item.labelColor};--system-shell:${item.shell};--system-ring:${item.ring};--system-panel:${item.panel};--system-sheet:url('${SHEETS[item.id]}');--sprite-col:0;--sprite-row:0"><span class="cw-themed-system-button"><span class="cw-themed-system-avatar-wrap"><img class="cw-themed-system-fallback" src="${FALLBACK[item.id]}" alt=""><span class="cw-themed-system-avatar" role="img" aria-label="${item.character}"></span><span class="cw-themed-unread" hidden></span></span><span class="cw-themed-system-monogram" aria-hidden="true">${item.monogram}</span><span class="cw-themed-system-copy"><b>${item.character}</b><small>${item.label}</small></span></span></a>`}).join('');
     nav.addEventListener('pointerdown',event=>{const link=event.target.closest?.('a[data-system]');if(link)startHold(event,link)});nav.addEventListener('pointermove',moveHold);nav.addEventListener('pointerup',finishHold);nav.addEventListener('pointercancel',cancelHold);
     nav.addEventListener('contextmenu',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;event.preventDefault();cancelHold();suppressClickUntil=Date.now()+500;openQuickMenu(link.dataset.system,{focus:true})});
     nav.addEventListener('keydown',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;if(event.key==='ContextMenu'||event.key==='ArrowUp'||(event.key==='Enter'&&event.shiftKey)){event.preventDefault();openQuickMenu(link.dataset.system,{focus:true})}});
     nav.addEventListener('click',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;event.preventDefault();if(Date.now()<suppressClickUntil)return;closeQuickMenu({restoreFocus:false});const target=String(link.dataset.system||'');syncCurrentSelection(target);routeSystem(target)});document.body.append(nav);
-  }else{nav.dataset.navigationRevision=VERSION;nav.dataset.geometryRevision='canonical-tall-v1'}
-  ensureMenu();syncChrome();for(const item of SYSTEMS)if(!linkFor(item.id)?.dataset.expression)setExpression(item.id,'neutral','boot');hydrate();void ensureStateMapper().then(hydrate);requestAnimationFrame(()=>applyRequestedFeature());return true;
+  }else{nav.dataset.navigationRevision=VERSION;nav.dataset.geometryRevision='canonical-tall-v1';nav.dataset.spriteFogRevision='load-aware-v1'}
+  ensureMenu();for(const item of SYSTEMS)armSpriteFog(item.id);syncChrome();for(const item of SYSTEMS)if(!linkFor(item.id)?.dataset.expression)setExpression(item.id,'neutral','boot');hydrate();void ensureStateMapper().then(hydrate);requestAnimationFrame(()=>applyRequestedFeature());return true;
 }
 function ensureMounted(){if(EMBEDDED){clearEmbedded();return false}return mount()}
 
