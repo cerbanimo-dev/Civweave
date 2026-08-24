@@ -1,14 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='1.5.0-living-school-generation-budget-v1-interactive-timeout';
+const VERSION='1.6.0-living-school-generation-budget-v1-single-owner';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
 const QUIZ_REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v263';
 const DEPTH_PURPOSE='living-school-module-depth-expansion-v262';
 const DESIGN_TIMEOUT_MS=90000;
-const stats={designCalls:0,designCompletionRetries:0,designTimeouts:0,structureCompiles:0,quizCallsBlocked:0,repairCallsBlocked:0,depthCallsBlocked:0,filteredSourceNoise:0,outerRewraps:0,installedAt:'',lastBlockedAt:''};
-let wrappedRuntime=null;
+const stats={designCalls:0,designCompletionRetries:0,designTimeouts:0,structureCompiles:0,quizCallsBlocked:0,repairCallsBlocked:0,depthCallsBlocked:0,filteredSourceNoise:0,installCount:0,installedAt:'',lastBlockedAt:''};
+let wrappedRuntime=null,installed=false;
 const clean=(value,max=64000)=>String(value??'').trim().slice(0,max);
 const lower=value=>clean(value,240).toLowerCase();
 const livingSchoolPurpose=purpose=>/^living-school-/.test(lower(purpose));
@@ -24,6 +24,7 @@ function publish(){
     root.dataset.livingSchoolRepairCallsBlocked=String(stats.repairCallsBlocked);
     root.dataset.livingSchoolDepthCallsBlocked=String(stats.depthCallsBlocked);
     root.dataset.livingSchoolFilteredSourceNoise=String(stats.filteredSourceNoise);
+    root.dataset.livingSchoolBudgetInstallCount=String(stats.installCount);
     root.dataset.livingSchoolBudgetOuter=globalThis.CivweaveModelRuntime===wrappedRuntime?'true':'false';
   }catch{}
 }
@@ -141,9 +142,11 @@ function compileStructure(request){
     return{schema:'civweave-model-result-1.0',requestId:request?.requestId||`ls-compile-failed-${Date.now().toString(36)}`,purpose:STRUCTURE_PURPOSE,status:'invalid-response',outputText:'',outputJson:null,usage:{},stream:{requested:false,used:false},structured:{requested:true,valid:false,repairAttempts:0},fallback:{used:false},actual:{provider:'civweave',model:'grounded-design-compiler-v338+assessment-curator-v338'},error:{code:clean(error?.code||'LIVING_SCHOOL_GROUNDED_COMPILE_FAILED',160),message:clean(error?.message||error,2400)},diagnostics:['Living School refused to call a provider to repair a grounded compile failure. The failed module remains visible for explicit recovery.']};
   }
 }
+function finalGuardsReady(){return Boolean(globalThis.CivweaveLivingSchoolGenerationGuardV262?.installed&&globalThis.CivweaveLivingSchoolQuizContractGuardV263?.installed&&globalThis.CivweaveLivingSchoolVideoGenerationGuardV1?.installed)}
 function install(){
+  if(installed){publish();return true}
+  if(!finalGuardsReady())return false;
   const current=globalThis.CivweaveModelRuntime;if(!current?.generate)return false;
-  if(current===wrappedRuntime&&current.livingSchoolGenerationBudgetRevision===VERSION){publish();return true}
   const original=current.generate.bind(current);
   const generate=async request=>{
     const purpose=lower(request?.purpose);
@@ -157,13 +160,12 @@ function install(){
   };
   wrappedRuntime=Object.freeze({...current,generate,livingSchoolGenerationBudgetRevision:VERSION});
   try{Object.defineProperty(globalThis,'CivweaveModelRuntime',{configurable:true,enumerable:true,writable:true,value:wrappedRuntime})}catch{globalThis.CivweaveModelRuntime=wrappedRuntime}
-  stats.outerRewraps+=1;if(!stats.installedAt)stats.installedAt=new Date().toISOString();publish();
-  try{dispatchEvent(new CustomEvent('civweave:living-school-generation-budget-ready',{detail:{version:VERSION,designProviderCallsMax:2,designTimeoutMs:DESIGN_TIMEOUT_MS,designExecutionProfile:'interactive',postDesignProviderCalls:0,structureCompiler:'grounded-design-compiler-v338',quizCompiler:'assessment-curator-v338',outermost:true,at:new Date().toISOString()}}))}catch{}
+  installed=true;stats.installCount=1;stats.installedAt=new Date().toISOString();publish();
+  try{dispatchEvent(new CustomEvent('civweave:living-school-generation-budget-ready',{detail:{version:VERSION,designProviderCallsMax:2,designTimeoutMs:DESIGN_TIMEOUT_MS,designExecutionProfile:'interactive',postDesignProviderCalls:0,structureCompiler:'grounded-design-compiler-v338',quizCompiler:'assessment-curator-v338',singleOwner:true,installCount:1,at:stats.installedAt}}))}catch{}
   return true;
 }
-function schedule(){queueMicrotask(install);setTimeout(install,0);setTimeout(install,120)}
-for(const event of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:assistant-runtime-ready','civweave:living-school-runtime-route-ready','pageshow'])addEventListener?.(event,schedule);
-for(const event of ['civweave:living-school-generation-guard-ready','civweave:living-school-quiz-contract-ready','civweave:living-school-video-generation-guard-ready','civweave:living-school-grounded-compiler-ready','civweave:living-school-assessment-curator-ready'])addEventListener?.(event,()=>{install();setTimeout(install,0)});
-schedule();
-globalThis.CivweaveLivingSchoolGenerationBudgetV1=Object.freeze({version:VERSION,install,designPacketCheck,looksLikeIndexNoise,compileStructure,stats:()=>({...stats})});
+function installAfterFinalGuard(){if(!installed&&finalGuardsReady())install()}
+addEventListener?.('civweave:living-school-video-generation-guard-ready',installAfterFinalGuard);
+queueMicrotask(installAfterFinalGuard);
+globalThis.CivweaveLivingSchoolGenerationBudgetV1=Object.freeze({version:VERSION,install,installAfterFinalGuard,designPacketCheck,looksLikeIndexNoise,compileStructure,get installed(){return installed},get runtime(){return wrappedRuntime},stats:()=>({...stats})});
 })();
