@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const VERSION='canonical-navbar-cache-first-v9-shared-rail';
+const VERSION='canonical-navbar-cache-first-v10-shared-skin';
 const NAV_PATH='/app/themed-system-nav-v178.js';
 const DIRECT_NAV_PATH='/app/five-system-direct-navigation-v1.js';
 const OUTPUT_NORMALIZER_PATH='/app/server-ai-output-normalizer-v1.js';
@@ -17,7 +17,7 @@ const PATHS=Object.freeze([
   '/app/platform-experience-v160.css'
 ]);
 const PATH_SET=new Set(PATHS);
-const CACHE='cw-nav-canonical-v8';
+const CACHE='cw-nav-canonical-v10-shared-skin';
 const FETCH_TIMEOUT_MS=2500;
 function valid(response,path){
   if(!response?.ok)return false;
