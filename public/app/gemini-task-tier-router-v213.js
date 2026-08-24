@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.74-gemini-task-tier-router-v328-living-school-post-fallback-lite';
+const VERSION='1.0.75-gemini-task-tier-router-v329-call-lifecycle';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const RESEARCH_FALLBACK_MODEL='gemini-3.5-flash';
 const COMPLEX_MODEL='gemini-3.7-flash';
@@ -18,7 +18,7 @@ const LIVING_SCHOOL_FLASH_LITE_PURPOSES=new Set([
   'living-school-quiz-delta-completion-v258',
   'living-school-quiz-question-contract-repair-v263'
 ]);
-let noticeTimer=null;
+let noticeTimer=null,routingSequence=0;
 if(globalThis.CivweaveGeminiTaskTierRouterV213?.version===VERSION)return;
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
 const lower=value=>clean(value).toLowerCase();
@@ -115,12 +115,19 @@ function installStyle(){
   if(typeof document==='undefined'||document.getElementById(STYLE_ID))return;
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`#${NOTICE_ID}{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top));transform:translateX(-50%);z-index:2147483646;width:min(680px,calc(100vw - 24px));padding:12px 15px;border:1px solid rgba(120,232,255,.55);border-radius:14px;background:rgba(5,15,35,.96);box-shadow:0 16px 48px rgba(0,0,0,.45);color:#f5fbff;font:600 14px/1.4 system-ui,sans-serif;text-align:center;pointer-events:none}#${NOTICE_ID}[hidden]{display:none!important}#cw-gemini-routing-note-v213{padding:13px 15px;border:1px solid rgba(120,232,255,.35);border-radius:13px;background:#071a2a;color:#dff9ff}#cw-gemini-routing-note-v213 b{display:block;margin-bottom:4px;color:#8eeeff}`;document.head.append(style);
 }
+function callIdFor(request={}){return clean(request?.__civweaveGeminiRouting?.callId||request?.requestId,180)||`gemini-call-${Date.now().toString(36)}-${(++routingSequence).toString(36)}`}
+function livingSchoolRunActive(){if(typeof document==='undefined')return false;const root=document.documentElement;return root?.dataset?.livingSchoolGenerationActive==='true'||root?.dataset?.livingSchoolRunRailActive==='true'||Boolean(document.querySelector('[data-ls-action="generate-curriculum"][aria-busy="true"]'))}
 function disclose(decision,model,request={}){
-  const detail={schema:'civweave.gemini-task-routing.v2',version:VERSION,tier:decision.tier,reason:decision.reason,requirements:decision.requirements,model,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,purpose:clean(request.purpose,160),at:new Date().toISOString()};
+  const detail={schema:'civweave.gemini-task-routing.v3',version:VERSION,callId:callIdFor(request),tier:decision.tier,reason:decision.reason,requirements:decision.requirements,model,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,purpose:clean(request.purpose,160),startedAtMs:Date.now(),at:new Date().toISOString()};
   try{dispatchEvent(new CustomEvent('civweave:gemini-task-tier-selected',{detail}))}catch{}
-  if(typeof document==='undefined'||decision.tier!=='complex')return detail;
+  if(typeof document==='undefined'||decision.tier!=='complex'||livingSchoolRunActive())return detail;
   installStyle();let notice=document.getElementById(NOTICE_ID);if(!notice){notice=document.createElement('div');notice.id=NOTICE_ID;notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');document.body.append(notice)}
   notice.textContent=`Capability routing selected Gemini 3.7 Flash for ${decision.reason}. Routine requests use Gemini 3.1 Flash-Lite.`;notice.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{if(notice?.isConnected)notice.hidden=true},7000);return detail;
+}
+function completeRouting(meta,result){
+  if(!meta)return;
+  const detail={...meta,status:clean(result?.status,80)||'unknown',completedAtMs:Date.now(),completedAt:new Date().toISOString(),errorCode:clean(result?.error?.code,160)};
+  try{dispatchEvent(new CustomEvent('civweave:gemini-task-tier-completed',{detail}))}catch{}
 }
 function patchSettings(){
   if(typeof document==='undefined')return;
@@ -153,6 +160,7 @@ function middleware(){
     after(result,request){
       const bounded=designEconomyViolation(result,request),meta=request?.__civweaveGeminiRouting;
       if(!meta||!bounded||typeof bounded!=='object')return bounded;
+      completeRouting(meta,bounded);
       return{...bounded,taskRouting:meta};
     }
   };
@@ -170,5 +178,5 @@ addEventListener?.('civweave:model-settings-saved',()=>{migrateStoredGeminiPolic
 addEventListener?.('civweave:model-settings-opened',()=>queueMicrotask(patchSettings));
 if(typeof document!=='undefined'){document.addEventListener('change',event=>{if(event.target?.name==='route')queueMicrotask(patchSettings)});document.addEventListener('submit',event=>{if(event.target?.matches?.('[data-cw-cleanroom-form]'))patchSettings()},true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',patchSettings,{once:true});else patchSettings();}
 migrateStoredGeminiPolicy();install();
-globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID,canonicalSettingsPresentation:true});
+globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID,canonicalSettingsPresentation:true,callLifecycle:true});
 })();
