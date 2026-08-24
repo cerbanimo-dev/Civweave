@@ -2,14 +2,14 @@
 'use strict';
 
 const VERSION='1.0.167';
-const REVISION='five-system-route-contract-v229-v440-home';
-const SHELL_REVISION='direct-first-class-routes-v3-v440-home';
+const REVISION='five-system-route-contract-v230-shared-navbar-owner';
+const SHELL_REVISION='direct-first-class-routes-v4-shared-navbar-owner';
 const LEGACY_SHELL_PATH='/app/working-campus-v156.html';
 const SHELL_PATH='/app/working-campus-v440.html';
 const FRESH_SHELL_PATH=SHELL_PATH;
-const DIRECT_NAV_SRC='/app/five-system-direct-navigation-v1.js?v=1.0.1-five-system-direct-navigation-v440-home';
+const DIRECT_NAV_SRC='/app/five-system-direct-navigation-v1.js?v=1.0.2-five-system-direct-navigation-v440-home-rapid-tap-guard';
 const SERVER_AI_OUTPUT_NORMALIZER_SRC='/app/server-ai-output-normalizer-v1.js?v=1.0.0';
-const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.5-direct-routes';
+const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer';
 const PERSISTENT_CONTEXT_SRC='/app/persistent-system-context-v1.js?v=1.0.3-direct-routes';
 const GUILD_USAGE_SRC='/app/guild-chat-usage-v1.js?v=1.0.2-mobile-session-upgrade';
 const GUILD_USAGE_VERSION='1.0.2-';
@@ -107,13 +107,14 @@ function guildUsageSnapshot(){return globalThis.CivweaveGuildChatUsageV1?.snapsh
 function renderGuildUsage(){return Boolean(globalThis.CivweaveGuildChatUsageV1?.render?.())}
 async function refreshGuildUsage(options){ensureGuildUsage();return await globalThis.CivweaveGuildChatUsageV1?.refresh?.(options)||guildUsageSnapshot()}
 
-const api=Object.freeze({version:VERSION,revision:REVISION,shellRevision:SHELL_REVISION,shellPath:SHELL_PATH,freshShellPath:FRESH_SHELL_PATH,legacyShellPath:LEGACY_SHELL_PATH,bootKey:BOOT_KEY,contextKey:CONTEXT_KEY,systems:SYSTEM_IDS,routeFor,routes,identify,isCanonicalPath,authorize,directUrlFor,shellUrlFor,shouldUseDirect,urlFor,navigate,rememberContext,legacyRequestedSystem,ensureDirectNavigation,ensureServerAIOutputNormalizer,ensurePersistentShellActions,ensurePersistentSystemContext,ensureGuildUsage,guildUsageRevision:'guild-chat-usage-v1-mobile-session-upgrade',guildUsageVersion:GUILD_USAGE_VERSION,guildUsageSnapshot,renderGuildUsage,refreshGuildUsage,singlePersistentShell:false,legacyRealmEntrypoints:true,navigationReloadOnSystemSwitch:true,directNavigationOwner:'five-system-direct-navigation-v1',serverAIOutputNormalizer:'server-ai-output-normalizer-v1'});
+const api=Object.freeze({version:VERSION,revision:REVISION,shellRevision:SHELL_REVISION,shellPath:SHELL_PATH,freshShellPath:FRESH_SHELL_PATH,legacyShellPath:LEGACY_SHELL_PATH,bootKey:BOOT_KEY,contextKey:CONTEXT_KEY,systems:SYSTEM_IDS,routeFor,routes,identify,isCanonicalPath,authorize,directUrlFor,shellUrlFor,shouldUseDirect,urlFor,navigate,rememberContext,legacyRequestedSystem,ensureDirectNavigation,ensureServerAIOutputNormalizer,ensurePersistentShellActions,ensurePersistentSystemContext,ensureGuildUsage,guildUsageRevision:'guild-chat-usage-v1-mobile-session-upgrade',guildUsageVersion:GUILD_USAGE_VERSION,guildUsageSnapshot,renderGuildUsage,refreshGuildUsage,singlePersistentShell:false,legacyRealmEntrypoints:true,navigationReloadOnSystemSwitch:true,directNavigationOwner:'themed-system-nav-v178',directNavigationAutoInstall:false,persistentSystemContextAutoInstall:false,serverAIOutputNormalizer:'server-ai-output-normalizer-v1'});
 globalThis.CivweaveSystemRoutesV227=api;
 if(typeof document!=='undefined'&&isCanonicalPath(globalThis.location?.href||globalThis.location?.pathname||'')){
   authorize();
   const current=identify();
   document.documentElement.dataset.civweaveSystemRoute=current||'civweave';
   document.documentElement.dataset.civweaveDirectShell='true';
+  document.documentElement.dataset.civweaveNavigationOwner='themed-system-nav-v178';
   try{delete document.documentElement.dataset.civweaveSingleSystemShell}catch{}
   const legacy=legacyRequestedSystem();
   if(current==='civweave'&&legacy&&legacy!=='civweave'){
@@ -123,8 +124,11 @@ if(typeof document!=='undefined'&&isCanonicalPath(globalThis.location?.href||glo
     return;
   }
   if(current)rememberContext(current);
-  ensureDirectNavigation();
+  // Shared five-system navigation is owned by themed-system-nav-v178. Do not
+  // auto-install the legacy capture/rewrite owner or whole-document context
+  // observer here; both used to compete with the shared rail on dynamic realms.
   ensureServerAIOutputNormalizer();
-  ensurePersistentShellActions();ensurePersistentSystemContext();ensureGuildUsage();
+  ensurePersistentShellActions();
+  ensureGuildUsage();
 }
 })();
