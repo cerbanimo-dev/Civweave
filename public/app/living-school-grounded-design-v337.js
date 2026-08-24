@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.0-living-school-grounded-design-v339-single-strong';
+const VERSION='1.3.0-living-school-grounded-design-v340-long-form';
 const ID='living-school-grounded-design-v337';
 const DESIGN='living-school-research-grounded-curriculum-v218.1';
 const MODES=new Set(['live-agentic','local-synthesized','local-downloaded','manual-sources','model-derived-unverified']);
@@ -18,6 +18,15 @@ const ASSESSMENT_CONTRACT=[
   'Bad: "Assess whether the learner understands controlled environments."',
   'Good: "A vacant urban lot has limited space and poor weather protection. Choose an appropriate controlled-environment approach and explain why it fits the site."'
 ].join(' ');
+const LONG_FORM_CONTRACT=[
+  'LONG-FORM INSTRUCTION IS REQUIRED. This is not an outline, executive summary, slide deck, or list of talking points.',
+  'Each Lesson Block must be connected instructional prose in full sentences, normally 2-4 substantive paragraphs and roughly 180-320 words when the supplied evidence supports that depth.',
+  'A one-sentence block, a paragraph-sized bullet, or a list of claims without explanation is invalid even if the headings are present.',
+  'Develop the teaching: explain definitions and mechanisms, make meaningful distinctions, work through concrete examples, discuss tradeoffs and common mistakes or failure modes, and state practical consequences where the source material supports them.',
+  'Do not compress later modules merely to fit the response. Keep all requested modules comparably developed.',
+  'When the supplied sources do not support a detail that would improve the explanation, either omit it or clearly mark the instructional inference GENERATED-UNVERIFIED; never manufacture a source-backed fact to create length.',
+  'Use bullets only for compact Concepts or Practice Steps. The actual Lesson Block teaching must be prose.'
+].join(' ');
 const FORMAT_CONTRACT=[
   'Use this exact instructional-design shape for every module so the compiler can preserve the teaching without inventing filler. Keep the labels and bold Lesson Block heading syntax exactly as shown:',
   '## Module N: Specific subject title',
@@ -28,11 +37,11 @@ const FORMAT_CONTRACT=[
   '- Term — concise definition.',
   '- Term — concise definition.',
   '**Lesson Block 1: Specific heading.**',
-  'Teach the idea in substantive prose. Explain definitions, mechanisms, distinctions, examples, tradeoffs, mistakes, or consequences as appropriate. Aim for at least 250 characters of useful teaching per lesson block. Attach supplied source IDs only to claims they support; use GENERATED-UNVERIFIED only for unsupported inference.',
+  'Write 2-4 connected paragraphs of long-form teaching. Normally target 180-320 words. Explain the idea rather than naming it. Attach supplied source IDs only to claims they support; use GENERATED-UNVERIFIED only for unsupported inference.',
   '**Lesson Block 2: Specific heading.**',
-  'Teach a distinct idea rather than restating Lesson Block 1.',
+  'Write another 2-4 connected paragraphs that teach a distinct idea rather than restating Lesson Block 1. Include concrete examples, distinctions, mechanisms, tradeoffs, or failure modes where appropriate.',
   '**Lesson Block 3: Specific heading.**',
-  'Teach a distinct idea and connect it to realistic use.',
+  'Write another 2-4 connected paragraphs that deepen the subject and connect it to realistic use. Do not collapse this block into a summary bullet.',
   'Exercise: one authentic task that applies the subject in a concrete situation.',
   'Practice Steps:',
   '1. concrete subject action',
@@ -49,21 +58,21 @@ function install(){
   spine.register(ID,{
     before(request){
       if(lower(request?.purpose)!==DESIGN||!MODES.has(lower(request?.context?.research?.mode)))return request;
-      const messages=[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:`The research/evidence pass is complete. This is the single strong instructional-design pass for this curriculum run. Produce instructional design only. Never output Civweave economy or reward metadata. Do not output Acorns, Buttons, XP, grants, payouts, wages, pricing, labor valuation, currency values, ledger metadata, or a reward contract. Use a SOURCE_ID only for claims actually supported by that source passage. Unsupported material must be marked GENERATED-UNVERIFIED with no SOURCE_ID. Do not output media URLs; provide only plain-text video search topics. ${ASSESSMENT_CONTRACT}\n\n${FORMAT_CONTRACT}`}];
-      return{...request,purpose:DESIGN,taskTier:'complex',executionProfile:'interactive',messages,context:{...(request.context||{}),livingSchoolOriginalPurpose:DESIGN,livingSchoolGroundedDesign:true,livingSchoolSingleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,pedagogyFormatContract:'subject-mastery-v1'}};
+      const messages=[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:`The research/evidence pass is complete. This is the single strong instructional-design pass for this curriculum run. Produce instructional design only. Never output Civweave economy or reward metadata. Do not output Acorns, Buttons, XP, grants, payouts, wages, pricing, labor valuation, currency values, ledger metadata, or a reward contract. Use a SOURCE_ID only for claims actually supported by that source passage. Unsupported material must be marked GENERATED-UNVERIFIED with no SOURCE_ID. Do not output media URLs; provide only plain-text video search topics. ${LONG_FORM_CONTRACT} ${ASSESSMENT_CONTRACT}\n\n${FORMAT_CONTRACT}`}];
+      return{...request,purpose:DESIGN,taskTier:'complex',executionProfile:'interactive',messages,context:{...(request.context||{}),livingSchoolOriginalPurpose:DESIGN,livingSchoolGroundedDesign:true,livingSchoolSingleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,longFormInstructionRequired:true,pedagogyFormatContract:'subject-mastery-long-form-v1'}};
     },
     after(result,request){
       if(lower(request?.purpose)!==DESIGN||result?.status!=='success')return result;
       const raw=clean(result?.outputText||result?.text||result?.output||'');if(!raw)return result;
       const bounded=sanitize(raw);
       if(!bounded.text)return{...result,status:'invalid-response',outputText:'',outputJson:undefined,error:{code:'LIVING_SCHOOL_GROUNDED_DESIGN_EMPTY_AFTER_BOUNDARY',message:'Living School removed provider-authored economy metadata and no instructional design remained.'}};
-      return{...result,outputText:bounded.text,diagnostics:[...(result.diagnostics||[]),'Living School kept the single strong design pass on the canonical curriculum-design purpose and required learner-facing subject-matter assessment wording.',...(bounded.removed?[`Living School removed ${bounded.removed} provider-authored economy/reward line${bounded.removed===1?'':'s'} before storing grounded design.`]:[])]};
+      return{...result,outputText:bounded.text,diagnostics:[...(result.diagnostics||[]),'Living School kept the single strong design pass on the canonical curriculum-design purpose and required long-form, learner-facing subject-matter teaching.',...(bounded.removed?[`Living School removed ${bounded.removed} provider-authored economy/reward line${bounded.removed===1?'':'s'} before storing grounded design.`]:[])]};
     }
   },170);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-grounded-design-ready',{detail:{version:VERSION,purpose:DESIGN,singleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,pedagogyFormatContract:'subject-mastery-v1',at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-grounded-design-ready',{detail:{version:VERSION,purpose:DESIGN,singleStrongDesign:true,applicationOwnedEconomyBoundary:true,learnerFacingAssessmentContract:true,longFormInstructionRequired:true,pedagogyFormatContract:'subject-mastery-long-form-v1',at:new Date().toISOString()}}))}catch{}
   return true;
 }
 for(const event of ['civweave:runtime-spine-ready','civweave:gemini-task-router-ready','civweave:living-school-runtime-route-ready'])addEventListener?.(event,()=>queueMicrotask(install));
 install();
-globalThis.CivweaveLivingSchoolGroundedDesignV337=Object.freeze({version:VERSION,install,purpose:DESIGN,sanitize,assessmentContract:ASSESSMENT_CONTRACT,formatContract:FORMAT_CONTRACT,singleStrongDesign:true});
+globalThis.CivweaveLivingSchoolGroundedDesignV337=Object.freeze({version:VERSION,install,purpose:DESIGN,sanitize,assessmentContract:ASSESSMENT_CONTRACT,longFormContract:LONG_FORM_CONTRACT,formatContract:FORMAT_CONTRACT,singleStrongDesign:true});
 })();
