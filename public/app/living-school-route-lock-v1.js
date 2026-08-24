@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-living-school-route-lock-v1-design-handoff';
+const VERSION='1.2.0-living-school-route-lock-v1-interactive-design';
 const ID='living-school-route-lock-v1';
 const LIVE_RESEARCH='living-school-live-source-research-v260';
 const DESIGN='living-school-research-grounded-curriculum-v218.1';
@@ -25,16 +25,16 @@ function install(){
       return{
         ...request,
         taskTier:design?'complex':'small',
-        executionProfile:design?'agentic':'interactive',
-        context:{...(request?.context||{}),livingSchoolRouteLock:VERSION,internalGeneration:!design,livingSchoolDesignHandoff:design?'strong-design-pass':'lightweight-followup'}
+        executionProfile:'interactive',
+        context:{...(request?.context||{}),livingSchoolRouteLock:VERSION,internalGeneration:!design,livingSchoolDesignHandoff:design?'strong-interactive-design-pass':'lightweight-followup'}
       };
     }
   },PRIORITY);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-route-lock-ready',{detail:{version:VERSION,priority:PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,groundedDesignPurpose:GROUNDED_DESIGN,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-route-lock-ready',{detail:{version:VERSION,priority:PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,groundedDesignPurpose:GROUNDED_DESIGN,strongDesignProfile:'interactive',at:new Date().toISOString()}}))}catch{}
   return true;
 }
 function schedule(){queueMicrotask(install);setTimeout(install,0);setTimeout(install,120)}
 for(const event of ['civweave:runtime-spine-ready','civweave:gemini-task-router-ready','civweave:assistant-runtime-ready','civweave:living-school-grounded-design-ready','pageshow'])addEventListener?.(event,schedule);
 install();
-globalThis.CivweaveLivingSchoolRouteLockV1=Object.freeze({version:VERSION,install,priority:PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,groundedDesignPurpose:GROUNDED_DESIGN});
+globalThis.CivweaveLivingSchoolRouteLockV1=Object.freeze({version:VERSION,install,priority:PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,groundedDesignPurpose:GROUNDED_DESIGN,strongDesignProfile:'interactive'});
 })();
