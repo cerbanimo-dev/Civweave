@@ -1,10 +1,14 @@
 <!doctype html>
-<html lang="en" data-build="realm-console-canonical-v254-shared-navbar-r1" data-civweave-system="cerbanimo">
+<html lang="en" data-build="realm-console-canonical-v255-shared-navbar-direct-boot-r1" data-civweave-system="cerbanimo">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07131e">
 <title>Civweave Realm Console</title>
+<!-- The same shared route/nav/action stack used by the other Civweave systems. Declaring it before install-boundary prevents duplicate injection. -->
+<script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner" defer></script>
+<script src="/app/themed-system-nav-v178.js?v=family-nav-single-owner-r1" defer></script>
+<script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer" defer></script>
 <script src="/app/install-boundary-v146.js"></script>
 <script src="/app/cw-reward-ledger-v2.js?v=basic-value-v1"></script>
 <script src="/app/civweave-basic-value-v1.js?v=acorn-scale-v2"></script>
@@ -32,14 +36,20 @@ if(next.searchParams.get('system')!=='cerbanimo'){next.searchParams.set('system'
 if(changed)history.replaceState(history.state,'',`${next.pathname}${next.search}${next.hash}`);
 })();
 </script>
-
-<!-- Canonical shared Civweave navigation. Cerbanimo does not own a navbar implementation. -->
-<script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v229-v440-home-live-guild-balance"></script>
-<script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail"></script>
-<script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer"></script>
+<script id="rc-boot-watchdog">
+(()=>{
+'use strict';
+setTimeout(()=>{
+  const app=document.getElementById('rc-app');
+  if(!app?.querySelector('.rc-loading'))return;
+  app.innerHTML='<div class="rc-empty"><h2>Cerbanimo did not finish opening</h2><p>The shared Civweave shell is still available. Re-open Cerbanimo to retry the workbench without reinstalling the app.</p></div>';
+  document.documentElement.dataset.cerbanimoBoot='timeout';
+},9000);
+})();
+</script>
 
 <script src="/app/shared/civweave-parity-runtime.js?v=parity-bounded-r1" defer></script>
-<script src="/app/realm-console-v140.js?v=canonical-r6-shared-navbar" defer></script>
+<script src="/app/realm-console-v140.js?v=canonical-r7-shared-navbar-direct-boot" defer></script>
 <script src="/app/local-first-policy-v131.js?v=1.0.4" defer></script>
 <script src="/app/platform-stability-v159.js?v=canonical-chat-r1" defer></script>
 <script src="/app/platform-experience-v160.js?v=dark-review-r1" defer></script>
