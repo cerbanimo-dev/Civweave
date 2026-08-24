@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.5.0-living-school-route-lock-v1-internal-review-bypass';
+const VERSION='1.6.0-living-school-route-lock-v1-prompt-scrub';
 const ID='living-school-route-lock-v1';
 const POST_ID='living-school-route-lock-post-router-v1';
 const LIVE_RESEARCH='living-school-live-source-research-v260';
@@ -34,8 +34,6 @@ function route(request={}){
     responseReviewOwner:'living-school',
     responseRouterBypass:'internal-generation'
   };
-  // Live research may remain agentic/tool-using, but it is still an internal
-  // Living School operation and must not be rewritten by the chat-response reviewer.
   if(purpose===LIVE_RESEARCH)return{...request,__civweaveSkipResponseRouter:true,context:{...baseContext,internalGeneration:true,livingSchoolDesignHandoff:'live-research'}};
   const strong=design;
   return{
@@ -50,16 +48,25 @@ function route(request={}){
     }
   };
 }
+function scrubLegacyEconomyBoundary(messages=[]){
+  return(Array.isArray(messages)?messages:[]).filter(message=>{
+    if(lower(message?.role)!=='system')return true;
+    const content=String(message?.content||'');
+    if(/Living School design boundary:/i.test(content)&&/Acorn pricing|Button labor values|XP amounts|ledger\/economy metadata/i.test(content))return false;
+    return true;
+  });
+}
 function postRouter(request={}){
   if(!isDesignPass(request))return request;
-  const config={...(request.config||{})},provider=lower(config.provider||config.route||config.engine);
+  const config={...(request.config||{})},provider=lower(config.provider||config.route||config.engine),messages=scrubLegacyEconomyBoundary(request.messages);
   return{
     ...request,
+    messages,
     __civweaveSkipResponseRouter:true,
     taskTier:'complex',
     executionProfile:'interactive',
     config:provider==='gemini'?{...config,provider:'gemini',route:'gemini',model:COMPLEX_MODEL}:config,
-    context:{...(request.context||{}),livingSchoolPostRouterBoundary:VERSION,singleStrongDesignProfile:'interactive',responseReviewOwner:'living-school',responseRouterBypass:'internal-generation'}
+    context:{...(request.context||{}),livingSchoolPostRouterBoundary:VERSION,singleStrongDesignProfile:'interactive',responseReviewOwner:'living-school',responseRouterBypass:'internal-generation',legacyEconomyPromptScrubbed:true}
   };
 }
 function install(){
@@ -68,11 +75,11 @@ function install(){
   spine.unregister?.(ID);spine.unregister?.(POST_ID);
   spine.register(ID,{before:route},PRIORITY);
   spine.register(POST_ID,{before:postRouter},POST_PRIORITY);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-route-lock-ready',{detail:{version:VERSION,priority:PRIORITY,postRouterPriority:POST_PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,strongDesignModel:COMPLEX_MODEL,strongDesignProfile:'interactive',sessionWideFollowupDowngrade:true,responseRouterBypass:true,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-route-lock-ready',{detail:{version:VERSION,priority:PRIORITY,postRouterPriority:POST_PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,strongDesignModel:COMPLEX_MODEL,strongDesignProfile:'interactive',sessionWideFollowupDowngrade:true,responseRouterBypass:true,legacyEconomyPromptScrubbed:true,at:new Date().toISOString()}}))}catch{}
   return true;
 }
 function schedule(){queueMicrotask(install);setTimeout(install,0);setTimeout(install,120)}
 for(const event of ['civweave:runtime-spine-ready','civweave:gemini-task-router-ready','civweave:assistant-runtime-ready','civweave:living-school-grounded-design-ready','pageshow'])addEventListener?.(event,schedule);
 install();
-globalThis.CivweaveLivingSchoolRouteLockV1=Object.freeze({version:VERSION,install,route,postRouter,priority:PRIORITY,postRouterPriority:POST_PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,strongDesignModel:COMPLEX_MODEL,strongDesignProfile:'interactive',generationActive,responseRouterBypass:true});
+globalThis.CivweaveLivingSchoolRouteLockV1=Object.freeze({version:VERSION,install,route,postRouter,priority:PRIORITY,postRouterPriority:POST_PRIORITY,liveResearchException:LIVE_RESEARCH,strongDesignPurpose:DESIGN,strongDesignModel:COMPLEX_MODEL,strongDesignProfile:'interactive',generationActive,responseRouterBypass:true,scrubLegacyEconomyBoundary});
 })();
