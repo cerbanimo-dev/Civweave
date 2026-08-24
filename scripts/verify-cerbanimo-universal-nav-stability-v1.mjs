@@ -10,8 +10,11 @@ const realmWorker=read('public/service-worker-five-system-pages-v1.js');
 const homeWorker=read('public/service-worker-canonical-home-v1.js');
 const quest=read('public/app/cerbanimo-quest-engine-v144.js');
 
-assert(shell.includes('data-build="persistent-system-shell-v1-r1"'),'Persistent shell must be the top-level five-system owner.');
+assert(shell.includes('data-build="persistent-system-shell-v1-r2-full-height-stage"'),'Persistent shell must use the full-height content-stage build.');
 assert(shell.includes('id="cw-persistent-system-stage"'),'Persistent shell must own one content stage.');
+assert(shell.includes('--cw-persistent-nav-space:'),'Persistent shell must define one shared reserved navbar height.');
+assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent iframe stage must explicitly fill the viewport above the navbar.');
+assert(!/#cw-persistent-system-stage\{[^}]*height:auto/.test(shell),'Persistent iframe must never use intrinsic height:auto; that exposes the parent background as a dark card.');
 assert(shell.includes('/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail'),'Persistent shell must reuse the canonical shared navbar unchanged.');
 assert(shell.includes('/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer'),'Persistent shell must reuse shared Guild/Map actions.');
 assert(shellRuntime.includes("document.addEventListener('click',intercept,true)"),'Persistent shell must intercept shared navbar navigation before a top-level reload.');
@@ -48,4 +51,4 @@ assert(quest.includes("const VERSION='1.0.33-cerbanimo-v144-frame-bounded'"),'Qu
 assert(quest.includes("observer.observe(target,{childList:true,subtree:false})"),'Quest engine observer must remain shallow and frame-local.');
 assert(quest.includes("if(typeof requestAnimationFrame==='function'&&!document.hidden)requestAnimationFrame(run);else setTimeout(run,0)"),'Quest rerenders must yield to the browser frame.');
 
-console.log('Persistent navbar contract passed: one top-level canonical navbar survives system changes, realm pages are content-only, sprite media is required offline, and Cerbanimo no longer runs global shell observers inside its frame.');
+console.log('Persistent navbar contract passed: one top-level canonical navbar survives system changes, the iframe stage fills the viewport above it, realm pages are content-only, sprite media is required offline, and Cerbanimo no longer runs global shell observers inside its frame.');
