@@ -1,14 +1,16 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v24-navbar-actions-refresh';
+const REVISION='shell-assets-v1-repair-v25-persistent-navbar-required';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
+  '/app/persistent-system-shell-v1.html',
+  '/app/persistent-system-shell-v1.js',
   '/app/system-routes-v227.js',
   '/app/themed-system-nav-v178.js',
   '/app/persistent-shell-actions-v1.js',
   '/app/subsystem-avatar-state-v347.js'
 ];
-const OPTIONAL_NAV_MEDIA=[
+const REQUIRED_NAV_MEDIA=[
   '/Civweave-weaveling-sprites.png',
   '/Living-School-moss-sprites.png',
   '/Cerbanimo-kamiya-sprites.png',
@@ -47,13 +49,13 @@ const OPTIONAL_HUMAN_CHAT=[
   '/app/local-object-mesh-v146.js',
   '/app/shared-intention-party-chat-v1.js'
 ];
-for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_CIVWEAVE_BOOT]){
+for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_NAV_MEDIA,...REQUIRED_CIVWEAVE_BOOT]){
   const optionalIndex=OPTIONAL_SHELL_ASSETS.indexOf(pathname);
   if(optionalIndex>=0)OPTIONAL_SHELL_ASSETS.splice(optionalIndex,1);
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-for(const pathname of [...OPTIONAL,...OPTIONAL_NAV_MEDIA,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
+for(const pathname of [...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
   const requiredIndex=REQUIRED_SHELL_ASSETS.indexOf(pathname);
   if(requiredIndex>=0)REQUIRED_SHELL_ASSETS.splice(requiredIndex,1);
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
@@ -62,13 +64,14 @@ for(const pathname of [...OPTIONAL,...OPTIONAL_NAV_MEDIA,...OPTIONAL_GUILD_QUEST
 self.CivweaveShellAssetsV1=Object.freeze({
   revision:REVISION,
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
+  requiredNavigationMedia:[...REQUIRED_NAV_MEDIA],
   requiredCivweaveBoot:[...REQUIRED_CIVWEAVE_BOOT],
-  optionalNavigationMedia:[...OPTIONAL_NAV_MEDIA],
-  optional:[...OPTIONAL,...OPTIONAL_NAV_MEDIA,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
+  optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
   humanChat:[...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',
   pwaStart:'/app/pwa-start-v436.html',
-  policy:'direct-system-pages-with-canonical-persistent-rail-actions'
+  persistentSystemShell:'/app/persistent-system-shell-v1.html',
+  policy:'one-persistent-top-level-navbar-shell-with-required-sprite-media-and-embedded-system-content'
 });
 })();
