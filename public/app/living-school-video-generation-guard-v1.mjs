@@ -1,8 +1,8 @@
 import{ensureLivingSchool,ensureModuleVideo,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1';
-import{offerMediaPacksBeforeCurriculum}from'./living-school-media-pack-recommender-v1.mjs?v=unified-source-packs-v1';
-import safeMode,{validateAdmission,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
+import{offerMediaPacksBeforeCurriculum}from'./living-school-media-pack-recommender-v1.mjs?v=foundation-authority-v17';
+import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v11-batched';
 
-const REVISION='living-school-video-generation-guard-v1.2-unified-source-packs';
+const REVISION='living-school-video-generation-guard-v1.3-batched-safe';
 const CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const SUBJECT_STOP=new Set(['about','after','again','also','basic','basics','beginner','build','building','capability','complete','course','create','creating','curriculum','foundation','foundations','guide','guided','help','intro','introduction','learn','learning','lesson','make','module','people','practice','practical','read','skill','skills','study','teach','teaching','through','understand','using','vocabulary','want','with','your']);
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
@@ -29,9 +29,27 @@ async function enforceSubjectVideos(output,subject,schoolSlug=''){
   output.videoContract={...(output.videoContract||{}),subjectGate:{revision:REVISION,subject:clean(subject,500),failClosedToFallback:true}};
   return output;
 }
+async function applyBatchedSafeVideoAdmission(originalGenerate,output){
+  const candidates=[];
+  for(const module of output.modules||[]){
+    const video=module?.video;
+    if(!video||video.url===FALLBACK_VIDEO_URL||video.safeAdmission?.admitted)continue;
+    const evidence=[video.title,video.creator,video.description,video.reason].filter(Boolean).join('\n');
+    if(evidence.length<80)throw safeModeError(`video for “${module?.title||'module'}”`,{ai:{categories:['insufficient-video-evidence']}});
+    candidates.push({module,item:{title:video.title,creator:video.creator,description:video.description,reason:video.reason,source:video.source,url:video.url}});
+  }
+  if(!candidates.length)return 0;
+  const reviewed=await validateAdmissions(originalGenerate,candidates.map(row=>row.item),{kind:'video'});
+  for(let index=0;index<candidates.length;index++){
+    const candidate=candidates[index],review=reviewed[index]?.review;
+    if(!review?.admitted)throw safeModeError(`video “${candidate.module?.video?.title||'Untitled'}”`,review||{ai:{categories:['ai-batch-review-incomplete']}});
+    candidate.module.video={...candidate.module.video,safeAdmission:review};candidate.module.videos=[candidate.module.video];
+  }
+  return candidates.length;
+}
 
 export async function installLivingSchoolVideoGenerationGuardV1(){
-  if(globalThis.CivweaveLivingSchoolVideoGenerationGuardV1?.installed)return globalThis.CivweaveLivingSchoolVideoGenerationGuardV1;
+  if(globalThis.CivweaveLivingSchoolVideoGenerationGuardV1?.installed&&globalThis.CivweaveLivingSchoolVideoGenerationGuardV1?.revision===REVISION)return globalThis.CivweaveLivingSchoolVideoGenerationGuardV1;
   await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
   const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate)throw new Error('The shared model runtime is unavailable for the Living School video generation guard.');
@@ -42,7 +60,7 @@ export async function installLivingSchoolVideoGenerationGuardV1(){
     let packOffer=null;
     if(request?.purpose===CURRICULUM_PURPOSE){
       const subject=clean(request?.context?.capability||request?.messages?.findLast?.(message=>message?.role==='user')?.content,2400);
-      try{packOffer=await offerMediaPacksBeforeCurriculum(subject,{limit:3})}catch{}
+      try{packOffer=await offerMediaPacksBeforeCurriculum(subject,{limit:3})}catch(error){console.warn('[Living School media packs]',error)}
       const addition=[
         'REQUIRED VIDEO COMPANION CONTRACT:',
         'Every curriculum module must leave generation with at least one video companion.',
@@ -61,24 +79,13 @@ export async function installLivingSchoolVideoGenerationGuardV1(){
     const output=typeof structuredClone==='function'?structuredClone(result.outputJson):JSON.parse(JSON.stringify(result.outputJson));
     const subject=clean(request?.context?.capability||output?.capability||output?.title,2400);
     await enforceSubjectVideos(output,subject);
-    if(safeMode.read().enabled){
-      for(const module of output.modules){
-        const video=module?.video;
-        if(video?.url===FALLBACK_VIDEO_URL)continue;
-        if(video?.safeAdmission?.admitted)continue;
-        const evidence=[video?.title,video?.creator,video?.description,video?.reason].filter(Boolean).join('\n');
-        if(evidence.length<80)throw safeModeError(`video for “${module?.title||'module'}”`,{ai:{categories:['insufficient-video-evidence']}});
-        const review=await validateAdmission(originalGenerate,{title:video?.title,creator:video?.creator,description:video?.description,reason:video?.reason,source:video?.source,url:video?.url},{kind:'video'});
-        if(!review.admitted)throw safeModeError(`video “${video?.title||'Untitled'}”`,review);
-        module.video={...video,safeAdmission:review};module.videos=[module.video];
-      }
-      output.videoContract={...(output.videoContract||{}),safeMode:{revision:safeMode.revision,admission:'deterministic-plus-ai',failClosed:true}};
-    }
+    let safeVideoReviews=0;
+    if(safeMode.read().enabled){safeVideoReviews=await applyBatchedSafeVideoAdmission(originalGenerate,output);output.videoContract={...(output.videoContract||{}),safeMode:{revision:safeMode.revision,admission:'deterministic-plus-one-batched-ai-review',failClosed:true,reviewedVideos:safeVideoReviews}}}
     return{...result,outputJson:output,outputText:JSON.stringify(output)};
   };
   const wrapped=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),livingSchoolVideoGenerationGuardRevision:REVISION});
   globalThis.CivweaveModelRuntime=wrapped;
-  const api=Object.freeze({installed:true,revision:REVISION,requiredPerModule:1,fallbackUrl:FALLBACK_VIDEO_URL,purpose:CURRICULUM_PURPOSE});
+  const api=Object.freeze({installed:true,revision:REVISION,requiredPerModule:1,fallbackUrl:FALLBACK_VIDEO_URL,purpose:CURRICULUM_PURPOSE,batchedSafeAdmission:true});
   globalThis.CivweaveLivingSchoolVideoGenerationGuardV1=api;
   try{dispatchEvent(new CustomEvent('civweave:living-school-video-generation-guard-ready',{detail:api}))}catch{}
   return api;

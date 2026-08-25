@@ -20,6 +20,13 @@ const validHttp=value=>{try{return['http:','https:'].includes(new URL(value).pro
 const normalizeUse=value=>['core','supporting','counterpoint','example'].includes(core.clean(value,80).toLowerCase())?core.clean(value,80).toLowerCase():'supporting';
 const normalizeQuality=value=>['authoritative','practitioner','community','commercial','contested'].includes(core.clean(value,80).toLowerCase())?core.clean(value,80).toLowerCase():'supporting';
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function curriculumGenerationActive(){
+  try{
+    if(typeof document==='undefined')return false;
+    const root=document.documentElement;
+    return root?.dataset?.livingSchoolGenerationActive==='true'||root?.dataset?.livingSchoolChatAction==='generating-curriculum'||Boolean(document.querySelector?.('[data-ls-action="generate-curriculum"][aria-busy="true"]'));
+  }catch{return false}
+}
 
 function tokenOccurrences(text,token){let count=0,from=0;while(count<12){const index=text.indexOf(token,from);if(index<0)break;count+=1;from=index+token.length}return count;}
 function subjectRelevant(title,notes,capability){
@@ -190,7 +197,12 @@ export async function researchCapability(capability,{force=false}={}){
   if(rows.length){
     let packet=localPacket(normalized,rows);
     if(packet.sources.length){
-      try{packet=await synthesizeLocalPacket(normalized,packet,liveError)}catch(error){packet={...packet,reason:`Live research unavailable: ${core.clean(liveError?.message||liveError,700)} Local synthesis unavailable: ${core.clean(error?.message||error,700)}`};}
+      if(curriculumGenerationActive()){
+        packet={...packet,reason:`Live research unavailable: ${core.clean(liveError?.message||liveError,700)} Local source synthesis intentionally skipped during curriculum generation; the full downloaded passages are supplied directly to the curriculum design model.`};
+        core.persist('living-school-local-synthesis-skipped',{capability:normalized,sourceCount:packet.sources.length,reason:'curriculum-generation-direct-source-grounding',policy:'strong-design-model-receives-raw-downloaded-passages'});
+      }else{
+        try{packet=await synthesizeLocalPacket(normalized,packet,liveError)}catch(error){packet={...packet,reason:`Live research unavailable: ${core.clean(liveError?.message||liveError,700)} Local synthesis unavailable: ${core.clean(error?.message||error,700)}`};}
+      }
       return applyPacket(s,normalized,packet);
     }
   }

@@ -3,14 +3,16 @@ import {readFile} from 'node:fs/promises';
 
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
-const [bubble,loader,repair,party,network,standalone,context]=await Promise.all([
+const [bubble,loader,repair,party,network,standalone,context,shell,cerbanimo]=await Promise.all([
   read('public/app/human-message-bubble-v1.js'),
   read('public/app/shared-guide-surface-v236.js'),
   read('public/service-worker-chat-repair-v245.js'),
   read('public/app/shared-intention-party-chat-v1.js'),
   read('public/app/human-chat-network-v1.js'),
   read('public/app/human-chat-standalone-v2.js'),
-  read('public/app/human-chat-guild-context-v1.js')
+  read('public/app/human-chat-guild-context-v1.js'),
+  read('public/app/persistent-system-shell-v1.html'),
+  read('public/app/realm-console-v140.html')
 ]);
 new Function(bubble);new Function(loader);new Function(repair);new Function(network);new Function(standalone);new Function(context);
 const checks=[];
@@ -29,5 +31,6 @@ check('standalone v2 uses the human network only as data and transport',standalo
 check('legacy network remains a transport/data API while its old presentation is quiesced',network.includes("const SURFACE_ID='cw-human-chat-network-v1'")&&network.includes('show:showSurface')&&network.includes('hide:hideSurface')&&standalone.includes('network()?.hide?.()'));
 check('guild context boots standalone v2 before human interaction',context.includes("const VERSION='1.0.2-human-chat-standalone-v2'")&&context.includes("load('/app/human-chat-standalone-v2.js'")&&context.includes('void bootStandalone();'));
 check('shared loader cache-busts the standalone v2 context',loader.includes('/app/human-chat-guild-context-v1.js?v=1.0.2-human-chat-standalone-v2')&&loader.includes("humanChatPresentation:'standalone-v2'")&&loader.includes('humanChatSharesGuideSurface:false'));
+check('persistent shell owns both chat launchers for content-only Cerbanimo',shell.includes('/app/shared-guide-surface-v236.js')&&cerbanimo.includes("target.searchParams.set('system','cerbanimo')")&&!cerbanimo.includes('/app/shared-guide-surface-v236.js'));
 check('offline chat repair still packages the human attention launcher',repair.includes("const HUMAN_BUBBLE_PATH='/app/human-message-bubble-v1.js'")&&repair.includes('cacheHumanMessageRuntime')&&repair.includes('packageHumanMessage'));
 console.log(JSON.stringify({ok:true,checks:checks.length,bubble:'human',presentation:'standalone-v2',sharesGuideSurface:false,usesNetworkShow:false,unreadSources:['shared-party','private-messages'],readState:'local-only'},null,2));

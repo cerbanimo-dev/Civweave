@@ -10,10 +10,12 @@ on:
   push:
     branches:
       - agent/video-learning-atlas-v1
+      - staging
     paths:
       - scripts/build-video-learning-atlas-v1.py
       - scripts/build-video-learning-atlas-parallel-v1.py
       - scripts/materialize-video-learning-lookup-v1.py
+      - scripts/materialize-video-learning-availability-v1.py
       - .github/workflows/build-video-learning-atlas.yml
       - ops/triggers/video-atlas-build.trigger
 
@@ -33,20 +35,24 @@ jobs:
       VIDEO_ATLAS_PER_SCHOOL: ${{ github.event.inputs.per_school || '250' }}
       VIDEO_ATLAS_WORKERS: '4'
       VIDEO_ATLAS_SEARCH_ROWS: '100'
+      VIDEO_ATLAS_EMBED_ORIGIN: 'https://civweave.cc'
+      VIDEO_ATLAS_EMBED_PROBE_WORKERS: '8'
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: agent/video-learning-atlas-v1
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
       - name: Build curated educational video catalogs
         run: python scripts/build-video-learning-atlas-parallel-v1.py
       - name: Materialize browser lookup
         run: python scripts/materialize-video-learning-lookup-v1.py
+      - name: Verify privacy-enhanced iframe availability
+        run: python scripts/materialize-video-learning-availability-v1.py
       - name: Validate generated catalogs
         run: |
-          python -m py_compile scripts/build-video-learning-atlas-v1.py scripts/build-video-learning-atlas-parallel-v1.py scripts/materialize-video-learning-lookup-v1.py
+          python -m py_compile scripts/build-video-learning-atlas-v1.py scripts/build-video-learning-atlas-parallel-v1.py scripts/materialize-video-learning-lookup-v1.py scripts/materialize-video-learning-availability-v1.py
           python - <<'PY'
           import json, pathlib, zipfile
           root=pathlib.Path('public/downloads/knowledge-schools/video-atlases')
@@ -57,11 +63,17 @@ jobs:
           lookup=json.loads((root/'lookup.json').read_text())
           assert lookup['count']==catalog['total_records']
           assert lookup['count']>0
+          availability=json.loads((root/'youtube-availability-current.json').read_text())
+          assert availability['schema']=='civweave.youtube-availability-index.v1'
+          assert availability['status']=='current'
+          assert availability.get('verification',{}).get('mode')=='youtube-data-api+privacy-enhanced-embed-probe'
+          assert availability.get('eligible_count',0)>0
           for school in catalog['schools']:
               path=root/school['zip_file']; assert path.exists() and path.stat().st_size==school['zip_bytes']
               with zipfile.ZipFile(path) as archive: assert 'catalog.json' in archive.namelist()
           enrichment=catalog.get('youtube_api_enrichment') or {}
           print('YouTube enrichment:', enrichment)
+          print('Availability verification:', availability.get('verification'))
           print('Materializer:', catalog.get('materializer'))
           PY
       - name: Commit catalog bundles on latest branch tip
@@ -75,6 +87,6 @@ jobs:
             exit 0
           fi
           git commit -m '[CF-Pages-Skip] Build optional Video Learning Atlas bundles'
-          git fetch origin agent/video-learning-atlas-v1
-          git rebase origin/agent/video-learning-atlas-v1
-          git push origin HEAD:agent/video-learning-atlas-v1
+          git fetch origin "${GITHUB_REF_NAME}"
+          git rebase "origin/${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

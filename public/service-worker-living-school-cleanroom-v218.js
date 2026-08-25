@@ -1,10 +1,22 @@
 'use strict';
 (()=>{
-const REVISION='living-school-cleanroom-v219-lifecycle-deferred';
+const REVISION='living-school-cleanroom-v224-response-router-fresh';
 const CANONICAL='/app/cabinets/living-school/index.html';
 const FRESH_PREFIX='/app/cabinets/living-school/living-school-cleanroom-';
 const GENERATION_GUARD='/app/living-school-generation-guard-v262.mjs';
+const QUIZ_GUARD='/app/living-school-quiz-contract-guard-v263.mjs';
+const VIDEO_GUARD='/app/living-school-video-generation-guard-v1.mjs';
+const MEDIA_RECOMMENDER='/app/living-school-media-pack-recommender-v1.mjs';
+const LOCAL_RESEARCH='/app/living-school-local-research-v243.mjs';
 const SAFE_POLICY='/app/safe-mode-v1.mjs';
+const ROUTE_LOCK='/app/living-school-route-lock-v1.js';
+const RUNTIME_ROUTE='/app/living-school-runtime-route-v2.js';
+const GROUNDED_DESIGN='/app/living-school-grounded-design-v337.js';
+const GENERATION_BUDGET='/app/living-school-generation-budget-v2.js';
+const ACTIVE_RUN_UI='/app/living-school-active-run-ui-v1.js';
+const GEMINI_ROUTER='/app/gemini-task-tier-router-v213.js';
+const RESPONSE_ROUTER='/app/minilm-response-router-v347.js';
+const FRESH_RUNTIME_PATHS=new Set([GENERATION_GUARD,QUIZ_GUARD,VIDEO_GUARD,MEDIA_RECOMMENDER,LOCAL_RESEARCH,SAFE_POLICY,ROUTE_LOCK,RUNTIME_ROUTE,GROUNDED_DESIGN,GENERATION_BUDGET,ACTIVE_RUN_UI,GEMINI_ROUTER,RESPONSE_ROUTER]);
 const SERVICE_PREFIX='/app/services/living-school/';
 const RETIRED_PATHS=new Set([
   '/app/cabinets/living-school/living-school-bootstrap-v194.js',
@@ -38,7 +50,7 @@ async function evictRetired(){
     const keys=await cache.keys();
     await Promise.all(keys.map(request=>{
       const pathname=new URL(request.url).pathname;
-      if(pathname===CANONICAL||pathname===GENERATION_GUARD||pathname===SAFE_POLICY||pathname.startsWith(FRESH_PREFIX)||pathname.startsWith(SERVICE_PREFIX)||RETIRED_PATHS.has(pathname))return cache.delete(request);
+      if(pathname===CANONICAL||FRESH_RUNTIME_PATHS.has(pathname)||pathname.startsWith(FRESH_PREFIX)||pathname.startsWith(SERVICE_PREFIX)||RETIRED_PATHS.has(pathname))return cache.delete(request);
       return false;
     }));
   }
@@ -54,7 +66,7 @@ async function fresh(request){
 // Clean-room routing is enforced on every relevant fetch. Scanning every cache
 // during both install and activate made Living School cleanup a global PWA boot
 // dependency. Keep lifecycle bounded; cleanup is now explicit/background work.
-self.addEventListener('install',event=>event.waitUntil(Promise.resolve()));
+self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate',event=>{
   event.waitUntil(self.clients.claim());
   void evictRetired().catch(()=>null);
@@ -77,7 +89,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Response.redirect(new URL(CANONICAL,self.location.origin),302));
     return;
   }
-  if(url.pathname===CANONICAL||url.pathname===GENERATION_GUARD||url.pathname===SAFE_POLICY||url.pathname.startsWith(FRESH_PREFIX)){
+  if(url.pathname===CANONICAL||FRESH_RUNTIME_PATHS.has(url.pathname)||url.pathname.startsWith(FRESH_PREFIX)){
     event.stopImmediatePropagation();
     event.respondWith(fresh(request));
     return;
@@ -87,5 +99,5 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Promise.resolve(retiredResponse(url.pathname)));
   }
 });
-self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,safePolicy:SAFE_POLICY,retired:[...RETIRED_PATHS],lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
+self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,quizGuard:QUIZ_GUARD,videoGuard:VIDEO_GUARD,mediaRecommender:MEDIA_RECOMMENDER,localResearch:LOCAL_RESEARCH,safePolicy:SAFE_POLICY,routeLock:ROUTE_LOCK,runtimeRoute:RUNTIME_ROUTE,groundedDesign:GROUNDED_DESIGN,generationBudget:GENERATION_BUDGET,activeRunUI:ACTIVE_RUN_UI,geminiRouter:GEMINI_ROUTER,responseRouter:RESPONSE_ROUTER,retired:[...RETIRED_PATHS],lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
 })();

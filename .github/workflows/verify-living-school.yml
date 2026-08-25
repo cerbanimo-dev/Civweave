@@ -5,6 +5,10 @@ on:
     paths:
       - 'public/app/cabinets/living-school/**'
       - 'public/app/services/living-school/**'
+      - 'public/app/living-school-grounded-design-v337.js'
+      - 'public/app/living-school-grounded-compiler-v336.js'
+      - 'public/app/living-school-assessment-curator-v337.js'
+      - 'public/app/living-school-generation-guard-v262.mjs'
       - 'public/app/living-school-quiz-contract-guard-v263.mjs'
       - 'public/app/living-school-cleanroom-actions-v243.mjs'
       - 'public/app/themed-system-nav-v178.js'
@@ -15,12 +19,17 @@ on:
       - 'scripts/verify-living-school-cleanroom-v218.mjs'
       - 'scripts/verify-living-school-tap-integrity-v217.mjs'
       - 'scripts/verify-living-school-quiz-contract-v263.mjs'
+      - 'scripts/verify-living-school-pedagogy-v338.mjs'
       - '.github/workflows/verify-living-school.yml'
   push:
     branches: [main]
     paths:
       - 'public/app/cabinets/living-school/**'
       - 'public/app/services/living-school/**'
+      - 'public/app/living-school-grounded-design-v337.js'
+      - 'public/app/living-school-grounded-compiler-v336.js'
+      - 'public/app/living-school-assessment-curator-v337.js'
+      - 'public/app/living-school-generation-guard-v262.mjs'
       - 'public/app/living-school-quiz-contract-guard-v263.mjs'
       - 'public/app/living-school-cleanroom-actions-v243.mjs'
       - 'public/app/themed-system-nav-v178.js'
@@ -31,6 +40,7 @@ on:
       - 'scripts/verify-living-school-cleanroom-v218.mjs'
       - 'scripts/verify-living-school-tap-integrity-v217.mjs'
       - 'scripts/verify-living-school-quiz-contract-v263.mjs'
+      - 'scripts/verify-living-school-pedagogy-v338.mjs'
       - '.github/workflows/verify-living-school.yml'
   workflow_dispatch:
 
@@ -66,6 +76,10 @@ jobs:
           node --check public/app/services/living-school/modules/rubric-engine.mjs
           node --check public/app/services/living-school/modules/project-gate.mjs
           node --check public/app/services/living-school/modules/cerbanimo-bridge.mjs
+          node --check public/app/living-school-grounded-design-v337.js
+          node --check public/app/living-school-grounded-compiler-v336.js
+          node --check public/app/living-school-assessment-curator-v337.js
+          node --check public/app/living-school-generation-guard-v262.mjs
           node --check public/app/living-school-quiz-contract-guard-v263.mjs
           node --check public/app/living-school-cleanroom-actions-v243.mjs
           node --check public/app/themed-system-nav-v178.js
@@ -76,6 +90,7 @@ jobs:
           node --check scripts/verify-living-school-cleanroom-v218.mjs
           node --check scripts/verify-living-school-tap-integrity-v217.mjs
           node --check scripts/verify-living-school-quiz-contract-v263.mjs
+          node --check scripts/verify-living-school-pedagogy-v338.mjs
       - name: Verify Living School contracts
         run: |
           node scripts/verify-living-school-boot-v195.mjs
@@ -83,3 +98,4 @@ jobs:
           node scripts/verify-living-school-cleanroom-v218.mjs
           node scripts/verify-living-school-tap-integrity-v217.mjs
           node scripts/verify-living-school-quiz-contract-v263.mjs
+          node scripts/verify-living-school-pedagogy-v338.mjs
