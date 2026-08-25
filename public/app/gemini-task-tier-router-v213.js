@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.75-gemini-task-tier-router-v329-call-lifecycle';
+const VERSION='1.0.76-gemini-task-tier-router-v329-living-school-503-fallback';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const RESEARCH_FALLBACK_MODEL='gemini-3.5-flash';
 const COMPLEX_MODEL='gemini-3.7-flash';
@@ -49,8 +49,10 @@ function capabilityRequirements(request={}){
 function livingSchoolResearchFallbackPurpose(request={}){return lower(request.purpose)===LIVING_SCHOOL_RESEARCH_FALLBACK_PURPOSE;}
 function livingSchoolPostFallbackDesign(request={}){return lower(request.purpose)===LIVING_SCHOOL_DESIGN_PURPOSE&&lower(request?.context?.research?.mode)==='model-derived-unverified';}
 function livingSchoolFlashLitePurpose(request={}){return LIVING_SCHOOL_FLASH_LITE_PURPOSES.has(lower(request.purpose));}
+function livingSchoolStrongDesign(request={}){return request?.context?.livingSchoolSingleStrongDesign===true&&lower(request?.context?.research?.mode)!=='model-derived-unverified';}
 function classify(runtime,request={}){
   const requirements=capabilityRequirements(request);
+  if(livingSchoolStrongDesign(request))return{tier:'complex',reason:'Living School grounded curriculum design',requirements};
   if(livingSchoolResearchFallbackPurpose(request))return{tier:'small',reason:'Living School first research fallback',requirements};
   if(livingSchoolPostFallbackDesign(request))return{tier:'small',reason:'Living School post-fallback design pass',requirements};
   if(livingSchoolFlashLitePurpose(request))return{tier:'small',reason:'Living School lightweight synthesis/repair/fill',requirements};
@@ -73,6 +75,9 @@ function effectiveConfig(runtime,request,profile){
   return{...stored,...requested};
 }
 function isGemini(runtime,request,profile){const config=effectiveConfig(runtime,request,profile);return providerName(config.provider||config.route||config.engine)==='gemini';}
+function providerStatus(value){const source=value?.error&&typeof value.error==='object'?value.error:value;const status=Number(source?.status??source?.statusCode??source?.httpStatus??source?.http_status);return Number.isFinite(status)?status:0;}
+function geminiHighDemand503(value){const source=value?.error&&typeof value.error==='object'?value.error:value,status=providerStatus(value),text=lower([source?.code,source?.message,value?.message].filter(Boolean).join(' '));return status===503||/\bhttp\s*503\b/.test(text)||(/\b503\b/.test(text)&&/(?:high demand|unavailable|temporar)/.test(text))||(/\bunavailable\b/.test(text)&&/high demand/.test(text));}
+function providerErrorResult(error,request){return{schema:'civweave-model-result-1.0',requestId:request?.requestId||`gemini-${Date.now().toString(36)}`,purpose:clean(request?.purpose,160),status:'provider-error',outputText:'',requested:{provider:'gemini',model:clean(request?.config?.model,240),executionProfile:clean(request?.executionProfile||'interactive',80)},actual:{provider:'gemini',model:clean(request?.config?.model,240)},error:{code:clean(error?.code||'GEMINI_PROVIDER_ERROR',160),message:clean(error?.message||error,2400),status:providerStatus(error)||undefined}};}
 function appendSystemBoundary(request,text){
   const messages=Array.isArray(request?.messages)?request.messages.map(message=>({...message})):[];
   messages.push({role:'system',content:text});
@@ -83,7 +88,7 @@ function prepareLivingSchoolDesign(request){
   return appendSystemBoundary(request,'Living School design boundary: produce instructional design only. Do not invent or recommend Acorn pricing, Button labor values, XP amounts, grants, bonuses, payouts, wages, currency values, curriculum valuation, or any ledger/economy metadata. Civweave attaches rewards after validated curriculum storage. Provenance boundary: use only the supplied source packet and SOURCE_ID values. Do not invent a bibliography, author, publication, URL, study, law, date, or named source that is not present in the supplied source material.');
 }
 function designEconomyViolation(result,request){
-  if(lower(request?.purpose)!==LIVING_SCHOOL_DESIGN_PURPOSE||result?.status!=='success')return result;
+  if((lower(request?.purpose)!==LIVING_SCHOOL_DESIGN_PURPOSE&&!livingSchoolStrongDesign(request))||result?.status!=='success')return result;
   const text=clean(result?.outputText||result?.text||result?.output||'',64000);
   if(!text)return result;
   const contaminated=/\b(?:Acorns?|Buttons?|XP|curriculum\s+(?:package\s+)?valuation|labor\s+worth|labour\s+worth|skill\s+ledger|value\s+accounting|completion\s+grant|wage\s+valuation)\b/i.test(text);
@@ -144,7 +149,7 @@ function patchSettings(){
   if(canonicalV322){note?.remove();return}
   if(gemini&&remote){
     let legacyNote=note;
-    if(!legacyNote){legacyNote=document.createElement('div');legacyNote.id='cw-gemini-routing-note-v213';legacyNote.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Living School may use Gemini 3.5 Flash for the first research fallback; every later design, synthesis, structure, repair, and fill call after that fallback uses Flash-Lite. Planning, primary research, code generation, and agentic work use Gemini 3.7 Flash.</span>';remote.insertBefore(legacyNote,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}
+    if(!legacyNote){legacyNote=document.createElement('div');legacyNote.id='cw-gemini-routing-note-v213';legacyNote.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Living School curriculum design starts on Gemini 3.7 Flash and retries once on Gemini 3.5 Flash only if 3.7 returns HTTP 503/high demand. Living School may also use Gemini 3.5 Flash for the first research fallback; lightweight synthesis, structure, repair, and fill use Flash-Lite.</span>';remote.insertBefore(legacyNote,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}
     legacyNote.hidden=false;
   }else if(note)note.hidden=true;
 }
@@ -157,11 +162,28 @@ function middleware(){
       const researchFallback=livingSchoolResearchFallbackPurpose(prepared),model=researchFallback?RESEARCH_FALLBACK_MODEL:(decision.tier==='complex'?COMPLEX_MODEL:SMALL_MODEL),meta=disclose(decision,model,prepared);
       return{...prepared,executionProfile:profile,taskTier:decision.tier,capabilityRequirements:decision.requirements,config:{...(prepared.config||{}),provider:'gemini',route:'gemini',model},__civweaveGeminiRouting:meta};
     },
+    async handle(request,ctx){
+      if(!livingSchoolStrongDesign(request)||providerName(request?.config?.provider||request?.config?.route)!=='gemini')return{handled:false};
+      const runtime=ctx?.baseRuntime;
+      if(!runtime?.generate)return{handled:false};
+      const primaryRequest={...request,executionProfile:'agentic',taskTier:'complex',config:{...(request.config||{}),provider:'gemini',route:'gemini',model:COMPLEX_MODEL}};
+      let primary;
+      try{primary=await runtime.generate(primaryRequest)}catch(error){if(!geminiHighDemand503(error))throw error;primary=providerErrorResult(error,primaryRequest)}
+      if(!geminiHighDemand503(primary))return{handled:true,result:primary};
+      const fallbackRequest={...primaryRequest,config:{...primaryRequest.config,model:RESEARCH_FALLBACK_MODEL}};
+      let fallback;
+      try{fallback=await runtime.generate(fallbackRequest)}catch(error){fallback=providerErrorResult(error,fallbackRequest)}
+      const diagnostic='Gemini 3.7 Flash returned HTTP 503/high demand; Living School retried the same curriculum design once with Gemini 3.5 Flash.';
+      const detail={schema:'civweave.living-school.gemini-fallback.v1',fromModel:COMPLEX_MODEL,toModel:RESEARCH_FALLBACK_MODEL,reason:'http-503-high-demand',status:clean(fallback?.status,80)||'unknown',at:new Date().toISOString()};
+      try{dispatchEvent(new CustomEvent('civweave:living-school-gemini-fallback',{detail}))}catch{}
+      return{handled:true,result:{...fallback,requested:primary?.requested||{provider:'gemini',model:COMPLEX_MODEL},actual:{...(fallback?.actual||{}),provider:'gemini',model:clean(fallback?.actual?.model,240)||RESEARCH_FALLBACK_MODEL},fallback:{...(fallback?.fallback||{}),used:true,provider:'gemini',fromModel:COMPLEX_MODEL,toModel:RESEARCH_FALLBACK_MODEL,reason:'http-503-high-demand'},diagnostics:[...(primary?.diagnostics||[]),...(fallback?.diagnostics||[]),diagnostic]}};
+    },
     after(result,request){
       const bounded=designEconomyViolation(result,request),meta=request?.__civweaveGeminiRouting;
       if(!meta||!bounded||typeof bounded!=='object')return bounded;
-      completeRouting(meta,bounded);
-      return{...bounded,taskRouting:meta};
+      const routing=bounded?.fallback?.used&&bounded?.fallback?.toModel?{...meta,fallbackUsed:true,fallbackModel:bounded.fallback.toModel,fallbackReason:bounded.fallback.reason}:meta;
+      completeRouting(routing,bounded);
+      return{...bounded,taskRouting:routing};
     }
   };
 }
@@ -170,7 +192,7 @@ function install(){
   if(!spine?.register)return false;
   migrateGeminiProfiles(spine.base?.()||globalThis.CivweaveModelRuntime);
   spine.register(MIDDLEWARE_ID,middleware(),40);
-  try{dispatchEvent(new CustomEvent('civweave:gemini-task-router-ready',{detail:{version:VERSION,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,middleware:MIDDLEWARE_ID,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:gemini-task-router-ready',{detail:{version:VERSION,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,middleware:MIDDLEWARE_ID,livingSchool503Fallback:true,at:new Date().toISOString()}}))}catch{}
   return true;
 }
 addEventListener?.('civweave:runtime-spine-ready',install);
@@ -178,5 +200,5 @@ addEventListener?.('civweave:model-settings-saved',()=>{migrateStoredGeminiPolic
 addEventListener?.('civweave:model-settings-opened',()=>queueMicrotask(patchSettings));
 if(typeof document!=='undefined'){document.addEventListener('change',event=>{if(event.target?.name==='route')queueMicrotask(patchSettings)});document.addEventListener('submit',event=>{if(event.target?.matches?.('[data-cw-cleanroom-form]'))patchSettings()},true);if(document.readyState==='loading')addEventListener('DOMContentLoaded',patchSettings,{once:true});else patchSettings();}
 migrateStoredGeminiPolicy();install();
-globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID,canonicalSettingsPresentation:true,callLifecycle:true});
+globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,researchFallbackModel:RESEARCH_FALLBACK_MODEL,complexModel:COMPLEX_MODEL,capabilityRequirements,classify:request=>classify(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveFastInteractiveV192?.base?.()||globalThis.CivweaveModelRuntime),middlewareId:MIDDLEWARE_ID,canonicalSettingsPresentation:true,callLifecycle:true,livingSchool503Fallback:true});
 })();
