@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-persistent-five-system-stage-chrome-owner';
+const VERSION='1.1.1-rapid-navigation-race-guard';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -34,9 +34,10 @@ let current='';
 let loadToken=0;
 let loadTimer=0;
 let chromeObserver=null;
+let chromeTimers=[];
 let settingsPromise=null;
 let guidePromise=null;
-let backlightTimer=0;
+let backlightTimers=[];
 
 function cleanSystem(value){const id=String(value||'').toLowerCase();return SYSTEMS.has(id)?id:'civweave'}
 function parse(value,fallback={}){try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}}
@@ -95,10 +96,8 @@ function syncBacklights(){
   return true;
 }
 function scheduleBacklights(){
-  clearTimeout(backlightTimer);
-  backlightTimer=setTimeout(syncBacklights,0);
-  setTimeout(syncBacklights,100);
-  setTimeout(syncBacklights,420);
+  backlightTimers.forEach(clearTimeout);
+  backlightTimers=[0,100,420].map(delay=>setTimeout(syncBacklights,delay));
   return true;
 }
 
@@ -152,10 +151,25 @@ function openGuide(system){
 }
 function closeQuickMenu(){try{globalThis.CivweaveFamilyNavigationV178?.closeQuickMenu?.({restoreFocus:false})}catch{}}
 
-function suppressChildChrome(reason='frame-load'){
-  const host=frame();let doc,win;try{doc=host?.contentDocument;win=host?.contentWindow}catch{return false}
+function clearChildChromeWork(){
+  chromeTimers.forEach(clearTimeout);chromeTimers=[];
+  if(chromeObserver)try{chromeObserver.disconnect()}catch{}
+  chromeObserver=null;
+  return true;
+}
+function frameMatchesExpected(host=frame(),expectedHref=''){
+  if(!host)return false;
+  const expected=String(expectedHref||host.dataset.cwExpectedHref||'');
+  if(!expected)return true;
+  try{return new URL(host.contentWindow?.location?.href||'',location.href).href===new URL(expected,location.href).href}catch{return false}
+}
+function suppressChildChrome(reason='frame-load',{token=loadToken,expectedHref=''}={}){
+  if(token!==loadToken)return false;
+  const host=frame();if(!frameMatchesExpected(host,expectedHref))return false;
+  let doc,win;try{doc=host?.contentDocument;win=host?.contentWindow}catch{return false}
   if(!doc?.documentElement)return false;
   const remove=()=>{
+    if(token!==loadToken||!frameMatchesExpected(host,expectedHref))return;
     for(const id of [HUMAN_LAUNCHER_ID,AI_LAUNCHER_ID,GUIDE_ROOT_ID])doc.getElementById(id)?.remove();
     doc.documentElement.dataset.persistentParentChrome='parent-owned';
     doc.documentElement.dataset.persistentChromeReason=reason;
@@ -167,16 +181,18 @@ function suppressChildChrome(reason='frame-load'){
   chromeObserver.observe(doc.documentElement,{childList:true,subtree:true});
   return true;
 }
-function scheduleChildChrome(reason='frame-load'){
-  for(const delay of [0,60,220,800,1800])setTimeout(()=>suppressChildChrome(`${reason}-${delay}`),delay);
+function scheduleChildChrome(reason='frame-load',{token=loadToken,expectedHref=''}={}){
+  clearChildChromeWork();
+  chromeTimers=[0,60,220,800,1800].map(delay=>setTimeout(()=>{if(token===loadToken)suppressChildChrome(`${reason}-${delay}`,{token,expectedHref})},delay));
   return true;
 }
 
 function navigate(system,{feature='',replace=false,source='persistent-navbar'}={}){
   system=cleanSystem(system);mark(system);const url=shellUrl(system,{feature});history[replace?'replaceState':'pushState']({system,feature},'',`${url.pathname}${url.search}`);
   const target=contentUrl(system,{feature}),host=frame();if(!host)return false;
+  clearChildChromeWork();
   const token=++loadToken;showLoading();clearTimeout(loadTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
-  host.title=`${system} · Civweave`;host.src=target.href;
+  host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;host.title=`${system} · Civweave`;host.src=target.href;
   scheduleBacklights();
   try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,feature,source,version:VERSION,persistent:true}}))}catch{}
   return true;
@@ -203,7 +219,11 @@ function bindBacklights(){
 function boot(){
   document.addEventListener('click',intercept,true);
   bindBacklights();
-  const host=frame();host?.addEventListener('load',()=>{clearTimeout(loadTimer);hideLoading();const node=errorBox();if(node)node.dataset.open='0';scheduleChildChrome('frame-load');scheduleBacklights()});
+  const host=frame();host?.addEventListener('load',()=>{
+    const token=Number(host.dataset.cwLoadToken||0),expectedHref=String(host.dataset.cwExpectedHref||'');
+    if(token!==loadToken||!frameMatchesExpected(host,expectedHref))return;
+    clearTimeout(loadTimer);hideLoading();const node=errorBox();if(node)node.dataset.open='0';scheduleChildChrome('frame-load',{token,expectedHref});scheduleBacklights();
+  });
   const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'shell-boot'});
   addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'history'});});
   scheduleBacklights();
