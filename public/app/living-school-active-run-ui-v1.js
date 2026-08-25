@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.3.0-living-school-active-run-ui-v1-session-owned-routes';
+const VERSION='1.4.0-living-school-active-run-ui-v1-explicit-35-fallback';
 const GENERATE='[data-ls-action="generate-curriculum"]';
 const REPORT='#lsc220-generation-recovery';
 const PACK_DIALOG='dialog[data-living-school-media-pack-offer]';
@@ -33,6 +33,7 @@ function modelLabel(model,tier=''){
   if(value.includes('3.5'))return'Gemini 3.5 Flash';
   if(value.includes('flash-lite'))return'Gemini 3.1 Flash-Lite';
   if(value)return clean(model,180);
+  if(tier==='fallback')return'Gemini 3.5 Flash';
   return tier==='complex'?'Gemini 3.7 Flash':'Gemini Lite';
 }
 function purposeLabel(purpose){
@@ -75,6 +76,7 @@ html[data-living-school-generation-active="true"] #${ROUTING_NOTICE_ID},html[dat
 #${RAIL_ID} .lsc-run-dots{display:flex;align-items:center;gap:9px;min-height:34px;margin:10px 0 7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
 #${RAIL_ID} .lsc-run-dot{appearance:none;display:block;flex:0 0 auto;width:12px;height:12px;padding:0;border:2px solid rgba(183,221,194,.58);border-radius:50%;background:rgba(216,238,220,.12);box-shadow:none;cursor:pointer;transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease}
 #${RAIL_ID} .lsc-run-dot.is-complex{width:23px;height:23px;border-width:3px}
+#${RAIL_ID} .lsc-run-dot.is-fallback{width:18px;height:18px;border-width:3px}
 #${RAIL_ID} .lsc-run-dot.is-active{border-color:#f2d67f;background:#4f8e66;box-shadow:0 0 0 5px rgba(242,214,127,.10),0 0 20px rgba(111,226,163,.28);animation:lscRunPulse 1.25s ease-in-out infinite}
 #${RAIL_ID} .lsc-run-dot.is-complete{border-color:#7ce1a2;background:#376f50}
 #${RAIL_ID} .lsc-run-dot.is-failed{border-color:#ff988a;background:#7b3d3b}
@@ -86,6 +88,7 @@ html[data-living-school-generation-active="true"] #${ROUTING_NOTICE_ID},html[dat
 #${RAIL_ID} .lsc-run-legend span{display:inline-flex;align-items:center;gap:6px}
 #${RAIL_ID} .lsc-run-key{display:inline-block;width:8px;height:8px;border:1px solid currentColor;border-radius:50%}
 #${RAIL_ID} .lsc-run-key.is-big{width:14px;height:14px;border-width:2px}
+#${RAIL_ID} .lsc-run-key.is-fallback{width:11px;height:11px;border-width:2px}
 @keyframes lscRunPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 @media(max-width:560px){#${RAIL_ID}{padding:12px}#${RAIL_ID} .lsc-run-dots{gap:8px}#${RAIL_ID} .lsc-run-phase{font-size:.86rem}}
 @media(prefers-reduced-motion:reduce){#${RAIL_ID} .lsc-run-dot.is-active{animation:none}}
@@ -130,19 +133,29 @@ function runDetailMarkup(run){
   if(!run)return session?.status==='running'?'Waiting for the first model call…':'No provider calls were recorded.';
   const status=run.status==='active'?`running · ${formatElapsed(nowMs()-run.startedAt)}`:run.status==='failed'?`failed${run.errorCode?` · ${clean(run.errorCode,80)}`:''}`:`complete · ${formatElapsed((run.endedAt||run.startedAt)-run.startedAt)}`;
   const nested=run.nested?' · nested':'';
-  return`<strong>${modelLabel(run.model,run.tier)}</strong> · ${purposeLabel(run.purpose)}${nested} · ${status}`;
+  return`<strong>${modelLabel(run.model,run.tier)}</strong> · ${purposeLabel(run.purpose)}${run.tier==='fallback'?' · fallback':''}${nested} · ${status}`;
 }
 function summaryMarkup(){
-  const runs=session?.runs||[],complex=runs.filter(run=>run.tier==='complex').length,lite=runs.length-complex,activeCount=runs.filter(run=>run.status==='active').length;
-  const parts=[];if(complex)parts.push(`${complex} 3.7/complex call${complex===1?'':'s'}`);if(lite)parts.push(`${lite} Lite/follow-up${lite===1?'':' calls'}`);parts.push(`${runs.length} model call${runs.length===1?'':'s'}`);if(activeCount)parts.push(`${activeCount} active`);
+  const runs=session?.runs||[];
+  const primary37=runs.filter(run=>clean(run.model,180).toLowerCase().includes('3.7')).length;
+  const fallback35=runs.filter(run=>run.tier==='fallback'||clean(run.model,180).toLowerCase().includes('3.5')).length;
+  const lite=runs.filter(run=>clean(run.model,180).toLowerCase().includes('flash-lite')||(!clean(run.model,180)&&run.tier==='small')).length;
+  const activeCount=runs.filter(run=>run.status==='active').length;
+  const parts=[];
+  if(primary37)parts.push(`${primary37} 3.7/complex call${primary37===1?'':'s'}`);
+  if(fallback35)parts.push(`${fallback35} 3.5/fallback call${fallback35===1?'':'s'}`);
+  if(lite)parts.push(`${lite} Lite/follow-up call${lite===1?'':'s'}`);
+  parts.push(`${runs.length} model call${runs.length===1?'':'s'}`);
+  if(activeCount)parts.push(`${activeCount} active`);
   return parts.join(' · ');
 }
+function runDotClass(run){return run.tier==='complex'?'is-complex':run.tier==='fallback'?'is-fallback':'is-lite'}
 function renderRail(){
   installRailStyle();const rail=ensureRail();if(!rail)return;
   if(!session){rail.hidden=true;return}
   rail.hidden=false;
   const runs=session.runs||[],picked=runs[selectedRun>=0&&selectedRun<runs.length?selectedRun:runs.length-1]||null;
-  rail.innerHTML=`<div class="lsc-run-head"><b>Generation run</b><span class="lsc-run-time">${formatElapsed((session.endedAt||nowMs())-session.startedAt)}</span></div><div class="lsc-run-phase">${clean(session.phase,180)}</div><div class="lsc-run-dots" role="list" aria-label="Model calls">${runs.map((run,index)=>`<button type="button" class="lsc-run-dot ${run.tier==='complex'?'is-complex':'is-lite'} is-${run.status}${index===(selectedRun>=0?selectedRun:runs.length-1)?' is-selected':''}" data-lsc-run-index="${index}" role="listitem" aria-label="Run ${index+1}: ${modelLabel(run.model,run.tier)}, ${purposeLabel(run.purpose)}, ${run.status}"></button>`).join('')}</div><div class="lsc-run-detail">${runDetailMarkup(picked)}</div><div class="lsc-run-summary">${summaryMarkup()}</div><div class="lsc-run-legend"><span><i class="lsc-run-key is-big"></i>3.7 / complex</span><span><i class="lsc-run-key"></i>Lite / follow-up</span></div>`;
+  rail.innerHTML=`<div class="lsc-run-head"><b>Generation run</b><span class="lsc-run-time">${formatElapsed((session.endedAt||nowMs())-session.startedAt)}</span></div><div class="lsc-run-phase">${clean(session.phase,180)}</div><div class="lsc-run-dots" role="list" aria-label="Model calls">${runs.map((run,index)=>`<button type="button" class="lsc-run-dot ${runDotClass(run)} is-${run.status}${index===(selectedRun>=0?selectedRun:runs.length-1)?' is-selected':''}" data-lsc-run-index="${index}" role="listitem" aria-label="Run ${index+1}: ${modelLabel(run.model,run.tier)}, ${purposeLabel(run.purpose)}, ${run.status}"></button>`).join('')}</div><div class="lsc-run-detail">${runDetailMarkup(picked)}</div><div class="lsc-run-summary">${summaryMarkup()}</div><div class="lsc-run-legend"><span><i class="lsc-run-key is-big"></i>3.7 / complex</span><span><i class="lsc-run-key is-fallback"></i>3.5 / fallback</span><span><i class="lsc-run-key"></i>Lite / follow-up</span></div>`;
   const dots=rail.querySelector('.lsc-run-dots');if(dots)dots.scrollLeft=dots.scrollWidth;
 }
 function updatePhaseOnly(value){const next=clean(value,180);if(!session||!next||session.phase===next)return;session.phase=next;const node=document.getElementById(RAIL_ID)?.querySelector?.('.lsc-run-phase');if(node)node.textContent=next}
@@ -157,8 +170,9 @@ function onRouteSelected(event){
   const callId=clean(detail.callId,180)||`legacy-${clean(detail.purpose,120)}-${clean(detail.model,80)}-${clean(detail.at,60)}`;
   const existing=session.runs.find(run=>run.callId===callId);
   if(existing){selectedRun=existing.index;renderRail();return}
-  const time=Number(detail.startedAtMs)||nowMs();
-  const run={index:session.runs.length,callId,tier:clean(detail.tier,40)==='complex'?'complex':'small',model:clean(detail.model,180),purpose:clean(detail.purpose,220),reason:clean(detail.reason,220),startedAt:time,endedAt:0,status:'active',nested:!isLivingSchoolPurpose(detail.purpose),errorCode:''};
+  const time=Number(detail.startedAtMs)||nowMs(),rawTier=clean(detail.tier,40).toLowerCase();
+  const tier=rawTier==='complex'?'complex':rawTier==='fallback'?'fallback':'small';
+  const run={index:session.runs.length,callId,tier,model:clean(detail.model,180),purpose:clean(detail.purpose,220),reason:clean(detail.reason,220),startedAt:time,endedAt:0,status:'active',nested:!isLivingSchoolPurpose(detail.purpose),errorCode:''};
   session.runs.push(run);selectedRun=run.index;renderRail();
 }
 function onRouteCompleted(event){
