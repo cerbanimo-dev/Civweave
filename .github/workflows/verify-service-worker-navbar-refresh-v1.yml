@@ -1,0 +1,35 @@
+name: Verify Service Worker Navbar Refresh v1
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - 'public/service-worker.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-canonical-navbar-v1.js'
+      - 'scripts/test-service-worker-navbar-refresh-v1.mjs'
+      - '.github/workflows/verify-service-worker-navbar-refresh-v1.yml'
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - 'public/service-worker.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-canonical-navbar-v1.js'
+      - 'scripts/test-service-worker-navbar-refresh-v1.mjs'
+      - '.github/workflows/verify-service-worker-navbar-refresh-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-navbar-refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify installed navbar refresh generation
+        run: node scripts/test-service-worker-navbar-refresh-v1.mjs
