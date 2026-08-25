@@ -2,12 +2,15 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-const [runtime,index,worker]=await Promise.all([
+const [runtime,activeUi,index,worker]=await Promise.all([
   readFile('public/app/living-school-terminal-fallback-v1.js','utf8'),
+  readFile('public/app/living-school-active-run-ui-v1.js','utf8'),
   readFile('public/app/cabinets/living-school/index.html','utf8'),
   readFile('public/service-worker-living-school-cleanroom-v218.js','utf8'),
 ]);
 
+new vm.Script(runtime,{filename:'living-school-terminal-fallback-v1.js'});
+new vm.Script(activeUi,{filename:'living-school-active-run-ui-v1.js'});
 assert(runtime.includes("const PRIMARY_MODEL='gemini-3.7-flash'"),'terminal fallback must start from Gemini 3.7 Flash');
 assert(runtime.includes("const FALLBACK_MODEL='gemini-3.5-flash'"),'terminal fallback must use Gemini 3.5 Flash');
 assert(runtime.includes("const FALLBACK_REASON='primary-3.7-error'"),'terminal fallback must cover any primary 3.7 error');
@@ -18,9 +21,12 @@ assert(runtime.includes('prepareFallbackForBase(request)'),'terminal fallback mu
 assert(runtime.includes("livingSchoolFallbackModelLocked:FALLBACK_MODEL"),'fallback request must lock Gemini 3.5 after Living School preparation');
 assert(runtime.includes('fallback=await fallbackGenerate(prepared)'),'terminal fallback must make exactly one direct prepared 3.5 retry');
 assert(!runtime.includes('spine.generate.bind(spine)'),'terminal fallback must never re-enter the shared routing spine');
+assert(activeUi.includes("rawTier==='fallback'?'fallback':'small'"),'run UI must preserve the explicit fallback tier');
+assert(activeUi.includes('3.5/fallback call'),'run UI summary must count Gemini 3.5 fallback calls separately');
+assert(activeUi.includes('3.5 / fallback'),'run UI legend must distinguish Gemini 3.5 fallback from Lite follow-up calls');
 assert(index.includes('/app/living-school-terminal-fallback-v1.js'),'Living School must load the terminal fallback runtime');
 assert(worker.includes("const TERMINAL_FALLBACK='/app/living-school-terminal-fallback-v1.js'"),'clean-room service worker must track the terminal fallback runtime');
-assert(worker.includes('GENERATION_BUDGET,TERMINAL_FALLBACK,ACTIVE_RUN_UI'),'terminal fallback must be in the fresh-runtime set');
+assert(worker.includes('GENERATION_BUDGET,TERMINAL_FALLBACK,ACTIVE_RUN_UI'),'terminal fallback and active run UI must be in the fresh-runtime set');
 
 const primaryCalls=[];
 const fallbackCalls=[];
@@ -98,7 +104,8 @@ const selected=events.filter(event=>event.type==='civweave:gemini-task-tier-sele
 const completed=events.filter(event=>event.type==='civweave:gemini-task-tier-completed');
 assert.equal(selected.length,1,'the direct 3.5 fallback must emit one visible model-call start event');
 assert.equal(selected[0].detail.model,'gemini-3.5-flash');
+assert.equal(selected[0].detail.tier,'fallback');
 assert.equal(completed.length,1,'the direct 3.5 fallback must emit one visible model-call completion event');
 assert.ok(events.some(event=>event.type==='civweave:living-school-gemini-fallback'),'the runtime must announce that the fallback occurred');
 
-console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',primaryCalls:1,fallbackCalls:1,maxProviderCalls:2,flashLiteFallback:false,directBase:true,genericDesignHandlerSuppressed:true,executedRoutingTest:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',primaryCalls:1,fallbackCalls:1,maxProviderCalls:2,flashLiteFallback:false,directBase:true,genericDesignHandlerSuppressed:true,visibleFallbackRun:true,executedRoutingTest:true},null,2));
