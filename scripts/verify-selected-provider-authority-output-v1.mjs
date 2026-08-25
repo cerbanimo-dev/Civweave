@@ -62,6 +62,27 @@ function contextFor({route='gemini',model='gemini-3.1-flash-lite',localId='' }={
 }
 
 {
+  const fixture=contextFor({route:'server-auto',model:'civweave-server-auto-v1'}),{context}=fixture;
+  assert.equal(context.CivweaveSelectedProviderAuthorityV1.authority().kind,'network');
+  assert.equal(context.CivweaveAssistantV141.selectedConfig().provider,'server-auto','Cloud AI selection did not remain authoritative in selectedConfig');
+  await context.CivweaveModelRuntime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config:{provider:'gemini',route:'gemini',model:'gemini-3.7-flash'}});
+  assert.equal(fixture.runtimeCalls[0].config.provider,'server-auto','Living School escaped the selected Cloud AI route into Gemini');
+  assert.equal(fixture.runtimeCalls[0].config.route,'server-auto','Living School did not preserve the selected Cloud AI route');
+  assert.equal(fixture.runtimeCalls[0].config.model,'civweave-server-auto-v1','stale Gemini model survived Cloud AI authority normalization');
+  const cloud=await context.CivweaveServerAIRouterV301.handle({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config:{provider:'server-auto',route:'server-auto'}});
+  assert.equal(fixture.serverCalls,1,'Cloud AI authority incorrectly blocked the selected server route');
+  assert.equal(cloud.actual.provider,'cloudflare-workers-ai');
+}
+
+{
+  const fixture=contextFor({route:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'}),{context}=fixture;
+  assert.equal(context.CivweaveSelectedProviderAuthorityV1.authority().kind,'network');
+  await context.CivweaveModelRuntime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config:{provider:'gemini',route:'gemini',model:'gemini-3.7-flash'}});
+  assert.equal(fixture.runtimeCalls[0].config.provider,'cloudflare-workers-ai','direct Cloudflare selection was replaced by Gemini');
+  assert.equal(fixture.runtimeCalls[0].config.model,'@cf/zai-org/glm-4.7-flash');
+}
+
+{
   const {context}=contextFor({route:'server-auto',model:'civweave-server-auto-v1'});
   const envelope={id:'chatcmpl-test',object:'chat.completion',model:'@cf/zai-org/glm-4.7-flash',choices:[{message:{role:'assistant',content:'Clean assistant content',reasoning:'private chain',reasoning_content:'private chain'}}],usage:{neurons:47.2}};
   const packet=context.CivweaveAssistantOutputSanitizerV1.sanitizePacket({response:{answer:JSON.stringify(envelope)},provider:'cloudflare-workers-ai',reasoning:'leak',reasoning_content:'leak'});
@@ -72,4 +93,4 @@ function contextFor({route='gemini',model='gemini-3.1-flash-lite',localId='' }={
   assert.equal(modelResult.outputText,'Clean assistant content');assert.equal('outputJson' in modelResult,false);
 }
 
-console.log('PASS selected-provider authority: saved Gemini/local-only blocks neuron-backed routing, while genuine Cloudflare output is normalized and reasoning never reaches the guide UI.');
+console.log('PASS selected-provider authority: Gemini, local, server-auto Cloud AI, and direct Cloudflare selections remain authoritative; cross-provider leakage is blocked and cloud output is sanitized.');
