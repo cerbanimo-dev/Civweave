@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.1.0-living-school-runtime-route-v2-terminal-owner-aware';
+const VERSION='2.2.0-living-school-runtime-route-v2-provider-neutral';
 const ID='living-school-runtime-route-v2';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const GROUNDED_RESEARCH_MODES=new Set(['live-agentic','local-synthesized','local-downloaded','manual-sources','model-derived-unverified']);
@@ -13,8 +13,8 @@ function prepare(request={}){
   if(!designRequest(request))return request;
   const config={...(request.config||{})},provider=lower(config.provider||config.route||config.engine),router=globalThis.CivweaveGeminiTaskTierRouterV213,complexModel=router?.complexModel||'gemini-3.7-flash';
   const terminalPrimary=request?.context?.livingSchoolTerminalPrimary===true;
-  const boundary='Living School strong-design boundary: this is the single Gemini 3.7 instructional-design call for the curriculum run. The evidence pass is already complete. Use only supplied SOURCE_ID values for grounded claims, label unsupported instructional inference GENERATED-UNVERIFIED, do not perform new research, do not invent sources or URLs, and output only plain-text video search topics rather than media links. Civweave owns rewards/economy metadata.';
-  return{...request,purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',config:provider==='gemini'?{...config,provider:'gemini',route:'gemini',model:complexModel}:config,context:{...(request.context||{}),livingSchoolRuntimeRoute:VERSION,livingSchoolSingleStrongDesign:terminalPrimary?false:true},messages:[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:boundary}]};
+  const boundary='Living School strong-design boundary: this is the single strong instructional-design call for the curriculum run. Use the provider and model selected in Civweave Settings; do not substitute another provider. The evidence pass is already complete. Use only supplied SOURCE_ID values for grounded claims, label unsupported instructional inference GENERATED-UNVERIFIED, do not perform new research, do not invent sources or URLs, and output only plain-text video search topics rather than media links. Civweave owns rewards/economy metadata.';
+  return{...request,purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',config:provider==='gemini'?{...config,provider:'gemini',route:'gemini',model:complexModel}:config,context:{...(request.context||{}),livingSchoolRuntimeRoute:VERSION,livingSchoolSingleStrongDesign:terminalPrimary?false:true,livingSchoolSelectedProvider:provider||''},messages:[...(Array.isArray(request.messages)?request.messages:[]),{role:'system',content:boundary}]};
 }
 function sanitizeGroundedDesign(result,request){
   if(!designRequest(request)||result?.status!=='success'||!clean(result?.outputText,64000))return result;
@@ -28,13 +28,13 @@ function install(){
   const spine=globalThis.CivweaveFastInteractiveV192;if(!spine?.register)return false;
   spine.unregister?.('living-school-runtime-route-v1');spine.unregister?.(ID);
   spine.register(ID,{before:prepare,after:sanitizeGroundedDesign},190);
-  try{dispatchEvent(new CustomEvent('civweave:living-school-runtime-route-ready',{detail:{version:VERSION,mode:'middleware-only',singleStrongDesign:true,terminalOwnerAware:true,globalRuntimeWrapping:false,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-runtime-route-ready',{detail:{version:VERSION,mode:'middleware-only',singleStrongDesign:true,terminalOwnerAware:true,providerNeutral:true,globalRuntimeWrapping:false,at:new Date().toISOString()}}))}catch{}
   return true;
 }
 function schedule(){queueMicrotask(install);setTimeout(install,0)}
 for(const event of ['civweave:runtime-spine-ready','civweave:gemini-task-router-ready','civweave:assistant-runtime-ready','pageshow'])addEventListener?.(event,schedule);
 install();
-const api=Object.freeze({version:VERSION,install,prepare,sanitizeGroundedDesign,designRequest,bridge:true,mode:'middleware-only',singleStrongDesign:true,terminalOwnerAware:true});
+const api=Object.freeze({version:VERSION,install,prepare,sanitizeGroundedDesign,designRequest,bridge:true,mode:'middleware-only',singleStrongDesign:true,terminalOwnerAware:true,providerNeutral:true});
 globalThis.CivweaveLivingSchoolRuntimeRouteV2=api;
 globalThis.CivweaveLivingSchoolRuntimeRouteV1=api;
 })();
