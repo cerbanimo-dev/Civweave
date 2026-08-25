@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
 
 const [runtime,index,worker]=await Promise.all([
   readFile('public/app/living-school-terminal-fallback-v1.js','utf8'),
@@ -25,4 +26,74 @@ assert(index.includes('/app/living-school-terminal-fallback-v1.js'),'Living Scho
 assert(worker.includes("const TERMINAL_FALLBACK='/app/living-school-terminal-fallback-v1.js'"),'clean-room service worker must track the terminal fallback runtime');
 assert(worker.includes('GENERATION_BUDGET,TERMINAL_FALLBACK,ACTIVE_RUN_UI'),'terminal fallback must be in the fresh-runtime set');
 
-console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',maxFallbackCalls:1,flashLiteFallback:false,directBase:true,sharedRouterReentry:false},null,2));
+const primaryCalls=[];
+const fallbackCalls=[];
+const primaryRuntime={
+  __livingSchoolGenerationBudgetV2:true,
+  async generate(request){
+    primaryCalls.push(request);
+    return {
+      schema:'civweave-model-result-1.0',
+      status:'provider-error',
+      requested:{provider:'gemini',model:'gemini-3.7-flash'},
+      actual:{provider:'gemini',model:'gemini-3.7-flash'},
+      error:{code:'PROVIDER_HTTP_ERROR',status:503,message:'high demand'},
+      diagnostics:[],
+    };
+  },
+};
+const baseRuntime={
+  async generate(request){
+    fallbackCalls.push(request);
+    return {
+      schema:'civweave-model-result-1.0',
+      status:'success',
+      outputText:'mock complete design packet',
+      requested:{provider:request.config?.provider,model:request.config?.model},
+      actual:{provider:request.config?.provider,model:request.config?.model},
+      diagnostics:[],
+    };
+  },
+};
+const events=[];
+const context=vm.createContext({
+  console,
+  CivweaveModelRuntime:primaryRuntime,
+  CivweaveFastInteractiveV192:{base:()=>baseRuntime},
+  CivweaveLivingSchoolGenerationBudgetV2:{installed:true,designPacketCheck:()=>({complete:true,issues:[],moduleCount:4})},
+  CivweaveLivingSchoolRouteLockV1:{
+    route:request=>({...request,config:{...(request.config||{}),model:'gemini-3.7-flash'},context:{...(request.context||{}),routePrepared:true}}),
+    postRouter:request=>({...request,config:{...(request.config||{}),model:'gemini-3.7-flash'},context:{...(request.context||{}),postRouterPrepared:true}}),
+  },
+  CivweaveLivingSchoolRuntimeRouteV2:{prepare:request=>({...request,config:{...(request.config||{}),model:'gemini-3.7-flash'},context:{...(request.context||{}),runtimePrepared:true}})},
+  document:{documentElement:{dataset:{}}},
+  CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},
+  dispatchEvent:event=>{events.push(event);return true},
+  addEventListener:()=>{},
+  queueMicrotask,
+  setTimeout:(fn)=>{fn();return 1},
+});
+vm.runInContext(runtime,context,{filename:'living-school-terminal-fallback-v1.js'});
+await Promise.resolve();
+assert.equal(context.CivweaveLivingSchoolTerminalFallbackV1.installed,true,'terminal fallback must install over the generation-budget runtime');
+const result=await context.CivweaveModelRuntime.generate({
+  purpose:'living-school-research-grounded-curriculum-v218.1',
+  config:{provider:'gemini',route:'gemini',model:'gemini-3.7-flash'},
+  context:{moduleCount:4,research:{mode:'local-downloaded'}},
+  messages:[{role:'user',content:'Build curriculum'}],
+});
+assert.equal(primaryCalls.length,1,'Living School must make exactly one primary 3.7 design call');
+assert.equal(fallbackCalls.length,1,'Living School must make exactly one fallback provider call');
+assert.equal(fallbackCalls[0].config.model,'gemini-3.5-flash','the fallback provider call must reach the base runtime as Gemini 3.5 Flash');
+assert.equal(fallbackCalls[0].config.provider,'gemini','the fallback provider must remain Gemini');
+assert.equal(fallbackCalls[0].context.livingSchoolFallbackDirectBase,true,'the fallback request must record direct-base routing');
+assert.equal(fallbackCalls[0].context.livingSchoolFallbackModelLocked,'gemini-3.5-flash','Living School preparation must not rewrite the fallback model back to 3.7');
+assert.equal(result.status,'success','a successful 3.5 fallback must be returned as the design result');
+assert.equal(result.actual.model,'gemini-3.5-flash','the decorated final result must report Gemini 3.5 Flash as the actual model');
+assert.equal(result.fallback.used,true,'the final result must expose fallback provenance');
+assert.equal(result.fallback.fromModel,'gemini-3.7-flash');
+assert.equal(result.fallback.toModel,'gemini-3.5-flash');
+assert.equal(result.livingSchoolTerminalFallback.providerCalls,2,'the final result must report exactly two provider calls');
+assert.ok(events.some(event=>event.type==='civweave:living-school-gemini-fallback'),'the runtime must announce that the fallback occurred');
+
+console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',maxFallbackCalls:1,flashLiteFallback:false,directBase:true,sharedRouterReentry:false,executedRoutingTest:true},null,2));
