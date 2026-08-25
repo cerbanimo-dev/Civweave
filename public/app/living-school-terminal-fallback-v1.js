@@ -1,12 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-living-school-terminal-fallback-v1-any-3.7-error';
+const VERSION='1.0.2-living-school-terminal-fallback-v1-direct-base';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const PRIMARY_MODEL='gemini-3.7-flash';
 const FALLBACK_MODEL='gemini-3.5-flash';
 const FALLBACK_REASON='primary-3.7-error';
-const FINALIZER_ID='living-school-terminal-fallback-finalizer-v1';
-const HANDLER_ID='living-school-terminal-fallback-handler-v1';
 let installed=false,priorRuntime=null,wrappedRuntime=null,fallbackGenerate=null;
 const clean=(value,max=64000)=>String(value??'').trim().slice(0,max);
 const lower=value=>clean(value,260).toLowerCase();
@@ -30,23 +28,20 @@ function errorResult(error,request,model){
 function fallbackRequest(request={}){
   return{...request,taskTier:'complex',executionProfile:'interactive',config:{...(request.config||{}),provider:'gemini',route:'gemini',model:FALLBACK_MODEL},context:{...(request.context||{}),livingSchoolTerminalFallback:true,livingSchoolFallbackFrom:PRIMARY_MODEL,livingSchoolFallbackTo:FALLBACK_MODEL,livingSchoolFallbackReason:FALLBACK_REASON}};
 }
-function finalizeFallbackRequest(request={}){
-  if(request?.context?.livingSchoolTerminalFallback!==true)return request;
-  const routing=request?.__civweaveGeminiRouting&&typeof request.__civweaveGeminiRouting==='object'?request.__civweaveGeminiRouting:null;
-  return{...request,taskTier:'complex',executionProfile:'interactive',config:{...(request.config||{}),provider:'gemini',route:'gemini',model:FALLBACK_MODEL},__civweaveGeminiRouting:routing?{...routing,model:FALLBACK_MODEL,reason:'Living School 3.7 error fallback',fallbackUsed:true,fallbackModel:FALLBACK_MODEL,fallbackReason:FALLBACK_REASON}:routing,context:{...(request.context||{}),livingSchoolTerminalFallback:true,livingSchoolSingleStrongDesign:true}};
-}
-async function handleFallback(request,ctx){
-  if(request?.context?.livingSchoolTerminalFallback!==true)return{handled:false};
-  const base=ctx?.baseRuntime;
-  if(!base?.generate)return{handled:false};
-  const prepared=finalizeFallbackRequest(request);
-  try{return{handled:true,result:await base.generate(prepared)}}
-  catch(error){if(explicitAbort(error,prepared))throw error;return{handled:true,result:errorResult(error,prepared,FALLBACK_MODEL)}}
+function prepareFallbackForBase(request={}){
+  let prepared=fallbackRequest(request);
+  const routeLock=globalThis.CivweaveLivingSchoolRouteLockV1;
+  const runtimeRoute=globalThis.CivweaveLivingSchoolRuntimeRouteV2||globalThis.CivweaveLivingSchoolRuntimeRouteV1;
+  try{if(typeof routeLock?.route==='function')prepared=routeLock.route(prepared)||prepared}catch{}
+  try{if(typeof runtimeRoute?.prepare==='function')prepared=runtimeRoute.prepare(prepared)||prepared}catch{}
+  try{if(typeof routeLock?.postRouter==='function')prepared=routeLock.postRouter(prepared)||prepared}catch{}
+  const routing=prepared?.__civweaveGeminiRouting&&typeof prepared.__civweaveGeminiRouting==='object'?prepared.__civweaveGeminiRouting:null;
+  return{...prepared,taskTier:'complex',executionProfile:'interactive',config:{...(prepared.config||{}),provider:'gemini',route:'gemini',model:FALLBACK_MODEL},__civweaveGeminiRouting:routing?{...routing,model:FALLBACK_MODEL,reason:'Living School direct 3.5 fallback',fallbackUsed:true,fallbackModel:FALLBACK_MODEL,fallbackReason:FALLBACK_REASON}:routing,context:{...(prepared.context||{}),livingSchoolTerminalFallback:true,livingSchoolSingleStrongDesign:true,livingSchoolFallbackDirectBase:true,livingSchoolFallbackModelLocked:FALLBACK_MODEL}};
 }
 function primaryFailureDetail(primary){return{status:clean(primary?.status,80)||'error',errorCode:clean(primary?.error?.code,160),httpStatus:providerStatus(primary)||undefined,message:clean(primary?.error?.message,800)};}
 function decorate(primary,fallback,request){
   const budget=globalThis.CivweaveLivingSchoolGenerationBudgetV2,count=Math.max(1,Math.min(8,Number(request?.context?.moduleCount||4)||4)),failure=primaryFailureDetail(primary);
-  let result={...fallback,requested:primary?.requested||{provider:'gemini',model:PRIMARY_MODEL},actual:{...(fallback?.actual||{}),provider:'gemini',model:clean(fallback?.actual?.model,240)||FALLBACK_MODEL},fallback:{...(fallback?.fallback||{}),used:true,provider:'gemini',fromModel:PRIMARY_MODEL,toModel:FALLBACK_MODEL,reason:FALLBACK_REASON,primaryStatus:failure.status,primaryErrorCode:failure.errorCode,primaryHttpStatus:failure.httpStatus},diagnostics:[...(primary?.diagnostics||[]),...(fallback?.diagnostics||[]),`Gemini 3.7 Flash design failed (${failure.errorCode||failure.status}${failure.httpStatus?` / HTTP ${failure.httpStatus}`:''}); Living School retried the prepared curriculum design once with Gemini 3.5 Flash.`],livingSchoolTerminalFallback:{version:VERSION,primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,primaryFailure:failure,providerCalls:2}};
+  let result={...fallback,requested:primary?.requested||{provider:'gemini',model:PRIMARY_MODEL},actual:{...(fallback?.actual||{}),provider:'gemini',model:clean(fallback?.actual?.model,240)||FALLBACK_MODEL},fallback:{...(fallback?.fallback||{}),used:true,provider:'gemini',fromModel:PRIMARY_MODEL,toModel:FALLBACK_MODEL,reason:FALLBACK_REASON,primaryStatus:failure.status,primaryErrorCode:failure.errorCode,primaryHttpStatus:failure.httpStatus},diagnostics:[...(primary?.diagnostics||[]),...(fallback?.diagnostics||[]),`Gemini 3.7 Flash design failed (${failure.errorCode||failure.status}${failure.httpStatus?` / HTTP ${failure.httpStatus}`:''}); Living School bypassed shared model routing and retried the prepared curriculum design once directly on Gemini 3.5 Flash.`],livingSchoolTerminalFallback:{version:VERSION,primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,primaryFailure:failure,providerCalls:2,directBase:true}};
   if(result?.status==='success'&&typeof budget?.designPacketCheck==='function'){
     const check=budget.designPacketCheck(resultText(result),count);
     if(!check.complete){
@@ -56,7 +51,7 @@ function decorate(primary,fallback,request){
       result={...result,livingSchoolDesignCompleteness:{revision:VERSION,complete:true,retried:true,moduleCount:count,designProviderCalls:2,model:FALLBACK_MODEL,fallbackReason:FALLBACK_REASON}};
     }
   }
-  try{dispatchEvent(new CustomEvent('civweave:living-school-gemini-fallback',{detail:{schema:'civweave.living-school.gemini-fallback.v3',version:VERSION,fromModel:PRIMARY_MODEL,toModel:FALLBACK_MODEL,reason:FALLBACK_REASON,primaryFailure:failure,status:clean(result?.status,80)||'unknown',providerCalls:2,at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:living-school-gemini-fallback',{detail:{schema:'civweave.living-school.gemini-fallback.v4',version:VERSION,fromModel:PRIMARY_MODEL,toModel:FALLBACK_MODEL,reason:FALLBACK_REASON,primaryFailure:failure,status:clean(result?.status,80)||'unknown',providerCalls:2,directBase:true,at:new Date().toISOString()}}))}catch{}
   return result;
 }
 async function generate(request={}){
@@ -65,32 +60,26 @@ async function generate(request={}){
   try{primary=await priorRuntime.generate(request)}catch(error){if(explicitAbort(error,request))throw error;primary=errorResult(error,{...request,config:{...(request.config||{}),model:PRIMARY_MODEL}},PRIMARY_MODEL)}
   if(!primaryFailed(primary))return primary;
   if(typeof fallbackGenerate!=='function')return primary;
-  const fallback=await fallbackGenerate(fallbackRequest(request));
+  const prepared=prepareFallbackForBase(request);
+  let fallback;
+  try{fallback=await fallbackGenerate(prepared)}catch(error){if(explicitAbort(error,prepared))throw error;fallback=errorResult(error,prepared,FALLBACK_MODEL)}
   return decorate(primary,fallback,request);
 }
-function registerMiddleware(){
-  const spine=globalThis.CivweaveFastInteractiveV192;if(!spine?.register)return false;
-  spine.unregister?.(FINALIZER_ID);spine.unregister?.(HANDLER_ID);
-  spine.register(FINALIZER_ID,{before:finalizeFallbackRequest},-100);
-  spine.register(HANDLER_ID,{handle:handleFallback},1000);
-  return true;
-}
 function install(){
-  registerMiddleware();
-  const budget=globalThis.CivweaveLivingSchoolGenerationBudgetV2,current=globalThis.CivweaveModelRuntime,spine=globalThis.CivweaveFastInteractiveV192?.proxy?.();
-  if(!budget?.installed||!current?.generate||!spine?.generate||current?.__livingSchoolTerminalFallbackV1===VERSION)return Boolean(current?.__livingSchoolTerminalFallbackV1===VERSION);
+  const budget=globalThis.CivweaveLivingSchoolGenerationBudgetV2,current=globalThis.CivweaveModelRuntime,base=globalThis.CivweaveFastInteractiveV192?.base?.();
+  if(!budget?.installed||!current?.generate||!base?.generate||current?.__livingSchoolTerminalFallbackV1===VERSION)return Boolean(current?.__livingSchoolTerminalFallbackV1===VERSION);
   if(!current?.__livingSchoolGenerationBudgetV2)return false;
   priorRuntime=current;
-  fallbackGenerate=spine.generate.bind(spine);
+  fallbackGenerate=base.generate.bind(base);
   wrappedRuntime=Object.freeze({...current,generate,__livingSchoolTerminalFallbackV1:VERSION,livingSchoolTerminalFallbackVersion:VERSION});
   try{Object.defineProperty(globalThis,'CivweaveModelRuntime',{configurable:true,enumerable:true,writable:true,value:wrappedRuntime})}catch{globalThis.CivweaveModelRuntime=wrappedRuntime}
   installed=globalThis.CivweaveModelRuntime===wrappedRuntime;
   if(installed)try{document.documentElement.dataset.livingSchoolTerminalFallback=VERSION}catch{}
-  if(installed)try{dispatchEvent(new CustomEvent('civweave:living-school-terminal-fallback-ready',{detail:{version:VERSION,primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true,terminalOwner:true,pinnedSpineGenerator:true,at:new Date().toISOString()}}))}catch{}
+  if(installed)try{dispatchEvent(new CustomEvent('civweave:living-school-terminal-fallback-ready',{detail:{version:VERSION,primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true,terminalOwner:true,directBase:true,at:new Date().toISOString()}}))}catch{}
   return installed;
 }
 function schedule(){queueMicrotask(install);setTimeout(install,0);setTimeout(install,120)}
 for(const event of ['civweave:living-school-generation-budget-ready','civweave:runtime-spine-ready','civweave:assistant-runtime-ready','pageshow'])addEventListener?.(event,schedule);
-registerMiddleware();schedule();
-globalThis.CivweaveLivingSchoolTerminalFallbackV1=Object.freeze({version:VERSION,install,registerMiddleware,primaryFailed,fallbackRequest,finalizeFallbackRequest,get installed(){return installed},get runtime(){return wrappedRuntime},primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true,pinnedSpineGenerator:true});
+schedule();
+globalThis.CivweaveLivingSchoolTerminalFallbackV1=Object.freeze({version:VERSION,install,primaryFailed,fallbackRequest,prepareFallbackForBase,get installed(){return installed},get runtime(){return wrappedRuntime},primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true,directBase:true});
 })();
