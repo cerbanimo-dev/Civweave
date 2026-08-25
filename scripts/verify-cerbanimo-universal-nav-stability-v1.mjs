@@ -4,6 +4,7 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const shell=read('public/app/persistent-system-shell-v1.html');
 const shellRuntime=read('public/app/persistent-system-shell-v1.js');
 const realm=read('public/app/realm-console-v140.html');
+const cerbanimoNavStability=read('public/app/cerbanimo-nav-stability-v1.js');
 const nav=read('public/app/themed-system-nav-v178.js');
 const shellAssets=read('public/service-worker-shell-assets-v1.js');
 const realmWorker=read('public/service-worker-five-system-pages-v1.js');
@@ -22,6 +23,10 @@ assert(shellRuntime.includes("'#cw-themed-system-nav a[data-system]'"),'Persiste
 assert(shellRuntime.includes("'#cw-themed-system-nav-menu [data-cw-nav-feature]'"),'Persistent shell must keep shared navbar quick actions inside the persistent stage.');
 assert(shellRuntime.includes("host.src=target.href"),'System changes must replace only the content stage.');
 assert(shellRuntime.includes('history['),'Persistent system changes must update history without replacing the shell document.');
+assert(shellRuntime.includes('host.dataset.cwExpectedHref=target.href'),'Persistent shell must record the expected iframe target for each navigation.');
+assert(shellRuntime.includes('frameMatchesExpected(host,expectedHref)'),'Persistent shell must reject stale iframe load completions.');
+assert(shellRuntime.includes('clearChildChromeWork()'),'Persistent shell must cancel old child-chrome observers and timers between system changes.');
+assert(shellRuntime.includes('chromeTimers=[0,60,220,800,1800].map'),'Child-chrome retries must be owned by the active navigation and cancelable.');
 
 assert(realm.includes('data-build="realm-console-canonical-v256-persistent-shell-content-r1"'),'Cerbanimo must be a content-only realm inside the persistent shell.');
 assert(realm.includes("query.get('embed')==='1'"),'Cerbanimo must recognize persistent-shell embedding.');
@@ -32,6 +37,9 @@ assert(!realm.includes('/app/install-boundary-v146.js'),'Cerbanimo content must 
 assert(!realm.includes('/app/platform-experience-v160.js'),'Cerbanimo content must not run the global experience observer stack inside the frame.');
 assert(!realm.includes('/app/local-object-mesh-v146.js'),'Cerbanimo content must not run the global object-mesh observer stack inside the frame.');
 assert(realm.includes('/app/cerbanimo-quest-engine-v144.js'),'Cerbanimo must retain the actual Quest engine.');
+assert(cerbanimoNavStability.includes("const persistentEmbedded=embedded&&(params.get('embed')==='1'||params.get('persistentShell')==='1')"),'Cerbanimo nav stability must distinguish persistent-shell frames from top-level standalone entry.');
+assert(!cerbanimoNavStability.includes('window.top.location.replace'),'Embedded Cerbanimo must never navigate the parent shell.');
+assert(cerbanimoNavStability.includes("document.documentElement.dataset.cerbanimoEmbed=persistentEmbedded?'persistent-shell-frame':'foreign-frame'"),'Cerbanimo must explicitly mark persistent-shell embedding.');
 
 for(const sheet of ['/Civweave-weaveling-sprites.png','/Living-School-moss-sprites.png','/Cerbanimo-kamiya-sprites.png','/FellowFare-rook-sprites.png','/Anarchadia-merlin-sprites.png']){
   assert(nav.includes(sheet),`Shared navbar must retain sprite sheet ${sheet}.`);
@@ -51,4 +59,4 @@ assert(quest.includes("const VERSION='1.0.33-cerbanimo-v144-frame-bounded'"),'Qu
 assert(quest.includes("observer.observe(target,{childList:true,subtree:false})"),'Quest engine observer must remain shallow and frame-local.');
 assert(quest.includes("if(typeof requestAnimationFrame==='function'&&!document.hidden)requestAnimationFrame(run);else setTimeout(run,0)"),'Quest rerenders must yield to the browser frame.');
 
-console.log('Persistent navbar contract passed: one top-level canonical navbar survives system changes, the iframe stage fills the viewport above it, realm pages are content-only, sprite media is required offline, and Cerbanimo no longer runs global shell observers inside its frame.');
+console.log('Persistent navbar contract passed: one top-level canonical navbar survives system changes, stale iframe work is rejected, embedded Cerbanimo cannot escape the parent shell, sprite media is required offline, and realm pages remain content-only.');
