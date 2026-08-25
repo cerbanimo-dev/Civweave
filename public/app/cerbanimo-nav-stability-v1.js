@@ -1,16 +1,18 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-cerbanimo-universal-navbar-only';
+const VERSION='1.0.6-embedded-persistent-shell-guard';
 const NAV_ID='cw-themed-system-nav';
 const NAV_SRC='/app/themed-system-nav-v178.js?v=1.0.163-five-guide-rail-universal-top-level-r1';
 const ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.5-direct-routes';
 const params=new URLSearchParams(location.search);
-const standalone=(()=>{try{return navigator.standalone===true||['standalone','fullscreen','minimal-ui'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)||params.get('installed')==='1'}catch{return params.get('installed')==='1'}})();
 const embedded=window.self!==window.top;
+const persistentEmbedded=embedded&&(params.get('embed')==='1'||params.get('persistentShell')==='1');
+const standalone=(()=>{try{return navigator.standalone===true||['standalone','fullscreen','minimal-ui'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)||(!embedded&&params.get('installed')==='1')}catch{return !embedded&&params.get('installed')==='1'}})();
 
 function cleanDirectUrl(){
   const next=new URL(location.href);
   next.searchParams.delete('embed');
+  next.searchParams.delete('persistentShell');
   if(next.searchParams.get('civweave')==='1')next.searchParams.delete('civweave');
   next.searchParams.set('system','cerbanimo');
   next.searchParams.set('cabinet','1');
@@ -29,9 +31,10 @@ function normalizeDirectRoute(){
 normalizeDirectRoute();
 
 if(embedded){
-  document.documentElement.dataset.cerbanimoEmbed='foreign-frame';
-  if(standalone){try{window.top.location.replace(cleanDirectUrl().href)}catch{}}
-  globalThis.CivweaveCerbanimoNavStabilityV1=Object.freeze({version:VERSION,ensure:()=>false,standalone,embedded,directShell:true,normalizeDirectRoute,cleanDirectUrl,navOwner:'universal-five-system-navbar'});
+  document.documentElement.dataset.cerbanimoEmbed=persistentEmbedded?'persistent-shell-frame':'foreign-frame';
+  document.documentElement.dataset.persistentParentChrome=persistentEmbedded?'parent-owned':'foreign-frame';
+  const navOwner=persistentEmbedded?'persistent-parent-shell':'universal-five-system-navbar';
+  globalThis.CivweaveCerbanimoNavStabilityV1=Object.freeze({version:VERSION,ensure:()=>false,standalone:false,embedded,persistentEmbedded,directShell:false,normalizeDirectRoute,cleanDirectUrl,navOwner});
   return;
 }
 
@@ -59,5 +62,5 @@ function ensure(){
 function schedule(){retryTimers.forEach(clearTimeout);retryTimers=[0,180,700,1800].map(delay=>setTimeout(()=>{if(ensure())retryTimers.forEach(clearTimeout)},delay))}
 addEventListener('pageshow',ensure);addEventListener('focus',ensure);addEventListener('civweave:system-route-changed',ensure);addEventListener('cerbanimo:quest-engine-changed',ensure);document.addEventListener('visibilitychange',()=>{if(!document.hidden)ensure()});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
-globalThis.CivweaveCerbanimoNavStabilityV1=Object.freeze({version:VERSION,ensure,standalone,embedded,directShell:true,normalizeDirectRoute,cleanDirectUrl,navOwner:'universal-five-system-navbar'});
+globalThis.CivweaveCerbanimoNavStabilityV1=Object.freeze({version:VERSION,ensure,standalone,embedded,persistentEmbedded:false,directShell:true,normalizeDirectRoute,cleanDirectUrl,navOwner:'universal-five-system-navbar'});
 })();
