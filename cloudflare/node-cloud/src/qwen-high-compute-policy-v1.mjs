@@ -35,59 +35,119 @@ export function qwenNeuronsForTokens(inputTokens = 0, outputTokens = 0) {
   return Math.max(1, Math.ceil((input * QWEN_INPUT_NEURONS_PER_MILLION + output * QWEN_OUTPUT_NEURONS_PER_MILLION) / 1_000_000));
 }
 
-/**
- * Selection is included-pool only. Qwen never consumes lifetime credits and
- * never upgrades a request to paid compute merely because the high tier was
- * requested. When it does not fit, the caller should fall through to the normal
- * low-cost router unchanged.
- */
-export function chooseQwenHighCompute({ input = {}, estimatedTokens = {}, memberStatus = {} } = {}) {
-  if (!qwenHighComputeIntent(input)) return Object.freeze({
+function notSelected(reason, details = {}) {
+  return Object.freeze({
     schema: QWEN_HIGH_COMPUTE_SCHEMA,
     selected: false,
-    reason: 'not-explicit-high-code',
+    reason,
     model: QWEN_HIGH_MODEL,
+    ...details,
   });
+}
+
+function selected({ reason, route, pool, estimatedNeurons, includedRemainingNeurons, lifetimeRemainingNeurons, sharedFreeRemainingNeurons, allowLifetimeCredits }) {
+  return Object.freeze({
+    schema: QWEN_HIGH_COMPUTE_SCHEMA,
+    selected: true,
+    reason,
+    model: QWEN_HIGH_MODEL,
+    route,
+    pool,
+    estimatedNeurons,
+    includedRemainingNeurons,
+    lifetimeRemainingNeurons,
+    sharedFreeRemainingNeurons,
+    allowLifetimeCredits,
+  });
+}
+
+/**
+ * Qwen keeps a strict task-selection gate, but uses the same funding boundary as
+ * the rest of Civweave: included neurons first, then a whole-request switch to
+ * lifetime credits only when the caller explicitly authorizes them. Lifetime-
+ * funded Qwen requires a paid Workers host because Qwen is executed on Workers AI
+ * and the paid-overage rail is unavailable on a Workers Free host.
+ */
+export function chooseQwenHighCompute({ input = {}, estimatedTokens = {}, memberStatus = {} } = {}) {
+  if (!qwenHighComputeIntent(input)) return notSelected('not-explicit-high-code');
 
   const estimatedNeurons = qwenNeuronsForTokens(estimatedTokens.inputTokens, estimatedTokens.outputTokens);
   const includedRemainingNeurons = nonNegative(memberStatus?.quota?.includedRemainingNeurons);
-  if (estimatedNeurons > includedRemainingNeurons) return Object.freeze({
-    schema: QWEN_HIGH_COMPUTE_SCHEMA,
-    selected: false,
-    reason: 'included-daily-budget',
-    model: QWEN_HIGH_MODEL,
-    estimatedNeurons,
-    includedRemainingNeurons,
-  });
-
+  const lifetimeRemainingNeurons = nonNegative(memberStatus?.quota?.lifetimeRemainingNeurons);
+  const debtNeurons = nonNegative(memberStatus?.quota?.debtNeurons);
   const sharedFreeRemainingNeurons = nonNegative(
     memberStatus?.quota?.workersAiFreeRemainingNeurons ?? memberStatus?.capacity?.workersAiFreeRemainingNeurons,
   );
   const paidWorkers = lower(memberStatus?.capacity?.workersPlan) === 'paid';
-  let route = 'workers-ai-free';
-  if (estimatedNeurons > sharedFreeRemainingNeurons) {
-    if (!paidWorkers) return Object.freeze({
-      schema: QWEN_HIGH_COMPUTE_SCHEMA,
-      selected: false,
-      reason: 'shared-workers-free-budget',
-      model: QWEN_HIGH_MODEL,
+
+  if (estimatedNeurons <= includedRemainingNeurons) {
+    if (estimatedNeurons <= sharedFreeRemainingNeurons) return selected({
+      reason: 'explicit-high-code-within-included-budget',
+      route: 'workers-ai-free',
+      pool: 'included',
       estimatedNeurons,
       includedRemainingNeurons,
+      lifetimeRemainingNeurons,
+      sharedFreeRemainingNeurons,
+      allowLifetimeCredits: false,
+    });
+
+    if (paidWorkers) return selected({
+      reason: 'explicit-high-code-within-included-budget',
+      route: 'workers-ai-paid-overage',
+      pool: 'included',
+      estimatedNeurons,
+      includedRemainingNeurons,
+      lifetimeRemainingNeurons,
+      sharedFreeRemainingNeurons,
+      allowLifetimeCredits: false,
+    });
+
+    return notSelected('shared-workers-free-budget', {
+      estimatedNeurons,
+      includedRemainingNeurons,
+      lifetimeRemainingNeurons,
       sharedFreeRemainingNeurons,
     });
-    route = 'workers-ai-paid-overage';
   }
 
-  return Object.freeze({
-    schema: QWEN_HIGH_COMPUTE_SCHEMA,
-    selected: true,
-    reason: 'explicit-high-code-within-included-budget',
-    model: QWEN_HIGH_MODEL,
-    route,
-    pool: 'included',
+  if (input.allowLifetimeCredits !== true) return notSelected('lifetime-permission-required', {
     estimatedNeurons,
     includedRemainingNeurons,
+    lifetimeRemainingNeurons,
     sharedFreeRemainingNeurons,
-    allowLifetimeCredits: false,
+  });
+
+  if (!paidWorkers) return notSelected('workers-paid-required-for-lifetime-qwen', {
+    estimatedNeurons,
+    includedRemainingNeurons,
+    lifetimeRemainingNeurons,
+    sharedFreeRemainingNeurons,
+  });
+
+  if (debtNeurons > 0) return notSelected('lifetime-credit-debt', {
+    estimatedNeurons,
+    includedRemainingNeurons,
+    lifetimeRemainingNeurons,
+    sharedFreeRemainingNeurons,
+    debtNeurons,
+  });
+
+  if (estimatedNeurons > lifetimeRemainingNeurons) return notSelected('lifetime-credit-budget', {
+    estimatedNeurons,
+    includedRemainingNeurons,
+    lifetimeRemainingNeurons,
+    sharedFreeRemainingNeurons,
+  });
+
+  return selected({
+    reason: 'explicit-high-code-authorized-lifetime',
+    route: 'workers-ai-paid-overage',
+    pool: 'lifetime',
+    estimatedNeurons,
+    includedRemainingNeurons,
+    lifetimeRemainingNeurons,
+    sharedFreeRemainingNeurons,
+    allowLifetimeCredits: true,
   });
 }
