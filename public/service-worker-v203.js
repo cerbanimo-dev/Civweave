@@ -10,7 +10,7 @@
 // shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
-importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v10-shared-skin');
+importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
 importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-persistent-shell-r2');
 importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-persistent-shell-r5');
