@@ -1,0 +1,31 @@
+name: Verify Cloudflare Pages Source Authority v1
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/test-cloudflare-pages-source-authority-v1.mjs'
+      - '.github/workflows/verify-cloudflare-pages-source-authority-v1.yml'
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - 'scripts/build-cloudflare-pages.mjs'
+      - 'scripts/test-cloudflare-pages-source-authority-v1.mjs'
+      - '.github/workflows/verify-cloudflare-pages-source-authority-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-pages-source-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify checked-in Pages source authority
+        run: node scripts/test-cloudflare-pages-source-authority-v1.mjs
