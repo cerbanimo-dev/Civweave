@@ -1,8 +1,8 @@
 'use strict';
 (()=>{
-const REVISION='navigation-runtime-recovery-v3-all-installed-origins';
-const RECOVERY_CACHE='cwrecovery-v446-navigation-runtime-all-origins';
-const MARKER='/__civweave/navigation-runtime-recovery-v3';
+const REVISION='navigation-runtime-recovery-v4-family-shell-mixed-generation';
+const RECOVERY_CACHE='cwrecovery-v447-navigation-runtime-family-shell';
+const MARKER='/__civweave/navigation-runtime-recovery-v4';
 const STALE_RUNTIME_PATHS=Object.freeze([
   '/app/system-routes-v227.js',
   '/app/themed-system-nav-v178.js',
@@ -10,6 +10,13 @@ const STALE_RUNTIME_PATHS=Object.freeze([
   '/app/persistent-system-context-v1.js',
   '/app/persistent-system-shell-v1.js',
   '/app/persistent-shell-actions-v1.js',
+  '/app/family-shell-v104.js',
+  '/app/family-shell-v104.css',
+  '/app/family-ai-loader-v105.js',
+  '/app/platform-stability-v159.js',
+  '/app/platform-stability-v159.css',
+  '/app/mobile-regression-v170.css',
+  '/app/merlinites-shell-fix-v166.css',
   '/app/subsystem-avatar-state-v347.js',
   '/app/platform-experience-v160.css',
   '/app/system-interface-v157.css',
