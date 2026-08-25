@@ -3,18 +3,18 @@
 // persistent-stage-viewport-r1: the iframe stage has explicit dynamic viewport height so intrinsic iframe sizing cannot expose the parent shell as a dark card.
 // canonical-home-v1: top-level home navigation enters the persistent shell; embedded home remains the validated v440 campus.
 // five-system-pages-v1: top-level realm navigation enters the persistent shell; embedded realm content remains bounded and validated.
-// navigation-runtime-recovery-v2: stale navigation code/pages are purged without reloading or redirecting open clients.
+// navigation-runtime-recovery-v3: stale navigation code/pages are purged once on every installed Civweave origin without touching user data.
 // direct-shell-retirement-v1: only retired legacy shells are purged; the current persistent-system-shell-v1 is not retired.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail across all five systems.
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
 // shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
-importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v9-shared-rail');
+importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v10-shared-skin');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
 importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-persistent-shell-r2');
 importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-persistent-shell-r5');
-importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=staging-navigation-runtime-recovery-v2-purge-only');
+importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=navigation-runtime-recovery-v3-all-installed-origins');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v219-lifecycle-deferred');
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
