@@ -2,14 +2,16 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-const [runtime,activeUi,index,worker]=await Promise.all([
+const [runtime,runtimeRoute,activeUi,index,worker]=await Promise.all([
   readFile('public/app/living-school-terminal-fallback-v1.js','utf8'),
+  readFile('public/app/living-school-runtime-route-v2.js','utf8'),
   readFile('public/app/living-school-active-run-ui-v1.js','utf8'),
   readFile('public/app/cabinets/living-school/index.html','utf8'),
   readFile('public/service-worker-living-school-cleanroom-v218.js','utf8'),
 ]);
 
 new vm.Script(runtime,{filename:'living-school-terminal-fallback-v1.js'});
+new vm.Script(runtimeRoute,{filename:'living-school-runtime-route-v2.js'});
 new vm.Script(activeUi,{filename:'living-school-active-run-ui-v1.js'});
 assert(runtime.includes("const PRIMARY_MODEL='gemini-3.7-flash'"),'terminal fallback must start from Gemini 3.7 Flash');
 assert(runtime.includes("const FALLBACK_MODEL='gemini-3.5-flash'"),'terminal fallback must use Gemini 3.5 Flash');
@@ -21,12 +23,36 @@ assert(runtime.includes('prepareFallbackForBase(request)'),'terminal fallback mu
 assert(runtime.includes("livingSchoolFallbackModelLocked:FALLBACK_MODEL"),'fallback request must lock Gemini 3.5 after Living School preparation');
 assert(runtime.includes('fallback=await fallbackGenerate(prepared)'),'terminal fallback must make exactly one direct prepared 3.5 retry');
 assert(!runtime.includes('spine.generate.bind(spine)'),'terminal fallback must never re-enter the shared routing spine');
+assert(runtimeRoute.includes("const terminalPrimary=request?.context?.livingSchoolTerminalPrimary===true"),'runtime route must recognize the terminal primary marker');
+assert(runtimeRoute.includes("livingSchoolSingleStrongDesign:terminalPrimary?false:true"),'runtime route must not re-arm the stale generic design handler for terminal-owned primary calls');
 assert(activeUi.includes("rawTier==='fallback'?'fallback':'small'"),'run UI must preserve the explicit fallback tier');
 assert(activeUi.includes('3.5/fallback call'),'run UI summary must count Gemini 3.5 fallback calls separately');
 assert(activeUi.includes('3.5 / fallback'),'run UI legend must distinguish Gemini 3.5 fallback from Lite follow-up calls');
 assert(index.includes('/app/living-school-terminal-fallback-v1.js'),'Living School must load the terminal fallback runtime');
 assert(worker.includes("const TERMINAL_FALLBACK='/app/living-school-terminal-fallback-v1.js'"),'clean-room service worker must track the terminal fallback runtime');
 assert(worker.includes('GENERATION_BUDGET,TERMINAL_FALLBACK,ACTIVE_RUN_UI'),'terminal fallback and active run UI must be in the fresh-runtime set');
+
+const routeContext=vm.createContext({
+  console,
+  URL,
+  CivweaveGeminiTaskTierRouterV213:{complexModel:'gemini-3.7-flash'},
+  CivweaveFastInteractiveV192:{register:()=>true,unregister:()=>true},
+  CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},
+  dispatchEvent:()=>true,
+  addEventListener:()=>{},
+  queueMicrotask,
+  setTimeout:()=>1,
+});
+vm.runInContext(runtimeRoute,routeContext,{filename:'living-school-runtime-route-v2.js'});
+const routedPrimary=routeContext.CivweaveLivingSchoolRuntimeRouteV2.prepare({
+  purpose:'living-school-research-grounded-curriculum-v218.1',
+  config:{provider:'gemini',route:'gemini',model:'gemini-3.7-flash'},
+  context:{research:{mode:'local-downloaded'},livingSchoolTerminalPrimary:true,livingSchoolSingleStrongDesign:false},
+  messages:[],
+});
+assert.equal(routedPrimary.context.livingSchoolTerminalPrimary,true,'runtime preparation must preserve the terminal primary marker');
+assert.equal(routedPrimary.context.livingSchoolSingleStrongDesign,false,'runtime preparation must keep the generic strong-design handler disabled for the terminal primary pass');
+assert.equal(routedPrimary.config.model,'gemini-3.7-flash','terminal-owned primary preparation must still use Gemini 3.7 Flash');
 
 const primaryCalls=[];
 const fallbackCalls=[];
@@ -67,7 +93,7 @@ const context=vm.createContext({
     route:request=>({...request,config:{...(request.config||{}),model:'gemini-3.7-flash'},context:{...(request.context||{}),routePrepared:true}}),
     postRouter:request=>({...request,config:{...(request.config||{}),model:'gemini-3.7-flash'},context:{...(request.context||{}),postRouterPrepared:true}}),
   },
-  CivweaveLivingSchoolRuntimeRouteV2:{prepare:request=>({...request,config:{...(request.config||{}),model:'gemini-3.7-flash'},context:{...(request.context||{}),runtimePrepared:true}})},
+  CivweaveLivingSchoolRuntimeRouteV2:{prepare:request=>({...request,config:{...(request.config||{}),model:'gemini-3.7-flash'},context:{...(request.context||{}),runtimePrepared:true,livingSchoolSingleStrongDesign:false}})},
   document:{documentElement:{dataset:{}}},
   CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},
   dispatchEvent:event=>{events.push(event);return true},
@@ -108,4 +134,4 @@ assert.equal(selected[0].detail.tier,'fallback');
 assert.equal(completed.length,1,'the direct 3.5 fallback must emit one visible model-call completion event');
 assert.ok(events.some(event=>event.type==='civweave:living-school-gemini-fallback'),'the runtime must announce that the fallback occurred');
 
-console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',primaryCalls:1,fallbackCalls:1,maxProviderCalls:2,flashLiteFallback:false,directBase:true,genericDesignHandlerSuppressed:true,visibleFallbackRun:true,executedRoutingTest:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',primaryCalls:1,fallbackCalls:1,maxProviderCalls:2,flashLiteFallback:false,directBase:true,genericDesignHandlerSuppressed:true,runtimePreparationPreservesOwnership:true,visibleFallbackRun:true,executedRoutingTest:true},null,2));
