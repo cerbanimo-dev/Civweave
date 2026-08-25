@@ -2,7 +2,7 @@ import baseWorker, {
   CivweaveCloudNode,
   CivweaveCapacityAccount as ProductionCapacityAccount,
   CivweaveAccountDirectory,
-} from './server-ai-entry-v6.mjs';
+} from './server-ai-entry-v7.mjs';
 
 export { CivweaveCloudNode, CivweaveAccountDirectory };
 export const STAGING_CHARTERKEEPER_REVISION = 'charterkeeper-v1-signed-handoff';
