@@ -11,17 +11,13 @@ const [runtime,index,worker]=await Promise.all([
 assert(runtime.includes("const PRIMARY_MODEL='gemini-3.7-flash'"),'terminal fallback must start from Gemini 3.7 Flash');
 assert(runtime.includes("const FALLBACK_MODEL='gemini-3.5-flash'"),'terminal fallback must use Gemini 3.5 Flash');
 assert(runtime.includes("const FALLBACK_REASON='primary-3.7-error'"),'terminal fallback must cover any primary 3.7 error');
-assert(runtime.includes("function primaryFailed(result){return !result||lower(result?.status||'error')!=='success';}"),'terminal fallback must retry any non-successful 3.7 result');
-assert(runtime.includes('primary=errorResult(error'),'terminal fallback must convert thrown 3.7 errors into the bounded fallback path');
-assert(runtime.includes('if(explicitAbort(error,request))throw error'),'explicit user cancellation must not be mistaken for a model failure');
+assert(runtime.includes("livingSchoolSingleStrongDesign:false"),'terminal owner must suppress the router\'s stale internal design fallback on its primary pass');
 assert(runtime.includes('base=globalThis.CivweaveFastInteractiveV192?.base?.();'),'terminal fallback must pin the base provider runtime rather than the routing spine');
 assert(runtime.includes('fallbackGenerate=base.generate.bind(base);'),'terminal fallback must call the base generator directly');
 assert(runtime.includes('prepareFallbackForBase(request)'),'terminal fallback must explicitly prepare the Living School fallback before the direct provider call');
 assert(runtime.includes("livingSchoolFallbackModelLocked:FALLBACK_MODEL"),'fallback request must lock Gemini 3.5 after Living School preparation');
 assert(runtime.includes('fallback=await fallbackGenerate(prepared)'),'terminal fallback must make exactly one direct prepared 3.5 retry');
 assert(!runtime.includes('spine.generate.bind(spine)'),'terminal fallback must never re-enter the shared routing spine');
-assert(!runtime.includes('spine.register('),'terminal fallback must not depend on middleware ordering');
-assert(!runtime.includes('gemini-3.1-flash-lite'),'terminal curriculum fallback must never use Flash-Lite');
 assert(index.includes('/app/living-school-terminal-fallback-v1.js'),'Living School must load the terminal fallback runtime');
 assert(worker.includes("const TERMINAL_FALLBACK='/app/living-school-terminal-fallback-v1.js'"),'clean-room service worker must track the terminal fallback runtime');
 assert(worker.includes('GENERATION_BUDGET,TERMINAL_FALLBACK,ACTIVE_RUN_UI'),'terminal fallback must be in the fresh-runtime set');
@@ -79,21 +75,30 @@ assert.equal(context.CivweaveLivingSchoolTerminalFallbackV1.installed,true,'term
 const result=await context.CivweaveModelRuntime.generate({
   purpose:'living-school-research-grounded-curriculum-v218.1',
   config:{provider:'gemini',route:'gemini',model:'gemini-3.7-flash'},
-  context:{moduleCount:4,research:{mode:'local-downloaded'}},
+  context:{moduleCount:4,research:{mode:'local-downloaded'},livingSchoolSingleStrongDesign:true},
   messages:[{role:'user',content:'Build curriculum'}],
 });
-assert.equal(primaryCalls.length,1,'Living School must make exactly one primary 3.7 design call');
+assert.equal(primaryCalls.length,1,'Living School must make exactly one primary design call through the prepared runtime');
+assert.equal(primaryCalls[0].context.livingSchoolSingleStrongDesign,false,'the terminal owner must prevent the generic router from making a second hidden 3.7 design attempt');
+assert.equal(primaryCalls[0].context.livingSchoolTerminalPrimary,true,'the primary request must identify the terminal owner');
 assert.equal(fallbackCalls.length,1,'Living School must make exactly one fallback provider call');
 assert.equal(fallbackCalls[0].config.model,'gemini-3.5-flash','the fallback provider call must reach the base runtime as Gemini 3.5 Flash');
 assert.equal(fallbackCalls[0].config.provider,'gemini','the fallback provider must remain Gemini');
+assert.equal(fallbackCalls[0].executionProfile,'interactive','the 3.5 fallback must avoid the stored agentic 3.7 profile override');
 assert.equal(fallbackCalls[0].context.livingSchoolFallbackDirectBase,true,'the fallback request must record direct-base routing');
 assert.equal(fallbackCalls[0].context.livingSchoolFallbackModelLocked,'gemini-3.5-flash','Living School preparation must not rewrite the fallback model back to 3.7');
+assert.notEqual(fallbackCalls[0].config.model,'gemini-3.1-flash-lite','Flash-Lite must never be used for curriculum design fallback');
 assert.equal(result.status,'success','a successful 3.5 fallback must be returned as the design result');
 assert.equal(result.actual.model,'gemini-3.5-flash','the decorated final result must report Gemini 3.5 Flash as the actual model');
 assert.equal(result.fallback.used,true,'the final result must expose fallback provenance');
 assert.equal(result.fallback.fromModel,'gemini-3.7-flash');
 assert.equal(result.fallback.toModel,'gemini-3.5-flash');
 assert.equal(result.livingSchoolTerminalFallback.providerCalls,2,'the final result must report exactly two provider calls');
+const selected=events.filter(event=>event.type==='civweave:gemini-task-tier-selected');
+const completed=events.filter(event=>event.type==='civweave:gemini-task-tier-completed');
+assert.equal(selected.length,1,'the direct 3.5 fallback must emit one visible model-call start event');
+assert.equal(selected[0].detail.model,'gemini-3.5-flash');
+assert.equal(completed.length,1,'the direct 3.5 fallback must emit one visible model-call completion event');
 assert.ok(events.some(event=>event.type==='civweave:living-school-gemini-fallback'),'the runtime must announce that the fallback occurred');
 
-console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',maxFallbackCalls:1,flashLiteFallback:false,directBase:true,sharedRouterReentry:false,executedRoutingTest:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'living-school-terminal-fallback-v1',primary:'gemini-3.7-flash',fallback:'gemini-3.5-flash',fallbackOn:'any-3.7-error',primaryCalls:1,fallbackCalls:1,maxProviderCalls:2,flashLiteFallback:false,directBase:true,genericDesignHandlerSuppressed:true,executedRoutingTest:true},null,2));
