@@ -8,7 +8,21 @@ import {
 
 const ampleStatus = {
   capacity: { workersPlan: 'free', workersAiFreeRemainingNeurons: 8_000 },
-  quota: { includedRemainingNeurons: 900, workersAiFreeRemainingNeurons: 8_000 },
+  quota: {
+    includedRemainingNeurons: 900,
+    lifetimeRemainingNeurons: 5_000,
+    debtNeurons: 0,
+    workersAiFreeRemainingNeurons: 8_000,
+  },
+};
+const paidStatus = {
+  capacity: { workersPlan: 'paid', workersAiFreeRemainingNeurons: 8_000 },
+  quota: {
+    includedRemainingNeurons: 900,
+    lifetimeRemainingNeurons: 5_000,
+    debtNeurons: 0,
+    workersAiFreeRemainingNeurons: 8_000,
+  },
 };
 
 assert.equal(
@@ -57,13 +71,54 @@ assert.equal(normalHighCode.route, 'workers-ai-free');
 assert.ok(normalHighCode.estimatedNeurons < 900);
 assert.equal(normalHighCode.allowLifetimeCredits, false);
 
-const lowDailyBalance = chooseQwenHighCompute({
+const lowDailyWithoutPermission = chooseQwenHighCompute({
+  input: { executionProfile: 'agentic', purpose: 'cerbanimo-code-patch' },
+  estimatedTokens: { inputTokens: 1_000, outputTokens: 1_150 },
+  memberStatus: { ...paidStatus, quota: { ...paidStatus.quota, includedRemainingNeurons: 300 } },
+});
+assert.equal(lowDailyWithoutPermission.selected, false);
+assert.equal(lowDailyWithoutPermission.reason, 'lifetime-permission-required');
+
+const paidLifetimeAuthorized = chooseQwenHighCompute({
+  input: { executionProfile: 'agentic', purpose: 'cerbanimo-code-patch', allowLifetimeCredits: true },
+  estimatedTokens: { inputTokens: 1_000, outputTokens: 1_150 },
+  memberStatus: { ...paidStatus, quota: { ...paidStatus.quota, includedRemainingNeurons: 300 } },
+});
+assert.equal(paidLifetimeAuthorized.selected, true);
+assert.equal(paidLifetimeAuthorized.route, 'workers-ai-paid-overage');
+assert.equal(paidLifetimeAuthorized.pool, 'lifetime');
+assert.equal(paidLifetimeAuthorized.allowLifetimeCredits, true);
+assert.equal(paidLifetimeAuthorized.reason, 'explicit-high-code-authorized-lifetime');
+
+const freeWorkerCannotLifetimeFundQwen = chooseQwenHighCompute({
   input: { executionProfile: 'agentic', purpose: 'cerbanimo-code-patch', allowLifetimeCredits: true },
   estimatedTokens: { inputTokens: 1_000, outputTokens: 1_150 },
   memberStatus: { ...ampleStatus, quota: { ...ampleStatus.quota, includedRemainingNeurons: 300 } },
 });
-assert.equal(lowDailyBalance.selected, false);
-assert.equal(lowDailyBalance.reason, 'included-daily-budget');
+assert.equal(freeWorkerCannotLifetimeFundQwen.selected, false);
+assert.equal(freeWorkerCannotLifetimeFundQwen.reason, 'workers-paid-required-for-lifetime-qwen');
+
+const insufficientLifetime = chooseQwenHighCompute({
+  input: { executionProfile: 'agentic', purpose: 'cerbanimo-code-patch', allowLifetimeCredits: true },
+  estimatedTokens: { inputTokens: 1_000, outputTokens: 1_150 },
+  memberStatus: {
+    ...paidStatus,
+    quota: { ...paidStatus.quota, includedRemainingNeurons: 300, lifetimeRemainingNeurons: 100 },
+  },
+});
+assert.equal(insufficientLifetime.selected, false);
+assert.equal(insufficientLifetime.reason, 'lifetime-credit-budget');
+
+const lifetimeDebt = chooseQwenHighCompute({
+  input: { executionProfile: 'agentic', purpose: 'cerbanimo-code-patch', allowLifetimeCredits: true },
+  estimatedTokens: { inputTokens: 1_000, outputTokens: 1_150 },
+  memberStatus: {
+    ...paidStatus,
+    quota: { ...paidStatus.quota, includedRemainingNeurons: 300, lifetimeRemainingNeurons: 5_000, debtNeurons: 1 },
+  },
+});
+assert.equal(lifetimeDebt.selected, false);
+assert.equal(lifetimeDebt.reason, 'lifetime-credit-debt');
 
 const oversizedGeneration = chooseQwenHighCompute({
   input: { executionProfile: 'agentic', purpose: 'cerbanimo-code-patch' },
@@ -71,7 +126,7 @@ const oversizedGeneration = chooseQwenHighCompute({
   memberStatus: ampleStatus,
 });
 assert.equal(oversizedGeneration.selected, false);
-assert.equal(oversizedGeneration.reason, 'included-daily-budget');
+assert.equal(oversizedGeneration.reason, 'lifetime-permission-required');
 assert.ok(oversizedGeneration.estimatedNeurons > 900);
 
 const sharedFreeExhausted = chooseQwenHighCompute({
@@ -79,31 +134,41 @@ const sharedFreeExhausted = chooseQwenHighCompute({
   estimatedTokens: { inputTokens: 500, outputTokens: 800 },
   memberStatus: {
     capacity: { workersPlan: 'free', workersAiFreeRemainingNeurons: 10 },
-    quota: { includedRemainingNeurons: 900, workersAiFreeRemainingNeurons: 10 },
+    quota: { includedRemainingNeurons: 900, lifetimeRemainingNeurons: 5_000, debtNeurons: 0, workersAiFreeRemainingNeurons: 10 },
   },
 });
 assert.equal(sharedFreeExhausted.selected, false);
 assert.equal(sharedFreeExhausted.reason, 'shared-workers-free-budget');
 
 const paidWorkersIncluded = chooseQwenHighCompute({
-  input: { executionProfile: 'agentic', taskTier: 'programming', purpose: 'cerbanimo-work' },
+  input: { executionProfile: 'agentic', taskTier: 'programming', purpose: 'cerbanimo-work', allowLifetimeCredits: true },
   estimatedTokens: { inputTokens: 500, outputTokens: 800 },
   memberStatus: {
     capacity: { workersPlan: 'paid', workersAiFreeRemainingNeurons: 10 },
-    quota: { includedRemainingNeurons: 900, workersAiFreeRemainingNeurons: 10 },
+    quota: { includedRemainingNeurons: 900, lifetimeRemainingNeurons: 5_000, debtNeurons: 0, workersAiFreeRemainingNeurons: 10 },
   },
 });
 assert.equal(paidWorkersIncluded.selected, true);
 assert.equal(paidWorkersIncluded.route, 'workers-ai-paid-overage');
 assert.equal(paidWorkersIncluded.pool, 'included');
-assert.equal(paidWorkersIncluded.allowLifetimeCredits, false);
+assert.equal(paidWorkersIncluded.allowLifetimeCredits, false, 'Included neurons are spent before lifetime credits even when permission exists.');
 
 assert.equal(qwenNeuronsForTokens(1_000_000, 0), 40_909);
 assert.equal(qwenNeuronsForTokens(0, 1_000_000), 290_909);
 
 console.log(JSON.stringify({
   ok: true,
-  revision: 'qwen-high-compute-routing-v1',
+  revision: 'qwen-high-compute-routing-v1-paid-lifetime',
   model: QWEN_HIGH_MODEL,
-  cases: { normalHighCode, lowDailyBalance, oversizedGeneration, sharedFreeExhausted, paidWorkersIncluded },
+  cases: {
+    normalHighCode,
+    lowDailyWithoutPermission,
+    paidLifetimeAuthorized,
+    freeWorkerCannotLifetimeFundQwen,
+    insufficientLifetime,
+    lifetimeDebt,
+    oversizedGeneration,
+    sharedFreeExhausted,
+    paidWorkersIncluded,
+  },
 }, null, 2));
