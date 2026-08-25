@@ -174,9 +174,9 @@ async function reserveQwen(env, member, selection) {
     requestedNeurons: selection.estimatedNeurons,
     billingCeilingNeurons: selection.estimatedNeurons,
     billingRail: selection.route,
-    fundingSource: 'included',
+    fundingSource: selection.pool,
     billingModel: QWEN_HIGH_MODEL,
-    allowLifetimeCredits: false,
+    allowLifetimeCredits: selection.allowLifetimeCredits === true,
   })).reservation;
 }
 async function settleQwen(env, reservation, neurons) {
@@ -280,7 +280,7 @@ async function handleQwenGenerate(request, env, ctx, nodeId, input) {
     userId: member.userId,
     model: QWEN_HIGH_MODEL,
     computeRoute: selection.route,
-    pool: 'included',
+    pool: selection.pool,
     text: text || (outputJson ? JSON.stringify(outputJson) : ''),
     outputJson,
     metadata: {
@@ -288,7 +288,7 @@ async function handleQwenGenerate(request, env, ctx, nodeId, input) {
       highCompute: {
         schema: selection.schema,
         reason: selection.reason,
-        lifetimeCreditsAllowed: false,
+        lifetimeCreditsAllowed: selection.allowLifetimeCredits === true,
         estimatedNeurons: selection.estimatedNeurons,
       },
     },
