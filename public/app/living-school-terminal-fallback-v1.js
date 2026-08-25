@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-living-school-terminal-fallback-v1-any-3.7-error';
+const VERSION='1.0.1-living-school-terminal-fallback-v1-any-3.7-error';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const PRIMARY_MODEL='gemini-3.7-flash';
 const FALLBACK_MODEL='gemini-3.5-flash';
 const FALLBACK_REASON='primary-3.7-error';
 const FINALIZER_ID='living-school-terminal-fallback-finalizer-v1';
 const HANDLER_ID='living-school-terminal-fallback-handler-v1';
-let installed=false,priorRuntime=null,wrappedRuntime=null;
+let installed=false,priorRuntime=null,wrappedRuntime=null,fallbackGenerate=null;
 const clean=(value,max=64000)=>String(value??'').trim().slice(0,max);
 const lower=value=>clean(value,260).toLowerCase();
 const designRequest=request=>lower(request?.purpose)===DESIGN_PURPOSE;
@@ -64,9 +64,8 @@ async function generate(request={}){
   let primary;
   try{primary=await priorRuntime.generate(request)}catch(error){if(explicitAbort(error,request))throw error;primary=errorResult(error,{...request,config:{...(request.config||{}),model:PRIMARY_MODEL}},PRIMARY_MODEL)}
   if(!primaryFailed(primary))return primary;
-  const spine=globalThis.CivweaveFastInteractiveV192?.proxy?.();
-  if(!spine?.generate)return primary;
-  const fallback=await spine.generate(fallbackRequest(request));
+  if(typeof fallbackGenerate!=='function')return primary;
+  const fallback=await fallbackGenerate(fallbackRequest(request));
   return decorate(primary,fallback,request);
 }
 function registerMiddleware(){
@@ -78,19 +77,20 @@ function registerMiddleware(){
 }
 function install(){
   registerMiddleware();
-  const budget=globalThis.CivweaveLivingSchoolGenerationBudgetV2,current=globalThis.CivweaveModelRuntime;
-  if(!budget?.installed||!current?.generate||current?.__livingSchoolTerminalFallbackV1===VERSION)return Boolean(current?.__livingSchoolTerminalFallbackV1===VERSION);
+  const budget=globalThis.CivweaveLivingSchoolGenerationBudgetV2,current=globalThis.CivweaveModelRuntime,spine=globalThis.CivweaveFastInteractiveV192?.proxy?.();
+  if(!budget?.installed||!current?.generate||!spine?.generate||current?.__livingSchoolTerminalFallbackV1===VERSION)return Boolean(current?.__livingSchoolTerminalFallbackV1===VERSION);
   if(!current?.__livingSchoolGenerationBudgetV2)return false;
   priorRuntime=current;
+  fallbackGenerate=spine.generate.bind(spine);
   wrappedRuntime=Object.freeze({...current,generate,__livingSchoolTerminalFallbackV1:VERSION,livingSchoolTerminalFallbackVersion:VERSION});
   try{Object.defineProperty(globalThis,'CivweaveModelRuntime',{configurable:true,enumerable:true,writable:true,value:wrappedRuntime})}catch{globalThis.CivweaveModelRuntime=wrappedRuntime}
   installed=globalThis.CivweaveModelRuntime===wrappedRuntime;
   if(installed)try{document.documentElement.dataset.livingSchoolTerminalFallback=VERSION}catch{}
-  if(installed)try{dispatchEvent(new CustomEvent('civweave:living-school-terminal-fallback-ready',{detail:{version:VERSION,primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true,terminalOwner:true,at:new Date().toISOString()}}))}catch{}
+  if(installed)try{dispatchEvent(new CustomEvent('civweave:living-school-terminal-fallback-ready',{detail:{version:VERSION,primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true,terminalOwner:true,pinnedSpineGenerator:true,at:new Date().toISOString()}}))}catch{}
   return installed;
 }
 function schedule(){queueMicrotask(install);setTimeout(install,0);setTimeout(install,120)}
 for(const event of ['civweave:living-school-generation-budget-ready','civweave:runtime-spine-ready','civweave:assistant-runtime-ready','pageshow'])addEventListener?.(event,schedule);
 registerMiddleware();schedule();
-globalThis.CivweaveLivingSchoolTerminalFallbackV1=Object.freeze({version:VERSION,install,registerMiddleware,primaryFailed,fallbackRequest,finalizeFallbackRequest,get installed(){return installed},get runtime(){return wrappedRuntime},primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true});
+globalThis.CivweaveLivingSchoolTerminalFallbackV1=Object.freeze({version:VERSION,install,registerMiddleware,primaryFailed,fallbackRequest,finalizeFallbackRequest,get installed(){return installed},get runtime(){return wrappedRuntime},primaryModel:PRIMARY_MODEL,fallbackModel:FALLBACK_MODEL,reason:FALLBACK_REASON,anyPrimaryError:true,pinnedSpineGenerator:true});
 })();
