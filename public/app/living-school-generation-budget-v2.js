@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='2.1.0-living-school-generation-budget-v2-strong-origin';
+const VERSION='2.1.1-living-school-generation-budget-v2-six-minute-design-timeout';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
 const QUIZ_REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v263';
 const DEPTH_PURPOSE='living-school-module-depth-expansion-v262';
 const EXPECTED_DESIGN_MODEL='gemini-3.7-flash';
-const DESIGN_TIMEOUT_MS=120000;
+const DESIGN_TIMEOUT_MS=360000;
 const DESIGN_MAX_TOKENS=16384;
 const MIN_LESSON_WORDS=120;
 const stats={designCalls:0,duplicateDesignCallsBlocked:0,designTimeouts:0,wrongModelDesignsRejected:0,structureCompiles:0,quizCallsBlocked:0,repairCallsBlocked:0,depthCallsBlocked:0,filteredSourceNoise:0,installCount:0,installedAt:'',lastBlockedAt:''};
