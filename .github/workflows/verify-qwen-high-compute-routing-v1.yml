@@ -1,0 +1,32 @@
+name: Verify Qwen high-compute routing
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'cloudflare/node-cloud/src/qwen-high-compute-policy-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v7.mjs'
+      - 'cloudflare/node-cloud/src/staging-entry-v1.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'cloudflare/node-cloud/wrangler.staging.jsonc'
+      - 'scripts/test-qwen-high-compute-routing-v1.mjs'
+      - '.github/workflows/verify-qwen-high-compute-routing-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  routing-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check module syntax
+        run: |
+          node --check cloudflare/node-cloud/src/qwen-high-compute-policy-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v7.mjs
+      - name: Verify Qwen selection guards
+        run: node scripts/test-qwen-high-compute-routing-v1.mjs
