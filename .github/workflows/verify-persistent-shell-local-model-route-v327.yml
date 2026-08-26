@@ -3,6 +3,7 @@ name: Verify Persistent Shell Local Settings Route
 on:
   pull_request:
     paths:
+      - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
@@ -11,6 +12,7 @@ on:
   push:
     branches: [staging]
     paths:
+      - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
