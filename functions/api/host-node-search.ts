@@ -41,6 +41,16 @@ function slotsFor(capacity: JsonRecord) {
   return { free, paid };
 }
 
+function publishedMobileSlots(capacity: JsonRecord) {
+  if (capacity?.capacityAvailable !== true) return null;
+  const free = finiteWhole(capacity?.slots?.free ?? capacity?.communitySeatsRemaining);
+  if (free == null) return null;
+  return {
+    free,
+    paid: finiteWhole(capacity?.slots?.paid ?? capacity?.paidExpansionSeatsRemaining) ?? 0,
+  };
+}
+
 function stagingSlots(guild: NonNullable<ReturnType<typeof stagingGuild>>, capacity: JsonRecord) {
   const remaining = finiteWhole(capacity.totalSeatsRemaining);
   return {
@@ -99,29 +109,62 @@ function isPublicMobileGuild(node: JsonRecord) {
     && String(node?.status || "active") !== "offline";
 }
 
-function mobileGuildRows(packet: JsonRecord, latitude: number, longitude: number, mode: string) {
-  // Older Mobile Guild Workers did not publish Citizen/Patron seat accounting.
-  // Surface them for the default broad search, but never invent that a specific
-  // Citizen- or Patron-only slot is open.
-  if (mode !== "both") return [];
-  const rows = Array.isArray(packet?.nodes) ? packet.nodes : [];
-  return rows.filter((node: JsonRecord) => isPublicMobileGuild(node)).map((node: JsonRecord) => {
-    const location = locationFor(node)!;
-    return {
+async function mobileGuildRows(packet: JsonRecord, latitude: number, longitude: number, mode: string) {
+  const rows = (Array.isArray(packet?.nodes) ? packet.nodes : [])
+    .filter((node: JsonRecord) => isPublicMobileGuild(node))
+    .map((node: JsonRecord) => {
+      const location = locationFor(node)!;
+      return {
+        node,
+        location,
+        distanceKm: distanceKm(latitude, longitude, location.latitude, location.longitude),
+      };
+    })
+    .sort((left: any, right: any) => left.distanceKm - right.distanceKm)
+    .slice(0, MAX_CAPACITY_PROBES);
+
+  const probed = await Promise.all(rows.map(async ({ node, distanceKm: distance }: any) => {
+    const hostOrigin = safeHttps(node.publicOrigin);
+    const base = {
       schema: "civweave.nearby-hub.v1",
       nodeId: String(node.nodeId || ""),
       displayName: String(node.displayName || node.nodeId || "Civweave Guild").slice(0, 180),
-      hostOrigin: safeHttps(node.publicOrigin),
+      hostOrigin,
       runtime: "cloudflare-mobile-guild-edge",
       status: String(node.status || "active"),
-      distanceKm: Number(distanceKm(latitude, longitude, location.latitude, location.longitude).toFixed(2)),
-      slots: null,
-      capacityAvailable: false,
-      capacityMessage: "This Mobile Guild is online, but its current Worker does not publish Citizen/Patron seat accounting yet.",
+      distanceKm: Number(distance.toFixed(2)),
       publicMobileGuild: true,
       liveGuild: true,
     };
-  });
+
+    try {
+      const capacityResult = await getJson(new URL("/api/fabric/capacity", hostOrigin));
+      const capacity = capacityResult.payload || {};
+      const slots = capacityResult.ok ? publishedMobileSlots(capacity) : null;
+      if (slots) {
+        if (!matches(mode, slots)) return null;
+        return {
+          ...base,
+          slots,
+          capacityAvailable: true,
+          aiEnabled: capacity.aiEnabled === true,
+          capacityMessage: "This Mobile Guild publishes live Citizen/Patron capacity and resident neuron accounting.",
+        };
+      }
+    } catch {
+      // Keep older Mobile Guilds discoverable in broad mode without inventing capacity.
+    }
+
+    if (mode !== "both") return null;
+    return {
+      ...base,
+      slots: null,
+      capacityAvailable: false,
+      capacityMessage: "This Mobile Guild is online, but its current Worker does not publish Citizen/Patron seat accounting yet.",
+    };
+  }));
+
+  return probed.filter(Boolean);
 }
 
 async function stagingSearch(latitude: number, longitude: number, mode: string) {
@@ -186,7 +229,7 @@ async function stagingSearch(latitude: number, longitude: number, mode: string) 
       productionMembershipIsolation: true,
     };
   }).filter(Boolean);
-  const mobileRows = mobileGuildRows(stagingDirectory.payload || {}, roundedLatitude, roundedLongitude, mode)
+  const mobileRows = (await mobileGuildRows(stagingDirectory.payload || {}, roundedLatitude, roundedLongitude, mode))
     .filter((node: JsonRecord) => node.nodeId !== STAGING_NODE_ID);
   const nodes = [...shadowRows, ...mobileRows]
     .sort((left: any, right: any) => left.distanceKm - right.distanceKm)
@@ -274,7 +317,7 @@ export const onRequestPost: PagesFunction = async (context) => {
         return null;
       }
     }));
-    const mobileRows = mobileGuildRows({nodes:directoryRows}, roundedLatitude, roundedLongitude, mode)
+    const mobileRows = (await mobileGuildRows({ nodes: directoryRows }, roundedLatitude, roundedLongitude, mode))
       .filter((node: JsonRecord) => !hostNodeIds.includes(String(node.nodeId)));
     const nodes = [...probed.filter(Boolean), ...mobileRows]
       .sort((left: any, right: any) => left.distanceKm == null ? 1 : right.distanceKm == null ? -1 : left.distanceKm - right.distanceKm)
