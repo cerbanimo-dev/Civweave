@@ -10,6 +10,8 @@
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
 // shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
+// Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths.
+importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
 importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v1-20260825');
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');
