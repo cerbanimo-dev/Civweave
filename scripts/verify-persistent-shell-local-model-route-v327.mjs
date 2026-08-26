@@ -15,59 +15,48 @@ const alias = fs.readFileSync(aliasPath, 'utf8');
 const fresh = fs.readFileSync(freshPath, 'utf8');
 const expectedVersion = '1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const expectedShellVersion = '1.1.2-canonical-local-settings-refresh';
+const directPreload = '/app/settings-local-route-v327.js?v=1.1.6-persistent-shell-direct-preload-v331';
 
 const fail = message => { throw new Error(message); };
 
-if (!shellHtml.includes(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`)) {
-  fail('Persistent shell HTML does not cache-bust the shell runtime containing the local-settings loader.');
+if (!shellHtml.includes('data-build="persistent-system-shell-v1-r8-direct-local-model-preload"')) {
+  fail('Persistent shell HTML is not on the direct Local models preload build.');
 }
-if (!shell.includes(`const VERSION='${expectedShellVersion}'`)) {
-  fail('Persistent shell runtime version does not match its HTML cache key.');
+if (!shellHtml.includes('delete globalThis.CivweaveSettingsLocalRouteV323')) {
+  fail('Persistent shell HTML does not evict a stale Local models global before the direct preload.');
+}
+if (!shellHtml.includes(directPreload)) {
+  fail('Persistent shell HTML does not preload the full v327 Local models renderer.');
+}
+const evictAt = shellHtml.indexOf('delete globalThis.CivweaveSettingsLocalRouteV323');
+const preloadAt = shellHtml.indexOf(directPreload);
+const shellRuntimeAt = shellHtml.indexOf(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`);
+if (!(evictAt >= 0 && preloadAt > evictAt && shellRuntimeAt > preloadAt)) {
+  fail('Local models stale-global eviction and direct preload must happen before the persistent shell runtime can open Settings.');
+}
+if (!fresh.includes(`const VERSION='${expectedVersion}'`)) {
+  fail('Direct v327 Local models renderer does not expose the version expected by the persistent shell.');
+}
+if (!fresh.includes('savedStateOnlyView:true') || !fresh.includes('viewWritesState:false')) {
+  fail('Direct Local models preload is no longer an inert saved-state-only view.');
+}
+if (/const m=manager\(\);let all,selected;\s*if\(m\?\.state&&m\?\.selection\)/.test(fresh)) {
+  fail('Direct Local models renderer still consults the live download manager during snapshot rendering.');
 }
 if (!shell.includes(`const SETTINGS_LOCAL_ROUTE_VERSION='${expectedVersion}'`)) {
-  fail('Persistent shell does not pin the inert local-settings bridge version.');
+  fail('Persistent shell fallback loader does not pin the full Local models API version.');
 }
 if (!shell.includes("const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`")) {
-  fail('Persistent shell does not load settings-local-route-v325.js as its local-settings bridge.');
-}
-if (shell.includes("SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v323.js")) {
-  fail('Persistent shell still loads the legacy v323 path directly.');
-}
-if (!shell.includes("function settingsLocalRouteReady(){return globalThis.CivweaveSettingsLocalRouteV323?.version===SETTINGS_LOCAL_ROUTE_VERSION}")) {
-  fail('Persistent shell does not require the pinned local-settings API version.');
-}
-if (!shell.includes('if(settingsLocalRouteReady()&&invoke())return true;')) {
-  fail('Settings can still open before the local-settings bridge is ready.');
-}
-if (!shell.includes("loadScript(SETTINGS_LOCAL_ROUTE,settingsLocalRouteReady,'Settings local-model view')")) {
-  fail('Persistent shell does not load the local-settings bridge before Settings opens.');
-}
-if (!bridge.includes(`const VERSION='${expectedVersion}'`)) {
-  fail('v325 parent bridge version does not match the persistent-shell pin.');
+  fail('Persistent shell lost its v325 fallback bridge.');
 }
 if (!bridge.includes("const FULL_ROUTE='/app/settings-local-route-v327.js?v=1.1.4-settings-local-route-v325-parent-bridge'")) {
-  fail('v325 parent bridge does not hand off to the cache-distinct v327 full implementation.');
+  fail('v325 fallback bridge no longer hands off to v327.');
 }
 if (!bridge.includes('delete globalThis.CivweaveSettingsLocalRouteV323')) {
-  fail('v325 parent bridge does not evict a stale same-version local-settings global before handoff.');
-}
-if (!bridge.includes('loaderBridge:true')) {
-  fail('v325 parent bridge is not marked as a replaceable loader bridge.');
-}
-if (!bridge.includes('renderLocalModels')) {
-  fail('v325 parent bridge does not expose an immediate Local models renderer.');
-}
-if (bridge === fresh) {
-  fail('v325 must remain a small parent bridge rather than duplicating the full v327 implementation.');
+  fail('v325 fallback bridge no longer evicts a stale same-version global.');
 }
 if (alias !== fresh) {
   fail('v323 compatibility alias drifted from the full v327 saved-state implementation.');
 }
-if (/CivweaveLocalModelDownloadV266|\bmanager\(\)|\bregistry\(\)|\bpackManager\(\)/.test(bridge)) {
-  fail('Parent bridge must not touch local-model lifecycle managers before the explicit Local models handoff.');
-}
-if (/const m=manager\(\);let all,selected;\s*if\(m\?\.state&&m\?\.selection\)/.test(fresh)) {
-  fail('Fresh local-settings implementation still consults the live download manager during snapshot rendering.');
-}
 
-console.log('PASS persistent shell loads an inert v325 bridge that evicts stale globals and hands Local models to the cache-distinct saved-state-only v327 implementation.');
+console.log('PASS persistent shell synchronously evicts stale Local models globals and preloads the full inert v327 renderer before Settings can open, with the v325 bridge retained only as fallback.');
