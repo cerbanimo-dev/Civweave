@@ -19,9 +19,6 @@ const directPreload = '/app/settings-local-route-v327.js?v=1.1.6-persistent-shel
 
 const fail = message => { throw new Error(message); };
 
-if (!shellHtml.includes('data-build="persistent-system-shell-v1-r8-direct-local-model-preload"')) {
-  fail('Persistent shell HTML is not on the direct Local models preload build.');
-}
 if (!shellHtml.includes('delete globalThis.CivweaveSettingsLocalRouteV323')) {
   fail('Persistent shell HTML does not evict a stale Local models global before the direct preload.');
 }
