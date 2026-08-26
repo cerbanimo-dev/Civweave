@@ -4,15 +4,19 @@ import {readFile} from 'node:fs/promises';
 
 const canonicalUrl=new URL('../public/app/settings-local-route-v325.js',import.meta.url);
 const compatUrl=new URL('../public/app/settings-local-route-v323.js',import.meta.url);
+const freshUrl=new URL('../public/app/settings-local-route-v327.js',import.meta.url);
 const campusUrl=new URL('../public/app/working-campus-v440.html',import.meta.url);
-const [canonical,compat,campus]=await Promise.all([
+const [canonical,compat,fresh,campus]=await Promise.all([
   readFile(canonicalUrl,'utf8'),
   readFile(compatUrl,'utf8'),
+  readFile(freshUrl,'utf8'),
   readFile(campusUrl,'utf8')
 ]);
 
-assert.equal(compat,canonical,'v323 compatibility path must be byte-identical to canonical v325 so the two settings routes cannot drift.');
-assert.match(campus,/settings-local-route-v325\.js/,'Current Working Campus must load the canonical v325 Local models route.');
+assert.equal(compat,canonical,'v323 compatibility path must be byte-identical to canonical v325 so the settings routes cannot drift.');
+assert.equal(fresh,canonical,'v327 fresh path must be byte-identical to canonical v325 so cache escape never changes behavior.');
+assert.match(campus,/settings-local-route-v327\.js\?v=1\.1\.3-settings-local-route-v326-canonical-inert-hard-local-fresh-path/,'Current Working Campus must load the cache-distinct v327 Local models path.');
+assert.doesNotMatch(campus,/settings-local-route-v325\.js\?v=working-campus-v440-settings-v325/,'Working Campus must not retain the stale-cache v325 script URL.');
 
 let managerReads=0;
 let storageWrites=0;
@@ -93,9 +97,9 @@ Object.defineProperty(context,'CivweaveLocalModelDownloadV266',{
 });
 
 vm.createContext(context);
-vm.runInContext(canonical,context,{filename:'settings-local-route-v325.js'});
+vm.runInContext(fresh,context,{filename:'settings-local-route-v327.js'});
 const api=context.CivweaveSettingsLocalRouteV323;
-assert.ok(api?.renderLocalModels,'Canonical Local models route must expose renderLocalModels.');
+assert.ok(api?.renderLocalModels,'Fresh Local models route must expose renderLocalModels.');
 const rendered=api.renderLocalModels(form);
 assert.ok(rendered,'Local models must render from saved state.');
 assert.equal(managerReads,0,'Opening Local models must not touch the live model manager.');
@@ -113,6 +117,7 @@ console.log(JSON.stringify({
   revision:api.version,
   canonical:'settings-local-route-v325.js',
   compatibilityAlias:'settings-local-route-v323.js',
+  freshAlias:'settings-local-route-v327.js',
   routesByteIdentical:true,
   managerReads,
   storageWrites,
