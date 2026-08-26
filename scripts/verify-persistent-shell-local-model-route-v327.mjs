@@ -3,16 +3,25 @@ import path from 'node:path';
 
 const root = process.cwd();
 const shellPath = path.join(root, 'public/app/persistent-system-shell-v1.js');
+const shellHtmlPath = path.join(root, 'public/app/persistent-system-shell-v1.html');
 const routePath = path.join(root, 'public/app/settings-local-route-v325.js');
 const aliasPath = path.join(root, 'public/app/settings-local-route-v323.js');
 
 const shell = fs.readFileSync(shellPath, 'utf8');
+const shellHtml = fs.readFileSync(shellHtmlPath, 'utf8');
 const route = fs.readFileSync(routePath, 'utf8');
 const alias = fs.readFileSync(aliasPath, 'utf8');
 const expectedVersion = '1.1.3-settings-local-route-v326-canonical-inert-hard-local';
+const expectedShellVersion = '1.1.2-canonical-local-settings-refresh';
 
 const fail = message => { throw new Error(message); };
 
+if (!shellHtml.includes(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`)) {
+  fail('Persistent shell HTML does not cache-bust the shell runtime containing the canonical local-settings loader.');
+}
+if (!shell.includes(`const VERSION='${expectedShellVersion}'`)) {
+  fail('Persistent shell runtime version does not match its HTML cache key.');
+}
 if (!shell.includes(`const SETTINGS_LOCAL_ROUTE_VERSION='${expectedVersion}'`)) {
   fail('Persistent shell does not pin the canonical inert local-settings version.');
 }
@@ -41,4 +50,4 @@ if (/const m=manager\(\);let all,selected;\s*if\(m\?\.state&&m\?\.selection\)/.t
   fail('Canonical local-settings view still consults the live download manager during snapshot rendering.');
 }
 
-console.log('PASS persistent shell refreshes the canonical inert local-model Settings route across all realms.');
+console.log('PASS persistent shell and its HTML cache boundary refresh the canonical inert local-model Settings route across all realms.');
