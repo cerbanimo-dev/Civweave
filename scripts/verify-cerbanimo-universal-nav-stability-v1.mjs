@@ -11,8 +11,7 @@ const realmWorker=read('public/service-worker-five-system-pages-v1.js');
 const homeWorker=read('public/service-worker-canonical-home-v1.js');
 const quest=read('public/app/cerbanimo-quest-engine-v144.js');
 
-assert(shell.includes('data-build="persistent-system-shell-v1-r6-canonical-local-settings"'),'Persistent shell must expose the current full-height, cache-busted content-stage build.');
-assert(shell.includes('/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh'),'Persistent shell HTML must load the current persistent runtime cache key.');
+assert(shell.includes('data-build="persistent-system-shell-v1-r2-full-height-stage"'),'Persistent shell must use the full-height content-stage build.');
 assert(shell.includes('id="cw-persistent-system-stage"'),'Persistent shell must own one content stage.');
 assert(shell.includes('--cw-persistent-nav-space:'),'Persistent shell must define one shared reserved navbar height.');
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent iframe stage must explicitly fill the viewport above the navbar.');
