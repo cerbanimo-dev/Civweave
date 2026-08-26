@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r7-human-chat-owner" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r8-direct-local-model-preload" data-civweave-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -21,6 +21,11 @@ body{padding:0!important}
 (()=>{try{sessionStorage.setItem('civweave.pwa.launch-session.v1','1');sessionStorage.setItem('civweave.install-boundary.boot.v228','1')}catch{}})();
 </script>
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner"></script>
+<!-- Local models is a saved-state-only view. Preload the full renderer in the parent shell before Settings can open so a stale v325 bridge/global can never strand the tab on the gateway placeholder. This does not start the local model runtime, GPU, service worker, or inference. -->
+<script>
+(()=>{try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}})();
+</script>
+<script src="/app/settings-local-route-v327.js?v=1.1.6-persistent-shell-direct-preload-v331"></script>
 <script src="/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh"></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail"></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer"></script>
