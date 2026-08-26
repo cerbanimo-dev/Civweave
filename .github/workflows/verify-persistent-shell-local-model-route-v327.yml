@@ -1,0 +1,28 @@
+name: Verify Persistent Shell Local Settings Route
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/settings-local-route-v323.js'
+      - 'public/app/settings-local-route-v325.js'
+      - 'scripts/verify-persistent-shell-local-model-route-v327.mjs'
+      - '.github/workflows/verify-persistent-shell-local-model-route-v327.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/settings-local-route-v323.js'
+      - 'public/app/settings-local-route-v325.js'
+      - 'scripts/verify-persistent-shell-local-model-route-v327.mjs'
+      - '.github/workflows/verify-persistent-shell-local-model-route-v327.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-persistent-shell-local-model-route-v327.mjs
