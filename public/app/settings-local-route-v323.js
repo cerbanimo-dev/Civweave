@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-settings-local-route-v325-browser-pack-handoff';
+const VERSION='1.1.2-settings-local-route-v326-inert-view';
 const ROUTE='downloaded-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
@@ -83,21 +83,18 @@ let actionPromise=null,notice='',noticeError=false,navigating=false;
 function writable(){return !navigating&&Boolean(document.documentElement?.isConnected)}
 function selection(){try{return parse(localStorage.getItem(SELECTION_KEY),{active:false,id:null})}catch{return{active:false,id:null}}}
 function normalizeLegacyBrowserPackErrors(packs){
-  let changed=false;
+  const normalized={...(packs&&typeof packs==='object'?packs:{})};
   for(const id of BROWSER_PACKS){
-    const state=packs[id];if(!state)continue;
+    const state=normalized[id];if(!state)continue;
     if(state.errorCode===LEGACY_BROWSER_ERROR||state.phase==='browser-download-required'){
-      packs[id]={...state,status:'browser-ready',phase:'browser-download-ready',percent:0,completedBytes:0,error:'',errorCode:'',downloadMode:'browser'};changed=true;
+      normalized[id]={...state,status:'browser-ready',phase:'browser-download-ready',percent:0,completedBytes:0,error:'',errorCode:'',downloadMode:'browser'};
     }
   }
-  if(changed)try{localStorage.setItem(PACK_STATE_KEY,JSON.stringify(packs))}catch{}
-  return packs;
+  return normalized;
 }
 function snapshot(){
-  const m=manager();let all,selected;
-  if(m?.state&&m?.selection){all=m.state()||{};selected=m.selection()||{active:false,id:null}}
-  else{try{all=parse(localStorage.getItem(DOWNLOADS_KEY),{});selected=selection()}catch{all={};selected={active:false,id:null}}}
-  let packs={};try{packs=parse(localStorage.getItem(PACK_STATE_KEY),{})}catch{}
+  let all={},selected={active:false,id:null},packs={};
+  try{all=parse(localStorage.getItem(DOWNLOADS_KEY),{});selected=selection();packs=parse(localStorage.getItem(PACK_STATE_KEY),{})}catch{}
   return{all,selection:selected,packs:normalizeLegacyBrowserPackErrors(packs)};
 }
 function savedHealth(){try{return parse(localStorage.getItem(HEALTH_KEY),{})}catch{return{}}}
@@ -105,7 +102,7 @@ function fallbackConfig(){try{const profiles=parse(localStorage.getItem(PROFILES
 function selectedLabel(){const current=selection();return current.active&&current.id?String(current.id):'No downloaded model selected'}
 function panelFor(form){let panel=form.querySelector('[data-panel="downloaded-local"]');if(panel)return panel;panel=document.createElement('section');panel.className='cw-clean-panel';panel.dataset.panel='downloaded-local';panel.hidden=true;panel.innerHTML='<div><h3>Downloaded local AI</h3><p data-downloaded-local-summary></p></div><div class="cw-clean-note">Use the Local models tab to install a complete AI pack or choose an individual model. Selecting downloaded AI keeps your configured remote provider as fallback; opening Settings does not load the model runtime.</div>';const anchor=form.querySelector('[data-panel="deterministic"]');if(anchor)anchor.after(panel);else form.prepend(panel);return panel}
 function sync(form){if(!form?.isConnected)return false;const route=form.elements?.namedItem?.('route');if(!route)return false;if(!route.querySelector(`option[value="${ROUTE}"]`)){const option=document.createElement('option');option.value=ROUTE;option.textContent='Downloaded local AI';const deterministic=route.querySelector('option[value="deterministic"]');deterministic?.after(option)||route.prepend(option)}const panel=panelFor(form),current=selection(),summary=panel.querySelector('[data-downloaded-local-summary]');if(summary)summary.textContent=current.active&&current.id?`${current.id} is selected for on-device interactive chat.`:'No downloaded model is selected yet.';const useLocal=route.value===ROUTE;panel.hidden=!useLocal;if(useLocal){form.querySelector('[data-panel="deterministic"]')?.setAttribute('hidden','');form.querySelector('[data-panel="remote"]')?.setAttribute('hidden','')}return true}
-function fmt(bytes){const b=Number(bytes||0);const via=manager()?.formatBytes?.(b);if(via)return via;return b>=1e9?`${(b/1e9).toFixed(1)} GB`:b>=1e6?`${Math.round(b/1e6)} MB`:`${Math.max(1,Math.round(b/1e3))} KB`}
+function fmt(bytes){const b=Number(bytes||0);return b>=1e9?`${(b/1e9).toFixed(1)} GB`:b>=1e6?`${Math.round(b/1e6)} MB`:`${Math.max(1,Math.round(b/1e3))} KB`}
 function installLocalStyle(){
   if(document.getElementById(STYLE_ID))return true;if(!writable()||!document.head)return false;
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
@@ -186,7 +183,7 @@ function ensureScript(src,ready){
   return new Promise((resolve,reject)=>{
     const path=new URL(src,location.href).pathname,existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);
     if(existing){if(ready?.())return resolve(true);existing.addEventListener('load',()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`)),{once:true});existing.addEventListener('error',()=>reject(new Error(`${path} could not load.`)),{once:true});return}
-    const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveLocalModelAction='v325';script.onload=()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`));script.onerror=()=>reject(new Error(`${path} could not load.`));document.head.append(script);
+    const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveLocalModelAction='v326';script.onload=()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`));script.onerror=()=>reject(new Error(`${path} could not load.`));document.head.append(script);
   });
 }
 function ensureActionModules(){if(ACTION_FILES.every(([,ready])=>ready?.()))return Promise.resolve(true);if(actionPromise)return actionPromise;actionPromise=(async()=>{for(const [src,ready] of ACTION_FILES)await ensureScript(src,ready);return true})().finally(()=>{actionPromise=null});return actionPromise}
@@ -257,6 +254,6 @@ addEventListener('pageshow',()=>{navigating=false;queueMicrotask(()=>{patchVisib
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patchVisible,{once:true});else queueMicrotask(patchVisible);
 globalThis.CivweaveSettingsLocalRouteV323=Object.freeze({
   version:VERSION,route:ROUTE,patch,selection,selectedLabel,renderLocalModels,ensureActionModules,catalogue:CATALOGUE,packCatalogue:PACK_CATALOGUE,
-  settingsPresentationOwnership:false,inputOwnership:false,managerDependency:false,runtimeDependency:false,cacheDependency:false,localModelsViewDirect:true,lifecycleDependency:false,registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,packRuntimeDependencyOnView:false,packCacheReadOnView:false,actionModulesOnDemand:true,browserPackHandoff:true,legacyBrowserErrorRecovery:true
+  settingsPresentationOwnership:false,inputOwnership:false,managerDependency:false,runtimeDependency:false,cacheDependency:false,localModelsViewDirect:true,lifecycleDependency:false,registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,packRuntimeDependencyOnView:false,packCacheReadOnView:false,savedStateOnlyView:true,viewWritesState:false,actionModulesOnDemand:true,browserPackHandoff:true,legacyBrowserErrorRecovery:true
 });
 })();
