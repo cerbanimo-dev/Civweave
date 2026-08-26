@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-civweave-system="living-school" data-living-school-runtime="cleanroom-v218" data-living-school-revision="structured-single-v221">
+<html lang="en" data-civweave-system="living-school" data-living-school-runtime="cleanroom-v218" data-living-school-revision="structured-single-v221-boot-first-v1">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -84,18 +84,6 @@
   <script src="/app/local-first-policy-v131.js?v=cleanroom-v218.1" defer></script>
   <script src="/app/platform-stability-v159.js?v=cleanroom-v218.1" defer></script>
   <script src="/app/platform-experience-v160.js?v=cleanroom-v218.1" defer></script>
-  <script src="/app/minilm-response-router-v347.js?v=1.3.1-living-school-bypass" defer></script>
-  <script src="/app/family-ai-loader-v105.js?v=cleanroom-v218.1-v256" defer></script>
-  <script src="/app/gemini-task-tier-router-v213.js?v=1.0.76-living-school-503-fallback" defer></script>
-  <script src="/app/living-school-route-lock-v1.js?v=1.7.0-provider-neutral" defer></script>
-  <script src="/app/living-school-grounded-design-v337.js?v=1.4.0-effort-hours" defer></script>
-  <script src="/app/living-school-grounded-compiler-v336.js" defer></script>
-  <script src="/app/living-school-assessment-curator-v337.js" defer></script>
-  <script src="/app/living-school-runtime-route-v2.js?v=2.3.0-provider-neutral" defer></script>
-  <script src="/app/living-school-generation-budget-v3.js?v=3.0.0-provider-neutral" defer></script>
-  <script src="/app/living-school-active-run-ui-v2.js?v=2.0.0-provider-neutral" defer></script>
-  <script src="/app/living-school-generation-report-ui-v1.js?v=1.0.0-provider-neutral" defer></script>
-  <script src="/app/living-school-pack-offer-authority-v1.js?v=1.0.0" defer></script>
   <script src="/app/family-shell-v104.js?v=family-nav-single-owner-r1" defer></script>
   <script src="/app/local-object-mesh-v146.js?v=open-media-cache-v1" defer></script>
   <script type="module" src="/app/open-learning-media-cache-v1.mjs?v=open-media-cache-v1"></script>
@@ -118,10 +106,48 @@
     root.innerHTML=`<article class="lsc218-loading lsc304-boot-error" role="alert"><small>STARTUP RECOVERY</small><h1>Living School did not finish opening</h1><p>The surrounding Civweave shell is still running. Retry only the Living School workbench instead of reinstalling the app.</p><code>${message.replace(/[&<>]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[char]))}</code><button class="lsc304-boot-retry" type="button" data-ls-bootstrap-retry>Retry Living School</button></article>`;
     root.querySelector('[data-ls-bootstrap-retry]')?.addEventListener('click',()=>location.reload(),{once:true});
   };
+  const supportScripts=[
+    '/app/minilm-response-router-v347.js?v=1.3.1-living-school-bypass',
+    '/app/family-ai-loader-v105.js?v=cleanroom-v218.1-v256',
+    '/app/gemini-task-tier-router-v213.js?v=1.0.76-living-school-503-fallback',
+    '/app/living-school-route-lock-v1.js?v=1.7.0-provider-neutral',
+    '/app/living-school-grounded-design-v337.js?v=1.4.0-effort-hours',
+    '/app/living-school-grounded-compiler-v336.js',
+    '/app/living-school-assessment-curator-v337.js',
+    '/app/living-school-runtime-route-v2.js?v=2.3.0-provider-neutral',
+    '/app/living-school-generation-budget-v3.js?v=3.0.0-provider-neutral',
+    '/app/living-school-active-run-ui-v2.js?v=2.0.0-provider-neutral',
+    '/app/living-school-generation-report-ui-v1.js?v=1.0.1-provider-neutral-idempotent',
+    '/app/living-school-pack-offer-authority-v1.js?v=1.0.0'
+  ];
+  let supportPromise=null;
+  const scriptPath=src=>new URL(src,location.href).pathname;
+  const loadSupportScript=src=>new Promise((resolve,reject)=>{
+    const path=scriptPath(src),existing=[...document.scripts].find(node=>{try{return scriptPath(node.src)===path}catch{return false}});
+    if(existing){resolve(true);return}
+    const script=document.createElement('script');script.src=src;script.async=false;script.dataset.livingSchoolSupport='true';
+    script.onload=()=>resolve(true);script.onerror=()=>reject(new Error(`Living School support script could not load: ${path}`));
+    document.head.append(script);
+  });
+  const ensureSupportRuntime=()=>{
+    if(supportPromise)return supportPromise;
+    document.documentElement.dataset.livingSchoolSupportRuntime='loading';
+    supportPromise=(async()=>{
+      for(const src of supportScripts)await loadSupportScript(src);
+      document.documentElement.dataset.livingSchoolSupportRuntime='ready';
+      return true;
+    })().catch(error=>{
+      supportPromise=null;
+      document.documentElement.dataset.livingSchoolSupportRuntime='unavailable';
+      throw error;
+    });
+    return supportPromise;
+  };
+  globalThis.CivweaveLivingSchoolSupportRuntimeV1=Object.freeze({version:'1.0.0-workbench-first',ensure:ensureSupportRuntime,scripts:[...supportScripts]});
   const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
   try{
     document.documentElement.dataset.livingSchoolWorkbench='loading';
-    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221');
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v1');
     bootComplete=true;
     clearTimeout(watchdog);
     document.documentElement.dataset.livingSchoolWorkbench='ready';
