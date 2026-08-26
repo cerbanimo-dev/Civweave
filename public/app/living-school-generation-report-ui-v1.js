@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-living-school-generation-report-ui-v1-provider-neutral';
+const VERSION='1.0.1-living-school-generation-report-ui-v1-provider-neutral-idempotent';
 const PANEL_ID='lsc220-generation-recovery';
 let queued=false;
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
@@ -20,8 +20,9 @@ function render(){
   const note=panel.querySelector('.lsc218-note'),strong=note?.querySelector('b');if(!strong)return;
   const report=reportState(),design=report?.unstructured||{},config=runtimeConfig();
   const provider=clean(design.provider||config.provider||config.route||config.engine,120),model=clean(design.model||config.model,220);
-  strong.textContent=`${providerLabel(provider)}${model?` · ${model}`:''} design → local compile`;
-  panel.dataset.providerNeutralReport='true';
+  const next=`${providerLabel(provider)}${model?` · ${model}`:''} design → local compile`;
+  if(strong.textContent!==next)strong.textContent=next;
+  if(panel.dataset.providerNeutralReport!=='true')panel.dataset.providerNeutralReport='true';
 }
 function schedule(){if(queued)return;queued=true;queueMicrotask(render)}
 function install(){
