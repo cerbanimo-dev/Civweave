@@ -2,10 +2,11 @@ name: Verify Local Models Inert View
 
 on:
   push:
-    branches: [staging, main, agent/fix-live-local-model-tab-v326]
+    branches: [staging, main, fix/local-model-view-fresh-route-v328]
     paths:
       - public/app/settings-local-route-v323.js
       - public/app/settings-local-route-v325.js
+      - public/app/settings-local-route-v327.js
       - public/app/working-campus-v440.html
       - scripts/verify-local-model-tab-inert-v326.mjs
       - .github/workflows/verify-local-model-tab-inert-v326.yml
@@ -14,6 +15,7 @@ on:
     paths:
       - public/app/settings-local-route-v323.js
       - public/app/settings-local-route-v325.js
+      - public/app/settings-local-route-v327.js
       - public/app/working-campus-v440.html
       - scripts/verify-local-model-tab-inert-v326.mjs
       - .github/workflows/verify-local-model-tab-inert-v326.yml
@@ -39,6 +41,7 @@ jobs:
         run: |
           node --check public/app/settings-local-route-v325.js
           node --check public/app/settings-local-route-v323.js
+          node --check public/app/settings-local-route-v327.js
           node --check scripts/verify-local-model-tab-inert-v326.mjs
       - name: Verify live Local models route is inert and canonical
         run: node scripts/verify-local-model-tab-inert-v326.mjs
