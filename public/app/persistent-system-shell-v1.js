@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-rapid-navigation-race-guard';
+const VERSION='1.1.2-canonical-local-settings-refresh';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -17,7 +17,8 @@ const UPDATE_STYLE_ID='cw-persistent-platform-update-backlights-v1';
 const SUBSYSTEM_STATE_KEY='civweave.subsystem-avatar-state.v347';
 const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.133-settings-v324-direct-local-model-view';
-const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v323.js?v=1.1.1-settings-local-route-v325-browser-pack-handoff';
+const SETTINGS_LOCAL_ROUTE_VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
+const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
 const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.170-guide-chat-surface-v350-parakeet-no-proxy-worker';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
@@ -116,12 +117,12 @@ function loadScript(src,ready,label){
   });
 }
 function settingsApi(){return globalThis.CivweaveSettingsV320||globalThis.CivweaveSettingsGatewayV317||null}
+function settingsLocalRouteReady(){return globalThis.CivweaveSettingsLocalRouteV323?.version===SETTINGS_LOCAL_ROUTE_VERSION}
 function ensureSettings(){
-  if(settingsApi()?.open)return Promise.resolve(settingsApi());
+  if(settingsApi()?.open&&settingsLocalRouteReady())return Promise.resolve(settingsApi());
   if(settingsPromise)return settingsPromise;
-  settingsPromise=loadScript(SETTINGS_LOCAL_ROUTE,()=>Boolean(globalThis.CivweaveSettingsLocalRouteV323),'Settings local-model view')
-    .catch(()=>false)
-    .then(()=>loadScript(SETTINGS_GATEWAY,()=>Boolean(settingsApi()?.open),'Shared Settings'))
+  settingsPromise=loadScript(SETTINGS_LOCAL_ROUTE,settingsLocalRouteReady,'Settings local-model view')
+    .then(()=>settingsApi()?.open?true:loadScript(SETTINGS_GATEWAY,()=>Boolean(settingsApi()?.open),'Shared Settings'))
     .then(()=>settingsApi())
     .finally(()=>{settingsPromise=null});
   return settingsPromise;
@@ -129,7 +130,7 @@ function ensureSettings(){
 function openSettings(){
   const launcher=document.querySelector('#cw-themed-system-nav .cw-themed-system-link[data-system="civweave"]')||document.activeElement;
   const invoke=()=>{const api=settingsApi();if(!api?.open)return false;try{api.open(launcher);return true}catch{return false}};
-  if(invoke())return true;
+  if(settingsLocalRouteReady()&&invoke())return true;
   void ensureSettings().then(invoke).catch(error=>showError(error?.message||'Settings could not open.'));
   return true;
 }
