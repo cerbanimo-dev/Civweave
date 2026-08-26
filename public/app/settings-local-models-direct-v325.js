@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-settings-v325-direct-local-models';
+const VERSION='1.0.1-settings-v325-direct-local-models';
 const LAYER_ID='cw-settings-v320';
 const PANEL_ID='cw-local-models-direct-v325';
 const STYLE_ID='cw-local-models-direct-v325-style';
@@ -10,7 +10,7 @@ const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const HEALTH_KEY='civweave.local-ai.health.v286';
 const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=settings-v325-action-route';
 const ACTION_ROUTE_VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
-const BUILD_LABEL='Settings v325 · renderer direct-local-v325 · actions lazy-v331';
+const BUILD_LABEL='Settings v325 · renderer direct-local-v325.1 · actions lazy-v331';
 const PACKS=Object.freeze([
   {id:'minimum-spec',label:'Minimum Spec Pack',tier:'MINIMUM',size:'~1.7 GB',summary:'Smallest complete offline voice + chat bundle, with CPU/WASM as the primary text path.',primaryModel:'qwen3-0.6b-q8-wasm'},
   {id:'premier-phone',label:'Premier Phone Pack',tier:'PREMIER PHONE',size:'~7.6 GB',summary:'Full phone-local AI ladder with fast and deep Gemma 4 paths plus CPU-safe fallback.',primaryModel:'gemma4-e2b-it-q2f16-mobile'},
@@ -31,7 +31,7 @@ if(globalThis.CivweaveSettingsLocalDirectV325?.version===VERSION)return;
 let actionPromise=null;
 const parse=(value,fallback={})=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const read=(key,fallback={})=>{try{return parse(localStorage.getItem(key),fallback)}catch{return fallback}};
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 function snapshot(){return{selection:read(SELECTION_KEY,{active:false,id:null}),downloads:read(DOWNLOADS_KEY,{}),packs:read(PACK_STATE_KEY,{}),health:read(HEALTH_KEY,{})}}
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
@@ -109,7 +109,7 @@ function render(layer=document.getElementById(LAYER_ID)){
     return`<article class="cw-direct-model" data-active="${active?'true':'false'}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.size)} · ${esc(statusCopy(state,active))}${active?' · ACTIVE':''}</p><p>${esc(healthText)}</p></div><div class="cw-direct-actions">${modelAction(model,state,active)}</div></article>`;
   }).join('');
   target.innerHTML=`<section id="${PANEL_ID}" class="cw-clean-panel" data-cw-direct-local-panel><div><h3>AI Downloads</h3><p>Saved choices are rendered immediately by Settings. Model lifecycle, cache, service-worker, GPU, and inference code stay unloaded until you choose an action.</p></div><div class="cw-direct-build">${esc(BUILD_LABEL)}</div><div class="cw-direct-note">This panel is no longer waiting on the local-model runtime to display. If this line is visible, the v325 Settings renderer reached this device.</div><div class="cw-direct-status" data-cw-direct-local-status role="status">Saved local model state loaded.</div><div class="cw-direct-pack-grid">${packMarkup}</div><details><summary><b>Individual models</b></summary><div class="cw-direct-model-list">${modelMarkup}</div></details>${snap.selection?.active?'<div class="cw-direct-actions"><button type="button" data-cw-direct-local-action data-local-disable>Stop using downloaded AI</button></div>':''}</section>`;
-  form.dataset.directLocalModels='v325';layer.dataset.localModelsRenderer='direct-local-v325';
+  form.dataset.directLocalModels='v325';layer.dataset.localModelsRenderer='direct-local-v325.1';
   return true;
 }
 function status(layer,text,error=false){
@@ -125,13 +125,13 @@ function actionDescriptor(button){
 function escapeSelector(value){try{return CSS?.escape?CSS.escape(String(value)):String(value).replace(/["\\]/g,'\\$&')}catch{return String(value).replace(/["\\]/g,'\\$&')}}
 function ensureActionRoute(){
   const current=globalThis.CivweaveSettingsLocalRouteV323;
-  if(current?.version===ACTION_ROUTE_VERSION&&current?.renderLocalModels)return Promise.resolve(current);
+  if(current?.version===ACTION_ROUTE_VERSION&&current?.renderLocalModels&&current?.settingsV325DisplayShim!==true&&current?.actionModulesOnDemand===true)return Promise.resolve(current);
   if(actionPromise)return actionPromise;
   actionPromise=new Promise((resolve,reject)=>{
     try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}
     const script=document.createElement('script');script.src=ACTION_ROUTE;script.async=false;script.dataset.civweaveExplicitLocalModelAction='v325';
     const timer=setTimeout(()=>reject(new Error('Local model action code did not become ready within 8 seconds.')),8000);
-    script.onload=()=>{clearTimeout(timer);const api=globalThis.CivweaveSettingsLocalRouteV323;api?.renderLocalModels?resolve(api):reject(new Error('Local model action code loaded without its action API.'))};
+    script.onload=()=>{clearTimeout(timer);const api=globalThis.CivweaveSettingsLocalRouteV323;api?.renderLocalModels&&api?.settingsV325DisplayShim!==true?resolve(api):reject(new Error('Local model action code loaded without its action API.'))};
     script.onerror=()=>{clearTimeout(timer);reject(new Error('Local model action code could not load.'))};
     document.head?.append(script);
   }).finally(()=>{actionPromise=null});
