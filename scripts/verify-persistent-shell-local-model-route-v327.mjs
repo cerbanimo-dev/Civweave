@@ -7,67 +7,68 @@ const shellHtmlPath = path.join(root, 'public/app/persistent-system-shell-v1.htm
 const bridgePath = path.join(root, 'public/app/settings-local-route-v325.js');
 const aliasPath = path.join(root, 'public/app/settings-local-route-v323.js');
 const freshPath = path.join(root, 'public/app/settings-local-route-v327.js');
+const generationPath = path.join(root, 'public/app/settings-local-route-v331.js');
+const coreWorkerPath = path.join(root, 'public/service-worker-core-v208.js');
 
 const shell = fs.readFileSync(shellPath, 'utf8');
 const shellHtml = fs.readFileSync(shellHtmlPath, 'utf8');
 const bridge = fs.readFileSync(bridgePath, 'utf8');
 const alias = fs.readFileSync(aliasPath, 'utf8');
 const fresh = fs.readFileSync(freshPath, 'utf8');
+const generation = fs.readFileSync(generationPath, 'utf8');
+const coreWorker = fs.readFileSync(coreWorkerPath, 'utf8');
 const expectedVersion = '1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const expectedShellVersion = '1.1.2-canonical-local-settings-refresh';
 
 const fail = message => { throw new Error(message); };
 
+if (!coreWorker.includes("const cached = await findCached(url.pathname);")) {
+  fail('Core worker cache behavior changed; revisit the pathname-generation regression assumptions.');
+}
+if (!coreWorker.includes("{ ignoreSearch: true }")) {
+  fail('Core worker no longer ignores query strings; revisit the pathname-generation regression assumptions.');
+}
+if (!shellHtml.includes('/app/settings-local-route-v331.js?v=1.1.7-persistent-shell-cache-generation-v332')) {
+  fail('Persistent shell does not preload the cache-distinct v331 Local models pathname.');
+}
+if (shellHtml.includes('/app/settings-local-route-v327.js?v=1.1.6-persistent-shell-direct-preload-v331')) {
+  fail('Persistent shell still relies on a query-only cache bust of the already-cached v327 pathname.');
+}
+if (!shellHtml.includes('delete globalThis.CivweaveSettingsLocalRouteV323')) {
+  fail('Persistent shell does not evict a stale Local models global before the cache-distinct preload.');
+}
+if (shellHtml.indexOf('/app/settings-local-route-v331.js') > shellHtml.indexOf('/app/persistent-system-shell-v1.js')) {
+  fail('Cache-distinct Local models renderer must load before persistent Settings can open.');
+}
 if (!shellHtml.includes(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`)) {
-  fail('Persistent shell HTML does not cache-bust the shell runtime containing the local-settings loader.');
+  fail('Persistent shell HTML does not load the expected shell runtime.');
 }
 if (!shell.includes(`const VERSION='${expectedShellVersion}'`)) {
   fail('Persistent shell runtime version does not match its HTML cache key.');
 }
 if (!shell.includes(`const SETTINGS_LOCAL_ROUTE_VERSION='${expectedVersion}'`)) {
-  fail('Persistent shell does not pin the inert local-settings bridge version.');
+  fail('Persistent shell fallback does not pin the inert local-settings API version.');
 }
 if (!shell.includes("const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`")) {
-  fail('Persistent shell does not load settings-local-route-v325.js as its local-settings bridge.');
+  fail('Persistent shell fallback bridge changed unexpectedly.');
 }
-if (shell.includes("SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v323.js")) {
-  fail('Persistent shell still loads the legacy v323 path directly.');
-}
-if (!shell.includes("function settingsLocalRouteReady(){return globalThis.CivweaveSettingsLocalRouteV323?.version===SETTINGS_LOCAL_ROUTE_VERSION}")) {
-  fail('Persistent shell does not require the pinned local-settings API version.');
-}
-if (!shell.includes('if(settingsLocalRouteReady()&&invoke())return true;')) {
-  fail('Settings can still open before the local-settings bridge is ready.');
-}
-if (!shell.includes("loadScript(SETTINGS_LOCAL_ROUTE,settingsLocalRouteReady,'Settings local-model view')")) {
-  fail('Persistent shell does not load the local-settings bridge before Settings opens.');
-}
-if (!bridge.includes(`const VERSION='${expectedVersion}'`)) {
-  fail('v325 parent bridge version does not match the persistent-shell pin.');
-}
-if (!bridge.includes("const FULL_ROUTE='/app/settings-local-route-v327.js?v=1.1.4-settings-local-route-v325-parent-bridge'")) {
-  fail('v325 parent bridge does not hand off to the cache-distinct v327 full implementation.');
-}
-if (!bridge.includes('delete globalThis.CivweaveSettingsLocalRouteV323')) {
-  fail('v325 parent bridge does not evict a stale same-version local-settings global before handoff.');
-}
-if (!bridge.includes('loaderBridge:true')) {
-  fail('v325 parent bridge is not marked as a replaceable loader bridge.');
-}
-if (!bridge.includes('renderLocalModels')) {
-  fail('v325 parent bridge does not expose an immediate Local models renderer.');
-}
-if (bridge === fresh) {
-  fail('v325 must remain a small parent bridge rather than duplicating the full v327 implementation.');
+if (generation !== fresh) {
+  fail('v331 cache-generation route must remain byte-identical to the validated v327 saved-state renderer.');
 }
 if (alias !== fresh) {
-  fail('v323 compatibility alias drifted from the full v327 saved-state implementation.');
+  fail('v323 compatibility alias drifted from the validated v327 saved-state renderer.');
+}
+if (!bridge.includes(`const VERSION='${expectedVersion}'`)) {
+  fail('v325 parent bridge version does not match the persistent-shell fallback pin.');
+}
+if (!bridge.includes("const FULL_ROUTE='/app/settings-local-route-v327.js?v=1.1.4-settings-local-route-v325-parent-bridge'")) {
+  fail('v325 fallback bridge no longer hands off to the validated full implementation.');
 }
 if (/CivweaveLocalModelDownloadV266|\bmanager\(\)|\bregistry\(\)|\bpackManager\(\)/.test(bridge)) {
-  fail('Parent bridge must not touch local-model lifecycle managers before the explicit Local models handoff.');
+  fail('Parent bridge must not touch local-model lifecycle managers before an explicit Local models action.');
 }
-if (/const m=manager\(\);let all,selected;\s*if\(m\?\.state&&m\?\.selection\)/.test(fresh)) {
-  fail('Fresh local-settings implementation still consults the live download manager during snapshot rendering.');
+if (/const m=manager\(\);let all,selected;\s*if\(m\?\.state&&m\?\.selection\)/.test(generation)) {
+  fail('Cache-generation Local models view still consults the live download manager during snapshot rendering.');
 }
 
-console.log('PASS persistent shell loads an inert v325 bridge that evicts stale globals and hands Local models to the cache-distinct saved-state-only v327 implementation.');
+console.log('PASS Local models uses a genuinely new pathname generation before persistent Settings opens; query-only cache busting cannot satisfy this regression.');
