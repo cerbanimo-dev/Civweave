@@ -1,0 +1,39 @@
+name: Verify Local Models Inert View
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/settings-local-route-v323.js
+      - scripts/verify-local-model-tab-inert-v326.mjs
+      - .github/workflows/verify-local-model-tab-inert-v326.yml
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - public/app/settings-local-route-v323.js
+      - scripts/verify-local-model-tab-inert-v326.mjs
+      - .github/workflows/verify-local-model-tab-inert-v326.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-local-model-tab-inert-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inert-view:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Syntax check
+        run: |
+          node --check public/app/settings-local-route-v323.js
+          node --check scripts/verify-local-model-tab-inert-v326.mjs
+      - name: Verify Local models opens without live runtime work
+        run: node scripts/verify-local-model-tab-inert-v326.mjs
