@@ -2,10 +2,22 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
-const source=await readFile(new URL('../public/app/settings-local-route-v323.js',import.meta.url),'utf8');
+const canonicalUrl=new URL('../public/app/settings-local-route-v325.js',import.meta.url);
+const compatUrl=new URL('../public/app/settings-local-route-v323.js',import.meta.url);
+const campusUrl=new URL('../public/app/working-campus-v440.html',import.meta.url);
+const [canonical,compat,campus]=await Promise.all([
+  readFile(canonicalUrl,'utf8'),
+  readFile(compatUrl,'utf8'),
+  readFile(campusUrl,'utf8')
+]);
+
+assert.equal(compat,canonical,'v323 compatibility path must be byte-identical to canonical v325 so the two settings routes cannot drift.');
+assert.match(campus,/settings-local-route-v325\.js/,'Current Working Campus must load the canonical v325 Local models route.');
+
 let managerReads=0;
 let storageWrites=0;
 let panel=null;
+let dock=null;
 
 const store=new Map([
   ['civweave.local-ai.downloads.v266',JSON.stringify({'gemma4-e2b-it-q2f16-mobile':{status:'ready',percent:100,bytesDownloaded:2335000000,totalBytes:2335000000}})],
@@ -31,9 +43,12 @@ const form={
   }
 };
 
-function element(){
+function element(tag='div'){
   return{
+    tagName:String(tag).toUpperCase(),
+    id:'',
     dataset:{},
+    className:'',
     classList:{toggle(){}},
     addEventListener(){},
     remove(){},
@@ -41,7 +56,8 @@ function element(){
     append(){},
     querySelector(){return null},
     innerHTML:'',
-    hidden:false
+    hidden:false,
+    type:''
   };
 }
 
@@ -55,10 +71,10 @@ const context={
     readyState:'loading',
     documentElement:{isConnected:true},
     head:{append(){}},
-    body:{append(){}},
+    body:{append(node){dock=node}},
     scripts:[],
-    getElementById(){return null},
-    createElement(){return element()},
+    getElementById(id){return id==='cw-local-ai-download-dock-v324'?dock:null},
+    createElement(tag){return element(tag)},
     addEventListener(){},
     querySelector(){return null}
   },
@@ -73,21 +89,33 @@ const context={
 };
 Object.defineProperty(context,'CivweaveLocalModelDownloadV266',{
   configurable:true,
-  get(){managerReads++;throw new Error('Local-model manager was touched while rendering the Local models tab.')}
+  get(){managerReads++;throw new Error('Live local-model manager was touched while rendering Local models.')}
 });
 
 vm.createContext(context);
-vm.runInContext(source,context,{filename:'settings-local-route-v323.js'});
+vm.runInContext(canonical,context,{filename:'settings-local-route-v325.js'});
 const api=context.CivweaveSettingsLocalRouteV323;
-assert.ok(api?.renderLocalModels,'Local-model settings API must expose renderLocalModels.');
+assert.ok(api?.renderLocalModels,'Canonical Local models route must expose renderLocalModels.');
 const rendered=api.renderLocalModels(form);
 assert.ok(rendered,'Local models must render from saved state.');
 assert.equal(managerReads,0,'Opening Local models must not touch the live model manager.');
 assert.equal(storageWrites,0,'Opening Local models must not mutate saved state.');
 assert.match(panel?.innerHTML||'',/AI Downloads/);
 assert.match(panel?.innerHTML||'',/Gemma 4 E2B IT/);
-assert.match(api.version,/v326-inert-view/);
+assert.match(panel?.innerHTML||'',/Ready for browser download/);
 assert.equal(api.savedStateOnlyView,true);
 assert.equal(api.viewWritesState,false);
+assert.equal(api.hardLocalOnly,true);
+assert.equal(api.canonicalPath,'/app/settings-local-route-v325.js');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-tab-inert-v326',managerReads,storageWrites,rendered:true},null,2));
+console.log(JSON.stringify({
+  ok:true,
+  revision:api.version,
+  canonical:'settings-local-route-v325.js',
+  compatibilityAlias:'settings-local-route-v323.js',
+  routesByteIdentical:true,
+  managerReads,
+  storageWrites,
+  rendered:true,
+  hardLocalOnly:api.hardLocalOnly
+},null,2));
