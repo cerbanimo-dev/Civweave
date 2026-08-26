@@ -6,6 +6,7 @@ const routeLock=read('public/app/living-school-route-lock-v1.js');
 const runtimeRoute=read('public/app/living-school-runtime-route-v2.js');
 const runUi=read('public/app/living-school-active-run-ui-v2.js');
 const reportUi=read('public/app/living-school-generation-report-ui-v1.js');
+const worker=read('public/service-worker-living-school-cleanroom-v218.js');
 const checks=[
   ['v3 provider-neutral budget is wired',index.includes('/app/living-school-generation-budget-v3.js')],
   ['legacy Gemini terminal fallback is not wired',!index.includes('/app/living-school-terminal-fallback-v1.js')],
@@ -19,6 +20,8 @@ const checks=[
   ['run UI uses generic runtime model events',runUi.includes("civweave:model-event")&&!runUi.includes('3.7 / complex')&&!runUi.includes('3.5 / fallback')&&!runUi.includes('flash-lite')],
   ['run UI counts nested safety/provider calls during generation',runUi.includes("relevant=running||session?.status==='running'||livingSchoolPurpose(purpose)")],
   ['generation report label is runtime-derived',reportUi.includes('runtimeConfig()')&&reportUi.includes('design.provider||config.provider')&&!reportUi.includes('Gemini 3.7 design')],
+  ['cleanroom service worker keeps provider-neutral modules fresh',worker.includes("const GENERATION_BUDGET='/app/living-school-generation-budget-v3.js'")&&worker.includes("const ACTIVE_RUN_UI='/app/living-school-active-run-ui-v2.js'")&&worker.includes("const REPORT_UI='/app/living-school-generation-report-ui-v1.js'")],
+  ['cleanroom service worker retires old provider-owned wrappers',worker.includes("'/app/living-school-generation-budget-v2.js'")&&worker.includes("'/app/living-school-terminal-fallback-v1.js'")&&worker.includes("'/app/living-school-provider-run-bridge-v1.js'")],
 ];
 const failed=checks.filter(([,ok])=>!ok);
 for(const [label,ok]of checks)console.log(`${ok?'PASS':'FAIL'} ${label}`);
