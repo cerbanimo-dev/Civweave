@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-civweave-system="living-school" data-living-school-runtime="cleanroom-v218" data-living-school-revision="structured-single-v221-boot-first-v1">
+<html lang="en" data-civweave-system="living-school" data-living-school-runtime="cleanroom-v218" data-living-school-revision="structured-single-v221-boot-first-v2">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -143,14 +143,17 @@
     });
     return supportPromise;
   };
-  globalThis.CivweaveLivingSchoolSupportRuntimeV1=Object.freeze({version:'1.0.0-workbench-first',ensure:ensureSupportRuntime,scripts:[...supportScripts]});
+  globalThis.CivweaveLivingSchoolSupportRuntimeV1=Object.freeze({version:'1.0.1-workbench-first-warm-after-ready',ensure:ensureSupportRuntime,scripts:[...supportScripts]});
   const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
   try{
     document.documentElement.dataset.livingSchoolWorkbench='loading';
-    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v1');
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v2');
     bootComplete=true;
     clearTimeout(watchdog);
     document.documentElement.dataset.livingSchoolWorkbench='ready';
+    const supportReady=ensureSupportRuntime();
+    globalThis.CivweaveLivingSchoolSupportRuntimeReadyV1=supportReady;
+    supportReady.catch(error=>console.warn('[Living School support runtime]',error));
     import('/app/living-school-learning-packs-v1.mjs?v=learning-packs-v1').catch(error=>console.warn('[Living School learning packs]',error));
   }catch(error){
     clearTimeout(watchdog);
