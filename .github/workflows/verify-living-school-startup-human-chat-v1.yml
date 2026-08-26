@@ -1,0 +1,19 @@
+name: Verify Living School startup and human chat
+
+on:
+  push:
+    branches: [staging, main]
+  pull_request:
+    branches: [staging, main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify startup and human chat contracts
+        run: node scripts/verify-living-school-startup-human-chat-v1.mjs
