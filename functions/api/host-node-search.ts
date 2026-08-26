@@ -164,7 +164,7 @@ async function mobileGuildRows(packet: JsonRecord, latitude: number, longitude: 
     };
   }));
 
-  return probed.filter(Boolean);
+  return probed.filter(Boolean) as JsonRecord[];
 }
 
 async function stagingSearch(latitude: number, longitude: number, mode: string) {
