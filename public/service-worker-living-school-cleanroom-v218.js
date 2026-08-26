@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='living-school-cleanroom-v226-provider-neutral-generation';
+const REVISION='living-school-cleanroom-v227-provider-handoff';
 const CANONICAL='/app/cabinets/living-school/index.html';
 const FRESH_PREFIX='/app/cabinets/living-school/living-school-cleanroom-';
 const GENERATION_GUARD='/app/living-school-generation-guard-v262.mjs';
@@ -18,7 +18,12 @@ const REPORT_UI='/app/living-school-generation-report-ui-v1.js';
 const PACK_AUTHORITY='/app/living-school-pack-offer-authority-v1.js';
 const GEMINI_ROUTER='/app/gemini-task-tier-router-v213.js';
 const RESPONSE_ROUTER='/app/minilm-response-router-v347.js';
-const FRESH_RUNTIME_PATHS=new Set([GENERATION_GUARD,QUIZ_GUARD,VIDEO_GUARD,MEDIA_RECOMMENDER,LOCAL_RESEARCH,SAFE_POLICY,ROUTE_LOCK,RUNTIME_ROUTE,GROUNDED_DESIGN,GENERATION_BUDGET,ACTIVE_RUN_UI,REPORT_UI,PACK_AUTHORITY,GEMINI_ROUTER,RESPONSE_ROUTER]);
+const FAMILY_AI_LOADER='/app/family-ai-loader-v105.js';
+const SHARED_MODEL_RUNTIME='/app/shared/civweave-model-runtime.js';
+const SELECTED_PROVIDER_AUTHORITY='/app/selected-provider-authority-v1.js';
+const SERVER_AI_ROUTER='/app/server-ai-router-v301.js';
+const SERVER_AI_OUTPUT_NORMALIZER='/app/server-ai-output-normalizer-v1.js';
+const FRESH_RUNTIME_PATHS=new Set([GENERATION_GUARD,QUIZ_GUARD,VIDEO_GUARD,MEDIA_RECOMMENDER,LOCAL_RESEARCH,SAFE_POLICY,ROUTE_LOCK,RUNTIME_ROUTE,GROUNDED_DESIGN,GENERATION_BUDGET,ACTIVE_RUN_UI,REPORT_UI,PACK_AUTHORITY,GEMINI_ROUTER,RESPONSE_ROUTER,FAMILY_AI_LOADER,SHARED_MODEL_RUNTIME,SELECTED_PROVIDER_AUTHORITY,SERVER_AI_ROUTER,SERVER_AI_OUTPUT_NORMALIZER]);
 const SERVICE_PREFIX='/app/services/living-school/';
 const RETIRED_PATHS=new Set([
   '/app/cabinets/living-school/living-school-bootstrap-v194.js',
@@ -91,5 +96,5 @@ self.addEventListener('fetch',event=>{
     event.stopImmediatePropagation();event.respondWith(Promise.resolve(retiredResponse(url.pathname)));
   }
 });
-self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,quizGuard:QUIZ_GUARD,videoGuard:VIDEO_GUARD,mediaRecommender:MEDIA_RECOMMENDER,localResearch:LOCAL_RESEARCH,safePolicy:SAFE_POLICY,routeLock:ROUTE_LOCK,runtimeRoute:RUNTIME_ROUTE,groundedDesign:GROUNDED_DESIGN,generationBudget:GENERATION_BUDGET,activeRunUI:ACTIVE_RUN_UI,reportUI:REPORT_UI,packAuthority:PACK_AUTHORITY,geminiRouter:GEMINI_ROUTER,responseRouter:RESPONSE_ROUTER,retired:[...RETIRED_PATHS],providerNeutralGeneration:true,lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
+self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,quizGuard:QUIZ_GUARD,videoGuard:VIDEO_GUARD,mediaRecommender:MEDIA_RECOMMENDER,localResearch:LOCAL_RESEARCH,safePolicy:SAFE_POLICY,routeLock:ROUTE_LOCK,runtimeRoute:RUNTIME_ROUTE,groundedDesign:GROUNDED_DESIGN,generationBudget:GENERATION_BUDGET,activeRunUI:ACTIVE_RUN_UI,reportUI:REPORT_UI,packAuthority:PACK_AUTHORITY,geminiRouter:GEMINI_ROUTER,responseRouter:RESPONSE_ROUTER,familyAILoader:FAMILY_AI_LOADER,sharedModelRuntime:SHARED_MODEL_RUNTIME,selectedProviderAuthority:SELECTED_PROVIDER_AUTHORITY,serverAIRouter:SERVER_AI_ROUTER,serverAIOutputNormalizer:SERVER_AI_OUTPUT_NORMALIZER,retired:[...RETIRED_PATHS],providerNeutralGeneration:true,providerHandoffFresh:true,lifecyclePolicy:'deferred-cache-scan',cleanupMessage:'CIVWEAVE_LIVING_SCHOOL_CLEANROOM_CLEANUP'});
 })();
