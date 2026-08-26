@@ -5,6 +5,7 @@ on:
     branches: [staging, main]
     paths:
       - public/app/settings-local-models-direct-v325.js
+      - public/app/settings-local-route-v325.js
       - public/app/settings-local-route-v327.js
       - public/service-worker-settings-v325-override.js
       - public/service-worker-v203.js
@@ -16,6 +17,7 @@ on:
     branches: [staging, main]
     paths:
       - public/app/settings-local-models-direct-v325.js
+      - public/app/settings-local-route-v325.js
       - public/app/settings-local-route-v327.js
       - public/service-worker-settings-v325-override.js
       - public/service-worker-v203.js
@@ -44,6 +46,7 @@ jobs:
       - name: Syntax check
         run: |
           node --check public/app/settings-local-models-direct-v325.js
+          node --check public/app/settings-local-route-v325.js
           node --check public/app/settings-local-route-v327.js
           node --check public/service-worker-settings-v325-override.js
           node --check public/service-worker-v203.js
