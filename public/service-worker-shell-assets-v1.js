@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v25-persistent-navbar-required';
+const REVISION='shell-assets-v1-repair-v26-persistent-human-chat-required';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
@@ -32,6 +32,12 @@ const REQUIRED_CIVWEAVE_BOOT=[
   '/app/local-ai/browser-pack-download-v1.js',
   '/app/local-ai/browser-pack-pwa-import-v1.js'
 ];
+const REQUIRED_HUMAN_CHAT=[
+  '/app/human-message-bubble-v1.js',
+  '/app/human-chat-network-v1.js',
+  '/app/human-chat-guild-context-v1.js',
+  '/app/human-chat-standalone-v2.js'
+];
 const OPTIONAL_GUILD_QUEST=[
   '/app/civweave-guild-quest-v1.html',
   '/app/civweave-guild-quest-embed-v1.html',
@@ -39,9 +45,6 @@ const OPTIONAL_GUILD_QUEST=[
   '/app/cerbanimo-intention-landscape-v1.js'
 ];
 const OPTIONAL_HUMAN_CHAT=[
-  '/app/human-message-bubble-v1.js',
-  '/app/human-chat-guild-context-v1.js',
-  '/app/human-chat-network-v1.js',
   '/app/guild-membership-mesh-v1.js',
   '/app/ble-object-transport-v1.js',
   '/app/human-chat-ble-controls-v1.js',
@@ -49,7 +52,7 @@ const OPTIONAL_HUMAN_CHAT=[
   '/app/local-object-mesh-v146.js',
   '/app/shared-intention-party-chat-v1.js'
 ];
-for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_NAV_MEDIA,...REQUIRED_CIVWEAVE_BOOT]){
+for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_NAV_MEDIA,...REQUIRED_CIVWEAVE_BOOT,...REQUIRED_HUMAN_CHAT]){
   const optionalIndex=OPTIONAL_SHELL_ASSETS.indexOf(pathname);
   if(optionalIndex>=0)OPTIONAL_SHELL_ASSETS.splice(optionalIndex,1);
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
@@ -66,12 +69,13 @@ self.CivweaveShellAssetsV1=Object.freeze({
   requiredFamilyNavigation:[...REQUIRED_FAMILY_NAV],
   requiredNavigationMedia:[...REQUIRED_NAV_MEDIA],
   requiredCivweaveBoot:[...REQUIRED_CIVWEAVE_BOOT],
+  requiredHumanChat:[...REQUIRED_HUMAN_CHAT],
   optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
-  humanChat:[...OPTIONAL_HUMAN_CHAT],
+  humanChat:[...REQUIRED_HUMAN_CHAT,...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',
   pwaStart:'/app/pwa-start-v436.html',
   persistentSystemShell:'/app/persistent-system-shell-v1.html',
-  policy:'one-persistent-top-level-navbar-shell-with-required-sprite-media-and-embedded-system-content'
+  policy:'one-persistent-top-level-navbar-shell-with-required-sprite-media-and-required-human-chat-launcher-runtime'
 });
 })();
