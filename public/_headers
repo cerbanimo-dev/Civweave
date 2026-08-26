@@ -30,6 +30,9 @@
 /service-worker-v203.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
+/service-worker-living-school-cleanroom-v218.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /service-worker-navigation-runtime-recovery-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
