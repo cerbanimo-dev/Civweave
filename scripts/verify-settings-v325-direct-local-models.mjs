@@ -8,9 +8,11 @@ const v203Source=await readFile(new URL('../public/service-worker-v203.js',impor
 const rootWorker=await readFile(new URL('../public/service-worker.js',import.meta.url),'utf8');
 
 assert.match(directSource,/CIVWEAVE SETTINGS · v325/);
-assert.match(directSource,/Settings v325 · renderer direct-local-v325 · actions lazy-v331/);
+assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · actions lazy-v331/);
 assert.match(directSource,/hardLoadingGuardMs:900/);
 assert.match(directSource,/cwAction=1/);
+assert.match(directSource,/settingsV325DisplayShim!==true/,'Explicit actions must reject the lightweight display shim.');
+assert.match(directSource,/actionModulesOnDemand===true/,'An already-loaded full action route must identify itself as action-capable.');
 assert.doesNotMatch(directSource,/navigator\.serviceWorker/,'The direct display renderer must not touch the service worker.');
 assert.doesNotMatch(directSource,/\bcaches\./,'The direct display renderer must not inspect CacheStorage.');
 
