@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-server-ai-output-normalizer-v1-provider-authority-r2';
+const VERSION='1.1.2-server-ai-output-normalizer-v1-provider-authority-r3';
 const MIDDLEWARE_ID='server-auto-v301';
 const AUTHORITY='/app/selected-provider-authority-v1.js';
-const AUTHORITY_VERSION='1.0.1-selected-provider-authority-v1-wrapper-resilient';
+const AUTHORITY_VERSION='1.1.0-selected-provider-authority-v1-all-routes';
 const SANITIZER='/app/assistant-output-sanitizer-v1.js';
 const SANITIZER_VERSION='1.0.1-assistant-output-sanitizer-v1-wrapper-resilient';
 if(globalThis.CivweaveServerAIOutputNormalizerV1?.version===VERSION)return;
