@@ -12,6 +12,7 @@ on:
       - public/service-worker.js
       - scripts/verify-settings-v325-direct-local-models.mjs
       - scripts/verify-settings-v325-stale-worker-bridge.mjs
+      - scripts/verify-settings-registered-worker-boundary-v338.mjs
       - .github/workflows/verify-settings-v325-direct-local-models.yml
   pull_request:
     branches: [staging, main]
@@ -24,6 +25,7 @@ on:
       - public/service-worker.js
       - scripts/verify-settings-v325-direct-local-models.mjs
       - scripts/verify-settings-v325-stale-worker-bridge.mjs
+      - scripts/verify-settings-registered-worker-boundary-v338.mjs
       - .github/workflows/verify-settings-v325-direct-local-models.yml
   workflow_dispatch:
 
@@ -53,7 +55,9 @@ jobs:
           node --check public/service-worker.js
           node --check scripts/verify-settings-v325-direct-local-models.mjs
           node --check scripts/verify-settings-v325-stale-worker-bridge.mjs
+          node --check scripts/verify-settings-registered-worker-boundary-v338.mjs
       - name: Verify installed Settings v325 local-model path
         run: |
           node scripts/verify-settings-v325-direct-local-models.mjs
           node scripts/verify-settings-v325-stale-worker-bridge.mjs
+          node scripts/verify-settings-registered-worker-boundary-v338.mjs
