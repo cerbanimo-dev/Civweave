@@ -67,7 +67,8 @@ assert.doesNotMatch(localTarget.innerHTML,/Reading saved local model choices/);
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")>0,'v203 must import the Settings override.');
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-release-generation-v1.js"),'Settings override must register before other fetch handlers.');
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-core-v208.js"),'Settings override must register before cache-first core.');
-assert.match(rootWorker,/root-worker-bridge-v23-settings-v325-direct/,'Root worker bytes must change so installed clients discover this generation.');
+assert.match(rootWorker,/root-worker-bridge-v25-settings-v337-direct-gateway/,'Root worker bytes must change so installed clients discover the v337 direct Settings generation.');
+assert.match(rootWorker,/service-worker-v203\.js\?v=root-worker-bridge-v25-settings-v337-direct-gateway/,'Root worker must import v203 through the v337 Settings generation boundary.');
 assert.match(workerSource,/stopImmediatePropagation\(\)/);
 assert.match(workerSource,/settings-gateway-v317\.js/);
 assert.match(workerSource,/settings-local-route-v331\.js/);
@@ -124,4 +125,4 @@ assert.doesNotMatch(shimText,/download-manager|runtime-v266|WebGPU/i,'Display sh
 const actionResponse=await runFetch('https://example.test/app/settings-local-route-v331.js?cwAction=1');
 assert.match(await actionResponse.text(),/action-route/,'Explicit actions must receive the full action route rather than the display shim.');
 
-console.log(JSON.stringify({ok:true,revision:'settings-v325-direct-local-models',visibleVersion:'v325',managerReads,storageWrites,gatewayTransformed:true,displayShim:true,actionRouteLazy:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'settings-v325-direct-local-models',visibleVersion:'v325',managerReads,storageWrites,gatewayTransformed:true,displayShim:true,actionRouteLazy:true,rootWorkerGeneration:'v25-settings-v337-direct-gateway'},null,2));
