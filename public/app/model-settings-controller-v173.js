@@ -1,14 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='1.0.18-model-settings-controller-v173-gemma4-browser-status-sync';
+const VERSION='1.0.19-model-settings-controller-v173-gemma4-download-handoff-guard';
 const GEMMA4_DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
 const GEMMA4_DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
 const GEMMA4_PACK_VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
 const GEMMA4_PACK_SRC='/app/local-ai/gemma4-pack-extension-v1.js?v=1.0.1-render-safe';
 const GEMMA4_ACTIONS_VERSION='1.1.0-gemma4-dual-q4-actions-v1-retry-import';
 const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-q4-actions-v1.js?v=1.1.0-retry-import';
-const GEMMA4_FAST_VERSION='1.1.0-gemma4-litert-fast-extension-v1-dual-phone';
-const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.0-dual-phone';
+const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
+const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
 const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority';
 const GEMMA4_PHONE_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.2.0-resume-authority';
 const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
@@ -54,9 +54,9 @@ function ensureGemma4Pack(){
     globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
     globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
     globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
-    return true;
+    return Promise.resolve(true);
   }
-  if(packLoadPromise)return true;
+  if(packLoadPromise)return packLoadPromise;
   packLoadPromise=loadScript(GEMMA4_PACK_SRC,packReady,'gemma4-q4-compatibility-core')
     .then(()=>loadScript(GEMMA4_DEEP_SRC,deepReady,'gemma4-e4b-q4-compatibility'))
     .then(()=>loadScript(GEMMA4_ACTIONS_SRC,actionsReady,'gemma4-dual-q4-actions'))
@@ -74,7 +74,7 @@ function ensureGemma4Pack(){
     })
     .catch(error=>{console.warn('[Civweave] Gemma 4 current phone pack failed to load.',error);return false})
     .finally(()=>{packLoadPromise=null});
-  return true;
+  return packLoadPromise;
 }
 ensureGemma4Pack();
 addEventListener('pageshow',()=>queueMicrotask(ensureGemma4Pack));
@@ -100,6 +100,7 @@ const api=Object.freeze({
   gemma4BrowserManagedLiteRT:true,
   gemma4MidrangeUsesLiteRT:true,
   gemma4PostImportStatusSync:true,
+  gemma4DownloadHandoffAwaitable:true,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
 globalThis.CivweaveModelSettingsControllerV173=api;
