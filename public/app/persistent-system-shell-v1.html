@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r9-local-model-stage-bridge" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r10-local-model-full-route" data-civweave-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -22,8 +22,8 @@ body{padding:0!important}
 </script>
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner"></script>
 <script src="/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh"></script>
-<!-- Settings is rendered inside the same-origin stage iframe, not in this parent document. This new-path bridge attaches to each stage document and loads the saved-state-only Local Models renderer in that realm only when the Local models tab is selected. -->
-<script src="/app/settings-local-loader-v335.js?v=1.1.0-stage-iframe-bridge"></script>
+<!-- Settings is rendered inside the same-origin stage iframe, not in this parent document. v337 attaches to each stage document, rejects compatibility shims/bridges, and explicitly requests the validated saved-state renderer through the Settings service-worker action path. -->
+<script src="/app/settings-local-loader-v337.js?v=1.2.0-stage-full-route"></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail"></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer"></script>
 <!-- The parent persistent shell owns both chat launchers and shared quick actions. Realm iframes are content-only; child launchers are suppressed by the shell owner. -->
