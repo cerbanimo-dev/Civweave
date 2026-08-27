@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r8-local-model-recovery" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r9-local-model-stage-bridge" data-civweave-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -21,14 +21,9 @@ body{padding:0!important}
 (()=>{try{sessionStorage.setItem('civweave.pwa.launch-session.v1','1');sessionStorage.setItem('civweave.install-boundary.boot.v228','1')}catch{}})();
 </script>
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner"></script>
-<!-- Local models is a saved-state-only view. The service worker caches /app scripts by pathname and ignores query strings, so this preload uses a genuinely new pathname generation rather than another ?v= cache bust. -->
-<script>
-(()=>{try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}})();
-</script>
-<script src="/app/settings-local-route-v331.js?v=1.1.7-persistent-shell-cache-generation-v333"></script>
-<!-- New pathname recovery protects installed clients that still execute an older cached Settings gateway. It only runs when Local models is explicitly selected. -->
-<script src="/app/settings-local-loader-v334.js?v=1.0.0-stale-gateway-recovery"></script>
 <script src="/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh"></script>
+<!-- Settings is rendered inside the same-origin stage iframe, not in this parent document. This new-path bridge attaches to each stage document and loads the saved-state-only Local Models renderer in that realm only when the Local models tab is selected. -->
+<script src="/app/settings-local-loader-v335.js?v=1.1.0-stage-iframe-bridge"></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail"></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer"></script>
 <!-- The parent persistent shell owns both chat launchers and shared quick actions. Realm iframes are content-only; child launchers are suppressed by the shell owner. -->
