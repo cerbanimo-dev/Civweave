@@ -1,0 +1,77 @@
+name: Civweave Capability Lock
+
+on:
+  pull_request:
+  push:
+    branches:
+      - staging
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capability-lock-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capability-lock:
+    name: capability-lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout candidate with history
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Use Node 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Resolve immutable comparison base
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
+          elif [[ "${{ github.event_name }}" == "push" && -n "${{ github.event.before }}" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
+            BASE_REF="${{ github.event.before }}"
+          else
+            BASE_REF="$(git rev-parse HEAD^)"
+          fi
+          git cat-file -e "${BASE_REF}^{commit}"
+          echo "CIVWEAVE_CAPABILITY_BASE_REF=${BASE_REF}" >> "$GITHUB_ENV"
+          echo "Capability baseline: ${BASE_REF}"
+
+      - name: Install browser contract runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts playwright@1.55.0
+          npx playwright install chromium
+
+      - name: Materialize trusted runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          TRUSTED_RUNNER="$RUNNER_TEMP/civweave-capability-lock-runner.mjs"
+          if git cat-file -e "${CIVWEAVE_CAPABILITY_BASE_REF}:scripts/capability-lock-runner.mjs" 2>/dev/null; then
+            git show "${CIVWEAVE_CAPABILITY_BASE_REF}:scripts/capability-lock-runner.mjs" > "$TRUSTED_RUNNER"
+            echo "Using capability-lock runner from base commit."
+          else
+            cp scripts/capability-lock-runner.mjs "$TRUSTED_RUNNER"
+            echo "Bootstrap run: base predates Capability Lock; using candidate runner once."
+          fi
+          node --check "$TRUSTED_RUNNER"
+          echo "CIVWEAVE_TRUSTED_RUNNER=${TRUSTED_RUNNER}" >> "$GITHUB_ENV"
+
+      - name: Verify accepted capability baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node "$CIVWEAVE_TRUSTED_RUNNER" \
+            --repo "$GITHUB_WORKSPACE" \
+            --base-ref "$CIVWEAVE_CAPABILITY_BASE_REF"
