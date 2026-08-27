@@ -10,10 +10,10 @@
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
 // shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
-const V203_REGISTERED_SETTINGS_GENERATION='v338-settings-registered-worker-boundary';
-// The direct-route Settings bootstrap must run before the historical v325 override so it can own the gateway request and install the full-route recovery loader in the actual Settings document.
-importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v337-direct-gateway-bootstrap-v2-registered-worker-boundary');
-// Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths not claimed by the v337 direct-route bootstrap.
+const V203_REGISTERED_SETTINGS_GENERATION='v339-settings-saved-state-first-worker-boundary';
+// The saved-state-first Settings bootstrap must run before the historical v325 override so the Local Models tab can render without waiting for lifecycle/runtime code.
+importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved-state-first-registered-worker-v1');
+// Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths not claimed by the v339 direct-route bootstrap.
 importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
 importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v1-20260825');
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
@@ -72,11 +72,14 @@ if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
   self.addEventListener('activate',event=>{event.waitUntil((async()=>{await v203PurgeLivingSchoolSourceStatusAssets();const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('learning-source-pack-authority-v1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 
-// staging-installed-entry-takeover-v23-settings-v338-registered-worker: one-shot staging activation for the direct-route Settings bootstrap on the script URL installed clients actually register. This generation is allowed to replace a waiting worker even while the installed app is open because it only purges executable Settings assets, never user model data or downloaded model bytes.
-const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v455-settings-v338-registered-worker';
-const V203_STAGING_SETTINGS_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v23-settings-v338-registered-worker';
+// staging-installed-entry-takeover-v24-settings-v339-saved-state-first: one-shot staging activation for the canonical worker bytes installed clients actually register. It purges only Settings executable assets, never saved model state or downloaded model bytes.
+const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v456-settings-v339-saved-state-first';
+const V203_STAGING_SETTINGS_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v24-settings-v339-saved-state-first';
 const V203_STAGING_SETTINGS_PATHS=new Set([
   '/app/settings-gateway-v317.js',
+  '/app/settings-direct-entry-v338.js',
+  '/app/settings-direct-entry-v339.js',
+  '/app/settings-local-models-direct-v325.js',
   '/app/settings-local-loader-v337.js',
   '/app/settings-local-route-v323.js',
   '/app/settings-local-route-v325.js',
@@ -97,6 +100,6 @@ async function v203PurgeSettingsRecoveryAssets(){
 }
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await v203StagingSettingsRecoveryPending())await self.skipWaiting()})())});
-  self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await v203StagingSettingsRecoveryPending()))return;await v203PurgeSettingsRecoveryAssets();const cache=await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE);await cache.put(v203StagingSettingsRecoveryRequest(),new Response('settings-v338-registered-worker-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await v203StagingSettingsRecoveryPending()))return;await v203PurgeSettingsRecoveryAssets();const cache=await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE);await cache.put(v203StagingSettingsRecoveryRequest(),new Response('settings-v339-saved-state-first-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
