@@ -1,12 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.133-settings-v324-direct-local-model-view';
-const COMPAT_VERSION='1.0.133-settings-gateway-v317-compat';
+const VERSION='1.0.134-settings-v324-local-route-self-loading';
+const COMPAT_VERSION='1.0.134-settings-gateway-v317-compat';
 const SELECTOR='[data-open-unified-ai-settings]';
 const LAYER_ID='cw-settings-v320';
 const STYLE_ID='cw-settings-v320-style';
 const INPUT_SLOT='__civweaveSettingsV320Capture';
 const SETTINGS_UI='/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend';
+const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v325.js?v=1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
 const SESSION_KEY='civweave-model-session';
@@ -24,7 +25,7 @@ const GEMINI_ROUTING='capability-spine-v271';
 const APP_VERSION='1.0.8';
 const DEFAULTS=Object.freeze({route:'deterministic',provider:'deterministic',model:'civweave-deterministic-v188',endpoint:'',consent:false,apiKey:'',credentialMode:'session'});
 if(globalThis.CivweaveSettingsV320?.version===VERSION)return;
-let returnFocus=null,uiPromise=null;
+let returnFocus=null,uiPromise=null,localPromise=null;
 const parse=(value,fallback={})=>{try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}};
 const getLocal=key=>{try{return localStorage.getItem(key)||''}catch{return''}};
 const setLocal=(key,value)=>{try{localStorage.setItem(key,value);return true}catch{return false}};
@@ -104,16 +105,34 @@ function close(reason='explicit'){const layer=document.getElementById(LAYER_ID);
 function afterPaint(task){const run=()=>setTimeout(task,0);if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(task,0)}
 function append(src,ready,label){if(ready?.())return Promise.resolve(true);return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsService='v324';const timer=setTimeout(()=>reject(new Error(`${label} did not become ready.`)),8000);script.onload=()=>{clearTimeout(timer);ready?.()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`))};script.onerror=()=>{clearTimeout(timer);reject(new Error(`${label} could not load.`))};if(!document.head?.isConnected){clearTimeout(timer);reject(new Error(`${label} could not mount because the document is leaving.`));return}document.head.append(script)})}
 function ensureSettingsUI(layer=document.getElementById(LAYER_ID)){if(!layer?.isConnected||layer.hidden)return Promise.resolve(false);const ready=()=>Boolean(globalThis.CivweaveServerAISettingsV301?.enhance);if(ready()){globalThis.CivweaveServerAISettingsV301.enhance(layer.querySelector('form'));layer.querySelector('[data-membership-slot-placeholder]')?.remove();return Promise.resolve(true)}if(uiPromise)return uiPromise;uiPromise=append(SETTINGS_UI,ready,'Shared Settings membership service').then(()=>{globalThis.CivweaveServerAISettingsV301?.enhance?.(layer.querySelector('form'));layer.querySelector('[data-membership-slot-placeholder]')?.remove();return true}).catch(error=>{const placeholder=layer.querySelector('[data-membership-slot-placeholder] p');if(placeholder)placeholder.textContent='Membership controls are unavailable in this session.';try{dispatchEvent(new CustomEvent('civweave:settings-ui-extension-unavailable',{detail:{version:VERSION,message:String(error?.message||error)}}))}catch{}return false}).finally(()=>{uiPromise=null});return uiPromise}
+function renderLocalRoute(layer){
+  const local=globalThis.CivweaveSettingsLocalRouteV323;
+  if(!local?.renderLocalModels)return false;
+  return Boolean(local.renderLocalModels(layer));
+}
 function ensureManagement(layer=document.getElementById(LAYER_ID)){
   if(!layer?.isConnected||layer.hidden)return Promise.resolve(false);
-  const local=globalThis.CivweaveSettingsLocalRouteV323;
-  if(local?.renderLocalModels){
-    try{return Promise.resolve(Boolean(local.renderLocalModels(layer)))}catch(error){try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-unavailable',{detail:{version:VERSION,message:String(error?.message||error),settingsStillOpen:Boolean(layer&&!layer.hidden)}}))}catch{}return Promise.resolve(false)}
-  }
+  try{if(renderLocalRoute(layer))return Promise.resolve(true)}catch(error){try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-unavailable',{detail:{version:VERSION,message:String(error?.message||error),settingsStillOpen:Boolean(layer&&!layer.hidden)}}))}catch{}}
+  if(localPromise)return localPromise;
   const status=layer.querySelector('[data-local-model-management-status]');
-  if(status)status.textContent='Local model view is unavailable in this session.';
-  try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-unavailable',{detail:{version:VERSION,message:'Direct local model view module is unavailable.',settingsStillOpen:Boolean(layer&&!layer.hidden)}}))}catch{}
-  return Promise.resolve(false);
+  if(status)status.textContent='Loading saved local model controls…';
+  const ready=()=>Boolean(globalThis.CivweaveSettingsLocalRouteV323?.renderLocalModels);
+  localPromise=append(SETTINGS_LOCAL_ROUTE,ready,'Local model settings view')
+    .then(()=>{
+      if(!layer?.isConnected||layer.hidden)return false;
+      const rendered=renderLocalRoute(layer);
+      if(!rendered)throw new Error('Local model settings view loaded but did not render.');
+      layer.dataset.localModelsLoaded='true';
+      return true;
+    })
+    .catch(error=>{
+      const current=layer.querySelector('[data-local-model-management-status]');
+      if(current)current.textContent=`Local models could not load: ${String(error?.message||error)}`;
+      try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-unavailable',{detail:{version:VERSION,message:String(error?.message||error),settingsStillOpen:Boolean(layer&&!layer.hidden)}}))}catch{}
+      return false;
+    })
+    .finally(()=>{localPromise=null});
+  return localPromise;
 }
 function bind(layer){
   if(layer.dataset.bound==='true')return;layer.dataset.bound='true';const form=layer.querySelector('form');
@@ -129,15 +148,15 @@ function bind(layer){
   layer.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close('escape')}});
 }
 function build(){let layer=document.getElementById(LAYER_ID);if(layer)return layer;for(const id of ['cw-ai-settings-bootstrap-v180','cw-ai-settings-v175','cw-ai-settings-v181','cw-ai-settings-v182','cw-ai-settings-cleanroom-v188','cw-ai-settings-v132','cw127-settings','cw128-settings'])document.getElementById(id)?.remove();installStyle();layer=document.createElement('section');layer.id=LAYER_ID;layer.hidden=true;layer.setAttribute('role','dialog');layer.setAttribute('aria-modal','true');layer.setAttribute('aria-label','Civweave settings');layer.dataset.presentation='settings-v324';layer.dataset.credentialRevision=CREDENTIAL_REVISION;layer.innerHTML=markup();document.body.append(layer);bind(layer);fill(layer.querySelector('form'));return layer}
-function open(launcher){const layer=build();fill(layer.querySelector('form'));returnFocus=launcher instanceof HTMLElement?launcher:(document.activeElement instanceof HTMLElement?document.activeElement:null);layer.hidden=false;layer.dataset.openedAt=String(Date.now());document.documentElement.dataset.settingsOpenState='open';document.documentElement.dataset.settingsOwner='settings-v320';try{dispatchEvent(new CustomEvent('civweave:model-settings-opened',{detail:{version:VERSION,credentialRevision:CREDENTIAL_REVISION,presentation:'settings-v324',providerRuntimeLoaded:false,credentialStatus:credentialStatus(),inputOwner:'settings-v320',singleMenu:true,localModelManagementLoaded:false,openWork:'ui-only',localModelView:'direct-saved-state',geminiPresets:[GEMINI_SMALL,GEMINI_COMPLEX]}}))}catch{}afterPaint(()=>void ensureSettingsUI(layer));return layer}
+function open(launcher){const layer=build();fill(layer.querySelector('form'));returnFocus=launcher instanceof HTMLElement?launcher:(document.activeElement instanceof HTMLElement?document.activeElement:null);layer.hidden=false;layer.dataset.openedAt=String(Date.now());document.documentElement.dataset.settingsOpenState='open';document.documentElement.dataset.settingsOwner='settings-v320';try{dispatchEvent(new CustomEvent('civweave:model-settings-opened',{detail:{version:VERSION,credentialRevision:CREDENTIAL_REVISION,presentation:'settings-v324',providerRuntimeLoaded:false,credentialStatus:credentialStatus(),inputOwner:'settings-v320',singleMenu:true,localModelManagementLoaded:Boolean(globalThis.CivweaveSettingsLocalRouteV323?.renderLocalModels),openWork:'ui-only',localModelView:'direct-saved-state',geminiPresets:[GEMINI_SMALL,GEMINI_COMPLEX]}}))}catch{}afterPaint(()=>void ensureSettingsUI(layer));return layer}
 function ensure(){build();return Promise.resolve(true)}
 function onClick(event){const target=event.target instanceof Element?event.target.closest(SELECTOR):null;if(!target||target.closest(`#${LAYER_ID}`))return;event.preventDefault();event.stopImmediatePropagation();open(target)}
 const previous=globalThis[INPUT_SLOT];if(previous&&typeof previous==='function')document.removeEventListener('click',previous,true);document.addEventListener('click',onClick,true);globalThis[INPUT_SLOT]=onClick;
-const api=Object.freeze({version:VERSION,authority:'settings-v320',selector:SELECTOR,open,close,ensure,ensureManagement,ensureSettingsUI,readState,providerName,isRetired,restoreRememberedCredential,forgetCredential,credentialStatus,currentLanguage,persistLanguage,chooseLanguage,inputOwner:true,presentationOwner:true,credentialOwner:true,singleMenu:true,singleLauncherListener:true,languageBuiltIn:true,localModelExtensionSlot:true,localModelManagementExplicit:true,localModelManagementOnTab:true,localModelViewDirect:true,localModelLifecycleDependency:false,localModelRegistryDependencyOnView:false,localModelManagerDependencyOnView:false,settingsOpenUiOnly:true,settingsTabsCanonical:true,geminiPresetsBuiltIn:true,geminiSmallModel:GEMINI_SMALL,geminiComplexModel:GEMINI_COMPLEX,legacyPresentationOwners:false,launchWork:'none'});
+const api=Object.freeze({version:VERSION,authority:'settings-v320',selector:SELECTOR,open,close,ensure,ensureManagement,ensureSettingsUI,readState,providerName,isRetired,restoreRememberedCredential,forgetCredential,credentialStatus,currentLanguage,persistLanguage,chooseLanguage,inputOwner:true,presentationOwner:true,credentialOwner:true,singleMenu:true,singleLauncherListener:true,languageBuiltIn:true,localModelExtensionSlot:true,localModelManagementExplicit:true,localModelManagementOnTab:true,localModelViewDirect:true,localModelLifecycleDependency:false,localModelRegistryDependencyOnView:false,localModelManagerDependencyOnView:false,localModelRouteSelfLoading:true,settingsOpenUiOnly:true,settingsTabsCanonical:true,geminiPresetsBuiltIn:true,geminiSmallModel:GEMINI_SMALL,geminiComplexModel:GEMINI_COMPLEX,legacyPresentationOwners:false,launchWork:'none'});
 globalThis.CivweaveSettingsV320=api;
 const compat=Object.freeze({version:COMPAT_VERSION,compatibilityFacade:true,canonical:'CivweaveSettingsV320',selector:SELECTOR,open:launcher=>api.open(launcher),close:reason=>api.close(reason),ensure:()=>api.ensure(),ensureManagement:layer=>api.ensureManagement(layer),readState:()=>api.readState(),credentialStatus:()=>api.credentialStatus(),inputOwner:false,presentationOwner:false,credentialOwner:false,domCreation:false});
 globalThis.CivweaveSettingsGatewayV317=compat;
 if(!globalThis.CivweaveModelSettingsControllerV173)globalThis.CivweaveModelSettingsControllerV173=compat;
 document.documentElement.dataset.settingsOwner='settings-v320';document.documentElement.dataset.settingsOpenState='ready';
-try{dispatchEvent(new CustomEvent('civweave:settings-ready',{detail:{version:VERSION,selector:SELECTOR,inputOwner:'settings-v320',presentationOwner:'settings-v324',singleMenu:true,settingsOpenUiOnly:true,settingsTabsCanonical:true,localModelView:'direct-saved-state',geminiPresets:[GEMINI_SMALL,GEMINI_COMPLEX]}}))}catch{}
+try{dispatchEvent(new CustomEvent('civweave:settings-ready',{detail:{version:VERSION,selector:SELECTOR,inputOwner:'settings-v320',presentationOwner:'settings-v324',singleMenu:true,settingsOpenUiOnly:true,settingsTabsCanonical:true,localModelView:'direct-saved-state',localModelRouteSelfLoading:true,geminiPresets:[GEMINI_SMALL,GEMINI_COMPLEX]}}))}catch{}
 })();
