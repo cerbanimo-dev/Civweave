@@ -36,7 +36,7 @@ if(!direct339.includes('savedStateFirst:true'))fail('v339 saved-state-first cont
 if(!direct339.includes('serviceWorkerIndependentDisplay:true'))fail('v339 direct display ownership marker missing.');
 if(!direct339.includes('data-settings-v339-diagnostics'))fail('v339 failure diagnostics missing.');
 
-if(!directRenderer.includes('Opening Settings does not load the model runtime'))fail('Read-only direct renderer no longer promises runtime-free display.');
+if(!directRenderer.includes('Model lifecycle, cache, service-worker, GPU, and inference code stay unloaded until you choose an action.'))fail('Read-only direct renderer no longer keeps model lifecycle code lazy while displaying saved state.');
 if(!directRenderer.includes('ACTION_ROUTE='))fail('Direct renderer no longer lazy-loads the action route.');
 if(!loader.includes("cwAction=1"))fail('Full-route fallback no longer explicitly bypasses the display shim.');
 if(!direct338.includes('serviceWorkerIndependent:true'))fail('Existing v338 page anchor no longer remains safe while v339 is injected by the gateway.');
