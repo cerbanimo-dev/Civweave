@@ -10,7 +10,9 @@
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
 // shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
-// Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths.
+// The direct-route Settings bootstrap must run before the historical v325 override so it can own the gateway request and install the full-route recovery loader in the actual Settings document.
+importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v337-direct-gateway-bootstrap-v1');
+// Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths not claimed by the v337 direct-route bootstrap.
 importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
 importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v1-20260825');
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
@@ -67,5 +69,33 @@ async function v203PurgeLivingSchoolSourceStatusAssets(){
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(!(await v203StagingRecoveryPending()))return;if(await v203VisibleInstallerClient())return;await self.skipWaiting()})())});
   self.addEventListener('activate',event=>{event.waitUntil((async()=>{await v203PurgeLivingSchoolSourceStatusAssets();const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('learning-source-pack-authority-v1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+}
+
+// staging-installed-entry-takeover-v22-settings-v337-direct-gateway: one-shot staging activation for the direct-route Settings bootstrap. This generation is allowed to replace a waiting worker even while the installed app is open because it only purges executable Settings assets, never user model data or downloaded model bytes.
+const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v454-settings-v337-direct-gateway';
+const V203_STAGING_SETTINGS_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v22-settings-v337-direct-gateway';
+const V203_STAGING_SETTINGS_PATHS=new Set([
+  '/app/settings-gateway-v317.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-route-v323.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-local-route-v327.js',
+  '/app/settings-local-route-v331.js'
+]);
+function v203StagingSettingsRecoveryRequest(){return new Request(new URL(V203_STAGING_SETTINGS_RECOVERY_MARKER,self.location.origin).href)}
+async function v203StagingSettingsRecoveryPending(){if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;try{return !(await(await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE)).match(v203StagingSettingsRecoveryRequest()))}catch{return true}}
+async function v203PurgeSettingsRecoveryAssets(){
+  const names=await caches.keys();
+  for(const name of names){
+    const cache=await caches.open(name),requests=await cache.keys();
+    for(const request of requests){
+      let pathname='';try{pathname=new URL(request.url).pathname}catch{}
+      if(V203_STAGING_SETTINGS_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true});
+    }
+  }
+}
+if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
+  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await v203StagingSettingsRecoveryPending())await self.skipWaiting()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await v203StagingSettingsRecoveryPending()))return;await v203PurgeSettingsRecoveryAssets();const cache=await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE);await cache.put(v203StagingSettingsRecoveryRequest(),new Response('settings-v337-direct-gateway-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})

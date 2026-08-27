@@ -3,30 +3,44 @@ name: Verify Persistent Shell Local Settings Route
 on:
   pull_request:
     paths:
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-start-v436.html'
+      - 'public/app/working-campus-v440.html'
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/system-routes-v227.js'
       - 'public/app/settings-local-loader-v337.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
       - 'public/app/settings-local-route-v327.js'
       - 'public/app/settings-local-route-v331.js'
+      - 'public/service-worker-v203.js'
       - 'public/service-worker-core-v208.js'
       - 'public/service-worker-settings-v325-override.js'
+      - 'public/service-worker-settings-v337-entrypoint.js'
       - 'scripts/verify-persistent-shell-local-model-route-v327.mjs'
+      - 'scripts/verify-settings-v337-direct-entrypoint-v1.mjs'
       - '.github/workflows/verify-persistent-shell-local-model-route-v327.yml'
   push:
     branches: [staging]
     paths:
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-start-v436.html'
+      - 'public/app/working-campus-v440.html'
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/system-routes-v227.js'
       - 'public/app/settings-local-loader-v337.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
       - 'public/app/settings-local-route-v327.js'
       - 'public/app/settings-local-route-v331.js'
+      - 'public/service-worker-v203.js'
       - 'public/service-worker-core-v208.js'
       - 'public/service-worker-settings-v325-override.js'
+      - 'public/service-worker-settings-v337-entrypoint.js'
       - 'scripts/verify-persistent-shell-local-model-route-v327.mjs'
+      - 'scripts/verify-settings-v337-direct-entrypoint-v1.mjs'
       - '.github/workflows/verify-persistent-shell-local-model-route-v327.yml'
 
 jobs:
@@ -38,3 +52,4 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/verify-persistent-shell-local-model-route-v327.mjs
+      - run: node scripts/verify-settings-v337-direct-entrypoint-v1.mjs
