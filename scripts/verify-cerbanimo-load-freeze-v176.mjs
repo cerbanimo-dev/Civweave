@@ -18,7 +18,7 @@ assert(activeWorker.includes('/service-worker-five-system-pages-v1.js?v=five-sys
 assert(activeWorker.includes('staging-installed-entry-takeover-v21-learning-source-pack-authority'),'Staging must remain on the current installed-entry worker generation.');
 assert(activeWorker.includes('persistent-stage-viewport-r1'),'Active staging worker must carry the persistent-stage viewport repair.');
 assert(activeWorker.includes('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v25-persistent-navbar-required'),'Installed staging must require persistent shell assets and sprite media.');
-assert(shell.includes('persistent-system-shell-v1-r9-local-model-stage-bridge'),'Persistent shell must retain the full-height stage while using the iframe-aware local-settings revision.');
+assert(shell.includes('persistent-system-shell-v1-r10-local-model-full-route'),'Persistent shell must retain the full-height stage while using the iframe-aware full-route local-settings revision.');
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent stage must explicitly fill the dynamic viewport above the universal navbar.');
 assert(!/#cw-persistent-system-stage\{[^}]*height:auto/.test(shell),'Persistent stage must never regress to intrinsic iframe height:auto.');
 assert(realm.includes('realm-console-canonical-v256-persistent-shell-content-r1'),'Cerbanimo must use the content-only frame build.');
