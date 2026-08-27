@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r7-human-chat-owner" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r8-local-model-recovery" data-civweave-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -26,6 +26,8 @@ body{padding:0!important}
 (()=>{try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}})();
 </script>
 <script src="/app/settings-local-route-v331.js?v=1.1.7-persistent-shell-cache-generation-v333"></script>
+<!-- New pathname recovery protects installed clients that still execute an older cached Settings gateway. It only runs when Local models is explicitly selected. -->
+<script src="/app/settings-local-loader-v334.js?v=1.0.0-stale-gateway-recovery"></script>
 <script src="/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh"></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail"></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer"></script>
