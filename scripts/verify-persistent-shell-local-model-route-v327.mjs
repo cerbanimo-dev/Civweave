@@ -4,12 +4,13 @@ import path from 'node:path';
 const root = process.cwd();
 const shellPath = path.join(root, 'public/app/persistent-system-shell-v1.js');
 const shellHtmlPath = path.join(root, 'public/app/persistent-system-shell-v1.html');
-const loaderPath = path.join(root, 'public/app/settings-local-loader-v335.js');
+const loaderPath = path.join(root, 'public/app/settings-local-loader-v337.js');
 const bridgePath = path.join(root, 'public/app/settings-local-route-v325.js');
 const aliasPath = path.join(root, 'public/app/settings-local-route-v323.js');
 const freshPath = path.join(root, 'public/app/settings-local-route-v327.js');
 const generationPath = path.join(root, 'public/app/settings-local-route-v331.js');
 const coreWorkerPath = path.join(root, 'public/service-worker-core-v208.js');
+const settingsWorkerPath = path.join(root, 'public/service-worker-settings-v325-override.js');
 
 const shell = fs.readFileSync(shellPath, 'utf8');
 const shellHtml = fs.readFileSync(shellHtmlPath, 'utf8');
@@ -19,10 +20,11 @@ const alias = fs.readFileSync(aliasPath, 'utf8');
 const fresh = fs.readFileSync(freshPath, 'utf8');
 const generation = fs.readFileSync(generationPath, 'utf8');
 const coreWorker = fs.readFileSync(coreWorkerPath, 'utf8');
+const settingsWorker = fs.readFileSync(settingsWorkerPath, 'utf8');
 const expectedVersion = '1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const expectedShellVersion = '1.1.2-canonical-local-settings-refresh';
-const generatedRoute = '/app/settings-local-route-v331.js?v=1.1.7-persistent-shell-cache-generation-v333';
-const stageLoader = '/app/settings-local-loader-v335.js?v=1.1.0-stage-iframe-bridge';
+const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.0-stage-full-route-v337';
+const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.0-stage-full-route';
 
 const fail = message => { throw new Error(message); };
 
@@ -32,10 +34,19 @@ if (!coreWorker.includes('const cached = await findCached(url.pathname);')) {
 if (!coreWorker.includes('{ ignoreSearch: true }')) {
   fail('Core worker no longer ignores query strings; revisit the pathname-generation regression assumptions.');
 }
-if (!shellHtml.includes(stageLoader)) {
-  fail('Persistent shell HTML does not load the cache-distinct stage-iframe Local Models bridge.');
+if (!settingsWorker.includes("const CW_SETTINGS_V325_ACTION_PARAM='cwAction'")) {
+  fail('Settings service worker no longer exposes the explicit full-route action bypass.');
 }
-if (shellHtml.includes(`<script src="${generatedRoute}"></script>`)) {
+if (!settingsWorker.includes("if(url.searchParams.get(CW_SETTINGS_V325_ACTION_PARAM)==='1')")) {
+  fail('Settings service worker no longer distinguishes full action routes from display shims.');
+}
+if (!settingsWorker.includes('CW_SETTINGS_V325_SHIM')) {
+  fail('Settings service-worker shim contract changed; revalidate shim rejection in the stage loader.');
+}
+if (!shellHtml.includes(stageLoader)) {
+  fail('Persistent shell HTML does not load the cache-distinct full-route stage-iframe Local Models bridge.');
+}
+if (shellHtml.includes('<script src="/app/settings-local-route-v331.js')) {
   fail('Persistent shell HTML must not preload the Local Models renderer into the parent realm.');
 }
 if (!shellHtml.includes(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`)) {
@@ -47,8 +58,17 @@ if (!loader.includes("const STAGE_ID='cw-persistent-system-stage'")) {
 if (!loader.includes(`const ROUTE_VERSION='${expectedVersion}'`)) {
   fail('Local Models bridge no longer pins the validated renderer version.');
 }
-if (!loader.includes(`const ROUTE_SRC='${generatedRoute}'`)) {
-  fail('Local Models bridge no longer loads the cache-distinct v331 route generation.');
+if (!loader.includes(`const ROUTE_SRC='${fullRoute}'`)) {
+  fail('Local Models bridge no longer requests the full v331 renderer through the service-worker action path.');
+}
+if (!loader.includes('api?.settingsV325DisplayShim!==true')) {
+  fail('Local Models bridge can mistake the service-worker display shim for the full renderer.');
+}
+if (!loader.includes('api?.loaderBridge!==true')) {
+  fail('Local Models bridge can mistake a compatibility bridge for the full renderer.');
+}
+if (!loader.includes('Array.isArray(api?.catalogue)&&api.catalogue.length>0')) {
+  fail('Local Models bridge no longer positively identifies the full renderer catalogue.');
 }
 if (!loader.includes('frame.contentWindow')) {
   fail('Local Models bridge does not enter the child browsing context.');
@@ -68,8 +88,11 @@ if (!loader.includes("doc.createElement('script')")) {
 if (!loader.includes('route(realm).renderLocalModels(root)')) {
   fail('Local Models bridge is not invoking the child-realm renderer against the child settings layer.');
 }
-if (!loader.includes('stageIframeBridge:true') || !loader.includes('childRealmRenderer:true')) {
-  fail('Local Models bridge lost its explicit iframe-recovery contract.');
+if (!loader.includes('stageIframeBridge:true') || !loader.includes('childRealmRenderer:true') || !loader.includes('fullRouteRequired:true')) {
+  fail('Local Models bridge lost its explicit iframe/full-route recovery contract.');
+}
+if (!loader.includes('displayShimRejected:true') || !loader.includes('loaderBridgeRejected:true') || !loader.includes('actionRouteBypass:true')) {
+  fail('Local Models bridge lost its shim-resistant delivery contract.');
 }
 if (generation !== fresh) {
   fail('v331 cache-generation route must remain byte-identical to the validated v327 inert renderer.');
@@ -89,11 +112,11 @@ if (!shell.includes(`const SETTINGS_LOCAL_ROUTE_VERSION='${expectedVersion}'`)) 
 if (!shell.includes("const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`")) {
   fail('Persistent shell lost its v325 compatibility fallback bridge.');
 }
-if (!bridge.includes("const FULL_ROUTE='/app/settings-local-route-v327.js?v=1.1.4-settings-local-route-v325-parent-bridge'")) {
-  fail('v325 compatibility bridge no longer hands off to v327.');
+if (!bridge.includes("const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=settings-v325-parent-action-v1'")) {
+  fail('v325 compatibility bridge no longer has an explicit full-renderer action route.');
 }
 if (alias !== fresh) {
   fail('v323 compatibility alias drifted from the validated v327 saved-state implementation.');
 }
 
-console.log('PASS persistent Settings recovers Local Models inside the stage iframe using a cache-distinct child-realm renderer.');
+console.log('PASS persistent Settings recovers Local Models inside the stage iframe, rejects shim/bridge lookalikes, and explicitly loads the validated full renderer.');
