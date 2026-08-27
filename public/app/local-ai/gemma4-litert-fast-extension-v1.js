@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-gemma4-litert-fast-extension-v1-dual-phone';
+const VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const RUNTIME_ROOT='/app/vendor/litert-lm/';
 const RUNTIME_MANIFEST=`${RUNTIME_ROOT}stage-manifest.json`;
 const RUNTIME_CACHE='civweave-litert-lm-runtime-v1';
 const UPGRADE_ID='cw-gemma4-litert-fast-upgrade-v1';
+const BROWSER_HANDOFF_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync';
 const MODELS=Object.freeze({
   e2: Object.freeze({
     id:'gemma4-e2b-it-litert-web',
@@ -49,11 +50,36 @@ const FAST_IDS=Object.freeze([...BY_ID.keys()]);
 const LEGACY_IDS=Object.freeze(Object.values(MODELS).flatMap(model=>[model.legacyQ4Id,model.legacyQ2Id]));
 if(globalThis.CivweaveGemma4LiteRTFastExtensionV1?.version===VERSION)return;
 const freeze=value=>Object.freeze(value);
-let primeFlight=null,primed=false,uiObserver=null;
+let primeFlight=null,primed=false,uiObserver=null,handoffFlight=null;
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
 const fmt=bytes=>`${(Number(bytes||0)/1e9).toFixed(1)} GB`;
 
 function definition(id){return BY_ID.get(id)||null}
+function browserHandoff(){return globalThis.CivweaveGemma4BrowserPackCoherenceV1||null}
+function handoffReady(){return Boolean(browserHandoff()?.startModelDownload&&browserHandoff()?.startPair)}
+async function ensureBrowserHandoff(){
+  if(handoffReady())return browserHandoff();
+  if(handoffFlight)return handoffFlight;
+  handoffFlight=(async()=>{
+    try{await globalThis.CivweaveModelSettingsControllerV173?.ensureGemma4Pack?.()}catch{}
+    if(handoffReady())return browserHandoff();
+    return new Promise((resolve,reject)=>{
+      const target=new URL(BROWSER_HANDOFF_SRC,location.href),path=target.pathname;
+      let script=[...document.scripts].find(row=>{try{return new URL(row.src,location.href).pathname===path}catch{return false}});
+      const finish=()=>handoffReady()?resolve(browserHandoff()):reject(new Error('The browser-managed Gemma 4 download layer loaded without becoming ready.'));
+      if(script&&!handoffReady())try{script.remove()}catch{}
+      if(handoffReady()){resolve(browserHandoff());return}
+      script=document.createElement('script');
+      script.src=`${BROWSER_HANDOFF_SRC}&cwGemma4FastHandoff=${Date.now()}`;
+      script.async=false;
+      script.dataset.civweaveGemma4BrowserHandoff='';
+      script.onload=finish;
+      script.onerror=()=>reject(new Error('The browser-managed Gemma 4 download layer could not load.'));
+      document.head?.append(script);
+    });
+  })().finally(()=>{handoffFlight=null});
+  return handoffFlight;
+}
 function legacyFor(registry,model){
   return registry?.byId?.(model.legacyQ4Id)||registry?.byId?.(model.legacyQ2Id)||{};
 }
@@ -214,22 +240,23 @@ async function primeRuntime({force=false}={}){
   })().catch(error=>{primed=false;emit('civweave:gemma4-litert-runtime-failed',{message:String(error?.message||error)});throw error}).finally(()=>{primeFlight=null});
   return primeFlight;
 }
-async function download(id=MODELS.e2.id,{onProgress}={}){
+async function download(id=MODELS.e2.id,{onProgress,button}={}){
   const def=definition(id);if(!def)throw new Error(`Unknown Gemma 4 LiteRT model: ${id}`);
   if(!watch())throw new Error('The local model registry is not ready.');
-  const downloadManager=globalThis.CivweaveLocalModelDownloadV266;if(!downloadManager?.start)throw new Error('The local model download manager is not ready.');
-  const result=await downloadManager.start(id,{onProgress,preferBackground:true});
-  const current=await status(id);if(current?.available)void primeRuntime().catch(()=>null);
-  return result;
+  const current=await status(id);
+  if(current?.available){void primeRuntime().catch(()=>null);return current}
+  const handoff=await ensureBrowserHandoff();
+  if(typeof handoff?.startModelDownload!=='function')throw new Error('Gemma 4 requires the browser-managed download/import flow on this device.');
+  const control=button||document.querySelector(`[data-litert-fast-download="${id}"]`)||{disabled:false,textContent:''};
+  try{onProgress?.({model:def,phase:'browser-handoff',message:`Opening browser download for ${def.label}.`})}catch{}
+  return handoff.startModelDownload(id,control);
 }
-async function downloadPhonePair({onProgress}={}){
-  const results=[];
-  for(const def of Object.values(MODELS)){
-    const current=await status(def.id);
-    if(current?.available){results.push({id:def.id,available:true,skipped:true});continue}
-    results.push(await download(def.id,{onProgress}));
-  }
-  return results;
+async function downloadPhonePair({onProgress,button}={}){
+  const handoff=await ensureBrowserHandoff();
+  if(typeof handoff?.startPair!=='function')throw new Error('Gemma 4 requires the browser-managed download/import flow on this device.');
+  const control=button||document.querySelector('[data-litert-fast-pair]')||{disabled:false,textContent:''};
+  try{onProgress?.({phase:'browser-handoff',message:'Opening the browser-managed Gemma 4 phone download flow.'})}catch{}
+  return handoff.startPair(control);
 }
 async function remove(id=MODELS.e2.id){const def=definition(id);if(!def)return false;return globalThis.CivweaveLocalModelDownloadV266?.remove?.(id)}
 function maybePrime(event){
@@ -244,13 +271,15 @@ async function renderUpgradeCard(){
   const states=await Promise.all(Object.values(MODELS).map(async def=>({def,checked:await status(def.id)})));
   const readyCount=states.filter(row=>row.checked?.available).length;
   const rows=states.map(({def,checked})=>{
-    const state=checked?.state||{},ready=Boolean(checked?.available),busy=['downloading','finalizing'].includes(String(state.status||'')),percent=Math.max(0,Math.min(100,Number(state.percent||0)));
-    return `<div style="display:grid;gap:4px"><b>${def===MODELS.e2?'E2B fast':'E4B deep'} · ${fmt(def.artifactBytes)}</b><span class="cw-local-meta">${ready?'READY · automatically accelerates the matching Gemma 4 model.':busy?`${String(state.status||'downloading').toUpperCase()} · ${percent}%`:'Web-optimized LiteRT-LM model.'}</span><div class="cw-local-actions">${ready?`<button type="button" data-litert-fast-remove="${def.id}">Remove</button>`:`<button type="button" data-litert-fast-download="${def.id}" ${busy?'disabled':''}>${busy?'Downloading…':`Download ${fmt(def.artifactBytes)}`}</button>`}</div></div>`;
+    const state=checked?.state||{},ready=Boolean(checked?.available),staleLegacy=['downloading','finalizing'].includes(String(state.status||''));
+    const stateText=ready?'READY · automatically accelerates the matching Gemma 4 model.':staleLegacy?'BROWSER DOWNLOAD REQUIRED · the retired in-app transfer will not be resumed.':'Browser-managed LiteRT-LM model.';
+    const actionText=staleLegacy?'Resume browser download':`Download ${fmt(def.artifactBytes)}`;
+    return `<div style="display:grid;gap:4px"><b>${def===MODELS.e2?'E2B fast':'E4B deep'} · ${fmt(def.artifactBytes)}</b><span class="cw-local-meta">${stateText}</span><div class="cw-local-actions">${ready?`<button type="button" data-litert-fast-remove="${def.id}">Remove</button>`:`<button type="button" data-litert-fast-download="${def.id}">${actionText}</button>`}</div></div>`;
   }).join('');
   card.innerHTML=`<div><b>Gemma 4 · 12 GB phone performance profile</b><p>Use Google’s Web-optimized LiteRT models instead of the heavier generic ONNX graphs. Only one Gemma engine stays resident at a time; the existing ONNX models remain compatibility fallbacks.</p><div style="display:grid;gap:10px;margin-top:8px">${rows}</div></div><div class="cw-local-actions">${readyCount===2?'':`<button type="button" data-litert-fast-pair>Install both · ${fmt(MODELS.e2.artifactBytes+MODELS.e4.artifactBytes)}</button>`}</div>`;
-  for(const button of card.querySelectorAll('[data-litert-fast-download]'))button.addEventListener('click',async event=>{const target=event.currentTarget,id=target.dataset.litertFastDownload;target.disabled=true;target.textContent='Starting download…';try{await download(id);await renderUpgradeCard()}catch(error){target.disabled=false;target.textContent='Retry';emit('civweave:gemma4-litert-upgrade-ui-error',{id,message:String(error?.message||error)})}});
+  for(const button of card.querySelectorAll('[data-litert-fast-download]'))button.addEventListener('click',async event=>{const target=event.currentTarget,id=target.dataset.litertFastDownload;target.disabled=true;target.textContent='Opening browser download…';try{await download(id,{button:target});await renderUpgradeCard()}catch(error){target.disabled=false;target.textContent='Retry browser download';emit('civweave:gemma4-litert-upgrade-ui-error',{id,message:String(error?.message||error)})}});
   for(const button of card.querySelectorAll('[data-litert-fast-remove]'))button.addEventListener('click',async event=>{const target=event.currentTarget,id=target.dataset.litertFastRemove;target.disabled=true;try{await remove(id);await renderUpgradeCard()}catch{target.disabled=false}});
-  card.querySelector('[data-litert-fast-pair]')?.addEventListener('click',async event=>{const target=event.currentTarget;target.disabled=true;target.textContent='Installing optimized pair…';try{await downloadPhonePair();await renderUpgradeCard()}catch(error){target.disabled=false;target.textContent='Retry optimized pair';emit('civweave:gemma4-litert-upgrade-ui-error',{message:String(error?.message||error)})}});
+  card.querySelector('[data-litert-fast-pair]')?.addEventListener('click',async event=>{const target=event.currentTarget;target.disabled=true;target.textContent='Opening browser downloads…';try{await downloadPhonePair({button:target});await renderUpgradeCard()}catch(error){target.disabled=false;target.textContent='Retry optimized downloads';emit('civweave:gemma4-litert-upgrade-ui-error',{message:String(error?.message||error)})}});
   return true;
 }
 function bindUpgradeUi(){
@@ -263,7 +292,7 @@ watch();bindUpgradeUi();
 for(const name of ['civweave:local-model-runtime-ready','civweave:guide-loader-reset','civweave:settings-local-route-ready','pageshow'])addEventListener(name,()=>{queueMicrotask(watch);queueMicrotask(()=>void renderUpgradeCard())});
 addEventListener('civweave:local-model-download-progress',event=>{maybePrime(event);const id=event?.detail?.id||event?.detail?.state?.id;if(FAST_IDS.includes(id))queueMicrotask(()=>void renderUpgradeCard())});
 addEventListener('civweave:local-model-downloaded',event=>{if(FAST_IDS.includes(event?.detail?.id)){void primeRuntime().catch(()=>null);queueMicrotask(()=>void renderUpgradeCard())}});
-try{dispatchEvent(new CustomEvent('civweave:gemma4-litert-fast-extension-ready',{detail:{version:VERSION,ids:FAST_IDS,bytes:MODELS.e2.artifactBytes+MODELS.e4.artifactBytes,revisions:Object.fromEntries(Object.values(MODELS).map(model=>[model.id,model.revision])),explicitDownload:true,offlineRuntimePriming:true,settingsUpgradeCard:true,phoneProfile:'12gb-dual'}}))}catch{}
+try{dispatchEvent(new CustomEvent('civweave:gemma4-litert-fast-extension-ready',{detail:{version:VERSION,ids:FAST_IDS,bytes:MODELS.e2.artifactBytes+MODELS.e4.artifactBytes,revisions:Object.fromEntries(Object.values(MODELS).map(model=>[model.id,model.revision])),explicitDownload:true,offlineRuntimePriming:true,settingsUpgradeCard:true,phoneProfile:'12gb-dual',browserManagedDownloadsOnly:true}}))}catch{}
 globalThis.CivweaveGemma4LiteRTFastExtensionV1=freeze({
   version:VERSION,
   id:MODELS.e2.id,
@@ -281,6 +310,7 @@ globalThis.CivweaveGemma4LiteRTFastExtensionV1=freeze({
   watch,
   patchRegistry,
   status,
+  ensureBrowserHandoff,
   download,
   downloadPhonePair,
   remove,
@@ -288,12 +318,14 @@ globalThis.CivweaveGemma4LiteRTFastExtensionV1=freeze({
   renderUpgradeCard,
   bindUpgradeUi,
   explicitDownload:true,
+  browserManagedDownloadsOnly:true,
+  legacyDirectDownloadDisabled:true,
   transparentAcceleration:true,
   dualModelAcceleration:true,
   oneEngineAtATime:true,
   phoneProfile:'12gb-dual',
   offlineRuntimePriming:true,
   settingsUpgradeCard:true,
-  state:()=>freeze({primed,priming:Boolean(primeFlight),upgradeCard:Boolean(document.getElementById(UPGRADE_ID))})
+  state:()=>freeze({primed,priming:Boolean(primeFlight),handoffLoading:Boolean(handoffFlight),upgradeCard:Boolean(document.getElementById(UPGRADE_ID))})
 });
 })();
