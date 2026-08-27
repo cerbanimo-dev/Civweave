@@ -2,13 +2,15 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 await import('./verify-system-ownership-v317.mjs');
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,living,actions,boundary,mobile]=await Promise.all([
+const [gateway,lifecycle,living,actions,boundary,mobile,release,recovery]=await Promise.all([
   read('public/app/settings-gateway-v317.js'),
   read('public/app/document-lifecycle-v221.js'),
   read('public/app/cabinets/living-school/index.html'),
   read('public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'),
   read('public/app/install-boundary-v146.js'),
-  read('public/app/mobile-ai-hardening-v302.js')
+  read('public/app/mobile-ai-hardening-v302.js'),
+  read('public/app/release-version-v1.js'),
+  read('public/app/settings-local-tab-recovery-v334.js')
 ]);
 assert.match(gateway,/globalThis\.CivweaveSettingsV320=api/);
 assert.match(gateway,/singleMenu:true/);
@@ -32,4 +34,13 @@ assert.match(living,/family-shell-v104\.js/);
 assert.ok(boundary.indexOf('SETTINGS_GATEWAY')<boundary.indexOf('EXPERIENCE_ORCHESTRATOR'),'Settings gateway must be registered before general experience modules.');
 assert.match(mobile,/mobileFullscreenChat:true/);
 assert.doesNotMatch(mobile,/addEventListener\('click'/,'Mobile hardening must not own Settings input.');
-console.log(JSON.stringify({ok:true,revision:'mobile-local-settings-v322',systems:5,settingsOwner:'CivweaveSettingsV320',singleMenu:true,localModelsOnTabOnly:true,livingSchoolShared:true},null,2));
+assert.match(release,/SETTINGS_LOCAL_RECOVERY='\/app\/settings-local-tab-recovery-v334\.js'/,'Every canonical system must bootstrap the bounded Local Models recovery sidecar.');
+assert.match(release,/ensureSettingsLocalRecovery\(\)/);
+assert.match(recovery,/ROUTE_PATH='\/app\/settings-local-route-v325\.js'/,'Recovery must use the canonical saved-state-only Local Models route.');
+assert.match(recovery,/MutationObserver/,'Recovery must not depend on requestAnimationFrame to notice the selected Local Models tab.');
+assert.match(recovery,/animationFrameDependency:false/);
+assert.match(recovery,/savedStateOnly:true/);
+assert.match(recovery,/clearsSavedState:false/);
+assert.match(recovery,/clearsModelFiles:false/);
+assert.doesNotMatch(recovery,/localStorage\.clear|sessionStorage\.clear|caches\.delete|indexedDB\.deleteDatabase|CivweaveLocalModelRuntime/,'Local Models view recovery must never clear user state or touch inference/runtime storage.');
+console.log(JSON.stringify({ok:true,revision:'mobile-local-settings-v334',systems:5,settingsOwner:'CivweaveSettingsV320',singleMenu:true,localModelsOnTabOnly:true,localModelsRecovery:'mutation-observer-plus-canonical-route',livingSchoolShared:true},null,2));
