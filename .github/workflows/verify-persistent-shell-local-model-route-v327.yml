@@ -5,8 +5,12 @@ on:
     paths:
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/settings-local-loader-v335.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
+      - 'public/app/settings-local-route-v327.js'
+      - 'public/app/settings-local-route-v331.js'
+      - 'public/service-worker-core-v208.js'
       - 'scripts/verify-persistent-shell-local-model-route-v327.mjs'
       - '.github/workflows/verify-persistent-shell-local-model-route-v327.yml'
   push:
@@ -14,8 +18,12 @@ on:
     paths:
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/settings-local-loader-v335.js'
       - 'public/app/settings-local-route-v323.js'
       - 'public/app/settings-local-route-v325.js'
+      - 'public/app/settings-local-route-v327.js'
+      - 'public/app/settings-local-route-v331.js'
+      - 'public/service-worker-core-v208.js'
       - 'scripts/verify-persistent-shell-local-model-route-v327.mjs'
       - '.github/workflows/verify-persistent-shell-local-model-route-v327.yml'
 
