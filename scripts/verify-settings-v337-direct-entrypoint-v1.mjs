@@ -16,8 +16,13 @@ const loader=read('public/app/settings-local-loader-v337.js');
 
 if(!campus.includes('/app/settings-direct-entry-v338.js?v=1.3.0-settings-direct-entry-v338'))fail('Canonical campus lost the direct Settings recovery anchor.');
 if(!pwaStart.includes('await registration.update()'))fail('Installed launch must explicitly refresh the service worker and its imported scripts.');
-if(!worker.includes("importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v337-direct-gateway-bootstrap-v2-registered-worker-boundary')"))fail('Canonical worker no longer imports the Settings gateway recovery before cache handlers.');
+if(!worker.includes("const V203_REGISTERED_SETTINGS_GENERATION='v339-settings-saved-state-first-worker-boundary'"))fail('Canonical service-worker bytes were not advanced to the v339 Settings generation.');
+if(!worker.includes("importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved-state-first-registered-worker-v1')"))fail('Canonical worker no longer imports the v339 Settings gateway recovery before cache handlers.');
 if(worker.indexOf('service-worker-settings-v337-entrypoint.js')>worker.indexOf('service-worker-settings-v325-override.js'))fail('Settings recovery must register before the historical v325 override.');
+if(!worker.includes("const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v456-settings-v339-saved-state-first'"))fail('Staging worker activation boundary is not cache-distinct for v339.');
+for(const pathname of ['/app/settings-gateway-v317.js','/app/settings-direct-entry-v338.js','/app/settings-direct-entry-v339.js','/app/settings-local-models-direct-v325.js','/app/settings-local-loader-v337.js','/app/settings-local-route-v331.js']){
+  if(!worker.includes(`'${pathname}'`))fail(`v339 activation does not purge stale executable Settings asset ${pathname}.`);
+}
 
 if(!workerEntrypoint.includes("const CW_SETTINGS_V339_ENTRY='/app/settings-direct-entry-v339.js?v=1.4.0-settings-direct-entry-v339'"))fail('Gateway does not bootstrap the cache-distinct v339 page recovery.');
 if(!workerEntrypoint.includes("const CW_SETTINGS_V339_BOOTSTRAP_MARKER='v339-saved-state-first-bootstrap'"))fail('v339 gateway bootstrap marker missing.');
@@ -41,4 +46,4 @@ if(!directRenderer.includes('ACTION_ROUTE='))fail('Direct renderer no longer laz
 if(!loader.includes("cwAction=1"))fail('Full-route fallback no longer explicitly bypasses the display shim.');
 if(!direct338.includes('serviceWorkerIndependent:true'))fail('Existing v338 page anchor no longer remains safe while v339 is injected by the gateway.');
 
-console.log('PASS Local Models v339 renders saved state first, self-recovers independent of click ordering, keeps lifecycle code lazy, and exposes diagnostics instead of an endless placeholder.');
+console.log('PASS Local Models v339 is anchored in canonical worker bytes, renders saved state first, self-recovers independent of click ordering, keeps lifecycle code lazy, and exposes diagnostics instead of an endless placeholder.');
