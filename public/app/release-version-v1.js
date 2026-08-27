@@ -2,6 +2,7 @@
 'use strict';
 const API_VERSION='release-version-v1';
 const JAPANESE_RUNTIME='/app/japanese-mode-v1.js';
+const SETTINGS_LOCAL_RECOVERY='/app/settings-local-tab-recovery-v334.js';
 let languagePromise=null;
 function versionFromManifest(manifest){
   const name=String(manifest?.name||'');
@@ -21,6 +22,20 @@ function wantsJapanese(){
     if(explicit==='en'||explicit==='en-us')return false;
     return localStorage.getItem('civweave.language.v1')==='ja';
   }catch{return false}
+}
+function ensureSettingsLocalRecovery(){
+  if(globalThis.CivweaveSettingsLocalTabRecoveryV334)return true;
+  const existing=[...document.scripts].find(script=>{
+    try{return script.src&&new URL(script.src,location.href).pathname===SETTINGS_LOCAL_RECOVERY}catch{return false}
+  });
+  if(existing)return true;
+  if(!document.head?.isConnected)return false;
+  const script=document.createElement('script');
+  script.src=`${SETTINGS_LOCAL_RECOVERY}?v=1.0.0-settings-local-tab-recovery-v334`;
+  script.async=false;
+  script.dataset.civweaveSettingsRecovery='release-version-v1';
+  document.head.append(script);
+  return true;
 }
 function ensureLanguageRuntime(){
   if(!wantsJapanese())return Promise.resolve(false);
@@ -61,14 +76,15 @@ function apply(version){
   document.documentElement.dataset.civweaveVersion=version;
   document.documentElement.dataset.civweaveVersionSync='structural-safe-v2';
   if(/\bv\d+\.\d+\.\d+\b/.test(document.title))document.title=document.title.replace(/\bv\d+\.\d+\.\d+\b/g,`v${version}`);
-  globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version,apply,realmMutation:false,ensureLanguageRuntime,structuralSafe:true});
+  globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version,apply,realmMutation:false,ensureLanguageRuntime,ensureSettingsLocalRecovery,structuralSafe:true,settingsLocalRecovery:'v334'});
   dispatchEvent(new CustomEvent('civweave:release-version',{detail:{version,apiVersion:API_VERSION}}));
   return true;
 }
 async function sync(){
+  ensureSettingsLocalRecovery();
   void ensureLanguageRuntime();
   if(canonicalRealm()){
-    globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version:'',apply,realmMutation:false,skipped:'canonical-realm',ensureLanguageRuntime,japaneseBootstrap:'preference-only',structuralSafe:true});
+    globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version:'',apply,realmMutation:false,skipped:'canonical-realm',ensureLanguageRuntime,ensureSettingsLocalRecovery,japaneseBootstrap:'preference-only',settingsLocalRecovery:'v334',structuralSafe:true});
     return;
   }
   try{
