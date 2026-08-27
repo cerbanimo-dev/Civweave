@@ -1,0 +1,57 @@
+name: Capability Lock v2 Bootstrap
+
+on:
+  pull_request:
+    branches:
+      - staging
+
+permissions:
+  contents: read
+
+jobs:
+  capability-lock-v2-bootstrap:
+    name: capability-lock-v2-bootstrap
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout candidate merge
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Use pinned Node runtime
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: 22
+
+      - name: Verify v2 control-plane structure
+        run: |
+          set -euo pipefail
+          node --check scripts/capability-lock-enforced-runner.mjs
+          node scripts/verify-capability-lock-control-plane-v2.mjs
+
+      - name: Install isolated browser contract runtime
+        run: |
+          set -euo pipefail
+          TOOLS="$RUNNER_TEMP/capability-tools"
+          mkdir -p "$TOOLS"
+          cd "$TOOLS"
+          npm init -y >/dev/null 2>&1
+          npm install --ignore-scripts --no-save playwright@1.55.0
+          node node_modules/playwright/cli.js install chromium
+          echo "CIVWEAVE_TOOLS_NODE_MODULES=$TOOLS/node_modules" >> "$GITHUB_ENV"
+
+      - name: Exercise v2 isolation against current PR merge
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          AUTHORITY_SHA="$(git rev-parse HEAD)"
+          node scripts/capability-lock-enforced-runner.mjs \
+            --authority "$GITHUB_WORKSPACE" \
+            --authority-ref "$AUTHORITY_SHA" \
+            --base-ref "$BASE_SHA" \
+            --candidate-ref "$AUTHORITY_SHA" \
+            --work-root "$RUNNER_TEMP/capability-lock-v2-bootstrap" \
+            --tools-node-modules "$CIVWEAVE_TOOLS_NODE_MODULES"
