@@ -4,6 +4,7 @@ import vm from 'node:vm';
 
 const read=path=>readFileSync(path,'utf8');
 const includes=(source,needle,label)=>assert(source.includes(needle),`${label} is missing ${needle}`);
+const excludes=(source,needle,label)=>assert(!source.includes(needle),`${label} must not contain ${needle}`);
 const before=(source,a,b,label)=>{
   const left=source.indexOf(a),right=source.indexOf(b);
   assert(left>=0,`${label} is missing ${a}`);
@@ -100,12 +101,18 @@ includes(retirement,'maxSupportedVariantsPerGemmaSize:2','Q2 retirement contract
 includes(retirement,'function activate(){scheduleDecorate();return true}','Q2 retirement must not auto-delete');
 
 const fastExtension=read(fastExtensionPath);
-includes(fastExtension,"VERSION='1.1.0-gemma4-litert-fast-extension-v1-dual-phone'",'LiteRT extension');
+includes(fastExtension,"VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard'",'LiteRT extension');
 includes(fastExtension,"id:'gemma4-e2b-it-litert-web'",'LiteRT extension');
 includes(fastExtension,"id:'gemma4-e4b-it-litert-web'",'LiteRT extension');
 includes(fastExtension,'artifactBytes:2_008_432_640','LiteRT E2B artifact');
 includes(fastExtension,'artifactBytes:2_969_059_328','LiteRT E4B artifact');
 includes(fastExtension,'dualModelAcceleration:true','LiteRT extension');
+includes(fastExtension,'browserManagedDownloadsOnly:true','LiteRT browser-only download contract');
+includes(fastExtension,'legacyDirectDownloadDisabled:true','LiteRT retired direct-download contract');
+includes(fastExtension,'return handoff.startModelDownload(id,control);','LiteRT single-model browser handoff');
+includes(fastExtension,'return handoff.startPair(control);','LiteRT pair browser handoff');
+excludes(fastExtension,'downloadManager.start(','LiteRT must not use the retired multi-gigabyte direct downloader');
+excludes(fastExtension,"busy=['downloading','finalizing']",'LiteRT stale direct-download progress must not disable browser handoff');
 
 const fastRuntime=read(fastRuntimePath);
 includes(fastRuntime,"VERSION='1.3.0-litert-gemma4-fast-runtime-v1-dual-phone-mtp-jspi'",'LiteRT runtime');
@@ -122,4 +129,4 @@ includes(deep,"VERSION='1.0.0-gemma4-e4b-q4-extension-v1'",'E4B registration');
 includes(deep,"E4_Q4='gemma4-e4b-it-q4f16'",'E4B registration');
 includes(deep,'__civweaveGemma4E4BQ4V1:true','E4B registration');
 
-console.log('PASS Gemma 4 phone path keeps only LiteRT + Q4 as supported variants per size, retires Q2 without automatic deletion, exposes explicit obsolete-model cleanup for existing users, prefers LiteRT when installed, and preserves Q4 compatibility fallback.');
+console.log('PASS Gemma 4 phone path keeps only LiteRT + Q4 as supported variants per size, retires Q2 without automatic deletion, exposes explicit obsolete-model cleanup for existing users, routes LiteRT downloads exclusively through the browser handoff, ignores stale 0% direct-download states, prefers LiteRT when installed, and preserves Q4 compatibility fallback.');
