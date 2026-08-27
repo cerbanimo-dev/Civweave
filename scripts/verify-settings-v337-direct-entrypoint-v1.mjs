@@ -33,11 +33,13 @@ if(!directEntrypoint.includes('loader.recover(globalThis)'))fail('Direct Setting
 if(!directEntrypoint.includes('navigator.serviceWorker?.controller?.scriptURL'))fail('Failure diagnostics no longer expose the active service-worker controller.');
 if(!directEntrypoint.includes('serviceWorkerIndependent:true'))fail('Direct page ownership contract is missing.');
 
-const bootstrapImport="importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v337-direct-gateway-bootstrap-v1');";
+const bootstrapNeedle="importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v337-direct-gateway-bootstrap-v";
 const legacyImport="importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');";
-if(!worker.includes(bootstrapImport))fail('Shell worker does not import the v337 direct-route Settings bootstrap.');
-if(worker.indexOf(bootstrapImport)>worker.indexOf(legacyImport))fail('v337 direct-route bootstrap must run before the historical v325 Settings override.');
-if(!worker.includes("const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v454-settings-v337-direct-gateway'"))fail('Shell worker lost the cache-distinct staging activation marker for the v337 bootstrap.');
+const bootstrapIndex=worker.indexOf(bootstrapNeedle),legacyIndex=worker.indexOf(legacyImport);
+if(bootstrapIndex<0)fail('Shell worker does not import the v337/v338 direct-route Settings bootstrap.');
+if(legacyIndex<0||bootstrapIndex>legacyIndex)fail('Direct-route Settings bootstrap must run before the historical v325 Settings override.');
+if(!worker.includes("const V203_REGISTERED_SETTINGS_GENERATION='v338-settings-registered-worker-boundary'"))fail('Shell worker no longer identifies the registered Settings v338 boundary.');
+if(!worker.includes("const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v455-settings-v338-registered-worker'"))fail('Shell worker lost the cache-distinct registered-worker Settings v338 activation marker.');
 if(!worker.includes('if(await v203StagingSettingsRecoveryPending())await self.skipWaiting()'))fail('Staging worker can remain waiting instead of replacing the broken Settings controller.');
 for(const pathname of ['/app/settings-gateway-v317.js','/app/settings-local-loader-v337.js','/app/settings-local-route-v331.js']){
   if(!worker.includes(`'${pathname}'`))fail(`Staging activation does not purge stale executable Settings asset ${pathname}.`);
@@ -53,4 +55,4 @@ if(!loader.includes('api?.settingsV325DisplayShim!==true'))fail('Recovery loader
 if(!loader.includes('api?.loaderBridge!==true'))fail('Recovery loader can accept a compatibility bridge as the full renderer.');
 if(!loader.includes('attachRealm(globalThis)'))fail('Recovery loader no longer supports the direct-route document itself.');
 
-console.log('PASS canonical Working Campus loads Settings recovery directly, installed launch is cache-distinct, v324 is rejected, worker fallback remains available, and failures expose the active worker/controller generation.');
+console.log('PASS canonical Working Campus loads Settings recovery directly, installed launch is cache-distinct, v324 is rejected, registered-worker fallback remains available, and failures expose the active worker/controller generation.');
