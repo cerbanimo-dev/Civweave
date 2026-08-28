@@ -1,0 +1,24 @@
+name: Verify Civweave ledger distribution v1
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'docs/architecture/civweave-ledger-distribution-v1.md'
+      - 'scripts/verify-civweave-ledger-distribution-v1.mjs'
+      - '.github/workflows/verify-civweave-ledger-distribution-v1.yml'
+  pull_request:
+    paths:
+      - 'docs/architecture/civweave-ledger-distribution-v1.md'
+      - 'scripts/verify-civweave-ledger-distribution-v1.mjs'
+      - '.github/workflows/verify-civweave-ledger-distribution-v1.yml'
+permissions:
+  contents: read
+jobs:
+  verify-ledger-distribution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-civweave-ledger-distribution-v1.mjs
