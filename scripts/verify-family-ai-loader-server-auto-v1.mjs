@@ -33,9 +33,11 @@ assert.match(router, /modelEvent\(next,'completed'/);
 assert.match(spine, /function serverAuto\(request=\{\}\)/);
 assert.match(spine, /if\(handledBy==='base-runtime'\)result=await base\.generate\(request\)/);
 
-assert.match(livingSchool, /const curriculumConfig=\{\.\.\.config,maxTokens:/);
-assert.match(livingSchool, /runtime\.generate\(\{purpose:'living-school-research-grounded-curriculum-v218\.1',executionProfile:'interactive',config:curriculumConfig/);
-assert.match(livingSchool, /refusing deterministic module padding/);
+assert.match(livingSchool, /const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218\.1'/);
+assert.match(livingSchool, /async function generateDesignPacket\(runtime,config,data,count,sources,previous=''\)/);
+assert.match(livingSchool, /purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive'/);
+assert.match(livingSchool, /config:\{\.\.\.tierConfig\(config,'complex'\),maxTokens:Math\.max\(Number\(config\.maxTokens\)\|\|0,8192\)/);
+assert.match(livingSchool, /const result=await runtime\.generate\(request\)/);
 
 console.log(JSON.stringify({
   ok: true,
@@ -44,6 +46,6 @@ console.log(JSON.stringify({
   serverAutoMiddlewareRequired: true,
   directWorkersAiMiddlewareRequired: true,
   sharedModelEventTelemetryRequired: true,
-  livingSchoolUsesSharedConfig: true,
-  deterministicCurriculumPaddingBlocked: true,
+  livingSchoolUsesSelectedRuntimeConfig: true,
+  livingSchoolDesignPassUsesSharedRuntime: true,
 }, null, 2));
