@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r11-local-model-v331-preload" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r12-local-model-v331-action-prewarm" data-civweave-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -21,13 +21,13 @@ body{padding:0!important}
 (()=>{try{sessionStorage.setItem('civweave.pwa.launch-session.v1','1');sessionStorage.setItem('civweave.install-boundary.boot.v228','1')}catch{}})();
 </script>
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner"></script>
-<!-- Local models is a saved-state-only view. The service worker caches /app scripts by pathname and ignores query strings, so warm the genuinely cache-distinct v331 pathname before the stage iframe can request the route. This exact preload was previously present and was accidentally displaced by the later iframe loader. -->
+<!-- Settings opens in the parent persistent shell. Prewarm the validated saved-state renderer before the shell runtime can fall back to the historical v325 bridge. cwAction=1 is required: the current Settings service-worker boundary deliberately serves a lightweight shim for ordinary route requests. -->
 <script>
 (()=>{try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}})();
 </script>
-<script src="/app/settings-local-route-v331.js?v=1.1.7-persistent-shell-cache-generation-v333"></script>
+<script src="/app/settings-local-route-v331.js?cwAction=1&amp;v=1.1.8-persistent-shell-full-route-v343"></script>
 <script src="/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh"></script>
-<!-- Settings is rendered inside the same-origin stage iframe. The parent v331 preload warms the cache-distinct renderer; v337 attaches to each stage document and injects that same validated renderer into the child realm only when Local models is selected. -->
+<!-- v337 remains the child-stage recovery path for Settings launchers that originate inside a system iframe. Both parent and child therefore converge on the same v331 saved-state renderer. -->
 <script src="/app/settings-local-loader-v337.js?v=1.2.0-stage-full-route"></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail"></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer"></script>
