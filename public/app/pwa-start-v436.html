@@ -23,12 +23,12 @@
 (()=>{
 'use strict';
 const VERSION='1.0.163';
-const START_REVISION='pwa-start-v447-settings-v339-saved-state-first';
+const START_REVISION='pwa-start-v448-settings-v339-exact-worker-generation';
 const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
 const SHELL_WORKER_PATH='/service-worker-v203.js';
 const SHELL_WORKER_URL='/service-worker-v203.js?v=1.0.163&revision=settings-v339-saved-state-first-r1';
-const WORKER_SETTLE_MS=3200;
+const WORKER_SETTLE_MS=6000;
 const params=new URLSearchParams(location.search);
 const status=document.querySelector('#status');
 const ROUTES=Object.freeze({
@@ -39,7 +39,8 @@ const ROUTES=Object.freeze({
   anarchadia:['/app/anarchadia-console-v139.html',{cabinet:'1'}]
 });
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
-const workerPath=worker=>{try{return new URL(worker?.scriptURL||'',location.href).pathname}catch{return''}};
+const workerURL=worker=>{try{return new URL(worker?.scriptURL||'',location.href).href}catch{return''}};
+const expectedWorkerURL=()=>new URL(SHELL_WORKER_URL,location.origin).href;
 function rememberLaunch(){try{sessionStorage.setItem(LAUNCH_SESSION_KEY,'1');sessionStorage.setItem(BOOT_KEY,'1');sessionStorage.removeItem('civweave.working-campus.return-recovery.v425')}catch{}}
 function installer(){const url=new URL('/app/index.html',location.origin);url.searchParams.set('install','required');url.searchParams.set('source',START_REVISION+'-browser');return url}
 function destination(){
@@ -49,29 +50,46 @@ function destination(){
   return url;
 }
 function fail(message){document.documentElement.dataset.cwPwaStart='recovery';if(status)status.textContent=message}
+function waitForWorkerGeneration(registration){
+  const expected=expectedWorkerURL();
+  if(workerURL(registration?.active)===expected&&workerURL(navigator.serviceWorker.controller)===expected)return Promise.resolve(true);
+  return new Promise(resolve=>{
+    let done=false;
+    const finish=value=>{if(done)return;done=true;clearTimeout(timer);navigator.serviceWorker.removeEventListener('controllerchange',onController);registration?.removeEventListener?.('updatefound',onUpdateFound);resolve(value)};
+    const check=()=>{
+      if(workerURL(registration?.waiting)===expected){try{registration.waiting.postMessage({type:'SKIP_WAITING'})}catch{}}
+      if(workerURL(navigator.serviceWorker.controller)===expected||workerURL(registration?.active)===expected)return finish(true);
+      return false;
+    };
+    const watchInstalling=worker=>{if(!worker)return;worker.addEventListener('statechange',check)};
+    const onController=()=>check();
+    const onUpdateFound=()=>{watchInstalling(registration.installing);check()};
+    navigator.serviceWorker.addEventListener('controllerchange',onController);
+    registration?.addEventListener?.('updatefound',onUpdateFound);
+    watchInstalling(registration?.installing);
+    const timer=setTimeout(()=>finish(check()===true),WORKER_SETTLE_MS);
+    check();
+  });
+}
 async function refreshShellWorker(){
   if(!('serviceWorker'in navigator))return false;
-  let registration=await navigator.serviceWorker.getRegistration('/').catch(()=>null);
-  const controllerBefore=workerPath(navigator.serviceWorker.controller);
-  const controllerChange=new Promise(resolve=>{
-    let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(value)};const timer=setTimeout(()=>finish(false),WORKER_SETTLE_MS);navigator.serviceWorker.addEventListener('controllerchange',()=>finish(true),{once:true});
-  });
-  if(!registration||workerPath(registration.active)!==SHELL_WORKER_PATH)registration=await navigator.serviceWorker.register(SHELL_WORKER_URL,{scope:'/',updateViaCache:'none'});else{
+  const expected=expectedWorkerURL();
+  let registration=await navigator.serviceWorker.register(SHELL_WORKER_URL,{scope:'/',updateViaCache:'none'});
+  if(workerURL(registration.active)!==expected&&workerURL(registration.waiting)!==expected&&workerURL(registration.installing)!==expected){
     await registration.update();
-    if(registration.waiting){try{registration.waiting.postMessage({type:'SKIP_WAITING'})}catch{}}
   }
-  try{registration.waiting?.postMessage({type:'SKIP_WAITING'})}catch{}
-  if(registration.installing||registration.waiting||controllerBefore!==SHELL_WORKER_PATH)await controllerChange;
-  return workerPath(navigator.serviceWorker.controller)===SHELL_WORKER_PATH;
+  try{if(workerURL(registration.waiting)===expected)registration.waiting.postMessage({type:'SKIP_WAITING'})}catch{}
+  await waitForWorkerGeneration(registration);
+  return workerURL(navigator.serviceWorker.controller)===expected||workerURL(registration.active)===expected;
 }
 async function launch(){
   if(!installedDisplay()){location.replace(installer().href);return}
   rememberLaunch();
-  try{if(status)status.textContent='Refreshing Settings v339 and bounded navigation…';await refreshShellWorker()}catch(error){console.warn('[Civweave PWA start] Shell worker refresh failed; continuing to the exact requested system.',error)}
-  const target=destination(),watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open Civweave directly.'),5000);addEventListener('pagehide',()=>clearTimeout(watchdog),{once:true});location.replace(target.href);
+  try{if(status)status.textContent='Refreshing Settings v339 and bounded navigation…';await refreshShellWorker()}catch(error){console.warn('[Civweave PWA start] Exact v339 worker refresh failed; continuing to the v339-pinned campus.',error)}
+  const target=destination(),watchdog=setTimeout(()=>fail('Startup did not leave this doorway. Open Civweave directly.'),7000);addEventListener('pagehide',()=>clearTimeout(watchdog),{once:true});location.replace(target.href);
 }
 launch().catch(error=>fail(`Startup could not continue: ${error?.message||error}`));
-globalThis.CivweavePwaStartV436=Object.freeze({version:VERSION,revision:START_REVISION,installedDisplay,rememberLaunch,destination,refreshShellWorker,shellWorkerPath:SHELL_WORKER_PATH,canonicalCampusPath:'/app/working-campus-v440.html',freshCampusPath:'/app/working-campus-v440.html',settingsRecovery:'v339'});
+globalThis.CivweavePwaStartV436=Object.freeze({version:VERSION,revision:START_REVISION,installedDisplay,rememberLaunch,destination,refreshShellWorker,shellWorkerPath:SHELL_WORKER_PATH,shellWorkerUrl:SHELL_WORKER_URL,expectedWorkerURL,canonicalCampusPath:'/app/working-campus-v440.html',freshCampusPath:'/app/working-campus-v440.html',settingsRecovery:'v339',exactWorkerGeneration:true});
 })();
 </script>
 </body>
