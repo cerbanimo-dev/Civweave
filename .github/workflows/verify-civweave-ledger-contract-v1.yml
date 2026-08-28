@@ -1,0 +1,29 @@
+name: Verify Civweave ledger contract v1
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/civweave-ledger-contract-v1.js'
+      - 'docs/architecture/civweave-ledger-architecture-v1.md'
+      - 'scripts/verify-civweave-ledger-contract-v1.mjs'
+      - '.github/workflows/verify-civweave-ledger-contract-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/civweave-ledger-contract-v1.js'
+      - 'docs/architecture/civweave-ledger-architecture-v1.md'
+      - 'scripts/verify-civweave-ledger-contract-v1.mjs'
+      - '.github/workflows/verify-civweave-ledger-contract-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-ledger-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-civweave-ledger-contract-v1.mjs
