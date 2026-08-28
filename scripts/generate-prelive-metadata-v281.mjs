@@ -238,6 +238,9 @@ const [workerSource, shellAssetsWorkerSource, installerWorkerSource] = await Pro
 const requiredShellAssets = [...new Set([
   ...extractStringArray(workerSource, 'REQUIRED_SHELL_ASSETS', 'service-worker-core-v208.js'),
   ...extractStringArray(shellAssetsWorkerSource, 'REQUIRED_FAMILY_NAV', 'service-worker-shell-assets-v1.js'),
+  ...extractStringArray(shellAssetsWorkerSource, 'REQUIRED_NAV_MEDIA', 'service-worker-shell-assets-v1.js'),
+  ...extractStringArray(shellAssetsWorkerSource, 'REQUIRED_CIVWEAVE_BOOT', 'service-worker-shell-assets-v1.js'),
+  ...extractStringArray(shellAssetsWorkerSource, 'REQUIRED_HUMAN_CHAT', 'service-worker-shell-assets-v1.js'),
   ...extractStringArray(installerWorkerSource, 'INSTALLER_STATE_ASSETS', 'service-worker-installer-state-v280.js')
 ])];
 const hashes = {};
