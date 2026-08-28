@@ -1,0 +1,29 @@
+name: Verify server AI request deadlines
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/server-ai-router-v301.js
+      - public/app/node-ai-mesh-v1.js
+      - scripts/verify-server-ai-request-deadlines-v1.mjs
+      - .github/workflows/verify-server-ai-request-deadlines-v1.yml
+  pull_request:
+    paths:
+      - public/app/server-ai-router-v301.js
+      - public/app/node-ai-mesh-v1.js
+      - scripts/verify-server-ai-request-deadlines-v1.mjs
+      - .github/workflows/verify-server-ai-request-deadlines-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-server-ai-request-deadlines-v1.mjs
