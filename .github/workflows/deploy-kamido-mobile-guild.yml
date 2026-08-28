@@ -6,7 +6,6 @@ on:
     branches: [staging]
     paths:
       - '.github/deploy/kamido-mobile-guild'
-      - '.github/workflows/deploy-kamido-mobile-guild.yml'
 
 permissions:
   contents: read
@@ -19,8 +18,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.KAMIDO_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.KAMIDO_CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.KAMIDO_CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.KAMIDO_CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,11 +29,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify Cloudflare credentials are configured
+      - name: Verify Kamido Cloudflare credentials are configured
         shell: bash
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "Missing Cloudflare deployment credentials. Configure either KAMIDO_CLOUDFLARE_API_TOKEN/KAMIDO_CLOUDFLARE_ACCOUNT_ID or the repository CLOUDFLARE_API_TOKEN/CLOUDFLARE_ACCOUNT_ID pair." >&2
+            echo "Missing KAMIDO_CLOUDFLARE_API_TOKEN or KAMIDO_CLOUDFLARE_ACCOUNT_ID repository secret." >&2
             exit 1
           fi
 
