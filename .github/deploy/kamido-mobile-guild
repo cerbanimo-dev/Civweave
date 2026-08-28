@@ -1,1 +1,2 @@
 Redeploy Kamido mobile Guild edge after correcting the Cloudflare Worker target.
+Redeploy 2026-08-28: honor the full 16,384-token Living School GLM generation budget and current Cloudflare completion-token field.
