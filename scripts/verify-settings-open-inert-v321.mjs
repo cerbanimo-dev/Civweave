@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,livingActions]=await Promise.all([
+const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,livingActions,workingCampus,directEntry,freshLocalRoute]=await Promise.all([
   'public/app/settings-gateway-v317.js',
   'public/app/document-lifecycle-v221.js',
   'public/app/local-ai/settings-panel-v267.js',
@@ -11,9 +11,12 @@ const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemin
   'public/app/local-ai/download-policy-v278.js',
   'public/app/server-ai-settings-v301.js',
   'public/app/gemini-task-tier-router-v213.js',
-  'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
+  'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs',
+  'public/app/working-campus-v440.html',
+  'public/app/settings-direct-entry-v339.js',
+  'public/app/settings-local-route-v327.js'
 ].map(read));
-for(const source of [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini])new Function(source);
+for(const source of [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,directEntry,freshLocalRoute])new Function(source);
 
 const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
 assert.doesNotMatch(openBlock,/ensureManagement\(/,'Opening Settings must not load downloaded-model management automatically.');
@@ -30,6 +33,20 @@ assert.match(gateway,/if\(name==='local-models'\)/);
 const localTabBlock=gateway.slice(gateway.indexOf("if(name==='local-models')"),gateway.indexOf("if(name==='membership')"));
 assert.match(localTabBlock,/ensureManagement\(layer\)/);
 assert.doesNotMatch(localTabBlock,/requestInferenceQuiescence|local-inference-cancel-requested|requestAdapter|new Worker|\.generate\(/);
+
+// The v339 recovery shim used a subtree MutationObserver that rewrote the visible
+// Settings header on every inspection. Rewriting textContent generated another
+// childList mutation, so opening Settings could starve the main thread before a
+// paint. The Working Campus must use the canonical local route directly instead.
+assert.doesNotMatch(workingCampus,/settings-direct-entry-v339\.js/,'Working Campus must not load the recursive Local Models recovery shim.');
+assert.match(workingCampus,/settings-local-route-v327\.js/,'Working Campus must retain the cache-distinct canonical Local Models route.');
+assert.doesNotMatch(directEntry,/new MutationObserver/,'Local Models fallback must not observe and rewrite the Settings subtree.');
+assert.doesNotMatch(directEntry,/const watchdog\s*=\s*setInterval/,'Local Models fallback must not run a presentation watchdog.');
+assert.match(directEntry,/mutationWatch:false/);
+assert.match(directEntry,/watchdog:false/);
+assert.match(directEntry,/eventDriven:true/);
+assert.match(directEntry,/canonicalRouteFirst:true/);
+assert.match(freshLocalRoute,/renderLocalModels/,'The cache-distinct Local Models route must own direct saved-state rendering.');
 
 assert.match(lifecycle,/document-lifecycle-v323-local-model-view-service/);
 assert.match(lifecycle,/document-lifecycle-v323-view-only-actions-lazy/);
@@ -75,8 +92,10 @@ assert.doesNotMatch(livingActions,/['"]open-ai-settings['"]/);
 
 console.log(JSON.stringify({
   ok:true,
-  contract:'settings-local-model-v323',
+  contract:'settings-local-model-v342',
   canonicalTabs:true,
+  workingCampusCanonicalRouteOnly:true,
+  recursiveSettingsObserver:false,
   localRouteVisibleWithoutManager:true,
   localModelsViewOnlyOnTab:true,
   localModelActionModulesOnDemand:true,
