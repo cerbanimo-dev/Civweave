@@ -23,14 +23,14 @@ assert.doesNotMatch(direct339,/const\s+watchdog\s*=\s*setInterval/,'v339 compati
 assert.match(direct339,/eventDriven:true/,'v339 compatibility fallback must remain event driven.');
 assert.match(direct339,/canonicalRouteFirst:true/,'v339 compatibility fallback must defer to the canonical saved-state route.');
 
-// The persistent shell and stage iframe are separate JS realms. Warm the
-// genuinely cache-distinct renderer pathname in the parent before the child can
-// request it, then let v337 inject that same renderer into the selected child
-// Settings realm. This avoids the service-worker query-insensitive stale-path
-// trap while preserving a read-only Local Models view.
-assert.match(shell,/settings-local-route-v331\.js\?v=1\.1\.7-persistent-shell-cache-generation-v333/,'Persistent shell must warm the v331 renderer pathname.');
+// Settings opened from the persistent navbar lives in the parent shell realm.
+// Prewarm the full v331 renderer there through cwAction=1 so the service worker
+// cannot substitute its lightweight v325 view shim. v337 separately injects the
+// same full renderer into a child stage realm when Settings originates there.
+assert.match(shell,/settings-local-route-v331\.js\?cwAction=1&amp;v=1\.1\.8-persistent-shell-full-route-v343/,'Persistent shell must prewarm the full v331 renderer through the action bypass.');
+assert.doesNotMatch(shell,/settings-local-route-v331\.js\?v=1\.1\.7-persistent-shell-cache-generation-v333/,'Persistent shell must not warm v331 through the ordinary shim route.');
 assert.match(shell,/settings-local-loader-v337\.js\?v=1\.2\.0-stage-full-route/,'Persistent shell must attach the stage-aware Local Models loader.');
-assert.match(loader,/ROUTE_SRC='\/app\/settings-local-route-v331\.js\?cwAction=1&v=1\.2\.0-stage-full-route-v337'/,'Stage loader must inject the same v331 pathname into the child realm.');
+assert.match(loader,/ROUTE_SRC='\/app\/settings-local-route-v331\.js\?cwAction=1&v=1\.2\.0-stage-full-route-v337'/,'Stage loader must inject the same full v331 pathname into the child realm.');
 assert.match(loader,/savedStateOnlyView===true&&api\?\.viewWritesState===false/,'Stage loader must reject routes that are not saved-state-only.');
 assert.match(generation,/savedStateOnlyView:true/,'v331 renderer must remain saved-state-only.');
 assert.match(generation,/viewWritesState:false/,'v331 renderer must remain read-only on view.');
@@ -40,10 +40,10 @@ assert.match(generation,/hardwareProbeOnView:false/,'v331 renderer must not prob
 
 console.log(JSON.stringify({
   ok:true,
-  contract:'settings-v343-persistent-v331',
+  contract:'settings-v343-persistent-v331-action-prewarm',
   canonicalCampusV339:false,
   recursiveObserver:false,
-  persistentV331Preload:true,
+  parentFullRoutePrewarm:true,
   stageLoader:true,
   savedStateOnly:true
 },null,2));
