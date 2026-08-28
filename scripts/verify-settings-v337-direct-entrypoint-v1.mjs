@@ -17,11 +17,13 @@ const loader=read('public/app/settings-local-loader-v337.js');
 if(!campus.includes('/app/settings-direct-entry-v339.js?v=1.4.0-settings-direct-entry-v339'))fail('Canonical campus is not directly anchored to Settings v339.');
 if(campus.includes('/app/settings-direct-entry-v338.js?v=1.3.0-settings-direct-entry-v338'))fail('Canonical campus still reloads the superseded v338 direct Settings entry.');
 if(!campus.includes('settingsRecovery=v339'))fail('Canonical campus recovery link can still fall back to the v338 generation.');
-if(!pwaStart.includes("const START_REVISION='pwa-start-v447-settings-v339-saved-state-first'"))fail('Installed launcher revision is not v339.');
+if(!pwaStart.includes("const START_REVISION='pwa-start-v448-settings-v339-exact-worker-generation'"))fail('Installed launcher revision is not the exact v339 worker generation.');
 if(!pwaStart.includes("revision=settings-v339-saved-state-first-r1"))fail('Installed launcher does not request the v339 worker generation.');
+if(!pwaStart.includes("navigator.serviceWorker.register(SHELL_WORKER_URL,{scope:'/',updateViaCache:'none'})"))fail('Installed launcher no longer registers the exact cache-distinct worker URL.');
+if(!pwaStart.includes('workerURL(navigator.serviceWorker.controller)===expected'))fail('Installed launcher can still accept a worker by pathname instead of exact generation URL.');
+if(!pwaStart.includes('exactWorkerGeneration:true'))fail('Installed launcher exact-worker contract marker missing.');
 if(!pwaStart.includes("url.searchParams.set('settingsRecovery','v339')"))fail('Installed launcher still routes the campus to an older Settings recovery generation.');
 if(!pwaStart.includes("settingsRecovery:'v339'"))fail('Installed launcher diagnostics do not identify v339.');
-if(!pwaStart.includes('await registration.update()'))fail('Installed launch must explicitly refresh the service worker and its imported scripts.');
 if(!worker.includes("const V203_REGISTERED_SETTINGS_GENERATION='v339-settings-saved-state-first-worker-boundary'"))fail('Canonical service-worker bytes were not advanced to the v339 Settings generation.');
 if(!worker.includes("importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved-state-first-registered-worker-v1')"))fail('Canonical worker no longer imports the v339 Settings gateway recovery before cache handlers.');
 if(worker.indexOf('service-worker-settings-v337-entrypoint.js')>worker.indexOf('service-worker-settings-v325-override.js'))fail('Settings recovery must register before the historical v325 override.');
@@ -52,4 +54,4 @@ if(!directRenderer.includes('ACTION_ROUTE='))fail('Direct renderer no longer laz
 if(!loader.includes("cwAction=1"))fail('Full-route fallback no longer explicitly bypasses the display shim.');
 if(!direct338.includes('serviceWorkerIndependent:true'))fail('Legacy v338 fallback lost its bounded safety contract.');
 
-console.log('PASS Settings v339 is pinned end-to-end across installed launcher, canonical campus, canonical worker, saved-state renderer, and diagnostics; v338 cannot be reasserted by a cold PWA launch.');
+console.log('PASS Settings v339 is pinned end-to-end across exact installed worker URL, canonical campus, canonical worker, saved-state renderer, and diagnostics; pathname-only matching cannot reassert v338.');
