@@ -7,6 +7,8 @@ on:
       - public/app/settings-local-route-v323.js
       - public/app/settings-local-route-v325.js
       - public/app/settings-local-route-v327.js
+      - public/app/settings-local-route-v331.js
+      - public/app/persistent-system-shell-v1.html
       - public/app/working-campus-v440.html
       - scripts/verify-local-model-tab-inert-v326.mjs
       - .github/workflows/verify-local-model-tab-inert-v326.yml
@@ -16,6 +18,8 @@ on:
       - public/app/settings-local-route-v323.js
       - public/app/settings-local-route-v325.js
       - public/app/settings-local-route-v327.js
+      - public/app/settings-local-route-v331.js
+      - public/app/persistent-system-shell-v1.html
       - public/app/working-campus-v440.html
       - scripts/verify-local-model-tab-inert-v326.mjs
       - .github/workflows/verify-local-model-tab-inert-v326.yml
@@ -42,6 +46,7 @@ jobs:
           node --check public/app/settings-local-route-v325.js
           node --check public/app/settings-local-route-v323.js
           node --check public/app/settings-local-route-v327.js
+          node --check public/app/settings-local-route-v331.js
           node --check scripts/verify-local-model-tab-inert-v326.mjs
       - name: Verify live Local models route is inert and canonical
         run: node scripts/verify-local-model-tab-inert-v326.mjs
