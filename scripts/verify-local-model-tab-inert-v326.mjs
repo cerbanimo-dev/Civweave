@@ -18,7 +18,8 @@ const [bridge,compat,fresh,generation,shellHtml]=await Promise.all([
 assert.equal(compat,fresh,'v323 compatibility route and v327 validated implementation must remain byte-identical.');
 assert.equal(generation,fresh,'v331 pathname generation must be byte-identical to the validated inert renderer.');
 assert.notEqual(bridge,fresh,'v325 is intentionally a parent-shell bridge; it must not collapse back to the full implementation.');
-assert.match(shellHtml,/settings-local-route-v331\.js\?v=1\.1\.7-persistent-shell-cache-generation-v333/,'Persistent shell must preload the genuinely cache-distinct v331 pathname.');
+assert.match(shellHtml,/settings-local-route-v331\.js\?cwAction=1&amp;v=1\.1\.8-persistent-shell-full-route-v343/,'Persistent shell must prewarm the full v331 renderer through the service-worker action bypass.');
+assert.doesNotMatch(shellHtml,/settings-local-route-v331\.js\?v=1\.1\.7-persistent-shell-cache-generation-v333/,'Persistent shell must not preload v331 through the ordinary shim route.');
 assert.doesNotMatch(shellHtml,/settings-local-route-v327\.js\?v=1\.1\.6-persistent-shell-direct-preload-v331/,'Query-only preload of v327 must remain retired.');
 
 let managerReads=0;
@@ -118,6 +119,7 @@ console.log(JSON.stringify({
   ok:true,
   revision:api.version,
   cacheGeneration:'settings-local-route-v331.js',
+  parentPrewarm:'cwAction=1',
   managerReads,
   storageWrites,
   rendered:true,
