@@ -2,8 +2,9 @@
 'use strict';
 if(globalThis.CivweaveFulfillmentLedgerV1)return;
 
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const KEY='civweave.fulfillment-ledger.v1';
+const VALIDATION_KEY='civweave.validation-ledger.v1.1';
 const SCHEMA='civweave.fulfillment-ledger.v1';
 const ENTRY='civweave.fulfillment-entry.v1';
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -13,6 +14,16 @@ const clone=value=>structuredClone(value);
 const empty=()=>({schema:SCHEMA,version:1,entries:[],processedFulfillmentIds:[],updatedAt:now()});
 const read=()=>{const value=parse(localStorage.getItem(KEY),null);return value?.schema===SCHEMA&&Array.isArray(value.entries)?value:empty()};
 function write(ledger){ledger.updatedAt=now();localStorage.setItem(KEY,JSON.stringify(ledger));try{dispatchEvent(new CustomEvent('civweave:fulfillment-ledger-changed',{detail:clone(ledger)}))}catch{}return ledger}
+function validationThreshold(validationRef){
+  const ref=clean(validationRef,240),state=parse(localStorage.getItem(VALIDATION_KEY),{}),rows=Array.isArray(state?.thresholdReceipts)?state.thresholdReceipts:[];
+  const receipt=rows.find(row=>clean(row?.id,240)===ref);
+  if(!receipt)return null;
+  if(receipt.outcome!=='pass'||receipt.payoutEligible!==true)return null;
+  if(receipt.integrity!=='derived-from-weighted-confidence')return null;
+  if(!Number.isFinite(Number(receipt.confidence))||Number(receipt.confidence)<.88)return null;
+  if(!receipt.diversity?.satisfied)return null;
+  return receipt;
+}
 function normalize(input={}){
   const contract=globalThis.CivweaveLedgerContractV1;
   if(!contract)throw new Error('Civweave ledger contract is required.');
@@ -45,23 +56,27 @@ function record(input={}){
 async function settle(input={}){
   const rewards=globalThis.CivweaveCanonicalRewardsV2;
   if(!rewards)throw new Error('Canonical Reward Ledger v2 is required.');
-  const ledger=read();
-  if(ledger.processedFulfillmentIds.includes(clean(input.fulfillmentId,240)))return{duplicate:true,entry:ledger.entries.find(row=>row.fulfillmentId===clean(input.fulfillmentId,240))||null};
-  const prepared=normalize(input);
+  const ledger=read(),fulfillmentId=clean(input.fulfillmentId,240);
+  if(ledger.processedFulfillmentIds.includes(fulfillmentId))return{duplicate:true,entry:ledger.entries.find(row=>row.fulfillmentId===fulfillmentId)||null};
+  const prepared=normalize(input),threshold=validationThreshold(prepared.validationRef);
+  if(!threshold)throw new Error('Fulfillment settlement requires an accepted canonical validation threshold receipt.');
+  if(threshold.submissionId&&clean(input.submissionId||prepared.fulfillmentId,240)!==clean(threshold.submissionId,240)&&clean(prepared.fulfillmentId,240)!==clean(threshold.submissionId,240))throw new Error('Validation threshold does not authorize this fulfillment.');
   const burn=await rewards.appendEntry({
     accountId:prepared.requesterId,assetType:prepared.assetType,operation:'burn',amount:prepared.burnAmount,
     sourceSystem:'fellowfare',sourceKind:'fulfillment',sourceId:prepared.fulfillmentId,sourceKey:prepared.burnSourceKey,
-    evidenceHash:prepared.validationRef,metadata:{validationRef:prepared.validationRef,fulfillmentId:prepared.fulfillmentId,role:'requester'}
+    evidenceHash:prepared.validationRef,validatorIds:threshold.verdictReceiptIds,metadata:{validationRef:prepared.validationRef,fulfillmentId:prepared.fulfillmentId,role:'requester',validationConfidence:threshold.confidence}
   });
   const reward=await rewards.appendEntry({
     accountId:prepared.fulfillerId,assetType:prepared.assetType,operation:'earn',amount:prepared.rewardAmount,
     sourceSystem:'fellowfare',sourceKind:'fulfillment',sourceId:prepared.fulfillmentId,sourceKey:prepared.rewardSourceKey,
-    evidenceHash:prepared.validationRef,metadata:{validationRef:prepared.validationRef,fulfillmentId:prepared.fulfillmentId,role:'fulfiller'}
+    evidenceHash:prepared.validationRef,validatorIds:threshold.verdictReceiptIds,metadata:{validationRef:prepared.validationRef,fulfillmentId:prepared.fulfillmentId,role:'fulfiller',validationConfidence:threshold.confidence}
   });
   prepared.status='settled';prepared.settledAt=now();prepared.settlementEventIds=[burn.entry.id,reward.entry.id];
-  ledger.entries.push(prepared);ledger.processedFulfillmentIds.push(prepared.fulfillmentId);write(ledger);
-  return{duplicate:false,entry:prepared,burn:burn.entry,reward:reward.entry};
+  const existingIndex=ledger.entries.findIndex(row=>row.fulfillmentId===prepared.fulfillmentId);
+  if(existingIndex>=0)ledger.entries[existingIndex]={...ledger.entries[existingIndex],...prepared,createdAt:ledger.entries[existingIndex].createdAt||prepared.createdAt};else ledger.entries.push(prepared);
+  ledger.processedFulfillmentIds.push(prepared.fulfillmentId);write(ledger);
+  return{duplicate:false,entry:prepared,burn:burn.entry,reward:reward.entry,validation:threshold};
 }
-const api=Object.freeze({VERSION,KEY,SCHEMA,ENTRY,readLedger:read,record,settle,normalize});
+const api=Object.freeze({VERSION,KEY,VALIDATION_KEY,SCHEMA,ENTRY,readLedger:read,record,settle,normalize,validationThreshold});
 globalThis.CivweaveFulfillmentLedgerV1=api;
 })();
