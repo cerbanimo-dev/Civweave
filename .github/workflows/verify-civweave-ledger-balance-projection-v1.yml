@@ -1,0 +1,24 @@
+name: Verify Civweave reward balance projection v1
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/cw-reward-ledger-v2.js'
+      - 'scripts/verify-civweave-ledger-balance-projection-v1.mjs'
+      - '.github/workflows/verify-civweave-ledger-balance-projection-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/cw-reward-ledger-v2.js'
+      - 'scripts/verify-civweave-ledger-balance-projection-v1.mjs'
+      - '.github/workflows/verify-civweave-ledger-balance-projection-v1.yml'
+permissions:
+  contents: read
+jobs:
+  verify-balance-projection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-civweave-ledger-balance-projection-v1.mjs
