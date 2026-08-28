@@ -157,5 +157,7 @@ jobs:
         run: node scripts/test-creator-provenance-retention-v1.mjs
       - name: Verify mobile Guild receipt subscriber
         run: node scripts/test-mobile-guild-provenance-forward-v1.mjs
+      - name: Verify mobile Guild AI generation budget
+        run: node scripts/test-mobile-guild-provenance-ai-generation-budget-v1.mjs
       - name: Verify Cerbanimo Reckoning audit integration
         run: node scripts/test-creator-audit-quest-beat-v1.mjs
