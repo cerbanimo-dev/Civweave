@@ -19,12 +19,17 @@ const orderedLoads = 'await loadScript(...FAST_RUNTIME);await loadScript(...SERV
 assert.equal(
   loader.split(orderedLoads).length - 1,
   2,
-  'Both warm and cold family-AI loader paths must register server-auto routing after the runtime spine and before response routing.',
+  'Both warm and cold family-AI loader paths must register server-side routing after the runtime spine and before response routing.',
 );
 
 assert.match(router, /const MIDDLEWARE_ID='server-auto-v301'/);
+assert.match(router, /const WORKERS_AI_ROUTES=new Set\(\['cloudflare-workers-ai','workers-ai','cloudflare'\]\)/);
 assert.match(router, /s\.register\(MIDDLEWARE_ID,\{handle\},60\)/);
-assert.match(router, /function isServerAuto\(request=\{\}\)\{return selectedRoute\(request\)===ROUTE\}/);
+assert.match(router, /function routeMode\(request=\{\}\)\{const route=selectedRoute\(request\);if\(route===ROUTE\)return ROUTE;if\(WORKERS_AI_ROUTES\.has\(route\)\)return'cloudflare-workers-ai';return''\}/);
+assert.match(router, /function isServerAuto\(request=\{\}\)\{return routeMode\(request\)===ROUTE\}/);
+assert.match(router, /function isDirectWorkersAI\(request=\{\}\)\{return routeMode\(request\)==='cloudflare-workers-ai'\}/);
+assert.match(router, /modelEvent\(next,'generating'/);
+assert.match(router, /modelEvent\(next,'completed'/);
 assert.match(spine, /function serverAuto\(request=\{\}\)/);
 assert.match(spine, /if\(handledBy==='base-runtime'\)result=await base\.generate\(request\)/);
 
@@ -37,6 +42,8 @@ console.log(JSON.stringify({
   revision: 'family-ai-loader-server-auto-v1',
   loaderOwnsServerAutoReadiness: true,
   serverAutoMiddlewareRequired: true,
+  directWorkersAiMiddlewareRequired: true,
+  sharedModelEventTelemetryRequired: true,
   livingSchoolUsesSharedConfig: true,
   deterministicCurriculumPaddingBlocked: true,
 }, null, 2));
