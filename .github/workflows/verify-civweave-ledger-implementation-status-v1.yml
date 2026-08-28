@@ -1,0 +1,19 @@
+name: Verify Civweave ledger implementation status v1
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'docs/architecture/civweave-ledger-implementation-status-v1.md'
+      - '.github/workflows/verify-civweave-ledger-implementation-status-v1.yml'
+  pull_request:
+    paths:
+      - 'docs/architecture/civweave-ledger-implementation-status-v1.md'
+      - '.github/workflows/verify-civweave-ledger-implementation-status-v1.yml'
+permissions:
+  contents: read
+jobs:
+  verify-status-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: grep -q 'paired requester burn + fulfiller reward' docs/architecture/civweave-ledger-implementation-status-v1.md
