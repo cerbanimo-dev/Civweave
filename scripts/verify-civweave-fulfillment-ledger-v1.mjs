@@ -18,11 +18,18 @@ for(const path of sources)vm.runInContext(fs.readFileSync(new URL(path,ROOT),'ut
 
 const rewards=context.CivweaveCanonicalRewardsV2,fulfillment=context.CivweaveFulfillmentLedgerV1;
 assert.ok(rewards&&fulfillment,'ledger runtimes did not boot');
+const validThreshold=id=>({id,submissionId:id.replace('threshold-','f-'),outcome:'pass',payoutEligible:true,confidence:.94,diversity:{satisfied:true,familyCount:2},verdictReceiptIds:['receipt-a','receipt-b'],integrity:'derived-from-weighted-confidence',createdAt:new Date().toISOString()});
+context.localStorage.setItem(fulfillment.VALIDATION_KEY,JSON.stringify({schema:'civweave.validation-ledger.v1.1',thresholdReceipts:[validThreshold('threshold-1'),validThreshold('threshold-2')]}));
+
 await rewards.appendEntry({accountId:'passport:a',assetType:'button',operation:'earn',amount:10,sourceSystem:'cerbanimo',sourceKind:'doing',sourceId:'task-a'});
+const prerecord=fulfillment.record({fulfillmentId:'f-1',requesterId:'passport:a',fulfillerId:'passport:b',assetType:'button',burnAmount:4,rewardAmount:6,validationRef:'threshold-1',status:'validated'});
+assert.equal(prerecord.duplicate,false);
 const settled=await fulfillment.settle({fulfillmentId:'f-1',requesterId:'passport:a',fulfillerId:'passport:b',assetType:'button',burnAmount:4,rewardAmount:6,validationRef:'threshold-1'});
 assert.equal(settled.entry.status,'settled');
 assert.equal(settled.burn.operation,'burn');
 assert.equal(settled.reward.operation,'earn');
+assert.equal(settled.validation.id,'threshold-1');
+assert.equal(fulfillment.readLedger().entries.filter(row=>row.fulfillmentId==='f-1').length,1,'settlement duplicated a pre-recorded fulfillment');
 const a=rewards.project(undefined,{accountId:'passport:a'}),b=rewards.project(undefined,{accountId:'passport:b'});
 assert.equal(a.buttons,6,'requester burn did not reduce balance');
 assert.equal(b.buttons,6,'fulfiller reward was not newly issued');
@@ -30,5 +37,6 @@ assert.equal(rewards.readLedger().entries.filter(row=>row.sourceId==='f-1').leng
 const again=await fulfillment.settle({fulfillmentId:'f-1',requesterId:'passport:a',fulfillerId:'passport:b',assetType:'button',burnAmount:4,rewardAmount:6,validationRef:'threshold-1'});
 assert.equal(again.duplicate,true,'fulfillment settled twice');
 assert.equal(rewards.readLedger().entries.filter(row=>row.sourceId==='f-1').length,2,'duplicate settlement mutated rewards');
+await assert.rejects(()=>fulfillment.settle({fulfillmentId:'f-missing',requesterId:'passport:a',fulfillerId:'passport:b',assetType:'button',burnAmount:1,rewardAmount:1,validationRef:'threshold-missing'}),/accepted canonical validation threshold/);
 await assert.rejects(()=>fulfillment.settle({fulfillmentId:'f-2',requesterId:'passport:a',fulfillerId:'passport:b',assetType:'button',burnAmount:99,rewardAmount:99,validationRef:'threshold-2'}),/Insufficient button balance/);
 console.log('Civweave fulfillment ledger v1 verified');
