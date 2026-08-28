@@ -24,6 +24,7 @@ const settingsWorker = fs.readFileSync(settingsWorkerPath, 'utf8');
 const expectedVersion = '1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const expectedShellVersion = '1.1.2-canonical-local-settings-refresh';
 const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.0-stage-full-route-v337';
+const parentFullRoute = '/app/settings-local-route-v331.js?cwAction=1&amp;v=1.1.8-persistent-shell-full-route-v343';
 const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.0-stage-full-route';
 
 const fail = message => { throw new Error(message); };
@@ -44,10 +45,13 @@ if (!settingsWorker.includes('CW_SETTINGS_V325_SHIM')) {
   fail('Settings service-worker shim contract changed; revalidate shim rejection in the stage loader.');
 }
 if (!shellHtml.includes(stageLoader)) {
-  fail('Persistent shell HTML does not load the cache-distinct full-route stage-iframe Local Models bridge.');
+  fail('Persistent shell HTML does not load the stage-iframe Local Models bridge.');
 }
-if (shellHtml.includes('<script src="/app/settings-local-route-v331.js')) {
-  fail('Persistent shell HTML must not preload the Local Models renderer into the parent realm.');
+if (!shellHtml.includes(parentFullRoute)) {
+  fail('Persistent shell must prewarm the full v331 renderer through cwAction=1 before the parent Settings runtime can fall back to the v325 shim/bridge.');
+}
+if (shellHtml.includes('/app/settings-local-route-v331.js?v=')) {
+  fail('Persistent shell must never preload v331 through the ordinary service-worker shim route.');
 }
 if (!shellHtml.includes(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`)) {
   fail('Persistent shell runtime version changed; revalidate Local Models stage integration.');
@@ -119,4 +123,4 @@ if (alias !== fresh) {
   fail('v323 compatibility alias drifted from the validated v327 saved-state implementation.');
 }
 
-console.log('PASS persistent Settings recovers Local Models inside the stage iframe, rejects shim/bridge lookalikes, and explicitly loads the validated full renderer.');
+console.log('PASS persistent Settings prewarms the full v331 saved-state renderer in the parent, retains child-stage recovery, rejects shim/bridge lookalikes, and keeps model lifecycle code lazy.');
