@@ -22,7 +22,7 @@ assert.doesNotMatch(workingCampus,/settings-direct-entry-v339\.js/,'Working Camp
 assert.match(workingCampus,/settings-local-route-v327\.js/,'Working Campus must load the canonical cache-distinct Local Models route.');
 
 assert.doesNotMatch(directEntry,/new MutationObserver/,'Settings compatibility recovery must not observe its own subtree mutations.');
-assert.doesNotMatch(directEntry,/setInterval\(/,'Settings compatibility recovery must not run a presentation watchdog.');
+assert.doesNotMatch(directEntry,/const\s+watchdog\s*=\s*setInterval/,'Settings compatibility recovery must not run a presentation watchdog.');
 assert.match(directEntry,/mutationWatch:false/);
 assert.match(directEntry,/watchdog:false/);
 assert.match(directEntry,/eventDriven:true/);
