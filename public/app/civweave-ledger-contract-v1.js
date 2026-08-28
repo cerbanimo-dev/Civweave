@@ -2,7 +2,7 @@
 'use strict';
 if(globalThis.CivweaveLedgerContractV1)return;
 
-const VERSION='1.0.0';
+const VERSION='1.0.1';
 const SCHEMA='civweave.ledger-contract.v1';
 const ASSETS=Object.freeze({
   SKILL_XP:'skill-xp',
@@ -53,12 +53,13 @@ function normalizeOperation(value,amount){
   return num(amount)<0?OPERATIONS.BURN:OPERATIONS.EARN;
 }
 function assertRewardMutation(input={}){
-  const asset=normalizeAsset(input.assetType||input.asset),operation=normalizeOperation(input.operation,input.amount),amount=Math.abs(num(input.amount));
+  const rawOperation=clean(input.operation,40).toLowerCase();
+  const asset=normalizeAsset(input.assetType||input.asset),operation=normalizeOperation(rawOperation,input.amount),amount=Math.abs(num(input.amount));
   if(!allowedAsset(asset)||asset===ASSETS.COTOKEN)throw new Error('Reward Ledger only accepts Skill XP, Acorns, and Buttons.');
   if(!amount)throw new Error('Reward amount must be non-zero.');
+  if(rawOperation==='transfer'||input.toAccountId||input.recipientId||input.transferTo||input.fromAccountId)throw new Error(`${asset} is non-transferable; mint/reward and burn must be separate events.`);
   if(operation===OPERATIONS.BURN&&!BURNABLE[asset])throw new Error(`${asset} is not burnable.`);
   if(operation===OPERATIONS.EARN&&num(input.amount)<0)throw new Error('Earn events must not carry a negative amount.');
-  if(input.toAccountId||input.recipientId||input.transferTo||operation==='transfer')throw new Error(`${asset} is non-transferable; mint/reward and burn must be separate events.`);
   return{assetType:asset,operation,amount};
 }
 function fulfillmentSettlement(input={}){
