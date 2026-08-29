@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,livingActions,workingCampus,directEntry,freshLocalRoute]=await Promise.all([
+const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,livingActions,workingCampus,directEntry,parentLocalRoute,freshLocalRoute]=await Promise.all([
   'public/app/settings-gateway-v317.js',
   'public/app/document-lifecycle-v221.js',
   'public/app/local-ai/settings-panel-v267.js',
@@ -14,9 +14,10 @@ const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemin
   'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs',
   'public/app/working-campus-v440.html',
   'public/app/settings-direct-entry-v339.js',
+  'public/app/settings-local-route-v325.js',
   'public/app/settings-local-route-v327.js'
 ].map(read));
-for(const source of [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,directEntry,freshLocalRoute])new Function(source);
+for(const source of [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,directEntry,parentLocalRoute,freshLocalRoute])new Function(source);
 
 const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
 assert.doesNotMatch(openBlock,/ensureManagement\(/,'Opening Settings must not load downloaded-model management automatically.');
@@ -38,20 +39,23 @@ assert.doesNotMatch(localTabBlock,/requestInferenceQuiescence|local-inference-ca
 // The v339 recovery shim used a subtree MutationObserver that rewrote the visible
 // Settings header on every inspection. Rewriting textContent generated another
 // childList mutation, so opening Settings could starve the main thread before a
-// paint. Fast Boot keeps only the canonical Settings gateway on the page; that
-// gateway self-loads the cache-distinct Local Models route after explicit tab use.
+// paint. Fast Boot keeps only the canonical Settings gateway on the page; the
+// gateway lazily loads the small v325 recovery bridge after explicit tab use,
+// and that bridge retains the fresh v327 implementation as its validated fallback.
 assert.doesNotMatch(workingCampus,/settings-direct-entry-v339\.js/,'Working Campus must not load the recursive Local Models recovery shim.');
 assert.match(workingCampus,/settings-gateway-v317\.js/,'Working Campus must retain the canonical Settings gateway.');
-assert.doesNotMatch(workingCampus,/<script[^>]+settings-local-route-v327\.js/,'Fast Boot must not eagerly load the Local Models route.');
-assert.match(gateway,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v327\.js/,'Settings gateway must retain the cache-distinct canonical Local Models route.');
+assert.doesNotMatch(workingCampus,/<script[^>]+settings-local-route-v32[57]\.js/,'Fast Boot must not eagerly load a Local Models route.');
+assert.match(gateway,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v325\.js/,'Settings gateway must retain the small self-loading Local Models recovery route.');
 assert.match(gateway,/localModelRouteSelfLoading:true/,'Settings gateway must self-load the Local Models route.');
+assert.match(parentLocalRoute,/const FULL_ROUTE='\/app\/settings-local-route-v327\.js/,'The parent Local Models bridge must retain the fresh v327 implementation fallback.');
+assert.match(parentLocalRoute,/staleWorkerSourceRecovery:true/,'The parent Local Models bridge must retain stale-worker source recovery.');
 assert.doesNotMatch(directEntry,/new MutationObserver/,'Local Models fallback must not observe and rewrite the Settings subtree.');
 assert.doesNotMatch(directEntry,/const watchdog\s*=\s*setInterval/,'Local Models fallback must not run a presentation watchdog.');
 assert.match(directEntry,/mutationWatch:false/);
 assert.match(directEntry,/watchdog:false/);
 assert.match(directEntry,/eventDriven:true/);
 assert.match(directEntry,/canonicalRouteFirst:true/);
-assert.match(freshLocalRoute,/renderLocalModels/,'The cache-distinct Local Models route must own direct saved-state rendering.');
+assert.match(freshLocalRoute,/renderLocalModels/,'The fresh Local Models route must own direct saved-state rendering.');
 
 assert.match(lifecycle,/document-lifecycle-v323-local-model-view-service/);
 assert.match(lifecycle,/document-lifecycle-v323-view-only-actions-lazy/);
@@ -100,7 +104,7 @@ console.log(JSON.stringify({
   contract:'settings-local-model-v342-fast-boot-v1',
   canonicalTabs:true,
   workingCampusSettingsGatewayOnly:true,
-  localModelsRouteSelfLoading:true,
+  localModelsRouteSelfLoading:'v325-parent-to-v327-fallback',
   recursiveSettingsObserver:false,
   localRouteVisibleWithoutManager:true,
   localModelsViewOnlyOnTab:true,
