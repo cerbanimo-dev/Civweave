@@ -106,12 +106,22 @@ const candidateRoots = [...new Set((manifest.includePrefixes || ['/app/', '/exte
 const files = [];
 for (const rootName of candidateRoots) files.push(...await walk(path.join(publicDir, rootName)));
 
+// The offline package manifest is itself part of /app/. Measuring its final byte
+// size while simultaneously writing the byte total into that same file creates a
+// feedback loop: changing the preflight numbers changes the measured package size
+// again. Measure a canonical copy with preflight removed so repeated generation is
+// idempotent while the rest of the manifest still counts toward the package.
+const manifestForStableSizing = { ...manifest };
+delete manifestForStableSizing.preflight;
+const stableOfflineManifestBytes = Buffer.byteLength(`${JSON.stringify(manifestForStableSizing, null, 2)}\n`, 'utf8');
+
 const candidates = [];
 for (const file of [...new Set(files)]) {
   const urlPath = urlPathFor(file);
   if (!isCandidate(urlPath, manifest)) continue;
   const stat = await fs.stat(file);
-  candidates.push({ urlPath, bytes: stat.size });
+  const bytes = path.resolve(file) === path.resolve(offlineManifestPath) ? stableOfflineManifestBytes : stat.size;
+  candidates.push({ urlPath, bytes });
 }
 
 const maxAssets = Math.max(50, Math.min(1500, Number(manifest.maxAssets || 700)));
@@ -136,6 +146,7 @@ console.log(JSON.stringify({
   version,
   sourceMutations: false,
   sourceAuthority: 'committed-bytes-only-v344',
+  preflightSelfReference: false,
   shellIntegrity: { changed: integrityChanged, requiredAssetCount: requiredShellAssets.length },
   campusBudget: { changed: manifestChanged, ...manifest.preflight }
 }, null, 2));
