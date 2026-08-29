@@ -32,14 +32,19 @@ assert.match(gateway,/geminiRouting:GEMINI_ROUTING/);
 assert.match(gateway,/if\(name==='local-models'\)/);
 const localTabBlock=gateway.slice(gateway.indexOf("if(name==='local-models')"),gateway.indexOf("if(name==='membership')"));
 assert.match(localTabBlock,/ensureManagement\(layer\)/);
+assert.match(localTabBlock,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/,'Local Models view work must start only after its tab paints.');
 assert.doesNotMatch(localTabBlock,/requestInferenceQuiescence|local-inference-cancel-requested|requestAdapter|new Worker|\.generate\(/);
 
 // The v339 recovery shim used a subtree MutationObserver that rewrote the visible
 // Settings header on every inspection. Rewriting textContent generated another
 // childList mutation, so opening Settings could starve the main thread before a
-// paint. The Working Campus must use the canonical local route directly instead.
+// paint. Fast Boot keeps only the canonical Settings gateway on the page; that
+// gateway self-loads the cache-distinct Local Models route after explicit tab use.
 assert.doesNotMatch(workingCampus,/settings-direct-entry-v339\.js/,'Working Campus must not load the recursive Local Models recovery shim.');
-assert.match(workingCampus,/settings-local-route-v327\.js/,'Working Campus must retain the cache-distinct canonical Local Models route.');
+assert.match(workingCampus,/settings-gateway-v317\.js/,'Working Campus must retain the canonical Settings gateway.');
+assert.doesNotMatch(workingCampus,/<script[^>]+settings-local-route-v327\.js/,'Fast Boot must not eagerly load the Local Models route.');
+assert.match(gateway,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v327\.js/,'Settings gateway must retain the cache-distinct canonical Local Models route.');
+assert.match(gateway,/localModelRouteSelfLoading:true/,'Settings gateway must self-load the Local Models route.');
 assert.doesNotMatch(directEntry,/new MutationObserver/,'Local Models fallback must not observe and rewrite the Settings subtree.');
 assert.doesNotMatch(directEntry,/const watchdog\s*=\s*setInterval/,'Local Models fallback must not run a presentation watchdog.');
 assert.match(directEntry,/mutationWatch:false/);
@@ -92,9 +97,10 @@ assert.doesNotMatch(livingActions,/['"]open-ai-settings['"]/);
 
 console.log(JSON.stringify({
   ok:true,
-  contract:'settings-local-model-v342',
+  contract:'settings-local-model-v342-fast-boot-v1',
   canonicalTabs:true,
-  workingCampusCanonicalRouteOnly:true,
+  workingCampusSettingsGatewayOnly:true,
+  localModelsRouteSelfLoading:true,
   recursiveSettingsObserver:false,
   localRouteVisibleWithoutManager:true,
   localModelsViewOnlyOnTab:true,
