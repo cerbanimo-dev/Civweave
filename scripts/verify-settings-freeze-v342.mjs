@@ -19,7 +19,12 @@ assert.doesNotMatch(openBlock,/ensureManagement\(/,'Opening Settings must paint 
 assert.doesNotMatch(openBlock,/requestInferenceQuiescence|local-inference-cancel-requested|new Worker|\.generate\(/,'Opening Settings must not start or tear down inference.');
 
 assert.doesNotMatch(workingCampus,/settings-direct-entry-v339\.js/,'Working Campus must not load the recursive v339 recovery shim.');
-assert.match(workingCampus,/settings-local-route-v327\.js/,'Working Campus must load the canonical cache-distinct Local Models route.');
+assert.match(workingCampus,/settings-gateway-v317\.js/,'Working Campus must retain the canonical Settings gateway.');
+assert.doesNotMatch(workingCampus,/<script[^>]+settings-local-route-v327\.js/,'Fast Boot must not eagerly load the Local Models route.');
+assert.match(gateway,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v327\.js/,'The Settings gateway must retain the cache-distinct Local Models route.');
+assert.match(gateway,/localModelRouteSelfLoading:true/,'The Settings gateway must self-load the Local Models route.');
+const localTabBlock=gateway.slice(gateway.indexOf("if(name==='local-models')"),gateway.indexOf("if(name==='membership')"));
+assert.match(localTabBlock,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/,'Local Models management must start only after the tab paints.');
 
 assert.doesNotMatch(directEntry,/new MutationObserver/,'Settings compatibility recovery must not observe its own subtree mutations.');
 assert.doesNotMatch(directEntry,/const\s+watchdog\s*=\s*setInterval/,'Settings compatibility recovery must not run a presentation watchdog.');
@@ -31,9 +36,10 @@ assert.match(localRoute,/renderLocalModels/,'The canonical Local Models route mu
 
 console.log(JSON.stringify({
   ok:true,
-  contract:'settings-freeze-v342',
+  contract:'settings-freeze-v342-fast-boot-v1',
   settingsOpenPaintFirst:true,
-  workingCampusCanonicalRouteOnly:true,
+  workingCampusSettingsGatewayOnly:true,
+  localModelsRoute:'self-loading-after-tab-paint',
   recursiveObserver:false,
   watchdog:false,
   eventDrivenFallback:true
