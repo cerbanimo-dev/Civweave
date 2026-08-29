@@ -45,3 +45,50 @@ self.addEventListener('fetch',event=>{
   const url=new URL(request.url);if(url.origin!==self.location.origin||url.pathname!==CW_SETTINGS_V339_GATEWAY)return;
   event.stopImmediatePropagation();event.respondWith(cwSettingsV339GatewayResponse(request));
 });
+
+// v344 staging takeover: PR #765 changed the persistent shell bytes but the
+// required-shell integrity manifest was not regenerated. Installed staging PWAs
+// could therefore retain the previous shell generation even though Pages had the
+// new Local Models code. This imported-worker byte change forces a service-worker
+// update; activation purges only the Settings delivery surface and persistent
+// shell document, never saved model state or downloaded model/model-pack bytes.
+const CW_SETTINGS_V344_HOST='civweave-staging.pages.dev';
+const CW_SETTINGS_V344_CACHE='cwrecovery-v457-settings-delivery-integrity-v344';
+const CW_SETTINGS_V344_MARKER='/__civweave/settings-delivery-integrity-v344';
+const CW_SETTINGS_V344_PURGE_PATHS=new Set([
+  '/app/persistent-system-shell-v1.html',
+  '/app/settings-gateway-v317.js',
+  '/app/settings-direct-entry-v339.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-models-direct-v325.js',
+  '/app/settings-local-route-v323.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-local-route-v327.js',
+  '/app/settings-local-route-v331.js',
+  '/app/shell-integrity-v281.json'
+]);
+function cwSettingsV344MarkerRequest(){return new Request(new URL(CW_SETTINGS_V344_MARKER,self.location.origin).href)}
+async function cwSettingsV344Pending(){
+  if(self.location.hostname!==CW_SETTINGS_V344_HOST)return false;
+  try{return !(await(await caches.open(CW_SETTINGS_V344_CACHE)).match(cwSettingsV344MarkerRequest()))}catch{return true}
+}
+async function cwSettingsV344Purge(){
+  const names=await caches.keys();
+  for(const name of names){
+    const cache=await caches.open(name),requests=await cache.keys();
+    for(const request of requests){
+      let pathname='';try{pathname=new URL(request.url).pathname}catch{}
+      if(CW_SETTINGS_V344_PURGE_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true});
+    }
+  }
+}
+if(self.location.hostname===CW_SETTINGS_V344_HOST){
+  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await cwSettingsV344Pending())await self.skipWaiting()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{
+    if(!(await cwSettingsV344Pending()))return;
+    await cwSettingsV344Purge();
+    const cache=await caches.open(CW_SETTINGS_V344_CACHE);
+    await cache.put(cwSettingsV344MarkerRequest(),new Response('settings-delivery-integrity-v344-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));
+    await self.clients.claim();
+  })())});
+}
