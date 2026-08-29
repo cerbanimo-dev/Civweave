@@ -6,12 +6,14 @@ on:
     paths:
       - public/app/server-ai-router-v301.js
       - public/app/node-ai-mesh-v1.js
+      - public/app/living-school-generation-budget-v3.js
       - scripts/verify-server-ai-request-deadlines-v1.mjs
       - .github/workflows/verify-server-ai-request-deadlines-v1.yml
   pull_request:
     paths:
       - public/app/server-ai-router-v301.js
       - public/app/node-ai-mesh-v1.js
+      - public/app/living-school-generation-budget-v3.js
       - scripts/verify-server-ai-request-deadlines-v1.mjs
       - .github/workflows/verify-server-ai-request-deadlines-v1.yml
 
