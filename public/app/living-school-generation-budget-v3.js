@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='3.0.0-living-school-generation-budget-v3-provider-neutral';
+const VERSION='3.0.1-living-school-generation-budget-v3-design-transport-deadline';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
@@ -69,7 +69,10 @@ function cleanDesignSources(request){
 }
 function boundedRequest(request,tier='small'){
   const prepared=designPurpose(request?.purpose)?cleanDesignSources(request):request,config={...(prepared?.config||{})};
-  if(tier==='complex')config.maxTokens=Math.max(Number(config.maxTokens)||0,DESIGN_MAX_TOKENS);
+  if(tier==='complex'){
+    config.maxTokens=Math.max(Number(config.maxTokens)||0,DESIGN_MAX_TOKENS);
+    config.timeoutMs=Math.max(Number(config.timeoutMs)||0,DESIGN_TIMEOUT_MS);
+  }
   return{...prepared,config,maxRepairAttempts:0,taskTier:tier,executionProfile:'interactive',context:{...(prepared?.context||{}),automaticRepairBudget:0,generationBudgetRevision:VERSION,designProviderCallsMax:1,postDesignProviderCallsMax:0,providerSelectionOwner:'civweave-runtime',providerNeutralBudget:true,...(tier==='complex'?{designTimeoutMs:DESIGN_TIMEOUT_MS}: {})}};
 }
 function resultText(result){
