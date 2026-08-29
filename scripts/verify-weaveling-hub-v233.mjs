@@ -39,8 +39,12 @@ assert(hub.includes('wh233-embedded-composer'),'Working Campus embedded composer
 assert(!hub.includes('wh233-legacy-bridge'),'Legacy chat bridge naming must be retired.');
 
 for(const retired of ['public/app/persistent-guide-chat-v215.js','public/app/persistent-guide-viewport-v216.js'])assert.equal(await exists(retired),false,`${retired} must remain deleted.`);
-assert(runtime.includes("const HUB_SCRIPT='/app/weaveling-hub-v233.js';"),'Working Campus must load the Weaveling hub.');
-assert(runtime.includes('await ensureHub();'),'Working Campus must mount the hub before its split runtime starts.');
+assert(runtime.includes("const HUB_SCRIPT='/app/weaveling-hub-v233.js';"),'Working Campus must retain the Weaveling hub capability.');
+assert(runtime.includes('function scheduleHubHydration()'),'Working Campus must schedule nonblocking hub hydration.');
+assert(runtime.includes("blocking:false"),'Hub readiness must explicitly publish its nonblocking Fast Boot contract.');
+assert(!runtime.includes('  await ensureHub();'),'Working Campus must not block core startup on the observation hub.');
+const coreRunIndex=runtime.indexOf('  runCompiledCore();'),hubScheduleIndex=runtime.indexOf('  scheduleHubHydration();');
+assert(coreRunIndex>=0&&hubScheduleIndex>coreRunIndex,'Working Campus must make its compiled core interactive before scheduling hub hydration.');
 assert(workspace.includes('Compatibility loader only'),'v242 must remain a loader-only compatibility path.');
 assert(workspace.includes("const TARGET='/app/guide-chat-surface-v350.js';"),'v242 must forward to the canonical v350 chat surface.');
 assert(guideSurface.includes("const LAUNCHER_ID='cwp215-launcher';"),'Canonical v350 launcher contract changed unexpectedly.');
@@ -70,4 +74,4 @@ assert.equal(working.plan.id,'intention-test','Visible review state must contain
 assert.equal(generated.response.approvalGate.required,true,'Materialized plan must not activate without approval.');
 assert(events.some(event=>event.type==='civweave:weave-review-ready'),'Materialization must emit the explicit review-ready event.');
 
-console.log(JSON.stringify({ok:true,version,revision:'weaveling-hub-v233+v350-canonical-chat',sections:['agent-reports','chronicle','report-in'],chatOwner:'guide-chat-surface-v350',compatibilityLoader:'guide-workspace-v242',retiredRuntimeLoads:0,reviewMaterialization:'working-campus-review-v265',scrollOwner:'document-v265'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'weaveling-hub-v233+v350-canonical-chat+fast-boot-v1',sections:['agent-reports','chronicle','report-in'],chatOwner:'guide-chat-surface-v350',compatibilityLoader:'guide-workspace-v242',retiredRuntimeLoads:0,hubStartup:'post-core-nonblocking',reviewMaterialization:'working-campus-review-v265',scrollOwner:'document-v265'},null,2));
