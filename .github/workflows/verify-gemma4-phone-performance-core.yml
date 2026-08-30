@@ -13,6 +13,7 @@ on:
       - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
       - 'scripts/verify-gemma4-phone-performance-core-v1.mjs'
       - 'scripts/verify-gemma4-settings-migration-v1.mjs'
+      - 'scripts/verify-gemma4-browser-user-gesture-v1.mjs'
       - '.github/workflows/verify-gemma4-phone-performance-core.yml'
   push:
     branches: [main, staging]
@@ -27,6 +28,7 @@ on:
       - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
       - 'scripts/verify-gemma4-phone-performance-core-v1.mjs'
       - 'scripts/verify-gemma4-settings-migration-v1.mjs'
+      - 'scripts/verify-gemma4-browser-user-gesture-v1.mjs'
       - '.github/workflows/verify-gemma4-phone-performance-core.yml'
   workflow_dispatch:
 
@@ -58,7 +60,10 @@ jobs:
           node --check public/app/local-ai/gemma4-e4b-q4-extension-v1.js
           node --check scripts/verify-gemma4-phone-performance-core-v1.mjs
           node --check scripts/verify-gemma4-settings-migration-v1.mjs
+          node --check scripts/verify-gemma4-browser-user-gesture-v1.mjs
       - name: Verify Gemma 4 phone authority contracts
         run: node scripts/verify-gemma4-phone-performance-core-v1.mjs
       - name: Verify Gemma 4 settings migration
         run: node scripts/verify-gemma4-settings-migration-v1.mjs
+      - name: Verify direct browser download gestures
+        run: node scripts/verify-gemma4-browser-user-gesture-v1.mjs
