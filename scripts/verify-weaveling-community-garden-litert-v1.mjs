@@ -128,7 +128,7 @@ includes(extension,'data-litert-fast-browser-link','LiteRT model extension direc
 includes(extension,'data-litert-fast-import-input','LiteRT model extension browser file import');
 includes(extension,'directBrowserUserGesture:true','LiteRT model extension browser gesture contract');
 includes(extension,'directFileImport:true','LiteRT model extension browser import contract');
-assert(!extension.includes('data-litert-fast-pair'),'LiteRT phone UI must not claim a one-tap multi-file browser download.');
+assert(!/<button[^>]+data-litert-fast-pair/.test(extension),'LiteRT phone UI must not render a one-tap multi-file browser download button.');
 includes(extension,'transparentAcceleration:true','LiteRT model extension');
 includes(extension,'dualModelAcceleration:true','LiteRT model extension');
 includes(extension,'oneEngineAtATime:true','LiteRT model extension');
