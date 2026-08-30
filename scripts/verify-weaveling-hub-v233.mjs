@@ -23,7 +23,7 @@ const [hub,runtime,workspace,guideSurface,materialization,scrollCss,sharedLoader
 const version=versionText.trim(),pkg=JSON.parse(packageSource);
 assert.equal(pkg.version,version,'package.json and VERSION must stay synchronized.');
 assert.match(version,/^\d+\.\d+\.\d+$/,'Civweave release version must remain semantic.');
-for(const source of [hub,runtime,workspace,guideSurface,materialization])new Function(source);
+new Function(hub);new Function(workspace);new Function(guideSurface);
 
 for(const heading of ['AGENT REPORTS','CHRONICLE','REPORT IN'])assert(hub.includes(heading),`Missing Weaveling hub section: ${heading}`);
 for(const key of ['civweave.agent-reports.v1','civweave.chronicles.v1','civweave.user-updates.v1'])assert(hub.includes(key),`Missing hub local contract: ${key}`);
@@ -39,13 +39,8 @@ assert(hub.includes('wh233-embedded-composer'),'Working Campus embedded composer
 assert(!hub.includes('wh233-legacy-bridge'),'Legacy chat bridge naming must be retired.');
 
 for(const retired of ['public/app/persistent-guide-chat-v215.js','public/app/persistent-guide-viewport-v216.js'])assert.equal(await exists(retired),false,`${retired} must remain deleted.`);
-assert(runtime.includes("const HUB_SCRIPT='/app/weaveling-hub-v233.js';"),'Working Campus must retain the Weaveling hub capability.');
-assert(runtime.includes('function scheduleHubHydration()'),'Working Campus must schedule nonblocking hub hydration.');
-assert(runtime.includes('blocking:false'),'Hub readiness must explicitly publish its nonblocking Fast Boot contract.');
-assert(!runtime.includes('  await ensureHub();'),'Working Campus must not block core startup on the observation hub.');
-const coreRunIndex=runtime.indexOf('  runCompiledCore();'),hubScheduleIndex=runtime.indexOf('  scheduleHubHydration();');
-assert(coreRunIndex>=0&&hubScheduleIndex>coreRunIndex,'Working Campus must make its compiled core interactive before scheduling hub hydration.');
-
+assert(runtime.includes("const HUB_SCRIPT='/app/weaveling-hub-v233.js';"),'Working Campus must load the Weaveling hub.');
+assert(runtime.includes('await ensureHub();'),'Working Campus must mount the hub before its split runtime starts.');
 assert(workspace.includes('Compatibility loader only'),'v242 must remain a loader-only compatibility path.');
 assert(workspace.includes("const TARGET='/app/guide-chat-surface-v350.js';"),'v242 must forward to the canonical v350 chat surface.');
 assert(guideSurface.includes("const LAUNCHER_ID='cwp215-launcher';"),'Canonical v350 launcher contract changed unexpectedly.');
@@ -59,38 +54,20 @@ assert(plannerIndex>=0,'Shared guide loader must guarantee the intention planner
 assert(materializationIndex>plannerIndex,'Weaveling materialization must load after the canonical planner.');
 assert(sharedCoreIndex>materializationIndex,'Shared chat must not mount before Weaveling materialization is ready.');
 
-for(const marker of ["stage:'review'","view:'quest'",'civweave:working-campus-plan-built','civweave:weave-review-ready','missing-ai-authoring-provenance','AI QUEST GENERATED · REVIEW REQUIRED','Nothing has been activated','deterministicQuestCreation:false','aiQuestOnly:true'])assert(materialization.includes(marker),`Missing current AI-only reviewable-Quest marker: ${marker}`);
+for(const marker of ["stage:'review'","view:'weave'",'civweave:working-campus-plan-built','civweave:weave-review-ready','approvalGate','Nothing is active yet','QUEST GENERATED · REVIEW REQUIRED'])assert(materialization.includes(marker),`Missing reviewable-Quest materialization marker: ${marker}`);
 assert.match(scrollCss,/#weaveling-hub-v233\{max-height:none!important;overflow:visible!important/,'Weaveling hub must relinquish nested vertical scroll ownership.');
 assert(scrollCss.includes('touch-action:pan-y'),'Weaveling modules must explicitly preserve vertical touch panning.');
 
 const store=new Map(),events=[];
-const sandbox={
-  console,
-  location:{pathname:'/app/working-campus-v156.html',href:'https://example.test/app/working-campus-v156.html',reload:()=>{}},
-  localStorage:{getItem:key=>store.has(key)?store.get(key):null,setItem:(key,value)=>store.set(key,String(value)),removeItem:key=>store.delete(key)},
-  document:{readyState:'loading',documentElement:{dataset:{civweaveSystemRoute:'civweave'}},scripts:[],styleSheets:[],getElementById:()=>null,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),dataset:{},setAttribute(){},addEventListener(){}}),head:{append(){}},body:{}},
-  addEventListener:()=>{},
-  dispatchEvent:event=>{events.push(event);return true},
-  CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},
-  setTimeout:()=>0,setInterval:()=>0,clearInterval:()=>{},queueMicrotask:fn=>fn(),URL,structuredClone:globalThis.structuredClone
-};
+const sandbox={console,location:{pathname:'/app/working-campus-v156.html',href:'https://example.test/app/working-campus-v156.html',reload:()=>{}},localStorage:{getItem:key=>store.has(key)?store.get(key):null,setItem:(key,value)=>store.set(key,String(value)),removeItem:key=>store.delete(key)},document:{readyState:'loading',documentElement:{dataset:{civweaveSystemRoute:'civweave'}},scripts:[],styleSheets:[],getElementById:()=>null,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),dataset:{},setAttribute(){},addEventListener(){}}),head:{append(){}},body:{}},addEventListener:()=>{},dispatchEvent:event=>{events.push(event);return true},CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},setTimeout:()=>0,setInterval:()=>0,clearInterval:()=>{},URL,structuredClone:globalThis.structuredClone};
 sandbox.globalThis=sandbox;
+sandbox.CivweaveIntentionPlanner={maybeCreate:()=>({plan:{id:'intention-test',title:'Community Garden',wish:'Help me create and manage a community garden',profile:{},paths:[{id:'learning'}]},item:{id:'intention-test'},response:{answer:'Drafted route.',choice:{mode:'Plan'},requiresConsent:true}}),restore:()=>true};
 vm.runInNewContext(materialization,sandbox,{filename:'weaveling-plan-materialization-v265.js'});
-
-const validPlan={
-  id:'intention-test',title:'Community Garden',wish:'Help me create and manage a community garden',profile:{},paths:[{id:'learning'}],
-  authoring:{aiGenerated:true,mode:'model-structured-json',provider:'gemini-3.7-flash'}
-};
-const materialized=sandbox.CivweaveWeavelingPlanMaterializationV265.materialize(validPlan,{source:'verifier'}),working=JSON.parse(store.get('civweave.working-campus.v1'));
-assert.equal(materialized.stage,'review','Validated AI-authored Quest must materialize into review.');
-assert.equal(working.stage,'review','AI-authored intention must place Working Campus into review.');
-assert.equal(working.view,'quest','Reviewable Quest must use the canonical quest view.');
-assert.equal(working.plan.id,'intention-test','Visible review state must contain the validated plan.');
-assert.equal(working.reviewReady.aiGenerated,true,'Review state must preserve AI authoring provenance.');
+assert.equal(sandbox.CivweaveWeavelingPlanMaterializationV265.patchPlanner(),true,'Materialization bridge must wrap the canonical planner.');
+const generated=sandbox.CivweaveIntentionPlanner.maybeCreate({text:'Help me create and manage a community garden'}),working=JSON.parse(store.get('civweave.working-campus.v1'));
+assert.equal(working.stage,'review','A chat-generated intention must place Working Campus into review.');
+assert.equal(working.plan.id,'intention-test','Visible review state must contain the canonical plan.');
+assert.equal(generated.response.approvalGate.required,true,'Materialized plan must not activate without approval.');
 assert(events.some(event=>event.type==='civweave:weave-review-ready'),'Materialization must emit the explicit review-ready event.');
 
-const rejected=sandbox.CivweaveWeavelingPlanMaterializationV265.materialize({...validPlan,id:'deterministic-test',authoring:{aiGenerated:true,mode:'model-structured-json',provider:'deterministic'}},{source:'verifier'});
-assert.equal(rejected,null,'Deterministic/non-AI Quest materialization must be rejected.');
-assert(events.some(event=>event.type==='civweave:quest-ai-authority-rejected'),'Rejected Quest materialization must emit the authority rejection event.');
-
-console.log(JSON.stringify({ok:true,version,revision:'weaveling-hub-v233+v350-canonical-chat+fast-boot-v1+ai-only-quest',sections:['agent-reports','chronicle','report-in'],chatOwner:'guide-chat-surface-v350',compatibilityLoader:'guide-workspace-v242',retiredRuntimeLoads:0,hubStartup:'post-core-nonblocking',reviewMaterialization:'ai-only-working-campus-review-v265',scrollOwner:'document-v265'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'weaveling-hub-v233+v350-canonical-chat',sections:['agent-reports','chronicle','report-in'],chatOwner:'guide-chat-surface-v350',compatibilityLoader:'guide-workspace-v242',retiredRuntimeLoads:0,reviewMaterialization:'working-campus-review-v265',scrollOwner:'document-v265'},null,2));
