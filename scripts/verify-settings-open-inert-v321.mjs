@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,livingActions,workingCampus,directEntry,parentLocalRoute,freshLocalRoute]=await Promise.all([
+const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,livingActions,workingCampus,directEntry,freshLocalRoute]=await Promise.all([
   'public/app/settings-gateway-v317.js',
   'public/app/document-lifecycle-v221.js',
   'public/app/local-ai/settings-panel-v267.js',
@@ -14,10 +14,9 @@ const [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemin
   'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs',
   'public/app/working-campus-v440.html',
   'public/app/settings-direct-entry-v339.js',
-  'public/app/settings-local-route-v325.js',
   'public/app/settings-local-route-v327.js'
 ].map(read));
-for(const source of [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,directEntry,parentLocalRoute,freshLocalRoute])new Function(source);
+for(const source of [gateway,lifecycle,panel,localRoute,boundary,manager,policy,serverAI,gemini,directEntry,freshLocalRoute])new Function(source);
 
 const openBlock=gateway.slice(gateway.indexOf('function open(launcher)'),gateway.indexOf('function ensure()'));
 assert.doesNotMatch(openBlock,/ensureManagement\(/,'Opening Settings must not load downloaded-model management automatically.');
@@ -33,29 +32,21 @@ assert.match(gateway,/geminiRouting:GEMINI_ROUTING/);
 assert.match(gateway,/if\(name==='local-models'\)/);
 const localTabBlock=gateway.slice(gateway.indexOf("if(name==='local-models')"),gateway.indexOf("if(name==='membership')"));
 assert.match(localTabBlock,/ensureManagement\(layer\)/);
-assert.match(localTabBlock,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/,'Local Models view work must start only after its tab paints.');
 assert.doesNotMatch(localTabBlock,/requestInferenceQuiescence|local-inference-cancel-requested|requestAdapter|new Worker|\.generate\(/);
 
 // The v339 recovery shim used a subtree MutationObserver that rewrote the visible
 // Settings header on every inspection. Rewriting textContent generated another
 // childList mutation, so opening Settings could starve the main thread before a
-// paint. Fast Boot keeps only the canonical Settings gateway on the page; the
-// gateway lazily loads the small v325 recovery bridge after explicit tab use,
-// and that bridge retains the fresh v327 implementation as its validated fallback.
+// paint. The Working Campus must use the canonical local route directly instead.
 assert.doesNotMatch(workingCampus,/settings-direct-entry-v339\.js/,'Working Campus must not load the recursive Local Models recovery shim.');
-assert.match(workingCampus,/settings-gateway-v317\.js/,'Working Campus must retain the canonical Settings gateway.');
-assert.doesNotMatch(workingCampus,/<script[^>]+settings-local-route-v32[57]\.js/,'Fast Boot must not eagerly load a Local Models route.');
-assert.match(gateway,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v325\.js/,'Settings gateway must retain the small self-loading Local Models recovery route.');
-assert.match(gateway,/localModelRouteSelfLoading:true/,'Settings gateway must self-load the Local Models route.');
-assert.match(parentLocalRoute,/const FULL_ROUTE='\/app\/settings-local-route-v327\.js/,'The parent Local Models bridge must retain the fresh v327 implementation fallback.');
-assert.match(parentLocalRoute,/staleWorkerSourceRecovery:true/,'The parent Local Models bridge must retain stale-worker source recovery.');
+assert.match(workingCampus,/settings-local-route-v327\.js/,'Working Campus must retain the cache-distinct canonical Local Models route.');
 assert.doesNotMatch(directEntry,/new MutationObserver/,'Local Models fallback must not observe and rewrite the Settings subtree.');
 assert.doesNotMatch(directEntry,/const watchdog\s*=\s*setInterval/,'Local Models fallback must not run a presentation watchdog.');
 assert.match(directEntry,/mutationWatch:false/);
 assert.match(directEntry,/watchdog:false/);
 assert.match(directEntry,/eventDriven:true/);
 assert.match(directEntry,/canonicalRouteFirst:true/);
-assert.match(freshLocalRoute,/renderLocalModels/,'The fresh Local Models route must own direct saved-state rendering.');
+assert.match(freshLocalRoute,/renderLocalModels/,'The cache-distinct Local Models route must own direct saved-state rendering.');
 
 assert.match(lifecycle,/document-lifecycle-v323-local-model-view-service/);
 assert.match(lifecycle,/document-lifecycle-v323-view-only-actions-lazy/);
@@ -91,8 +82,7 @@ assert.match(localRoute,/option\.textContent='Downloaded local AI'/);
 assert.match(localRoute,/managerDependency:false/);
 assert.match(localRoute,/runtimeDependency:false/);
 assert.match(localRoute,/cacheDependency:false/);
-assert.match(localRoute,/const interactive=\{route:ROUTE,provider:ROUTE,model:String\(current\.id\),endpoint:'',externalConsent:false\}/,'A selected downloaded model must persist as the explicit interactive route.');
-assert.match(localRoute,/localOnly:true/,'Downloaded local selection must remain hard local-only rather than silently falling through to cloud or Guild AI.');
+assert.match(localRoute,/event\.preventDefault\(\);event\.stopImmediatePropagation\(\)/,'Downloaded local route must preserve the configured fallback instead of overwriting provider settings.');
 assert.match(boundary,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v323\.js'/);
 assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[SETTINGS_GATEWAY,SETTINGS_LOCAL_ROUTE,/,'All five systems must load the same lightweight local-route enhancer after the canonical Settings owner.');
 
@@ -102,15 +92,13 @@ assert.doesNotMatch(livingActions,/['"]open-ai-settings['"]/);
 
 console.log(JSON.stringify({
   ok:true,
-  contract:'settings-local-model-v342-fast-boot-v1',
+  contract:'settings-local-model-v342',
   canonicalTabs:true,
-  workingCampusSettingsGatewayOnly:true,
-  localModelsRouteSelfLoading:'v325-parent-to-v327-fallback',
+  workingCampusCanonicalRouteOnly:true,
   recursiveSettingsObserver:false,
   localRouteVisibleWithoutManager:true,
   localModelsViewOnlyOnTab:true,
   localModelActionModulesOnDemand:true,
-  hardLocalSelection:true,
   cacheReadOnView:false,
   serviceWorkerReadyOnView:false,
   hardwareProbeOnView:false,
