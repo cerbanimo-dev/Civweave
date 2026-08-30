@@ -9,8 +9,10 @@ const bridgePath = path.join(root, 'public/app/settings-local-route-v325.js');
 const aliasPath = path.join(root, 'public/app/settings-local-route-v323.js');
 const freshPath = path.join(root, 'public/app/settings-local-route-v327.js');
 const generationPath = path.join(root, 'public/app/settings-local-route-v331.js');
+const controllerPath = path.join(root, 'public/app/model-settings-controller-v173.js');
 const coreWorkerPath = path.join(root, 'public/service-worker-core-v208.js');
 const settingsWorkerPath = path.join(root, 'public/service-worker-settings-v325-override.js');
+const settingsEntrypointPath = path.join(root, 'public/service-worker-settings-v337-entrypoint.js');
 
 const shell = fs.readFileSync(shellPath, 'utf8');
 const shellHtml = fs.readFileSync(shellHtmlPath, 'utf8');
@@ -19,8 +21,10 @@ const bridge = fs.readFileSync(bridgePath, 'utf8');
 const alias = fs.readFileSync(aliasPath, 'utf8');
 const fresh = fs.readFileSync(freshPath, 'utf8');
 const generation = fs.readFileSync(generationPath, 'utf8');
+const controller = fs.readFileSync(controllerPath, 'utf8');
 const coreWorker = fs.readFileSync(coreWorkerPath, 'utf8');
 const settingsWorker = fs.readFileSync(settingsWorkerPath, 'utf8');
+const settingsEntrypoint = fs.readFileSync(settingsEntrypointPath, 'utf8');
 const expectedVersion = '1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const expectedShellVersion = '1.1.2-canonical-local-settings-refresh';
 const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.0-stage-full-route-v337';
@@ -110,6 +114,21 @@ if (!generation.includes('savedStateOnlyView:true') || !generation.includes('vie
 if (/const m=manager\(\);let all,selected;\s*if\(m\?\.state&&m\?\.selection\)/.test(generation)) {
   fail('v331 Local Models renderer still consults the live download manager during snapshot rendering.');
 }
+if (!controller.includes('providerRuntimeOnOpen:false') || !controller.includes('gemma4PassivePreload:false')) {
+  fail('Legacy model Settings controller must remain a passive compatibility facade while Settings is only viewing saved state.');
+}
+if (/^\s*ensureGemma4Pack\(\);\s*$/m.test(controller)) {
+  fail('Legacy model Settings controller passively hydrates Gemma code during script evaluation. Gemma code must load only after an explicit model action.');
+}
+if (/addEventListener\(\s*['"]pageshow['"][^\n]*ensureGemma4Pack/.test(controller)) {
+  fail('Legacy model Settings controller rehydrates Gemma code on pageshow. Returning to Settings must remain inert.');
+}
+if (!settingsEntrypoint.includes("'/app/model-settings-controller-v173.js'")) {
+  fail('Staging Settings takeover does not evict the regressed model-settings controller from installed caches.');
+}
+if (!settingsEntrypoint.includes('CW_SETTINGS_V345_MARKER') || !settingsEntrypoint.includes('settings-passive-gemma-v345')) {
+  fail('Staging Settings takeover generation was not advanced for the passive Gemma regression repair.');
+}
 if (!shell.includes(`const SETTINGS_LOCAL_ROUTE_VERSION='${expectedVersion}'`)) {
   fail('Persistent shell fallback loader does not pin the full Local Models API version.');
 }
@@ -123,4 +142,4 @@ if (alias !== fresh) {
   fail('v323 compatibility alias drifted from the validated v327 saved-state implementation.');
 }
 
-console.log('PASS persistent Settings prewarms the full v331 saved-state renderer in the parent, retains child-stage recovery, rejects shim/bridge lookalikes, and keeps model lifecycle code lazy.');
+console.log('PASS persistent Settings prewarms the full v331 saved-state renderer, keeps model lifecycle and Gemma compatibility code action-only, refreshes stale installed Settings executables, and retains child-stage recovery.');

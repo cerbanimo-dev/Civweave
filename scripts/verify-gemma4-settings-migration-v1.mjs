@@ -19,7 +19,7 @@ const fastPath='public/app/local-ai/gemma4-litert-fast-extension-v1.js';
 for(const path of [settingsPath,retirementPath,browserPackPath,fastPath])new vm.Script(read(path),{filename:path});
 
 const settings=read(settingsPath);
-includes(settings,"VERSION='1.0.19-model-settings-controller-v173-gemma4-download-handoff-guard'",'model settings controller');
+includes(settings,"VERSION='1.0.20-model-settings-controller-v173-passive-gemma-actions'",'model settings controller');
 includes(settings,"const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard'",'model settings controller');
 includes(settings,"const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard'",'model settings controller');
 includes(settings,"const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority'",'model settings controller');
@@ -28,6 +28,11 @@ includes(settings,"const GEMMA4_BROWSER_PACK_VERSION='1.0.1-gemma4-browser-pack-
 includes(settings,"const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync'",'model settings controller');
 includes(settings,"if(packLoadPromise)return packLoadPromise;",'model settings controller awaitable handoff');
 includes(settings,"gemma4DownloadHandoffAwaitable:true",'model settings controller awaitable handoff contract');
+includes(settings,"gemma4PassivePreload:false",'model settings controller passive Settings contract');
+includes(settings,"passiveGemmaHydration:false",'model settings controller bootstrap passive Settings contract');
+includes(settings,"providerRuntimeOnOpen:false",'model settings controller passive Settings contract');
+assert(!/^\s*ensureGemma4Pack\(\);\s*$/m.test(settings),'model settings controller must not hydrate Gemma merely because Settings loaded');
+assert(!/addEventListener\(\s*['"]pageshow['"][^\n]*ensureGemma4Pack/.test(settings),'model settings controller must not hydrate Gemma on pageshow');
 includes(settings,"gemma4PackCore:'litert-current+q4-compatibility'",'model settings controller');
 includes(settings,"gemma4FastModel:'gemma4-e2b-it-litert-web'",'model settings controller');
 includes(settings,"gemma4DeepModel:'gemma4-e4b-it-litert-web'",'model settings controller');
@@ -40,12 +45,12 @@ includes(settings,'gemma4MaxVariantsPerSize:2','model settings controller');
 includes(settings,'gemma4BrowserManagedLiteRT:true','model settings controller');
 includes(settings,'gemma4MidrangeUsesLiteRT:true','model settings controller');
 includes(settings,'gemma4PostImportStatusSync:true','model settings controller');
-before(settings,"loadScript(GEMMA4_PACK_SRC", "loadScript(GEMMA4_DEEP_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_DEEP_SRC", "loadScript(GEMMA4_ACTIONS_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_ACTIONS_SRC", "loadScript(GEMMA4_FAST_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_FAST_SRC", "loadScript(GEMMA4_PHONE_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_PHONE_SRC", "loadScript(GEMMA4_Q2_RETIRE_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_Q2_RETIRE_SRC", "loadScript(GEMMA4_BROWSER_PACK_SRC",'settings model boot order');
+before(settings,"loadScript(GEMMA4_PACK_SRC", "loadScript(GEMMA4_DEEP_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_DEEP_SRC", "loadScript(GEMMA4_ACTIONS_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_ACTIONS_SRC", "loadScript(GEMMA4_FAST_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_FAST_SRC", "loadScript(GEMMA4_PHONE_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_PHONE_SRC", "loadScript(GEMMA4_Q2_RETIRE_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_Q2_RETIRE_SRC", "loadScript(GEMMA4_BROWSER_PACK_SRC",'settings model explicit-action boot order');
 
 const fast=read(fastPath);
 includes(fast,"VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard'",'Gemma LiteRT fast extension');
@@ -91,4 +96,4 @@ includes(browserPack,"midrangeUsesLiteRT:true",'Gemma browser handoff contract')
 includes(browserPack,"q4CompatibilityPreserved:true",'Gemma browser handoff contract');
 includes(browserPack,"postImportStatusSync:true",'Gemma browser handoff contract');
 
-console.log('PASS Local Models boots LiteRT + Q4, retires Q2, updates the Premier Phone mid-range pack to LiteRT E2B/E4B, forbids the retired multi-gigabyte in-app downloader, keeps stale 0% states clickable, awaits the browser handoff, routes LiteRT through browser download/import, and synchronizes imported models to READY state.');
+console.log('PASS Local Models remains a saved-state-only view until an explicit action requests Gemma compatibility code; explicit Gemma actions still boot LiteRT + Q4 in order, retire Q2 safely, route browser downloads/imports, and synchronize imported models to READY state.');
