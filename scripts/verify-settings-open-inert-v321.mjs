@@ -91,7 +91,8 @@ assert.match(localRoute,/option\.textContent='Downloaded local AI'/);
 assert.match(localRoute,/managerDependency:false/);
 assert.match(localRoute,/runtimeDependency:false/);
 assert.match(localRoute,/cacheDependency:false/);
-assert.match(localRoute,/event\.preventDefault\(\);event\.stopImmediatePropagation\(\)/,'Downloaded local route must preserve the configured fallback instead of overwriting provider settings.');
+assert.match(localRoute,/const interactive=\{route:ROUTE,provider:ROUTE,model:String\(current\.id\),endpoint:'',externalConsent:false\}/,'A selected downloaded model must persist as the explicit interactive route.');
+assert.match(localRoute,/localOnly:true/,'Downloaded local selection must remain hard local-only rather than silently falling through to cloud or Guild AI.');
 assert.match(boundary,/const SETTINGS_LOCAL_ROUTE='\/app\/settings-local-route-v323\.js'/);
 assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[SETTINGS_GATEWAY,SETTINGS_LOCAL_ROUTE,/,'All five systems must load the same lightweight local-route enhancer after the canonical Settings owner.');
 
@@ -109,6 +110,7 @@ console.log(JSON.stringify({
   localRouteVisibleWithoutManager:true,
   localModelsViewOnlyOnTab:true,
   localModelActionModulesOnDemand:true,
+  hardLocalSelection:true,
   cacheReadOnView:false,
   serviceWorkerReadyOnView:false,
   hardwareProbeOnView:false,
