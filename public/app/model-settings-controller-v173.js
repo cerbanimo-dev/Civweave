@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.19-model-settings-controller-v173-gemma4-download-handoff-guard';
+const VERSION='1.0.20-model-settings-controller-v173-passive-gemma-actions';
 const GEMMA4_DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
 const GEMMA4_DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
 const GEMMA4_PACK_VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
@@ -76,8 +76,9 @@ function ensureGemma4Pack(){
     .finally(()=>{packLoadPromise=null});
   return packLoadPromise;
 }
-ensureGemma4Pack();
-addEventListener('pageshow',()=>queueMicrotask(ensureGemma4Pack));
+// Settings is a saved-state view. Gemma compatibility/runtime code is available
+// through ensureGemma4Pack() for an explicit model action, but must never hydrate
+// merely because Settings loaded, reopened, or received a pageshow event.
 const api=Object.freeze({
   version:VERSION,
   compatibilityFacade:true,
@@ -101,11 +102,12 @@ const api=Object.freeze({
   gemma4MidrangeUsesLiteRT:true,
   gemma4PostImportStatusSync:true,
   gemma4DownloadHandoffAwaitable:true,
+  gemma4PassivePreload:false,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
 globalThis.CivweaveModelSettingsControllerV173=api;
 globalThis.CivweaveModelSettingsControllerBootstrapV173=Object.freeze({
-  version:VERSION,dormant:true,canonical:'CivweaveSettingsV320',
+  version:VERSION,dormant:true,canonical:'CivweaveSettingsV320',passiveGemmaHydration:false,
   gemma4PackExtension:GEMMA4_PACK_SRC,gemma4PackVersion:GEMMA4_PACK_VERSION,
   gemma4DeepExtension:GEMMA4_DEEP_SRC,gemma4DeepVersion:GEMMA4_DEEP_VERSION,
   gemma4Actions:GEMMA4_ACTIONS_SRC,gemma4ActionsVersion:GEMMA4_ACTIONS_VERSION,
