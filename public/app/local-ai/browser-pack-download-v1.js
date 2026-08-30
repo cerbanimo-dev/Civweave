@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.0-browser-pack-download-v1-progress-and-final-match';
+const VERSION='1.3.1-browser-pack-download-v1-worker-import';
 const PENDING_KEY='civweave.ai-pack.browser-downloads.v1';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const GENERATIVE_CACHE='civweave-model-generative-v266';
@@ -11,6 +11,7 @@ const RECEIPT_VERSION=3;
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
 const REGISTRY_SRC='/app/local-ai/model-registry-v266.js?v=1.0.115-v302-gemma3-v4';
 const PACKS_SRC='/app/local-ai/model-packs-v1.js?v=1.0.1-browser-guard';
+const IMPORT_WORKER_SRC='/app/local-ai/browser-pack-import-worker-v1.js?v=1.0.0';
 if(globalThis.CivweaveBrowserPackDownloadV1?.version===VERSION)return;
 
 const clean=(value,max=240)=>String(value??'').trim().slice(0,max);
@@ -178,9 +179,29 @@ function assignFiles(files,records){
   for(const candidate of candidates){if(usedFiles.has(candidate.fileIndex)||usedRecords.has(candidate.recordIndex))continue;usedFiles.add(candidate.fileIndex);usedRecords.add(candidate.recordIndex);matches.push(candidate)}
   return{matches,missing:records.filter((_,index)=>!usedRecords.has(index)),unused:files.filter((_,index)=>!usedFiles.has(index))};
 }
+function putFileWorker(record,file,onProgress){
+  return new Promise((resolve,reject)=>{
+    if(typeof Worker!=='function'){reject(new Error('Background model import is unavailable in this browser.'));return}
+    const id=`${Date.now()}-${Math.random().toString(36).slice(2)}`;let worker,settled=false;
+    const finish=(fn,value)=>{if(settled)return;settled=true;try{worker?.terminate?.()}catch{}fn(value)};
+    try{worker=new Worker(IMPORT_WORKER_SRC,{name:'civweave-large-model-import'})}catch(error){finish(reject,error);return}
+    worker.addEventListener('message',event=>{
+      const packet=event.data||{};if(packet.id!==id)return;
+      if(packet.type==='progress'){try{onProgress?.(Number(packet.copied||0),Number(packet.total||file.size||0),Boolean(packet.force))}catch{};return}
+      if(packet.type==='done'){try{onProgress?.(Number(packet.copied||file.size||0),Number(packet.total||file.size||0),true)}catch{};finish(resolve,true);return}
+      if(packet.type==='error')finish(reject,new Error(packet.message||'Background model import failed.'));
+    });
+    worker.addEventListener('error',event=>finish(reject,new Error(event?.message||'Background model import worker failed.')),{once:true});
+    try{worker.postMessage({type:'CIVWEAVE_BROWSER_PACK_IMPORT_FILE_V1',id,cacheName:cacheFor(record.kind),url:record.url,path:record.path,minBytes:Number(record.minBytes||0),contentType:file.type||guessType(record.path),file})}catch(error){finish(reject,error)}
+  });
+}
 async function putFile(record,file,onProgress){
-  const cache=await caches.open(cacheFor(record.kind));
   const total=Number(file.size||0);
+  if(total>=LARGE_BYTES&&typeof Worker==='function'){
+    await new Promise(resolve=>setTimeout(resolve,0));
+    return putFileWorker(record,file,onProgress);
+  }
+  const cache=await caches.open(cacheFor(record.kind));
   const headers=new Headers({'content-type':file.type||guessType(record.path),'content-length':String(total),'x-civweave-imported':'browser-download-v1'});
   if(!file.stream||typeof ReadableStream==='undefined'){
     await cache.put(record.url,new Response(file,{status:200,headers}));
@@ -285,6 +306,6 @@ function importUrl(packId){const next=new URL('/app/index.html',location.origin)
 
 globalThis.CivweaveBrowserPackDownloadV1=Object.freeze({
   version:VERSION,prepare,queue,queueNext,nextRecord,markStarted,retryMissing,downloadUrl,pending,clear,recordsFor,receiptFor,receiptCounts,unimportedRecords,importedBytes,importFiles,pickAndImport,importUrl,
-  pendingKey:PENDING_KEY,packStateKey:PACK_STATE_KEY,largeThreshold:LARGE_BYTES,browserPackIds:Object.freeze([...BROWSER_PACKS]),explicitBrowserFiles:true,partialImport:true,streamingImportProgress:true,relaxedMinimumOnlyMatching:true
+  pendingKey:PENDING_KEY,packStateKey:PACK_STATE_KEY,largeThreshold:LARGE_BYTES,browserPackIds:Object.freeze([...BROWSER_PACKS]),explicitBrowserFiles:true,partialImport:true,streamingImportProgress:true,relaxedMinimumOnlyMatching:true,workerImport:true,importWorkerSrc:IMPORT_WORKER_SRC
 });
 })();
