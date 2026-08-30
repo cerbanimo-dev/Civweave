@@ -124,7 +124,11 @@ includes(extension,"sha256:'3904d826d5dddd25ea173e85204caec09e68ba038116e9b992b6
 includes(extension,"RUNTIME_CACHE='civweave-litert-lm-runtime-v1'",'LiteRT model extension');
 includes(extension,'primeRuntime','LiteRT model extension');
 includes(extension,'Gemma 4 · 12 GB phone performance profile','LiteRT model extension');
-includes(extension,'Install both','LiteRT model extension');
+includes(extension,'data-litert-fast-browser-link','LiteRT model extension direct browser download');
+includes(extension,'data-litert-fast-import-input','LiteRT model extension browser file import');
+includes(extension,'directBrowserUserGesture:true','LiteRT model extension browser gesture contract');
+includes(extension,'directFileImport:true','LiteRT model extension browser import contract');
+assert(!extension.includes('data-litert-fast-pair'),'LiteRT phone UI must not claim a one-tap multi-file browser download.');
 includes(extension,'transparentAcceleration:true','LiteRT model extension');
 includes(extension,'dualModelAcceleration:true','LiteRT model extension');
 includes(extension,'oneEngineAtATime:true','LiteRT model extension');
