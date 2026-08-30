@@ -7,6 +7,7 @@ const RUNTIME_MANIFEST=`${RUNTIME_ROOT}stage-manifest.json`;
 const RUNTIME_CACHE='civweave-litert-lm-runtime-v1';
 const UPGRADE_ID='cw-gemma4-litert-fast-upgrade-v1';
 const BROWSER_HANDOFF_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync';
+const PREMIER='premier-phone';
 const MODELS=Object.freeze({
   e2: Object.freeze({
     id:'gemma4-e2b-it-litert-web',
@@ -53,10 +54,16 @@ const freeze=value=>Object.freeze(value);
 let primeFlight=null,primed=false,uiObserver=null,handoffFlight=null;
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
 const fmt=bytes=>`${(Number(bytes||0)/1e9).toFixed(1)} GB`;
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
 function definition(id){return BY_ID.get(id)||null}
 function browserHandoff(){return globalThis.CivweaveGemma4BrowserPackCoherenceV1||null}
 function handoffReady(){return Boolean(browserHandoff()?.startModelDownload&&browserHandoff()?.startPair)}
+function directDownloadUrl(model){
+  const url=new URL(`https://huggingface.co/${model.repo}/resolve/${model.revision}/${model.artifact}`);
+  url.searchParams.set('download','true');
+  return url.href;
+}
 async function ensureBrowserHandoff(){
   if(handoffReady())return browserHandoff();
   if(handoffFlight)return handoffFlight;
@@ -258,6 +265,18 @@ async function downloadPhonePair({onProgress,button}={}){
   try{onProgress?.({phase:'browser-handoff',message:'Opening the browser-managed Gemma 4 phone download flow.'})}catch{}
   return handoff.startPair(control);
 }
+async function importBrowserFiles(id,files,{onProgress}={}){
+  const def=definition(id);if(!def)throw new Error(`Unknown Gemma 4 LiteRT model: ${id}`);
+  if(!files?.length)return{cancelled:true,id};
+  const handoff=await ensureBrowserHandoff();
+  if(typeof handoff?.prepareCurrentPack!=='function')throw new Error('The browser-managed Gemma 4 import layer is not ready.');
+  const prepared=await handoff.prepareCurrentPack(progress=>{try{onProgress?.(progress)}catch{}});
+  const current=prepared?.current||globalThis.CivweaveBrowserPackDownloadV1;
+  if(typeof current?.importFiles!=='function')throw new Error('The browser-managed Gemma 4 file importer is not ready.');
+  const result=await current.importFiles(PREMIER,[...files],{onProgress:progress=>{try{onProgress?.(progress)}catch{}}});
+  try{await handoff.syncFastStatus?.()}catch{}
+  return result;
+}
 async function remove(id=MODELS.e2.id){const def=definition(id);if(!def)return false;return globalThis.CivweaveLocalModelDownloadV266?.remove?.(id)}
 function maybePrime(event){
   const detail=event?.detail||{},state=detail.state||detail,id=detail.id||state.id;
@@ -273,13 +292,19 @@ async function renderUpgradeCard(){
   const rows=states.map(({def,checked})=>{
     const state=checked?.state||{},ready=Boolean(checked?.available),staleLegacy=['downloading','finalizing'].includes(String(state.status||''));
     const stateText=ready?'READY · automatically accelerates the matching Gemma 4 model.':staleLegacy?'BROWSER DOWNLOAD REQUIRED · the retired in-app transfer will not be resumed.':'Browser-managed LiteRT-LM model.';
-    const actionText=staleLegacy?'Resume browser download':`Download ${fmt(def.artifactBytes)}`;
-    return `<div style="display:grid;gap:4px"><b>${def===MODELS.e2?'E2B fast':'E4B deep'} · ${fmt(def.artifactBytes)}</b><span class="cw-local-meta">${stateText}</span><div class="cw-local-actions">${ready?`<button type="button" data-litert-fast-remove="${def.id}">Remove</button>`:`<button type="button" data-litert-fast-download="${def.id}">${actionText}</button>`}</div></div>`;
+    const actionText=staleLegacy?'Download again in browser':`Download ${fmt(def.artifactBytes)}`;
+    const inputId=`cw-litert-import-${def.id}`;
+    const direct=directDownloadUrl(def);
+    const actions=ready
+      ?`<button type="button" data-litert-fast-remove="${esc(def.id)}">Remove</button>`
+      :`<a href="${esc(direct)}" download="${esc(def.artifact)}" rel="noopener" data-litert-fast-browser-link="${esc(def.id)}">${actionText}</a><label for="${esc(inputId)}" class="cw-browser-pack-import-label" data-litert-fast-import-label="${esc(def.id)}">Import downloaded file</label><input id="${esc(inputId)}" type="file" multiple data-litert-fast-import-input="${esc(def.id)}" style="position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0;pointer-events:none" aria-label="Import downloaded ${esc(def.label)} file">`;
+    return `<div style="display:grid;gap:4px"><b>${def===MODELS.e2?'E2B fast':'E4B deep'} · ${fmt(def.artifactBytes)}</b><span class="cw-local-meta">${stateText}</span><div class="cw-local-actions">${actions}</div></div>`;
   }).join('');
-  card.innerHTML=`<div><b>Gemma 4 · 12 GB phone performance profile</b><p>Use Google’s Web-optimized LiteRT models instead of the heavier generic ONNX graphs. Only one Gemma engine stays resident at a time; the existing ONNX models remain compatibility fallbacks.</p><div style="display:grid;gap:10px;margin-top:8px">${rows}</div></div><div class="cw-local-actions">${readyCount===2?'':`<button type="button" data-litert-fast-pair>Install both · ${fmt(MODELS.e2.artifactBytes+MODELS.e4.artifactBytes)}</button>`}</div>`;
-  for(const button of card.querySelectorAll('[data-litert-fast-download]'))button.addEventListener('click',async event=>{const target=event.currentTarget,id=target.dataset.litertFastDownload;target.disabled=true;target.textContent='Opening browser download…';try{await download(id,{button:target});await renderUpgradeCard()}catch(error){target.disabled=false;target.textContent='Retry browser download';emit('civweave:gemma4-litert-upgrade-ui-error',{id,message:String(error?.message||error)})}});
+  const remaining=readyCount===2?'':`<span class="cw-local-meta">Download each LiteRT file above directly in the browser, then use Import downloaded file. Both models total ${fmt(MODELS.e2.artifactBytes+MODELS.e4.artifactBytes)}.</span>`;
+  card.innerHTML=`<div><b>Gemma 4 · 12 GB phone performance profile</b><p>Use Google’s Web-optimized LiteRT models instead of the heavier generic ONNX graphs. Only one Gemma engine stays resident at a time; the existing ONNX models remain compatibility fallbacks.</p><div style="display:grid;gap:10px;margin-top:8px">${rows}</div></div><div class="cw-local-actions">${remaining}</div>`;
+  for(const link of card.querySelectorAll('[data-litert-fast-browser-link]'))link.addEventListener('click',event=>{const target=event.currentTarget,id=target.dataset.litertFastBrowserLink;target.textContent='Browser download started';emit('civweave:gemma4-browser-direct-user-gesture',{id,userActivation:Boolean(navigator.userActivation?.isActive),href:target.href});});
+  for(const input of card.querySelectorAll('[data-litert-fast-import-input]'))input.addEventListener('change',event=>{const target=event.currentTarget,id=target.dataset.litertFastImportInput,files=[...(target.files||[])];target.value='';if(!files.length)return;const label=card.querySelector(`[data-litert-fast-import-label="${id}"]`);if(label)label.textContent='Importing downloaded file…';void importBrowserFiles(id,files,{onProgress:progress=>{if(label&&progress?.message)label.textContent=progress.message}}).then(()=>renderUpgradeCard()).catch(error=>{if(label)label.textContent='Retry import downloaded file';emit('civweave:gemma4-litert-upgrade-ui-error',{id,message:String(error?.message||error)})})});
   for(const button of card.querySelectorAll('[data-litert-fast-remove]'))button.addEventListener('click',async event=>{const target=event.currentTarget,id=target.dataset.litertFastRemove;target.disabled=true;try{await remove(id);await renderUpgradeCard()}catch{target.disabled=false}});
-  card.querySelector('[data-litert-fast-pair]')?.addEventListener('click',async event=>{const target=event.currentTarget;target.disabled=true;target.textContent='Opening browser downloads…';try{await downloadPhonePair({button:target});await renderUpgradeCard()}catch(error){target.disabled=false;target.textContent='Retry optimized downloads';emit('civweave:gemma4-litert-upgrade-ui-error',{message:String(error?.message||error)})}});
   return true;
 }
 function bindUpgradeUi(){
@@ -292,7 +317,7 @@ watch();bindUpgradeUi();
 for(const name of ['civweave:local-model-runtime-ready','civweave:guide-loader-reset','civweave:settings-local-route-ready','pageshow'])addEventListener(name,()=>{queueMicrotask(watch);queueMicrotask(()=>void renderUpgradeCard())});
 addEventListener('civweave:local-model-download-progress',event=>{maybePrime(event);const id=event?.detail?.id||event?.detail?.state?.id;if(FAST_IDS.includes(id))queueMicrotask(()=>void renderUpgradeCard())});
 addEventListener('civweave:local-model-downloaded',event=>{if(FAST_IDS.includes(event?.detail?.id)){void primeRuntime().catch(()=>null);queueMicrotask(()=>void renderUpgradeCard())}});
-try{dispatchEvent(new CustomEvent('civweave:gemma4-litert-fast-extension-ready',{detail:{version:VERSION,ids:FAST_IDS,bytes:MODELS.e2.artifactBytes+MODELS.e4.artifactBytes,revisions:Object.fromEntries(Object.values(MODELS).map(model=>[model.id,model.revision])),explicitDownload:true,offlineRuntimePriming:true,settingsUpgradeCard:true,phoneProfile:'12gb-dual',browserManagedDownloadsOnly:true}}))}catch{}
+try{dispatchEvent(new CustomEvent('civweave:gemma4-litert-fast-extension-ready',{detail:{version:VERSION,ids:FAST_IDS,bytes:MODELS.e2.artifactBytes+MODELS.e4.artifactBytes,revisions:Object.fromEntries(Object.values(MODELS).map(model=>[model.id,model.revision])),explicitDownload:true,offlineRuntimePriming:true,settingsUpgradeCard:true,phoneProfile:'12gb-dual',browserManagedDownloadsOnly:true,directBrowserUserGesture:true,directFileImport:true}}))}catch{}
 globalThis.CivweaveGemma4LiteRTFastExtensionV1=freeze({
   version:VERSION,
   id:MODELS.e2.id,
@@ -310,15 +335,19 @@ globalThis.CivweaveGemma4LiteRTFastExtensionV1=freeze({
   watch,
   patchRegistry,
   status,
+  directDownloadUrl,
   ensureBrowserHandoff,
   download,
   downloadPhonePair,
+  importBrowserFiles,
   remove,
   primeRuntime,
   renderUpgradeCard,
   bindUpgradeUi,
   explicitDownload:true,
   browserManagedDownloadsOnly:true,
+  directBrowserUserGesture:true,
+  directFileImport:true,
   legacyDirectDownloadDisabled:true,
   transparentAcceleration:true,
   dualModelAcceleration:true,
