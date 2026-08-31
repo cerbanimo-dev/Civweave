@@ -95,9 +95,14 @@ includes(deep,'presentationOwnership:false','retired E4B presentation');
 excludes(deep,'Complete Q4F16 core','retired E4B source must not render stale controls');
 
 const actions=read(actionsPath);
-includes(actions,'Download missing support files (','current phone actions');
+includes(actions,'Download missing support files internally (','current phone actions');
 includes(actions,'downloadSupportFiles','current phone actions');
 includes(actions,'supportDownloadsWorkerOnly:true','current phone actions');
+includes(actions,'supportFilesInternal:true','current phone actions');
+includes(actions,'supportAutoDetect:true','current phone actions');
+includes(actions,'browserReceiptGemmaOnly:true','current phone actions');
+includes(actions,'repairPremierReceipt','current phone actions');
+includes(actions,'finished downloading but was not detected in Civweave internal storage','current phone actions');
 includes(actions,'singlePresentationOwner:true','current phone actions');
 excludes(actions,'Complete Q4F16 core','current phone actions');
 
@@ -106,4 +111,4 @@ includes(supportWorker,"VERSION='1.0.0-premier-phone-support-worker-v1'",'suppor
 includes(supportWorker,'mainThreadLargeCachePut:false','support worker');
 includes(supportWorker,'sequentialArtifacts:true','support worker');
 
-console.log('PASS Gemma 4 Premier Phone uses E2B/E4B LiteRT as the current runtime, keeps legacy Q4/Q2 presentation retired, delegates support-component readiness correctly, exposes an explicit missing-support download path, keeps large support cache writes off the document thread, and preserves runtime-only authority separation.');
+console.log('PASS Gemma 4 Premier Phone uses E2B/E4B LiteRT as the browser-managed current runtime, stores Qwen/speech/TTS support files internally with immediate autodetection, keeps legacy Q4/Q2 presentation retired, and preserves runtime-only authority separation.');
