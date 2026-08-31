@@ -27,10 +27,14 @@ assert(shared.includes('score>=6')||shared.includes('bestScore>=6'),'Shared cont
 assert(shared.includes('youtube-nocookie.com/embed'),'Shared contract does not produce privacy-enhanced embeds.');
 assert(shared.includes("enablejsapi:'1'")&&shared.includes("params.set('origin',origin)"),'Shared YouTube embed must enable the player handshake and bind it to the current Civweave origin.');
 assert(shared.includes('YOUTUBE_EMBED_READY_TIMEOUT_MS'),'Shared contract does not have a runtime iframe readiness watchdog.');
+assert(shared.includes("YOUTUBE_PLAYER_ORIGINS=Object.freeze(['https://www.youtube-nocookie.com','https://www.youtube.com'])"),'Runtime handshake does not accept both YouTube player message origins.');
+assert(shared.includes("globalThis.addEventListener?.('message',onMessage)")&&shared.includes("timer=setTimeout(()=>fail("),'The iframe watchdog is not armed independently of the iframe load event.');
+assert(shared.indexOf('installYoutubeEmbedGuard(frame,media,section,onYoutubeFailure)')<shared.indexOf("section.insertBefore(frame,direct)"),'The embed guard must be installed before the iframe is inserted and begins navigation.');
 assert(shared.includes('Open video directly on YouTube'),'Shared contract lacks a direct source fallback for refused embeds.');
 assert(shared.includes('section.replaceWith(next)'),'Living School does not replace a failed module iframe with the next relevant companion.');
 assert(shared.includes('await ensureModuleVideo(module'),'Runtime replacement does not pass back through the module video admission contract.');
 assert(shared.includes('privacy-enhanced embed verified'),'Living School does not distinguish strongly verified embed availability.');
+assert(shared.includes('YouTube API embeddability candidate')&&!shared.includes('YouTube API embed eligible'),'Weak availability-index evidence is still being presented as a runtime embed guarantee.');
 assert(livingGuard.includes("CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1'"),'Living School AI harness is not attached to curriculum generation.');
 assert(livingGuard.includes('await enforceSubjectVideos(output,subject)'),'Living School AI harness does not enforce the subject-gated per-module video contract.');
 assert(livingGuard.includes('await ensureLivingSchool(output,{schoolSlug})'),'Living School video guard does not finish with the shared per-module video invariant.');
@@ -68,4 +72,4 @@ assert(workflow.includes('build-video-learning-atlas-parallel-v1.py'),'Build wor
 assert(workflow.includes('materialize-video-learning-lookup-v1.py'),'Build workflow does not materialize the browser lookup.');
 assert(workflow.includes('materialize-video-learning-availability-v1.py'),'Build workflow does not refresh the verified iframe availability index.');
 assert(workflow.includes('youtube-data-api+privacy-enhanced-embed-probe'),'Build workflow does not enforce the strong embed verification mode.');
-console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, privacy-enhanced iframe probing, runtime dead-frame recovery, offline lookup, Living School subject-gated per-module video invariant, Cerbanimo per-task video invariant, post-install all-atlas lazy staging, and required fallback are wired.');
+console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, privacy-enhanced iframe probing, runtime two-origin handshake and dead-frame recovery, offline lookup, Living School subject-gated per-module video invariant, Cerbanimo per-task video invariant, post-install all-atlas lazy staging, and required fallback are wired.');
