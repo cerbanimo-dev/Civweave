@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority';
+const VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status';
 const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const PACKS_KEY='CivweaveLocalModelPacksV1';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
@@ -39,7 +39,7 @@ function writePackState(patch){
 }
 function existingPremier(){
   const state=packStates()[PREMIER]||{};
-  return Boolean(state.installedAt||['ready','browser-ready','browser-partial','browser-queued','core-update-required','performance-core-required'].includes(String(state.status||'')));
+  return Boolean(state.installedAt||['ready','browser-ready','browser-partial','browser-queued','core-update-required','performance-core-required','support-required'].includes(String(state.status||'')));
 }
 function savedReady(id){return downloads()?.[id]?.status==='ready'}
 function missingFastIds(){return [FAST_E2,FAST_E4].filter(id=>!savedReady(id))}
@@ -137,8 +137,8 @@ function layeredBase(api){
 function patchPackManager(api){
   const base=layeredBase(api);
   if(!base?.byId)return base;
-  if(base.__civweaveGemma4PhonePerformanceCoreV1)return base;
-  const baseById=base.byId.bind(base),baseStatus=base.status?.bind(base),baseUse=base.use?.bind(base),baseRemove=base.remove?.bind(base),baseCatalogue=base.catalogue?.bind(base);
+  if(base.__civweaveGemma4PhonePerformanceCoreVersion===VERSION)return base;
+  const baseById=base.byId.bind(base),baseStatus=base.status?.bind(base),baseComponentStatus=base.componentStatus?.bind(base),baseUse=base.use?.bind(base),baseRemove=base.remove?.bind(base),baseCatalogue=base.catalogue?.bind(base);
   const rawPremier=baseById(PREMIER)||{};
   const byId=id=>{
     if(id!==PREMIER)return baseById(id);
@@ -148,22 +148,33 @@ function patchPackManager(api){
     if(id!==PREMIER)return baseStatus?baseStatus(id):null;
     const pack=performancePack(rawPremier),components=[];
     for(const componentId of pack.installOrder){
-      try{components.push({id:componentId,...await manager()?.status?.(componentId)})}
-      catch(error){components.push({id:componentId,available:false,error:String(error?.message||error)})}
+      try{
+        const current=(componentId===FAST_E2||componentId===FAST_E4)
+          ?await manager()?.status?.(componentId)
+          :baseComponentStatus?await baseComponentStatus(componentId):await manager()?.status?.(componentId);
+        components.push({id:componentId,...(current||{}),available:Boolean(current?.available)});
+      }catch(error){components.push({id:componentId,available:false,error:String(error?.message||error)})}
     }
     const available=components.length>0&&components.every(row=>row.available);
-    const installedBytes=components.reduce((sum,row)=>sum+Number(row?.state?.bytesDownloaded||row?.bytes||0),0);
+    const installedBytes=components.reduce((sum,row)=>sum+Number(row?.state?.bytesDownloaded||row?.bytes||row?.rows?.reduce?.((n,a)=>n+Number(a.bytes||0),0)||0),0);
+    const missingPerformance=missingFastIds();
+    const missingSupport=components.filter(row=>!row.available&&row.id!==FAST_E2&&row.id!==FAST_E4).map(row=>row.id);
     if(available){
-      writePackState({status:'ready',phase:'ready',percent:100,error:'',primaryModel:FAST_E2,deepModel:FAST_E4,selectedModel:packStates()[PREMIER]?.selectedModel||FAST_E2,installedBytes,installedAt:packStates()[PREMIER]?.installedAt||new Date().toISOString(),optimizedRuntime:'google-litert-lm-webgpu'});
-    }else if(existingPremier()&&missingFastIds().length){
-      writePackState({status:'core-update-required',phase:'gemma4-litert-performance-core-required',error:'',primaryModel:FAST_E2,deepModel:FAST_E4,missingPerformanceModels:missingFastIds()});
+      writePackState({status:'ready',phase:'ready',percent:100,error:'',primaryModel:FAST_E2,deepModel:FAST_E4,selectedModel:packStates()[PREMIER]?.selectedModel||FAST_E2,installedBytes,installedAt:packStates()[PREMIER]?.installedAt||new Date().toISOString(),optimizedRuntime:'google-litert-lm-webgpu',missingPerformanceModels:[],missingSupportComponents:[]});
+    }else if(existingPremier()&&missingPerformance.length){
+      writePackState({status:'core-update-required',phase:'gemma4-litert-performance-core-required',error:'',primaryModel:FAST_E2,deepModel:FAST_E4,missingPerformanceModels:missingPerformance,missingSupportComponents:missingSupport});
+    }else if(existingPremier()&&missingSupport.length){
+      writePackState({status:'support-required',phase:'phone-support-required',error:'',primaryModel:FAST_E2,deepModel:FAST_E4,missingPerformanceModels:[],missingSupportComponents:missingSupport});
     }
-    return{id:PREMIER,label:pack.label,available,installed:available,components,installedBytes,state:packStates()[PREMIER]||null};
+    return{id:PREMIER,label:pack.label,available,installed:available,components,installedBytes,missingPerformanceModels:missingPerformance,missingSupportComponents:missingSupport,state:packStates()[PREMIER]||null};
   };
   const use=async id=>{
     if(id!==PREMIER)return baseUse?baseUse(id):null;
     const checked=await status(PREMIER);
-    if(!checked.available)throw Object.assign(new Error('Premier Phone Pack needs its LiteRT phone-performance core before local Gemma 4 can run at phone speed. Open Local models and choose Complete phone performance core.'),{code:'LOCAL_PHONE_PERFORMANCE_CORE_REQUIRED',missingModels:missingFastIds()});
+    if(!checked.available){
+      if(checked.missingPerformanceModels?.length)throw Object.assign(new Error('Premier Phone Pack still needs its imported E2B/E4B LiteRT phone models to be recognized.'),{code:'LOCAL_PHONE_PERFORMANCE_CORE_REQUIRED',missingModels:checked.missingPerformanceModels});
+      throw Object.assign(new Error(`Premier Phone Pack still needs ${checked.missingSupportComponents?.length||1} support component${checked.missingSupportComponents?.length===1?'':'s'}. Open Local models and download the missing support files.`),{code:'LOCAL_PHONE_SUPPORT_REQUIRED',missingComponents:checked.missingSupportComponents||[]});
+    }
     manager()?.select?.(FAST_E2);
     const pack=performancePack(rawPremier);
     writePackState({status:'ready',phase:'ready',selectedModel:FAST_E2,primaryModel:FAST_E2,deepModel:FAST_E4,lastUsedAt:new Date().toISOString(),optimizedRuntime:'google-litert-lm-webgpu'});
@@ -184,6 +195,7 @@ function patchPackManager(api){
     packs:freeze({...(base.packs||{}),[PREMIER]:performancePack(rawPremier)}),
     byId,status,use,remove,catalogue,
     __civweaveGemma4PhonePerformanceCoreV1:true,
+    __civweaveGemma4PhonePerformanceCoreVersion:VERSION,
     gemma4CoreModel:FAST_E2,
     gemma4DeepModel:FAST_E4,
     gemma4PhonePerformanceCore:freeze([FAST_E2,FAST_E4]),
@@ -226,12 +238,9 @@ function scheduleAuthorityReassert(){
 }
 function activate(){
   const state=applyAuthority();
-  try{deepExtension()?.scheduleDecorate?.()}catch{}
-  try{fastExtension()?.bindUpgradeUi?.()}catch{}
-  scheduleDecorate();
   scheduleAuthorityReassert();
   const registry=globalThis[REGISTRY_KEY],missing=registry?.gemma4PhonePerformanceRegistryMissing||[];
-  emit('civweave:gemma4-phone-performance-authority',{...state,registryComplete:Boolean(registry?.gemma4PhonePerformanceRegistryComplete),missing,resumeSafe:true});
+  emit('civweave:gemma4-phone-performance-authority',{...state,registryComplete:Boolean(registry?.gemma4PhonePerformanceRegistryComplete),missing,resumeSafe:true,runtimeOnly:true});
   return state.ready;
 }
 async function completePerformanceCore(){
@@ -251,42 +260,11 @@ function assertSelectedPerformance(){
   if(registryMissing.length)throw Object.assign(new Error(`Gemma 4 phone runtime registration is incomplete: ${registryMissing.join(', ')}.`),{code:'LOCAL_PHONE_MODEL_REGISTRY_INCOMPLETE',missingModels:[...registryMissing]});
   if(!selectedLegacyNeedsPerformance())return true;
   const pick=manager()?.selection?.(),target=pick?.id===LEGACY_E4?FAST_E4:FAST_E2;
-  throw Object.assign(new Error(`${pick?.id===LEGACY_E4?'Gemma 4 E4B':'Gemma 4 E2B'} is selected, but its LiteRT phone-performance model is not installed. Open Local models and choose Complete phone performance core.`),{code:'LOCAL_PHONE_PERFORMANCE_CORE_REQUIRED',selectedModel:pick?.id,requiredModel:target,missingModels:missingFastIds()});
+  throw Object.assign(new Error(`${pick?.id===LEGACY_E4?'Gemma 4 E4B':'Gemma 4 E2B'} is selected, but its LiteRT phone-performance model is not installed.`),{code:'LOCAL_PHONE_PERFORMANCE_CORE_REQUIRED',selectedModel:pick?.id,requiredModel:target,missingModels:missingFastIds()});
 }
-function decorateSettings(){
-  const panel=document.getElementById('cw-local-ai-v324');if(!panel)return false;
-  const card=panel.querySelector(`[data-pack-id="${PREMIER}"]`);if(!card)return false;
-  const missing=missingFastIds(),signature=JSON.stringify({missing,pack:packStates()[PREMIER]?.status||''});
-  if(card.dataset.gemma4PhonePerformance===signature)return true;
-  const paragraphs=[...card.children].filter(node=>node.tagName==='P');
-  if(paragraphs[0])paragraphs[0].textContent='Gemma 4 E2B and E4B use the Web-optimized LiteRT-LM phone binaries. Generic ONNX/Q4 files are compatibility fallbacks, not the primary phone runtime.';
-  if(paragraphs[1])paragraphs[1].innerHTML='<b>Target:</b> 12 GB RAM · modern Android WebGPU · one Gemma engine resident at a time';
-  if(paragraphs[2])paragraphs[2].innerHTML='<b>Storage:</b> ~6.9 GB phone core · existing ONNX/Q2 files may be kept or removed separately';
-  if(existingPremier()&&missing.length){
-    const actions=[...card.querySelectorAll('.cw-local-actions')].find(node=>!node.closest('[data-gemma4-q2-extensions]'));
-    if(actions)actions.innerHTML='<button type="button" data-gemma4-performance-complete>Complete phone performance core</button>';
-    let note=card.querySelector('[data-gemma4-performance-note]');
-    if(!note){note=document.createElement('p');note.dataset.gemma4PerformanceNote='';note.className='cw-local-meta';card.append(note)}
-    const labels=missing.map(id=>id===FAST_E2?'E2B LiteRT 2.0 GB':'E4B LiteRT 3.0 GB').join(' + ');
-    note.textContent=`Performance update required: ${labels}. Your existing model files are kept; only the missing phone-optimized binaries download.`;
-  }
-  card.dataset.gemma4PhonePerformance=signature;
-  return true;
-}
-let decorateTimer=0;
-function scheduleDecorate(){
-  clearTimeout(decorateTimer);const waits=[30,120,320,700,1200];let index=0;
-  const run=()=>{decorateSettings();index+=1;if(index<waits.length)decorateTimer=setTimeout(run,waits[index])};
-  decorateTimer=setTimeout(run,waits[0]);
-}
-function onClick(event){
-  const button=event.target?.closest?.('[data-gemma4-performance-complete]');
-  if(!button)return;
-  event.preventDefault();event.stopImmediatePropagation();button.disabled=true;
-  void completePerformanceCore().catch(error=>emit('civweave:gemma4-phone-performance-error',{message:String(error?.message||error)})).finally(()=>{button.disabled=false;scheduleDecorate()});
-}
-document.addEventListener('click',onClick,true);
-for(const name of ['civweave:settings-opened','civweave:settings-local-route-ready','civweave:local-model-runtime-ready','civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-pack-progress','civweave:local-model-pack-selected','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>{scheduleAuthorityReassert();scheduleDecorate()});
+function decorateSettings(){return true}
+function scheduleDecorate(){return true}
+for(const name of ['civweave:local-model-download-progress','civweave:local-model-downloaded','civweave:local-model-pack-progress','civweave:local-model-pack-selected','civweave:gemma4-support-progress'])addEventListener(name,scheduleAuthorityReassert);
 activate();
 
 globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
@@ -305,6 +283,7 @@ globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
   activate,
   completePerformanceCore,
   decorateSettings,
+  scheduleDecorate,
   missingFastIds,
   selectedLegacyNeedsPerformance,
   assertSelectedPerformance,
@@ -313,6 +292,12 @@ globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
   packAuthority:true,
   resumeSafeAuthority:true,
   oneEngineAtATime:true,
-  explicitMigration:true
+  explicitMigration:true,
+  runtimeOnly:true,
+  presentationOwnership:false,
+  mutationObserver:false,
+  specializedComponentStatusViaPackManager:true,
+  supportRequiredState:true,
+  replacesOlderPackWrappers:true
 });
 })();

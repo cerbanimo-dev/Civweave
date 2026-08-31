@@ -1,12 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.24-model-settings-controller-v173-passive-gemma-single-owner';
-const GEMMA4_ACTIONS_VERSION='1.2.2-gemma4-dual-actions-v2-single-owner-opfs-reconcile';
-const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.2.2-single-owner-opfs-reconcile';
+const VERSION='1.0.25-model-settings-controller-v173-passive-gemma-support-downloads';
+const GEMMA4_ACTIONS_VERSION='1.3.0-gemma4-dual-actions-v2-support-downloads';
+const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.3.0-support-downloads';
 const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority';
-const GEMMA4_PHONE_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.2.0-resume-authority';
+const GEMMA4_PHONE_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status';
+const GEMMA4_PHONE_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.3.0-runtime-only-support-status';
 const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
 const GEMMA4_Q2_RETIRE_SRC='/app/local-ai/gemma4-q2-retirement-v1.js?v=1.0.0-q2-retirement';
 const GEMMA4_BROWSER_PACK_VERSION='1.0.2-gemma4-browser-pack-coherence-v2-event-driven';
@@ -40,10 +40,8 @@ function loadScript(src,ready,label){
 async function settleGemma4Phone(){
   const actions=globalThis.CivweaveGemma4DualQ4ActionsV1;
   try{await actions?.synchronizeImportedModels?.()}catch(error){console.warn('[Civweave] Gemma 4 imported-model reconciliation deferred.',error)}
-  // The phone-performance module self-activates when it loads. Reassert only its
-  // registry/pack authority here; calling activate() again would also invoke any
-  // stale legacy presentation global left in an older page realm.
   try{globalThis.CivweaveGemma4PhonePerformanceCoreV1?.applyAuthority?.()}catch{}
+  try{await actions?.refreshSupportStatus?.({autoReconcile:true})}catch(error){console.warn('[Civweave] Premier Phone support status deferred.',error)}
   actions?.scheduleDecorate?.();
   globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
   globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
@@ -70,10 +68,6 @@ function ensureGemma4Pack(){
     .finally(()=>{packLoadPromise=null});
   return packLoadPromise;
 }
-// Settings remains a saved-state view. Current Gemma modules hydrate only after
-// an explicit model action. Retired Q4 compatibility extensions are not loaded
-// here because they also own obsolete Settings presentation and can overwrite
-// the LiteRT phone state after a successful 2/2 import.
 const api=Object.freeze({
   version:VERSION,
   compatibilityFacade:true,
@@ -104,6 +98,9 @@ const api=Object.freeze({
   gemma4LegacyDeepExtensionLoaded:false,
   gemma4SinglePhonePresentationOwner:true,
   gemma4ImportedReceiptReconciledBeforeDecorate:true,
+  gemma4SupportStatusBeforeReady:true,
+  gemma4MissingSupportDownloadAction:true,
+  gemma4SupportWorkerOnly:true,
   gemma4PassivePreload:false,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });

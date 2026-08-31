@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.10-gemma4-inference-repair-v1-q2-retirement';
+const VERSION='1.0.11-gemma4-inference-repair-v1-current-phone-authority';
 const EXPECTED_WORKER_REVISION='1.0.126-v315-gemma4-template-logits';
 const RUNTIME_WORKER_URL='/app/local-ai/worker-v266.js?v=1.0.125-v314-smooth-fit';
 const WORKER_PATH='/app/local-ai/worker-v266.js';
@@ -9,9 +9,9 @@ const V4_MANIFEST_PATH='/app/vendor/transformers-v4/stage-manifest.json';
 const V4_STAGE_SCHEMA='civweave.transformers-stage.v7';
 const V4_BACKPORT='huggingface-transformers-js-pr-1681';
 const DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
-const DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
-const PHONE_AUTH_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority';
-const PHONE_AUTH_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.2.0-resume-authority';
+const DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-retired-registration';
+const PHONE_AUTH_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status';
+const PHONE_AUTH_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.3.0-runtime-only-support-status';
 const Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
 const Q2_RETIRE_SRC='/app/local-ai/gemma4-q2-retirement-v1.js?v=1.0.0-q2-retirement';
 const GEMMA4_RE=/gemma4|gemma-4/i;
@@ -42,9 +42,9 @@ async function ensurePhoneAuthority(){
     return true;
   }
   if(phoneAuthorityFlight)return phoneAuthorityFlight;
-  phoneAuthorityFlight=loadScript(DEEP_SRC,deepReady,'Gemma 4 E4B deep registration')
-    .then(()=>loadScript(PHONE_AUTH_SRC,phoneReady,'Gemma 4 phone performance authority'))
-    .then(()=>{globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();emit('civweave:gemma4-phone-authority-ready',{deepModel:'gemma4-e4b-it-q4f16',fastModel:'gemma4-e2b-it-litert-web',deepFastModel:'gemma4-e4b-it-litert-web',registryAuthority:true,resumeSafe:true});return true})
+  phoneAuthorityFlight=loadScript(DEEP_SRC,deepReady,'Gemma 4 retired Q4 compatibility registration')
+    .then(()=>loadScript(PHONE_AUTH_SRC,phoneReady,'Gemma 4 current phone performance authority'))
+    .then(()=>{globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();emit('civweave:gemma4-phone-authority-ready',{fastModel:'gemma4-e2b-it-litert-web',deepFastModel:'gemma4-e4b-it-litert-web',legacyDeepModel:'gemma4-e4b-it-q4f16',registryAuthority:true,resumeSafe:true,runtimeOnly:true});return true})
     .catch(error=>{emit('civweave:gemma4-phone-authority-failed',{message:String(error?.message||error)});throw error})
     .finally(()=>{phoneAuthorityFlight=null});
   return phoneAuthorityFlight;
@@ -136,11 +136,11 @@ function patch(){
     if(activeGemma4())await refreshWorkerAsset();
     return base.generate(args);
   };
-  const next=Object.freeze({...base,generate,gemma4InferenceRepairV1:VERSION,gemma4WorkerRevision:EXPECTED_WORKER_REVISION,gemma4ChatTemplateRepair:true,gemma4NextTokenLogitsOnly:true,gemma4UpstreamLogitsBackport:true,gemma4RuntimeStageSchema:V4_STAGE_SCHEMA,gemma4PhoneAuthority:true,gemma4DeepRegistrationGuaranteed:true,gemma4PhonePerformanceCoreRequired:false,gemma4PhonePerformanceCoreOptional:true,gemma4LegacyCompatibilityFallback:true,gemma4PhoneRegistryAuthority:true,gemma4Q2Retirement:true,gemma4Q2ExplicitDelete:true,phoneAuthorityHotReload:true,phoneAuthorityAfterInferenceCore:true,phoneAuthorityResumeSafe:true,transformersRepairScope:'onnx-only'});
+  const next=Object.freeze({...base,generate,gemma4InferenceRepairV1:VERSION,gemma4WorkerRevision:EXPECTED_WORKER_REVISION,gemma4ChatTemplateRepair:true,gemma4NextTokenLogitsOnly:true,gemma4UpstreamLogitsBackport:true,gemma4RuntimeStageSchema:V4_STAGE_SCHEMA,gemma4PhoneAuthority:true,gemma4DeepRegistrationGuaranteed:true,gemma4PhonePerformanceCoreRequired:false,gemma4PhonePerformanceCoreOptional:true,gemma4LegacyCompatibilityFallback:true,gemma4PhoneRegistryAuthority:true,gemma4Q2Retirement:true,gemma4Q2ExplicitDelete:true,phoneAuthorityHotReload:true,phoneAuthorityAfterInferenceCore:true,phoneAuthorityResumeSafe:true,phoneAuthorityRuntimeOnly:true,transformersRepairScope:'onnx-only'});
   try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}
-  wrapped=next;emit('civweave:gemma4-inference-repair-installed',{workerRevision:EXPECTED_WORKER_REVISION,runtimeStageSchema:V4_STAGE_SCHEMA,scope:'onnx-only',phoneAuthority:true,registryAuthority:true,hotReload:true,afterInferenceCore:true,resumeSafe:true,litertOptional:true,legacyCompatibilityFallback:true,q2Retirement:true});return true;
+  wrapped=next;emit('civweave:gemma4-inference-repair-installed',{workerRevision:EXPECTED_WORKER_REVISION,runtimeStageSchema:V4_STAGE_SCHEMA,scope:'onnx-only',phoneAuthority:true,registryAuthority:true,hotReload:true,afterInferenceCore:true,resumeSafe:true,runtimeOnly:true,litertOptional:true,legacyCompatibilityFallback:true,q2Retirement:true});return true;
 }
 for(const name of ['civweave:local-model-runtime-ready','civweave:assistant-runtime-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(()=>{patch();void ensurePhoneAuthority().catch(()=>null);void ensureQ2Retirement().catch(()=>null)}));
 patch();void ensurePhoneAuthority().catch(()=>null);void ensureQ2Retirement().catch(()=>null);
-globalThis.CivweaveGemma4InferenceRepairV1=Object.freeze({version:VERSION,expectedWorkerRevision:EXPECTED_WORKER_REVISION,runtimeWorkerUrl:RUNTIME_WORKER_URL,workerPath:WORKER_PATH,v4BundlePath:V4_BUNDLE_PATH,v4ManifestPath:V4_MANIFEST_PATH,v4StageSchema:V4_STAGE_SCHEMA,v4Backport:V4_BACKPORT,patch,refreshWorkerAsset,verifyPatchedV4Runtime,ensurePhoneAuthority,ensureQ2Retirement,checkSelectedPerformance,activeGemma4,gemma4PhoneAuthority:true,gemma4DeepRegistrationGuaranteed:true,gemma4PhonePerformanceCoreRequired:false,gemma4PhonePerformanceCoreOptional:true,gemma4LegacyCompatibilityFallback:true,gemma4PhoneRegistryAuthority:true,gemma4Q2Retirement:true,gemma4Q2ExplicitDelete:true,phoneAuthorityHotReload:true,phoneAuthorityAfterInferenceCore:true,phoneAuthorityResumeSafe:true,transformersRepairScope:'onnx-only',state:()=>Object.freeze({installed:Boolean(wrapped),refreshDone,refreshing:Boolean(refreshFlight),phoneAuthorityReady:globalThis.CivweaveGemma4PhonePerformanceCoreV1?.version===PHONE_AUTH_VERSION,phoneAuthorityLoading:Boolean(phoneAuthorityFlight),q2RetirementReady:globalThis.CivweaveGemma4Q2RetirementV1?.version===Q2_RETIRE_VERSION,q2RetirementLoading:Boolean(q2RetirementFlight)})});
+globalThis.CivweaveGemma4InferenceRepairV1=Object.freeze({version:VERSION,expectedWorkerRevision:EXPECTED_WORKER_REVISION,runtimeWorkerUrl:RUNTIME_WORKER_URL,workerPath:WORKER_PATH,v4BundlePath:V4_BUNDLE_PATH,v4ManifestPath:V4_MANIFEST_PATH,v4StageSchema:V4_STAGE_SCHEMA,v4Backport:V4_BACKPORT,patch,refreshWorkerAsset,verifyPatchedV4Runtime,ensurePhoneAuthority,ensureQ2Retirement,checkSelectedPerformance,activeGemma4,gemma4PhoneAuthority:true,gemma4DeepRegistrationGuaranteed:true,gemma4PhonePerformanceCoreRequired:false,gemma4PhonePerformanceCoreOptional:true,gemma4LegacyCompatibilityFallback:true,gemma4PhoneRegistryAuthority:true,gemma4Q2Retirement:true,gemma4Q2ExplicitDelete:true,phoneAuthorityHotReload:true,phoneAuthorityAfterInferenceCore:true,phoneAuthorityResumeSafe:true,phoneAuthorityRuntimeOnly:true,transformersRepairScope:'onnx-only',state:()=>Object.freeze({installed:Boolean(wrapped),refreshDone,refreshing:Boolean(refreshFlight),phoneAuthorityReady:globalThis.CivweaveGemma4PhonePerformanceCoreV1?.version===PHONE_AUTH_VERSION,phoneAuthorityLoading:Boolean(phoneAuthorityFlight),q2RetirementReady:globalThis.CivweaveGemma4Q2RetirementV1?.version===Q2_RETIRE_VERSION,q2RetirementLoading:Boolean(q2RetirementFlight)})});
 })();

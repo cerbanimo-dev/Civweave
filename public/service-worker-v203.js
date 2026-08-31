@@ -16,7 +16,7 @@ importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved
 // Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths not claimed by the v339 direct-route bootstrap.
 importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
 // Staging takeover for the current Gemma phone stack. It runs before historical local-AI coherence so retired Q4 presentation scripts cannot reclaim Settings after a successful LiteRT import.
-importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v2');
+importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v3-support-downloads');
 importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v1-20260825');
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');

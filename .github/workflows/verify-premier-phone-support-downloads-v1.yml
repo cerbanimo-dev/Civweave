@@ -1,0 +1,47 @@
+name: Verify Premier Phone Support Downloads v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/gemma4-dual-actions-v2.js'
+      - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'public/app/local-ai/premier-phone-support-worker-v1.js'
+      - 'public/app/local-ai/browser-pack-pwa-import-v1.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/app/model-settings-controller-v173.js'
+      - 'public/app/local-ai/gemma4-pack-extension-v1.js'
+      - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
+      - 'public/app/local-ai/gemma4-dual-q4-actions-v1.js'
+      - 'public/service-worker-gemma4-current-phone-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/verify-premier-phone-support-downloads-v1.mjs'
+      - '.github/workflows/verify-premier-phone-support-downloads-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/gemma4-dual-actions-v2.js'
+      - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'public/app/local-ai/premier-phone-support-worker-v1.js'
+      - 'public/app/local-ai/browser-pack-pwa-import-v1.js'
+      - 'public/app/local-ai/gemma4-inference-repair-v1.js'
+      - 'public/app/model-settings-controller-v173.js'
+      - 'public/app/local-ai/gemma4-pack-extension-v1.js'
+      - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
+      - 'public/app/local-ai/gemma4-dual-q4-actions-v1.js'
+      - 'public/service-worker-gemma4-current-phone-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/verify-premier-phone-support-downloads-v1.mjs'
+      - '.github/workflows/verify-premier-phone-support-downloads-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-premier-phone-support-downloads-v1.mjs

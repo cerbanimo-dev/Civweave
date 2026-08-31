@@ -1,9 +1,9 @@
 'use strict';
 
-const CW_GEMMA4_CURRENT_PHONE_SW_VERSION='gemma4-current-phone-worker-v2';
+const CW_GEMMA4_CURRENT_PHONE_SW_VERSION='gemma4-current-phone-worker-v3-support-downloads';
 const CW_GEMMA4_STAGING_HOST='civweave-staging.pages.dev';
-const CW_GEMMA4_RECOVERY_CACHE='cwrecovery-v457-gemma4-current-phone-owner';
-const CW_GEMMA4_RECOVERY_MARKER='/__civweave/staging-gemma4-current-phone-owner-v2';
+const CW_GEMMA4_RECOVERY_CACHE='cwrecovery-v458-gemma4-current-phone-support-owner';
+const CW_GEMMA4_RECOVERY_MARKER='/__civweave/staging-gemma4-current-phone-owner-v3-support-downloads';
 const CW_GEMMA4_CURRENT_PATHS=new Set([
   '/app/model-settings-controller-v173.js',
   '/app/local-ai/gemma4-dual-actions-v2.js',
@@ -13,12 +13,14 @@ const CW_GEMMA4_CURRENT_PATHS=new Set([
   '/app/local-ai/gemma4-opfs-storage-v1.js',
   '/app/local-ai/gemma4-q2-retirement-v1.js',
   '/app/local-ai/browser-pack-download-v1.js',
-  '/app/local-ai/browser-pack-import-worker-v2.js'
+  '/app/local-ai/browser-pack-pwa-import-v1.js',
+  '/app/local-ai/browser-pack-import-worker-v2.js',
+  '/app/local-ai/premier-phone-support-worker-v1.js'
 ]);
 const CW_GEMMA4_RETIRED_PRESENTATION_PATHS=new Map([
-  ['/app/local-ai/gemma4-pack-extension-v1.js',`(()=>{'use strict';const VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';if(globalThis.CivweaveGemma4PackExtensionV1?.version===VERSION)return;const passthrough=value=>value;globalThis.CivweaveGemma4PackExtensionV1=Object.freeze({version:VERSION,patchRegistry:passthrough,patchPackManager:passthrough,activate:()=>true,decorateSettings:()=>true,scheduleDecorate:()=>true,extensionStatus:async()=>({available:false}),extensionDownload:async()=>false,extensionRemove:async()=>false,completeCore:async()=>false,existingQ2Preserved:true,q2Optional:true,q4RequiredCore:false,fullReinstallRequired:false,renderLoopSafe:true,mutationObserver:false,presentationOwnership:false,retiredPresentation:true});})();`],
-  ['/app/local-ai/gemma4-e4b-q4-extension-v1.js',`(()=>{'use strict';const VERSION='1.0.0-gemma4-e4b-q4-extension-v1';if(globalThis.CivweaveGemma4E4BQ4ExtensionV1?.version===VERSION)return;const passthrough=value=>value;globalThis.CivweaveGemma4E4BQ4ExtensionV1=Object.freeze({version:VERSION,patchRegistry:passthrough,patchPackManager:passthrough,activate:()=>true,decorateSettings:()=>true,scheduleDecorate:()=>true,completeCore:async()=>false,q4RequiredCore:false,q2Optional:true,textOnly:true,renderLoopSafe:true,mutationObserver:false,presentationOwnership:false,retiredPresentation:true});})();`],
-  ['/app/local-ai/gemma4-dual-q4-actions-v1.js',`(()=>{'use strict';const VERSION='1.1.0-gemma4-dual-q4-actions-v1-retry-import';if(globalThis.CivweaveGemma4DualQ4ActionsV1?.version===VERSION)return;globalThis.CivweaveGemma4DualQ4ActionsV1=Object.freeze({version:VERSION,scheduleDecorate:()=>true,decorateSettings:()=>true,pendingSummary:()=>({receipt:null,missing:[],startedMissing:[],unstartedMissing:[],imported:0,total:0}),compatibilityOnly:true,presentationOwnership:false,mutationObserverGuarded:false,mutationObserver:false,q4PresentationRetired:true});})();`]
+  ['/app/local-ai/gemma4-pack-extension-v1.js',`(()=>{'use strict';const VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';if(globalThis.CivweaveGemma4PackExtensionV1?.version===VERSION)return;const passthrough=value=>value;globalThis.CivweaveGemma4PackExtensionV1=Object.freeze({version:VERSION,patchRegistry:passthrough,patchPackManager:passthrough,activate:()=>true,decorateSettings:()=>true,scheduleDecorate:()=>true,extensionStatus:async()=>({available:false}),extensionDownload:async()=>false,extensionRemove:async()=>false,completeCore:async()=>false,existingQ2Preserved:true,q2Optional:true,q4RequiredCore:false,fullReinstallRequired:false,renderLoopSafe:true,mutationObserver:false,presentationOwnership:false,retiredPresentation:true,sourceRetired:true});})();`],
+  ['/app/local-ai/gemma4-e4b-q4-extension-v1.js',`(()=>{'use strict';const VERSION='1.0.0-gemma4-e4b-q4-extension-v1';if(globalThis.CivweaveGemma4E4BQ4ExtensionV1?.version===VERSION)return;const passthrough=value=>value;globalThis.CivweaveGemma4E4BQ4ExtensionV1=Object.freeze({version:VERSION,patchRegistry:passthrough,patchPackManager:passthrough,activate:()=>true,decorateSettings:()=>true,scheduleDecorate:()=>true,completeCore:async()=>false,q4RequiredCore:false,q2Optional:true,textOnly:true,renderLoopSafe:true,mutationObserver:false,presentationOwnership:false,retiredPresentation:true,sourceRetired:true});})();`],
+  ['/app/local-ai/gemma4-dual-q4-actions-v1.js',`(()=>{'use strict';const VERSION='1.1.0-gemma4-dual-q4-actions-v1-retry-import';if(globalThis.CivweaveGemma4DualQ4ActionsV1?.version===VERSION)return;globalThis.CivweaveGemma4DualQ4ActionsV1=Object.freeze({version:VERSION,scheduleDecorate:()=>true,decorateSettings:()=>true,pendingSummary:()=>({receipt:null,missing:[],startedMissing:[],unstartedMissing:[],imported:0,total:0}),compatibilityOnly:true,presentationOwnership:false,mutationObserverGuarded:false,mutationObserver:false,q4PresentationRetired:true,sourceRetired:true});})();`]
 ]);
 
 function cwGemma4MarkerRequest(){return new Request(new URL(CW_GEMMA4_RECOVERY_MARKER,self.location.origin).href)}
@@ -100,5 +102,7 @@ self.CivweaveGemma4CurrentPhoneWorkerV1=Object.freeze({
   retiredQ4PresentationNeutralized:true,
   currentCodeNetworkFirst:true,
   reloadsAppClientsOnce:true,
+  supportWorkerCurrent:true,
+  browserPackImporterCurrent:true,
   recoveryMarker:CW_GEMMA4_RECOVERY_MARKER
 });

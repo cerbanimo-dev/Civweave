@@ -1,17 +1,20 @@
 (()=>{
 'use strict';
-const VERSION='1.2.0-browser-pack-pwa-import-v1-progress-and-missing-file';
+const VERSION='1.3.0-browser-pack-pwa-import-v1-event-driven-current-owner-handoff';
 const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.3.0-progress-and-final-match';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
+const PREMIER='premier-phone';
 const STYLE_ID='cw-browser-pack-pwa-import-v1-style';
 if(globalThis.CivweaveBrowserPackPwaImportV1?.version===VERSION)return;
 
 const parse=(value,fallback={})=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const bridge=()=>globalThis.CivweaveBrowserPackDownloadV1;
+const currentOwner=()=>globalThis.CivweaveGemma4DualQ4ActionsV1;
+const settingsController=()=>globalThis.CivweaveModelSettingsControllerV173;
 const importProgress=new Map();
-let bridgePromise=null,syncQueued=false;
+let bridgePromise=null,syncQueued=false,ownerFlight=null;
 
 function installStyle(){
   if(document.getElementById(STYLE_ID)||!document.head)return;
@@ -66,11 +69,25 @@ function applyProgress(packId,progress){
     const overall=Math.max(0,Math.min(100,(Number(progress.completed||0)/Math.max(1,Number(progress.total||1)))*100));
     importProgress.set(packId,{percent:overall,text:`Imported ${progress.completed}/${progress.total} large files · ${Math.floor(overall)}%`});
   }else if(progress.phase==='finishing-small'){
-    importProgress.set(packId,{percent:99,text:`Large files imported · finishing support files ${progress.completed}/${progress.total}`});
+    importProgress.set(packId,{percent:99,text:`Large files imported · checking support files ${progress.completed}/${progress.total}`});
   }else if(progress.phase==='partial'||progress.phase==='ready'){
     importProgress.delete(packId);
   }
   scheduleSync();
+}
+function ensureCurrentPremierOwner(){
+  const current=currentOwner();
+  if(current?.currentPhoneAuthority&&current?.downloadSupportFiles)return Promise.resolve(current);
+  if(ownerFlight)return ownerFlight;
+  const controller=settingsController();
+  if(!controller?.ensureGemma4Pack)return Promise.reject(new Error('The current Premier Phone setup controller is unavailable. Close and reopen Civweave, then try again.'));
+  ownerFlight=Promise.resolve(controller.ensureGemma4Pack()).then(ok=>{
+    const next=currentOwner();
+    if(!ok||!next?.currentPhoneAuthority||!next?.downloadSupportFiles)throw new Error('The current Premier Phone setup controls did not become ready.');
+    next.scheduleDecorate?.();
+    return next;
+  }).finally(()=>{ownerFlight=null});
+  return ownerFlight;
 }
 function ensureImportInput(packId){
   let input=document.getElementById(inputId(packId));if(input)return input;
@@ -78,9 +95,16 @@ function ensureImportInput(packId){
   input.addEventListener('change',()=>{
     const files=[...(input.files||[])];input.value='';if(!files.length)return;
     status(`Importing ${files.length} selected browser download${files.length===1?'':'s'}…`);
-    ensureBridge().then(current=>current.importFiles(packId,files,{onProgress:progress=>applyProgress(packId,progress)})).then(result=>{
+    ensureBridge().then(current=>current.importFiles(packId,files,{onProgress:progress=>applyProgress(packId,progress)})).then(async result=>{
       if(result?.available){importProgress.delete(packId);status(`${result.pack.label} is installed in Civweave local storage.`)}
       else if(result?.partial){importProgress.delete(packId);const missing=result.missing?.[0];status(`Imported ${result.importedTotal}/${result.receipt.large.length} large files. Still missing ${missing?`${missing.label} · ${missing.basename}`:'one large file'}.`)}
+      if(packId===PREMIER){
+        const receipt=bridge()?.pending?.(PREMIER),counts=receipt?bridge()?.receiptCounts?.(receipt):null;
+        if(counts?.expected>0&&counts.imported===counts.expected){
+          status('Both Gemma 4 LiteRT files are imported · checking the smaller Premier Phone support files…');
+          await ensureCurrentPremierOwner().catch(error=>status(String(error?.message||error),true));
+        }
+      }
       scheduleSync();
     }).catch(error=>{importProgress.delete(packId);status(String(error?.message||error),true);scheduleSync()});
   });
@@ -104,23 +128,27 @@ function syncProgress(card,packId,receipt,state){
   const text=active?.text||`Import progress · ${counts.imported}/${counts.expected} files · ${Math.floor(percent)}%`;
   box.style.setProperty('--cw-browser-pack-progress',`${percent}%`);const label=box.querySelector('small');if(label&&label.textContent!==text)label.textContent=text;
 }
-function controlsHtml(packId,receipt,state){
-  const current=bridge(),counts=current.receiptCounts(receipt),next=current.nextRecord(packId),missing=current.unimportedRecords(receipt),downloadRecord=next||missing[0],parts=[];
+function controlsHtml(packId,receipt){
+  const current=bridge(),next=current.nextRecord(packId),missing=current.unimportedRecords(receipt),downloadRecord=next||missing[0],parts=[];
   if(downloadRecord){const retry=!next&&missing.length>0,label=retry?'Download missing again':'Download next';parts.push(`<a href="${esc(current.downloadUrl(downloadRecord))}" data-cw-browser-pack-download-next="${esc(packId)}" data-cw-browser-record-key="${esc(downloadRecord.key)}" download="${esc(downloadRecord.basename)}">${label} · ${esc(downloadRecord.label)} · ${esc(downloadRecord.basename)} · ${esc(fmt(downloadRecord.minBytes||downloadRecord.expectedBytes))}</a>`)}
   parts.push(`<label class="cw-browser-pack-import-label" for="${esc(inputId(packId))}">Import downloaded files</label>`);
   parts.push(`<button type="button" data-local-pack-remove="${esc(packId)}">Clear pack</button>`);
   return parts.join('')
 }
 function normalizeBaseStatus(card,state){
-  if(!['browser-queued','browser-partial','browser-importing'].includes(state))return;
+  if(!['browser-queued','browser-partial','browser-importing','support-required'].includes(state))return;
   for(const row of card.querySelectorAll('.cw-local-meta')){
     if(/Browser downloads queued|Sending files to the browser download manager/i.test(row.textContent||'')){
       const copy='Browser-managed downloads · import completed files or download the specifically missing file below.';if(row.textContent!==copy)row.textContent=copy;
     }
   }
 }
+function currentOwnerActive(card){const owner=currentOwner();return Boolean(card?.dataset?.gemma4CurrentPhoneOwner||owner?.currentPhoneAuthority&&owner?.singlePresentationOwner)}
 function syncCards(){
-  syncQueued=false;installStyle();const current=bridge();if(!current?.streamingImportProgress){ensureBridge().then(scheduleSync,()=>{});return}
+  syncQueued=false;installStyle();const current=bridge();
+  // Passive Settings rendering never loads the browser bridge. The bridge is loaded only
+  // from an explicit download/import action; until then the saved-state base card remains untouched.
+  if(!current?.streamingImportProgress)return;
   const states=packStates();
   for(const card of document.querySelectorAll('#cw-local-ai-v324 [data-pack-id]')){
     const packId=String(card.dataset.packId||'');if(!BROWSER_PACKS.has(packId))continue;
@@ -128,8 +156,16 @@ function syncCards(){
     normalizeBaseStatus(card,state);
     if(state==='ready'||!receipt){card.querySelector('[data-cw-browser-pack-state]')?.remove();card.querySelector('[data-cw-browser-pack-missing]')?.remove();syncProgress(card,packId,receipt,state);delete actions.dataset.cwBrowserSignature;ensureImportInput(packId);continue}
     ensureImportInput(packId);stateLine(card,receipt,state);syncProgress(card,packId,receipt,state);
-    const counts=current.receiptCounts(receipt),next=current.nextRecord(packId),missing=current.unimportedRecords(receipt),downloadRecord=next||missing[0],signature=[receipt.version,counts.expected,counts.started,counts.imported,downloadRecord?.key||'',state].join('|');
-    if(actions.dataset.cwBrowserSignature!==signature){actions.innerHTML=controlsHtml(packId,receipt,state);actions.dataset.cwBrowserSignature=signature}
+    const counts=current.receiptCounts(receipt),complete=counts.expected>0&&counts.imported===counts.expected;
+    if(packId===PREMIER&&complete){
+      delete actions.dataset.cwBrowserSignature;
+      if(currentOwnerActive(card))continue;
+      const html='<button type="button" data-cw-premier-phone-finish>Finish Premier Phone setup</button><button type="button" data-local-pack-remove="premier-phone">Clear pack</button>';
+      if(actions.innerHTML!==html)actions.innerHTML=html;
+      continue;
+    }
+    const next=current.nextRecord(packId),missing=current.unimportedRecords(receipt),downloadRecord=next||missing[0],signature=[receipt.version,counts.expected,counts.started,counts.imported,downloadRecord?.key||'',state].join('|');
+    if(actions.dataset.cwBrowserSignature!==signature){actions.innerHTML=controlsHtml(packId,receipt);actions.dataset.cwBrowserSignature=signature}
   }
 }
 function scheduleSync(){if(syncQueued)return;syncQueued=true;queueMicrotask(syncCards)}
@@ -141,16 +177,18 @@ function beginQueue(packId,control){
   }).catch(error=>status(String(error?.message||error),true)).finally(()=>{control.disabled=false;scheduleSync()})
 }
 function onClick(event){
+  const finish=event.target.closest?.('button[data-cw-premier-phone-finish]');
+  if(finish){event.preventDefault();event.stopImmediatePropagation();finish.disabled=true;status('Checking Premier Phone support files…');void ensureCurrentPremierOwner().catch(error=>status(String(error?.message||error),true)).finally(()=>{finish.disabled=false;scheduleSync()});return}
   const start=event.target.closest?.('button[data-local-pack-download]');
   if(start){const packId=packIdFrom(start);if(packId){event.preventDefault();event.stopImmediatePropagation();beginQueue(packId,start);return}}
   const next=event.target.closest?.('a[data-cw-browser-pack-download-next]');
   if(next){const packId=packIdFrom(next),key=String(next.dataset.cwBrowserRecordKey||'');if(!packId||!key)return;status(`Starting ${next.getAttribute('download')||'browser download'}…`);setTimeout(()=>{bridge()?.markStarted?.(packId,key);scheduleSync()},0);return}
 }
-const observer=new MutationObserver(scheduleSync);
-function boot(){installStyle();ensureBridge().then(scheduleSync,()=>{});document.addEventListener('click',onClick,true);observer.observe(document.documentElement,{childList:true,subtree:true});scheduleSync()}
+function boot(){installStyle();document.addEventListener('click',onClick,true);scheduleSync()}
 addEventListener('civweave:model-settings-opened',scheduleSync);
-for(const name of ['civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-pack-removed'])addEventListener(name,scheduleSync);
+addEventListener('civweave:settings-opened',scheduleSync);
+for(const name of ['civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-pack-removed','civweave:local-model-downloaded','civweave:gemma4-support-progress'])addEventListener(name,scheduleSync);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 
-globalThis.CivweaveBrowserPackPwaImportV1=Object.freeze({version:VERSION,ensureBridge,syncCards,scheduleSync,ensureImportInput,explicitBrowserFiles:true,progressUi:true,missingFileRecovery:true});
+globalThis.CivweaveBrowserPackPwaImportV1=Object.freeze({version:VERSION,ensureBridge,syncCards,scheduleSync,ensureImportInput,ensureCurrentPremierOwner,explicitBrowserFiles:true,progressUi:true,missingFileRecovery:true,eventDriven:true,mutationObserver:false,passiveBridgeLoad:false,currentPremierOwnerHandoff:true,completedPremierActionsRelinquished:true});
 })();
