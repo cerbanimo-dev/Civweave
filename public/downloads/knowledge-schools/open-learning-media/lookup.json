@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-08-18T03:31:27Z",
+  "built_at": "2026-08-31T11:39:03Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -176,7 +176,7 @@
         "critical-thinking",
         "philosophy-ethics"
       ],
-      "coverage": 0.6,
+      "coverage": 0.8,
       "available": true
     },
     {
@@ -205,7 +205,7 @@
         "personal-finance",
         "communication-conflict"
       ],
-      "coverage": 0.75,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -1364,7 +1364,7 @@
         "provider": "peertube",
         "provider_id": "8c8552a4-1e47-45f5-82a6-d81f6cf086df",
         "title": "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey or refreshing the basics, this video will help you *boost your daily English communication skills*. What You’ll Learn in This Video: ✅ Pronunciation – Learn how to say \"Civilization\" easily and correctly. ✅ Meaning – Understand its definition: \"Advanced human society\" ✅ Part of Speech – See how \"Civilization\" works as a Noun in simple sentences. ✅ Synonyms & Antonyms – Explore similar and opposite words to grow your vocabulary. ✅ Real-Life Examples – Discover how to use \"Civilization\" in sentences you can actually use every day. Why Should You Learn This Word? The word \"Civilization\" is a super useful way to talk about the development and characteristics of different societies throughout history in English. It’s one of the basic words B2 learners must know to make their speech more natural and clear. By mastering it, you’ll feel more confident in conversations, writing, and even exams. Word Breakdown: • Vocabulary Level : B2 • Part of Speech : Noun • Word : Civilization • Definition : \"Advanced human society\" • Synonyms : Society, Culture, Development • Antonyms : Barbarism, Savagery, Primitivity • Example Sentences : 1. The Roman Civilization was known for its advanced engineering. 2. Contact with other civilizations broadened their cultural horizons. 3. Preserving our civilization for future generations is crucial. Tips for Beginners: 👉 Start using \"Civilization\" in your daily conversations. For example: \"The museum showcases artifacts from various civilizations.\" 👉 Compare it with similar words like \"Culture\" to understand su",
+        "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey o...",
         "source_url": "https://diler.tube/videos/watch/8c8552a4-1e47-45f5-82a6-d81f6cf086df",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -1406,11 +1406,10 @@
         },
         "relevance": {
           "world-history": {
-            "score": 14,
+            "score": 10,
             "evidence": [
               "world history",
-              "world history",
-              "civilizations"
+              "world history"
             ]
           }
         },
@@ -1508,7 +1507,7 @@
         "provider": "peertube",
         "provider_id": "ba7baa17-7a0e-432c-ba49-c2cfb1f0096d",
         "title": "How to use Mergin Maps in Academia",
-        "description": "Mergin Maps is a mobile app for collecting, storing, and synchronizing data with students, built on QGIS. The Mergin Maps University Program offers a free Academic Plan for lecturers and students. This plan includes 5 GB of storage, a free book fo...",
+        "description": "Mergin Maps is a mobile app for collecting, storing, and synchronizing data with students, built on QGIS. The Mergin Maps University Program offers a free Academic Plan for lecturers and students. This plan includes 5 GB of storage, a free book for teachers, unlimited workspaces, and the ability to add unlimited students to projects. To apply for the Academic Plan, you need to fill out a Google Form found on the Mergin Maps academia-plan webpage. The plan is valid for one calendar year and requires re-verification of academic status annually. See more: https://merginmaps.com/academic-plan #QGIS #MerginMaps #AcademicPlan #OpenSource #GIS #FieldDataCollection",
         "source_url": "https://videos.qwast-gis.com/videos/watch/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -1735,95 +1734,6 @@
           "earth-geography": {
             "strong_title_matches": [
               "mapping"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "earth-geography": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-        "title": "Topographical maps for all!",
-        "description": "LibrePlanet 2023 videos Presented by: Anonymous Anaximander c. 610 – c. 546 BC) was a pre-Socratic Greek philosopher who lived in Miletus, a city of Ionia (in modern-day Turkey). He belonged to the Milesian school and learned the teachings of hi...",
-        "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 333684675,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 186076391,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 155856944,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-240-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 120216224,
-            "resolution": "240p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Free Software Foundation",
-          "source_title": "Topographical maps for all!",
-          "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "earth-geography": {
-            "score": 10,
-            "evidence": [
-              "maps",
-              "maps"
-            ]
-          }
-        },
-        "pedagogy": {
-          "earth-geography": {
-            "strong_title_matches": [
-              "maps"
             ],
             "strong_description_matches": [],
             "educational_intent": true,
@@ -2161,70 +2071,6 @@
           "creator": "UK Parliament",
           "source_title": "An introduction to Parliament",
           "source_url": "https://commons.wikimedia.org/wiki/File:An_introduction_to_Parliament.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "civics-society": {
-            "score": 10,
-            "evidence": [
-              "government",
-              "government"
-            ]
-          }
-        },
-        "pedagogy": {
-          "civics-society": {
-            "strong_title_matches": [],
-            "strong_description_matches": [
-              "government"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "civics-society": {
-            "reason": "topic-description-anchor-plus-instructional-title",
-            "pedagogy_score": 36
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Elections and voting explained (UK).webm",
-        "title": "Elections and voting explained (UK)",
-        "description": "Discover how elections work in the UK and take a closer look at the General Election, exploring: our right to vote, how candidates and parties gain votes and what happens once elected. If you are a teacher, this animation is a quick and easy way to introduce the General Election with secondary students studying subjects such as Citizenship or Government & Politics. This is just one chapter of the ‘An Introduction to Parliament’ video. Find the full video, along with further chapters, such as Parliament’s Structure and Your Voice, here: https://www.youtube.com/watch?v=RAMbIz3Y2JA",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Elections_and_voting_explained_%28UK%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 7768739,
-            "provider_sha1": "d9fb26a96fbab6fda2f8774fea28f96a52241d1b",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "UK Parliament",
-          "source_title": "Elections and voting explained (UK)",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
         },
@@ -2790,6 +2636,178 @@
     "physics-foundations": [
       {
         "provider": "wikimedia-commons",
+        "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
+        "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 8378497,
+            "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "FuseSchool - Global Education",
+          "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 10,
+            "evidence": [
+              "chemistry",
+              "chemistry"
+            ]
+          },
+          "physics-foundations": {
+            "score": 20,
+            "evidence": [
+              "physics",
+              "energy",
+              "physics",
+              "energy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "chemistry"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "strong_title_matches": [
+              "energy"
+            ],
+            "strong_description_matches": [
+              "physics",
+              "energy"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "b57d1522-c21a-47c0-956d-c1a5e49785e4",
+        "title": "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+        "description": "Inertia | Forces and Motion Inertia is the resistance to a change in motion. So an object at rest remains at rest and an object in motion remains in motion with the same velocity unless acted upon by an unbalanced force. CREDITS Animation & Design: Bing Rijper Narration: Dale Bennett Script: Bethan Parry, Keith Ross and Alistair Haynes Author: FuseSchool - Global Education",
+        "source_url": "https://diler.tube/videos/watch/b57d1522-c21a-47c0-956d-c1a5e49785e4",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/b57d1522-c21a-47c0-956d-c1a5e49785e4-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 14481048,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/b57d1522-c21a-47c0-956d-c1a5e49785e4-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 8105995,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/b57d1522-c21a-47c0-956d-c1a5e49785e4",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 28,
+            "evidence": [
+              "physics",
+              "forces and motion",
+              "physics",
+              "forces",
+              "motion"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics",
+              "forces and motion"
+            ],
+            "strong_description_matches": [
+              "forces and motion"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
         "provider_id": "File:Physics Of Crystals by LesBrown.webm",
         "title": "Physics Of Crystals by LesBrown",
         "description": "This rare documentary takes a look at the true nature of magnetism, electricity and gravity. Crystals, Physics of a fractal universe and Spin on orbiting bodies. Also speaks of pyramids and how to make one to grow large crops. This was taken from a DVD called \"The Physics of Crystals.\" Buy it here: http://vanguardsciences.biz/dvdcrysta ... Here's a link to his pyramid research book: http://www.holyconservancy.org/789005 ... http://www.vanguardsciences.biz/dvds.htm - Excellent video provides insights into Pyramidal and Tetrahedral Geometry. How they work and how to use them for novel effects. Incredible, information packed, over 2 Hour long DVD describing many unusual and original experiments including transmutation of elements, energy extraction, increasing plant growth, healing the body and more. Also check out our other DVDs and our ebooks at; http://www.vanguardsciences.biz/ebook ...",
@@ -3136,86 +3154,6 @@
         }
       },
       {
-        "provider": "peertube",
-        "provider_id": "76846280-2d75-4397-8802-56d7a8ee2e14",
-        "title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-        "description": "Learn the basics about balancing equations, as a part of chemical calculations. The law of conservation of mass states that no atoms are lost or made during a chemical reaction. There are different ways of arranging the atoms. Chemical reactions are about rearranging atoms. Chemical reactions can be represented by symbol equations so long as the number of atoms on each side of the equals sign remains the same. Equations need to be balanced to conserve atoms, by putting numbers in front. A good way to balance an equation is to use a table to keep track of everything. You can only change the big number in front of the compounds, which says how many molecules you have. Charges in a formula also need to be balanced. So, both the atoms and the charges have to balance. Nothing can appear or disappear! This is the most important rule about balancing: no atoms or charges can be made or destroyed. Author: FuseSchool - Global Education",
-        "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 7276195,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 4512470,
-            "resolution": "480p",
-            "fps": 25,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-          "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "chemistry-foundations": {
-            "score": 38,
-            "evidence": [
-              "chemistry",
-              "chemical reactions",
-              "molecules",
-              "chemistry",
-              "atoms",
-              "reactions"
-            ]
-          }
-        },
-        "pedagogy": {
-          "chemistry-foundations": {
-            "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [
-              "chemical reactions",
-              "molecules"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 64
-          }
-        },
-        "selection": {
-          "chemistry-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
-          }
-        }
-      },
-      {
         "provider": "wikimedia-commons",
         "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
         "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
@@ -3257,6 +3195,15 @@
               "chemistry",
               "chemistry"
             ]
+          },
+          "physics-foundations": {
+            "score": 20,
+            "evidence": [
+              "physics",
+              "energy",
+              "physics",
+              "energy"
+            ]
           }
         },
         "pedagogy": {
@@ -3272,12 +3219,30 @@
             "clickbait_title": false,
             "non_instructional_title": false,
             "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "strong_title_matches": [
+              "energy"
+            ],
+            "strong_description_matches": [
+              "physics",
+              "energy"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
           }
         },
         "selection": {
           "chemistry-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
           }
         }
       },
@@ -3418,9 +3383,83 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "76846280-2d75-4397-8802-56d7a8ee2e14",
+        "title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+        "description": "Learn the basics about balancing equations, as a part of chemical calculations. The law of conservation of mass states that no atoms are lost or made during a chemical reaction. There are different ways of arranging the atoms. Chemical reac...",
+        "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 7276195,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 4512470,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 14,
+            "evidence": [
+              "chemistry",
+              "chemistry",
+              "atoms"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51",
         "title": "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-        "description": "In this video, we’re going to learn about the loss of mass in a chemical reaction, how it happens and why we measure this. The total MASS of reactants will be the same as that of the products, as mass is always conserved in a chemical reaction. But often in a reaction, not all of the products formed will stay in the reaction vessel. Some may be lost to the surroundings as a gas. So when gas escapes from a reaction vessel, you can observe that mass has been lost and this mass can be measured. Measuring the loss of mass as a reaction occurs is important, because it can tell us the rate at which the reaction proceeds, which can be vital when it comes to producing chemicals in industry quickly and efficiently. On the other hand, measuring the total loss of mass once a reaction has gone to completion can tell us whether the experiment has been successful and whether the reactants are pure. To measure the loss of mass in a reaction, you can carry out the reaction on electronic scales. Record the initial mass, and then take recordings at regular intervals throughout the reaction. You then can plot a graph of 'loss of mass' against 'time' from which you can then work out the rate of reaction. You can also predict the loss of mass from the chemical equation for the reaction, and then check this expected value against the results of the experiment. Both are important techniques used by chemists. Author: FuseSchool - Global Education",
+        "description": "In this video, we’re going to learn about the loss of mass in a chemical reaction, how it happens and why we measure this. The total MASS of reactants will be the same as that of the products, as mass is always conserved in a chemical reaction...",
         "source_url": "https://diler.tube/videos/watch/4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -3905,7 +3944,7 @@
         "provider": "peertube",
         "provider_id": "aec56f25-9201-447f-acd4-23fa7132499d",
         "title": "What Is Water Pollution ｜ Environmental Chemistry ｜ Chemistry ｜ FuseSchool",
-        "description": "Learn the basics about water pollution, whilst learning about environmental chemistry. The substances mankind throws away have polluted lakes, rivers and even the oceans. The United Nations estimate that around 10% of the world’s people do not have access to clean drinking water. The main problem with this untreated water is that it can carry diseases, such as cholera, that spread through untreated human faeces. This is particularly serious in shanty towns near big cities and in refugee camps. Rivers and streams can also be polluted with diseases from water coming from badly managed rubbish dumps. But human sewage is not the only substance that pollutes our water supplies – most of the other substances humans allow to escape into streams, rivers and the oceans, are more a danger to natural ecosystems than to us directly. Chemical fertilisers are much more soluble in water than organic, manure-based fertilisers, so heavy rain can wash them into streams and lakes, causing eutrophication. The fertilisers cause algae to grow very fast forming a mat on the lake surface, which blocks sunlight from the vegetation deeper down, which then dies. Bacteria feed off the dying vegetation and use up the remaining oxygen supply. Once the oxygen has gone all animal life dies and the lake ecosystem is destroyed. If heavy metals, such as lead mercury and cadmium, get into rivers and lakes many animals will die. Radioactive waste is normally stored above ground in water tanks, waiting for a more permanent underground storage where it has to be safe for millions of years. There are fears that these underground stores could fail and contaminate water courses. Following a nuclear disaster, water courses and the oceans can become dangerously polluted with radioactive waste. During mining and d",
+        "description": "Learn the basics about water pollution, whilst learning about environmental chemistry. The substances mankind throws away have polluted lakes, rivers and even the oceans. The United Nations estimate that around 10% of the world’s people do ...",
         "source_url": "https://diler.tube/videos/watch/aec56f25-9201-447f-acd4-23fa7132499d",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -4390,78 +4429,9 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "6d5ef824-df67-4eb1-8275-75e8bfb755a2",
-        "title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
-        "description": "In this video we look at the basics of algebra, focusing on the notation that is used. In algebra we use symbols to represent numbers. These symbols are called variables. Some reasons for using symbols instead of numbers is that the symbols, or variables, can represent unknown quantities and for showing formulae like the area of a circle. Instead of writing a X b we remove the multiplication sign and just write ab instead. Two letters next to each other or a number and a letter, means those things are multiplied together. We use a curly x for the letter because otherwise it looks like a multiplication sign. Instead of the division sign, in algebra we usually write it as a fraction. Numbers are usually left as fractions rather than as decimals. Author: FuseSchool - Global Education",
-        "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/6d5ef824-df67-4eb1-8275-75e8bfb755a2-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 6825911,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
-          "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "mathematics-foundations": {
-            "score": 20,
-            "evidence": [
-              "algebra",
-              "fractions",
-              "algebra"
-            ]
-          }
-        },
-        "pedagogy": {
-          "mathematics-foundations": {
-            "strong_title_matches": [
-              "algebra"
-            ],
-            "strong_description_matches": [
-              "algebra",
-              "fractions"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 64
-          }
-        },
-        "selection": {
-          "mathematics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
         "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
+        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
         "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -4536,10 +4506,10 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "65b65650-2b35-492d-84d7-1e516dc721a5",
-        "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
-        "source_url": "https://videos.trom.tf/videos/watch/65b65650-2b35-492d-84d7-1e516dc721a5",
+        "provider_id": "6d5ef824-df67-4eb1-8275-75e8bfb755a2",
+        "title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "description": "In this video we look at the basics of algebra, focusing on the notation that is used. In algebra we use symbols to represent numbers. These symbols are called variables. Some reasons for using symbols instead of numbers is that the symbols, o...",
+        "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC-BY-SA",
@@ -4552,37 +4522,28 @@
         },
         "files": [
           {
-            "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/65b65650-2b35-492d-84d7-1e516dc721a5-1080-fragmented.mp4",
+            "url": "https://diler.tube/download/web-videos/6d5ef824-df67-4eb1-8275-75e8bfb755a2-360.mp4",
             "mime": "video/mp4",
-            "bytes": 149771389,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/65b65650-2b35-492d-84d7-1e516dc721a5-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 112530337,
-            "resolution": "720p",
-            "fps": 25,
-            "role": "streaming-file"
+            "bytes": 6825911,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "web-video"
           }
         ],
         "quality_score": 87,
         "content_hash": null,
         "hash_state": "compute-on-cache",
         "attribution": {
-          "creator": "Charlotte Aten",
-          "source_title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-          "source_url": "https://videos.trom.tf/videos/watch/65b65650-2b35-492d-84d7-1e516dc721a5",
+          "creator": "jessa",
+          "source_title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
           "license": "Attribution - Share Alike",
           "license_url": ""
         },
         "relevance": {
           "mathematics-foundations": {
-            "score": 20,
+            "score": 10,
             "evidence": [
-              "mathematics",
               "algebra",
               "algebra"
             ]
@@ -4594,20 +4555,19 @@
               "algebra"
             ],
             "strong_description_matches": [
-              "mathematics",
               "algebra"
             ],
             "educational_intent": true,
             "instructional_title": true,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 64
+            "pedagogy_score": 56
           }
         },
         "selection": {
           "mathematics-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
+            "pedagogy_score": 56
           }
         }
       },
@@ -4615,7 +4575,7 @@
         "provider": "peertube",
         "provider_id": "cf8641b0-88ee-498e-86eb-65b3028bea60",
         "title": "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "description": "In this video, we apply the formula derived in the previous video to find the shortest distance between two skew lines. We first do that in vector form. We then apply the formula for vector form to solve a problem when the equations are given in cartesian form. We realise that the vector form is more convenient. We finally solve a problem where the given equations need some rearrangement to get to the vector form. Author: Khan Academy India - English",
+        "description": "In this video, we apply the formula derived in the previous video to find the shortest distance between two skew lines. We first do that in vector form. We then apply the formula for vector form to solve a problem when the equations are given in c...",
         "source_url": "https://diler.tube/videos/watch/cf8641b0-88ee-498e-86eb-65b3028bea60",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -4691,7 +4651,7 @@
         "provider": "peertube",
         "provider_id": "3f64a5b6-787d-41b2-8397-3d4289be110f",
         "title": "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
-        "description": "Today's episode is a special one, as we explore the fascinating world of Geometry: Patterns, Sketches, and Conjectures. If you're ready for a Funny Math Lesson that combines humor with learning, you're in the right place!📐🧮 🔍 In today's installment, we'll delve into: The captivating intricacies of geometry, focusing on Math Pattern Recognition and the art of crafting precise Geometry Conjectures. A stimulating challenge straight from a McDougal Littell High School Geometry textbook. Can you visualize and sketch the next figure in our Geometry Sequences? 🧠 Why This Adventure? Sparking Curiosity: Geometry is more than just shapes; it's about recognizing patterns, discovering connections, and understanding the space around us. Tool Time: Sharpen your skills and precision with geometry tools like the compass, a staple in Math Exploration. Growth Mindset: Remember, it's okay to stumble. Each mistake paves the way to deeper understanding. Author: Mister Marx",
+        "description": "Today's episode is a special one, as we explore the fascinating world of Geometry: Patterns, Sketches, and Conjectures. If you're ready for a Funny Math Lesson that combines humor with learning, you're in the right place!📐🧮 🔍 In today's inst...",
         "source_url": "https://diler.tube/videos/watch/3f64a5b6-787d-41b2-8397-3d4289be110f",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -4847,84 +4807,9 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "6a2c633d-cea5-4c61-87db-3479b4fef231",
-        "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
-        "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early stages of lattice theory. The 1935 paper of Birkhoff I mention can be found at [https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf](https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf). The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
-        "source_url": "https://videos.trom.tf/videos/watch/6a2c633d-cea5-4c61-87db-3479b4fef231",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/6a2c633d-cea5-4c61-87db-3479b4fef231-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 176185194,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/6a2c633d-cea5-4c61-87db-3479b4fef231-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 127228375,
-            "resolution": "720p",
-            "fps": 25,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Charlotte Aten",
-          "source_title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
-          "source_url": "https://videos.trom.tf/videos/watch/6a2c633d-cea5-4c61-87db-3479b4fef231",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "mathematics-foundations": {
-            "score": 10,
-            "evidence": [
-              "algebra",
-              "algebra"
-            ]
-          }
-        },
-        "pedagogy": {
-          "mathematics-foundations": {
-            "strong_title_matches": [
-              "algebra"
-            ],
-            "strong_description_matches": [
-              "algebra"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "mathematics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "46b1e473-a4a6-4dd3-a5f5-9a1e547e270e",
         "title": "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "description": "In this video, we learn how to find the distance between two parallel lines in 3D. We first derive the formula to get the distance between two given lines. We then understand why it works in vector form. We then apply the formula to get the distance between two given parallel lines. Author: Khan Academy India - English",
+        "description": "In this video, we learn how to find the distance between two parallel lines in 3D. We first derive the formula to get the distance between two given lines. We then understand why it works in vector form. We then apply the formula to get the distan...",
         "source_url": "https://diler.tube/videos/watch/46b1e473-a4a6-4dd3-a5f5-9a1e547e270e",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -4995,9 +4880,75 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
+        "title": "Vartika: Inside nowadays Mathematics (Part 4)",
+        "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge. Because Vartika is more basic than Addition.",
+        "source_url": "https://p.eertu.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC0",
+          "label": "Public Domain Dedication",
+          "url": "",
+          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/b356b20b-d97b-4727-acc3-3b5ee5c17bb9-450-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 67491768,
+            "resolution": "450p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "danisanti",
+          "source_title": "Vartika: Inside nowadays Mathematics (Part 4)",
+          "source_url": "https://p.eertu.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
+          "license": "Public Domain Dedication",
+          "license_url": ""
+        },
+        "relevance": {
+          "mathematics-foundations": {
+            "score": 10,
+            "evidence": [
+              "mathematics"
+            ]
+          }
+        },
+        "pedagogy": {
+          "mathematics-foundations": {
+            "strong_title_matches": [
+              "mathematics"
+            ],
+            "strong_description_matches": [
+              "mathematics"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 45
+          }
+        },
+        "selection": {
+          "mathematics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 45
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "871b3ca9-e913-4a7d-a5b9-bcbfa9a6636a",
         "title": "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
-        "description": "In this video get to learn about the basic concept of volume and surface area of solids. How do we get the formulae for different 3D shapes? Learn more in this video. Khan Academy is a free learning platform for Class 1-12 students with videos, exercises, and tests for maths, science, and more subjects. Our content is aligned to CBSE syllabus and available in Hindi, English, and many more regional languages. Author: Khan Academy India - English",
+        "description": "In this video get to learn about the basic concept of volume and surface area of solids. How do we get the formulae for different 3D shapes? Learn more in this video. Khan Academy is a free learning platform for Class 1-12 students with videos,...",
         "source_url": "https://diler.tube/videos/watch/871b3ca9-e913-4a7d-a5b9-bcbfa9a6636a",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5784,7 +5735,7 @@
         "provider": "peertube",
         "provider_id": "2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "title": "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat, a shading and to finish with a paint-over and post-effect. This is a tutorial doesn't dive into the details, but keeps an overview of the workflow, the goal is to give an idea of the full path and to give tips on the way. I hope showing my recipe will inspire you to start a drawing to test something you'll find interesting and find your own path. **Timeline:** - 00:19 Thumbnail (or Sketch) - 00:57 Drawing - 01:41 Silhouettes - 02:26 Color Flat - 03:31 Shading - 05:46 Paint-over and post effects License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com webcomic: www.peppercarrot.com Background music by Omfgdude \"Lofi-Hip-hop\" CC-0 / Public Domain - 2018 https://opengameart.org/content/lofi-hip-hop Special thanks to @RinCat@meow.cloud on the Fediverse for saving a corrupted MP4 recording of this video. Edited with Kdenlive 21.04 appimage on Fedora 37 KDE **Support:** - Patreon: https://www.patreon.com/join/davidrevoy? - Tipeee: https://fr.tipeee.com/pepper-carrot - Paypal: https://paypal.me/davidrevoy - Liberapay: https://liberapay.com/davidrevoy/ **Follow:** - Mastodon: https://framapiaf.org/@davidrevoy - Twitter: http://twitter.com/davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ **Website:** - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/ **Alternative channel:** - Peertube: https://peertube.touhoppai.moe/accounts/shichimi/videos - Youtube: https://www.youtube.com/",
+        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat...",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5858,10 +5809,9 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 14,
+            "score": 10,
             "evidence": [
-              "digital painting",
-              "music"
+              "digital painting"
             ]
           }
         },
@@ -5891,7 +5841,7 @@
         "provider": "peertube",
         "provider_id": "6efece70-20fa-4a68-88fe-85dad69c9ba7",
         "title": "Tutorial: Grayscale to Color - Krita Digital Painting - Character design",
-        "description": "A commented step-by-step guide and advice on how to paint an original fantasy character design from scratch in Krita. Timeline: - 00:00 Intro - 00:48 Setup - 02:05 Silhouette - 06:32 Lambert Lightning - 08:00 Grayscale painting - 10:30 Color - 15:10 Painting In the intro of this video I explain my interface: https://youtu.be/uYdEkOyFUn8 My brushes are here: https://youtu.be/s7rV88734pE Soundtrack: → Opening background: A Ghrà, CC-BY Damiano Baldoni opengameart.org → Intro: Fabian Measures - Hanami (CC-By) www.freemusicarchive.org www.soundcloud.com/fogheart → Background; Village Ambiance CC-BY Alexander Nakarada https://www.serpentsoundstudios.com/royalty-free-music/celtic-fantasy License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com Social Media: - Mastodon: https://framapiaf.org/@davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/",
+        "description": "A commented step-by-step guide and advice on how to paint an original fantasy character design from scratch in Krita. Timeline: - 00:00 Intro - 00:48 Setup - 02:05 Silhouette - 06:32 Lambert Lightning - 08:00 Grayscale painting ...",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/6efece70-20fa-4a68-88fe-85dad69c9ba7",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5965,10 +5915,9 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 14,
+            "score": 10,
             "evidence": [
-              "digital painting",
-              "music"
+              "digital painting"
             ]
           }
         },
@@ -5998,7 +5947,7 @@
         "provider": "peertube",
         "provider_id": "4c128773-325c-4746-985e-521d2855451c",
         "title": "3 out of 5 Healthy Breakfast Lesson Plan: Nutrition Made Fun!",
-        "description": "The \"3 out of 5\" concept for a healthy breakfast can be hard to convey to children. (The \"3 out of 5\" concept is also taught in our fun, informative ‘Power up your breakfast game’ at http://bit.ly/1vnZXPE.) Looking for ideas for healthy eating lesson plans, including a lesson plan on the importance of a healthy breakfast? Look no further: this informative, fun video explains key concepts in a lively animated format kids will love. Eating breakfast is an important start to the day, and eating a balanced breakfast containing \"3 out of 5\" key food groups is really important. This fun video supplements your lesson plan with an informative easy excursion through various options for kids to have a healthy breakfast. Help kids learn to mix and match \"3 out of 5\" of key food groups such as milk and dairy, bread and grains, meat and beans and fruits and vegetables. Want even more fun, ideas or recipes? Visit us at http://www.healthyeating.org/. Visit us at www.HealthyEating.org for more information and follow our social channels! FACEBOOK: www.facebook.com/HealthyEatingCA TWITTER: www.facebook.com/HealthyEatingCA INSTAGRAM: www.instagram.com/HealthyEatingCA PINTEREST: www.pinterest.com/HealthyEatingCA",
+        "description": "The \"3 out of 5\" concept for a healthy breakfast can be hard to convey to children. (The \"3 out of 5\" concept is also taught in our fun, informative ‘Power up your breakfast game’ at http://bit.ly/1vnZXPE.) Looking for ideas for healthy eating les...",
         "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/4c128773-325c-4746-985e-521d2855451c",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6423,113 +6372,6 @@
             "pedagogy_score": 44
           }
         }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
-        "title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://github.com/stagfoo/joro //----------------Libraries------------------/// https://github.com/stagfoo/chumbucket https://github.com/visionmedia/page.js https://github.com/choojs/nanohtml",
-        "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 45722677,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 38045937,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 33093299,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 46792840,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 37630151,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 32676797,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "stagfoo",
-          "source_title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-          "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "philosophy-ethics": {
-            "score": 10,
-            "evidence": [
-              "philosophy",
-              "philosophy"
-            ]
-          }
-        },
-        "pedagogy": {
-          "philosophy-ethics": {
-            "strong_title_matches": [
-              "philosophy"
-            ],
-            "strong_description_matches": [
-              "philosophy"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "philosophy-ethics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
       }
     ],
     "vibe-coding": [
@@ -6656,154 +6498,6 @@
           "vibe-coding": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
-        "title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
-        "description": "In this debut episode of The BMad Code Podcast, I sit down with Marten Angner, a 26-year UX veteran, digital product manager, and the creator of the Whiteport Design Studio (WDS), the first official community module in the BMad Method ecosystem. Marten founded Whiteport Studio in Stockholm in 2003 and has personally taught over 2,500 people how to sketch interfaces by hand. When AI hit, he went through the same panic most designers did. He tried the \"vibe coding\" tools, hated them, and went looking for something built for serious professionals. That search led him to BMad, and eventually to building the WDS. We talk about why most designers (and developers) are doing UX backwards, why the trigger map is the most valuable hour you will spend on a project, and why \"specifications are the new code\" is the shift every serious builder needs to make. If you have ever felt like AI was making you faster but dumber, this one is for you. Topics covered: - Why pixel-first design is the wrong starting point for AI-era software - The trigger map: business goals, target groups, driving forces (positive and negative) - Loss aversion, FOMO, and why fear motivates users more than benefit - Scenarios, selective ignorance, and the shortest path from natural starting point to value - Lo-fi wireframes as a tool for failing with grace - Why Figma is now an \"agent training tool,\" not a design destination - Naming every component so AI agents can actually work with your design - Specifications as the new code, and why AI agents love what developers throw away - The future role of designers as strategists and user researchers, not pixel pushers - How WDS plugs into the BMad Method to take you from product brief to working code ================================================================ LIN",
-        "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-2160-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 2187969975,
-            "resolution": "2160p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 485728739,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Bleme",
-          "source_title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
-          "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "vibe-coding": {
-            "score": 10,
-            "evidence": [
-              "vibe coding",
-              "vibe coding"
-            ]
-          }
-        },
-        "pedagogy": {
-          "vibe-coding": {
-            "strong_title_matches": [
-              "vibe coding"
-            ],
-            "strong_description_matches": [
-              "vibe coding"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "vibe-coding": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
-        "title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
-        "description": "*Note: Kenton has just released Cloudflare OS today: https://x.com/KentonVarda/status/2084990137180590572 This talk was recorded a month prior to launch.* Claude needed a strikethrough the slide app did not have, so it added one to the app. Asked to build a deck from a Google doc, it also added text centering and a box that accepts raw SVG, then generated the SVG for a diagram the app could not otherwise draw. That is Kenton Varda's argument in a single move. Software today ships from a developer to users whose feature requests die in Jira, and the escape hatch developers reach for is a plugin architecture rewrite that takes years and never lands. If a user's own agent can add the feature, the core app stays clean and nobody waits. Nothing in current infrastructure supports that. Mobile platforms will not run unsigned code, and 25 years of cloud architecture put one blessed version of every app on the developer's server. Gadgets is his answer, built on Cloudflare Workers with no containers and no database. Each gadget is a single instance of an app, one deck or one board, and sharing is implemented by the platform so the app itself cannot get access control wrong. The UI runs in a null origin iframe that can only postMessage to its parent, over a Cap'n Web RPC session to server code in a dynamic worker sandbox, so an XSS bug in vibecoded code has nothing left to leak. The whole demo ran locally on workerd, so a dead conference network cost him only the one call that needed a model. Speaker info: - https://x.com/KentonVarda - https://lanparty.house - https://github.com/cloudflare/workerd Timestamps: 0:00 - Personal AI codegen breaks cloud infrastructure 1:16 - How feature requests die today 2:35 - The plugin system rewrite trap 3:27 - What if users could add their own fe",
-        "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 89849511,
-            "resolution": "1080p",
-            "fps": 60,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 57610775,
-            "resolution": "720p",
-            "fps": 60,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Bleme",
-          "source_title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
-          "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "vibe-coding": {
-            "score": 10,
-            "evidence": [
-              "vibe coding",
-              "vibe coding"
-            ]
-          }
-        },
-        "pedagogy": {
-          "vibe-coding": {
-            "strong_title_matches": [
-              "vibe coding"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "vibe-coding": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
           }
         }
       }
@@ -7338,220 +7032,6 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "logical-frameworks": {
-            "score": 10,
-            "evidence": [
-              "systems thinking",
-              "systems thinking"
-            ]
-          }
-        },
-        "pedagogy": {
-          "logical-frameworks": {
-            "strong_title_matches": [
-              "systems thinking"
-            ],
-            "strong_description_matches": [
-              "systems thinking"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "logical-frameworks": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about Systems Thinking? Is it the same as non-linear thinking? Let’s find out together with Diana Montalion and Lisa Maria Moritz in this episode. Diana and Lisa will talk about Diana’s new book “Learning Systems Thinking: Essential Nonlinear Skills & Practices for Software Professionals”. Links * [Software Architecture Gathering](https://conferences.isaqb.org/software-architecture-gathering/) Code SATV_SAG15 for 15% off * [Diana Montalion: Learning Systems Thinking: Essential Nonlinear Skills and Practices for Software Professionals](https://amzn.to/4egWSJ7) * [Lisa Moritzs Training \"Sketchnotes in der IT\"](https://www.socreatory.com/de/trainings/sketchnotes) * [Lisa Moritz: \"Sketchnotes in der IT\"](https://amzn.to/4fDOXqA)",
-        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 1911000052,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 260879888,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 225051511,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 540467455,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 260480450,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 224646233,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Eberhard Wolff",
-          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "logical-frameworks": {
-            "score": 10,
-            "evidence": [
-              "systems thinking",
-              "systems thinking"
-            ]
-          }
-        },
-        "pedagogy": {
-          "logical-frameworks": {
-            "strong_title_matches": [
-              "systems thinking"
-            ],
-            "strong_description_matches": [
-              "systems thinking"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "logical-frameworks": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "a4e1b73a-57fe-4460-9f0a-39d75cda843f",
-        "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
-        "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing software. In this episode, Xin Yao will give us an overview about systems thinking and her perspective on how it can help complex software efforts in large sociotechnical environments. Links * [Better Value - Sooner - Safer - Happier](https://www.soonersaferhappier.com/) * [Xin's talk at OOP](https://www.oop-konferenz.de/oop-2023-muenchen/programm/konferenzprogramm?li_fat_id=a38b29b5-feec-46ff-b5f5-e8509d883b8a#item-5814)",
-        "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 3160911997,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 306127830,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 241335269,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 811473511,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 304518584,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 239725747,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Eberhard Wolff",
-          "source_title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
-          "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
         },
         "relevance": {
           "logical-frameworks": {
@@ -9525,424 +9005,6 @@
     "statistics-data-literacy": [
       {
         "provider": "peertube",
-        "provider_id": "a224e97c-f67c-4cbd-9a76-42d23fbe735e",
-        "title": "Lecture 1： Probability and Counting ｜ Statistics 110",
-        "description": "We introduce sample spaces and the naive definition of probability (we'll get to the non-naive definition later). To apply the naive definition, we need to be able to count. So we introduce the multiplication rule, binomial coefficients, and the s...",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/a224e97c-f67c-4cbd-9a76-42d23fbe735e-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 175595558,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 1： Probability and Counting ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
-        "title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
-        "description": "We discuss the birthday problem (how many people do you need to have a 50% chance of there being 2 with the same birthday?), the matching problem (de Montmort), inclusion-exclusion, and properties of probability.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 215357082,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "7ec1769f-c185-4ddb-9d73-cfdb674995e9",
-        "title": "Lecture 4： Conditional Probability ｜ Statistics 110",
-        "description": "We introduce conditional probability, independence of events, and Bayes' rule.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/7ec1769f-c185-4ddb-9d73-cfdb674995e9-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 240622288,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 4： Conditional Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "287bec4a-6717-4f2e-956b-09bb7db6b0d7",
-        "title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
-        "description": "We continue further with conditional probability, and discuss the law of total probability, the so-called prosecutor's fallacy, a disease testing example, and the crucial distinction between independence and conditional independence.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/287bec4a-6717-4f2e-956b-09bb7db6b0d7-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 308676613,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "332961a8-c516-4604-8c7b-928d1988a465",
-        "title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
-        "description": "We fill in the \"Bose-Einstein\" entry of the sampling table, and discuss story proofs. For example, proving Vandermonde's identity with a story is easier and more insightful than going through a tedious algebraic derivation. We then introduce the a...",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/332961a8-c516-4604-8c7b-928d1988a465-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 196752740,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 69
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 69
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
-        "title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
-        "description": "We show how conditional probability sheds light on two of the most famous puzzles in statistics, both of which are often counterintuitive (at first): the Monty Hall problem and Simpson's paradox.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/5453a5e3-fd3b-4d47-85dd-de22c21ec58c-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 245719171,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics"
-            ],
-            "strong_description_matches": [
-              "statistics",
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 65
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 65
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "28780678-085f-4a41-be57-650a21a419e6",
         "title": "Quick Statistics and Visual Overview of Data in LabPlot",
         "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistic...",
@@ -10337,10 +9399,216 @@
       }
     ],
     "meditation-mindfulness": [],
-    "communication-conflict": [],
+    "communication-conflict": [
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Wikipedia to enhance student communication skills - Wikimedia Australia.webm",
+        "title": "Wikipedia to enhance student communication skills - Wikimedia Australia",
+        "description": "Staff from Charles Sturt University and La Trobe University partnered with Wikimedia Australia to develop an active learning exercise that analyses the readability, accuracy, and authorship of Wikipedia articles and generative AI tools within the context of science communication. This Zoom is a recording of the session “Wikipedia to enhance student communication skills”, held on 11th September 2024, where academics across Australia were invited to discuss the benefits of analysing Wikipedia to support students’ learning of communication skills and develop assessments for activities, including rubrics.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 4.0",
+          "url": "https://creativecommons.org/licenses/by/4.0",
+          "evidence": "CC BY 4.0 | Creative Commons Attribution 4.0 | cc-by-4.0 | https://creativecommons.org/licenses/by/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 306465340,
+            "provider_sha1": "7f70e8b73b9adf9e111edbde8d9e770833f088b5",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "AlphaLemur",
+          "source_title": "Wikipedia to enhance student communication skills - Wikimedia Australia",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm",
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0"
+        },
+        "relevance": {
+          "communication-conflict": {
+            "score": 14,
+            "evidence": [
+              "communication skills",
+              "communication"
+            ]
+          }
+        },
+        "pedagogy": {
+          "communication-conflict": {
+            "strong_title_matches": [
+              "communication skills"
+            ],
+            "strong_description_matches": [
+              "communication skills"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "communication-conflict": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership.webm",
+        "title": "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership",
+        "description": "Video recording for Wikimania 2023 Title: Let's Connect x LDWG Learning Clinics: Communication skills for collaborative leadership Speakers: Jan-Bart de Vreede, Let's Connect Working Group, Leadership Development Working Group, Nada Alfarra (User:Nada kareem22), Chinmayee Mishra Abstract: What is this Learning Clinic for? Be introduced to skills that foster communication and empathy needed for collaborative leadership and manage potential conflicts. Learning outcomes: Participants will become more aware of the importance of good communication skills that can support collaborative leadership and mitigate conflict or transform it in a positive way. Methodology: The workshops would be based on these learning methods: Hands-on exercises for people to learn some basic skills with a practical application Learning from peer examples. We will be bringing in community experiences that can be useful for learning and the interactive exercises we will hold. Audience: Maximum 35 community members that are part of organised groups (ie. affiliates or groups of organisers). It would be great to have a mixture of organisers from emerging formal and non-formal groups, as well as those of larger more experienced affiliates. These workshops will be done in collaboration between the Let's Connect working group (led by community members and supported by the Wikimedia Foundation https://meta.wikimedia.org/wiki/Grants:Knowledge_Sharing/Connect/Team ) and also with the support of the Community Development team at the Foundation and the Leadership Development Working Group: https://meta.wikimedia.org/wiki/Leadership_Development_Working_Group ). Presented at: Suntec Singapore Convention and Exhibition Centre , 2023-08-16 03:15 to 05:15 UTC Etherpad link: https://etherpad.wikimedia.org/p/C8NUGA",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 4.0",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 2833552312,
+            "provider_sha1": "9cb212703269a5cd6d03e0248a899b15dd639c51",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Wikimania 2023",
+          "source_title": "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        },
+        "relevance": {
+          "communication-conflict": {
+            "score": 14,
+            "evidence": [
+              "communication skills",
+              "communication"
+            ]
+          }
+        },
+        "pedagogy": {
+          "communication-conflict": {
+            "strong_title_matches": [
+              "communication skills"
+            ],
+            "strong_description_matches": [
+              "communication skills"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "communication-conflict": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      }
+    ],
     "parenting-caregiving": [],
     "gardening-plants": [],
     "entrepreneurship-small-business": [
+      {
+        "provider": "peertube",
+        "provider_id": "a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+        "title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+        "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BE...",
+        "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC0",
+          "label": "Public Domain Dedication",
+          "url": "",
+          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 45051327,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 33517998,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Frank",
+          "source_title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+          "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+          "license": "Public Domain Dedication",
+          "license_url": ""
+        },
+        "relevance": {
+          "entrepreneurship-small-business": {
+            "score": 10,
+            "evidence": [
+              "business model",
+              "business model"
+            ]
+          }
+        },
+        "pedagogy": {
+          "entrepreneurship-small-business": {
+            "strong_title_matches": [
+              "business model"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 49
+          }
+        },
+        "selection": {
+          "entrepreneurship-small-business": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 49
+          }
+        }
+      },
       {
         "provider": "peertube",
         "provider_id": "61802aa3-a02a-419b-aafc-70a5d6861fe7",
@@ -10411,6 +9679,70 @@
           "entrepreneurship-small-business": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Partners in Safety- An Insurance and Small Business Perspective.webm",
+        "title": "Partners in Safety- An Insurance and Small Business Perspective",
+        "description": "Falls are the number one cause of construction-worker fatalities, accounting for one-third of on-the-job deaths in the industry. Each year NIOSH, OSHA, and CPWR–The Center for Construction Research and Training lead a National Campaign to Prevent Falls in Construction ( http://www.stopconstructionfalls.com/ ). Builders Mutual talks about the role of the insurance industry (while working with small construction businesses) to prevent falls injuries and fatalities through this campaign and the National Stand-Down. They share the business perspective on the high cost of not being safe and benefits of investing in safety. Small businesses also discuss the benefits of participating in this National Campaign and Stand-Down. Comments on this video are allowed in accordance with our comment policy: https://www.cdc.gov/SocialMedia/Tools/CommentPolicy.html This video can also be viewed at https://www.cdc.gov/niosh/video/lo-res/partner-safety/PartnersForSafety_InsAndSmBizPerspective_LoRes.mp4",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Public domain",
+          "url": "",
+          "evidence": "Public domain | Public domain | pd |",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/2/28/Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 58274942,
+            "provider_sha1": "34bb5ab04934550b92f9f3cd73900dff714f5624",
+            "role": "original"
+          }
+        ],
+        "quality_score": 91,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Centers for Disease Control and Prevention",
+          "source_title": "Partners in Safety- An Insurance and Small Business Perspective",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm",
+          "license": "Public domain",
+          "license_url": ""
+        },
+        "relevance": {
+          "entrepreneurship-small-business": {
+            "score": 10,
+            "evidence": [
+              "small business",
+              "small business"
+            ]
+          }
+        },
+        "pedagogy": {
+          "entrepreneurship-small-business": {
+            "strong_title_matches": [
+              "small business"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 37
+          }
+        },
+        "selection": {
+          "entrepreneurship-small-business": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 37
           }
         }
       }
@@ -10570,7 +9902,7 @@
         "provider": "peertube",
         "provider_id": "a71715c3-bf6c-4e92-a43e-cfc42e08e6c9",
         "title": "Lecture 3. Rhythm: Fundamentals",
-        "description": "Listening to Music (MUSI 112) In this lecture, Professor Wright explains the basic system of Western musical notation, and offers an interpretation of its advantages and disadvantages. He also discusses the fundamental principles of rhythm, ela...",
+        "description": "Listening to Music (MUSI 112) In this lecture, Professor Wright explains the basic system of Western musical notation, and offers an interpretation of its advantages and disadvantages. He also discusses the fundamental principles of rhythm, elaborating upon such concepts as beat, meter, and discussing in some depth the nature of durational patterns in duple and triple meters. The students are taught to conduct basic patterns in these meters through musical examples drawn from Chuck Mangione, Cole Porter, REM, Chopin, and Ravel. 00:00 - Chapter 1. Advantages and Disadvantages of Musical Notation 14:41 - Chapter 2. Beats and Meters 23:09 - Chapter 3. Exercises Distinguishing Duple and Triple Meters 31:27 - Chapter 4. Conducting Basic Meter Patterns: Exercises with REM, Chopin, and Ravel Complete course materials are available at the Yale Online website: online.yale.edu This course was recorded in Fall 2008.",
         "source_url": "https://peer.raise-uav.com/videos/watch/a71715c3-bf6c-4e92-a43e-cfc42e08e6c9",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -10868,6 +10200,204 @@
         }
       },
       {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Continuous — Teaching Ideas — 1.webm",
+        "title": "English Grammar — Present Continuous — Teaching Ideas — 1",
+        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. ///",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/4/4c/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3631686,
+            "provider_sha1": "aceff8fac4b0b9d4a39050b3da31b318d91dbde3",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Continuous — Teaching Ideas — 1",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [
+              "English grammar"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Continuous — Teaching Ideas — 2.webm",
+        "title": "English Grammar — Present Continuous — Teaching Ideas — 2",
+        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. The TEFL lesson in this video can be found in our 140-hour online TEFL certification course.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 2841607,
+            "provider_sha1": "4cb8123a80ae5416ff295f1325cc9e110653f074",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Continuous — Teaching Ideas — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [
+              "English grammar"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Contiuous — Teaching Ideas — 3.webm",
+        "title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
+        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. . ///",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3557521,
+            "provider_sha1": "8c650a73239f91c3e60c171fc06603b5768e4232",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [
+              "English grammar"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
         "provider": "peertube",
         "provider_id": "7f7b757d-358e-4b92-a923-f016fa561023",
         "title": "Starting to learn Taiwanese: Language Learning Journey 1",
@@ -10955,6 +10485,70 @@
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Perfect — Teaching Ideas — 2.webm",
+        "title": "English Grammar — Present Perfect — Teaching Ideas — 2",
+        "description": "The teaching idea covered in this video is a fun group game that should generate a good deal of student talk time using the Present Perfect tense. The students will be in small groups and each student will have the question sheet with a number of pictures and word prompts. Students take turns forming their question with the aid of the prompts. The groups then give their answers using the Present Perfect. The prompts include: win/a competition, go/scuba-diving, meet/ a famous person The questions would be: Have you ever won a competition?, Have you ever been scuba-diving?, Have you ever met a famous person? Group members would answer, Yes I have...., No I haven't... After a given amount of time each group share their answers with the class. The teacher could then encourage the class to come up with their own prompts and repeat the game. One area within the EFL industry that is very popular is that of teaching individual students. A game like the activity above could be adapted for one student. There is a demand for one to one lessons particularly in the business world. These types of lessons allow the teacher to focus specifically on the particular needs and wants of one student. Another advantage for the teacher is that you are only teaching to one level. These students are usually highly motivated.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3849512,
+            "provider_sha1": "d87575989d8e9b454e05a0d4a7875f8c2f9104ab",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Perfect — Teaching Ideas — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
           }
         }
       },
@@ -11085,6 +10679,134 @@
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Continuous — Structure.webm",
+        "title": "English Grammar — Present Continuous — Structure",
+        "description": "This TEFL certification video explores the structure of the present continuous tense. Tense forms have specific structures that TEFL teachers will need to know before they get a TEFL job. Even if grammar wasn't a strong point at school, our TEFL training courses will give you the lessons you need to conduct meaningful and productive EFL lessons. ///",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3653409,
+            "provider_sha1": "28318443cccb3f7e1d2bafe833917481231a7a84",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Continuous — Structure",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Perfect — Structure — 2.webm",
+        "title": "English Grammar — Present Perfect — Structure — 2",
+        "description": "This ITTT video is the second part of a lesson looking at the structure of the Present Perfect tense. It reviews an example of the structure with a regular verb -- played. I/you/we/they have played. She/He/It has played. The video then examines some of the spelling patterns that are used with irregular verbs. For example, verbs ending with a consonant + y. cry changes to cried, try changes to tried. Another spelling pattern with irregular verbs ending with a consonant + a vowel + a consonant Shop changes to shopped, ship changes to shipped. When teaching this particular point, as with other grammar points, it is important to explain to students that there are exceptions to most rules in the English language. Where specific patterns exist we need to introduce them to our students.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 2410285,
+            "provider_sha1": "d5b798ec9e81c0524e060408e3dd2acb47b8ad2e",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Perfect — Structure — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
           }
         }
       },
