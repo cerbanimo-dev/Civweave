@@ -25,6 +25,7 @@ jobs:
           node --check public/app/settings-local-interaction-repair-v1.js
           node --check public/service-worker-settings-v337-entrypoint.js
           node --check public/service-worker-settings-v325-override.js
+          node --check public/service-worker-v203.js
           grep -Fq "pickAndImport(packId" public/app/settings-local-interaction-repair-v1.js
           grep -Fq "a[href*=\"source=settings-ai-pack-import\"]" public/app/settings-local-interaction-repair-v1.js
           grep -Fq "event.stopImmediatePropagation()" public/app/settings-local-interaction-repair-v1.js
@@ -38,3 +39,7 @@ jobs:
           grep -Fq "settings-inline-import-v346" public/service-worker-settings-v337-entrypoint.js
           grep -Fq "settings-local-interaction-repair-v1.js?v=1.0.0-inline-import-recovery" public/service-worker-settings-v325-override.js
           grep -Fq "Recovering current Local Models controls inside Settings." public/service-worker-settings-v325-override.js
+          grep -Fq "V203_REGISTERED_SETTINGS_GENERATION='v346-settings-inline-import-worker-boundary'" public/service-worker-v203.js
+          grep -Fq "service-worker-settings-v337-entrypoint.js?v=settings-v346-inline-import-registered-worker-v1" public/service-worker-v203.js
+          grep -Fq "service-worker-settings-v325-override.js?v=settings-v325-inline-import-shim-v2" public/service-worker-v203.js
+          grep -Fq "staging-installed-entry-takeover-v25-settings-inline-import" public/service-worker-v203.js
