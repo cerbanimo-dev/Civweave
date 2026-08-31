@@ -1,9 +1,9 @@
 'use strict';
 
-const CW_GEMMA4_CURRENT_PHONE_SW_VERSION='gemma4-current-phone-worker-v1';
+const CW_GEMMA4_CURRENT_PHONE_SW_VERSION='gemma4-current-phone-worker-v2';
 const CW_GEMMA4_STAGING_HOST='civweave-staging.pages.dev';
 const CW_GEMMA4_RECOVERY_CACHE='cwrecovery-v457-gemma4-current-phone-owner';
-const CW_GEMMA4_RECOVERY_MARKER='/__civweave/staging-gemma4-current-phone-owner-v1';
+const CW_GEMMA4_RECOVERY_MARKER='/__civweave/staging-gemma4-current-phone-owner-v2';
 const CW_GEMMA4_CURRENT_PATHS=new Set([
   '/app/model-settings-controller-v173.js',
   '/app/local-ai/gemma4-dual-actions-v2.js',
@@ -37,6 +37,16 @@ async function cwGemma4PurgeExecutablePaths(){
     }
   }
 }
+async function cwGemma4ReloadAppClients(){
+  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+  for(const client of clients){
+    try{
+      const url=new URL(client.url);
+      if(url.origin!==self.location.origin||!url.pathname.startsWith('/app/'))continue;
+      await client.navigate(url.href);
+    }catch{}
+  }
+}
 function cwGemma4RetiredResponse(pathname){
   const body=CW_GEMMA4_RETIRED_PRESENTATION_PATHS.get(pathname);
   return body?new Response(body,{status:200,headers:{'content-type':'application/javascript; charset=utf-8','cache-control':'no-store','x-civweave-retired-presentation':'gemma4-q4'}}):null;
@@ -52,12 +62,14 @@ async function cwGemma4NetworkCurrent(request){
 if(self.location.hostname===CW_GEMMA4_STAGING_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await cwGemma4RecoveryPending())await self.skipWaiting()})())});
   self.addEventListener('activate',event=>{event.waitUntil((async()=>{
-    if(await cwGemma4RecoveryPending()){
+    const pending=await cwGemma4RecoveryPending();
+    if(pending){
       await cwGemma4PurgeExecutablePaths();
       const cache=await caches.open(CW_GEMMA4_RECOVERY_CACHE);
       await cache.put(cwGemma4MarkerRequest(),new Response(CW_GEMMA4_CURRENT_PHONE_SW_VERSION,{headers:{'content-type':'text/plain','cache-control':'no-store'}}));
     }
     await self.clients.claim();
+    if(pending)await cwGemma4ReloadAppClients();
   })())});
   self.addEventListener('fetch',event=>{
     const request=event.request;if(request.method!=='GET'&&request.method!=='HEAD')return;
@@ -86,5 +98,7 @@ self.CivweaveGemma4CurrentPhoneWorkerV1=Object.freeze({
   preservesSavedModelState:true,
   purgesExecutablePathsOnly:true,
   retiredQ4PresentationNeutralized:true,
-  currentCodeNetworkFirst:true
+  currentCodeNetworkFirst:true,
+  reloadsAppClientsOnce:true,
+  recoveryMarker:CW_GEMMA4_RECOVERY_MARKER
 });
