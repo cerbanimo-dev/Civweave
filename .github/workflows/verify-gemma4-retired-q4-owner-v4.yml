@@ -1,0 +1,55 @@
+name: Verify Gemma Retired Q4 Owner v4
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/model-settings-controller-v173.js
+      - public/app/local-ai/gemma4-pack-extension-v1.js
+      - public/app/local-ai/gemma4-e4b-q4-extension-v1.js
+      - public/app/local-ai/gemma4-dual-q4-actions-v1.js
+      - public/app/local-ai/gemma4-dual-actions-v2.js
+      - public/app/local-ai/gemma4-phone-performance-core-v1.js
+      - public/service-worker-v203.js
+      - public/service-worker-gemma4-current-phone-v1.js
+      - scripts/verify-gemma4-retired-q4-owner-v4.mjs
+      - .github/workflows/verify-gemma4-retired-q4-owner-v4.yml
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - public/app/model-settings-controller-v173.js
+      - public/app/local-ai/gemma4-pack-extension-v1.js
+      - public/app/local-ai/gemma4-e4b-q4-extension-v1.js
+      - public/app/local-ai/gemma4-dual-q4-actions-v1.js
+      - public/app/local-ai/gemma4-dual-actions-v2.js
+      - public/app/local-ai/gemma4-phone-performance-core-v1.js
+      - public/service-worker-v203.js
+      - public/service-worker-gemma4-current-phone-v1.js
+      - scripts/verify-gemma4-retired-q4-owner-v4.mjs
+      - .github/workflows/verify-gemma4-retired-q4-owner-v4.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-gemma4-retired-q4-owner-v4-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Parse current Gemma controller and takeover
+        run: |
+          node --check public/app/model-settings-controller-v173.js
+          node --check public/service-worker-gemma4-current-phone-v1.js
+          node --check public/service-worker-v203.js
+          node --check scripts/verify-gemma4-retired-q4-owner-v4.mjs
+      - name: Verify retired Q4 presentation cannot own current Settings
+        run: node scripts/verify-gemma4-retired-q4-owner-v4.mjs
