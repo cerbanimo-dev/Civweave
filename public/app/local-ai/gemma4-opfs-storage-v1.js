@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-gemma4-opfs-storage-v1';
+const VERSION='1.0.1-gemma4-opfs-storage-v1-stream-transfer';
 const GENERATIVE_CACHE='civweave-model-generative-v266';
 const OPFS_ROOT='civweave-models-v1';
-const WORKER_SRC='/app/local-ai/browser-pack-import-worker-v2.js?v=2.0.0-opfs';
+const WORKER_SRC='/app/local-ai/browser-pack-import-worker-v2.js?v=2.0.2-opfs-stream-transfer';
 const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.3.1-worker-import';
 const MODELS=Object.freeze({
   'gemma-4-E2B-it-web.litertlm':Object.freeze({id:'gemma4-e2b-it-litert-web',minBytes:2_000_000_000,label:'Gemma 4 E2B LiteRT'}),
@@ -73,11 +73,22 @@ function workerImport(record,file,onProgress){
   return new Promise((resolve,reject)=>{
     if(typeof Worker!=='function'){reject(new Error('Dedicated workers are unavailable for large-model import.'));return}
     const id=`opfs-${Date.now()}-${Math.random().toString(36).slice(2)}`,info=recordInfo(record);if(!info){reject(new Error('This is not a supported LiteRT OPFS record.'));return}
-    let worker,settled=false;const finish=(fn,value)=>{if(settled)return;settled=true;try{worker?.terminate()}catch{}fn(value)};
+    const totalBytes=Number(file.size||0),packet={type:'CIVWEAVE_BROWSER_PACK_IMPORT_FILE_V2',id,storageBackend:'opfs',componentId:record.componentId||info.id,modelId:info.id,path:record.path||record.basename||info.name,basename:record.basename||info.name,minBytes:Number(record.minBytes||info.minBytes||0),totalBytes};
+    let worker,settled=false,objectUrl='';
+    const cleanup=()=>{if(objectUrl){try{URL.revokeObjectURL(objectUrl)}catch{}objectUrl=''}try{worker?.terminate()}catch{}};
+    const finish=(fn,value)=>{if(settled)return;settled=true;cleanup();fn(value)};
     try{worker=new Worker(WORKER_SRC,{name:'civweave-gemma4-opfs-import'})}catch(error){finish(reject,error);return}
-    worker.addEventListener('message',event=>{const packet=event.data||{};if(packet.id!==id)return;if(packet.type==='progress'){try{onProgress?.(Number(packet.copied||0),Number(packet.total||file.size||0),Boolean(packet.force))}catch{};return}if(packet.type==='done'){finish(resolve,packet);return}if(packet.type==='error')finish(reject,new Error(packet.message||'Origin-private model import failed.'))});
+    worker.addEventListener('message',event=>{const message=event.data||{};if(message.id!==id)return;if(message.type==='progress'){try{onProgress?.(Number(message.copied||0),Number(message.total||totalBytes||0),Boolean(message.force))}catch{};return}if(message.type==='done'){finish(resolve,message);return}if(message.type==='error')finish(reject,new Error(message.message||'Origin-private model import failed.'))});
     worker.addEventListener('error',event=>finish(reject,new Error(event?.message||'Origin-private model import worker failed.')),{once:true});
-    try{worker.postMessage({type:'CIVWEAVE_BROWSER_PACK_IMPORT_FILE_V2',id,storageBackend:'opfs',componentId:record.componentId||info.id,modelId:info.id,path:record.path||record.basename||info.name,basename:record.basename||info.name,minBytes:Number(record.minBytes||info.minBytes||0),file})}catch(error){finish(reject,error)}
+    // Never structured-clone a 2–3+ GB File across the page/worker boundary. Chromium on Android can stall the document while registering that Blob.
+    try{
+      const sourceStream=typeof file.stream==='function'?file.stream():null;
+      if(sourceStream&&typeof sourceStream.getReader==='function'){
+        try{worker.postMessage({...packet,sourceStream},[sourceStream]);return}catch{}
+      }
+      objectUrl=URL.createObjectURL(file);
+      worker.postMessage({...packet,sourceUrl:objectUrl});
+    }catch(error){finish(reject,error)}
   });
 }
 function saveReceipt(base,packId,receipt){
@@ -113,7 +124,7 @@ async function importFilesOpfs(base,packId,files,{onProgress}={}){
   return finalizePack(base,packId,receipt,{onProgress});
 }
 function wrapBridge(base){
-  if(!base?.importFiles)return null;if(base.__civweaveGemma4Opfs===VERSION)return base;const wrapped=Object.freeze({...base,version:'1.3.2-browser-pack-opfs-overlay',importFiles:(packId,files,options)=>importFilesOpfs(base,packId,files,options||{}),opfsLiteRT:true,opfsRoot:OPFS_ROOT,importWorkerSrc:WORKER_SRC,__civweaveGemma4Opfs:VERSION});
+  if(!base?.importFiles)return null;if(base.__civweaveGemma4Opfs===VERSION)return base;const wrapped=Object.freeze({...base,version:'1.3.3-browser-pack-opfs-stream-overlay',importFiles:(packId,files,options)=>importFilesOpfs(base,packId,files,options||{}),opfsLiteRT:true,opfsRoot:OPFS_ROOT,importWorkerSrc:WORKER_SRC,__civweaveGemma4Opfs:VERSION});
   try{globalThis.CivweaveBrowserPackDownloadV1=wrapped;installedBridge=wrapped;return wrapped}catch{return null}
 }
 function ensureBridge(){
@@ -123,5 +134,5 @@ function ensureBridge(){
 function install(){installCacheFacade();void ensureBridge().catch(()=>null);return true}
 install();
 for(const name of ['civweave:model-settings-opened','civweave:settings-local-route-ready','civweave:gemma4-litert-fast-extension-ready'])addEventListener(name,()=>{if(globalThis.CivweaveModelSettingsControllerV173?.gemma4PassivePreload===false)void ensureBridge().catch(()=>null)});
-globalThis.CivweaveGemma4OPFSStorageV1=Object.freeze({version:VERSION,root:OPFS_ROOT,workerSrc:WORKER_SRC,ensureBridge,installCacheFacade,opfsStatus,removeOpfs,modelIds:Object.freeze(Object.values(MODELS).map(row=>row.id)),cacheFacade:true,opfsLargeModels:true,settingsPassive:true,cacheStorageLargePutBlocked:true});
+globalThis.CivweaveGemma4OPFSStorageV1=Object.freeze({version:VERSION,root:OPFS_ROOT,workerSrc:WORKER_SRC,ensureBridge,installCacheFacade,opfsStatus,removeOpfs,modelIds:Object.freeze(Object.values(MODELS).map(row=>row.id)),cacheFacade:true,opfsLargeModels:true,settingsPassive:true,cacheStorageLargePutBlocked:true,rawFileWorkerClone:false,transferableFileStream:true,blobUrlFallback:true});
 })();
