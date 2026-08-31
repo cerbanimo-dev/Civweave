@@ -66,7 +66,7 @@ function applyProgress(packId,progress){
     const overall=Math.max(0,Math.min(100,((Number(progress.completed||0)+fileFraction)/Math.max(1,Number(progress.total||1)))*100));
     importProgress.set(packId,{percent:overall,text:`Importing ${progress.record?.label||'model file'} · ${Math.floor(fileFraction*100)}% · ${fmt(progress.currentBytes)} / ${fmt(progress.currentTotal)} · overall ${Math.floor(overall)}%`});
   }else if(progress.phase==='importing-large'){
-    const overall=Math.max(0,Math.min(100),(Number(progress.completed||0)/Math.max(1,Number(progress.total||1)))*100);
+    const overall=Math.max(0,Math.min(100,(Number(progress.completed||0)/Math.max(1,Number(progress.total||1)))*100));
     importProgress.set(packId,{percent:overall,text:`Imported ${progress.completed}/${progress.total} large files · ${Math.floor(overall)}%`});
   }else if(progress.phase==='finishing-small'){
     importProgress.set(packId,{percent:99,text:`Large files imported · checking support files ${progress.completed}/${progress.total}`});
