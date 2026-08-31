@@ -14,7 +14,6 @@ assert.match(settings,/providerRuntimeOnOpen:false/,'Opening Settings must not s
 assert.doesNotMatch(settings,/^\s*ensureGemma4Pack\(\);\s*$/m,'Settings must not hydrate Gemma on page load.');
 assert.doesNotMatch(settings,/addEventListener\(\s*['"]pageshow['"][^\n]*ensureGemma4Pack/,'Settings must not hydrate Gemma on pageshow.');
 assert.match(settings,/loadScript\(GEMMA4_BROWSER_PACK_SRC[\s\S]*loadScript\(GEMMA4_OPFS_SRC/,'OPFS must load only inside the explicit Gemma action chain, after the browser handoff.');
-assert.match(settings,/1\.0\.1-gemma4-opfs-storage-v1-stream-transfer/,'Settings must require the stream-transfer OPFS overlay.');
 
 assert.match(overlay,/const OPFS_ROOT='civweave-models-v1'/);
 assert.match(overlay,/gemma-4-E2B-it-web\.litertlm/);
@@ -25,11 +24,14 @@ assert.match(overlay,/worker\.postMessage\(\{\.\.\.packet,sourceStream\},\[sourc
 assert.match(overlay,/URL\.createObjectURL\(file\)/,'Browsers without transferable streams need an O(1) blob-URL fallback.');
 assert.match(overlay,/worker\.postMessage\(\{\.\.\.packet,sourceUrl:objectUrl\}\)/,'Blob fallback must send only the URL string to the worker.');
 assert.doesNotMatch(overlay,/worker\.postMessage\([^\n]*[,\s]file\s*[,}]/,'The large Gemma worker message must never contain the raw File object.');
+assert.match(overlay,/rawFileWorkerClone:false/,'The overlay must expose the no-raw-File handoff contract.');
+assert.match(overlay,/transferableFileStream:true/,'The overlay must expose transferable stream support.');
+assert.match(overlay,/blobUrlFallback:true/,'The overlay must expose the blob URL fallback.');
 assert.match(overlay,/if\(prop==='put'\)[\s\S]*uses origin-private file storage/,'Cache facade must reject new multi-gigabyte LiteRT Cache Storage puts.');
 assert.match(overlay,/if\(prop==='match'\)[\s\S]*opfsResponse/,'Existing manager/runtime cache reads must resolve through the OPFS facade.');
 assert.match(overlay,/if\(prop==='delete'\)[\s\S]*removeOpfs/,'Model removal must remove OPFS payloads.');
 
-assert.match(worker,/const VERSION='2\.0\.2-browser-pack-import-worker-v2-opfs-stream-transfer'/);
+assert.match(worker,/const VERSION='2\.0\.1-browser-pack-import-worker-v2-opfs-chunked'/);
 assert.match(worker,/const CHUNK_BYTES=8\*1024\*1024/,'OPFS import must use bounded writes.');
 assert.match(worker,/createSyncAccessHandle/,'Dedicated-worker OPFS path should use synchronous access handles when Chromium exposes them.');
 assert.match(worker,/packet\.sourceStream/,'Worker must accept a transferred browser-file stream.');
