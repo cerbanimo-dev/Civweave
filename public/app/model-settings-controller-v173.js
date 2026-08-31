@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.20-model-settings-controller-v173-passive-gemma-actions';
+const VERSION='1.0.21-model-settings-controller-v173-passive-gemma-opfs-actions';
 const GEMMA4_DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
 const GEMMA4_DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
 const GEMMA4_PACK_VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
@@ -15,6 +15,8 @@ const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
 const GEMMA4_Q2_RETIRE_SRC='/app/local-ai/gemma4-q2-retirement-v1.js?v=1.0.0-q2-retirement';
 const GEMMA4_BROWSER_PACK_VERSION='1.0.1-gemma4-browser-pack-coherence-v1-status-sync';
 const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync';
+const GEMMA4_OPFS_VERSION='1.0.0-gemma4-opfs-storage-v1';
+const GEMMA4_OPFS_SRC='/app/local-ai/gemma4-opfs-storage-v1.js?v=1.0.0-opfs-large-model';
 if(globalThis.CivweaveModelSettingsControllerV173?.version===VERSION)return;
 const canonical=()=>globalThis.CivweaveSettingsV320||null;
 function open(launcher){return canonical()?.open?.(launcher)||null}
@@ -48,7 +50,8 @@ function ensureGemma4Pack(){
   const phoneReady=()=>globalThis.CivweaveGemma4PhonePerformanceCoreV1?.version===GEMMA4_PHONE_VERSION;
   const retireReady=()=>globalThis.CivweaveGemma4Q2RetirementV1?.version===GEMMA4_Q2_RETIRE_VERSION;
   const browserPackReady=()=>globalThis.CivweaveGemma4BrowserPackCoherenceV1?.version===GEMMA4_BROWSER_PACK_VERSION;
-  if(packReady()&&deepReady()&&actionsReady()&&fastReady()&&phoneReady()&&retireReady()&&browserPackReady()){
+  const opfsReady=()=>globalThis.CivweaveGemma4OPFSStorageV1?.version===GEMMA4_OPFS_VERSION;
+  if(packReady()&&deepReady()&&actionsReady()&&fastReady()&&phoneReady()&&retireReady()&&browserPackReady()&&opfsReady()){
     globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();
     globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
     globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
@@ -64,6 +67,7 @@ function ensureGemma4Pack(){
     .then(()=>loadScript(GEMMA4_PHONE_SRC,phoneReady,'gemma4-current-phone-pack-authority'))
     .then(()=>loadScript(GEMMA4_Q2_RETIRE_SRC,retireReady,'gemma4-q2-retirement'))
     .then(()=>loadScript(GEMMA4_BROWSER_PACK_SRC,browserPackReady,'gemma4-browser-pack-coherence'))
+    .then(()=>loadScript(GEMMA4_OPFS_SRC,opfsReady,'gemma4-opfs-large-model-storage'))
     .then(()=>{
       globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();
       globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
@@ -76,9 +80,9 @@ function ensureGemma4Pack(){
     .finally(()=>{packLoadPromise=null});
   return packLoadPromise;
 }
-// Settings is a saved-state view. Gemma compatibility/runtime code is available
-// through ensureGemma4Pack() for an explicit model action, but must never hydrate
-// merely because Settings loaded, reopened, or received a pageshow event.
+// Settings is a saved-state view. Gemma compatibility/runtime/storage code is
+// available through ensureGemma4Pack() for an explicit model action, but must
+// never hydrate merely because Settings loaded, reopened, or received pageshow.
 const api=Object.freeze({
   version:VERSION,
   compatibilityFacade:true,
@@ -102,6 +106,8 @@ const api=Object.freeze({
   gemma4MidrangeUsesLiteRT:true,
   gemma4PostImportStatusSync:true,
   gemma4DownloadHandoffAwaitable:true,
+  gemma4OPFSLargeModels:true,
+  gemma4CacheStorageLargePut:false,
   gemma4PassivePreload:false,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
@@ -114,6 +120,7 @@ globalThis.CivweaveModelSettingsControllerBootstrapV173=Object.freeze({
   gemma4FastExtension:GEMMA4_FAST_SRC,gemma4FastVersion:GEMMA4_FAST_VERSION,
   gemma4PhoneAuthority:GEMMA4_PHONE_SRC,gemma4PhoneVersion:GEMMA4_PHONE_VERSION,
   gemma4Q2Retirement:GEMMA4_Q2_RETIRE_SRC,gemma4Q2RetirementVersion:GEMMA4_Q2_RETIRE_VERSION,
-  gemma4BrowserPackCoherence:GEMMA4_BROWSER_PACK_SRC,gemma4BrowserPackCoherenceVersion:GEMMA4_BROWSER_PACK_VERSION
+  gemma4BrowserPackCoherence:GEMMA4_BROWSER_PACK_SRC,gemma4BrowserPackCoherenceVersion:GEMMA4_BROWSER_PACK_VERSION,
+  gemma4OPFSStorage:GEMMA4_OPFS_SRC,gemma4OPFSStorageVersion:GEMMA4_OPFS_VERSION
 });
 })();
