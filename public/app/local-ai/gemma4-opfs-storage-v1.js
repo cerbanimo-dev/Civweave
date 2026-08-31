@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-gemma4-opfs-storage-v1-stream-transfer';
+const VERSION='1.0.0-gemma4-opfs-storage-v1';
 const GENERATIVE_CACHE='civweave-model-generative-v266';
 const OPFS_ROOT='civweave-models-v1';
 const WORKER_SRC='/app/local-ai/browser-pack-import-worker-v2.js?v=2.0.2-opfs-stream-transfer';
@@ -80,7 +80,6 @@ function workerImport(record,file,onProgress){
     try{worker=new Worker(WORKER_SRC,{name:'civweave-gemma4-opfs-import'})}catch(error){finish(reject,error);return}
     worker.addEventListener('message',event=>{const message=event.data||{};if(message.id!==id)return;if(message.type==='progress'){try{onProgress?.(Number(message.copied||0),Number(message.total||totalBytes||0),Boolean(message.force))}catch{};return}if(message.type==='done'){finish(resolve,message);return}if(message.type==='error')finish(reject,new Error(message.message||'Origin-private model import failed.'))});
     worker.addEventListener('error',event=>finish(reject,new Error(event?.message||'Origin-private model import worker failed.')),{once:true});
-    // Never structured-clone a 2–3+ GB File across the page/worker boundary. Chromium on Android can stall the document while registering that Blob.
     try{
       const sourceStream=typeof file.stream==='function'?file.stream():null;
       if(sourceStream&&typeof sourceStream.getReader==='function'){
@@ -124,7 +123,7 @@ async function importFilesOpfs(base,packId,files,{onProgress}={}){
   return finalizePack(base,packId,receipt,{onProgress});
 }
 function wrapBridge(base){
-  if(!base?.importFiles)return null;if(base.__civweaveGemma4Opfs===VERSION)return base;const wrapped=Object.freeze({...base,version:'1.3.3-browser-pack-opfs-stream-overlay',importFiles:(packId,files,options)=>importFilesOpfs(base,packId,files,options||{}),opfsLiteRT:true,opfsRoot:OPFS_ROOT,importWorkerSrc:WORKER_SRC,__civweaveGemma4Opfs:VERSION});
+  if(!base?.importFiles)return null;if(base.__civweaveGemma4Opfs===VERSION)return base;const wrapped=Object.freeze({...base,version:'1.3.2-browser-pack-opfs-overlay',importFiles:(packId,files,options)=>importFilesOpfs(base,packId,files,options||{}),opfsLiteRT:true,opfsRoot:OPFS_ROOT,importWorkerSrc:WORKER_SRC,__civweaveGemma4Opfs:VERSION});
   try{globalThis.CivweaveBrowserPackDownloadV1=wrapped;installedBridge=wrapped;return wrapped}catch{return null}
 }
 function ensureBridge(){
