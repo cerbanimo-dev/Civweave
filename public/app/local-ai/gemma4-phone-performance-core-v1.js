@@ -137,7 +137,7 @@ function layeredBase(api){
 function patchPackManager(api){
   const base=layeredBase(api);
   if(!base?.byId)return base;
-  if(base.__civweaveGemma4PhonePerformanceCoreV1)return base;
+  if(base.__civweaveGemma4PhonePerformanceCoreVersion===VERSION)return base;
   const baseById=base.byId.bind(base),baseStatus=base.status?.bind(base),baseComponentStatus=base.componentStatus?.bind(base),baseUse=base.use?.bind(base),baseRemove=base.remove?.bind(base),baseCatalogue=base.catalogue?.bind(base);
   const rawPremier=baseById(PREMIER)||{};
   const byId=id=>{
@@ -195,6 +195,7 @@ function patchPackManager(api){
     packs:freeze({...(base.packs||{}),[PREMIER]:performancePack(rawPremier)}),
     byId,status,use,remove,catalogue,
     __civweaveGemma4PhonePerformanceCoreV1:true,
+    __civweaveGemma4PhonePerformanceCoreVersion:VERSION,
     gemma4CoreModel:FAST_E2,
     gemma4DeepModel:FAST_E4,
     gemma4PhonePerformanceCore:freeze([FAST_E2,FAST_E4]),
@@ -296,6 +297,7 @@ globalThis.CivweaveGemma4PhonePerformanceCoreV1=freeze({
   presentationOwnership:false,
   mutationObserver:false,
   specializedComponentStatusViaPackManager:true,
-  supportRequiredState:true
+  supportRequiredState:true,
+  replacesOlderPackWrappers:true
 });
 })();
