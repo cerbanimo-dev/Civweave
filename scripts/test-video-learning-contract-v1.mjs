@@ -29,7 +29,8 @@ const algebra=await contract.resolveRelevantVideo('How do I solve algebra equati
 assert.equal(algebra.url,'https://www.youtube.com/watch?v=abcDEF12345');
 assert.equal(algebra.source,'civweave-video-atlas');
 assert(algebra.score>=6);
-assert(algebra.reason.includes('embeddability verified'));
+assert(algebra.reason.includes('YouTube API embeddability candidate'));
+assert(!algebra.reason.includes('privacy-enhanced embed verified'));
 
 const unmatched=await contract.resolveRelevantVideo('interdimensional snail choreography on Europa');
 assert.equal(unmatched.url,fallback);
@@ -85,4 +86,4 @@ assert.equal(unmatchedAction.checkpointVideos[0].url,fallback);
 assert.equal(unmatchedAction.checkpointVideos[0].source,'required-fallback');
 
 assert.equal(contract.youtubeEmbedUrl(fallback),'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');
-console.log('Video Learning Contract behavior verified: current embeddability filtering, subject relevance, exact fallback, Living School modules, Cerbanimo tasks, and embed URL.');
+console.log('Video Learning Contract behavior verified: current availability filtering, honest embed-evidence labeling, subject relevance, exact fallback, Living School modules, Cerbanimo tasks, and embed URL.');
