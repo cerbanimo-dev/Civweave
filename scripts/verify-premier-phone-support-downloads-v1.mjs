@@ -17,12 +17,19 @@ const retiredPack=read('public/app/local-ai/gemma4-pack-extension-v1.js');
 const retiredDeep=read('public/app/local-ai/gemma4-e4b-q4-extension-v1.js');
 const retiredActions=read('public/app/local-ai/gemma4-dual-q4-actions-v1.js');
 
-has(actions,'1.3.0-gemma4-dual-actions-v2-support-downloads');
-has(actions,'Download missing support files (');
+has(actions,'1.3.1-gemma4-dual-actions-v2-support-autodetect');
+has(actions,'Download missing support files internally (');
 for(const id of ['qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])has(actions,id);
 has(actions,'premier-phone-support-worker-v1.js');
 has(actions,'downloadSupportFiles');
 has(actions,'supportStatus');
+has(actions,'repairPremierReceipt');
+has(actions,"const PENDING_KEY='civweave.ai-pack.browser-downloads.v1'");
+has(actions,"receiptScope:'gemma-litert-browser-only'");
+has(actions,'supportFilesManagedInternally:true');
+has(actions,'supportAutoDetect:true');
+has(actions,'browserReceiptGemmaOnly:true');
+has(actions,'finished downloading but was not detected in Civweave internal storage');
 has(actions,'preservesExistingLargeFiles:true');
 has(actions,'supportLargeFileReimportRequired:false');
 has(actions,'singlePresentationOwner:true');
@@ -43,7 +50,14 @@ has(worker,'civweave-specialized-model-packs-v1');
 has(worker,'mainThreadLargeCachePut:false');
 has(worker,'sequentialArtifacts:true');
 
-has(importer,'1.3.0-browser-pack-pwa-import-v1-event-driven-current-owner-handoff');
+has(importer,'1.3.1-browser-pack-pwa-import-v1-gemma-only-support-handoff');
+has(importer,"const PREMIER_BROWSER_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web'])");
+has(importer,'browserRecords');
+has(importer,'missingBrowserRecords');
+has(importer,'Recheck imported Gemma files');
+has(importer,'Support files will download internally after these are imported.');
+has(importer,'supportFilesInternal:true');
+has(importer,'premierGemmaOnly:true');
 has(importer,'Finish Premier Phone setup');
 has(importer,'ensureCurrentPremierOwner');
 has(importer,'currentPremierOwnerHandoff:true');
@@ -59,18 +73,23 @@ has(inference,'1.0.11-gemma4-inference-repair-v1-current-phone-authority');
 has(inference,"PHONE_AUTH_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status'");
 has(inference,'phoneAuthorityRuntimeOnly:true');
 
-has(controller,'1.0.25-model-settings-controller-v173-passive-gemma-support-downloads');
+has(controller,'1.0.26-model-settings-controller-v173-passive-gemma-support-autodetect');
+has(controller,'1.3.1-gemma4-dual-actions-v2-support-autodetect');
 has(controller,'gemma4MissingSupportDownloadAction:true');
 has(controller,'gemma4SupportWorkerOnly:true');
+has(controller,'gemma4SupportAutoDetect:true');
+has(controller,'gemma4SupportFilesInternal:true');
+has(controller,'gemma4BrowserReceiptGemmaOnly:true');
 has(controller,'gemma4PassivePreload:false');
 has(controller,'providerRuntimeOnOpen:false');
 has(controller,'passiveGemmaHydration:false');
 
-has(registeredWorker,'gemma4-current-phone-worker-v3-support-downloads');
-has(takeover,'gemma4-current-phone-worker-v3-support-downloads');
+has(registeredWorker,'gemma4-current-phone-worker-v4-support-autodetect');
+has(takeover,'gemma4-current-phone-worker-v4-support-autodetect');
 has(takeover,'premier-phone-support-worker-v1.js');
 has(takeover,'browser-pack-pwa-import-v1.js');
 has(takeover,'browserPackImporterCurrent:true');
+has(takeover,'supportAutoDetectCurrent:true');
 has(takeover,'preservesDownloadedModels:true');
 has(takeover,'preservesSavedModelState:true');
 
@@ -82,4 +101,4 @@ for(const text of [retiredPack,retiredDeep,retiredActions]){
   lacks(text,'Gemma 4 E2B Q4F16 is the fast core');
 }
 
-console.log('Premier Phone support-download authority verified.');
+console.log('Premier Phone internal support downloads and autodetection verified.');

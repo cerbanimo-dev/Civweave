@@ -1,9 +1,9 @@
 'use strict';
 
-const CW_GEMMA4_CURRENT_PHONE_SW_VERSION='gemma4-current-phone-worker-v3-support-downloads';
+const CW_GEMMA4_CURRENT_PHONE_SW_VERSION='gemma4-current-phone-worker-v4-support-autodetect';
 const CW_GEMMA4_STAGING_HOST='civweave-staging.pages.dev';
-const CW_GEMMA4_RECOVERY_CACHE='cwrecovery-v458-gemma4-current-phone-support-owner';
-const CW_GEMMA4_RECOVERY_MARKER='/__civweave/staging-gemma4-current-phone-owner-v3-support-downloads';
+const CW_GEMMA4_RECOVERY_CACHE='cwrecovery-v459-gemma4-current-phone-support-autodetect';
+const CW_GEMMA4_RECOVERY_MARKER='/__civweave/staging-gemma4-current-phone-owner-v4-support-autodetect';
 const CW_GEMMA4_CURRENT_PATHS=new Set([
   '/app/model-settings-controller-v173.js',
   '/app/local-ai/gemma4-dual-actions-v2.js',
@@ -104,5 +104,6 @@ self.CivweaveGemma4CurrentPhoneWorkerV1=Object.freeze({
   reloadsAppClientsOnce:true,
   supportWorkerCurrent:true,
   browserPackImporterCurrent:true,
+  supportAutoDetectCurrent:true,
   recoveryMarker:CW_GEMMA4_RECOVERY_MARKER
 });
