@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/app/local-ai/gemma4-dual-actions-v2.js'
       - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'public/app/local-ai/premier-phone-qwen-download-v1.js'
       - 'public/app/local-ai/premier-phone-support-worker-v1.js'
       - 'public/app/local-ai/browser-pack-pwa-import-v1.js'
       - 'public/app/local-ai/gemma4-inference-repair-v1.js'
@@ -21,6 +22,7 @@ on:
     paths:
       - 'public/app/local-ai/gemma4-dual-actions-v2.js'
       - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'public/app/local-ai/premier-phone-qwen-download-v1.js'
       - 'public/app/local-ai/premier-phone-support-worker-v1.js'
       - 'public/app/local-ai/browser-pack-pwa-import-v1.js'
       - 'public/app/local-ai/gemma4-inference-repair-v1.js'
@@ -44,4 +46,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: node --check public/app/local-ai/premier-phone-qwen-download-v1.js
       - run: node scripts/verify-premier-phone-support-downloads-v1.mjs
