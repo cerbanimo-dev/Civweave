@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.22-model-settings-controller-v173-passive-gemma-opfs-stream-actions';
+const VERSION='1.0.21-model-settings-controller-v173-passive-gemma-opfs-actions';
 const GEMMA4_DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
 const GEMMA4_DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
 const GEMMA4_PACK_VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
@@ -15,8 +15,8 @@ const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
 const GEMMA4_Q2_RETIRE_SRC='/app/local-ai/gemma4-q2-retirement-v1.js?v=1.0.0-q2-retirement';
 const GEMMA4_BROWSER_PACK_VERSION='1.0.1-gemma4-browser-pack-coherence-v1-status-sync';
 const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync';
-const GEMMA4_OPFS_VERSION='1.0.1-gemma4-opfs-storage-v1-stream-transfer';
-const GEMMA4_OPFS_SRC='/app/local-ai/gemma4-opfs-storage-v1.js?v=1.0.1-opfs-stream-transfer';
+const GEMMA4_OPFS_VERSION='1.0.0-gemma4-opfs-storage-v1';
+const GEMMA4_OPFS_SRC='/app/local-ai/gemma4-opfs-storage-v1.js?v=1.0.0-opfs-large-model';
 if(globalThis.CivweaveModelSettingsControllerV173?.version===VERSION)return;
 const canonical=()=>globalThis.CivweaveSettingsV320||null;
 function open(launcher){return canonical()?.open?.(launcher)||null}
