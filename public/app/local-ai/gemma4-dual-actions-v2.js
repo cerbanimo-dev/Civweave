@@ -1,11 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='1.2.2-gemma4-dual-actions-v2-single-owner-opfs-reconcile';
+const VERSION='1.3.0-gemma4-dual-actions-v2-support-downloads';
 const PREMIER='premier-phone';
 const E2='gemma4-e2b-it-litert-web';
 const E4='gemma4-e4b-it-litert-web';
+const FALLBACK='qwen3-0.6b-q8-wasm';
 const FAST_IDS=Object.freeze([E2,E4]);
+const SUPPORT_IDS=Object.freeze([FALLBACK,'silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8']);
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
+const SUPPORT_WORKER='/app/local-ai/premier-phone-support-worker-v1.js?v=1.0.0-worker-cache-stream';
 const MODEL_FILES=Object.freeze({
   [E2]:Object.freeze({path:'gemma-4-E2B-it-web.litertlm',minBytes:2_000_000_000,label:'Gemma 4 E2B LiteRT'}),
   [E4]:Object.freeze({path:'gemma-4-E4B-it-web.litertlm',minBytes:2_950_000_000,label:'Gemma 4 E4B LiteRT'})
@@ -15,11 +18,14 @@ const phone=()=>globalThis.CivweaveGemma4PhonePerformanceCoreV1;
 const handoff=()=>globalThis.CivweaveGemma4BrowserPackCoherenceV1;
 const bridge=()=>globalThis.CivweaveBrowserPackDownloadV1;
 const manager=()=>globalThis.CivweaveLocalModelDownloadV266;
+const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
 const packs=()=>globalThis.CivweaveLocalModelPacksV1;
 const opfs=()=>globalThis.CivweaveGemma4OPFSStorageV1;
 const parse=(value,fallback={})=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const stateMap=()=>parse(localStorage.getItem('civweave.local-ai.packs.v1'),{});
 let timers=[];
+let supportSnapshot={checked:false,loading:false,rows:[],missing:[]};
+let supportPromise=null;
 function setText(node,value){if(!node)return false;const next=String(value??'');if(node.textContent===next)return false;node.textContent=next;return true}
 function setHtml(node,value){if(!node)return false;const next=String(value??'');if(node.innerHTML===next)return false;node.innerHTML=next;return true}
 function pendingSummary(){
@@ -28,6 +34,7 @@ function pendingSummary(){
 }
 function statusLine(text,error=false){const node=document.querySelector('#cw-local-ai-v324 [data-local-status]');if(node){setText(node,text);node.classList.toggle('cw-local-error',Boolean(error))}}
 function directActions(card){return[...card.children].find(node=>node.classList?.contains('cw-local-actions'))||null}
+function labelFor(id){return packs()?.specialized?.[id]?.label||registry()?.byId?.(id)?.label||({[FALLBACK]:'Qwen 3 0.6B CPU fallback'}[id])||id}
 function writeDownloadReady(id,bytes){
   const rows=parse(localStorage.getItem(DOWNLOADS_KEY),{}),previous=rows[id]||{},value=Math.max(0,Number(bytes||previous.bytesDownloaded||previous.totalBytes||MODEL_FILES[id]?.minBytes||0));
   rows[id]={...previous,status:'ready',phase:'ready',percent:100,bytesDownloaded:value,totalBytes:value,installedAt:previous.installedAt||new Date().toISOString(),error:'',storageBackend:'opfs',updatedAt:new Date().toISOString()};
@@ -55,6 +62,27 @@ async function synchronizeImportedModels(){
   const models=[];for(const id of FAST_IDS)models.push(await recognizeImportedModel(id));
   return{complete:true,models};
 }
+async function supportStatus(){
+  const p=packs(),m=manager(),rows=[];
+  for(const id of SUPPORT_IDS){
+    try{
+      let current=null;
+      if(id===FALLBACK)current=await m?.status?.(id);
+      else if(p?.componentStatus)current=await p.componentStatus(id);
+      else if(p?.specializedStatus)current=await p.specializedStatus(id);
+      rows.push({id,label:labelFor(id),...(current||{}),available:Boolean(current?.available)});
+    }catch(error){rows.push({id,label:labelFor(id),available:false,error:String(error?.message||error)})}
+  }
+  return{rows,missing:rows.filter(row=>!row.available)};
+}
+function supportNote(card){
+  let note=card.querySelector('[data-gemma4-support-note]');
+  if(!pendingSummary().complete){note?.remove();return}
+  if(!note){note=document.createElement('p');note.dataset.gemma4SupportNote='';note.className='cw-local-meta';card.append(note)}
+  if(supportSnapshot.loading&&!supportSnapshot.checked){setText(note,'Checking the smaller Premier Phone support files…');return}
+  if(supportSnapshot.missing.length){setText(note,`Still needed: ${supportSnapshot.missing.map(row=>row.label||row.id).join(' · ')}. Your two imported Gemma LiteRT files are already kept.`);return}
+  if(supportSnapshot.checked)setText(note,'Gemma E2B/E4B and all Premier Phone support files are present.');
+}
 function decorateCurrentPhone(){
   const card=document.querySelector('#cw-local-ai-v324 [data-pack-id="premier-phone"]');if(!card)return false;
   const paragraphs=[...card.children].filter(node=>node.tagName==='P');
@@ -66,20 +94,20 @@ function decorateCurrentPhone(){
   card.querySelector('[data-gemma4-runnable-note]')?.remove();
   card.querySelector('[data-gemma4-performance-note]')?.remove();
   const summary=pendingSummary(),state=stateMap()[PREMIER]||{},actions=directActions(card);
-  if(actions&&summary.complete&&state.status!=='ready'){
-    const html='<button type="button" data-gemma4-phone-reconcile>Finish phone performance core</button>';
-    if(actions.innerHTML!==html)actions.innerHTML=html;
-  }else if(actions&&state.status==='ready'){
-    const html='<button type="button" data-gemma4-phone-use="gemma4-e2b-it-litert-web">Use fast phone model</button><button type="button" data-gemma4-phone-use="gemma4-e4b-it-litert-web">Use deep phone model</button>';
+  if(actions&&summary.complete){
+    let html='';
+    if(supportSnapshot.loading&&!supportSnapshot.checked)html='<button type="button" disabled>Checking support files…</button>';
+    else if(supportSnapshot.missing.length)html=`<button type="button" data-gemma4-phone-support>Download missing support files (${supportSnapshot.missing.length})</button>`;
+    else if(state.status==='ready')html='<button type="button" data-gemma4-phone-use="gemma4-e2b-it-litert-web">Use fast phone model</button><button type="button" data-gemma4-phone-use="gemma4-e4b-it-litert-web">Use deep phone model</button>';
+    else html='<button type="button" data-gemma4-phone-reconcile>Finish phone performance core</button>';
     if(actions.innerHTML!==html)actions.innerHTML=html;
   }
+  supportNote(card);
   card.dataset.gemma4CurrentPhoneOwner=VERSION;
   return true;
 }
 function runDecorators(){
   try{decorateCurrentPhone()}catch{}
-  // Presentation has exactly one owner: this module. The phone-performance core
-  // remains the registry/pack authority but is not allowed to rewrite Settings.
   try{handoff()?.scheduleDecorate?.()}catch{}
 }
 function scheduleDecorate(){
@@ -87,6 +115,66 @@ function scheduleDecorate(){
   queueMicrotask(runDecorators);
   for(const delay of [220,650,1350])timers.push(setTimeout(runDecorators,delay));
   return true;
+}
+function workerInstallSupport(id,{onProgress}={}){
+  const p=packs(),component=p?.specialized?.[id];
+  if(!component?.artifacts?.length)throw new Error(`Support component ${labelFor(id)} has no specialized asset manifest.`);
+  const artifacts=component.artifacts.map(art=>({path:art.path,minBytes:art.minBytes,sizeBytes:art.sizeBytes,url:p.assetUrl(id,art.path)}));
+  return new Promise((resolve,reject)=>{
+    const worker=new Worker(SUPPORT_WORKER);
+    const cleanup=()=>{try{worker.terminate()}catch{}};
+    worker.onmessage=event=>{
+      const packet=event.data||{};if(packet.componentId!==id)return;
+      if(packet.type==='progress'){try{onProgress?.(packet)}catch{};return}
+      if(packet.type==='complete'){cleanup();resolve(packet);return}
+      if(packet.type==='error'){cleanup();reject(new Error(packet.message||`${labelFor(id)} download failed.`))}
+    };
+    worker.onerror=event=>{cleanup();reject(new Error(event?.message||`${labelFor(id)} support worker failed.`))};
+    worker.postMessage({type:'install-support-component',cacheName:p.cache,component:{id,label:component.label,artifacts}});
+  });
+}
+async function waitForModel(id,onProgress){
+  const m=manager(),started=Date.now();
+  while(Date.now()-started<7_200_000){
+    const current=await m?.status?.(id);if(current?.available)return current;
+    const state=m?.state?.(id)||current?.state||{};try{onProgress?.(state)}catch{}
+    if(['error','paused','aborted'].includes(String(state.status||'')))throw new Error(state.error||`${labelFor(id)} download stopped.`);
+    await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  throw new Error(`${labelFor(id)} did not finish within the download session.`);
+}
+async function installSupportComponent(row,index,total){
+  const id=row.id,label=row.label||labelFor(id),m=manager();
+  statusLine(`Downloading support file ${index}/${total} · ${label}…`);
+  if(id===FALLBACK){
+    if(!m?.start)throw new Error('Local generative download manager is unavailable.');
+    await m.requestPersistence?.();
+    const current=await m.status(id);if(!current?.available){
+      await m.start(id,{preferBackground:false,onProgress:state=>{const pct=Math.max(0,Math.min(99,Number(state?.percent||0)));statusLine(`${label} · ${pct}%`)}});
+      await waitForModel(id,state=>{const pct=Math.max(0,Math.min(99,Number(state?.percent||0)));statusLine(`${label} · ${pct}%`)});
+    }
+  }else{
+    await workerInstallSupport(id,{onProgress:packet=>{
+      const pct=packet.total?Math.max(0,Math.min(99,Math.floor(Number(packet.loaded||0)/Number(packet.total||1)*100))):0;
+      statusLine(`${label} · ${packet.artifact||'model data'} · ${pct}%`);
+    }});
+  }
+  try{dispatchEvent(new CustomEvent('civweave:gemma4-support-progress',{detail:{version:VERSION,id,label,index,total,complete:true}}))}catch{}
+}
+async function downloadSupportFiles(){
+  if(supportPromise)return supportPromise;
+  supportPromise=(async()=>{
+    await synchronizeImportedModels();
+    let current=await supportStatus();
+    if(!current.missing.length)return reconcilePhoneCore();
+    const missing=[...current.missing],total=missing.length;
+    for(let index=0;index<missing.length;index++)await installSupportComponent(missing[index],index+1,total);
+    current=await supportStatus();
+    supportSnapshot={checked:true,loading:false,...current};scheduleDecorate();
+    if(current.missing.length)throw new Error(`Premier Phone support is still missing ${current.missing.map(row=>row.label||row.id).join(', ')}.`);
+    return reconcilePhoneCore();
+  })().finally(()=>{supportPromise=null});
+  return supportPromise;
 }
 async function reconcilePhoneCore({onProgress}={}){
   const current=bridge(),receipt=current?.pending?.(PREMIER);if(!receipt?.large?.length)throw new Error('There is no completed Premier Phone Pack browser-import receipt to reconcile.');
@@ -97,32 +185,50 @@ async function reconcilePhoneCore({onProgress}={}){
     modelStates.push(await recognizeImportedModel(id));
   }
   const unavailable=modelStates.filter(row=>!row?.available);if(unavailable.length)throw new Error(`The imported LiteRT files are present in the receipt but ${unavailable.map(row=>row?.label||row?.id).join(' and ')} are not yet readable from local model storage.`);
-  try{onProgress?.({phase:'reconciling-pack',completed:FAST_IDS.length,total:FAST_IDS.length,message:'Phone models recognized · reconciling the existing support stack…'})}catch{}
+  const support=await supportStatus();supportSnapshot={checked:true,loading:false,...support};scheduleDecorate();
+  if(support.missing.length)throw new Error(`The two Gemma LiteRT models are installed. Download the remaining support files: ${support.missing.map(row=>row.label||row.id).join(', ')}.`);
+  try{onProgress?.({phase:'reconciling-pack',completed:FAST_IDS.length,total:FAST_IDS.length,message:'Phone models and support stack recognized · finalizing the pack…'})}catch{}
   try{phone()?.applyAuthority?.()}catch{}
   const packStatus=await packs()?.status?.(PREMIER);
   if(!packStatus?.available){
-    const missingComponents=(packStatus?.components||[]).filter(row=>!row.available).map(row=>row.label||row.id).filter(Boolean);
-    throw new Error(`The two Gemma LiteRT models are installed, but the Premier Phone Pack still needs ${missingComponents.slice(0,3).join(', ')||'one or more support components'}. The large model files do not need to be imported again.`);
+    const missingComponents=(packStatus?.components||[]).filter(row=>!row.available).map(row=>row.label||labelFor(row.id)).filter(Boolean);
+    throw new Error(`Premier Phone still reports missing ${missingComponents.slice(0,5).join(', ')||'one or more support components'}. The two large Gemma files do not need to be imported again.`);
   }
   try{dispatchEvent(new CustomEvent('civweave:local-model-pack-installed',{detail:{version:VERSION,id:PREMIER,label:'Premier Phone Pack',source:'gemma4-phone-reconcile'}}))}catch{}
-  statusLine('Premier Phone Pack is ready. Both Gemma 4 LiteRT phone models were recognized without re-importing the files.');
+  statusLine('Premier Phone Pack is ready. Choose the fast or deep Gemma 4 LiteRT phone model.');
   scheduleDecorate();return packStatus;
+}
+async function refreshSupportStatus({autoReconcile=true}={}){
+  const summary=pendingSummary();if(!summary.complete)return null;
+  if(supportSnapshot.loading)return supportSnapshot;
+  supportSnapshot={...supportSnapshot,loading:true};scheduleDecorate();
+  try{
+    await synchronizeImportedModels();
+    const current=await supportStatus();supportSnapshot={checked:true,loading:false,...current};
+    if(autoReconcile&&!current.missing.length){
+      try{phone()?.applyAuthority?.();await packs()?.status?.(PREMIER)}catch{}
+    }
+    return supportSnapshot;
+  }finally{supportSnapshot={...supportSnapshot,loading:false};scheduleDecorate()}
 }
 async function useModel(modelId){const checked=await recognizeImportedModel(modelId);if(!checked?.available)throw new Error(`${checked?.label||modelId} is not installed.`);const m=manager();if(!m?.select)throw new Error('Local model manager is unavailable.');m.select(modelId);return checked}
 function onClick(event){
+  const support=event.target?.closest?.('[data-gemma4-phone-support]');
+  if(support){event.preventDefault();event.stopImmediatePropagation();support.disabled=true;void downloadSupportFiles().catch(error=>statusLine(String(error?.message||error),true)).finally(()=>{support.disabled=false;void refreshSupportStatus({autoReconcile:true})});return}
   const reconcile=event.target?.closest?.('[data-gemma4-phone-reconcile]');
-  if(reconcile){event.preventDefault();event.stopImmediatePropagation();reconcile.disabled=true;statusLine('Recognizing the two imported Gemma 4 LiteRT files…');void reconcilePhoneCore({onProgress:progress=>{if(progress?.message)statusLine(progress.message)}}).catch(error=>statusLine(String(error?.message||error),true)).finally(()=>{reconcile.disabled=false;scheduleDecorate()});return}
+  if(reconcile){event.preventDefault();event.stopImmediatePropagation();reconcile.disabled=true;statusLine('Finalizing the Premier Phone Pack…');void reconcilePhoneCore({onProgress:progress=>{if(progress?.message)statusLine(progress.message)}}).catch(error=>statusLine(String(error?.message||error),true)).finally(()=>{reconcile.disabled=false;void refreshSupportStatus({autoReconcile:true})});return}
   const use=event.target?.closest?.('[data-gemma4-phone-use]');if(!use)return;
   event.preventDefault();event.stopImmediatePropagation();use.disabled=true;void useModel(use.dataset.gemma4PhoneUse).then(row=>statusLine(`${row.label||'Gemma 4'} selected for local phone work.`)).catch(error=>statusLine(String(error?.message||error),true)).finally(()=>{use.disabled=false;scheduleDecorate()});
 }
 document.addEventListener('click',onClick,true);
-for(const name of ['civweave:model-settings-opened','civweave:settings-opened','civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-downloaded','pageshow'])addEventListener(name,scheduleDecorate);
+for(const name of ['civweave:model-settings-opened','civweave:settings-opened','civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-downloaded','civweave:gemma4-support-progress','pageshow'])addEventListener(name,()=>{scheduleDecorate();if(pendingSummary().complete)void refreshSupportStatus({autoReconcile:true})});
 globalThis.CivweaveGemma4DualQ4ActionsV1=Object.freeze({
-  version:VERSION,primaryModel:E2,deepModel:E4,packId:PREMIER,
-  scheduleDecorate,decorateSettings:decorateCurrentPhone,pendingSummary,reconcilePhoneCore,useModel,synchronizeImportedModels,recognizeImportedModel,
+  version:VERSION,primaryModel:E2,deepModel:E4,packId:PREMIER,supportIds:SUPPORT_IDS,supportWorker:SUPPORT_WORKER,
+  scheduleDecorate,decorateSettings:decorateCurrentPhone,pendingSummary,reconcilePhoneCore,useModel,synchronizeImportedModels,recognizeImportedModel,supportStatus,refreshSupportStatus,downloadSupportFiles,
   compatibilityOnly:true,currentPhoneAuthority:true,presentationOwnership:true,singlePresentationOwner:true,
   mutationObserverGuarded:false,mutationObserver:false,q4PresentationRetired:true,
-  completedImportReconciliation:true,opfsReceiptReconciliation:true,preservesExistingLargeFiles:true,fullPackReinstallRequired:false
+  completedImportReconciliation:true,opfsReceiptReconciliation:true,preservesExistingLargeFiles:true,fullPackReinstallRequired:false,
+  missingSupportDownloadAction:true,supportDownloadsWorkerOnly:true,supportLargeFileReimportRequired:false
 });
-void synchronizeImportedModels().catch(()=>null).finally(scheduleDecorate);
+void synchronizeImportedModels().catch(()=>null).then(()=>refreshSupportStatus({autoReconcile:true})).catch(()=>null).finally(scheduleDecorate);
 })();
