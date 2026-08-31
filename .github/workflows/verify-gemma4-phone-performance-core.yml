@@ -8,6 +8,7 @@ on:
       - 'public/app/local-ai/gemma4-inference-repair-v1.js'
       - 'public/app/local-ai/gemma4-q2-retirement-v1.js'
       - 'public/app/local-ai/gemma4-browser-pack-coherence-v1.js'
+      - 'public/app/local-ai/gemma4-browser-pack-coherence-v2.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
@@ -17,6 +18,7 @@ on:
       - 'public/app/local-ai/gemma4-opfs-storage-v1.js'
       - 'scripts/verify-gemma4-phone-performance-core-v1.mjs'
       - 'scripts/verify-gemma4-settings-migration-v1.mjs'
+      - 'scripts/verify-gemma4-browser-observer-freeze-v2.mjs'
       - 'scripts/verify-gemma4-browser-user-gesture-v1.mjs'
       - 'scripts/verify-browser-pack-import-worker-v1.mjs'
       - 'scripts/verify-gemma4-opfs-import-v1.mjs'
@@ -29,6 +31,7 @@ on:
       - 'public/app/local-ai/gemma4-inference-repair-v1.js'
       - 'public/app/local-ai/gemma4-q2-retirement-v1.js'
       - 'public/app/local-ai/gemma4-browser-pack-coherence-v1.js'
+      - 'public/app/local-ai/gemma4-browser-pack-coherence-v2.js'
       - 'public/app/local-ai/gemma4-litert-fast-extension-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/gemma4-e4b-q4-extension-v1.js'
@@ -38,6 +41,7 @@ on:
       - 'public/app/local-ai/gemma4-opfs-storage-v1.js'
       - 'scripts/verify-gemma4-phone-performance-core-v1.mjs'
       - 'scripts/verify-gemma4-settings-migration-v1.mjs'
+      - 'scripts/verify-gemma4-browser-observer-freeze-v2.mjs'
       - 'scripts/verify-gemma4-browser-user-gesture-v1.mjs'
       - 'scripts/verify-browser-pack-import-worker-v1.mjs'
       - 'scripts/verify-gemma4-opfs-import-v1.mjs'
@@ -67,6 +71,7 @@ jobs:
           node --check public/app/local-ai/gemma4-inference-repair-v1.js
           node --check public/app/local-ai/gemma4-q2-retirement-v1.js
           node --check public/app/local-ai/gemma4-browser-pack-coherence-v1.js
+          node --check public/app/local-ai/gemma4-browser-pack-coherence-v2.js
           node --check public/app/local-ai/gemma4-litert-fast-extension-v1.js
           node --check public/app/local-ai/litert-gemma4-fast-runtime-v1.js
           node --check public/app/local-ai/gemma4-e4b-q4-extension-v1.js
@@ -76,13 +81,14 @@ jobs:
           node --check public/app/local-ai/gemma4-opfs-storage-v1.js
           node --check scripts/verify-gemma4-phone-performance-core-v1.mjs
           node --check scripts/verify-gemma4-settings-migration-v1.mjs
+          node --check scripts/verify-gemma4-browser-observer-freeze-v2.mjs
           node --check scripts/verify-gemma4-browser-user-gesture-v1.mjs
           node --check scripts/verify-browser-pack-import-worker-v1.mjs
           node --check scripts/verify-gemma4-opfs-import-v1.mjs
       - name: Verify Gemma 4 phone authority contracts
         run: node scripts/verify-gemma4-phone-performance-core-v1.mjs
-      - name: Verify Gemma 4 settings migration
-        run: node scripts/verify-gemma4-settings-migration-v1.mjs
+      - name: Verify observer-free Gemma browser handoff
+        run: node scripts/verify-gemma4-browser-observer-freeze-v2.mjs
       - name: Verify direct browser download gestures
         run: node scripts/verify-gemma4-browser-user-gesture-v1.mjs
       - name: Verify non-blocking browser imports
