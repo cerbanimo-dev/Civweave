@@ -36,13 +36,18 @@ assert.match(controller,/gemma4LegacyDeepExtensionLoaded:false/);
 assert.match(controller,/gemma4PassivePreload:false/,'Working Settings menu must remain passive.');
 assert.match(controller,/providerRuntimeOnOpen:false/,'Opening Settings must remain runtime-inert.');
 
-const takeoverImport=worker203.indexOf("importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v1')");
+const takeoverImport=worker203.indexOf("importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v2')");
 const localAiImport=worker203.indexOf("importScripts('/service-worker-local-ai-coherence-v307.js");
 assert.ok(takeoverImport>=0&&localAiImport>takeoverImport,'Current Gemma takeover must register before historical local-AI coherence.');
+assert.match(takeover,/gemma4-current-phone-worker-v2/,'Takeover generation must change so installed PWAs receive a new registered worker byte sequence.');
+assert.match(takeover,/staging-gemma4-current-phone-owner-v2/,'Takeover must use a fresh one-shot recovery marker.');
 assert.match(takeover,/gemma4-e4b-q4-extension-v1\.js/);
 assert.match(takeover,/gemma4-pack-extension-v1\.js/);
 assert.match(takeover,/gemma4-dual-q4-actions-v1\.js/);
 assert.match(takeover,/x-civweave-retired-presentation/);
+assert.match(takeover,/cwGemma4ReloadAppClients/,'Staging takeover must replace any already-running page realm that still contains a retired Q4 observer.');
+assert.match(takeover,/client\.navigate\(url\.href\)/,'One-shot takeover must reload controlled app clients after executable purge.');
+assert.match(takeover,/reloadsAppClientsOnce:true/);
 assert.match(takeover,/purgesExecutablePathsOnly:true/);
 assert.match(takeover,/preservesDownloadedModels:true/);
 assert.match(takeover,/preservesSavedModelState:true/);
@@ -59,4 +64,4 @@ assert.match(currentActions,/synchronizeImportedModels/,'2\/2 imported payloads 
 assert.match(phone,/Web-optimized LiteRT-LM phone binaries/);
 assert.match(phone,/Complete phone performance core/,'Older phone-core presentation remains a compatibility fixture but must not own the current action layer.');
 
-console.log(JSON.stringify({ok:true,contract:'gemma4-phone-single-owner-v5',staleCopySource:'gemma4-e4b-q4-extension-v1.js',currentController:'litert-single-owner',opfsReceiptReconciledBeforeDecorate:true,currentActionsOwnPresentation:true,phoneCoreDecoratorNotInvoked:true,workerTakeoverBeforeLegacyCoherence:true,settingsPassive:true,downloadedModelsPreserved:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'gemma4-phone-single-owner-v6',staleCopySource:'gemma4-e4b-q4-extension-v1.js',currentController:'litert-single-owner',opfsReceiptReconciledBeforeDecorate:true,currentActionsOwnPresentation:true,phoneCoreDecoratorNotInvoked:true,workerTakeoverBeforeLegacyCoherence:true,registeredWorkerGeneration:'v2',reloadsOldPageRealm:true,settingsPassive:true,downloadedModelsPreserved:true},null,2));
