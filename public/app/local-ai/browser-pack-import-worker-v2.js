@@ -21,18 +21,18 @@ async function writeOpfs(packet,file){
     try{
       access.truncate(0);let offset=0;
       while(offset<total){
-        const end=Math.min(total,offset+CHUNK_BYTES),chunk=new Uint8Array(await file.slice(offset,end).arrayBuffer());let at=0;
-        while(at<chunk.byteLength){const written=Number(access.write(chunk.subarray(at),{at:offset+at})||0);if(written<=0)throw new Error('Origin-private model storage stopped accepting data.');at+=written}
-        offset=end;progress.add(chunk.byteLength);
+        const start=offset,end=Math.min(total,start+CHUNK_BYTES),chunk=new Uint8Array(await file.slice(start,end).arrayBuffer());let at=0;
+        while(at<chunk.byteLength){const written=Number(access.write(chunk.subarray(at),{at:start+at})||0);if(written<=0)throw new Error('Origin-private model storage stopped accepting data.');at+=written}
+        offset=end;progress.add(end-start);
       }
-      access.flush();const copied=progress.finish(offset);if(total&&copied<total)throw new Error(`Origin-private model import stopped early (${copied}/${total} bytes).`);
+      access.flush();const size=Number(access.getSize?.()||offset),copied=progress.finish(size);if(total&&size<total)throw new Error(`Origin-private model import stopped early (${size}/${total} bytes).`);
       return{copied,total,backend:'opfs',modelId:safePart(packet.componentId||packet.modelId||'local-model'),fileName:safePart(packet.path||packet.basename||'model-file'),chunkBytes:CHUNK_BYTES,syncAccess:true};
     }finally{try{access.close()}catch{}}
   }
   const writable=await handle.createWritable({keepExistingData:false});
   try{
     let offset=0;
-    while(offset<total){const end=Math.min(total,offset+CHUNK_BYTES),chunk=await file.slice(offset,end).arrayBuffer();await writable.write({type:'write',position:offset,data:chunk});offset=end;progress.add(end-(offset-(end-offset)))}
+    while(offset<total){const start=offset,end=Math.min(total,start+CHUNK_BYTES),chunk=await file.slice(start,end).arrayBuffer();await writable.write({type:'write',position:start,data:chunk});offset=end;progress.add(end-start)}
     await writable.close();const copied=progress.finish(offset);if(total&&copied<total)throw new Error(`Origin-private model import stopped early (${copied}/${total} bytes).`);
     return{copied,total,backend:'opfs',modelId:safePart(packet.componentId||packet.modelId||'local-model'),fileName:safePart(packet.path||packet.basename||'model-file'),chunkBytes:CHUNK_BYTES,syncAccess:false};
   }catch(error){try{await writable.abort?.()}catch{}throw error}
