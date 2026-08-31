@@ -40,7 +40,10 @@ function loadScript(src,ready,label){
 async function settleGemma4Phone(){
   const actions=globalThis.CivweaveGemma4DualQ4ActionsV1;
   try{await actions?.synchronizeImportedModels?.()}catch(error){console.warn('[Civweave] Gemma 4 imported-model reconciliation deferred.',error)}
-  globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
+  // The phone-performance module self-activates when it loads. Reassert only its
+  // registry/pack authority here; calling activate() again would also invoke any
+  // stale legacy presentation global left in an older page realm.
+  try{globalThis.CivweaveGemma4PhonePerformanceCoreV1?.applyAuthority?.()}catch{}
   actions?.scheduleDecorate?.();
   globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
   globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
