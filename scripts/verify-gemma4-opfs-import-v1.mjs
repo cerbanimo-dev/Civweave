@@ -39,6 +39,6 @@ assert.match(worker,/packet\.sourceUrl/,'Worker must accept the blob-URL fallbac
 assert.match(worker,/subarray\(start,Math\.min\(value\.byteLength,start\+CHUNK_BYTES\)\)/,'Worker must cap every OPFS write to the configured chunk bound.');
 const opfsBlock=worker.slice(worker.indexOf('async function writeOpfs'),worker.indexOf('async function writeCache'));
 assert.doesNotMatch(opfsBlock,/caches\.open|cache\.put/,'OPFS import must never enter Cache Storage.');
-assert.match(worker,/if\(packet\.storageBackend==='opfs'\)return writeOpfs\(packet\)/,'Only explicit OPFS records may take the OPFS path.');
+assert.match(worker,/packet\.storageBackend==='opfs'\?writeOpfs\(packet,file\):writeCache\(packet,file\)/,'Only explicit OPFS records may take the OPFS path while preserving the legacy cache routing contract.');
 
 console.log(JSON.stringify({ok:true,contract:'gemma4-opfs-import-v1',settingsPassive:true,largeLiteRTCachePut:false,rawFileWorkerClone:false,transferableStream:true,blobUrlFallback:true,opfsWorker:true,chunkBytes:8*1024*1024,legacyCacheReadFacade:true},null,2));
