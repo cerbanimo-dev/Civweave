@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.0.23-model-settings-controller-v173-passive-gemma-litert-only';
-const GEMMA4_ACTIONS_VERSION='1.2.1-gemma4-dual-actions-v2-phone-reconcile';
-const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.2.1-phone-reconcile';
+const VERSION='1.0.24-model-settings-controller-v173-passive-gemma-single-owner';
+const GEMMA4_ACTIONS_VERSION='1.2.2-gemma4-dual-actions-v2-single-owner-opfs-reconcile';
+const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.2.2-single-owner-opfs-reconcile';
 const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
 const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority';
@@ -37,6 +37,18 @@ function loadScript(src,ready,label){
     document.head?.append(script);
   });
 }
+async function settleGemma4Phone(){
+  const actions=globalThis.CivweaveGemma4DualQ4ActionsV1;
+  try{await actions?.synchronizeImportedModels?.()}catch(error){console.warn('[Civweave] Gemma 4 imported-model reconciliation deferred.',error)}
+  // The phone-performance module self-activates when it loads. Reassert only its
+  // registry/pack authority here; calling activate() again would also invoke any
+  // stale legacy presentation global left in an older page realm.
+  try{globalThis.CivweaveGemma4PhonePerformanceCoreV1?.applyAuthority?.()}catch{}
+  actions?.scheduleDecorate?.();
+  globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
+  globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
+  return true;
+}
 let packLoadPromise=null;
 function ensureGemma4Pack(){
   const actionsReady=()=>globalThis.CivweaveGemma4DualQ4ActionsV1?.version===GEMMA4_ACTIONS_VERSION;
@@ -45,13 +57,7 @@ function ensureGemma4Pack(){
   const retireReady=()=>globalThis.CivweaveGemma4Q2RetirementV1?.version===GEMMA4_Q2_RETIRE_VERSION;
   const browserPackReady=()=>globalThis.CivweaveGemma4BrowserPackCoherenceV1?.version===GEMMA4_BROWSER_PACK_VERSION;
   const opfsReady=()=>globalThis.CivweaveGemma4OPFSStorageV1?.version===GEMMA4_OPFS_VERSION;
-  if(actionsReady()&&fastReady()&&phoneReady()&&retireReady()&&browserPackReady()&&opfsReady()){
-    globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
-    globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
-    globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
-    globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
-    return Promise.resolve(true);
-  }
+  if(actionsReady()&&fastReady()&&phoneReady()&&retireReady()&&browserPackReady()&&opfsReady())return settleGemma4Phone();
   if(packLoadPromise)return packLoadPromise;
   packLoadPromise=loadScript(GEMMA4_ACTIONS_SRC,actionsReady,'gemma4-current-phone-actions')
     .then(()=>loadScript(GEMMA4_FAST_SRC,fastReady,'gemma4-litert-current-mobile-models'))
@@ -59,13 +65,7 @@ function ensureGemma4Pack(){
     .then(()=>loadScript(GEMMA4_Q2_RETIRE_SRC,retireReady,'gemma4-q2-retirement'))
     .then(()=>loadScript(GEMMA4_BROWSER_PACK_SRC,browserPackReady,'gemma4-browser-pack-coherence'))
     .then(()=>loadScript(GEMMA4_OPFS_SRC,opfsReady,'gemma4-opfs-large-model-storage'))
-    .then(()=>{
-      globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
-      globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
-      globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
-      globalThis.CivweaveGemma4BrowserPackCoherenceV1?.scheduleDecorate?.();
-      return true;
-    })
+    .then(settleGemma4Phone)
     .catch(error=>{console.warn('[Civweave] Gemma 4 current phone pack failed to load.',error);return false})
     .finally(()=>{packLoadPromise=null});
   return packLoadPromise;
@@ -102,6 +102,8 @@ const api=Object.freeze({
   gemma4LegacyQ4PresentationOwner:false,
   gemma4LegacyPackExtensionLoaded:false,
   gemma4LegacyDeepExtensionLoaded:false,
+  gemma4SinglePhonePresentationOwner:true,
+  gemma4ImportedReceiptReconciledBeforeDecorate:true,
   gemma4PassivePreload:false,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
