@@ -8,6 +8,7 @@ const lacks=(text,needle,message)=>must(!text.includes(needle),message||`Unexpec
 const actions=read('public/app/local-ai/gemma4-dual-actions-v2.js');
 const phone=read('public/app/local-ai/gemma4-phone-performance-core-v1.js');
 const worker=read('public/app/local-ai/premier-phone-support-worker-v1.js');
+const qwen=read('public/app/local-ai/premier-phone-qwen-download-v1.js');
 const importer=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
 const inference=read('public/app/local-ai/gemma4-inference-repair-v1.js');
 const controller=read('public/app/model-settings-controller-v173.js');
@@ -50,6 +51,18 @@ has(worker,'civweave-specialized-model-packs-v1');
 has(worker,'mainThreadLargeCachePut:false');
 has(worker,'sequentialArtifacts:true');
 
+has(qwen,'1.0.0-premier-phone-qwen-download-v1');
+has(qwen,"const CACHE='civweave-model-generative-v266'");
+has(qwen,"const ID='qwen3-0.6b-q8-wasm'");
+has(qwen,"onnx/model_quantized.onnx");
+has(qwen,'600_000_000');
+has(qwen,'premier-phone-support-worker-v1.js');
+has(qwen,'workerOnly:true');
+has(qwen,'mainThreadLargeCachePut:false');
+has(qwen,'autoDetect:true');
+has(qwen,'if(!existing?.start||!existing?.status)globalThis.CivweaveLocalModelDownloadV266=api');
+lacks(qwen,"download-manager-v267.js");
+
 has(importer,'1.3.1-browser-pack-pwa-import-v1-gemma-only-support-handoff');
 has(importer,"const PREMIER_BROWSER_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web'])");
 has(importer,'browserRecords');
@@ -73,21 +86,29 @@ has(inference,'1.0.11-gemma4-inference-repair-v1-current-phone-authority');
 has(inference,"PHONE_AUTH_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status'");
 has(inference,'phoneAuthorityRuntimeOnly:true');
 
-has(controller,'1.0.26-model-settings-controller-v173-passive-gemma-support-autodetect');
+has(controller,'1.0.27-model-settings-controller-v173-passive-gemma-qwen-internal');
+has(controller,'1.0.0-premier-phone-qwen-download-v1');
+has(controller,'premier-phone-qwen-download-v1.js?v=1.0.0-qwen-internal');
 has(controller,'1.3.1-gemma4-dual-actions-v2-support-autodetect');
+has(controller,"loadScript(GEMMA4_QWEN_SRC,qwenReady,'premier-phone-qwen-internal-download')");
 has(controller,'gemma4MissingSupportDownloadAction:true');
 has(controller,'gemma4SupportWorkerOnly:true');
 has(controller,'gemma4SupportAutoDetect:true');
 has(controller,'gemma4SupportFilesInternal:true');
+has(controller,'gemma4QwenInternalManager:true');
+has(controller,'gemma4QwenManagerExplicitOnly:true');
 has(controller,'gemma4BrowserReceiptGemmaOnly:true');
 has(controller,'gemma4PassivePreload:false');
 has(controller,'providerRuntimeOnOpen:false');
 has(controller,'passiveGemmaHydration:false');
 
-has(registeredWorker,'gemma4-current-phone-worker-v4-support-autodetect');
-has(takeover,'gemma4-current-phone-worker-v4-support-autodetect');
+has(registeredWorker,'gemma4-current-phone-worker-v5-qwen-internal');
+has(takeover,'gemma4-current-phone-worker-v5-qwen-internal');
+has(takeover,'staging-gemma4-current-phone-owner-v5-qwen-internal');
+has(takeover,'premier-phone-qwen-download-v1.js');
 has(takeover,'premier-phone-support-worker-v1.js');
 has(takeover,'browser-pack-pwa-import-v1.js');
+has(takeover,'qwenInternalManagerCurrent:true');
 has(takeover,'browserPackImporterCurrent:true');
 has(takeover,'supportAutoDetectCurrent:true');
 has(takeover,'preservesDownloadedModels:true');
@@ -101,4 +122,4 @@ for(const text of [retiredPack,retiredDeep,retiredActions]){
   lacks(text,'Gemma 4 E2B Q4F16 is the fast core');
 }
 
-console.log('Premier Phone internal support downloads and autodetection verified.');
+console.log('Premier Phone internal support downloads, Qwen compatibility download ownership, and autodetection verified.');
