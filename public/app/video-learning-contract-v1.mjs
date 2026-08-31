@@ -83,7 +83,7 @@ function installYoutubeEmbedGuard(frame,media,section,onFailure){
   const fail=reason=>{if(settled)return;settled=true;cleanup();failedYoutubeIds.add(id);frame.hidden=true;status.hidden=false;status.textContent=reason||'Embedded playback is unavailable here. Use the direct video link instead.';try{onFailure?.({id,media,section,frame,status})}catch{}};
   const ready=()=>{if(settled)return;settled=true;cleanup();status.hidden=true;section.dataset.youtubeEmbedReady='1'};
   const onMessage=event=>{if(event.source!==frame.contentWindow)return;if(event.origin&&!YOUTUBE_PLAYER_ORIGINS.includes(event.origin))return;let data=event.data;if(typeof data==='string'){try{data=JSON.parse(data)}catch{return}}if(!data||typeof data!=='object')return;if(data.event==='onReady'||data.event==='infoDelivery')ready()};
-  const ping=()=>{for(const origin of YOUTUBE_PLAYER_ORIGINS){try{frame.contentWindow?.postMessage(JSON.stringify({event:'listening',id:frame.id}),' '+origin)}catch{try{frame.contentWindow?.postMessage(JSON.stringify({event:'listening',id:frame.id}),origin)}catch{}}}};
+  const ping=()=>{const payload=JSON.stringify({event:'listening',id:frame.id});for(const origin of YOUTUBE_PLAYER_ORIGINS){try{frame.contentWindow?.postMessage(payload,origin)}catch{}}};
   globalThis.addEventListener?.('message',onMessage);
   timer=setTimeout(()=>fail('This video did not establish an embedded player session. Civweave removed the dead frame; use the direct link or the replacement video.'),YOUTUBE_EMBED_READY_TIMEOUT_MS);
   frame.addEventListener('load',()=>{if(started)return;started=true;ping();pinger=setInterval(ping,500)},{once:true});
