@@ -13,6 +13,7 @@ const CW_GEMMA4_CURRENT_PATHS=new Set([
   '/app/local-ai/gemma4-opfs-storage-v1.js',
   '/app/local-ai/gemma4-q2-retirement-v1.js',
   '/app/local-ai/browser-pack-download-v1.js',
+  '/app/local-ai/browser-pack-pwa-import-v1.js',
   '/app/local-ai/browser-pack-import-worker-v2.js',
   '/app/local-ai/premier-phone-support-worker-v1.js'
 ]);
@@ -102,5 +103,6 @@ self.CivweaveGemma4CurrentPhoneWorkerV1=Object.freeze({
   currentCodeNetworkFirst:true,
   reloadsAppClientsOnce:true,
   supportWorkerCurrent:true,
+  browserPackImporterCurrent:true,
   recoveryMarker:CW_GEMMA4_RECOVERY_MARKER
 });
