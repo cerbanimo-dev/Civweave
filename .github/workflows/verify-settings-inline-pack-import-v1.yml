@@ -1,0 +1,40 @@
+name: Verify Settings Inline Local Import v1
+
+on:
+  pull_request:
+    branches: [staging]
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify Settings Local Models stays in-place
+        run: |
+          set -euxo pipefail
+          node --check public/app/settings-local-interaction-repair-v1.js
+          node --check public/service-worker-settings-v337-entrypoint.js
+          node --check public/service-worker-settings-v325-override.js
+          grep -Fq "pickAndImport(packId" public/app/settings-local-interaction-repair-v1.js
+          grep -Fq "a[href*=\"source=settings-ai-pack-import\"]" public/app/settings-local-interaction-repair-v1.js
+          grep -Fq "event.stopImmediatePropagation()" public/app/settings-local-interaction-repair-v1.js
+          grep -Fq "settings-local-models-direct-v325.js?v=settings-local-interaction-repair-v1" public/app/settings-local-interaction-repair-v1.js
+          grep -Fq "cw-local-ai-download-dock-v324" public/app/settings-local-interaction-repair-v1.js
+          grep -Fq "legacyDownloadPageNavigation:false" public/app/settings-local-interaction-repair-v1.js
+          grep -Fq "mutationObserver:false" public/app/settings-local-interaction-repair-v1.js
+          ! grep -Fq "MutationObserver" public/app/settings-local-interaction-repair-v1.js
+          ! grep -Eq "location\.(assign|replace)|window\.open" public/app/settings-local-interaction-repair-v1.js
+          grep -Fq "settings-local-interaction-repair-v1.js?v=1.0.0-inline-import-recovery" public/service-worker-settings-v337-entrypoint.js
+          grep -Fq "settings-inline-import-v346" public/service-worker-settings-v337-entrypoint.js
+          grep -Fq "settings-local-interaction-repair-v1.js?v=1.0.0-inline-import-recovery" public/service-worker-settings-v325-override.js
+          grep -Fq "Recovering current Local Models controls inside Settings." public/service-worker-settings-v325-override.js
