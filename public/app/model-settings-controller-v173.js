@@ -1,10 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.22-model-settings-controller-v173-passive-gemma-current-phone-actions';
-const GEMMA4_DEEP_VERSION='1.0.0-gemma4-e4b-q4-extension-v1';
-const GEMMA4_DEEP_SRC='/app/local-ai/gemma4-e4b-q4-extension-v1.js?v=1.0.0-e4b-q4-deep';
-const GEMMA4_PACK_VERSION='1.0.1-gemma4-pack-extension-v1-render-safe';
-const GEMMA4_PACK_SRC='/app/local-ai/gemma4-pack-extension-v1.js?v=1.0.1-render-safe';
+const VERSION='1.0.23-model-settings-controller-v173-passive-gemma-litert-only';
 const GEMMA4_ACTIONS_VERSION='1.2.1-gemma4-dual-actions-v2-phone-reconcile';
 const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.2.1-phone-reconcile';
 const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -43,16 +39,13 @@ function loadScript(src,ready,label){
 }
 let packLoadPromise=null;
 function ensureGemma4Pack(){
-  const packReady=()=>globalThis.CivweaveGemma4PackExtensionV1?.version===GEMMA4_PACK_VERSION;
-  const deepReady=()=>globalThis.CivweaveGemma4E4BQ4ExtensionV1?.version===GEMMA4_DEEP_VERSION;
   const actionsReady=()=>globalThis.CivweaveGemma4DualQ4ActionsV1?.version===GEMMA4_ACTIONS_VERSION;
   const fastReady=()=>globalThis.CivweaveGemma4LiteRTFastExtensionV1?.version===GEMMA4_FAST_VERSION;
   const phoneReady=()=>globalThis.CivweaveGemma4PhonePerformanceCoreV1?.version===GEMMA4_PHONE_VERSION;
   const retireReady=()=>globalThis.CivweaveGemma4Q2RetirementV1?.version===GEMMA4_Q2_RETIRE_VERSION;
   const browserPackReady=()=>globalThis.CivweaveGemma4BrowserPackCoherenceV1?.version===GEMMA4_BROWSER_PACK_VERSION;
   const opfsReady=()=>globalThis.CivweaveGemma4OPFSStorageV1?.version===GEMMA4_OPFS_VERSION;
-  if(packReady()&&deepReady()&&actionsReady()&&fastReady()&&phoneReady()&&retireReady()&&browserPackReady()&&opfsReady()){
-    globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();
+  if(actionsReady()&&fastReady()&&phoneReady()&&retireReady()&&browserPackReady()&&opfsReady()){
     globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
     globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
     globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
@@ -60,16 +53,13 @@ function ensureGemma4Pack(){
     return Promise.resolve(true);
   }
   if(packLoadPromise)return packLoadPromise;
-  packLoadPromise=loadScript(GEMMA4_PACK_SRC,packReady,'gemma4-q4-compatibility-core')
-    .then(()=>loadScript(GEMMA4_DEEP_SRC,deepReady,'gemma4-e4b-q4-compatibility'))
-    .then(()=>loadScript(GEMMA4_ACTIONS_SRC,actionsReady,'gemma4-current-phone-actions'))
+  packLoadPromise=loadScript(GEMMA4_ACTIONS_SRC,actionsReady,'gemma4-current-phone-actions')
     .then(()=>loadScript(GEMMA4_FAST_SRC,fastReady,'gemma4-litert-current-mobile-models'))
     .then(()=>loadScript(GEMMA4_PHONE_SRC,phoneReady,'gemma4-current-phone-pack-authority'))
     .then(()=>loadScript(GEMMA4_Q2_RETIRE_SRC,retireReady,'gemma4-q2-retirement'))
     .then(()=>loadScript(GEMMA4_BROWSER_PACK_SRC,browserPackReady,'gemma4-browser-pack-coherence'))
     .then(()=>loadScript(GEMMA4_OPFS_SRC,opfsReady,'gemma4-opfs-large-model-storage'))
     .then(()=>{
-      globalThis.CivweaveGemma4E4BQ4ExtensionV1?.activate?.();
       globalThis.CivweaveGemma4PhonePerformanceCoreV1?.activate?.();
       globalThis.CivweaveGemma4DualQ4ActionsV1?.scheduleDecorate?.();
       globalThis.CivweaveGemma4Q2RetirementV1?.scheduleDecorate?.();
@@ -80,16 +70,17 @@ function ensureGemma4Pack(){
     .finally(()=>{packLoadPromise=null});
   return packLoadPromise;
 }
-// Settings is a saved-state view. Gemma compatibility/runtime/storage code is
-// available through ensureGemma4Pack() for an explicit model action, but must
-// never hydrate merely because Settings loaded, reopened, or received pageshow.
+// Settings remains a saved-state view. Current Gemma modules hydrate only after
+// an explicit model action. Retired Q4 compatibility extensions are not loaded
+// here because they also own obsolete Settings presentation and can overwrite
+// the LiteRT phone state after a successful 2/2 import.
 const api=Object.freeze({
   version:VERSION,
   compatibilityFacade:true,
   canonical:'CivweaveSettingsV320',
   authority:'settings-v320',
   open,close,ensure,readState,credentialStatus,ensureGemma4Pack,
-  gemma4PackCore:'litert-current+q4-compatibility',
+  gemma4PackCore:'litert-current-only',
   gemma4FastModel:'gemma4-e2b-it-litert-web',
   gemma4DeepModel:'gemma4-e4b-it-litert-web',
   gemma4CompatibilityModels:Object.freeze(['gemma4-e2b-it-q4f16','gemma4-e4b-it-q4f16']),
@@ -109,19 +100,20 @@ const api=Object.freeze({
   gemma4OPFSLargeModels:true,
   gemma4CacheStorageLargePut:false,
   gemma4LegacyQ4PresentationOwner:false,
+  gemma4LegacyPackExtensionLoaded:false,
+  gemma4LegacyDeepExtensionLoaded:false,
   gemma4PassivePreload:false,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
 globalThis.CivweaveModelSettingsControllerV173=api;
 globalThis.CivweaveModelSettingsControllerBootstrapV173=Object.freeze({
   version:VERSION,dormant:true,canonical:'CivweaveSettingsV320',passiveGemmaHydration:false,
-  gemma4PackExtension:GEMMA4_PACK_SRC,gemma4PackVersion:GEMMA4_PACK_VERSION,
-  gemma4DeepExtension:GEMMA4_DEEP_SRC,gemma4DeepVersion:GEMMA4_DEEP_VERSION,
   gemma4Actions:GEMMA4_ACTIONS_SRC,gemma4ActionsVersion:GEMMA4_ACTIONS_VERSION,
   gemma4FastExtension:GEMMA4_FAST_SRC,gemma4FastVersion:GEMMA4_FAST_VERSION,
   gemma4PhoneAuthority:GEMMA4_PHONE_SRC,gemma4PhoneVersion:GEMMA4_PHONE_VERSION,
   gemma4Q2Retirement:GEMMA4_Q2_RETIRE_SRC,gemma4Q2RetirementVersion:GEMMA4_Q2_RETIRE_VERSION,
   gemma4BrowserPackCoherence:GEMMA4_BROWSER_PACK_SRC,gemma4BrowserPackCoherenceVersion:GEMMA4_BROWSER_PACK_VERSION,
-  gemma4OPFSStorage:GEMMA4_OPFS_SRC,gemma4OPFSStorageVersion:GEMMA4_OPFS_VERSION
+  gemma4OPFSStorage:GEMMA4_OPFS_SRC,gemma4OPFSStorageVersion:GEMMA4_OPFS_VERSION,
+  retiredPresentationModules:Object.freeze(['/app/local-ai/gemma4-pack-extension-v1.js','/app/local-ai/gemma4-e4b-q4-extension-v1.js','/app/local-ai/gemma4-dual-q4-actions-v1.js'])
 });
 })();
