@@ -30,11 +30,14 @@ lacks(actions,'Complete Q4F16 core','Current phone owner must never restore the 
 
 has(phone,"1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status");
 has(phone,'baseComponentStatus=base.componentStatus?.bind(base)');
+has(phone,'__civweaveGemma4PhonePerformanceCoreVersion:VERSION');
+has(phone,'base.__civweaveGemma4PhonePerformanceCoreVersion===VERSION');
 has(phone,"status:'support-required'");
 has(phone,"phase:'phone-support-required'");
 has(phone,'function decorateSettings(){return true}');
 has(phone,'presentationOwnership:false');
 has(phone,'runtimeOnly:true');
+has(phone,'replacesOlderPackWrappers:true');
 lacks(phone,"document.addEventListener('click'",'Runtime authority must not own Settings clicks.');
 
 has(worker,"1.0.0-premier-phone-support-worker-v1");
