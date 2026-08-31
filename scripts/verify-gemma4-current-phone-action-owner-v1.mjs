@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const settings=readFileSync('public/app/model-settings-controller-v173.js','utf8');
+const current=readFileSync('public/app/local-ai/gemma4-dual-actions-v2.js','utf8');
+assert.match(settings,/gemma4-dual-actions-v2\.js/);
+assert.doesNotMatch(settings,/GEMMA4_ACTIONS_SRC='\/app\/local-ai\/gemma4-dual-q4-actions-v1\.js/);
+assert.doesNotMatch(current,/new\s+MutationObserver|MutationObserver\s*\(/);
+assert.match(current,/q4PresentationRetired:true/);
+assert.match(current,/Finish phone performance core/);
+console.log('PASS current Gemma phone action owner is observer-free and legacy Q4 Settings presentation is retired.');
