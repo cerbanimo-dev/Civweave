@@ -85,5 +85,10 @@ assert.equal(unmatchedAction.checkpointVideos.length,1);
 assert.equal(unmatchedAction.checkpointVideos[0].url,fallback);
 assert.equal(unmatchedAction.checkpointVideos[0].source,'required-fallback');
 
-assert.equal(contract.youtubeEmbedUrl(fallback),'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');
-console.log('Video Learning Contract behavior verified: current availability filtering, honest embed-evidence labeling, subject relevance, exact fallback, Living School modules, Cerbanimo tasks, and embed URL.');
+const embed=new URL(contract.youtubeEmbedUrl(fallback));
+assert.equal(embed.origin,'https://www.youtube-nocookie.com');
+assert.equal(embed.pathname,'/embed/dQw4w9WgXcQ');
+assert.equal(embed.searchParams.get('enablejsapi'),'1');
+assert.equal(embed.searchParams.get('playsinline'),'1');
+assert.equal(embed.searchParams.get('rel'),'0');
+console.log('Video Learning Contract behavior verified: current availability filtering, honest embed-evidence labeling, subject relevance, exact fallback, Living School modules, Cerbanimo tasks, and runtime handshake embed URL.');
