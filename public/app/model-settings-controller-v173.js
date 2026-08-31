@@ -13,8 +13,8 @@ const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-author
 const GEMMA4_PHONE_SRC='/app/local-ai/gemma4-phone-performance-core-v1.js?v=1.2.0-resume-authority';
 const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1';
 const GEMMA4_Q2_RETIRE_SRC='/app/local-ai/gemma4-q2-retirement-v1.js?v=1.0.0-q2-retirement';
-const GEMMA4_BROWSER_PACK_VERSION='1.0.1-gemma4-browser-pack-coherence-v1-status-sync';
-const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync';
+const GEMMA4_BROWSER_PACK_VERSION='1.0.2-gemma4-browser-pack-coherence-v2-event-driven';
+const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v2.js?v=1.0.2-event-driven';
 const GEMMA4_OPFS_VERSION='1.0.0-gemma4-opfs-storage-v1';
 const GEMMA4_OPFS_SRC='/app/local-ai/gemma4-opfs-storage-v1.js?v=1.0.0-opfs-large-model';
 if(globalThis.CivweaveModelSettingsControllerV173?.version===VERSION)return;
