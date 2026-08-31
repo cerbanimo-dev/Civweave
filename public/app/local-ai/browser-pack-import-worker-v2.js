@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION='2.0.2-browser-pack-import-worker-v2-opfs-stream-transfer';
+const VERSION='2.0.1-browser-pack-import-worker-v2-opfs-chunked';
 const ALLOWED_CACHES=new Set(['civweave-model-generative-v266','civweave-specialized-model-packs-v1']);
 const OPFS_ROOT='civweave-models-v1';
 const CHUNK_BYTES=8*1024*1024;
