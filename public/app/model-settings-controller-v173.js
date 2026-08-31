@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.0.25-model-settings-controller-v173-passive-gemma-support-downloads';
-const GEMMA4_ACTIONS_VERSION='1.3.0-gemma4-dual-actions-v2-support-downloads';
-const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.3.0-support-downloads';
+const VERSION='1.0.26-model-settings-controller-v173-passive-gemma-support-autodetect';
+const GEMMA4_ACTIONS_VERSION='1.3.1-gemma4-dual-actions-v2-support-autodetect';
+const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.3.1-support-autodetect';
 const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
 const GEMMA4_PHONE_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status';
@@ -101,6 +101,9 @@ const api=Object.freeze({
   gemma4SupportStatusBeforeReady:true,
   gemma4MissingSupportDownloadAction:true,
   gemma4SupportWorkerOnly:true,
+  gemma4SupportAutoDetect:true,
+  gemma4SupportFilesInternal:true,
+  gemma4BrowserReceiptGemmaOnly:true,
   gemma4PassivePreload:false,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
