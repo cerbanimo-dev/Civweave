@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
-const VERSION='1.0.12-working-campus-home-relocation-v441-navbar-actions-restore';
+const VERSION='1.0.13-working-campus-home-relocation-v441-premier-import-handoff';
 const STYLE_ID='cw-working-campus-home-relocation-v441-style';
 const APP_TAB='app-device';
-const BROWSER_PACK_IMPORT_SRC='/app/local-ai/browser-pack-pwa-import-v1.js?v=1.2.0-progress-and-missing-file';
+const BROWSER_PACK_IMPORT_SRC='/app/local-ai/browser-pack-pwa-import-v1.js?v=1.3.2-premier-incremental-handoff';
 const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.6-v440-navbar-actions-restore';
 if(globalThis.CivweaveHomeRelocationV441?.version===VERSION)return;
 const isCivweave=()=>String(document.documentElement?.dataset?.civweaveSystemRoute||document.documentElement?.dataset?.civweaveSystem||'').toLowerCase()==='civweave';
@@ -47,7 +47,7 @@ function installAppSettings(){
   let panel=q(`[data-settings-tab-panel="${APP_TAB}"]`,form);if(!panel){panel=document.createElement('div');panel.className='cw-settings-tab-panel';panel.dataset.settingsTabPanel=APP_TAB;panel.hidden=true;panel.innerHTML='<section class="cw-clean-panel"><div><h3>Appearance &amp; downloads</h3><p>Device-level controls live here instead of taking space from the Current Quest.</p></div><div class="cw-v441-app-actions"><button type="button" data-cw-v441-theme><b data-cw-v441-theme-label>Theme: System</b><small>Cycle system, dark, and light appearance.</small></button><button type="button" data-cw-v441-downloads><b>Downloads &amp; offline storage</b><small>Manage Civweave downloads and offline packs.</small></button></div></section>';q('[data-cw-v441-theme]',panel).addEventListener('click',cycleTheme);q('[data-cw-v441-downloads]',panel).addEventListener('click',openDownloads);form.append(panel)}
   syncThemeLabel();return true;
 }
-function ensureBrowserPackPwaImport(){if(globalThis.CivweaveBrowserPackPwaImportV1?.ensureBridge&&globalThis.CivweaveBrowserPackPwaImportV1?.version?.startsWith?.('1.2.0-'))return true;const target=new URL(BROWSER_PACK_IMPORT_SRC,location.href).href;if([...document.scripts].some(script=>script.src===target))return false;const script=document.createElement('script');script.src=BROWSER_PACK_IMPORT_SRC;script.async=false;script.dataset.cwV441BrowserPackImport='';(document.head||document.documentElement).append(script);return true}
+function ensureBrowserPackPwaImport(){if(globalThis.CivweaveBrowserPackPwaImportV1?.ensureBridge&&globalThis.CivweaveBrowserPackPwaImportV1?.version?.startsWith?.('1.3.2-'))return true;const target=new URL(BROWSER_PACK_IMPORT_SRC,location.href).href;if([...document.scripts].some(script=>script.src===target))return false;const script=document.createElement('script');script.src=BROWSER_PACK_IMPORT_SRC;script.async=false;script.dataset.cwV441BrowserPackImport='';(document.head||document.documentElement).append(script);return true}
 function ensurePersistentActions(){
   const api=globalThis.CivweavePersistentShellActionsV1;
   if(api?.ensureMounted){api.ensureMounted();return true}
