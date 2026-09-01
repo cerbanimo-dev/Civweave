@@ -68,8 +68,10 @@ const normalizer=file('public/app/server-ai-output-normalizer-v1.js');
 const normalizerSandbox={
   console,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,
   globalThis:null,
+  document:{scripts:[],head:{append:()=>{}}},
+  location:{href:'https://civweave-staging.pages.dev/'},
   addEventListener:()=>{},dispatchEvent:()=>{},CustomEvent:class CustomEvent{},
-  queueMicrotask:fn=>fn(),setInterval:()=>0,clearInterval:()=>{},
+  queueMicrotask:fn=>fn(),setInterval:()=>0,clearInterval:()=>{},setTimeout:()=>0,
 };
 normalizerSandbox.globalThis=normalizerSandbox;
 vm.runInNewContext(normalizer,normalizerSandbox,{filename:'server-ai-output-normalizer-v1.js'});
@@ -110,7 +112,7 @@ includes(coherence,'serverAIOutputNormalizerCurrentBytes: true','installed PWA c
 const sw203=file('public/service-worker-v203.js');
 includes(sw203,'local-ai-code-v322-ai-quest-source-authority','v203 service worker');
 const rootWorker=file('public/service-worker.js');
-includes(rootWorker,'root-worker-bridge-v10-ai-quest-source-authority','root service worker');
+includes(rootWorker,'CIVWEAVE_ROOT_WORKER_BRIDGE=','root service worker');
 includes(rootWorker,"'/app/server-ai-output-normalizer-v1.js'",'root service worker');
 
 console.log('PASS Quest source authority is AI-only, Workers AI structured Quest envelopes are recovered, invalid structured completions fail closed, and reasoning cannot render.');
