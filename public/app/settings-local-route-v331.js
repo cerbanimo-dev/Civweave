@@ -11,6 +11,7 @@ const PROFILES_KEY='civweave-model-profiles-v1';
 const PANEL_ID='cw-local-ai-v324';
 const STYLE_ID='cw-local-ai-v324-style';
 const DOCK_ID='cw-local-ai-download-dock-v324';
+const SETTINGS_LAYER_ID='cw-settings-v320';
 const FOREGROUND_PHONE_MODELS=new Set(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16']);
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
 const LEGACY_BROWSER_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
@@ -70,7 +71,7 @@ const ACTION_FILES=[
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true)],
   ['/app/local-ai/specialized-model-capabilities-v1.js?v=1.1.0-model-packs',()=>Boolean(globalThis.CivweaveLocalSpecializedAI?.preferredTts==='supertonic-3-tts-int8')],
   ['/app/local-ai/model-packs-v1.js?v=1.0.1-browser-guard',()=>Boolean(globalThis.CivweaveLocalModelPacksV1?.byId&&globalThis.CivweaveLocalModelPacksV1?.install)],
-  ['/app/local-ai/browser-pack-download-v1.js?v=1.0.0-settings-v325',()=>Boolean(globalThis.CivweaveBrowserPackDownloadV1?.queue&&globalThis.CivweaveBrowserPackDownloadV1?.importUrl)]
+  ['/app/local-ai/browser-pack-download-v1.js?v=1.0.0-settings-v325',()=>Boolean(globalThis.CivweaveBrowserPackDownloadV1?.queue&&globalThis.CivweaveBrowserPackDownloadV1?.pickAndImport)]
 ];
 
 if(globalThis.CivweaveSettingsLocalRouteV323?.version===VERSION)return;
@@ -203,6 +204,8 @@ function statusMarkup(st,available){
   if(st.status==='browser-ready')return'<p class="cw-local-meta"><b>Ready for browser download</b> · Large files will use the browser download manager.</p>';
   if(st.status==='browser-queuing')return'<p class="cw-local-meta"><b>Sending files to the browser download manager…</b></p>';
   if(st.status==='browser-queued')return'<p class="cw-local-meta"><b>Browser downloads queued</b> · Civweave can be closed while they finish. Import the completed files afterward.</p>';
+  if(st.status==='browser-partial')return'<p class="cw-local-meta"><b>Some browser files are imported</b> · Import the remaining completed file without leaving Settings.</p>';
+  if(st.status==='browser-importing')return'<p class="cw-local-meta"><b>Importing browser files…</b></p>';
   const percent=available?100:Math.max(0,Math.min(99,Number(st.percent||0)));
   return`<div class="cw-progress" style="--pct:${percent}%"><i></i></div><p class="cw-local-meta"><b>${percent}%</b>${st.status?` · ${esc(st.status)}`:''}${st.error?` · <span class="cw-local-error">${esc(st.error)}</span>`:''}</p>`;
 }
@@ -218,10 +221,8 @@ function packActions(pack,st,active){
   const state=String(st?.status||'');
   if(state==='ready')return`<button type="button" data-local-pack-use="${esc(pack.id)}">${active?'Using pack':'Use pack'}</button><button type="button" data-local-pack-remove="${esc(pack.id)}">Remove pack</button>`;
   if(state==='browser-queuing')return'<button type="button" disabled>Sending to browser…</button>';
-  if(state==='browser-queued'){
-    const href=`/app/index.html?source=settings-ai-pack-import&pack=${encodeURIComponent(pack.id)}#cw-ai-pack-browser-title`;
-    return`<a href="${esc(href)}" target="_blank" rel="noopener">Import finished downloads</a><button type="button" data-local-pack-download="${esc(pack.id)}">Queue again</button><button type="button" data-local-pack-remove="${esc(pack.id)}">Clear pack</button>`;
-  }
+  if(state==='browser-importing')return'<button type="button" disabled>Importing files…</button>';
+  if(state==='browser-queued'||state==='browser-partial')return`<button type="button" data-local-pack-import="${esc(pack.id)}">Import finished downloads</button><button type="button" data-local-pack-download="${esc(pack.id)}">Queue again</button><button type="button" data-local-pack-remove="${esc(pack.id)}">Clear pack</button>`;
   if(['downloading','finalizing'].includes(state))return`<button type="button" data-local-pack-cancel="${esc(pack.id)}">Cancel</button>`;
   if(['paused','error','aborted'].includes(state))return`<button type="button" data-local-pack-download="${esc(pack.id)}">Resume pack</button><button type="button" data-local-pack-remove="${esc(pack.id)}">Clear pack</button>`;
   return`<button type="button" data-local-pack-download="${esc(pack.id)}">Download pack</button>`;
@@ -241,8 +242,20 @@ function dock(){
   return element;
 }
 
+function settingsVisible(){
+  const layer=document.getElementById(SETTINGS_LAYER_ID);
+  return Boolean(layer?.isConnected&&!layer.hidden);
+}
+function hideDock(){
+  const element=document.getElementById(DOCK_ID);
+  if(!element)return false;
+  element.hidden=true;
+  element.replaceChildren();
+  return true;
+}
 function renderDock(){
   if(!writable())return;
+  if(settingsVisible()){hideDock();return}
   installLocalStyle();
   const element=dock();
   if(!element)return;
@@ -263,9 +276,10 @@ function renderDock(){
 
 function localPanel(form){return form?.querySelector(`#${PANEL_ID}`)||null}
 
-function renderLocalModels(layerOrForm=document.getElementById('cw-settings-v320')){
+function renderLocalModels(layerOrForm=document.getElementById(SETTINGS_LAYER_ID)){
   if(!writable())return null;
   installLocalStyle();
+  hideDock();
   const form=layerOrForm?.matches?.('[data-cw-settings-form]')?layerOrForm:layerOrForm?.querySelector?.('[data-cw-settings-form]')||document.querySelector('[data-cw-settings-form]');
   if(!form?.isConnected)return null;
   const target=form.querySelector('[data-settings-tab-panel="local-models"]');
@@ -294,12 +308,11 @@ function renderLocalModels(layerOrForm=document.getElementById('cw-settings-v320
     return`<div class="cw-local-row${active?' cw-local-active':''}" data-model-id="${esc(model.id)}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.repo)} · ${fmt(model.estimatedBytes)} · ${esc(model.license)}${active?' · ACTIVE':''}</p><p class="cw-local-meta">Model window <b>${Number(model.contextWindowTokens||0).toLocaleString()} tokens</b> · Civweave working default <b>${Number(model.workingContextTokens||0).toLocaleString()}</b></p><p class="cw-local-meta">${healthCopy}</p>${statusMarkup(st,available)}</div><div class="cw-local-actions">${actions(model,st,available,active)}</div></div>`;
   }).join('');
   const preview=PREVIEW.map(model=>`<div class="cw-local-row"><div><b>${esc(model.label)} · preview</b><p>${esc(model.reason)}</p></div></div>`).join('');
-  panel.innerHTML=`<div><h3>AI Downloads</h3><p>Choose a complete hardware-tier pack or manage individual local models. This view reads only small saved-state records; opening it does not touch model caches, GPUs, service workers, or inference runtimes.</p></div><div class="cw-clean-note">Pack/model code loads only after an explicit Download, Resume, Use, Remove, Cancel, or Stop action. Large phone/server packs hand their large files to the browser download manager so Civweave does not need to remain open for the transfer.</div><div data-local-status role="status" class="${noticeError?'cw-local-error':''}">${esc(notice)}</div><div class="cw-pack-grid">${packCards}</div><div class="cw-local-divider"></div><details><summary><b>Individual models</b></summary><div style="display:grid;gap:8px;margin-top:10px">${rows}</div></details><details><summary>Preview models</summary><div style="display:grid;gap:8px;margin-top:10px">${preview}</div></details><div class="cw-local-actions"><button type="button" data-local-disable ${currentSelection.active?'':'hidden'}>Stop using downloaded AI</button></div>`;
+  panel.innerHTML=`<div><h3>AI Downloads</h3><p>Choose a complete hardware-tier pack or manage individual local models. This view reads only small saved-state records; opening it does not touch model caches, GPUs, service workers, or inference runtimes.</p></div><div class="cw-clean-note">Pack/model code loads only after an explicit Download, Resume, Use, Remove, Cancel, Stop, or Import action. Large phone/server pack imports stay inside this Settings surface instead of navigating to the whole-app downloads page.</div><div data-local-status role="status" class="${noticeError?'cw-local-error':''}">${esc(notice)}</div><div class="cw-pack-grid">${packCards}</div><div class="cw-local-divider"></div><details><summary><b>Individual models</b></summary><div style="display:grid;gap:8px;margin-top:10px">${rows}</div></details><details><summary>Preview models</summary><div style="display:grid;gap:8px;margin-top:10px">${preview}</div></details><div class="cw-local-actions"><button type="button" data-local-disable ${currentSelection.active?'':'hidden'}>Stop using downloaded AI</button></div>`;
   if(panel.dataset.cwLocalActionsBound!=='1'){
     panel.dataset.cwLocalActionsBound='1';
     panel.addEventListener('click',event=>void localAction(event,panel));
   }
-  renderDock();
   return panel;
 }
 
@@ -360,7 +373,7 @@ function foregroundDownload(model){
 async function localAction(event,panel){
   const button=event.target.closest('button');
   if(!button||!writable())return;
-  const packId=button.dataset.localPackDownload||button.dataset.localPackUse||button.dataset.localPackRemove||button.dataset.localPackCancel;
+  const packId=button.dataset.localPackDownload||button.dataset.localPackImport||button.dataset.localPackUse||button.dataset.localPackRemove||button.dataset.localPackCancel;
   const id=button.dataset.localDownload||button.dataset.localUse||button.dataset.localRemove||button.dataset.localCancel;
   if(!packId&&!id&&!button.hasAttribute('data-local-disable'))return;
   try{
@@ -377,7 +390,7 @@ async function localAction(event,panel){
         if(!browser?.queue)throw new Error('The browser AI pack download bridge did not become ready.');
         showLocal(`Sending ${pack.label} to the browser download manager…`);
         await browser.queue(packId,{onProgress:progress=>{if(progress?.message)showLocal(progress.message)}});
-        showLocal(`${pack.label} downloads are queued in the browser. Civweave can be closed while they finish; then choose Import finished downloads.`);
+        showLocal(`${pack.label} downloads are queued in the browser. Civweave can be closed while they finish; then import the completed files here in Settings.`);
       }else{
         showLocal(`Downloading ${pack.label}…`);
         await p.install(packId,{onProgress:progress=>{
@@ -386,6 +399,15 @@ async function localAction(event,panel){
         }});
         showLocal(`${pack.label} is downloaded and verified.`);
       }
+    }else if(button.hasAttribute('data-local-pack-import')){
+      const pack=p.byId(packId),browser=browserPackDownload();
+      if(!browser?.pickAndImport)throw new Error('The in-Settings model import picker did not become ready.');
+      showLocal(`Choose the completed ${pack.label} model file${browser.pending?.(packId)?.browserRemainingFiles===1?'':'s'} from Android Downloads.`);
+      const result=await browser.pickAndImport(packId,{onProgress:progress=>{if(progress?.message)showLocal(progress.message)}});
+      if(result?.cancelled)showLocal('Model import cancelled. Your existing downloaded and imported files were left unchanged.');
+      else if(result?.partial)showLocal(`Imported ${result.importedTotal||0} browser file${Number(result.importedTotal||0)===1?'':'s'}. ${result.missing?.length||0} file${Number(result.missing?.length||0)===1?' remains':'s remain'} to import.`);
+      else if(result?.available)showLocal(`${pack.label} browser files are imported and verified inside Civweave.`);
+      else showLocal(`${pack.label} import finished. Rechecking pack state…`);
     }else if(button.hasAttribute('data-local-pack-cancel')){
       await p.cancel(packId);
       showLocal(`${p.byId(packId).label} download paused.`);
@@ -469,6 +491,7 @@ function patch(form=document.querySelector('[data-cw-settings-form]')){
 function patchVisible(){
   const form=document.querySelector('[data-cw-settings-form]');
   if(form)patch(form);
+  if(settingsVisible())hideDock();
 }
 
 function rerenderVisible(){
@@ -497,6 +520,6 @@ globalThis.CivweaveSettingsLocalRouteV323=Object.freeze({
   localModelsViewDirect:true,lifecycleDependency:false,registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,
   serviceWorkerReadyOnView:false,hardwareProbeOnView:false,packRuntimeDependencyOnView:false,packCacheReadOnView:false,
   savedStateOnlyView:true,viewWritesState:false,actionModulesOnDemand:true,browserPackHandoff:true,legacyBrowserErrorRecovery:true,
-  hardLocalOnly:true,canonicalPath:'/app/settings-local-route-v325.js',compatibilityAlias:'/app/settings-local-route-v323.js'
+  importStaysInSettings:true,downloadDockOutsideSettingsOnly:true,hardLocalOnly:true,canonicalPath:'/app/settings-local-route-v325.js',compatibilityAlias:'/app/settings-local-route-v323.js'
 });
 })();
