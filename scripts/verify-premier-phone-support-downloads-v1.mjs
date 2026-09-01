@@ -46,10 +46,14 @@ has(phone,'presentationOwnership:false');
 has(phone,'runtimeOnly:true');
 lacks(phone,"document.addEventListener('click'");
 
-has(worker,'1.0.0-premier-phone-support-worker-v1');
+has(worker,'1.1.0-premier-phone-support-worker-v1-native-large-cache');
 has(worker,'civweave-specialized-model-packs-v1');
 has(worker,'mainThreadLargeCachePut:false');
 has(worker,'sequentialArtifacts:true');
+has(worker,'nativeLargeCachePut:true');
+has(worker,'NATIVE_CACHE_THRESHOLD=32*1024*1024');
+has(worker,'cache-storage-native');
+has(worker,'largeProgressIndeterminate:true');
 
 has(qwen,'1.0.0-premier-phone-qwen-download-v1');
 has(qwen,"const CACHE='civweave-model-generative-v266'");
@@ -122,4 +126,4 @@ for(const text of [retiredPack,retiredDeep,retiredActions]){
   lacks(text,'Gemma 4 E2B Q4F16 is the fast core');
 }
 
-console.log('Premier Phone internal support downloads, Qwen compatibility download ownership, and autodetection verified.');
+console.log('Premier Phone internal support downloads, native large-cache handoff, Qwen compatibility ownership, and autodetection verified.');
