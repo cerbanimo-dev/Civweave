@@ -109,11 +109,11 @@ function load(path,version,ready,label){
   });
 }
 function ensureDependencies(){
-  if(globalThis.CivweaveSelectedProviderAuthorityV1?.version===AUTHORITY_VERSION&&globalThis.CivweaveAssistantOutputSanitizerV1?.version===SANITIZER_VERSION){globalThis.CivweaveSelectedProviderAuthorityV1.install?.();globalThis.CivweaveAssistantOutputSanitizerV1.install?.();return Promise.resolve(true)}
+  if(globalThis.CivweaveSelectedProviderAuthorityV1?.version===AUTHORITY_VERSION&&globalThis.CivweaveAssistantOutputSanitizerV1?.version===SANITIZER_VERSION){globalThis.CivweaveSelectedProviderAuthorityV1.install?.();globalThis.CivweaveAssistantOutputSanitizerV1?.install?.();return Promise.resolve(true)}
   if(dependencyPromise)return dependencyPromise;
   dependencyPromise=load(AUTHORITY,AUTHORITY_VERSION,()=>globalThis.CivweaveSelectedProviderAuthorityV1?.version===AUTHORITY_VERSION,'selected provider authority')
     .then(()=>{globalThis.CivweaveSelectedProviderAuthorityV1?.install?.();return load(SANITIZER,SANITIZER_VERSION,()=>globalThis.CivweaveAssistantOutputSanitizerV1?.version===SANITIZER_VERSION,'assistant output sanitizer')})
-    .then(()=>{globalThis.CivweaveAssistantOutputSanitizerV1.install?.();patch();return true})
+    .then(()=>{globalThis.CivweaveAssistantOutputSanitizerV1?.install?.();patch();return true})
     .catch(error=>{try{console.warn('[Civweave] AI boundary guards did not attach:',error)}catch{};return false})
     .finally(()=>{dependencyPromise=null});
   return dependencyPromise;
