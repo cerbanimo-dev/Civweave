@@ -1,0 +1,45 @@
+name: Verify Moss Learning Journey Bridge
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
+      - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/unified-chat-system-v1.js'
+      - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
+      - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-moss-learning-journey-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check syntax
+        run: |
+          node --check public/app/install-boundary-v146.js
+          node --check public/app/unified-chat-system-v1.js
+          node --check scripts/verify-moss-learning-journey-bridge-v1.mjs
+      - name: Verify Moss learning goal routing and capability load order
+        run: node scripts/verify-moss-learning-journey-bridge-v1.mjs
