@@ -1,7 +1,9 @@
 'use strict';
 
-const VERSION='1.0.0-premier-phone-support-worker-v1';
+const VERSION='1.1.0-premier-phone-support-worker-v1-native-large-cache';
 const DEFAULT_CACHE='civweave-specialized-model-packs-v1';
+const NATIVE_CACHE_THRESHOLD=32*1024*1024;
+const HEARTBEAT_MS=5000;
 
 function post(type,detail={}){try{self.postMessage({type,version:VERSION,...detail})}catch{}}
 function safeBytes(value){return Math.max(0,Number(value)||0)}
@@ -13,6 +15,16 @@ async function existing(cache,url,minBytes){
   const bytes=safeBytes(response.headers.get('content-length'));
   if(bytes&&bytes<minBytes){await cache.delete(url);return null}
   return{response,bytes};
+}
+async function nativeCacheLarge(cache,url,response,component,path,index,totalArtifacts,total,minBytes){
+  post('progress',{componentId:component.id,label:component.label,artifact:path,index,totalArtifacts,loaded:0,total:0,expectedTotal:total,indeterminate:true,storageBackend:'cache-storage-native'});
+  const heartbeat=setInterval(()=>post('progress',{componentId:component.id,label:component.label,artifact:path,index,totalArtifacts,loaded:0,total:0,expectedTotal:total,indeterminate:true,storageBackend:'cache-storage-native'}),HEARTBEAT_MS);
+  try{await cache.put(url,response)}finally{clearInterval(heartbeat)}
+  const stored=await existing(cache,url,minBytes);
+  if(!stored)throw new Error(`${component.label||component.id} · ${path} finished transferring but was not readable from Civweave internal storage.`);
+  const bytes=stored.bytes||total;
+  post('progress',{componentId:component.id,label:component.label,artifact:path,index,totalArtifacts,loaded:bytes,total:bytes,storageBackend:'cache-storage-native'});
+  return bytes;
 }
 async function cacheArtifact(cache,component,artifact,index,totalArtifacts){
   const url=String(artifact?.url||'');
@@ -32,6 +44,7 @@ async function cacheArtifact(cache,component,artifact,index,totalArtifacts){
   const declared=safeBytes(response.headers.get('content-length'));
   if(declared&&declared<minBytes)throw new Error(`${component.label||component.id} · ${path} is smaller than its model manifest.`);
   const total=declared||expected;
+  if(total>=NATIVE_CACHE_THRESHOLD)return nativeCacheLarge(cache,url,response,component,path,index,totalArtifacts,total,minBytes);
   if(!response.body?.getReader){
     await cache.put(url,response);
     post('progress',{componentId:component.id,label:component.label,artifact:path,index,totalArtifacts,loaded:total,total});
@@ -74,4 +87,4 @@ self.addEventListener('message',event=>{
   void install(packet).catch(error=>post('error',{componentId:packet?.component?.id||'',label:packet?.component?.label||'',message:String(error?.message||error)}));
 });
 
-self.CivweavePremierPhoneSupportWorkerV1=Object.freeze({version:VERSION,cache:DEFAULT_CACHE,workerOnly:true,mainThreadLargeCachePut:false,sequentialArtifacts:true});
+self.CivweavePremierPhoneSupportWorkerV1=Object.freeze({version:VERSION,cache:DEFAULT_CACHE,workerOnly:true,mainThreadLargeCachePut:false,sequentialArtifacts:true,nativeLargeCachePut:true,nativeLargeCacheThreshold:NATIVE_CACHE_THRESHOLD,largeProgressIndeterminate:true});
