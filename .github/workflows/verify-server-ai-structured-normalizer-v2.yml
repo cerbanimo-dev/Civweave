@@ -1,0 +1,34 @@
+name: Verify Server AI Structured Normalizer
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'scripts/verify-server-ai-structured-normalizer-v2.mjs'
+      - '.github/workflows/verify-server-ai-structured-normalizer-v2.yml'
+  pull_request:
+    paths:
+      - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'scripts/verify-server-ai-structured-normalizer-v2.mjs'
+      - '.github/workflows/verify-server-ai-structured-normalizer-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check syntax
+        run: |
+          node --check public/app/server-ai-output-normalizer-v1.js
+          node --check scripts/verify-server-ai-structured-normalizer-v2.mjs
+      - name: Verify overwrite-proof structured recovery
+        run: node scripts/verify-server-ai-structured-normalizer-v2.mjs
