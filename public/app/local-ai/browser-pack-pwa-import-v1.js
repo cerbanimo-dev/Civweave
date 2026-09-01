@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.3.1-browser-pack-pwa-import-v1-gemma-only-support-handoff';
+const VERSION='1.3.2-browser-pack-pwa-import-v1-premier-incremental-handoff';
 const BRIDGE_SRC='/app/local-ai/browser-pack-download-v1.js?v=1.3.0-progress-and-final-match';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
@@ -83,17 +83,26 @@ function applyProgress(packId,progress){
   }
   scheduleSync();
 }
+async function settleCurrentPremierOwner(owner){
+  if(!owner?.currentPhoneAuthority||!owner?.downloadSupportFiles)throw new Error('The current Premier Phone setup controls did not become ready.');
+  try{await owner.synchronizeImportedModels?.()}catch(error){console.warn('[Civweave] Premier Phone imported-model settlement deferred.',error)}
+  const summary=owner.pendingSummary?.();
+  if(summary?.complete){
+    try{await owner.refreshSupportStatus?.({autoReconcile:true})}catch(error){console.warn('[Civweave] Premier Phone support settlement deferred.',error)}
+  }
+  owner.scheduleDecorate?.();
+  return owner;
+}
 function ensureCurrentPremierOwner(){
   const current=currentOwner();
-  if(current?.currentPhoneAuthority&&current?.downloadSupportFiles)return Promise.resolve(current);
+  if(current?.currentPhoneAuthority&&current?.downloadSupportFiles)return settleCurrentPremierOwner(current);
   if(ownerFlight)return ownerFlight;
   const controller=settingsController();
   if(!controller?.ensureGemma4Pack)return Promise.reject(new Error('The current Premier Phone setup controller is unavailable. Close and reopen Civweave, then try again.'));
   ownerFlight=Promise.resolve(controller.ensureGemma4Pack()).then(ok=>{
     const next=currentOwner();
     if(!ok||!next?.currentPhoneAuthority||!next?.downloadSupportFiles)throw new Error('The current Premier Phone setup controls did not become ready.');
-    next.scheduleDecorate?.();
-    return next;
+    return settleCurrentPremierOwner(next);
   }).finally(()=>{ownerFlight=null});
   return ownerFlight;
 }
@@ -106,9 +115,9 @@ function ensureImportInput(packId){
     ensureBridge().then(current=>current.importFiles(packId,files,{onProgress:progress=>applyProgress(packId,progress)})).then(async result=>{
       const receipt=bridge()?.pending?.(packId),counts=browserCounts(packId,receipt),missing=missingBrowserRecords(packId,receipt);
       if(packId!==PREMIER&&result?.available){importProgress.delete(packId);status(`${result.pack.label} is installed in Civweave local storage.`)}
-      else if(missing.length){importProgress.delete(packId);status(`Imported ${counts.imported}/${counts.expected} browser-managed file${counts.expected===1?'':'s'}. Still missing ${missing[0].label} · ${missing[0].basename}.`)}
+      else if(missing.length){importProgress.delete(packId);status(`Imported ${counts.imported}/${counts.expected} browser-managed file${counts.expected===1?'':'s'}. Still missing ${missing[0].label} · ${missing[0].basename}. Import downloaded files remains available for the next model.`)}
       if(packId===PREMIER&&(counts.imported>0||counts.expected&&counts.imported===counts.expected)){
-        status('Checking existing Gemma imports and Civweave internal support storage…');
+        status(counts.remainingToImport?'Keeping the remaining Gemma import available…':'Checking existing Gemma imports and Civweave internal support storage…');
         await ensureCurrentPremierOwner().catch(error=>status(String(error?.message||error),true));
       }
       scheduleSync();
@@ -149,7 +158,7 @@ function normalizeBaseStatus(card,state){
     }
   }
 }
-function currentOwnerActive(card){const owner=currentOwner();return Boolean(card?.dataset?.gemma4CurrentPhoneOwner||owner?.currentPhoneAuthority&&owner?.singlePresentationOwner)}
+function currentOwnerActive(){const owner=currentOwner(),summary=owner?.pendingSummary?.();return Boolean(owner?.currentPhoneAuthority&&owner?.singlePresentationOwner&&summary?.complete)}
 function syncCards(){
   syncQueued=false;installStyle();const current=bridge();
   if(!current?.streamingImportProgress)return;
@@ -163,7 +172,7 @@ function syncCards(){
     const counts=browserCounts(packId,receipt),complete=counts.expected>0&&counts.imported===counts.expected;
     if(packId===PREMIER&&complete){
       delete actions.dataset.cwBrowserSignature;
-      if(currentOwnerActive(card))continue;
+      if(currentOwnerActive()){currentOwner()?.scheduleDecorate?.();continue}
       const html='<button type="button" data-cw-premier-phone-finish>Finish Premier Phone setup</button><button type="button" data-local-pack-remove="premier-phone">Clear pack</button>';
       if(actions.innerHTML!==html)actions.innerHTML=html;
       continue;
@@ -200,5 +209,5 @@ addEventListener('civweave:settings-opened',scheduleSync);
 for(const name of ['civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-pack-removed','civweave:local-model-downloaded','civweave:gemma4-support-progress'])addEventListener(name,scheduleSync);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 
-globalThis.CivweaveBrowserPackPwaImportV1=Object.freeze({version:VERSION,ensureBridge,syncCards,scheduleSync,ensureImportInput,ensureCurrentPremierOwner,browserRecords,browserCounts,missingBrowserRecords,explicitBrowserFiles:true,progressUi:true,missingFileRecovery:true,eventDriven:true,mutationObserver:false,passiveBridgeLoad:false,currentPremierOwnerHandoff:true,completedPremierActionsRelinquished:true,premierGemmaOnly:true,supportFilesInternal:true});
+globalThis.CivweaveBrowserPackPwaImportV1=Object.freeze({version:VERSION,ensureBridge,syncCards,scheduleSync,ensureImportInput,ensureCurrentPremierOwner,browserRecords,browserCounts,missingBrowserRecords,explicitBrowserFiles:true,progressUi:true,missingFileRecovery:true,eventDriven:true,mutationObserver:false,passiveBridgeLoad:false,currentPremierOwnerHandoff:true,completedPremierActionsRelinquished:true,premierGemmaOnly:true,supportFilesInternal:true,incrementalPremierImport:true,ownerSettlementOnEveryImport:true,ownerRequiresCompletedGemmaReceipt:true});
 })();
