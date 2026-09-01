@@ -1,16 +1,17 @@
 (()=>{
 'use strict';
-const VERSION='1.1.3-server-ai-output-normalizer-v1-structured-envelope-r4';
-const MIDDLEWARE_ID='server-auto-v301';
+const VERSION='1.2.0-server-ai-output-normalizer-v1-after-hook-repair';
+const SERVER_MIDDLEWARE_ID='server-auto-v301';
+const NORMALIZER_MIDDLEWARE_ID='server-ai-output-normalizer-v1';
 const AUTHORITY='/app/selected-provider-authority-v1.js';
 const AUTHORITY_VERSION='1.1.0-selected-provider-authority-v1-all-routes';
 const SANITIZER='/app/assistant-output-sanitizer-v1.js';
 const SANITIZER_VERSION='1.0.1-assistant-output-sanitizer-v1-wrapper-resilient';
 if(globalThis.CivweaveServerAIOutputNormalizerV1?.version===VERSION)return;
-let patchedHandle=null,timer=0,dependencyPromise=null;
+let registeredAfter=false,timer=0,dependencyPromise=null;
 const clean=(value,max=5000000)=>String(value??'').trim().slice(0,max);
 function completionText(value,depth=0){
-  if(depth>5||value==null)return'';
+  if(depth>6||value==null)return'';
   if(typeof value==='string'){
     const text=value.trim();
     if(!text)return'';
@@ -19,19 +20,23 @@ function completionText(value,depth=0){
   }
   if(typeof value!=='object')return'';
   const message=value?.choices?.[0]?.message;
+  if(message?.parsed&&typeof message.parsed==='object'){try{return JSON.stringify(message.parsed)}catch{}}
   if(typeof message?.content==='string'&&message.content.trim())return message.content.trim();
   if(Array.isArray(message?.content)){
     const text=message.content.map(part=>typeof part==='string'?part:part?.text||part?.content||'').filter(Boolean).join('');
     if(text.trim())return text.trim();
   }
   if(typeof value?.choices?.[0]?.text==='string'&&value.choices[0].text.trim())return value.choices[0].text.trim();
-  for(const candidate of [value.outputText,value.text,value.response,value.output,value.result,value.data]){
+  for(const candidate of [value.outputJson,value.outputText,value.text,value.response,value.output,value.result,value.data]){
+    if(candidate&&typeof candidate==='object'&&!Array.isArray(candidate)){
+      try{const encoded=JSON.stringify(candidate);if(encoded&&encoded!=='{}')return encoded}catch{}
+    }
     const nested=completionText(candidate,depth+1);if(nested)return nested;
   }
   return'';
 }
 function firstBalancedJson(value){
-  const source=clean(value).replace(/^```(?:json|javascript|js)?\s*/i,'').replace(/\s*```$/,'').trim();
+  const source=clean(value).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/^```(?:json|javascript|js)?\s*/i,'').replace(/\s*```$/,'').trim();
   for(let start=0;start<source.length;start+=1){
     const opener=source[start];
     if(opener!=='{'&&opener!=='[')continue;
@@ -84,20 +89,64 @@ function normalizePacket(packet){
   if(packet.status||Object.hasOwn(packet,'outputText'))return normalizeModelResult(packet);
   return packet;
 }
-function register(handle){
-  try{const spine=globalThis.CivweaveFastInteractiveV192;if(typeof spine?.register==='function'){spine.register(MIDDLEWARE_ID,{handle},60);return true}}catch{}
-  return false;
+function serverStructuredRequest(request={}){
+  const provider=clean(request?.config?.provider||request?.config?.route,80).toLowerCase();
+  return ['server-auto','cloudflare-workers-ai','workers-ai','cloudflare'].includes(provider)&&Boolean(request.schema||request.responseSchema||request.responseFormat==='json');
+}
+function repairMessages(request,result){
+  const rows=Array.isArray(request.messages)?request.messages.slice(-48):[];
+  return[
+    ...rows,
+    {role:'assistant',content:clean(result?.outputText,24000)},
+    {role:'user',content:'The preceding response did not satisfy the required JSON contract. Return only one corrected JSON object matching the supplied response schema. Do not include markdown, commentary, reasoning, or code fences.'}
+  ];
+}
+function aggregateUsage(first={},second={}){
+  const sum=key=>(Number(first?.[key])||0)+(Number(second?.[key])||0);
+  return{
+    ...first,...second,
+    inputTokens:sum('inputTokens'),outputTokens:sum('outputTokens'),totalTokens:sum('totalTokens'),costCents:sum('costCents'),chargedNeurons:sum('chargedNeurons'),
+    remainingCents:second?.remainingCents??first?.remainingCents,
+    remainingNeurons:second?.remainingNeurons??first?.remainingNeurons,
+    approximateTurnsLeft:second?.approximateTurnsLeft??first?.approximateTurnsLeft
+  };
+}
+async function normalizeAfter(result,request={}){
+  if(!serverStructuredRequest(request))return result;
+  const normalized=normalizeModelResult(result);
+  if(normalized?.status!=='invalid-response'||request.__cwServerAIStructuredRepair===true||Number(request.maxRepairAttempts)===0)return normalized;
+  const router=globalThis.CivweaveServerAIRouterV301,rawHandle=router?.handle?.__prior||router?.handle;
+  if(typeof rawHandle!=='function')return normalized;
+  try{
+    const repairRequest={...request,requestId:`${clean(request.requestId,150)||'server-auto'}:structured-repair-1`,messages:repairMessages(request,normalized),responseFormat:'json',maxRepairAttempts:0,__cwServerAIStructuredRepair:true,config:{...(request.config||{}),stream:false}};
+    const packet=await rawHandle(repairRequest),repairedPacket=normalizePacket(packet),repaired=repairPacketResult(repairedPacket);
+    if(repaired&&['success','fallback'].includes(repaired.status)&&repaired.outputJson&&typeof repaired.outputJson==='object'){
+      return{
+        ...repaired,
+        usage:aggregateUsage(normalized.usage||{},repaired.usage||{}),
+        structured:{...(repaired.structured||{}),requested:true,valid:true,repairAttempts:Math.max(1,Number(repaired?.structured?.repairAttempts)||0)},
+        diagnostics:[...(normalized.diagnostics||[]),...(repaired.diagnostics||[]),{code:'WORKERS_AI_STRUCTURED_OUTPUT_REPAIRED',message:'Civweave retried the same selected server AI once and recovered valid structured JSON.'}]
+      };
+    }
+  }catch(error){
+    return{...normalized,diagnostics:[...(normalized.diagnostics||[]),{code:'WORKERS_AI_STRUCTURED_REPAIR_FAILED',message:clean(error?.message||error,900)}]};
+  }
+  return normalized;
+}
+function repairPacketResult(packet){return packet?.result&&typeof packet.result==='object'?packet.result:packet}
+function registerAfter(){
+  try{
+    const spine=globalThis.CivweaveFastInteractiveV192;
+    if(typeof spine?.register!=='function')return false;
+    spine.register(NORMALIZER_MIDDLEWARE_ID,{after:normalizeAfter},61);
+    registeredAfter=true;
+    return true;
+  }catch{return false}
 }
 function patch(){
-  const api=globalThis.CivweaveServerAIRouterV301,current=api?.handle;if(!api||typeof current!=='function')return false;
-  if(current.__cwServerAIOutputNormalizerV1===VERSION){patchedHandle=current;register(current);return true}
-  const previous=current.bind(api),handle=async request=>normalizePacket(await previous(request||{}));
-  handle.__cwServerAIOutputNormalizerV1=VERSION;handle.__prior=current;
-  const next=Object.freeze({...api,handle,register:()=>register(handle),outputEnvelopeNormalization:true,outputNormalizerVersion:VERSION});
-  try{globalThis.CivweaveServerAIRouterV301=next}catch{return false}
-  patchedHandle=handle;register(handle);
-  try{dispatchEvent(new CustomEvent('civweave:server-ai-output-normalizer-ready',{detail:{version:VERSION,middleware:MIDDLEWARE_ID,openAICompletionEnvelope:true,structuredJsonRecovery:true,reasoningVisible:false,selectedProviderAuthority:true,finalAssistantSanitizer:true}}))}catch{}
-  return true;
+  const ready=registerAfter();
+  if(ready)try{dispatchEvent(new CustomEvent('civweave:server-ai-output-normalizer-ready',{detail:{version:VERSION,middleware:NORMALIZER_MIDDLEWARE_ID,serverMiddleware:SERVER_MIDDLEWARE_ID,registration:'independent-after-hook',overwriteProof:true,structuredRepairAttempts:1,openAICompletionEnvelope:true,structuredJsonRecovery:true,reasoningVisible:false,selectedProviderAuthority:true,finalAssistantSanitizer:true}}))}catch{}
+  return ready;
 }
 function find(path){return[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}})}
 function load(path,version,ready,label){
@@ -119,7 +168,7 @@ function ensureDependencies(){
   return dependencyPromise;
 }
 function install(){patch();void ensureDependencies();return true}
-for(const name of ['civweave:server-ai-router-ready','civweave:runtime-spine-ready','civweave:model-runtime-ready','civweave:assistant-runtime-ready','civweave:model-config-changed','civweave:guide-loader-reset','civweave:guide-provider-policy-runtime','civweave:guide-provider-policy-assistant','pageshow'])addEventListener(name,()=>queueMicrotask(install));
+for(const name of ['civweave:server-ai-router-ready','civweave:runtime-spine-ready','civweave:model-runtime-ready','civweave:assistant-runtime-ready','civweave:model-config-changed','civweave:guide-loader-reset','civweave:guide-provider-policy-runtime','civweave:guide-provider-policy-assistant','civweave:mobile-guild-attached','civweave:mobile-guild-fabric-refreshed','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
-globalThis.CivweaveServerAIOutputNormalizerV1=Object.freeze({version:VERSION,patch,install,ensureDependencies,completionText,firstBalancedJson,structuredJson,normalizeModelResult,normalizePacket,state:()=>({installed:Boolean(patchedHandle),middleware:MIDDLEWARE_ID,authority:Boolean(globalThis.CivweaveSelectedProviderAuthorityV1),sanitizer:Boolean(globalThis.CivweaveAssistantOutputSanitizerV1)}),reasoningVisible:false,structuredJsonRecovery:true,selectedProviderAuthority:true,finalAssistantSanitizer:true});
+globalThis.CivweaveServerAIOutputNormalizerV1=Object.freeze({version:VERSION,patch,install,ensureDependencies,completionText,firstBalancedJson,structuredJson,normalizeModelResult,normalizePacket,normalizeAfter,registerAfter,state:()=>({installed:registeredAfter,middleware:NORMALIZER_MIDDLEWARE_ID,serverMiddleware:SERVER_MIDDLEWARE_ID,registration:'independent-after-hook',overwriteProof:true,structuredRepairAttempts:1,authority:Boolean(globalThis.CivweaveSelectedProviderAuthorityV1),sanitizer:Boolean(globalThis.CivweaveAssistantOutputSanitizerV1)}),reasoningVisible:false,structuredJsonRecovery:true,structuredRepairAttempts:1,overwriteProof:true,selectedProviderAuthority:true,finalAssistantSanitizer:true});
 })();
