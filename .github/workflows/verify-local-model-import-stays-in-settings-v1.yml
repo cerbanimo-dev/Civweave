@@ -1,0 +1,32 @@
+name: Verify Local Model Import Stays in Settings
+
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - public/app/settings-local-route-v331.js
+      - scripts/verify-local-model-import-stays-in-settings-v1.mjs
+      - .github/workflows/verify-local-model-import-stays-in-settings-v1.yml
+  push:
+    branches: [staging]
+    paths:
+      - public/app/settings-local-route-v331.js
+      - scripts/verify-local-model-import-stays-in-settings-v1.mjs
+      - .github/workflows/verify-local-model-import-stays-in-settings-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Parse action route
+        run: node --check public/app/settings-local-route-v331.js
+      - name: Verify import stays in Settings
+        run: node scripts/verify-local-model-import-stays-in-settings-v1.mjs
