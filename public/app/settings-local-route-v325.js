@@ -6,18 +6,21 @@
 // service worker is still controlling the page and serving the v324 Settings
 // gateway. Displaying saved state never waits on the model manager, caches,
 // service-worker readiness, GPU detection, or inference code.
-const VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
-const REVISION='settings-v325-parent-source-recovery-v1';
+const VERSION='1.1.4-settings-local-route-v326-stable-local-actions';
+const REVISION='settings-v325-parent-source-recovery-v3-stable-actions-card-progress';
 const ROUTE='downloaded-local';
 const LAYER_ID='cw-settings-v320';
-const DIRECT_SRC='/app/settings-local-models-direct-v325.js?v=settings-v325-parent-source-recovery-v1';
+const DIRECT_VERSION='1.1.0-settings-v325-direct-local-models-stable-actions';
+const DIRECT_SRC='/app/settings-local-models-direct-v325.js?v=1.1.0-stable-in-place-actions';
 const FULL_ROUTE='/app/settings-local-route-v327.js?v=1.1.4-settings-local-route-v325-parent-bridge';
 const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=settings-v325-parent-action-v1';
+const STATUS_PLACEMENT_VERSION='1.0.1-settings-local-progress-card-owned-direct-aware';
+const STATUS_PLACEMENT_SRC='/app/settings-local-progress-placement-v1.js?v=1.0.1-settings-local-progress-card-owned-direct-aware';
 const PANEL_ID='cw-local-ai-v325-parent';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
-let directPromise=null,fullPromise=null,actionPromise=null;
+let directPromise=null,fullPromise=null,actionPromise=null,placementPromise=null;
 let BRIDGE=null;
 
 const parse=(value,fallback={})=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -54,7 +57,29 @@ function immediateMarkup(target){
   target.innerHTML=`<section id="${PANEL_ID}" class="cw-clean-panel" data-cw-v325-parent-recovery><div><h3>AI Downloads</h3><p>Saved local AI state is available immediately. Full controls are attaching from the v325 direct renderer.</p></div><div class="cw-clean-note"><b>Saved local state loaded.</b><br>${readyPacks} ready pack${readyPacks===1?'':'s'} · ${readyModels} ready model${readyModels===1?'':'s'}${current.active&&current.id?` · active: ${esc(current.id)}`:''}</div><p data-cw-v325-parent-status>Loading Local models controls…</p><button type="button" data-cw-v325-parent-retry>Retry Local models controls</button></section>`;
   target.querySelector?.('[data-cw-v325-parent-retry]')?.addEventListener?.('click',()=>{directPromise=null;void ensureDirect(layerFrom(target),true)});
 }
-function directApi(){return globalThis.CivweaveSettingsLocalDirectV325}
+function directApi(){const api=globalThis.CivweaveSettingsLocalDirectV325;return api?.version===DIRECT_VERSION?api:null}
+function ensureProgressPlacement(){
+  const existing=globalThis.CivweaveSettingsLocalProgressPlacementV1;
+  if(existing?.version===STATUS_PLACEMENT_VERSION&&existing?.localize){existing.schedule?.([0,80,250]);return Promise.resolve(existing)}
+  if(placementPromise)return placementPromise;
+  placementPromise=new Promise((resolve,reject)=>{
+    const path=new URL(STATUS_PLACEMENT_SRC,location.href).pathname;
+    let script=[...document.scripts].find(node=>{try{return new URL(node.src,location.href).pathname===path}catch{return false}});
+    const ready=()=>{const api=globalThis.CivweaveSettingsLocalProgressPlacementV1;if(api?.version===STATUS_PLACEMENT_VERSION&&api?.localize){api.schedule?.([0,80,250]);resolve(api);return}reject(new Error('Local AI progress placement loaded without becoming current.'))};
+    if(script&&globalThis.CivweaveSettingsLocalProgressPlacementV1?.version!==STATUS_PLACEMENT_VERSION){try{script.remove()}catch{}script=null}
+    if(script){
+      if(globalThis.CivweaveSettingsLocalProgressPlacementV1?.version===STATUS_PLACEMENT_VERSION&&globalThis.CivweaveSettingsLocalProgressPlacementV1?.localize){ready();return}
+      script.addEventListener('load',ready,{once:true});
+      script.addEventListener('error',()=>reject(new Error('Local AI progress placement could not load.')),{once:true});
+      return;
+    }
+    script=document.createElement('script');script.src=`${STATUS_PLACEMENT_SRC}&cwFresh=${Date.now()}`;script.async=false;script.dataset.civweaveLocalProgressPlacement='v1';
+    script.onload=ready;script.onerror=()=>reject(new Error('Local AI progress placement could not load.'));
+    if(!document.head?.isConnected){reject(new Error('Local AI progress placement could not mount because the document is leaving.'));return}
+    document.head.append(script);
+  }).finally(()=>{placementPromise=null});
+  return placementPromise;
+}
 function ensureFullFallback(layer=document.getElementById(LAYER_ID)){
   const active=globalThis.CivweaveSettingsLocalRouteV323;
   if(active&&active!==BRIDGE&&active?.renderLocalModels&&active?.loaderBridge!==true)return Promise.resolve(active);
@@ -62,7 +87,7 @@ function ensureFullFallback(layer=document.getElementById(LAYER_ID)){
   fullPromise=new Promise((resolve,reject)=>{
     try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}
     const script=document.createElement('script');script.src=FULL_ROUTE;script.async=false;script.dataset.civweaveLocalSettingsBridge='v325-to-v327';
-    script.onload=()=>{const api=globalThis.CivweaveSettingsLocalRouteV323;if(api&&api!==BRIDGE&&api?.renderLocalModels){if(layer?.isConnected&&!layer.hidden)api.renderLocalModels(layer);resolve(api);return}restoreBridge();reject(new Error('Fresh Local models implementation loaded without becoming ready.'))};
+    script.onload=()=>{const api=globalThis.CivweaveSettingsLocalRouteV323;if(api&&api!==BRIDGE&&api?.renderLocalModels){if(layer?.isConnected&&!layer.hidden)api.renderLocalModels(layer);void ensureProgressPlacement().catch(()=>{});resolve(api);return}restoreBridge();reject(new Error('Fresh Local models implementation loaded without becoming ready.'))};
     script.onerror=()=>{restoreBridge();reject(new Error('Fresh Local models implementation could not load.'))};
     if(!document.head?.isConnected){restoreBridge();reject(new Error('Fresh Local models implementation could not mount because the document is leaving.'));return}
     document.head.append(script);
@@ -71,15 +96,17 @@ function ensureFullFallback(layer=document.getElementById(LAYER_ID)){
 }
 function ensureDirect(layer=document.getElementById(LAYER_ID),force=false){
   const existing=directApi();
-  if(existing?.render){if(layer?.isConnected&&!layer.hidden)existing.render(layer);return Promise.resolve(existing)}
+  if(existing?.render&&!force){if(layer?.isConnected&&!layer.hidden)existing.render(layer);void ensureProgressPlacement().catch(()=>{});return Promise.resolve(existing)}
   if(directPromise&&!force)return directPromise;
   directPromise=new Promise((resolve,reject)=>{
     let script=[...document.scripts].find(node=>{try{return new URL(node.src,location.href).pathname==='/app/settings-local-models-direct-v325.js'}catch{return false}});
+    if(script&&globalThis.CivweaveSettingsLocalDirectV325?.version!==DIRECT_VERSION){try{script.remove()}catch{}script=null}
     const ready=()=>{
       const api=directApi();
-      if(!api?.render){reject(new Error('The v325 direct Local models renderer loaded without becoming ready.'));return}
+      if(!api?.render){reject(new Error('The current v325 direct Local models renderer loaded without becoming ready.'));return}
       updateHeader(layer);
       if(layer?.isConnected&&!layer.hidden)api.render(layer);
+      void ensureProgressPlacement().catch(()=>{});
       resolve(api);
     };
     if(script){
@@ -88,7 +115,7 @@ function ensureDirect(layer=document.getElementById(LAYER_ID),force=false){
       script.addEventListener('error',()=>reject(new Error('The v325 direct Local models renderer could not load.')),{once:true});
       return;
     }
-    script=document.createElement('script');script.src=DIRECT_SRC;script.async=false;script.dataset.civweaveSettingsV325ParentRecovery='v1';
+    script=document.createElement('script');script.src=`${DIRECT_SRC}&cwFresh=${Date.now()}`;script.async=false;script.dataset.civweaveSettingsV325ParentRecovery='v1';
     script.onload=ready;script.onerror=()=>reject(new Error('The v325 direct Local models renderer could not load.'));
     if(!document.head?.isConnected){reject(new Error('The v325 direct Local models renderer could not mount because the document is leaving.'));return}
     document.head.append(script);
@@ -102,9 +129,9 @@ function ensureDirect(layer=document.getElementById(LAYER_ID),force=false){
 }
 function renderLocalModels(layerOrForm=document.getElementById(LAYER_ID)){
   const form=formFrom(layerOrForm);if(!form?.isConnected)return null;
-  const layer=layerFrom(layerOrForm)||document.getElementById(LAYER_ID);updateHeader(layer);ensureRouteOption(form);
+  const layer=layerFrom(layerOrForm)||document.getElementById(LAYER_ID);updateHeader(layer);ensureRouteOption(form);void ensureProgressPlacement().catch(()=>{});
   const target=form.querySelector('[data-settings-tab-panel="local-models"]');if(!target?.isConnected)return null;
-  const direct=directApi();if(direct?.render){direct.render(layer);return target.querySelector?.('[data-cw-direct-local-panel]')||target}
+  const direct=directApi();if(direct?.render){direct.render(layer);globalThis.CivweaveSettingsLocalProgressPlacementV1?.schedule?.([0,80,250]);return target.querySelector?.('[data-cw-direct-local-panel]')||target}
   immediateMarkup(target);
   void ensureDirect(layer,false).catch(()=>{});
   return target.querySelector?.(`#${PANEL_ID}`)||target;
@@ -117,28 +144,31 @@ function patch(form=document.querySelector('[data-cw-settings-form]')){
 }
 function persistLocalRoute(){return null}
 function ensureActionModules(){
+  const direct=directApi();if(direct?.ensureActions)return direct.ensureActions();
   const current=globalThis.CivweaveSettingsLocalRouteV323;
   if(current&&current!==BRIDGE&&current?.actionModulesOnDemand===true&&current?.loaderBridge!==true)return current.ensureActionModules?.()??Promise.resolve(true);
   if(actionPromise)return actionPromise;
   actionPromise=new Promise((resolve,reject)=>{
     try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}
     const script=document.createElement('script');script.src=ACTION_ROUTE;script.async=false;script.dataset.civweaveExplicitLocalModelAction='v325-parent';
-    script.onload=()=>{const api=globalThis.CivweaveSettingsLocalRouteV323;if(api&&api!==BRIDGE&&api?.ensureActionModules)return Promise.resolve(api.ensureActionModules()).then(resolve,reject);restoreBridge();reject(new Error('Local model action route loaded without becoming ready.'))};
+    script.onload=()=>{const api=globalThis.CivweaveSettingsLocalRouteV323;if(api&&api!==BRIDGE&&api?.ensureActionModules){void ensureProgressPlacement().catch(()=>{});return Promise.resolve(api.ensureActionModules()).then(resolve,reject)}restoreBridge();reject(new Error('Local model action route loaded without becoming ready.'))};
     script.onerror=()=>{restoreBridge();reject(new Error('Local model action route could not load.'))};
     if(!document.head?.isConnected){restoreBridge();reject(new Error('Local model action route could not mount because the document is leaving.'));return}
     document.head.append(script);
   }).finally(()=>{actionPromise=null});
   return actionPromise;
 }
-function onSettingsOpened(){const layer=document.getElementById(LAYER_ID);if(!layer)return;updateHeader(layer);patch(layer.querySelector('[data-cw-settings-form]'))}
+function onSettingsOpened(){const layer=document.getElementById(LAYER_ID);if(!layer)return;updateHeader(layer);void ensureProgressPlacement().catch(()=>{});patch(layer.querySelector('[data-cw-settings-form]'))}
 
 BRIDGE=Object.freeze({
-  version:VERSION,revision:REVISION,route:ROUTE,patch,selection,selectedLabel,persistLocalRoute,renderLocalModels,ensureDirect,ensureFullFallback,ensureActionModules,
+  version:VERSION,revision:REVISION,route:ROUTE,patch,selection,selectedLabel,persistLocalRoute,renderLocalModels,ensureDirect,ensureFullFallback,ensureActionModules,ensureProgressPlacement,
   catalogue:Object.freeze([]),packCatalogue:Object.freeze([]),settingsPresentationOwnership:false,inputOwnership:false,
   managerDependency:false,runtimeDependency:false,cacheDependency:false,localModelsViewDirect:true,lifecycleDependency:false,
   registryDependencyOnView:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,
   packRuntimeDependencyOnView:false,packCacheReadOnView:false,savedStateOnlyView:true,viewWritesState:false,actionModulesOnDemand:true,
   browserPackHandoff:true,legacyBrowserErrorRecovery:true,hardLocalOnly:true,loaderBridge:true,staleWorkerSourceRecovery:true,
+  cardOwnedProgress:true,directCardProgress:true,globalProgressBanner:false,progressPlacementPath:STATUS_PLACEMENT_SRC,
+  stableInPlaceActions:true,directVersion:DIRECT_VERSION,
   visibleSettingsVersion:'v325',canonicalPath:'/app/settings-local-route-v325.js',directRendererPath:DIRECT_SRC,
   freshImplementationPath:'/app/settings-local-route-v327.js',actionPath:ACTION_ROUTE,compatibilityAlias:'/app/settings-local-route-v323.js'
 });

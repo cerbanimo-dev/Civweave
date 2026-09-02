@@ -12,6 +12,7 @@ const qwen=read('public/app/local-ai/premier-phone-qwen-download-v1.js');
 const importer=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
 const inference=read('public/app/local-ai/gemma4-inference-repair-v1.js');
 const controller=read('public/app/model-settings-controller-v173.js');
+const finalizer=read('public/app/local-ai/premier-phone-finalizer-v1.js');
 const takeover=read('public/service-worker-gemma4-current-phone-v1.js');
 const registeredWorker=read('public/service-worker-v203.js');
 const retiredPack=read('public/app/local-ai/gemma4-pack-extension-v1.js');
@@ -63,7 +64,7 @@ has(qwen,'autoDetect:true');
 has(qwen,'if(!existing?.start||!existing?.status)globalThis.CivweaveLocalModelDownloadV266=api');
 lacks(qwen,"download-manager-v267.js");
 
-has(importer,'1.3.1-browser-pack-pwa-import-v1-gemma-only-support-handoff');
+has(importer,'1.3.2-browser-pack-pwa-import-v1-premier-incremental-handoff');
 has(importer,"const PREMIER_BROWSER_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web'])");
 has(importer,'browserRecords');
 has(importer,'missingBrowserRecords');
@@ -78,7 +79,10 @@ has(importer,'completedPremierActionsRelinquished:true');
 has(importer,'passiveBridgeLoad:false');
 has(importer,'mutationObserver:false');
 has(importer,'if(!current?.streamingImportProgress)return;');
-has(importer,'if(currentOwnerActive(card))continue;');
+has(importer,"if(currentOwnerActive()){currentOwner()?.scheduleDecorate?.();continue}");
+has(importer,'incrementalPremierImport:true');
+has(importer,'ownerSettlementOnEveryImport:true');
+has(importer,'ownerRequiresCompletedGemmaReceipt:true');
 lacks(importer,'new MutationObserver');
 lacks(importer,'observer.observe');
 
@@ -86,11 +90,15 @@ has(inference,'1.0.11-gemma4-inference-repair-v1-current-phone-authority');
 has(inference,"PHONE_AUTH_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status'");
 has(inference,'phoneAuthorityRuntimeOnly:true');
 
-has(controller,'1.0.27-model-settings-controller-v173-passive-gemma-qwen-internal');
+has(controller,'1.0.28-model-settings-controller-v173-premier-phone-finalizer');
 has(controller,'1.0.0-premier-phone-qwen-download-v1');
 has(controller,'premier-phone-qwen-download-v1.js?v=1.0.0-qwen-internal');
+has(controller,'1.0.0-premier-phone-finalizer-v1');
+has(controller,'premier-phone-finalizer-v1.js?v=1.0.0-idempotent-existing-components');
 has(controller,'1.3.1-gemma4-dual-actions-v2-support-autodetect');
 has(controller,"loadScript(GEMMA4_QWEN_SRC,qwenReady,'premier-phone-qwen-internal-download')");
+has(controller,"loadScript(GEMMA4_FINALIZER_SRC,finalizerReady,'premier-phone-idempotent-finalizer')");
+must(controller.indexOf('loadScript(GEMMA4_FINALIZER_SRC')<controller.indexOf('loadScript(GEMMA4_ACTIONS_SRC'),'Finalizer must load before legacy current-action listener.');
 has(controller,'gemma4MissingSupportDownloadAction:true');
 has(controller,'gemma4SupportWorkerOnly:true');
 has(controller,'gemma4SupportAutoDetect:true');
@@ -98,9 +106,19 @@ has(controller,'gemma4SupportFilesInternal:true');
 has(controller,'gemma4QwenInternalManager:true');
 has(controller,'gemma4QwenManagerExplicitOnly:true');
 has(controller,'gemma4BrowserReceiptGemmaOnly:true');
+has(controller,'gemma4IdempotentFinalizer:true');
+has(controller,'gemma4FinalizerPreservesExistingDownloads:true');
 has(controller,'gemma4PassivePreload:false');
 has(controller,'providerRuntimeOnOpen:false');
 has(controller,'passiveGemmaHydration:false');
+
+has(finalizer,'preservesExistingModels:true');
+has(finalizer,'downloadsMissingSupportOnly:true');
+has(finalizer,'requeuesVerifiedLargeModels:false');
+has(finalizer,'individualDownloadsRecognized:true');
+has(finalizer,'let legacyError=null');
+has(finalizer,'const verified=await supportStatus()');
+has(finalizer,'if(verified.missing.length&&legacyError)throw legacyError');
 
 has(registeredWorker,'gemma4-current-phone-worker-v5-qwen-internal');
 has(takeover,'gemma4-current-phone-worker-v5-qwen-internal');
@@ -122,4 +140,4 @@ for(const text of [retiredPack,retiredDeep,retiredActions]){
   lacks(text,'Gemma 4 E2B Q4F16 is the fast core');
 }
 
-console.log('Premier Phone internal support downloads, Qwen compatibility download ownership, and autodetection verified.');
+console.log('Premier Phone internal support downloads, idempotent finalization, incremental Gemma import, Qwen compatibility ownership, and autodetection verified.');
