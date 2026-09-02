@@ -7,14 +7,20 @@ const compat=await readFile(new URL('../public/app/settings-local-route-v323.js'
 const fresh=await readFile(new URL('../public/app/settings-local-route-v327.js',import.meta.url),'utf8');
 const actions=await readFile(new URL('../public/app/settings-local-route-v331.js',import.meta.url),'utf8');
 
-assert.match(source,/settings-v325-parent-source-recovery-v1/);
-assert.match(source,/settings-local-models-direct-v325\.js\?v=settings-v325-parent-source-recovery-v1/);
+assert.match(source,/1\.1\.4-settings-local-route-v326-stable-local-actions/);
+assert.match(source,/settings-v325-parent-source-recovery-v3-stable-actions-card-progress/);
+assert.match(source,/DIRECT_VERSION='1\.1\.0-settings-v325-direct-local-models-stable-actions'/);
+assert.match(source,/settings-local-models-direct-v325\.js\?v=1\.1\.0-stable-in-place-actions/);
+assert.match(source,/STATUS_PLACEMENT_VERSION='1\.0\.1-settings-local-progress-card-owned-direct-aware'/);
 assert.match(source,/CIVWEAVE SETTINGS · v325/);
 assert.match(source,/settings-local-route-v331\.js\?cwAction=1/);
 assert.match(source,/managerDependencyOnView:false/);
 assert.match(source,/cacheReadOnView:false/);
 assert.match(source,/serviceWorkerReadyOnView:false/);
 assert.match(source,/staleWorkerSourceRecovery:true/);
+assert.match(source,/stableInPlaceActions:true/);
+assert.match(source,/directCardProgress:true/);
+assert.match(source,/globalProgressBanner:false/);
 assert.doesNotMatch(source,/navigator\.serviceWorker/);
 assert.doesNotMatch(source,/\bcaches\./);
 assert.equal(compat,fresh,'v323 and v327 validated inert implementations must remain byte-identical.');
@@ -103,6 +109,7 @@ vm.runInContext(source,context,{filename:'settings-local-route-v325.js'});
 
 const api=context.CivweaveSettingsLocalRouteV323;
 assert.ok(api?.staleWorkerSourceRecovery);
+assert.ok(api?.stableInPlaceActions);
 assert.ok(api.renderLocalModels(layer));
 assert.equal(managerReads,0,'The stale-worker parent bridge must not touch the live model manager.');
 assert.equal(header.textContent,'CIVWEAVE SETTINGS · v325');
@@ -110,6 +117,6 @@ assert.equal(layer.dataset.settingsVisibleVersion,'v325');
 assert.match(target.innerHTML,/AI Downloads/);
 assert.match(target.innerHTML,/Saved local state loaded/);
 assert.doesNotMatch(target.innerHTML,/Reading saved local model choices/);
-assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js')),'The parent bridge must request the cache-distinct direct renderer without waiting for a worker update.');
+assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js?v=1.1.0-stable-in-place-actions')),'The parent bridge must request the cache-distinct current direct renderer without waiting for a worker update.');
 
-console.log(JSON.stringify({ok:true,revision:'settings-v325-parent-source-recovery-v1',managerReads,visibleVersion:'v325',fallbackPainted:true,directRendererRequested:true,validatedAliasesPreserved:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'settings-v325-parent-source-recovery-v3-stable-actions-card-progress',managerReads,visibleVersion:'v325',fallbackPainted:true,directRendererRequested:true,stableInPlaceActions:true,directCardProgress:true,validatedAliasesPreserved:true},null,2));
