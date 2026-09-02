@@ -105,8 +105,11 @@ async function downloadOnlyMissingSupport(current,onProgress){
   const dual=actions();
   if(!dual?.downloadSupportFiles)throw new Error(`Premier Phone still needs ${current.missing.map(row=>row.label||row.id).join(', ')} and the internal support downloader is unavailable.`);
   report(`Finishing ${current.missing.length} missing Premier Phone support component${current.missing.length===1?'':'s'}…`,onProgress,{phase:'support',missing:current.missing.map(row=>row.id)});
-  await dual.downloadSupportFiles();
-  return supportStatus();
+  let legacyError=null;
+  try{await dual.downloadSupportFiles()}catch(error){legacyError=error}
+  const verified=await supportStatus();
+  if(verified.missing.length&&legacyError)throw legacyError;
+  return verified;
 }
 function markReady(models,support){
   const previous=stateMap()[PREMIER]||{};
