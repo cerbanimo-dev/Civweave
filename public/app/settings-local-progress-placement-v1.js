@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-settings-local-progress-card-owned';
+const VERSION='1.0.1-settings-local-progress-card-owned-direct-aware';
 const PANEL_ID='cw-local-ai-v324';
 const DIRECT_PANEL_ID='cw-local-models-direct-v325';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
@@ -35,10 +35,10 @@ function targetCard(target=activeTarget){
   if(!target)return null;
   const id=escapeSelector(target.id);
   if(target.kind==='pack'){
-    return document.querySelector(`#${PANEL_ID} [data-pack-id="${id}"]`)||target.element?.isConnected&&target.element||null;
+    return document.querySelector(`#${PANEL_ID} [data-pack-id="${id}"]`)||document.querySelector(`#${DIRECT_PANEL_ID} [data-pack-id="${id}"]`)||target.element?.isConnected&&target.element||null;
   }
   if(target.kind==='model'){
-    return document.querySelector(`#${PANEL_ID} [data-model-id="${id}"]`)||target.element?.isConnected&&target.element||null;
+    return document.querySelector(`#${PANEL_ID} [data-model-id="${id}"]`)||document.querySelector(`#${DIRECT_PANEL_ID} [data-model-id="${id}"]`)||target.element?.isConnected&&target.element||null;
   }
   return target.element?.isConnected?target.element:null;
 }
@@ -71,7 +71,7 @@ function schedule(delays=[0,40,160]){
 }
 
 function targetFromButton(button){
-  const packId=button?.dataset?.localPackDownload||button?.dataset?.localPackImport||button?.dataset?.localPackUse||button?.dataset?.localPackRemove||button?.dataset?.localPackCancel;
+  const packId=button?.dataset?.localPackFinish||button?.dataset?.localPackDownload||button?.dataset?.localPackImport||button?.dataset?.localPackUse||button?.dataset?.localPackRemove||button?.dataset?.localPackCancel;
   if(packId)return{kind:'pack',id:String(packId),element:button.closest?.('.cw-pack-card,.cw-direct-card')||null};
   const modelId=button?.dataset?.localDownload||button?.dataset?.localUse||button?.dataset?.localRemove||button?.dataset?.localCancel;
   if(modelId)return{kind:'model',id:String(modelId),element:button.closest?.('.cw-local-row,.cw-direct-model')||null};
@@ -109,5 +109,5 @@ addEventListener('civweave:settings-ready',onSettings);
 addEventListener('pageshow',onSettings);
 
 onSettings();
-globalThis.CivweaveSettingsLocalProgressPlacementV1=Object.freeze({version:VERSION,localize,schedule,inferTarget,cardOwnedProgress:true,globalProgressBanner:false});
+globalThis.CivweaveSettingsLocalProgressPlacementV1=Object.freeze({version:VERSION,localize,schedule,inferTarget,targetCard,targetFromButton,cardOwnedProgress:true,directCards:true,globalProgressBanner:false});
 })();
