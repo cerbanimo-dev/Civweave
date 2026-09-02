@@ -7,7 +7,9 @@ on:
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/moss-learning-plan-approval-button-v1.js'
       - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
+      - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
       - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
   push:
     branches: ['**']
@@ -16,7 +18,9 @@ on:
       - 'public/app/guide-chat-surface-v350.js'
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/moss-learning-plan-approval-button-v1.js'
       - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
+      - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
       - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
   workflow_dispatch:
 
@@ -40,6 +44,10 @@ jobs:
         run: |
           node --check public/app/install-boundary-v146.js
           node --check public/app/unified-chat-system-v1.js
+          node --check public/app/moss-learning-plan-approval-button-v1.js
           node --check scripts/verify-moss-learning-journey-bridge-v1.mjs
+          node --check scripts/verify-moss-learning-plan-approval-button-v1.mjs
       - name: Verify Moss learning goal routing and capability load order
         run: node scripts/verify-moss-learning-journey-bridge-v1.mjs
+      - name: Verify Moss direct approval button materialization
+        run: node scripts/verify-moss-learning-plan-approval-button-v1.mjs
