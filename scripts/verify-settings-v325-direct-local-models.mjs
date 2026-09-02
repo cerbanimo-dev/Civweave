@@ -8,11 +8,14 @@ const v203Source=await readFile(new URL('../public/service-worker-v203.js',impor
 const rootWorker=await readFile(new URL('../public/service-worker.js',import.meta.url),'utf8');
 
 assert.match(directSource,/CIVWEAVE SETTINGS · v325/);
-assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · actions lazy-v331/);
+assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · stable in-place actions/);
 assert.match(directSource,/hardLoadingGuardMs:900/);
-assert.match(directSource,/cwAction=1/);
-assert.match(directSource,/settingsV325DisplayShim!==true/,'Explicit actions must reject the lightweight display shim.');
-assert.match(directSource,/actionModulesOnDemand===true/,'An already-loaded full action route must identify itself as action-capable.');
+assert.match(directSource,/data-local-pack-finish/,'Premier Phone finalization must be owned directly by the card renderer.');
+assert.match(directSource,/actionsStayInPlace:true/,'Local model actions must remain in the direct renderer.');
+assert.match(directSource,/fullRendererSwapOnAction:false/,'Actions must never replace the Settings renderer.');
+assert.match(directSource,/premierPhoneFinalizer:true/,'Premier Phone must use the idempotent finalizer.');
+assert.doesNotMatch(directSource,/delegated\.click\(\)/,'Direct actions must never synthesize a second click.');
+assert.doesNotMatch(directSource,/route\.renderLocalModels\(layer\)/,'Direct actions must never swap to the full lifecycle renderer.');
 assert.doesNotMatch(directSource,/navigator\.serviceWorker/,'The direct display renderer must not touch the service worker.');
 assert.doesNotMatch(directSource,/\bcaches\./,'The direct display renderer must not inspect CacheStorage.');
 
@@ -60,7 +63,7 @@ assert.equal(managerReads,0,'Rendering Local models must not touch the live mode
 assert.equal(storageWrites,0,'Rendering Local models must not mutate saved state.');
 assert.equal(headerLabel.textContent,'CIVWEAVE SETTINGS · v325');
 assert.match(localTarget.innerHTML,/AI Downloads/);
-assert.match(localTarget.innerHTML,/Gemma 4 E2B IT/);
+assert.match(localTarget.innerHTML,/Gemma 4 E2B LiteRT/);
 assert.match(localTarget.innerHTML,/renderer direct-local-v325/);
 assert.doesNotMatch(localTarget.innerHTML,/Reading saved local model choices/);
 
@@ -123,6 +126,6 @@ const shimText=await shimResponse.text();
 assert.match(shimText,/settingsV325DisplayShim:true/);
 assert.doesNotMatch(shimText,/download-manager|runtime-v266|WebGPU/i,'Display shim must not load local-model lifecycle/runtime code.');
 const actionResponse=await runFetch('https://example.test/app/settings-local-route-v331.js?cwAction=1');
-assert.match(await actionResponse.text(),/action-route/,'Explicit actions must receive the full action route rather than the display shim.');
+assert.match(await actionResponse.text(),/action-route/,'Explicit fallback action routes must remain available for stale clients.');
 
-console.log(JSON.stringify({ok:true,revision:'settings-v325-direct-local-models',visibleVersion:'v325',managerReads,storageWrites,gatewayTransformed:true,displayShim:true,actionRouteLazy:true,rootWorkerGeneration:'v25-settings-v337-direct-gateway'},null,2));
+console.log(JSON.stringify({ok:true,revision:'settings-v325-direct-local-models',visibleVersion:'v325',managerReads,storageWrites,gatewayTransformed:true,displayShim:true,stableInPlaceActions:true,legacyActionRouteFallback:true,rootWorkerGeneration:'v25-settings-v337-direct-gateway'},null,2));
