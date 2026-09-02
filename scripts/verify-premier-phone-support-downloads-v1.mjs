@@ -79,7 +79,10 @@ has(importer,'completedPremierActionsRelinquished:true');
 has(importer,'passiveBridgeLoad:false');
 has(importer,'mutationObserver:false');
 has(importer,'if(!current?.streamingImportProgress)return;');
-has(importer,'if(currentOwnerActive(card))continue;');
+has(importer,"if(currentOwnerActive()){currentOwner()?.scheduleDecorate?.();continue}");
+has(importer,'incrementalPremierImport:true');
+has(importer,'ownerSettlementOnEveryImport:true');
+has(importer,'ownerRequiresCompletedGemmaReceipt:true');
 lacks(importer,'new MutationObserver');
 lacks(importer,'observer.observe');
 
@@ -137,4 +140,4 @@ for(const text of [retiredPack,retiredDeep,retiredActions]){
   lacks(text,'Gemma 4 E2B Q4F16 is the fast core');
 }
 
-console.log('Premier Phone internal support downloads, idempotent finalization, Qwen compatibility ownership, and autodetection verified.');
+console.log('Premier Phone internal support downloads, idempotent finalization, incremental Gemma import, Qwen compatibility ownership, and autodetection verified.');
