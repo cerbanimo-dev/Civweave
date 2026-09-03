@@ -1,0 +1,31 @@
+name: Verify Gemma 4 Structured Quest Completion
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/gemma4-structured-quest-completion-v1.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-gemma4-structured-quest-completion-v1.mjs'
+      - '.github/workflows/verify-gemma4-structured-quest-completion-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/gemma4-structured-quest-completion-v1.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-gemma4-structured-quest-completion-v1.mjs'
+      - '.github/workflows/verify-gemma4-structured-quest-completion-v1.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Check runtime syntax
+        run: node --check public/app/local-ai/gemma4-structured-quest-completion-v1.js
+      - name: Verify local structured Quest completion
+        run: node scripts/verify-gemma4-structured-quest-completion-v1.mjs
