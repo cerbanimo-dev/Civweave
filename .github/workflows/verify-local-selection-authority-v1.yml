@@ -1,0 +1,32 @@
+name: Verify Local Selection Authority
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/settings-local-route-v325.js'
+      - 'public/app/local-ai/gemma4-dual-actions-v2.js'
+      - 'scripts/verify-local-selection-authority-v1.mjs'
+      - '.github/workflows/verify-local-selection-authority-v1.yml'
+  push:
+    branches:
+      - staging
+    paths:
+      - 'public/app/settings-local-route-v325.js'
+      - 'public/app/local-ai/gemma4-dual-actions-v2.js'
+      - 'scripts/verify-local-selection-authority-v1.mjs'
+      - '.github/workflows/verify-local-selection-authority-v1.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Parse changed runtime files
+        run: |
+          node --check public/app/settings-local-route-v325.js
+          node --check public/app/local-ai/gemma4-dual-actions-v2.js
+      - name: Verify local selection authority
+        run: node scripts/verify-local-selection-authority-v1.mjs

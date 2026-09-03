@@ -6,8 +6,8 @@
 // service worker is still controlling the page and serving the v324 Settings
 // gateway. Displaying saved state never waits on the model manager, caches,
 // service-worker readiness, GPU detection, or inference code.
-const VERSION='1.1.4-settings-local-route-v326-stable-local-actions';
-const REVISION='settings-v325-parent-source-recovery-v3-stable-actions-card-progress';
+const VERSION='1.1.5-settings-local-route-v326-local-selection-authority';
+const REVISION='settings-v325-parent-source-recovery-v4-local-selection-authority';
 const ROUTE='downloaded-local';
 const LAYER_ID='cw-settings-v320';
 const DIRECT_VERSION='1.1.0-settings-v325-direct-local-models-stable-actions';
@@ -20,6 +20,8 @@ const PANEL_ID='cw-local-ai-v325-parent';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const PROFILES_KEY='civweave-model-profiles-v1';
 let directPromise=null,fullPromise=null,actionPromise=null,placementPromise=null;
 let BRIDGE=null;
 
@@ -142,7 +144,23 @@ function patch(form=document.querySelector('[data-cw-settings-form]')){
   if(form.dataset?.activeSettingsTab==='local-models'||form.querySelector?.('[data-settings-tab="local-models"]')?.getAttribute?.('aria-selected')==='true')renderLocalModels(form);
   return true;
 }
-function persistLocalRoute(){return null}
+function persistLocalRoute(current=selection()){
+  if(!current?.active||!current.id)return null;
+  const at=new Date().toISOString();
+  const interactive={route:ROUTE,provider:ROUTE,model:String(current.id),endpoint:'',externalConsent:false};
+  const settings=read(SETTINGS_KEY,{}),profiles=read(PROFILES_KEY,{});
+  const stored={...settings,...interactive,consent:false,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
+  const nextProfiles={...profiles,interactive,agentic:null,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
+  try{
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(stored));
+    localStorage.setItem(PROFILES_KEY,JSON.stringify(nextProfiles));
+  }catch{}
+  const detail={version:VERSION,route:ROUTE,primaryRoute:ROUTE,primaryModel:current.id,interactive,agentic:null,agenticEnabled:false,localSelection:current,localOnly:true,savedAt:at};
+  try{dispatchEvent(new CustomEvent('civweave:model-settings-saved',{detail}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:model-config-changed',{detail:{...detail,source:'local-model-selection'}}))}catch{}
+  const form=document.querySelector?.('[data-cw-settings-form]');if(form?.isConnected)ensureRouteOption(form);
+  return detail;
+}
 function ensureActionModules(){
   const direct=directApi();if(direct?.ensureActions)return direct.ensureActions();
   const current=globalThis.CivweaveSettingsLocalRouteV323;
@@ -168,7 +186,7 @@ BRIDGE=Object.freeze({
   packRuntimeDependencyOnView:false,packCacheReadOnView:false,savedStateOnlyView:true,viewWritesState:false,actionModulesOnDemand:true,
   browserPackHandoff:true,legacyBrowserErrorRecovery:true,hardLocalOnly:true,loaderBridge:true,staleWorkerSourceRecovery:true,
   cardOwnedProgress:true,directCardProgress:true,globalProgressBanner:false,progressPlacementPath:STATUS_PLACEMENT_SRC,
-  stableInPlaceActions:true,directVersion:DIRECT_VERSION,
+  stableInPlaceActions:true,directVersion:DIRECT_VERSION,canonicalLocalPersistence:true,selectedLocalBecomesProviderAuthority:true,
   visibleSettingsVersion:'v325',canonicalPath:'/app/settings-local-route-v325.js',directRendererPath:DIRECT_SRC,
   freshImplementationPath:'/app/settings-local-route-v327.js',actionPath:ACTION_ROUTE,compatibilityAlias:'/app/settings-local-route-v323.js'
 });
