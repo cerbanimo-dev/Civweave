@@ -26,11 +26,14 @@ vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'gemma4-structured-quest-completion-v1.js'});
 
 const api=sandbox.CivweaveGemma4StructuredQuestCompletionV1;
-assert.equal(api.version,'1.0.1-gemma4-structured-quest-completion-v1-mutable-runtime');
+assert.equal(api.version,'1.0.2-gemma4-structured-quest-completion-v1-json-canonicalization');
 assert.equal(api.budgetFor('gemma4-e4b-it-litert-web'),2800,'E4B must receive its full local output budget');
 assert.equal(api.budgetFor('gemma4-e2b-it-litert-web'),2400,'E2B must stay within its actual local output budget');
+assert.equal(api.jsonCanonicalization,true,'local Quest bridge must canonicalize deterministic near-JSON before shared validation');
+assert.equal(api.balancedInvalidJsonDistinguished,true,'balanced invalid JSON must not be mislabeled as complete valid JSON');
 assert.equal(Object.isFrozen(sandbox.CivweaveModelRuntime),false,'structured Quest wrapper must not freeze the shared model runtime');
 assert.equal(sandbox.CivweaveModelRuntime.gemma4StructuredQuestRuntimeMutable,true);
+assert.equal(sandbox.CivweaveModelRuntime.gemma4StructuredQuestJsonCanonicalization,true);
 const postQuestWrapper=sandbox.CivweaveModelRuntime.generate;
 const laterLayer=async request=>postQuestWrapper({...request,__laterLayer:true});
 sandbox.CivweaveModelRuntime.generate=laterLayer;
@@ -50,6 +53,7 @@ assert.notEqual(hardened,request);
 assert.equal(hardened.config.maxTokens,2800,'E4B Quest request must no longer be capped at 2200/2400');
 assert.equal(hardened.config.provider,'downloaded-local');
 assert.equal(hardened.schema.properties.governance.required,undefined,'governance:false must not fail the generic schema validator');
+assert.match(hardened.messages[0].content,/strict JSON syntax/,'local Quest prompt must explicitly require strict JSON');
 assert.match(hardened.messages[0].content,/included\":false/,'local Quest prompt must explicitly permit governance:false');
 assert.equal(typeof hardened.transport,'function');
 
@@ -58,19 +62,54 @@ assert.equal(generatedArgs.maxNewTokens,2800,'transport must pass the full E4B b
 assert.equal(first.payload.finishReason,'MAX_OUTPUT_TOKENS','unclosed Quest JSON must propagate a truncation signal so shared repair activates');
 assert.equal(api.jsonCompletion(first.text).truncated,true);
 
+const malformed=`{
+ title: "Manifestation App",
+ "wish": "Learn manifestation
+and turn it into an app",
+ "outcome": “A working app”,
+ "assumptions": ["Use evidence-aware practice",],
+ "paths": [{"type":"learning","realm":"living-school","title":"Learn","purpose":"Study","steps":["Study",],"completionCriteria":"Explain","evidence":["Notes"],}],
+ "governance": {"included": False,},
+}`;
+const canonical=api.canonicalizeQuestJson(malformed);
+assert.equal(canonical.valid,true,'balanced Gemma near-JSON should be made strict before schema validation');
+assert.equal(canonical.repaired,true,'near-JSON fixture must exercise deterministic repair');
+const parsedCanonical=JSON.parse(canonical.text);
+assert.equal(parsedCanonical.title,'Manifestation App');
+assert.equal(parsedCanonical.wish,'Learn manifestation\nand turn it into an app','raw newline inside a JSON string must be escaped without changing the value');
+assert.equal(parsedCanonical.outcome,'A working app','curly quotes must be normalized');
+assert.equal(parsedCanonical.governance.included,false,'Python-style False must become JSON false');
+assert.deepEqual(parsedCanonical.assumptions,['Use evidence-aware practice'],'trailing array commas must be removed');
+assert.match(canonical.text,/"title":"Manifestation App"/,'bare object keys must become quoted keys');
+assert.doesNotMatch(canonical.text,/,\s*[}\]]/,'canonical output must not retain trailing commas');
+
+sandbox.CivweaveLocalChatRuntimeV295.generate=async args=>{generatedArgs=args;return{status:'success',outputText:malformed,executionId:'gemma4-e4b-it-litert-web'}};
+const normalizedTransport=await hardened.transport({config:hardened.config,messages:hardened.messages,emit:()=>{}});
+assert.equal(generatedArgs.maxNewTokens,2800);
+assert.equal(normalizedTransport.payload.finishReason,undefined,'balanced near-JSON must not be mislabeled as truncation');
+assert.doesNotThrow(()=>JSON.parse(normalizedTransport.text),'transport must hand the shared runtime strict JSON');
+assert.equal(normalizedTransport.jsonCanonicalization.valid,true);
+assert.equal(normalizedTransport.jsonCanonicalization.repaired,true);
+assert.match(normalizedTransport.diagnostics.join(' '),/normalized deterministically/);
+
 sandbox.CivweaveLocalChatRuntimeV295.generate=async args=>{generatedArgs=args;return{status:'success',outputText:'{"title":"Manifestation App","wish":"Learn manifestation and build an app","outcome":"A working app","assumptions":["Start critically"],"paths":[{"type":"learning","realm":"living-school","title":"Learn","purpose":"Study","steps":["Study"],"completionCriteria":"Explain","evidence":["Notes"]}],"governance":{"included":false}}',executionId:'gemma4-e4b-it-litert-web'}};
 const complete=await hardened.transport({config:hardened.config,messages:hardened.messages,emit:()=>{}});
 assert.equal(generatedArgs.maxNewTokens,2800);
 assert.equal(complete.payload.finishReason,undefined,'complete JSON must not be mislabeled as truncated');
 assert.equal(api.jsonCompletion(complete.text).complete,true);
+assert.equal(complete.jsonCanonicalization.valid,true);
+assert.equal(complete.jsonCanonicalization.repaired,false);
 
 const truncatedFailure=api.clarifyResult({status:'invalid-response',outputText:'{"title":"x","paths":[',structured:{errors:['invalid json']},error:{code:'INVALID_STRUCTURED_OUTPUT',message:'generic'}},hardened);
 assert.match(truncatedFailure.error.message,/ended before the Quest JSON was complete/,'user-facing failure must identify truncation');
+const balancedInvalidFailure=api.clarifyResult({status:'invalid-response',outputText:'{"title":"x" "paths":[]}',structured:{errors:['The provider did not return valid JSON.']},error:{code:'INVALID_STRUCTURED_OUTPUT',message:'The provider did not return valid JSON.'}},hardened);
+assert.match(balancedInvalidFailure.error.message,/JSON syntax was still invalid after deterministic cleanup/,'balanced malformed JSON must get an accurate syntax diagnostic');
+assert.doesNotMatch(balancedInvalidFailure.error.message,/returned complete JSON/,'balanced malformed JSON must not be called complete valid JSON');
 const schemaFailure=api.clarifyResult({status:'invalid-response',outputText:'{"title":"x","paths":[]}',structured:{errors:['$.paths must contain at least 1 items.']},error:{code:'INVALID_STRUCTURED_OUTPUT',message:'generic'}},hardened);
-assert.match(schemaFailure.error.message,/returned complete JSON, but it did not satisfy the Quest contract/,'user-facing failure must distinguish schema rejection from truncation');
+assert.match(schemaFailure.error.message,/returned valid JSON, but it did not satisfy the Quest contract/,'user-facing failure must distinguish schema rejection from JSON syntax failure');
 
 storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'}));
 const e2=api.hardenRequest({...request,config:{...request.config,model:'gemma4-e2b-it-litert-web'}});
 assert.equal(e2.config.maxTokens,2400);
 
-console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-completion-v1',e4Budget:2800,e2Budget:2400,truncationRepair:true,governanceFalseAllowed:true,failureDiagnostics:true,sharedRuntimeMutable:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-completion-v1',e4Budget:2800,e2Budget:2400,truncationRepair:true,governanceFalseAllowed:true,failureDiagnostics:true,sharedRuntimeMutable:true,jsonCanonicalization:true,balancedInvalidJsonDistinguished:true},null,2));
