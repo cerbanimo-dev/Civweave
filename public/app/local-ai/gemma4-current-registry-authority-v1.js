@@ -8,15 +8,19 @@ const FAST_E2='gemma4-e2b-it-litert-web';
 const FAST_E4='gemma4-e4b-it-litert-web';
 const LEGACY_E2='gemma4-e2b-it-q4f16';
 const LEGACY_E4='gemma4-e4b-it-q4f16';
+const COMPACT_QUEST_SRC='/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js?v=1.0.0-compact-envelope';
+const COMPACT_QUEST_VERSION='1.0.0-gemma4-structured-quest-compact-envelope-v1';
 const freeze=value=>Object.freeze(value);
 const same=(left=[],right=[])=>left.length===right.length&&left.every((value,index)=>value===right[index]);
 
 if(globalThis.CivweaveGemma4CurrentRegistryAuthorityV1?.version===VERSION){
   globalThis.CivweaveGemma4CurrentRegistryAuthorityV1.schedule?.();
+  globalThis.CivweaveGemma4CurrentRegistryAuthorityV1.ensureCompactQuestEnvelope?.();
   return;
 }
 
 let queued=false;
+let compactQuestFlight=null;
 function currentMissing(registry){return [FAST_E2,FAST_E4].filter(id=>!registry?.byId?.(id))}
 function compatibilityMissing(registry){return [LEGACY_E2,LEGACY_E4].filter(id=>!registry?.byId?.(id))}
 function repairRegistryValue(registry){
@@ -41,6 +45,34 @@ function repairRegistry(){
     try{globalThis[REGISTRY_KEY]=next}catch{}
   }
   return globalThis[REGISTRY_KEY]||next||current||null;
+}
+function compactQuestReady(){return globalThis.CivweaveGemma4StructuredQuestCompactEnvelopeV1?.version===COMPACT_QUEST_VERSION}
+function ensureCompactQuestEnvelope(){
+  if(compactQuestReady()){globalThis.CivweaveGemma4StructuredQuestCompactEnvelopeV1.schedule?.();return Promise.resolve(true)}
+  if(compactQuestFlight)return compactQuestFlight;
+  if(!globalThis.document?.createElement||!document.head)return Promise.resolve(false);
+  compactQuestFlight=new Promise(resolve=>{
+    let settled=false;
+    const finish=ok=>{if(settled)return;settled=true;resolve(Boolean(ok&&compactQuestReady()))};
+    let existing=null;
+    try{existing=[...(document.scripts||[])].find(node=>new URL(node.src,location.href).pathname==='/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js')||null}catch{}
+    if(existing){
+      if(compactQuestReady()){finish(true);return}
+      existing.addEventListener?.('load',()=>finish(true),{once:true});
+      existing.addEventListener?.('error',()=>finish(false),{once:true});
+      setTimeout(()=>finish(compactQuestReady()),5000);
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=COMPACT_QUEST_SRC;
+    script.async=false;
+    script.dataset.civweaveGemma4CompactQuest='v1';
+    script.onload=()=>finish(true);
+    script.onerror=()=>finish(false);
+    document.head.append(script);
+    setTimeout(()=>finish(compactQuestReady()),5000);
+  }).finally(()=>{compactQuestFlight=null});
+  return compactQuestFlight;
 }
 function installAuthority(){
   const base=globalThis[AUTH_KEY];
@@ -79,7 +111,7 @@ function installAuthority(){
   });
   try{globalThis[AUTH_KEY]=next}catch{return false}
   repairRegistry();
-  try{dispatchEvent(new CustomEvent('civweave:gemma4-current-registry-authority-ready',{detail:{version:VERSION,currentModels:[FAST_E2,FAST_E4],legacyRegistrationRequired:false}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:gemma4-current-registry-authority-ready',{detail:{version:VERSION,currentModels:[FAST_E2,FAST_E4],legacyRegistrationRequired:false,compactQuestEnvelopeLoader:true}}))}catch{}
   return true;
 }
 function schedule(){
@@ -89,9 +121,10 @@ function schedule(){
     queued=false;
     installAuthority();
     repairRegistry();
+    void ensureCompactQuestEnvelope();
   });
 }
-for(const name of ['civweave:gemma4-phone-performance-authority','civweave:gemma4-phone-authority-ready','civweave:local-model-runtime-ready','civweave:local-model-pack-selected','pageshow'])addEventListener(name,schedule);
+for(const name of ['civweave:gemma4-phone-performance-authority','civweave:gemma4-phone-authority-ready','civweave:local-model-runtime-ready','civweave:local-model-pack-selected','civweave:gemma4-structured-quest-completion-ready','pageshow'])addEventListener(name,schedule);
 for(const delay of [0,40,180,650,1600,3200])setTimeout(schedule,delay);
 
 globalThis.CivweaveGemma4CurrentRegistryAuthorityV1=freeze({
@@ -100,6 +133,9 @@ globalThis.CivweaveGemma4CurrentRegistryAuthorityV1=freeze({
   repairRegistry,
   repairRegistryValue,
   schedule,
+  ensureCompactQuestEnvelope,
+  compactQuestEnvelopeLoader:true,
+  compactQuestEnvelopeSource:COMPACT_QUEST_SRC,
   currentModels:freeze([FAST_E2,FAST_E4]),
   compatibilityModels:freeze([LEGACY_E2,LEGACY_E4]),
   legacyRegistrationRequired:false,
