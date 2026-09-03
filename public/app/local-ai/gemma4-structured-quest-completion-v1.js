@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-gemma4-structured-quest-completion-v1';
+const VERSION='1.0.1-gemma4-structured-quest-completion-v1-mutable-runtime';
 const PURPOSE='civweave-weaveling-intention-json-v190';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const FAST_E2='gemma4-e2b-it-litert-web';
@@ -162,10 +162,10 @@ function install(){
   };
   generate.__civweaveGemma4StructuredQuestCompletionV1=VERSION;
   generate.__prior=prior;
-  const next=Object.freeze({...runtime,generate,gemma4StructuredQuestCompletion:VERSION,gemma4StructuredQuestFullBudget:true});
+  const next={...runtime,generate,gemma4StructuredQuestCompletion:VERSION,gemma4StructuredQuestFullBudget:true,gemma4StructuredQuestRuntimeMutable:true};
   try{globalThis.CivweaveModelRuntime=next}catch{return false}
   wrappedGenerate=generate;
-  try{dispatchEvent(new CustomEvent('civweave:gemma4-structured-quest-completion-ready',{detail:{version:VERSION,budgets:{...BUDGETS},governanceOptional:true,truncationRepair:true}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:gemma4-structured-quest-completion-ready',{detail:{version:VERSION,budgets:{...BUDGETS},governanceOptional:true,truncationRepair:true,sharedRuntimeMutable:true}}))}catch{}
   return true;
 }
 function schedule(){
@@ -192,7 +192,8 @@ globalThis.CivweaveGemma4StructuredQuestCompletionV1=Object.freeze({
   fullLocalBudget:true,
   governanceOptional:true,
   truncationRepair:true,
-  state:()=>Object.freeze({installed:Boolean(wrappedGenerate),model:selectedLocal()?.id||'',budget:budgetFor(selectedLocal()?.id||'')})
+  sharedRuntimeMutable:true,
+  state:()=>Object.freeze({installed:Boolean(wrappedGenerate),model:selectedLocal()?.id||'',budget:budgetFor(selectedLocal()?.id||''),runtimeMutable:Boolean(globalThis.CivweaveModelRuntime&&!Object.isFrozen(globalThis.CivweaveModelRuntime))})
 });
 schedule();
 })();

@@ -18,16 +18,24 @@ const sandbox={
   dispatchEvent:()=>{},
   CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},
   DOMException:globalThis.DOMException,
-  structuredClone:globalThis.structuredClone
+  structuredClone:globalThis.structuredClone,
+  Object
 };
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'gemma4-structured-quest-completion-v1.js'});
 
 const api=sandbox.CivweaveGemma4StructuredQuestCompletionV1;
-assert.equal(api.version,'1.0.0-gemma4-structured-quest-completion-v1');
+assert.equal(api.version,'1.0.1-gemma4-structured-quest-completion-v1-mutable-runtime');
 assert.equal(api.budgetFor('gemma4-e4b-it-litert-web'),2800,'E4B must receive its full local output budget');
 assert.equal(api.budgetFor('gemma4-e2b-it-litert-web'),2400,'E2B must stay within its actual local output budget');
+assert.equal(Object.isFrozen(sandbox.CivweaveModelRuntime),false,'structured Quest wrapper must not freeze the shared model runtime');
+assert.equal(sandbox.CivweaveModelRuntime.gemma4StructuredQuestRuntimeMutable,true);
+const postQuestWrapper=sandbox.CivweaveModelRuntime.generate;
+const laterLayer=async request=>postQuestWrapper({...request,__laterLayer:true});
+sandbox.CivweaveModelRuntime.generate=laterLayer;
+assert.equal(sandbox.CivweaveModelRuntime.generate,laterLayer,'later runtime layers must be able to replace generate without a read-only property error');
+sandbox.CivweaveModelRuntime.generate=postQuestWrapper;
 
 const request={
   purpose:'civweave-weaveling-intention-json-v190',
@@ -65,4 +73,4 @@ storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'g
 const e2=api.hardenRequest({...request,config:{...request.config,model:'gemma4-e2b-it-litert-web'}});
 assert.equal(e2.config.maxTokens,2400);
 
-console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-completion-v1',e4Budget:2800,e2Budget:2400,truncationRepair:true,governanceFalseAllowed:true,failureDiagnostics:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-completion-v1',e4Budget:2800,e2Budget:2400,truncationRepair:true,governanceFalseAllowed:true,failureDiagnostics:true,sharedRuntimeMutable:true},null,2));
