@@ -19,7 +19,7 @@ const retiredPack=read('public/app/local-ai/gemma4-pack-extension-v1.js');
 const retiredDeep=read('public/app/local-ai/gemma4-e4b-q4-extension-v1.js');
 const retiredActions=read('public/app/local-ai/gemma4-dual-q4-actions-v1.js');
 
-has(actions,'1.3.1-gemma4-dual-actions-v2-support-autodetect');
+has(actions,'1.3.2-gemma4-dual-actions-v2-local-selection-authority');
 has(actions,'Download missing support files internally (');
 for(const id of ['qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])has(actions,id);
 has(actions,'premier-phone-support-worker-v1.js');
@@ -35,6 +35,9 @@ has(actions,'finished downloading but was not detected in Civweave internal stor
 has(actions,'preservesExistingLargeFiles:true');
 has(actions,'supportLargeFileReimportRequired:false');
 has(actions,'singlePresentationOwner:true');
+has(actions,'localSelectionPersistsProviderRoute:true');
+has(actions,'selectedButtonStateVisible:true');
+has(actions,'persistLocalRoute?.(selected');
 lacks(actions,'Complete Q4F16 core');
 
 has(phone,'1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status');
@@ -90,12 +93,13 @@ has(inference,'1.0.11-gemma4-inference-repair-v1-current-phone-authority');
 has(inference,"PHONE_AUTH_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status'");
 has(inference,'phoneAuthorityRuntimeOnly:true');
 
-has(controller,'1.0.28-model-settings-controller-v173-premier-phone-finalizer');
+has(controller,'1.0.29-model-settings-controller-v173-local-selection-authority');
 has(controller,'1.0.0-premier-phone-qwen-download-v1');
 has(controller,'premier-phone-qwen-download-v1.js?v=1.0.0-qwen-internal');
 has(controller,'1.0.0-premier-phone-finalizer-v1');
 has(controller,'premier-phone-finalizer-v1.js?v=1.0.0-idempotent-existing-components');
-has(controller,'1.3.1-gemma4-dual-actions-v2-support-autodetect');
+has(controller,'1.3.2-gemma4-dual-actions-v2-local-selection-authority');
+has(controller,'gemma4-dual-actions-v2.js?v=1.3.2-local-selection-authority');
 has(controller,"loadScript(GEMMA4_QWEN_SRC,qwenReady,'premier-phone-qwen-internal-download')");
 has(controller,"loadScript(GEMMA4_FINALIZER_SRC,finalizerReady,'premier-phone-idempotent-finalizer')");
 must(controller.indexOf('loadScript(GEMMA4_FINALIZER_SRC')<controller.indexOf('loadScript(GEMMA4_ACTIONS_SRC'),'Finalizer must load before legacy current-action listener.');
@@ -108,6 +112,7 @@ has(controller,'gemma4QwenManagerExplicitOnly:true');
 has(controller,'gemma4BrowserReceiptGemmaOnly:true');
 has(controller,'gemma4IdempotentFinalizer:true');
 has(controller,'gemma4FinalizerPreservesExistingDownloads:true');
+has(controller,'gemma4LocalSelectionPersistsProviderRoute:true');
 has(controller,'gemma4PassivePreload:false');
 has(controller,'providerRuntimeOnOpen:false');
 has(controller,'passiveGemmaHydration:false');
@@ -140,4 +145,4 @@ for(const text of [retiredPack,retiredDeep,retiredActions]){
   lacks(text,'Gemma 4 E2B Q4F16 is the fast core');
 }
 
-console.log('Premier Phone internal support downloads, idempotent finalization, incremental Gemma import, Qwen compatibility ownership, and autodetection verified.');
+console.log('Premier Phone internal support downloads, idempotent finalization, incremental Gemma import, local selection authority, Qwen compatibility ownership, and autodetection verified.');
