@@ -27,12 +27,12 @@ for(const [name,source] of [['deepLegacy',deepLegacy],['packLegacy',packLegacy],
   assert.doesNotMatch(source,/new MutationObserver/,`${name} must not retain its historical observer loop.`);
 }
 
-assert.match(controller,/1\.0\.28-model-settings-controller-v173-premier-phone-finalizer/);
+assert.match(controller,/1\.0\.29-model-settings-controller-v173-local-selection-authority/);
 const activeController=controller.slice(0,controller.indexOf('const api=Object.freeze'));
 assert.doesNotMatch(activeController,/GEMMA4_PACK_SRC|GEMMA4_DEEP_SRC|gemma4-pack-extension-v1\.js|gemma4-e4b-q4-extension-v1\.js/,'Current model-settings action chain must not load retired Q4 presentation extensions.');
 assert.match(controller,/premier-phone-qwen-download-v1\.js\?v=1\.0\.0-qwen-internal/);
 assert.match(controller,/premier-phone-finalizer-v1\.js\?v=1\.0\.0-idempotent-existing-components/);
-assert.match(controller,/gemma4-dual-actions-v2\.js\?v=1\.3\.1-support-autodetect/);
+assert.match(controller,/gemma4-dual-actions-v2\.js\?v=1\.3\.2-local-selection-authority/);
 assert.match(controller,/loadScript\(GEMMA4_QWEN_SRC,qwenReady,'premier-phone-qwen-internal-download'\)/,'Qwen support compatibility must load only from the explicit phone setup chain.');
 assert.match(controller,/loadScript\(GEMMA4_FINALIZER_SRC,finalizerReady,'premier-phone-idempotent-finalizer'\)/,'The idempotent finalizer must be part of the explicit phone setup chain.');
 assert.ok(controller.indexOf('loadScript(GEMMA4_FINALIZER_SRC')<controller.indexOf('loadScript(GEMMA4_ACTIONS_SRC'),'Finalizer listener must load before the legacy current-action listener.');
@@ -51,6 +51,7 @@ assert.match(controller,/gemma4BrowserReceiptGemmaOnly:true/);
 assert.match(controller,/gemma4IdempotentFinalizer:true/);
 assert.match(controller,/gemma4FinalizerPreservesExistingDownloads:true/);
 assert.match(controller,/gemma4FinalizerLoadsBeforeLegacyActions:true/);
+assert.match(controller,/gemma4LocalSelectionPersistsProviderRoute:true/);
 assert.match(controller,/gemma4LegacyPackExtensionLoaded:false/);
 assert.match(controller,/gemma4LegacyDeepExtensionLoaded:false/);
 assert.match(controller,/gemma4PassivePreload:false/,'Working Settings menu must remain passive.');
@@ -102,6 +103,8 @@ assert.match(currentActions,/supportFilesInternal:true/);
 assert.match(currentActions,/browserReceiptGemmaOnly:true/);
 assert.match(currentActions,/singlePresentationOwner:true/);
 assert.match(currentActions,/presentationOwnership:true/);
+assert.match(currentActions,/localSelectionPersistsProviderRoute:true/);
+assert.match(currentActions,/persistLocalRoute\?\.\(selected/,'Current fast/deep action owner must persist downloaded-local provider authority.');
 assert.doesNotMatch(currentActions,/phone\(\)\?\.decorateSettings/,'Current action owner must never invoke the phone-core Settings decorator.');
 assert.match(currentActions,/opfs\(\)\?\.opfsStatus|storage\.opfsStatus/,'Completed browser receipts must be verified against OPFS directly.');
 assert.match(currentActions,/writeDownloadReady/,'Verified OPFS payloads must reconcile the download-manager saved state before phone authority checks.');
@@ -113,4 +116,4 @@ assert.match(phone,/presentationOwnership:false/);
 assert.match(phone,/function decorateSettings\(\)\{return true\}/,'Phone core is runtime/data authority only.');
 assert.doesNotMatch(phone,/Complete phone performance core|Complete Q4F16 core/,'Runtime-only phone core must not contain a competing Settings action.');
 
-console.log(JSON.stringify({ok:true,contract:'gemma4-phone-single-owner-v10',retiredQ4SourcesPhysicallyStubbed:true,currentController:'litert-support-qwen-finalizer-single-owner',opfsReceiptReconciledBeforeDecorate:true,currentActionsOwnPresentation:true,phoneCoreRuntimeOnly:true,workerTakeoverBeforeLegacyCoherence:true,registeredWorkerGeneration:'v5-qwen-internal',supportFilesInternal:true,qwenInternalManager:true,supportAutoDetect:true,browserReceiptGemmaOnly:true,idempotentFinalizer:true,reloadsOldPageRealm:true,settingsPassive:true,downloadedModelsPreserved:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'gemma4-phone-single-owner-v11-local-selection-authority',retiredQ4SourcesPhysicallyStubbed:true,currentController:'litert-support-qwen-finalizer-single-owner',opfsReceiptReconciledBeforeDecorate:true,currentActionsOwnPresentation:true,phoneCoreRuntimeOnly:true,workerTakeoverBeforeLegacyCoherence:true,registeredWorkerGeneration:'v5-qwen-internal',supportFilesInternal:true,qwenInternalManager:true,supportAutoDetect:true,browserReceiptGemmaOnly:true,idempotentFinalizer:true,localSelectionAuthority:true,reloadsOldPageRealm:true,settingsPassive:true,downloadedModelsPreserved:true},null,2));
