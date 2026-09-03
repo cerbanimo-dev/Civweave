@@ -1,0 +1,34 @@
+name: Verify Weaveling Local Structured E4B
+
+on:
+  push:
+    paths:
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/minilm-response-router-v347.js'
+      - 'scripts/verify-weaveling-local-structured-e4b-v1.mjs'
+      - '.github/workflows/verify-weaveling-local-structured-e4b-v1.yml'
+  pull_request:
+    paths:
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/minilm-response-router-v347.js'
+      - 'scripts/verify-weaveling-local-structured-e4b-v1.mjs'
+      - '.github/workflows/verify-weaveling-local-structured-e4b-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Parse structured Quest routing files
+        run: |
+          node --check public/extensions/civweave-weaveling-plan-json-v190.js
+          node --check public/app/minilm-response-router-v347.js
+          node --check scripts/verify-weaveling-local-structured-e4b-v1.mjs
+      - name: Verify selected E4B remains local for structured Quest generation
+        run: node scripts/verify-weaveling-local-structured-e4b-v1.mjs
