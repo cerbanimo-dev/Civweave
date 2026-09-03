@@ -55,13 +55,16 @@ function patchRegistry(registry){
   const base=layeredRegistry(registry);
   if(!base?.byId||!Array.isArray(base.models))return base;
   if(base.__civweaveGemma4PhonePerformanceRegistryV1)return base;
-  const missing=[LEGACY_E2,LEGACY_E4,FAST_E2,FAST_E4].filter(id=>!base.byId(id));
+  const missing=[FAST_E2,FAST_E4].filter(id=>!base.byId(id));
+  const compatibilityMissing=[LEGACY_E2,LEGACY_E4].filter(id=>!base.byId(id));
   return freeze({
     ...base,
     __civweaveGemma4PhonePerformanceRegistryV1:true,
     gemma4PhonePerformanceRegistry:true,
     gemma4PhonePerformanceRegistryComplete:missing.length===0,
     gemma4PhonePerformanceRegistryMissing:freeze(missing),
+    gemma4PhoneCompatibilityRegistryMissing:freeze(compatibilityMissing),
+    gemma4PhoneLegacyRegistrationRequired:false,
     gemma4PhonePrimaryModel:FAST_E2,
     gemma4PhoneDeepModel:FAST_E4,
     gemma4LegacyFastAlias:LEGACY_E2,
