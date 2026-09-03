@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.3.1-gemma4-dual-actions-v2-support-autodetect';
+const VERSION='1.3.2-gemma4-dual-actions-v2-local-selection-authority';
 const PREMIER='premier-phone';
 const E2='gemma4-e2b-it-litert-web';
 const E4='gemma4-e4b-it-litert-web';
@@ -121,8 +121,10 @@ function decorateCurrentPhone(){
     let html='';
     if(supportSnapshot.loading&&!supportSnapshot.checked)html='<button type="button" disabled>Checking support files…</button>';
     else if(supportSnapshot.missing.length)html=`<button type="button" data-gemma4-phone-support>Download missing support files internally (${supportSnapshot.missing.length})</button>`;
-    else if(state.status==='ready')html='<button type="button" data-gemma4-phone-use="gemma4-e2b-it-litert-web">Use fast phone model</button><button type="button" data-gemma4-phone-use="gemma4-e4b-it-litert-web">Use deep phone model</button>';
-    else html='<button type="button" data-gemma4-phone-reconcile>Finish phone performance core</button>';
+    else if(state.status==='ready'){
+      const selected=manager()?.selection?.(),active=selected?.active?selected.id:state.selectedModel;
+      html=`<button type="button" data-gemma4-phone-use="${E2}" aria-pressed="${active===E2?'true':'false'}">${active===E2?'Using fast phone model':'Use fast phone model'}</button><button type="button" data-gemma4-phone-use="${E4}" aria-pressed="${active===E4?'true':'false'}">${active===E4?'Using deep phone model':'Use deep phone model'}</button>`;
+    }else html='<button type="button" data-gemma4-phone-reconcile>Finish phone performance core</button>';
     if(actions.innerHTML!==html)actions.innerHTML=html;
   }
   supportNote(card);
@@ -237,7 +239,17 @@ async function refreshSupportStatus({autoReconcile=true}={}){
     return supportSnapshot;
   }finally{supportSnapshot={...supportSnapshot,loading:false};scheduleDecorate()}
 }
-async function useModel(modelId){const checked=await recognizeImportedModel(modelId);if(!checked?.available)throw new Error(`${checked?.label||modelId} is not installed.`);const m=manager();if(!m?.select)throw new Error('Local model manager is unavailable.');m.select(modelId);return checked}
+async function useModel(modelId){
+  const checked=await recognizeImportedModel(modelId);if(!checked?.available)throw new Error(`${checked?.label||modelId} is not installed.`);
+  const m=manager();if(!m?.select)throw new Error('Local model manager is unavailable.');
+  const selected=m.select(modelId),packMap=stateMap(),previous=packMap[PREMIER]||{},at=new Date().toISOString();
+  packMap[PREMIER]={...previous,status:'ready',phase:'ready',percent:100,selectedModel:modelId,lastUsedAt:at,updatedAt:at};
+  localStorage.setItem(PACK_STATE_KEY,JSON.stringify(packMap));
+  const route=globalThis.CivweaveSettingsLocalRouteV323?.persistLocalRoute?.(selected||m.selection?.()||{active:true,id:modelId});
+  if(!route)throw new Error('The local model was selected, but Civweave could not make downloaded local AI the active provider route.');
+  try{dispatchEvent(new CustomEvent('civweave:local-model-pack-selected',{detail:{version:VERSION,id:PREMIER,label:'Premier Phone Pack',model:modelId,source:'gemma4-phone-use'}}))}catch{}
+  scheduleDecorate();return checked;
+}
 function onClick(event){
   const support=event.target?.closest?.('[data-gemma4-phone-support]');
   if(support){event.preventDefault();event.stopImmediatePropagation();support.disabled=true;void downloadSupportFiles().catch(error=>statusLine(String(error?.message||error),true)).finally(()=>{support.disabled=false;void refreshSupportStatus({autoReconcile:true})});return}
@@ -247,14 +259,15 @@ function onClick(event){
   event.preventDefault();event.stopImmediatePropagation();use.disabled=true;void useModel(use.dataset.gemma4PhoneUse).then(row=>statusLine(`${row.label||'Gemma 4'} selected for local phone work.`)).catch(error=>statusLine(String(error?.message||error),true)).finally(()=>{use.disabled=false;scheduleDecorate()});
 }
 document.addEventListener('click',onClick,true);
-for(const name of ['civweave:model-settings-opened','civweave:settings-opened','civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-downloaded','civweave:gemma4-support-progress','pageshow'])addEventListener(name,()=>{scheduleDecorate();if(pendingSummary().complete)void refreshSupportStatus({autoReconcile:true})});
+for(const name of ['civweave:model-settings-opened','civweave:settings-opened','civweave:local-model-pack-progress','civweave:local-model-pack-installed','civweave:local-model-downloaded','civweave:local-model-selection','civweave:local-model-pack-selected','civweave:gemma4-support-progress','pageshow'])addEventListener(name,()=>{scheduleDecorate();if(pendingSummary().complete)void refreshSupportStatus({autoReconcile:true})});
 globalThis.CivweaveGemma4DualQ4ActionsV1=Object.freeze({
   version:VERSION,primaryModel:E2,deepModel:E4,packId:PREMIER,supportIds:SUPPORT_IDS,supportWorker:SUPPORT_WORKER,
   scheduleDecorate,decorateSettings:decorateCurrentPhone,pendingSummary,reconcilePhoneCore,useModel,synchronizeImportedModels,recognizeImportedModel,repairPremierReceipt,supportStatus,refreshSupportStatus,downloadSupportFiles,
   compatibilityOnly:true,currentPhoneAuthority:true,presentationOwnership:true,singlePresentationOwner:true,
   mutationObserverGuarded:false,mutationObserver:false,q4PresentationRetired:true,
   completedImportReconciliation:true,opfsReceiptReconciliation:true,preservesExistingLargeFiles:true,fullPackReinstallRequired:false,
-  missingSupportDownloadAction:true,supportDownloadsWorkerOnly:true,supportLargeFileReimportRequired:false,supportFilesInternal:true,supportAutoDetect:true,browserReceiptGemmaOnly:true
+  missingSupportDownloadAction:true,supportDownloadsWorkerOnly:true,supportLargeFileReimportRequired:false,supportFilesInternal:true,supportAutoDetect:true,browserReceiptGemmaOnly:true,
+  localSelectionPersistsProviderRoute:true,selectedButtonStateVisible:true
 });
 void synchronizeImportedModels().catch(()=>null).then(()=>refreshSupportStatus({autoReconcile:true})).catch(()=>null).finally(scheduleDecorate);
 })();
