@@ -1,0 +1,34 @@
+name: Verify Gemma 4 Compact Quest Envelope
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/gemma4-current-registry-authority-v1.js'
+      - 'public/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js'
+      - 'scripts/verify-gemma4-structured-quest-compact-envelope-v1.mjs'
+      - '.github/workflows/verify-gemma4-structured-quest-compact-envelope-v1.yml'
+  push:
+    branches:
+      - staging
+    paths:
+      - 'public/app/local-ai/gemma4-current-registry-authority-v1.js'
+      - 'public/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js'
+      - 'scripts/verify-gemma4-structured-quest-compact-envelope-v1.mjs'
+      - '.github/workflows/verify-gemma4-structured-quest-compact-envelope-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check compact Quest runtime syntax
+        run: |
+          node --check public/app/local-ai/gemma4-current-registry-authority-v1.js
+          node --check public/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js
+          node --check scripts/verify-gemma4-structured-quest-compact-envelope-v1.mjs
+      - name: Verify compact local Quest envelope
+        run: node scripts/verify-gemma4-structured-quest-compact-envelope-v1.mjs
