@@ -1,12 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.28-model-settings-controller-v173-premier-phone-finalizer';
+const VERSION='1.0.29-model-settings-controller-v173-local-selection-authority';
 const GEMMA4_QWEN_VERSION='1.0.0-premier-phone-qwen-download-v1';
 const GEMMA4_QWEN_SRC='/app/local-ai/premier-phone-qwen-download-v1.js?v=1.0.0-qwen-internal';
 const GEMMA4_FINALIZER_VERSION='1.0.0-premier-phone-finalizer-v1';
 const GEMMA4_FINALIZER_SRC='/app/local-ai/premier-phone-finalizer-v1.js?v=1.0.0-idempotent-existing-components';
-const GEMMA4_ACTIONS_VERSION='1.3.1-gemma4-dual-actions-v2-support-autodetect';
-const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.3.1-support-autodetect';
+const GEMMA4_ACTIONS_VERSION='1.3.2-gemma4-dual-actions-v2-local-selection-authority';
+const GEMMA4_ACTIONS_SRC='/app/local-ai/gemma4-dual-actions-v2.js?v=1.3.2-local-selection-authority';
 const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
 const GEMMA4_PHONE_VERSION='1.3.0-gemma4-phone-performance-core-v1-runtime-only-support-status';
@@ -117,6 +117,7 @@ const api=Object.freeze({
   gemma4IdempotentFinalizer:true,
   gemma4FinalizerPreservesExistingDownloads:true,
   gemma4FinalizerLoadsBeforeLegacyActions:true,
+  gemma4LocalSelectionPersistsProviderRoute:true,
   gemma4PassivePreload:false,
   inputOwnership:false,presentationOwnership:false,credentialOwnership:false,domCreation:false,activationRequired:false,legacySettingsCapture:false,providerRuntimeOnOpen:false,quiescenceAfterPaint:true
 });
