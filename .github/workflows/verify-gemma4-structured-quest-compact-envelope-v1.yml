@@ -5,6 +5,9 @@ on:
     paths:
       - 'public/app/local-ai/gemma4-current-registry-authority-v1.js'
       - 'public/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'public/app/shell-integrity-v281.json'
       - 'scripts/verify-gemma4-structured-quest-compact-envelope-v1.mjs'
       - '.github/workflows/verify-gemma4-structured-quest-compact-envelope-v1.yml'
   push:
@@ -13,6 +16,9 @@ on:
     paths:
       - 'public/app/local-ai/gemma4-current-registry-authority-v1.js'
       - 'public/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'public/app/shell-integrity-v281.json'
       - 'scripts/verify-gemma4-structured-quest-compact-envelope-v1.mjs'
       - '.github/workflows/verify-gemma4-structured-quest-compact-envelope-v1.yml'
   workflow_dispatch:
