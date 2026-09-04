@@ -4,7 +4,15 @@ import vm from 'node:vm';
 
 const source=await readFile(new URL('../public/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js',import.meta.url),'utf8');
 const registrySource=await readFile(new URL('../public/app/local-ai/gemma4-current-registry-authority-v1.js',import.meta.url),'utf8');
-assert.match(registrySource,/gemma4-structured-quest-compact-envelope-v1\.js\?v=1\.0\.0-compact-envelope/,'current Gemma registry authority must load the compact Quest envelope in every shell that already loads current phone-model authority');
+const workingCampus=await readFile(new URL('../public/app/working-campus-v440.html',import.meta.url),'utf8');
+const persistentShell=await readFile(new URL('../public/app/persistent-system-shell-v1.html',import.meta.url),'utf8');
+assert.match(registrySource,/gemma4-structured-quest-compact-envelope-v1\.js\?v=1\.0\.0-compact-envelope/,'current Gemma registry authority must retain its compact Quest fallback loader');
+for(const [name,html] of [['Working Campus',workingCampus],['persistent shell',persistentShell]]){
+  const completionIndex=html.indexOf('/app/local-ai/gemma4-structured-quest-completion-v1.js');
+  const compactIndex=html.indexOf('/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js?v=1.0.0-compact-envelope');
+  assert.ok(completionIndex>=0,`${name} must load the base structured Quest completion bridge`);
+  assert.ok(compactIndex>completionIndex,`${name} must directly load the compact Quest bridge after the base completion bridge so cached registry authority cannot strand the old full-JSON path`);
+}
 const storage=new Map([['civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e4b-it-litert-web'})]]);
 let generatedArgs=null;
 const localSelection={active:true,id:'gemma4-e4b-it-litert-web'};
@@ -108,4 +116,4 @@ assert.equal(wrappedResult.request.__civweaveCompactStructuredQuestEnvelopeV1,tr
 assert.equal(wrappedResult.request.maxRepairAttempts,2);
 assert.equal(typeof wrappedResult.request.transport,'function');
 
-console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-compact-envelope-v1',compactEnvelope:true,repairInputCompacted:true,maxRepairAttempts:2,e4Budget:2800,manifestationAppExpanded:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-compact-envelope-v1',compactEnvelope:true,directShellLoad:true,repairInputCompacted:true,maxRepairAttempts:2,e4Budget:2800,manifestationAppExpanded:true},null,2));
