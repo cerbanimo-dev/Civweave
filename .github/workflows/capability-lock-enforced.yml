@@ -1,0 +1,87 @@
+name: Civweave Capability Lock Enforced
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - staging
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: capability-lock-enforced-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  capability-lock-enforced:
+    name: capability-lock-enforced
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout trusted default-branch authority
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+          path: authority
+
+      - name: Use pinned Node runtime
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: 22
+
+      - name: Resolve and verify immutable PR refs
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          git -C authority fetch --no-tags origin \
+            "+${BASE_SHA}:refs/capability-lock/base" \
+            "+${HEAD_SHA}:refs/capability-lock/head" \
+            "+refs/pull/${PR_NUMBER}/merge:refs/capability-lock/merge"
+          RESOLVED_BASE="$(git -C authority rev-parse refs/capability-lock/base)"
+          RESOLVED_HEAD="$(git -C authority rev-parse refs/capability-lock/head)"
+          RESOLVED_MERGE="$(git -C authority rev-parse refs/capability-lock/merge)"
+          FIRST_PARENT="$(git -C authority rev-parse refs/capability-lock/merge^1)"
+          SECOND_PARENT="$(git -C authority rev-parse refs/capability-lock/merge^2)"
+          [[ "$RESOLVED_BASE" == "$BASE_SHA" ]]
+          [[ "$RESOLVED_HEAD" == "$HEAD_SHA" ]]
+          [[ "$FIRST_PARENT" == "$BASE_SHA" ]]
+          [[ "$SECOND_PARENT" == "$HEAD_SHA" ]]
+          AUTHORITY_SHA="$(git -C authority rev-parse HEAD)"
+          echo "CIVWEAVE_AUTHORITY_SHA=${AUTHORITY_SHA}" >> "$GITHUB_ENV"
+          echo "CIVWEAVE_BASE_SHA=${RESOLVED_BASE}" >> "$GITHUB_ENV"
+          echo "CIVWEAVE_CANDIDATE_SHA=${RESOLVED_MERGE}" >> "$GITHUB_ENV"
+
+      - name: Install isolated browser contract runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOOLS="$RUNNER_TEMP/capability-tools"
+          mkdir -p "$TOOLS"
+          cd "$TOOLS"
+          npm init -y >/dev/null 2>&1
+          npm install --ignore-scripts --no-save playwright@1.55.0
+          node node_modules/playwright/cli.js install chromium
+          echo "CIVWEAVE_TOOLS_NODE_MODULES=$TOOLS/node_modules" >> "$GITHUB_ENV"
+
+      - name: Run default-branch-authority Capability Lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          node authority/scripts/capability-lock-enforced-runner.mjs \
+            --authority "$GITHUB_WORKSPACE/authority" \
+            --authority-ref "$CIVWEAVE_AUTHORITY_SHA" \
+            --base-ref "$CIVWEAVE_BASE_SHA" \
+            --candidate-ref "$CIVWEAVE_CANDIDATE_SHA" \
+            --work-root "$RUNNER_TEMP/capability-lock-workspaces" \
+            --tools-node-modules "$CIVWEAVE_TOOLS_NODE_MODULES"
