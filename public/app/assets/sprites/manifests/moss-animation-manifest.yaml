@@ -1,0 +1,53 @@
+# Moss — Living School animation interpretation manifest
+character:
+  name: "Moss"
+  species: "Anthropomorphic owl"
+  realm: "Living School"
+  role: "Learner / teacher / seed-keeper"
+  visual_hooks: ["small tawny owl", "green leaf cloak", "acorn companion", "wooden teaching staff"]
+  animation_personality: ["gentle grounded beats", "wing-led gestures", "protective hugs", "sudden brave bursts"]
+sheet:
+  file: "Living-School-moss-sprites.png"
+  dimensions_px: [1536, 1024]
+  rows: 4
+  columns: 5
+  indexing: "R{row}C{column}, 1-based"
+  note: "Concept/emote atlas: each cell is a key pose, not a production in-between frame."
+poses:
+  R1C1: {label: acorn_idle, description: "Neutral stance hugging an acorn companion.", tags: [idle, acorn]}
+  R1C2: {label: happy_hug, description: "Joyful hug/wave with the acorn.", tags: [happy, support]}
+  R1C3: {label: wing_cheer, description: "Wings spread in celebration.", tags: [cheer, success]}
+  R1C4: {label: seated_laugh, description: "Sits laughing with the acorn.", tags: [laugh, sit]}
+  R1C5: {label: inspect, description: "Looks through a magnifying glass.", tags: [inspect, learn]}
+  R2C1: {label: leaf_thought, description: "Ponders a leaf idea while holding the acorn.", tags: [think, leaf]}
+  R2C2: {label: confused, description: "Question-mark confusion.", tags: [confused]}
+  R2C3: {label: startled, description: "Wings up in surprise.", tags: [surprise]}
+  R2C4: {label: worried, description: "Hugs the acorn protectively with worried eyes.", tags: [worry, protect]}
+  R2C5: {label: quiet_cry, description: "Looks down with tears while holding the acorn.", tags: [cry, revision]}
+  R3C1: {label: big_cry, description: "Large crying reaction.", tags: [cry, fail]}
+  R3C2: {label: comfort, description: "Closed-eye comforting hug.", tags: [heal, comfort]}
+  R3C3: {label: brave_charge, description: "Runs/charges forward with wings set.", tags: [charge, attack]}
+  R3C4: {label: lesson_staff, description: "Raises a wooden staff with blue-green lens.", tags: [staff, teach, magic]}
+  R3C5: {label: leaf_wink, description: "Winks and raises a leafy twig/wand.", tags: [leaf, magic, support]}
+  R4C1: {label: sleep, description: "Sleeps beneath the cloak beside the acorn.", tags: [sleep]}
+  R4C2: {label: acorn_victory, description: "Cheers while lifting the acorn companion.", tags: [success, cheer]}
+  R4C3: {label: wave, description: "Friendly open-wing wave.", tags: [wave]}
+  R4C4: {label: point_lesson, description: "Points toward the next step while holding the acorn.", tags: [point, teach]}
+  R4C5: {label: heart_hug, description: "Happy heart-framed hug.", tags: [heart, heal, success]}
+animation_groups:
+  idle: {type: loop, sequence: [R1C1, R1C2, R1C1, R3C2], target_duration_s: 2.4}
+  acorn_guard:
+    type: action
+    sequence: [R2C4, R3C4, R3C5, R4C5]
+    target_duration_s: 1.35
+    notes: ["Grow a leaf/acorn shield between the party and incoming charm hearts.", "Shield can crack rather than disappear on a revision outcome."]
+  lesson_light: {type: action, sequence: [R2C1, R3C4, R4C4, R1C3], target_duration_s: 1.3}
+  seed_charge: {type: action, sequence: [R3C3, R3C5, R4C2], target_duration_s: 1.0}
+  revision_reaction: {type: reaction_chain, sequence: [R2C3, R2C4, R2C5], target_duration_s: 1.4}
+  celebrate: {type: loop, sequence: [R1C3, R4C2, R4C3], target_duration_s: 1.4}
+  sleep_idle: {type: loop, sequence: [R4C1], target_duration_s: 3.0}
+production_notes:
+  recommended_fps: 12
+  anchor: "feet/base center"
+  secondary_motion: ["cloak settles after wing motions", "acorn companion bobs one frame late", "staff glow should stay soft and educational rather than destructive"]
+  battle_identity: "Moss protects the party with leaf/acorn wards and turns learning into a support attack."

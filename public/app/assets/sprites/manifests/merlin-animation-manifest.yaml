@@ -1,0 +1,53 @@
+# Merlin — Anarchadia animation interpretation manifest
+character:
+  name: "Merlin"
+  species: "Clockwork wizard / lens-being"
+  realm: "Anarchadia"
+  role: "Observer / navigator / arcane analyst"
+  visual_hooks: ["brass clockwork body", "single huge blue lens", "purple star hat and cape", "compass-star chest"]
+  animation_personality: ["precise mechanical starts", "big telescope curiosity", "unexpectedly exuberant spell flourishes", "gear-driven pauses"]
+sheet:
+  file: "Anarchadia-merlin-sprites.png"
+  dimensions_px: [1536, 1024]
+  rows: 4
+  columns: 5
+  indexing: "R{row}C{column}, 1-based"
+  note: "Concept/emote atlas: each cell is a key pose, not a production in-between frame."
+poses:
+  R1C1: {label: lens_idle, description: "Neutral standing lens-wizard pose.", tags: [idle, observe]}
+  R1C2: {label: confident_fist, description: "Raises a fist with a wink/confident beat.", tags: [ready, cheer]}
+  R1C3: {label: orbit_cast, description: "Surrounded by a blue-purple orbit ring.", tags: [magic, attack, orbit]}
+  R1C4: {label: jump_cheer, description: "Both fists up in celebration.", tags: [jump, success]}
+  R1C5: {label: telescope_scan, description: "Extends telescope lens toward the target.", tags: [scan, inspect, verify]}
+  R2C1: {label: gear_think, description: "Orange gears turn beside the head during analysis.", tags: [think, gears]}
+  R2C2: {label: confused, description: "Question marks around a puzzled pose.", tags: [confused]}
+  R2C3: {label: startled, description: "Arms thrown outward in surprise.", tags: [surprise]}
+  R2C4: {label: anxious, description: "Sweat-drop anxious reaction.", tags: [worry, revision]}
+  R2C5: {label: grumpy_sit, description: "Sits with narrowed eye and folded posture.", tags: [annoyed, fail]}
+  R3C1: {label: waterworks, description: "Comically strong crying reaction.", tags: [cry, fail]}
+  R3C2: {label: heart_signal, description: "Blows/sends heart signals.", tags: [heart, support]}
+  R3C3: {label: target_point, description: "Points decisively at the target.", tags: [point, target]}
+  R3C4: {label: compass_staff, description: "Raises the star-compass staff with sparkles.", tags: [staff, magic, success]}
+  R3C5: {label: orb_charge, description: "Builds a blue-purple arcane orb.", tags: [magic, charge, attack]}
+  R4C1: {label: sleep, description: "Sleeps under hat/cape with Z marks.", tags: [sleep]}
+  R4C2: {label: star_victory, description: "Celebrates amid gold stars.", tags: [success, stars]}
+  R4C3: {label: alert_ready, description: "One fist up, focused and ready.", tags: [ready, attack]}
+  R4C4: {label: command_point, description: "Points the route/target with confident stance.", tags: [point, guide]}
+  R4C5: {label: full_spell, description: "Large blue-purple spell orbit around staff and body.", tags: [magic, attack, finisher]}
+animation_groups:
+  idle: {type: loop, sequence: [R1C1, R1C5, R1C1, R2C1], target_duration_s: 2.3}
+  star_compass_beam:
+    type: action
+    sequence: [R1C5, R3C3, R3C5, R4C5, R3C4]
+    target_duration_s: 1.45
+    notes: ["Telescope scan acquires target before the beam.", "Beam can use compass-star geometry and blue-purple rings."]
+  validation_scan: {type: loop, sequence: [R1C5, R2C1, R1C5], target_duration_s: 1.9}
+  revision_reaction: {type: reaction_chain, sequence: [R2C3, R2C4, R2C5], target_duration_s: 1.4}
+  orbit_guard: {type: action, sequence: [R4C3, R1C3, R3C4], target_duration_s: 1.1}
+  celebrate: {type: loop, sequence: [R1C4, R4C2, R1C2], target_duration_s: 1.35}
+  sleep_idle: {type: loop, sequence: [R4C1], target_duration_s: 3.0}
+production_notes:
+  recommended_fps: 12
+  anchor: "feet/base center"
+  secondary_motion: ["hat settles after jumps", "telescope extends on scan", "gear effects spin in short stepped increments"]
+  battle_identity: "Merlin scans the validation state, then fires a precise compass-star beam or orbit ward."
