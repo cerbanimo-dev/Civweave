@@ -6,26 +6,27 @@
 // code only after an explicit model action.
 const CW_SETTINGS_V339_GATEWAY='/app/settings-gateway-v317.js';
 const CW_SETTINGS_V339_ENTRY='/app/settings-direct-entry-v339.js?v=1.4.0-settings-direct-entry-v339';
-const CW_SETTINGS_V339_CACHE='cw-settings-v339-direct-gateway-v1';
-const CW_SETTINGS_V339_BOOTSTRAP_MARKER='v339-saved-state-first-bootstrap';
+const CW_SETTINGS_LOCAL_INTERACTION='/app/settings-local-interaction-repair-v1.js?v=1.0.0-inline-import-recovery';
+const CW_SETTINGS_V339_CACHE='cw-settings-v339-direct-gateway-v2';
+const CW_SETTINGS_V339_BOOTSTRAP_MARKER='v339-saved-state-first-bootstrap-v2';
 
 function cwSettingsV339Headers(source){
   const headers=new Headers(source?.headers||{});
   headers.delete('content-length');headers.delete('content-encoding');headers.delete('etag');headers.delete('last-modified');
   headers.set('content-type','application/javascript; charset=utf-8');
   headers.set('cache-control','no-store');
-  headers.set('x-civweave-settings-build','v339-direct-gateway');
+  headers.set('x-civweave-settings-build','v339-direct-gateway-v2');
   return headers;
 }
 async function cwSettingsV339Network(request){return fetch(new Request(request,{method:'GET',cache:'no-store',credentials:'same-origin'}))}
 async function cwSettingsV339Cached(){try{return await caches.match(new Request(new URL(CW_SETTINGS_V339_GATEWAY,self.location.origin).href),{ignoreSearch:true})}catch{return null}}
 function cwSettingsV339Bootstrap(){
-  return `\n;(()=>{'use strict';const marker='${CW_SETTINGS_V339_BOOTSTRAP_MARKER}',src='${CW_SETTINGS_V339_ENTRY}';if(globalThis.CivweaveSettingsDirectEntryV339?.savedStateFirst===true)return;const existing=[...document.scripts].some(script=>{try{return new URL(script.src,location.href).pathname==='/app/settings-direct-entry-v339.js'}catch{return false}});if(existing)return;const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsDirectBootstrap=marker;(document.head||document.documentElement).append(script);})();\n`;
+  return `\n;(()=>{'use strict';const marker='${CW_SETTINGS_V339_BOOTSTRAP_MARKER}',entries=[['/app/settings-direct-entry-v339.js','${CW_SETTINGS_V339_ENTRY}','civweaveSettingsDirectBootstrap'],['/app/settings-local-interaction-repair-v1.js','${CW_SETTINGS_LOCAL_INTERACTION}','civweaveSettingsLocalInteractionBootstrap']];for(const [path,src,key] of entries){const existing=[...document.scripts].some(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}});if(existing)continue;const script=document.createElement('script');script.src=src;script.async=false;script.dataset[key]=marker;(document.head||document.documentElement).append(script)}})();\n`;
 }
 function cwSettingsV339TransformGateway(text){
   let output=String(text||'');
-  output=output.replaceAll('1.0.134-settings-v324-local-route-self-loading','1.0.136-settings-v339-saved-state-first');
-  output=output.replaceAll('1.0.133-settings-v324-direct-local-model-view','1.0.136-settings-v339-saved-state-first');
+  output=output.replaceAll('1.0.134-settings-v324-local-route-self-loading','1.0.137-settings-v339-inline-local-recovery');
+  output=output.replaceAll('1.0.133-settings-v324-direct-local-model-view','1.0.137-settings-v339-inline-local-recovery');
   output=output.replaceAll('CIVWEAVE SETTINGS · v324','CIVWEAVE SETTINGS · v339');
   output=output.replaceAll('settings-v324','settings-v339');
   output=output.replaceAll("civweaveSettingsService='v324'","civweaveSettingsService='v339'");
@@ -46,19 +47,18 @@ self.addEventListener('fetch',event=>{
   event.stopImmediatePropagation();event.respondWith(cwSettingsV339GatewayResponse(request));
 });
 
-// v345 staging takeover: the regression began when the formerly headless
-// model-settings compatibility facade started eagerly hydrating the Gemma 4 pack
-// on load/pageshow. That can occupy Settings before its saved-state Local Models
-// renderer paints. Force one new staging worker generation and remove only cached
-// Settings executables, including the regressed controller; saved model state and
-// downloaded model/model-pack bytes remain untouched.
-const CW_SETTINGS_V345_HOST='civweave-staging.pages.dev';
-const CW_SETTINGS_V345_CACHE='cwrecovery-v458-settings-passive-gemma-v345';
-const CW_SETTINGS_V345_MARKER='/__civweave/settings-passive-gemma-v345';
-const CW_SETTINGS_V345_PURGE_PATHS=new Set([
+// v346 staging takeover: recover installed Settings realms that still expose the
+// v324 loading placeholder or route browser-pack imports to the app Downloads page.
+// Purge executable Settings presentation/action code only. Saved model state,
+// Gemma OPFS files, and internal model caches remain untouched.
+const CW_SETTINGS_V346_HOST='civweave-staging.pages.dev';
+const CW_SETTINGS_V346_CACHE='cwrecovery-v459-settings-inline-import-v346';
+const CW_SETTINGS_V346_MARKER='/__civweave/settings-inline-import-v346';
+const CW_SETTINGS_V346_PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/settings-gateway-v317.js',
   '/app/settings-direct-entry-v339.js',
+  '/app/settings-local-interaction-repair-v1.js',
   '/app/settings-local-loader-v337.js',
   '/app/settings-local-models-direct-v325.js',
   '/app/settings-local-route-v323.js',
@@ -68,28 +68,28 @@ const CW_SETTINGS_V345_PURGE_PATHS=new Set([
   '/app/model-settings-controller-v173.js',
   '/app/shell-integrity-v281.json'
 ]);
-function cwSettingsV345MarkerRequest(){return new Request(new URL(CW_SETTINGS_V345_MARKER,self.location.origin).href)}
-async function cwSettingsV345Pending(){
-  if(self.location.hostname!==CW_SETTINGS_V345_HOST)return false;
-  try{return !(await(await caches.open(CW_SETTINGS_V345_CACHE)).match(cwSettingsV345MarkerRequest()))}catch{return true}
+function cwSettingsV346MarkerRequest(){return new Request(new URL(CW_SETTINGS_V346_MARKER,self.location.origin).href)}
+async function cwSettingsV346Pending(){
+  if(self.location.hostname!==CW_SETTINGS_V346_HOST)return false;
+  try{return !(await(await caches.open(CW_SETTINGS_V346_CACHE)).match(cwSettingsV346MarkerRequest()))}catch{return true}
 }
-async function cwSettingsV345Purge(){
+async function cwSettingsV346Purge(){
   const names=await caches.keys();
   for(const name of names){
     const cache=await caches.open(name),requests=await cache.keys();
     for(const request of requests){
       let pathname='';try{pathname=new URL(request.url).pathname}catch{}
-      if(CW_SETTINGS_V345_PURGE_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true});
+      if(CW_SETTINGS_V346_PURGE_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true});
     }
   }
 }
-if(self.location.hostname===CW_SETTINGS_V345_HOST){
-  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await cwSettingsV345Pending())await self.skipWaiting()})())});
+if(self.location.hostname===CW_SETTINGS_V346_HOST){
+  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await cwSettingsV346Pending())await self.skipWaiting()})())});
   self.addEventListener('activate',event=>{event.waitUntil((async()=>{
-    if(!(await cwSettingsV345Pending()))return;
-    await cwSettingsV345Purge();
-    const cache=await caches.open(CW_SETTINGS_V345_CACHE);
-    await cache.put(cwSettingsV345MarkerRequest(),new Response('settings-passive-gemma-v345-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));
+    if(!(await cwSettingsV346Pending()))return;
+    await cwSettingsV346Purge();
+    const cache=await caches.open(CW_SETTINGS_V346_CACHE);
+    await cache.put(cwSettingsV346MarkerRequest(),new Response('settings-inline-import-v346-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));
     await self.clients.claim();
   })())});
 }
