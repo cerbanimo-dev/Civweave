@@ -1,10 +1,10 @@
 {
   "schema": "civweave.open-learning-media-title-quality-audit.v2",
-  "built_at": "2026-08-31T11:39:03Z",
-  "records_before": 206,
+  "built_at": "2026-09-07T10:18:54Z",
+  "records_before": 207,
   "records_after": 179,
-  "rejected_records": 27,
-  "rejected_topic_links": 29,
+  "rejected_records": 28,
+  "rejected_topic_links": 30,
   "rejected_samples": [
     {
       "provider": "peertube",
@@ -56,27 +56,21 @@
     },
     {
       "provider": "peertube",
-      "provider_id": "1536791e-0f02-43ce-abf1-108a290ecc2e",
-      "title": "Secret Service Agent: How To Stay In Control When Someone Is Trying To Manipulate You!",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
       "provider_id": "248c90fc-1123-4999-ab89-dcbfacb9bb71",
       "title": "Direct ballpen training - video capture test",
       "topic_slug": "drawing-design"
     },
     {
       "provider": "peertube",
-      "provider_id": "d966777a-de5e-4c9d-bd65-d8349bcf8efb",
-      "title": "Quick start guide",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "peertube",
       "provider_id": "9534cc48-5fa0-470e-99c3-50cad15bab55",
       "title": "[Tech Maid] Mesecons Basics",
       "topic_slug": "electronics-basics"
+    },
+    {
+      "provider": "peertube",
+      "provider_id": "4e7a5dd6-a77c-4eef-a429-5817bac57037",
+      "title": "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
+      "topic_slug": "entrepreneurship-small-business"
     },
     {
       "provider": "peertube",
@@ -100,6 +94,18 @@
       "provider": "peertube",
       "provider_id": "318c7042-49a1-4134-81c8-8eb1f4b7dc13",
       "title": "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
+      "topic_slug": "language-learning"
+    },
+    {
+      "provider": "peertube",
+      "provider_id": "6063f531-1c36-430b-af13-a57238640202",
+      "title": "[Language learning] How to create and edit language in LingLibre?",
+      "topic_slug": "language-learning"
+    },
+    {
+      "provider": "peertube",
+      "provider_id": "729eefb9-ccf9-4e2e-a70f-aef6e7e3de8e",
+      "title": "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
       "topic_slug": "language-learning"
     },
     {
@@ -201,23 +207,23 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 7,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 7
+        "peertube": 8
       },
       "top_titles": [
         "Come and learn how free maps, free knowledge can help care for the world",
         "How to use Mergin Maps in Academia",
         "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
         "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
         "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
@@ -225,18 +231,18 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 5,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 5,
+        "peertube": 3
       },
       "top_titles": [
-        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
+        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
@@ -330,10 +336,10 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
@@ -344,7 +350,8 @@
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
-        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
+        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
+        "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool"
       ]
     },
     "computing-basics": {
@@ -409,16 +416,17 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
-        "The Philosophy of Antifa"
+        "The Philosophy of Antifa",
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
@@ -482,13 +490,16 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 4
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence"
@@ -513,11 +524,11 @@
       "name": "Cooking & Food Safety",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "EU Health and Food Safety - Audit and Non-Audit work explained",
@@ -525,8 +536,7 @@
         "\" COOKING TERMS AND WHAT THEY MEAN \" 1949 KITCHEN / HOME ECONOMICS TEACHING FILM GG24515",
         "Gear Up for Food Safety",
         "Food Safety During Power Outages",
-        "Food Safety Video",
-        "SubCat-Peking: Production of Natural Food Preservatives Containing Lysozyme and ... (2025) - Team Presentation [English]"
+        "Food Safety Video"
       ]
     },
     "emergency-preparedness": {
@@ -574,13 +584,12 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
-        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
@@ -613,15 +622,14 @@
       "name": "Drawing & Design",
       "school_slug": "arts",
       "required": false,
-      "records": 6,
+      "records": 5,
       "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "How to use the Artisan Charcoal brush pack for Painter",
-        "Inkscape Beginner Tutorial | Icon Drawing with Basic Shapes",
         "How to use the Sketch Essentials brush pack",
         "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Learn Grease Pencil 2D Animation in Blender 2.8 Alpha 2",
@@ -769,17 +777,15 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 6,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 5,
+        "peertube": 3,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
-        "Discover Who is On your LAN: Small Business Security 101",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
       ]
@@ -820,8 +826,8 @@
         "English Grammar — Present Perfect — Teaching Ideas — 2",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "English Grammar — Present Continuous — Structure",
-        "English Grammar — Present Perfect — Structure — 2"
+        "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+        "ESL - Sentence Structures： Simple, Compound and Complex"
       ]
     }
   },
@@ -859,7 +865,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 66,
+      "records": 70,
       "available": true
     },
     "digital-ai-literacy": {
@@ -883,7 +889,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 18,
       "available": true
     },
     "practical-life": {
@@ -905,7 +911,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 15,
       "available": true
     },
     "maker-creative": {
@@ -944,7 +950,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "deep-science": {
@@ -989,7 +995,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8333,
-      "records": 23,
+      "records": 26,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -1009,7 +1015,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 11,
+      "records": 12,
       "available": true
     },
     "mind-body-practice": {
@@ -1026,7 +1032,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.6667,
-      "records": 6,
+      "records": 7,
       "available": true
     },
     "relationships-care": {
@@ -1047,7 +1053,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "garden-nature": {
@@ -1084,7 +1090,7 @@
         "communication-conflict"
       ],
       "coverage": 1.0,
-      "records": 9,
+      "records": 8,
       "available": true
     },
     "music-performance": {
@@ -1134,7 +1140,7 @@
         "mathematics-foundations"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 19,
       "available": true
     },
     "home-independence": {
@@ -1154,7 +1160,7 @@
         "health-wellness"
       ],
       "coverage": 0.6,
-      "records": 11,
+      "records": 10,
       "available": true
     },
     "hands-on-maker": {
@@ -1176,7 +1182,7 @@
         "computing-basics"
       ],
       "coverage": 0.6667,
-      "records": 17,
+      "records": 16,
       "available": true
     },
     "environment-resilience": {
@@ -1195,7 +1201,7 @@
         "health-wellness"
       ],
       "coverage": 0.75,
-      "records": 12,
+      "records": 13,
       "available": true
     },
     "visual-storytelling": {
@@ -1232,7 +1238,7 @@
         "critical-thinking"
       ],
       "coverage": 0.75,
-      "records": 9,
+      "records": 10,
       "available": true
     },
     "technology-builder": {
@@ -1254,7 +1260,7 @@
         "prompt-engineering"
       ],
       "coverage": 1.0,
-      "records": 14,
+      "records": 13,
       "available": true
     }
   }

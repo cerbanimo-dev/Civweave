@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-08-31T11:39:03Z",
-  "before": 503,
-  "after": 270,
-  "rejected": 233,
+  "built_at": "2026-09-07T10:18:54Z",
+  "before": 502,
+  "after": 268,
+  "rejected": 234,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -35,12 +35,12 @@
         "How to use Mergin Maps in Academia",
         "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
         "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
         "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
-        "Quick start guide"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
@@ -48,19 +48,19 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 10,
-      "mesh_redistributable": 7,
+      "mesh_redistributable": 8,
       "providers": {
-        "peertube": 5,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 6,
+        "peertube": 4
       },
       "top_titles": [
-        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
+        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "When Code Became a Weapon - Crypto Wars Explained",
         "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
@@ -159,10 +159,10 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
@@ -173,7 +173,8 @@
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
-        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
+        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
+        "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool"
       ]
     },
     "computing-basics": {
@@ -239,16 +240,17 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 5,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
         "juneteeth 2026 part1 introduction chat and arcus chroma"
       ]
     },
@@ -313,13 +315,16 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 4
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence"
@@ -346,11 +351,11 @@
       "name": "Cooking & Food Safety",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "EU Health and Food Safety - Audit and Non-Audit work explained",
@@ -358,8 +363,7 @@
         "\" COOKING TERMS AND WHAT THEY MEAN \" 1949 KITCHEN / HOME ECONOMICS TEACHING FILM GG24515",
         "Gear Up for Food Safety",
         "Food Safety During Power Outages",
-        "Food Safety Video",
-        "SubCat-Peking: Production of Natural Food Preservatives Containing Lysozyme and ... (2025) - Team Presentation [English]"
+        "Food Safety Video"
       ]
     },
     "emergency-preparedness": {
@@ -407,13 +411,12 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 6,
-      "mesh_redistributable": 5,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 6
+        "peertube": 5
       },
       "top_titles": [
-        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "[Tech Maid] Mesecons Basics",
@@ -452,15 +455,14 @@
       "name": "Drawing & Design",
       "school_slug": "arts",
       "required": false,
-      "records": 7,
+      "records": 6,
       "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "How to use the Artisan Charcoal brush pack for Painter",
-        "Inkscape Beginner Tutorial | Icon Drawing with Basic Shapes",
         "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "How to use the Sketch Essentials brush pack",
         "Direct ballpen training - video capture test",
@@ -574,16 +576,14 @@
       "name": "Communication & Conflict",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "wikimedia-commons": 2,
-        "peertube": 1
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "Wikipedia to enhance student communication skills - Wikimedia Australia",
-        "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership",
-        "Secret Service Agent: How To Stay In Control When Someone Is Trying To Manipulate You!"
+        "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership"
       ]
     },
     "parenting-caregiving": {
@@ -617,17 +617,16 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 6,
+      "records": 5,
       "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
-        "Discover Who is On your LAN: Small Business Security 101",
+        "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
       ]
@@ -653,10 +652,10 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 25,
-      "mesh_redistributable": 25,
+      "records": 27,
+      "mesh_redistributable": 27,
       "providers": {
-        "peertube": 19,
+        "peertube": 21,
         "wikimedia-commons": 6
       },
       "top_titles": [
@@ -668,8 +667,8 @@
         "English Grammar — Present Continuous — Teaching Ideas — 2",
         "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
-        "English Grammar — Present Perfect — Teaching Ideas — 2",
-        "4 English phrasal verbs with up - Learn English grammar & vocabulary"
+        "[Language learning] How to create and edit language in LingLibre?",
+        "[Language learning] How to fast read with LingLibre using Keyboard shortcuts"
       ]
     }
   },
@@ -788,23 +787,16 @@
     },
     {
       "provider": "peertube",
+      "title": "Factorio Space Age: To The Edge of the Solar System! - 10/10/2025, 5:05:30 PM",
+      "relevance_topics": [
+        "astronomy-space"
+      ]
+    },
+    {
+      "provider": "peertube",
       "title": "Factorio Space Age: To The Edge of the Solar System! - 10/10/2025, 9:14:25 PM",
       "relevance_topics": [
         "astronomy-space"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Our Solar System - In Time (Full Album 2016)",
-      "relevance_topics": [
-        "astronomy-space"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "FOSS4G 2021 Open GeoData and Open-Source GIS in the Center for Forest Ecology and ......",
-      "relevance_topics": [
-        "biology-life"
       ]
     },
     {
@@ -817,6 +809,13 @@
     {
       "provider": "peertube",
       "title": "Human Impacts on Biodiversity ｜ Ecology and Environment ｜ Biology ｜ FuseSchool",
+      "relevance_topics": [
+        "biology-life"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "The media ecology of source code access",
       "relevance_topics": [
         "biology-life"
       ]
@@ -921,7 +920,21 @@
     },
     {
       "provider": "peertube",
+      "title": "Die demokratische Qualität von Debatten messbar machen; Espresso Doppio mit Mirko Lange vom Democracy Intellig",
+      "relevance_topics": [
+        "civics-society"
+      ]
+    },
+    {
+      "provider": "peertube",
       "title": "The Future of Democracy @ Horsham Skeptics in the Pub, May 2017",
+      "relevance_topics": [
+        "civics-society"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "TICTeC Show & Tell - Right to Know across Europe: impacts and lessons learned",
       "relevance_topics": [
         "civics-society"
       ]
@@ -948,13 +961,6 @@
       ]
     },
     {
-      "provider": "peertube",
-      "title": "First Gigawatt Down Part 2",
-      "relevance_topics": [
-        "climate-environment"
-      ]
-    },
-    {
       "provider": "wikimedia-commons",
       "title": "The Australian Institute of Marine Science (AIMS) is researching the current and possible future impacts of climate change on tropical marine ecosystems",
       "relevance_topics": [
@@ -971,6 +977,13 @@
     {
       "provider": "peertube",
       "title": "FOSS4G - Towards the establishment of a new opensource geospatial remote sensing VRE",
+      "relevance_topics": [
+        "climate-environment"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4G 2021 - Towards the establishment of a new opensource geospatial remote sensing VRE for ...",
       "relevance_topics": [
         "climate-environment"
       ]
@@ -1012,13 +1025,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Quatermass And The Pit (1967) predicts reaction to climate change",
-      "relevance_topics": [
-        "climate-environment"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "ULC: rap video cells (2024) [English]",
       "relevance_topics": [
         "climate-environment"
@@ -1036,13 +1042,6 @@
       "title": "The Non-Violent Communication Model",
       "relevance_topics": [
         "communication-conflict"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "BKA-Chipmixer",
-      "relevance_topics": [
-        "computing-basics"
       ]
     },
     {
@@ -1075,7 +1074,21 @@
     },
     {
       "provider": "peertube",
+      "title": "02.05 L'évolution du logiciel libre à l'heure du cloud",
+      "relevance_topics": [
+        "computing-basics"
+      ]
+    },
+    {
+      "provider": "peertube",
       "title": "2.5. L’évolution du logiciel libre à l’ère du Cloud",
+      "relevance_topics": [
+        "computing-basics"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "John Hardy's Australian and Kent Pitman's MIT early computer/internet +Ramin Honary #lispyGopherClimate #pc #lisp #basic",
       "relevance_topics": [
         "computing-basics"
       ]
@@ -1103,16 +1116,16 @@
     },
     {
       "provider": "peertube",
-      "title": "\" SAFE FOOD \" 1960s AGRICULTURAL FOOD HYGIENE AND SAFETY FILM SEASONAL FARM WORKERS XD98005",
+      "title": "UM-Macau: PoreGlow: Safeguarding Food Safety Against Live Listeria (2026) - Project Promotion",
       "relevance_topics": [
         "cooking-food-safety"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Vérifier l’info : le fact-checking - Samuel Etienne / Aude WTFake - La Collab' de l'info",
+      "title": "\" SAFE FOOD \" 1960s AGRICULTURAL FOOD HYGIENE AND SAFETY FILM SEASONAL FARM WORKERS XD98005",
       "relevance_topics": [
-        "critical-thinking"
+        "cooking-food-safety"
       ]
     },
     {
@@ -1132,6 +1145,20 @@
     {
       "provider": "peertube",
       "title": "Guerilla Media : Les Contradictions du Fact-Checking | Avec Le Canard Réfractaire et Igor Galligo",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "À propos du \"contrat Microsoft\" à l'Éducation nationale",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Wikimania 2026 – The edit button nobody clicks short-form video, creator-gen volunteers, and Wikipedia's recruitment gap",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -1229,7 +1256,7 @@
     },
     {
       "provider": "peertube",
-      "title": "FOSS4GE 2025 | fAIr - Community AI Assisted Mapping Roadmap",
+      "title": "MapLibre from data to rendering in one status update",
       "relevance_topics": [
         "earth-geography"
       ]
@@ -1244,6 +1271,13 @@
     {
       "provider": "peertube",
       "title": "A Power Supply for a Vintage Weller Soldering Iron",
+      "relevance_topics": [
+        "electronics-basics"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
       "relevance_topics": [
         "electronics-basics"
       ]
@@ -1390,13 +1424,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Gardening with a disability #125",
-      "relevance_topics": [
-        "gardening-plants"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "Illegal crops and vegetables growing by the road in Korea",
       "relevance_topics": [
         "gardening-plants"
@@ -1404,14 +1431,21 @@
     },
     {
       "provider": "peertube",
-      "title": "Lazy Gardening Podcast, die erste Episode P001",
+      "title": "BURGESS FLUIDIC LAWN FEEDER 1980s TV COMMERCIALS LAWN CARE & GARDENING XD45054o",
       "relevance_topics": [
         "gardening-plants"
       ]
     },
     {
       "provider": "peertube",
-      "title": "BURGESS FLUIDIC LAWN FEEDER 1980s TV COMMERCIALS LAWN CARE & GARDENING XD45054o",
+      "title": "Gardening with a disability #125",
+      "relevance_topics": [
+        "gardening-plants"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Lazy Gardening Podcast, die erste Episode P001",
       "relevance_topics": [
         "gardening-plants"
       ]
@@ -1565,13 +1599,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Data exploitation in reproductive healthcare in Kenya",
-      "relevance_topics": [
-        "law-rights-basics"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "Rosa Parks - Civil Rights Activist | Mini Bio | BIO",
       "relevance_topics": [
         "law-rights-basics"
@@ -1614,13 +1641,6 @@
     },
     {
       "provider": "peertube",
-      "title": "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool",
-      "relevance_topics": [
-        "mathematics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "fractions-decimales-et-nombres-decimaux-.mp4",
       "relevance_topics": [
         "mathematics-foundations"
@@ -1629,6 +1649,13 @@
     {
       "provider": "peertube",
       "title": "meditation loop",
+      "relevance_topics": [
+        "meditation-mindfulness"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Inner Smile Guided Meditation for Happiness & Relaxation",
       "relevance_topics": [
         "meditation-mindfulness"
       ]
@@ -1670,20 +1697,6 @@
     },
     {
       "provider": "peertube",
-      "title": "MEDITATION MEDICATION On the Banks of the Cumberland",
-      "relevance_topics": [
-        "meditation-mindfulness"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Jon Kabat-Zinn & Yuval Noah Harari In Conversation",
-      "relevance_topics": [
-        "meditation-mindfulness"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "Christmas music performance by Los Granaderos at Casa Rosada",
       "relevance_topics": [
         "music-performance"
@@ -1692,13 +1705,6 @@
     {
       "provider": "peertube",
       "title": "Eddy's Piano Performance - \"The Sound of Music\" (The Song of Do Re Mi), and \"Skater's Waltz\"",
-      "relevance_topics": [
-        "music-performance"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Lupe Fiasco presents “Rap Theory & Practice: an Introduction”",
       "relevance_topics": [
         "music-performance"
       ]
@@ -1783,13 +1789,6 @@
     {
       "provider": "peertube",
       "title": "Age of Mythology EE: Campagne FR [5] Juste assez de Corde pour se Pendre",
-      "relevance_topics": [
-        "mythology-folklore"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Age of Mythology EE: Campagne FR [6] Pourvu que Ça Marche",
       "relevance_topics": [
         "mythology-folklore"
       ]
