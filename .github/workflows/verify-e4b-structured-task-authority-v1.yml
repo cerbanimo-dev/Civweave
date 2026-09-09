@@ -4,15 +4,19 @@ on:
   push:
     paths:
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-e2b-intake-e4b-handoff-v1.mjs'
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
   pull_request:
     paths:
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-e2b-intake-e4b-handoff-v1.mjs'
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
 
@@ -30,5 +34,7 @@ jobs:
           node-version: '22'
       - name: Syntax check structured task authority
         run: node --check public/app/local-ai/gemma4-structured-task-authority-v1.js
-      - name: Verify E2B qualification and E4B structured tasks
+      - name: Syntax check local guide control bypass
+        run: node --check public/app/local-guide-control-bypass-v1.js
+      - name: Verify E2B intake and E4B structured generation
         run: node scripts/verify-e4b-structured-task-authority-v1.mjs
