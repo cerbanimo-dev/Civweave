@@ -8,9 +8,10 @@ const requestAuthoritySource=await readFile(new URL('../public/app/local-ai/gemm
 const fastRuntimeSource=await readFile(new URL('../public/app/local-ai/litert-gemma4-fast-runtime-v1.js',import.meta.url),'utf8');
 
 assert.match(registrySource,/gemma4-structured-quest-compact-envelope-v1\.js\?v=1\.1\.0-formatted-output/);
-assert.match(registrySource,/gemma4-litert-request-authority-v1\.js\?v=1\.0\.0-first-request-formatted-output/);
+assert.match(registrySource,/gemma4-litert-request-authority-v1\.js\?v=1\.0\.1-stable-composition/);
 assert.match(requestAuthoritySource,/firstRequestOwnership:true/);
 assert.match(requestAuthoritySource,/genericTransformersBypass:true/);
+assert.match(requestAuthoritySource,/stableAssistantComposition:true/);
 assert.match(fastRuntimeSource,/conversationConfig\.enableConstrainedDecoding=true/);
 assert.match(fastRuntimeSource,/prefaceConfig\.tools=\[formattedTool\]/);
 assert.match(fastRuntimeSource,/chunkToolCalls\(response\)/);
@@ -26,7 +27,7 @@ const sandbox={
   console,JSON,Object,Array,String,Number,Boolean,RegExp,Promise,Math,Date,
   localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value))},
   CivweaveGemma4StructuredQuestCompletionV1:base,
-  CivweaveGemma4LiteRTRequestAuthorityV1:{version:'1.0.0-gemma4-litert-request-authority-v1',ensure:async()=>{ensureCalls++;return true}},
+  CivweaveGemma4LiteRTRequestAuthorityV1:{version:'1.0.1-gemma4-litert-request-authority-v1-stable-composition',ensure:async()=>{ensureCalls++;return true}},
   CivweaveLocalChatRuntimeV295:{generate:async args=>{generatedArgs=args;if(args.structuredTool){if(formattedFailures>0){formattedFailures--;throw Object.assign(new Error('formatted lane unavailable'),{code:'TEST_FORMATTED_UNAVAILABLE'})}const argumentsObject=structuredClone(compactValue);return{status:'success',outputText:JSON.stringify(argumentsObject),executionId:localSelection.id,formattedOutput:{used:true,constrainedDecoding:true,toolName:'submit_quest',toolCall:{type:'function',function:{name:'submit_quest',arguments:argumentsObject}}}}}return{status:'success',outputText:JSON.stringify(compactValue),executionId:localSelection.id}}},
   CivweaveModelRuntime:{version:'test',generate:async request=>({status:'success',request})},CivweaveLocalModelRuntimeV266:{shutdown:()=>{}},
   queueMicrotask:fn=>fn(),setTimeout:()=>1,clearTimeout:()=>{},addEventListener:()=>{},dispatchEvent:()=>{},CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},DOMException:globalThis.DOMException,structuredClone:globalThis.structuredClone
@@ -39,4 +40,4 @@ const transport=api.compactTransport();const result=await transport({config:{max
 assert.equal(ensureCalls,1);assert.equal(generatedArgs.structuredTool.function.name,'submit_quest');assert.equal(generatedArgs.maxNewTokens,2800);assert.equal(full.title,'Manifestation Practice App');assert.equal(full.paths.length,2);assert.equal(full.paths[0].realm,'living-school');assert.equal(full.paths[1].realm,'cerbanimo');assert.equal(result.compactQuestEnvelope.formattedOutput,true);assert.equal(result.compactQuestEnvelope.constrainedDecoding,true);
 formattedFailures=1;const fallback=await transport({config:{maxTokens:2800},messages,emit:()=>{}});assert.equal(JSON.parse(fallback.text).title,'Manifestation Practice App');assert.equal(fallback.compactQuestEnvelope.formattedOutput,false);assert.match(fallback.compactQuestEnvelope.formattedFallback,/formatted lane unavailable/);
 const request={purpose:'civweave-weaveling-intention-json-v190',__civweaveLocalStructuredPlan:true,__civweaveSkipResponseRouter:true,config:{provider:'downloaded-local',model:localSelection.id,maxTokens:2200},messages,schema:{type:'object'}};const hardened=api.hardenRequest(request);assert.equal(hardened.maxRepairAttempts,2);assert.equal(typeof hardened.transport,'function');
-console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-compact-envelope-v1',formattedOutput:true,constrainedDecoding:true,firstRequestOwnership:true,compactFallback:true,e4Budget:2800,manifestationAppExpanded:true},null,2));
+console.log(JSON.stringify({ok:true,contract:'gemma4-structured-quest-compact-envelope-v1',formattedOutput:true,constrainedDecoding:true,firstRequestOwnership:true,stableAssistantComposition:true,compactFallback:true,e4Budget:2800,manifestationAppExpanded:true},null,2));
