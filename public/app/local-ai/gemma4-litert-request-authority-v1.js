@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2-gemma4-litert-request-authority-v1-structured-tool-shape';
+const VERSION='1.1.0-gemma4-litert-request-authority-v1-weave-draft-pipeline';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -9,6 +9,10 @@ const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1
 const FAST_RUNTIME_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
+const TRACKER_VERSION='1.0.0-guide-generation-tracker-v1-live-pipeline-streams';
+const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.0-live-pipeline-streams';
+const WEAVE_PIPELINE_VERSION='1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.0.0-plan-compile-repair';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const FAST_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web']);
 const SELECTION_KEY='civweave.local-ai.selection.v266';
@@ -160,6 +164,16 @@ async function ensureLocalChat(onProgress){
 function fastExtensionReady(){return globalThis.CivweaveGemma4LiteRTFastExtensionV1?.version===FAST_EXTENSION_VERSION}
 function fastRuntimeReady(){return globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===FAST_RUNTIME_VERSION}
 function fastWrapperReady(){return globalThis.CivweaveLocalChatRuntimeV295?.__civweaveLiteRTGemma4FastV1===FAST_RUNTIME_VERSION}
+function trackerReady(){return globalThis.CivweaveGuideGenerationTrackerV1?.version===TRACKER_VERSION}
+function weavePipelineReady(){return globalThis.CivweaveGemma4WeaveDraftPipelineV1?.version===WEAVE_PIPELINE_VERSION}
+async function ensureWeaveLayers(){
+  if(!trackerReady())await loadScript(TRACKER_SRC,trackerReady,'live Weave generation tracker');
+  globalThis.CivweaveGuideGenerationTrackerV1?.install?.();
+  if(!weavePipelineReady())await loadScript(WEAVE_PIPELINE_SRC,weavePipelineReady,'E4B Weave Draft compiler');
+  globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.();
+  if(!trackerReady()||!weavePipelineReady())throw Object.assign(new Error('The Weave Draft generation layers did not become ready.'),{code:'LOCAL_GEMMA4_WEAVE_PIPELINE_NOT_READY'});
+  return true;
+}
 async function ensure({onProgress,reason='local-request'}={}){
   if(!selectedFast())return globalThis.CivweaveLocalChatRuntimeV295||null;
   if(ensureFlight)return ensureFlight;
@@ -181,7 +195,8 @@ async function ensure({onProgress,reason='local-request'}={}){
     }
     installFastStructuredToolAdapter();
     installLearningPlanMetadataAdapter();
-    emit('civweave:gemma4-litert-first-request-ready',{reason,model:pick?.id||'',firstRequestOwned:true,structuredToolAdapter:true});
+    await ensureWeaveLayers();
+    emit('civweave:gemma4-litert-first-request-ready',{reason,model:pick?.id||'',firstRequestOwned:true,structuredToolAdapter:true,weaveDraftPipeline:true,liveTracker:true});
     return globalThis.CivweaveLocalChatRuntimeV295;
   })().catch(error=>{
     emit('civweave:gemma4-litert-first-request-failed',{reason,model:selected()?.id||'',code:error?.code||'LOCAL_GEMMA4_LITERT_STARTUP_FAILED',message:String(error?.message||error)});
@@ -198,6 +213,8 @@ function copyCompositionMetadata(target,source){
 function installAssistant(){
   installFastStructuredToolAdapter();
   installLearningPlanMetadataAdapter();
+  try{globalThis.CivweaveGuideGenerationTrackerV1?.install?.()}catch{}
+  try{globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.()}catch{}
   const api=globalThis.CivweaveAssistantV141;
   if(!api?.respond)return false;
   if(api.respond.__civweaveGemma4LiteRTFirstRequest===VERSION){assistantTarget=api;return true}
@@ -206,6 +223,7 @@ function installAssistant(){
     if(selectedFast())await ensure({onProgress:args?.onProgress,reason:'guide-request'});
     installFastStructuredToolAdapter();
     installLearningPlanMetadataAdapter();
+    globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.();
     return prior.call(api,args);
   };
   copyCompositionMetadata(respond,prior);
@@ -215,13 +233,13 @@ function installAssistant(){
   const next={...api,respond,gemma4LiteRTFirstRequestAuthority:VERSION,gemma4LiteRTStableComposition:true};
   try{globalThis.CivweaveAssistantV141=next}catch{return false}
   assistantTarget=next;
-  emit('civweave:gemma4-litert-request-authority-installed',{compositionPreserved:true,selectedFast:selectedFast(),structuredToolAdapter:Boolean(fastAdapterTarget)});
+  emit('civweave:gemma4-litert-request-authority-installed',{compositionPreserved:true,selectedFast:selectedFast(),structuredToolAdapter:Boolean(fastAdapterTarget),weaveDraftPipeline:weavePipelineReady(),liveTracker:trackerReady()});
   return true;
 }
 function schedule(){
   if(queued)return;
   queued=true;
-  queueMicrotask(()=>{queued=false;installFastStructuredToolAdapter();installLearningPlanMetadataAdapter();installAssistant()});
+  queueMicrotask(()=>{queued=false;installFastStructuredToolAdapter();installLearningPlanMetadataAdapter();try{globalThis.CivweaveGuideGenerationTrackerV1?.install?.()}catch{}try{globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.()}catch{}installAssistant()});
 }
 function prewarm(){
   if(!selectedFast())return Promise.resolve(false);
@@ -237,6 +255,7 @@ for(const name of [
   'civweave:guide-capability-passover-ready',
   'civweave:gemma4-litert-fast-runtime-ready',
   'civweave:structured-task-authority-ready',
+  'civweave:weave-pipeline',
   'pageshow'
 ])addEventListener(name,schedule);
 for(const delay of [0,40,160,500,1200,2600,5200,9000,15000])setTimeout(schedule,delay);
@@ -246,7 +265,9 @@ globalThis.CivweaveGemma4LiteRTRequestAuthorityV1=Object.freeze({
   fastRuntimeVersion:FAST_RUNTIME_VERSION,
   fastExtensionVersion:FAST_EXTENSION_VERSION,
   structuredToolAdapterVersion:FAST_STRUCTURED_TOOL_ADAPTER_VERSION,
-  selected,selectedFast,ensure,prewarm,installAssistant,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
+  trackerVersion:TRACKER_VERSION,
+  weavePipelineVersion:WEAVE_PIPELINE_VERSION,
+  selected,selectedFast,ensure,prewarm,ensureWeaveLayers,installAssistant,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
   firstRequestOwnership:true,
   requestTriggeredOwnership:true,
   passivePrewarm:false,
@@ -255,9 +276,12 @@ globalThis.CivweaveGemma4LiteRTRequestAuthorityV1=Object.freeze({
   structuredToolDualShape:true,
   sameModelJsonFallback:true,
   e4bLearningPlanMetadata:true,
+  weaveDraftPipeline:true,
+  liveGenerationTracker:true,
+  finalResponseStreaming:true,
   compositionKeys:COMPOSITION_KEYS,
   state:()=>Object.freeze({
-    selected:selected()?.id||'',selectedFast:selectedFast(),localChatReady:localChatReady(),fastExtensionReady:fastExtensionReady(),fastRuntimeReady:fastRuntimeReady(),fastWrapperReady:fastWrapperReady(),ensuring:Boolean(ensureFlight),assistantWrapped:Boolean(assistantTarget),fastStructuredAdapter:Boolean(fastAdapterTarget),learningPlanMetadataAdapter:Boolean(unifiedTarget),compositionPreserved:Boolean(globalThis.CivweaveAssistantV141?.respond?.__civweaveGemma4LiteRTStableComposition)
+    selected:selected()?.id||'',selectedFast:selectedFast(),localChatReady:localChatReady(),fastExtensionReady:fastExtensionReady(),fastRuntimeReady:fastRuntimeReady(),fastWrapperReady:fastWrapperReady(),trackerReady:trackerReady(),weavePipelineReady:weavePipelineReady(),ensuring:Boolean(ensureFlight),assistantWrapped:Boolean(assistantTarget),fastStructuredAdapter:Boolean(fastAdapterTarget),learningPlanMetadataAdapter:Boolean(unifiedTarget),compositionPreserved:Boolean(globalThis.CivweaveAssistantV141?.respond?.__civweaveGemma4LiteRTStableComposition)
   })
 });
 schedule();
