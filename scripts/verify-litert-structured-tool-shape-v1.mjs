@@ -3,7 +3,8 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-litert-request-authority-v1.js','utf8');
-assert.match(source,/1\.1\.1-gemma4-litert-request-authority-v1-global-stream-tracker/);
+assert.match(source,/1\.1\.2-gemma4-litert-request-authority-v1-global-stream-tracker/);
+assert.match(source,/1\.0\.1-guide-generation-tracker-v1-live-pipeline-streams/);
 assert.match(source,/litert-web-dual-tool-shape-json-fallback/);
 assert.match(source,/You MUST respond by calling the \$\{tool\.name\} tool exactly once/);
 assert.match(source,/LITERT_FORMATTED_OUTPUT_MISSING/);
@@ -34,6 +35,7 @@ assert.ok(authority);
 assert.equal(authority.weaveDraftPipeline,true);
 assert.equal(authority.liveGenerationTracker,true);
 assert.equal(authority.globalFinalResponseStreaming,true);
+assert.equal(authority.trackerVersion,'1.0.1-guide-generation-tracker-v1-live-pipeline-streams');
 
 // E2B intake still uses LiteRT's structured-tool adapter. E4B Learning/Quest generation
 // is covered separately by the Weave Draft regression and must not use this adapter.
@@ -85,4 +87,4 @@ assert.equal(metadata.provider,'downloaded-local');
 assert.equal(metadata.model,'gemma4-e4b-it-litert-web');
 assert.equal(metadata.e2bIntakeModel,'gemma4-e2b-it-litert-web');
 
-console.log('PASS: E2B intake keeps the LiteRT dual tool declaration and same-model fallback; E4B handoff metadata and Weave Draft ownership are intact.');
+console.log('PASS: E2B intake keeps the LiteRT dual tool declaration and same-model fallback; E4B handoff metadata, Weave Draft ownership, and the refined live tracker contract are intact.');
