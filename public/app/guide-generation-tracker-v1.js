@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-guide-generation-tracker-v1-live-pipeline-streams';
+const VERSION='1.0.1-guide-generation-tracker-v1-live-pipeline-streams';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
@@ -25,7 +25,7 @@ let installBound=false;
 
 function freshState(){return{
   requestId:`process-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,
-  pipelineId:'',kind:'',startedAt:now(),terminal:'',activeStage:'',
+  pipelineId:'',kind:'',startedAt:now(),terminal:'',activeStage:'',showPipeline:false,
   stages:Object.fromEntries(STAGES.map(stage=>[stage.id,{state:'waiting',label:stage.label,model:''}])),
   streams:{draft:'',compile:'',repair:'',final:''},
   counts:{resources:0,specialists:0,gates:0},
@@ -34,6 +34,7 @@ function freshState(){return{
 function activeRoot(){return document.getElementById(ROOT_ID)}
 function activeArticle(){const root=activeRoot();return root?[...root.querySelectorAll('[data-log] article[data-role="assistant"]')].at(-1)||null:null}
 function stageState(id,status,label='',model=''){const row=state.stages[id]||{state:'waiting',label:id,model:''};state.stages[id]={...row,state:status,label:label||row.label,model:model||row.model};if(status==='running'||status==='streaming')state.activeStage=id}
+function skipAfterIntake(){for(const id of ['draft','compile','validate','repair','saved'])if(state.stages[id]?.state==='waiting')stageState(id,'skipped',state.stages[id]?.label||id)}
 function resetForRequest(){
   if(finalAnimation){try{cancelAnimationFrame(finalAnimation)}catch{}finalAnimation=null}
   state=freshState();lastFinalFingerprint='';
@@ -51,7 +52,8 @@ function installStyle(){
 #${ROOT_ID} .cw-weave-node[data-state="complete"]{color:#dfffea}#${ROOT_ID} .cw-weave-node[data-state="complete"] .cw-weave-dot{border-color:#6ff1a6;background:#43c87b;box-shadow:0 0 10px #43c87b80}
 #${ROOT_ID} .cw-weave-node[data-state="running"],#${ROOT_ID} .cw-weave-node[data-state="streaming"]{color:#fff}#${ROOT_ID} .cw-weave-node[data-state="running"] .cw-weave-dot,#${ROOT_ID} .cw-weave-node[data-state="streaming"] .cw-weave-dot{border-color:var(--guide-accent,#d8dde7);background:var(--guide-accent,#d8dde7);box-shadow:0 0 0 4px color-mix(in srgb,var(--guide-accent,#d8dde7) 16%,transparent),0 0 18px color-mix(in srgb,var(--guide-accent,#d8dde7) 70%,transparent);animation:cwWeavePulse 1.05s ease-in-out infinite alternate}
 #${ROOT_ID} .cw-weave-node[data-state="failed"]{color:#ffd8d8}#${ROOT_ID} .cw-weave-node[data-state="failed"] .cw-weave-dot{border-color:#ff7373;background:#9f3131;box-shadow:0 0 12px #ff5d5d70}
-#${ROOT_ID} .cw-weave-node[data-state="skipped"]{opacity:.45}
+#${ROOT_ID} .cw-weave-node[data-state="stopped"]{color:#ffe3aa}#${ROOT_ID} .cw-weave-node[data-state="stopped"] .cw-weave-dot{border-color:#ffc35d;background:#7a5417}
+#${ROOT_ID} .cw-weave-node[data-state="skipped"]{opacity:.36}
 #${ROOT_ID} .cw-weave-counts{display:flex;flex-wrap:wrap;gap:5px;padding:0 9px 9px}#${ROOT_ID} .cw-weave-chip{padding:4px 7px;border:1px solid #ffffff1b;border-radius:999px;background:#ffffff08;color:#bcd0e4;font-size:9px;font-weight:750}
 #${ROOT_ID} .cw-weave-details{border-top:1px solid #ffffff13;padding:9px;background:#020811b0}#${ROOT_ID} .cw-weave-details[hidden]{display:none!important}
 #${ROOT_ID} .cw-weave-stream{margin:0 0 9px}#${ROOT_ID} .cw-weave-stream:last-child{margin-bottom:0}#${ROOT_ID} .cw-weave-stream>strong{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;color:#dfeeff;font-size:9px;letter-spacing:.04em;text-transform:uppercase}#${ROOT_ID} .cw-weave-stream>strong span{color:#8096ad;font-weight:650;text-transform:none;letter-spacing:0}
@@ -63,7 +65,7 @@ function installStyle(){
 `;
   document.head?.append(style);
 }
-function terminalLabel(){if(state.terminal==='failed')return'Generation failed';if(state.terminal==='stopped')return'Generation stopped';if(state.terminal==='complete')return'Weave ready';const active=STAGES.find(row=>row.id===state.activeStage);return active?active.label:'Preparing pipeline'}
+function terminalLabel(){if(state.terminal==='failed')return'Generation failed';if(state.terminal==='stopped')return'Generation stopped';if(state.terminal==='complete')return state.kind?'Weave ready':'Response ready';const active=STAGES.find(row=>row.id===state.activeStage);return active?active.label:'Preparing pipeline'}
 function panelHtml(){
   const rail=STAGES.map(stage=>{const item=state.stages[stage.id]||{state:'waiting'};return`<div class="cw-weave-node" data-stage="${stage.id}" data-state="${esc(item.state)}" title="${esc(item.label||stage.label)}${item.model?` · ${esc(item.model)}`:''}"><i class="cw-weave-dot"></i><span>${esc(stage.short)}</span></div>`}).join('');
   const counts=`<div class="cw-weave-counts"><span class="cw-weave-chip">Resources ${state.counts.resources}</span><span class="cw-weave-chip">Specialists ${state.counts.specialists}</span><span class="cw-weave-chip">Decision gates ${state.counts.gates}</span></div>`;
@@ -75,8 +77,11 @@ function panelHtml(){
   ].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||'Waiting…')}</pre></section>`).join('');
   return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live Weave pipeline</strong><span>${esc(terminalLabel())}${state.kind?` · ${esc(state.kind==='learning'?'Learning Journey':'Quest')}`:''}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="false">Show live process</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details hidden>${sections}</div>`;
 }
+function existingPanel(){const article=activeArticle(),host=article?.children?.[1]||article;return host?.querySelector?.(':scope > .cw-weave-tracker')||null}
 function ensurePanel(){
-  installStyle();const article=activeArticle();if(!article)return null;
+  installStyle();
+  if(!state.showPipeline){existingPanel()?.remove?.();return null}
+  const article=activeArticle();if(!article)return null;
   const host=article.children?.[1]||article;let panel=host.querySelector?.(':scope > .cw-weave-tracker');
   if(!panel){panel=document.createElement('div');panel.className='cw-weave-tracker';panel.dataset.pipelineId=state.pipelineId||state.requestId;host.append(panel)}
   const wasOpen=panel.querySelector?.('[data-weave-details]')?.hidden===false;
@@ -86,6 +91,7 @@ function ensurePanel(){
   return panel;
 }
 function refreshStream(phase){
+  if(!state.showPipeline)return;
   const panel=ensurePanel();if(!panel)return;
   const section=panel.querySelector(`[data-stream="${phase}"]`);if(!section)return;section.hidden=false;
   const pre=section.querySelector('pre');if(pre){pre.textContent=state.streams[phase]||'Waiting…';try{pre.scrollTop=pre.scrollHeight}catch{}}
@@ -94,13 +100,15 @@ function onIntake(event){
   const detail=event?.detail||{};
   if(detail.phase==='classifying'){
     if(!state.pendingObserved||state.terminal)resetForRequest();
-    state.pendingObserved=true;state.kind=detail.route||state.kind;stageState('intake','running','E2B Intake',detail.model||'gemma4-e2b-it-litert-web');ensurePanel();return;
+    state.pendingObserved=true;state.showPipeline=true;state.kind=detail.route||state.kind;stageState('intake','running','E2B Intake',detail.model||'gemma4-e2b-it-litert-web');ensurePanel();return;
   }
   if(['handoff','answered','ready','gathering'].includes(detail.phase))stageState('intake',detail.phase==='gathering'?'running':'complete','E2B Intake',detail.model||'gemma4-e2b-it-litert-web');
+  if(detail.route)state.kind=detail.route==='learning'?'learning':detail.route==='quest'?'quest':'';
+  if(detail.phase==='answered'||detail.route==='ordinary'){state.terminal='complete';skipAfterIntake()}
   ensurePanel();
 }
 function onPipeline(event){
-  const detail=event?.detail||{};if(detail.pipelineId)state.pipelineId=detail.pipelineId;if(detail.kind)state.kind=detail.kind;
+  const detail=event?.detail||{};state.showPipeline=true;if(detail.pipelineId)state.pipelineId=detail.pipelineId;if(detail.kind)state.kind=detail.kind;
   const phase=detail.phase,stateName=detail.state||'running';
   if(phase==='pipeline'&&stateName==='start'){stageState('intake','complete');state.pendingObserved=true;ensurePanel();return}
   if(['draft','compile','repair'].includes(phase)){
@@ -130,7 +138,7 @@ function animateFinal(text,row){
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   const start=()=>{
     const article=activeArticle(),bubble=article?.querySelector?.('.cw350-bubble,.cw237-bubble');if(!bubble)return false;
-    ensurePanel();state.finalSource=[clean(row?.provider,100),clean(row?.model,160)].filter(Boolean).join(' · ');state.streams.final='';
+    state.finalSource=[clean(row?.provider,100),clean(row?.model,160)].filter(Boolean).join(' · ');state.streams.final='';if(state.showPipeline)ensurePanel();
     if(reduced){bubble.textContent=target;state.streams.final=target;refreshStream('final');return true}
     const pieces=tokenPieces(target),batch=Math.max(1,Math.ceil(pieces.length/180));let index=0,visible='';bubble.textContent='';bubble.classList.add('cw-final-streaming');
     const tick=()=>{
@@ -143,12 +151,9 @@ function animateFinal(text,row){
 }
 function onThreadChanged(event){
   const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;
-  if(row.pending){
-    if(!state.pendingObserved){resetForRequest();state.pendingObserved=true}
-    ensurePanel();return;
-  }
+  if(row.pending){if(!state.pendingObserved){resetForRequest();state.pendingObserved=true}return}
   const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;
-  if(!state.terminal&&state.pipelineId)state.terminal='complete';
+  if(!state.terminal&&state.showPipeline)state.terminal='complete';
   animateFinal(row.text,row);
 }
 function bind(){
@@ -156,8 +161,8 @@ function bind(){
   addEventListener('civweave:weaveling-intake-progress',onIntake);
   addEventListener('civweave:weave-pipeline',onPipeline);
   addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);
-  addEventListener('civweave:generation-stop-requested',()=>{state.terminal='stopped';stageState(state.activeStage||'saved','stopped');ensurePanel()});
-  addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(ensurePanel));
+  addEventListener('civweave:generation-stop-requested',()=>{state.terminal='stopped';if(state.showPipeline){stageState(state.activeStage||'saved','stopped');ensurePanel()}});
+  addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{if(state.showPipeline)ensurePanel()}));
   document.addEventListener('click',event=>{
     const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;
     const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;
@@ -165,11 +170,11 @@ function bind(){
     if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}
   });
 }
-function install(){bind();queueMicrotask(ensurePanel);return true}
+function install(){bind();if(state.showPipeline)queueMicrotask(ensurePanel);return true}
 
 globalThis.CivweaveGuideGenerationTrackerV1=Object.freeze({
   version:VERSION,install,state:()=>JSON.parse(JSON.stringify(state)),ensurePanel,resetForRequest,
-  stages:STAGES,finalResponseStreaming:true,deterministicResponseStreaming:true,expandableLiveProcess:true,privateChainOfThoughtExposed:false
+  stages:STAGES,finalResponseStreaming:true,deterministicResponseStreaming:true,expandableLiveProcess:true,privateChainOfThoughtExposed:false,pipelineOnlyWhenActive:true
 });
 install();
 })();
