@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-gemma4-structured-task-authority-v1-e2b-intake-e4b-generation';
+const VERSION='1.1.1-gemma4-structured-task-authority-v1-e2b-intake-e4b-generation-progress';
 const INTAKE_MODEL='gemma4-e2b-it-litert-web';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const TASK_TIMEOUT_MS=600000;
@@ -36,6 +36,25 @@ function systemFor(args={}){return clean(args.systemId||args?.context?.guide?.sy
 function localProvider(request){return LOCAL_PROVIDERS.has(clean(request?.config?.provider||request?.config?.route,120).toLowerCase())}
 function taskKind(purpose){return purpose===LEARNING_PURPOSE?'learning-plan':'quest'}
 function intakeEligible(args={}){const pick=selectedLocal();return systemFor(args)==='civweave'&&Boolean(clean(args.text,12000))&&Boolean(pick?.active&&GEMMA4_LOCAL.test(clean(pick.id,240)))}
+function paintPending(text=''){
+  const value=clean(text,500);if(!value)return false;
+  try{
+    const api=globalThis.CivweaveRealmSessionIntegrityV237,thread=api?.readThread?.('civweave');
+    if(thread?.messages?.length&&typeof api?.writeThread==='function'){
+      const messages=thread.messages.map(row=>({...row}));
+      for(let i=messages.length-1;i>=0;i-=1){
+        const row=messages[i];
+        if(row?.role==='assistant'&&row?.pending){messages[i]={...row,text:value,intakeProgress:true};api.writeThread('civweave',{...thread,messages,updatedAt:new Date().toISOString()});return true}
+      }
+    }
+  }catch{}
+  try{
+    if(typeof document==='undefined')return false;
+    const root=document.getElementById?.('cw-persistent-guide-chat-v215'),rows=[...(root?.querySelectorAll?.('article[data-pending="true"]')||[])],bubble=rows.at(-1)?.querySelector?.('.cw350-bubble,.cw237-bubble');
+    if(bubble){bubble.textContent=value;return true}
+  }catch{}
+  return false;
+}
 
 async function modelStatus(id){
   const manager=globalThis.CivweaveLocalModelDownloadV266;
@@ -167,6 +186,7 @@ function normalizeIntake(raw={},args={},prior=null){
   };
 }
 async function classifyIntake(args={}){
+  paintPending('Weaveling is sorting this request with E2B…');
   await requireIntakeModel();
   const fast=await intakeRuntime();
   const prior=pendingIntake();
@@ -177,6 +197,10 @@ async function classifyIntake(args={}){
   if(!raw||typeof raw!=='object')throw Object.assign(new Error('Gemma 4 E2B intake did not return a valid routing record.'),{code:'CIVWEAVE_E2B_INTAKE_INVALID'});
   const record=normalizeIntake(raw,args,prior);
   saveIntake(record);
+  if(record.route==='learning'&&record.ready)paintPending('E2B has enough context. Moss is drafting the Learning Journey with E4B…');
+  else if(record.route==='quest'&&record.ready)paintPending('E2B has enough context. Weaveling is drafting the Quest with E4B…');
+  else if(!record.ready)paintPending('E2B is checking what context is still needed…');
+  else paintPending('E2B is preparing the response…');
   emit('civweave:weaveling-intake-progress',{phase:record.ready&&record.route!=='ordinary'?'handoff':record.state,model:INTAKE_MODEL,route:record.route,ready:record.ready});
   return record;
 }
@@ -187,16 +211,14 @@ function intakePacket(record){
   );
   return{response:{answer,choice:{mode,system:'civweave',room:'civweave.quad',nextAction:record.ready?'':'Answer the intake question so Weaveling can continue.'},assumptions:[],requiresConsent:false,confidence:.98},requestedProvider:'downloaded-local',provider:'downloaded-local',model:INTAKE_MODEL,intake:{...record,model:INTAKE_MODEL},fallbackFrom:null};
 }
-function learningGenerationText(record){
-  const facts=record.facts.length?`\n\nContext already gathered:\n${record.facts.map(item=>`- ${item}`).join('\n')}`:'';
-  return `I want to learn to ${clean(record.objective,1200)||'demonstrate the requested capability'}.${facts}`;
-}
+function learningGenerationText(record){return `I want to learn to ${clean(record.objective,1200)||'demonstrate the requested capability'}.`}
 function questGenerationText(record){
   const facts=record.facts.length?`\n\nKnown context from E2B intake:\n${record.facts.map(item=>`- ${item}`).join('\n')}`:'';
   return `I want to ${clean(record.objective,1200)||clean(record.latestText,1200)}.${facts}`;
 }
 async function handoffIntake(record,args={}){
   if(record.route==='learning'){
+    paintPending('E2B has enough context. Moss is drafting the Learning Journey with E4B…');
     const unified=globalThis.CivweaveUnifiedChatSystemV1;
     if(typeof unified?.generateLivingSchoolPlan!=='function')throw Object.assign(new Error('Moss high-level Learning Journey generation is unavailable.'),{code:'CIVWEAVE_LEARNING_PLAN_GENERATOR_NOT_READY'});
     const result=await unified.generateLivingSchoolPlan({...args,text:learningGenerationText(record),systemId:'living-school',sourceSystemId:'civweave',sourceGuide:'Weaveling',__civweaveE2BIntakeCompleted:true,intake:record});
@@ -204,6 +226,7 @@ async function handoffIntake(record,args={}){
     return result;
   }
   if(record.route==='quest'){
+    paintPending('E2B has enough context. Weaveling is drafting the Quest with E4B…');
     const task=await orchestrator();
     const result=await task.createModelPlan({...args,text:questGenerationText(record),latestRequest:clean(args.text,5000),__civweaveE2BIntakeCompleted:true,intake:record},globalThis.CivweaveAssistantV141);
     saveIntake({...record,state:'handed-off',handedOffTo:'quest',handedOffAt:new Date().toISOString()});
@@ -253,7 +276,7 @@ function installAssistant(){
 }
 function install(){
   const runtime=installRuntime(),assistant=installAssistant();
-  if(runtime||assistant)emit('civweave:structured-task-authority-ready',{runtime,assistant,timeoutMs:TASK_TIMEOUT_MS,intakeFirst:true,intakeModel:INTAKE_MODEL,deepModel:DEEP_MODEL,learningMaxTokens:LEARNING_MAX_TOKENS,structuredTaskFallbackToE2B:false});
+  if(runtime||assistant)emit('civweave:structured-task-authority-ready',{runtime,assistant,timeoutMs:TASK_TIMEOUT_MS,intakeFirst:true,intakeModel:INTAKE_MODEL,deepModel:DEEP_MODEL,learningMaxTokens:LEARNING_MAX_TOKENS,structuredTaskFallbackToE2B:false,visibleIntakeProgress:true});
   return runtime||assistant;
 }
 function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;install()})}
@@ -262,11 +285,11 @@ for(const delay of [0,50,200,700,1500,3000,6000,12000,20000,30000])setTimeout(sc
 
 globalThis.CivweaveGemma4StructuredTaskAuthorityV1=Object.freeze({
   version:VERSION,intakeModel:INTAKE_MODEL,deepModel:DEEP_MODEL,taskTimeoutMs:TASK_TIMEOUT_MS,learningMaxTokens:LEARNING_MAX_TOKENS,questPurpose:QUEST_PURPOSE,learningPurpose:LEARNING_PURPOSE,
-  selectedLocal,intakeEligible,modelStatus,requireIntakeModel,requireDeepModel,orchestrator,intakeRuntime,deepConfig,prepareStructuredRequest,
+  selectedLocal,intakeEligible,paintPending,modelStatus,requireIntakeModel,requireDeepModel,orchestrator,intakeRuntime,deepConfig,prepareStructuredRequest,
   readIntake,pendingIntake,saveIntake,clearIntake,intakeTool,intakeSystemPrompt,normalizeIntake,classifyIntake,intakePacket,learningGenerationText,questGenerationText,handoffIntake,intakeRespond,
   installRuntime,installAssistant,install,schedule,
   policy:'E2B is the mandatory local intake/classification stage; only ready learning or quest intake records may hand off to E4B structured generation.',
-  intakeFirst:true,fallbackToE2B:false,classificationByObject:true
+  intakeFirst:true,fallbackToE2B:false,classificationByObject:true,visibleIntakeProgress:true
 });
 schedule();
 })();
