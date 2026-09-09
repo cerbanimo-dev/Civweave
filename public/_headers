@@ -71,3 +71,9 @@
 
 /app/local-ai/worker-v266.js
   Cache-Control: no-cache
+
+/app/local-ai/gemma4-structured-task-authority-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-guide-control-bypass-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
