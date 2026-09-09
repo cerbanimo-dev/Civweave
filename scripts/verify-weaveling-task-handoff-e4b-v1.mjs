@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync('public/extensions/civweave-weaveling-plan-json-v190.js','utf8');
+const controlSource=fs.readFileSync('public/app/local-guide-control-bypass-v1.js','utf8');
 const values=new Map();
 const localStorage={
   getItem:key=>values.has(key)?values.get(key):null,
@@ -88,5 +89,42 @@ const transport=api.localStructuredTransport('quest');
 await transport({config:{model:'gemma4-e4b-it-litert-web',maxTokens:1800},messages:[{role:'system',content:'Return JSON.'},{role:'user',content:'Build the Quest.'}]});
 assert.equal(forcedFastModel,'gemma4-e4b-it-litert-web','Local structured transport did not force the requested E4B LiteRT model.');
 
+let pending=null,outerLocalCalls=0,outerQuestCalls=0,outerQuestText='';
+const outerLocal=async()=>{outerLocalCalls++;return{response:{answer:'What kind of game do you want to make?'},provider:'downloaded-local',model:'gemma4-e2b-it-litert-web'}};
+outerLocal.__civweaveLocalProviderAuthorityV1=true;
+outerLocal.__civweaveLocalProviderAuthorityVersion='test';
+outerLocal.__prior=async()=>({response:{answer:'deterministic control'}});
+const controlSandbox={
+  console,JSON,Date,Math,Promise,Map,Set,Object,Array,String,Number,Boolean,RegExp,Error,
+  globalThis:null,
+  setInterval:()=>0,clearInterval(){},setTimeout:()=>0,queueMicrotask:fn=>fn(),addEventListener(){},dispatchEvent(){},
+  CustomEvent:class{constructor(type,{detail}={}){this.type=type;this.detail=detail}},
+  document:{scripts:[],head:{isConnected:true,append(){}}},location:{href:'https://civweave-staging.pages.dev/'},URL,
+  CivweaveAssistantV141:{respond:outerLocal},
+  CivweaveWeavelingPlanJsonV190:{
+    version:'1.2.0-weaveling-plan-json-v190-ai-quest-intent',
+    planIntent:text=>/game|plan|quest/i.test(text),
+    shouldQualifyProject:text=>/^Could you help me make a game about time travel\?$/i.test(text),
+    savePendingProject:text=>(pending={text}),
+    readPendingProject:()=>pending,
+    clearPendingProject:()=>{pending=null},
+    substantiveQualifierReply:text=>text.split(/\s+/).length>=6,
+    createModelPlan:async args=>{outerQuestCalls++;outerQuestText=args.text;return{plan:{title:'Time Traveler vs Time Looper'},questAuthoring:{aiGenerated:true}}}
+  }
+};
+controlSandbox.globalThis=controlSandbox;
+vm.runInNewContext(controlSource,controlSandbox,{filename:'local-guide-control-bypass-v1.js'});
+const outerFirst=await controlSandbox.CivweaveAssistantV141.respond({text:first,systemId:'civweave',history:[]});
+assert.match(outerFirst.response.answer,/kind of game/i,'Outer local control route swallowed the qualification turn.');
+assert.equal(outerLocalCalls,1,'Outer local control route did not delegate the qualifier to E2B chat.');
+assert.equal(outerQuestCalls,0,'Outer local control route generated a Quest before qualification.');
+assert.equal(pending?.text,first,'Outer local control route did not retain the pending project.');
+const outerSecond=await controlSandbox.CivweaveAssistantV141.respond({text:second,systemId:'civweave',history:[{role:'user',text:first},{role:'assistant',text:outerFirst.response.answer}]});
+assert.equal(outerSecond.plan?.title,'Time Traveler vs Time Looper','Outer local control route did not populate the Quest after qualification.');
+assert.equal(outerQuestCalls,1,'Outer local control route did not hand the qualifying answer to structured Quest generation exactly once.');
+assert.match(outerQuestText,/Additional direction from the Hero:/,'Outer local control route did not combine the original request with the qualifying answer.');
+assert.equal(pending,null,'Outer local control route did not clear pending state after generation.');
+
 for(const required of ['civweave:assistant-runtime-ready','civweave:local-model-runtime-ready','civweave:gemma4-litert-fast-runtime-ready'])assert.ok(source.includes(required),`Lifecycle reassertion is missing ${required}.`);
-console.log('Weaveling qualification handoff, E4B task generation, and local Moss planning bridge verified.');
+assert.ok(controlSource.includes('__cwWeavelingQualificationHandoffV1'),'Outer local control qualification lock is missing.');
+console.log('Weaveling qualification handoff, outer control integration, E4B task generation, and local Moss planning bridge verified.');
