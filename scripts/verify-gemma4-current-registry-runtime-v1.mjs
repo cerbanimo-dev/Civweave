@@ -59,7 +59,7 @@ assert.deepEqual([...repaired.gemma4PhonePerformanceRegistryMissing],[],'retired
 assert.deepEqual([...repaired.gemma4PhoneCompatibilityRegistryMissing],[LEGACY_E2,LEGACY_E4],'retired Q4 aliases are not retained as compatibility diagnostics');
 assert.equal(repaired.gemma4PhoneLegacyRegistrationRequired,false,'retired Q4 aliases are still marked required');
 assert.equal(repaired.gemma4PhonePerformanceRegistryComplete,true,'current LiteRT E2B/E4B should complete the phone registry');
-assert.equal(sandbox.CivweaveGemma4PhonePerformanceCoreV1.currentRegistryOnlyAuthority,'1.0.0-gemma4-current-registry-authority-v1');
+assert.equal(sandbox.CivweaveGemma4PhonePerformanceCoreV1.currentRegistryOnlyAuthority,'1.0.1-gemma4-current-registry-authority-v1-formatted-output');
 assert.doesNotThrow(()=>sandbox.CivweaveGemma4PhonePerformanceCoreV1.assertSelectedPerformance(),'selected current LiteRT runtime is still blocked by retired aliases');
 
 const onlyE2=[{id:FAST_E2}];
@@ -68,10 +68,10 @@ sandbox.CivweaveGemma4CurrentRegistryAuthorityV1.repairRegistry();
 assert.deepEqual([...sandbox.CivweaveLocalModelRegistryV266.gemma4PhonePerformanceRegistryMissing],[FAST_E4],'a genuinely missing current E4B registration must still fail readiness');
 assert.throws(()=>sandbox.CivweaveGemma4PhonePerformanceCoreV1.assertSelectedPerformance(),/gemma4-e4b-it-litert-web/,'current E4B absence did not remain a hard runtime error');
 
-const scriptRef='/app/local-ai/gemma4-current-registry-authority-v1.js?v=1.0.0-current-litert-only';
+const scriptRef='/app/local-ai/gemma4-current-registry-authority-v1.js?v=1.0.1-formatted-output';
 assert.ok(campus.includes(scriptRef),'Working Campus does not load the current Gemma registry authority');
 assert.ok(shell.includes(scriptRef),'Persistent shell does not load the current Gemma registry authority');
 assert.ok(campus.indexOf(scriptRef)>campus.indexOf('/app/shared-guide-surface-v236.js'),'Working Campus registry authority must settle after the shared guide loader can restore cached Gemma globals');
 assert.ok(shell.indexOf(scriptRef)>shell.indexOf('/app/shared-guide-surface-v236.js'),'Persistent shell registry authority must settle after the shared guide loader can restore cached Gemma globals');
 
-console.log(JSON.stringify({ok:true,currentModels:[FAST_E2,FAST_E4],legacyAliasesRequired:false,cachedLegacyRegistryRecovered:true,currentRegistrationStillRequired:true,parentAndCampusLoaded:true},null,2));
+console.log(JSON.stringify({ok:true,currentModels:[FAST_E2,FAST_E4],legacyAliasesRequired:false,cachedLegacyRegistryRecovered:true,currentRegistrationStillRequired:true,parentAndCampusLoaded:true,formattedOutputAuthority:true},null,2));
