@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-gemma4-current-registry-authority-v1-formatted-output';
+const VERSION='1.0.2-gemma4-current-registry-authority-v1-stable-composition';
 const AUTH_KEY='CivweaveGemma4PhonePerformanceCoreV1';
 const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const FAST_E2='gemma4-e2b-it-litert-web',FAST_E4='gemma4-e4b-it-litert-web',LEGACY_E2='gemma4-e2b-it-q4f16',LEGACY_E4='gemma4-e4b-it-q4f16';
-const REQUEST_AUTH_SRC='/app/local-ai/gemma4-litert-request-authority-v1.js?v=1.0.0-first-request-formatted-output';
-const REQUEST_AUTH_VERSION='1.0.0-gemma4-litert-request-authority-v1';
+const REQUEST_AUTH_SRC='/app/local-ai/gemma4-litert-request-authority-v1.js?v=1.0.1-stable-composition';
+const REQUEST_AUTH_VERSION='1.0.1-gemma4-litert-request-authority-v1-stable-composition';
 const COMPACT_QUEST_SRC='/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js?v=1.1.0-formatted-output';
 const COMPACT_QUEST_VERSION='1.1.0-gemma4-structured-quest-compact-envelope-v1-formatted-output';
 const freeze=value=>Object.freeze(value),same=(left=[],right=[])=>left.length===right.length&&left.every((value,index)=>value===right[index]);
@@ -53,11 +53,11 @@ function installAuthority(){
   const assertSelectedPerformance=()=>{repairRegistry();return baseAssert()};
   const next=freeze({...base,patchRegistry,applyAuthority,activate,assertSelectedPerformance,currentRegistryOnlyAuthority:VERSION,legacyRegistrationRequired:false,currentPhoneModels:freeze([FAST_E2,FAST_E4])});
   try{globalThis[AUTH_KEY]=next}catch{return false}repairRegistry();
-  try{dispatchEvent(new CustomEvent('civweave:gemma4-current-registry-authority-ready',{detail:{version:VERSION,currentModels:[FAST_E2,FAST_E4],legacyRegistrationRequired:false,requestAuthorityLoader:true,compactQuestEnvelopeLoader:true,formattedOutput:true}}))}catch{}return true;
+  try{dispatchEvent(new CustomEvent('civweave:gemma4-current-registry-authority-ready',{detail:{version:VERSION,currentModels:[FAST_E2,FAST_E4],legacyRegistrationRequired:false,requestAuthorityLoader:true,compactQuestEnvelopeLoader:true,formattedOutput:true,stableAssistantComposition:true}}))}catch{}return true;
 }
 function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;installAuthority();repairRegistry();void ensureRequestAuthority();void ensureCompactQuestEnvelope()})}
-for(const name of ['civweave:gemma4-phone-performance-authority','civweave:gemma4-phone-authority-ready','civweave:local-model-runtime-ready','civweave:local-model-pack-selected','civweave:gemma4-structured-quest-completion-ready','pageshow'])addEventListener(name,schedule);
-for(const delay of [0,40,180,650,1600,3200])setTimeout(schedule,delay);
-globalThis.CivweaveGemma4CurrentRegistryAuthorityV1=freeze({version:VERSION,installAuthority,repairRegistry,repairRegistryValue,schedule,ensureRequestAuthority,requestAuthorityLoader:true,requestAuthoritySource:REQUEST_AUTH_SRC,ensureCompactQuestEnvelope,compactQuestEnvelopeLoader:true,compactQuestEnvelopeSource:COMPACT_QUEST_SRC,currentModels:freeze([FAST_E2,FAST_E4]),compatibilityModels:freeze([LEGACY_E2,LEGACY_E4]),legacyRegistrationRequired:false,formattedOutput:true,runtimeAuthorityOnly:true,presentationOwnership:false});
+for(const name of ['civweave:gemma4-phone-performance-authority','civweave:gemma4-phone-authority-ready','civweave:local-model-runtime-ready','civweave:local-model-pack-selected','civweave:gemma4-structured-quest-completion-ready','civweave:local-provider-authority-installed','civweave:local-guide-control-bypass-ready','pageshow'])addEventListener(name,schedule);
+for(const delay of [0,40,180,650,1600,3200,6000,10000])setTimeout(schedule,delay);
+globalThis.CivweaveGemma4CurrentRegistryAuthorityV1=freeze({version:VERSION,installAuthority,repairRegistry,repairRegistryValue,schedule,ensureRequestAuthority,requestAuthorityLoader:true,requestAuthoritySource:REQUEST_AUTH_SRC,ensureCompactQuestEnvelope,compactQuestEnvelopeLoader:true,compactQuestEnvelopeSource:COMPACT_QUEST_SRC,currentModels:freeze([FAST_E2,FAST_E4]),compatibilityModels:freeze([LEGACY_E2,LEGACY_E4]),legacyRegistrationRequired:false,formattedOutput:true,stableAssistantComposition:true,runtimeAuthorityOnly:true,presentationOwnership:false});
 schedule();
 })();
