@@ -75,5 +75,14 @@
 /app/local-ai/gemma4-structured-task-authority-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
+/app/local-ai/gemma4-litert-request-authority-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/gemma4-weave-draft-pipeline-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/guide-generation-tracker-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /app/local-guide-control-bypass-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
