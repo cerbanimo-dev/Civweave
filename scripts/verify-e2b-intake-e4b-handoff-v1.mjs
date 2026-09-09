@@ -8,11 +8,17 @@ const bypassSource=await readFile(new URL('public/app/local-guide-control-bypass
 
 assert.match(authoritySource,/INTAKE_MODEL='gemma4-e2b-it-litert-web'/);
 assert.match(authoritySource,/DEEP_MODEL='gemma4-e4b-it-litert-web'/);
+assert.match(authoritySource,/INTAKE_TIMEOUT_MS=90000/);
 assert.match(authoritySource,/intakeFirst:true/);
 assert.match(authoritySource,/classificationByObject:true/);
 assert.match(authoritySource,/Help me build a learning plan for X/);
 assert.match(authoritySource,/Help me build my first rock album/);
 assert.match(authoritySource,/LEARNING_MAX_TOKENS=900/);
+assert.match(authoritySource,/transport:directE4BTransport\(purpose\)/);
+assert.match(authoritySource,/constrainedE4B:true/);
+assert.match(authoritySource,/stopButton:true/);
+assert.match(authoritySource,/button\.textContent='Stop'/);
+assert.match(authoritySource,/CIVWEAVE_GENERATION_STOPPED/);
 assert.match(bypassSource,/e2bIntakeDefer:true/);
 assert.match(bypassSource,/CivweaveGemma4StructuredTaskAuthorityV1\?\.intakeFirst===true/);
 
@@ -24,12 +30,14 @@ const localStorage={
 };
 let e4Available=true;
 let intakeCalls=0;
+let e4StructuredCalls=0;
 let learningCalls=0;
 let questCalls=0;
 let ordinaryBaseCalls=0;
 let lastLearning=null;
 let lastQuest=null;
 let finalRuntimeRequest=null;
+let lastStructuredTool='';
 
 function intakeResult(context){
   const text=String(context.currentMessage||'');
@@ -53,13 +61,20 @@ const sandbox={
     status:async id=>({available:id==='gemma4-e2b-it-litert-web'||(id==='gemma4-e4b-it-litert-web'&&e4Available)})
   },
   CivweaveLiteRTGemma4FastRuntimeV1:{
-    runFast:async args=>{
+    runFast:async(args,forcedModel)=>{
+      if(forcedModel==='gemma4-e4b-it-litert-web'){
+        e4StructuredCalls+=1;
+        lastStructuredTool=args.structuredTool?.name||'';
+        return{status:'success',outputText:'{"ok":true}',executionId:forcedModel};
+      }
       intakeCalls+=1;
+      assert.equal(forcedModel,'gemma4-e2b-it-litert-web');
       assert.equal(args.structuredTool?.name,'route_civweave_request');
       const content=String(args.messages?.at(-1)?.content||'');
       const json=content.slice(content.indexOf('{'));
       return{status:'success',outputText:JSON.stringify(intakeResult(JSON.parse(json))),executionId:'gemma4-e2b-it-litert-web'};
-    }
+    },
+    unload:async()=>true
   },
   CivweaveModelRuntime:{
     generate:async request=>{finalRuntimeRequest=request;return{status:'success',outputJson:{ok:true},actual:{provider:request.config?.provider,model:request.config?.model}}}
@@ -81,6 +96,8 @@ const api=sandbox.CivweaveGemma4StructuredTaskAuthorityV1;
 assert.ok(api?.intakeFirst);
 assert.equal(api.intakeModel,'gemma4-e2b-it-litert-web');
 assert.equal(api.deepModel,'gemma4-e4b-it-litert-web');
+assert.equal(api.constrainedE4B,true);
+assert.equal(api.stopButton,true);
 
 api.clearIntake();
 let result=await sandbox.CivweaveAssistantV141.respond({systemId:'civweave',text:'Can you help me build a learning plan for x?',history:[]});
@@ -123,6 +140,16 @@ await sandbox.CivweaveModelRuntime.generate({purpose:'living-school-learning-pla
 assert.equal(finalRuntimeRequest.config.model,'gemma4-e4b-it-litert-web');
 assert.equal(finalRuntimeRequest.config.maxTokens,900);
 assert.equal(finalRuntimeRequest.config.timeoutMs,600000);
+assert.equal(typeof finalRuntimeRequest.transport,'function');
+
+const learningSchema={type:'object',required:['title'],properties:{title:{type:'string'}}};
+const preparedLearning=await api.prepareStructuredRequest({purpose:'living-school-learning-plan-review-v2',config:{provider:'downloaded-local',model:'gemma4-e2b-it-litert-web',maxTokens:900},schema:learningSchema});
+const transported=await preparedLearning.transport({config:preparedLearning.config,messages:[{role:'system',content:'Return the plan.'},{role:'user',content:'Tarot memorization'}],schema:learningSchema,emit:()=>{}});
+assert.equal(transported.model,'gemma4-e4b-it-litert-web');
+assert.equal(transported.provider,'downloaded-local');
+assert.equal(transported.text,'{"ok":true}');
+assert.equal(lastStructuredTool,'emit_learning_journey_plan');
+assert.equal(e4StructuredCalls,1,'structured Learning Journey transport must execute E4B directly');
 
 await sandbox.CivweaveModelRuntime.generate({purpose:'civweave-weaveling-intention-json-v190',config:{provider:'downloaded-local',model:'gemma4-e2b-it-litert-web',maxTokens:1200}});
 assert.equal(finalRuntimeRequest.config.model,'gemma4-e4b-it-litert-web');
@@ -134,4 +161,4 @@ await assert.rejects(
   error=>error?.code==='CIVWEAVE_E4B_STRUCTURED_TASK_REQUIRED'
 );
 
-console.log('E2B intake -> E4B generation regression passed.');
+console.log('E2B intake -> constrained E4B generation + stop-control regression passed.');
