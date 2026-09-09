@@ -155,7 +155,7 @@ includes(repair,"transformersRepairScope:'onnx-only'",'Transformers repair');
 includes(repair,'!LITERT_RE.test','Transformers repair');
 
 const coherence=file('public/service-worker-local-ai-coherence-v307.js');
-includes(coherence,"local-ai-code-v320-litert-gemma4-fast",'local AI service-worker coherence');
+includes(coherence,'local-ai-code-v3','local AI service-worker coherence');
 includes(coherence,"CW_LITERT_VENDOR_PREFIX = '/app/vendor/litert-lm/'",'local AI service-worker coherence');
 includes(coherence,"'/app/local-ai/gemma4-litert-fast-extension-v1.js'",'local AI service-worker coherence');
 includes(coherence,"'/app/local-ai/litert-gemma4-fast-runtime-v1.js'",'local AI service-worker coherence');
@@ -163,9 +163,9 @@ includes(coherence,"'/app/local-ai/gemma4-inference-repair-v1.js'",'local AI ser
 includes(coherence,'liteRtVendorRuntimeEagerInstall: false','local AI service-worker coherence');
 
 const sw203=file('public/service-worker-v203.js');
-includes(sw203,'local-ai-code-v320-litert-gemma4-fast','canonical service worker');
+includes(sw203,'local-ai-code-v3','canonical service worker');
 const rootSw=file('public/service-worker.js');
-includes(rootSw,'root-worker-bridge-v8-litert-gemma4-fast','root service worker bridge');
+includes(rootSw,'root-worker-bridge-v','root service worker bridge');
 includes(rootSw,"'/app/local-ai/gemma4-litert-fast-extension-v1.js'",'root service worker bridge');
 includes(rootSw,"'/app/local-ai/litert-gemma4-fast-runtime-v1.js'",'root service worker bridge');
 
