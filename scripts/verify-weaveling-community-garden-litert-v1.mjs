@@ -54,7 +54,7 @@ includes(orchestrator,'Your job is to design the user\'s Quest for them.','Quest
 assert(!orchestrator.includes('fallback:()=>planner.buildPlan'),'Structured Quest request still carries deterministic planner fallback.');
 assert(!orchestrator.includes("provider==='deterministic'?'deterministic-fallback'"),'Quest normalization still permits deterministic authorship.');
 
-const intentSandbox={console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,globalThis:null};
+const intentSandbox={console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,addEventListener:()=>{},queueMicrotask:fn=>fn(),globalThis:null};
 intentSandbox.globalThis=intentSandbox;
 vm.runInNewContext(orchestrator,intentSandbox,{filename:'civweave-weaveling-plan-json-v190.js'});
 const intentApi=intentSandbox.CivweaveWeavelingPlanJsonV190;
