@@ -17,6 +17,7 @@ on:
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-weaveling-plan-json-v190.mjs'
       - 'scripts/verify-weaveling-community-garden-litert-v1.mjs'
+      - 'scripts/verify-weaveling-task-handoff-e4b-v1.mjs'
       - '.github/workflows/verify-weaveling-community-garden-litert-v1.yml'
   pull_request:
     paths:
@@ -34,6 +35,7 @@ on:
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-weaveling-plan-json-v190.mjs'
       - 'scripts/verify-weaveling-community-garden-litert-v1.mjs'
+      - 'scripts/verify-weaveling-task-handoff-e4b-v1.mjs'
       - '.github/workflows/verify-weaveling-community-garden-litert-v1.yml'
 
 permissions:
@@ -54,3 +56,5 @@ jobs:
         run: node scripts/verify-weaveling-plan-json-v190.mjs
       - name: Verify AI Quest routing and fast-lane contracts
         run: node scripts/verify-weaveling-community-garden-litert-v1.mjs
+      - name: Verify qualification handoff, E4B task generation, and local Moss planning
+        run: node scripts/verify-weaveling-task-handoff-e4b-v1.mjs
