@@ -19,7 +19,7 @@ const sandbox={
   CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'gemma4-e2b-it-litert-web'}),status:async id=>({available:id==='gemma4-e4b-it-litert-web'})},
   CivweaveLocalChatRuntimeV295:{generate:async()=>({status:'success',outputText:'{}',executionId:'gemma4-e2b-it-litert-web'})},
   CivweaveLiteRTGemma4FastRuntimeV1:{runFast:async(args,modelId)=>{forcedFastModel=modelId;return{status:'success',outputText:'{"ok":true}',executionId:modelId}}},
-  CivweaveUnifiedChatSystemV1:{runLivingSchoolCurriculum:async options=>{mossRuns++;mossOptions=options;return{response:{answer:'Moss generated a Learning Journey review plan.'},provider:'living-school-learning-engine',model:'gemma4-e4b-it-litert-web',context:{guide:{system:'living-school',name:'Moss'}}}},
+  CivweaveUnifiedChatSystemV1:{runLivingSchoolCurriculum:async options=>{mossRuns++;mossOptions=options;return{response:{answer:'Moss generated a Learning Journey review plan.'},provider:'living-school-learning-engine',model:'gemma4-e4b-it-litert-web',context:{guide:{system:'living-school',name:'Moss'}}}}},
   CivweaveIntentionPlanner:{shouldCreate:()=>false,activeIntentionTurns:(history,text)=>[...history.map(row=>row.text||row.content),text],persist:plan=>({id:'weave-test',state:'review',plan})},
   CivweaveWeavelingPlanMaterializationV265:{materialize(){}}
 };
