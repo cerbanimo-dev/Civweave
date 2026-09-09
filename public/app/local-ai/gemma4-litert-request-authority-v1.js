@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-gemma4-litert-request-authority-v1';
+const VERSION='1.0.1-gemma4-litert-request-authority-v1-stable-composition';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -10,6 +10,21 @@ const FAST_RUNTIME_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output
 const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output';
 const FAST_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web']);
 const SELECTION_KEY='civweave.local-ai.selection.v266';
+const COMPOSITION_KEYS=Object.freeze([
+  '__civweaveLocalProviderAuthorityV1',
+  '__civweaveLocalProviderAuthorityVersion',
+  '__cwLocalGuideControlBypassV1',
+  '__cwLocalGuideControlBypassVersion',
+  '__cwWeavelingAIQuestRequiredV1',
+  '__cwWeavelingStructuredQuestRouteV1',
+  '__cwPlatformGuideGuardsV1',
+  '__cwUnifiedChatSystemV1',
+  '__weavelingPlanJsonV190',
+  '__guideIdentityIntegrityV216',
+  '__cwGuideCapabilityPassoverV1',
+  '__deterministicModeV175',
+  '__cwMossLearningGoalPlannerV1'
+]);
 
 if(globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.version===VERSION){
   globalThis.CivweaveGemma4LiteRTRequestAuthorityV1.schedule?.();
@@ -116,6 +131,12 @@ async function ensure({onProgress,reason='local-request'}={}){
   }).finally(()=>{ensureFlight=null});
   return ensureFlight;
 }
+function copyCompositionMetadata(target,source){
+  for(const key of COMPOSITION_KEYS){
+    if(source?.[key]!==undefined)target[key]=source[key];
+  }
+  return target;
+}
 function installAssistant(){
   const api=globalThis.CivweaveAssistantV141;
   if(!api?.respond)return false;
@@ -125,11 +146,14 @@ function installAssistant(){
     if(selectedFast())await ensure({onProgress:args?.onProgress,reason:'guide-request'});
     return prior.call(api,args);
   };
+  copyCompositionMetadata(respond,prior);
   respond.__civweaveGemma4LiteRTFirstRequest=VERSION;
+  respond.__civweaveGemma4LiteRTStableComposition=true;
   respond.__prior=prior;
-  const next={...api,respond,gemma4LiteRTFirstRequestAuthority:VERSION};
+  const next={...api,respond,gemma4LiteRTFirstRequestAuthority:VERSION,gemma4LiteRTStableComposition:true};
   try{globalThis.CivweaveAssistantV141=next}catch{return false}
   assistantTarget=next;
+  emit('civweave:gemma4-litert-request-authority-installed',{compositionPreserved:true,selectedFast:selectedFast()});
   return true;
 }
 function schedule(){
@@ -141,20 +165,31 @@ function prewarm(){
   if(!selectedFast())return Promise.resolve(false);
   return ensure({reason:'explicit-prewarm'}).then(()=>true,()=>false);
 }
-for(const name of ['civweave:assistant-runtime-ready','civweave:unified-chat-system-ready','civweave:local-model-selection','civweave:guide-loader-reset','pageshow'])addEventListener(name,schedule);
-for(const delay of [0,40,160,500,1200,2600])setTimeout(schedule,delay);
+for(const name of [
+  'civweave:assistant-runtime-ready',
+  'civweave:unified-chat-system-ready',
+  'civweave:local-model-selection',
+  'civweave:guide-loader-reset',
+  'civweave:local-provider-authority-installed',
+  'civweave:local-guide-control-bypass-ready',
+  'civweave:guide-capability-passover-ready',
+  'pageshow'
+])addEventListener(name,schedule);
+for(const delay of [0,40,160,500,1200,2600,5200,9000])setTimeout(schedule,delay);
 
 globalThis.CivweaveGemma4LiteRTRequestAuthorityV1=Object.freeze({
   version:VERSION,
   fastRuntimeVersion:FAST_RUNTIME_VERSION,
   fastExtensionVersion:FAST_EXTENSION_VERSION,
-  selected,selectedFast,ensure,prewarm,installAssistant,schedule,
+  selected,selectedFast,ensure,prewarm,installAssistant,schedule,copyCompositionMetadata,
   firstRequestOwnership:true,
   requestTriggeredOwnership:true,
   passivePrewarm:false,
   genericTransformersBypass:true,
+  stableAssistantComposition:true,
+  compositionKeys:COMPOSITION_KEYS,
   state:()=>Object.freeze({
-    selected:selected()?.id||'',selectedFast:selectedFast(),localChatReady:localChatReady(),fastExtensionReady:fastExtensionReady(),fastRuntimeReady:fastRuntimeReady(),fastWrapperReady:fastWrapperReady(),ensuring:Boolean(ensureFlight),assistantWrapped:Boolean(assistantTarget)
+    selected:selected()?.id||'',selectedFast:selectedFast(),localChatReady:localChatReady(),fastExtensionReady:fastExtensionReady(),fastRuntimeReady:fastRuntimeReady(),fastWrapperReady:fastWrapperReady(),ensuring:Boolean(ensureFlight),assistantWrapped:Boolean(assistantTarget),compositionPreserved:Boolean(globalThis.CivweaveAssistantV141?.respond?.__civweaveGemma4LiteRTStableComposition)
   })
 });
 schedule();
