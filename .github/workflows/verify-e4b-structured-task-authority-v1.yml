@@ -5,23 +5,29 @@ on:
     paths:
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/guide-generation-tracker-v1.js'
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/working-campus-v440.html'
       - 'scripts/verify-e2b-intake-e4b-handoff-v1.mjs'
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
+      - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
   pull_request:
     paths:
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/guide-generation-tracker-v1.js'
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/working-campus-v440.html'
       - 'scripts/verify-e2b-intake-e4b-handoff-v1.mjs'
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
+      - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
 
 permissions:
@@ -40,9 +46,15 @@ jobs:
         run: node --check public/app/local-ai/gemma4-structured-task-authority-v1.js
       - name: Syntax check LiteRT request authority
         run: node --check public/app/local-ai/gemma4-litert-request-authority-v1.js
+      - name: Syntax check Weave Draft pipeline
+        run: node --check public/app/local-ai/gemma4-weave-draft-pipeline-v1.js
+      - name: Syntax check live generation tracker
+        run: node --check public/app/guide-generation-tracker-v1.js
       - name: Syntax check local guide control bypass
         run: node --check public/app/local-guide-control-bypass-v1.js
       - name: Verify LiteRT structured tool shape
         run: node scripts/verify-litert-structured-tool-shape-v1.mjs
       - name: Verify E2B intake and E4B structured generation
         run: node scripts/verify-e4b-structured-task-authority-v1.mjs
+      - name: Verify E4B Weave Draft compiler pipeline
+        run: node scripts/verify-e4b-weave-draft-pipeline-v1.mjs
