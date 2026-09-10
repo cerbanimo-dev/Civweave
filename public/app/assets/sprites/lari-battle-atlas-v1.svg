@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+<style>.q,.bang,.z{font:700 15px system-ui;fill:#ff77bf;paint-order:stroke;stroke:#40143b;stroke-width:2px}.bang{fill:#ffd86f}.z{fill:#b58cff}</style>
+<defs>
+<linearGradient id="coat" x1="0" x2="1"><stop stop-color="#2b123f"/><stop offset="1" stop-color="#7b236f"/></linearGradient>
+<symbol id="heart" viewBox="0 0 16 16" width="16" height="16"><path d="M8 14S1 10 1 5.4C1 1.8 5.3 1 8 4c2.7-3 7-2.2 7 1.4C15 10 8 14 8 14Z" fill="#ff4da6" stroke="#ffd2eb" stroke-width="1"/></symbol>
+<symbol id="lari" viewBox="0 0 80 75">
+  <g fill="none" stroke-linecap="round">
+    <path d="M35 56C20 54 11 49 4 39" stroke="#f19a38" stroke-width="6"/><path d="M32 57C17 59 10 56 3 50" stroke="#f19a38" stroke-width="5"/>
+    <path d="M31 55C18 50 11 46 5 36" stroke="#25172e" stroke-width="2.2" stroke-dasharray="4 4"/><path d="M29 58C16 58 9 54 4 49" stroke="#25172e" stroke-width="2" stroke-dasharray="4 4"/>
+  </g>
+  <ellipse cx="40" cy="54" rx="18" ry="15" fill="#17151d"/>
+  <path d="M27 48 40 43 53 48 58 67H22Z" fill="url(#coat)" stroke="#d6a64a" stroke-width="1.3"/>
+  <path d="m34 46 6 8 6-8" fill="#eee7dc" stroke="#c89b52" stroke-width="1"/>
+  <path d="M40 53v13M29 54l11 5 11-5" stroke="#d6a64a" stroke-width="1" fill="none"/>
+  <circle cx="40" cy="31" r="16" fill="#1b1a20"/>
+  <ellipse cx="34" cy="30" rx="4.8" ry="6" fill="#f7edf6"/><ellipse cx="46" cy="30" rx="4.8" ry="6" fill="#f7edf6"/>
+  <circle cx="35" cy="31" r="2.3" fill="#b83c9a"/><circle cx="47" cy="31" r="2.3" fill="#b83c9a"/>
+  <path d="M40 34 50 37 40 40Z" fill="#d88945" stroke="#241a1c" stroke-width="1"/>
+  <path d="M22 22c5-9 9-14 19-14 8 0 13 5 17 14Z" fill="#3c155a" stroke="#d3a34d" stroke-width="1.3"/>
+  <path d="M28 15c4-10 8-12 11-13 7 7 8 12 8 17" fill="#4d176c" stroke="#d3a34d" stroke-width="1.2"/>
+  <path d="M24 22h34" stroke="#d3a34d" stroke-width="2"/>
+  <path d="M55 47 65 26" stroke="#d6a64a" stroke-width="2"/><circle cx="66" cy="24" r="3" fill="#b83c9a" stroke="#f4ce76" stroke-width="1"/>
+  <path d="M27 50 18 44M53 51l9 4" stroke="#17151d" stroke-width="5"/>
+  <path d="M32 67v6M48 67v6" stroke="#17151d" stroke-width="4"/>
+</symbol>
+</defs>
+<g transform="translate(0 0)"><g transform="rotate(0 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g></g><g transform="translate(80 0)"><g transform="rotate(-3 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g></g><g transform="translate(160 0)"><g transform="rotate(4 40 58) translate(-1.2 -1.7) scale(1.03) scale(-1 1) translate(-80 0)"><use href="#lari"/></g></g><g transform="translate(240 0)"><g transform="rotate(2 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g><use href="#heart" x="54" y="10"/></g><g transform="translate(320 0)"><g transform="rotate(-2 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g></g><g transform="translate(0 75)"><g transform="rotate(-2 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g></g><g transform="translate(80 75)"><g transform="rotate(0 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g><text x="58" y="18" class="q">?</text></g><g transform="translate(160 75)"><g transform="rotate(5 40 58) translate(0.0 0.0) scale(1) scale(-1 1) translate(-80 0)"><use href="#lari"/></g><use href="#heart" x="54" y="10"/></g><g transform="translate(240 75)"><g transform="rotate(-4 40 58) translate(-0.8 -1.2) scale(1.02)"><use href="#lari"/></g><use href="#heart" x="54" y="10"/></g><g transform="translate(320 75)"><g transform="rotate(4 40 58) translate(0.0 0.0) scale(1) scale(-1 1) translate(-80 0)"><use href="#lari"/></g></g><g transform="translate(0 150)"><g transform="rotate(6 40 58) translate(-2.0 -2.9) scale(1.05)"><use href="#lari"/></g><text x="58" y="18" class="bang">!</text></g><g transform="translate(80 150)"><g transform="rotate(-5 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g></g><g transform="translate(160 150)"><g transform="rotate(1 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g></g><g transform="translate(240 150)"><g transform="rotate(-7 40 58) translate(2.0 2.9) scale(0.95)"><use href="#lari"/></g></g><g transform="translate(320 150)"><g transform="rotate(0 40 58) translate(0.0 0.0) scale(1) scale(-1 1) translate(-80 0)"><use href="#lari"/></g></g><g transform="translate(0 225)"><g transform="rotate(0 40 58) translate(1.6 2.3) scale(0.96)"><use href="#lari"/></g><text x="56" y="18" class="z">z</text></g><g transform="translate(80 225)"><g transform="rotate(5 40 58) translate(-1.6 -2.3) scale(1.04)"><use href="#lari"/></g><use href="#heart" x="54" y="10"/></g><g transform="translate(160 225)"><g transform="rotate(0 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g><text x="58" y="18" class="q">?</text></g><g transform="translate(240 225)"><g transform="rotate(-2 40 58) translate(0.0 0.0) scale(1) scale(-1 1) translate(-80 0)"><use href="#lari"/></g><use href="#heart" x="54" y="10"/></g><g transform="translate(320 225)"><g transform="rotate(0 40 58) translate(0.0 0.0) scale(1)"><use href="#lari"/></g></g></svg>

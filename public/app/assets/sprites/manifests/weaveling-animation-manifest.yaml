@@ -1,0 +1,53 @@
+# Weaveling — Civweave Commons animation interpretation manifest
+character:
+  name: "Weaveling"
+  species: "Threaded commons creature"
+  realm: "Civweave Commons"
+  role: "Guide / connector / party coordinator"
+  visual_hooks: ["dark round face", "huge eyes", "multicolor yarn mantle", "thread and star motifs"]
+  animation_personality: ["soft buoyant motion", "welcoming waves", "thread-like follow-through", "quiet magical focus"]
+sheet:
+  file: "Civweave-weaveling-sprites.png"
+  dimensions_px: [1536, 1024]
+  rows: 4
+  columns: 5
+  indexing: "R{row}C{column}, 1-based"
+  note: "Concept/emote atlas: each cell is a key pose, not a production in-between frame."
+poses:
+  R1C1: {label: gentle_idle, description: "Neutral hands-together stance.", tags: [idle, calm]}
+  R1C2: {label: wave, description: "Friendly one-hand wave.", tags: [wave, greet]}
+  R1C3: {label: joyous_jump, description: "Big open-arm jump.", tags: [jump, success]}
+  R1C4: {label: seated_laugh, description: "Sits laughing with hands up.", tags: [laugh, sit]}
+  R1C5: {label: magnify, description: "Studies something through a magnifying glass.", tags: [inspect, verify]}
+  R2C1: {label: think, description: "Finger to chin in thought.", tags: [think]}
+  R2C2: {label: confused, description: "Question-mark uncertainty.", tags: [confused]}
+  R2C3: {label: startled, description: "Hands to cheeks in surprise.", tags: [surprise]}
+  R2C4: {label: worried, description: "Hands clasped, concerned expression.", tags: [worry, revision]}
+  R2C5: {label: cry, description: "Sits and cries softly.", tags: [cry, fail]}
+  R3C1: {label: bashful, description: "Blushing closed-eye smile.", tags: [bashful, relief]}
+  R3C2: {label: determined, description: "Low determined stance with fists ready.", tags: [determined, defend]}
+  R3C3: {label: thread_wand, description: "Raises a small woven-star wand/tool.", tags: [magic, thread, attack]}
+  R3C4: {label: playful_thread, description: "Leans into a playful thread-pulling gesture.", tags: [thread, support]}
+  R3C5: {label: yarn_sleep, description: "Sleeps against a yarn ball.", tags: [sleep, yarn]}
+  R4C1: {label: pom_cheer, description: "Cheerleader-like yarn pom celebration.", tags: [cheer, rally]}
+  R4C2: {label: broad_wave, description: "Big friendly wave.", tags: [wave, rally]}
+  R4C3: {label: point_path, description: "Points forward to the next path.", tags: [point, guide]}
+  R4C4: {label: weave_magic, description: "Eyes closed while colorful thread-light circles the body.", tags: [magic, thread, support]}
+  R4C5: {label: star_hold, description: "Cradles a small glowing star.", tags: [star, magic, success]}
+animation_groups:
+  idle: {type: loop, sequence: [R1C1, R1C2, R1C1, R3C1], target_duration_s: 2.3}
+  thread_bind:
+    type: action
+    sequence: [R3C2, R3C3, R4C4, R4C5]
+    target_duration_s: 1.35
+    notes: ["Spawn two or three thread ribbons that converge on the target.", "Use as a team combo setup rather than a heavy strike."]
+  party_rally: {type: loop, sequence: [R4C1, R1C3, R4C2, R4C3], target_duration_s: 1.6}
+  inspect_validation: {type: loop, sequence: [R1C5, R2C1, R1C5], target_duration_s: 1.8}
+  revision_reaction: {type: reaction_chain, sequence: [R2C3, R2C4, R2C2], target_duration_s: 1.3}
+  star_finish: {type: one_shot, sequence: [R3C3, R4C4, R4C5, R1C3], target_duration_s: 1.2}
+  sleep_idle: {type: loop, sequence: [R3C5], target_duration_s: 3.0}
+production_notes:
+  recommended_fps: 12
+  anchor: "feet/base center"
+  secondary_motion: ["yarn strands should trail every body turn", "magic ribbons inherit mantle colors", "avoid rigid cloth motion"]
+  battle_identity: "Weaveling links allies together, binds Lari's charm, and turns separate gifts into combo attacks."
