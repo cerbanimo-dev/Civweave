@@ -47,6 +47,13 @@
       "tier": "P1",
       "command": ["node", "scripts/browser-lud-mode-gauntlet-v1.mjs"],
       "timeoutSeconds": 300
+    },
+    {
+      "id": "CAPABILITY-LOCK-001",
+      "name": "Capability Lock enforced control plane remains base-authoritative and read-only",
+      "tier": "P0",
+      "command": ["node", "scripts/verify-capability-lock-control-plane-v2.mjs"],
+      "timeoutSeconds": 120
     }
   ]
 }

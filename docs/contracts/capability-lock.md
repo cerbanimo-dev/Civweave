@@ -11,14 +11,16 @@ The Capability Lock is a repository-level regression boundary. Its central rule 
 ## Sources of truth
 
 - `config/accepted-capabilities.json` is the monotonic accepted-capability registry.
-- `scripts/capability-lock-runner.mjs` is the lock runner.
-- `.github/workflows/capability-lock.yml` runs the lock on every pull request and on every push to `staging` or `main` without path filters.
+- `scripts/capability-lock-runner.mjs` is the v1 base-owned runner.
+- `.github/workflows/capability-lock.yml` is the v1 always-run PR/push gate.
+- `scripts/capability-lock-enforced-runner.mjs` is the v2 default-branch-authority runner.
+- `.github/workflows/capability-lock-enforced.yml` is the v2 `pull_request_target` enforcement workflow.
 
 ## Trust model
 
-For a normal pull request, the candidate checkout is the implementation under test, but the accepted registry, runner, and contract scripts come from the pull request base commit.
+For a normal pull request, the candidate checkout is the implementation under test, but the accepted registry, runner, and contract scripts do not come from the candidate change.
 
-The workflow materializes the runner from the base commit. The runner then:
+The v1 workflow materializes its runner from the pull request base commit. The runner then:
 
 1. Reads the accepted registry from the base commit.
 2. Reads the candidate registry from the candidate checkout.
@@ -30,7 +32,35 @@ The workflow materializes the runner from the base commit. The runner then:
 8. Executes every accepted P0/P1 capability against the candidate product code.
 9. Emits a machine-readable and GitHub Step Summary report.
 
-This means an implementation agent cannot make a regression green by weakening an accepted test in the same pull request. A rewritten verifier in the candidate branch is not the verifier used for accepted capabilities.
+This means an implementation agent cannot make a regression green merely by weakening an accepted test in the same pull request.
+
+## Enforced v2 authority
+
+V2 moves the workflow authority itself out of the candidate pull request. `.github/workflows/capability-lock-enforced.yml` uses `pull_request_target`, so once that workflow exists on the repository default branch GitHub loads the workflow definition from trusted default-branch state rather than from the candidate branch.
+
+The enforced job is intentionally unprivileged:
+
+- repository permission is `contents: read` only;
+- action dependencies are pinned to immutable commit SHAs;
+- checkout credentials are not persisted;
+- no repository secrets are passed to candidate execution;
+- the GitHub synthetic PR merge commit is fetched and both parents are verified against the event base/head SHAs;
+- the authority runner and locked control-plane files are taken from the default branch;
+- the accepted capability registry and contract scripts are taken from the actual PR base commit;
+- registry policy itself is immutable under ordinary feature PRs;
+- every accepted capability receives a freshly reconstructed candidate workspace;
+- candidate `scripts/` are removed and replaced with the base-owned trusted scripts before execution;
+- candidate processes receive an explicit environment allowlist rather than the complete GitHub Actions environment.
+
+The locked default-branch control plane is:
+
+- `.github/workflows/capability-lock-enforced.yml`;
+- `.github/CODEOWNERS`;
+- `scripts/capability-lock-enforced-runner.mjs`.
+
+An ordinary candidate PR that changes any of those files away from default-branch authority fails the enforced lock. Control-plane migration is therefore a separate governance action, not a normal feature change.
+
+Because `pull_request_target` executes the workflow from the repository default branch, staging the v2 files is not enough to activate default-branch authority. V2 becomes authoritative after the same control plane is deliberately promoted to `main` (the repository default branch). Until then, v1 remains the active staging gate.
 
 ## Monotonic acceptance
 
@@ -39,6 +69,8 @@ Existing capability entries are immutable under the ordinary feature-change path
 A new entry becomes part of the trusted base after it is merged. From the next change onward it is protected by the same base-owned proof mechanism.
 
 Retiring or intentionally redefining an accepted capability is not an ordinary implementation change. It requires an explicit human-approved contract migration and must never be silently bundled into unrelated feature work.
+
+V2 also freezes the registry `policy` object. A candidate cannot silently change trusted contract roots, run tiers, or the monotonic policy while leaving individual capability rows unchanged.
 
 ## Bootstrap rule: green evidence only
 
@@ -54,11 +86,11 @@ Only contracts demonstrated green against the current integration state are elig
 - **P1** — important behavior whose disappearance is a material regression but may not make the entire product unusable.
 - **P2** — useful lower-priority behavior that may be recorded in the registry but is not part of the mandatory every-change gate unless the policy is deliberately expanded.
 
-The v1 lock executes every P0 and P1 capability on every change.
+Every accepted P0 and P1 capability runs on every gated change.
 
 ## Initial accepted baseline
 
-The bootstrap registry contains only contracts that were executed by Capability Lock and demonstrated green against the unchanged integration product:
+The bootstrap registry began with contracts demonstrated green against the unchanged integration product:
 
 - persistent human-message launcher;
 - local-model download and inference capability;
@@ -67,11 +99,13 @@ The bootstrap registry contains only contracts that were executed by Capability 
 - Living School pedagogy invariants;
 - Lud Mode download, canonical open, and offline reload through a real Chromium browser gauntlet.
 
-This is a starting baseline, not a claim that every current Civweave feature already has sufficient acceptance coverage. Navigation, Settings, installer, and additional chat/generation contracts that failed the bootstrap audit must be repaired or replaced before they can be promoted. Every newly accepted feature should gain an executable capability ID rather than relying on conversational memory.
+V2 adds `CAPABILITY-LOCK-001`, a P0 contract for the enforced control plane itself.
+
+This remains a starting baseline, not a claim that every current Civweave feature already has sufficient acceptance coverage. Navigation, Settings, installer, and additional chat/generation contracts that failed the bootstrap audit must be repaired or replaced before they can be promoted. Every newly accepted feature should gain an executable capability ID rather than relying on conversational memory.
 
 ## No path filtering
 
-Capability Lock must not use `paths:` or `paths-ignore:` filters. Cross-system regressions are precisely the class of defect this gate exists to detect. A change in one subsystem, loader, service worker, route, CSS file, build script, or shared owner may affect another capability.
+Capability Lock must not use `paths:` or `paths-ignore:` filters for its authoritative gate. Cross-system regressions are precisely the class of defect this gate exists to detect. A change in one subsystem, loader, service worker, route, CSS file, build script, or shared owner may affect another capability.
 
 ## Browser evidence
 
@@ -79,9 +113,11 @@ Static source contracts remain useful for architectural ownership and determinis
 
 ## Required merge enforcement
 
-The workflow job has the stable check name `capability-lock`. GitHub branch protection or a repository ruleset should require this status check on both `staging` and `main`.
+The v1 workflow job has the stable check name `capability-lock`. The v2 authoritative job has the stable check name `capability-lock-enforced`.
 
-Without branch protection, the Capability Lock can detect a regression but GitHub can still permit a direct push or merge that bypasses the check. Protection is therefore part of the complete enforcement model, not an optional hardening step.
+For bypass-resistant enforcement, GitHub branch protection or a repository ruleset must require `capability-lock-enforced` on both `staging` and `main`, require pull requests, and require code-owner review for the Capability Lock control plane. Direct pushes and administrator bypass should be disabled or tightly restricted.
+
+Without branch protection/rulesets, repository CI can detect an attempted regression but GitHub can still permit a direct push or privileged merge that skips the check. Server-side branch enforcement is therefore part of the complete system.
 
 ## Acceptance rule for future work
 
