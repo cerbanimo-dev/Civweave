@@ -6,7 +6,8 @@
 // local-model lifecycle code merely to display the Local models tab.
 const CW_SETTINGS_V325_GATEWAY='/app/settings-gateway-v317.js';
 const CW_SETTINGS_V325_PATCH='/app/settings-local-models-direct-v325.js';
-const CW_SETTINGS_V325_CACHE='cw-settings-v325-bootstrap-v1';
+const CW_SETTINGS_V325_INTERACTION='/app/settings-local-interaction-repair-v1.js?v=1.0.0-inline-import-recovery';
+const CW_SETTINGS_V325_CACHE='cw-settings-v325-bootstrap-v2';
 const CW_SETTINGS_V325_ACTION_PARAM='cwAction';
 const CW_SETTINGS_V325_VIEW_ROUTES=new Set([
   '/app/settings-local-route-v323.js',
@@ -20,10 +21,12 @@ const CW_SETTINGS_V325_PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.js',
   '/app/working-campus-v440.html',
   CW_SETTINGS_V325_GATEWAY,
+  CW_SETTINGS_V325_PATCH,
+  '/app/settings-local-interaction-repair-v1.js',
   ...CW_SETTINGS_V325_VIEW_ROUTES
 ]);
 const CW_SETTINGS_V325_ROUTE_VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
-const CW_SETTINGS_V325_SHIM=`(()=>{'use strict';const VERSION='${CW_SETTINGS_V325_ROUTE_VERSION}';const existing=globalThis.CivweaveSettingsLocalRouteV323;if(existing?.version===VERSION&&existing?.settingsV325DisplayShim===true)return;globalThis.CivweaveSettingsLocalRouteV323=Object.freeze({version:VERSION,route:'downloaded-local',settingsV325DisplayShim:true,savedStateOnlyView:true,viewWritesState:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,renderLocalModels(layer){try{return Boolean(globalThis.CivweaveSettingsLocalDirectV325?.render?.(layer))}catch{return false}},selection(){try{return JSON.parse(localStorage.getItem('civweave.local-ai.selection.v266')||'{"active":false,"id":null}')}catch{return{active:false,id:null}}}});})();`;
+const CW_SETTINGS_V325_SHIM=`(()=>{'use strict';const VERSION='${CW_SETTINGS_V325_ROUTE_VERSION}',DIRECT='${CW_SETTINGS_V325_PATCH}?v=settings-v325-shim-direct-v2',INTERACTION='${CW_SETTINGS_V325_INTERACTION}';function has(path){return [...document.scripts].some(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}})}function load(path,src,marker){if(has(path))return;const script=document.createElement('script');script.src=src;script.async=false;script.dataset[marker]='v2';(document.head||document.documentElement).append(script)}function ensure(layer){load('/app/settings-local-interaction-repair-v1.js',INTERACTION,'civweaveSettingsLocalInteractionShim');if(globalThis.CivweaveSettingsLocalDirectV325?.render){try{return Boolean(globalThis.CivweaveSettingsLocalDirectV325.render(layer))}catch{return false}}load('/app/settings-local-models-direct-v325.js',DIRECT,'civweaveSettingsDirectShim');const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');if(target&&/Reading saved local model choices|Loading saved local model controls/i.test(target.textContent||''))target.innerHTML='<section class="cw-clean-panel"><h3>AI Downloads</h3><p>Opening saved local model controls…</p><p data-local-model-management-status>Recovering current Local Models controls inside Settings.</p></section>';return true}const existing=globalThis.CivweaveSettingsLocalRouteV323;if(existing?.version===VERSION&&existing?.settingsV325DisplayShim===true)return;globalThis.CivweaveSettingsLocalRouteV323=Object.freeze({version:VERSION,route:'downloaded-local',settingsV325DisplayShim:true,savedStateOnlyView:true,viewWritesState:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,renderLocalModels:ensure,selection(){try{return JSON.parse(localStorage.getItem('civweave.local-ai.selection.v266')||'{"active":false,"id":null}')}catch{return{active:false,id:null}}}});})();`;
 
 function cwSettingsV325Headers(source,contentType='application/javascript; charset=utf-8'){
   const headers=new Headers(source?.headers||{});
@@ -53,6 +56,7 @@ function cwSettingsV325TransformGateway(text){
   output=output.replaceAll('CIVWEAVE SETTINGS · v324','CIVWEAVE SETTINGS · v325');
   output=output.replaceAll('settings-v324','settings-v325');
   output=output.replaceAll("civweaveSettingsService='v324'","civweaveSettingsService='v325'");
+  if(!output.includes('/app/settings-local-interaction-repair-v1.js'))output+=`\n;(()=>{const src='${CW_SETTINGS_V325_INTERACTION}',path='/app/settings-local-interaction-repair-v1.js';if([...document.scripts].some(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}}))return;const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsLocalInteractionBootstrap='v2';(document.head||document.documentElement).append(script)})();\n`;
   return output;
 }
 async function cwSettingsV325GatewayResponse(request){
@@ -96,6 +100,6 @@ self.addEventListener('fetch',event=>{
   if(CW_SETTINGS_V325_VIEW_ROUTES.has(url.pathname)){
     event.stopImmediatePropagation();
     if(url.searchParams.get(CW_SETTINGS_V325_ACTION_PARAM)==='1')event.respondWith(cwSettingsV325ActionResponse(request));
-    else event.respondWith(Promise.resolve(new Response(CW_SETTINGS_V325_SHIM,{status:200,headers:{'content-type':'application/javascript; charset=utf-8','cache-control':'no-store','x-civweave-settings-build':'v325-shim'}})));
+    else event.respondWith(Promise.resolve(new Response(CW_SETTINGS_V325_SHIM,{status:200,headers:{'content-type':'application/javascript; charset=utf-8','cache-control':'no-store','x-civweave-settings-build':'v325-shim-v2'}})));
   }
 });
