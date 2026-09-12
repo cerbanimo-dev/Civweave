@@ -57,21 +57,46 @@ jobs:
           unzip -q build/knowledge-tier-publish.zip -d build/knowledge-tier-publish
           test -f build/knowledge-tier-publish/tiers.json
 
+      - name: Configure public browser-read CORS
+        env:
+          R2_BUCKET: ${{ inputs.r2_bucket }}
+        run: |
+          set -euo pipefail
+          cat > build/knowledge-tier-publish/cors.json <<'JSON'
+          {
+            "rules": [
+              {
+                "allowed": {
+                  "origins": ["*"],
+                  "methods": ["GET", "HEAD"]
+                },
+                "maxAgeSeconds": 3600
+              }
+            ]
+          }
+          JSON
+          npx --yes wrangler@4 --version
+          npx --yes wrangler@4 r2 bucket cors set "${R2_BUCKET}" \
+            --file build/knowledge-tier-publish/cors.json \
+            --force
+          npx --yes wrangler@4 r2 bucket cors list "${R2_BUCKET}"
+
       - name: Publish chunk payloads to R2
         env:
           R2_BUCKET: ${{ inputs.r2_bucket }}
           OBJECT_PREFIX: ${{ inputs.object_prefix }}
         run: |
           set -euo pipefail
-          npm exec --yes wrangler@4.39.0 -- --version
           while IFS= read -r -d '' file; do
             relative="${file#build/knowledge-tier-publish/tiers/}"
             object="${OBJECT_PREFIX%/}/${relative}"
             echo "publishing ${object}"
-            npm exec --yes wrangler@4.39.0 -- r2 object put "${R2_BUCKET}/${object}" \
+            npx --yes wrangler@4 r2 object put "${R2_BUCKET}/${object}" \
               --file "${file}" \
               --content-type application/zip \
-              --remote
+              --cache-control 'public, max-age=86400' \
+              --remote \
+              --force
           done < <(find build/knowledge-tier-publish/tiers -type f -name '*.zip' -print0)
 
       - name: Rewrite catalogs to external payload URLs
@@ -84,6 +109,8 @@ jobs:
           from pathlib import Path
           root=Path('build/knowledge-tier-publish')
           base=os.environ['PUBLIC_BASE_URL'].rstrip('/')
+          if not base.startswith('https://'):
+              raise SystemExit('public_base_url must use HTTPS')
           prefix=os.environ['OBJECT_PREFIX'].strip('/')
           for layer in ('expanded','deep'):
               path=root/'tiers'/layer/'catalog.json'
@@ -99,6 +126,23 @@ jobs:
               catalog['base_url']=f"{base}/{prefix}/{layer}/"
               path.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           PY
+
+      - name: Probe first published pack through public URL
+        env:
+          PUBLIC_BASE_URL: ${{ inputs.public_base_url }}
+          OBJECT_PREFIX: ${{ inputs.object_prefix }}
+        run: |
+          set -euo pipefail
+          first="$(find build/knowledge-tier-publish/tiers -type f -name '*.zip' -print -quit)"
+          test -n "${first}"
+          relative="${first#build/knowledge-tier-publish/tiers/}"
+          url="${PUBLIC_BASE_URL%/}/${OBJECT_PREFIX#/}/${relative}"
+          echo "probing ${url}"
+          curl --fail --show-error --location --head \
+            -H 'Origin: https://civweave.pages.dev' \
+            "${url}" \
+            | tee build/knowledge-tier-publish/public-probe-headers.txt
+          grep -qi '^access-control-allow-origin:' build/knowledge-tier-publish/public-probe-headers.txt
 
       - name: Materialize only catalogs and manifests into staging
         run: |
@@ -121,6 +165,7 @@ jobs:
       - name: Verify published catalog contract
         run: |
           node --check public/app/knowledge-library-tiers-v1.mjs
+          node --check public/app/knowledge-library-tier-installer-v1.mjs
           node scripts/verify-knowledge-library-tiers-v1.mjs
 
       - name: Commit tier catalogs to staging
