@@ -10,6 +10,8 @@
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
 // shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
+// The canonical installed PWA registers this worker directly, so current-generation AI route takeovers must be imported here rather than only from the root compatibility worker.
+importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r3');
 const V203_REGISTERED_SETTINGS_GENERATION='v339-settings-saved-state-first-worker-boundary';
 // The saved-state-first Settings bootstrap must run before the historical v325 override so the Local Models tab can render without waiting for lifecycle/runtime code.
 importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved-state-first-registered-worker-v1');
