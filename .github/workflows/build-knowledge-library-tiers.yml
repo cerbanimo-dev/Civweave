@@ -39,14 +39,24 @@ jobs:
       - name: Prepare compiler
         run: |
           python -m pip install --disable-pip-version-check pyarrow
-          python -m py_compile scripts/fetch-vital-memberships-v1.py scripts/build-knowledge-library-tiers-v1.py
+          python -m py_compile \
+            scripts/fetch-vital-memberships-v1.py \
+            scripts/reconcile-foundation-vital-membership-v1.py \
+            scripts/build-knowledge-library-tiers-v1.py
           node --check public/app/knowledge-library-tiers-v1.mjs
+          node --check public/app/knowledge-library-tier-installer-v1.mjs
           node --check scripts/verify-knowledge-library-tiers-v1.mjs
 
       - name: Fetch current Vital membership
         run: |
           python scripts/fetch-vital-memberships-v1.py \
             --output build/knowledge-library/vital-membership.json
+
+      - name: Reconcile Foundation membership to shipped packs
+        run: |
+          python scripts/reconcile-foundation-vital-membership-v1.py \
+            --membership build/knowledge-library/vital-membership.json \
+            --foundation-root public/downloads/knowledge-schools
 
       - name: Download source corpus artifact
         env:
