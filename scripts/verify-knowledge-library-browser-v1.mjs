@@ -21,14 +21,18 @@ includes(browser,[
   "import * as tierRuntime",
   "searchDownloadedKnowledge(activeQuery,{limit:100,maxSchools:11})",
   "knowledgeLayer",
-  "loadTierIndex(layer)",
+  "loadFoundationSchoolIndex",
+  "loadTierIndex(layer,filters.school)",
+  "api.loadCatalog()",
   "metadataFromResponse",
   "openSchoolPacks(layer,school.school_slug,{tokens:[],maxPacks:9999})",
-  "Browse A–Z",
-].filter(token=>token!=='Browse A–Z'),'library browser runtime');
+],'library browser runtime');
 assert(browser.includes("activeMode='browse'"),'Library browser must support direct browse mode.');
 assert(browser.includes("activeMode='search'"),'Library browser must support direct search mode.');
 assert(browser.includes("row.schoolSlug&&matchesFilters"),'Library search must remain scoped to Knowledge School results.');
+assert(browser.includes("installed[0]?.school_slug||'all'"),'Library browse must default to one installed school instead of eagerly unpacking every school.');
+assert(!browser.includes('const foundationIndex=await loadFoundationIndex()'),'Library status must not unpack every Foundation ZIP on startup.');
+assert(browser.includes("foundationCatalogBySlug.get(row.school_slug)?.counts?.articles"),'Library status must use catalog counts without scanning article archives.');
 includes(launcher,['cw-home-menu-v1','cw-civweave-primary-actions-v1','Browse and search knowledge saved on this device.','knowledge-library-browser-v1.html'],'library launcher');
 assert(campus.includes('/app/knowledge-library-launcher-v1.js?v=knowledge-library-browser-v1'),'Working Campus does not load the Library launcher.');
 const offlineManifest=JSON.parse(offline);
@@ -36,4 +40,4 @@ for(const path of ['/app/knowledge-library-browser-v1.html','/app/knowledge-libr
 includes(runtime,['knowledgeLayer:bundle.layer','tierBundles(slug,tokens)'],'Knowledge School runtime');
 includes(tiers,['openSchoolPacks','layerStatus','allLayerStatus'],'tier runtime');
 new Function(launcher);
-console.log(JSON.stringify({libraryBrowser:true,directBrowse:true,directSearch:true,schoolFilter:true,tierFilter:true,offlineCampus:true,declutterNavigation:true},null,2));
+console.log(JSON.stringify({libraryBrowser:true,directBrowse:true,directSearch:true,schoolFilter:true,tierFilter:true,lazySchoolIndex:true,offlineCampus:true,declutterNavigation:true},null,2));
