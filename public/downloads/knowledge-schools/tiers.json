@@ -1,0 +1,53 @@
+{
+  "schema": "civweave.knowledge-library-tiers.v1",
+  "revision": "knowledge-library-tiers-v1",
+  "updated_at": "2026-09-12T14:00:00Z",
+  "source": {
+    "dataset": "wikimedia/structured-wikipedia",
+    "homepage": "https://huggingface.co/datasets/wikimedia/structured-wikipedia",
+    "membership": "English Wikipedia Vital articles",
+    "license": "CC BY-SA 4.0",
+    "strategy": "additive-deltas"
+  },
+  "layers": [
+    {
+      "slug": "foundation",
+      "name": "Foundation Library",
+      "vital_level": 3,
+      "delta_from_level": null,
+      "cumulative_target_articles": 1000,
+      "materialized_articles": 1001,
+      "availability": "ready",
+      "storage": "legacy-school-catalog",
+      "catalog_url": "/downloads/knowledge-schools/catalog.json",
+      "dependencies": [],
+      "description": "The compact offline foundation already shipped with Civweave."
+    },
+    {
+      "slug": "expanded",
+      "name": "Expanded Local Library",
+      "vital_level": 4,
+      "delta_from_level": 3,
+      "cumulative_target_articles": 10000,
+      "materialized_articles": 0,
+      "availability": "build-required",
+      "storage": "chunked-school-delta",
+      "catalog_url": "/downloads/knowledge-schools/tiers/expanded/catalog.json",
+      "dependencies": ["foundation"],
+      "description": "Adds the Level 4 Vital articles that are not already present in Foundation."
+    },
+    {
+      "slug": "deep",
+      "name": "Deep Local Library",
+      "vital_level": 5,
+      "delta_from_level": 4,
+      "cumulative_target_articles": 50000,
+      "materialized_articles": 0,
+      "availability": "build-required",
+      "storage": "chunked-school-delta",
+      "catalog_url": "/downloads/knowledge-schools/tiers/deep/catalog.json",
+      "dependencies": ["foundation", "expanded"],
+      "description": "Adds the Level 5 Vital articles that are not already present in Foundation or Expanded."
+    }
+  ]
+}
