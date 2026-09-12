@@ -25,6 +25,26 @@ assert((bySlug.get('expanded').dependencies||[]).includes('foundation'),'Expande
 assert((bySlug.get('deep').dependencies||[]).includes('foundation')&&(bySlug.get('deep').dependencies||[]).includes('expanded'),'Deep must depend on Foundation and Expanded.');
 assert(bySlug.get('foundation').availability==='ready','Foundation must remain ready.');
 
+const foundationCatalog=JSON.parse(await fs.readFile(path.join(root,'catalog.json'),'utf8'));
+assert(foundationCatalog.schema==='civweave.knowledge-school-catalog.v1','Foundation catalog schema is incompatible.');
+assert(Array.isArray(foundationCatalog.schools)&&foundationCatalog.schools.length===11,'Foundation must contain eleven schools.');
+let foundationArticles=0,foundationBytes=0;
+const foundationSlugs=new Set();
+for(const school of foundationCatalog.schools){
+  assert(school.school_slug&&!foundationSlugs.has(school.school_slug),`Foundation has a duplicate/missing school slug: ${school.school_slug}`);
+  foundationSlugs.add(school.school_slug);
+  assert(safeRelative(school.zip_file)&&String(school.zip_file).startsWith('schools/'),`Foundation has unsafe ZIP path ${school.zip_file}.`);
+  const file=path.join(root,school.zip_file),stat=await fs.stat(file),bytes=Number(school.zip_bytes||0);
+  assert(stat.isFile(),`Missing Foundation pack ${school.zip_file}.`);
+  assert(bytes>0&&bytes<=maxPackBytes,`Foundation pack ${school.zip_file} is outside the 24 MiB boundary.`);
+  assert(stat.size===bytes,`Foundation pack ${school.zip_file} size mismatch.`);
+  assert(/^[0-9a-f]{64}$/.test(String(school.zip_sha256||'')),`Foundation pack ${school.zip_file} has invalid SHA-256.`);
+  assert(await sha256(file)===school.zip_sha256,`Foundation pack ${school.zip_file} SHA-256 mismatch.`);
+  foundationArticles+=Number(school.counts?.articles||0);foundationBytes+=bytes;
+}
+assert(foundationArticles===1001,`Foundation must contain exactly 1,001 articles; found ${foundationArticles}.`);
+assert(Number(bySlug.get('foundation').materialized_articles)===foundationArticles,'Tier manifest Foundation article count mismatch.');
+
 let readyLayerCount=0,packCount=0,externalPackCount=0,articleCount=0,compressedBytes=0;
 for(const slug of ['expanded','deep']){
   const layer=bySlug.get(slug);
@@ -41,6 +61,7 @@ for(const slug of ['expanded','deep']){
   const seen=new Set();let catalogArticles=0,catalogBytes=0;
   for(const school of catalog.schools){
     assert(school.school_slug&&!seen.has(school.school_slug),`${slug} has a duplicate/missing school slug.`);seen.add(school.school_slug);
+    assert(foundationSlugs.has(school.school_slug),`${slug} references unknown Foundation school ${school.school_slug}.`);
     assert(Array.isArray(school.packs),`${slug}/${school.school_slug} has no pack list.`);
     let schoolArticles=0,schoolBytes=0;
     for(const pack of school.packs){
@@ -69,13 +90,15 @@ for(const slug of ['expanded','deep']){
   articleCount+=catalogArticles;
 }
 
-const [runtime,builder,membershipBuilder]=await Promise.all([
+const [runtime,builder,membershipBuilder,reconciler]=await Promise.all([
   fs.readFile(path.join(repo,'public','app','knowledge-library-tiers-v1.mjs'),'utf8'),
   fs.readFile(path.join(repo,'scripts','build-knowledge-library-tiers-v1.py'),'utf8'),
   fs.readFile(path.join(repo,'scripts','fetch-vital-memberships-v1.py'),'utf8'),
+  fs.readFile(path.join(repo,'scripts','reconcile-foundation-vital-membership-v1.py'),'utf8'),
 ]);
 for(const token of ['MAX_PACK_BYTES=24*1024*1024','stageCumulative','openSchoolPacks','routing_terms','cwknowledge-library-tiers-v1'])assert(runtime.includes(token),`Tier runtime is missing ${token}.`);
 for(const token of ['civweave.knowledge-layer-catalog.v1','sections_fts','max-pack-mib','routing_terms','delta_from_level'])assert(builder.includes(token),`Tier compiler is missing ${token}.`);
 for(const token of ['Wikipedia:Vital articles/Level/4','Wikipedia:Vital articles/Level/5','plnamespace','civweave.vital-membership.v1'])assert(membershipBuilder.includes(token),`Vital membership builder is missing ${token}.`);
+for(const token of ['shipped-foundation-provenance','foundation_reconciliation','Could not prove Foundation membership'])assert(reconciler.includes(token),`Foundation reconciler is missing ${token}.`);
 
-console.log(JSON.stringify({schema:manifest.schema,foundationArticles:bySlug.get('foundation').materialized_articles,expanded:bySlug.get('expanded').availability,deep:bySlug.get('deep').availability,readyLayerCount,packCount,externalPackCount,materializedDeltaArticles:articleCount,compressedBytes,maxPackBytes},null,2));
+console.log(JSON.stringify({schema:manifest.schema,foundationArticles,foundationBytes,expanded:bySlug.get('expanded').availability,deep:bySlug.get('deep').availability,readyLayerCount,packCount,externalPackCount,materializedDeltaArticles:articleCount,compressedBytes,maxPackBytes},null,2));
