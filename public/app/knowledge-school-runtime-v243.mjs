@@ -1,9 +1,10 @@
 import {searchSupplementalArticles} from './learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
 
-const VERSION='1.0.39-knowledge-school-runtime-v243-subject-threshold';
+const VERSION='1.0.40-knowledge-school-runtime-v243-tiered-local-library';
 const INSTALLER='/app/knowledge-school-seeds-v1.js?v=local-reader-r2';
 const seedCache=new Map();
 let installerPromise=null;
+let tierRuntimePromise=null;
 
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
 const words=value=>[...new Set(clean(value,1800).toLowerCase().replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(word=>word.length>=3&&!['the','and','for','with','from','into','that','this','about','make','create','write','learn','each','one','project','projects','lead','leader','foundational','knowledge','strategy','strategies','equip','equipped','objective','capability'].includes(word)))].sort((a,b)=>b.length-a.length).slice(0,10);
@@ -12,6 +13,7 @@ const normalizeUrl=value=>{try{const url=new URL(clean(value,2400));url.hash='';
 
 function loadClassicScript(src){return new Promise((resolve,reject)=>{const pathname=new URL(src,location.href).pathname,existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===pathname);if(existing){if(globalThis.CivweaveKnowledgeSchools)return resolve();existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',()=>reject(new Error(`Could not load ${src}`)),{once:true});return}const script=document.createElement('script');script.src=src;script.async=true;script.addEventListener('load',resolve,{once:true});script.addEventListener('error',()=>reject(new Error(`Could not load ${src}`)),{once:true});document.head.append(script)})}
 async function installer(){if(globalThis.CivweaveKnowledgeSchools)return globalThis.CivweaveKnowledgeSchools;if(!installerPromise)installerPromise=loadClassicScript(INSTALLER).then(()=>{if(!globalThis.CivweaveKnowledgeSchools)throw new Error('Knowledge-school storage runtime did not initialize.');return globalThis.CivweaveKnowledgeSchools});return installerPromise}
+async function tierRuntime(){if(!tierRuntimePromise)tierRuntimePromise=import('./knowledge-library-tiers-v1.mjs?v=knowledge-library-tiers-v1').catch(error=>{tierRuntimePromise=null;throw error});return tierRuntimePromise}
 
 function u16(view,offset){return view.getUint16(offset,true)}
 function u32(view,offset){return view.getUint32(offset,true)}
@@ -49,19 +51,37 @@ async function extractArticleMetadata(zipBytes,entries){
   const seen=new Set();
   return records.filter(row=>{const key=normalizeUrl(row.url);if(!key||seen.has(key))return false;seen.add(key);row.url=key;return true}).slice(0,3000);
 }
-async function databaseBundle(slug){
-  if(seedCache.has(slug))return seedCache.get(slug);
+async function bundleFromResponse(cacheKey,response){
+  if(seedCache.has(cacheKey))return seedCache.get(cacheKey);
   const promise=(async()=>{
-    const store=await installer(),response=await store.openSeed(slug);
-    if(!response)throw new Error(`Knowledge school ${slug} is not downloaded on this device.`);
+    if(!response)throw new Error(`Knowledge pack ${cacheKey} is not downloaded on this device.`);
     const zipBytes=new Uint8Array(await response.arrayBuffer()),entries=zipEntries(zipBytes),entry=entries.find(item=>/\.(sqlite|sqlite3|db)$/i.test(item.name)&&item.uncompressedSize>0);
-    if(!entry)throw new Error(`Knowledge school ${slug} contains no SQLite database.`);
+    if(!entry)throw new Error(`Knowledge pack ${cacheKey} contains no SQLite database.`);
     const metadata=await extractArticleMetadata(zipBytes,entries),bytes=await extractEntry(zipBytes,entry),magic=new TextDecoder('ascii').decode(bytes.subarray(0,16));
-    if(!magic.startsWith('SQLite format 3'))throw new Error(`Knowledge school ${slug} does not contain a valid SQLite 3 database.`);
+    if(!magic.startsWith('SQLite format 3'))throw new Error(`Knowledge pack ${cacheKey} does not contain a valid SQLite 3 database.`);
     return{bytes,metadata};
   })();
-  seedCache.set(slug,promise);
-  try{return await promise}catch(error){seedCache.delete(slug);throw error}
+  seedCache.set(cacheKey,promise);
+  try{return await promise}catch(error){seedCache.delete(cacheKey);throw error}
+}
+async function databaseBundle(slug){
+  if(seedCache.has(`foundation:${slug}`))return seedCache.get(`foundation:${slug}`);
+  const store=await installer(),response=await store.openSeed(slug);
+  return bundleFromResponse(`foundation:${slug}`,response)
+}
+async function tierBundles(slug,tokens){
+  const out=[];let runtime;
+  try{runtime=await tierRuntime()}catch{return out}
+  for(const layer of ['expanded','deep']){
+    try{
+      const packs=await runtime.openSchoolPacks(layer,slug,{tokens,maxPacks:3});
+      for(const item of packs){
+        const bundle=await bundleFromResponse(`${layer}:${item.pack.pack_id}`,item.response);
+        out.push({...bundle,layer,packId:item.pack.pack_id});
+      }
+    }catch(error){console.warn('[Knowledge library tier reader]',layer,slug,error)}
+  }
+  return out
 }
 
 const searchDecoder=new TextDecoder('windows-1252');
@@ -145,19 +165,21 @@ export async function searchDownloadedKnowledge(capability,{limit=10,maxSchools=
     for(const row of supplemental)results.push({...row,score:Number(row.score||0)+24});
   }catch(error){console.warn('[Knowledge School supplemental reader]',error)}
   for(const slug of slugs){
-    const record=bySlug.get(slug);
-    try{
-      const bundle=await databaseBundle(slug),passages=findPassages(bundle.bytes,tokens,{limit:Math.max(6,limit)});
+    const record=bySlug.get(slug),bundles=[];
+    try{bundles.push({...await databaseBundle(slug),layer:'foundation'})}catch(error){console.warn('[Knowledge School local reader]',slug,error)}
+    bundles.push(...await tierBundles(slug,tokens));
+    for(const bundle of bundles){
+      const passages=findPassages(bundle.bytes,tokens,{limit:Math.max(6,Math.ceil(limit/Math.max(1,bundles.length)))});
       for(const passage of passages){
         const semantic=bestMetadataForPassage(passage.text,tokens,bundle.metadata),nearby=canonicalNearHit(bundle.bytes,passage.hit,bundle.metadata),matched=semantic||nearby,title=clean(matched?.title,320)||`${record.school_name} downloaded reference`,url=normalizeUrl(matched?.url);
-        results.push({title,url,notes:passage.text,score:passage.score,schoolSlug:slug,schoolName:record.school_name,table:'sqlite-byte-search',articleTitle:title,canonicalUrl:url,linkProvenance:url?(semantic?'archive-manifest-title-match':'archive-canonical-near-passage'):'unresolved'});
+        results.push({title,url,notes:passage.text,score:passage.score+(bundle.layer==='foundation'?0:2),schoolSlug:slug,schoolName:record.school_name,knowledgeLayer:bundle.layer,table:'sqlite-byte-search',articleTitle:title,canonicalUrl:url,linkProvenance:url?(semantic?'archive-manifest-title-match':'archive-canonical-near-passage'):'unresolved'});
       }
-    }catch(error){console.warn('[Knowledge School local reader]',slug,error)}
-    if(results.length>=limit*3)break;
+    }
+    if(results.length>=limit*4)break;
   }
   const minimumMatches=tokens.length>=2?2:1,seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const relevanceText=`${item.title||''} ${item.notes||''}`.toLowerCase(),matches=tokens.reduce((count,token)=>count+(relevanceText.includes(token)?1:0),0);if(matches<minimumMatches)return false;const key=(item.canonicalUrl||item.url||item.notes).toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,220);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
 }
 
 export function clearKnowledgeSchoolDatabaseCache(){seedCache.clear()}
 export const version=VERSION;
-globalThis.CivweaveKnowledgeSchoolRuntimeV243=Object.freeze({version:VERSION,search:searchDownloadedKnowledge,clear:clearKnowledgeSchoolDatabaseCache,engine:'dependency-free-sqlite-byte-search+canonical-source-links+supplemental-source-pack'});
+globalThis.CivweaveKnowledgeSchoolRuntimeV243=Object.freeze({version:VERSION,search:searchDownloadedKnowledge,clear:clearKnowledgeSchoolDatabaseCache,engine:'dependency-free-sqlite-byte-search+tier-routing+canonical-source-links+supplemental-source-pack'});
