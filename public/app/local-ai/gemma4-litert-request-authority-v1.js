@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.2-gemma4-litert-request-authority-v1-global-stream-tracker';
+const VERSION='1.1.3-gemma4-litert-request-authority-v1-family-loader-weave-rebind';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -42,6 +42,7 @@ let trackerFlight=null;
 let assistantTarget=null;
 let fastAdapterTarget=null;
 let unifiedTarget=null;
+let familyLoaderTarget=null;
 let queued=false;
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
@@ -180,8 +181,39 @@ async function ensureWeaveLayers(){
   if(!trackerReady()||!weavePipelineReady())throw Object.assign(new Error('The Weave Draft generation layers did not become ready.'),{code:'LOCAL_GEMMA4_WEAVE_PIPELINE_NOT_READY'});
   return true;
 }
+function installFamilyLoaderWeaveRebind(){
+  const loader=globalThis.CivweaveFamilyAILoaderV105,current=loader?.ensure;
+  if(!loader||typeof current!=='function')return false;
+  if(current.__civweaveWeavePostEnsureV1===VERSION){familyLoaderTarget=loader;return true}
+  const prior=current.bind(loader);
+  const ensure=async(...args)=>{
+    const result=await prior(...args);
+    if(selectedFast()){
+      await ensureWeaveLayers();
+      const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
+      if(!pipeline?.installRuntime?.())throw Object.assign(new Error('The family AI loader completed but the E4B Weave runtime did not reattach.'),{code:'LOCAL_GEMMA4_WEAVE_POST_LOADER_REBIND_FAILED'});
+      emit('civweave:gemma4-weave-post-loader-rebind',{selected:selected()?.id||'',runtimeBound:true});
+    }
+    return result;
+  };
+  ensure.__civweaveWeavePostEnsureV1=VERSION;
+  ensure.__prior=current;
+  try{
+    loader.ensure=ensure;
+    if(loader.ensure!==ensure)throw new Error('family loader assignment did not stick');
+    familyLoaderTarget=loader;
+    return true;
+  }catch{}
+  try{
+    const next={...loader,ensure};
+    globalThis.CivweaveFamilyAILoaderV105=next;
+    familyLoaderTarget=next;
+    return globalThis.CivweaveFamilyAILoaderV105?.ensure===ensure;
+  }catch{return false}
+}
 async function ensure({onProgress,reason='local-request'}={}){
   if(!selectedFast())return globalThis.CivweaveLocalChatRuntimeV295||null;
+  installFamilyLoaderWeaveRebind();
   if(ensureFlight)return ensureFlight;
   ensureFlight=(async()=>{
     const pick=selected();
@@ -202,7 +234,9 @@ async function ensure({onProgress,reason='local-request'}={}){
     installFastStructuredToolAdapter();
     installLearningPlanMetadataAdapter();
     await ensureWeaveLayers();
-    emit('civweave:gemma4-litert-first-request-ready',{reason,model:pick?.id||'',firstRequestOwned:true,structuredToolAdapter:true,weaveDraftPipeline:true,liveTracker:true});
+    installFamilyLoaderWeaveRebind();
+    globalThis.CivweaveGemma4WeaveDraftPipelineV1?.installRuntime?.();
+    emit('civweave:gemma4-litert-first-request-ready',{reason,model:pick?.id||'',firstRequestOwned:true,structuredToolAdapter:true,weaveDraftPipeline:true,liveTracker:true,familyLoaderRebind:true});
     return globalThis.CivweaveLocalChatRuntimeV295;
   })().catch(error=>{
     emit('civweave:gemma4-litert-first-request-failed',{reason,model:selected()?.id||'',code:error?.code||'LOCAL_GEMMA4_LITERT_STARTUP_FAILED',message:String(error?.message||error)});
@@ -219,6 +253,7 @@ function copyCompositionMetadata(target,source){
 function installAssistant(){
   installFastStructuredToolAdapter();
   installLearningPlanMetadataAdapter();
+  installFamilyLoaderWeaveRebind();
   try{globalThis.CivweaveGuideGenerationTrackerV1?.install?.()}catch{}
   try{globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.()}catch{}
   const api=globalThis.CivweaveAssistantV141;
@@ -229,6 +264,7 @@ function installAssistant(){
     if(selectedFast())await ensure({onProgress:args?.onProgress,reason:'guide-request'});
     installFastStructuredToolAdapter();
     installLearningPlanMetadataAdapter();
+    installFamilyLoaderWeaveRebind();
     globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.();
     return prior.call(api,args);
   };
@@ -239,7 +275,7 @@ function installAssistant(){
   const next={...api,respond,gemma4LiteRTFirstRequestAuthority:VERSION,gemma4LiteRTStableComposition:true};
   try{globalThis.CivweaveAssistantV141=next}catch{return false}
   assistantTarget=next;
-  emit('civweave:gemma4-litert-request-authority-installed',{compositionPreserved:true,selectedFast:selectedFast(),structuredToolAdapter:Boolean(fastAdapterTarget),weaveDraftPipeline:weavePipelineReady(),liveTracker:trackerReady()});
+  emit('civweave:gemma4-litert-request-authority-installed',{compositionPreserved:true,selectedFast:selectedFast(),structuredToolAdapter:Boolean(fastAdapterTarget),weaveDraftPipeline:weavePipelineReady(),liveTracker:trackerReady(),familyLoaderRebind:Boolean(familyLoaderTarget)});
   return true;
 }
 function schedule(){
@@ -248,7 +284,7 @@ function schedule(){
   queueMicrotask(()=>{
     queued=false;
     void ensureTracker().catch(()=>{});
-    installFastStructuredToolAdapter();installLearningPlanMetadataAdapter();
+    installFastStructuredToolAdapter();installLearningPlanMetadataAdapter();installFamilyLoaderWeaveRebind();
     try{globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.()}catch{}
     installAssistant();
   });
@@ -279,7 +315,7 @@ globalThis.CivweaveGemma4LiteRTRequestAuthorityV1=Object.freeze({
   structuredToolAdapterVersion:FAST_STRUCTURED_TOOL_ADAPTER_VERSION,
   trackerVersion:TRACKER_VERSION,
   weavePipelineVersion:WEAVE_PIPELINE_VERSION,
-  selected,selectedFast,ensure,prewarm,ensureTracker,ensureWeaveLayers,installAssistant,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
+  selected,selectedFast,ensure,prewarm,ensureTracker,ensureWeaveLayers,installAssistant,installFamilyLoaderWeaveRebind,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
   firstRequestOwnership:true,
   requestTriggeredOwnership:true,
   passivePrewarm:false,
@@ -291,9 +327,10 @@ globalThis.CivweaveGemma4LiteRTRequestAuthorityV1=Object.freeze({
   weaveDraftPipeline:true,
   liveGenerationTracker:true,
   globalFinalResponseStreaming:true,
+  familyLoaderWeaveRebind:true,
   compositionKeys:COMPOSITION_KEYS,
   state:()=>Object.freeze({
-    selected:selected()?.id||'',selectedFast:selectedFast(),localChatReady:localChatReady(),fastExtensionReady:fastExtensionReady(),fastRuntimeReady:fastRuntimeReady(),fastWrapperReady:fastWrapperReady(),trackerReady:trackerReady(),weavePipelineReady:weavePipelineReady(),ensuring:Boolean(ensureFlight),assistantWrapped:Boolean(assistantTarget),fastStructuredAdapter:Boolean(fastAdapterTarget),learningPlanMetadataAdapter:Boolean(unifiedTarget),compositionPreserved:Boolean(globalThis.CivweaveAssistantV141?.respond?.__civweaveGemma4LiteRTStableComposition)
+    selected:selected()?.id||'',selectedFast:selectedFast(),localChatReady:localChatReady(),fastExtensionReady:fastExtensionReady(),fastRuntimeReady:fastRuntimeReady(),fastWrapperReady:fastWrapperReady(),trackerReady:trackerReady(),weavePipelineReady:weavePipelineReady(),ensuring:Boolean(ensureFlight),assistantWrapped:Boolean(assistantTarget),fastStructuredAdapter:Boolean(fastAdapterTarget),learningPlanMetadataAdapter:Boolean(unifiedTarget),familyLoaderWeaveRebind:Boolean(familyLoaderTarget),compositionPreserved:Boolean(globalThis.CivweaveAssistantV141?.respond?.__civweaveGemma4LiteRTStableComposition)
   })
 });
 schedule();
