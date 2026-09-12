@@ -5,6 +5,7 @@ on:
     paths:
       - public/downloads/knowledge-schools/**
       - public/app/knowledge-school-**
+      - public/app/knowledge-library-**
       - public/app/pwa-update-controller-v204.js
       - public/app/install-boundary-v146.js
       - public/install-v130.js
@@ -12,13 +13,21 @@ on:
       - public/service-worker-v203.js
       - public/service-worker-update-v204.js
       - scripts/verify-knowledge-school-seeds-v1.mjs
+      - scripts/verify-knowledge-library-tiers-v1.mjs
+      - scripts/fetch-vital-memberships-v1.py
+      - scripts/reconcile-foundation-vital-membership-v1.py
+      - scripts/build-knowledge-library-tiers-v1.py
+      - .github/workflows/build-knowledge-library-tiers.yml
+      - .github/workflows/publish-knowledge-library-tiers.yml
       - .github/workflows/verify-knowledge-school-seeds-v1.yml
   push:
     branches:
+      - staging
       - agent/fix-updates-and-library-staging
     paths:
       - public/downloads/knowledge-schools/**
       - public/app/knowledge-school-**
+      - public/app/knowledge-library-**
       - public/app/pwa-update-controller-v204.js
       - public/app/install-boundary-v146.js
       - public/install-v130.js
@@ -26,6 +35,12 @@ on:
       - public/service-worker-v203.js
       - public/service-worker-update-v204.js
       - scripts/verify-knowledge-school-seeds-v1.mjs
+      - scripts/verify-knowledge-library-tiers-v1.mjs
+      - scripts/fetch-vital-memberships-v1.py
+      - scripts/reconcile-foundation-vital-membership-v1.py
+      - scripts/build-knowledge-library-tiers-v1.py
+      - .github/workflows/build-knowledge-library-tiers.yml
+      - .github/workflows/publish-knowledge-library-tiers.yml
       - .github/workflows/verify-knowledge-school-seeds-v1.yml
 
 permissions:
@@ -43,15 +58,24 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify scripts, update controls, and optional asset boundaries
+      - name: Verify scripts, tier contracts, update controls, and optional asset boundaries
         run: |
           node --check public/app/knowledge-school-seeds-v1.js
           node --check public/app/knowledge-school-installer-v1.js
+          node --check public/app/knowledge-school-runtime-v243.mjs
+          node --check public/app/knowledge-library-tiers-v1.mjs
+          node --check public/app/knowledge-library-tier-installer-v1.mjs
           node --check public/app/pwa-update-controller-v204.js
           node --check public/app/install-boundary-v146.js
           node --check public/install-v130.js
           node --check public/service-worker-v203.js
           node --check public/service-worker-update-v204.js
           node --check scripts/verify-knowledge-school-seeds-v1.mjs
-          python -m py_compile public/downloads/knowledge-schools/batch_unpack_schools.py
+          node --check scripts/verify-knowledge-library-tiers-v1.mjs
+          python -m py_compile \
+            public/downloads/knowledge-schools/batch_unpack_schools.py \
+            scripts/fetch-vital-memberships-v1.py \
+            scripts/reconcile-foundation-vital-membership-v1.py \
+            scripts/build-knowledge-library-tiers-v1.py
           node scripts/verify-knowledge-school-seeds-v1.mjs
+          node scripts/verify-knowledge-library-tiers-v1.mjs
