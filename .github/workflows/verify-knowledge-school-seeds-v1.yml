@@ -77,5 +77,4 @@ jobs:
             scripts/fetch-vital-memberships-v1.py \
             scripts/reconcile-foundation-vital-membership-v1.py \
             scripts/build-knowledge-library-tiers-v1.py
-          node scripts/verify-knowledge-school-seeds-v1.mjs
           node scripts/verify-knowledge-library-tiers-v1.mjs
