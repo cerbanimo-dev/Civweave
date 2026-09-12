@@ -10,6 +10,7 @@ const manifest=JSON.parse(await fs.readFile(path.join(root,'tiers.json'),'utf8')
 const maxPackBytes=24*1024*1024;
 const requiredLayers=['foundation','expanded','deep'];
 const safeRelative=value=>typeof value==='string'&&value.length>0&&!value.includes('..')&&!path.isAbsolute(value);
+const externalUrl=value=>{try{const url=new URL(String(value||''));return url.protocol==='https:'}catch{return false}};
 async function sha256(file){const data=await fs.readFile(file);return crypto.createHash('sha256').update(data).digest('hex')}
 function assert(condition,message){if(!condition)throw new Error(message)}
 
@@ -24,7 +25,7 @@ assert((bySlug.get('expanded').dependencies||[]).includes('foundation'),'Expande
 assert((bySlug.get('deep').dependencies||[]).includes('foundation')&&(bySlug.get('deep').dependencies||[]).includes('expanded'),'Deep must depend on Foundation and Expanded.');
 assert(bySlug.get('foundation').availability==='ready','Foundation must remain ready.');
 
-let readyLayerCount=0,packCount=0,articleCount=0,compressedBytes=0;
+let readyLayerCount=0,packCount=0,externalPackCount=0,articleCount=0,compressedBytes=0;
 for(const slug of ['expanded','deep']){
   const layer=bySlug.get(slug);
   assert(['ready','build-required'].includes(layer.availability),`${slug} has unsupported availability ${layer.availability}.`);
@@ -46,11 +47,17 @@ for(const slug of ['expanded','deep']){
       assert(safeRelative(pack.zip_file),`${slug}/${school.school_slug} has unsafe pack path ${pack.zip_file}.`);
       assert(Number(pack.zip_bytes)>0&&Number(pack.zip_bytes)<=maxPackBytes,`${slug}/${pack.pack_id} is outside the 24 MiB pack boundary.`);
       assert(/^[0-9a-f]{64}$/.test(String(pack.zip_sha256||'')),`${slug}/${pack.pack_id} has an invalid SHA-256.`);
-      const file=path.join(root,'tiers',slug,pack.zip_file),stat=await fs.stat(file);
-      assert(stat.isFile(),`Missing ${slug} pack ${pack.zip_file}.`);
-      assert(stat.size===Number(pack.zip_bytes),`Size mismatch for ${slug}/${pack.zip_file}.`);
-      assert(await sha256(file)===pack.zip_sha256,`SHA-256 mismatch for ${slug}/${pack.zip_file}.`);
-      schoolArticles+=Number(pack.article_count||0);schoolBytes+=stat.size;packCount++;compressedBytes+=stat.size;
+      const bytes=Number(pack.zip_bytes);
+      if(pack.download_url){
+        assert(externalUrl(pack.download_url),`${slug}/${pack.pack_id} has an invalid external download URL.`);
+        externalPackCount++;
+      }else{
+        const file=path.join(root,'tiers',slug,pack.zip_file),stat=await fs.stat(file);
+        assert(stat.isFile(),`Missing ${slug} pack ${pack.zip_file}.`);
+        assert(stat.size===bytes,`Size mismatch for ${slug}/${pack.zip_file}.`);
+        assert(await sha256(file)===pack.zip_sha256,`SHA-256 mismatch for ${slug}/${pack.zip_file}.`);
+      }
+      schoolArticles+=Number(pack.article_count||0);schoolBytes+=bytes;packCount++;compressedBytes+=bytes;
     }
     assert(schoolArticles===Number(school.article_count||0),`${slug}/${school.school_slug} article count does not equal its packs.`);
     assert(schoolBytes===Number(school.zip_bytes||0),`${slug}/${school.school_slug} byte count does not equal its packs.`);
@@ -71,4 +78,4 @@ for(const token of ['MAX_PACK_BYTES=24*1024*1024','stageCumulative','openSchoolP
 for(const token of ['civweave.knowledge-layer-catalog.v1','sections_fts','max-pack-mib','routing_terms','delta_from_level'])assert(builder.includes(token),`Tier compiler is missing ${token}.`);
 for(const token of ['Wikipedia:Vital articles/Level/4','Wikipedia:Vital articles/Level/5','plnamespace','civweave.vital-membership.v1'])assert(membershipBuilder.includes(token),`Vital membership builder is missing ${token}.`);
 
-console.log(JSON.stringify({schema:manifest.schema,foundationArticles:bySlug.get('foundation').materialized_articles,expanded:bySlug.get('expanded').availability,deep:bySlug.get('deep').availability,readyLayerCount,packCount,materializedDeltaArticles:articleCount,compressedBytes,maxPackBytes},null,2));
+console.log(JSON.stringify({schema:manifest.schema,foundationArticles:bySlug.get('foundation').materialized_articles,expanded:bySlug.get('expanded').availability,deep:bySlug.get('deep').availability,readyLayerCount,packCount,externalPackCount,materializedDeltaArticles:articleCount,compressedBytes,maxPackBytes},null,2));
