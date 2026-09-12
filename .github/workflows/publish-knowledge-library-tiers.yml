@@ -1,0 +1,137 @@
+name: Publish optional knowledge library tiers
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact_id:
+        description: Artifact ID produced by Build optional knowledge library tiers
+        required: true
+      r2_bucket:
+        description: Cloudflare R2 bucket name for optional knowledge packs
+        required: true
+      public_base_url:
+        description: Public HTTPS base URL mapped to the R2 bucket (no trailing slash required)
+        required: true
+      object_prefix:
+        description: Object prefix inside the bucket
+        required: true
+        default: civweave/knowledge-library/v1
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download compiled tier artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ inputs.artifact_id }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+          rm -rf build/knowledge-tier-publish
+          mkdir -p build/knowledge-tier-publish
+          curl --fail --show-error --location \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
+            -o build/knowledge-tier-publish.zip
+          unzip -q build/knowledge-tier-publish.zip -d build/knowledge-tier-publish
+          test -f build/knowledge-tier-publish/tiers.json
+
+      - name: Publish chunk payloads to R2
+        env:
+          R2_BUCKET: ${{ inputs.r2_bucket }}
+          OBJECT_PREFIX: ${{ inputs.object_prefix }}
+        run: |
+          set -euo pipefail
+          npm exec --yes wrangler@4.39.0 -- --version
+          while IFS= read -r -d '' file; do
+            relative="${file#build/knowledge-tier-publish/tiers/}"
+            object="${OBJECT_PREFIX%/}/${relative}"
+            echo "publishing ${object}"
+            npm exec --yes wrangler@4.39.0 -- r2 object put "${R2_BUCKET}/${object}" \
+              --file "${file}" \
+              --content-type application/zip \
+              --remote
+          done < <(find build/knowledge-tier-publish/tiers -type f -name '*.zip' -print0)
+
+      - name: Rewrite catalogs to external payload URLs
+        env:
+          PUBLIC_BASE_URL: ${{ inputs.public_base_url }}
+          OBJECT_PREFIX: ${{ inputs.object_prefix }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path('build/knowledge-tier-publish')
+          base=os.environ['PUBLIC_BASE_URL'].rstrip('/')
+          prefix=os.environ['OBJECT_PREFIX'].strip('/')
+          for layer in ('expanded','deep'):
+              path=root/'tiers'/layer/'catalog.json'
+              if not path.exists():
+                  continue
+              catalog=json.loads(path.read_text(encoding='utf-8'))
+              for school in catalog.get('schools',[]):
+                  for pack in school.get('packs',[]):
+                      relative=f"{layer}/{pack['zip_file']}"
+                      pack['download_url']=f"{base}/{prefix}/{relative}"
+                      pack['distribution']='cloudflare-r2'
+              catalog['distribution']='cloudflare-r2'
+              catalog['base_url']=f"{base}/{prefix}/{layer}/"
+              path.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+      - name: Materialize only catalogs and manifests into staging
+        run: |
+          set -euo pipefail
+          target=public/downloads/knowledge-schools
+          cp build/knowledge-tier-publish/tiers.json "${target}/tiers.json"
+          for layer in expanded deep; do
+            source="build/knowledge-tier-publish/tiers/${layer}"
+            if [ ! -f "${source}/catalog.json" ]; then
+              continue
+            fi
+            mkdir -p "${target}/tiers/${layer}"
+            rm -rf "${target}/tiers/${layer}/packs"
+            cp "${source}/catalog.json" "${target}/tiers/${layer}/catalog.json"
+            cp "${source}/SHA256SUMS" "${target}/tiers/${layer}/SHA256SUMS"
+          done
+          cp build/knowledge-tier-publish/BUILD-MANIFEST.json "${target}/tiers/BUILD-MANIFEST.json"
+          cp build/knowledge-tier-publish/VITAL-MEMBERSHIP.json "${target}/tiers/VITAL-MEMBERSHIP.json"
+
+      - name: Verify published catalog contract
+        run: |
+          node --check public/app/knowledge-library-tiers-v1.mjs
+          node scripts/verify-knowledge-library-tiers-v1.mjs
+
+      - name: Commit tier catalogs to staging
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/downloads/knowledge-schools/tiers.json public/downloads/knowledge-schools/tiers
+          if git diff --cached --quiet; then
+            echo 'Published knowledge tier catalogs are already current.'
+            exit 0
+          fi
+          git commit -m 'Publish optional knowledge library tier catalogs'
+          git push origin HEAD:staging
