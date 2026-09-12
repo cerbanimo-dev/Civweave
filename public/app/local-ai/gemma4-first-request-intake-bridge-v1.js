@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0-gemma4-first-request-intake-bridge-v1-weave-required';
+const VERSION='1.0.1-gemma4-first-request-intake-bridge-v1-living-school-intake';
 const PIPELINE_VERSION='1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair';
 const E2B='gemma4-e2b-it-litert-web';
 const E4B='gemma4-e4b-it-litert-web';
@@ -29,14 +29,31 @@ function hasLayer(fn,flag,value=''){
   }
   return false;
 }
+function isLivingSchoolLearning(args={}){
+  if(systemFor(args)!=='living-school')return false;
+  try{return Boolean(globalThis.CivweaveUnifiedChatSystemV1?.learningJourneyIntent?.(clean(args.text,12000),Array.isArray(args.history)?args.history:[]))}catch{return false}
+}
+function intakeArgs(args={}){
+  if(systemFor(args)!=='living-school')return args;
+  return{
+    ...args,
+    sourceSystemId:args.sourceSystemId||'living-school',
+    sourceGuide:args.sourceGuide||'Moss',
+    systemId:'civweave',
+    context:{...(args.context||{}),guide:{...(args.context?.guide||{}),system:'civweave',name:'Weaveling'}}
+  };
+}
 function eligible(args={}){
-  if(!selectedGemma()||systemFor(args)!=='civweave')return false;
+  if(!selectedGemma())return false;
+  const system=systemFor(args);
+  if(system!=='civweave'&&!(system==='living-school'&&isLivingSchoolLearning(args)))return false;
   const authority=globalThis.CivweaveGemma4StructuredTaskAuthorityV1;
-  try{return Boolean(authority?.intakeFirst===true&&authority?.intakeEligible?.(args))}catch{return false}
+  try{return Boolean(authority?.intakeFirst===true&&authority?.intakeEligible?.(intakeArgs(args)))}catch{return false}
 }
 async function ensureWeaveAuthority(args={}){
   const first=globalThis.CivweaveGemma4LiteRTRequestAuthorityV1;
   if(typeof first?.ensure==='function')await first.ensure({onProgress:args?.onProgress,reason:'first-request-intake-bridge'});
+  try{first?.installFamilyLoaderWeaveRebind?.()}catch{}
   try{globalThis.CivweaveGuideGenerationTrackerV1?.install?.()}catch{}
   const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
   if(pipeline?.version!==PIPELINE_VERSION)throw Object.assign(new Error('The E4B Weave Draft pipeline did not become ready before intake handoff.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_READY'});
@@ -56,17 +73,17 @@ function failurePacket(error){
 }
 async function directIntake(args={}){
   await ensureWeaveAuthority(args);
-  const authority=globalThis.CivweaveGemma4StructuredTaskAuthorityV1;
-  if(!authority?.intakeFirst||typeof authority?.intakeRespond!=='function'||!authority?.intakeEligible?.(args))return{handled:false,result:null};
-  emit('intake-start',{model:E2B,textLength:clean(args.text,12000).length});
+  const authority=globalThis.CivweaveGemma4StructuredTaskAuthorityV1,normalized=intakeArgs(args);
+  if(!authority?.intakeFirst||typeof authority?.intakeRespond!=='function'||!authority?.intakeEligible?.(normalized))return{handled:false,result:null};
+  emit('intake-start',{model:E2B,textLength:clean(args.text,12000).length,sourceSystem:systemFor(args)});
   try{
     authority.syncStopButton?.();
-    const result=await authority.intakeRespond(args);
+    const result=await authority.intakeRespond(normalized);
     if(result==null)return{handled:false,result:null};
-    emit('intake-complete',{model:result?.model||'',provider:result?.provider||'',generationStage:result?.generationStage||''});
+    emit('intake-complete',{model:result?.model||'',provider:result?.provider||'',generationStage:result?.generationStage||'',sourceSystem:systemFor(args)});
     return{handled:true,result};
   }catch(error){
-    emit('intake-failed',{code:error?.code||'',message:clean(error?.message||error,800)});
+    emit('intake-failed',{code:error?.code||'',message:clean(error?.message||error,800),sourceSystem:systemFor(args)});
     return{handled:true,result:failurePacket(error)};
   }finally{try{authority.syncStopButton?.()}catch{}}
 }
@@ -84,19 +101,20 @@ function install(){
   for(const key of Object.keys(current))try{respond[key]=current[key]}catch{}
   respond.__civweaveFirstRequestIntakeBridgeV1=VERSION;
   respond.__civweaveE2BIntakeFirstV1=true;
+  respond.__civweaveLivingSchoolIntakeFirstV1=true;
   respond.__civweaveWeavePipelineRequiredV1=true;
   respond.__prior=current;
   try{api.respond=respond;if(api.respond!==respond)throw new Error('assistant assignment did not stick')}catch{
     try{globalThis.CivweaveAssistantV141={...api,respond}}catch{return false}
   }
   installedTarget=globalThis.CivweaveAssistantV141?.respond||respond;
-  emit('installed',{weaveRequired:true,selectedGemma:selectedGemma()});
+  emit('installed',{weaveRequired:true,selectedGemma:selectedGemma(),livingSchoolLearningIntake:true});
   return true;
 }
 function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;install()})}
 for(const name of ['civweave:assistant-runtime-ready','civweave:local-provider-authority-installed','civweave:local-guide-control-bypass-ready','civweave:structured-task-authority-ready','civweave:gemma4-litert-first-request-ready','civweave:guide-loader-reset','civweave:unified-chat-system-ready','pageshow'])addEventListener?.(name,schedule);
 for(const delay of [0,50,180,500,1200,2800,6000,12000,20000])setTimeout(schedule,delay);
 
-globalThis.CivweaveGemma4FirstRequestIntakeBridgeV1=Object.freeze({version:VERSION,pipelineVersion:PIPELINE_VERSION,eligible,selectedGemma,hasLayer,ensureWeaveAuthority,directIntake,install,schedule,weaveRequired:true,intakeModel:E2B,deepModel:E4B,state:()=>Object.freeze({installed:Boolean(installedTarget),selectedGemma:selectedGemma(),pipelineActive:hasLayer(globalThis.CivweaveModelRuntime?.generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION)})});
+globalThis.CivweaveGemma4FirstRequestIntakeBridgeV1=Object.freeze({version:VERSION,pipelineVersion:PIPELINE_VERSION,eligible,isLivingSchoolLearning,intakeArgs,selectedGemma,hasLayer,ensureWeaveAuthority,directIntake,install,schedule,weaveRequired:true,livingSchoolLearningIntake:true,intakeModel:E2B,deepModel:E4B,state:()=>Object.freeze({installed:Boolean(installedTarget),selectedGemma:selectedGemma(),pipelineActive:hasLayer(globalThis.CivweaveModelRuntime?.generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION)})});
 schedule();
 })();
