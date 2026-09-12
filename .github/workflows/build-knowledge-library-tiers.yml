@@ -1,0 +1,95 @@
+name: Build optional knowledge library tiers
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_artifact_id:
+        description: Actions artifact containing Wikimedia-compatible JSONL/NDJSON/Parquet source files
+        required: true
+      source_revision:
+        description: Wikimedia Structured Wikipedia snapshot/revision label
+        required: true
+        default: current
+      layers:
+        description: Additive layers to build (expanded,deep or expanded)
+        required: true
+        default: expanded,deep
+      max_missing_ratio:
+        description: Maximum selected Vital titles absent from the supplied corpus
+        required: true
+        default: '0.02'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prepare compiler
+        run: |
+          python -m pip install --disable-pip-version-check pyarrow
+          python -m py_compile scripts/fetch-vital-memberships-v1.py scripts/build-knowledge-library-tiers-v1.py
+          node --check public/app/knowledge-library-tiers-v1.mjs
+          node --check scripts/verify-knowledge-library-tiers-v1.mjs
+
+      - name: Fetch current Vital membership
+        run: |
+          python scripts/fetch-vital-memberships-v1.py \
+            --output build/knowledge-library/vital-membership.json
+
+      - name: Download source corpus artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_ARTIFACT_ID: ${{ inputs.source_artifact_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/knowledge-library/source
+          curl --fail --show-error --location \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}/zip" \
+            -o build/knowledge-library/source.zip
+          unzip -q build/knowledge-library/source.zip -d build/knowledge-library/source
+
+      - name: Compile additive tier packs
+        run: |
+          python scripts/build-knowledge-library-tiers-v1.py \
+            --membership build/knowledge-library/vital-membership.json \
+            --source build/knowledge-library/source \
+            --output build/knowledge-library/materialized \
+            --layers '${{ inputs.layers }}' \
+            --source-revision '${{ inputs.source_revision }}' \
+            --max-missing-ratio '${{ inputs.max_missing_ratio }}'
+          cp build/knowledge-library/vital-membership.json build/knowledge-library/materialized/VITAL-MEMBERSHIP.json
+
+      - name: Enforce pack boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          limit=24*1024*1024
+          files=list(Path('build/knowledge-library/materialized/tiers').rglob('*.zip'))
+          oversized=[(str(p),p.stat().st_size) for p in files if p.stat().st_size>limit]
+          if oversized:
+              raise SystemExit(f'Knowledge tier packs exceed 24 MiB: {oversized}')
+          print(f'validated {len(files)} chunked packs')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: civweave-knowledge-library-tiers
+          path: build/knowledge-library/materialized
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
