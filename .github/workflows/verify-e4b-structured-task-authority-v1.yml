@@ -4,11 +4,13 @@ on:
   push:
     paths:
       - 'public/service-worker.js'
+      - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
       - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
+      - 'public/app/local-ai/gemma4-route-integrity-v1.js'
       - 'public/app/guide-generation-tracker-v1.js'
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
@@ -18,16 +20,19 @@ on:
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
       - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
       - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
+      - 'scripts/verify-gemma4-route-integrity-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
   pull_request:
     paths:
       - 'public/service-worker.js'
+      - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
       - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
+      - 'public/app/local-ai/gemma4-route-integrity-v1.js'
       - 'public/app/guide-generation-tracker-v1.js'
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
@@ -37,6 +42,7 @@ on:
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
       - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
       - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
+      - 'scripts/verify-gemma4-route-integrity-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
 
@@ -52,6 +58,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Syntax check canonical registered worker
+        run: node --check public/service-worker-v203.js
       - name: Syntax check structured task authority
         run: node --check public/app/local-ai/gemma4-structured-task-authority-v1.js
       - name: Syntax check LiteRT request authority
@@ -60,6 +68,8 @@ jobs:
         run: node --check public/app/local-ai/gemma4-weave-draft-pipeline-v1.js
       - name: Syntax check first-request intake bridge
         run: node --check public/app/local-ai/gemma4-first-request-intake-bridge-v1.js
+      - name: Syntax check post-loader route integrity
+        run: node --check public/app/local-ai/gemma4-route-integrity-v1.js
       - name: Syntax check Weave pipeline service-worker takeover
         run: node --check public/service-worker-weave-pipeline-takeover-v1.js
       - name: Syntax check live generation tracker
@@ -74,5 +84,7 @@ jobs:
         run: node scripts/verify-e4b-weave-draft-pipeline-v1.mjs
       - name: Verify first-request intake bridge
         run: node scripts/verify-gemma4-first-request-intake-bridge-v1.mjs
+      - name: Verify post-loader original-text routing
+        run: node scripts/verify-gemma4-route-integrity-v1.mjs
       - name: Verify installed PWA generation takeover
         run: node scripts/verify-weave-pipeline-installed-generation-v1.mjs
