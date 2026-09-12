@@ -4,18 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       source_artifact_id:
-        description: Actions artifact containing Wikimedia-compatible JSONL/NDJSON/Parquet source files
+        description: Optional Actions artifact containing Wikimedia-compatible JSONL/NDJSON/Parquet source files; leave blank to query public Structured Wikipedia directly
+        required: false
+        default: ''
+      structured_dataset:
+        description: Public Structured Wikipedia Parquet glob used when source_artifact_id is blank
         required: true
+        default: hf://datasets/wikimedia/structured-wikipedia/enwiki/data/*.parquet
       source_revision:
-        description: Wikimedia Structured Wikipedia snapshot/revision label
+        description: Wikimedia Structured Wikipedia snapshot/revision label recorded in the output manifest
         required: true
-        default: current
+        default: structured-wikipedia-2026-05-13
       layers:
         description: Additive layers to build (expanded,deep or expanded)
         required: true
         default: expanded,deep
       max_missing_ratio:
-        description: Maximum selected Vital titles absent from the supplied corpus
+        description: Maximum selected Vital titles absent from the supplied/current corpus
         required: true
         default: '0.02'
 
@@ -26,7 +31,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,10 +43,11 @@ jobs:
 
       - name: Prepare compiler
         run: |
-          python -m pip install --disable-pip-version-check pyarrow
+          python -m pip install --disable-pip-version-check pyarrow duckdb
           python -m py_compile \
             scripts/fetch-vital-memberships-v1.py \
             scripts/reconcile-foundation-vital-membership-v1.py \
+            scripts/extract-structured-wikipedia-vital-v1.py \
             scripts/build-knowledge-library-tiers-v1.py
           node --check public/app/knowledge-library-tiers-v1.mjs
           node --check public/app/knowledge-library-tier-installer-v1.mjs
@@ -58,7 +64,8 @@ jobs:
             --membership build/knowledge-library/vital-membership.json \
             --foundation-root public/downloads/knowledge-schools
 
-      - name: Download source corpus artifact
+      - name: Download supplied source corpus artifact
+        if: ${{ inputs.source_artifact_id != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_ARTIFACT_ID: ${{ inputs.source_artifact_id }}
@@ -73,6 +80,17 @@ jobs:
             -o build/knowledge-library/source.zip
           unzip -q build/knowledge-library/source.zip -d build/knowledge-library/source
 
+      - name: Extract selected articles directly from public Structured Wikipedia
+        if: ${{ inputs.source_artifact_id == '' }}
+        run: |
+          mkdir -p build/knowledge-library/source build/knowledge-library/duckdb-tmp
+          python scripts/extract-structured-wikipedia-vital-v1.py \
+            --membership build/knowledge-library/vital-membership.json \
+            --dataset '${{ inputs.structured_dataset }}' \
+            --output build/knowledge-library/source/structured-wikipedia-vital.parquet \
+            --temp-directory build/knowledge-library/duckdb-tmp \
+            --max-missing-ratio '${{ inputs.max_missing_ratio }}'
+
       - name: Compile additive tier packs
         run: |
           python scripts/build-knowledge-library-tiers-v1.py \
@@ -83,6 +101,10 @@ jobs:
             --source-revision '${{ inputs.source_revision }}' \
             --max-missing-ratio '${{ inputs.max_missing_ratio }}'
           cp build/knowledge-library/vital-membership.json build/knowledge-library/materialized/VITAL-MEMBERSHIP.json
+          if [ -f build/knowledge-library/source/structured-wikipedia-vital.parquet.manifest.json ]; then
+            cp build/knowledge-library/source/structured-wikipedia-vital.parquet.manifest.json \
+              build/knowledge-library/materialized/STRUCTURED-WIKIPEDIA-EXTRACT.json
+          fi
 
       - name: Enforce pack boundary
         run: |
@@ -90,6 +112,8 @@ jobs:
           from pathlib import Path
           limit=24*1024*1024
           files=list(Path('build/knowledge-library/materialized/tiers').rglob('*.zip'))
+          if not files:
+              raise SystemExit('Knowledge tier build produced no ZIP packs.')
           oversized=[(str(p),p.stat().st_size) for p in files if p.stat().st_size>limit]
           if oversized:
               raise SystemExit(f'Knowledge tier packs exceed 24 MiB: {oversized}')
