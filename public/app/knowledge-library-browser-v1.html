@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" data-civweave-library-browser="v1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07162f">
+<title>Civweave Library</title>
+<link rel="stylesheet" href="/app/knowledge-library-browser-v1.css?v=library-browser-v1">
+</head>
+<body>
+<main class="library-app">
+  <header class="library-header">
+    <a class="back" href="/app/working-campus-v156.html" aria-label="Back to Civweave">← Civweave</a>
+    <div class="library-heading">
+      <small>OFFLINE KNOWLEDGE</small>
+      <h1>Library</h1>
+      <p>Browse and search the knowledge saved on this device. No AI call is required.</p>
+    </div>
+    <a class="manage" href="/app/index.html?manage=downloads&source=library">Manage downloads</a>
+  </header>
+
+  <section class="library-status" aria-label="Installed library status">
+    <div><strong id="library-installed-count">—</strong><span>indexed articles</span></div>
+    <div><strong id="library-school-count">—</strong><span>installed schools</span></div>
+    <div><strong id="library-tier-status">Checking…</strong><span>knowledge tiers</span></div>
+  </section>
+
+  <section class="library-search" aria-labelledby="library-search-title">
+    <div class="section-heading">
+      <small>SEARCH OR BROWSE</small>
+      <h2 id="library-search-title">Find something in your local library</h2>
+    </div>
+    <form id="library-search-form" role="search">
+      <label for="library-query">Search installed knowledge</label>
+      <div class="search-row">
+        <input id="library-query" name="q" type="search" autocomplete="off" enterkeyhint="search" placeholder="Try: soil health, time travel, tarot symbolism…">
+        <button type="submit">Search</button>
+      </div>
+    </form>
+    <div class="filters" aria-label="Library filters">
+      <label>School
+        <select id="library-school-filter"><option value="all">All installed schools</option></select>
+      </label>
+      <label>Tier
+        <select id="library-tier-filter">
+          <option value="foundation">Foundation</option>
+          <option value="all">All installed tiers</option>
+          <option value="expanded">Expanded</option>
+          <option value="deep">Deep</option>
+        </select>
+      </label>
+      <button id="library-clear-search" type="button">Browse A–Z</button>
+    </div>
+    <p id="library-help" class="library-help" role="status">Reading the installed library index…</p>
+  </section>
+
+  <section class="library-workspace">
+    <div class="library-results-panel">
+      <div class="results-heading"><strong id="library-results-title">Foundation A–Z</strong><span id="library-results-count"></span></div>
+      <div id="library-results" class="library-results" aria-live="polite"></div>
+      <button id="library-load-more" class="load-more" type="button" hidden>Show more</button>
+    </div>
+    <article id="library-reader" class="library-reader" aria-live="polite">
+      <small>LOCAL READER</small>
+      <h2>Choose an article or search result</h2>
+      <p>Browse titles on the left, or search the downloaded text. Search results include local excerpts even when you are offline.</p>
+    </article>
+  </section>
+</main>
+<script type="module" src="/app/knowledge-library-browser-v1.mjs?v=library-browser-v1"></script>
+</body>
+</html>
