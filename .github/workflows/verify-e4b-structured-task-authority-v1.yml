@@ -6,6 +6,7 @@ on:
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
       - 'public/app/guide-generation-tracker-v1.js'
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
@@ -14,12 +15,14 @@ on:
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
       - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
+      - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
   pull_request:
     paths:
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
       - 'public/app/guide-generation-tracker-v1.js'
       - 'public/app/local-guide-control-bypass-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
@@ -28,6 +31,7 @@ on:
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
       - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
+      - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
 
 permissions:
@@ -48,6 +52,8 @@ jobs:
         run: node --check public/app/local-ai/gemma4-litert-request-authority-v1.js
       - name: Syntax check Weave Draft pipeline
         run: node --check public/app/local-ai/gemma4-weave-draft-pipeline-v1.js
+      - name: Syntax check first-request intake bridge
+        run: node --check public/app/local-ai/gemma4-first-request-intake-bridge-v1.js
       - name: Syntax check live generation tracker
         run: node --check public/app/guide-generation-tracker-v1.js
       - name: Syntax check local guide control bypass
@@ -58,3 +64,5 @@ jobs:
         run: node scripts/verify-e4b-structured-task-authority-v1.mjs
       - name: Verify E4B Weave Draft compiler pipeline
         run: node scripts/verify-e4b-weave-draft-pipeline-v1.mjs
+      - name: Verify first-request intake bridge
+        run: node scripts/verify-gemma4-first-request-intake-bridge-v1.mjs
