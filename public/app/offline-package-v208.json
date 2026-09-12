@@ -18,6 +18,7 @@
     "/app/cerbanimo-commerce-distribution-v1.js",
     "/app/civweave-systems-mesh-v251.js",
     "/app/working-campus-v156.html",
+    "/app/knowledge-library-browser-v1.html",
     "/app/cabinets/living-school/index.html",
     "/app/realm-console-v140.html",
     "/app/fellowfare-cabinet-v144.html",
@@ -65,7 +66,11 @@
     "/app/server-ai-settings-v301.js",
     "/app/browser-tool-v1.js",
     "/app/local-ai/browser-agent-v1.js",
-    "/app/knowledge-school-runtime-v243.mjs"
+    "/app/knowledge-school-runtime-v243.mjs",
+    "/app/knowledge-library-tiers-v1.mjs",
+    "/app/knowledge-library-launcher-v1.js",
+    "/app/knowledge-library-browser-v1.css",
+    "/app/knowledge-library-browser-v1.mjs"
   ],
   "lazyPacks": [
     {
