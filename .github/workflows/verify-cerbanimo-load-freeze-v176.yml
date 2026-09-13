@@ -18,6 +18,8 @@ on:
       - 'public/app/shared/civweave-parity-runtime.js'
       - 'public/app/themed-system-nav-v178.js'
       - 'public/app/persistent-shell-actions-v1.js'
+      - 'public/app/generation-lifecycle-v1.js'
+      - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-path-v266.js'
       - 'public/app/cerbanimo-proof-attachments-v165.js'
@@ -51,6 +53,7 @@ jobs:
           node --check public/app/shared/civweave-parity-runtime.js
           node --check public/app/themed-system-nav-v178.js
           node --check public/app/persistent-shell-actions-v1.js
+          node --check public/app/generation-lifecycle-v2.js
           node --check public/app/cerbanimo-quest-engine-v144.js
           node --check public/app/cerbanimo-quest-path-v266.js
           node --check public/app/cerbanimo-proof-attachments-v165.js
