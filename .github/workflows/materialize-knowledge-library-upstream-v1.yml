@@ -1,0 +1,112 @@
+name: Materialize source-native Living Library manifests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - staging
+    paths:
+      - scripts/build-knowledge-library-upstream-manifests-v1.py
+      - scripts/fetch-vital-memberships-v1.py
+      - scripts/reconcile-foundation-vital-membership-v1.py
+      - .github/workflows/materialize-knowledge-library-upstream-v1.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: living-library-upstream-manifests
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate manifest compiler
+        run: |
+          python -m py_compile \
+            scripts/fetch-vital-memberships-v1.py \
+            scripts/reconcile-foundation-vital-membership-v1.py \
+            scripts/build-knowledge-library-upstream-manifests-v1.py
+          node --check public/app/knowledge-library-upstream-v1.mjs
+
+      - name: Fetch current Vital Article membership
+        run: |
+          python scripts/fetch-vital-memberships-v1.py \
+            --output build/living-library/vital-membership.json
+
+      - name: Reconcile exact shipped Foundation membership
+        run: |
+          python scripts/reconcile-foundation-vital-membership-v1.py \
+            --membership build/living-library/vital-membership.json \
+            --foundation-root public/downloads/knowledge-schools
+
+      - name: Build direct-Wikimedia school manifests
+        run: |
+          rm -rf public/downloads/knowledge-schools/upstream/v1
+          python scripts/build-knowledge-library-upstream-manifests-v1.py \
+            --membership build/living-library/vital-membership.json \
+            --output public/downloads/knowledge-schools/upstream/v1 \
+            --tiers public/downloads/knowledge-schools/tiers.json
+
+      - name: Verify source-native contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('public/downloads/knowledge-schools/upstream/v1')
+          index=json.loads((root/'index.json').read_text(encoding='utf-8'))
+          assert index['schema']=='civweave.knowledge-upstream-index.v1'
+          assert index['foundation_articles']==1001
+          layers={row['slug']:row for row in index['layers']}
+          assert {'expanded','deep'} == set(layers)
+          for layer in ('expanded','deep'):
+              row=layers[layer]
+              assert row['article_count'] > 0
+              assert len(row['schools']) == 11
+              counted=0
+              seen=set()
+              for school in row['schools']:
+                  manifest=json.loads((Path('public')/school['manifest_url'].lstrip('/')).read_text(encoding='utf-8'))
+                  assert manifest['schema']=='civweave.knowledge-upstream-school.v1'
+                  assert manifest['layer']==layer
+                  assert manifest['school_slug']==school['school_slug']
+                  assert manifest['article_count']==len(manifest['articles'])
+                  for article in manifest['articles']:
+                      title=article['title']
+                      assert title not in seen, (layer,title)
+                      seen.add(title)
+                      assert article['canonical_url'].startswith('https://en.wikipedia.org/wiki/')
+                  counted += len(manifest['articles'])
+              assert counted == row['article_count']
+          tiers=json.loads(Path('public/downloads/knowledge-schools/tiers.json').read_text(encoding='utf-8'))
+          by_slug={row['slug']:row for row in tiers['layers']}
+          for layer in ('expanded','deep'):
+              assert by_slug[layer]['availability']=='source-ready'
+              assert by_slug[layer]['storage']=='wikimedia-direct-cache'
+              assert by_slug[layer]['indexed_articles']==layers[layer]['article_count']
+          print(json.dumps({'expanded':layers['expanded']['article_count'],'deep':layers['deep']['article_count']}))
+          PY
+
+      - name: Commit only compact manifests
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/downloads/knowledge-schools/upstream/v1 public/downloads/knowledge-schools/tiers.json
+          if git diff --cached --quiet; then
+            echo 'Source-native Living Library manifests are already current.'
+            exit 0
+          fi
+          git commit -m 'Materialize source-native Living Library manifests'
+          git push origin HEAD:staging
