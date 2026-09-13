@@ -3,12 +3,17 @@
 
 The script walks only the Vital Articles list pages through the MediaWiki API and emits
 article-title membership for Civweave's additive Foundation/Expanded/Deep compiler.
+Requests are deliberately serialized and rate-limited because this is a catalog build,
+not an interactive workload.
 """
 from __future__ import annotations
 
 import argparse
+import email.utils
 import json
+import random
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections import defaultdict, deque
@@ -16,7 +21,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 API = "https://en.wikipedia.org/w/api.php"
-USER_AGENT = "CivweaveKnowledgeLibrary/1.0 (offline library membership builder)"
+USER_AGENT = "CivweaveKnowledgeLibrary/1.1 (https://civweave.cc; offline-library membership builder)"
+MIN_REQUEST_GAP_SECONDS = 0.8
+MAX_RETRIES = 8
+_last_request_at = 0.0
 
 ROOTS = {
     4: {
@@ -50,20 +58,68 @@ ROOTS = {
 HEALTH_HINTS = ("health", "medicine", "medical", "disease", "clinical", "pathology", "pharmac", "nutrition")
 
 
-def request_json(params: dict[str, str], retries: int = 4) -> dict:
-    query = urllib.parse.urlencode({"format": "json", "formatversion": "2", **params})
+def _wait_for_request_slot() -> None:
+    global _last_request_at
+    elapsed = time.monotonic() - _last_request_at
+    if elapsed < MIN_REQUEST_GAP_SECONDS:
+        time.sleep(MIN_REQUEST_GAP_SECONDS - elapsed)
+    _last_request_at = time.monotonic()
+
+
+def _retry_after_seconds(error: urllib.error.HTTPError) -> float | None:
+    raw = error.headers.get("Retry-After") if error.headers else None
+    if not raw:
+        return None
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        try:
+            when = email.utils.parsedate_to_datetime(raw)
+            if when.tzinfo is None:
+                when = when.replace(tzinfo=timezone.utc)
+            return max(0.0, (when - datetime.now(timezone.utc)).total_seconds())
+        except Exception:
+            return None
+
+
+def request_json(params: dict[str, str], retries: int = MAX_RETRIES) -> dict:
+    query = urllib.parse.urlencode({
+        "format": "json",
+        "formatversion": "2",
+        "maxlag": "5",
+        **params,
+    })
     url = f"{API}?{query}"
     last = None
     for attempt in range(retries):
+        _wait_for_request_slot()
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=45) as response:
-                return json.load(response)
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": USER_AGENT,
+                    "Accept": "application/json",
+                    "Accept-Encoding": "identity",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=60) as response:
+                data = json.load(response)
+            if data.get("error", {}).get("code") == "maxlag":
+                raise RuntimeError(f"MediaWiki maxlag: {data['error'].get('info', 'server busy')}")
+            return data
+        except urllib.error.HTTPError as exc:
+            last = exc
+            if exc.code not in (429, 500, 502, 503, 504) or attempt + 1 >= retries:
+                break
+            retry_after = _retry_after_seconds(exc)
+            delay = retry_after if retry_after is not None else min(60.0, 2.0 ** (attempt + 1))
+            time.sleep(delay + random.uniform(0.2, 0.8))
         except Exception as exc:
             last = exc
-            if attempt + 1 < retries:
-                time.sleep(1.5 * (attempt + 1))
-    raise RuntimeError(f"MediaWiki request failed: {last}")
+            if attempt + 1 >= retries:
+                break
+            time.sleep(min(30.0, 1.5 * (attempt + 1)) + random.uniform(0.1, 0.5))
+    raise RuntimeError(f"MediaWiki request failed after {retries} attempts: {last}")
 
 
 def links_for_page(title: str) -> list[dict]:
@@ -74,7 +130,7 @@ def links_for_page(title: str) -> list[dict]:
             "action": "query",
             "prop": "links",
             "titles": title,
-            "pllimit": "max",
+            "pllimit": "500",
             "plnamespace": "0|4",
             **continuation,
         }
@@ -111,7 +167,6 @@ def crawl_root(root: str) -> tuple[set[str], dict[str, str]]:
                 origin.setdefault(title, page)
             elif namespace == 4 and title.startswith(prefix) and title not in visited:
                 queue.append(title)
-        time.sleep(0.04)
     return articles, origin
 
 
@@ -161,6 +216,12 @@ def main() -> int:
         "schema": "civweave.vital-membership.v1",
         "retrieved_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "source": API,
+        "request_policy": {
+            "user_agent": USER_AGENT,
+            "minimum_gap_seconds": MIN_REQUEST_GAP_SECONDS,
+            "max_retries": MAX_RETRIES,
+            "maxlag_seconds": 5,
+        },
         "levels": {
             "3": {"articles": level3, "count": len(level3)},
             "4": {"schools": level4, "count": len(all4)},
