@@ -1,0 +1,42 @@
+name: Verify Living Library
+
+on:
+  pull_request:
+    paths:
+      - public/app/cabinets/living-school/living-library-panel-v1.js
+      - public/app/living-school-learning-packs-v1.mjs
+      - public/app/knowledge-library-**
+      - public/app/offline-package-v208.json
+      - scripts/verify-knowledge-library-browser-v1.mjs
+      - .github/workflows/verify-living-library-v1.yml
+  push:
+    branches:
+      - staging
+    paths:
+      - public/app/cabinets/living-school/living-library-panel-v1.js
+      - public/app/living-school-learning-packs-v1.mjs
+      - public/app/knowledge-library-**
+      - public/app/offline-package-v208.json
+      - scripts/verify-knowledge-library-browser-v1.mjs
+      - .github/workflows/verify-living-library-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Living Library integration
+        run: |
+          node --check public/app/cabinets/living-school/living-library-panel-v1.js
+          node --check public/app/living-school-learning-packs-v1.mjs
+          node --check public/app/knowledge-library-launcher-v1.js
+          node --check public/app/knowledge-library-browser-v1.mjs
+          node --check scripts/verify-knowledge-library-browser-v1.mjs
+          node scripts/verify-knowledge-library-browser-v1.mjs

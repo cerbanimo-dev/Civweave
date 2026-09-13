@@ -69,6 +69,7 @@
     "/app/knowledge-school-runtime-v243.mjs",
     "/app/knowledge-library-tiers-v1.mjs",
     "/app/knowledge-library-launcher-v1.js",
+    "/app/cabinets/living-school/living-library-panel-v1.js",
     "/app/knowledge-library-browser-v1.css",
     "/app/knowledge-library-browser-v1.mjs"
   ],
