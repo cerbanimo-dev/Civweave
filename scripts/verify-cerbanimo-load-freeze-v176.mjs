@@ -9,6 +9,7 @@ const realm=read('public/app/realm-console-v140.html');
 const shell=read('public/app/persistent-system-shell-v1.html');
 const shellRuntime=read('public/app/persistent-system-shell-v1.js');
 const generationLifecycle=read('public/app/generation-lifecycle-v2.js');
+const shellAssets=read('public/service-worker-shell-assets-v1.js');
 
 assert(realmNavigationWorker.includes("const VERSION='five-system-pages-v1-persistent-shell-r5'"),'Realm navigation must use the persistent-shell revision.');
 assert(realmNavigationWorker.includes("const CACHE='cw-five-system-pages-v2'"),'Embedded realm HTML must remain on the cache-distinct realm cache.');
@@ -18,7 +19,9 @@ assert(realmNavigationWorker.includes("shellRedirect(url,spec.system)"),'Top-lev
 assert(activeWorker.includes('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-persistent-shell-r5'),'Installed staging PWA must activate persistent realm routing.');
 assert(activeWorker.includes('staging-installed-entry-takeover-v21-learning-source-pack-authority'),'Staging must remain on the current installed-entry worker generation.');
 assert(activeWorker.includes('persistent-stage-viewport-r1'),'Active staging worker must carry the persistent-stage viewport repair.');
-assert(activeWorker.includes('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v25-persistent-navbar-required'),'Installed staging must require persistent shell assets and sprite media.');
+assert(activeWorker.includes('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required'),'Installed staging must force a worker update for the bounded lifecycle shell generation.');
+assert(shellAssets.includes("const REVISION='shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required'"),'Shell assets must expose the bounded-lifecycle generation.');
+assert(shellAssets.includes("'/app/generation-lifecycle-v2.js'"),'Bounded generation lifecycle must be a required installed shell asset.');
 assert(/data-build="persistent-system-shell-v1-r\d+[^\"]*"/.test(shell),'Persistent shell must expose a revisioned build identity.');
 assert(shell.includes('/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding'),'Persistent shell must load the bounded generation lifecycle runtime.');
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent stage must explicitly fill the dynamic viewport above the universal navbar.');
@@ -32,4 +35,4 @@ assert(generationLifecycle.includes('const wiredFrames=new WeakSet()'),'Cross-fr
 assert(!generationLifecycle.includes('new MutationObserver'),'Cross-frame lifecycle discovery must not watch the entire shell DOM.');
 assert(generationLifecycle.includes('for(const delay of [0,100,500,1500,4000,9000])setTimeout(refreshBindings,delay)'),'Cross-frame lifecycle discovery must remain finite.');
 
-console.log('Cerbanimo freeze regression contract passed: the universal navbar lives outside realm content, Cerbanimo boots only frame-local workbench runtimes, and cross-frame generation lifecycle discovery is event-driven, finite, and listener-idempotent.');
+console.log('Cerbanimo freeze regression contract passed: the installed worker requires the bounded lifecycle shell generation, the universal navbar lives outside realm content, Cerbanimo boots only frame-local workbench runtimes, and cross-frame generation lifecycle discovery is event-driven, finite, and listener-idempotent.');
