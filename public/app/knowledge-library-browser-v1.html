@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#07162f">
 <title>Civweave Library</title>
 <link rel="stylesheet" href="/app/knowledge-library-browser-v1.css?v=library-browser-v1">
+<link rel="stylesheet" href="/app/knowledge-school-installer-v1.css?v=knowledge-schools-v2">
+<link rel="stylesheet" href="/app/cabinets/living-school/living-library-downloads-v1.css?v=living-library-downloads-v1">
 </head>
 <body>
 <main class="library-app">
@@ -16,13 +18,67 @@
       <h1>Library</h1>
       <p>Browse and search the knowledge saved on this device. No AI call is required.</p>
     </div>
-    <a class="manage" href="/app/index.html?manage=downloads&source=library">Manage downloads</a>
+    <button class="manage" id="library-manage-toggle" type="button" aria-controls="living-library-downloads" aria-expanded="false">Manage library downloads</button>
   </header>
 
   <section class="library-status" aria-label="Installed library status">
     <div><strong id="library-installed-count">—</strong><span>indexed articles</span></div>
     <div><strong id="library-school-count">—</strong><span>installed schools</span></div>
     <div><strong id="library-tier-status">Checking…</strong><span>knowledge tiers</span></div>
+  </section>
+
+  <section id="living-library-downloads" class="living-library-downloads" aria-labelledby="living-library-downloads-title" hidden>
+    <div class="living-library-downloads-head">
+      <div>
+        <small>LIVING SCHOOL · LIBRARY STORAGE</small>
+        <h2 id="living-library-downloads-title">Manage Living Library downloads</h2>
+        <p>Add or remove offline knowledge here without leaving Living School. Foundation is available now; larger tiers become downloadable only after their verified payloads are published.</p>
+      </div>
+      <button id="living-library-downloads-close" class="living-library-downloads-close" type="button">Close downloads</button>
+    </div>
+
+    <div class="living-library-tier-grid" aria-label="Living Library tier availability">
+      <article class="living-library-tier-card" data-library-tier-card="foundation" data-availability="ready">
+        <strong>Foundation Library</strong>
+        <span class="living-library-tier-state" data-library-tier-state>Available now</span>
+        <span data-library-tier-count>1,001 materialized articles</span>
+      </article>
+      <article class="living-library-tier-card" data-library-tier-card="expanded" data-availability="build-required">
+        <strong>Expanded Local Library</strong>
+        <span class="living-library-tier-state" data-library-tier-state>Not published yet</span>
+        <span data-library-tier-count>10,000 cumulative target · payload unavailable</span>
+      </article>
+      <article class="living-library-tier-card" data-library-tier-card="deep" data-availability="build-required">
+        <strong>Deep Local Library</strong>
+        <span class="living-library-tier-state" data-library-tier-state>Not published yet</span>
+        <span data-library-tier-count>50,000 cumulative target · payload unavailable</span>
+      </article>
+    </div>
+
+    <section class="living-library-foundation-manager" aria-labelledby="foundation-library-downloads-title">
+      <header>
+        <small>AVAILABLE NOW</small>
+        <h3 id="foundation-library-downloads-title">Foundation Knowledge Schools</h3>
+        <p>Select the schools you want stored on this device. Downloads are checksum-verified, resumable, and stay separate from the small Civweave app shell.</p>
+      </header>
+      <div id="knowledge-school-presets" class="knowledge-school-presets" aria-label="Foundation library presets">
+        <button type="button" data-school-preset="human-worlds">Human worlds</button>
+        <button type="button" data-school-preset="making-and-measuring">Making and measuring</button>
+        <button type="button" data-school-preset="all">All schools</button>
+        <button type="button" data-school-preset="none">None</button>
+      </div>
+      <div id="knowledge-school-list" class="knowledge-school-list" aria-live="polite"></div>
+      <div class="knowledge-school-summary">
+        <strong id="knowledge-school-total">Opening Foundation catalog…</strong>
+        <span>Saved schools remain available through app-shell cleanup and updates.</span>
+      </div>
+      <div class="knowledge-school-actions">
+        <button id="stage-knowledge-schools" type="button" disabled>Opening Foundation catalog…</button>
+        <button id="remove-knowledge-schools" type="button" disabled>Remove selected saved schools</button>
+      </div>
+      <p id="knowledge-school-help" role="status">Open this drawer to manage the 11 currently published Foundation library packs.</p>
+      <p class="living-library-refresh-note">Expanded and Deep stay disabled until their catalog files and verified archives exist in the release.</p>
+    </section>
   </section>
 
   <section class="library-search" aria-labelledby="library-search-title">
@@ -45,8 +101,8 @@
         <select id="library-tier-filter">
           <option value="foundation">Foundation</option>
           <option value="all">All installed tiers</option>
-          <option value="expanded">Expanded</option>
-          <option value="deep">Deep</option>
+          <option value="expanded" disabled>Expanded · not published yet</option>
+          <option value="deep" disabled>Deep · not published yet</option>
         </select>
       </label>
       <button id="library-clear-search" type="button">Browse A–Z</button>
@@ -68,5 +124,6 @@
   </section>
 </main>
 <script type="module" src="/app/knowledge-library-browser-v1.mjs?v=library-browser-v1"></script>
+<script src="/app/cabinets/living-school/living-library-downloads-v1.js?v=living-library-downloads-v1"></script>
 </body>
 </html>
