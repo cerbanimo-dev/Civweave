@@ -78,6 +78,9 @@
 /app/unified-chat-system-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
+/app/generation-failure-inspector-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /app/family-ai-loader-v105.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
@@ -94,6 +97,9 @@
   Cache-Control: no-store, max-age=0, must-revalidate
 
 /app/local-ai/gemma4-route-integrity-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/gemma4-learning-plan-entry-authority-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
 /app/local-ai/gemma4-weave-draft-pipeline-v1.js
