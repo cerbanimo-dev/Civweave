@@ -7,7 +7,7 @@
 <title>Civweave Library</title>
 <link rel="stylesheet" href="/app/knowledge-library-browser-v1.css?v=library-browser-v1">
 <link rel="stylesheet" href="/app/knowledge-school-installer-v1.css?v=knowledge-schools-v2">
-<link rel="stylesheet" href="/app/cabinets/living-school/living-library-downloads-v1.css?v=living-library-downloads-v1">
+<link rel="stylesheet" href="/app/cabinets/living-school/living-library-downloads-v1.css?v=wikimedia-direct-v1">
 </head>
 <body>
 <main class="library-app">
@@ -22,7 +22,7 @@
   </header>
 
   <section class="library-status" aria-label="Installed library status">
-    <div><strong id="library-installed-count">—</strong><span>indexed articles</span></div>
+    <div><strong id="library-installed-count">—</strong><span>saved articles</span></div>
     <div><strong id="library-school-count">—</strong><span>installed schools</span></div>
     <div><strong id="library-tier-status">Checking…</strong><span>knowledge tiers</span></div>
   </section>
@@ -32,7 +32,7 @@
       <div>
         <small>LIVING SCHOOL · LIBRARY STORAGE</small>
         <h2 id="living-library-downloads-title">Manage Living Library downloads</h2>
-        <p>Add or remove offline knowledge here without leaving Living School. Foundation is available now; larger tiers become downloadable only after their verified payloads are published.</p>
+        <p>Add or remove offline knowledge without leaving Living School. Foundation uses Civweave's compact verified packs. Expanded and Deep use small membership indexes; selected article bodies download directly from Wikimedia and stay on this device.</p>
       </div>
       <button id="living-library-downloads-close" class="living-library-downloads-close" type="button">Close downloads</button>
     </div>
@@ -41,25 +41,25 @@
       <article class="living-library-tier-card" data-library-tier-card="foundation" data-availability="ready">
         <strong>Foundation Library</strong>
         <span class="living-library-tier-state" data-library-tier-state>Available now</span>
-        <span data-library-tier-count>1,001 materialized articles</span>
+        <span data-library-tier-count>1,001 packaged articles</span>
       </article>
       <article class="living-library-tier-card" data-library-tier-card="expanded" data-availability="build-required">
         <strong>Expanded Local Library</strong>
-        <span class="living-library-tier-state" data-library-tier-state>Not published yet</span>
-        <span data-library-tier-count>10,000 cumulative target · payload unavailable</span>
+        <span class="living-library-tier-state" data-library-tier-state>Source index preparing</span>
+        <span data-library-tier-count>10,000 cumulative target · bodies supplied by Wikimedia</span>
       </article>
       <article class="living-library-tier-card" data-library-tier-card="deep" data-availability="build-required">
         <strong>Deep Local Library</strong>
-        <span class="living-library-tier-state" data-library-tier-state>Not published yet</span>
-        <span data-library-tier-count>50,000 cumulative target · payload unavailable</span>
+        <span class="living-library-tier-state" data-library-tier-state>Source index preparing</span>
+        <span data-library-tier-count>50,000 cumulative target · bodies supplied by Wikimedia</span>
       </article>
     </div>
 
     <section class="living-library-foundation-manager" aria-labelledby="foundation-library-downloads-title">
       <header>
-        <small>AVAILABLE NOW</small>
+        <small>PACKAGED FOUNDATION</small>
         <h3 id="foundation-library-downloads-title">Foundation Knowledge Schools</h3>
-        <p>Select the schools you want stored on this device. Downloads are checksum-verified, resumable, and stay separate from the small Civweave app shell.</p>
+        <p>Select the schools you want stored on this device. Foundation downloads are checksum-verified, resumable, and stay separate from the small Civweave app shell.</p>
       </header>
       <div id="knowledge-school-presets" class="knowledge-school-presets" aria-label="Foundation library presets">
         <button type="button" data-school-preset="human-worlds">Human worlds</button>
@@ -76,8 +76,8 @@
         <button id="stage-knowledge-schools" type="button" disabled>Opening Foundation catalog…</button>
         <button id="remove-knowledge-schools" type="button" disabled>Remove selected saved schools</button>
       </div>
-      <p id="knowledge-school-help" role="status">Open this drawer to manage the 11 currently published Foundation library packs.</p>
-      <p class="living-library-refresh-note">Expanded and Deep stay disabled until their catalog files and verified archives exist in the release.</p>
+      <p id="knowledge-school-help" role="status">Open this drawer to manage the 11 Foundation library packs.</p>
+      <p class="living-library-refresh-note">Expanded and Deep use Wikimedia as the source host. Civweave publishes only the school membership indexes and does not mirror those article bodies.</p>
     </section>
   </section>
 
@@ -101,8 +101,8 @@
         <select id="library-tier-filter">
           <option value="foundation">Foundation</option>
           <option value="all">All installed tiers</option>
-          <option value="expanded" disabled>Expanded · not published yet</option>
-          <option value="deep" disabled>Deep · not published yet</option>
+          <option value="expanded" disabled>Expanded · source index loading</option>
+          <option value="deep" disabled>Deep · source index loading</option>
         </select>
       </label>
       <button id="library-clear-search" type="button">Browse A–Z</button>
@@ -123,7 +123,7 @@
     </article>
   </section>
 </main>
-<script type="module" src="/app/knowledge-library-browser-v1.mjs?v=library-browser-v1"></script>
-<script src="/app/cabinets/living-school/living-library-downloads-v1.js?v=living-library-downloads-v1"></script>
+<script type="module" src="/app/knowledge-library-browser-v1.mjs?v=wikimedia-direct-v1"></script>
+<script src="/app/cabinets/living-school/living-library-downloads-v1.js?v=wikimedia-direct-v1"></script>
 </body>
 </html>
