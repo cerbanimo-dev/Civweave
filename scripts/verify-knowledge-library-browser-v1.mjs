@@ -1,11 +1,13 @@
 import fs from 'node:fs/promises';
 
 const read=path=>fs.readFile(path,'utf8');
-const [html,css,browser,panel,launcher,learningPacks,campus,offline,runtime,tiers]=await Promise.all([
+const [html,css,browser,panel,downloads,downloadsCss,launcher,learningPacks,campus,offline,runtime,tiers]=await Promise.all([
   read('public/app/knowledge-library-browser-v1.html'),
   read('public/app/knowledge-library-browser-v1.css'),
   read('public/app/knowledge-library-browser-v1.mjs'),
   read('public/app/cabinets/living-school/living-library-panel-v1.js'),
+  read('public/app/cabinets/living-school/living-library-downloads-v1.js'),
+  read('public/app/cabinets/living-school/living-library-downloads-v1.css'),
   read('public/app/knowledge-library-launcher-v1.js'),
   read('public/app/living-school-learning-packs-v1.mjs'),
   read('public/app/working-campus-v156.html'),
@@ -16,8 +18,35 @@ const [html,css,browser,panel,launcher,learningPacks,campus,offline,runtime,tier
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const includes=(source,tokens,label)=>{for(const token of tokens)assert(source.includes(token),`${label} is missing ${token}`)};
 
-includes(html,['id="library-search-form"','id="library-school-filter"','id="library-tier-filter"','id="library-results"','id="library-reader"','Manage downloads','No AI call is required.'],'library browser HTML');
+includes(html,[
+  'id="library-search-form"',
+  'id="library-school-filter"',
+  'id="library-tier-filter"',
+  'id="library-results"',
+  'id="library-reader"',
+  'id="library-manage-toggle"',
+  'id="living-library-downloads"',
+  'id="knowledge-school-list"',
+  'id="stage-knowledge-schools"',
+  'Manage library downloads',
+  'No AI call is required.',
+  'Expanded · not published yet',
+  'Deep · not published yet',
+],'library browser HTML');
+assert(!html.includes('/app/index.html?manage=downloads'),'Living Library must not send download management back to the Threshold installer.');
+assert(html.includes('<option value="expanded" disabled>'),'Expanded must stay disabled until its payload is published.');
+assert(html.includes('<option value="deep" disabled>'),'Deep must stay disabled until its payload is published.');
 includes(css,['.library-workspace','.library-results','.library-reader','@media(max-width:760px)'],'library responsive CSS');
+includes(downloadsCss,['.living-library-downloads','.living-library-tier-grid','.living-library-foundation-manager'],'Living Library download CSS');
+includes(downloads,[
+  'library-manage-toggle',
+  'living-library-downloads',
+  'knowledge-school-seeds-v1.js',
+  'knowledge-school-installer-v1.js',
+  'loadTierManifest()',
+  "record.availability==='ready'",
+  "option.disabled=!ready",
+],'Living Library download controller');
 includes(browser,[
   "import {searchDownloadedKnowledge}",
   "import * as tierRuntime",
@@ -45,6 +74,7 @@ includes(panel,[
   'No AI call is required.',
   "document.documentElement.dataset.civweaveSystem!=='living-school'",
 ],'Living Library panel');
+assert(!panel.includes("manage.setAttribute('target','_top')"),'Embedded Living Library must not force download management out to a top-level installer page.');
 includes(learningPacks,[
   "import './cabinets/living-school/living-library-panel-v1.js?v=living-library-v1'",
   'living-school-learning-packs-v1-living-library',
@@ -68,11 +98,15 @@ for(const path of [
 includes(runtime,['knowledgeLayer:bundle.layer','tierBundles(slug,tokens)'],'Knowledge School runtime');
 includes(tiers,['openSchoolPacks','layerStatus','allLayerStatus'],'tier runtime');
 new Function(panel);
+new Function(downloads);
 new Function(launcher);
 console.log(JSON.stringify({
   livingLibrary:true,
   owner:'living-school',
   expandablePanel:true,
+  inLibraryDownloadManager:true,
+  thresholdDownloadRedirect:false,
+  unpublishedTiersDisabled:true,
   directBrowse:true,
   directSearch:true,
   schoolFilter:true,
