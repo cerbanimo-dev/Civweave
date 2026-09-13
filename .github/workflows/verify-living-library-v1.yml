@@ -32,11 +32,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify Living Library integration
-        run: |
-          node --check public/app/cabinets/living-school/living-library-panel-v1.js
-          node --check public/app/living-school-learning-packs-v1.mjs
-          node --check public/app/knowledge-library-launcher-v1.js
-          node --check public/app/knowledge-library-browser-v1.mjs
-          node --check scripts/verify-knowledge-library-browser-v1.mjs
-          node scripts/verify-knowledge-library-browser-v1.mjs
+      - name: Check Living Library panel syntax
+        run: node --check public/app/cabinets/living-school/living-library-panel-v1.js
+      - name: Check Living School integration syntax
+        run: node --check public/app/living-school-learning-packs-v1.mjs
+      - name: Check compatibility launcher syntax
+        run: node --check public/app/knowledge-library-launcher-v1.js
+      - name: Check library browser syntax
+        run: node --check public/app/knowledge-library-browser-v1.mjs
+      - name: Check verifier syntax
+        run: node --check scripts/verify-knowledge-library-browser-v1.mjs
+      - name: Verify Living Library contract
+        run: node scripts/verify-knowledge-library-browser-v1.mjs
