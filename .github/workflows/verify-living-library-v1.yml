@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - public/app/cabinets/living-school/living-library-panel-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.css
       - public/app/living-school-learning-packs-v1.mjs
       - public/app/knowledge-library-**
       - public/app/offline-package-v208.json
@@ -14,6 +16,8 @@ on:
       - staging
     paths:
       - public/app/cabinets/living-school/living-library-panel-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.css
       - public/app/living-school-learning-packs-v1.mjs
       - public/app/knowledge-library-**
       - public/app/offline-package-v208.json
@@ -34,6 +38,8 @@ jobs:
           node-version: '22'
       - name: Check Living Library panel syntax
         run: node --check public/app/cabinets/living-school/living-library-panel-v1.js
+      - name: Check Living Library downloads syntax
+        run: node --check public/app/cabinets/living-school/living-library-downloads-v1.js
       - name: Check Living School integration syntax
         run: node --check public/app/living-school-learning-packs-v1.mjs
       - name: Check compatibility launcher syntax
