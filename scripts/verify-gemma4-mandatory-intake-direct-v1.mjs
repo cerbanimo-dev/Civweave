@@ -7,11 +7,13 @@ const bypassPath = 'public/app/local-guide-control-bypass-v1.js';
 const sharedPath = 'public/app/shared-guide-surface-v236.js';
 const takeoverPath = 'public/service-worker-weave-pipeline-takeover-v1.js';
 const rootWorkerPath = 'public/service-worker.js';
+const installedWorkerPath = 'public/service-worker-v203.js';
 
 const bypass = read(bypassPath);
 const shared = read(sharedPath);
 const takeover = read(takeoverPath);
 const rootWorker = read(rootWorkerPath);
+const installedWorker = read(installedWorkerPath);
 
 assert.match(bypass, /1\.4\.3-local-guide-control-bypass-v1-mandatory-intake-direct/);
 assert.match(bypass, /bridge\.directIntake\(input\)/);
@@ -29,6 +31,8 @@ assert.match(takeover, /weave-pipeline-takeover-v1-r6/);
 assert.match(takeover, /cwrecovery-v462-mandatory-gemma-intake/);
 assert.match(rootWorker, /root-worker-bridge-v31-mandatory-gemma-intake/);
 assert.match(rootWorker, /weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r6/);
+assert.match(installedWorker, /service-worker-weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r6/, 'the canonical installed PWA worker must itself import takeover r6');
+assert.doesNotMatch(installedWorker, /service-worker-weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r5/);
 
 let bridgeCalls = 0;
 let legacyCalls = 0;
@@ -70,4 +74,4 @@ assert.equal(bridgeCalls, 1, 'mandatory first-request bridge must own eligible G
 assert.equal(legacyCalls, 0, 'captured legacy local provider must not run for eligible Gemma intake');
 assert.equal(deterministicCalls, 0, 'deterministic control path must not run for substantive intake');
 
-console.log('PASS: local Gemma learning requests cannot bypass mandatory E2B intake through a stale captured provider wrapper.');
+console.log('PASS: local Gemma learning requests cannot bypass mandatory E2B intake and the canonical installed worker forces takeover r6.');
