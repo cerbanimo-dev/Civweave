@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v26-persistent-human-chat-required';
+const REVISION='shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
@@ -8,6 +8,7 @@ const REQUIRED_FAMILY_NAV=[
   '/app/system-routes-v227.js',
   '/app/themed-system-nav-v178.js',
   '/app/persistent-shell-actions-v1.js',
+  '/app/generation-lifecycle-v2.js',
   '/app/subsystem-avatar-state-v347.js'
 ];
 const REQUIRED_NAV_MEDIA=[
@@ -76,6 +77,6 @@ self.CivweaveShellAssetsV1=Object.freeze({
   humanChatBle:'object-transport-v1',
   pwaStart:'/app/pwa-start-v436.html',
   persistentSystemShell:'/app/persistent-system-shell-v1.html',
-  policy:'one-persistent-top-level-navbar-shell-with-required-sprite-media-and-required-human-chat-launcher-runtime'
+  policy:'one-persistent-top-level-navbar-shell-with-event-bounded-generation-lifecycle-required-sprite-media-and-required-human-chat-launcher-runtime'
 });
 })();
