@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r3';
+const REVISION='weave-pipeline-takeover-v1-r4';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v459-weave-pipeline-route-integrity';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r3';
+const CACHE='cwrecovery-v460-explicit-learning-weave-entry';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r4';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/shared-guide-surface-v236.js',
@@ -11,11 +11,13 @@ const PURGE_PATHS=new Set([
   '/app/local-guide-control-bypass-v1.js',
   '/app/unified-chat-system-v1.js',
   '/app/guide-generation-tracker-v1.js',
+  '/app/generation-failure-inspector-v1.js',
   '/app/family-ai-loader-v105.js',
   '/app/local-ai/gemma4-litert-request-authority-v1.js',
   '/app/local-ai/gemma4-structured-task-authority-v1.js',
   '/app/local-ai/gemma4-first-request-intake-bridge-v1.js',
   '/app/local-ai/gemma4-route-integrity-v1.js',
+  '/app/local-ai/gemma4-learning-plan-entry-authority-v1.js',
   '/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
 ]);
 const RELOAD_PATHS=new Set([
