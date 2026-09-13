@@ -1,15 +1,16 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r5';
+const REVISION='weave-pipeline-takeover-v1-r6';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v461-generation-lifecycle';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r5';
+const CACHE='cwrecovery-v462-mandatory-gemma-intake';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r6';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/shared-guide-surface-v236.js',
   '/app/guide-chat-surface-v350.js',
   '/app/guide-generation-tracker-v1.js',
   '/app/generation-lifecycle-v1.js',
+  '/app/generation-lifecycle-v2.js',
   '/app/local-guide-control-bypass-v1.js',
   '/app/unified-chat-system-v1.js',
   '/app/generation-failure-inspector-v1.js',
