@@ -1,0 +1,33 @@
+name: Verify Gemma 4 Mandatory Intake Route
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-guide-control-bypass-v1.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
+      - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/gemma4-learning-plan-entry-authority-v1.js'
+      - 'public/service-worker-weave-pipeline-takeover-v1.js'
+      - 'public/service-worker.js'
+      - 'scripts/verify-gemma4-mandatory-intake-direct-v1.mjs'
+      - '.github/workflows/verify-gemma4-mandatory-intake-direct-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check changed generation authorities
+        run: |
+          node --check public/app/local-guide-control-bypass-v1.js
+          node --check public/app/shared-guide-surface-v236.js
+          node --check public/service-worker-weave-pipeline-takeover-v1.js
+          node --check public/service-worker.js
+      - name: Verify mandatory Gemma intake ownership
+        run: node scripts/verify-gemma4-mandatory-intake-direct-v1.mjs
