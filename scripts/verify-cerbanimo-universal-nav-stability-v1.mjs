@@ -10,14 +10,16 @@ const shellAssets=read('public/service-worker-shell-assets-v1.js');
 const realmWorker=read('public/service-worker-five-system-pages-v1.js');
 const homeWorker=read('public/service-worker-canonical-home-v1.js');
 const quest=read('public/app/cerbanimo-quest-engine-v144.js');
+const generationLifecycle=read('public/app/generation-lifecycle-v2.js');
 
-assert(shell.includes('data-build="persistent-system-shell-v1-r10-local-model-full-route"'),'Persistent shell must use the current full-height, iframe-aware full-route settings build.');
+assert(/data-build="persistent-system-shell-v1-r\d+[^\"]*"/.test(shell),'Persistent shell must expose a revisioned build identity without pinning the regression test to one historical revision.');
 assert(shell.includes('id="cw-persistent-system-stage"'),'Persistent shell must own one content stage.');
 assert(shell.includes('--cw-persistent-nav-space:'),'Persistent shell must define one shared reserved navbar height.');
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent iframe stage must explicitly fill the viewport above the navbar.');
 assert(!/#cw-persistent-system-stage\{[^}]*height:auto/.test(shell),'Persistent iframe must never use intrinsic height:auto; that exposes the parent background as a dark card.');
 assert(shell.includes('/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail'),'Persistent shell must reuse the canonical shared navbar unchanged.');
 assert(shell.includes('/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer'),'Persistent shell must reuse shared Guild/Map actions.');
+assert(shell.includes('/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding'),'Persistent shell must use the event-bounded generation lifecycle bridge.');
 assert(shellRuntime.includes("document.addEventListener('click',intercept,true)"),'Persistent shell must intercept shared navbar navigation before a top-level reload.');
 assert(shellRuntime.includes("'#cw-themed-system-nav a[data-system]'"),'Persistent shell must route the existing shared navbar links.');
 assert(shellRuntime.includes("'#cw-themed-system-nav-menu [data-cw-nav-feature]'"),'Persistent shell must keep shared navbar quick actions inside the persistent stage.');
@@ -41,6 +43,13 @@ assert(cerbanimoNavStability.includes("const persistentEmbedded=embedded&&(param
 assert(!cerbanimoNavStability.includes('window.top.location.replace'),'Embedded Cerbanimo must never navigate the parent shell.');
 assert(cerbanimoNavStability.includes("document.documentElement.dataset.cerbanimoEmbed=persistentEmbedded?'persistent-shell-frame':'foreign-frame'"),'Cerbanimo must explicitly mark persistent-shell embedding.');
 
+assert(generationLifecycle.includes("const VERSION='1.1.0-generation-lifecycle-v2-event-bounded-frame-binding'"),'Generation lifecycle must use the bounded v2 runtime.');
+assert(generationLifecycle.includes('const wiredFrames=new WeakSet()'),'Generation lifecycle must remember which iframe elements already own a load hook.');
+assert(generationLifecycle.includes('if(!frame||wiredFrames.has(frame))return false'),'Generation lifecycle must not accumulate duplicate iframe load listeners.');
+assert(!generationLifecycle.includes('new MutationObserver'),'Generation lifecycle must never use a document-wide MutationObserver to discover runtime readiness.');
+assert(generationLifecycle.includes("frame.addEventListener('load',()=>setTimeout(attach,0),{passive:true})"),'Generation lifecycle must attach one passive load hook per persistent stage iframe.');
+assert(generationLifecycle.includes('for(const delay of [0,100,500,1500,4000,9000])setTimeout(refreshBindings,delay)'),'Generation lifecycle startup discovery must remain finite and bounded.');
+
 for(const sheet of ['/Civweave-weaveling-sprites.png','/Living-School-moss-sprites.png','/Cerbanimo-kamiya-sprites.png','/FellowFare-rook-sprites.png','/Anarchadia-merlin-sprites.png']){
   assert(nav.includes(sheet),`Shared navbar must retain sprite sheet ${sheet}.`);
   assert(shellAssets.includes(sheet),`Installed shell must require sprite sheet ${sheet}.`);
@@ -59,4 +68,4 @@ assert(quest.includes("const VERSION='1.0.33-cerbanimo-v144-frame-bounded'"),'Qu
 assert(quest.includes("observer.observe(target,{childList:true,subtree:false})"),'Quest engine observer must remain shallow and frame-local.');
 assert(quest.includes("if(typeof requestAnimationFrame==='function'&&!document.hidden)requestAnimationFrame(run);else setTimeout(run,0)"),'Quest rerenders must yield to the browser frame.');
 
-console.log('Persistent navbar contract passed: one top-level canonical navbar survives system changes, stale iframe work is rejected, embedded Cerbanimo cannot escape the parent shell, sprite media is required offline, and realm pages remain content-only.');
+console.log('Persistent navbar contract passed: one top-level canonical navbar survives system changes, Cerbanimo remains content-only, and cross-frame generation lifecycle discovery is finite, event-driven, and listener-idempotent.');
