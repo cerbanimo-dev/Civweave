@@ -1,23 +1,24 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-09-07T10:18:54Z",
+  "built_at": "2026-09-14T10:40:49Z",
   "before": 1137,
-  "after": 502,
-  "rejected": 635,
+  "after": 508,
+  "rejected": 629,
   "topics": {
     "world-history": {
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
+        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
       ]
     },
     "earth-geography": {
@@ -47,23 +48,22 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 10,
+      "records": 9,
       "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 6,
-        "peertube": 4
+        "peertube": 3,
+        "wikimedia-commons": 6
       },
       "top_titles": [
+        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
         "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "When Code Became a Weapon - Crypto Wars Explained",
-        "Houses of History - Explore the story of Parliament and democracy",
-        "An introduction to Parliament"
+        "Democracy in the Dark: Protecting Your Digital Rights",
+        "When Code Became a Weapon - Crypto Wars Explained"
       ]
     },
     "biology-life": {
@@ -102,7 +102,7 @@
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
@@ -159,22 +159,19 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 10,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 10
+        "peertube": 7
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
-        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
-        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
-        "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool"
+        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
     "computing-basics": {
@@ -272,13 +269,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -323,11 +322,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -525,12 +524,12 @@
       "school_slug": "society-and-social-sciences",
       "required": false,
       "records": 3,
-      "mesh_redistributable": 0,
+      "mesh_redistributable": 1,
       "providers": {
         "peertube": 3
       },
       "top_titles": [
-        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
+        "Civil Rights and the 1950s: Crash Course US History #39",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
       ]
@@ -539,13 +538,14 @@
       "name": "Tarot & Symbolic Systems",
       "school_slug": "philosophy-and-religion",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "House of Tarot (Game Gear)",
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November",
         "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
       ]
     },
@@ -590,14 +590,15 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "Parenting - Blender 2.80 Fundamentals",
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
+        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
       ]
     },
     "gardening-plants": {
@@ -617,13 +618,14 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4,
+        "peertube": 5,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
@@ -684,6 +686,11 @@
       "topic_slug": "arts-culture"
     },
     {
+      "provider": "peertube",
+      "title": "Jakub Józef Orliński: Beyond Baroque | Pulse of Culture",
+      "topic_slug": "arts-culture"
+    },
+    {
       "provider": "wikimedia-commons",
       "title": "Easiest Way to Build Consistent Character - Step-by-Step Guide with OpenArt",
       "topic_slug": "arts-culture"
@@ -721,11 +728,6 @@
     {
       "provider": "peertube",
       "title": "Digital Art in 9 Minutes: From Early Computing Technologies To Crypto NFT Hype 💻",
-      "topic_slug": "arts-culture"
-    },
-    {
-      "provider": "peertube",
-      "title": "Pachelbel Canon in D Major - the original and best version.",
       "topic_slug": "arts-culture"
     },
     {
@@ -825,6 +827,11 @@
     },
     {
       "provider": "peertube",
+      "title": "HOLLYWOOD STARS & QUEEN ELIZABETH II DEDICATE THE CITY OF HOPE LEE PEDIATRIC CENTER GG48235",
+      "topic_slug": "astronomy-space"
+    },
+    {
+      "provider": "peertube",
       "title": "Costa_Rica: Synbio Workshop (2022) [Spanish]",
       "topic_slug": "astronomy-space"
     },
@@ -884,16 +891,6 @@
       "topic_slug": "biology-life"
     },
     {
-      "provider": "peertube",
-      "title": "Banana DNA Experiment",
-      "topic_slug": "biology-life"
-    },
-    {
-      "provider": "peertube",
-      "title": "CRISPR Science: DNA, RNA, and Gene Editing",
-      "topic_slug": "biology-life"
-    },
-    {
       "provider": "wikimedia-commons",
       "title": "5th Fighter Wing 73rd Anniversary Video",
       "topic_slug": "career-work-skills"
@@ -911,11 +908,6 @@
     {
       "provider": "peertube",
       "title": "Démonstration de PorteJunes",
-      "topic_slug": "career-work-skills"
-    },
-    {
-      "provider": "peertube",
-      "title": "Résumé des 4 premières vidéos d'A.Stevens sur la démocratie directe",
       "topic_slug": "career-work-skills"
     },
     {
@@ -951,6 +943,11 @@
     {
       "provider": "peertube",
       "title": "Nextcloud Hub 26 Winter design update. 🎨 QR code login, intuitive icons, enhanced filters, and more!",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
+      "title": "résumé talents 2026",
       "topic_slug": "career-work-skills"
     },
     {
@@ -1020,7 +1017,7 @@
     },
     {
       "provider": "peertube",
-      "title": "YESTERDAY'S NEWSREEL CAREER OF CARRIER USS LEXINGTON FLYING WING SUIT RED SOX 94894b",
+      "title": "Don't choose the wrong career in 2026",
       "topic_slug": "career-work-skills"
     },
     {
@@ -1060,12 +1057,32 @@
     },
     {
       "provider": "peertube",
-      "title": "Civic Data Lab: Daten VON und FÜR die Zivilgesellschaft!",
+      "title": "Finnish Grandparents for Climate singing children's song on Europa Day 2025",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "CDL Espresso Talk_ Overview of Civic Tech Trends and How LLMs Influence Sensemaking in Civic Tech",
       "topic_slug": "civics-society"
     },
     {
       "provider": "peertube",
       "title": "Civils_et_militaires_1ère_GM",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "Le Royaume-Uni adopte la loi sur l’expulsion des demandeurs d’asile au Rwanda",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "Parliament Speaker insults finance minister | رئيس مجلس النوّاب يُهين وزير المال",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "TICTeC Show & Tell - Right to Know across Europe: impacts and lessons learned",
       "topic_slug": "civics-society"
     },
     {
@@ -1085,27 +1102,7 @@
     },
     {
       "provider": "peertube",
-      "title": "A brief history of representation in nearly 60 seconds",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "How does the House of Lords work? Jump Start",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "Parliament’s structure explained (primary)",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "What is the House of Commons?",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "What is the House of Lords? Jump Start",
+      "title": "Sad moment for our fundamental rights",
       "topic_slug": "civics-society"
     },
     {
@@ -1181,11 +1178,6 @@
     {
       "provider": "wikimedia-commons",
       "title": "4-2CR Conducts Urban Combat Training During Saber Guardian 25 (966725)",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Address Before a Joint Session of Congress (February 24, 2009) - Barack Obama (WhiteHouse.gov)",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1275,6 +1267,11 @@
     },
     {
       "provider": "peertube",
+      "title": "There are no “win-win” terms to come from Putin | News In Depth",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
       "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 04.02.2026",
       "topic_slug": "communication-conflict"
     },
@@ -1305,22 +1302,17 @@
     },
     {
       "provider": "peertube",
-      "title": "10 Difficult FOCUS Tests ASMR Soft Spoken",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
       "title": "7 Difficult Words To Pronounce in English - Improve your pronunciation in English",
       "topic_slug": "communication-conflict"
     },
     {
       "provider": "peertube",
-      "title": "[GIT] Résolution d'un conflit de fusion",
+      "title": "Ce que disent nos 6 émotions de base sur nos perceptions et nos besoins – présentation animée",
       "topic_slug": "communication-conflict"
     },
     {
       "provider": "peertube",
-      "title": "Ce que disent nos 6 émotions de base sur nos perceptions et nos besoins – présentation animée",
+      "title": "Comment parler du climat de manière simple et efficace | CHALEUR HUMAINE S.2 E.5",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1471,6 +1463,16 @@
     {
       "provider": "wikimedia-commons",
       "title": "Hearing on Regulating Cryptocurrency Markets",
+      "topic_slug": "computing-basics"
+    },
+    {
+      "provider": "peertube",
+      "title": "(1990) How Computers Work: A Journey Into the Walk-Through Computer",
+      "topic_slug": "computing-basics"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "How a Computer Works - from silicon to apps",
       "topic_slug": "computing-basics"
     }
   ]

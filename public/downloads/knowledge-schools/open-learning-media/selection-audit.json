@@ -1,23 +1,24 @@
 {
   "schema": "civweave.open-learning-media-selection-audit.v3",
-  "built_at": "2026-09-07T10:18:54Z",
-  "before": 268,
-  "after": 207,
+  "built_at": "2026-09-14T10:40:49Z",
+  "before": 269,
+  "after": 208,
   "rejected": 61,
   "topics": {
     "world-history": {
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
+        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
       ]
     },
     "earth-geography": {
@@ -47,23 +48,22 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 10,
+      "records": 9,
       "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 6,
-        "peertube": 4
+        "peertube": 3,
+        "wikimedia-commons": 6
       },
       "top_titles": [
+        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
         "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "When Code Became a Weapon - Crypto Wars Explained",
-        "Houses of History - Explore the story of Parliament and democracy",
-        "An introduction to Parliament"
+        "Democracy in the Dark: Protecting Your Digital Rights",
+        "When Code Became a Weapon - Crypto Wars Explained"
       ]
     },
     "biology-life": {
@@ -102,7 +102,7 @@
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
@@ -159,22 +159,19 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 10,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 10
+        "peertube": 7
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
-        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
-        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
-        "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool"
+        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
     "computing-basics": {
@@ -272,13 +269,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -323,11 +322,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -525,12 +524,12 @@
       "school_slug": "society-and-social-sciences",
       "required": false,
       "records": 3,
-      "mesh_redistributable": 0,
+      "mesh_redistributable": 1,
       "providers": {
         "peertube": 3
       },
       "top_titles": [
-        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
+        "Civil Rights and the 1950s: Crash Course US History #39",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
       ]
@@ -539,13 +538,14 @@
       "name": "Tarot & Symbolic Systems",
       "school_slug": "philosophy-and-religion",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "House of Tarot (Game Gear)",
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November",
         "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
       ]
     },
@@ -590,14 +590,15 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "Parenting - Blender 2.80 Fundamentals",
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
+        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
       ]
     },
     "gardening-plants": {
@@ -617,13 +618,14 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4,
+        "peertube": 5,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
@@ -706,7 +708,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 76,
+      "records": 73,
       "available": true
     },
     "digital-ai-literacy": {
@@ -788,10 +790,11 @@
         "critical-thinking",
         "civics-society",
         "statistics-data-literacy",
-        "climate-environment"
+        "climate-environment",
+        "law-rights-basics"
       ],
-      "coverage": 0.8,
-      "records": 13,
+      "coverage": 1.0,
+      "records": 14,
       "available": true
     },
     "deep-science": {
@@ -833,10 +836,11 @@
         "earth-geography",
         "arts-culture",
         "civics-society",
-        "philosophy-ethics"
+        "philosophy-ethics",
+        "law-rights-basics"
       ],
-      "coverage": 0.8333,
-      "records": 29,
+      "coverage": 1.0,
+      "records": 30,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -856,7 +860,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 14,
+      "records": 15,
       "available": true
     },
     "mind-body-practice": {
@@ -933,7 +937,7 @@
         "communication-conflict"
       ],
       "coverage": 1.0,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "music-performance": {
@@ -983,7 +987,7 @@
         "mathematics-foundations"
       ],
       "coverage": 1.0,
-      "records": 19,
+      "records": 16,
       "available": true
     },
     "home-independence": {
@@ -1079,11 +1083,12 @@
       ],
       "covered_topics": [
         "civics-society",
+        "law-rights-basics",
         "world-history",
         "critical-thinking"
       ],
-      "coverage": 0.75,
-      "records": 12,
+      "coverage": 1.0,
+      "records": 13,
       "available": true
     },
     "technology-builder": {
@@ -1189,6 +1194,13 @@
     },
     {
       "provider": "peertube",
+      "title": "#fediday2025 Jos Poortvliet - Good and bad ways for the public sector to support a federated future (EN)",
+      "reasons": {
+        "civics-society": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
+      "provider": "peertube",
       "title": "What is Juneteenth? | All About Holidays for Kids",
       "reasons": {
         "civics-society": "insufficient-automatic-instructional-evidence"
@@ -1199,13 +1211,6 @@
       "title": "What Is Privacy?",
       "reasons": {
         "civics-society": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "peertube",
-      "title": "First Gigawatt Down Part 2",
-      "reasons": {
-        "climate-environment": "insufficient-automatic-instructional-evidence"
       }
     },
     {

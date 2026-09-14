@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-09-07T10:18:54Z",
+  "built_at": "2026-09-14T10:40:49Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -98,7 +98,7 @@
         "climate-environment",
         "law-rights-basics"
       ],
-      "coverage": 0.8,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -131,7 +131,7 @@
         "philosophy-ethics",
         "law-rights-basics"
       ],
-      "coverage": 0.8333,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -322,7 +322,7 @@
         "world-history",
         "critical-thinking"
       ],
-      "coverage": 0.75,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -1364,7 +1364,7 @@
         "provider": "peertube",
         "provider_id": "8c8552a4-1e47-45f5-82a6-d81f6cf086df",
         "title": "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey or refreshing the basics, this video will help you *boost your daily English communication skills*. What You’ll Learn in This Video: ✅ Pronunciation – Learn how to say \"Civilization\" easily and correctly. ✅ Meaning – Understand its definition: \"Advanced human society\" ✅ Part of Speech – See how \"Civilization\" works as a Noun in simple sentences. ✅ Synonyms & Antonyms – Explore similar and opposite words to grow your vocabulary. ✅ Real-Life Examples – Discover how to use \"Civilization\" in sentences you can actually use every day. Why Should You Learn This Word? The word \"Civilization\" is a super useful way to talk about the development and characteristics of different societies throughout history in English. It’s one of the basic words B2 learners must know to make their speech more natural and clear. By mastering it, you’ll feel more confident in conversations, writing, and even exams. Word Breakdown: • Vocabulary Level : B2 • Part of Speech : Noun • Word : Civilization • Definition : \"Advanced human society\" • Synonyms : Society, Culture, Development • Antonyms : Barbarism, Savagery, Primitivity • Example Sentences : 1. The Roman Civilization was known for its advanced engineering. 2. Contact with other civilizations broadened their cultural horizons. 3. Preserving our civilization for future generations is crucial. Tips for Beginners: 👉 Start using \"Civilization\" in your daily conversations. For example: \"The museum showcases artifacts from various civilizations.\" 👉 Compare it with similar words like \"Culture\" to understand su",
+        "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey o...",
         "source_url": "https://diler.tube/videos/watch/8c8552a4-1e47-45f5-82a6-d81f6cf086df",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -1406,11 +1406,10 @@
         },
         "relevance": {
           "world-history": {
-            "score": 14,
+            "score": 10,
             "evidence": [
               "world history",
-              "world history",
-              "civilizations"
+              "world history"
             ]
           }
         },
@@ -2130,89 +2129,6 @@
         }
       },
       {
-        "provider": "peertube",
-        "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "title": "Democracy in the Dark: Protecting Your Digital Rights",
-        "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://thenewoil.org/en/support/ ============================= You can also view these videos on other websites: 🎥 PeerTube: https://apertatube.net/c/thenewoil/videos 🎥 YouTube: https://youtube.com/thenewoil ⏰ Timestamps 00:00 Introduction 00:37 Disclaimer 01:23 Overview 02:13 Part 1: Why Privacy Matters to Democracy 05:35 Part 2: Protection From Targeted Ads and Disinformation 13:12 Part 3: Protection Against Doxing and Other Real-Life Threats 18:58 Part 4: Protesting ✅ Sources There were a whopping 67 sources on this episode. Check them out here: https://gitlab.com/thenewoil/content/-/blob/main/Show%20Notes/20240919-democracy #privacy #election #democracy #protesting #targetedadvertising #voting #misinformation",
-        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 446658800,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 273190887,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 164171737,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Nate Bartram",
-          "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
-          "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "civics-society": {
-            "score": 10,
-            "evidence": [
-              "democracy",
-              "democracy"
-            ]
-          }
-        },
-        "pedagogy": {
-          "civics-society": {
-            "strong_title_matches": [
-              "democracy"
-            ],
-            "strong_description_matches": [
-              "democracy"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "civics-society": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
         "provider": "wikimedia-commons",
         "provider_id": "File:An introduction to Parliament.webm",
         "title": "An introduction to Parliament",
@@ -2467,6 +2383,87 @@
             "pedagogy_score": 36
           }
         }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
+        "title": "Democracy in the Dark: Protecting Your Digital Rights",
+        "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://the...",
+        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 446658800,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 273190887,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 164171737,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Nate Bartram",
+          "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
+          "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "civics-society": {
+            "score": 10,
+            "evidence": [
+              "democracy",
+              "democracy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "civics-society": {
+            "strong_title_matches": [
+              "democracy"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "civics-society": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
       }
     ],
     "biology-life": [
@@ -2555,7 +2552,7 @@
         "provider": "peertube",
         "provider_id": "93ff2046-d427-4f4b-8590-9de10877c4e6",
         "title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
-        "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business le...",
+        "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business leaders, community surveys and organizing iGEM Day at our University. We will present what we have learnt from these activities, and how they have inpacted our community. Our main goal of the stage talk is to share our local community educational efforts with other iGEM teams so that it may encourage them to also act locally to influence their own communities in a sustainable way.",
         "source_url": "https://video.igem.org/videos/watch/93ff2046-d427-4f4b-8590-9de10877c4e6",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -2885,80 +2882,66 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "b57d1522-c21a-47c0-956d-c1a5e49785e4",
-        "title": "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
-        "description": "Inertia | Forces and Motion Inertia is the resistance to a change in motion. So an object at rest remains at rest and an object in motion remains in motion with the same velocity unless acted upon by an unbalanced force. CREDITS Animation & Design: Bing Rijper Narration: Dale Bennett Script: Bethan Parry, Keith Ross and Alistair Haynes Author: FuseSchool - Global Education",
-        "source_url": "https://diler.tube/videos/watch/b57d1522-c21a-47c0-956d-c1a5e49785e4",
+        "provider_id": "816a526f-039e-4b23-b3de-be75bc98bcdd",
+        "title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+        "description": "Please Help Support This Channel:https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S A 40 minute audio recording, restored with visual aids and diagrams, given by the legendary physicist and educator Richard Feynman on the ...",
+        "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
+          "spdx": "CC-BY",
+          "label": "Attribution",
           "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "evidence": "PeerTube API licence id 1: Attribution",
           "commercial_use": true,
           "derivatives": true,
-          "share_alike": true
+          "share_alike": false
         },
         "files": [
           {
-            "url": "https://diler.tube/download/web-videos/b57d1522-c21a-47c0-956d-c1a5e49785e4-1080.mp4",
+            "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/816a526f-039e-4b23-b3de-be75bc98bcdd-1080-fragmented.mp4",
             "mime": "video/mp4",
-            "bytes": 14481048,
+            "bytes": 174713047,
             "resolution": "1080p",
-            "fps": 25,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/b57d1522-c21a-47c0-956d-c1a5e49785e4-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 8105995,
-            "resolution": "480p",
-            "fps": 25,
-            "role": "web-video"
+            "fps": 30,
+            "role": "streaming-file"
           }
         ],
-        "quality_score": 87,
+        "quality_score": 88,
         "content_hash": null,
         "hash_state": "compute-on-cache",
         "attribution": {
-          "creator": "jessa",
-          "source_title": "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
-          "source_url": "https://diler.tube/videos/watch/b57d1522-c21a-47c0-956d-c1a5e49785e4",
-          "license": "Attribution - Share Alike",
+          "creator": "sb",
+          "source_title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+          "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
+          "license": "Attribution",
           "license_url": ""
         },
         "relevance": {
           "physics-foundations": {
-            "score": 28,
+            "score": 10,
             "evidence": [
               "physics",
-              "forces and motion",
-              "physics",
-              "forces",
-              "motion"
+              "physics"
             ]
           }
         },
         "pedagogy": {
           "physics-foundations": {
             "strong_title_matches": [
-              "physics",
-              "forces and motion"
+              "physics"
             ],
-            "strong_description_matches": [
-              "forces and motion"
-            ],
+            "strong_description_matches": [],
             "educational_intent": true,
-            "instructional_title": false,
+            "instructional_title": true,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 64
+            "pedagogy_score": 48
           }
         },
         "selection": {
           "physics-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
+            "pedagogy_score": 48
           }
         }
       },
@@ -4585,83 +4568,6 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
-        "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
-        "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 109870045,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 66441980,
-            "resolution": "720p",
-            "fps": 25,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Charlotte Aten",
-          "source_title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-          "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "mathematics-foundations": {
-            "score": 20,
-            "evidence": [
-              "mathematics",
-              "algebra",
-              "algebra"
-            ]
-          }
-        },
-        "pedagogy": {
-          "mathematics-foundations": {
-            "strong_title_matches": [
-              "algebra"
-            ],
-            "strong_description_matches": [
-              "mathematics",
-              "algebra"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 64
-          }
-        },
-        "selection": {
-          "mathematics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "6d5ef824-df67-4eb1-8275-75e8bfb755a2",
         "title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "description": "In this video we look at the basics of algebra, focusing on the notation that is used. In algebra we use symbols to represent numbers. These symbols are called variables. Some reasons for using symbols instead of numbers is that the symbols, o...",
@@ -4880,89 +4786,6 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "48450782-7789-4099-b54d-5ee1e57aefb1",
-        "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
-        "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early...",
-        "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 127878198,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 77337120,
-            "resolution": "720p",
-            "fps": 25,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 37375797,
-            "resolution": "360p",
-            "fps": 25,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Charlotte Aten",
-          "source_title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
-          "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "mathematics-foundations": {
-            "score": 10,
-            "evidence": [
-              "algebra",
-              "algebra"
-            ]
-          }
-        },
-        "pedagogy": {
-          "mathematics-foundations": {
-            "strong_title_matches": [
-              "algebra"
-            ],
-            "strong_description_matches": [
-              "algebra"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "mathematics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "46b1e473-a4a6-4dd3-a5f5-9a1e547e270e",
         "title": "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "description": "In this video, we learn how to find the distance between two parallel lines in 3D. We first derive the formula to get the distance between two given lines. We then understand why it works in vector form. We then apply the formula to get the distan...",
@@ -5038,7 +4861,7 @@
         "provider": "peertube",
         "provider_id": "b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
         "title": "Vartika: Inside nowadays Mathematics (Part 4)",
-        "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge. Because Vartika is more basic than Addition.",
+        "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge....",
         "source_url": "https://p.eertu.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5164,79 +4987,6 @@
             "pedagogy_score": 36
           }
         }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "fc51c7fe-b60f-471a-8f25-70b3cbd2eeff",
-        "title": "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool",
-        "description": "CREDITS Animation & Design: Peter van de Heuvel Narration: Lucy Billings Script: Lucy Billings The word polygon comes from Greek. Poly means “many” and Gon means “angles”. Polygon = many angles. Polygons are 2-dimensional shapes, that are made of straight lines, with all the sides joined up. They can be regular, with equal angles and equal sides. Or irregular with angles and lengths of different sizes. They can even intersect themselves. Depending upon how many sides they have, different polygons have different names. Starting with 3 sides: triangles. There are different types of triangles (equilateral, isosceles, scalene, right angle triangles) but they all have 3 sides and 3 angles. Next come quadrilaterals with 4 sides and 4 angles. Now for 5, 6, 7, 8, 9 and 10 sided shapes: Pentagon, Hexagon, Heptagon, Octagon, Nonagon and Decagons. The names can be a little hard to remember and connect them with something. Quad for quad bikes which have 4 wheels. The “Pentagon” building in america has 5 sides. Or P E N T A on your fingers is 5. Hex has an X as does six. Octopus have 8 legs. N for nonogon and for nine. Dec is for 10 just like our decimal system is base 10. Author: FuseSchool - Global Education",
-        "source_url": "https://diler.tube/videos/watch/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 11271285,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 5820214,
-            "resolution": "480p",
-            "fps": 25,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool",
-          "source_url": "https://diler.tube/videos/watch/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "mathematics-foundations": {
-            "score": 10,
-            "evidence": [
-              "geometry",
-              "geometry"
-            ]
-          }
-        },
-        "pedagogy": {
-          "mathematics-foundations": {
-            "strong_title_matches": [
-              "geometry"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "mathematics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
-          }
-        }
       }
     ],
     "computing-basics": [
@@ -5311,7 +5061,7 @@
         "provider": "peertube",
         "provider_id": "ada53935-7f08-4375-a479-dc0dfe929ddf",
         "title": "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
-        "description": "Donate and Support this Channel: https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S Introduction Article to Heuristics and Metaheuristics: http://muonray.blogspot.ie/2016/04/meta-heuristics-and-universal-power-law.html Richard Feynman, Winner of the 1965 Nobel Prize in Physics, gives us an insightful lecture about computer heuristics: how computers work, how they file information, how they handle data, how they use their information in allocated processing in a finite amount of time to solve problems and how they actually compute values of interest to human beings. These topics are essential in the study of what processes reduce the amount of work done in solving a particular problem in computers, giving them speeds of solving problems that can outmatch humans in certain fields but which have not yet reached the complexity of human driven intelligence. The question if human thought is a series of fixed processes that could be, in principle, imitated by a computer is a major theme of this lecture and, in Feynman's trademark style of teaching, gives us clear and yet very powerful answers for this field which has gone on to consume so much of our lives today. No doubt this lecture will be of crucial interest to anyone who has ever wondered about the process of human or machine thinking and if a synthesis between the two can be made without violating logic.",
+        "description": "Donate and Support this Channel: https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S Introduction Article to Heuristics and Metaheuristics: http://muonray.blogspot.ie/2016/04/meta-heuristics-and-universal-power-law.html Ric...",
         "source_url": "https://tube.sbcloud.cc/videos/watch/ada53935-7f08-4375-a479-dc0dfe929ddf",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5964,7 +5714,7 @@
         "provider": "peertube",
         "provider_id": "2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "title": "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat, a shading and to finish with a paint-over and post-effect. This is a tutorial doesn't dive into the details, but keeps an overview of the workflow, the goal is to give an idea of the full path and to give tips on the way. I hope showing my recipe will inspire you to start a drawing to test something you'll find interesting and find your own path. **Timeline:** - 00:19 Thumbnail (or Sketch) - 00:57 Drawing - 01:41 Silhouettes - 02:26 Color Flat - 03:31 Shading - 05:46 Paint-over and post effects License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com webcomic: www.peppercarrot.com Background music by Omfgdude \"Lofi-Hip-hop\" CC-0 / Public Domain - 2018 https://opengameart.org/content/lofi-hip-hop Special thanks to @RinCat@meow.cloud on the Fediverse for saving a corrupted MP4 recording of this video. Edited with Kdenlive 21.04 appimage on Fedora 37 KDE **Support:** - Patreon: https://www.patreon.com/join/davidrevoy? - Tipeee: https://fr.tipeee.com/pepper-carrot - Paypal: https://paypal.me/davidrevoy - Liberapay: https://liberapay.com/davidrevoy/ **Follow:** - Mastodon: https://framapiaf.org/@davidrevoy - Twitter: http://twitter.com/davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ **Website:** - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/ **Alternative channel:** - Peertube: https://peertube.touhoppai.moe/accounts/shichimi/videos - Youtube: https://www.youtube.com/",
+        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat...",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6038,10 +5788,9 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 14,
+            "score": 10,
             "evidence": [
-              "digital painting",
-              "music"
+              "digital painting"
             ]
           }
         },
@@ -6533,7 +6282,7 @@
         "provider": "peertube",
         "provider_id": "8d6c1bba-f4c0-4fca-ab42-84a298c65064",
         "title": "The Philosophy of Antifa",
-        "description": "From Philosophy Tube https://www.youtube.com/watch?v=bgwS_FMZ3nQ 00.00 - Introduction 00:53 - Meet The Antifascists 08:18 - Fascism 20:47 - Violence 39:58 - Free Speech 53:30 - There Is No Peaceful White Nationalism Subscribe! htt...",
+        "description": "From Philosophy Tube https://www.youtube.com/watch?v=bgwS_FMZ3nQ 00.00 - Introduction 00:53 - Meet The Antifascists 08:18 - Fascism 20:47 - Violence 39:58 - Free Speech 53:30 - There Is No Peaceful White Nationalism Subscribe! http://tinyurl.com/pr99a46 Patreon: Patreon: PhilosophyTube Paypal.me/PhilosophyTube Audible: http://tinyurl.com/jn6tpup FAQ: http://tinyurl.com/j8bo4gb Facebook: http://tinyurl.com/jgjek5w Twitter: @PhilosophyTube Email: ollysphilosophychannel@gmail.com Google+: google.com/+thephilosophytube realphilosophytube.tumblr.com Bibliography: Ahmed, The Cultural Politics of Emotion - http://tinyurl.com/y9a569vy Arendt, The Origins of Totalitarianism - http://tinyurl.com/yab2r3sm Auden & Isherwood – On the Frontier - http://tinyurl.com/y8c8w3sc BadMouse Productions: Spotting Fascism – (The Handmaid's Tale: Spotting Fascism) Bray, Antifa: the Antifascist Handbook - http://tinyurl.com/y7nwsr6c Burgdörfer: \"Sterben die weißen Völker?” Cacho, Social Death - http://tinyurl.com/yalbdhkb Contrapoints – “Debating the Alt-Right,” (Video), “Decrypting the Alt-Right” (Decrypting the Alt-Right: How to Recognize...), “The Left” (The Left | ContraPoints), “Does the Left Hate Free Speech?” (Video, “Why White Nationalism is Wrong” (Video) D’Souza, The Big Lie - http://tinyurl.com/ydavsb82 Faludi, Backlash - http://tinyurl.com/ycnjhv5s Fang, Delete Your Account Podcast, E63, “Punching Nazis” Herman & Chomsky, Manufacturing Consent - http://tinyurl.com/ybd3rots Hermansson, “My Year Inside the Alt-Right” https://alternativeright.hopenothate.... Hitler, Mein Kampf Hobbes, Leviathan - http://tinyurl.com/y98m5tf7 Kesīqnaeh, Fascism & Anti-Fascism: A Decolonial Perspective http://tinyurl.com/y9m36ckv King Jr. - Letter From A Birmingham Jail - http://tinyurl.com/ovcktqb Mill, On",
         "source_url": "https://communitymedia.video/videos/watch/8d6c1bba-f4c0-4fca-ab42-84a298c65064",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6608,7 +6357,7 @@
         "provider": "peertube",
         "provider_id": "8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
         "title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://github.com/stagfoo/joro //----------------Libraries------------------/// https://github.com/stagfoo/chumbucket https://github.com/visionmedia/page.js https://github.com/choojs/nanohtml",
+        "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://g...",
         "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -7404,113 +7153,6 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about Systems Thinking? Is it the same as non-linear thinking? Let’s find out together with Diana Montalion and Lisa Maria Moritz in this episode. Diana and Lisa will talk about Diana’s new book “Learning Systems Thinking: Essential Nonlinear Skills & Practices for Software Professionals”. Links * [Software Architecture Gathering](https://conferences.isaqb.org/software-architecture-gathering/) Code SATV_SAG15 for 15% off * [Diana Montalion: Learning Systems Thinking: Essential Nonlinear Skills and Practices for Software Professionals](https://amzn.to/4egWSJ7) * [Lisa Moritzs Training \"Sketchnotes in der IT\"](https://www.socreatory.com/de/trainings/sketchnotes) * [Lisa Moritz: \"Sketchnotes in der IT\"](https://amzn.to/4fDOXqA)",
-        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 1911000052,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 260879888,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 225051511,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 540467455,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 260480450,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 224646233,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Eberhard Wolff",
-          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "logical-frameworks": {
-            "score": 10,
-            "evidence": [
-              "systems thinking",
-              "systems thinking"
-            ]
-          }
-        },
-        "pedagogy": {
-          "logical-frameworks": {
-            "strong_title_matches": [
-              "systems thinking"
-            ],
-            "strong_description_matches": [
-              "systems thinking"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "logical-frameworks": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "a4e1b73a-57fe-4460-9f0a-39d75cda843f",
         "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing s...",
@@ -7778,6 +7420,111 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 10,
+            "evidence": [
+              "systems thinking",
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "systems thinking"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about ...",
+        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 1911000052,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 260879888,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 225051511,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 540467455,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 260480450,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 224646233,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Eberhard Wolff",
+          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
         },
         "relevance": {
           "logical-frameworks": {
@@ -9646,8 +9393,184 @@
         }
       }
     ],
-    "law-rights-basics": [],
+    "law-rights-basics": [
+      {
+        "provider": "peertube",
+        "provider_id": "b4248fb8-c89c-4b01-887c-b9e375ddc3a4",
+        "title": "Civil Rights and the 1950s: Crash Course US History #39",
+        "description": "In which John Green teaches you about the early days of the Civil Rights movement. By way of providing context for this, John also talks a bit about wider America in the 1950s. The 1950s are a deeply nostalgic period for many Americans, but there ...",
+        "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/b4248fb8-c89c-4b01-887c-b9e375ddc3a4",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 169376540,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 96312060,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 57879152,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 169320102,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 96247746,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 57818342,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "simon_lanciaux",
+          "source_title": "Civil Rights and the 1950s: Crash Course US History #39",
+          "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/b4248fb8-c89c-4b01-887c-b9e375ddc3a4",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "law-rights-basics": {
+            "score": 14,
+            "evidence": [
+              "civil rights",
+              "rights",
+              "civil rights"
+            ]
+          }
+        },
+        "pedagogy": {
+          "law-rights-basics": {
+            "strong_title_matches": [
+              "civil rights"
+            ],
+            "strong_description_matches": [
+              "civil rights"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "law-rights-basics": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      }
+    ],
     "tarot-symbolism": [
+      {
+        "provider": "peertube",
+        "provider_id": "b43de4bb-fb56-4707-970f-64befe2f2c4e",
+        "title": "How The Tarot Works - The Word Cloud Tarot Show 14th November",
+        "description": "Have you ever wondered, how does the #tarot work? This month WordcloudTarot and HappyToast are launching a New Deck: the Happy Toast deck. The easiest one to learn ever. The meanings are written on the cards. In celebration here's a five ...",
+        "source_url": "https://dalliance.network/videos/watch/b43de4bb-fb56-4707-970f-64befe2f2c4e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://dalliance.network/download/streaming-playlists/hls/videos/b43de4bb-fb56-4707-970f-64befe2f2c4e-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 120531831,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "wordcloudtarot",
+          "source_title": "How The Tarot Works - The Word Cloud Tarot Show 14th November",
+          "source_url": "https://dalliance.network/videos/watch/b43de4bb-fb56-4707-970f-64befe2f2c4e",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "tarot-symbolism": {
+            "score": 10,
+            "evidence": [
+              "tarot",
+              "tarot"
+            ]
+          }
+        },
+        "pedagogy": {
+          "tarot-symbolism": {
+            "strong_title_matches": [
+              "tarot"
+            ],
+            "strong_description_matches": [
+              "tarot"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "tarot-symbolism": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
       {
         "provider": "peertube",
         "provider_id": "7c80db19-ca5d-463e-9abf-057d64b4a624",
@@ -9932,9 +9855,82 @@
     "entrepreneurship-small-business": [
       {
         "provider": "peertube",
+        "provider_id": "a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+        "title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+        "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BE...",
+        "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC0",
+          "label": "Public Domain Dedication",
+          "url": "",
+          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 45051327,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 33517998,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Frank",
+          "source_title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+          "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+          "license": "Public Domain Dedication",
+          "license_url": ""
+        },
+        "relevance": {
+          "entrepreneurship-small-business": {
+            "score": 10,
+            "evidence": [
+              "business model",
+              "business model"
+            ]
+          }
+        },
+        "pedagogy": {
+          "entrepreneurship-small-business": {
+            "strong_title_matches": [
+              "business model"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 49
+          }
+        },
+        "selection": {
+          "entrepreneurship-small-business": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 49
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "61802aa3-a02a-419b-aafc-70a5d6861fe7",
         "title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-        "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and secured operating system, and pre-loading MNO profiles on a smaller PCB footprint, leading to more design freedom. https://youtu.be/sRCKZbwK5ak",
+        "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and s...",
         "source_url": "https://tube.xy-space.de/videos/watch/61802aa3-a02a-419b-aafc-70a5d6861fe7",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -10073,7 +10069,7 @@
         "provider": "peertube",
         "provider_id": "ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
         "title": "a track i made for music theory back in high school",
-        "description": "i made this track in OpenMPT back in high school for that one music theory class i took one semester i remembered it while trying to compose a theme for a stage in support mage RPG, and i think i'll remake this for the game instead of coming up...",
+        "description": "i made this track in OpenMPT back in high school for that one music theory class i took one semester i remembered it while trying to compose a theme for a stage in support mage RPG, and i think i'll remake this for the game instead of coming up with something new.",
         "source_url": "https://makertube.net/videos/watch/ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -10449,7 +10445,7 @@
         "provider": "peertube",
         "provider_id": "dd25c9d7-09f3-4fe7-8d30-b8f573b8e5b4",
         "title": "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
-        "description": "Students have requested lessons on vocabulary, so in this lesson, Mr. P./Marc will delve into the difference between \"been\" and \"being.\" Both these participles can be easily confused among students of English. In this lesson, Mr. P. will explain their difference by giving examples and introducing everyday expressions that use being or being. This is part of the playlist called \"confusing English.\" You may also find other lessons on that list. This lesson is intended for intermediate students who wish to improve their English grammar and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, Canada, who has been teaching English since 1997. He taught English to adults in Rome for 20 years. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+        "description": "Students have requested lessons on vocabulary, so in this lesson, Mr. P./Marc will delve into the difference between \"been\" and \"being.\" Both these participles can be easily confused among students of English. In this lesson, Mr. P. will explain t...",
         "source_url": "https://diler.tube/videos/watch/dd25c9d7-09f3-4fe7-8d30-b8f573b8e5b4",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -10491,13 +10487,11 @@
         },
         "relevance": {
           "language-learning": {
-            "score": 38,
+            "score": 24,
             "evidence": [
               "English vocabulary",
-              "English grammar",
               "vocabulary lesson",
-              "vocabulary",
-              "grammar"
+              "vocabulary"
             ]
           }
         },
@@ -10507,20 +10501,18 @@
               "English vocabulary",
               "vocabulary lesson"
             ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
+            "strong_description_matches": [],
             "educational_intent": true,
             "instructional_title": true,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 76
+            "pedagogy_score": 68
           }
         },
         "selection": {
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 76
+            "pedagogy_score": 68
           }
         }
       },
@@ -10947,7 +10939,7 @@
         "provider": "peertube",
         "provider_id": "a9b13538-31c4-49c7-bc60-7bd64cc9b1e0",
         "title": "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "description": "In this video, Mr. P. will give guidelines on how to give a good oral presentation in school or even at work. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He is an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Since 2018, he has been attending Queen's University. Author: Englishing",
+        "description": "In this video, Mr. P. will give guidelines on how to give a good oral presentation in school or even at work. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts abo...",
         "source_url": "https://diler.tube/videos/watch/a9b13538-31c4-49c7-bc60-7bd64cc9b1e0",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -11048,82 +11040,6 @@
           "creator": "jessa",
           "source_title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
           "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 24,
-            "evidence": [
-              "ESL",
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "ESL"
-            ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
-        "title": "ESL - Sentence Structures： Simple, Compound and Complex",
-        "description": "In this lesson, Mr. P. will discuss three sentence types: Simple, complex and compound. He will also explain coordinating and subordinating conjunctions using them in complex and compound sentences. This lesson is designed for beginners who wish to improve their English grammar and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Marc is a Canadian English Teacher/Coach from Toronto, Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
-        "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 26610298,
-            "resolution": "1080p",
-            "fps": 59,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 15758913,
-            "resolution": "480p",
-            "fps": 25,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "ESL - Sentence Structures： Simple, Compound and Complex",
-          "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
           "license": "Attribution - Share Alike",
           "license_url": ""
         },
@@ -11291,7 +11207,7 @@
         "provider": "peertube",
         "provider_id": "c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
         "title": "ESL - Expletive sentences (there, here, it)",
-        "description": "Expletive constructions are phrases or sentences that begin with “There are,” “There is,” “It is,” “It was, \"\"Here comes,\" etc. The verb “to be” is also part of many of these uninspired sentences. In this lesson, Mr. P. will give an easy explanation of how to build an expletive sentence. He will further delve into how to use there, it, and here in a sentence. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+        "description": "Expletive constructions are phrases or sentences that begin with “There are,” “There is,” “It is,” “It was, \"\"Here comes,\" etc. The verb “to be” is also part of many of these uninspired sentences. In this lesson, Mr. P. will give an easy explanat...",
         "source_url": "https://diler.tube/videos/watch/c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -11361,9 +11277,81 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+        "title": "ESL - Sentence Structures： Simple, Compound and Complex",
+        "description": "In this lesson, Mr. P. will discuss three sentence types: Simple, complex and compound. He will also explain coordinating and subordinating conjunctions using them in complex and compound sentences. This lesson is designed for beginners who wish...",
+        "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 26610298,
+            "resolution": "1080p",
+            "fps": 59,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 15758913,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - Sentence Structures： Simple, Compound and Complex",
+          "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "7c3488cf-7a0c-4e67-95c5-4ce053d8039e",
         "title": "ESL - Subordinating Conjunctions",
-        "description": "Conjunctions are words that join words and sentences together. In this lesson, Mr. P. will discuss subordinating conjunctions. They are those that are attached to dependent clauses, so they cannot stand alone to give complete thought or meaning to the sentence. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He is an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+        "description": "Conjunctions are words that join words and sentences together. In this lesson, Mr. P. will discuss subordinating conjunctions. They are those that are attached to dependent clauses, so they cannot stand alone to give complete thought or meaning to...",
         "source_url": "https://diler.tube/videos/watch/7c3488cf-7a0c-4e67-95c5-4ce053d8039e",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -11435,7 +11423,7 @@
         "provider": "peertube",
         "provider_id": "30ad7444-5c32-455e-b548-9b0a3bba93b1",
         "title": "ESL Writing - Summarizing and Paraphrasing",
-        "description": "In this video, Mr. P. will discuss the difference between summarizing and paraphrasing by giving easy examples taken from the book Writing - A journey by Faigley and Rubens. He will provide tips on how to improve your writing and avoid plagiarism. This lesson is designed for intermediate students who wish to improve their writing skills and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+        "description": "In this video, Mr. P. will discuss the difference between summarizing and paraphrasing by giving easy examples taken from the book Writing - A journey by Faigley and Rubens. He will provide tips on how to improve your writing and avoid plagiarism....",
         "source_url": "https://diler.tube/videos/watch/30ad7444-5c32-455e-b548-9b0a3bba93b1",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {

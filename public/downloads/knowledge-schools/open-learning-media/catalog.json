@@ -1,19 +1,19 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-09-07T10:18:54Z",
-  "record_count": 179,
+  "built_at": "2026-09-14T10:40:49Z",
+  "record_count": 180,
   "mesh_redistributable_count": 132,
-  "download_candidate_count": 280,
+  "download_candidate_count": 282,
   "providers": {
     "internet-archive": {
-      "records": 6,
+      "records": 7,
       "mesh_redistributable": 0,
-      "download_candidates": 14
+      "download_candidates": 15
     },
     "peertube": {
       "records": 120,
       "mesh_redistributable": 79,
-      "download_candidates": 213
+      "download_candidates": 214
     },
     "wikimedia-commons": {
       "records": 53,
@@ -26,15 +26,16 @@
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
+        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
       ]
     },
     "earth-geography": {
@@ -64,21 +65,20 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 8,
+      "records": 7,
       "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 5,
-        "peertube": 3
+        "peertube": 2,
+        "wikimedia-commons": 5
       },
       "top_titles": [
+        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
         "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Houses of History - Explore the story of Parliament and democracy",
-        "An introduction to Parliament"
+        "Democracy in the Dark: Protecting Your Digital Rights"
       ]
     },
     "biology-life": {
@@ -116,7 +116,7 @@
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -170,22 +170,19 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 10,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 10
+        "peertube": 7
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
-        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
-        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
-        "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool"
+        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
     "computing-basics": {
@@ -281,13 +278,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -332,11 +331,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -525,12 +524,12 @@
       "school_slug": "society-and-social-sciences",
       "required": false,
       "records": 3,
-      "mesh_redistributable": 0,
+      "mesh_redistributable": 1,
       "providers": {
         "peertube": 3
       },
       "top_titles": [
-        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
+        "Civil Rights and the 1950s: Crash Course US History #39",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
       ]
@@ -539,12 +538,13 @@
       "name": "Tarot & Symbolic Systems",
       "school_slug": "philosophy-and-religion",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November",
         "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
       ]
     },
@@ -589,13 +589,14 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 1,
+      "records": 2,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
+        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
       ]
     },
     "gardening-plants": {
@@ -611,13 +612,14 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 3,
+        "peertube": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
@@ -661,7 +663,7 @@
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
         "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
-        "ESL - Sentence Structures： Simple, Compound and Complex"
+        "English Grammar — Present Continuous — Structure"
       ]
     }
   },
@@ -1393,7 +1395,7 @@
       ],
       "matched_query": "Krita digital painting tutorial",
       "title": "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-      "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat, a shading and to finish with a paint-over and post-effect. This is a tutorial doesn't dive into the details, but keeps an overview of the workflow, the goal is to give an idea of the full path and to give tips on the way. I hope showing my recipe will inspire you to start a drawing to test something you'll find interesting and find your own path. **Timeline:** - 00:19 Thumbnail (or Sketch) - 00:57 Drawing - 01:41 Silhouettes - 02:26 Color Flat - 03:31 Shading - 05:46 Paint-over and post effects License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com webcomic: www.peppercarrot.com Background music by Omfgdude \"Lofi-Hip-hop\" CC-0 / Public Domain - 2018 https://opengameart.org/content/lofi-hip-hop Special thanks to @RinCat@meow.cloud on the Fediverse for saving a corrupted MP4 recording of this video. Edited with Kdenlive 21.04 appimage on Fedora 37 KDE **Support:** - Patreon: https://www.patreon.com/join/davidrevoy? - Tipeee: https://fr.tipeee.com/pepper-carrot - Paypal: https://paypal.me/davidrevoy - Liberapay: https://liberapay.com/davidrevoy/ **Follow:** - Mastodon: https://framapiaf.org/@davidrevoy - Twitter: http://twitter.com/davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ **Website:** - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/ **Alternative channel:** - Peertube: https://peertube.touhoppai.moe/accounts/shichimi/videos - Youtube: https://www.youtube.com/",
+      "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat...",
       "creator": "Shichimi − David Revoy on Peertube",
       "language": "en",
       "duration_seconds": 440,
@@ -1476,16 +1478,15 @@
           "school_slug": "arts",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 56,
-          "relevance_score": 14
+          "relevance_score": 10
         }
       ],
       "quality_score": 88,
       "relevance": {
         "arts-culture": {
-          "score": 14,
+          "score": 10,
           "evidence": [
-            "digital painting",
-            "music"
+            "digital painting"
           ]
         }
       },
@@ -2397,7 +2398,7 @@
       ],
       "matched_query": "biology educational film",
       "title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
-      "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business le...",
+      "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business leaders, community surveys and organizing iGEM Day at our University. We will present what we have learnt from these activities, and how they have inpacted our community. Our main goal of the stage talk is to share our local community educational efforts with other iGEM teams so that it may encourage them to also act locally to influence their own communities in a sustainable way.",
       "creator": "iGEM Teams",
       "language": "en",
       "duration_seconds": 605,
@@ -5381,6 +5382,93 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "9bfc1233-5546-40f0-ba53-471eb4ce3c22",
+      "topic_slug": "civics-society",
+      "topic_name": "Civics & Society",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "civics",
+        "government",
+        "democracy",
+        "institutions"
+      ],
+      "matched_query": "democracy civics lesson",
+      "title": "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
+      "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm Visit our website www.PeriscopeFilm.com This black & white educational film is about the process of Democracy. The copyright is 1945. Openi...",
+      "creator": "amal",
+      "language": "en",
+      "duration_seconds": 626,
+      "source_url": "https://peertube.dngr.us/videos/watch/9bfc1233-5546-40f0-ba53-471eb4ce3c22",
+      "source_host": "peertube.dngr.us",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "amal",
+        "source_title": "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
+        "source_url": "https://peertube.dngr.us/videos/watch/9bfc1233-5546-40f0-ba53-471eb4ce3c22",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "civics-society",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 67,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 32,
+      "relevance": {
+        "civics-society": {
+          "score": 20,
+          "evidence": [
+            "democracy",
+            "government",
+            "government",
+            "democracy"
+          ]
+        }
+      },
+      "pedagogy": {
+        "civics-society": {
+          "strong_title_matches": [
+            "democracy",
+            "government"
+          ],
+          "strong_description_matches": [
+            "democracy"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 67
+        }
+      },
+      "selection": {
+        "civics-society": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 67
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
       "provider_id": "File:How UK Parliament holds government to account.webm",
       "topic_slug": "civics-society",
@@ -5456,115 +5544,6 @@
           ],
           "strong_description_matches": [
             "government"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 44
-        }
-      },
-      "selection": {
-        "civics-society": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
-      "topic_slug": "civics-society",
-      "topic_name": "Civics & Society",
-      "school_slug": "society-and-social-sciences",
-      "concepts": [
-        "civics",
-        "government",
-        "democracy",
-        "institutions"
-      ],
-      "matched_query": "democracy civics lesson",
-      "title": "Democracy in the Dark: Protecting Your Digital Rights",
-      "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://thenewoil.org/en/support/ ============================= You can also view these videos on other websites: 🎥 PeerTube: https://apertatube.net/c/thenewoil/videos 🎥 YouTube: https://youtube.com/thenewoil ⏰ Timestamps 00:00 Introduction 00:37 Disclaimer 01:23 Overview 02:13 Part 1: Why Privacy Matters to Democracy 05:35 Part 2: Protection From Targeted Ads and Disinformation 13:12 Part 3: Protection Against Doxing and Other Real-Life Threats 18:58 Part 4: Protesting ✅ Sources There were a whopping 67 sources on this episode. Check them out here: https://gitlab.com/thenewoil/content/-/blob/main/Show%20Notes/20240919-democracy #privacy #election #democracy #protesting #targetedadvertising #voting #misinformation",
-      "creator": "Nate Bartram",
-      "language": "en",
-      "duration_seconds": 1979,
-      "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-      "source_host": "apertatube.net",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 446658800,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 273190887,
-          "resolution": "720p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 164171737,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Nate Bartram",
-        "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
-        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "civics-society",
-          "school_slug": "society-and-social-sciences",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "civics-society": {
-          "score": 10,
-          "evidence": [
-            "democracy",
-            "democracy"
-          ]
-        }
-      },
-      "pedagogy": {
-        "civics-society": {
-          "strong_title_matches": [
-            "democracy"
-          ],
-          "strong_description_matches": [
-            "democracy"
           ],
           "educational_intent": true,
           "instructional_title": false,
@@ -5943,7 +5922,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "b069053f-c242-4e7d-8b81-b77571559eac",
+      "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
       "topic_slug": "civics-society",
       "topic_name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
@@ -5954,13 +5933,13 @@
         "institutions"
       ],
       "matched_query": "democracy civics lesson",
-      "title": "Houses of History - Explore the story of Parliament and democracy",
-      "description": "Journey through time with this playful, animated and interactive timeline, and explore the story of democracy. Explore the Houses of History interactive timeline at: http://www.parliament.uk/education/teaching-resources-lesson-plans/history-of-...",
-      "creator": "Open History",
+      "title": "Democracy in the Dark: Protecting Your Digital Rights",
+      "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://the...",
+      "creator": "Nate Bartram",
       "language": "en",
-      "duration_seconds": 190,
-      "source_url": "https://tilvids.com/videos/watch/b069053f-c242-4e7d-8b81-b77571559eac",
-      "source_host": "tilvids.com",
+      "duration_seconds": 1979,
+      "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
+      "source_host": "apertatube.net",
       "license": {
         "spdx": "CC-BY",
         "label": "Attribution",
@@ -5970,16 +5949,41 @@
         "derivatives": true,
         "share_alike": false
       },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 446658800,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 273190887,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 164171737,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "Open History",
-        "source_title": "Houses of History - Explore the story of Parliament and democracy",
-        "source_url": "https://tilvids.com/videos/watch/b069053f-c242-4e7d-8b81-b77571559eac",
+        "creator": "Nate Bartram",
+        "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
+        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
         "license": "Attribution",
         "license_url": ""
       },
@@ -5988,11 +5992,11 @@
           "topic_slug": "civics-society",
           "school_slug": "society-and-social-sciences",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 35,
+          "pedagogy_score": 36,
           "relevance_score": 10
         }
       ],
-      "quality_score": 30,
+      "quality_score": 88,
       "relevance": {
         "civics-society": {
           "score": 10,
@@ -6007,102 +6011,18 @@
           "strong_title_matches": [
             "democracy"
           ],
-          "strong_description_matches": [
-            "democracy"
-          ],
+          "strong_description_matches": [],
           "educational_intent": true,
           "instructional_title": false,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 35
+          "pedagogy_score": 36
         }
       },
       "selection": {
         "civics-society": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 35
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "e79e65e3-e469-4d9a-a788-a67f73e34537",
-      "topic_slug": "civics-society",
-      "topic_name": "Civics & Society",
-      "school_slug": "society-and-social-sciences",
-      "concepts": [
-        "civics",
-        "government",
-        "democracy",
-        "institutions"
-      ],
-      "matched_query": "parliament government introduction",
-      "title": "An introduction to Parliament",
-      "description": "A short animation that introduces the UK Parliament, looking at its history and how it works today. This is an ideal teaching resource for secondary students studying citizenship or Government & Politics View the whole film or skip to chapt...",
-      "creator": "Open History",
-      "language": "en",
-      "duration_seconds": 505,
-      "source_url": "https://tilvids.com/videos/watch/e79e65e3-e469-4d9a-a788-a67f73e34537",
-      "source_host": "tilvids.com",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Open History",
-        "source_title": "An introduction to Parliament",
-        "source_url": "https://tilvids.com/videos/watch/e79e65e3-e469-4d9a-a788-a67f73e34537",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "civics-society",
-          "school_slug": "society-and-social-sciences",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 27,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 30,
-      "relevance": {
-        "civics-society": {
-          "score": 10,
-          "evidence": [
-            "government",
-            "government"
-          ]
-        }
-      },
-      "pedagogy": {
-        "civics-society": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "government"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 27
-        }
-      },
-      "selection": {
-        "civics-society": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 27
+          "pedagogy_score": 36
         }
       }
     },
@@ -6595,7 +6515,7 @@
       ],
       "matched_query": "computer science basics",
       "title": "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
-      "description": "Donate and Support this Channel: https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S Introduction Article to Heuristics and Metaheuristics: http://muonray.blogspot.ie/2016/04/meta-heuristics-and-universal-power-law.html Richard Feynman, Winner of the 1965 Nobel Prize in Physics, gives us an insightful lecture about computer heuristics: how computers work, how they file information, how they handle data, how they use their information in allocated processing in a finite amount of time to solve problems and how they actually compute values of interest to human beings. These topics are essential in the study of what processes reduce the amount of work done in solving a particular problem in computers, giving them speeds of solving problems that can outmatch humans in certain fields but which have not yet reached the complexity of human driven intelligence. The question if human thought is a series of fixed processes that could be, in principle, imitated by a computer is a major theme of this lecture and, in Feynman's trademark style of teaching, gives us clear and yet very powerful answers for this field which has gone on to consume so much of our lives today. No doubt this lecture will be of crucial interest to anyone who has ever wondered about the process of human or machine thinking and if a synthesis between the two can be made without violating logic.",
+      "description": "Donate and Support this Channel: https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S Introduction Article to Heuristics and Metaheuristics: http://muonray.blogspot.ie/2016/04/meta-heuristics-and-universal-power-law.html Ric...",
       "creator": "sb",
       "language": "en",
       "duration_seconds": 4547,
@@ -8826,7 +8746,7 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "Map Themes in QGIS and Mergin Maps",
       "description": "In this tutorial, we show you how to use Map Themes to create a seamless transition between different background maps and layer styles directly on your mobile device. You will learn how to define custom symbology for your survey layers and configu...",
       "creator": "hansakwast",
@@ -8937,7 +8857,7 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
       "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
       "creator": "amal",
@@ -9020,7 +8940,7 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
       "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
       "creator": "amal",
@@ -9204,7 +9124,7 @@
         "cartography",
         "geospatial data"
       ],
-      "matched_query": "map reading land navigation",
+      "matched_query": "map reading educational film",
       "title": "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144",
       "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm This WWII era educational film from the U.S. Army Signal Corps gives an overview of \"Map Reading\", providing lessons on elevation, logical co...",
       "creator": "amal",
@@ -10036,6 +9956,105 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+      "topic_slug": "entrepreneurship-small-business",
+      "topic_name": "Entrepreneurship & Small Business",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "entrepreneurship",
+        "small business",
+        "business model",
+        "customers"
+      ],
+      "matched_query": "business model customer basics tutorial",
+      "title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+      "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BE...",
+      "creator": "Frank",
+      "language": "en",
+      "duration_seconds": 850,
+      "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+      "source_host": "video.fraxoweb.com",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 45051327,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 33517998,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Frank",
+        "source_title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+        "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "entrepreneurship-small-business",
+          "school_slug": "everyday-life",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 49,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 90,
+      "relevance": {
+        "entrepreneurship-small-business": {
+          "score": 10,
+          "evidence": [
+            "business model",
+            "business model"
+          ]
+        }
+      },
+      "pedagogy": {
+        "entrepreneurship-small-business": {
+          "strong_title_matches": [
+            "business model"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 49
+        }
+      },
+      "selection": {
+        "entrepreneurship-small-business": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 49
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "61802aa3-a02a-419b-aafc-70a5d6861fe7",
       "topic_slug": "entrepreneurship-small-business",
       "topic_name": "Entrepreneurship & Small Business",
@@ -10048,7 +10067,7 @@
       ],
       "matched_query": "business model customer basics tutorial",
       "title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-      "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and secured operating system, and pre-loading MNO profiles on a smaller PCB footprint, leading to more design freedom. https://youtu.be/sRCKZbwK5ak",
+      "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and s...",
       "creator": "Nashat Mostafa",
       "language": "en",
       "duration_seconds": 3526,
@@ -10872,7 +10891,7 @@
       ],
       "matched_query": "English vocabulary lesson",
       "title": "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
-      "description": "Students have requested lessons on vocabulary, so in this lesson, Mr. P./Marc will delve into the difference between \"been\" and \"being.\" Both these participles can be easily confused among students of English. In this lesson, Mr. P. will explain their difference by giving examples and introducing everyday expressions that use being or being. This is part of the playlist called \"confusing English.\" You may also find other lessons on that list. This lesson is intended for intermediate students who wish to improve their English grammar and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, Canada, who has been teaching English since 1997. He taught English to adults in Rome for 20 years. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+      "description": "Students have requested lessons on vocabulary, so in this lesson, Mr. P./Marc will delve into the difference between \"been\" and \"being.\" Both these participles can be easily confused among students of English. In this lesson, Mr. P. will explain t...",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 168,
@@ -10922,20 +10941,18 @@
           "topic_slug": "language-learning",
           "school_slug": "language-and-literature",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 76,
-          "relevance_score": 38
+          "pedagogy_score": 68,
+          "relevance_score": 24
         }
       ],
       "quality_score": 87,
       "relevance": {
         "language-learning": {
-          "score": 38,
+          "score": 24,
           "evidence": [
             "English vocabulary",
-            "English grammar",
             "vocabulary lesson",
-            "vocabulary",
-            "grammar"
+            "vocabulary"
           ]
         }
       },
@@ -10945,20 +10962,18 @@
             "English vocabulary",
             "vocabulary lesson"
           ],
-          "strong_description_matches": [
-            "English grammar"
-          ],
+          "strong_description_matches": [],
           "educational_intent": true,
           "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 76
+          "pedagogy_score": 68
         }
       },
       "selection": {
         "language-learning": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 76
+          "pedagogy_score": 68
         }
       }
     },
@@ -11570,7 +11585,7 @@
       ],
       "matched_query": "ESL beginner lesson",
       "title": "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-      "description": "In this video, Mr. P. will give guidelines on how to give a good oral presentation in school or even at work. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He is an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Since 2018, he has been attending Queen's University. Author: Englishing",
+      "description": "In this video, Mr. P. will give guidelines on how to give a good oral presentation in school or even at work. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts abo...",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 603,
@@ -11705,111 +11720,6 @@
         "creator": "jessa",
         "source_title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
         "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "language-learning",
-          "school_slug": "language-and-literature",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44,
-          "relevance_score": 24
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "language-learning": {
-          "score": 24,
-          "evidence": [
-            "ESL",
-            "English grammar",
-            "grammar"
-          ]
-        }
-      },
-      "pedagogy": {
-        "language-learning": {
-          "strong_title_matches": [
-            "ESL"
-          ],
-          "strong_description_matches": [
-            "English grammar"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 44
-        }
-      },
-      "selection": {
-        "language-learning": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
-      "topic_slug": "language-learning",
-      "topic_name": "Language Learning",
-      "school_slug": "language-and-literature",
-      "concepts": [
-        "language learning",
-        "second language acquisition",
-        "vocabulary",
-        "grammar",
-        "listening",
-        "speaking",
-        "language practice"
-      ],
-      "matched_query": "ESL beginner lesson",
-      "title": "ESL - Sentence Structures： Simple, Compound and Complex",
-      "description": "In this lesson, Mr. P. will discuss three sentence types: Simple, complex and compound. He will also explain coordinating and subordinating conjunctions using them in complex and compound sentences. This lesson is designed for beginners who wish to improve their English grammar and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Marc is a Canadian English Teacher/Coach from Toronto, Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
-      "creator": "jessa",
-      "language": "en",
-      "duration_seconds": 502,
-      "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
-      "source_host": "diler.tube",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 26610298,
-          "resolution": "1080p",
-          "fps": 59,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 15758913,
-          "resolution": "480p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "jessa",
-        "source_title": "ESL - Sentence Structures： Simple, Compound and Complex",
-        "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
         "license": "Attribution - Share Alike",
         "license_url": ""
       },
@@ -12059,7 +11969,7 @@
       ],
       "matched_query": "ESL beginner lesson",
       "title": "ESL - Expletive sentences (there, here, it)",
-      "description": "Expletive constructions are phrases or sentences that begin with “There are,” “There is,” “It is,” “It was, \"\"Here comes,\" etc. The verb “to be” is also part of many of these uninspired sentences. In this lesson, Mr. P. will give an easy explanation of how to build an expletive sentence. He will further delve into how to use there, it, and here in a sentence. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+      "description": "Expletive constructions are phrases or sentences that begin with “There are,” “There is,” “It is,” “It was, \"\"Here comes,\" etc. The verb “to be” is also part of many of these uninspired sentences. In this lesson, Mr. P. will give an easy explanat...",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 466,
@@ -12145,6 +12055,107 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+      "topic_slug": "language-learning",
+      "topic_name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "concepts": [
+        "language learning",
+        "second language acquisition",
+        "vocabulary",
+        "grammar",
+        "listening",
+        "speaking",
+        "language practice"
+      ],
+      "matched_query": "ESL beginner lesson",
+      "title": "ESL - Sentence Structures： Simple, Compound and Complex",
+      "description": "In this lesson, Mr. P. will discuss three sentence types: Simple, complex and compound. He will also explain coordinating and subordinating conjunctions using them in complex and compound sentences. This lesson is designed for beginners who wish...",
+      "creator": "jessa",
+      "language": "en",
+      "duration_seconds": 502,
+      "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 26610298,
+          "resolution": "1080p",
+          "fps": 59,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 15758913,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jessa",
+        "source_title": "ESL - Sentence Structures： Simple, Compound and Complex",
+        "source_url": "https://diler.tube/videos/watch/fdb1b73b-bc5e-455e-ad9a-74a6b05d4151",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "language-learning",
+          "school_slug": "language-and-literature",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "language-learning": {
+          "score": 10,
+          "evidence": [
+            "ESL"
+          ]
+        }
+      },
+      "pedagogy": {
+        "language-learning": {
+          "strong_title_matches": [
+            "ESL"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "language-learning": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "7c3488cf-7a0c-4e67-95c5-4ce053d8039e",
       "topic_slug": "language-learning",
       "topic_name": "Language Learning",
@@ -12160,7 +12171,7 @@
       ],
       "matched_query": "ESL beginner lesson",
       "title": "ESL - Subordinating Conjunctions",
-      "description": "Conjunctions are words that join words and sentences together. In this lesson, Mr. P. will discuss subordinating conjunctions. They are those that are attached to dependent clauses, so they cannot stand alone to give complete thought or meaning to the sentence. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He is an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+      "description": "Conjunctions are words that join words and sentences together. In this lesson, Mr. P. will discuss subordinating conjunctions. They are those that are attached to dependent clauses, so they cannot stand alone to give complete thought or meaning to...",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 442,
@@ -12261,7 +12272,7 @@
       ],
       "matched_query": "ESL beginner lesson",
       "title": "ESL Writing - Summarizing and Paraphrasing",
-      "description": "In this video, Mr. P. will discuss the difference between summarizing and paraphrasing by giving easy examples taken from the book Writing - A journey by Faigley and Rubens. He will provide tips on how to improve your writing and avoid plagiarism. This lesson is designed for intermediate students who wish to improve their writing skills and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
+      "description": "In this video, Mr. P. will discuss the difference between summarizing and paraphrasing by giving easy examples taken from the book Writing - A journey by Faigley and Rubens. He will provide tips on how to improve your writing and avoid plagiarism....",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 363,
@@ -12347,7 +12358,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "499b9c26-35ab-4a77-8696-e1bfe49774d8",
+      "provider_id": "b4248fb8-c89c-4b01-887c-b9e375ddc3a4",
       "topic_slug": "law-rights-basics",
       "topic_name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
@@ -12358,33 +12369,82 @@
         "legal systems"
       ],
       "matched_query": "civil rights law basics",
-      "title": "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
-      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
-      "creator": "amal",
+      "title": "Civil Rights and the 1950s: Crash Course US History #39",
+      "description": "In which John Green teaches you about the early days of the Civil Rights movement. By way of providing context for this, John also talks a bit about wider America in the 1950s. The 1950s are a deeply nostalgic period for many Americans, but there ...",
+      "creator": "simon_lanciaux",
       "language": "en",
-      "duration_seconds": 1986,
-      "source_url": "https://peertube.dngr.us/videos/watch/499b9c26-35ab-4a77-8696-e1bfe49774d8",
-      "source_host": "peertube.dngr.us",
+      "duration_seconds": 718,
+      "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/b4248fb8-c89c-4b01-887c-b9e375ddc3a4",
+      "source_host": "tube-langues-vivantes.apps.education.fr",
       "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
+        "spdx": "CC-BY",
+        "label": "Attribution",
         "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "evidence": "PeerTube API licence id 1: Attribution",
         "commercial_use": true,
         "derivatives": true,
         "share_alike": false
       },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 169376540,
+          "resolution": "1080p",
+          "fps": 24,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 96312060,
+          "resolution": "720p",
+          "fps": 24,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 57879152,
+          "resolution": "480p",
+          "fps": 24,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 169320102,
+          "resolution": "1080p",
+          "fps": 24,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 96247746,
+          "resolution": "720p",
+          "fps": 24,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/b4248fb8-c89c-4b01-887c-b9e375ddc3a4-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 57818342,
+          "resolution": "480p",
+          "fps": 24,
+          "role": "streaming-file"
+        }
+      ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "amal",
-        "source_title": "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
-        "source_url": "https://peertube.dngr.us/videos/watch/499b9c26-35ab-4a77-8696-e1bfe49774d8",
-        "license": "Public Domain Dedication",
+        "creator": "simon_lanciaux",
+        "source_title": "Civil Rights and the 1950s: Crash Course US History #39",
+        "source_url": "https://tube-langues-vivantes.apps.education.fr/videos/watch/b4248fb8-c89c-4b01-887c-b9e375ddc3a4",
+        "license": "Attribution",
         "license_url": ""
       },
       "topic_matches": [
@@ -12392,11 +12452,11 @@
           "topic_slug": "law-rights-basics",
           "school_slug": "society-and-social-sciences",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27,
+          "pedagogy_score": 56,
           "relevance_score": 14
         }
       ],
-      "quality_score": 32,
+      "quality_score": 88,
       "relevance": {
         "law-rights-basics": {
           "score": 14,
@@ -12412,18 +12472,20 @@
           "strong_title_matches": [
             "civil rights"
           ],
-          "strong_description_matches": [],
+          "strong_description_matches": [
+            "civil rights"
+          ],
           "educational_intent": true,
-          "instructional_title": false,
+          "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 27
+          "pedagogy_score": 56
         }
       },
       "selection": {
         "law-rights-basics": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27
+          "pedagogy_score": 56
         }
       }
     },
@@ -12654,139 +12716,6 @@
         }
       ],
       "quality_score": 89,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "systems thinking",
-            "systems thinking"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [
-            "systems thinking"
-          ],
-          "strong_description_matches": [
-            "systems thinking"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "logical-frameworks": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logic & Systems Thinking",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "systems thinking",
-      "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-      "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about Systems Thinking? Is it the same as non-linear thinking? Let’s find out together with Diana Montalion and Lisa Maria Moritz in this episode. Diana and Lisa will talk about Diana’s new book “Learning Systems Thinking: Essential Nonlinear Skills & Practices for Software Professionals”. Links * [Software Architecture Gathering](https://conferences.isaqb.org/software-architecture-gathering/) Code SATV_SAG15 for 15% off * [Diana Montalion: Learning Systems Thinking: Essential Nonlinear Skills and Practices for Software Professionals](https://amzn.to/4egWSJ7) * [Lisa Moritzs Training \"Sketchnotes in der IT\"](https://www.socreatory.com/de/trainings/sketchnotes) * [Lisa Moritz: \"Sketchnotes in der IT\"](https://amzn.to/4fDOXqA)",
-      "creator": "Eberhard Wolff",
-      "language": "en",
-      "duration_seconds": 3669,
-      "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-      "source_host": "tube.tchncs.de",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 1911000052,
-          "resolution": "1080p",
-          "fps": 24,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 260879888,
-          "resolution": "480p",
-          "fps": 24,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
-          "mime": "video/mp4",
-          "bytes": 225051511,
-          "resolution": "360p",
-          "fps": 24,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 540467455,
-          "resolution": "1080p",
-          "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 260480450,
-          "resolution": "480p",
-          "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 224646233,
-          "resolution": "360p",
-          "fps": 24,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Eberhard Wolff",
-        "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
       "relevance": {
         "logical-frameworks": {
           "score": 10,
@@ -13224,6 +13153,137 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logic & Systems Thinking",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "systems thinking",
+      "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+      "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about ...",
+      "creator": "Eberhard Wolff",
+      "language": "en",
+      "duration_seconds": 3669,
+      "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+      "source_host": "tube.tchncs.de",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 1911000052,
+          "resolution": "1080p",
+          "fps": 24,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 260879888,
+          "resolution": "480p",
+          "fps": 24,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
+          "mime": "video/mp4",
+          "bytes": 225051511,
+          "resolution": "360p",
+          "fps": 24,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 540467455,
+          "resolution": "1080p",
+          "fps": 24,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 260480450,
+          "resolution": "480p",
+          "fps": 24,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 224646233,
+          "resolution": "360p",
+          "fps": 24,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Eberhard Wolff",
+        "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 10,
+          "evidence": [
+            "systems thinking",
+            "systems thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [
+            "systems thinking"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "e0408dc6-5438-4206-b763-8479601f9183",
       "topic_slug": "mathematics-foundations",
       "topic_name": "Mathematics Foundations",
@@ -13317,109 +13377,6 @@
         "mathematics-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 92
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
-      "topic_slug": "mathematics-foundations",
-      "topic_name": "Mathematics Foundations",
-      "school_slug": "mathematics",
-      "concepts": [
-        "arithmetic",
-        "algebra",
-        "geometry",
-        "mathematical reasoning"
-      ],
-      "matched_query": "mathematics basics algebra",
-      "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-      "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
-      "creator": "Charlotte Aten",
-      "language": "en",
-      "duration_seconds": 2446,
-      "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
-      "source_host": "peertube.wtf",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-1080-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 109870045,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-720-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 66441980,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Charlotte Aten",
-        "source_title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "mathematics-foundations",
-          "school_slug": "mathematics",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 64,
-          "relevance_score": 20
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "mathematics-foundations": {
-          "score": 20,
-          "evidence": [
-            "mathematics",
-            "algebra",
-            "algebra"
-          ]
-        }
-      },
-      "pedagogy": {
-        "mathematics-foundations": {
-          "strong_title_matches": [
-            "algebra"
-          ],
-          "strong_description_matches": [
-            "mathematics",
-            "algebra"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 64
-        }
-      },
-      "selection": {
-        "mathematics-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 64
         }
       }
     },
@@ -13722,115 +13679,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "48450782-7789-4099-b54d-5ee1e57aefb1",
-      "topic_slug": "mathematics-foundations",
-      "topic_name": "Mathematics Foundations",
-      "school_slug": "mathematics",
-      "concepts": [
-        "arithmetic",
-        "algebra",
-        "geometry",
-        "mathematical reasoning"
-      ],
-      "matched_query": "mathematics basics algebra",
-      "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
-      "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early...",
-      "creator": "Charlotte Aten",
-      "language": "en",
-      "duration_seconds": 2965,
-      "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
-      "source_host": "peertube.wtf",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-1080-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 127878198,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-720-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 77337120,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-360-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 37375797,
-          "resolution": "360p",
-          "fps": 25,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Charlotte Aten",
-        "source_title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
-        "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "mathematics-foundations",
-          "school_slug": "mathematics",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "mathematics-foundations": {
-          "score": 10,
-          "evidence": [
-            "algebra",
-            "algebra"
-          ]
-        }
-      },
-      "pedagogy": {
-        "mathematics-foundations": {
-          "strong_title_matches": [
-            "algebra"
-          ],
-          "strong_description_matches": [
-            "algebra"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "mathematics-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "46b1e473-a4a6-4dd3-a5f5-9a1e547e270e",
       "topic_slug": "mathematics-foundations",
       "topic_name": "Mathematics Foundations",
@@ -13942,7 +13790,7 @@
       ],
       "matched_query": "mathematics basics algebra",
       "title": "Vartika: Inside nowadays Mathematics (Part 4)",
-      "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge. Because Vartika is more basic than Addition.",
+      "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge....",
       "creator": "danisanti",
       "language": "en",
       "duration_seconds": 945,
@@ -14032,7 +13880,7 @@
         "geometry",
         "mathematical reasoning"
       ],
-      "matched_query": "geometry mathematics",
+      "matched_query": "mathematics basics algebra",
       "title": "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
       "description": "In this video get to learn about the basic concept of volume and surface area of solids. How do we get the formulae for different 3D shapes? Learn more in this video. Khan Academy is a free learning platform for Class 1-12 students with videos,...",
       "creator": "jessa",
@@ -14113,105 +13961,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "fc51c7fe-b60f-471a-8f25-70b3cbd2eeff",
-      "topic_slug": "mathematics-foundations",
-      "topic_name": "Mathematics Foundations",
-      "school_slug": "mathematics",
-      "concepts": [
-        "arithmetic",
-        "algebra",
-        "geometry",
-        "mathematical reasoning"
-      ],
-      "matched_query": "geometry mathematics",
-      "title": "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool",
-      "description": "CREDITS Animation & Design: Peter van de Heuvel Narration: Lucy Billings Script: Lucy Billings The word polygon comes from Greek. Poly means “many” and Gon means “angles”. Polygon = many angles. Polygons are 2-dimensional shapes, that are made of straight lines, with all the sides joined up. They can be regular, with equal angles and equal sides. Or irregular with angles and lengths of different sizes. They can even intersect themselves. Depending upon how many sides they have, different polygons have different names. Starting with 3 sides: triangles. There are different types of triangles (equilateral, isosceles, scalene, right angle triangles) but they all have 3 sides and 3 angles. Next come quadrilaterals with 4 sides and 4 angles. Now for 5, 6, 7, 8, 9 and 10 sided shapes: Pentagon, Hexagon, Heptagon, Octagon, Nonagon and Decagons. The names can be a little hard to remember and connect them with something. Quad for quad bikes which have 4 wheels. The “Pentagon” building in america has 5 sides. Or P E N T A on your fingers is 5. Hex has an X as does six. Octopus have 8 legs. N for nonogon and for nine. Dec is for 10 just like our decimal system is base 10. Author: FuseSchool - Global Education",
-      "creator": "jessa",
-      "language": "en",
-      "duration_seconds": 160,
-      "source_url": "https://diler.tube/videos/watch/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff",
-      "source_host": "diler.tube",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://diler.tube/download/web-videos/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 11271285,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 5820214,
-          "resolution": "480p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "jessa",
-        "source_title": "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/fc51c7fe-b60f-471a-8f25-70b3cbd2eeff",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "mathematics-foundations",
-          "school_slug": "mathematics",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "mathematics-foundations": {
-          "score": 10,
-          "evidence": [
-            "geometry",
-            "geometry"
-          ]
-        }
-      },
-      "pedagogy": {
-        "mathematics-foundations": {
-          "strong_title_matches": [
-            "geometry"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "mathematics-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
       "topic_slug": "music-performance",
       "topic_name": "Music & Performance",
@@ -14225,7 +13974,7 @@
       ],
       "matched_query": "music theory beginner course",
       "title": "a track i made for music theory back in high school",
-      "description": "i made this track in OpenMPT back in high school for that one music theory class i took one semester i remembered it while trying to compose a theme for a stage in support mage RPG, and i think i'll remake this for the game instead of coming up...",
+      "description": "i made this track in OpenMPT back in high school for that one music theory class i took one semester i remembered it while trying to compose a theme for a stage in support mage RPG, and i think i'll remake this for the game instead of coming up with something new.",
       "creator": "gogolassy",
       "language": "en",
       "duration_seconds": 104,
@@ -14985,6 +14734,88 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "943ad703-dd9f-4f94-b722-f2125dd43532",
+      "topic_slug": "parenting-caregiving",
+      "topic_name": "Parenting & Caregiving",
+      "school_slug": "everyday-life",
+      "concepts": [
+        "parenting",
+        "caregiving",
+        "child development",
+        "co-regulation"
+      ],
+      "matched_query": "parenting skills child development course",
+      "title": "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705",
+      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
+      "creator": "amal",
+      "language": "en",
+      "duration_seconds": 1378,
+      "source_url": "https://peertube.dngr.us/videos/watch/943ad703-dd9f-4f94-b722-f2125dd43532",
+      "source_host": "peertube.dngr.us",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "amal",
+        "source_title": "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705",
+        "source_url": "https://peertube.dngr.us/videos/watch/943ad703-dd9f-4f94-b722-f2125dd43532",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "parenting-caregiving",
+          "school_slug": "everyday-life",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 27,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 32,
+      "relevance": {
+        "parenting-caregiving": {
+          "score": 10,
+          "evidence": [
+            "parenting",
+            "parenting"
+          ]
+        }
+      },
+      "pedagogy": {
+        "parenting-caregiving": {
+          "strong_title_matches": [
+            "parenting"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 27
+        }
+      },
+      "selection": {
+        "parenting-caregiving": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 27
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "19c695b9-cb67-44ba-9f4c-330d18ae626b",
       "topic_slug": "personal-finance",
       "topic_name": "Personal Finance",
@@ -15493,7 +15324,7 @@
       ],
       "matched_query": "philosophy introduction",
       "title": "The Philosophy of Antifa",
-      "description": "From Philosophy Tube https://www.youtube.com/watch?v=bgwS_FMZ3nQ 00.00 - Introduction 00:53 - Meet The Antifascists 08:18 - Fascism 20:47 - Violence 39:58 - Free Speech 53:30 - There Is No Peaceful White Nationalism Subscribe! htt...",
+      "description": "From Philosophy Tube https://www.youtube.com/watch?v=bgwS_FMZ3nQ 00.00 - Introduction 00:53 - Meet The Antifascists 08:18 - Fascism 20:47 - Violence 39:58 - Free Speech 53:30 - There Is No Peaceful White Nationalism Subscribe! http://tinyurl.com/pr99a46 Patreon: Patreon: PhilosophyTube Paypal.me/PhilosophyTube Audible: http://tinyurl.com/jn6tpup FAQ: http://tinyurl.com/j8bo4gb Facebook: http://tinyurl.com/jgjek5w Twitter: @PhilosophyTube Email: ollysphilosophychannel@gmail.com Google+: google.com/+thephilosophytube realphilosophytube.tumblr.com Bibliography: Ahmed, The Cultural Politics of Emotion - http://tinyurl.com/y9a569vy Arendt, The Origins of Totalitarianism - http://tinyurl.com/yab2r3sm Auden & Isherwood – On the Frontier - http://tinyurl.com/y8c8w3sc BadMouse Productions: Spotting Fascism – (The Handmaid's Tale: Spotting Fascism) Bray, Antifa: the Antifascist Handbook - http://tinyurl.com/y7nwsr6c Burgdörfer: \"Sterben die weißen Völker?” Cacho, Social Death - http://tinyurl.com/yalbdhkb Contrapoints – “Debating the Alt-Right,” (Video), “Decrypting the Alt-Right” (Decrypting the Alt-Right: How to Recognize...), “The Left” (The Left | ContraPoints), “Does the Left Hate Free Speech?” (Video, “Why White Nationalism is Wrong” (Video) D’Souza, The Big Lie - http://tinyurl.com/ydavsb82 Faludi, Backlash - http://tinyurl.com/ycnjhv5s Fang, Delete Your Account Podcast, E63, “Punching Nazis” Herman & Chomsky, Manufacturing Consent - http://tinyurl.com/ybd3rots Hermansson, “My Year Inside the Alt-Right” https://alternativeright.hopenothate.... Hitler, Mein Kampf Hobbes, Leviathan - http://tinyurl.com/y98m5tf7 Kesīqnaeh, Fascism & Anti-Fascism: A Decolonial Perspective http://tinyurl.com/y9m36ckv King Jr. - Letter From A Birmingham Jail - http://tinyurl.com/ovcktqb Mill, On",
       "creator": "ArtFED",
       "language": "en",
       "duration_seconds": 4025,
@@ -15593,7 +15424,7 @@
       ],
       "matched_query": "philosophy introduction",
       "title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-      "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://github.com/stagfoo/joro //----------------Libraries------------------/// https://github.com/stagfoo/chumbucket https://github.com/visionmedia/page.js https://github.com/choojs/nanohtml",
+      "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://g...",
       "creator": "stagfoo",
       "language": "en",
       "duration_seconds": 1303,
@@ -16546,7 +16377,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "b57d1522-c21a-47c0-956d-c1a5e49785e4",
+      "provider_id": "816a526f-039e-4b23-b3de-be75bc98bcdd",
       "topic_slug": "physics-foundations",
       "topic_name": "Physics Foundations",
       "school_slug": "science",
@@ -16556,51 +16387,43 @@
         "motion",
         "energy"
       ],
-      "matched_query": "forces motion physics",
-      "title": "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
-      "description": "Inertia | Forces and Motion Inertia is the resistance to a change in motion. So an object at rest remains at rest and an object in motion remains in motion with the same velocity unless acted upon by an unbalanced force. CREDITS Animation & Design: Bing Rijper Narration: Dale Bennett Script: Bethan Parry, Keith Ross and Alistair Haynes Author: FuseSchool - Global Education",
-      "creator": "jessa",
+      "matched_query": "physics basics",
+      "title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+      "description": "Please Help Support This Channel:https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S A 40 minute audio recording, restored with visual aids and diagrams, given by the legendary physicist and educator Richard Feynman on the ...",
+      "creator": "sb",
       "language": "en",
-      "duration_seconds": 260,
-      "source_url": "https://diler.tube/videos/watch/b57d1522-c21a-47c0-956d-c1a5e49785e4",
-      "source_host": "diler.tube",
+      "duration_seconds": 2490,
+      "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
+      "source_host": "tube.sbcloud.cc",
       "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
+        "spdx": "CC-BY",
+        "label": "Attribution",
         "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "evidence": "PeerTube API licence id 1: Attribution",
         "commercial_use": true,
         "derivatives": true,
-        "share_alike": true
+        "share_alike": false
       },
       "cache_policy": "MESH_REDISTRIBUTABLE",
       "mesh_redistributable": true,
       "download_enabled": true,
       "files": [
         {
-          "url": "https://diler.tube/download/web-videos/b57d1522-c21a-47c0-956d-c1a5e49785e4-1080.mp4",
+          "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/816a526f-039e-4b23-b3de-be75bc98bcdd-1080-fragmented.mp4",
           "mime": "video/mp4",
-          "bytes": 14481048,
+          "bytes": 174713047,
           "resolution": "1080p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/b57d1522-c21a-47c0-956d-c1a5e49785e4-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 8105995,
-          "resolution": "480p",
-          "fps": 25,
-          "role": "web-video"
+          "fps": 30,
+          "role": "streaming-file"
         }
       ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "jessa",
-        "source_title": "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/b57d1522-c21a-47c0-956d-c1a5e49785e4",
-        "license": "Attribution - Share Alike",
+        "creator": "sb",
+        "source_title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
+        "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
+        "license": "Attribution",
         "license_url": ""
       },
       "topic_matches": [
@@ -16608,43 +16431,37 @@
           "topic_slug": "physics-foundations",
           "school_slug": "science",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 64,
-          "relevance_score": 28
+          "pedagogy_score": 48,
+          "relevance_score": 10
         }
       ],
-      "quality_score": 87,
+      "quality_score": 88,
       "relevance": {
         "physics-foundations": {
-          "score": 28,
+          "score": 10,
           "evidence": [
             "physics",
-            "forces and motion",
-            "physics",
-            "forces",
-            "motion"
+            "physics"
           ]
         }
       },
       "pedagogy": {
         "physics-foundations": {
           "strong_title_matches": [
-            "physics",
-            "forces and motion"
+            "physics"
           ],
-          "strong_description_matches": [
-            "forces and motion"
-          ],
+          "strong_description_matches": [],
           "educational_intent": true,
-          "instructional_title": false,
+          "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 64
+          "pedagogy_score": 48
         }
       },
       "selection": {
         "physics-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 64
+          "pedagogy_score": 48
         }
       }
     },
@@ -17154,6 +16971,99 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "internet-archive",
+      "provider_id": "effective-prompt-engineering-for-python-programmers",
+      "topic_slug": "prompt-engineering",
+      "topic_name": "Prompt Engineering",
+      "school_slug": "technology",
+      "concepts": [
+        "prompt engineering",
+        "LLM prompting",
+        "prompt patterns",
+        "evaluation"
+      ],
+      "matched_query": "prompt engineering",
+      "title": "Effective prompt engineering for Python programmers",
+      "description": "Talk page: https://2023.za.pycon.org/talks/36-effective-prompt-engineering-for-python-programmers/ Speaker: Diana Pholo Track: Teaching and Learning with Python Type: Remote Talk Room: Talk Room 2 (Remote Talks) Time: Oct 05 (Thu): 14:15 Duration: 0:45 The world of technology is witnessing a transformation powered by Large Language Models (LLMs) like ChatGPT and Bing AI. These marvels of AI are reshaping how we interact with machines as they can comprehend and generate human-like text. But to get the most out of these models, you must learn to ask the right question. Prompt engineering is the art of crafting specific instructions for LLMs. It molds the language model's responses, making them more accurate, relevant, and actionable. Our session will delve into the essence of prompt engineering, addressing its significance for programmers and its role in improving model outputs and reducing biases. We'll explore a variety of prompt types, and offer practical tips for optimisation. Additionally, we'll navigate through real-world case studies, showcasing the tangible impact of prompt engineering on programming tasks. If you're intrigued by the potential of LLMs and eager to harness their power effectively, this presentation is your gateway to unlocking their true potential in your projects. URLs: Slides (pdf): https://2023.za.pycon.org/media/pages_files/Effective_Prompt_Engineering_Slides.pdf Sponsors: Platinum: Python Software Foundation: https://www.python.org/psf/membership Patron: Thinkst Canary: https://canary.tools/ Afrolabs: http://www.afrolabs.co.za/",
+      "creator": "Diana Pholo",
+      "language": "eng",
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+      "source_host": "archive.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://archive.org/download/effective-prompt-engineering-for-python-programmers/Effective%20prompt%20engineering%20for%20Python%20programmers.mp4",
+          "bytes": 580905223,
+          "provider_sha1": "ebd1c7e46bed5cb7e512a8b6424c718074391870",
+          "provider_md5": "0631f39b2b51c5762a446b84e1f8f4f9",
+          "format": "MPEG4",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Diana Pholo",
+        "source_title": "Effective prompt engineering for Python programmers",
+        "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+        "license": "CC-BY",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "prompt-engineering",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 85,
+      "relevance": {
+        "prompt-engineering": {
+          "score": 10,
+          "evidence": [
+            "prompt engineering",
+            "prompt engineering"
+          ]
+        }
+      },
+      "pedagogy": {
+        "prompt-engineering": {
+          "strong_title_matches": [
+            "prompt engineering"
+          ],
+          "strong_description_matches": [
+            "prompt engineering"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "prompt-engineering": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
       "provider_id": "6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
       "topic_slug": "prompt-engineering",
@@ -17264,7 +17174,7 @@
         "flowcharts",
         "computational thinking"
       ],
-      "matched_query": "computational thinking",
+      "matched_query": "algorithm design",
       "title": "Dijkstra s algorithm explained",
       "description": "Tutorial of the Dijkstra's algorithm for finding the shortest path between nodes in a network.",
       "creator": "Jaakko",
@@ -17541,6 +17451,101 @@
         "statistics-data-literacy": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 64
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "b43de4bb-fb56-4707-970f-64befe2f2c4e",
+      "topic_slug": "tarot-symbolism",
+      "topic_name": "Tarot & Symbolic Systems",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "tarot",
+        "major arcana",
+        "minor arcana",
+        "card symbolism",
+        "tarot history",
+        "tarot spreads"
+      ],
+      "matched_query": "tarot cards history major minor arcana lecture",
+      "title": "How The Tarot Works - The Word Cloud Tarot Show 14th November",
+      "description": "Have you ever wondered, how does the #tarot work? This month WordcloudTarot and HappyToast are launching a New Deck: the Happy Toast deck. The easiest one to learn ever. The meanings are written on the cards. In celebration here's a five ...",
+      "creator": "wordcloudtarot",
+      "language": "en",
+      "duration_seconds": 371,
+      "source_url": "https://dalliance.network/videos/watch/b43de4bb-fb56-4707-970f-64befe2f2c4e",
+      "source_host": "dalliance.network",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://dalliance.network/download/streaming-playlists/hls/videos/b43de4bb-fb56-4707-970f-64befe2f2c4e-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 120531831,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "wordcloudtarot",
+        "source_title": "How The Tarot Works - The Word Cloud Tarot Show 14th November",
+        "source_url": "https://dalliance.network/videos/watch/b43de4bb-fb56-4707-970f-64befe2f2c4e",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "tarot-symbolism",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "tarot-symbolism": {
+          "score": 10,
+          "evidence": [
+            "tarot",
+            "tarot"
+          ]
+        }
+      },
+      "pedagogy": {
+        "tarot-symbolism": {
+          "strong_title_matches": [
+            "tarot"
+          ],
+          "strong_description_matches": [
+            "tarot"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "tarot-symbolism": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
         }
       }
     },
@@ -18002,7 +18007,7 @@
       ],
       "matched_query": "world history overview",
       "title": "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-      "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey or refreshing the basics, this video will help you *boost your daily English communication skills*. What You’ll Learn in This Video: ✅ Pronunciation – Learn how to say \"Civilization\" easily and correctly. ✅ Meaning – Understand its definition: \"Advanced human society\" ✅ Part of Speech – See how \"Civilization\" works as a Noun in simple sentences. ✅ Synonyms & Antonyms – Explore similar and opposite words to grow your vocabulary. ✅ Real-Life Examples – Discover how to use \"Civilization\" in sentences you can actually use every day. Why Should You Learn This Word? The word \"Civilization\" is a super useful way to talk about the development and characteristics of different societies throughout history in English. It’s one of the basic words B2 learners must know to make their speech more natural and clear. By mastering it, you’ll feel more confident in conversations, writing, and even exams. Word Breakdown: • Vocabulary Level : B2 • Part of Speech : Noun • Word : Civilization • Definition : \"Advanced human society\" • Synonyms : Society, Culture, Development • Antonyms : Barbarism, Savagery, Primitivity • Example Sentences : 1. The Roman Civilization was known for its advanced engineering. 2. Contact with other civilizations broadened their cultural horizons. 3. Preserving our civilization for future generations is crucial. Tips for Beginners: 👉 Start using \"Civilization\" in your daily conversations. For example: \"The museum showcases artifacts from various civilizations.\" 👉 Compare it with similar words like \"Culture\" to understand su",
+      "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey o...",
       "creator": "jessa",
       "language": "en",
       "duration_seconds": 311,
@@ -18053,17 +18058,16 @@
           "school_slug": "history",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 48,
-          "relevance_score": 14
+          "relevance_score": 10
         }
       ],
       "quality_score": 87,
       "relevance": {
         "world-history": {
-          "score": 14,
+          "score": 10,
           "evidence": [
             "world history",
-            "world history",
-            "civilizations"
+            "world history"
           ]
         }
       },
@@ -18086,28 +18090,111 @@
           "pedagogy_score": 48
         }
       }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "9fba9ae0-f607-4afb-9791-671fd4cf40cd",
+      "topic_slug": "world-history",
+      "topic_name": "World History",
+      "school_slug": "history",
+      "concepts": [
+        "world history",
+        "civilizations",
+        "historical change"
+      ],
+      "matched_query": "world history overview",
+      "title": "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162",
+      "description": "Support Our Channel : https://www.patreon.com/PeriscopeFilm Created in 1939, \"Refreshment Through the Years\" is a corporate history of the Coca-Cola Company produced by the Jam Handy Organization. This film was the very first Technicolor industri...",
+      "creator": "amal",
+      "language": "en",
+      "duration_seconds": 1240,
+      "source_url": "https://peertube.dngr.us/videos/watch/9fba9ae0-f607-4afb-9791-671fd4cf40cd",
+      "source_host": "peertube.dngr.us",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "amal",
+        "source_title": "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162",
+        "source_url": "https://peertube.dngr.us/videos/watch/9fba9ae0-f607-4afb-9791-671fd4cf40cd",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "world-history",
+          "school_slug": "history",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 35,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 32,
+      "relevance": {
+        "world-history": {
+          "score": 10,
+          "evidence": [
+            "history of"
+          ]
+        }
+      },
+      "pedagogy": {
+        "world-history": {
+          "strong_title_matches": [
+            "history of"
+          ],
+          "strong_description_matches": [
+            "history of"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 35
+        }
+      },
+      "selection": {
+        "world-history": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 35
+        }
+      }
     }
   ],
   "record_count_before_relevance_gate": 1137,
-  "record_count_before_pedagogy_gate": 502,
-  "record_count_before_selection_gate": 268,
-  "rejected_by_relevance_gate": 635,
-  "rejected_by_pedagogy_gate": 234,
+  "record_count_before_pedagogy_gate": 508,
+  "record_count_before_selection_gate": 269,
+  "rejected_by_relevance_gate": 629,
+  "rejected_by_pedagogy_gate": 239,
   "rejected_by_selection_gate": 61,
   "topic_stats": {
     "world-history": {
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
+        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
       ]
     },
     "earth-geography": {
@@ -18137,21 +18224,20 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 8,
+      "records": 7,
       "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 5,
-        "peertube": 3
+        "peertube": 2,
+        "wikimedia-commons": 5
       },
       "top_titles": [
+        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
         "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Houses of History - Explore the story of Parliament and democracy",
-        "An introduction to Parliament"
+        "Democracy in the Dark: Protecting Your Digital Rights"
       ]
     },
     "biology-life": {
@@ -18189,7 +18275,7 @@
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -18243,22 +18329,19 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 10,
+      "records": 7,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 10
+        "peertube": 7
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
-        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
-        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
-        "What Are Polygons ｜ Geometry & Measures ｜ Maths ｜ FuseSchool"
+        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
     "computing-basics": {
@@ -18354,13 +18437,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -18405,11 +18490,11 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -18598,12 +18683,12 @@
       "school_slug": "society-and-social-sciences",
       "required": false,
       "records": 3,
-      "mesh_redistributable": 0,
+      "mesh_redistributable": 1,
       "providers": {
         "peertube": 3
       },
       "top_titles": [
-        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
+        "Civil Rights and the 1950s: Crash Course US History #39",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
       ]
@@ -18612,12 +18697,13 @@
       "name": "Tarot & Symbolic Systems",
       "school_slug": "philosophy-and-religion",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
+        "How The Tarot Works - The Word Cloud Tarot Show 14th November",
         "How The Tarot Works - The Word Cloud Tarot Show 14th November 2022"
       ]
     },
@@ -18662,13 +18748,14 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 1,
+      "records": 2,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
+        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
       ]
     },
     "gardening-plants": {
@@ -18684,13 +18771,14 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 3,
+        "peertube": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
@@ -18734,7 +18822,7 @@
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
         "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
-        "ESL - Sentence Structures： Simple, Compound and Complex"
+        "English Grammar — Present Continuous — Structure"
       ]
     }
   },
@@ -18772,7 +18860,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 70,
+      "records": 67,
       "available": true
     },
     "digital-ai-literacy": {
@@ -18854,10 +18942,11 @@
         "critical-thinking",
         "civics-society",
         "statistics-data-literacy",
-        "climate-environment"
+        "climate-environment",
+        "law-rights-basics"
       ],
-      "coverage": 0.8,
-      "records": 11,
+      "coverage": 1.0,
+      "records": 12,
       "available": true
     },
     "deep-science": {
@@ -18899,10 +18988,11 @@
         "earth-geography",
         "arts-culture",
         "civics-society",
-        "philosophy-ethics"
+        "philosophy-ethics",
+        "law-rights-basics"
       ],
-      "coverage": 0.8333,
-      "records": 26,
+      "coverage": 1.0,
+      "records": 27,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -18922,7 +19012,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 13,
       "available": true
     },
     "mind-body-practice": {
@@ -18997,7 +19087,7 @@
         "communication-conflict"
       ],
       "coverage": 1.0,
-      "records": 8,
+      "records": 9,
       "available": true
     },
     "music-performance": {
@@ -19047,7 +19137,7 @@
         "mathematics-foundations"
       ],
       "coverage": 1.0,
-      "records": 19,
+      "records": 16,
       "available": true
     },
     "home-independence": {
@@ -19141,11 +19231,12 @@
       ],
       "covered_topics": [
         "civics-society",
+        "law-rights-basics",
         "world-history",
         "critical-thinking"
       ],
-      "coverage": 0.75,
-      "records": 10,
+      "coverage": 1.0,
+      "records": 11,
       "available": true
     },
     "technology-builder": {
@@ -19172,7 +19263,7 @@
     }
   },
   "pack_registry_revision": "subject-media-packs-v2.5",
-  "records_before_title_quality_gate": 207,
+  "records_before_title_quality_gate": 208,
   "rejected_by_title_quality_gate": 28,
   "rejected_topic_links_by_title_quality_gate": 30,
   "title_quality_gate": {
