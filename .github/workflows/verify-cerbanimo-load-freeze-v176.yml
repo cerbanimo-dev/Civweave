@@ -7,6 +7,7 @@ on:
       - 'public/service-worker-canonical-navbar-v1.js'
       - 'public/service-worker-canonical-home-v1.js'
       - 'public/service-worker-shell-assets-v1.js'
+      - 'public/service-worker-release-generation-v1.js'
       - 'public/service-worker-release-coherence-v220.js'
       - 'public/service-worker-five-system-pages-v1.js'
       - 'public/service-worker-direct-shell-retirement-v1.js'
@@ -44,6 +45,7 @@ jobs:
           node --check public/service-worker-canonical-navbar-v1.js
           node --check public/service-worker-canonical-home-v1.js
           node --check public/service-worker-shell-assets-v1.js
+          node --check public/service-worker-release-generation-v1.js
           node --check public/service-worker-release-coherence-v220.js
           node --check public/service-worker-five-system-pages-v1.js
           node --check public/service-worker-direct-shell-retirement-v1.js
