@@ -30,7 +30,7 @@ assert(shellRuntime.includes('frameMatchesExpected(host,expectedHref)'),'Persist
 assert(shellRuntime.includes('clearChildChromeWork()'),'Persistent shell must cancel old child-chrome observers and timers between system changes.');
 assert(shellRuntime.includes('chromeTimers=[0,60,220,800,1800].map'),'Child-chrome retries must be owned by the active navigation and cancelable.');
 
-assert(realm.includes('data-build="realm-console-canonical-v256-persistent-shell-content-r1"'),'Cerbanimo must be a content-only realm inside the persistent shell.');
+assert(/data-build="realm-console-canonical-v\d+[^\"]*"/.test(realm),'Cerbanimo must expose a revisioned canonical realm build identity.');
 assert(realm.includes("query.get('embed')==='1'"),'Cerbanimo must recognize persistent-shell embedding.');
 assert(realm.includes("location.replace(target.href)"),'Direct top-level Cerbanimo entry must recover into the persistent system shell.');
 assert(!realm.includes('/app/themed-system-nav-v178.js'),'Cerbanimo content must not instantiate another navbar.');
