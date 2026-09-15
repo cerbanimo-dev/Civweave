@@ -21,9 +21,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 API = "https://en.wikipedia.org/w/api.php"
-USER_AGENT = "CivweaveKnowledgeLibrary/1.1 (https://civweave.cc; offline-library membership builder)"
-MIN_REQUEST_GAP_SECONDS = 0.8
-MAX_RETRIES = 8
+USER_AGENT = "CivweaveKnowledgeLibrary/1.2 (https://civweave.cc; Living Library Vital membership builder; contact: cerbanimo@gmail.com)"
+MIN_REQUEST_GAP_SECONDS = 1.5
+MAX_RETRIES = 10
+MIN_429_COOLDOWN_SECONDS = 30.0
 _last_request_at = 0.0
 
 ROOTS = {
@@ -112,13 +113,20 @@ def request_json(params: dict[str, str], retries: int = MAX_RETRIES) -> dict:
             if exc.code not in (429, 500, 502, 503, 504) or attempt + 1 >= retries:
                 break
             retry_after = _retry_after_seconds(exc)
-            delay = retry_after if retry_after is not None else min(60.0, 2.0 ** (attempt + 1))
-            time.sleep(delay + random.uniform(0.2, 0.8))
+            if exc.code == 429:
+                exponential = min(180.0, MIN_429_COOLDOWN_SECONDS * (2.0 ** min(attempt, 3)))
+                delay = max(retry_after or 0.0, exponential)
+            else:
+                delay = max(retry_after or 0.0, min(60.0, 5.0 * (attempt + 1)))
+            print(json.dumps({"mediawiki_retry": exc.code, "attempt": attempt + 1, "sleep_seconds": round(delay, 2)}), flush=True)
+            time.sleep(delay + random.uniform(0.4, 1.2))
         except Exception as exc:
             last = exc
             if attempt + 1 >= retries:
                 break
-            time.sleep(min(30.0, 1.5 * (attempt + 1)) + random.uniform(0.1, 0.5))
+            delay = min(45.0, 3.0 * (attempt + 1))
+            print(json.dumps({"mediawiki_retry": type(exc).__name__, "attempt": attempt + 1, "sleep_seconds": round(delay, 2)}), flush=True)
+            time.sleep(delay + random.uniform(0.2, 0.8))
     raise RuntimeError(f"MediaWiki request failed after {retries} attempts: {last}")
 
 
@@ -220,6 +228,7 @@ def main() -> int:
             "user_agent": USER_AGENT,
             "minimum_gap_seconds": MIN_REQUEST_GAP_SECONDS,
             "max_retries": MAX_RETRIES,
+            "minimum_429_cooldown_seconds": MIN_429_COOLDOWN_SECONDS,
             "maxlag_seconds": 5,
         },
         "levels": {
