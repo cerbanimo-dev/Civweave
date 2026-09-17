@@ -1,46 +1,14 @@
 {
-  "schema": "civweave.guild-cloud-auto-update.v1",
-  "sourceRepository": "cerbanimo-dev/Civweave",
-  "sourcePath": "cloudflare/mobile-guild-edge",
-  "channel": "staging",
-  "checkIntervalHours": 6,
-  "schedulerHeartbeatDays": 30,
-  "managedPaths": [
-    "src",
-    ".civweave",
-    ".github/workflows/civweave-auto-update.yml",
-    "README.md",
-    ".gitignore",
-    ".dev.vars.example",
-    "civweave-update.json"
-  ],
-  "packageManagedKeys": [
-    "version",
-    "private",
-    "type",
-    "scripts",
-    "devDependencies",
-    "cloudflare"
-  ],
-  "packagePreservedKeys": [
-    "name"
-  ],
-  "wranglerManagedKeys": [
-    "main",
-    "compatibility_date",
-    "compatibility_flags",
-    "ai",
-    "durable_objects",
-    "migrations",
-    "observability"
-  ],
-  "wranglerPreservedKeys": [
-    "name",
-    "account_id",
-    "workers_dev",
-    "preview_urls",
-    "routes",
-    "route",
-    "placement"
-  ]
+  "schema": "civweave.guild-partner-release-relay.v1",
+  "mode": "partner-relay",
+  "automaticCentralUpstream": false,
+  "releaseManifestSchema": "civweave.guild-release-manifest.v1",
+  "trustBundleSchema": "civweave.release-trust-bundle.v1",
+  "releaseCurrentPath": "/api/civweave-release/current",
+  "releaseAssetPath": "/api/civweave-release/asset",
+  "releaseImportPath": "/api/civweave-release/import",
+  "releaseRelayPath": "/api/civweave-release/relay",
+  "trustBundlePath": "/api/civweave-trust/bundle",
+  "trustImportPath": "/api/civweave-trust/import",
+  "notes": "A Guild receives signed application releases and signed trust statements from any trusted partner or partner Guild. No repository, root server, canonical key endpoint, channel, or scheduler is an update authority."
 }
