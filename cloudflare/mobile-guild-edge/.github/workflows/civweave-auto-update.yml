@@ -13,4 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Verify Guild release relay has no scheduled central upstream
-        run: node scripts/test-mobile-guild-auto-update-v1.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const config=JSON.parse(fs.readFileSync('civweave-update.json','utf8'));
+          if(config.schema!=='civweave.guild-partner-release-relay.v1')throw new Error('Unexpected Guild release policy schema.');
+          if(config.mode!=='partner-relay'||config.automaticCentralUpstream!==false)throw new Error('Guild release policy must remain partner-relay only.');
+          const relay=fs.readFileSync('src/release-relay-entry.mjs','utf8');
+          for(const route of ['/api/civweave-release/current','/api/civweave-release/relay','/api/civweave-trust/bundle'])if(!relay.includes(route))throw new Error(`Missing decentralized relay route ${route}`);
+          const combined=JSON.stringify(config)+'\n'+relay;
+          if(/sourceRepository|SOURCE_CHANNEL|cerbanimo-dev\/Civweave|git clone/.test(combined))throw new Error('A central repository/channel dependency reappeared in the Guild release policy.');
+          console.log('Guild partner-release policy verified.');
+          NODE
