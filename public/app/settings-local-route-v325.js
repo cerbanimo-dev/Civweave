@@ -49,7 +49,7 @@ function ensureRouteOption(form){
     const deterministic=route.querySelector?.('option[value="deterministic"]');
     deterministic?.after?.(option)||route.prepend?.(option);
   }
-  const current=selection();if(current.active&&current.id)route.value=ROUTE;
+
   return true;
 }
 function immediateMarkup(target){
@@ -145,22 +145,9 @@ function patch(form=document.querySelector('[data-cw-settings-form]')){
   return true;
 }
 function persistLocalRoute(current=selection()){
-  if(!current?.active||!current.id)return null;
-  const at=new Date().toISOString();
-  const interactive={route:ROUTE,provider:ROUTE,model:String(current.id),endpoint:'',externalConsent:false};
-  const settings=read(SETTINGS_KEY,{}),profiles=read(PROFILES_KEY,{});
-  const stored={...settings,...interactive,consent:false,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
-  const nextProfiles={...profiles,interactive,agentic:null,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
-  try{
-    localStorage.setItem(SETTINGS_KEY,JSON.stringify(stored));
-    localStorage.setItem(PROFILES_KEY,JSON.stringify(nextProfiles));
-  }catch{}
-  const detail={version:VERSION,route:ROUTE,primaryRoute:ROUTE,primaryModel:current.id,interactive,agentic:null,agenticEnabled:false,localSelection:current,localOnly:true,savedAt:at};
-  try{dispatchEvent(new CustomEvent('civweave:model-settings-saved',{detail}))}catch{}
-  try{dispatchEvent(new CustomEvent('civweave:model-config-changed',{detail:{...detail,source:'local-model-selection'}}))}catch{}
-  const form=document.querySelector?.('[data-cw-settings-form]');if(form?.isConnected)ensureRouteOption(form);
-  return detail;
+  return globalThis.CivweaveSettingsV320?.selectLocalModel?.(current)||null;
 }
+
 function ensureActionModules(){
   const direct=directApi();if(direct?.ensureActions)return direct.ensureActions();
   const current=globalThis.CivweaveSettingsLocalRouteV323;

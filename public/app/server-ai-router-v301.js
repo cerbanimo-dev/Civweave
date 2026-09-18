@@ -153,21 +153,36 @@ function modelEvent(request,phase,detail={}){
 }
 function resultFor(request,{provider,model,text,outputJson=null,usage={},diagnostics=[],routeTrace=[]}={}){
   const started=request.__serverAutoStartedAt||Date.now(),guildOnly=request.guildOnly===true,directWorkers=isDirectWorkersAI(request),requestedProvider=guildOnly?'guild-server-local':directWorkers?'cloudflare-workers-ai':ROUTE,requestedModel=guildOnly?'civweave-guild-auto':directWorkers?workersAiModel(request):'civweave-server-auto';
+  const schema=request.schema||request.responseSchema,structured=Boolean(schema||request.responseFormat==='json');
+  let validationErrors=[];
+  if(structured){
+    if(outputJson==null){
+      const normalizer=globalThis.CivweaveServerAIOutputNormalizerV1;
+      outputJson=normalizer?.structuredJson?.(text)||null;
+      if(outputJson==null)try{outputJson=JSON.parse(String(text||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''))}catch{validationErrors.push('The provider returned incomplete or invalid JSON.')}
+    }
+    if(schema&&!validationErrors.length){
+      const validate=runtime()?.validateSchema;
+      validationErrors=typeof validate==='function'?validate(outputJson,schema):['The output schema validator is unavailable.'];
+    }
+  }else if(!String(text||'').trim())validationErrors.push('The provider returned no usable text.');
+  const valid=validationErrors.length===0;
   return{
     schema:'civweave-model-result-1.0',
     requestId:clean(request.requestId,180)||`server-auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
     purpose:clean(request.purpose,160)||'interactive',
-    status:'success',
+    status:valid?'success':'invalid-response',
+    ...(valid?{}:{error:{code:'INVALID_STRUCTURED_OUTPUT',message:validationErrors.join('; ')}}),
     requested:{provider:requestedProvider,model:requestedModel,endpoint:'',executionProfile:clean(request.executionProfile,40)||'interactive'},
     actual:{provider,model:model||provider},
     outputText:text||'',
-    outputJson,
+    outputJson:valid?outputJson:null,
     usage:{inputTokens:Number(usage.inputTokens??usage.prompt_tokens??usage.input_tokens??0)||0,outputTokens:Number(usage.outputTokens??usage.completion_tokens??usage.output_tokens??0)||0,totalTokens:Number(usage.totalTokens??usage.total_tokens??0)||0,costCents:Number(usage.costCents||0)||0,remainingCents:Number(usage.remainingCents||0)||0,chargedNeurons:Number(usage.chargedNeurons||0)||0,remainingNeurons:usage.remainingNeurons!=null&&Number.isFinite(Number(usage.remainingNeurons))?Math.max(0,Math.floor(Number(usage.remainingNeurons))):null,approximateTurnsLeft:usage.approximateTurnsLeft!=null&&Number.isFinite(Number(usage.approximateTurnsLeft))?Math.max(0,Math.floor(Number(usage.approximateTurnsLeft))):null},
     timing:{startedAt:new Date(started).toISOString(),completedAt:now(),elapsedMs:Math.max(0,Date.now()-started)},
     events:[],
     diagnostics:[{code:guildOnly?'GUILD_AI_ORDER':directWorkers?'DIRECT_WORKERS_AI_ROUTE':'SERVER_AUTO_ORDER',message:guildOnly?'Explicit Guild processing uses the paired server-local model only.':directWorkers?'The selected Cloudflare Workers AI route goes directly to Guild-owned or host-capacity Workers AI.':'Server-side AI preference is device local → paired server-local → Guild-owned Cloudflare → other Cloudflare capacity.'},...diagnostics,{code:'SERVER_AUTO_TRACE',message:routeTrace.map(item=>`${item.route}:${item.status}`).join(' → '),routeTrace}],
     stream:{requested:Boolean(request?.config?.stream||request.stream),used:false},
-    structured:{requested:Boolean(request.schema||request.responseSchema||request.responseFormat==='json'),valid:true,repairAttempts:0},
+    structured:{requested:Boolean(request.schema||request.responseSchema||request.responseFormat==='json'),valid,validationErrors,repairAttempts:0},
     fallback:{used:routeTrace.some(item=>item.status==='failed'||item.status==='skipped'),route:provider}
   };
 }

@@ -10,14 +10,13 @@ for(const [name,source] of [['settings local route',bridge],['Premier Phone acti
 
 assert.match(bridge,/function persistLocalRoute\(current=selection\(\)\)/,'parent Local models bridge must own canonical local-route persistence');
 assert.doesNotMatch(bridge,/function persistLocalRoute\(\)\{return null\}/,'local-route persistence must not be a no-op');
-assert.match(bridge,/SETTINGS_KEY='civweave\.universal-ai\.v127'/,'canonical settings key must be updated');
-assert.match(bridge,/PROFILES_KEY='civweave-model-profiles-v1'/,'canonical model profiles must be updated');
-assert.match(bridge,/provider:ROUTE,model:String\(current\.id\)/,'selected downloaded model must become the canonical interactive provider/model');
-assert.match(bridge,/localStorage\.setItem\(SETTINGS_KEY/,'canonical settings record must be persisted');
-assert.match(bridge,/localStorage\.setItem\(PROFILES_KEY/,'canonical profile record must be persisted');
-assert.match(bridge,/civweave:model-settings-saved/,'selection must notify Settings consumers');
-assert.match(bridge,/civweave:model-config-changed/,'selection must refresh provider authority wrappers');
-assert.match(bridge,/selectedLocalBecomesProviderAuthority:true/,'bridge must declare provider-authority ownership');
+assert.match(bridge,/CivweaveSettingsV320\?\.selectLocalModel/,'bridge must use the shared Settings owner');
+assert.match(bridge,/selectLocalModel\?\.\(current\)/,'selection must delegate persistence to the Settings owner');
+assert.doesNotMatch(bridge,/localStorage\.setItem\(SETTINGS_KEY|localStorage\.setItem\(PROFILES_KEY/,'bridge must not compete with Settings persistence');
+const gateway=fs.readFileSync('public/app/settings-gateway-v317.js','utf8');
+assert.match(gateway,/function selectLocalModel\(/);
+assert.match(gateway,/civweave:model-config-changed/);
+assert.match(gateway,/civweave:model-settings-saved/);
 
 assert.match(phone,/const route=globalThis\.CivweaveSettingsLocalRouteV323\?\.persistLocalRoute\?\.\(/,'fast/deep phone buttons must persist the downloaded-local route');
 assert.match(phone,/if\(!route\)throw new Error\('The local model was selected, but Civweave could not make downloaded local AI the active provider route\.'/,'a failed route handoff must be visible rather than silently falling back');

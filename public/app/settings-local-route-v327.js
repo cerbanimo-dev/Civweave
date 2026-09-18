@@ -88,20 +88,7 @@ function writable(){return !navigating&&Boolean(document.documentElement?.isConn
 function selection(){try{return parse(localStorage.getItem(SELECTION_KEY),{active:false,id:null})}catch{return{active:false,id:null}}}
 
 function persistLocalRoute(current=selection()){
-  if(!current?.active||!current.id)return null;
-  const at=new Date().toISOString();
-  const interactive={route:ROUTE,provider:ROUTE,model:String(current.id),endpoint:'',externalConsent:false};
-  const settings=parse(localStorage.getItem(SETTINGS_KEY),{});
-  const profiles=parse(localStorage.getItem(PROFILES_KEY),{});
-  const stored={...settings,...interactive,consent:false,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
-  const nextProfiles={...profiles,interactive,agentic:null,agenticEnabled:false,localOnly:true,settingsOwner:VERSION,updatedAt:at};
-  try{
-    localStorage.setItem(SETTINGS_KEY,JSON.stringify(stored));
-    localStorage.setItem(PROFILES_KEY,JSON.stringify(nextProfiles));
-  }catch{}
-  const detail={version:VERSION,route:ROUTE,primaryRoute:ROUTE,primaryModel:current.id,interactive,agentic:null,agenticEnabled:false,localSelection:current,localOnly:true,savedAt:at};
-  try{dispatchEvent(new CustomEvent('civweave:model-settings-saved',{detail}))}catch{}
-  return detail;
+  return globalThis.CivweaveSettingsV320?.selectLocalModel?.(current)||null;
 }
 
 function normalizeLegacyBrowserPackErrors(packs){
@@ -458,33 +445,12 @@ function patch(form=document.querySelector('[data-cw-settings-form]')){
   if(!route)return false;
   sync(form);
   const current=selection();
-  if(current.active&&current.id)route.value=ROUTE;
+
   sync(form);
   if(form.dataset.cwLocalRouteV323==='1')return true;
   form.dataset.cwLocalRouteV323='1';
   route.addEventListener('change',()=>queueMicrotask(()=>sync(form)));
-  form.addEventListener('submit',event=>{
-    const chosen=String(route.value||''),currentSelection=selection();
-    if(chosen===ROUTE){
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      const status=form.querySelector('[data-status]');
-      if(!currentSelection.active||!currentSelection.id){
-        if(status)status.textContent='Choose an AI pack or downloaded model in Local models before using Downloaded local AI.';
-        form.querySelector('[data-settings-tab="local-models"]')?.click?.();
-        return;
-      }
-      persistLocalRoute(currentSelection);
-      if(status)status.textContent=`Downloaded local AI is active · ${currentSelection.id}. Guild and cloud fallback are disabled for this route.`;
-      return;
-    }
-    if(currentSelection.active&&currentSelection.id){
-      try{
-        localStorage.setItem(SELECTION_KEY,JSON.stringify({active:false,id:null,updatedAt:new Date().toISOString()}));
-        dispatchEvent(new CustomEvent('civweave:local-model-selection',{detail:{active:false,id:null,updatedAt:new Date().toISOString()}}));
-      }catch{}
-    }
-  },true);
+
   return true;
 }
 

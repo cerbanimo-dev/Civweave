@@ -162,7 +162,12 @@ function frameMatchesExpected(host=frame(),expectedHref=''){
   if(!host)return false;
   const expected=String(expectedHref||host.dataset.cwExpectedHref||'');
   if(!expected)return true;
-  try{return new URL(host.contentWindow?.location?.href||'',location.href).href===new URL(expected,location.href).href}catch{return false}
+  try{
+    const actual=new URL(host.contentWindow?.location?.href||'',location.href),target=new URL(expected,location.href);
+    // Pages redirects .html documents to clean URLs; retain origin and query checks.
+    const path=url=>url.pathname.replace(/\.html$/,'');
+    return actual.origin===target.origin&&path(actual)===path(target)&&actual.search===target.search&&actual.hash===target.hash;
+  }catch{return false}
 }
 function suppressChildChrome(reason='frame-load',{token=loadToken,expectedHref=''}={}){
   if(token!==loadToken)return false;

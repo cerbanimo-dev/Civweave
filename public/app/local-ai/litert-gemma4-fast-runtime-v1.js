@@ -11,6 +11,7 @@ const PROFILES=Object.freeze({
 });
 const ALIAS_TO_FAST=new Map(Object.values(PROFILES).flatMap(profile=>profile.aliases.map(id=>[id,profile.id])));
 if(globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===VERSION)return;
+let pendingUnloadReason='',engineReleasePromise=null;
 let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,wrapped=null,generationActive=false,lastMetrics=null;
 const now=()=>performance.now();
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
@@ -44,13 +45,18 @@ async function loadModule(){
   return modulePromise;
 }
 function artisanConfig(useSubmodel=true){return{num_output_candidates:1,wait_for_weight_uploads:true,num_decode_steps_per_sync:1,sequence_batch_size:0,supported_lora_ranks:[],max_top_k:64,enable_decode_logits:false,enable_external_embeddings:false,use_submodel:Boolean(useSubmodel)}}
-async function unloadEngine(reason='model-switch'){
+async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
+  if(generationActive&&!afterGeneration&&reason!=='switch-model'){pendingUnloadReason=reason;return false}
+  if(engineReleasePromise)return engineReleasePromise;
   if(enginePromise){try{await enginePromise}catch{}}
   const prior=engine,priorId=engineModelId,priorMtp=engineUsesMtp;
   engine=null;engineModelId='';engineUsesMtp=false;
-  if(prior)try{await prior.delete?.()}catch{}
-  if(priorId)emit('civweave:litert-gemma4-engine-released',{model:priorId,reason,mtpEnabled:priorMtp});
-  return true;
+  engineReleasePromise=(async()=>{
+    if(prior)try{await prior.delete?.()}catch{}
+    if(priorId)emit('civweave:litert-gemma4-engine-released',{model:priorId,reason,mtpEnabled:priorMtp});
+    return true;
+  })();
+  try{return await engineReleasePromise}finally{engineReleasePromise=null}
 }
 async function instantiateEngine(mod,profile,useSubmodel){
   const stream=await modelStream(profile.id);
@@ -70,6 +76,7 @@ async function createEngine(modelId){
   return value;
 }
 async function ensureEngine(modelId){
+  if(engineReleasePromise)await engineReleasePromise;
   const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT Gemma 4 model: ${modelId}`);
   if(engine&&engineModelId===profile.id)return engine;
   if(enginePromise&&enginePromiseModelId===profile.id)return enginePromise;
@@ -131,12 +138,18 @@ async function runFast(args={},forcedModelId=''){
     const formattedText=formattedTool?toolArgumentText(toolCall):'';
     if(formattedTool&&!formattedText)throw Object.assign(new Error(`LiteRT-LM constrained decoding completed without the required ${formattedTool.function.name} tool call.`),{code:'LITERT_FORMATTED_OUTPUT_MISSING',formattedOutput:true,toolName:formattedTool.function.name});
     const outputText=(formattedTool?formattedText:text).trim();
+    if(!outputText)throw Object.assign(new Error('Gemma completed without a usable answer. Retry with a smaller request.'),{code:'LOCAL_MODEL_EMPTY_OUTPUT'});
     let benchmark={};try{benchmark=benchmarkMetrics(await chat.getBenchmarkInfo())}catch{}
     const completed=now(),generationMs=Math.round(completed-started),ttftMs=firstTokenAt?Math.round(firstTokenAt-started):null,decodeSeconds=Math.max(.001,(completed-(firstTokenAt||started))/1000),approxTokens=Math.max(1,Math.round(outputText.length/3.7)),measuredApproxTokensPerSecond=Number((approxTokens/decodeSeconds).toFixed(2));
     const metrics={runtime:'litert-lm-web-0.14.0',backend:'webgpu-gpu-artisan',model:profile.id,generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),...benchmark};
     lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
-  }finally{generationActive=false;if(chat)try{await chat.delete()}catch{}}
+  }finally{
+    try{
+      if(chat)try{await chat.delete()}catch{}
+      if(pendingUnloadReason){const reason=pendingUnloadReason;pendingUnloadReason='';await unloadEngine(reason,{afterGeneration:true})}
+    }finally{generationActive=false}
+  }
 }
 async function accelerationTarget(selectedId){const profile=profileFor(selectedId);if(!profile)return null;if(selectedId===profile.id)return profile;return Boolean((await fastStatus(profile.id))?.available)?profile:null}
 async function shouldAccelerate(){const pick=selected();if(!pick?.active)return false;return Boolean(await accelerationTarget(pick.id))}
