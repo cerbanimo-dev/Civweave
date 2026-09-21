@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-09-14T10:40:49Z",
+  "built_at": "2026-09-21T10:44:38Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -278,7 +278,7 @@
         "photography-video",
         "computing-basics"
       ],
-      "coverage": 0.6667,
+      "coverage": 0.8333,
       "available": true
     },
     {
@@ -2383,87 +2383,6 @@
             "pedagogy_score": 36
           }
         }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "title": "Democracy in the Dark: Protecting Your Digital Rights",
-        "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://the...",
-        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 446658800,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 273190887,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 164171737,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Nate Bartram",
-          "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
-          "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "civics-society": {
-            "score": 10,
-            "evidence": [
-              "democracy",
-              "democracy"
-            ]
-          }
-        },
-        "pedagogy": {
-          "civics-society": {
-            "strong_title_matches": [
-              "democracy"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "civics-society": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
-          }
-        }
       }
     ],
     "biology-life": [
@@ -2552,7 +2471,7 @@
         "provider": "peertube",
         "provider_id": "93ff2046-d427-4f4b-8590-9de10877c4e6",
         "title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
-        "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business leaders, community surveys and organizing iGEM Day at our University. We will present what we have learnt from these activities, and how they have inpacted our community. Our main goal of the stage talk is to share our local community educational efforts with other iGEM teams so that it may encourage them to also act locally to influence their own communities in a sustainable way.",
+        "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business le...",
         "source_url": "https://video.igem.org/videos/watch/93ff2046-d427-4f4b-8590-9de10877c4e6",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -2787,164 +2706,6 @@
       }
     ],
     "physics-foundations": [
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
-        "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 8378497,
-            "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "FuseSchool - Global Education",
-          "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "chemistry-foundations": {
-            "score": 10,
-            "evidence": [
-              "chemistry",
-              "chemistry"
-            ]
-          },
-          "physics-foundations": {
-            "score": 20,
-            "evidence": [
-              "physics",
-              "energy",
-              "physics",
-              "energy"
-            ]
-          }
-        },
-        "pedagogy": {
-          "chemistry-foundations": {
-            "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [
-              "chemistry"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "strong_title_matches": [
-              "energy"
-            ],
-            "strong_description_matches": [
-              "physics",
-              "energy"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 64
-          }
-        },
-        "selection": {
-          "chemistry-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "816a526f-039e-4b23-b3de-be75bc98bcdd",
-        "title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
-        "description": "Please Help Support This Channel:https://www.paypal.com/donate/?cmd=_s-xclick&hosted_button_id=BLJ283JMTMT7S A 40 minute audio recording, restored with visual aids and diagrams, given by the legendary physicist and educator Richard Feynman on the ...",
-        "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/816a526f-039e-4b23-b3de-be75bc98bcdd-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 174713047,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "sb",
-          "source_title": "Richard Feynman's Story of Particle Physics - 1973 Lecture",
-          "source_url": "https://tube.sbcloud.cc/videos/watch/816a526f-039e-4b23-b3de-be75bc98bcdd",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "physics-foundations": {
-            "score": 10,
-            "evidence": [
-              "physics",
-              "physics"
-            ]
-          }
-        },
-        "pedagogy": {
-          "physics-foundations": {
-            "strong_title_matches": [
-              "physics"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
       {
         "provider": "wikimedia-commons",
         "provider_id": "File:Physics Of Crystals by LesBrown.webm",
@@ -3334,15 +3095,6 @@
               "chemistry",
               "chemistry"
             ]
-          },
-          "physics-foundations": {
-            "score": 20,
-            "evidence": [
-              "physics",
-              "energy",
-              "physics",
-              "energy"
-            ]
           }
         },
         "pedagogy": {
@@ -3358,30 +3110,12 @@
             "clickbait_title": false,
             "non_instructional_title": false,
             "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "strong_title_matches": [
-              "energy"
-            ],
-            "strong_description_matches": [
-              "physics",
-              "energy"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 64
           }
         },
         "selection": {
           "chemistry-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
           }
         }
       },
@@ -4570,7 +4304,7 @@
         "provider": "peertube",
         "provider_id": "6d5ef824-df67-4eb1-8275-75e8bfb755a2",
         "title": "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
-        "description": "In this video we look at the basics of algebra, focusing on the notation that is used. In algebra we use symbols to represent numbers. These symbols are called variables. Some reasons for using symbols instead of numbers is that the symbols, o...",
+        "description": "In this video we look at the basics of algebra, focusing on the notation that is used. In algebra we use symbols to represent numbers. These symbols are called variables. Some reasons for using symbols instead of numbers is that the symbols, or variables, can represent unknown quantities and for showing formulae like the area of a circle. Instead of writing a X b we remove the multiplication sign and just write ab instead. Two letters next to each other or a number and a letter, means those things are multiplied together. We use a curly x for the letter because otherwise it looks like a multiplication sign. Instead of the division sign, in algebra we usually write it as a fraction. Numbers are usually left as fractions rather than as decimals. Author: FuseSchool - Global Education",
         "source_url": "https://diler.tube/videos/watch/6d5ef824-df67-4eb1-8275-75e8bfb755a2",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -4604,8 +4338,86 @@
         },
         "relevance": {
           "mathematics-foundations": {
-            "score": 10,
+            "score": 20,
             "evidence": [
+              "algebra",
+              "fractions",
+              "algebra"
+            ]
+          }
+        },
+        "pedagogy": {
+          "mathematics-foundations": {
+            "strong_title_matches": [
+              "algebra"
+            ],
+            "strong_description_matches": [
+              "algebra",
+              "fractions"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "mathematics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+        "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
+        "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 109870045,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/f8d7473b-d8e5-4db9-870e-0381eb5ea72f-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 66441980,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Charlotte Aten",
+          "source_title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+          "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "mathematics-foundations": {
+            "score": 20,
+            "evidence": [
+              "mathematics",
               "algebra",
               "algebra"
             ]
@@ -4617,19 +4429,20 @@
               "algebra"
             ],
             "strong_description_matches": [
+              "mathematics",
               "algebra"
             ],
             "educational_intent": true,
             "instructional_title": true,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 56
+            "pedagogy_score": 64
           }
         },
         "selection": {
           "mathematics-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
+            "pedagogy_score": 64
           }
         }
       },
@@ -4786,6 +4599,89 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "48450782-7789-4099-b54d-5ee1e57aefb1",
+        "title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "description": "This is the fifth in a series of talks about universal algebra and lattice theory. I discuss the basics of posets and lattices, as well as some connections between topology, probability, and lattice theory. I also give a short history of the early stages of lattice theory. The 1935 paper of Birkhoff I mention can be found at [https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf](https://math.hawaii.edu/~ralph/Classes/619/birkhoff1935.pdf). The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
+        "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 127878198,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 77337120,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://peertube.wtf/download/streaming-playlists/hls/videos/48450782-7789-4099-b54d-5ee1e57aefb1-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 37375797,
+            "resolution": "360p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Charlotte Aten",
+          "source_title": "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+          "source_url": "https://peertube.wtf/videos/watch/48450782-7789-4099-b54d-5ee1e57aefb1",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "mathematics-foundations": {
+            "score": 10,
+            "evidence": [
+              "algebra",
+              "algebra"
+            ]
+          }
+        },
+        "pedagogy": {
+          "mathematics-foundations": {
+            "strong_title_matches": [
+              "algebra"
+            ],
+            "strong_description_matches": [
+              "algebra"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "mathematics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "46b1e473-a4a6-4dd3-a5f5-9a1e547e270e",
         "title": "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "description": "In this video, we learn how to find the distance between two parallel lines in 3D. We first derive the formula to get the distance between two given lines. We then understand why it works in vector form. We then apply the formula to get the distan...",
@@ -4862,7 +4758,7 @@
         "provider_id": "b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
         "title": "Vartika: Inside nowadays Mathematics (Part 4)",
         "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge....",
-        "source_url": "https://p.eertu.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
+        "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC0",
@@ -4889,7 +4785,7 @@
         "attribution": {
           "creator": "danisanti",
           "source_title": "Vartika: Inside nowadays Mathematics (Part 4)",
-          "source_url": "https://p.eertu.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
+          "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
           "license": "Public Domain Dedication",
           "license_url": ""
         },
@@ -4927,7 +4823,7 @@
         "provider": "peertube",
         "provider_id": "871b3ca9-e913-4a7d-a5b9-bcbfa9a6636a",
         "title": "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
-        "description": "In this video get to learn about the basic concept of volume and surface area of solids. How do we get the formulae for different 3D shapes? Learn more in this video. Khan Academy is a free learning platform for Class 1-12 students with videos,...",
+        "description": "In this video get to learn about the basic concept of volume and surface area of solids. How do we get the formulae for different 3D shapes? Learn more in this video. Khan Academy is a free learning platform for Class 1-12 students with videos, exercises, and tests for maths, science, and more subjects. Our content is aligned to CBSE syllabus and available in Hindi, English, and many more regional languages. Author: Khan Academy India - English",
         "source_url": "https://diler.tube/videos/watch/871b3ca9-e913-4a7d-a5b9-bcbfa9a6636a",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5328,89 +5224,6 @@
     "arts-culture": [
       {
         "provider": "peertube",
-        "provider_id": "fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1",
-        "title": "Dark matter cloud particles effect - Krita digital-painting tutorial",
-        "description": "Support my work on: https://www.patreon.com/davidrevoy My webcomic: https://www.peppercarrot.com/ License: Creative-Commons-Attribution 4.0 internationale to David Revoy, www.davidrevoy.com Music: CC-By Kevin McLeod - Perspective - www.i...",
-        "source_url": "https://share.tube/videos/watch/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 81264990,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 56268775,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 38119069,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "artmirrors",
-          "source_title": "Dark matter cloud particles effect - Krita digital-painting tutorial",
-          "source_url": "https://share.tube/videos/watch/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "arts-culture": {
-            "score": 24,
-            "evidence": [
-              "digital painting",
-              "painting tutorial",
-              "music"
-            ]
-          }
-        },
-        "pedagogy": {
-          "arts-culture": {
-            "strong_title_matches": [
-              "digital painting",
-              "painting tutorial"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 68
-          }
-        },
-        "selection": {
-          "arts-culture": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 68
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "40e74153-ae60-46ed-946a-545b97e83dd9",
         "title": "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "description": "My webcomic: https://www.peppercarrot.com/ License: Creative-Commons-Attribution 4.0 internationale to David Revoy, www.davidrevoy.com Music: CC-By Kevin McLeod - Perspective - www.incompetech.com",
@@ -5714,7 +5527,7 @@
         "provider": "peertube",
         "provider_id": "2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "title": "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat...",
+        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat, a shading and to finish with a paint-over and post-effect. This is a tutorial doesn't dive into the details, but keeps an overview of the workflow, the goal is to give an idea of the full path and to give tips on the way. I hope showing my recipe will inspire you to start a drawing to test something you'll find interesting and find your own path. **Timeline:** - 00:19 Thumbnail (or Sketch) - 00:57 Drawing - 01:41 Silhouettes - 02:26 Color Flat - 03:31 Shading - 05:46 Paint-over and post effects License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com webcomic: www.peppercarrot.com Background music by Omfgdude \"Lofi-Hip-hop\" CC-0 / Public Domain - 2018 https://opengameart.org/content/lofi-hip-hop Special thanks to @RinCat@meow.cloud on the Fediverse for saving a corrupted MP4 recording of this video. Edited with Kdenlive 21.04 appimage on Fedora 37 KDE **Support:** - Patreon: https://www.patreon.com/join/davidrevoy? - Tipeee: https://fr.tipeee.com/pepper-carrot - Paypal: https://paypal.me/davidrevoy - Liberapay: https://liberapay.com/davidrevoy/ **Follow:** - Mastodon: https://framapiaf.org/@davidrevoy - Twitter: http://twitter.com/davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ **Website:** - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/ **Alternative channel:** - Peertube: https://peertube.touhoppai.moe/accounts/shichimi/videos - Youtube: https://www.youtube.com/",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5788,9 +5601,10 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 10,
+            "score": 14,
             "evidence": [
-              "digital painting"
+              "digital painting",
+              "music"
             ]
           }
         },
@@ -6282,7 +6096,7 @@
         "provider": "peertube",
         "provider_id": "8d6c1bba-f4c0-4fca-ab42-84a298c65064",
         "title": "The Philosophy of Antifa",
-        "description": "From Philosophy Tube https://www.youtube.com/watch?v=bgwS_FMZ3nQ 00.00 - Introduction 00:53 - Meet The Antifascists 08:18 - Fascism 20:47 - Violence 39:58 - Free Speech 53:30 - There Is No Peaceful White Nationalism Subscribe! http://tinyurl.com/pr99a46 Patreon: Patreon: PhilosophyTube Paypal.me/PhilosophyTube Audible: http://tinyurl.com/jn6tpup FAQ: http://tinyurl.com/j8bo4gb Facebook: http://tinyurl.com/jgjek5w Twitter: @PhilosophyTube Email: ollysphilosophychannel@gmail.com Google+: google.com/+thephilosophytube realphilosophytube.tumblr.com Bibliography: Ahmed, The Cultural Politics of Emotion - http://tinyurl.com/y9a569vy Arendt, The Origins of Totalitarianism - http://tinyurl.com/yab2r3sm Auden & Isherwood – On the Frontier - http://tinyurl.com/y8c8w3sc BadMouse Productions: Spotting Fascism – (The Handmaid's Tale: Spotting Fascism) Bray, Antifa: the Antifascist Handbook - http://tinyurl.com/y7nwsr6c Burgdörfer: \"Sterben die weißen Völker?” Cacho, Social Death - http://tinyurl.com/yalbdhkb Contrapoints – “Debating the Alt-Right,” (Video), “Decrypting the Alt-Right” (Decrypting the Alt-Right: How to Recognize...), “The Left” (The Left | ContraPoints), “Does the Left Hate Free Speech?” (Video, “Why White Nationalism is Wrong” (Video) D’Souza, The Big Lie - http://tinyurl.com/ydavsb82 Faludi, Backlash - http://tinyurl.com/ycnjhv5s Fang, Delete Your Account Podcast, E63, “Punching Nazis” Herman & Chomsky, Manufacturing Consent - http://tinyurl.com/ybd3rots Hermansson, “My Year Inside the Alt-Right” https://alternativeright.hopenothate.... Hitler, Mein Kampf Hobbes, Leviathan - http://tinyurl.com/y98m5tf7 Kesīqnaeh, Fascism & Anti-Fascism: A Decolonial Perspective http://tinyurl.com/y9m36ckv King Jr. - Letter From A Birmingham Jail - http://tinyurl.com/ovcktqb Mill, On",
+        "description": "From Philosophy Tube https://www.youtube.com/watch?v=bgwS_FMZ3nQ 00.00 - Introduction 00:53 - Meet The Antifascists 08:18 - Fascism 20:47 - Violence 39:58 - Free Speech 53:30 - There Is No Peaceful White Nationalism Subscribe! htt...",
         "source_url": "https://communitymedia.video/videos/watch/8d6c1bba-f4c0-4fca-ab42-84a298c65064",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -8290,87 +8104,6 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "0f5b118a-e441-42e7-bf27-45762522ca95",
-        "title": "Mesecons Tutorial - Basic Circuits",
-        "description": "Website: https://totallynotashadyweb.site/ Patreon: https://www.patreon.com/benrob0329 Basic Mesecons Tutorial: http://mesecons.net/uberi/projects/MeseconsBasics/index.html",
-        "source_url": "https://share.tube/videos/watch/0f5b118a-e441-42e7-bf27-45762522ca95",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 117854217,
-            "resolution": "1080p",
-            "fps": 60,
-            "role": "web-video"
-          },
-          {
-            "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 63816790,
-            "resolution": "720p",
-            "fps": 60,
-            "role": "web-video"
-          },
-          {
-            "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 41372233,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Benrob0329",
-          "source_title": "Mesecons Tutorial - Basic Circuits",
-          "source_url": "https://share.tube/videos/watch/0f5b118a-e441-42e7-bf27-45762522ca95",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "electronics-basics": {
-            "score": 14,
-            "evidence": [
-              "basic circuits",
-              "circuits"
-            ]
-          }
-        },
-        "pedagogy": {
-          "electronics-basics": {
-            "strong_title_matches": [
-              "basic circuits"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "electronics-basics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "afab2272-06c3-4aa8-90e7-166092657a75",
         "title": "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "description": "Christopher Howard (he/him) https://emacsconf.org/2025/talks/calc 00:03 Introduction 02:36 What is Calc? 04:54 calc-algebraic-entry 06:37 calc-roll-down 08:07 Advanced functions 08:58 Solving equations with calc-solve-for 09:54 Systems of equati...",
@@ -8492,7 +8225,81 @@
       }
     ],
     "woodworking-basics": [],
-    "sewing-textiles": [],
+    "sewing-textiles": [
+      {
+        "provider": "peertube",
+        "provider_id": "240756c1-57bd-4aa7-a69b-d6c7243f9a9e",
+        "title": "Mini Tutorial J&D Creations Sewing Feet",
+        "description": "A mini tutorial showing how to sew feet (these are platypus feet)",
+        "source_url": "https://makertube.net/videos/watch/240756c1-57bd-4aa7-a69b-d6c7243f9a9e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC0",
+          "label": "Public Domain Dedication",
+          "url": "",
+          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://makertube.net/download/streaming-playlists/hls/videos/240756c1-57bd-4aa7-a69b-d6c7243f9a9e-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 26864938,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://makertube.net/download/streaming-playlists/hls/videos/240756c1-57bd-4aa7-a69b-d6c7243f9a9e-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 12479437,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Jovial and Durable Creations",
+          "source_title": "Mini Tutorial J&D Creations Sewing Feet",
+          "source_url": "https://makertube.net/videos/watch/240756c1-57bd-4aa7-a69b-d6c7243f9a9e",
+          "license": "Public Domain Dedication",
+          "license_url": ""
+        },
+        "relevance": {
+          "sewing-textiles": {
+            "score": 10,
+            "evidence": [
+              "sewing",
+              "sewing"
+            ]
+          }
+        },
+        "pedagogy": {
+          "sewing-textiles": {
+            "strong_title_matches": [
+              "sewing"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 49
+          }
+        },
+        "selection": {
+          "sewing-textiles": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 49
+          }
+        }
+      }
+    ],
     "drawing-design": [
       {
         "provider": "wikimedia-commons",
@@ -8717,7 +8524,7 @@
         "provider": "peertube",
         "provider_id": "3b17dd85-497b-4421-a855-e584b7da38e7",
         "title": "Learn Grease Pencil 2D Animation in Blender 2.8 Alpha 2",
-        "description": "* * * Download links below! * * * After watching this tutorial by Matias Mendiola you'll have covered the basics of the new 2D workflow in Blender 2.8. From drawing to coloring, animating, adding modifiers and even FX! * Download Blender 2.8 A...",
+        "description": "* * * Download links below! * * * After watching this tutorial by Matias Mendiola you'll have covered the basics of the new 2D workflow in Blender 2.8. From drawing to coloring, animating, adding modifiers and even FX! * Download Blender 2.8 Alpha 2: https://builder.blender.org/download * Download the .blend file: https://cloud.blender.org/p/gallery/5b7433ecbf419c0d249af5f0 Learn more about Blender 2.8 on https://code.blender.org - Twitter: https://twitter.com/BlenderDev - Facebook: https://www.facebook.com/BlenderDevelopers - YouTube: https://www.youtube.com/BlenderDevelopers",
         "source_url": "https://video.blender.org/videos/watch/3b17dd85-497b-4421-a855-e584b7da38e7",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -9145,9 +8952,494 @@
     "statistics-data-literacy": [
       {
         "provider": "peertube",
+        "provider_id": "a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+        "title": "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "description": "We introduce sample spaces and the naive definition of probability (we'll get to the non-naive definition later). To apply the naive definition, we need to be able to count. So we introduce the multiplication rule, binomial coefficients, and the s...",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/a224e97c-f67c-4cbd-9a76-42d23fbe735e-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 175595558,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 1： Probability and Counting ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+        "title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "description": "We discuss the birthday problem (how many people do you need to have a 50% chance of there being 2 with the same birthday?), the matching problem (de Montmort), inclusion-exclusion, and properties of probability.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 215357082,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+        "title": "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "description": "We introduce conditional probability, independence of events, and Bayes' rule.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/7ec1769f-c185-4ddb-9d73-cfdb674995e9-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 240622288,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 4： Conditional Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+        "title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "description": "We continue further with conditional probability, and discuss the law of total probability, the so-called prosecutor's fallacy, a disease testing example, and the crucial distinction between independence and conditional independence.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/287bec4a-6717-4f2e-956b-09bb7db6b0d7-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 308676613,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 77
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 77
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "332961a8-c516-4604-8c7b-928d1988a465",
+        "title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "description": "We fill in the \"Bose-Einstein\" entry of the sampling table, and discuss story proofs. For example, proving Vandermonde's identity with a story is easier and more insightful than going through a tedious algebraic derivation. We then introduce the a...",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/332961a8-c516-4604-8c7b-928d1988a465-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 196752740,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics",
+              "probability"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 69
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 69
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
+        "title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+        "description": "We show how conditional probability sheds light on two of the most famous puzzles in statistics, both of which are often counterintuitive (at first): the Monty Hall problem and Simpson's paradox.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/5453a5e3-fd3b-4d47-85dd-de22c21ec58c-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 245719171,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 20,
+            "evidence": [
+              "statistics",
+              "probability",
+              "statistics",
+              "probability"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics"
+            ],
+            "strong_description_matches": [
+              "statistics",
+              "probability"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 65
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 65
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
+        "title": "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+        "description": "We show how Beta and Gamma are connected (via the bank-post office story), and introduce order statistics. We then start on conditional expectation, with a peek inside the Two Envelope Paradox.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 231121116,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 10,
+            "evidence": [
+              "statistics",
+              "statistics"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics"
+            ],
+            "strong_description_matches": [
+              "statistics"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 57
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 57
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "28780678-085f-4a41-be57-650a21a419e6",
         "title": "Quick Statistics and Visual Overview of Data in LabPlot",
-        "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistics and visual overview of your data in LabPlot.",
+        "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistic...",
         "source_url": "https://tube.kockatoo.org/videos/watch/28780678-085f-4a41-be57-650a21a419e6",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -9211,20 +9503,84 @@
               "statistics"
             ],
             "strong_description_matches": [
-              "statistics",
               "data visualization"
             ],
             "educational_intent": true,
             "instructional_title": true,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 64
+            "pedagogy_score": 56
           }
         },
         "selection": {
           "statistics-data-literacy": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "18ac146b-3baf-44bb-8a64-a87a625fe369",
+        "title": "Lecture 28： Inequalities ｜ Statistics 110",
+        "description": "We consider the sum of a random number of random variable (e.g., with customers in a store). We then introduce 4 useful inequalities: Cauchy-Schwarz, Jensen, Markov, and Chebyshev.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/18ac146b-3baf-44bb-8a64-a87a625fe369",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/18ac146b-3baf-44bb-8a64-a87a625fe369-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 252025067,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 28： Inequalities ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/18ac146b-3baf-44bb-8a64-a87a625fe369",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 10,
+            "evidence": [
+              "statistics",
+              "statistics"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 49
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 49
           }
         }
       }
@@ -9644,7 +10000,7 @@
         "provider": "peertube",
         "provider_id": "ec57d93d-6e96-45bd-8e80-49d446282db8",
         "title": "ESL - What are Myths？",
-        "description": "What is a myth, legend and folktale?. In this video, Mr. P. will find the answers to that question. He will also explain clearly the difference between creation and heroic myths. This lesson is designed for intermediate students who wish to improve their English and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, in Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He is an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Since 2018, he has been attending Queen's University. Author: Englishing",
+        "description": "What is a myth, legend and folktale?. In this video, Mr. P. will find the answers to that question. He will also explain clearly the difference between creation and heroic myths. This lesson is designed for intermediate students who wish to improv...",
         "source_url": "https://diler.tube/videos/watch/ec57d93d-6e96-45bd-8e80-49d446282db8",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -9855,79 +10211,6 @@
     "entrepreneurship-small-business": [
       {
         "provider": "peertube",
-        "provider_id": "a5e5f0e4-d0ca-4b50-971a-275b610004d2",
-        "title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
-        "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BE...",
-        "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC0",
-          "label": "Public Domain Dedication",
-          "url": "",
-          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 45051327,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 33517998,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Frank",
-          "source_title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
-          "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
-          "license": "Public Domain Dedication",
-          "license_url": ""
-        },
-        "relevance": {
-          "entrepreneurship-small-business": {
-            "score": 10,
-            "evidence": [
-              "business model",
-              "business model"
-            ]
-          }
-        },
-        "pedagogy": {
-          "entrepreneurship-small-business": {
-            "strong_title_matches": [
-              "business model"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 49
-          }
-        },
-        "selection": {
-          "entrepreneurship-small-business": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 49
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "61802aa3-a02a-419b-aafc-70a5d6861fe7",
         "title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and s...",
@@ -10069,7 +10352,7 @@
         "provider": "peertube",
         "provider_id": "ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
         "title": "a track i made for music theory back in high school",
-        "description": "i made this track in OpenMPT back in high school for that one music theory class i took one semester i remembered it while trying to compose a theme for a stage in support mage RPG, and i think i'll remake this for the game instead of coming up with something new.",
+        "description": "i made this track in OpenMPT back in high school for that one music theory class i took one semester i remembered it while trying to compose a theme for a stage in support mage RPG, and i think i'll remake this for the game instead of coming up...",
         "source_url": "https://makertube.net/videos/watch/ca8d71ad-6940-4b2b-ad24-6bfe8b0c256d",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -10219,7 +10502,7 @@
         "provider": "peertube",
         "provider_id": "a71715c3-bf6c-4e92-a43e-cfc42e08e6c9",
         "title": "Lecture 3. Rhythm: Fundamentals",
-        "description": "Listening to Music (MUSI 112) In this lecture, Professor Wright explains the basic system of Western musical notation, and offers an interpretation of its advantages and disadvantages. He also discusses the fundamental principles of rhythm, ela...",
+        "description": "Listening to Music (MUSI 112) In this lecture, Professor Wright explains the basic system of Western musical notation, and offers an interpretation of its advantages and disadvantages. He also discusses the fundamental principles of rhythm, elaborating upon such concepts as beat, meter, and discussing in some depth the nature of durational patterns in duple and triple meters. The students are taught to conduct basic patterns in these meters through musical examples drawn from Chuck Mangione, Cole Porter, REM, Chopin, and Ravel. 00:00 - Chapter 1. Advantages and Disadvantages of Musical Notation 14:41 - Chapter 2. Beats and Meters 23:09 - Chapter 3. Exercises Distinguishing Duple and Triple Meters 31:27 - Chapter 4. Conducting Basic Meter Patterns: Exercises with REM, Chopin, and Ravel Complete course materials are available at the Yale Online website: online.yale.edu This course was recorded in Fall 2008.",
         "source_url": "https://peer.raise-uav.com/videos/watch/a71715c3-bf6c-4e92-a43e-cfc42e08e6c9",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -11000,82 +11283,6 @@
         }
       },
       {
-        "provider": "peertube",
-        "provider_id": "a55993c8-ef7b-44ec-ae66-f79540df0301",
-        "title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
-        "description": "In this mini-lesson, the student will learn about the eight parts of speech. Mr. P. will introduce nouns, pronouns, verbs, adjectives, prepositions, adverbs, conjunctions, and interjections with easy examples. This lesson is designed for beginners who wish to improve their English grammar and those above levels who wish to clarify doubts about this topic. Watch, Listen & Speak English! Mr. P. is a Canadian English Teacher/Coach from Toronto, Canada. He has been an English Teacher since 1997, teaching adults and adolescents in Toronto and Rome. He graduated from Queens University and was an Honorary Fellow in the English Language at UNITELMA La Sapienza University in Rome. In the past, he was also a Language Monitor at the University of Toronto. He has also taught English to many important politicians and celebrities in Italy. He is a certified English Teacher specializing in TEFL, TESL, TESOL (Arizona State University) & TOEFL. Author: Englishing",
-        "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/a55993c8-ef7b-44ec-ae66-f79540df0301-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 12862681,
-            "resolution": "1080p",
-            "fps": 60,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/a55993c8-ef7b-44ec-ae66-f79540df0301-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 8873042,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
-          "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 24,
-            "evidence": [
-              "ESL",
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "ESL"
-            ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
         "provider": "wikimedia-commons",
         "provider_id": "File:English Grammar — Present Continuous — Structure.webm",
         "title": "English Grammar — Present Continuous — Structure",
@@ -11244,6 +11451,78 @@
           "creator": "jessa",
           "source_title": "ESL - Expletive sentences (there, here, it)",
           "source_url": "https://diler.tube/videos/watch/c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 10,
+            "evidence": [
+              "ESL"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "ESL"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a55993c8-ef7b-44ec-ae66-f79540df0301",
+        "title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+        "description": "In this mini-lesson, the student will learn about the eight parts of speech. Mr. P. will introduce nouns, pronouns, verbs, adjectives, prepositions, adverbs, conjunctions, and interjections with easy examples. This lesson is designed for beginne...",
+        "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/a55993c8-ef7b-44ec-ae66-f79540df0301-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 12862681,
+            "resolution": "1080p",
+            "fps": 60,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/a55993c8-ef7b-44ec-ae66-f79540df0301-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 8873042,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jessa",
+          "source_title": "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+          "source_url": "https://diler.tube/videos/watch/a55993c8-ef7b-44ec-ae66-f79540df0301",
           "license": "Attribution - Share Alike",
           "license_url": ""
         },

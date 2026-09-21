@@ -1,24 +1,23 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-09-14T10:40:49Z",
-  "before": 1137,
-  "after": 508,
-  "rejected": 629,
+  "built_at": "2026-09-21T10:44:38Z",
+  "before": 1138,
+  "after": 510,
+  "rejected": 628,
   "topics": {
     "world-history": {
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
       ]
     },
     "earth-geography": {
@@ -48,10 +47,10 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 3,
+        "peertube": 4,
         "wikimedia-commons": 6
       },
       "top_titles": [
@@ -62,8 +61,9 @@
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Democracy in the Dark: Protecting Your Digital Rights",
-        "When Code Became a Weapon - Crypto Wars Explained"
+        "When Code Became a Weapon - Crypto Wars Explained",
+        "Houses of History - Explore the story of Parliament and democracy",
+        "An introduction to Parliament"
       ]
     },
     "biology-life": {
@@ -93,18 +93,17 @@
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 4,
+      "records": 7,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -127,8 +126,8 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
         "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
@@ -159,16 +158,18 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 7,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 7
+        "peertube": 9
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
@@ -196,15 +197,14 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 6,
+      "records": 8,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 6,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -269,15 +269,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -410,16 +408,15 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
-        "Mesecons Tutorial - Basic Circuits",
-        "[Tech Maid] Mesecons Basics",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
+        "[Tech Maid] Mesecons Basics",
         "Karnaugh Map - Sum of Products Explained"
       ]
     },
@@ -441,12 +438,13 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
+        "Mini Tutorial J&D Creations Sewing Feet",
         "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
       ]
     },
@@ -493,13 +491,21 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 1
+        "peertube": 9
       },
       "top_titles": [
-        "Quick Statistics and Visual Overview of Data in LabPlot"
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+        "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Lecture 28： Inequalities ｜ Statistics 110"
       ]
     },
     "climate-environment": {
@@ -618,14 +624,13 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 6,
-      "mesh_redistributable": 4,
+      "records": 5,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
@@ -827,11 +832,6 @@
     },
     {
       "provider": "peertube",
-      "title": "HOLLYWOOD STARS & QUEEN ELIZABETH II DEDICATE THE CITY OF HOPE LEE PEDIATRIC CENTER GG48235",
-      "topic_slug": "astronomy-space"
-    },
-    {
-      "provider": "peertube",
       "title": "Costa_Rica: Synbio Workshop (2022) [Spanish]",
       "topic_slug": "astronomy-space"
     },
@@ -887,6 +887,16 @@
     },
     {
       "provider": "peertube",
+      "title": "Banana DNA Experiment",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "peertube",
+      "title": "CRISPR Science: DNA, RNA, and Gene Editing",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "peertube",
       "title": "Vaccine Controversy | What is Myth and Truth? | Is Vaccination Good? | Autism and Vaccines",
       "topic_slug": "biology-life"
     },
@@ -908,6 +918,11 @@
     {
       "provider": "peertube",
       "title": "Démonstration de PorteJunes",
+      "topic_slug": "career-work-skills"
+    },
+    {
+      "provider": "peertube",
+      "title": "Résumé des 4 premières vidéos d'A.Stevens sur la démocratie directe",
       "topic_slug": "career-work-skills"
     },
     {
@@ -948,11 +963,6 @@
     {
       "provider": "peertube",
       "title": "résumé talents 2026",
-      "topic_slug": "career-work-skills"
-    },
-    {
-      "provider": "peertube",
-      "title": "The evolution of Software engineering",
       "topic_slug": "career-work-skills"
     },
     {
@@ -1057,27 +1067,12 @@
     },
     {
       "provider": "peertube",
-      "title": "Finnish Grandparents for Climate singing children's song on Europa Day 2025",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
       "title": "CDL Espresso Talk_ Overview of Civic Tech Trends and How LLMs Influence Sensemaking in Civic Tech",
       "topic_slug": "civics-society"
     },
     {
       "provider": "peertube",
       "title": "Civils_et_militaires_1ère_GM",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "Le Royaume-Uni adopte la loi sur l’expulsion des demandeurs d’asile au Rwanda",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "Parliament Speaker insults finance minister | رئيس مجلس النوّاب يُهين وزير المال",
       "topic_slug": "civics-society"
     },
     {
@@ -1102,7 +1097,27 @@
     },
     {
       "provider": "peertube",
-      "title": "Sad moment for our fundamental rights",
+      "title": "A brief history of representation in nearly 60 seconds",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "How does the House of Lords work? Jump Start",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "Parliament’s structure explained (primary)",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "What is the House of Commons?",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "What is the House of Lords? Jump Start",
       "topic_slug": "civics-society"
     },
     {
@@ -1182,6 +1197,11 @@
     },
     {
       "provider": "wikimedia-commons",
+      "title": "Address Before a Joint Session of Congress (February 24, 2009) - Barack Obama (WhiteHouse.gov)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
       "title": "Combined Jungle Operations Training Course Phase 1 Reel (985339)",
       "topic_slug": "communication-conflict"
     },
@@ -1247,16 +1267,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 10.12.25",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
-      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 17.12.25",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
       "title": "Negotiations Progress Slowly, War's End Possible Says Budanov",
       "topic_slug": "communication-conflict"
     },
@@ -1268,16 +1278,6 @@
     {
       "provider": "peertube",
       "title": "There are no “win-win” terms to come from Putin | News In Depth",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
-      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 04.02.2026",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
-      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 11.02.2026",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1298,6 +1298,11 @@
     {
       "provider": "peertube",
       "title": "1. Introduction",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "10 Difficult FOCUS Tests ASMR Soft Spoken",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1386,11 +1391,6 @@
       "topic_slug": "communication-conflict"
     },
     {
-      "provider": "peertube",
-      "title": "Why is life so difficult?",
-      "topic_slug": "communication-conflict"
-    },
-    {
       "provider": "wikimedia-commons",
       "title": "February 2023 Wikimedia Enterprise API community conversation meeting",
       "topic_slug": "communication-conflict"
@@ -1422,17 +1422,22 @@
     },
     {
       "provider": "peertube",
-      "title": "Estratto: KenoMATTINA 20 gennaio 2025",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
       "title": "Habeebat Ajayi on courage, risk and difficult stories",
       "topic_slug": "communication-conflict"
     },
     {
       "provider": "peertube",
       "title": "L'incredibile profondità di Bubble Bobble raccontata nei dettagli",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Traduzione di un articolo di Cory Doctorow: \"I Large Language Model sono veri, l'IA no\"",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Zu - 2021-06-25 Ekigunak",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1457,23 +1462,23 @@
     },
     {
       "provider": "peertube",
-      "title": "Mastering Science Communcation - iGEM Community",
+      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 10.12.25",
       "topic_slug": "communication-conflict"
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "Hearing on Regulating Cryptocurrency Markets",
-      "topic_slug": "computing-basics"
+      "provider": "peertube",
+      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 17.12.25",
+      "topic_slug": "communication-conflict"
     },
     {
       "provider": "peertube",
-      "title": "(1990) How Computers Work: A Journey Into the Walk-Through Computer",
-      "topic_slug": "computing-basics"
+      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 04.02.2026",
+      "topic_slug": "communication-conflict"
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "How a Computer Works - from silicon to apps",
-      "topic_slug": "computing-basics"
+      "provider": "peertube",
+      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 11.02.2026",
+      "topic_slug": "communication-conflict"
     }
   ]
 }

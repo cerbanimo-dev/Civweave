@@ -1,24 +1,23 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-09-14T10:40:49Z",
-  "before": 508,
-  "after": 269,
-  "rejected": 239,
+  "built_at": "2026-09-21T10:44:38Z",
+  "before": 510,
+  "after": 276,
+  "rejected": 234,
   "topics": {
     "world-history": {
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
       ]
     },
     "earth-geography": {
@@ -48,10 +47,10 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 7,
       "providers": {
-        "peertube": 3,
+        "peertube": 4,
         "wikimedia-commons": 6
       },
       "top_titles": [
@@ -62,8 +61,9 @@
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Democracy in the Dark: Protecting Your Digital Rights",
-        "When Code Became a Weapon - Crypto Wars Explained"
+        "When Code Became a Weapon - Crypto Wars Explained",
+        "Houses of History - Explore the story of Parliament and democracy",
+        "An introduction to Parliament"
       ]
     },
     "biology-life": {
@@ -93,18 +93,17 @@
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 4,
+      "records": 7,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -127,8 +126,8 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
         "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
@@ -159,16 +158,18 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 7,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 7
+        "peertube": 9
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
@@ -196,15 +197,14 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 6,
+      "records": 8,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 6,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -269,15 +269,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -410,16 +408,15 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
-        "Mesecons Tutorial - Basic Circuits",
-        "[Tech Maid] Mesecons Basics",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
+        "[Tech Maid] Mesecons Basics",
         "Karnaugh Map - Sum of Products Explained"
       ]
     },
@@ -441,12 +438,13 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
+        "Mini Tutorial J&D Creations Sewing Feet",
         "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
       ]
     },
@@ -493,13 +491,21 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 1
+        "peertube": 9
       },
       "top_titles": [
-        "Quick Statistics and Visual Overview of Data in LabPlot"
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+        "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Lecture 28： Inequalities ｜ Statistics 110"
       ]
     },
     "climate-environment": {
@@ -618,14 +624,13 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 6,
-      "mesh_redistributable": 4,
+      "records": 5,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
@@ -678,6 +683,13 @@
     {
       "provider": "wikimedia-commons",
       "title": "Baroque Art Rembrandt cc",
+      "relevance_topics": [
+        "arts-culture"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Color Adjustements for digital-painting using Krita",
       "relevance_topics": [
         "arts-culture"
       ]
@@ -739,6 +751,13 @@
       ]
     },
     {
+      "provider": "wikimedia-commons",
+      "title": "The oldest stars in the Universe – A tour from the Big Bang to the present and an exploration of the earliest era, the Dark Ages (with info on Square Kilometre Array modern astronomy)",
+      "relevance_topics": [
+        "astronomy-space"
+      ]
+    },
+    {
       "provider": "peertube",
       "title": "Astronomy and astrophysics in Africa ｜ The Royal Society-mm8rbo_mKfc",
       "relevance_topics": [
@@ -755,6 +774,13 @@
     {
       "provider": "peertube",
       "title": "The Royal Society - Hunting the oldest stars in the Universe ｜ The Royal Society",
+      "relevance_topics": [
+        "astronomy-space"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "The Weight of the Universe is Balanced on a Knife Edge",
       "relevance_topics": [
         "astronomy-space"
       ]
@@ -817,13 +843,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Biota Talks #1 - Chloroplast-Derived Cell-Free Systems: Advancing Plant Synthetic Biology through Rapid Prototyping",
-      "relevance_topics": [
-        "biology-life"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "HainanU-China: Improving the micro-ecology of the skin (2023) - Project Promotion [English]",
       "relevance_topics": [
         "biology-life"
@@ -831,14 +850,7 @@
     },
     {
       "provider": "peertube",
-      "title": "Paris_Bettencourt: A synthetic biology toolkit to interface genetic circuits wit... (2022) - Project Promotion [English]",
-      "relevance_topics": [
-        "biology-life"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Paris_Bettencourt: A synthetic biology toolkit to interface genetic circuits with... (2022) - Project Promotion [French]",
+      "title": "Mitosis - Stages of Mitosis | Cells | Biology | FuseSchool",
       "relevance_topics": [
         "biology-life"
       ]
@@ -922,13 +934,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Government shake-up in Ukraine: Koretskyi named PM, Fedorov dismissed | Midday Report",
-      "relevance_topics": [
-        "civics-society"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "Die demokratische Qualität von Debatten messbar machen; Espresso Doppio mit Mirko Lange vom Democracy Intellig",
       "relevance_topics": [
         "civics-society"
@@ -944,20 +949,6 @@
     {
       "provider": "peertube",
       "title": "The Future of Democracy @ Horsham Skeptics in the Pub, May 2017",
-      "relevance_topics": [
-        "civics-society"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Observers Episode 8 - Strike! - Flatscreen Version",
-      "relevance_topics": [
-        "civics-society"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Polish attorney Roman Giertych and prosecutor Ewa Wrzosek were both being spied on using #Pegasus spyware",
       "relevance_topics": [
         "civics-society"
       ]
@@ -1083,13 +1074,6 @@
     },
     {
       "provider": "peertube",
-      "title": "Congrès SIF 2020 Industrie, numérique et éco responsabilité",
-      "relevance_topics": [
-        "computing-basics"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "E0034 Dial-up Pastorale",
       "relevance_topics": [
         "computing-basics"
@@ -1112,6 +1096,13 @@
     {
       "provider": "peertube",
       "title": "2.5. L’évolution du logiciel libre à l’ère du Cloud",
+      "relevance_topics": [
+        "computing-basics"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Eben Moglen - Freedom In The Cloud (2010)",
       "relevance_topics": [
         "computing-basics"
       ]
@@ -1196,13 +1187,6 @@
     {
       "provider": "peertube",
       "title": "Tuto IA - Vera, l'appli de fact checking par simple appel ou message sur Whatsapp. Simple et top !!",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -1378,6 +1362,13 @@
     {
       "provider": "peertube",
       "title": "6 Reasons Why Print-on-Demand Might NOT Be For you (Business Model Weaknesses) From My Experience",
+      "relevance_topics": [
+        "entrepreneurship-small-business"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Mojeek's Business Model",
       "relevance_topics": [
         "entrepreneurship-small-business"
       ]
@@ -1621,13 +1612,6 @@
       ]
     },
     {
-      "provider": "peertube",
-      "title": "Vartika: A current Problem (Part 1)",
-      "relevance_topics": [
-        "mathematics-foundations"
-      ]
-    },
-    {
       "provider": "wikimedia-commons",
       "title": "Matematik 2 - 18 - Algebra - parentesmultiplikation",
       "relevance_topics": [
@@ -1674,13 +1658,6 @@
       "title": "fractions-decimales-et-nombres-decimaux-.mp4",
       "relevance_topics": [
         "mathematics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "meditation loop",
-      "relevance_topics": [
-        "meditation-mindfulness"
       ]
     },
     {
@@ -1791,6 +1768,34 @@
     {
       "provider": "peertube",
       "title": "Franse folklore in het Kurhaus",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Mythology's Influence on Art, Music, and Popular Culture",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Twentse folklore",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Age of Mythology EE: Campagne FR [4] Un Bon Plan",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Age of Mythology EE: Campagne FR [5] Juste assez de Corde pour se Pendre",
       "relevance_topics": [
         "mythology-folklore"
       ]

@@ -1,19 +1,19 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-09-14T10:40:49Z",
-  "records": 180,
-  "mesh_redistributable": 132,
-  "download_candidates": 282,
+  "built_at": "2026-09-21T10:44:38Z",
+  "records": 186,
+  "mesh_redistributable": 138,
+  "download_candidates": 284,
   "providers": {
     "internet-archive": {
-      "records": 7,
+      "records": 6,
       "mesh_redistributable": 0,
-      "download_candidates": 15
+      "download_candidates": 14
     },
     "peertube": {
-      "records": 120,
-      "mesh_redistributable": 79,
-      "download_candidates": 214
+      "records": 127,
+      "mesh_redistributable": 85,
+      "download_candidates": 217
     },
     "wikimedia-commons": {
       "records": 53,
@@ -26,16 +26,15 @@
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
       ]
     },
     "earth-geography": {
@@ -65,10 +64,10 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 8,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 2,
+        "peertube": 3,
         "wikimedia-commons": 5
       },
       "top_titles": [
@@ -78,7 +77,8 @@
         "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Democracy in the Dark: Protecting Your Digital Rights"
+        "Houses of History - Explore the story of Parliament and democracy",
+        "An introduction to Parliament"
       ]
     },
     "biology-life": {
@@ -107,16 +107,14 @@
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 5,
-        "wikimedia-commons": 2
+        "peertube": 4,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -170,16 +168,18 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 7,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 7
+        "peertube": 9
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
@@ -207,15 +207,14 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 6,
+      "records": 7,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -278,15 +277,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -417,13 +414,12 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
-        "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
@@ -446,10 +442,14 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 1,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "Mini Tutorial J&D Creations Sewing Feet"
+      ]
     },
     "drawing-design": {
       "name": "Drawing & Design",
@@ -493,13 +493,21 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 1
+        "peertube": 9
       },
       "top_titles": [
-        "Quick Statistics and Visual Overview of Data in LabPlot"
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+        "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Lecture 28： Inequalities ｜ Statistics 110"
       ]
     },
     "climate-environment": {
@@ -612,14 +620,13 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4,
+        "peertube": 3,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
@@ -662,33 +669,32 @@
         "English Grammar — Present Perfect — Teaching Ideas — 2",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
-        "English Grammar — Present Continuous — Structure"
+        "English Grammar — Present Continuous — Structure",
+        "English Grammar — Present Perfect — Structure — 2"
       ]
     }
   },
   "failures": 0,
-  "records_before_relevance_gate": 1137,
-  "records_before_pedagogy_gate": 508,
-  "records_before_selection_gate": 269,
-  "rejected_by_relevance_gate": 629,
-  "rejected_by_pedagogy_gate": 239,
-  "rejected_by_selection_gate": 61,
+  "records_before_relevance_gate": 1138,
+  "records_before_pedagogy_gate": 510,
+  "records_before_selection_gate": 276,
+  "rejected_by_relevance_gate": 628,
+  "rejected_by_pedagogy_gate": 234,
+  "rejected_by_selection_gate": 62,
   "topic_stats": {
     "world-history": {
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162"
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
       ]
     },
     "earth-geography": {
@@ -718,10 +724,10 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 8,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 2,
+        "peertube": 3,
         "wikimedia-commons": 5
       },
       "top_titles": [
@@ -731,7 +737,8 @@
         "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "Democracy in the Dark: Protecting Your Digital Rights"
+        "Houses of History - Explore the story of Parliament and democracy",
+        "An introduction to Parliament"
       ]
     },
     "biology-life": {
@@ -760,16 +767,14 @@
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 5,
-        "wikimedia-commons": 2
+        "peertube": 4,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
@@ -823,16 +828,18 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 7,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 7
+        "peertube": 9
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
@@ -860,15 +867,14 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 6,
+      "records": 7,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 5,
+        "peertube": 4,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -931,15 +937,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -1070,13 +1074,12 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
-        "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
@@ -1099,10 +1102,14 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 1,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "Mini Tutorial J&D Creations Sewing Feet"
+      ]
     },
     "drawing-design": {
       "name": "Drawing & Design",
@@ -1146,13 +1153,21 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 1
+        "peertube": 9
       },
       "top_titles": [
-        "Quick Statistics and Visual Overview of Data in LabPlot"
+        "Lecture 1： Probability and Counting ｜ Statistics 110",
+        "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
+        "Lecture 4： Conditional Probability ｜ Statistics 110",
+        "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
+        "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
+        "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+        "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Lecture 28： Inequalities ｜ Statistics 110"
       ]
     },
     "climate-environment": {
@@ -1265,14 +1280,13 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4,
+        "peertube": 3,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
@@ -1315,8 +1329,8 @@
         "English Grammar — Present Perfect — Teaching Ideas — 2",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
-        "English Grammar — Present Continuous — Structure"
+        "English Grammar — Present Continuous — Structure",
+        "English Grammar — Present Perfect — Structure — 2"
       ]
     }
   },
@@ -1354,7 +1368,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 67,
+      "records": 66,
       "available": true
     },
     "digital-ai-literacy": {
@@ -1400,7 +1414,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 15,
+      "records": 23,
       "available": true
     },
     "maker-creative": {
@@ -1418,7 +1432,7 @@
         "photography-video"
       ],
       "coverage": 1.0,
-      "records": 14,
+      "records": 13,
       "available": true
     },
     "civic-media-literacy": {
@@ -1440,7 +1454,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 19,
       "available": true
     },
     "deep-science": {
@@ -1462,7 +1476,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 29,
+      "records": 28,
       "available": true
     },
     "humanities-culture": {
@@ -1486,7 +1500,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 27,
+      "records": 25,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -1506,7 +1520,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 13,
+      "records": 12,
       "available": true
     },
     "mind-body-practice": {
@@ -1581,7 +1595,7 @@
         "communication-conflict"
       ],
       "coverage": 1.0,
-      "records": 9,
+      "records": 8,
       "available": true
     },
     "music-performance": {
@@ -1597,7 +1611,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 11,
+      "records": 10,
       "available": true
     },
     "language-communication": {
@@ -1631,7 +1645,7 @@
         "mathematics-foundations"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 26,
       "available": true
     },
     "home-independence": {
@@ -1668,11 +1682,12 @@
       ],
       "covered_topics": [
         "electronics-basics",
+        "sewing-textiles",
         "drawing-design",
         "photography-video",
         "computing-basics"
       ],
-      "coverage": 0.6667,
+      "coverage": 0.8333,
       "records": 16,
       "available": true
     },
@@ -1710,7 +1725,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 14,
+      "records": 13,
       "available": true
     },
     "society-rights": {
@@ -1730,7 +1745,7 @@
         "critical-thinking"
       ],
       "coverage": 1.0,
-      "records": 11,
+      "records": 10,
       "available": true
     },
     "technology-builder": {
@@ -1752,7 +1767,7 @@
         "prompt-engineering"
       ],
       "coverage": 1.0,
-      "records": 13,
+      "records": 12,
       "available": true
     }
   },
@@ -1769,9 +1784,9 @@
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
-  "records_before_title_quality_gate": 208,
+  "records_before_title_quality_gate": 214,
   "rejected_by_title_quality_gate": 28,
-  "rejected_topic_links_by_title_quality_gate": 30,
+  "rejected_topic_links_by_title_quality_gate": 31,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v2",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."
