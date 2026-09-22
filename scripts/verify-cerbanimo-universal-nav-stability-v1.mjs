@@ -18,7 +18,7 @@ assert(shell.includes('--cw-persistent-nav-space:'),'Persistent shell must defin
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent iframe stage must explicitly fill the viewport above the navbar.');
 assert(!/#cw-persistent-system-stage\{[^}]*height:auto/.test(shell),'Persistent iframe must never use intrinsic height:auto; that exposes the parent background as a dark card.');
 assert(shell.includes('/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail'),'Persistent shell must reuse the canonical shared navbar unchanged.');
-assert(shell.includes('/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer'),'Persistent shell must reuse shared Guild/Map actions.');
+assert(shell.includes('/app/persistent-shell-actions-v1.js?v=1.0.7-direct-routes-persistent-guild-map-nav'),'Persistent shell must reuse shared Guild/Map actions.');
 assert(shell.includes('/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding'),'Persistent shell must use the event-bounded generation lifecycle bridge.');
 assert(shellRuntime.includes("document.addEventListener('click',intercept,true)"),'Persistent shell must intercept shared navbar navigation before a top-level reload.');
 assert(shellRuntime.includes("'#cw-themed-system-nav a[data-system]'"),'Persistent shell must route the existing shared navbar links.');
