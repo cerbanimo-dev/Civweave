@@ -7,14 +7,20 @@ on:
       - 'public/app/selected-provider-authority-v1.js'
       - 'public/app/assistant-output-sanitizer-v1.js'
       - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'public/app/living-school-runtime-route-v2.js'
+      - 'public/service-worker-living-school-cleanroom-v218.js'
       - 'scripts/verify-selected-provider-authority-output-v1.mjs'
+      - 'scripts/verify-living-school-provider-handoff-v1.mjs'
       - '.github/workflows/verify-selected-provider-authority-v1.yml'
   pull_request:
     paths:
       - 'public/app/selected-provider-authority-v1.js'
       - 'public/app/assistant-output-sanitizer-v1.js'
       - 'public/app/server-ai-output-normalizer-v1.js'
+      - 'public/app/living-school-runtime-route-v2.js'
+      - 'public/service-worker-living-school-cleanroom-v218.js'
       - 'scripts/verify-selected-provider-authority-output-v1.mjs'
+      - 'scripts/verify-living-school-provider-handoff-v1.mjs'
       - '.github/workflows/verify-selected-provider-authority-v1.yml'
 
 permissions:
@@ -28,4 +34,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node scripts/verify-selected-provider-authority-output-v1.mjs
+      - name: Verify selected provider authority
+        run: node scripts/verify-selected-provider-authority-output-v1.mjs
+      - name: Verify Living School provider handoff
+        run: node scripts/verify-living-school-provider-handoff-v1.mjs

@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.2.0-living-school-generation-budget-v2-503-fallback';
+const VERSION='2.2.1-living-school-generation-budget-v2-local-quiz-skip';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
@@ -160,7 +160,7 @@ function install(){
     const purpose=lower(request?.purpose);
     if(purpose===DESIGN_PURPOSE)return runOneDesignCall(original,request);
     if(purpose===STRUCTURE_PURPOSE)return compileStructure(boundedRequest(request,'small'));
-    if(purpose===QUIZ_PURPOSE)return blocked(request,'quiz','Living School blocked a supplemental AI quiz pass because the local assessment curator owns quiz completion.');
+    if(purpose===QUIZ_PURPOSE){const message='Living School skipped the supplemental AI quiz pass because the local assessment curator already owns quiz completion.';return{schema:'civweave-model-result-1.0',requestId:request?.requestId||`ls-local-quiz-${Date.now().toString(36)}`,purpose:QUIZ_PURPOSE,status:'success',outputText:'',outputJson:{skipped:true,owner:'local-assessment-curator'},usage:{inputTokens:0,outputTokens:0,totalTokens:0,costCents:0,remainingCents:0},stream:{requested:false,used:false},actual:{provider:'civweave',model:'local-assessment-curator'},diagnostics:[message],livingSchoolGenerationBudget:{version:VERSION,kind:'quiz',blocked:false,skipped:true,postDesignProviderCalls:0,owner:'local-assessment-curator'}}}
     if(purpose===QUIZ_REPAIR_PURPOSE)return blocked(request,'repair','Living School blocked a hidden per-question quiz repair instead of calling a provider.');
     if(purpose===DEPTH_PURPOSE)return blocked(request,'depth','Living School blocked a hidden module-depth expansion call. Regenerate the single design packet explicitly if lesson material is inadequate.');
     if(livingSchoolPurpose(purpose))return original(boundedRequest(request,'small'));

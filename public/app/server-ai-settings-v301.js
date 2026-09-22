@@ -60,15 +60,7 @@ function installTabbedLayout(form){
   form.dataset.settingsTabs='1';
   return form;
 }
-function saveServerRoute(form){
-  const interactive={route:ROUTE,provider:ROUTE,model:'civweave-server-auto-v1',endpoint:'',externalConsent:true,serverOrder:['device-local','server-local','cloudflare-workers-ai']};
-  const saved={...interactive,consent:true,agenticEnabled:false,version:'1.0.117',settingsController:VERSION};
-  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(saved));localStorage.setItem(PROFILES_KEY,JSON.stringify({interactive,agentic:null,agenticEnabled:false,version:'1.0.117',settingsController:VERSION}))}catch{}
-  try{globalThis.CivweaveModelRuntime?.saveSharedConfig?.(interactive,{profile:'interactive'})}catch{}
-  const status=form.querySelector('[data-status]');if(status)status.textContent='Server-side AI saved. Civweave will try this device, then a paired self-hosted server, then Cloudflare capacity.';
-  try{dispatchEvent(new CustomEvent('civweave:model-config-changed',{detail:{profile:'interactive',config:interactive,source:VERSION,at:new Date().toISOString()}}));dispatchEvent(new CustomEvent('civweave:server-ai-selected',{detail:{order:interactive.serverOrder,at:new Date().toISOString()}}))}catch{}
-  return interactive;
-}
+
 function setServerVisibility(form,enabled){
   const panel=form.querySelector(`#${PANEL_ID}`);if(panel)panel.hidden=!enabled;
   if(enabled){for(const section of form.querySelectorAll('[data-panel="deterministic"],[data-panel="remote"]'))section.hidden=true}
@@ -125,10 +117,10 @@ function enhance(form=document.querySelector('#cw-ai-settings-cleanroom-v188 for
   bindCommerce(form);
   if(form.dataset.serverAiBound!=='1'){
     form.dataset.serverAiBound='1';
-    form.addEventListener('change',event=>{if(event.target!==select)return;if(select.value===ROUTE){event.stopImmediatePropagation();setServerVisibility(form,true)}else queueMicrotask(()=>setServerVisibility(form,false))},true);
-    form.addEventListener('submit',event=>{if(select.value!==ROUTE)return;event.preventDefault();event.stopImmediatePropagation();saveServerRoute(form);setServerVisibility(form,true)},true);
+    form.addEventListener('change',event=>{if(event.target!==select)return;if(select.value===ROUTE){setServerVisibility(form,true)}else queueMicrotask(()=>setServerVisibility(form,false))},true);
+
   }
-  if(savedRoute()===ROUTE){select.value=ROUTE;setServerVisibility(form,true)}
+  setServerVisibility(form,select.value===ROUTE);
   return true;
 }
 async function openCommerce(){

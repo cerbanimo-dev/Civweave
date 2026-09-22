@@ -1,0 +1,34 @@
+name: Verify Settings Freeze v342
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-route-v327.js'
+      - 'public/app/settings-direct-entry-v339.js'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-settings-freeze-v342.mjs'
+      - '.github/workflows/verify-settings-freeze-v342.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-route-v327.js'
+      - 'public/app/settings-direct-entry-v339.js'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-settings-freeze-v342.mjs'
+      - '.github/workflows/verify-settings-freeze-v342.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-settings-freeze-v342.mjs

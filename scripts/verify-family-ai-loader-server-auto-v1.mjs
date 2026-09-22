@@ -19,24 +19,33 @@ const orderedLoads = 'await loadScript(...FAST_RUNTIME);await loadScript(...SERV
 assert.equal(
   loader.split(orderedLoads).length - 1,
   2,
-  'Both warm and cold family-AI loader paths must register server-auto routing after the runtime spine and before response routing.',
+  'Both warm and cold family-AI loader paths must register server-side routing after the runtime spine and before response routing.',
 );
 
 assert.match(router, /const MIDDLEWARE_ID='server-auto-v301'/);
+assert.match(router, /const WORKERS_AI_ROUTES=new Set\(\['cloudflare-workers-ai','workers-ai','cloudflare'\]\)/);
 assert.match(router, /s\.register\(MIDDLEWARE_ID,\{handle\},60\)/);
-assert.match(router, /function isServerAuto\(request=\{\}\)\{return selectedRoute\(request\)===ROUTE\}/);
+assert.match(router, /function routeMode\(request=\{\}\)\{const route=selectedRoute\(request\);if\(route===ROUTE\)return ROUTE;if\(WORKERS_AI_ROUTES\.has\(route\)\)return'cloudflare-workers-ai';return''\}/);
+assert.match(router, /function isServerAuto\(request=\{\}\)\{return routeMode\(request\)===ROUTE\}/);
+assert.match(router, /function isDirectWorkersAI\(request=\{\}\)\{return routeMode\(request\)==='cloudflare-workers-ai'\}/);
+assert.match(router, /modelEvent\(next,'generating'/);
+assert.match(router, /modelEvent\(next,'completed'/);
 assert.match(spine, /function serverAuto\(request=\{\}\)/);
 assert.match(spine, /if\(handledBy==='base-runtime'\)result=await base\.generate\(request\)/);
 
-assert.match(livingSchool, /const curriculumConfig=\{\.\.\.config,maxTokens:/);
-assert.match(livingSchool, /runtime\.generate\(\{purpose:'living-school-research-grounded-curriculum-v218\.1',executionProfile:'interactive',config:curriculumConfig/);
-assert.match(livingSchool, /refusing deterministic module padding/);
+assert.match(livingSchool, /const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218\.1'/);
+assert.match(livingSchool, /async function generateDesignPacket\(runtime,config,data,count,sources,previous=''\)/);
+assert.match(livingSchool, /purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive'/);
+assert.match(livingSchool, /config:\{\.\.\.tierConfig\(config,'complex'\),maxTokens:Math\.max\(Number\(config\.maxTokens\)\|\|0,8192\)/);
+assert.match(livingSchool, /const result=await runtime\.generate\(request\)/);
 
 console.log(JSON.stringify({
   ok: true,
   revision: 'family-ai-loader-server-auto-v1',
   loaderOwnsServerAutoReadiness: true,
   serverAutoMiddlewareRequired: true,
-  livingSchoolUsesSharedConfig: true,
-  deterministicCurriculumPaddingBlocked: true,
+  directWorkersAiMiddlewareRequired: true,
+  sharedModelEventTelemetryRequired: true,
+  livingSchoolUsesSelectedRuntimeConfig: true,
+  livingSchoolDesignPassUsesSharedRuntime: true,
 }, null, 2));

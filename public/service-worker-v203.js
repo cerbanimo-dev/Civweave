@@ -3,14 +3,23 @@
 // persistent-stage-viewport-r1: the iframe stage has explicit dynamic viewport height so intrinsic iframe sizing cannot expose the parent shell as a dark card.
 // canonical-home-v1: top-level home navigation enters the persistent shell; embedded home remains the validated v440 campus.
 // five-system-pages-v1: top-level realm navigation enters the persistent shell; embedded realm content remains bounded and validated.
-// release-generation-boundary-v1: live code/doc assets are network-first, stale executable/page cache entries are purged, and user data/media caches are preserved.
+// release-generation-boundary-v2: live code/doc assets are network-first with finite request deadlines; warm-cache fanout is bounded; stale executable/page cache entries are purged while user data/media caches are preserved.
 // navigation-runtime-recovery-v3: stale navigation code/pages are purged once on every installed Civweave origin without touching user data.
 // direct-shell-retirement-v1: only retired legacy shells are purged; the current persistent-system-shell-v1 is not retired.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail across all five systems.
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
-// shell-assets-v25: persistent shell, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
+// shell-assets-v27: persistent shell, event-bounded generation lifecycle, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
-importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v1-20260825');
+// The canonical installed PWA registers this worker directly, so current-generation AI route takeovers must be imported here rather than only from the root compatibility worker.
+importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r6');
+const V203_REGISTERED_SETTINGS_GENERATION='v339-settings-saved-state-first-worker-boundary';
+// The saved-state-first Settings bootstrap must run before the historical v325 override so the Local Models tab can render without waiting for lifecycle/runtime code.
+importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved-state-first-registered-worker-v1');
+// Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths not claimed by the v339 direct-route bootstrap.
+importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
+// Staging takeover for the current Gemma phone stack. It runs before historical local-AI coherence so retired Q4 presentation scripts cannot reclaim Settings after a successful LiteRT import.
+importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v5-qwen-internal');
+importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v2-bounded-network-20260915');
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
@@ -22,7 +31,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
 importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v25-persistent-navbar-required');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
@@ -65,5 +74,36 @@ async function v203PurgeLivingSchoolSourceStatusAssets(){
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(!(await v203StagingRecoveryPending()))return;if(await v203VisibleInstallerClient())return;await self.skipWaiting()})())});
   self.addEventListener('activate',event=>{event.waitUntil((async()=>{await v203PurgeLivingSchoolSourceStatusAssets();const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('learning-source-pack-authority-v1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+}
+
+// staging-installed-entry-takeover-v24-settings-v339-saved-state-first: one-shot staging activation for the canonical worker bytes installed clients actually register. It purges only Settings executable assets, never saved model state or downloaded model bytes.
+const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v456-settings-v339-saved-state-first';
+const V203_STAGING_SETTINGS_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v24-settings-v339-saved-state-first';
+const V203_STAGING_SETTINGS_PATHS=new Set([
+  '/app/settings-gateway-v317.js',
+  '/app/settings-direct-entry-v338.js',
+  '/app/settings-direct-entry-v339.js',
+  '/app/settings-local-models-direct-v325.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-route-v323.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-local-route-v327.js',
+  '/app/settings-local-route-v331.js'
+]);
+function v203StagingSettingsRecoveryRequest(){return new Request(new URL(V203_STAGING_SETTINGS_RECOVERY_MARKER,self.location.origin).href)}
+async function v203StagingSettingsRecoveryPending(){if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;try{return !(await(await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE)).match(v203StagingSettingsRecoveryRequest()))}catch{return true}}
+async function v203PurgeSettingsRecoveryAssets(){
+  const names=await caches.keys();
+  for(const name of names){
+    const cache=await caches.open(name),requests=await cache.keys();
+    for(const request of requests){
+      let pathname='';try{pathname=new URL(request.url).pathname}catch{}
+      if(V203_STAGING_SETTINGS_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true});
+    }
+  }
+}
+if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
+  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await v203StagingSettingsRecoveryPending())await self.skipWaiting()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await v203StagingSettingsRecoveryPending()))return;await v203PurgeSettingsRecoveryAssets();const cache=await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE);await cache.put(v203StagingSettingsRecoveryRequest(),new Response('settings-v339-saved-state-first-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})

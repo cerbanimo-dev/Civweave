@@ -1,0 +1,52 @@
+name: Verify Living Library
+
+on:
+  pull_request:
+    paths:
+      - public/app/cabinets/living-school/living-library-panel-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.css
+      - public/app/living-school-learning-packs-v1.mjs
+      - public/app/knowledge-library-**
+      - public/app/offline-package-v208.json
+      - scripts/verify-knowledge-library-browser-v1.mjs
+      - .github/workflows/verify-living-library-v1.yml
+  push:
+    branches:
+      - staging
+    paths:
+      - public/app/cabinets/living-school/living-library-panel-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.js
+      - public/app/cabinets/living-school/living-library-downloads-v1.css
+      - public/app/living-school-learning-packs-v1.mjs
+      - public/app/knowledge-library-**
+      - public/app/offline-package-v208.json
+      - scripts/verify-knowledge-library-browser-v1.mjs
+      - .github/workflows/verify-living-library-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Living Library panel syntax
+        run: node --check public/app/cabinets/living-school/living-library-panel-v1.js
+      - name: Check Living Library downloads syntax
+        run: node --check public/app/cabinets/living-school/living-library-downloads-v1.js
+      - name: Check Living School integration syntax
+        run: node --check public/app/living-school-learning-packs-v1.mjs
+      - name: Check compatibility launcher syntax
+        run: node --check public/app/knowledge-library-launcher-v1.js
+      - name: Check library browser syntax
+        run: node --check public/app/knowledge-library-browser-v1.mjs
+      - name: Check verifier syntax
+        run: node --check scripts/verify-knowledge-library-browser-v1.mjs
+      - name: Verify Living Library contract
+        run: node scripts/verify-knowledge-library-browser-v1.mjs

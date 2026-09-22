@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-civweave-system="civweave" data-build="working-campus-v440-live-guild-balance" data-package-recovery="v440">
+<html lang="en" data-civweave-system="civweave" data-build="working-campus-v440-live-guild-balance-local-settings-v342-canonical-route-only-litert-structured-tool-shape" data-package-recovery="v440">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -49,8 +49,7 @@ function restore(reason='check'){
   if(document.querySelector(modalSelector))return false;
   for(const node of [state.main,state.guide,state.work].filter(Boolean)){
     node.removeAttribute('hidden');node.removeAttribute('inert');
-    node.style.setProperty('visibility','visible','important');
-    node.style.setProperty('opacity','1','important');
+    node.style.setProperty('visibility','visible','important');node.style.setProperty('opacity','1','important');
   }
   if(state.main){state.main.style.setProperty('display','grid','important');state.main.style.setProperty('transform','none','important')}
   for(const node of [state.guide,state.work].filter(Boolean))node.style.setProperty('display','block','important');
@@ -112,12 +111,12 @@ document.addEventListener('pointerup',()=>setTimeout(()=>queue('post-interaction
   </section>
 </main>
 <div class="toast" id="toast" hidden></div>
-<section id="cw-v440-recovery" role="alert"><div><h1>Civweave could not paint the fresh campus.</h1><p id="cw-v440-recovery-detail">The cache-distinct Working Campus did not finish rendering.</p><p>This page will not reload itself or enter the old recovery loop.</p><a href="/app/working-campus-v440.html?installed=1&version=1.0.163&retry=1">Retry fresh campus</a></div></section>
+<section id="cw-v440-recovery" role="alert"><div><h1>Civweave could not paint the fresh campus.</h1><p id="cw-v440-recovery-detail">The cache-distinct Working Campus did not finish rendering.</p><p>This page will not reload itself or enter the old recovery loop.</p><a href="/app/working-campus-v440.html?installed=1&version=1.0.163&retry=1&settingsRecovery=v342">Retry fresh campus</a></div></section>
 <script src="/app/system-routes-v227.js?v=working-campus-v440-live-guild-balance-v1"></script>
 <script src="/app/release-version-v2.js?v=working-campus-v440"></script>
 <script src="/app/platform-experience-v160.js?v=working-campus-v440"></script>
-<script src="/app/settings-gateway-v317.js?v=working-campus-v440"></script>
-<script src="/app/settings-local-route-v325.js?v=working-campus-v440-settings-v325"></script>
+<script src="/app/settings-gateway-v317.js?v=1.0.134-settings-v324-local-route-self-loading"></script>
+<script src="/app/settings-local-route-v327.js?v=1.1.3-settings-local-route-v326-canonical-inert-hard-local-fresh-path"></script>
 <script src="/app/model-settings-controller-v173.js?v=working-campus-v440"></script>
 <script src="/app/mobile-ai-hardening-v302.js?v=working-campus-v440"></script>
 <script src="/app/family-ai-loader-v105.js?v=working-campus-v440"></script>
@@ -133,6 +132,11 @@ document.addEventListener('pointerup',()=>setTimeout(()=>queue('post-interaction
 <script src="/app/campus-background-download-v241.js?v=working-campus-v440"></script>
 <script src="/app/shared-review-surface-v234.js?v=working-campus-v440"></script>
 <script src="/app/shared-guide-surface-v236.js?v=working-campus-v440-live-guild-balance-v1"></script>
+<script src="/app/local-ai/gemma4-current-registry-authority-v1.js?v=1.0.2-stable-composition"></script>
+<script src="/app/local-ai/gemma4-structured-quest-completion-v1.js?v=1.0.2-local-json-canonicalization"></script>
+<script src="/app/local-ai/gemma4-litert-request-authority-v1.js?v=1.0.2-structured-tool-shape"></script>
+<script src="/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js?v=1.1.0-formatted-output"></script>
+<script src="/app/local-ai/gemma4-structured-task-authority-v1.js?v=1.2.0-e2b-intake-e4b-constrained-stop"></script>
 <script src="/app/local-object-mesh-v146.js?v=working-campus-v440" defer></script>
 <script type="module" src="/app/open-learning-media-cache-v1.mjs?v=working-campus-v440"></script>
 </body>

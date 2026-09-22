@@ -208,28 +208,23 @@ function render(){
   globalThis.CivweaveSavedChatUIV295?.render?.(activeSystem);
   return true;
 }
-function historyFor(system){return(readThread(system).messages||[]).filter(row=>!row.pending&&['user','assistant'].includes(row.role)).slice(-16).map(row=>({role:row.role,text:clean(row.text,6000)}))}
-function deterministicReply(system,text){
-  const value=clean(text,180),g=guide(system);
-  if(system==='living-school')return`Moss kept this locally. For “${value}”, identify the capability, the smallest practice step, and the evidence that would prove it before shaping a Learning Journey.`;
-  if(system==='cerbanimo')return`Kamiya kept this locally. For “${value}”, define the Endeavor's concrete deliverable, what counts as done, and the first verifiable dependency.`;
-  if(system==='fellowfare')return`Rook kept this locally. For “${value}”, name the exact need or offer, timing, acceptable substitutes, and exchange boundary for the Manifest.`;
-  if(system==='anarchadia')return`Merlin kept this locally. For “${value}”, name the proposed change, who it affects, and the reversible test for success.`;
-  return`${g.name} kept this locally. For “${value}”, start with the Quest outcome you want, then separate what must be learned, built, acquired, or agreed.`;
-}
+function historyFor(system){return(readThread(system).messages||[]).filter(row=>!row.pending&&!row.modelError&&!/^(?:deterministic|manual)/.test(row.provider||'')&&['user','assistant'].includes(row.role)).slice(-16).map(row=>({role:row.role,text:clean(row.text,6000)}))}
 function localFailure(system,selection,error){const message=clean(error?.message||error||'The selected local model did not complete.',900);return{text:`${guide(system).name} could not run the selected local model ${selection?.id||''}: ${message}`,provider:'local-model-error',model:selection?.id||'',error:message}}
 async function fallbackReply(system,text){
   const selection=selectedLocal();
-  try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.()}catch(error){if(selection)return localFailure(system,selection,error)}
-  const runtime=globalThis.CivweaveModelRuntime;
-  if(typeof runtime?.generate==='function')try{
-    const result=await runtime.generate({purpose:`${system}-guide-chat-v350`,executionProfile:'interactive',config:selection?{provider:'downloaded-local',route:'downloaded-local',model:selection.id,externalConsent:false}:undefined,messages:[{role:'system',content:`You are ${guide(system).name}, ${guide(system).role}. Give a useful concise response while preserving user control.`},...historyFor(system).slice(-10).map(row=>({role:row.role,content:row.text})),{role:'user',content:text}],deterministic:()=>deterministicReply(system,text),fallback:()=>deterministicReply(system,text)});
+  try{
+    await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+    const runtime=globalThis.CivweaveModelRuntime;
+    if(typeof runtime?.generate!=='function')throw new Error('The AI runtime is unavailable.');
+    const result=await runtime.generate({purpose:`${system}-guide-chat-v350`,executionProfile:'interactive',config:selection?{provider:'downloaded-local',route:'downloaded-local',model:selection.id,externalConsent:false}:undefined,messages:[{role:'system',content:`You are ${guide(system).name}, ${guide(system).role}. Give a useful concise response while preserving user control.`},...historyFor(system).slice(-10).map(row=>({role:row.role,content:row.text})),{role:'user',content:text}]});
     const output=clean(result?.outputText||result?.text||result?.output||result?.response,10000),provider=result?.actual?.provider||result?.provider||result?.requested?.provider||'model-runtime',model=result?.actual?.model||result?.model||result?.requested?.model||'';
-    if(selection&&!output)throw new Error('The selected downloaded-local route returned no text.');
-    return{text:output||deterministicReply(system,text),provider,model};
-  }catch(error){if(selection)return localFailure(system,selection,error)}
-  if(selection)return localFailure(system,selection,'The selected downloaded-local runtime is unavailable.');
-  return{text:deterministicReply(system,text),provider:'deterministic-local',model:''};
+    if((result?.status&&result.status!=='success')||!output||/deterministic|manual/.test(provider)||result?.completionValidation?.valid===false)throw new Error('The selected AI route did not produce a usable answer. Check the provider in Settings and retry.');
+    return{text:output,provider,model};
+  }catch(error){
+    if(selection)return localFailure(system,selection,error);
+    const message=clean(error?.message||error,900);
+    return{text:`${guide(system).name} could not generate a response: ${message}`,provider:'model-error',model:'',error:message};
+  }
 }
 function explicitHandoffTarget(result,system){const target=clean(result?.handoff?.targetSystem||result?.handoffSystem||result?.response?.handoffSystem,80);return SYSTEMS.includes(target)&&target!==system?target:''}
 async function submitActive(text){
@@ -242,7 +237,7 @@ async function submitActive(text){
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:result?.model,chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
     if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(system,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
   }catch(error){
-    const fallback=await fallbackReply(system,value),thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(fallback.provider==='local-model-error'){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
+    const fallback=await fallbackReply(system,value),thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
   }finally{busy=false;if(button)button.disabled=false;render();emitState()}
   return true;
 }

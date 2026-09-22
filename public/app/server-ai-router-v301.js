@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.121-server-ai-router-v301-guild-telemetry';
+const VERSION='1.0.124-server-ai-router-v301-explicit-long-deadlines';
 const MIDDLEWARE_ID='server-auto-v301';
 const MARKET_SESSION_KEY='civweave.node-ai-marketplace.sessions.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
@@ -8,9 +8,12 @@ const MARKET_PREF_KEY='civweave.node-ai-marketplace.preferences.v1';
 const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
 const GUILD_TELEMETRY_KEY='civweave.guild-ai-telemetry.v1';
 const ROUTE='server-auto';
+const WORKERS_AI_ROUTES=new Set(['cloudflare-workers-ai','workers-ai','cloudflare']);
 const MAX_GENERATION_TOKENS=16384;
 const DEFAULT_WORKERS_AI_MODEL='@cf/zai-org/glm-4.7-flash';
 const DEFAULT_NEURONS_PER_CHAT=12;
+const CLOUDFLARE_REQUEST_TIMEOUT_MS=90_000;
+const MAX_EXPLICIT_REQUEST_TIMEOUT_MS=360_000;
 if(globalThis.CivweaveServerAIRouterV301?.version===VERSION)return;
 let registered=false;
 let mobileGuildRefreshPromise=null;
@@ -23,6 +26,24 @@ const runtime=()=>globalThis.CivweaveModelRuntime||null;
 const spine=()=>globalThis.CivweaveFastInteractiveV192||null;
 const mesh=()=>globalThis.CivweaveNodeAIMeshV1||null;
 const hostAccess=()=>globalThis.CivweaveHostNodeSessionV1||null;
+function requestTimeoutMs(request={},fallback=CLOUDFLARE_REQUEST_TIMEOUT_MS){
+  const raw=Number(request?.config?.timeoutMs??request?.timeoutMs);
+  return Number.isFinite(raw)&&raw>0?Math.max(15_000,Math.min(MAX_EXPLICIT_REQUEST_TIMEOUT_MS,Math.floor(raw))):fallback;
+}
+async function fetchJsonWithTimeout(url,options={},timeoutMs=CLOUDFLARE_REQUEST_TIMEOUT_MS,{code='SERVER_AI_REQUEST_TIMEOUT',label='Server AI request'}={}){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const response=await fetch(url,{...options,signal:controller.signal});
+    const body=await response.json().catch(()=>({}));
+    return{response,body};
+  }catch(error){
+    if(error?.name==='AbortError'){
+      const timeout=new Error(`${label} did not respond within ${Math.ceil(timeoutMs/1000)} seconds.`);
+      timeout.code=code;timeout.timeoutMs=timeoutMs;throw timeout;
+    }
+    throw error;
+  }finally{clearTimeout(timer)}
+}
 function storageObject(storage,key){try{const value=parse(storage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}catch{return{}}}
 function guildTelemetryRows(){return storageObject(sessionStorage,GUILD_TELEMETRY_KEY)}
 function saveGuildTelemetryRows(value){try{sessionStorage.setItem(GUILD_TELEMETRY_KEY,JSON.stringify(value));return true}catch{return false}}
@@ -48,7 +69,9 @@ function selectedRoute(request={}){
     return clean(profile.provider||profile.route,80).toLowerCase();
   }catch{return''}
 }
-function isServerAuto(request={}){return selectedRoute(request)===ROUTE}
+function routeMode(request={}){const route=selectedRoute(request);if(route===ROUTE)return ROUTE;if(WORKERS_AI_ROUTES.has(route))return'cloudflare-workers-ai';return''}
+function isServerAuto(request={}){return routeMode(request)===ROUTE}
+function isDirectWorkersAI(request={}){return routeMode(request)==='cloudflare-workers-ai'}
 function marketSessions(){return storageObject(sessionStorage,MARKET_SESSION_KEY)}
 function capacitySessions(){return storageObject(sessionStorage,CAPACITY_SESSION_KEY)}
 function marketPrefs(){return storageObject(localStorage,MARKET_PREF_KEY)}
@@ -84,6 +107,7 @@ function requestPayload(request={}){
     responseSchema:clone(request.schema||request.responseSchema||null),
     maxTokens:Math.max(32,Math.min(MAX_GENERATION_TOKENS,Number(request?.config?.maxTokens||request.maxTokens||1024)||1024)),
     temperature:Math.max(0,Math.min(2,Number(request?.config?.temperature??request.temperature??0.2))),
+    timeoutMs:requestTimeoutMs(request),
     purpose:clean(request.purpose,160)||'interactive',
     executionProfile:clean(request.executionProfile,40)||'interactive'
   };
@@ -107,23 +131,58 @@ function textFromOutput(value){
   if(typeof value?.result?.response==='string')return value.result.response;
   try{return JSON.stringify(value)}catch{return String(value)}
 }
+function eventProvider(request={},fallback=''){
+  const mode=routeMode(request);
+  return clean(fallback,120)||(mode==='cloudflare-workers-ai'?'cloudflare-workers-ai':mode||selectedRoute(request)||ROUTE);
+}
+function modelEvent(request,phase,detail={}){
+  const event={
+    schema:'civweave-model-event-1.0',
+    requestId:clean(request?.requestId,180),
+    phase:clean(phase,80),
+    provider:eventProvider(request,detail.provider),
+    model:clean(detail.model,220)||(isDirectWorkersAI(request)?workersAiModel(request):clean(request?.config?.model,220)),
+    purpose:clean(request?.purpose,220)||'interactive',
+    executionProfile:clean(request?.executionProfile,40)||'interactive',
+    at:now(),
+    ...detail
+  };
+  try{request?.onEvent?.(event)}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:model-event',{detail:event}))}catch{}
+  return event;
+}
 function resultFor(request,{provider,model,text,outputJson=null,usage={},diagnostics=[],routeTrace=[]}={}){
-  const started=request.__serverAutoStartedAt||Date.now(),guildOnly=request.guildOnly===true;
+  const started=request.__serverAutoStartedAt||Date.now(),guildOnly=request.guildOnly===true,directWorkers=isDirectWorkersAI(request),requestedProvider=guildOnly?'guild-server-local':directWorkers?'cloudflare-workers-ai':ROUTE,requestedModel=guildOnly?'civweave-guild-auto':directWorkers?workersAiModel(request):'civweave-server-auto';
+  const schema=request.schema||request.responseSchema,structured=Boolean(schema||request.responseFormat==='json');
+  let validationErrors=[];
+  if(structured){
+    if(outputJson==null){
+      const normalizer=globalThis.CivweaveServerAIOutputNormalizerV1;
+      outputJson=normalizer?.structuredJson?.(text)||null;
+      if(outputJson==null)try{outputJson=JSON.parse(String(text||'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''))}catch{validationErrors.push('The provider returned incomplete or invalid JSON.')}
+    }
+    if(schema&&!validationErrors.length){
+      const validate=runtime()?.validateSchema;
+      validationErrors=typeof validate==='function'?validate(outputJson,schema):['The output schema validator is unavailable.'];
+    }
+  }else if(!String(text||'').trim())validationErrors.push('The provider returned no usable text.');
+  const valid=validationErrors.length===0;
   return{
     schema:'civweave-model-result-1.0',
     requestId:clean(request.requestId,180)||`server-auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
     purpose:clean(request.purpose,160)||'interactive',
-    status:'success',
-    requested:{provider:guildOnly?'guild-server-local':ROUTE,model:guildOnly?'civweave-guild-auto':'civweave-server-auto',endpoint:'',executionProfile:clean(request.executionProfile,40)||'interactive'},
+    status:valid?'success':'invalid-response',
+    ...(valid?{}:{error:{code:'INVALID_STRUCTURED_OUTPUT',message:validationErrors.join('; ')}}),
+    requested:{provider:requestedProvider,model:requestedModel,endpoint:'',executionProfile:clean(request.executionProfile,40)||'interactive'},
     actual:{provider,model:model||provider},
     outputText:text||'',
-    outputJson,
+    outputJson:valid?outputJson:null,
     usage:{inputTokens:Number(usage.inputTokens??usage.prompt_tokens??usage.input_tokens??0)||0,outputTokens:Number(usage.outputTokens??usage.completion_tokens??usage.output_tokens??0)||0,totalTokens:Number(usage.totalTokens??usage.total_tokens??0)||0,costCents:Number(usage.costCents||0)||0,remainingCents:Number(usage.remainingCents||0)||0,chargedNeurons:Number(usage.chargedNeurons||0)||0,remainingNeurons:usage.remainingNeurons!=null&&Number.isFinite(Number(usage.remainingNeurons))?Math.max(0,Math.floor(Number(usage.remainingNeurons))):null,approximateTurnsLeft:usage.approximateTurnsLeft!=null&&Number.isFinite(Number(usage.approximateTurnsLeft))?Math.max(0,Math.floor(Number(usage.approximateTurnsLeft))):null},
     timing:{startedAt:new Date(started).toISOString(),completedAt:now(),elapsedMs:Math.max(0,Date.now()-started)},
     events:[],
-    diagnostics:[{code:guildOnly?'GUILD_AI_ORDER':'SERVER_AUTO_ORDER',message:guildOnly?'Explicit Guild processing uses the paired server-local model only.':'Server-side AI preference is device local → paired server-local → Guild-owned Cloudflare → other Cloudflare capacity.'},...diagnostics,{code:'SERVER_AUTO_TRACE',message:routeTrace.map(item=>`${item.route}:${item.status}`).join(' → '),routeTrace}],
+    diagnostics:[{code:guildOnly?'GUILD_AI_ORDER':directWorkers?'DIRECT_WORKERS_AI_ROUTE':'SERVER_AUTO_ORDER',message:guildOnly?'Explicit Guild processing uses the paired server-local model only.':directWorkers?'The selected Cloudflare Workers AI route goes directly to Guild-owned or host-capacity Workers AI.':'Server-side AI preference is device local → paired server-local → Guild-owned Cloudflare → other Cloudflare capacity.'},...diagnostics,{code:'SERVER_AUTO_TRACE',message:routeTrace.map(item=>`${item.route}:${item.status}`).join(' → '),routeTrace}],
     stream:{requested:Boolean(request?.config?.stream||request.stream),used:false},
-    structured:{requested:Boolean(request.schema||request.responseSchema||request.responseFormat==='json'),valid:true,repairAttempts:0},
+    structured:{requested:Boolean(request.schema||request.responseSchema||request.responseFormat==='json'),valid,validationErrors,repairAttempts:0},
     fallback:{used:routeTrace.some(item=>item.status==='failed'||item.status==='skipped'),route:provider}
   };
 }
@@ -150,9 +209,9 @@ async function serverLocal(request,trace){
       if(!text&&!outputJson)throw new Error('Paired server-local model returned no output.');
       trace.push({route:'server-local',status:'success',nodeId:selection.nodeId,serviceId:selection.serviceId});
       return resultFor(request,{provider:'server-local',model:selection.model||selection.serviceLabel||selection.serviceId,text,outputJson,usage:{costCents:response?.retailCostCents||0},diagnostics:[{code:'SERVER_LOCAL_NODE',message:`Used paired self-hosted service ${selection.serviceId} on ${selection.nodeId}.`}],routeTrace:trace});
-    }catch(error){lastError=error;trace.push({route:'server-local',status:'failed',nodeId:selection.nodeId,serviceId:selection.serviceId,reason:clean(error?.message||error,500)})}
+    }catch(error){lastError=error;trace.push({route:'server-local',status:'failed',nodeId:selection.nodeId,serviceId:selection.serviceId,code:clean(error?.code,160)||null,reason:clean(error?.message||error,500)})}
   }
-  if(lastError)dispatchEvent(new CustomEvent('civweave:server-ai-route-failed',{detail:{route:'server-local',message:clean(lastError.message,800),at:now()}}));
+  if(lastError)dispatchEvent(new CustomEvent('civweave:server-ai-route-failed',{detail:{route:'server-local',message:clean(lastError.message,800),code:clean(lastError?.code,160)||null,at:now()}}));
   return null;
 }
 function mobileGuildState(){
@@ -217,8 +276,13 @@ async function cloudflare(request,trace){
   const payload=workersAiPayload(request);
   const headers={'content-type':'application/json','authorization':`Bearer ${session.token}`};
   if(!session.generateUrl)headers['x-civweave-node-id']=session.nodeId;
-  const response=await fetch(endpointUrl,{method:'POST',headers,body:JSON.stringify({...payload,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})});
-  const body=await response.json().catch(()=>({}));
+  let response,body;
+  try{
+    ({response,body}=await fetchJsonWithTimeout(endpointUrl,{method:'POST',headers,body:JSON.stringify({...payload,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})},requestTimeoutMs(request),{code:'SERVER_AI_CLOUDFLARE_TIMEOUT',label:'Cloudflare Workers AI'}));
+  }catch(error){
+    trace.push({route:'cloudflare-workers-ai',status:'failed',nodeId:session.nodeId,source:session.source||'capacity-session',model:payload.model,code:clean(error?.code,160)||null,reason:clean(error?.message||error,1000)});
+    throw error;
+  }
   if(!response.ok){
     const message=clean(body?.error||`Cloudflare Workers AI returned HTTP ${response.status}.`,1000);
     trace.push({route:'cloudflare-workers-ai',status:'failed',nodeId:session.nodeId,source:session.source||'capacity-session',model:payload.model,httpStatus:response.status,reason:message});
@@ -233,27 +297,43 @@ async function cloudflare(request,trace){
   return resultFor(request,{provider:'cloudflare-workers-ai',model:body.model||nested?.model||payload.model,text:text||JSON.stringify(outputJson),outputJson,usage:{...(body.usage||{}),chargedNeurons:Number(body?.usage?.chargedNeurons||0),remainingNeurons:telemetry.remainingNeurons,approximateTurnsLeft:telemetry.approximateTurnsLeft},diagnostics:[{code:guildOwned?'GUILD_OWNED_CLOUDFLARE':'CLOUDFLARE_CAPACITY',message:guildOwned?`Used this device's paired mobile Guild Cloudflare node ${session.nodeId}.`:`Used capacity-backed Workers AI through ${session.nodeId}; lifetime credits are never spent unless explicitly allowed.`}],routeTrace:trace});
 }
 async function handle(request={}){
-  if(!isServerAuto(request))return null;
-  const guildOnly=request.guildOnly===true,next={...request,__serverAutoStartedAt:Date.now()},trace=guildOnly?[]:[{route:'device-local',status:'skipped-or-failed-over',reason:'downloaded-local middleware gets first priority when available'}];
-  const node=await serverLocal(next,trace);if(node)return{handled:true,result:node};
-  if(guildOnly){
-    const error=new Error('No paired Guild server-local AI service is available for this request. Connect to a Guild AI service and try again.');
-    error.code='GUILD_AI_UNAVAILABLE';error.routeTrace=trace;throw error;
+  const mode=routeMode(request);if(!mode)return null;
+  const guildOnly=request.guildOnly===true,directWorkers=mode==='cloudflare-workers-ai'&&!guildOnly,requestId=clean(request.requestId,180)||`server-auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,next={...request,requestId,__serverAutoStartedAt:Date.now()},trace=guildOnly?[]:directWorkers?[]:[{route:'device-local',status:'skipped-or-failed-over',reason:'downloaded-local middleware gets first priority when available'}];
+  modelEvent(next,'generating',{provider:directWorkers?'cloudflare-workers-ai':ROUTE,model:directWorkers?workersAiModel(next):clean(next?.config?.model,220)||'civweave-server-auto'});
+  try{
+    if(!directWorkers){
+      let node=null;
+      try{node=await serverLocal(next,trace)}catch(error){
+        trace.push({route:'server-local',status:'failed',code:clean(error?.code,160)||null,reason:clean(error?.message||error,500)});
+        try{dispatchEvent(new CustomEvent('civweave:server-ai-route-failed',{detail:{route:'server-local',message:clean(error?.message||error,800),code:clean(error?.code,160)||null,at:now()}}))}catch{}
+      }
+      if(node){modelEvent(next,'completed',{provider:node.actual?.provider,model:node.actual?.model,status:node.status,usage:node.usage});return{handled:true,result:node}}
+      if(guildOnly){
+        const error=new Error('No paired Guild server-local AI service is available for this request. Connect to a Guild AI service and try again.');
+        error.code='GUILD_AI_UNAVAILABLE';error.routeTrace=trace;throw error;
+      }
+    }
+    try{
+      const edge=await cloudflare(next,trace);
+      if(edge){modelEvent(next,'completed',{provider:edge.actual?.provider,model:edge.actual?.model,status:edge.status,usage:edge.usage});return{handled:true,result:edge}}
+    }catch(error){
+      dispatchEvent(new CustomEvent('civweave:server-ai-route-failed',{detail:{route:'cloudflare-workers-ai',message:clean(error?.message||error,800),status:error?.status||null,code:clean(error?.code,160)||null,at:now()}}));
+      throw Object.assign(error,{code:error.code||'SERVER_AI_CLOUDFLARE_FAILED',routeTrace:trace});
+    }
+    const error=new Error(directWorkers?'Cloudflare Workers AI is selected, but this device has no usable Guild-owned or host-capacity Cloudflare session. Pair or join a Cloudflare-backed Guild and try again.':'Server-side AI could not find a usable paired self-hosted model, paired mobile Guild Cloudflare node, or other Cloudflare capacity session. Pair a Guild host or join a Cloudflare-backed Guild, then try again.');
+    error.code=directWorkers?'WORKERS_AI_CAPACITY_UNAVAILABLE':'SERVER_AI_EXHAUSTED';error.routeTrace=trace;throw error;
+  }catch(error){
+    modelEvent(next,'failed',{provider:directWorkers?'cloudflare-workers-ai':eventProvider(next),model:directWorkers?workersAiModel(next):clean(next?.config?.model,220),status:'provider-error',error:{code:clean(error?.code,160)||'SERVER_AI_ERROR',message:clean(error?.message||error,1200)}});
+    throw error;
   }
-  try{const edge=await cloudflare(next,trace);if(edge)return{handled:true,result:edge}}catch(error){
-    dispatchEvent(new CustomEvent('civweave:server-ai-route-failed',{detail:{route:'cloudflare-workers-ai',message:clean(error?.message||error,800),status:error?.status||null,at:now()}}));
-    throw Object.assign(error,{code:error.code||'SERVER_AI_CLOUDFLARE_FAILED',routeTrace:trace});
-  }
-  const error=new Error('Server-side AI could not find a usable paired self-hosted model, paired mobile Guild Cloudflare node, or other Cloudflare capacity session. Pair a Guild host or join a Cloudflare-backed Guild, then try again.');
-  error.code='SERVER_AI_EXHAUSTED';error.routeTrace=trace;throw error;
 }
 function register(){
   const s=spine();if(!s?.register)return false;
   s.register(MIDDLEWARE_ID,{handle},60);registered=true;
-  try{dispatchEvent(new CustomEvent('civweave:server-ai-router-ready',{detail:{version:VERSION,middleware:MIDDLEWARE_ID,priority:60,order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],guildOnly:true,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,at:now()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:server-ai-router-ready',{detail:{version:VERSION,middleware:MIDDLEWARE_ID,priority:60,acceptedRoutes:[ROUTE,...WORKERS_AI_ROUTES],order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],directWorkersAi:true,guildOnly:true,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,cloudflareRequestTimeoutMs:CLOUDFLARE_REQUEST_TIMEOUT_MS,maxExplicitRequestTimeoutMs:MAX_EXPLICIT_REQUEST_TIMEOUT_MS,at:now()}}))}catch{}
   return true;
 }
-function status(){const mobile=mobileGuildCapacitySession(),telemetry=guildTelemetry(mobile?.guildId||mobile?.nodeId||'');return{version:VERSION,registered,selectedRoute:selectedRoute({}),marketSessions:Object.keys(marketSessions()).length,capacitySessions:Object.keys(capacitySessions()).length,mobileGuildCapacity:Boolean(mobile),mobileGuildCapacitySource:mobile?.source||null,guildTelemetry:telemetry,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],guildOnly:true}}
+function status(){const mobile=mobileGuildCapacitySession(),telemetry=guildTelemetry(mobile?.guildId||mobile?.nodeId||'');return{version:VERSION,registered,selectedRoute:selectedRoute({}),routeMode:routeMode({}),acceptedRoutes:[ROUTE,...WORKERS_AI_ROUTES],directWorkersAi:true,marketSessions:Object.keys(marketSessions()).length,capacitySessions:Object.keys(capacitySessions()).length,mobileGuildCapacity:Boolean(mobile),mobileGuildCapacitySource:mobile?.source||null,guildTelemetry:telemetry,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,cloudflareRequestTimeoutMs:CLOUDFLARE_REQUEST_TIMEOUT_MS,maxExplicitRequestTimeoutMs:MAX_EXPLICIT_REQUEST_TIMEOUT_MS,order:['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai'],guildOnly:true}}
 addEventListener('civweave:runtime-spine-ready',register);addEventListener('civweave:model-runtime-ready',register);addEventListener('civweave:local-model-bridge-installed',register);addEventListener('civweave:mobile-guild-attached',register);addEventListener('civweave:mobile-guild-fabric-refreshed',register);addEventListener('pageshow',register);register();
-globalThis.CivweaveServerAIRouterV301=Object.freeze({version:VERSION,route:ROUTE,register,status,isServerAuto,handle,mobileGuildCapacitySession,guildTelemetry,workersAiModel,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,order:Object.freeze(['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai']),guildOnly:true});
+globalThis.CivweaveServerAIRouterV301=Object.freeze({version:VERSION,route:ROUTE,workersAiRoutes:Object.freeze([...WORKERS_AI_ROUTES]),register,status,selectedRoute,routeMode,isServerAuto,isDirectWorkersAI,handle,mobileGuildCapacitySession,guildTelemetry,workersAiModel,modelEvent,defaultWorkersAiModel:DEFAULT_WORKERS_AI_MODEL,cloudflareRequestTimeoutMs:CLOUDFLARE_REQUEST_TIMEOUT_MS,maxExplicitRequestTimeoutMs:MAX_EXPLICIT_REQUEST_TIMEOUT_MS,order:Object.freeze(['device-local','server-local','guild-owned-cloudflare','cloudflare-workers-ai']),directWorkersAi:true,guildOnly:true});
 })();

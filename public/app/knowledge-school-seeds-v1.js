@@ -234,4 +234,5 @@ async function openSeed(slug){
   return (await matchCachedSeed(cache,school)).response;
 }
 window.CivweaveKnowledgeSchools=Object.freeze({CATALOG_URL,CACHE_NAME,LEGACY_CACHE_NAMES,loadCatalog,status,stage,save,remove,clear,openSeed,seedUrl,seedFilename,migrateLegacyCaches,persistStorage});
+if(typeof document!=='undefined')import('/app/knowledge-library-tier-installer-v1.mjs?v=knowledge-library-tier-installer-v1').catch(error=>console.warn('[Knowledge library tier installer]',error));
 })();

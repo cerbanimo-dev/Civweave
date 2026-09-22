@@ -54,7 +54,7 @@ includes(orchestrator,'Your job is to design the user\'s Quest for them.','Quest
 assert(!orchestrator.includes('fallback:()=>planner.buildPlan'),'Structured Quest request still carries deterministic planner fallback.');
 assert(!orchestrator.includes("provider==='deterministic'?'deterministic-fallback'"),'Quest normalization still permits deterministic authorship.');
 
-const intentSandbox={console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,globalThis:null};
+const intentSandbox={console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,addEventListener:()=>{},queueMicrotask:fn=>fn(),globalThis:null};
 intentSandbox.globalThis=intentSandbox;
 vm.runInNewContext(orchestrator,intentSandbox,{filename:'civweave-weaveling-plan-json-v190.js'});
 const intentApi=intentSandbox.CivweaveWeavelingPlanJsonV190;
@@ -124,7 +124,11 @@ includes(extension,"sha256:'3904d826d5dddd25ea173e85204caec09e68ba038116e9b992b6
 includes(extension,"RUNTIME_CACHE='civweave-litert-lm-runtime-v1'",'LiteRT model extension');
 includes(extension,'primeRuntime','LiteRT model extension');
 includes(extension,'Gemma 4 · 12 GB phone performance profile','LiteRT model extension');
-includes(extension,'Install both','LiteRT model extension');
+includes(extension,'data-litert-fast-browser-link','LiteRT model extension direct browser download');
+includes(extension,'data-litert-fast-import-input','LiteRT model extension browser file import');
+includes(extension,'directBrowserUserGesture:true','LiteRT model extension browser gesture contract');
+includes(extension,'directFileImport:true','LiteRT model extension browser import contract');
+assert(!/<button[^>]+data-litert-fast-pair/.test(extension),'LiteRT phone UI must not render a one-tap multi-file browser download button.');
 includes(extension,'transparentAcceleration:true','LiteRT model extension');
 includes(extension,'dualModelAcceleration:true','LiteRT model extension');
 includes(extension,'oneEngineAtATime:true','LiteRT model extension');
@@ -151,7 +155,7 @@ includes(repair,"transformersRepairScope:'onnx-only'",'Transformers repair');
 includes(repair,'!LITERT_RE.test','Transformers repair');
 
 const coherence=file('public/service-worker-local-ai-coherence-v307.js');
-includes(coherence,"local-ai-code-v320-litert-gemma4-fast",'local AI service-worker coherence');
+includes(coherence,'local-ai-code-v3','local AI service-worker coherence');
 includes(coherence,"CW_LITERT_VENDOR_PREFIX = '/app/vendor/litert-lm/'",'local AI service-worker coherence');
 includes(coherence,"'/app/local-ai/gemma4-litert-fast-extension-v1.js'",'local AI service-worker coherence');
 includes(coherence,"'/app/local-ai/litert-gemma4-fast-runtime-v1.js'",'local AI service-worker coherence');
@@ -159,9 +163,9 @@ includes(coherence,"'/app/local-ai/gemma4-inference-repair-v1.js'",'local AI ser
 includes(coherence,'liteRtVendorRuntimeEagerInstall: false','local AI service-worker coherence');
 
 const sw203=file('public/service-worker-v203.js');
-includes(sw203,'local-ai-code-v320-litert-gemma4-fast','canonical service worker');
+includes(sw203,'local-ai-code-v3','canonical service worker');
 const rootSw=file('public/service-worker.js');
-includes(rootSw,'root-worker-bridge-v8-litert-gemma4-fast','root service worker bridge');
+includes(rootSw,'root-worker-bridge-v','root service worker bridge');
 includes(rootSw,"'/app/local-ai/gemma4-litert-fast-extension-v1.js'",'root service worker bridge');
 includes(rootSw,"'/app/local-ai/litert-gemma4-fast-runtime-v1.js'",'root service worker bridge');
 

@@ -36,12 +36,12 @@ The implementation map is an engineering/compliance screening artifact, not auth
 Settings is the reference implementation of this discipline.
 
 - Input owner: `public/app/settings-gateway-v317.js`
-- Presentation owner: `public/app/model-settings-controller-v173.js`
+- Presentation and persistence owner: `public/app/settings-gateway-v317.js`
 - Downloaded-model management subscriber: `public/app/document-lifecycle-v221.js`
 - Canonical control: `[data-open-unified-ai-settings]`
 - Shared realm control: `public/app/family-shell-v104.js`
 
-The gateway is intentionally tiny. At launch it installs one inert delegated click listener and does no Settings implementation work. On the first explicit Settings request it activates the controller. Only after the Settings surface has opened and the browser has yielded a paint may downloaded-model management activate.
+The gateway owns the shared form and provider persistence. Local-model renderers and the primary-route compatibility facade delegate explicit selection to `selectLocalModel`; they must not add competing submit handlers or rewrite providers on load. Opening Settings reads saved state only. The Local models tab loads its view, and explicit model actions load the management/runtime lane.
 
 Forbidden Settings patterns:
 

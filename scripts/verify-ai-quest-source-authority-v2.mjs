@@ -68,8 +68,10 @@ const normalizer=file('public/app/server-ai-output-normalizer-v1.js');
 const normalizerSandbox={
   console,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,
   globalThis:null,
+  document:{scripts:[],head:{append:()=>{}}},
+  location:{href:'https://civweave-staging.pages.dev/'},
   addEventListener:()=>{},dispatchEvent:()=>{},CustomEvent:class CustomEvent{},
-  queueMicrotask:fn=>fn(),setInterval:()=>0,clearInterval:()=>{},
+  queueMicrotask:fn=>fn(),setInterval:()=>0,clearInterval:()=>{},setTimeout:()=>0,
 };
 normalizerSandbox.globalThis=normalizerSandbox;
 vm.runInNewContext(normalizer,normalizerSandbox,{filename:'server-ai-output-normalizer-v1.js'});
@@ -80,6 +82,27 @@ assert(!output.completionText(raw).includes('PRIVATE REASONING'),'Workers AI rea
 const packet=output.normalizePacket({handled:true,result:{status:'success',outputText:raw,actual:{provider:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'}}});
 assert(packet.result.outputText==='Test received.','normalized server-auto packet still contains raw completion JSON');
 
+const questObject={
+  title:'Manifestation principles into a web app',
+  wish:'Learn manifestation principles and use them to create a web app',
+  outcome:'Understand the practical principles and ship a small web app that applies them.',
+  assumptions:['The user wants a practical, testable learning path rather than supernatural guarantees.'],
+  paths:[{type:'learning',realm:'living-school',title:'Learn manifestation as intentional practice',purpose:'Separate useful goal-setting, attention, visualization, and action principles from unsupported certainty claims.',steps:['Study intention and goal formulation.','Practice visualization as rehearsal.','Connect each intention to observable action.'],completionCriteria:'The user can explain the principles and their limits.',evidence:['Written principles summary']}],
+  confidence:.92
+};
+const questEnvelope=JSON.stringify({id:'chatcmpl-quest',object:'chat.completion',choices:[{message:{role:'assistant',content:`\`\`\`json\n${JSON.stringify(questObject)}\n\`\`\``}}]});
+const structuredPacket=output.normalizePacket({status:'success',outputText:questEnvelope,outputJson:null,structured:{requested:true,valid:true,repairAttempts:0},actual:{provider:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'}});
+assert(structuredPacket.status==='success','valid structured completion envelope was incorrectly failed');
+assert(structuredPacket.structured?.valid===true,'recovered structured completion was not marked valid');
+assert(structuredPacket.outputJson?.title===questObject.title,'Quest JSON inside Workers AI completion content was not recovered into outputJson');
+assert(structuredPacket.outputJson?.paths?.[0]?.realm==='living-school','recovered Quest JSON lost nested path data');
+assert(structuredPacket.diagnostics?.some(item=>item?.code==='WORKERS_AI_STRUCTURED_OUTPUT_RECOVERED'),'structured recovery was not diagnosed');
+const invalidEnvelope=JSON.stringify({id:'chatcmpl-invalid',object:'chat.completion',choices:[{message:{role:'assistant',content:'I finished, but this is not JSON.'}}]});
+const invalidStructured=output.normalizePacket({status:'success',outputText:invalidEnvelope,outputJson:null,structured:{requested:true,valid:true,repairAttempts:0},actual:{provider:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'}});
+assert(invalidStructured.status==='invalid-response','structured server response without JSON still reported success');
+assert(invalidStructured.structured?.valid===false,'structured server response without JSON still reported valid');
+assert(invalidStructured.error?.code==='INVALID_STRUCTURED_OUTPUT','structured server response without JSON did not expose a useful failure code');
+
 const coherence=file('public/service-worker-local-ai-coherence-v307.js');
 includes(coherence,'local-ai-code-v322-ai-quest-source-authority','installed PWA coherence');
 includes(coherence,"'/app/working-campus-v156.html'",'installed PWA coherence');
@@ -89,7 +112,7 @@ includes(coherence,'serverAIOutputNormalizerCurrentBytes: true','installed PWA c
 const sw203=file('public/service-worker-v203.js');
 includes(sw203,'local-ai-code-v322-ai-quest-source-authority','v203 service worker');
 const rootWorker=file('public/service-worker.js');
-includes(rootWorker,'root-worker-bridge-v10-ai-quest-source-authority','root service worker');
+includes(rootWorker,'CIVWEAVE_ROOT_WORKER_BRIDGE=','root service worker');
 includes(rootWorker,"'/app/server-ai-output-normalizer-v1.js'",'root service worker');
 
-console.log('PASS Quest source authority is AI-only, Working Campus has no deterministic author, and Workers AI completion envelopes cannot expose reasoning.');
+console.log('PASS Quest source authority is AI-only, Workers AI structured Quest envelopes are recovered, invalid structured completions fail closed, and reasoning cannot render.');

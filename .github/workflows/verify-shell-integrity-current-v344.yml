@@ -1,0 +1,31 @@
+name: Verify Current Shell Integrity v344
+
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - 'public/**'
+      - 'scripts/verify-shell-integrity-current-v344.mjs'
+      - '.github/workflows/verify-shell-integrity-current-v344.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/**'
+      - 'scripts/verify-shell-integrity-current-v344.mjs'
+      - '.github/workflows/verify-shell-integrity-current-v344.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Verify every required shell asset matches committed integrity metadata
+        run: node scripts/verify-shell-integrity-current-v344.mjs

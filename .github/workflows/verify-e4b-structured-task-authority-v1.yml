@@ -1,0 +1,108 @@
+name: Verify E4B Structured Task Authority
+
+on:
+  push:
+    paths:
+      - 'public/service-worker.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-weave-pipeline-takeover-v1.js'
+      - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
+      - 'public/app/local-ai/gemma4-route-integrity-v1.js'
+      - 'public/app/local-ai/gemma4-learning-plan-entry-authority-v1.js'
+      - 'public/app/generation-failure-inspector-v1.js'
+      - 'public/app/guide-generation-tracker-v1.js'
+      - 'public/app/local-guide-control-bypass-v1.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-e2b-intake-e4b-handoff-v1.mjs'
+      - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
+      - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
+      - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
+      - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
+      - 'scripts/verify-gemma4-route-integrity-v1.mjs'
+      - 'scripts/verify-gemma4-learning-plan-entry-authority-v1.mjs'
+      - 'scripts/verify-generation-failure-inspector-v1.mjs'
+      - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
+      - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
+  pull_request:
+    paths:
+      - 'public/service-worker.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-weave-pipeline-takeover-v1.js'
+      - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
+      - 'public/app/local-ai/gemma4-route-integrity-v1.js'
+      - 'public/app/local-ai/gemma4-learning-plan-entry-authority-v1.js'
+      - 'public/app/generation-failure-inspector-v1.js'
+      - 'public/app/guide-generation-tracker-v1.js'
+      - 'public/app/local-guide-control-bypass-v1.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-e2b-intake-e4b-handoff-v1.mjs'
+      - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
+      - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
+      - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
+      - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
+      - 'scripts/verify-gemma4-route-integrity-v1.mjs'
+      - 'scripts/verify-gemma4-learning-plan-entry-authority-v1.mjs'
+      - 'scripts/verify-generation-failure-inspector-v1.mjs'
+      - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
+      - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check root compatibility worker
+        run: node --check public/service-worker.js
+      - name: Syntax check canonical registered worker
+        run: node --check public/service-worker-v203.js
+      - name: Syntax check structured task authority
+        run: node --check public/app/local-ai/gemma4-structured-task-authority-v1.js
+      - name: Syntax check LiteRT request authority
+        run: node --check public/app/local-ai/gemma4-litert-request-authority-v1.js
+      - name: Syntax check Weave Draft pipeline
+        run: node --check public/app/local-ai/gemma4-weave-draft-pipeline-v1.js
+      - name: Syntax check first-request intake bridge
+        run: node --check public/app/local-ai/gemma4-first-request-intake-bridge-v1.js
+      - name: Syntax check post-loader route integrity
+        run: node --check public/app/local-ai/gemma4-route-integrity-v1.js
+      - name: Syntax check explicit Learning Weave entry
+        run: node --check public/app/local-ai/gemma4-learning-plan-entry-authority-v1.js
+      - name: Syntax check rejected generation inspector
+        run: node --check public/app/generation-failure-inspector-v1.js
+      - name: Syntax check Weave pipeline service-worker takeover
+        run: node --check public/service-worker-weave-pipeline-takeover-v1.js
+      - name: Syntax check live generation tracker
+        run: node --check public/app/guide-generation-tracker-v1.js
+      - name: Syntax check local guide control bypass
+        run: node --check public/app/local-guide-control-bypass-v1.js
+      - name: Verify LiteRT structured tool shape
+        run: node scripts/verify-litert-structured-tool-shape-v1.mjs
+      - name: Verify E2B intake and E4B structured generation
+        run: node scripts/verify-e4b-structured-task-authority-v1.mjs
+      - name: Verify E4B Weave Draft compiler pipeline
+        run: node scripts/verify-e4b-weave-draft-pipeline-v1.mjs
+      - name: Verify first-request intake bridge
+        run: node scripts/verify-gemma4-first-request-intake-bridge-v1.mjs
+      - name: Verify post-loader original-text routing
+        run: node scripts/verify-gemma4-route-integrity-v1.mjs
+      - name: Verify explicit Learning Journey Weave entry
+        run: node scripts/verify-gemma4-learning-plan-entry-authority-v1.mjs
+      - name: Verify rejected generation inspector
+        run: node scripts/verify-generation-failure-inspector-v1.mjs
+      - name: Verify installed PWA generation takeover
+        run: node scripts/verify-weave-pipeline-installed-generation-v1.mjs

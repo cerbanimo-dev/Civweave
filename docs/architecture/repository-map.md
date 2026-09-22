@@ -24,7 +24,7 @@ The repository is organized around **functional ownership**, not around screens,
 
 Start in `public/app/`.
 
-- If the symptom is on a concrete visible system surface, trace from `public/app/fullscreen-family-v104.html` to the active system entry.
+- If the symptom is on a concrete visible system surface, trace from `public/app/system-routes-v227.js` and `public/app/persistent-system-shell-v1.html` to the active system entry.
 - If the behavior is shared across systems, identify the owner in `docs/architecture/systems-of-practice.md` and `config/system-ownership.json` before editing a page.
 - Shared presentation/runtime code commonly lives in `public/app/shared/` and other explicitly named shared owners under `public/app/`.
 - Optional installed-package capabilities may live under `public/extensions/`.
@@ -125,13 +125,13 @@ Presentation routing is evidence about composition. It is not permission to rede
 
 ## Active installed-family route snapshot
 
-`public/app/fullscreen-family-v104.html` is currently the installed-family dispatcher. It selects the system from the `system` query parameter, routes to the corresponding active entry, and appends `installed=1`.
+`public/app/system-routes-v227.js` defines the installed-family routes. `public/app/persistent-system-shell-v1.html` hosts system content in an iframe while retaining the shared navigation, Settings, and guide chat. Content entrypoints use `embed=1&persistentShell=1` under that shell. The removed fullscreen-family dispatcher is not an active source.
 
 Current route table:
 
 | System | Active entry |
 | --- | --- |
-| Civweave | `public/app/working-campus-v156.html` |
+| Civweave | `public/app/working-campus-v440.html` |
 | Living School | `public/app/cabinets/living-school/index.html?cabinet=1` |
 | Cerbanimo | `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1` |
 | FellowFare | `public/app/fellowfare-cabinet-v144.html?cabinet=1` |
@@ -146,8 +146,8 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Capability | Current landmark |
 | --- | --- |
 | Shared Settings input | `public/app/settings-gateway-v317.js` |
-| Settings presentation | `public/app/model-settings-controller-v173.js` |
-| Family navigation/chrome | `public/app/family-shell-v104.js` |
+| Settings presentation and persistence | `public/app/settings-gateway-v317.js`; local-model renderers delegate saves to this owner |
+| Family navigation/chrome | `public/app/themed-system-nav-v178.js` and `public/app/persistent-system-shell-v1.js` |
 | Route authority | `public/app/system-routes-v227.js` |
 | Guide chat workspace | `public/app/guide-workspace-v242.js` |
 | Guide chat loader | `public/app/family-ai-loader-v105.js` |

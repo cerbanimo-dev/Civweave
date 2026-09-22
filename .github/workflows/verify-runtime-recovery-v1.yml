@@ -1,0 +1,17 @@
+name: Runtime recovery contracts
+on:
+  push:
+    paths: ['public/app/**', 'scripts/test-runtime-recovery-v1.mjs', '.github/workflows/verify-runtime-recovery-v1.yml']
+  pull_request:
+    paths: ['public/app/**', 'scripts/test-runtime-recovery-v1.mjs', '.github/workflows/verify-runtime-recovery-v1.yml']
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/test-runtime-recovery-v1.mjs
+      - run: node scripts/verify-local-selection-authority-v1.mjs
+      - run: node scripts/verify-settings-open-inert-v321.mjs

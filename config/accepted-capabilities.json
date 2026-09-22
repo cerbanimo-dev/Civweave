@@ -1,0 +1,52 @@
+{
+  "schema": "civweave.accepted-capabilities.v1",
+  "policy": {
+    "description": "Accepted P0/P1 capabilities are monotonic. Existing entries may not be removed or changed by an ordinary feature pull request.",
+    "trustedContractRoots": ["scripts/"],
+    "runTiers": ["P0", "P1"]
+  },
+  "capabilities": [
+    {
+      "id": "CHAT-001",
+      "name": "Persistent human-message launcher remains available",
+      "tier": "P0",
+      "command": ["node", "scripts/verify-human-message-bubble-v1.mjs"],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "LOCAL-AI-001",
+      "name": "Local model download and inference capability remains available",
+      "tier": "P0",
+      "command": ["node", "scripts/verify-local-model-download-v267.mjs"],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "LOCAL-AI-002",
+      "name": "Local model health pulse remains available",
+      "tier": "P1",
+      "command": ["node", "scripts/verify-local-model-test-pulse-v269.mjs"],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "LIVING-SCHOOL-001",
+      "name": "Living School boots workbench-first and retains persistent human chat",
+      "tier": "P0",
+      "command": ["node", "scripts/verify-living-school-startup-human-chat-v1.mjs"],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "LIVING-SCHOOL-002",
+      "name": "Living School pedagogy contract remains complete",
+      "tier": "P1",
+      "command": ["node", "scripts/verify-living-school-pedagogy-v338.mjs"],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "LUD-001",
+      "name": "Lud Mode download, canonical open, and offline reload survive the browser gauntlet",
+      "tier": "P1",
+      "command": ["node", "scripts/browser-lud-mode-gauntlet-v1.mjs"],
+      "timeoutSeconds": 300
+    }
+  ]
+}

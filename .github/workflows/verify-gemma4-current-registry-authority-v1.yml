@@ -1,0 +1,33 @@
+name: Verify Gemma 4 Current Registry Authority
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'scripts/verify-gemma4-current-registry-authority-v1.mjs'
+      - '.github/workflows/verify-gemma4-current-registry-authority-v1.yml'
+  push:
+    branches:
+      - staging
+    paths:
+      - 'public/app/local-ai/gemma4-phone-performance-core-v1.js'
+      - 'scripts/verify-gemma4-current-registry-authority-v1.mjs'
+      - '.github/workflows/verify-gemma4-current-registry-authority-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check current phone authority
+        run: |
+          node --check public/app/local-ai/gemma4-phone-performance-core-v1.js
+          node --check scripts/verify-gemma4-current-registry-authority-v1.mjs
+      - name: Verify current LiteRT registry authority
+        run: node scripts/verify-gemma4-current-registry-authority-v1.mjs

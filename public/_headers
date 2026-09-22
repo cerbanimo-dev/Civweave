@@ -30,6 +30,12 @@
 /service-worker-v203.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
+/service-worker-weave-pipeline-takeover-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/service-worker-living-school-cleanroom-v218.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /service-worker-navigation-runtime-recovery-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
@@ -66,5 +72,41 @@
 /app/installer-online-fallback-v225.js
   Cache-Control: no-cache
 
+/app/guide-chat-surface-v350.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/unified-chat-system-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/generation-failure-inspector-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/family-ai-loader-v105.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /app/local-ai/worker-v266.js
   Cache-Control: no-cache
+
+/app/local-ai/gemma4-structured-task-authority-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/gemma4-litert-request-authority-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/gemma4-first-request-intake-bridge-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/gemma4-route-integrity-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/gemma4-learning-plan-entry-authority-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/gemma4-weave-draft-pipeline-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/guide-generation-tracker-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-guide-control-bypass-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate

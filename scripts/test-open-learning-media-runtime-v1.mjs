@@ -43,9 +43,10 @@ assert.equal(revocations.schema,'civweave.open-learning-media-revocations.v1');
 assert(Array.isArray(revocations.record_keys));
 assert(Array.isArray(revocations.content_hashes));
 const atlasInstaller=fs.readFileSync(path.join(root,'public/app/video-atlas-installer-v1.js'),'utf8');
-assert(atlasInstaller.includes('/app/open-learning-media-installer-v1.mjs'));
-assert(atlasInstaller.includes('scheduleLazyStage'));
-assert(atlasInstaller.includes("addEventListener('civweave:pwa-installed'"));
+assert(atlasInstaller.includes('/app/learning-source-pack-runtime-v1.mjs'),'video atlas installer must use the unified learning source-pack runtime');
+assert(atlasInstaller.includes('stageLearningSourcePacks'),'video atlas installer must expose unified staging');
+assert(atlasInstaller.includes('learningSourcePackStatus'),'video atlas installer must expose unified status');
+assert(!atlasInstaller.includes('/app/open-learning-media-installer-v1.mjs'),'Open Learning Media must remain an independent lazy pack rather than rejoining the atlas installer');
 const mediaInstaller=fs.readFileSync(path.join(root,'public/app/open-learning-media-installer-v1.mjs'),'utf8');
 assert(mediaInstaller.includes("ROOT_ID='open-learning-media-cache'"));
 assert(mediaInstaller.includes('ensureRoot'));
@@ -91,4 +92,4 @@ for(const slug of focus){
   minimumFocusPackBytes+=Math.min(...sizes);
 }
 assert(minimumFocusPackBytes<=POLICY_PRESETS['learning-path'].budgetBytes,`smallest five-topic focus pack ${minimumFocusPackBytes} exceeds Learning Path budget ${POLICY_PRESETS['learning-path'].budgetBytes}`);
-console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, generated-topic inference, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, requested-only serialized mesh, revocation kill switch, safe URL/MIME validation, range-aware offline playback, persistent-storage request, automatic post-install all-pack lazy queue, and realm wiring.`);
+console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, generated-topic inference, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, requested-only serialized mesh, revocation kill switch, safe URL/MIME validation, range-aware offline playback, persistent-storage request, automatic post-install all-pack lazy queue, independent Open Learning Media lazy pack, and unified learning source-pack atlas wiring.`);

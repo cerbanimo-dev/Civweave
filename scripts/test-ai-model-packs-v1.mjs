@@ -64,14 +64,23 @@ test('browser-managed packs recover the final file and report streaming import p
 
   assert.match(browserPackPwa,/Import downloaded files/);
   assert.match(browserPackPwa,/Download missing again/);
-  assert.match(browserPackPwa,/Still missing:/);
+  assert.match(browserPackPwa,/Still missing browser-managed model:/);
   assert.match(browserPackPwa,/cw-browser-pack-progress-track/);
-  assert.match(browserPackPwa,/Import progress/);
+  assert.match(browserPackPwa,/Gemma import progress/);
   assert.match(browserPackPwa,/current\.importFiles\(packId,files/);
   assert.match(browserPackPwa,/current\.prepare\(packId/);
+  assert.match(browserPackPwa,/async function settleCurrentPremierOwner\(/);
+  assert.match(browserPackPwa,/owner\.synchronizeImportedModels/);
+  assert.match(browserPackPwa,/owner\.refreshSupportStatus/);
+  assert.match(browserPackPwa,/owner\.pendingSummary\?\.\(\)/);
+  assert.match(browserPackPwa,/summary\?\.complete/);
   assert.match(browserPackPwa,/progressUi:true/);
   assert.match(browserPackPwa,/missingFileRecovery:true/);
-  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.2\.0-progress-and-missing-file/);
+  assert.match(browserPackPwa,/incrementalPremierImport:true/);
+  assert.match(browserPackPwa,/ownerSettlementOnEveryImport:true/);
+  assert.match(browserPackPwa,/ownerRequiresCompletedGemmaReceipt:true/);
+  assert.match(relocation,/browser-pack-pwa-import-v1\.js\?v=1\.3\.2-premier-incremental-handoff/);
+  assert.match(relocation,/startsWith\?\.\('1\.3\.2-'\)/);
   assert.match(shellAssets,/browser-pack-pwa-import-v1\.js/);
   assert.match(shellAssets,/browser-pack-download-v1\.js/);
 });

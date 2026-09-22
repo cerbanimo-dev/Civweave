@@ -1,0 +1,42 @@
+name: Verify Gemma Import Reconcile v3
+
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - public/app/model-settings-controller-v173.js
+      - public/app/local-ai/gemma4-dual-actions-v2.js
+      - public/app/local-ai/gemma4-browser-pack-coherence-v2.js
+      - public/app/local-ai/gemma4-opfs-storage-v1.js
+      - scripts/verify-gemma4-import-reconcile-v3.mjs
+      - .github/workflows/verify-gemma4-import-reconcile-v3.yml
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/model-settings-controller-v173.js
+      - public/app/local-ai/gemma4-dual-actions-v2.js
+      - public/app/local-ai/gemma4-browser-pack-coherence-v2.js
+      - public/app/local-ai/gemma4-opfs-storage-v1.js
+      - scripts/verify-gemma4-import-reconcile-v3.mjs
+      - .github/workflows/verify-gemma4-import-reconcile-v3.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Parse current phone action owner
+        run: |
+          node --check public/app/model-settings-controller-v173.js
+          node --check public/app/local-ai/gemma4-dual-actions-v2.js
+          node --check scripts/verify-gemma4-import-reconcile-v3.mjs
+      - name: Verify completed import reconciliation
+        run: node scripts/verify-gemma4-import-reconcile-v3.mjs

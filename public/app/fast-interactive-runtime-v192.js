@@ -8,7 +8,15 @@ const state={installed:false,mode:'waiting',lastError:'',baseVersion:'',calls:0,
 let base=null,proxy=null;
 const clock=()=>Number(root.performance?.now?.())||Date.now();
 function dispatch(name,detail){try{root.dispatchEvent?.(new CustomEvent(name,{detail}))}catch{}}
-function optimizedRequest(request={}){const purpose=String(request?.purpose||'');if(!/^civweave-guide-response-v141/.test(purpose))return request;const config={...(request.config||{})},provider=String(config.provider||config.route||'').toLowerCase(),configured=Number(config.timeoutMs)||Number(config.timeoutSeconds)*1000||0;if(provider==='gemini')config.timeoutMs=Math.min(configured||8000,10000);else if(provider==='hosted')config.timeoutMs=Math.min(configured||12000,15000);const tokenLimit=Number(config.maxTokens||config.max_tokens)||0;config.maxTokens=Math.min(tokenLimit||1400,1800);config.stream=false;return{...request,config,responseFormat:'json',maxRepairAttempts:0}}
+function optimizedRequest(request={}){
+  if(!/^civweave-guide-response-v141/.test(String(request.purpose||'')))return request;
+  const config={...(request.config||{})};
+  // Structured plans need the budget selected by their capability owner.
+  if(!(Number(config.timeoutMs)>0)&&!(Number(config.timeoutSeconds)>0))config.timeoutMs=60000;
+  if(!(Number(config.maxTokens)>0)&&!(Number(config.max_tokens)>0))config.maxTokens=4096;
+  config.stream=false;
+  return{...request,config,responseFormat:'json'};
+}
 function ordered(){return[...middleware.values()].sort((a,b)=>(b.priority||0)-(a.priority||0)||a.id.localeCompare(b.id))}
 function register(id,hooks={},priority=0){const key=String(id||'').trim();if(!key)throw new Error('Runtime spine middleware requires an id.');const record=Object.freeze({id:key,priority:Number(priority)||0,before:typeof hooks.before==='function'?hooks.before:null,handle:typeof hooks.handle==='function'?hooks.handle:null,after:typeof hooks.after==='function'?hooks.after:null});middleware.set(key,record);dispatch('civweave:runtime-spine-middleware',{version:VERSION,action:'register',id:key,priority:record.priority});return()=>unregister(key)}
 function unregister(id){const removed=middleware.delete(String(id||''));if(removed)dispatch('civweave:runtime-spine-middleware',{version:VERSION,action:'unregister',id:String(id)});return removed}

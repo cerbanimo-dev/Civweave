@@ -10,9 +10,9 @@ const MAX_RESIDENTS=28;
 const PATRON_SEAT_LIMIT=MAX_RESIDENTS-COMMUNITY_SEAT_LIMIT;
 const SESSION_TTL_MS=30*24*60*60*1000;
 const DEFAULT_AI_MODEL='@cf/zai-org/glm-4.7-flash';
-const MAX_GENERATION_TOKENS=4096;
-const WORKERS_INPUT_NEURONS_PER_MILLION=4119;
-const WORKERS_OUTPUT_NEURONS_PER_MILLION=34868;
+const MAX_GENERATION_TOKENS=16384;
+const WORKERS_INPUT_NEURONS_PER_MILLION=5500;
+const WORKERS_OUTPUT_NEURONS_PER_MILLION=36400;
 const enc=new TextEncoder();
 const dec=new TextDecoder();
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
@@ -84,7 +84,7 @@ function requestedNodeId(request){const url=new URL(request.url),pathMatch=url.p
 function isGeneratePath(pathname){return pathname==='/api/ai/node/generate'||/^\/nodes\/[^/]+\/api\/ai\/node\/generate$/.test(pathname)}
 function isSessionPath(pathname){return pathname==='/api/ai/node/session'}
 function aiMessages(input={}){const rows=(Array.isArray(input.messages)?input.messages:[]).slice(-64).map(item=>({role:item?.role==='assistant'?'assistant':item?.role==='system'?'system':'user',content:clean(item?.content,48000)})).filter(item=>item.content);if(clean(input.system,48000)&&!rows.some(item=>item.role==='system'))rows.unshift({role:'system',content:clean(input.system,48000)});if(!rows.length&&clean(input.prompt,48000))rows.push({role:'user',content:clean(input.prompt,48000)});if(!rows.length)rows.push({role:'user',content:'Continue.'});return rows}
-function aiOptions(input={}){const options={messages:aiMessages(input),stream:false,max_tokens:Math.max(32,Math.min(MAX_GENERATION_TOKENS,Number(input.max_tokens??input.maxTokens??1024)||1024)),temperature:Math.max(0,Math.min(2,Number(input.temperature??0.2)))};if(input.responseFormat==='json')options.response_format={type:'json_object'};if(input.responseSchema&&typeof input.responseSchema==='object')options.response_format={type:'json_schema',json_schema:input.responseSchema};return options}
+function aiOptions(input={}){const maxTokens=Math.max(32,Math.min(MAX_GENERATION_TOKENS,Number(input.max_completion_tokens??input.max_tokens??input.maxTokens??1024)||1024)),options={messages:aiMessages(input),stream:false,max_completion_tokens:maxTokens,temperature:Math.max(0,Math.min(2,Number(input.temperature??0.2)))};if(input.responseFormat==='json')options.response_format={type:'json_object'};if(input.responseSchema&&typeof input.responseSchema==='object')options.response_format={type:'json_schema',json_schema:input.responseSchema};return options}
 function resultText(result){if(typeof result==='string')return result;if(typeof result?.response==='string')return result.response;if(typeof result?.text==='string')return result.text;if(typeof result?.result?.response==='string')return result.result.response;if(result?.response&&typeof result.response==='object')return JSON.stringify(result.response);try{return JSON.stringify(result??{})}catch{return String(result??'')}}
 function resultObject(result){for(const value of [result?.response,result?.result?.response,result?.output,result?.outputJson])if(value&&typeof value==='object'&&!Array.isArray(value))return value;return null}
 function usageTokens(result,input,outputText){const usage=result?.usage||result?.usageMetadata||{},inputTokens=Number(usage.prompt_tokens??usage.input_tokens??usage.promptTokenCount),outputTokens=Number(usage.completion_tokens??usage.output_tokens??usage.candidatesTokenCount);return{inputTokens:Number.isFinite(inputTokens)&&inputTokens>=0?inputTokens:Math.max(1,Math.ceil(JSON.stringify(input).length/4)),outputTokens:Number.isFinite(outputTokens)&&outputTokens>=0?outputTokens:Math.max(1,Math.ceil(clean(outputText,5000000).length/4))}}

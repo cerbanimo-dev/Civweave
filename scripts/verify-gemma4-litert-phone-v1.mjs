@@ -40,9 +40,13 @@ assert.match(runtime,/contextTokens:4096/);
 assert.match(runtime,/maxOutputTokens:2400/);
 assert.match(runtime,/maxOutputTokens:2800/);
 
-// Preserve Gemma's published non-thinking sampler rather than reducing quality to gain speed.
+// Preserve Gemma's published non-thinking sampler for normal chat while using
+// low-temperature constrained decoding for schema-bound artifact output.
 assert.match(extension,/topK:64,topP:\.95,nonThinkingTemperature:1/);
-assert.match(runtime,/samplerParams:\{k:64,p:\.95,temperature:1\}/);
+assert.match(runtime,/samplerParams:\{k:64,p:\.95,temperature:formattedTool\?0\.2:1\}/);
+assert.match(runtime,/conversationConfig\.enableConstrainedDecoding=true/);
+assert.match(runtime,/prefaceConfig\.tools=\[formattedTool\]/);
+assert.match(runtime,/structuredToolCalling:true/);
 
 // Match LiteRT-LM v0.14's official Web GPU_ARTISAN MTP configuration. If a
 // device rejects the submodel path, runtime creation must retry without MTP.
@@ -85,6 +89,7 @@ console.log(JSON.stringify({
   compatibilityFallback:'existing ONNX Q4/Q2',
   mtp:'requested-with-safe-non-mtp-engine-fallback',
   webRuntime:'chromium-jspi-webgpu',
+  formattedOutput:'constrained-tool-decoding',
   pagesAssetLimitMiB:24,
   asyncifyFallbacks:'excluded-from-pages-output'
 },null,2));

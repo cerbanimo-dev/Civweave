@@ -1,0 +1,31 @@
+name: Verify Gemma Current Phone Action Owner
+
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - public/app/model-settings-controller-v173.js
+      - public/app/local-ai/gemma4-dual-actions-v2.js
+      - scripts/verify-gemma4-current-phone-action-owner-v1.mjs
+      - .github/workflows/verify-gemma4-current-phone-action-owner-v1.yml
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/model-settings-controller-v173.js
+      - public/app/local-ai/gemma4-dual-actions-v2.js
+      - scripts/verify-gemma4-current-phone-action-owner-v1.mjs
+      - .github/workflows/verify-gemma4-current-phone-action-owner-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node scripts/verify-gemma4-current-phone-action-owner-v1.mjs

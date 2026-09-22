@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-direct-routes-bounded-nav-observer';
+const VERSION='1.0.7-direct-routes-persistent-guild-map-nav';
 const NAV_ID='cw-themed-system-nav';
 const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
@@ -15,6 +15,7 @@ const RETIRED_PATHS=Object.freeze({
 const GUILD_RUNTIME_SRC='/app/guild-symbol-v1.js?v=guild-symbol-v1.5-standalone-guild-search-card';
 let guildRuntimePromise=null;
 let legacyRouteBound=false;
+let observedNav=null;
 
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
@@ -47,13 +48,24 @@ function ensureGuildRuntime(){
 }
 async function openGuilds(){try{const api=await ensureGuildRuntime();await api.openNearbyGuilds();return true}catch(error){console.warn('[Civweave] Persistent Guild action fell back to the Guild lobby.',error);return guildFallback()}}
 function openMap(){location.assign('/finder?view=map&source=persistent-shell');return true}
+
+const navObserver=new MutationObserver(()=>{
+  if(!observedNav||!observedNav.isConnected){observedNav=null;ensureMounted();return}
+  if(!observedNav.querySelector(`#${ACTIONS_ID}`))ensureMounted();
+});
+function bindNavObserver(nav){
+  if(observedNav===nav)return Boolean(nav);
+  navObserver.disconnect();observedNav=nav||null;
+  if(observedNav)navObserver.observe(observedNav,{childList:true});
+  return Boolean(observedNav);
+}
 function ensureMounted(){
-  installStyle();bindLegacyRoutes();const nav=document.getElementById(NAV_ID);if(!nav)return false;let actions=document.getElementById(ACTIONS_ID);if(actions&&actions.parentElement===nav)return true;
-  document.getElementById('cw-civweave-primary-actions-v441')?.remove();actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild and map');actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button>`;actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}});nav.append(actions);nav.dataset.persistentActions='guilds-map-all-systems-v4-bounded-observer';return true
+  installStyle();bindLegacyRoutes();const nav=document.getElementById(NAV_ID);if(!nav){bindNavObserver(null);return false}bindNavObserver(nav);let actions=document.getElementById(ACTIONS_ID);if(actions&&actions.parentElement===nav)return true;
+  document.getElementById('cw-civweave-primary-actions-v441')?.remove();actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild and map');actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button>`;actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}});nav.append(actions);nav.dataset.persistentActions='guilds-map-all-systems-v5-nav-child-observer';return true
 }
 const observer=new MutationObserver(records=>{if(records.some(record=>[...record.addedNodes,...record.removedNodes].some(node=>node?.nodeType===1&&(node.id===NAV_ID||node.querySelector?.(`#${NAV_ID}`)))))ensureMounted()});
 function boot(){bindLegacyRoutes();ensureMounted();const target=document.body||document.documentElement;observer.observe(target,{childList:true,subtree:false});for(const delay of [80,300,900,1800])setTimeout(ensureMounted,delay)}
 addEventListener('pageshow',ensureMounted);addEventListener('focus',ensureMounted);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,legacySystemFor,switchLegacyRoute,retiredRealmEntrypoints:false,canonicalRealmInterception:false,observerScope:'body-direct-children'});
+globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,legacySystemFor,switchLegacyRoute,retiredRealmEntrypoints:false,canonicalRealmInterception:false,observerScope:'body-direct-children+navbar-childlist'});
 })();

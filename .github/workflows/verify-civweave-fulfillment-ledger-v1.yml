@@ -1,0 +1,31 @@
+name: Verify Civweave fulfillment ledger v1
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/civweave-ledger-contract-v1.js'
+      - 'public/app/civweave-fulfillment-ledger-v1.js'
+      - 'public/app/cw-reward-ledger-v2.js'
+      - 'scripts/verify-civweave-fulfillment-ledger-v1.mjs'
+      - '.github/workflows/verify-civweave-fulfillment-ledger-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/civweave-ledger-contract-v1.js'
+      - 'public/app/civweave-fulfillment-ledger-v1.js'
+      - 'public/app/cw-reward-ledger-v2.js'
+      - 'scripts/verify-civweave-fulfillment-ledger-v1.mjs'
+      - '.github/workflows/verify-civweave-fulfillment-ledger-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-fulfillment-ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-civweave-fulfillment-ledger-v1.mjs

@@ -8,6 +8,7 @@ on:
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'
       - 'scripts/verify-family-ai-loader-server-auto-v1.mjs'
+      - 'scripts/verify-server-ai-direct-workers-route-v1.mjs'
       - '.github/workflows/verify-family-ai-loader-server-auto-v1.yml'
   push:
     branches: ['**']
@@ -17,6 +18,7 @@ on:
       - 'public/app/fast-interactive-runtime-v192.js'
       - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'
       - 'scripts/verify-family-ai-loader-server-auto-v1.mjs'
+      - 'scripts/verify-server-ai-direct-workers-route-v1.mjs'
       - '.github/workflows/verify-family-ai-loader-server-auto-v1.yml'
   workflow_dispatch:
 
@@ -42,5 +44,8 @@ jobs:
           node --check public/app/server-ai-router-v301.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check scripts/verify-family-ai-loader-server-auto-v1.mjs
-      - name: Verify shared server-auto loader contract
+          node --check scripts/verify-server-ai-direct-workers-route-v1.mjs
+      - name: Verify shared server routing contract
         run: node scripts/verify-family-ai-loader-server-auto-v1.mjs
+      - name: Verify direct Workers AI Living School routing
+        run: node scripts/verify-server-ai-direct-workers-route-v1.mjs

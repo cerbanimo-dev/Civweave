@@ -7,6 +7,7 @@ on:
       - 'public/service-worker-canonical-navbar-v1.js'
       - 'public/service-worker-canonical-home-v1.js'
       - 'public/service-worker-shell-assets-v1.js'
+      - 'public/service-worker-release-generation-v1.js'
       - 'public/service-worker-release-coherence-v220.js'
       - 'public/service-worker-five-system-pages-v1.js'
       - 'public/service-worker-direct-shell-retirement-v1.js'
@@ -18,6 +19,8 @@ on:
       - 'public/app/shared/civweave-parity-runtime.js'
       - 'public/app/themed-system-nav-v178.js'
       - 'public/app/persistent-shell-actions-v1.js'
+      - 'public/app/generation-lifecycle-v1.js'
+      - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-path-v266.js'
       - 'public/app/cerbanimo-proof-attachments-v165.js'
@@ -42,6 +45,7 @@ jobs:
           node --check public/service-worker-canonical-navbar-v1.js
           node --check public/service-worker-canonical-home-v1.js
           node --check public/service-worker-shell-assets-v1.js
+          node --check public/service-worker-release-generation-v1.js
           node --check public/service-worker-release-coherence-v220.js
           node --check public/service-worker-five-system-pages-v1.js
           node --check public/service-worker-direct-shell-retirement-v1.js
@@ -51,6 +55,7 @@ jobs:
           node --check public/app/shared/civweave-parity-runtime.js
           node --check public/app/themed-system-nav-v178.js
           node --check public/app/persistent-shell-actions-v1.js
+          node --check public/app/generation-lifecycle-v2.js
           node --check public/app/cerbanimo-quest-engine-v144.js
           node --check public/app/cerbanimo-quest-path-v266.js
           node --check public/app/cerbanimo-proof-attachments-v165.js

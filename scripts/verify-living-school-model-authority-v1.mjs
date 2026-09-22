@@ -35,6 +35,8 @@ assert(budget.includes("const EXPECTED_DESIGN_MODEL='gemini-3.7-flash'")&&budget
 assert(budget.includes('function accepted503Fallback')&&budget.includes("lower(fallback.reason)==='http-503-high-demand'"),'The terminal Living School budget does not validate 3.5 fallback provenance.');
 assert(budget.includes('designProviderCallsMax:2')&&budget.includes("fallbackReason:'http-503-high-demand'"),'The Living School design budget no longer permits exactly one conditional fallback call.');
 assert(!budget.includes('Automatic model fallback is not accepted for curriculum design.'),'The retired absolute fallback rejection is still present in the terminal Living School budget.');
+assert(budget.includes("if(purpose===QUIZ_PURPOSE){")&&budget.includes("status:'success'")&&budget.includes("owner:'local-assessment-curator'")&&budget.includes("postDesignProviderCalls:0"),'A locally owned Living School quiz is no longer represented as a successful zero-provider skip.');
+assert(!budget.includes('blocked a supplemental AI quiz pass because the local assessment curator owns quiz completion'),'The retired false-error quiz status is still present.');
 
 console.log(JSON.stringify({
   ok:true,
@@ -45,5 +47,6 @@ console.log(JSON.stringify({
   truthfulGenerationProvenance:true,
   cacheBusted:true,
   geminiCapabilityRouting:true,
-  livingSchoolDesignFallback:'3.7 -> 3.5 on HTTP 503 only'
+  livingSchoolDesignFallback:'3.7 -> 3.5 on HTTP 503 only',
+  localQuizOwnership:'successful zero-provider skip'
 },null,2));

@@ -1,9 +1,10 @@
+import './cabinets/living-school/living-library-panel-v1.js?v=living-library-v1';
 import * as packs from './shared/learning-pack-runtime-v1.mjs?v=learning-packs-v1';
 import * as resolver from './shared/learning-pack-resolver-v1.mjs?v=learning-packs-v1';
 import * as labor from './shared/labor-intelligence-core-v1.mjs?v=core-labor-v1';
 import {mountLearningPackShelf} from './shared/learning-pack-shelf-v1.mjs?v=learning-pack-shelf-v1';
 
-const VERSION='1.4.0-living-school-learning-packs-v1-core-labor';
+const VERSION='1.5.0-living-school-learning-packs-v1-living-library';
 let readyPromise=null;
 const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
 

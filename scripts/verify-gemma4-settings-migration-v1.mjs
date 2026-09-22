@@ -4,6 +4,7 @@ import vm from 'node:vm';
 
 const read=path=>readFileSync(path,'utf8');
 const includes=(source,needle,label)=>assert(source.includes(needle),`${label} is missing ${needle}`);
+const excludes=(source,needle,label)=>assert(!source.includes(needle),`${label} must not contain ${needle}`);
 const before=(source,a,b,label)=>{
   const left=source.indexOf(a),right=source.indexOf(b);
   assert(left>=0,`${label} is missing ${a}`);
@@ -14,15 +15,30 @@ const before=(source,a,b,label)=>{
 const settingsPath='public/app/model-settings-controller-v173.js';
 const retirementPath='public/app/local-ai/gemma4-q2-retirement-v1.js';
 const browserPackPath='public/app/local-ai/gemma4-browser-pack-coherence-v1.js';
-for(const path of [settingsPath,retirementPath,browserPackPath])new vm.Script(read(path),{filename:path});
+const fastPath='public/app/local-ai/gemma4-litert-fast-extension-v1.js';
+const opfsPath='public/app/local-ai/gemma4-opfs-storage-v1.js';
+const workerPath='public/app/local-ai/browser-pack-import-worker-v2.js';
+for(const path of [settingsPath,retirementPath,browserPackPath,fastPath,opfsPath,workerPath])new vm.Script(read(path),{filename:path});
 
 const settings=read(settingsPath);
-includes(settings,"VERSION='1.0.18-model-settings-controller-v173-gemma4-browser-status-sync'",'model settings controller');
-includes(settings,"const GEMMA4_FAST_VERSION='1.1.0-gemma4-litert-fast-extension-v1-dual-phone'",'model settings controller');
+includes(settings,"VERSION='1.0.21-model-settings-controller-v173-passive-gemma-opfs-actions'",'model settings controller');
+includes(settings,"const GEMMA4_FAST_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard'",'model settings controller');
+includes(settings,"const GEMMA4_FAST_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard'",'model settings controller');
 includes(settings,"const GEMMA4_PHONE_VERSION='1.2.0-gemma4-phone-performance-core-v1-resume-authority'",'model settings controller');
 includes(settings,"const GEMMA4_Q2_RETIRE_VERSION='1.0.0-gemma4-q2-retirement-v1'",'model settings controller');
 includes(settings,"const GEMMA4_BROWSER_PACK_VERSION='1.0.1-gemma4-browser-pack-coherence-v1-status-sync'",'model settings controller');
 includes(settings,"const GEMMA4_BROWSER_PACK_SRC='/app/local-ai/gemma4-browser-pack-coherence-v1.js?v=1.0.1-status-sync'",'model settings controller');
+includes(settings,"const GEMMA4_OPFS_VERSION='1.0.0-gemma4-opfs-storage-v1'",'model settings controller');
+includes(settings,"const GEMMA4_OPFS_SRC='/app/local-ai/gemma4-opfs-storage-v1.js?v=1.0.0-opfs-large-model'",'model settings controller');
+includes(settings,"if(packLoadPromise)return packLoadPromise;",'model settings controller awaitable handoff');
+includes(settings,"gemma4DownloadHandoffAwaitable:true",'model settings controller awaitable handoff contract');
+includes(settings,"gemma4OPFSLargeModels:true",'model settings controller OPFS action contract');
+includes(settings,"gemma4CacheStorageLargePut:false",'model settings controller large Cache Storage retirement contract');
+includes(settings,"gemma4PassivePreload:false",'model settings controller passive Settings contract');
+includes(settings,"passiveGemmaHydration:false",'model settings controller bootstrap passive Settings contract');
+includes(settings,"providerRuntimeOnOpen:false",'model settings controller passive Settings contract');
+assert(!/^\s*ensureGemma4Pack\(\);\s*$/m.test(settings),'model settings controller must not hydrate Gemma merely because Settings loaded');
+assert(!/addEventListener\(\s*['"]pageshow['"][^\n]*ensureGemma4Pack/.test(settings),'model settings controller must not hydrate Gemma on pageshow');
 includes(settings,"gemma4PackCore:'litert-current+q4-compatibility'",'model settings controller');
 includes(settings,"gemma4FastModel:'gemma4-e2b-it-litert-web'",'model settings controller');
 includes(settings,"gemma4DeepModel:'gemma4-e4b-it-litert-web'",'model settings controller');
@@ -35,12 +51,25 @@ includes(settings,'gemma4MaxVariantsPerSize:2','model settings controller');
 includes(settings,'gemma4BrowserManagedLiteRT:true','model settings controller');
 includes(settings,'gemma4MidrangeUsesLiteRT:true','model settings controller');
 includes(settings,'gemma4PostImportStatusSync:true','model settings controller');
-before(settings,"loadScript(GEMMA4_PACK_SRC", "loadScript(GEMMA4_DEEP_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_DEEP_SRC", "loadScript(GEMMA4_ACTIONS_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_ACTIONS_SRC", "loadScript(GEMMA4_FAST_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_FAST_SRC", "loadScript(GEMMA4_PHONE_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_PHONE_SRC", "loadScript(GEMMA4_Q2_RETIRE_SRC",'settings model boot order');
-before(settings,"loadScript(GEMMA4_Q2_RETIRE_SRC", "loadScript(GEMMA4_BROWSER_PACK_SRC",'settings model boot order');
+before(settings,"loadScript(GEMMA4_PACK_SRC", "loadScript(GEMMA4_DEEP_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_DEEP_SRC", "loadScript(GEMMA4_ACTIONS_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_ACTIONS_SRC", "loadScript(GEMMA4_FAST_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_FAST_SRC", "loadScript(GEMMA4_PHONE_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_PHONE_SRC", "loadScript(GEMMA4_Q2_RETIRE_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_Q2_RETIRE_SRC", "loadScript(GEMMA4_BROWSER_PACK_SRC",'settings model explicit-action boot order');
+before(settings,"loadScript(GEMMA4_BROWSER_PACK_SRC", "loadScript(GEMMA4_OPFS_SRC",'settings model explicit-action OPFS boot order');
+
+const fast=read(fastPath);
+includes(fast,"VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard'",'Gemma LiteRT fast extension');
+includes(fast,'async function ensureBrowserHandoff()','Gemma LiteRT browser handoff guard');
+includes(fast,"await globalThis.CivweaveModelSettingsControllerV173?.ensureGemma4Pack?.()",'Gemma LiteRT browser handoff guard');
+includes(fast,'return handoff.startModelDownload(id,control);','Gemma LiteRT single-model browser handoff');
+includes(fast,'return handoff.startPair(control);','Gemma LiteRT pair browser handoff');
+includes(fast,"BROWSER DOWNLOAD REQUIRED · the retired in-app transfer will not be resumed.",'Gemma LiteRT stale legacy state recovery UI');
+includes(fast,'browserManagedDownloadsOnly:true','Gemma LiteRT browser-only contract');
+includes(fast,'legacyDirectDownloadDisabled:true','Gemma LiteRT legacy-download retirement contract');
+excludes(fast,'downloadManager.start(','Gemma LiteRT fast extension must never restart the retired multi-gigabyte in-app downloader');
+excludes(fast,"busy=['downloading','finalizing']",'Gemma LiteRT fast extension must not disable browser handoff buttons from stale legacy progress');
 
 const retirement=read(retirementPath);
 includes(retirement,"data-gemma4-obsolete-delete>Delete obsolete models",'obsolete-model cleanup UI');
@@ -74,4 +103,16 @@ includes(browserPack,"midrangeUsesLiteRT:true",'Gemma browser handoff contract')
 includes(browserPack,"q4CompatibilityPreserved:true",'Gemma browser handoff contract');
 includes(browserPack,"postImportStatusSync:true",'Gemma browser handoff contract');
 
-console.log('PASS Local Models boots LiteRT + Q4, retires Q2, updates the Premier Phone mid-range pack to LiteRT E2B/E4B, routes multi-gigabyte LiteRT downloads through the browser-managed download/import flow instead of the failing legacy Cache Storage path, and immediately synchronizes imported LiteRT models to READY state.');
+const opfs=read(opfsPath),worker=read(workerPath);
+includes(opfs,"const OPFS_ROOT='civweave-models-v1'",'Gemma OPFS overlay');
+includes(opfs,"version:'1.3.2-browser-pack-opfs-overlay'",'Gemma OPFS bridge wrapper');
+includes(opfs,"storageBackend:'opfs'",'Gemma OPFS worker dispatch');
+includes(opfs,"if(prop==='put')",'Gemma OPFS Cache Storage guard');
+includes(opfs,'opfsLargeModels:true','Gemma OPFS contract');
+includes(opfs,'settingsPassive:true','Gemma OPFS Settings preservation');
+includes(worker,"const VERSION='2.0.1-browser-pack-import-worker-v2-opfs-chunked'",'Gemma OPFS worker');
+includes(worker,"const CHUNK_BYTES=8*1024*1024",'Gemma OPFS bounded worker chunks');
+includes(worker,"createSyncAccessHandle",'Gemma OPFS dedicated-worker storage');
+includes(worker,"packet.storageBackend==='opfs'?writeOpfs(packet,file):writeCache(packet,file)",'Gemma OPFS backend routing');
+
+console.log('PASS Local Models remains a saved-state-only view until an explicit action requests Gemma code; explicit Gemma actions boot LiteRT + Q4 + OPFS in order, retire Q2 safely, route browser imports away from multi-gigabyte Cache Storage writes, and preserve READY status compatibility through the narrow cache facade.');

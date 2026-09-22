@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-persistent-five-system-stage-chrome-owner';
+const VERSION='1.1.2-canonical-local-settings-refresh';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -17,7 +17,8 @@ const UPDATE_STYLE_ID='cw-persistent-platform-update-backlights-v1';
 const SUBSYSTEM_STATE_KEY='civweave.subsystem-avatar-state.v347';
 const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.133-settings-v324-direct-local-model-view';
-const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v323.js?v=1.1.1-settings-local-route-v325-browser-pack-handoff';
+const SETTINGS_LOCAL_ROUTE_VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
+const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
 const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.170-guide-chat-surface-v350-parakeet-no-proxy-worker';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
@@ -34,9 +35,10 @@ let current='';
 let loadToken=0;
 let loadTimer=0;
 let chromeObserver=null;
+let chromeTimers=[];
 let settingsPromise=null;
 let guidePromise=null;
-let backlightTimer=0;
+let backlightTimers=[];
 
 function cleanSystem(value){const id=String(value||'').toLowerCase();return SYSTEMS.has(id)?id:'civweave'}
 function parse(value,fallback={}){try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}}
@@ -95,10 +97,8 @@ function syncBacklights(){
   return true;
 }
 function scheduleBacklights(){
-  clearTimeout(backlightTimer);
-  backlightTimer=setTimeout(syncBacklights,0);
-  setTimeout(syncBacklights,100);
-  setTimeout(syncBacklights,420);
+  backlightTimers.forEach(clearTimeout);
+  backlightTimers=[0,100,420].map(delay=>setTimeout(syncBacklights,delay));
   return true;
 }
 
@@ -117,12 +117,12 @@ function loadScript(src,ready,label){
   });
 }
 function settingsApi(){return globalThis.CivweaveSettingsV320||globalThis.CivweaveSettingsGatewayV317||null}
+function settingsLocalRouteReady(){return globalThis.CivweaveSettingsLocalRouteV323?.version===SETTINGS_LOCAL_ROUTE_VERSION}
 function ensureSettings(){
-  if(settingsApi()?.open)return Promise.resolve(settingsApi());
+  if(settingsApi()?.open&&settingsLocalRouteReady())return Promise.resolve(settingsApi());
   if(settingsPromise)return settingsPromise;
-  settingsPromise=loadScript(SETTINGS_LOCAL_ROUTE,()=>Boolean(globalThis.CivweaveSettingsLocalRouteV323),'Settings local-model view')
-    .catch(()=>false)
-    .then(()=>loadScript(SETTINGS_GATEWAY,()=>Boolean(settingsApi()?.open),'Shared Settings'))
+  settingsPromise=loadScript(SETTINGS_LOCAL_ROUTE,settingsLocalRouteReady,'Settings local-model view')
+    .then(()=>settingsApi()?.open?true:loadScript(SETTINGS_GATEWAY,()=>Boolean(settingsApi()?.open),'Shared Settings'))
     .then(()=>settingsApi())
     .finally(()=>{settingsPromise=null});
   return settingsPromise;
@@ -130,7 +130,7 @@ function ensureSettings(){
 function openSettings(){
   const launcher=document.querySelector('#cw-themed-system-nav .cw-themed-system-link[data-system="civweave"]')||document.activeElement;
   const invoke=()=>{const api=settingsApi();if(!api?.open)return false;try{api.open(launcher);return true}catch{return false}};
-  if(invoke())return true;
+  if(settingsLocalRouteReady()&&invoke())return true;
   void ensureSettings().then(invoke).catch(error=>showError(error?.message||'Settings could not open.'));
   return true;
 }
@@ -152,10 +152,30 @@ function openGuide(system){
 }
 function closeQuickMenu(){try{globalThis.CivweaveFamilyNavigationV178?.closeQuickMenu?.({restoreFocus:false})}catch{}}
 
-function suppressChildChrome(reason='frame-load'){
-  const host=frame();let doc,win;try{doc=host?.contentDocument;win=host?.contentWindow}catch{return false}
+function clearChildChromeWork(){
+  chromeTimers.forEach(clearTimeout);chromeTimers=[];
+  if(chromeObserver)try{chromeObserver.disconnect()}catch{}
+  chromeObserver=null;
+  return true;
+}
+function frameMatchesExpected(host=frame(),expectedHref=''){
+  if(!host)return false;
+  const expected=String(expectedHref||host.dataset.cwExpectedHref||'');
+  if(!expected)return true;
+  try{
+    const actual=new URL(host.contentWindow?.location?.href||'',location.href),target=new URL(expected,location.href);
+    // Pages redirects .html documents to clean URLs; retain origin and query checks.
+    const path=url=>url.pathname.replace(/\.html$/,'');
+    return actual.origin===target.origin&&path(actual)===path(target)&&actual.search===target.search&&actual.hash===target.hash;
+  }catch{return false}
+}
+function suppressChildChrome(reason='frame-load',{token=loadToken,expectedHref=''}={}){
+  if(token!==loadToken)return false;
+  const host=frame();if(!frameMatchesExpected(host,expectedHref))return false;
+  let doc,win;try{doc=host?.contentDocument;win=host?.contentWindow}catch{return false}
   if(!doc?.documentElement)return false;
   const remove=()=>{
+    if(token!==loadToken||!frameMatchesExpected(host,expectedHref))return;
     for(const id of [HUMAN_LAUNCHER_ID,AI_LAUNCHER_ID,GUIDE_ROOT_ID])doc.getElementById(id)?.remove();
     doc.documentElement.dataset.persistentParentChrome='parent-owned';
     doc.documentElement.dataset.persistentChromeReason=reason;
@@ -167,16 +187,18 @@ function suppressChildChrome(reason='frame-load'){
   chromeObserver.observe(doc.documentElement,{childList:true,subtree:true});
   return true;
 }
-function scheduleChildChrome(reason='frame-load'){
-  for(const delay of [0,60,220,800,1800])setTimeout(()=>suppressChildChrome(`${reason}-${delay}`),delay);
+function scheduleChildChrome(reason='frame-load',{token=loadToken,expectedHref=''}={}){
+  clearChildChromeWork();
+  chromeTimers=[0,60,220,800,1800].map(delay=>setTimeout(()=>{if(token===loadToken)suppressChildChrome(`${reason}-${delay}`,{token,expectedHref})},delay));
   return true;
 }
 
 function navigate(system,{feature='',replace=false,source='persistent-navbar'}={}){
   system=cleanSystem(system);mark(system);const url=shellUrl(system,{feature});history[replace?'replaceState':'pushState']({system,feature},'',`${url.pathname}${url.search}`);
   const target=contentUrl(system,{feature}),host=frame();if(!host)return false;
+  clearChildChromeWork();
   const token=++loadToken;showLoading();clearTimeout(loadTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
-  host.title=`${system} · Civweave`;host.src=target.href;
+  host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;host.title=`${system} · Civweave`;host.src=target.href;
   scheduleBacklights();
   try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,feature,source,version:VERSION,persistent:true}}))}catch{}
   return true;
@@ -203,7 +225,11 @@ function bindBacklights(){
 function boot(){
   document.addEventListener('click',intercept,true);
   bindBacklights();
-  const host=frame();host?.addEventListener('load',()=>{clearTimeout(loadTimer);hideLoading();const node=errorBox();if(node)node.dataset.open='0';scheduleChildChrome('frame-load');scheduleBacklights()});
+  const host=frame();host?.addEventListener('load',()=>{
+    const token=Number(host.dataset.cwLoadToken||0),expectedHref=String(host.dataset.cwExpectedHref||'');
+    if(token!==loadToken||!frameMatchesExpected(host,expectedHref))return;
+    clearTimeout(loadTimer);hideLoading();const node=errorBox();if(node)node.dataset.open='0';scheduleChildChrome('frame-load',{token,expectedHref});scheduleBacklights();
+  });
   const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'shell-boot'});
   addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'history'});});
   scheduleBacklights();

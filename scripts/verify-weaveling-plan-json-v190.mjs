@@ -22,7 +22,7 @@ const storage=new MemoryStorage({
 let captured=null,generateCalls=0,activateCalls=0,openCalls=0,selection={active:true,id:'gemma4-e2b-it-q4f16'};
 const sandbox={
   console,Date,Math,structuredClone,localStorage:storage,
-  CustomEvent:class{constructor(type,{detail}={}){this.type=type;this.detail=detail}},dispatchEvent(){},
+  CustomEvent:class{constructor(type,{detail}={}){this.type=type;this.detail=detail}},dispatchEvent(){},addEventListener(){},queueMicrotask(fn){fn()},
   DOMException:globalThis.DOMException,
   globalThis:null,
 };
@@ -59,7 +59,7 @@ sandbox.CivweaveAssistantV141={
   respond:async()=>({response:{answer:'legacy route'},provider:'legacy',model:'legacy'}),
 };
 vm.runInContext(orchestratorSource,sandbox,{filename:'civweave-weaveling-plan-json-v190.js'});
-const wish='I want to make a community garden with my friends';
+const wish='I want a plan to make a community garden with my friends';
 const result=await sandbox.CivweaveAssistantV141.respond({text:wish,systemId:'civweave',history:[{role:'user',text:wish}]});
 assert(captured,'AI structured planning request was not made.');
 assert(captured.purpose==='civweave-weaveling-intention-json-v190','Structured Quest purpose was not selected.');
@@ -84,7 +84,7 @@ assert(generateCalls===1,'Activation incorrectly made another AI generation call
 
 storage.setItem('civweave.intentions.v127','[]');
 sandbox.CivweaveModelRuntime.generate=async request=>{generateCalls++;captured=request;return{status:'provider-error',structured:{requested:true,valid:false},outputText:'',error:{code:'LOCAL_MODEL_FAILED',message:'Selected AI failed to generate the Quest.'},actual:{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16'}}};
-const failed=await sandbox.CivweaveAssistantV141.respond({text:'I want to organize a neighborhood tool library',systemId:'civweave',history:[]});
+const failed=await sandbox.CivweaveAssistantV141.respond({text:'Make a plan to organize a neighborhood tool library',systemId:'civweave',history:[]});
 saved=JSON.parse(storage.getItem('civweave.intentions.v127')||'[]');
 assert(saved.length===0,'A Quest was persisted after AI generation failed.');
 assert(failed.plan==null&&failed.questAuthoring?.aiGenerated===false&&failed.questAuthoring?.questCreated===false,'AI failure did not return a no-Quest state.');
@@ -93,7 +93,7 @@ assert(/Nothing was created or saved/.test(failed.response?.answer||''),'AI fail
 selection={active:false,id:null};
 storage.setItem('civweave.local-ai.selection.v266',JSON.stringify(selection));
 sandbox.CivweaveAssistantV141.selectedConfig=()=>({provider:'deterministic',route:'deterministic',model:'deterministic-compiler'});
-const deterministic=await sandbox.CivweaveAssistantV141.respond({text:'I want to start a neighborhood repair club',systemId:'civweave',history:[]});
+const deterministic=await sandbox.CivweaveAssistantV141.respond({text:'Make a plan to start a neighborhood repair club',systemId:'civweave',history:[]});
 saved=JSON.parse(storage.getItem('civweave.intentions.v127')||'[]');
 assert(saved.length===0,'A deterministic route created a Quest without AI generation.');
 assert(deterministic.questAuthoring?.aiGenerated===false&&deterministic.plan==null,'Deterministic Quest attempt did not fail closed.');
@@ -105,4 +105,4 @@ assert(workerWrapper.includes("importScripts('/service-worker-core-v208.js"),'Ac
 assert(workerCore.includes('discoverReferences')&&workerCore.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Offline campus no longer discovers and stores seed dependencies.');
 assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the Working Campus.');
 assert(offlineManifest.includePrefixes.includes('/extensions/'),'Offline campus excludes extension runtimes discovered from Working Campus.');
-console.log(JSON.stringify({ok:true,revision:'v190-weaveling-ai-required-quest',provider:'downloaded-local',schema:true,localStructuredTransport:true,requestSpecificAIContent:true,deterministicQuestFallback:false,aiFailurePersistsNothing:true,plainLanguageActivation:true,offlinePackaged:'discovered-from-working-campus'},null,2));
+console.log(JSON.stringify({ok:true,revision:'v190-weaveling-ai-required-quest',provider:'downloaded-local',schema:true,localStructuredTransport:true,requestSpecificAIContent:true,deterministicQuestFallback:false,aiFailurePersistsNothing:true,plainLanguageActivation:true,qualificationHandoff:true,offlinePackaged:'discovered-from-working-campus'},null,2));

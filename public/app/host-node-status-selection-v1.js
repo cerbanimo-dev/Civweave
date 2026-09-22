@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const REVISION='host-node-status-selection-v2-mobile-guild-compat';
+const REVISION='host-node-status-selection-v3-decentralized-guild-release';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
@@ -17,9 +17,34 @@ function currentMeta(){
 function selectedRecord(){
   try{
     const saved=parse(localStorage.getItem(SELECTION_KEY),{});
-    return{origin:new URL(saved?.origin||'').origin,nodeId:clean(saved?.nodeId,180)};
+    return{...saved,origin:new URL(saved?.origin||'').origin,nodeId:clean(saved?.nodeId,180)};
   }catch{return{origin:'',nodeId:''};}
 }
+function serviceWorkerTargets(){
+  const targets=[];
+  if(navigator.serviceWorker?.controller)targets.push(navigator.serviceWorker.controller);
+  return navigator.serviceWorker?.ready?.then(registration=>{
+    if(registration?.active&&!targets.includes(registration.active))targets.push(registration.active);
+    return targets;
+  }).catch(()=>targets)||Promise.resolve(targets);
+}
+async function sendWorker(message){for(const target of await serviceWorkerTargets())try{target.postMessage(message)}catch{}}
+async function syncReleaseSource(selection=selectedRecord()){
+  if(!selection?.origin)return false;
+  await sendWorker({type:'CIVWEAVE_GUILD_RELEASE_CONFIG',selection:{origin:selection.origin,nodeId:clean(selection.nodeId,180),selectedAt:selection.selectedAt||new Date().toISOString()}});
+  return true;
+}
+async function trustReleasePartner(anchor){
+  if(!anchor?.publicKey)throw new Error('A partner release public key is required.');
+  await sendWorker({type:'CIVWEAVE_RELEASE_TRUST_ANCHOR',explicit:true,anchor});
+  return true;
+}
+async function removeReleasePartner(keyId){
+  if(!clean(keyId,180))throw new Error('A release partner key id is required.');
+  await sendWorker({type:'CIVWEAVE_RELEASE_TRUST_REMOVE',explicit:true,keyId:clean(keyId,180)});
+  return true;
+}
+async function checkGuildRelease(){await syncReleaseSource();await sendWorker({type:'CIVWEAVE_GUILD_RELEASE_CHECK'});return true}
 function slotUnknown(id){
   const text=clean(document.getElementById(id)?.textContent,40);
   return !text||text==='—'||text==='-';
@@ -34,6 +59,7 @@ function persistSelection(meta){
   const selection=Object.freeze({schema:'civweave.host-node-selection.v1',origin:meta.origin,nodeId:meta.nodeId,displayName:title,selectedAt:new Date().toISOString(),source:REVISION,loginMode:'legacy-mobile-selection'});
   localStorage.setItem(HOST_ENDPOINT_KEY,meta.origin);
   localStorage.setItem(SELECTION_KEY,JSON.stringify(selection));
+  syncReleaseSource(selection).catch(()=>{});
   return selection;
 }
 function applyMobileCompatibility(){
@@ -50,7 +76,7 @@ function applyMobileCompatibility(){
 }
 function sync(){
   const {origin,nodeId}=currentMeta();
-  if(!origin||!nodeId){applyMobileCompatibility();return false;}
+  if(!origin||!nodeId){applyMobileCompatibility();syncReleaseSource().catch(()=>{});return false;}
   let changed=false;
   try{
     const url=new URL(location.href);
@@ -63,6 +89,7 @@ function sync(){
   }catch{}
   globalThis.CivweaveHostNodePaidJoinV1?.apply?.();
   applyMobileCompatibility();
+  syncReleaseSource().catch(()=>{});
   return changed;
 }
 function selectLegacyMobileGuild(event){
@@ -88,8 +115,11 @@ function selectLegacyMobileGuild(event){
 }
 
 document.addEventListener('click',selectLegacyMobileGuild,true);
+addEventListener('civweave:release-trust-import',event=>{trustReleasePartner(event.detail).catch(()=>{})});
+addEventListener('civweave:release-trust-remove',event=>{removeReleasePartner(event.detail?.keyId).catch(()=>{})});
 const observer=new MutationObserver(sync);observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});else sync();
+navigator.serviceWorker?.addEventListener?.('controllerchange',()=>syncReleaseSource().catch(()=>{}));
 addEventListener('pagehide',()=>{observer.disconnect();document.removeEventListener('click',selectLegacyMobileGuild,true);},{once:true});
-globalThis.CivweaveHostNodeStatusSelectionV1=Object.freeze({revision:REVISION,sync,applyMobileCompatibility,mobileSelectionOnly});
+globalThis.CivweaveHostNodeStatusSelectionV1=Object.freeze({revision:REVISION,sync,applyMobileCompatibility,mobileSelectionOnly,syncReleaseSource,trustReleasePartner,removeReleasePartner,checkGuildRelease});
 })();

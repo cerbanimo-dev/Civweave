@@ -71,16 +71,24 @@ function safeHttpsOrigin(value: unknown) {
   }
 }
 
+function publicMobileGuildRow(row: JsonRecord, origin: string) {
+  if (!row || String(row.runtime || "") !== "cloudflare-mobile-guild-edge") return false;
+  const capabilities = Array.isArray(row.capabilities) ? row.capabilities.map(String) : [];
+  return capabilities.includes("public-guild-directory") && safeHttpsOrigin(row.publicOrigin) === origin;
+}
+
 async function directoryMobileGuild(directoryUrl: string, nodeId: string | null, origin: string) {
-  if (!nodeId || !origin) return null;
+  if (!origin) return null;
   const directory = await getJson(directoryUrl).catch(() => ({ ok: false, status: 502, payload: {} }));
   if (!directory.ok) return null;
   const rows = Array.isArray(directory.payload?.nodes) ? directory.payload.nodes : [];
-  const row = rows.find((candidate: JsonRecord) => String(candidate?.nodeId || "") === nodeId);
-  if (!row || String(row.runtime || "") !== "cloudflare-mobile-guild-edge") return null;
-  const capabilities = Array.isArray(row.capabilities) ? row.capabilities.map(String) : [];
-  if (!capabilities.includes("public-guild-directory") || safeHttpsOrigin(row.publicOrigin) !== origin) return null;
-  return row;
+  const candidates = rows.filter((candidate: JsonRecord) => publicMobileGuildRow(candidate, origin));
+  if (!candidates.length) return null;
+  if (nodeId) {
+    const exact = candidates.find((candidate: JsonRecord) => String(candidate?.nodeId || "") === nodeId);
+    if (exact) return exact;
+  }
+  return candidates[0] || null;
 }
 
 function mobileGuildPublishedSlots(capacity: JsonRecord) {
@@ -93,18 +101,28 @@ function mobileGuildPublishedSlots(capacity: JsonRecord) {
   };
 }
 
-async function mobileGuildStatus(target: URL, nodeId: string, directoryRow: JsonRecord, extra: JsonRecord = {}) {
+async function mobileGuildStatus(target: URL, requestedNode: string, directoryRow: JsonRecord, extra: JsonRecord = {}) {
+  const guildId = requestedNodeId(String(directoryRow?.nodeId || ""));
+  const nodeId = requestedNodeId(requestedNode) || guildId;
+  if (!guildId || !nodeId) {
+    return reply({ ok: false, error: "mobile-guild-directory-invalid", hostOrigin: target.origin, nodeId: nodeId || requestedNode, ...extra }, 502);
+  }
   try {
     const [statusResult, capacityResult] = await Promise.all([
       getJson(new URL("/api/guild/status", target)),
       getJson(new URL("/api/fabric/capacity", target)),
     ]);
     const status = statusResult.payload || {}, capacity = capacityResult.payload || {};
-    if (!statusResult.ok || status?.ok !== true || status?.claimed !== true || String(status.guildId || "") !== nodeId) {
-      return reply({ ok: false, error: "mobile-guild-status-unavailable", hostOrigin: target.origin, nodeId, guildStatus: statusResult.status, ...extra }, 502);
+    if (!statusResult.ok || status?.ok !== true || status?.claimed !== true || String(status.guildId || "") !== guildId) {
+      return reply({ ok: false, error: "mobile-guild-status-unavailable", hostOrigin: target.origin, nodeId, guildId, guildStatus: statusResult.status, ...extra }, 502);
     }
     if (!capacityResult.ok || capacity?.status !== "ready" || !Array.isArray(capacity?.starterNodes) || capacity.starterNodes.length < 3) {
-      return reply({ ok: false, error: "mobile-guild-fabric-unavailable", hostOrigin: target.origin, nodeId, capacityStatus: capacityResult.status, ...extra }, 502);
+      return reply({ ok: false, error: "mobile-guild-fabric-unavailable", hostOrigin: target.origin, nodeId, guildId, capacityStatus: capacityResult.status, ...extra }, 502);
+    }
+    const starterNodes = capacity.starterNodes;
+    const requestedIsGuildNode = nodeId === guildId || starterNodes.some((row: JsonRecord) => String(row?.nodeId || "") === nodeId);
+    if (!requestedIsGuildNode) {
+      return reply({ ok: false, error: "mobile-guild-node-not-found", hostOrigin: target.origin, nodeId, guildId, ...extra }, 404);
     }
     const slots = mobileGuildPublishedSlots(capacity);
     return reply({
@@ -113,7 +131,8 @@ async function mobileGuildStatus(target: URL, nodeId: string, directoryRow: Json
       kind: "cloudflare-mobile-guild-edge",
       hostOrigin: target.origin,
       nodeId,
-      displayName: String(status.displayName || directoryRow.displayName || nodeId),
+      guildId,
+      displayName: String(status.displayName || directoryRow.displayName || guildId),
       runtime: "cloudflare-mobile-guild-edge",
       status: "online",
       health: { ok: true, connections: null, updatedAt: status.updatedAt || capacity.updatedAt || directoryRow.updatedAt || null },
@@ -134,12 +153,12 @@ async function mobileGuildStatus(target: URL, nodeId: string, directoryRow: Json
         residentSessionSchema: String(capacity.residentSessionSchema || "") || null,
       } : undefined,
       publicMobileGuild: true,
-      starterNodeCount: capacity.starterNodes.length,
+      starterNodeCount: starterNodes.length,
       aiEnabled: capacity.aiEnabled === true,
       ...extra,
     });
   } catch (error) {
-    return reply({ ok: false, error: "mobile-guild-status-fetch-failed", hostOrigin: target.origin, nodeId, message: String((error as Error)?.message || error), ...extra }, 502);
+    return reply({ ok: false, error: "mobile-guild-status-fetch-failed", hostOrigin: target.origin, nodeId, guildId, message: String((error as Error)?.message || error), ...extra }, 502);
   }
 }
 
@@ -185,8 +204,15 @@ async function stagingStatus(request: Request) {
   const target = hostOrigin(requestUrl.searchParams.get("host"));
   if (!target) return reply({ ok: false, error: "host-node-not-allowed" }, 400);
   const nodeId = requestedNodeId(requestUrl.searchParams.get("node"));
-  const mobile = await directoryMobileGuild(STAGING_CORE_DIRECTORY, nodeId, target.origin);
-  if (mobile && nodeId) return mobileGuildStatus(target, nodeId, mobile, { environment: "staging", productionIsolation: true, stagingMobileDirectory: true });
+  const stagingMobile = await directoryMobileGuild(STAGING_CORE_DIRECTORY, nodeId, target.origin);
+  const publicMobile = stagingMobile ? null : await directoryMobileGuild(CORE_DIRECTORY, nodeId, target.origin);
+  const mobile = stagingMobile || publicMobile;
+  if (mobile && nodeId) return mobileGuildStatus(target, nodeId, mobile, {
+    environment: "staging",
+    productionIsolation: true,
+    stagingMobileDirectory: Boolean(stagingMobile),
+    publicGuildCloudException: Boolean(publicMobile),
+  });
 
   const pagesOrigin = requestOrigin(request);
   if (target.origin !== pagesOrigin && target.origin !== STAGING_GUILD_SERVER_ORIGIN) {

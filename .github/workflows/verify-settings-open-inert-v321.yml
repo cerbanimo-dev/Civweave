@@ -1,10 +1,30 @@
 name: Verify Settings Open Inertness
 on:
+  pull_request:
+    paths:
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-route-v323.js'
+      - 'public/app/settings-local-route-v327.js'
+      - 'public/app/settings-direct-entry-v339.js'
+      - 'public/app/working-campus-v440.html'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/document-lifecycle-v221.js'
+      - 'public/app/server-ai-settings-v301.js'
+      - 'public/app/gemini-task-tier-router-v213.js'
+      - 'public/app/local-ai/download-manager-v267.js'
+      - 'public/app/local-ai/download-policy-v278.js'
+      - 'public/app/local-ai/settings-panel-v267.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
+      - 'scripts/verify-settings-open-inert-v321.mjs'
+      - '.github/workflows/verify-settings-open-inert-v321.yml'
   push:
     branches: [staging]
     paths:
       - 'public/app/settings-gateway-v317.js'
       - 'public/app/settings-local-route-v323.js'
+      - 'public/app/settings-local-route-v327.js'
+      - 'public/app/settings-direct-entry-v339.js'
+      - 'public/app/working-campus-v440.html'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/document-lifecycle-v221.js'
       - 'public/app/server-ai-settings-v301.js'
