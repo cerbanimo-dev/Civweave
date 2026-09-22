@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v3-decentralized-guild-release-20260917';
-const CACHE='cw-live-runtime-release-generation-v3-20260917';
+const REVISION='release-generation-boundary-v4-complete-shell-bootstrap-20260922';
+const CACHE='cw-live-runtime-release-generation-v4-20260922';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
 const GUILD_CACHE_PREFIX='cw-guild-release-v1-';
 const DB_NAME='civweave-decentralized-release-v1';
@@ -29,7 +29,27 @@ const WARM_PATHS=Object.freeze([
   '/app/five-system-direct-navigation-v1.js',
   '/app/persistent-system-context-v1.js',
   '/app/persistent-shell-actions-v1.js',
+  '/app/generation-lifecycle-v2.js',
   '/app/subsystem-avatar-state-v347.js',
+  '/app/settings-local-route-v331.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-gateway-v317.js',
+  '/app/shared-guide-surface-v236.js',
+  '/app/guide-chat-surface-v350.js',
+  '/app/local-ai/gemma4-current-registry-authority-v1.js',
+  '/app/local-ai/gemma4-structured-quest-completion-v1.js',
+  '/app/local-ai/gemma4-litert-request-authority-v1.js',
+  '/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js',
+  '/app/local-ai/gemma4-structured-task-authority-v1.js',
+  '/app/local-ai/gemma4-weave-draft-pipeline-v1.js',
+  '/app/local-ai/gemma4-first-request-intake-bridge-v1.js',
+  '/app/local-ai/gemma4-route-integrity-v1.js',
+  '/app/local-ai/gemma4-learning-plan-entry-authority-v1.js',
+  '/app/generation-failure-inspector-v1.js',
+  '/app/human-message-bubble-v1.js',
+  '/app/human-chat-network-v1.js',
+  '/app/human-chat-guild-context-v1.js',
   '/app/platform-experience-v160.css',
   '/app/working-campus-v440.html',
   '/app/realm-console-v140.html',
