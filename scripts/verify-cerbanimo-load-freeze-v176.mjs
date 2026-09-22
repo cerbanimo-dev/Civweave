@@ -18,7 +18,7 @@ assert(realmNavigationWorker.includes("const NETWORK_TIMEOUT_MS=4000"),'Embedded
 assert(realmNavigationWorker.includes('new AbortController()'),'Embedded realm navigation must abort stalled requests.');
 assert(realmNavigationWorker.includes("shellRedirect(url,spec.system)"),'Top-level realm navigation must move into the persistent shell rather than replacing its navbar.');
 
-assert(releaseWorker.includes("const REVISION='release-generation-boundary-v2-bounded-network-20260915'"),'Runtime release generation must use the bounded-network revision.');
+assert(releaseWorker.includes("const REVISION='release-generation-boundary-v4-complete-shell-bootstrap-20260922'"),'Runtime release generation must use the complete-shell bounded-network revision.');
 assert(releaseWorker.includes('const NETWORK_TIMEOUT_MS=3200'),'Runtime JS/CSS/HTML requests must have a finite network deadline.');
 assert(releaseWorker.includes('const WARM_TIMEOUT_MS=2500'),'Warm-cache requests must have a finite deadline.');
 assert(releaseWorker.includes('const WARM_CONCURRENCY=6'),'Warm-cache fanout must remain bounded on mobile connections.');
@@ -27,10 +27,22 @@ assert(releaseWorker.includes("const controller=typeof AbortController==='functi
 assert(releaseWorker.includes("'/app/realm-console-v140.css'"),'The Cerbanimo first-paint stylesheet must be warmed with the current release.');
 assert(releaseWorker.includes("'/app/realm-console-v140.js'"),'The Cerbanimo console runtime must be warmed with the current release.');
 assert(releaseWorker.includes("'/app/cerbanimo-quest-engine-v144.js'"),'The Cerbanimo quest engine must be warmed with the current release.');
+for(const path of [
+  '/app/generation-lifecycle-v2.js',
+  '/app/settings-local-route-v331.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/shared-guide-surface-v236.js',
+  '/app/local-ai/gemma4-current-registry-authority-v1.js',
+  '/app/local-ai/gemma4-weave-draft-pipeline-v1.js',
+  '/app/generation-failure-inspector-v1.js',
+  '/app/human-message-bubble-v1.js',
+  '/app/human-chat-network-v1.js',
+  '/app/human-chat-guild-context-v1.js'
+]) assert(releaseWorker.includes(`'${path}'`),`Guild releases must require persistent-shell dependency ${path}.`);
 assert(releaseWorker.includes('queue=[...WARM_PATHS]'),'Release warming must use a bounded work queue rather than unbounded request fanout.');
 
 assert(activeWorker.includes('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-persistent-shell-r5'),'Installed staging PWA must activate persistent realm routing.');
-assert(activeWorker.includes('/service-worker-release-generation-v1.js?v=release-generation-boundary-v2-bounded-network-20260915'),'Installed staging must force clients onto the bounded runtime-fetch generation.');
+assert(activeWorker.includes('/service-worker-release-generation-v1.js?v=release-generation-boundary-v4-complete-shell-bootstrap-20260922'),'Installed staging must force clients onto the complete-shell runtime generation.');
 assert(activeWorker.includes('staging-installed-entry-takeover-v21-learning-source-pack-authority'),'Staging must remain on the current installed-entry worker generation.');
 assert(activeWorker.includes('persistent-stage-viewport-r1'),'Active staging worker must carry the persistent-stage viewport repair.');
 assert(activeWorker.includes('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required'),'Installed staging must require the bounded-lifecycle shell generation.');
@@ -41,6 +53,16 @@ assert(/data-build="persistent-system-shell-v1-r\d+[^\"]*"/.test(shell),'Persist
 assert(shell.includes('/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding'),'Persistent shell must load the bounded generation lifecycle runtime.');
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent stage must explicitly fill the dynamic viewport above the universal navbar.');
 assert(!/#cw-persistent-system-stage\{[^}]*height:auto/.test(shell),'Persistent stage must never regress to intrinsic iframe height:auto.');
+assert(shell.includes('persistent-system-shell-v1-r28-paint-first-shell-boot'),'Persistent shell must carry the paint-first bootstrap generation.');
+for(const tag of [
+  '<script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner" defer></script>',
+  '<script src="/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh" defer></script>',
+  '<script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail" defer></script>',
+  '<script src="/app/persistent-shell-actions-v1.js?v=1.0.7-direct-routes-persistent-guild-map-nav" defer></script>',
+  '<script src="/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding" defer></script>'
+]) assert(shell.includes(tag),`Paint-first shell is missing deferred critical runtime: ${tag}`);
+assert(shell.indexOf('/app/persistent-system-shell-v1.js')<shell.indexOf('/app/settings-local-route-v331.js'),'Shell navigation runtime must precede optional Settings startup.');
+assert(shell.indexOf('/app/themed-system-nav-v178.js')<shell.indexOf('/app/settings-local-route-v331.js'),'Canonical navbar must precede optional Settings startup.');
 
 assert(realm.includes('realm-console-canonical-v257-bounded-mobile-boot'),'Cerbanimo must use the bounded mobile boot build.');
 assert(!realm.includes('/app/install-boundary-v146.js'),'Cerbanimo frame must not boot the global install/shell observer stack.');
@@ -61,4 +83,4 @@ assert(generationLifecycle.includes('const wiredFrames=new WeakSet()'),'Cross-fr
 assert(!generationLifecycle.includes('new MutationObserver'),'Cross-frame lifecycle discovery must not watch the entire shell DOM.');
 assert(generationLifecycle.includes('for(const delay of [0,100,500,1500,4000,9000])setTimeout(refreshBindings,delay)'),'Cross-frame lifecycle discovery must remain finite.');
 
-console.log('Cerbanimo freeze regression contract passed: installed runtime requests are deadline-bounded, warm-cache fanout is finite, Cerbanimo first paint is parser-independent from reward runtimes, and cross-frame lifecycle discovery remains bounded.');
+console.log('Cerbanimo freeze regression contract passed: the parent shell paints before external runtimes, shell-critical navigation precedes Settings/AI/chat, Guild releases require the current shell dependency graph, Cerbanimo first paint is parser-independent, and cross-frame lifecycle discovery remains bounded.');
