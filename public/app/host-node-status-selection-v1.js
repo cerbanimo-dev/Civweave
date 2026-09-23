@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const REVISION='host-node-status-selection-v3-decentralized-guild-release';
+const REVISION='host-node-status-selection-v4-compatible-guild-release-cutover';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
@@ -29,8 +29,15 @@ function serviceWorkerTargets(){
   }).catch(()=>targets)||Promise.resolve(targets);
 }
 async function sendWorker(message){for(const target of await serviceWorkerTargets())try{target.postMessage(message)}catch{}}
+async function clearReleaseSource(reason='no-compatible-release-source'){
+  await sendWorker({type:'CIVWEAVE_GUILD_RELEASE_CLEAR',reason,revision:REVISION});
+  return true;
+}
 async function syncReleaseSource(selection=selectedRecord()){
-  if(!selection?.origin)return false;
+  if(!selection?.origin){await clearReleaseSource('no-selected-guild');return false;}
+  // Legacy Mobile Guild selection is a connectivity choice, not proof that the Guild can transport
+  // a complete signed Civweave application release. Do not let it pin the PWA to stale shell assets.
+  if(selection.loginMode==='legacy-mobile-selection'){await clearReleaseSource('legacy-mobile-guild-not-release-capable');return false;}
   await sendWorker({type:'CIVWEAVE_GUILD_RELEASE_CONFIG',selection:{origin:selection.origin,nodeId:clean(selection.nodeId,180),selectedAt:selection.selectedAt||new Date().toISOString()}});
   return true;
 }
@@ -121,5 +128,5 @@ const observer=new MutationObserver(sync);observer.observe(document.documentElem
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});else sync();
 navigator.serviceWorker?.addEventListener?.('controllerchange',()=>syncReleaseSource().catch(()=>{}));
 addEventListener('pagehide',()=>{observer.disconnect();document.removeEventListener('click',selectLegacyMobileGuild,true);},{once:true});
-globalThis.CivweaveHostNodeStatusSelectionV1=Object.freeze({revision:REVISION,sync,applyMobileCompatibility,mobileSelectionOnly,syncReleaseSource,trustReleasePartner,removeReleasePartner,checkGuildRelease});
+globalThis.CivweaveHostNodeStatusSelectionV1=Object.freeze({revision:REVISION,sync,applyMobileCompatibility,mobileSelectionOnly,syncReleaseSource,clearReleaseSource,trustReleasePartner,removeReleasePartner,checkGuildRelease});
 })();
