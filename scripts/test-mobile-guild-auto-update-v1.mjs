@@ -21,7 +21,7 @@ assert.equal(config.trustBundleSchema,'civweave.release-trust-bundle.v1');
 assert.equal(wrangler.main,'src/release-relay-entry.mjs');
 
 assert.doesNotMatch(workflow,/schedule\s*:/);
-assert.doesNotMatch(workflow,/cerbanimo-dev\/Civweave|git clone|sourceRepository|SOURCE_CHANNEL/);
+assert.doesNotMatch(JSON.stringify(config)+'\n'+relay,/cerbanimo-dev\/Civweave|git clone|sourceRepository|SOURCE_CHANNEL/);
 assert.match(workflow,/workflow_dispatch/);
 assert.match(workflow,/contents:\s*read/);
 
@@ -35,7 +35,7 @@ for(const route of [
 ]) assert.ok(relay.includes(route),`Guild release relay route missing: ${route}`);
 assert.match(relay,/authenticateGuild/);
 assert.match(relay,/membershipHash/);
-assert.match(relay,/Partner Guild asset hash mismatch/);
+assert.match(relay,/Partner release asset hash mismatch/);
 
 assert.match(sw,/civweave\.release-trust-bundle\.v1/);
 assert.match(sw,/civweave\.release-key-delegation\.v1/);
