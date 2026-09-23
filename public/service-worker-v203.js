@@ -3,7 +3,7 @@
 // persistent-stage-viewport-r1: the iframe stage has explicit dynamic viewport height so intrinsic iframe sizing cannot expose the parent shell as a dark card.
 // canonical-home-v1: top-level home navigation enters the persistent shell; embedded home remains the validated v440 campus.
 // five-system-pages-v1: top-level realm navigation enters the persistent shell; embedded realm content remains bounded and validated.
-// release-generation-boundary-v4: persistent-shell bootstrap dependencies are release-required; first-paint runtime requests remain deadline-bounded and Guild transport stays signed/local-trust governed.
+// release-generation-boundary-v5: Guild transport becomes exclusive only after a complete signed release is installed; legacy/incomplete Guilds remain on the current origin release until compatible cutover.
 // navigation-runtime-recovery-v3: stale navigation code/pages are purged once on every installed Civweave origin without touching user data.
 // direct-shell-retirement-v1: only retired legacy shells are purged; the current persistent-system-shell-v1 is not retired.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail across all five systems.
@@ -19,7 +19,7 @@ importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved
 importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
 // Staging takeover for the current Gemma phone stack. It runs before historical local-AI coherence so retired Q4 presentation scripts cannot reclaim Settings after a successful LiteRT import.
 importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v5-qwen-internal');
-importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v4-complete-shell-bootstrap-20260922');
+importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v5-compatible-guild-cutover-20260923');
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
