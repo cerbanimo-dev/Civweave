@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v4-complete-shell-bootstrap-20260922';
-const CACHE='cw-live-runtime-release-generation-v4-20260922';
+const REVISION='release-generation-boundary-v5-compatible-guild-cutover-20260923';
+const CACHE='cw-live-runtime-release-generation-v5-20260923';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
 const GUILD_CACHE_PREFIX='cw-guild-release-v1-';
 const DB_NAME='civweave-decentralized-release-v1';
@@ -178,6 +178,27 @@ async function setGuildConfig(input={}){
   return config;
 }
 async function guildConfig(){return await dbGet('guild')||null}
+const guildCompatibility=new Map();
+async function activeGuildRelease(){
+  const active=await dbGet('activeRelease');
+  if(!active?.cacheName)return null;
+  if(guildCompatibility.has(active.cacheName))return guildCompatibility.get(active.cacheName)?active:null;
+  let complete=true;
+  try{
+    const cache=await caches.open(active.cacheName);
+    for(const pathname of WARM_PATHS){
+      const response=await cache.match(cacheKey(pathname),{ignoreSearch:true});
+      if(!valid(response,pathname)){complete=false;break}
+    }
+  }catch{complete=false}
+  guildCompatibility.set(active.cacheName,complete);
+  if(!complete){
+    await dbDelete('activeRelease').catch(()=>{});
+    try{await notifyClients({type:'CIVWEAVE_GUILD_RELEASE_INCOMPATIBLE',releaseId:active.releaseId||'',cacheName:active.cacheName,requiredGeneration:REVISION})}catch{}
+    return null;
+  }
+  return active;
+}
 async function remoteTrustBundle(guild){
   const response=await boundedFetch(new Request(`${guild.origin}/api/civweave-trust/bundle`,{cache:'no-store'}),NETWORK_TIMEOUT_MS);
   if(response.status===404)return{schema:TRUST_BUNDLE_SCHEMA,delegations:[],revocations:[]};
@@ -295,6 +316,7 @@ async function installGuildRelease(guild,manifest){
       await cache.put(cacheKey(pathname),response.clone());
     }
     await dbPut('activeRelease',{schema:'civweave.active-guild-release.v1',releaseId:manifest.releaseId,cacheName,signerKeyId:manifest.signerKeyId,activatedAt:new Date().toISOString(),guildOrigin:guild.origin});
+    guildCompatibility.set(cacheName,true);
     const names=await caches.keys();
     await Promise.all(names.filter(name=>name.startsWith(GUILD_CACHE_PREFIX)&&name!==cacheName&&name!==stagingName).map(name=>caches.delete(name)));
     return{releaseId:manifest.releaseId,cacheName};
@@ -323,19 +345,11 @@ async function checkGuildRelease({force=false}={}){
 async function notifyClients(message){
   try{for(const client of await self.clients.matchAll({type:'window',includeUncontrolled:true}))client.postMessage(message)}catch{}
 }
-async function activeGuildResponse(pathname,method){
-  const guild=await guildConfig();
-  if(!guild)return null;
-  const active=await dbGet('activeRelease');
-  if(active?.cacheName){
-    const response=await(await caches.open(active.cacheName)).match(cacheKey(pathname),{ignoreSearch:true});
-    if(valid(response,pathname))return method==='HEAD'?head(response):response;
-  }
-  const fresh=await freshCached(pathname,method);
-  if(fresh)return fresh;
-  const legacy=await legacyFallback(pathname,method);
-  if(legacy)return legacy;
-  return new Response('Civweave is connected to a Guild, but this runtime asset is not present in a verified Guild release on this device.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
+async function activeGuildResponse(pathname,method,active){
+  if(!active?.cacheName)return null;
+  const response=await(await caches.open(active.cacheName)).match(cacheKey(pathname),{ignoreSearch:true});
+  if(valid(response,pathname))return method==='HEAD'?head(response):response;
+  return new Response('The active signed Guild release is incomplete for this runtime generation.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-guild-release':String(active.releaseId||'')}});
 }
 async function network(request,pathname){
   try{
@@ -356,14 +370,20 @@ async function legacyFallback(pathname,method){
   return method==='HEAD'?head(response):response;
 }
 async function responseFor(request,pathname){
-  if(await guildConfig())return activeGuildResponse(pathname,request.method);
+  const guild=await guildConfig();
+  if(guild){
+    const active=await activeGuildRelease();
+    if(active)return activeGuildResponse(pathname,request.method,active);
+  }
+  // A selected Guild does not become exclusive application transport until a complete signed release is installed.
+  // This keeps legacy/partially-upgraded Guilds from pinning clients to incomplete shell generations.
   const live=await network(request,pathname);
   if(live)return live;
   const fresh=await freshCached(pathname,request.method);
   if(fresh)return fresh;
   const legacy=await legacyFallback(pathname,request.method);
   if(legacy)return legacy;
-  return new Response('Civweave runtime asset is unavailable offline on this device.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
+  return new Response(guild?'The selected Guild does not yet have a compatible signed Civweave release, and the current installed release is unavailable.':'Civweave runtime asset is unavailable offline on this device.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
 }
 async function warmOne(cache,pathname){
   try{
@@ -418,6 +438,7 @@ self.addEventListener('activate',event=>event.waitUntil(activationRepair()));
 self.addEventListener('message',event=>{
   const data=event.data||{};
   if(data.type==='CIVWEAVE_GUILD_RELEASE_CONFIG')event.waitUntil((async()=>{const config=await setGuildConfig(data.selection||data);await checkGuildRelease({force:true}).catch(error=>notifyClients({type:'CIVWEAVE_GUILD_RELEASE_ERROR',error:String(error?.message||error)}));return config})());
+  if(data.type==='CIVWEAVE_GUILD_RELEASE_CLEAR')event.waitUntil((async()=>{await dbDelete('guild').catch(()=>{});await dbDelete('activeRelease').catch(()=>{});guildCompatibility.clear();await notifyClients({type:'CIVWEAVE_GUILD_RELEASE_STATUS',result:{ok:true,reason:'release-source-cleared'}})})());
   if(data.type==='CIVWEAVE_RELEASE_TRUST_ANCHOR'&&data.explicit===true)event.waitUntil((async()=>{const anchor=await addAnchor(data.anchor||{});await notifyClients({type:'CIVWEAVE_RELEASE_TRUST_CHANGED',action:'added',keyId:anchor.keyId});await checkGuildRelease({force:true}).catch(()=>null)})());
   if(data.type==='CIVWEAVE_RELEASE_TRUST_REMOVE'&&data.explicit===true)event.waitUntil((async()=>{const removed=await removeAnchor(clean(data.keyId,180));await notifyClients({type:'CIVWEAVE_RELEASE_TRUST_CHANGED',action:'removed',keyId:clean(data.keyId,180),removed})})());
   if(data.type==='CIVWEAVE_GUILD_RELEASE_CHECK')event.waitUntil(checkGuildRelease({force:true}).then(result=>notifyClients({type:'CIVWEAVE_GUILD_RELEASE_STATUS',result})).catch(error=>notifyClients({type:'CIVWEAVE_GUILD_RELEASE_ERROR',error:String(error?.message||error)})));
@@ -434,5 +455,5 @@ self.addEventListener('fetch',event=>{
   if(request.mode==='navigate')event.waitUntil(checkGuildRelease().catch(()=>null));
   event.respondWith(responseFor(request,pathname));
 });
-self.CivweaveReleaseGenerationV1=Object.freeze({revision:REVISION,cache:CACHE,warmPaths:[...WARM_PATHS],networkTimeoutMs:NETWORK_TIMEOUT_MS,warmTimeoutMs:WARM_TIMEOUT_MS,warmConcurrency:WARM_CONCURRENCY,policy:'guild-selected-means-guild-only-signed-release-transport-local-trust-anchors-delegated-partner-keys-no-central-key-or-release-fallback'});
+self.CivweaveReleaseGenerationV1=Object.freeze({revision:REVISION,cache:CACHE,warmPaths:[...WARM_PATHS],networkTimeoutMs:NETWORK_TIMEOUT_MS,warmTimeoutMs:WARM_TIMEOUT_MS,warmConcurrency:WARM_CONCURRENCY,policy:'complete-signed-guild-release-is-exclusive-transport-legacy-or-incomplete-guilds-remain-on-current-origin-release-until-compatible-cutover'});
 })();
