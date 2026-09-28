@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-09-21T10:44:38Z",
-  "before": 510,
-  "after": 276,
-  "rejected": 234,
+  "built_at": "2026-09-28T11:44:14Z",
+  "before": 499,
+  "after": 267,
+  "rejected": 232,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -24,40 +24,39 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 11,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 7,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 8
+        "peertube": 7,
+        "wikimedia-commons": 3
       },
       "top_titles": [
+        "Topographical maps for all!",
         "Come and learn how free maps, free knowledge can help care for the world",
         "How to use Mergin Maps in Academia",
         "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
-        "Topographical maps for all!",
         "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
-        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 7,
+      "records": 9,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 4,
-        "wikimedia-commons": 6
+        "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
@@ -93,17 +92,16 @@
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 2,
       "providers": {
-        "wikimedia-commons": 3,
+        "wikimedia-commons": 2,
         "peertube": 4
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -165,8 +163,8 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -197,14 +195,15 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 9,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 5,
+        "peertube": 6,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -237,17 +236,16 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
-      "mesh_redistributable": 5,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
         "juneteeth 2026 part1 introduction chat and arcus chroma"
       ]
     },
@@ -312,19 +310,16 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 4,
-        "peertube": 2
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -408,15 +403,17 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 2,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 4
+        "peertube": 6
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
-        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
+        "Mesecons Tutorial - Basic Circuits",
         "[Tech Maid] Mesecons Basics",
+        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
       ]
     },
@@ -438,13 +435,12 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 1,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Mini Tutorial J&D Creations Sewing Feet",
         "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
       ]
     },
@@ -627,12 +623,11 @@
       "records": 5,
       "mesh_redistributable": 3,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 1
+        "peertube": 5
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-        "Partners in Safety- An Insurance and Small Business Perspective",
         "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
@@ -659,23 +654,22 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 27,
-      "mesh_redistributable": 27,
+      "records": 19,
+      "mesh_redistributable": 19,
       "providers": {
-        "peertube": 21,
-        "wikimedia-commons": 6
+        "peertube": 19
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
         "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
-        "English Grammar — Present Continuous — Teaching Ideas — 1",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
-        "[Language learning] How to create and edit language in LingLibre?",
-        "[Language learning] How to fast read with LingLibre using Keyboard shortcuts"
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "NFLSHS-CHINA: Using Synthetic Biology to Decode the Secrets of Youth (2025) - Team Presentation [English]",
+        "Collective｜ Learn C1 English Adjective – Describe group efforts strongly.",
+        "Colonial｜ Learn C1 English Adjective – Talk about historical contexts."
       ]
     }
   },
@@ -683,13 +677,6 @@
     {
       "provider": "wikimedia-commons",
       "title": "Baroque Art Rembrandt cc",
-      "relevance_topics": [
-        "arts-culture"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Color Adjustements for digital-painting using Krita",
       "relevance_topics": [
         "arts-culture"
       ]
@@ -731,13 +718,6 @@
     },
     {
       "provider": "wikimedia-commons",
-      "title": "Hubble Science- Planetary Missions, Fossils of our Solar System (SVS14267)",
-      "relevance_topics": [
-        "astronomy-space"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
       "title": "Solar System Resource Page (SVS20391)",
       "relevance_topics": [
         "astronomy-space"
@@ -752,7 +732,7 @@
     },
     {
       "provider": "wikimedia-commons",
-      "title": "The oldest stars in the Universe – A tour from the Big Bang to the present and an exploration of the earliest era, the Dark Ages (with info on Square Kilometre Array modern astronomy)",
+      "title": "Solar System Song",
       "relevance_topics": [
         "astronomy-space"
       ]
@@ -760,6 +740,13 @@
     {
       "provider": "peertube",
       "title": "Astronomy and astrophysics in Africa ｜ The Royal Society-mm8rbo_mKfc",
+      "relevance_topics": [
+        "astronomy-space"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Formation of the Solar System",
       "relevance_topics": [
         "astronomy-space"
       ]
@@ -808,16 +795,16 @@
     },
     {
       "provider": "peertube",
-      "title": "Factorio Space Age: To The Edge of the Solar System! - 10/10/2025, 5:05:30 PM",
+      "title": "Factorio Space Age: To The Edge of the Solar System! - 10/10/2025, 9:14:25 PM",
       "relevance_topics": [
         "astronomy-space"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Factorio Space Age: To The Edge of the Solar System! - 10/10/2025, 9:14:25 PM",
+      "title": "Inside Anthropic's molecular biology lab",
       "relevance_topics": [
-        "astronomy-space"
+        "biology-life"
       ]
     },
     {
@@ -906,6 +893,13 @@
     },
     {
       "provider": "peertube",
+      "title": "Magnesium and Lemon Juice",
+      "relevance_topics": [
+        "chemistry-foundations"
+      ]
+    },
+    {
+      "provider": "peertube",
       "title": "The Royal Society - Talk： NanoGlow - lighting up a sustainable future",
       "relevance_topics": [
         "chemistry-foundations"
@@ -930,6 +924,13 @@
       "title": "What is average atomic mass 2023",
       "relevance_topics": [
         "chemistry-foundations"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "#fediday2025 Jos Poortvliet - Good and bad ways for the public sector to support a federated future (EN)",
+      "relevance_topics": [
+        "civics-society"
       ]
     },
     {
@@ -1074,6 +1075,13 @@
     },
     {
       "provider": "peertube",
+      "title": "Congrès SIF 2020 Industrie, numérique et éco responsabilité",
+      "relevance_topics": [
+        "computing-basics"
+      ]
+    },
+    {
+      "provider": "peertube",
       "title": "E0034 Dial-up Pastorale",
       "relevance_topics": [
         "computing-basics"
@@ -1102,21 +1110,7 @@
     },
     {
       "provider": "peertube",
-      "title": "Eben Moglen - Freedom In The Cloud (2010)",
-      "relevance_topics": [
-        "computing-basics"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "John Hardy's Australian and Kent Pitman's MIT early computer/internet +Ramin Honary #lispyGopherClimate #pc #lisp #basic",
-      "relevance_topics": [
-        "computing-basics"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Tech Assisted Abuse: How smart devices can facilitate abuse",
       "relevance_topics": [
         "computing-basics"
       ]
@@ -1277,14 +1271,14 @@
     },
     {
       "provider": "peertube",
-      "title": "A Power Supply for a Vintage Weller Soldering Iron",
+      "title": "Why a Language Map of the World is Impossible",
       "relevance_topics": [
-        "electronics-basics"
+        "earth-geography"
       ]
     },
     {
       "provider": "peertube",
-      "title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+      "title": "A Power Supply for a Vintage Weller Soldering Iron",
       "relevance_topics": [
         "electronics-basics"
       ]
@@ -1528,20 +1522,6 @@
       ]
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "25 Essential Chinese Phrases You NEED to Know Before Visiting China!",
-      "relevance_topics": [
-        "language-learning"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "WIKITONGUES- Freddie speaking Portuguese",
-      "relevance_topics": [
-        "language-learning"
-      ]
-    },
-    {
       "provider": "peertube",
       "title": "Catullus 41 in Latin & English with Vocabulary & Grammar notes: Ameana puella defututa",
       "relevance_topics": [
@@ -1662,6 +1642,13 @@
     },
     {
       "provider": "peertube",
+      "title": "meditation loop",
+      "relevance_topics": [
+        "meditation-mindfulness"
+      ]
+    },
+    {
+      "provider": "peertube",
       "title": "Inner Smile Guided Meditation for Happiness & Relaxation",
       "relevance_topics": [
         "meditation-mindfulness"
@@ -1719,13 +1706,6 @@
     {
       "provider": "peertube",
       "title": "Stevie B - Lucifer’s Rain (Official Music Video)",
-      "relevance_topics": [
-        "music-performance"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Give Me A Beat! Creative Commons licensing, and ethical considerations for cultural heritage collections – Wikimania 2025 in Nairobi, Kenya",
       "relevance_topics": [
         "music-performance"
       ]
@@ -1796,6 +1776,20 @@
     {
       "provider": "peertube",
       "title": "Age of Mythology EE: Campagne FR [5] Juste assez de Corde pour se Pendre",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Age of Mythology EE: Campagne FR [6] Pourvu que Ça Marche",
+      "relevance_topics": [
+        "mythology-folklore"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Piola Sur - Folklore 1 (28 Abril 2022)",
       "relevance_topics": [
         "mythology-folklore"
       ]

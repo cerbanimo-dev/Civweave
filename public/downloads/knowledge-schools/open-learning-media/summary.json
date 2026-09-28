@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-09-21T10:44:38Z",
-  "records": 186,
-  "mesh_redistributable": 138,
-  "download_candidates": 284,
+  "built_at": "2026-09-28T11:44:14Z",
+  "records": 177,
+  "mesh_redistributable": 129,
+  "download_candidates": 263,
   "providers": {
     "internet-archive": {
       "records": 6,
@@ -11,14 +11,14 @@
       "download_candidates": 14
     },
     "peertube": {
-      "records": 127,
-      "mesh_redistributable": 85,
-      "download_candidates": 217
+      "records": 126,
+      "mesh_redistributable": 84,
+      "download_candidates": 204
     },
     "wikimedia-commons": {
-      "records": 53,
-      "mesh_redistributable": 53,
-      "download_candidates": 53
+      "records": 45,
+      "mesh_redistributable": 45,
+      "download_candidates": 45
     }
   },
   "focus_topics": {
@@ -41,40 +41,39 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 11,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 7,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 8
+        "peertube": 7,
+        "wikimedia-commons": 3
       },
       "top_titles": [
+        "Topographical maps for all!",
         "Come and learn how free maps, free knowledge can help care for the world",
         "How to use Mergin Maps in Academia",
         "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
-        "Topographical maps for all!",
         "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
-        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 7,
+      "mesh_redistributable": 4,
       "providers": {
         "peertube": 3,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "Houses of History - Explore the story of Parliament and democracy",
@@ -175,8 +174,8 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -207,14 +206,15 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 4,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -246,17 +246,16 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
-        "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
+        "The Philosophy of Antifa"
       ]
     },
     "vibe-coding": {
@@ -320,19 +319,16 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 4,
-        "peertube": 2
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -414,12 +410,14 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 3
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+        "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
@@ -442,14 +440,10 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "Mini Tutorial J&D Creations Sewing Feet"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "drawing-design": {
       "name": "Drawing & Design",
@@ -623,12 +617,11 @@
       "records": 4,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 3,
-        "wikimedia-commons": 1
+        "peertube": 4
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-        "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
       ]
@@ -654,33 +647,31 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 15,
-      "mesh_redistributable": 15,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 6
+        "peertube": 9
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
-        "English Grammar — Present Continuous — Teaching Ideas — 1",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
-        "English Grammar — Present Perfect — Teaching Ideas — 2",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "English Grammar — Present Continuous — Structure",
-        "English Grammar — Present Perfect — Structure — 2"
+        "ESL - Expletive sentences (there, here, it)",
+        "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+        "ESL - Sentence Structures： Simple, Compound and Complex",
+        "ESL - Subordinating Conjunctions",
+        "ESL Writing - Summarizing and Paraphrasing"
       ]
     }
   },
-  "failures": 0,
-  "records_before_relevance_gate": 1138,
-  "records_before_pedagogy_gate": 510,
-  "records_before_selection_gate": 276,
-  "rejected_by_relevance_gate": 628,
-  "rejected_by_pedagogy_gate": 234,
-  "rejected_by_selection_gate": 62,
+  "failures": 15,
+  "records_before_relevance_gate": 1126,
+  "records_before_pedagogy_gate": 499,
+  "records_before_selection_gate": 267,
+  "rejected_by_relevance_gate": 627,
+  "rejected_by_pedagogy_gate": 232,
+  "rejected_by_selection_gate": 64,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -701,40 +692,39 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 11,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 7,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 8
+        "peertube": 7,
+        "wikimedia-commons": 3
       },
       "top_titles": [
+        "Topographical maps for all!",
         "Come and learn how free maps, free knowledge can help care for the world",
         "How to use Mergin Maps in Academia",
         "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
-        "Topographical maps for all!",
         "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
-        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 7,
+      "mesh_redistributable": 4,
       "providers": {
         "peertube": 3,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "Houses of History - Explore the story of Parliament and democracy",
@@ -835,8 +825,8 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -867,14 +857,15 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 4,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -906,17 +897,16 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
-        "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
+        "The Philosophy of Antifa"
       ]
     },
     "vibe-coding": {
@@ -980,19 +970,16 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 4,
-        "peertube": 2
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -1074,12 +1061,14 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 3
+        "peertube": 5
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+        "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
@@ -1102,14 +1091,10 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "Mini Tutorial J&D Creations Sewing Feet"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "drawing-design": {
       "name": "Drawing & Design",
@@ -1283,12 +1268,11 @@
       "records": 4,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 3,
-        "wikimedia-commons": 1
+        "peertube": 4
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-        "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
       ]
@@ -1314,23 +1298,21 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 15,
-      "mesh_redistributable": 15,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 6
+        "peertube": 9
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
-        "English Grammar — Present Continuous — Teaching Ideas — 1",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
-        "English Grammar — Present Perfect — Teaching Ideas — 2",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "English Grammar — Present Continuous — Structure",
-        "English Grammar — Present Perfect — Structure — 2"
+        "ESL - Expletive sentences (there, here, it)",
+        "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
+        "ESL - Sentence Structures： Simple, Compound and Complex",
+        "ESL - Subordinating Conjunctions",
+        "ESL Writing - Summarizing and Paraphrasing"
       ]
     }
   },
@@ -1368,7 +1350,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 66,
+      "records": 64,
       "available": true
     },
     "digital-ai-literacy": {
@@ -1392,7 +1374,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 18,
+      "records": 16,
       "available": true
     },
     "practical-life": {
@@ -1432,7 +1414,7 @@
         "photography-video"
       ],
       "coverage": 1.0,
-      "records": 13,
+      "records": 14,
       "available": true
     },
     "civic-media-literacy": {
@@ -1454,7 +1436,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 19,
+      "records": 18,
       "available": true
     },
     "deep-science": {
@@ -1500,7 +1482,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 25,
+      "records": 23,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -1537,7 +1519,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.6667,
-      "records": 7,
+      "records": 6,
       "available": true
     },
     "relationships-care": {
@@ -1558,7 +1540,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8,
-      "records": 11,
+      "records": 10,
       "available": true
     },
     "garden-nature": {
@@ -1611,7 +1593,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "language-communication": {
@@ -1625,7 +1607,7 @@
         "language-learning"
       ],
       "coverage": 1.0,
-      "records": 15,
+      "records": 9,
       "available": true
     },
     "systems-decision-making": {
@@ -1645,7 +1627,7 @@
         "mathematics-foundations"
       ],
       "coverage": 1.0,
-      "records": 26,
+      "records": 24,
       "available": true
     },
     "home-independence": {
@@ -1682,13 +1664,12 @@
       ],
       "covered_topics": [
         "electronics-basics",
-        "sewing-textiles",
         "drawing-design",
         "photography-video",
         "computing-basics"
       ],
-      "coverage": 0.8333,
-      "records": 16,
+      "coverage": 0.6667,
+      "records": 17,
       "available": true
     },
     "environment-resilience": {
@@ -1707,7 +1688,7 @@
         "health-wellness"
       ],
       "coverage": 0.75,
-      "records": 13,
+      "records": 12,
       "available": true
     },
     "visual-storytelling": {
@@ -1725,7 +1706,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 13,
+      "records": 14,
       "available": true
     },
     "society-rights": {
@@ -1745,7 +1726,7 @@
         "critical-thinking"
       ],
       "coverage": 1.0,
-      "records": 10,
+      "records": 9,
       "available": true
     },
     "technology-builder": {
@@ -1767,7 +1748,7 @@
         "prompt-engineering"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 14,
       "available": true
     }
   },
@@ -1784,9 +1765,9 @@
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
-  "records_before_title_quality_gate": 214,
-  "rejected_by_title_quality_gate": 28,
-  "rejected_topic_links_by_title_quality_gate": 31,
+  "records_before_title_quality_gate": 203,
+  "rejected_by_title_quality_gate": 26,
+  "rejected_topic_links_by_title_quality_gate": 28,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v2",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."

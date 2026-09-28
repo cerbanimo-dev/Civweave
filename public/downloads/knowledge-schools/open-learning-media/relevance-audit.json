@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-09-21T10:44:38Z",
-  "before": 1138,
-  "after": 510,
-  "rejected": 628,
+  "built_at": "2026-09-28T11:44:14Z",
+  "before": 1126,
+  "after": 499,
+  "rejected": 627,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -24,40 +24,39 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 11,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 7,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 8
+        "peertube": 7,
+        "wikimedia-commons": 3
       },
       "top_titles": [
+        "Topographical maps for all!",
         "Come and learn how free maps, free knowledge can help care for the world",
         "How to use Mergin Maps in Academia",
         "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
-        "Topographical maps for all!",
         "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
-        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 7,
+      "records": 9,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 4,
-        "wikimedia-commons": 6
+        "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
@@ -93,17 +92,16 @@
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 2,
       "providers": {
-        "wikimedia-commons": 3,
+        "wikimedia-commons": 2,
         "peertube": 4
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -165,8 +163,8 @@
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
-        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
@@ -197,14 +195,15 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 9,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 5,
+        "peertube": 6,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -237,17 +236,16 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 5,
-      "mesh_redistributable": 5,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 2,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
         "juneteeth 2026 part1 introduction chat and arcus chroma"
       ]
     },
@@ -312,19 +310,16 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 4,
-        "peertube": 2
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Systems Thinking 8- Emergence"
       ]
     },
     "personal-finance": {
@@ -408,15 +403,17 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 2,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 4
+        "peertube": 6
       },
       "top_titles": [
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
         "Mesecons Tutorial - Basic Circuits",
-        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
+        "Mesecons Tutorial - Basic Circuits",
         "[Tech Maid] Mesecons Basics",
+        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
       ]
     },
@@ -438,13 +435,12 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 2,
-      "mesh_redistributable": 2,
+      "records": 1,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "Mini Tutorial J&D Creations Sewing Feet",
         "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
       ]
     },
@@ -627,12 +623,11 @@
       "records": 5,
       "mesh_redistributable": 3,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 1
+        "peertube": 5
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-        "Partners in Safety- An Insurance and Small Business Perspective",
         "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
@@ -659,23 +654,22 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 27,
-      "mesh_redistributable": 27,
+      "records": 19,
+      "mesh_redistributable": 19,
       "providers": {
-        "peertube": 21,
-        "wikimedia-commons": 6
+        "peertube": 19
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
         "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
-        "English Grammar — Present Continuous — Teaching Ideas — 1",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
-        "[Language learning] How to create and edit language in LingLibre?",
-        "[Language learning] How to fast read with LingLibre using Keyboard shortcuts"
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "NFLSHS-CHINA: Using Synthetic Biology to Decode the Secrets of Youth (2025) - Team Presentation [English]",
+        "Collective｜ Learn C1 English Adjective – Describe group efforts strongly.",
+        "Colonial｜ Learn C1 English Adjective – Talk about historical contexts."
       ]
     }
   },
@@ -882,7 +876,7 @@
     },
     {
       "provider": "peertube",
-      "title": "Hans Clevers: Extra footage 2",
+      "title": "Vaccine Controversy | What is Myth and Truth? | Is Vaccination Good? | Autism and Vaccines",
       "topic_slug": "biology-life"
     },
     {
@@ -893,11 +887,6 @@
     {
       "provider": "peertube",
       "title": "CRISPR Science: DNA, RNA, and Gene Editing",
-      "topic_slug": "biology-life"
-    },
-    {
-      "provider": "peertube",
-      "title": "Vaccine Controversy | What is Myth and Truth? | Is Vaccination Good? | Autism and Vaccines",
       "topic_slug": "biology-life"
     },
     {
@@ -1056,11 +1045,6 @@
       "topic_slug": "chemistry-foundations"
     },
     {
-      "provider": "peertube",
-      "title": "Magnesium and Lemon Juice",
-      "topic_slug": "chemistry-foundations"
-    },
-    {
       "provider": "wikimedia-commons",
       "title": "Matches animation of chain reaction with slow elements",
       "topic_slug": "chemistry-foundations"
@@ -1197,11 +1181,6 @@
     },
     {
       "provider": "wikimedia-commons",
-      "title": "Address Before a Joint Session of Congress (February 24, 2009) - Barack Obama (WhiteHouse.gov)",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "wikimedia-commons",
       "title": "Combined Jungle Operations Training Course Phase 1 Reel (985339)",
       "topic_slug": "communication-conflict"
     },
@@ -1267,6 +1246,16 @@
     },
     {
       "provider": "peertube",
+      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 10.12.25",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 17.12.25",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
       "title": "Negotiations Progress Slowly, War's End Possible Says Budanov",
       "topic_slug": "communication-conflict"
     },
@@ -1278,6 +1267,16 @@
     {
       "provider": "peertube",
       "title": "There are no “win-win” terms to come from Putin | News In Depth",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 04.02.2026",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
+      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 11.02.2026",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1422,6 +1421,11 @@
     },
     {
       "provider": "peertube",
+      "title": "Estratto: KenoMATTINA 20 gennaio 2025",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "peertube",
       "title": "Habeebat Ajayi on courage, risk and difficult stories",
       "topic_slug": "communication-conflict"
     },
@@ -1457,28 +1461,18 @@
     },
     {
       "provider": "peertube",
-      "title": "God and the State",
+      "title": "Mastering Science Communcation - iGEM Community",
       "topic_slug": "communication-conflict"
     },
     {
-      "provider": "peertube",
-      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 10.12.25",
-      "topic_slug": "communication-conflict"
+      "provider": "wikimedia-commons",
+      "title": "Hearing on Regulating Cryptocurrency Markets",
+      "topic_slug": "computing-basics"
     },
     {
       "provider": "peertube",
-      "title": "Metodologie Attive per esperienze Nonviolente in classe - L’approccio maieutico reciproco - 17.12.25",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
-      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 04.02.2026",
-      "topic_slug": "communication-conflict"
-    },
-    {
-      "provider": "peertube",
-      "title": "Trasformazione dei conflitti tra adulti- La comunicazione nonviolenta - 11.02.2026",
-      "topic_slug": "communication-conflict"
+      "title": "(1990) How Computers Work: A Journey Into the Walk-Through Computer",
+      "topic_slug": "computing-basics"
     }
   ]
 }
