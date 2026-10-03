@@ -13,7 +13,7 @@ const LOCAL_EXECUTION_CONTRACT='Civweave already selected this downloaded local 
 const CORE=Object.freeze([
   Object.freeze({
     name:'CivweaveLocalModelRegistryV266',
-    src:'/app/local-ai/model-registry-v266.js?v=1.0.116-v303-qwen35-phone-flagships&chatcore=v326',
+    src:'/app/local-ai/model-registry-v266.js?v=1.0.121-v307-gemma3-q4&chatcore=v325',
     ready:()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId&&globalThis.CivweaveLocalModelRegistryV266?.installable&&globalThis.CivweaveLocalModelRegistryV266?.directUrl)
   }),
   Object.freeze({
