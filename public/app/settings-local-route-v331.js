@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
+const VERSION='1.2.0-settings-local-route-v331-qwen35-phone-flagship';
 const ROUTE='downloaded-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
@@ -13,7 +13,7 @@ const STYLE_ID='cw-local-ai-v324-style';
 const DOCK_ID='cw-local-ai-download-dock-v324';
 const SETTINGS_LAYER_ID='cw-settings-v320';
 const FOREGROUND_PHONE_MODELS=new Set(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16']);
-const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
+const BROWSER_PACKS=new Set(['qwen-flagship-phone','premier-phone','server-quality']);
 const LEGACY_BROWSER_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
 
 const PACK_CATALOGUE=Object.freeze([
@@ -27,12 +27,21 @@ const PACK_CATALOGUE=Object.freeze([
     contents:'Qwen 3 0.6B CPU/WASM · SmolLM2 135M fallback · Silero VAD · Parakeet INT8 · Supertonic 3 multilingual TTS'
   }),
   Object.freeze({
-    id:'premier-phone',label:'Premier Phone Pack',tier:'PREMIER PHONE',estimatedBytes:7_577_000_000,
+    id:'qwen-flagship-phone',label:'Flagship Phone Pack',tier:'PHONE FLAGSHIP',estimatedBytes:13_970_000_000,
+    target:'12+ GB RAM · modern high-memory phone · LiteRT-LM',
+    storage:'~14.0 GB download · keep 20 GB free',
+    primaryModel:'qwen35-4b-litert-web',
+    modelIds:Object.freeze(['qwen35-4b-litert-web','qwen35-9b-litert-web','qwen3-0.6b-q8-wasm']),
+    summary:'Qwen 3.5 4B for standard phone work, Qwen 3.5 9B for high-capability work, plus local speech and a CPU-safe fallback.',
+    contents:'Qwen 3.5 4B · Qwen 3.5 9B · Qwen 3 0.6B CPU fallback · Silero · Parakeet INT8 · Omnilingual 300M INT8 · Supertonic 3'
+  }),
+  Object.freeze({
+    id:'premier-phone',label:'Gemma Phone Compatibility Pack',tier:'PHONE ALTERNATE',estimatedBytes:7_577_000_000,
     target:'12 GB RAM · modern Android-class WebGPU',
     storage:'~7.6 GB download · keep 11 GB free',
     primaryModel:'gemma4-e2b-it-q2f16-mobile',
     modelIds:Object.freeze(['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm']),
-    summary:'Full phone-local AI ladder: fast Gemma 4, deep Gemma 4, wide multilingual speech, and CPU-safe fallback.',
+    summary:'Alternate Gemma phone-local ladder retained for compatibility, with multilingual speech and CPU-safe fallback.',
     contents:'Gemma 4 E2B · Gemma 4 E4B · Qwen 3 0.6B CPU fallback · Silero · Parakeet INT8 · Omnilingual 300M INT8 · Supertonic 3'
   }),
   Object.freeze({
@@ -52,6 +61,8 @@ const CATALOGUE=Object.freeze([
   {id:'qwen3-0.6b-q4f16',label:'Qwen 3 0.6B',tier:'Small',repo:'onnx-community/Qwen3-0.6B-ONNX',estimatedBytes:610000000,license:'Apache-2.0',contextWindowTokens:40960,workingContextTokens:4096,preferBackground:true},
   {id:'gemma3-1b-it-q4f16',label:'Gemma 3 1B IT',tier:'Standard',repo:'onnx-community/gemma-3-1b-it-ONNX',estimatedBytes:884000000,license:'Gemma',contextWindowTokens:32768,workingContextTokens:4096,preferBackground:false},
   {id:'qwen3-1.7b-q4f16',label:'Qwen 3 1.7B',tier:'Large',repo:'onnx-community/Qwen3-1.7B-ONNX',estimatedBytes:1470000000,license:'Apache-2.0',contextWindowTokens:40960,workingContextTokens:4096,preferBackground:true},
+  {id:'qwen35-4b-litert-web',label:'Qwen 3.5 4B · LiteRT',tier:'Phone Flagship',repo:'litert-community/Qwen3.5-4B',estimatedBytes:2570000000,license:'Apache-2.0',contextWindowTokens:4096,workingContextTokens:4096,preferBackground:false,browserPackId:'qwen-flagship-phone'},
+  {id:'qwen35-9b-litert-web',label:'Qwen 3.5 9B · LiteRT',tier:'Phone Flagship Max',repo:'litert-community/Qwen3.5-9B-LiteRT',estimatedBytes:9520000000,license:'Apache-2.0',contextWindowTokens:4096,workingContextTokens:4096,preferBackground:false,browserPackId:'qwen-flagship-phone'},
   {id:'gemma4-e2b-it-q2f16-mobile',label:'Gemma 4 E2B IT',tier:'Gemma Fast',repo:'onnx-community/gemma-4-E2B-it-qat-mobile-ONNX',estimatedBytes:2335000000,license:'Apache-2.0',contextWindowTokens:128000,workingContextTokens:8192,preferBackground:true},
   {id:'gemma4-e4b-it-q2f16-mobile',label:'Gemma 4 E4B IT',tier:'Gemma Max',repo:'onnx-community/gemma-4-E4B-it-qat-mobile-ONNX',estimatedBytes:3365000000,license:'Apache-2.0',contextWindowTokens:128000,workingContextTokens:16384,preferBackground:true},
   {id:'smollm3-3b-q4f16',label:'SmolLM3 3B',tier:'Mini PC',repo:'HuggingFaceTB/SmolLM3-3B-ONNX',estimatedBytes:2160000000,license:'Apache-2.0',contextWindowTokens:65536,workingContextTokens:2048,preferBackground:false},
@@ -65,12 +76,12 @@ const PREVIEW=Object.freeze([
 ]);
 
 const ACTION_FILES=[
-  ['/app/local-ai/model-registry-v266.js?v=1.0.115-v302-gemma3-v4',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId)],
+  ['/app/local-ai/model-registry-v266.js?v=1.0.116-v303-qwen35-phone-flagships',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId)],
   ['/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.state&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true)],
   ['/app/local-ai/specialized-model-capabilities-v1.js?v=1.1.0-model-packs',()=>Boolean(globalThis.CivweaveLocalSpecializedAI?.preferredTts==='supertonic-3-tts-int8')],
-  ['/app/local-ai/model-packs-v1.js?v=1.0.1-browser-guard',()=>Boolean(globalThis.CivweaveLocalModelPacksV1?.byId&&globalThis.CivweaveLocalModelPacksV1?.install)],
+  ['/app/local-ai/model-packs-v1.js?v=1.1.0-qwen35-flagship',()=>Boolean(globalThis.CivweaveLocalModelPacksV1?.byId&&globalThis.CivweaveLocalModelPacksV1?.install)],
   ['/app/local-ai/browser-pack-download-v1.js?v=1.0.0-settings-v325',()=>Boolean(globalThis.CivweaveBrowserPackDownloadV1?.queue&&globalThis.CivweaveBrowserPackDownloadV1?.pickAndImport)]
 ];
 
@@ -163,7 +174,7 @@ function installLocalStyle(){
   style.id=STYLE_ID;
   style.textContent=`
 #${PANEL_ID}{display:grid;gap:12px}
-#${PANEL_ID} .cw-pack-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#${PANEL_ID} .cw-pack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 #${PANEL_ID} .cw-pack-card{display:grid;align-content:start;gap:8px;padding:13px;border:1px solid #ffffff22;border-radius:14px;background:#0a1730}
 #${PANEL_ID} .cw-pack-card[data-pack-active="true"]{outline:2px solid #90efd8}
 #${PANEL_ID} .cw-pack-card h4{margin:0;font-size:1rem}
@@ -199,6 +210,7 @@ function statusMarkup(st,available){
 
 function actions(model,st,available,active){
   if(available)return`<button type="button" data-local-use="${esc(model.id)}">${active?'Using locally':'Use locally'}</button><button type="button" data-local-remove="${esc(model.id)}">Remove</button>`;
+  if(model.browserPackId)return`<button type="button" data-local-pack-download="${esc(model.browserPackId)}">Download flagship pack</button>`;
   if(['downloading','finalizing'].includes(String(st.status||'')))return`<button type="button" data-local-cancel="${esc(model.id)}">Cancel</button>`;
   if(['paused','error','aborted','ready'].includes(String(st.status||'')))return`<button type="button" data-local-download="${esc(model.id)}">Resume</button><button type="button" data-local-remove="${esc(model.id)}">Clear</button>`;
   return`<button type="button" data-local-download="${esc(model.id)}">Download</button>`;
