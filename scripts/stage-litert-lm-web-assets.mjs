@@ -8,12 +8,12 @@ import {spawnSync} from 'node:child_process';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const CORE_PACKAGE='@litert-lm/core';
-const CORE_VERSION='0.14.0';
+const CORE_VERSION='0.16.1';
 const UTILS_PACKAGE='@litertjs/wasm-utils';
 const UTILS_VERSION='2.5.3';
 const SCHEMA='civweave.litert-lm-web-stage.v1';
 const MAX_CLOUDFLARE_ASSET_BYTES=24*1024*1024;
-// LiteRT-LM 0.14 ships two Asyncify fallback binaries around 31 MB each.
+// LiteRT-LM ships Asyncify fallback binaries that can exceed the Cloudflare Pages per-asset ceiling.
 // Cloudflare Pages rejects either file because its per-asset ceiling is 24 MiB.
 // Civweave's Gemma 4 fast lane is explicitly Chromium/JSPI + WebGPU; browsers
 // without JSPI fail the fast-lane capability probe and retain the existing ONNX
