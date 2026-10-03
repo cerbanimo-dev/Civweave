@@ -1,16 +1,16 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.1-browser-pack-download-v1-worker-import';
+const VERSION='1.4.0-browser-pack-download-v1-qwen35-flagship';
 const PENDING_KEY='civweave.ai-pack.browser-downloads.v1';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const GENERATIVE_CACHE='civweave-model-generative-v266';
 const SPECIALIZED_CACHE='civweave-specialized-model-packs-v1';
 const LARGE_BYTES=32*1024*1024;
 const RECEIPT_VERSION=3;
-const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
-const REGISTRY_SRC='/app/local-ai/model-registry-v266.js?v=1.0.115-v302-gemma3-v4';
-const PACKS_SRC='/app/local-ai/model-packs-v1.js?v=1.0.1-browser-guard';
+const BROWSER_PACKS=new Set(['qwen-flagship-phone','premier-phone','server-quality']);
+const REGISTRY_SRC='/app/local-ai/model-registry-v266.js?v=1.0.116-v303-qwen35-phone-flagships';
+const PACKS_SRC='/app/local-ai/model-packs-v1.js?v=1.1.0-qwen35-flagship';
 const IMPORT_WORKER_SRC='/app/local-ai/browser-pack-import-worker-v1.js?v=1.0.0';
 if(globalThis.CivweaveBrowserPackDownloadV1?.version===VERSION)return;
 
