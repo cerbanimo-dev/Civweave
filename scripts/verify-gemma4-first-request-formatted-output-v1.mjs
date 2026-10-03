@@ -54,6 +54,8 @@ const sandbox={
   CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'gemma4-e2b-it-litert-web'})},
   CivweaveGemma4LiteRTFastExtensionV1:{version:'1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard',watch:()=>events.push('extension-watch')},
   CivweaveGemma4CurrentRegistryAuthorityV1:{repairRegistry:()=>events.push('registry-repair')},
+  CivweaveGuideGenerationTrackerV1:{version:'1.0.1-guide-generation-tracker-v1-live-pipeline-streams',install:()=>true},
+  CivweaveGemma4WeaveDraftPipelineV1:{version:'1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair',install:()=>true,installRuntime:()=>true},
   CivweaveLiteRTGemma4FastRuntimeV1:{version:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',install(){events.push('fast-install');const prior=sandbox.CivweaveLocalChatRuntimeV295;sandbox.CivweaveLocalChatRuntimeV295={...prior,__civweaveLiteRTGemma4FastV1:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',generate:async()=>{events.push('fast-local-generate');return{status:'success',outputText:'ok'}}};return true}},
   CivweaveAssistantV141:{respond:lowerRespond},
   queueMicrotask:fn=>fn(),
