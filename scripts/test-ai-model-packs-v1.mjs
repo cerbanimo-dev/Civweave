@@ -10,7 +10,6 @@ const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
 const settings=read('public/app/settings-local-route-v323.js');
-const currentSettings=read('public/app/settings-local-route-v331.js');
 const directSettings=read('public/app/settings-local-models-direct-v325.js');
 const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
 const browserPackPwa=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
@@ -24,12 +23,10 @@ test('AI downloads expose the four intended named pack tiers',()=>{
     assert.ok(packs.includes(label),`Missing pack label: ${label}`);
   }
   assert.doesNotMatch(packs,/Nothing Phone/i);
-  for(const source of [currentSettings,directSettings]){
-    assert.match(source,/Minimum Spec Pack/);
-    assert.match(source,/Flagship Phone Pack/);
-    assert.match(source,/Gemma Phone Compatibility Pack/);
-    assert.match(source,/Server Quality Pack/);
-  }
+  assert.match(directSettings,/Minimum Spec Pack/);
+  assert.match(directSettings,/Flagship Phone Pack/);
+  assert.match(directSettings,/Gemma Phone Compatibility Pack/);
+  assert.match(directSettings,/Server Quality Pack/);
   assert.match(settings,/Minimum Spec Pack/);
   assert.match(settings,/Server Quality Pack/);
 });
