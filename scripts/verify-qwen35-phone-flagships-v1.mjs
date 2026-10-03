@@ -65,7 +65,7 @@ console.log(JSON.stringify({
   contract:'qwen35-phone-flagships-v1',
   defaultPhoneModel:'qwen35-4b-litert-web',
   deepPhoneModel:'qwen35-9b-litert-web',
-  runtime:'litert-lm-web-0.16.1',
+  runtime:'litert-lm-web-0.17.1',
   gemmaRoleBridge:true,
   qwenStructuredOutput:'strict-json-prompt',
   gemmaCompatibilityPack:true
