@@ -3,7 +3,7 @@
 const VERSION='1.5.0-litert-phone-runtime-v1-qwen35-flagships';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
-const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.16.1-civweave-qwen35';
+const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const QWEN_FAST='qwen35-4b-litert-web';
 const QWEN_DEEP='qwen35-9b-litert-web';
@@ -161,7 +161,7 @@ async function runFast(args={},forcedModelId=''){
     if(!outputText)throw Object.assign(new Error(`${profile.label} completed without a usable answer. Retry with a smaller request.`),{code:'LOCAL_MODEL_EMPTY_OUTPUT'});
     let benchmark={};try{benchmark=benchmarkMetrics(await chat.getBenchmarkInfo())}catch{}
     const completed=now(),generationMs=Math.round(completed-started),ttftMs=firstTokenAt?Math.round(firstTokenAt-started):null,decodeSeconds=Math.max(.001,(completed-(firstTokenAt||started))/1000),approxTokens=Math.max(1,Math.round(outputText.length/3.7)),measuredApproxTokensPerSecond=Number((approxTokens/decodeSeconds).toFixed(2));
-    const metrics={runtime:'litert-lm-web-0.16.1',backend:'webgpu-gpu-artisan',model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
+    const metrics={runtime:'litert-lm-web-0.17.1',backend:'webgpu-gpu-artisan',model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
     lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
   }finally{
