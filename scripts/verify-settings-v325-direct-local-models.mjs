@@ -63,7 +63,9 @@ assert.equal(managerReads,0,'Rendering Local models must not touch the live mode
 assert.equal(storageWrites,0,'Rendering Local models must not mutate saved state.');
 assert.equal(headerLabel.textContent,'CIVWEAVE SETTINGS · v325');
 assert.match(localTarget.innerHTML,/AI Downloads/);
-assert.match(localTarget.innerHTML,/Gemma 4 E2B LiteRT/);
+assert.match(localTarget.innerHTML,/Qwen 3\.5 4B · LiteRT/);
+assert.match(localTarget.innerHTML,/Qwen 3\.5 9B · LiteRT/);
+assert.match(localTarget.innerHTML,/Gemma Phone Compatibility Pack/);
 assert.match(localTarget.innerHTML,/renderer direct-local-v325/);
 assert.doesNotMatch(localTarget.innerHTML,/Reading saved local model choices/);
 
