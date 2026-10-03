@@ -10,7 +10,7 @@ const persistent=await readFile(new URL('../public/app/persistent-system-shell-v
 const campus=await readFile(new URL('../public/app/working-campus-v440.html',import.meta.url),'utf8');
 
 assert.match(authoritySource,/VERSION='1\.0\.1-gemma4-litert-request-authority-v1-stable-composition'/);
-assert.match(authoritySource,/FAST_RUNTIME_SRC='\/app\/local-ai\/litert-gemma4-fast-runtime-v1\.js\?v=1\.4\.0-formatted-output'/);
+assert.match(authoritySource,/FAST_RUNTIME_SRC='\/app\/local-ai\/litert-gemma4-fast-runtime-v1\.js\?v=1.5.0-qwen35-flagships'/);
 assert.match(authoritySource,/if\(!fastWrapperReady\(\)\)[\s\S]*LOCAL_GEMMA4_LITERT_OWNERSHIP_FAILED/,'authority must refuse inference until the LiteRT wrapper owns the selected model');
 assert.doesNotMatch(authoritySource,/CivweaveLocalModelRuntimeV266\?\.generate|CivweaveLocalModelRuntimeV266\.generate/,'first-request authority must never invoke the generic Transformers runtime directly');
 assert.match(authoritySource,/copyCompositionMetadata\(respond,prior\)/,'Gemma authority must preserve lower assistant-layer ownership metadata');
@@ -54,7 +54,7 @@ const sandbox={
   CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'gemma4-e2b-it-litert-web'})},
   CivweaveGemma4LiteRTFastExtensionV1:{version:'1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard',watch:()=>events.push('extension-watch')},
   CivweaveGemma4CurrentRegistryAuthorityV1:{repairRegistry:()=>events.push('registry-repair')},
-  CivweaveLiteRTGemma4FastRuntimeV1:{version:'1.4.0-litert-gemma4-fast-runtime-v1-formatted-output',install(){events.push('fast-install');const prior=sandbox.CivweaveLocalChatRuntimeV295;sandbox.CivweaveLocalChatRuntimeV295={...prior,__civweaveLiteRTGemma4FastV1:'1.4.0-litert-gemma4-fast-runtime-v1-formatted-output',generate:async()=>{events.push('fast-local-generate');return{status:'success',outputText:'ok'}}};return true}},
+  CivweaveLiteRTGemma4FastRuntimeV1:{version:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',install(){events.push('fast-install');const prior=sandbox.CivweaveLocalChatRuntimeV295;sandbox.CivweaveLocalChatRuntimeV295={...prior,__civweaveLiteRTGemma4FastV1:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',generate:async()=>{events.push('fast-local-generate');return{status:'success',outputText:'ok'}}};return true}},
   CivweaveAssistantV141:{respond:lowerRespond},
   queueMicrotask:fn=>fn(),
   setTimeout:()=>1,clearTimeout:()=>{},
