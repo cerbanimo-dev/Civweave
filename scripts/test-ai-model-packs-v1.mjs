@@ -20,13 +20,9 @@ const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js
 const voice=read('public/app/guide-voice-runtime-v1.js');
 
 test('AI downloads expose the four intended named pack tiers',()=>{
-  for(const label of ['Minimum Spec Pack','Flagship Phone Pack','Gemma Phone Compatibility Pack','Server Quality Pack'])assert.match(packs,new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g,'\\test('AI downloads expose exactly the three intended named pack tiers',()=>{
-  for(const label of ['Minimum Spec Pack','Premier Phone Pack','Server Quality Pack'])assert.match(packs,new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
-  assert.doesNotMatch(packs,/Nothing Phone/i);
-  assert.match(settings,/Minimum Spec Pack/);
-  assert.match(settings,/Premier Phone Pack/);
-  assert.match(settings,/Server Quality Pack/);
-});')));
+  for(const label of ['Minimum Spec Pack','Flagship Phone Pack','Gemma Phone Compatibility Pack','Server Quality Pack']){
+    assert.ok(packs.includes(label),`Missing pack label: ${label}`);
+  }
   assert.doesNotMatch(packs,/Nothing Phone/i);
   for(const source of [currentSettings,directSettings]){
     assert.match(source,/Minimum Spec Pack/);
@@ -37,9 +33,8 @@ test('AI downloads expose the four intended named pack tiers',()=>{
   assert.match(settings,/Minimum Spec Pack/);
   assert.match(settings,/Server Quality Pack/);
 });
-
 test('minimum pack remains useful on constrained devices',()=>{
-  const block=packs.match(/'minimum-spec'[\s\S]*?(?=\n  'premier-phone')/)?.[0]||'';
+  const block=packs.match(/'minimum-spec'[\s\S]*?(?=\n  'qwen-flagship-phone')/)?.[0]||'';
   for(const id of ['qwen3-0.6b-q8-wasm','smollm2-135m-instruct-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
 });
 
