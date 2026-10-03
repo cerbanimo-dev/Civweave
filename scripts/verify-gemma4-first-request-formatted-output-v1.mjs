@@ -25,13 +25,13 @@ assert.match(fastSource,/prefaceConfig\.tools=\[formattedTool\]/);
 assert.match(fastSource,/await chat\.sendMessage\(latest\)/,'formatted output should use the final structured response instead of partial streamed tool calls');
 assert.match(fastSource,/structuredToolCalling:true/);
 assert.match(compactSource,/structuredTool:COMPACT_TOOL/);
-for(const [label,html] of [['persistent shell',persistent],['Working Campus',campus]]){
+for(const [label,html,requestVersion] of [['persistent shell',persistent,'1.1.3-family-loader-weave-rebind'],['Working Campus',campus,'1.0.2-structured-tool-shape']]){
   const base=html.indexOf('gemma4-structured-quest-completion-v1.js');
   const request=html.indexOf('gemma4-litert-request-authority-v1.js');
   const compact=html.indexOf('gemma4-structured-quest-compact-envelope-v1.js');
   assert(base>=0&&request>base&&compact>request,`${label} must load base structured completion, first-request LiteRT authority, then compact formatted Quest bridge`);
   assert.match(html,/gemma4-current-registry-authority-v1\.js\?v=1\.0\.2-stable-composition/);
-  assert.match(html,/gemma4-litert-request-authority-v1\.js\?v=1\.0\.1-stable-composition/);
+  assert.ok(html.includes(`gemma4-litert-request-authority-v1.js?v=${requestVersion}`),`${label} must load its current LiteRT request-authority generation`);
 }
 
 const events=[];
@@ -66,7 +66,7 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(authoritySource,sandbox,{filename:'gemma4-litert-request-authority-v1.js'});
 const authority=sandbox.CivweaveGemma4LiteRTRequestAuthorityV1;
-assert.equal(authority.version,'1.0.1-gemma4-litert-request-authority-v1-stable-composition');
+assert.equal(authority.version,'1.1.3-gemma4-litert-request-authority-v1-family-loader-weave-rebind');
 assert.equal(authority.selectedFast(),true);
 assert.equal(authority.stableAssistantComposition,true);
 assert.equal(events.includes('fast-install'),false,'passive startup must not install the LiteRT wrapper before a request');
