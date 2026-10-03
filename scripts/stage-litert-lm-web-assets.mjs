@@ -8,7 +8,7 @@ import {spawnSync} from 'node:child_process';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const CORE_PACKAGE='@litert-lm/core';
-const CORE_VERSION='0.16.1';
+const CORE_VERSION='0.17.1';
 const UTILS_PACKAGE='@litertjs/wasm-utils';
 const UTILS_VERSION='2.5.3';
 const SCHEMA='civweave.litert-lm-web-stage.v1';
