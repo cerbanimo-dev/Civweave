@@ -51,7 +51,7 @@ assert.equal(normalized.parameters,normalized.function.parameters);
 
 let calls=[];
 sandbox.CivweaveLiteRTGemma4FastRuntimeV1={
-  version:'1.4.0-litert-gemma4-fast-runtime-v1-formatted-output',
+  version:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',
   runFast:async(args,forcedModelId)=>{calls.push({args,forcedModelId});return{status:'success',outputText:'{"route":"learning"}',diagnostics:[]}}
 };
 assert.equal(authority.installFastStructuredToolAdapter(),true);
@@ -65,7 +65,7 @@ assert.match(calls[0].args.systemPrompt,/MUST respond by calling the route_civwe
 calls=[];
 let first=true;
 sandbox.CivweaveLiteRTGemma4FastRuntimeV1={
-  version:'1.4.0-litert-gemma4-fast-runtime-v1-formatted-output',
+  version:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',
   runFast:async(args,forcedModelId)=>{
     calls.push({args,forcedModelId});
     if(first){first=false;throw Object.assign(new Error('tool call not surfaced'),{code:'LITERT_FORMATTED_OUTPUT_MISSING'})}

@@ -40,15 +40,15 @@ assert.match(runtime,/contextTokens:4096/);
 assert.match(runtime,/maxOutputTokens:2400/);
 assert.match(runtime,/maxOutputTokens:2800/);
 
-// Preserve Gemma's published non-thinking sampler for normal chat while using
-// low-temperature constrained decoding for schema-bound artifact output.
+// Preserve Gemma's sampler while allowing family-specific Qwen sampling.
 assert.match(extension,/topK:64,topP:\.95,nonThinkingTemperature:1/);
-assert.match(runtime,/samplerParams:\{k:64,p:\.95,temperature:formattedTool\?0\.2:1\}/);
+assert.match(runtime,/sampler=profile\.sampler/);
+assert.match(runtime,/temperature:formattedTool\?0\.2:\(sampler\.temperature\?\?1\)/);
 assert.match(runtime,/conversationConfig\.enableConstrainedDecoding=true/);
 assert.match(runtime,/prefaceConfig\.tools=\[formattedTool\]/);
 assert.match(runtime,/structuredToolCalling:true/);
 
-// Match LiteRT-LM v0.14's official Web GPU_ARTISAN MTP configuration. If a
+// Match the LiteRT-LM Web GPU_ARTISAN MTP configuration. If a
 // device rejects the submodel path, runtime creation must retry without MTP.
 assert.match(runtime,/num_output_candidates:1/);
 assert.match(runtime,/wait_for_weight_uploads:true/);
@@ -80,7 +80,7 @@ assert.match(stageRuntime,/MAX_CLOUDFLARE_ASSET_BYTES=24\*1024\*1024/);
 
 console.log(JSON.stringify({
   ok:true,
-  profile:'gemma4-12gb-android-litert-dual-mtp-jspi-v1',
+  profile:'phone-litert-dual-mtp-jspi-v2',
   fastModel:'gemma4-e2b-it-litert-web',
   deepModel:'gemma4-e4b-it-litert-web',
   contextTokens:4096,

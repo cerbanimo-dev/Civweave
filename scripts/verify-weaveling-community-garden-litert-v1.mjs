@@ -138,7 +138,7 @@ includes(fast,"'gemma4-e2b-it-litert-web'",'LiteRT fast runtime');
 includes(fast,"'gemma4-e4b-it-litert-web'",'LiteRT fast runtime');
 includes(fast,'mod.Backend.GPU_ARTISAN','LiteRT fast runtime');
 includes(fast,'contextTokens:4096','LiteRT fast runtime');
-includes(fast,"runtime:'litert-lm-web-0.14.0'",'LiteRT fast runtime');
+includes(fast,"runtime:'litert-lm-web-0.17.1'",'LiteRT fast runtime');
 includes(fast,"'gemma4-e2b-it-q2f16-mobile'",'LiteRT E2B alias');
 includes(fast,"'gemma4-e4b-it-q2f16-mobile'",'LiteRT E4B alias');
 includes(fast,'return base.generate(args)','LiteRT fast runtime fallback');
@@ -171,7 +171,7 @@ includes(rootSw,"'/app/local-ai/litert-gemma4-fast-runtime-v1.js'",'root service
 
 const stage=file('scripts/stage-litert-lm-web-assets.mjs');
 includes(stage,"CORE_PACKAGE='@litert-lm/core'",'LiteRT stage');
-includes(stage,"CORE_VERSION='0.14.0'",'LiteRT stage');
+includes(stage,"CORE_VERSION='0.17.1'",'LiteRT stage');
 includes(stage,"UTILS_VERSION='2.5.3'",'LiteRT stage');
 includes(stage,"SCHEMA='civweave.litert-lm-web-stage.v1'",'LiteRT stage');
 includes(stage,'MAX_CLOUDFLARE_ASSET_BYTES=24*1024*1024','LiteRT stage');
@@ -191,7 +191,7 @@ const manifestPath=resolve(root,'public/app/vendor/litert-lm/stage-manifest.json
 if(existsSync(manifestPath)){
   const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));
   assert(manifest.schema==='civweave.litert-lm-web-stage.v1','Staged LiteRT manifest has the wrong schema.');
-  assert(manifest.coreVersion==='0.14.0','Staged LiteRT manifest has the wrong core version.');
+  assert(manifest.coreVersion==='0.17.1','Staged LiteRT manifest has the wrong core version.');
   assert(manifest.browserProfile==='chromium-jspi-webgpu','Staged LiteRT manifest is not pinned to the Chromium/JSPI WebGPU profile.');
   assert(manifest.requiresJspi===true,'Staged LiteRT manifest must require JSPI.');
   assert(Array.isArray(manifest.omittedFiles)&&manifest.omittedFiles.length===2,'Staged LiteRT manifest must record the two omitted Asyncify fallbacks.');

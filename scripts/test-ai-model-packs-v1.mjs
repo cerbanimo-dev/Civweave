@@ -10,6 +10,7 @@ const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
 const settings=read('public/app/settings-local-route-v323.js');
+const directSettings=read('public/app/settings-local-models-direct-v325.js');
 const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
 const browserPackPwa=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
 const relocation=read('public/app/working-campus-home-relocation-v441.js');
@@ -17,20 +18,31 @@ const shellAssets=read('public/service-worker-shell-assets-v1.js');
 const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js');
 const voice=read('public/app/guide-voice-runtime-v1.js');
 
-test('AI downloads expose exactly the three intended named pack tiers',()=>{
-  for(const label of ['Minimum Spec Pack','Premier Phone Pack','Server Quality Pack'])assert.match(packs,new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+test('AI downloads expose the four intended named pack tiers',()=>{
+  for(const label of ['Minimum Spec Pack','Flagship Phone Pack','Gemma Phone Compatibility Pack','Server Quality Pack']){
+    assert.ok(packs.includes(label),`Missing pack label: ${label}`);
+  }
   assert.doesNotMatch(packs,/Nothing Phone/i);
+  assert.match(directSettings,/Minimum Spec Pack/);
+  assert.match(directSettings,/Flagship Phone Pack/);
+  assert.match(directSettings,/Gemma Phone Compatibility Pack/);
+  assert.match(directSettings,/Server Quality Pack/);
   assert.match(settings,/Minimum Spec Pack/);
-  assert.match(settings,/Premier Phone Pack/);
   assert.match(settings,/Server Quality Pack/);
 });
-
 test('minimum pack remains useful on constrained devices',()=>{
-  const block=packs.match(/'minimum-spec'[\s\S]*?(?=\n  'premier-phone')/)?.[0]||'';
+  const block=packs.match(/'minimum-spec'[\s\S]*?(?=\n  'qwen-flagship-phone')/)?.[0]||'';
   for(const id of ['qwen3-0.6b-q8-wasm','smollm2-135m-instruct-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
 });
 
-test('Premier Phone pack carries the full 12 GB phone ladder',()=>{
+test('Qwen flagship phone pack carries the standard and deep phone ladder',()=>{
+  const block=packs.match(/'qwen-flagship-phone'[\s\S]*?(?=\n  'premier-phone')/)?.[0]||'';
+  for(const id of ['qwen35-4b-litert-web','qwen35-9b-litert-web','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
+  assert.match(block,/primaryModel:'qwen35-4b-litert-web'/);
+  assert.match(block,/deepModel:'qwen35-9b-litert-web'/);
+});
+
+test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{
   const block=packs.match(/'premier-phone'[\s\S]*?(?=\n  'server-quality')/)?.[0]||'';
   for(const id of ['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
 });
@@ -42,7 +54,8 @@ test('server quality pack uses current executable high quality tiers and server 
 });
 
 test('large packs stay browser-managed inside the PWA',()=>{
-  assert.match(packs,/BROWSER_MANAGED_PACK_IDS=freeze\(\['premier-phone','server-quality'\]\)/);
+  assert.match(packs,/BROWSER_MANAGED_PACK_IDS=freeze\(\['qwen-flagship-phone','premier-phone','server-quality'\]\)/);
+  assert.match(browserPack,/BROWSER_PACKS=new Set\(\['qwen-flagship-phone','premier-phone','server-quality'\]\)/);
   assert.match(packs,/CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED/);
   assert.match(settings,/browserPackDownload/);
   assert.match(settings,/browser\.queue\(packId/);

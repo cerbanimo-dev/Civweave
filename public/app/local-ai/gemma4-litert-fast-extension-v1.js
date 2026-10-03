@@ -199,7 +199,7 @@ function patchRegistry(registry){
     gemma4LiteRTFastModelIds:FAST_IDS,
     gemma4LiteRTAccelerationFor:MODELS.e2.legacyQ4Id,
     gemma4LiteRTAccelerationMap:freeze(Object.fromEntries(Object.values(MODELS).map(model=>[model.legacyQ4Id,model.id]))),
-    gemma4LiteRTRuntime:'0.14.0',
+    gemma4LiteRTRuntime:'0.17.1',
     gemma4LiteRTArtifactRevision:MODELS.e2.revision,
     gemma4LiteRTArtifactRevisions:freeze(Object.fromEntries(Object.values(MODELS).map(model=>[model.id,model.revision])))
   });

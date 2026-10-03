@@ -1,15 +1,21 @@
 (()=>{
 'use strict';
-const VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
-const PRIOR_VERSION='1.3.0-litert-gemma4-fast-runtime-v1-dual-phone-mtp-jspi';
+const VERSION='1.5.0-litert-phone-runtime-v1-qwen35-flagships';
+const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
-const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.14.0-civweave-v1';
+const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
+const QWEN_FAST='qwen35-4b-litert-web';
+const QWEN_DEEP='qwen35-9b-litert-web';
 const PROFILES=Object.freeze({
-  'gemma4-e2b-it-litert-web':Object.freeze({id:'gemma4-e2b-it-litert-web',aliases:Object.freeze(['gemma4-e2b-it-litert-web','gemma4-e2b-it-q4f16','gemma4-e2b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E2B-it-litert-lm',contextTokens:4096,maxOutputTokens:2400,label:'Gemma 4 E2B LiteRT'}),
-  'gemma4-e4b-it-litert-web':Object.freeze({id:'gemma4-e4b-it-litert-web',aliases:Object.freeze(['gemma4-e4b-it-litert-web','gemma4-e4b-it-q4f16','gemma4-e4b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E4B-it-litert-lm',contextTokens:4096,maxOutputTokens:2800,label:'Gemma 4 E4B LiteRT'})
+  'gemma4-e2b-it-litert-web':Object.freeze({id:'gemma4-e2b-it-litert-web',aliases:Object.freeze(['gemma4-e2b-it-litert-web','gemma4-e2b-it-q4f16','gemma4-e2b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E2B-it-litert-lm',contextTokens:4096,maxOutputTokens:2400,label:'Gemma 4 E2B LiteRT',family:'gemma4',constrainedTools:true,sampler:Object.freeze({k:64,p:.95,temperature:1})}),
+  'gemma4-e4b-it-litert-web':Object.freeze({id:'gemma4-e4b-it-litert-web',aliases:Object.freeze(['gemma4-e4b-it-litert-web','gemma4-e4b-it-q4f16','gemma4-e4b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E4B-it-litert-lm',contextTokens:4096,maxOutputTokens:2800,label:'Gemma 4 E4B LiteRT',family:'gemma4',constrainedTools:true,sampler:Object.freeze({k:64,p:.95,temperature:1})}),
+  [QWEN_FAST]:Object.freeze({id:QWEN_FAST,aliases:Object.freeze([QWEN_FAST]),repo:'litert-community/Qwen3.5-4B',contextTokens:4096,maxOutputTokens:2400,label:'Qwen 3.5 4B LiteRT',family:'qwen35',constrainedTools:false,sampler:Object.freeze({k:20,p:.95,temperature:.6})}),
+  [QWEN_DEEP]:Object.freeze({id:QWEN_DEEP,aliases:Object.freeze([QWEN_DEEP]),repo:'litert-community/Qwen3.5-9B-LiteRT',contextTokens:4096,maxOutputTokens:3200,label:'Qwen 3.5 9B LiteRT',family:'qwen35',constrainedTools:false,sampler:Object.freeze({k:20,p:.95,temperature:.6})})
 });
 const ALIAS_TO_FAST=new Map(Object.values(PROFILES).flatMap(profile=>profile.aliases.map(id=>[id,profile.id])));
+const GEMMA_FAST_ALIASES=new Set(PROFILES['gemma4-e2b-it-litert-web'].aliases);
+const GEMMA_DEEP_ALIASES=new Set(PROFILES['gemma4-e4b-it-litert-web'].aliases);
 if(globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===VERSION)return;
 let pendingUnloadReason='',engineReleasePromise=null;
 let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,wrapped=null,generationActive=false,lastMetrics=null;
@@ -19,7 +25,15 @@ const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{ve
 const selected=()=>{try{return globalThis.CivweaveLocalModelDownloadV266?.selection?.()||null}catch{return null}};
 const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
 const manager=()=>globalThis.CivweaveLocalModelDownloadV266;
-const profileFor=id=>PROFILES[ALIAS_TO_FAST.get(id)||id]||null;
+const qwenFlagshipSelected=()=>{const id=String(selected()?.id||'');return id===QWEN_FAST||id===QWEN_DEEP};
+const profileFor=id=>{
+  let key=String(id||'');
+  if(qwenFlagshipSelected()){
+    if(GEMMA_FAST_ALIASES.has(key))key=QWEN_FAST;
+    else if(GEMMA_DEEP_ALIASES.has(key))key=QWEN_DEEP;
+  }
+  return PROFILES[ALIAS_TO_FAST.get(key)||key]||null;
+};
 const supportsJspi=()=>typeof globalThis.WebAssembly?.Suspending==='function'&&typeof globalThis.WebAssembly?.promising==='function';
 async function fastStatus(id){try{return await manager()?.status?.(id)}catch{return{available:false}}}
 function modelUrl(modelId){
@@ -95,6 +109,11 @@ function normalizedMessages(systemPrompt,messages=[]){
   return rows;
 }
 function chunkText(chunk){if(!chunk)return'';if(typeof chunk==='string')return chunk;if(typeof chunk.content==='string')return chunk.content;if(Array.isArray(chunk.content))return chunk.content.map(part=>clean(part?.text??part?.content??'',12000)).join('');return clean(chunk.text??chunk.delta??'',12000)}
+function structuredJsonContract(tool){
+  const name=clean(tool?.function?.name||'civweave_result',120),schema=tool?.function?.parameters||{type:'object'};
+  let serialized='{}';try{serialized=JSON.stringify(schema)}catch{}
+  return `Return exactly one JSON object for ${name}. Do not use markdown fences, commentary, analysis, or <think> tags. The JSON must satisfy this schema: ${serialized}`;
+}
 function normalizeStructuredTool(value){
   if(!value||typeof value!=='object')return null;
   if(value.type==='function'&&value.function?.name)return value;
@@ -118,11 +137,12 @@ async function runFast(args={},forcedModelId=''){
   const started=now();let chat=null,firstTokenAt=0,index=0,text='',toolCall=null;
   try{
     const status=await fastStatus(profile.id);if(!status?.available)throw Object.assign(new Error(`${profile.label} is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});
-    const activeEngine=await ensureEngine(profile.id),rows=normalizedMessages(args.systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
+    const activeEngine=await ensureEngine(profile.id),requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,rows=normalizedMessages(systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
     const maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024));
-    const formattedTool=normalizeStructuredTool(args.structuredTool),prefaceConfig={messages:preface};
+    const prefaceConfig={messages:preface};
     if(formattedTool){prefaceConfig.tools=[formattedTool];prefaceConfig.extra_context={enable_thinking:false}}
-    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:64,p:.95,temperature:formattedTool?0.2:1}},preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
+    const sampler=profile.sampler||{k:64,p:.95,temperature:1};
+    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)}},preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
     chat=await activeEngine.createConversation(conversationConfig);
     emit('civweave:litert-gemma4-progress',{phase:'generating',model:profile.id,backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
@@ -137,11 +157,11 @@ async function runFast(args={},forcedModelId=''){
     }
     const formattedText=formattedTool?toolArgumentText(toolCall):'';
     if(formattedTool&&!formattedText)throw Object.assign(new Error(`LiteRT-LM constrained decoding completed without the required ${formattedTool.function.name} tool call.`),{code:'LITERT_FORMATTED_OUTPUT_MISSING',formattedOutput:true,toolName:formattedTool.function.name});
-    const outputText=(formattedTool?formattedText:text).trim();
-    if(!outputText)throw Object.assign(new Error('Gemma completed without a usable answer. Retry with a smaller request.'),{code:'LOCAL_MODEL_EMPTY_OUTPUT'});
+    const outputText=(formattedTool?formattedText:text).replace(/^\s*<think>[\s\S]*?<\/think>\s*/i,'').trim();
+    if(!outputText)throw Object.assign(new Error(`${profile.label} completed without a usable answer. Retry with a smaller request.`),{code:'LOCAL_MODEL_EMPTY_OUTPUT'});
     let benchmark={};try{benchmark=benchmarkMetrics(await chat.getBenchmarkInfo())}catch{}
     const completed=now(),generationMs=Math.round(completed-started),ttftMs=firstTokenAt?Math.round(firstTokenAt-started):null,decodeSeconds=Math.max(.001,(completed-(firstTokenAt||started))/1000),approxTokens=Math.max(1,Math.round(outputText.length/3.7)),measuredApproxTokensPerSecond=Number((approxTokens/decodeSeconds).toFixed(2));
-    const metrics={runtime:'litert-lm-web-0.14.0',backend:'webgpu-gpu-artisan',model:profile.id,generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),...benchmark};
+    const metrics={runtime:'litert-lm-web-0.17.1',backend:'webgpu-gpu-artisan',model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
     lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
   }finally{
@@ -164,14 +184,14 @@ function install(){
     if(!target){if(pick.id===profile.id)throw Object.assign(new Error(`${profile.label} is selected but its optimized model file is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});return base.generate(args)}
     try{return await runFast(args,target.id)}catch(error){emit('civweave:litert-gemma4-fallback',{model:target.id,selectedModel:pick.id,message:String(error?.message||error),capability:error?.capability||null,formattedOutput:Boolean(args?.structuredTool)});if(pick.id!==profile.id)return base.generate(args);throw error}
   };
-  const next=Object.freeze({...base,generate,__civweaveLiteRTGemma4FastV1:VERSION,litertGemma4Fast:true,litertGemma4Dual:true,litertGemma4Mtp:true,litertGemma4Jspi:true,litertGemma4FormattedOutput:true,litertGemma4ConstrainedDecoding:true,litertModelId:PROFILES['gemma4-e2b-it-litert-web'].id,litertModelIds:Object.freeze(Object.keys(PROFILES)),legacyAcceleratedModelId:'gemma4-e2b-it-q4f16',legacyAcceleratedModelIds:Object.freeze([...ALIAS_TO_FAST.keys()].filter(id=>!PROFILES[id])),oneEngineAtATime:true,phoneProfile:'12gb-dual'});
+  const next=Object.freeze({...base,generate,__civweaveLiteRTGemma4FastV1:VERSION,litertGemma4Fast:true,litertGemma4Dual:true,litertGemma4Mtp:true,litertGemma4Jspi:true,litertGemma4FormattedOutput:true,litertGemma4ConstrainedDecoding:true,litertQwen35Phone:true,qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,litertModelId:QWEN_FAST,litertModelIds:Object.freeze(Object.keys(PROFILES)),legacyAcceleratedModelId:'gemma4-e2b-it-q4f16',legacyAcceleratedModelIds:Object.freeze([...ALIAS_TO_FAST.keys()].filter(id=>!PROFILES[id])),oneEngineAtATime:true,phoneProfile:'qwen35-flagship'});
   try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}
-  wrapped=next;emit('civweave:litert-gemma4-fast-runtime-ready',{models:Object.keys(PROFILES),transparentAliases:[...ALIAS_TO_FAST.keys()],oneEngineAtATime:true,phoneProfile:'12gb-dual',mtpRequested:true,jspiRequired:true,formattedOutput:true,constrainedDecoding:true});return true;
+  wrapped=next;emit('civweave:litert-gemma4-fast-runtime-ready',{models:Object.keys(PROFILES),transparentAliases:[...ALIAS_TO_FAST.keys()],qwen35Models:[QWEN_FAST,QWEN_DEEP],qwen35GemmaRoleBridge:true,oneEngineAtATime:true,phoneProfile:'qwen35-flagship',mtpRequested:true,jspiRequired:true,formattedOutput:true,constrainedDecoding:true});return true;
 }
 async function unload(){await unloadEngine('manual-unload');lastMetrics=null;return true}
 for(const name of ['civweave:local-model-runtime-ready','civweave:gemma4-litert-fast-extension-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 addEventListener('civweave:local-model-selection',()=>{const pick=selected(),target=profileFor(pick?.id);if(engine&&(!pick?.active||!target||target.id!==engineModelId))void unloadEngine('selection-change')});
 addEventListener('pagehide',()=>{void unloadEngine('pagehide')});
 install();
-globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,fastModelId:'gemma4-e2b-it-litert-web',fastModelIds:Object.freeze(Object.keys(PROFILES)),legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,engineContextTokens:4096,oneEngineAtATime:true,mtpRequested:true,jspiRequired:true,phoneProfile:'12gb-dual',formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
+globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,fastModelId:QWEN_FAST,fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,engineContextTokens:4096,oneEngineAtATime:true,mtpRequested:true,jspiRequired:true,phoneProfile:'qwen35-flagship',formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
 })();

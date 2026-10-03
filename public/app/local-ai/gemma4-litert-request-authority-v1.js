@@ -6,15 +6,19 @@ const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-c
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const FAST_RUNTIME_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
-const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output';
+const FAST_RUNTIME_VERSION='1.5.0-litert-phone-runtime-v1-qwen35-flagships';
+const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.5.0-qwen35-flagships';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.0.1-guide-generation-tracker-v1-live-pipeline-streams';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.1-live-pipeline-streams';
 const WEAVE_PIPELINE_VERSION='1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair';
 const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.0.0-plan-compile-repair';
-const DEEP_MODEL='gemma4-e4b-it-litert-web';
-const FAST_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web']);
+const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
+const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
+const QWEN_FAST_MODEL='qwen35-4b-litert-web';
+const QWEN_DEEP_MODEL='qwen35-9b-litert-web';
+const QWEN_IDS=new Set([QWEN_FAST_MODEL,QWEN_DEEP_MODEL]);
+const FAST_IDS=new Set([GEMMA_FAST_MODEL,GEMMA_DEEP_MODEL,QWEN_FAST_MODEL,QWEN_DEEP_MODEL]);
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const COMPOSITION_KEYS=Object.freeze([
   '__civweaveLocalProviderAuthorityV1',
@@ -60,6 +64,9 @@ function selectedFast(){
   const pick=selected();
   return Boolean(pick?.active&&FAST_IDS.has(clean(pick.id,240)));
 }
+function qwenSelected(){const pick=selected();return Boolean(pick?.active&&QWEN_IDS.has(clean(pick.id,240)))}
+function fastRoleModel(){return qwenSelected()?QWEN_FAST_MODEL:GEMMA_FAST_MODEL}
+function deepRoleModel(){return qwenSelected()?QWEN_DEEP_MODEL:GEMMA_DEEP_MODEL}
 function emit(type,detail={}){
   try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}
 }
@@ -79,6 +86,7 @@ function installFastStructuredToolAdapter(){
   const runFast=async(args={},forcedModelId='')=>{
     const tool=normalizedStructuredTool(args?.structuredTool);
     if(!tool)return prior(args,forcedModelId);
+    if(qwenSelected())return prior({...args,structuredTool:tool},forcedModelId);
     const toolContract=`STRUCTURED TOOL CONTRACT: You MUST respond by calling the ${tool.name} tool exactly once. Put the complete structured result in that tool's arguments. Do not answer with prose or raw JSON outside the tool call.`;
     const systemPrompt=[clean(args.systemPrompt,12000),toolContract].filter(Boolean).join('\n\n');
     try{return await prior({...args,structuredTool:tool,systemPrompt},forcedModelId)}catch(error){
@@ -103,7 +111,8 @@ function installLearningPlanMetadataAdapter(){
   const generateLivingSchoolPlan=async(...args)=>{
     const result=await prior(...args),options=args[0]||{};
     if(options?.__civweaveE2BIntakeCompleted===true){
-      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:DEEP_MODEL,structuredGenerationModel:DEEP_MODEL,e2bIntakeModel:'gemma4-e2b-it-litert-web'};
+      const deep=deepRoleModel(),fast=fastRoleModel();
+      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:deep,structuredGenerationModel:deep,e2bIntakeModel:fast,fastIntakeModel:fast,deepGenerationModel:deep};
     }
     return result;
   };
@@ -112,7 +121,7 @@ function installLearningPlanMetadataAdapter(){
   const next=Object.freeze({...api,generateLivingSchoolPlan,e4bIntakeHandoffMetadata:true});
   try{globalThis.CivweaveUnifiedChatSystemV1=next}catch{return false}
   unifiedTarget=next;
-  emit('civweave:e4b-learning-plan-metadata-ready',{model:DEEP_MODEL});
+  emit('civweave:e4b-learning-plan-metadata-ready',{model:deepRoleModel(),fastModel:fastRoleModel(),qwen35:qwenSelected()});
   return true;
 }
 function scriptFor(path){
@@ -315,7 +324,7 @@ globalThis.CivweaveGemma4LiteRTRequestAuthorityV1=Object.freeze({
   structuredToolAdapterVersion:FAST_STRUCTURED_TOOL_ADAPTER_VERSION,
   trackerVersion:TRACKER_VERSION,
   weavePipelineVersion:WEAVE_PIPELINE_VERSION,
-  selected,selectedFast,ensure,prewarm,ensureTracker,ensureWeaveLayers,installAssistant,installFamilyLoaderWeaveRebind,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
+  selected,selectedFast,qwenSelected,fastRoleModel,deepRoleModel,ensure,prewarm,ensureTracker,ensureWeaveLayers,installAssistant,installFamilyLoaderWeaveRebind,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
   firstRequestOwnership:true,
   requestTriggeredOwnership:true,
   passivePrewarm:false,

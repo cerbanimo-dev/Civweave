@@ -9,8 +9,8 @@ const compactSource=await readFile(new URL('../public/app/local-ai/gemma4-struct
 const persistent=await readFile(new URL('../public/app/persistent-system-shell-v1.html',import.meta.url),'utf8');
 const campus=await readFile(new URL('../public/app/working-campus-v440.html',import.meta.url),'utf8');
 
-assert.match(authoritySource,/VERSION='1\.0\.1-gemma4-litert-request-authority-v1-stable-composition'/);
-assert.match(authoritySource,/FAST_RUNTIME_SRC='\/app\/local-ai\/litert-gemma4-fast-runtime-v1\.js\?v=1\.4\.0-formatted-output'/);
+assert.match(authoritySource,/VERSION='1\.1\.3-gemma4-litert-request-authority-v1-family-loader-weave-rebind'/);
+assert.match(authoritySource,/FAST_RUNTIME_SRC='\/app\/local-ai\/litert-gemma4-fast-runtime-v1\.js\?v=1.5.0-qwen35-flagships'/);
 assert.match(authoritySource,/if\(!fastWrapperReady\(\)\)[\s\S]*LOCAL_GEMMA4_LITERT_OWNERSHIP_FAILED/,'authority must refuse inference until the LiteRT wrapper owns the selected model');
 assert.doesNotMatch(authoritySource,/CivweaveLocalModelRuntimeV266\?\.generate|CivweaveLocalModelRuntimeV266\.generate/,'first-request authority must never invoke the generic Transformers runtime directly');
 assert.match(authoritySource,/copyCompositionMetadata\(respond,prior\)/,'Gemma authority must preserve lower assistant-layer ownership metadata');
@@ -25,13 +25,13 @@ assert.match(fastSource,/prefaceConfig\.tools=\[formattedTool\]/);
 assert.match(fastSource,/await chat\.sendMessage\(latest\)/,'formatted output should use the final structured response instead of partial streamed tool calls');
 assert.match(fastSource,/structuredToolCalling:true/);
 assert.match(compactSource,/structuredTool:COMPACT_TOOL/);
-for(const [label,html] of [['persistent shell',persistent],['Working Campus',campus]]){
+for(const [label,html,requestVersion] of [['persistent shell',persistent,'1.1.3-family-loader-weave-rebind'],['Working Campus',campus,'1.0.2-structured-tool-shape']]){
   const base=html.indexOf('gemma4-structured-quest-completion-v1.js');
   const request=html.indexOf('gemma4-litert-request-authority-v1.js');
   const compact=html.indexOf('gemma4-structured-quest-compact-envelope-v1.js');
   assert(base>=0&&request>base&&compact>request,`${label} must load base structured completion, first-request LiteRT authority, then compact formatted Quest bridge`);
   assert.match(html,/gemma4-current-registry-authority-v1\.js\?v=1\.0\.2-stable-composition/);
-  assert.match(html,/gemma4-litert-request-authority-v1\.js\?v=1\.0\.1-stable-composition/);
+  assert.ok(html.includes(`gemma4-litert-request-authority-v1.js?v=${requestVersion}`),`${label} must load its current LiteRT request-authority generation`);
 }
 
 const events=[];
@@ -54,7 +54,9 @@ const sandbox={
   CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'gemma4-e2b-it-litert-web'})},
   CivweaveGemma4LiteRTFastExtensionV1:{version:'1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard',watch:()=>events.push('extension-watch')},
   CivweaveGemma4CurrentRegistryAuthorityV1:{repairRegistry:()=>events.push('registry-repair')},
-  CivweaveLiteRTGemma4FastRuntimeV1:{version:'1.4.0-litert-gemma4-fast-runtime-v1-formatted-output',install(){events.push('fast-install');const prior=sandbox.CivweaveLocalChatRuntimeV295;sandbox.CivweaveLocalChatRuntimeV295={...prior,__civweaveLiteRTGemma4FastV1:'1.4.0-litert-gemma4-fast-runtime-v1-formatted-output',generate:async()=>{events.push('fast-local-generate');return{status:'success',outputText:'ok'}}};return true}},
+  CivweaveGuideGenerationTrackerV1:{version:'1.0.1-guide-generation-tracker-v1-live-pipeline-streams',install:()=>true},
+  CivweaveGemma4WeaveDraftPipelineV1:{version:'1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair',install:()=>true,installRuntime:()=>true},
+  CivweaveLiteRTGemma4FastRuntimeV1:{version:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',install(){events.push('fast-install');const prior=sandbox.CivweaveLocalChatRuntimeV295;sandbox.CivweaveLocalChatRuntimeV295={...prior,__civweaveLiteRTGemma4FastV1:'1.5.0-litert-phone-runtime-v1-qwen35-flagships',generate:async()=>{events.push('fast-local-generate');return{status:'success',outputText:'ok'}}};return true}},
   CivweaveAssistantV141:{respond:lowerRespond},
   queueMicrotask:fn=>fn(),
   setTimeout:()=>1,clearTimeout:()=>{},
@@ -66,7 +68,7 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(authoritySource,sandbox,{filename:'gemma4-litert-request-authority-v1.js'});
 const authority=sandbox.CivweaveGemma4LiteRTRequestAuthorityV1;
-assert.equal(authority.version,'1.0.1-gemma4-litert-request-authority-v1-stable-composition');
+assert.equal(authority.version,'1.1.3-gemma4-litert-request-authority-v1-family-loader-weave-rebind');
 assert.equal(authority.selectedFast(),true);
 assert.equal(authority.stableAssistantComposition,true);
 assert.equal(events.includes('fast-install'),false,'passive startup must not install the LiteRT wrapper before a request');

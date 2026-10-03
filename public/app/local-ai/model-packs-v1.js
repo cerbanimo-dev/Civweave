@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-local-ai-model-packs-v1-browser-guard';
+const VERSION='1.1.0-local-ai-model-packs-v1-qwen35-flagship';
 const CACHE='civweave-specialized-model-packs-v1';
 const STATE_KEY='civweave.local-ai.packs.v1';
 const EVENT='civweave:local-model-pack-progress';
@@ -82,15 +82,28 @@ const PACKS=freeze({
     specialized:['silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8'],
     installOrder:['qwen3-0.6b-q8-wasm','smollm2-135m-instruct-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8']
   }),
+  'qwen-flagship-phone':pack('qwen-flagship-phone',{
+    label:'Flagship Phone Pack',
+    target:'12+ GB RAM · modern high-memory phone · LiteRT-LM',
+    storage:'About 14.0 GB download; keep at least 20 GB free',
+    estimatedBytes:13_970_000_000,
+    primaryModel:'qwen35-4b-litert-web',
+    deepModel:'qwen35-9b-litert-web',
+    fallbackModel:'qwen3-0.6b-q8-wasm',
+    summary:'Qwen 3.5 4B is the standard phone engine and Qwen 3.5 9B is the high-capability phone engine, with local speech and a CPU-safe fallback.',
+    generative:['qwen35-4b-litert-web','qwen35-9b-litert-web','qwen3-0.6b-q8-wasm'],
+    specialized:['silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'],
+    installOrder:['qwen3-0.6b-q8-wasm','qwen35-4b-litert-web','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8','omnilingual-asr-300m-int8','qwen35-9b-litert-web']
+  }),
   'premier-phone':pack('premier-phone',{
-    label:'Premier Phone Pack',
+    label:'Gemma Phone Compatibility Pack',
     target:'12 GB RAM · modern Android-class WebGPU',
     storage:'About 7.6 GB download; keep at least 11 GB free',
     estimatedBytes:7_577_000_000,
     primaryModel:'gemma4-e2b-it-q2f16-mobile',
     deepModel:'gemma4-e4b-it-q2f16-mobile',
     fallbackModel:'qwen3-0.6b-q8-wasm',
-    summary:'Full phone-local multimodel ladder with fast Gemma 4, deep Gemma 4, multilingual speech, and a CPU-safe fallback.',
+    summary:'Alternate Gemma phone-local ladder retained for compatibility, with multilingual speech and a CPU-safe fallback.',
     generative:['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm'],
     specialized:['silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'],
     installOrder:['qwen3-0.6b-q8-wasm','gemma4-e2b-it-q2f16-mobile','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8','omnilingual-asr-300m-int8','gemma4-e4b-it-q2f16-mobile']
@@ -111,7 +124,7 @@ const PACKS=freeze({
   })
 });
 
-const BROWSER_MANAGED_PACK_IDS=freeze(['premier-phone','server-quality']);
+const BROWSER_MANAGED_PACK_IDS=freeze(['qwen-flagship-phone','premier-phone','server-quality']);
 const BROWSER_INSTALL_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
 
 function save(force=false){const t=Date.now();if(!force&&t-lastSave<500)return;lastSave=t;try{localStorage.setItem(STATE_KEY,JSON.stringify(states))}catch{}}
