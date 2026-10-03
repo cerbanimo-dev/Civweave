@@ -6,7 +6,7 @@ const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [registry,packs,settings,runtime,authority,stage]=await Promise.all([
   read('public/app/local-ai/model-registry-v266.js'),
   read('public/app/local-ai/model-packs-v1.js'),
-  read('public/app/settings-local-route-v331.js'),
+  read('public/app/settings-local-models-direct-v325.js'),
   read('public/app/local-ai/litert-gemma4-fast-runtime-v1.js'),
   read('public/app/local-ai/gemma4-litert-request-authority-v1.js'),
   read('scripts/stage-litert-lm-web-assets.mjs')
@@ -39,9 +39,9 @@ assert.match(settings,/browserPackId:'qwen-flagship-phone'/);
 assert.match(settings,/Download flagship pack/);
 assert.match(settings,/Gemma Phone Compatibility Pack/);
 
-assert.match(stage,/CORE_VERSION='0\.16\.1'/);
+assert.match(stage,/CORE_VERSION='0\.17\.1'/);
 assert.match(runtime,/VERSION='1\.5\.0-litert-phone-runtime-v1-qwen35-flagships'/);
-assert.match(runtime,/MODULE_URL='\/app\/vendor\/litert-lm\/dist\/index\.js\?v=0\.16\.1-civweave-qwen35'/);
+assert.match(runtime,/MODULE_URL='\/app\/vendor\/litert-lm\/dist\/index\.js\?v=0\.17\.1-civweave-qwen35'/);
 assert.match(runtime,/const QWEN_FAST='qwen35-4b-litert-web'/);
 assert.match(runtime,/const QWEN_DEEP='qwen35-9b-litert-web'/);
 assert.match(runtime,/qwenFlagshipSelected/);
@@ -50,7 +50,7 @@ assert.match(runtime,/GEMMA_DEEP_ALIASES\.has\(key\).*?key=QWEN_DEEP/s);
 assert.match(runtime,/structuredJsonContract/);
 assert.match(runtime,/profile\.constrainedTools===false\?null:requestedTool/);
 assert.match(runtime,/structuredJsonPrompt:Boolean\(requestedTool&&!formattedTool\)/);
-assert.match(runtime,/runtime:'litert-lm-web-0\.16\.1'/);
+assert.match(runtime,/runtime:'litert-lm-web-0\.17\.1'/);
 
 assert.match(authority,/QWEN_FAST_MODEL='qwen35-4b-litert-web'/);
 assert.match(authority,/QWEN_DEEP_MODEL='qwen35-9b-litert-web'/);
