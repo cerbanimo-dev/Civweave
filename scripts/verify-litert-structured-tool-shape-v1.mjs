@@ -40,7 +40,7 @@ assert.equal(authority.globalFinalResponseStreaming,true);
 assert.equal(authority.familyLoaderWeaveRebind,true);
 assert.equal(authority.trackerVersion,'1.0.1-guide-generation-tracker-v1-live-pipeline-streams');
 
-// E2B intake still uses LiteRT's structured-tool adapter. E4B Learning/Quest generation
+// The LiteRT structured-tool adapter remains compatible with E2B as an ordinary local selection. E4B Learning/Quest generation
 // is covered separately by the Weave Draft regression and must not use this adapter.
 const rawTool={name:'route_civweave_request',description:'Route the intake',parameters:{type:'object',required:['route'],properties:{route:{type:'string'}}}};
 const normalized=authority.normalizedStructuredTool(rawTool);
@@ -85,16 +85,16 @@ sandbox.CivweaveUnifiedChatSystemV1={
   generateLivingSchoolPlan:async()=>({provider:'downloaded-local',model:'gemma4-e2b-it-litert-web',response:{answer:'failed'}})
 };
 assert.equal(authority.installLearningPlanMetadataAdapter(),true);
-const metadata=await sandbox.CivweaveUnifiedChatSystemV1.generateLivingSchoolPlan({__civweaveE2BIntakeCompleted:true});
+const metadata=await sandbox.CivweaveUnifiedChatSystemV1.generateLivingSchoolPlan({__civweaveE4BIntakeCompleted:true});
 assert.equal(metadata.provider,'downloaded-local');
 assert.equal(metadata.model,'gemma4-e4b-it-litert-web');
-assert.equal(metadata.e2bIntakeModel,'gemma4-e2b-it-litert-web');
+assert.equal(metadata.e4bIntakeModel,'gemma4-e4b-it-litert-web');
 
 // Regression: unified-chat awaits FamilyAILoader.ensure() immediately before it
 // captures CivweaveModelRuntime. The loader may replace the runtime object, so the
 // E4B Weave wrapper must be rebound before ensure() resolves back to Moss.
 storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'}));
-const WEAVE_VERSION='1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair';
+const WEAVE_VERSION='1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only';
 let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
@@ -132,4 +132,4 @@ assert.equal(sandbox.CivweaveModelRuntime.generate.__civweaveWeaveDraftPipelineV
 assert.ok(weaveInstalls>=1,'Weave runtime was not reinstalled after the family loader completed');
 assert.ok(trackerInstalls>=1,'generation tracker was not kept active during the family-loader rebind');
 
-console.log('PASS: E2B intake keeps the LiteRT dual tool declaration and same-model fallback; E4B metadata is correct; FamilyAILoader cannot return a replacement strict-JSON runtime without the Weave Draft wrapper being rebound.');
+console.log('PASS: LiteRT tool compatibility remains intact; E4B-only structured metadata is correct; FamilyAILoader rebinds the Weave Draft wrapper.');
