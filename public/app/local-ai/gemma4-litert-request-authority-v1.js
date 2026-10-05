@@ -9,8 +9,8 @@ const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1
 const FAST_RUNTIME_VERSION='1.5.0-litert-phone-runtime-v1-qwen35-flagships';
 const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.5.0-qwen35-flagships';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
-const TRACKER_VERSION='1.0.1-guide-generation-tracker-v1-live-pipeline-streams';
-const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.1-live-pipeline-streams';
+const TRACKER_VERSION='1.0.2-guide-generation-tracker-v1-e4b-only-intake';
+const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.2-e4b-only-intake';
 const WEAVE_PIPELINE_VERSION='1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only';
 const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.2.0-e4b-only';
 const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
