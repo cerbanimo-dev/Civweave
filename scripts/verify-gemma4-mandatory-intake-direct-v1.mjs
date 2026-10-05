@@ -27,11 +27,11 @@ assert.match(shared, /local-guide-control-bypass-v1\.js\?v=1\.4\.3-mandatory-int
 assert.doesNotMatch(shared, /local-guide-control-bypass-v1\.js\?v=1\.4\.1-ai-quest-lazy-route/);
 assert.doesNotMatch(shared, /litert-gemma4-fast-runtime-v1\.js\?v=1\.0\.1-web-safe/);
 
-assert.match(takeover, /weave-pipeline-takeover-v1-r6/);
-assert.match(takeover, /cwrecovery-v462-mandatory-gemma-intake/);
-assert.match(rootWorker, /root-worker-bridge-v31-mandatory-gemma-intake/);
-assert.match(rootWorker, /weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r6/);
-assert.match(installedWorker, /service-worker-weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r6/, 'the canonical installed PWA worker must itself import takeover r6');
+assert.match(takeover, /weave-pipeline-takeover-v1-r7/);
+assert.match(takeover, /cwrecovery-v463-e4b-only-weave/);
+assert.match(rootWorker, /root-worker-bridge-v32-e4b-only-weave/);
+assert.match(rootWorker, /weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r7/);
+assert.match(installedWorker, /service-worker-weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r7/, 'the canonical installed PWA worker must itself import takeover r6');
 assert.doesNotMatch(installedWorker, /service-worker-weave-pipeline-takeover-v1\.js\?v=weave-pipeline-takeover-v1-r5/);
 
 let bridgeCalls = 0;
@@ -58,7 +58,7 @@ const context = {
     intakeEligible: args => args?.systemId === 'civweave' && /tarot/i.test(args?.text || '')
   },
   CivweaveGemma4FirstRequestIntakeBridgeV1: {
-    directIntake: async () => { bridgeCalls += 1; return { handled: true, result: { provider: 'bridge-intake', model: 'gemma4-e2b-it-litert-web' } }; }
+    directIntake: async () => { bridgeCalls += 1; return { handled: true, result: { provider: 'bridge-intake', model: 'gemma4-e4b-it-litert-web' } }; }
   }
 };
 context.globalThis = context;
@@ -74,4 +74,4 @@ assert.equal(bridgeCalls, 1, 'mandatory first-request bridge must own eligible G
 assert.equal(legacyCalls, 0, 'captured legacy local provider must not run for eligible Gemma intake');
 assert.equal(deterministicCalls, 0, 'deterministic control path must not run for substantive intake');
 
-console.log('PASS: local Gemma learning requests cannot bypass mandatory E2B intake and the canonical installed worker forces takeover r6.');
+console.log('PASS: local Gemma learning requests cannot bypass mandatory E4B intake and the canonical installed worker forces takeover r7.');
