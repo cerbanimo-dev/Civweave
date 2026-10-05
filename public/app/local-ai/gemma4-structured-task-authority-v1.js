@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-gemma4-structured-task-authority-v1-e2b-intake-e4b-constrained-stop';
-const INTAKE_MODEL='gemma4-e2b-it-litert-web';
+const VERSION='1.3.0-gemma4-structured-task-authority-v1-e4b-only';
+const INTAKE_MODEL='gemma4-e4b-it-litert-web';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const TASK_TIMEOUT_MS=600000;
 const INTAKE_TIMEOUT_MS=90000;
@@ -79,7 +79,7 @@ async function requireModel(id,code,label){
   const error=new Error(`${label} is required for this local AI stage but is not installed and ready.`);
   error.code=code;error.model=id;error.status=status;throw error;
 }
-const requireIntakeModel=()=>requireModel(INTAKE_MODEL,'CIVWEAVE_E2B_INTAKE_REQUIRED','Gemma 4 E2B intake');
+const requireIntakeModel=()=>requireModel(INTAKE_MODEL,'CIVWEAVE_E4B_INTAKE_REQUIRED','Gemma 4 E4B intake');
 const requireDeepModel=()=>requireModel(DEEP_MODEL,'CIVWEAVE_E4B_STRUCTURED_TASK_REQUIRED','Gemma 4 E4B structured generation');
 
 async function orchestrator(timeoutMs=12000){
@@ -99,7 +99,7 @@ async function intakeRuntime(timeoutMs=12000){
     if(typeof fast?.runFast==='function')return fast;
     await sleep(50);
   }
-  throw Object.assign(new Error('The Gemma 4 LiteRT intake runtime did not become ready.'),{code:'CIVWEAVE_E2B_INTAKE_RUNTIME_NOT_READY'});
+  throw Object.assign(new Error('The Gemma 4 LiteRT intake runtime did not become ready.'),{code:'CIVWEAVE_E4B_INTAKE_RUNTIME_NOT_READY'});
 }
 
 function controlledFastRun(args,model,stage,timeoutMs){
@@ -189,7 +189,7 @@ async function prepareStructuredRequest(request){
     __civweaveSkipResponseRouter:true,
     __civweaveStructuredTaskAuthorityV1:true,
     __civweaveLocalStructuredPlan:true,
-    __civweaveE2BIntakeCompleted:Boolean(request?.__civweaveE2BIntakeCompleted),
+    __civweaveE4BIntakeCompleted:Boolean(request?.__civweaveE4BIntakeCompleted),
     ...(purpose===LEARNING_PURPOSE?{__civweaveLocalStructuredLearningPlan:true}:{__civweaveLocalStructuredQuest:true})
   };
 }
@@ -224,7 +224,7 @@ function intakeTool(){return{
     reply:{type:'string'}
   }}
 }}
-function intakeSystemPrompt(){return `You are Weaveling's fast E2B intake and routing stage. Every substantive local Weaveling request comes to you before any E4B task generation.
+function intakeSystemPrompt(){return `You are Weaveling's fast E4B intake and routing stage. Every substantive local Weaveling request comes to you before any E4B task generation.
 
 Classify by the OBJECT or OUTCOME the Hero is asking for, not by verbs such as help, build, create, make, or plan.
 - learning: the Hero wants to gain, practice, memorize, study, understand, or master a capability, OR explicitly asks for a learning plan, Learning Journey, curriculum, course, syllabus, lesson plan, study plan, or skill tree.
@@ -258,21 +258,21 @@ function normalizeIntake(raw={},args={},prior=null){
   };
 }
 async function classifyIntake(args={}){
-  paintPending('Weaveling is sorting this request with E2B…');
+  paintPending('Weaveling is sorting this request with E4B…');
   await requireIntakeModel();throwIfCancelled();
   const prior=pendingIntake();
   const context={currentMessage:clean(args.text,5000),pendingIntake:prior?{route:prior.route,objective:prior.objective,facts:prior.facts,missingContext:prior.missingContext,latestText:prior.latestText}:null,recentConversation:recentRows(args.history)};
   emit('civweave:weaveling-intake-progress',{phase:'classifying',model:INTAKE_MODEL});
-  const result=await controlledFastRun({systemPrompt:intakeSystemPrompt(),messages:[{role:'user',content:`Classify this intake context:\n${JSON.stringify(context)}`}],maxNewTokens:INTAKE_MAX_TOKENS,structuredTool:intakeTool()},INTAKE_MODEL,'Weaveling E2B intake',INTAKE_TIMEOUT_MS);
+  const result=await controlledFastRun({systemPrompt:intakeSystemPrompt(),messages:[{role:'user',content:`Classify this intake context:\n${JSON.stringify(context)}`}],maxNewTokens:INTAKE_MAX_TOKENS,structuredTool:intakeTool()},INTAKE_MODEL,'Weaveling E4B intake',INTAKE_TIMEOUT_MS);
   throwIfCancelled();
   const raw=parse(clean(result?.outputText||result?.text,12000),null);
-  if(!raw||typeof raw!=='object')throw Object.assign(new Error('Gemma 4 E2B intake did not return a valid routing record.'),{code:'CIVWEAVE_E2B_INTAKE_INVALID'});
+  if(!raw||typeof raw!=='object')throw Object.assign(new Error('Gemma 4 E4B intake did not return a valid routing record.'),{code:'CIVWEAVE_E4B_INTAKE_INVALID'});
   const record=normalizeIntake(raw,args,prior);
   saveIntake(record);
-  if(record.route==='learning'&&record.ready)paintPending('E2B has enough context. Moss is drafting the Learning Journey with E4B…');
-  else if(record.route==='quest'&&record.ready)paintPending('E2B has enough context. Weaveling is drafting the Quest with E4B…');
-  else if(!record.ready)paintPending('E2B is checking what context is still needed…');
-  else paintPending('E2B is preparing the response…');
+  if(record.route==='learning'&&record.ready)paintPending('E4B has enough context. Moss is drafting the Learning Journey with E4B…');
+  else if(record.route==='quest'&&record.ready)paintPending('E4B has enough context. Weaveling is drafting the Quest with E4B…');
+  else if(!record.ready)paintPending('E4B is checking what context is still needed…');
+  else paintPending('E4B is preparing the response…');
   emit('civweave:weaveling-intake-progress',{phase:record.ready&&record.route!=='ordinary'?'handoff':record.state,model:INTAKE_MODEL,route:record.route,ready:record.ready});
   return record;
 }
@@ -283,25 +283,25 @@ function intakePacket(record){
 }
 function learningGenerationText(record){return `I want to learn to ${clean(record.objective,1200)||'demonstrate the requested capability'}.`}
 function questGenerationText(record){
-  const facts=record.facts.length?`\n\nKnown context from E2B intake:\n${record.facts.map(item=>`- ${item}`).join('\n')}`:'';
+  const facts=record.facts.length?`\n\nKnown context from E4B intake:\n${record.facts.map(item=>`- ${item}`).join('\n')}`:'';
   return `I want to ${clean(record.objective,1200)||clean(record.latestText,1200)}.${facts}`;
 }
 async function handoffIntake(record,args={}){
   throwIfCancelled();
   if(record.route==='learning'){
-    paintPending('E2B has enough context. Moss is drafting the Learning Journey with E4B…');
+    paintPending('E4B has enough context. Moss is drafting the Learning Journey with E4B…');
     const unified=globalThis.CivweaveUnifiedChatSystemV1;
     if(typeof unified?.generateLivingSchoolPlan!=='function')throw Object.assign(new Error('Moss high-level Learning Journey generation is unavailable.'),{code:'CIVWEAVE_LEARNING_PLAN_GENERATOR_NOT_READY'});
-    let result=await unified.generateLivingSchoolPlan({...args,text:learningGenerationText(record),systemId:'living-school',sourceSystemId:'civweave',sourceGuide:'Weaveling',__civweaveE2BIntakeCompleted:true,intake:record});
+    let result=await unified.generateLivingSchoolPlan({...args,text:learningGenerationText(record),systemId:'living-school',sourceSystemId:'civweave',sourceGuide:'Weaveling',__civweaveE4BIntakeCompleted:true,intake:record});
     throwIfCancelled();
     if(/could not generate the high-level Learning Journey plan/i.test(clean(result?.response?.answer,3000)))result={...result,provider:'downloaded-local',model:DEEP_MODEL,generationStage:'e4b-learning-plan'};
     saveIntake({...record,state:'handed-off',handedOffTo:'living-school',handedOffAt:new Date().toISOString()});
     return result;
   }
   if(record.route==='quest'){
-    paintPending('E2B has enough context. Weaveling is drafting the Quest with E4B…');
+    paintPending('E4B has enough context. Weaveling is drafting the Quest with E4B…');
     const task=await orchestrator();throwIfCancelled();
-    const result=await task.createModelPlan({...args,text:questGenerationText(record),latestRequest:clean(args.text,5000),__civweaveE2BIntakeCompleted:true,intake:record},globalThis.CivweaveAssistantV141);
+    const result=await task.createModelPlan({...args,text:questGenerationText(record),latestRequest:clean(args.text,5000),__civweaveE4BIntakeCompleted:true,intake:record},globalThis.CivweaveAssistantV141);
     throwIfCancelled();
     saveIntake({...record,state:'handed-off',handedOffTo:'quest',handedOffAt:new Date().toISOString()});
     return result;
@@ -333,7 +333,7 @@ function installRuntime(){
 }
 function cancellationPacket(error){
   if(error?.code==='CIVWEAVE_GENERATION_STOPPED')return{response:{answer:'Generation stopped.',choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:''},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'generation-stopped',model:clean(activeFastRun?.model||'',240),cancelled:true,fallbackFrom:null};
-  if(error?.code==='CIVWEAVE_LOCAL_STAGE_TIMEOUT')return{response:{answer:`The local ${clean(error.stage,200)} stopped because it exceeded its ${Math.round(Number(error.timeoutMs||0)/1000)} second stage limit. Nothing was generated or queued.`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry the request or check the local model runtime.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'local-stage-timeout',model:error.stage?.includes('E2B')?INTAKE_MODEL:DEEP_MODEL,timeout:true,fallbackFrom:null};
+  if(error?.code==='CIVWEAVE_LOCAL_STAGE_TIMEOUT')return{response:{answer:`The local ${clean(error.stage,200)} stopped because it exceeded its ${Math.round(Number(error.timeoutMs||0)/1000)} second stage limit. Nothing was generated or queued.`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry the request or check the local model runtime.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'local-stage-timeout',model:error.stage?.includes('E4B')?INTAKE_MODEL:DEEP_MODEL,timeout:true,fallbackFrom:null};
   return null;
 }
 function installAssistant(){
@@ -348,12 +348,12 @@ function installAssistant(){
     try{return await intakeRespond(args)}catch(error){
       const cancelled=cancellationPacket(error);if(cancelled)return cancelled;
       const message=clean(error?.message||error,1400);
-      return{response:{answer:`Weaveling could not complete the local E2B intake stage. Nothing was handed to E4B.\n\nIntake detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after both Gemma 4 local packs are ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-e2b-intake-failed',model:INTAKE_MODEL,intake:{failed:true,error:message,code:error?.code||'CIVWEAVE_E2B_INTAKE_FAILED'},fallbackFrom:null};
+      return{response:{answer:`Weaveling could not complete the local E4B intake stage. Nothing was handed to E4B.\n\nIntake detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after both Gemma 4 local packs are ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-e4b-intake-failed',model:INTAKE_MODEL,intake:{failed:true,error:message,code:error?.code||'CIVWEAVE_E4B_INTAKE_FAILED'},fallbackFrom:null};
     }finally{activeRequest=null;syncStopButton()}
   };
   copyMetadata(respond,baseFn);
   respond.__civweaveStructuredTaskAuthorityV1=VERSION;
-  respond.__civweaveE2BIntakeFirstV1=true;
+  respond.__civweaveE4BIntakeFirstV1=true;
   respond.__civweaveE4BStructuredTaskOnly=true;
   respond.__civweaveGenerationStopV1=true;
   respond.__prior=baseFn;
@@ -393,7 +393,7 @@ function installStopUI(){
 }
 function install(){
   const runtime=installRuntime(),assistant=installAssistant(),stopUI=installStopUI();
-  if(runtime||assistant||stopUI)emit('civweave:structured-task-authority-ready',{runtime,assistant,stopUI,timeoutMs:TASK_TIMEOUT_MS,intakeTimeoutMs:INTAKE_TIMEOUT_MS,intakeFirst:true,intakeModel:INTAKE_MODEL,deepModel:DEEP_MODEL,learningMaxTokens:LEARNING_MAX_TOKENS,structuredTaskFallbackToE2B:false,visibleIntakeProgress:true,constrainedE4B:true,stopButton:true});
+  if(runtime||assistant||stopUI)emit('civweave:structured-task-authority-ready',{runtime,assistant,stopUI,timeoutMs:TASK_TIMEOUT_MS,intakeTimeoutMs:INTAKE_TIMEOUT_MS,intakeFirst:true,intakeModel:INTAKE_MODEL,deepModel:DEEP_MODEL,learningMaxTokens:LEARNING_MAX_TOKENS,structuredTaskFallbackToE4B:false,visibleIntakeProgress:true,constrainedE4B:true,stopButton:true});
   return runtime||assistant||stopUI;
 }
 function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;install()})}
@@ -405,8 +405,8 @@ globalThis.CivweaveGemma4StructuredTaskAuthorityV1=Object.freeze({
   selectedLocal,intakeEligible,paintPending,modelStatus,requireIntakeModel,requireDeepModel,orchestrator,intakeRuntime,controlledFastRun,cancelActiveGeneration,deepConfig,structuredTool,directE4BTransport,prepareStructuredRequest,
   readIntake,pendingIntake,saveIntake,clearIntake,intakeTool,intakeSystemPrompt,normalizeIntake,classifyIntake,intakePacket,learningGenerationText,questGenerationText,handoffIntake,intakeRespond,
   installRuntime,installAssistant,installStopUI,syncStopButton,install,schedule,
-  policy:'E2B is the mandatory local intake/classification stage; only ready learning or quest intake records may hand off to E4B structured generation.',
-  intakeFirst:true,fallbackToE2B:false,classificationByObject:true,visibleIntakeProgress:true,constrainedE4B:true,stopButton:true
+  policy:'E4B is the mandatory local intake/classification stage; only ready learning or quest intake records may hand off to E4B structured generation.',
+  intakeFirst:true,fallbackToE4B:false,classificationByObject:true,visibleIntakeProgress:true,constrainedE4B:true,stopButton:true
 });
 schedule();
 })();
