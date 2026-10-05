@@ -348,7 +348,7 @@ function installAssistant(){
     try{return await intakeRespond(args)}catch(error){
       const cancelled=cancellationPacket(error);if(cancelled)return cancelled;
       const message=clean(error?.message||error,1400);
-      return{response:{answer:`Weaveling could not complete the local E4B intake stage. Nothing was handed to E4B.\n\nIntake detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after both Gemma 4 local packs are ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-e4b-intake-failed',model:INTAKE_MODEL,intake:{failed:true,error:message,code:error?.code||'CIVWEAVE_E4B_INTAKE_FAILED'},fallbackFrom:null};
+      return{response:{answer:`Weaveling could not complete the local E4B intake stage. Nothing was handed to E4B.\n\nIntake detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after the Gemma 4 E4B local pack is ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-e4b-intake-failed',model:INTAKE_MODEL,intake:{failed:true,error:message,code:error?.code||'CIVWEAVE_E4B_INTAKE_FAILED'},fallbackFrom:null};
     }finally{activeRequest=null;syncStopButton()}
   };
   copyMetadata(respond,baseFn);
