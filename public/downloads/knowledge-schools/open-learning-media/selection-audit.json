@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-selection-audit.v3",
-  "built_at": "2026-09-28T11:44:14Z",
+  "built_at": "2026-10-05T12:18:50Z",
   "before": 267,
-  "after": 203,
-  "rejected": 64,
+  "after": 205,
+  "rejected": 62,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -177,16 +177,18 @@
       "name": "Computing Basics",
       "school_slug": "technology",
       "required": true,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "peertube": 4,
+        "wikimedia-commons": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
         "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "RSA Crypto Pad Demo",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
         "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
@@ -236,15 +238,14 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
-        "wikimedia-commons": 2,
+        "wikimedia-commons": 1,
         "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
-        "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
         "juneteeth 2026 part1 introduction chat and arcus chroma"
       ]
@@ -267,13 +268,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -310,16 +313,18 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
+      "records": 5,
       "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 4
+        "wikimedia-commons": 4,
+        "internet-archive": 1
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
     "personal-finance": {
@@ -731,7 +736,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 17,
       "available": true
     },
     "practical-life": {
@@ -753,7 +758,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 24,
+      "records": 25,
       "available": true
     },
     "maker-creative": {
@@ -839,7 +844,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 26,
+      "records": 25,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -859,7 +864,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 14,
+      "records": 13,
       "available": true
     },
     "mind-body-practice": {
@@ -876,7 +881,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.6667,
-      "records": 7,
+      "records": 6,
       "available": true
     },
     "relationships-care": {
@@ -898,7 +903,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 11,
       "available": true
     },
     "garden-nature": {
@@ -1030,7 +1035,7 @@
         "computing-basics"
       ],
       "coverage": 1.0,
-      "records": 21,
+      "records": 22,
       "available": true
     },
     "environment-resilience": {
@@ -1109,7 +1114,7 @@
         "prompt-engineering"
       ],
       "coverage": 1.0,
-      "records": 15,
+      "records": 16,
       "available": true
     }
   },
@@ -1123,7 +1128,7 @@
     },
     {
       "provider": "wikimedia-commons",
-      "title": "How long does it take to get to the Moon? Mars? Jupiter?",
+      "title": "How Long Does it Take to Get to the Moon, Mars, Jupiter",
       "reasons": {
         "astronomy-space": "insufficient-automatic-instructional-evidence"
       }
@@ -1256,21 +1261,21 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Leaked Video Shows Google Leadership In Dismay At 2016",
+      "title": "Iran just struck IDF base filled with soldiers as Netanyahu send appeal for ceasefire - OPTM",
       "reasons": {
         "critical-thinking": "insufficient-automatic-instructional-evidence"
       }
     },
     {
       "provider": "internet-archive",
-      "title": "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
+      "title": "Netanyahu Flee Like a Coward as Iran Unleashes Massive Retaliation!",
       "reasons": {
         "critical-thinking": "insufficient-automatic-instructional-evidence"
       }
     },
     {
       "provider": "internet-archive",
-      "title": "Norman Finkelstein's CLASHES With Benjamin Netanyahu (This is Epic)",
+      "title": "What Iran just DID...US's entire army in Arab nations is now USELESS - OPTM",
       "reasons": {
         "critical-thinking": "insufficient-automatic-instructional-evidence"
       }
@@ -1368,7 +1373,7 @@
     },
     {
       "provider": "internet-archive",
-      "title": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
+      "title": "World Leder Fangruida Bio. 2020v. 3.3 Revision",
       "reasons": {
         "logical-frameworks": "insufficient-automatic-instructional-evidence"
       }
@@ -1465,6 +1470,13 @@
       }
     },
     {
+      "provider": "internet-archive",
+      "title": "AI Ppt Vdo",
+      "reasons": {
+        "prompt-engineering": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
       "provider": "peertube",
       "title": "From real to anime",
       "reasons": {
@@ -1474,13 +1486,6 @@
     {
       "provider": "peertube",
       "title": "Upscale from pixels to real life",
-      "reasons": {
-        "prompt-engineering": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Generating novel images using CLIP in Python",
       "reasons": {
         "prompt-engineering": "insufficient-automatic-instructional-evidence"
       }
@@ -1508,28 +1513,14 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Open CS education resources for schools - how hard could it be?",
+      "title": "CLOUDS Casey Reas",
       "reasons": {
         "pseudocoding": "insufficient-automatic-instructional-evidence"
       }
     },
     {
       "provider": "internet-archive",
-      "title": "CLOUDS Aaron Koblin",
-      "reasons": {
-        "pseudocoding": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "CLOUDS Andres Colubri",
-      "reasons": {
-        "pseudocoding": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "CLOUDS: Pittsburgh Premiere (excerpt)",
+      "title": "CLOUDS Daniel Shiffman",
       "reasons": {
         "pseudocoding": "insufficient-automatic-instructional-evidence"
       }

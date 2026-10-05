@@ -1,14 +1,14 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-09-28T11:44:14Z",
+  "built_at": "2026-10-05T12:18:50Z",
   "record_count": 177,
-  "mesh_redistributable_count": 129,
+  "mesh_redistributable_count": 128,
   "download_candidate_count": 263,
   "providers": {
     "internet-archive": {
-      "records": 6,
+      "records": 7,
       "mesh_redistributable": 0,
-      "download_candidates": 14
+      "download_candidates": 15
     },
     "peertube": {
       "records": 126,
@@ -16,9 +16,9 @@
       "download_candidates": 204
     },
     "wikimedia-commons": {
-      "records": 45,
-      "mesh_redistributable": 45,
-      "download_candidates": 45
+      "records": 44,
+      "mesh_redistributable": 44,
+      "download_candidates": 44
     }
   },
   "focus_topics": {
@@ -246,15 +246,14 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 3,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "wikimedia-commons": 2,
+        "wikimedia-commons": 1,
         "peertube": 1
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
-        "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa"
       ]
     },
@@ -276,13 +275,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -665,8 +666,14 @@
       ]
     }
   },
-  "failure_count": 15,
+  "failure_count": 16,
   "failures": [
+    {
+      "provider": "wikimedia-commons",
+      "topic_slug": "entrepreneurship-small-business",
+      "query": "entrepreneurship introduction lecture",
+      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=entrepreneurship+introduction+lecture+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
+    },
     {
       "provider": "wikimedia-commons",
       "topic_slug": "entrepreneurship-small-business",
@@ -730,14 +737,14 @@
     {
       "provider": "wikimedia-commons",
       "topic_slug": "language-learning",
-      "query": "foreign language course beginner",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=foreign+language+course+beginner+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
+      "query": "second language acquisition lecture",
+      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=second+language+acquisition+lecture+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     },
     {
       "provider": "wikimedia-commons",
       "topic_slug": "language-learning",
-      "query": "second language acquisition lecture",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=second+language+acquisition+lecture+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
+      "query": "foreign language course beginner",
+      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=foreign+language+course+beginner+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     },
     {
       "provider": "wikimedia-commons",
@@ -14663,97 +14670,6 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:2017 Public Health Ethics Forum.webm",
-      "topic_slug": "philosophy-ethics",
-      "topic_name": "Philosophy & Ethics",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "philosophy",
-        "ethics",
-        "moral reasoning"
-      ],
-      "matched_query": "ethics moral philosophy",
-      "title": "2017 Public Health Ethics Forum",
-      "description": "The 2017 Public Health Ethics Forum, \"Optimal Health for Her Whole Life,\" focuses on a range of health issues and actions to improve the health of women and girls in the United States. The National Center for Bioethics in Research and Health Care at Tuskegee University and the Office of Minority Health and Health Equity at the Centers for Disease Control and Prevention (CDC) host this annual event. This year's forum explores ways to promote and protect women's health across the lifespan by emphasizing public health ethics in the practice of public health. Comments on this video are allowed in accordance with our comment policy: https://www.cdc.gov/SocialMedia/Tools/CommentPolicy.html This video can also be viewed at https://www.cdc.gov/minorityhealth/ethicsforum/2017/videos/2017_PHEF_video_LowRes.mp4",
-      "creator": "Centers for Disease Control and Prevention",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:2017_Public_Health_Ethics_Forum.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "Public domain",
-        "url": "",
-        "evidence": "Public domain | Public domain | pd |",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/2017_Public_Health_Ethics_Forum.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 2389916626,
-          "provider_sha1": "99f0d9ccf85c253c60fa999fcce47dacd382b7a6",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Centers for Disease Control and Prevention",
-        "source_title": "2017 Public Health Ethics Forum",
-        "source_url": "https://commons.wikimedia.org/wiki/File:2017_Public_Health_Ethics_Forum.webm",
-        "license": "Public domain",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "philosophy-ethics",
-          "school_slug": "philosophy-and-religion",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 45,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 91,
-      "relevance": {
-        "philosophy-ethics": {
-          "score": 10,
-          "evidence": [
-            "ethics",
-            "ethics"
-          ]
-        }
-      },
-      "pedagogy": {
-        "philosophy-ethics": {
-          "strong_title_matches": [
-            "ethics"
-          ],
-          "strong_description_matches": [
-            "ethics"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 45
-        }
-      },
-      "selection": {
-        "philosophy-ethics": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 45
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
       "provider_id": "8d6c1bba-f4c0-4fca-ab42-84a298c65064",
       "topic_slug": "philosophy-ethics",
@@ -16047,6 +15963,99 @@
           ],
           "strong_description_matches": [
             "prompt design"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "prompt-engineering": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "internet-archive",
+      "provider_id": "effective-prompt-engineering-for-python-programmers",
+      "topic_slug": "prompt-engineering",
+      "topic_name": "Prompt Engineering",
+      "school_slug": "technology",
+      "concepts": [
+        "prompt engineering",
+        "LLM prompting",
+        "prompt patterns",
+        "evaluation"
+      ],
+      "matched_query": "prompt engineering",
+      "title": "Effective prompt engineering for Python programmers",
+      "description": "Talk page: https://2023.za.pycon.org/talks/36-effective-prompt-engineering-for-python-programmers/ Speaker: Diana Pholo Track: Teaching and Learning with Python Type: Remote Talk Room: Talk Room 2 (Remote Talks) Time: Oct 05 (Thu): 14:15 Duration: 0:45 The world of technology is witnessing a transformation powered by Large Language Models (LLMs) like ChatGPT and Bing AI. These marvels of AI are reshaping how we interact with machines as they can comprehend and generate human-like text. But to get the most out of these models, you must learn to ask the right question. Prompt engineering is the art of crafting specific instructions for LLMs. It molds the language model's responses, making them more accurate, relevant, and actionable. Our session will delve into the essence of prompt engineering, addressing its significance for programmers and its role in improving model outputs and reducing biases. We'll explore a variety of prompt types, and offer practical tips for optimisation. Additionally, we'll navigate through real-world case studies, showcasing the tangible impact of prompt engineering on programming tasks. If you're intrigued by the potential of LLMs and eager to harness their power effectively, this presentation is your gateway to unlocking their true potential in your projects. URLs: Slides (pdf): https://2023.za.pycon.org/media/pages_files/Effective_Prompt_Engineering_Slides.pdf Sponsors: Platinum: Python Software Foundation: https://www.python.org/psf/membership Patron: Thinkst Canary: https://canary.tools/ Afrolabs: http://www.afrolabs.co.za/",
+      "creator": "Diana Pholo",
+      "language": "eng",
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+      "source_host": "archive.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://archive.org/download/effective-prompt-engineering-for-python-programmers/Effective%20prompt%20engineering%20for%20Python%20programmers.mp4",
+          "bytes": 580905223,
+          "provider_sha1": "ebd1c7e46bed5cb7e512a8b6424c718074391870",
+          "provider_md5": "0631f39b2b51c5762a446b84e1f8f4f9",
+          "format": "MPEG4",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Diana Pholo",
+        "source_title": "Effective prompt engineering for Python programmers",
+        "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+        "license": "CC-BY",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "prompt-engineering",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 85,
+      "relevance": {
+        "prompt-engineering": {
+          "score": 10,
+          "evidence": [
+            "prompt engineering",
+            "prompt engineering"
+          ]
+        }
+      },
+      "pedagogy": {
+        "prompt-engineering": {
+          "strong_title_matches": [
+            "prompt engineering"
+          ],
+          "strong_description_matches": [
+            "prompt engineering"
           ],
           "educational_intent": true,
           "instructional_title": true,
@@ -17849,12 +17858,12 @@
       }
     }
   ],
-  "record_count_before_relevance_gate": 1126,
-  "record_count_before_pedagogy_gate": 499,
+  "record_count_before_relevance_gate": 1128,
+  "record_count_before_pedagogy_gate": 500,
   "record_count_before_selection_gate": 267,
-  "rejected_by_relevance_gate": 627,
-  "rejected_by_pedagogy_gate": 232,
-  "rejected_by_selection_gate": 64,
+  "rejected_by_relevance_gate": 628,
+  "rejected_by_pedagogy_gate": 233,
+  "rejected_by_selection_gate": 62,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -18080,15 +18089,14 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 3,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "wikimedia-commons": 2,
+        "wikimedia-commons": 1,
         "peertube": 1
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
-        "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa"
       ]
     },
@@ -18110,13 +18118,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -18533,7 +18543,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 64,
+      "records": 63,
       "available": true
     },
     "digital-ai-literacy": {
@@ -18665,7 +18675,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 23,
+      "records": 22,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -18685,7 +18695,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 11,
       "available": true
     },
     "mind-body-practice": {
@@ -18702,7 +18712,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.6667,
-      "records": 6,
+      "records": 5,
       "available": true
     },
     "relationships-care": {
@@ -18723,7 +18733,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8,
-      "records": 10,
+      "records": 9,
       "available": true
     },
     "garden-nature": {
@@ -18936,9 +18946,9 @@
     }
   },
   "pack_registry_revision": "subject-media-packs-v2.5",
-  "records_before_title_quality_gate": 203,
-  "rejected_by_title_quality_gate": 26,
-  "rejected_topic_links_by_title_quality_gate": 28,
+  "records_before_title_quality_gate": 205,
+  "rejected_by_title_quality_gate": 28,
+  "rejected_topic_links_by_title_quality_gate": 30,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v2",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."

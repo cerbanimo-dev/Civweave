@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-09-28T11:44:14Z",
-  "before": 499,
+  "built_at": "2026-10-05T12:18:50Z",
+  "before": 500,
   "after": 267,
-  "rejected": 232,
+  "rejected": 233,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -177,16 +177,18 @@
       "name": "Computing Basics",
       "school_slug": "technology",
       "required": true,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "peertube": 4,
+        "wikimedia-commons": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
         "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "RSA Crypto Pad Demo",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
         "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
@@ -236,15 +238,14 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
-        "wikimedia-commons": 2,
+        "wikimedia-commons": 1,
         "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
-        "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa",
         "juneteeth 2026 part1 introduction chat and arcus chroma"
       ]
@@ -267,13 +268,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -310,16 +313,18 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
+      "records": 5,
       "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 4
+        "wikimedia-commons": 4,
+        "internet-archive": 1
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
     "personal-finance": {
@@ -712,6 +717,13 @@
     {
       "provider": "wikimedia-commons",
       "title": "Chandra X-ray Image & DSS Optical Image of NGC galaxies (2006-galaxies)",
+      "relevance_topics": [
+        "astronomy-space"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Hubble Science- Planetary Missions, Fossils of our Solar System (SVS14267)",
       "relevance_topics": [
         "astronomy-space"
       ]
@@ -1181,13 +1193,6 @@
     {
       "provider": "peertube",
       "title": "Tuto IA - Vera, l'appli de fact checking par simple appel ou message sur Whatsapp. Simple et top !!",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
       "relevance_topics": [
         "critical-thinking"
       ]

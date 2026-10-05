@@ -1,10 +1,10 @@
 {
   "schema": "civweave.open-learning-media-title-quality-audit.v2",
-  "built_at": "2026-09-28T11:44:14Z",
-  "records_before": 203,
+  "built_at": "2026-10-05T12:18:50Z",
+  "records_before": 205,
   "records_after": 177,
-  "rejected_records": 26,
-  "rejected_topic_links": 28,
+  "rejected_records": 28,
+  "rejected_topic_links": 30,
   "rejected_samples": [
     {
       "provider": "peertube",
@@ -53,6 +53,12 @@
       "provider_id": "409132f4-a2b6-47b2-ac01-b3aea4091426",
       "title": "When Code Became a Weapon - Crypto Wars Explained",
       "topic_slug": "civics-society"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "provider_id": "File:RSA Crypto Pad Demo.webm",
+      "title": "RSA Crypto Pad Demo",
+      "topic_slug": "computing-basics"
     },
     {
       "provider": "peertube",
@@ -131,6 +137,12 @@
       "provider_id": "6b3f6f93-68f7-4165-acab-95d5a33ded75",
       "title": "Subject-Verb Agreement (Lesson 1 - Finding the subject)",
       "topic_slug": "language-learning"
+    },
+    {
+      "provider": "internet-archive",
+      "provider_id": "Systems_Thinking_",
+      "title": "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_",
+      "topic_slug": "logical-frameworks"
     },
     {
       "provider": "peertube",
@@ -400,15 +412,14 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 3,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "wikimedia-commons": 2,
+        "wikimedia-commons": 1,
         "peertube": 1
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
-        "2017 Public Health Ethics Forum",
         "The Philosophy of Antifa"
       ]
     },
@@ -430,13 +441,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -853,7 +866,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 64,
+      "records": 63,
       "available": true
     },
     "digital-ai-literacy": {
@@ -985,7 +998,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 23,
+      "records": 22,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -1005,7 +1018,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 11,
       "available": true
     },
     "mind-body-practice": {
@@ -1022,7 +1035,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.6667,
-      "records": 6,
+      "records": 5,
       "available": true
     },
     "relationships-care": {
@@ -1043,7 +1056,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8,
-      "records": 10,
+      "records": 9,
       "available": true
     },
     "garden-nature": {

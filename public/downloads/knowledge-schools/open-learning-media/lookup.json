@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-09-28T11:44:14Z",
+  "built_at": "2026-10-05T12:18:50Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -5963,72 +5963,6 @@
           "philosophy-ethics": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:2017 Public Health Ethics Forum.webm",
-        "title": "2017 Public Health Ethics Forum",
-        "description": "The 2017 Public Health Ethics Forum, \"Optimal Health for Her Whole Life,\" focuses on a range of health issues and actions to improve the health of women and girls in the United States. The National Center for Bioethics in Research and Health Care at Tuskegee University and the Office of Minority Health and Health Equity at the Centers for Disease Control and Prevention (CDC) host this annual event. This year's forum explores ways to promote and protect women's health across the lifespan by emphasizing public health ethics in the practice of public health. Comments on this video are allowed in accordance with our comment policy: https://www.cdc.gov/SocialMedia/Tools/CommentPolicy.html This video can also be viewed at https://www.cdc.gov/minorityhealth/ethicsforum/2017/videos/2017_PHEF_video_LowRes.mp4",
-        "source_url": "https://commons.wikimedia.org/wiki/File:2017_Public_Health_Ethics_Forum.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Public domain",
-          "url": "",
-          "evidence": "Public domain | Public domain | pd |",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/2017_Public_Health_Ethics_Forum.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 2389916626,
-            "provider_sha1": "99f0d9ccf85c253c60fa999fcce47dacd382b7a6",
-            "role": "original"
-          }
-        ],
-        "quality_score": 91,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Centers for Disease Control and Prevention",
-          "source_title": "2017 Public Health Ethics Forum",
-          "source_url": "https://commons.wikimedia.org/wiki/File:2017_Public_Health_Ethics_Forum.webm",
-          "license": "Public domain",
-          "license_url": ""
-        },
-        "relevance": {
-          "philosophy-ethics": {
-            "score": 10,
-            "evidence": [
-              "ethics",
-              "ethics"
-            ]
-          }
-        },
-        "pedagogy": {
-          "philosophy-ethics": {
-            "strong_title_matches": [
-              "ethics"
-            ],
-            "strong_description_matches": [
-              "ethics"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 45
-          }
-        },
-        "selection": {
-          "philosophy-ethics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 45
           }
         }
       },
