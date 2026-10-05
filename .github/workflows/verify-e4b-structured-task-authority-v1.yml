@@ -92,7 +92,7 @@ jobs:
         run: node --check public/app/local-guide-control-bypass-v1.js
       - name: Verify LiteRT structured tool shape
         run: node scripts/verify-litert-structured-tool-shape-v1.mjs
-      - name: Verify E2B intake and E4B structured generation
+      - name: Verify E4B-only intake and structured generation
         run: node scripts/verify-e4b-structured-task-authority-v1.mjs
       - name: Verify E4B Weave Draft compiler pipeline
         run: node scripts/verify-e4b-weave-draft-pipeline-v1.mjs

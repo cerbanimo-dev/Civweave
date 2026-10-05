@@ -9,4 +9,4 @@ for(const html of [shell,campus]){
   assert.ok(html.includes('/app/local-ai/gemma4-structured-task-authority-v1.js'),'A canonical campus entry does not load the structured task authority.');
 }
 
-console.log('PASS: E2B is the mandatory Weaveling intake/router and ready structured learning/Quest work is handed to E4B with no E2B generation fallback.');
+console.log('PASS: E4B owns Weaveling intake/routing and structured learning/Quest generation; selected E2B is bypassed for this process.');

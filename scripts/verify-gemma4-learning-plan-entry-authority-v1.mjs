@@ -35,20 +35,20 @@ sandbox.CivweaveGemma4FirstRequestIntakeBridgeV1={
   selectedGemma:()=>true,
   directIntake:async args=>{
     intakeCalls+=1;
-    const result=await sandbox.CivweaveUnifiedChatSystemV1.generateLivingSchoolPlan({...args,systemId:'living-school',sourceSystemId:'civweave',__civweaveE2BIntakeCompleted:true});
+    const result=await sandbox.CivweaveUnifiedChatSystemV1.generateLivingSchoolPlan({...args,systemId:'living-school',sourceSystemId:'civweave',__civweaveE4BIntakeCompleted:true});
     return{handled:true,result};
   }
 };
 vm.runInNewContext(source,sandbox,{filename:'gemma4-learning-plan-entry-authority-v1.js'});
 const api=sandbox.CivweaveGemma4LearningPlanEntryAuthorityV1;
-assert(api?.mandatoryE2BIntake===true,'entry authority did not install');
+assert(api?.mandatoryE4BIntake===true,'entry authority did not install');
 api.install();
 const result=await sandbox.CivweaveUnifiedChatSystemV1.generateLivingSchoolPlan({text:'Can you teach me how to read and memorize the tarot?',systemId:'living-school',history:[]});
-assert.equal(intakeCalls,1,'Learning Journey did not pass through E2B intake exactly once');
+assert.equal(intakeCalls,1,'Learning Journey did not pass through E4B intake exactly once');
 assert.equal(pipelineCalls,1,'Learning Journey did not enter explicit E4B Weave transport exactly once');
 assert.equal(legacyCalls,0,'legacy strict-JSON generator was still reachable');
 assert(ensureCalls>=1,'LiteRT request authority was not ensured before E4B handoff');
 assert.equal(result.provider,'downloaded-local');
 assert.equal(result.model,'gemma4-e4b-it-litert-web');
 assert.equal(result.response.answer,'Tarot Reading');
-console.log('PASS: local Gemma Learning Journey requests cannot reach the legacy strict-JSON generator; E2B intake hands directly to the E4B Weave transport even after FamilyAILoader replaces the runtime.');
+console.log('PASS: local Gemma Learning Journey requests cannot reach the legacy strict-JSON generator; E4B intake hands directly to the E4B Weave transport even after FamilyAILoader replaces the runtime.');
