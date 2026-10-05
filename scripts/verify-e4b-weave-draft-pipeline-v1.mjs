@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 
 const root=new URL('../',import.meta.url);
 const source=await readFile(new URL('public/app/local-ai/gemma4-weave-draft-pipeline-v1.js',root),'utf8');
-assert.match(source,/E2B intake -> E4B free Weave Draft -> E4B JSON compile -> deterministic validation -> one E4B targeted repair/);
+assert.match(source,/E4B intake -> E4B free Weave Draft -> E4B JSON compile -> deterministic validation -> one E4B targeted repair/);
 assert.match(source,/constrainedToolRequired:false/);
 assert.match(source,/privateChainOfThoughtExposed:false/);
 assert.match(source,/resourceManifestRequired:true/);
