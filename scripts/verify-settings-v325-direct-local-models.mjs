@@ -8,7 +8,7 @@ const v203Source=await readFile(new URL('../public/service-worker-v203.js',impor
 const rootWorker=await readFile(new URL('../public/service-worker.js',import.meta.url),'utf8');
 
 assert.match(directSource,/CIVWEAVE SETTINGS · v325/);
-assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · stable in-place actions/);
+assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · premium phone \+ cyberdeck setups/);
 assert.match(directSource,/hardLoadingGuardMs:900/);
 assert.match(directSource,/data-local-pack-finish/,'Premier Phone finalization must be owned directly by the card renderer.');
 assert.match(directSource,/actionsStayInPlace:true/,'Local model actions must remain in the direct renderer.');
@@ -66,14 +66,20 @@ assert.match(localTarget.innerHTML,/AI Downloads/);
 assert.match(localTarget.innerHTML,/Qwen 3\.5 4B · LiteRT/);
 assert.match(localTarget.innerHTML,/Qwen 3\.5 9B · LiteRT/);
 assert.match(localTarget.innerHTML,/Gemma Phone Compatibility Pack/);
+assert.match(localTarget.innerHTML,/Premium Phone Pack/);
+assert.match(localTarget.innerHTML,/Premium phone companions/);
+assert.match(localTarget.innerHTML,/Mac mini \/ cyberdeck local AI setups/);
+assert.match(localTarget.innerHTML,/Qwen3\.8-27B · MLX 4-bit/);
+assert.match(localTarget.innerHTML,/Qwen3-Coder-Next · MLX 4-bit/);
+assert.match(localTarget.innerHTML,/Local Dream · Stable Diffusion 1\.5/);
 assert.match(localTarget.innerHTML,/renderer direct-local-v325/);
 assert.doesNotMatch(localTarget.innerHTML,/Reading saved local model choices/);
 
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")>0,'v203 must import the Settings override.');
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-release-generation-v1.js"),'Settings override must register before other fetch handlers.');
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-core-v208.js"),'Settings override must register before cache-first core.');
-assert.match(rootWorker,/root-worker-bridge-v25-settings-v337-direct-gateway/,'Root worker bytes must change so installed clients discover the v337 direct Settings generation.');
-assert.match(rootWorker,/service-worker-v203\.js\?v=root-worker-bridge-v25-settings-v337-direct-gateway/,'Root worker must import v203 through the v337 Settings generation boundary.');
+assert.match(rootWorker,/root-worker-bridge-v32-e4b-only-weave/,'Root worker must remain on the current staging generation while the direct Settings renderer evolves behind its override.');
+assert.match(rootWorker,/service-worker-v203\.js\?v=root-worker-bridge-v32-e4b-only-weave/,'Root worker must import v203 through the current staging generation boundary.');
 assert.match(workerSource,/stopImmediatePropagation\(\)/);
 assert.match(workerSource,/settings-gateway-v317\.js/);
 assert.match(workerSource,/settings-local-route-v331\.js/);
