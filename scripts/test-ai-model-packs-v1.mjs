@@ -9,7 +9,7 @@ const root=resolve(here,'..');
 const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
-const settings=read('public/app/settings-local-route-v323.js');
+const settings=read('public/app/settings-local-route-v331.js');
 const directSettings=read('public/app/settings-local-models-direct-v325.js');
 const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
 const browserPackPwa=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
@@ -47,7 +47,14 @@ test('premium phone pack carries chat, deep reasoning, alternate Gemma, and offl
 });
 
 test('premium companion and Mac mini setup links stay visible in direct Settings',()=>{
-  for(const text of ['Premium phone companions','Mac mini / cyberdeck local AI setups','Qwen3.8-27B · MLX 4-bit','Qwen3-Coder-Next · MLX 4-bit','Local Dream · Stable Diffusion 1.5'])assert.match(directSettings,new RegExp(text.replace(/[.*+?^${}()|[\\]\\]/g,'\\test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{')));
+  assert.match(directSettings,/Premium phone companions/);
+  assert.match(directSettings,/Mac mini \/ cyberdeck local AI setups/);
+  assert.match(directSettings,/Qwen3\.8-27B · MLX 4-bit/);
+  assert.match(directSettings,/Qwen3-Coder-Next · MLX 4-bit/);
+  assert.match(directSettings,/Local Dream · Stable Diffusion 1\.5/);
+});
+
+test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{')));
 });
 
 test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{
