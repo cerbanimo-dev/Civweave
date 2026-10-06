@@ -19,12 +19,12 @@ const specialized=read('public/app/local-ai/specialized-model-capabilities-v1.js
 const voice=read('public/app/guide-voice-runtime-v1.js');
 
 test('AI downloads expose the four intended named pack tiers',()=>{
-  for(const label of ['Minimum Spec Pack','Flagship Phone Pack','Gemma Phone Compatibility Pack','Server Quality Pack']){
+  for(const label of ['Minimum Spec Pack','Premium Phone Pack','Gemma Phone Compatibility Pack','Server Quality Pack']){
     assert.ok(packs.includes(label),`Missing pack label: ${label}`);
   }
   assert.doesNotMatch(packs,/Nothing Phone/i);
   assert.match(directSettings,/Minimum Spec Pack/);
-  assert.match(directSettings,/Flagship Phone Pack/);
+  assert.match(directSettings,/Premium Phone Pack/);
   assert.match(directSettings,/Gemma Phone Compatibility Pack/);
   assert.match(directSettings,/Server Quality Pack/);
   assert.match(settings,/Minimum Spec Pack/);
@@ -35,11 +35,19 @@ test('minimum pack remains useful on constrained devices',()=>{
   for(const id of ['qwen3-0.6b-q8-wasm','smollm2-135m-instruct-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
 });
 
-test('Qwen flagship phone pack carries the standard and deep phone ladder',()=>{
+test('premium phone pack carries chat, deep reasoning, alternate Gemma, and offline voice lanes',()=>{
   const block=packs.match(/'qwen-flagship-phone'[\s\S]*?(?=\n  'premier-phone')/)?.[0]||'';
-  for(const id of ['qwen35-4b-litert-web','qwen35-9b-litert-web','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
+  for(const id of ['qwen35-4b-litert-web','qwen35-9b-litert-web','gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
   assert.match(block,/primaryModel:'qwen35-4b-litert-web'/);
   assert.match(block,/deepModel:'qwen35-9b-litert-web'/);
+  assert.match(block,/General chat \+ voice reasoning/);
+  assert.match(block,/Complex logic \+ Civweave planning/);
+  assert.match(block,/Qwen2\.5-Coder-7B-Instruct Q4_K_M/);
+  assert.match(block,/Local Dream · Stable Diffusion 1\.5/);
+});
+
+test('premium companion and Mac mini setup links stay visible in direct Settings',()=>{
+  for(const text of ['Premium phone companions','Mac mini / cyberdeck local AI setups','Qwen3.8-27B · MLX 4-bit','Qwen3-Coder-Next · MLX 4-bit','Local Dream · Stable Diffusion 1.5'])assert.match(directSettings,new RegExp(text.replace(/[.*+?^${}()|[\\]\\]/g,'\\test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{')));
 });
 
 test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{
