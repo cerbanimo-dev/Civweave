@@ -9,7 +9,7 @@ const root=resolve(here,'..');
 const read=path=>readFileSync(resolve(root,path),'utf8');
 
 const packs=read('public/app/local-ai/model-packs-v1.js');
-const settings=read('public/app/settings-local-route-v331.js');
+const settings=read('public/app/settings-local-route-v323.js');
 const directSettings=read('public/app/settings-local-models-direct-v325.js');
 const browserPack=read('public/app/local-ai/browser-pack-download-v1.js');
 const browserPackPwa=read('public/app/local-ai/browser-pack-pwa-import-v1.js');
