@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.2-canonical-local-settings-refresh';
+const VERSION='1.1.3-interactive-frame-ready';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -34,6 +34,7 @@ const errorBox=()=>document.getElementById('cw-persistent-system-error');
 let current='';
 let loadToken=0;
 let loadTimer=0;
+let readyPollTimer=0;
 let chromeObserver=null;
 let chromeTimers=[];
 let settingsPromise=null;
@@ -59,6 +60,25 @@ function mark(system){
 }
 function showLoading(){const node=loading();if(node)node.hidden=false;const error=errorBox();if(error)error.dataset.open='0'}
 function hideLoading(){const node=loading();if(node)node.hidden=true}
+function childReadyEnough(host=frame(),expectedHref=''){
+  if(!host||!frameMatchesExpected(host,expectedHref))return false;
+  try{
+    const doc=host.contentDocument;
+    return Boolean(doc?.documentElement&&(doc.readyState==='interactive'||doc.readyState==='complete'));
+  }catch{return false}
+}
+function watchChildInteractive({token=loadToken,expectedHref='' }={}){
+  clearInterval(readyPollTimer);
+  readyPollTimer=setInterval(()=>{
+    if(token!==loadToken){clearInterval(readyPollTimer);readyPollTimer=0;return}
+    const host=frame();
+    if(!childReadyEnough(host,expectedHref))return;
+    clearInterval(readyPollTimer);readyPollTimer=0;
+    clearTimeout(loadTimer);clearInterval(readyPollTimer);readyPollTimer=0;hideLoading();
+    const node=errorBox();if(node)node.dataset.open='0';
+    scheduleChildChrome('frame-interactive',{token,expectedHref});scheduleBacklights();
+  },80);
+}
 function showError(message){hideLoading();const node=errorBox();if(node){node.textContent=String(message||'System did not finish loading.');node.dataset.open='1'}}
 
 function installBacklightStyle(){
@@ -197,8 +217,8 @@ function navigate(system,{feature='',replace=false,source='persistent-navbar'}={
   system=cleanSystem(system);mark(system);const url=shellUrl(system,{feature});history[replace?'replaceState':'pushState']({system,feature},'',`${url.pathname}${url.search}`);
   const target=contentUrl(system,{feature}),host=frame();if(!host)return false;
   clearChildChromeWork();
-  const token=++loadToken;showLoading();clearTimeout(loadTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
-  host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;host.title=`${system} · Civweave`;host.src=target.href;
+  const token=++loadToken;showLoading();clearTimeout(loadTimer);clearInterval(readyPollTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
+  host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;host.title=`${system} · Civweave`;host.src=target.href;watchChildInteractive({token,expectedHref:target.href});
   scheduleBacklights();
   try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,feature,source,version:VERSION,persistent:true}}))}catch{}
   return true;
