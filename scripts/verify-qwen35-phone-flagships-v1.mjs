@@ -33,7 +33,7 @@ assert.match(packs,/deepModel:'qwen35-9b-litert-web'/);
 assert.match(packs,/BROWSER_MANAGED_PACK_IDS=freeze\(\['qwen-flagship-phone'/);
 assert.match(packs,/Gemma Phone Compatibility Pack/);
 
-assert.match(settings,/id:'qwen-flagship-phone',label:'Flagship Phone Pack'/);
+assert.match(settings,/id:'qwen-flagship-phone',label:'Premium Phone Pack'/);
 assert.match(settings,/Phone Flagship Max/);
 assert.match(settings,/browserPackId:'qwen-flagship-phone'/);
 assert.match(settings,/Download flagship pack/);
@@ -68,5 +68,6 @@ console.log(JSON.stringify({
   runtime:'litert-lm-web-0.17.1',
   gemmaRoleBridge:true,
   qwenStructuredOutput:'strict-json-prompt',
+  premiumPhonePack:true,
   gemmaCompatibilityPack:true
 },null,2));
