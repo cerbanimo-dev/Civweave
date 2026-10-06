@@ -54,9 +54,6 @@ test('premium companion and Mac mini setup links stay visible in direct Settings
   assert.match(directSettings,/Local Dream · Stable Diffusion 1\.5/);
 });
 
-test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{')));
-});
-
 test('Gemma phone compatibility pack preserves the existing phone ladder',()=>{
   const block=packs.match(/'premier-phone'[\s\S]*?(?=\n  'server-quality')/)?.[0]||'';
   for(const id of ['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'])assert.match(block,new RegExp(id));
