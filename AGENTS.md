@@ -2,6 +2,12 @@
 
 This file applies to the entire repository. Every coding agent must read it before choosing an edit target.
 
+## Context-stage navigation (optional, subordinate)
+
+For an explicit bug or feature task, choose the relevant ICM developer stage from `docs/agent-workspaces/CONTEXT.md` and `docs/agent-workspaces/registry.json`. Use `node scripts/ai-context.mjs --list` and `node scripts/ai-context.mjs --workspace bug-fix --stage reproduce` for deterministic, narrow stage packets. These instructions organize work and do not outrank the canonical contracts, capability ownership registry, existing tests or active implementation. Working artifacts belong in task/PR evidence, not in an active source folder.
+
+The Moss workflow pack in `public/app/ai-workflows/` is contract-only (`runtimeEnabled: false`); it must not be presented as running in the installed app.
+
 ## Machine-readable work context
 
 Before choosing an edit target, read:
@@ -107,7 +113,7 @@ Browser prototypes and globals must never be patched to compensate for an implem
 
 When debugging a concrete rendered surface, trace the route actually used by the current application rather than guessing from filenames or directories.
 
-Use `docs/architecture/repository-map.md` for the current route snapshot, then verify it against `public/app/fullscreen-family-v104.html` before editing. The dispatcher may be used to discover current presentation entrypoints when it is still active, but it is not an architectural contract. Do not encode its current visual routing topology into shared-system design.
+Use `docs/architecture/repository-map.md` for the current route snapshot, then verify it against `public/app/system-routes-v227.js` and `public/app/persistent-system-shell-v1.html` before editing. The dispatcher may be used to discover current presentation entrypoints when it is still active, but it is not an architectural contract. Do not encode its current visual routing topology into shared-system design.
 
 If recent commits, an active route, and an older document disagree, the canonical contract and current functional ownership win. Update or delete misleading documentation in the same change, including the repository map when its route snapshot is stale.
 
