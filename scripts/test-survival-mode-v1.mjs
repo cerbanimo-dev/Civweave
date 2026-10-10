@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {planAssessment,normalizeReferenceCards,buildReferenceQuery} from '../public/app/survival/survival-mode.mjs';
+import {planAssessment,normalizeReferenceCards,buildReferenceQuery,buildFieldPacket,verificationChecklist} from '../public/app/survival/survival-mode.mjs';
 
 test('unassessed conditions are unknown, never declared safe',()=>{
   const assessment=planAssessment();
@@ -65,4 +65,50 @@ test('active entry exposes Survival Mode and keeps it in offline package',async(
   assert.ok(pack.seeds.includes('/app/survival/index.html'));
   assert.ok(pack.assets.includes('/app/survival/app.mjs'));
   assert.equal(ownership.systems['survival-assessment']?.owner,'public/app/survival/survival-mode.mjs');
+});
+
+
+test('ICM field packet contains user-reported observations, never inferred photo contents',()=>{
+  const packet=buildFieldPacket({
+    concerns:['plant','pipe'],
+    resources:['tarp','water bottle'],
+    observations:['Serrated leaves observed','White flowers visible'],
+    photoAttached:true,
+    imageBytes:'data:image/jpeg;base64,VERY_PRIVATE_PHOTO_BYTES',
+    location:{latitude:44,longitude:-76}
+  },[{title:'Botany note',notes:'Several species share these characteristics.',canonicalUrl:'https://example.org/botany'}]);
+  assert.equal(packet.schema,'civweave.survival-field-packet.v1');
+  assert.deepEqual(packet.observations.userReported,['Serrated leaves observed','White flowers visible']);
+  assert.deepEqual(packet.observations.aiInferred,[]);
+  assert.equal(packet.photo.status,'not-analyzed');
+  assert.equal(packet.photo.bytesIncluded,false);
+  assert.equal(packet.priority.primaryConcern,'plant');
+  assert.equal(packet.references[0].verifiedIdentification,false);
+  assert.equal(packet.references[0].availability,'offline-excerpt');
+  assert.equal(packet.privacy.exportRequiresAction,true);
+  assert.doesNotMatch(JSON.stringify(packet),/VERY_PRIVATE_PHOTO_BYTES|latitude|longitude|data:image/);
+});
+test('field packets remain unassessed and unsourced if nothing was inspected',()=>{
+  const packet=buildFieldPacket({photoAttached:false,observations:[]});
+  assert.equal(packet.priority.priority,'unassessed');
+  assert.deepEqual(packet.references,[]);
+  assert.equal(packet.photo.status,'not-provided');
+  assert.ok(packet.unknowns.includes('unverified-surroundings'));
+});
+test('plant lookalike prompts cannot be treated as approval to eat',()=>{
+  const checks=verificationChecklist({concerns:['plant']});
+  assert.ok(checks.length>=4);
+  assert.ok(checks.some(row=>/lookalike/i.test(row)));
+  assert.ok(checks.some(row=>/not eat|do not eat|do not consume/i.test(row)));
+});
+test('ICM survival workflow is explicitly a disabled, typed staged contract',async()=>{
+  const read=async path=>readFile(new URL('../'+path,import.meta.url),'utf8');
+  const manifest=JSON.parse(await read('public/app/ai-workflows/manifest.json'));
+  assert.equal(manifest.runtimeEnabled,false);
+  const survival=manifest.workflows.find(row=>row.id==='survival-assessment');
+  assert.ok(survival);
+  assert.equal(survival.canonicalOwner,'public/app/survival/survival-mode.mjs');
+  assert.deepEqual(survival.stages.map(x=>x.id),['intake','observe','prioritize','research','verify','handoff']);
+  assert.equal(survival.stages.find(x=>x.id==='prioritize').executor,'deterministic');
+  assert.equal(survival.stages.find(x=>x.id==='verify').executor,'human');
 });
