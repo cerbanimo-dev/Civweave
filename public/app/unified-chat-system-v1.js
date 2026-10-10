@@ -329,6 +329,9 @@ async function runLivingSchoolCurriculum(options={}){
 }
 async function approveLivingSchoolPlan(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for approval.','Tell Moss what you want to learn or demonstrate.');
+  const latest=readLearningPlan();
+  if(latest?.id===plan.id&&latest.state==='generating')return packet('This Learning Journey is already generating. Moss will preserve its progress and report the outcome.','Review the stage progress in the approved plan.');
+  if(latest?.id===plan.id&&latest.state==='completed')return learningPlanResponse(latest);
   if(plan.state==='completed')return learningPlanResponse(plan);
   const approved={...plan,state:'approved',approvedAt:plan.approvedAt||now(),updatedAt:now()};
   saveLearningPlan(approved);
