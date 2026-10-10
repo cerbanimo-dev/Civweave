@@ -10,7 +10,7 @@ const weaveSource=await readFile(new URL('../public/app/local-ai/gemma4-weave-dr
 const persistent=await readFile(new URL('../public/app/persistent-system-shell-v1.html',import.meta.url),'utf8');
 const campus=await readFile(new URL('../public/app/working-campus-v440.html',import.meta.url),'utf8');
 
-assert.match(authoritySource,/VERSION='1\\.1\\.4-gemma4-litert-request-authority-v1-e4b-only-weave'/);
+assert.match(authoritySource,/VERSION='1\.1\.4-gemma4-litert-request-authority-v1-e4b-only-weave'/);
 assert.match(authoritySource,/FAST_RUNTIME_SRC='\/app\/local-ai\/litert-gemma4-fast-runtime-v1\.js\?v=1.5.0-qwen35-flagships'/);
 assert.match(authoritySource,/if\(!fastWrapperReady\(\)\)[\s\S]*LOCAL_GEMMA4_LITERT_OWNERSHIP_FAILED/,'authority must refuse inference until the LiteRT wrapper owns the selected model');
 assert.doesNotMatch(authoritySource,/CivweaveLocalModelRuntimeV266\?\.generate|CivweaveLocalModelRuntimeV266\.generate/,'first-request authority must never invoke the generic Transformers runtime directly');
