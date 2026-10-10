@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b211c">
+<title>Survival Mode · Weaveling · Civweave</title>
+<style>
+:root{color-scheme:dark;font:16px/1.48 system-ui,-apple-system,sans-serif;background:#071a17;color:#effaf2}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:linear-gradient(175deg,#112e29,#071a17 58%);padding:16px max(14px,env(safe-area-inset-right)) max(90px,env(safe-area-inset-bottom))}
+main{max-width:760px;margin:0 auto}h1{font-size:clamp(1.55rem,5vw,2.25rem);line-height:1.1;margin:.5rem 0}h2{font-size:1.16rem;margin:0 0 .6rem}p{margin:.45rem 0 .8rem}a{color:#9ee9be}header{display:flex;align-items:center;justify-content:space-between;gap:12px}header a{font-weight:650}.eyebrow{font-size:.78rem;letter-spacing:.13em;color:#acd8bd;font-weight:850;text-transform:uppercase}
+.panel{border:1px solid #5785746b;background:#102820dd;border-radius:16px;padding:17px;margin:16px 0;box-shadow:0 5px 22px #0002}
+.notice{border-left:4px solid #f2be72;padding:12px;background:#43332355;border-radius:6px;color:#ffead1}
+label{display:block}.choices{display:grid;grid-template-columns:1fr;gap:9px}.choice{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:10px;border:1px solid #6a92705c;border-radius:10px;background:#ffffff08;cursor:pointer}.choice input{width:19px;height:19px;accent-color:#91d9ae;flex-shrink:0;margin:3px 0}
+textarea,input[type="text"],input[type="search"]{width:100%;background:#081b17;border:1px solid #749f87;border-radius:10px;color:#fff;padding:12px;font:inherit}textarea{min-height:70px;resize:vertical}
+button,.button{font:inherit;font-weight:750;border:1px solid #7cbd9b;border-radius:10px;background:#1e5540;color:#fafffc;min-height:44px;padding:10px 14px;cursor:pointer}button:disabled{opacity:.6;cursor:not-allowed}button.secondary{background:#0b231d}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #ecdb92;outline-offset:2px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.muted{color:#b1cabd;font-size:.9rem}.small{font-size:.82rem}#preview{display:none;max-width:100%;max-height:220px;object-fit:contain;margin-top:10px;border-radius:12px;border:1px solid #537863}#preview[data-visible="true"]{display:block}
+#priority[hidden],#references[hidden]{display:none}#priority h3{margin:0 0 .5rem}.risk{font-weight:850;text-transform:uppercase;letter-spacing:.08em;color:#f4cb8b;font-size:.76rem}.cards{display:grid;gap:12px}.source-card{padding:12px;border:1px solid #749a80a0;border-radius:12px;background:#0a1d19}.source-card h3{font-size:1rem;margin:0 0 5px}.source-card p{white-space:pre-wrap}.source-card small{color:#b8d4c4}.source-card .actions{margin-top:7px}
+@media(min-width:620px){.choices{grid-template-columns:1fr 1fr}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header><a href="/app/working-campus-v440.html?installed=1">← Civweave</a><span class="eyebrow">Weaveling · Field assistance</span></header>
+<h1>Survival Mode</h1>
+<p>Start with what you can see and what you know. Weaveling's first step is a local, safety-first assessment, even with no AI model or internet.</p>
+<div class="notice" role="note"><strong>Not an emergency service.</strong> For immediate danger or serious injury, contact local emergency services when possible. Photos are not interpreted yet; nothing here verifies plant edibility, water safety, structural stability, or a medical condition.</div>
+<form id="assessment-form" class="panel">
+<h2>1. Report your situation</h2>
+<p class="muted">Choose only conditions you actually know or suspect. Unchecked does not mean safe.</p>
+<div id="concerns" class="choices" role="group" aria-label="Potential hazards and needs"></div>
+<p><label for="resources"><strong>Resources you have</strong> <span class="muted">(optional, separate with commas)</span></label><textarea id="resources" maxlength="1500" placeholder="Example: tarp, flashlight, bottled water, charged radio"></textarea></p>
+<p><label for="photo"><strong>Show your surroundings or a problem</strong> <span class="muted">(optional)</span></label><input id="photo" type="file" accept="image/*" capture="environment"></p>
+<p class="muted small">The photo stays in this page's temporary preview and is not uploaded, stored, interpreted, or sent to an AI service.</p>
+<img id="preview" alt="Selected local photograph preview">
+<div class="actions"><button type="submit">Prioritize my next step</button><button type="button" id="clear-photo" class="secondary">Remove photo</button></div>
+</form>
+<section id="priority" class="panel" aria-live="polite" hidden>
+<h2>2. Safety priority</h2><div id="priority-content"></div>
+</section>
+<section id="references" class="panel">
+<h2>3. Check offline source material</h2>
+<p class="muted">Search downloaded Civweave Living Library passages. These are source excerpts, not independent confirmations of the situation in your photo. Original websites may require internet.</p>
+<label for="reference-query"><strong>Search topic</strong></label>
+<input id="reference-query" type="search" maxlength="250" placeholder="Example: electrical safety after flooding">
+<div class="actions"><button id="search-references" type="button">Search downloaded sources</button><a class="button" href="/app/knowledge-library-browser-v1.html">Manage local library</a></div>
+<p id="reference-status" role="status" class="muted">No local search has run.</p><div id="reference-results" class="cards"></div>
+</section>
+<p class="muted small">First release: deterministic triage, local photograph preview, and existing downloaded-library retrieval. Automatic visual identification, live environmental sensing, and community coordination are not active.</p>
+</main>
+<script type="module" src="/app/survival/app.mjs"></script>
+<noscript><p>JavaScript is unavailable. Avoid immediate hazards, contact emergency services for urgent danger, and use verified offline emergency reference materials.</p></noscript>
+</body>
+</html>

@@ -55,7 +55,10 @@
       "humanValidationNeuronClient": "public/app/human-validation-neuron-client-v1.js",
       "humanValidationNeuronPolicy": {
         "requestNeurons": 30,
-        "validatorCounts": [2, 3],
+        "validatorCounts": [
+          2,
+          3
+        ],
         "twoValidatorShareNeurons": 15,
         "threeValidatorShareNeurons": 10,
         "unusedSourceCapacityRollsOver": false,
@@ -263,6 +266,28 @@
     "review": {
       "capability": "Shared review surface and review handoffs",
       "owner": "public/app/shared-review-surface-v234.js"
+    },
+    "survival-assessment": {
+      "capability": "Offline first safety prioritization from user-reported conditions and locally stored references",
+      "owner": "public/app/survival/survival-mode.mjs",
+      "canonicalApi": "ES module: planAssessment, buildReferenceQuery, normalizeReferenceCards",
+      "presentationCaller": "public/app/survival/app.mjs",
+      "entrySurface": "public/app/survival/index.html",
+      "entryNavigationOwner": "public/app/persistent-shell-actions-v1.js",
+      "offlineManifest": "public/app/offline-package-v208.json",
+      "allowedCallers": [
+        "public/app/survival/app.mjs",
+        "scripts/test-survival-mode-v1.mjs"
+      ],
+      "rules": [
+        "Cross-realm capability, not an additional chat system or realm.",
+        "No image bytes are persisted, uploaded, analyzed, or claimed as identification in v1.",
+        "Unknown is never safe; use only user-reported concerns and supplies.",
+        "Life-threatening hazards override repair, foraging, and research.",
+        "Never authorize edibility from a photograph or local source excerpt.",
+        "Show offline source provenance and errors without inventing verification.",
+        "Basic guidance requires no Guild, paid compute, model, or network."
+      ]
     }
   }
 }
