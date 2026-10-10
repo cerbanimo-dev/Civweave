@@ -1,0 +1,26 @@
+name: Survival Mode Safety Contract
+on:
+  pull_request:
+    paths:
+      - 'public/app/survival/**'
+      - 'public/app/persistent-shell-actions-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'public/service-worker-core-v208.js'
+      - 'scripts/test-survival-mode-v1.mjs'
+      - 'config/system-ownership.json'
+      - '.github/workflows/survival-mode-contract.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/survival/**'
+      - 'scripts/test-survival-mode-v1.mjs'
+jobs:
+  survival-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Survival Mode contract
+        run: npm run test:survival

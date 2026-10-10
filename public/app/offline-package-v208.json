@@ -22,7 +22,8 @@
     "/app/cabinets/living-school/index.html",
     "/app/realm-console-v140.html",
     "/app/fellowfare-cabinet-v144.html",
-    "/app/anarchadia-console-v139.html"
+    "/app/anarchadia-console-v139.html",
+    "/app/survival/index.html"
   ],
   "assets": [
     "/finder",
@@ -73,7 +74,9 @@
     "/app/cabinets/living-school/living-library-downloads-v1.css",
     "/app/cabinets/living-school/living-library-downloads-v1.js",
     "/app/knowledge-library-browser-v1.css",
-    "/app/knowledge-library-browser-v1.mjs"
+    "/app/knowledge-library-browser-v1.mjs",
+    "/app/survival/app.mjs",
+    "/app/survival/survival-mode.mjs"
   ],
   "lazyPacks": [
     {

@@ -31,6 +31,9 @@ const REQUIRED_SHELL_ASSETS = [
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
+  '/app/survival/index.html',
+  '/app/survival/app.mjs',
+  '/app/survival/survival-mode.mjs',
   '/app/low-end-device-lab-v1.html',
   '/app/low-end-device-lab-v1.js',
   '/app/local-ai/model-registry-v266.js',
