@@ -6,6 +6,7 @@ const authoritySource=await readFile(new URL('../public/app/local-ai/gemma4-lite
 const registrySource=await readFile(new URL('../public/app/local-ai/gemma4-current-registry-authority-v1.js',import.meta.url),'utf8');
 const fastSource=await readFile(new URL('../public/app/local-ai/litert-gemma4-fast-runtime-v1.js',import.meta.url),'utf8');
 const compactSource=await readFile(new URL('../public/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js',import.meta.url),'utf8');
+const weaveSource=await readFile(new URL('../public/app/local-ai/gemma4-weave-draft-pipeline-v1.js',import.meta.url),'utf8');
 const persistent=await readFile(new URL('../public/app/persistent-system-shell-v1.html',import.meta.url),'utf8');
 const campus=await readFile(new URL('../public/app/working-campus-v440.html',import.meta.url),'utf8');
 
@@ -25,6 +26,10 @@ assert.match(fastSource,/prefaceConfig\.tools=\[formattedTool\]/);
 assert.match(fastSource,/await chat\.sendMessage\(latest\)/,'formatted output should use the final structured response instead of partial streamed tool calls');
 assert.match(fastSource,/structuredToolCalling:true/);
 assert.match(compactSource,/structuredTool:COMPACT_TOOL/);
+const expectedWeave=authoritySource.match(/const WEAVE_PIPELINE_VERSION='([^']+)'/)?.[1];
+const actualWeave=weaveSource.match(/const VERSION='([^']+)'/)?.[1];
+assert.equal(expectedWeave,actualWeave,'request authority and Weave Draft pipeline must share the exact runtime contract version');
+assert.equal(actualWeave,'1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only');
 for(const [label,html,requestVersion] of [['persistent shell',persistent,'1.1.4-e4b-only-weave'],['Working Campus',campus,'1.1.4-e4b-only-weave']]){
   const base=html.indexOf('gemma4-structured-quest-completion-v1.js');
   const request=html.indexOf('gemma4-litert-request-authority-v1.js');
