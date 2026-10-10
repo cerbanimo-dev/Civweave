@@ -217,7 +217,9 @@ async function generateCurriculumFromChat(input={}){
     const priorProgress=copy(state().progress||{});
     const school=await generateCurriculumFromData(data,{source:data.newPath?'moss-shared-chat-new-path':'moss-shared-chat',onStage:(stage,detail)=>{
       document.documentElement.dataset.livingSchoolChatStage=stage;
-      try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-stage',{detail:{stage,...detail,title:data.title,capability:data.capability,intent:data.intent}}))}catch{}
+      const stageDetail={stage,...detail,title:data.title,capability:data.capability,intent:data.intent,workflowRunId:clean(input?.workflowRunId,160)};
+      try{input?.onWorkflowStage?.(stage,stageDetail)}catch(error){console.warn('[Living School] Workflow observer failed:',error)}
+      try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-stage',{detail:stageDetail}))}catch{}
     }});
     reconcileProgressById(priorProgress);
     await ensureLivingSchool(school);

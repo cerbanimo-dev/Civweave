@@ -1,0 +1,113 @@
+{
+  "schema": "civweave.agent-workspaces.v1",
+  "authorityFiles": [
+    "AGENTS.md",
+    "config/agent-work-context.json",
+    "docs/contracts/mobile-interface-contract.md",
+    "docs/architecture/systems-of-practice.md",
+    "config/system-ownership.json",
+    "docs/architecture/repository-map.md"
+  ],
+  "workspaces": [
+    {
+      "id": "bug-fix",
+      "context": "docs/agent-workspaces/workspaces/bug-fix/CONTEXT.md",
+      "stages": [
+        {
+          "id": "reproduce",
+          "context": "docs/agent-workspaces/workspaces/bug-fix/stages/01-reproduce/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "reproduction.md"
+          ]
+        },
+        {
+          "id": "trace-owner",
+          "context": "docs/agent-workspaces/workspaces/bug-fix/stages/02-trace-owner/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "ownership-map.json"
+          ]
+        },
+        {
+          "id": "test-first",
+          "context": "docs/agent-workspaces/workspaces/bug-fix/stages/03-test-first/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "failing-test-reference.md"
+          ]
+        },
+        {
+          "id": "implement",
+          "context": "docs/agent-workspaces/workspaces/bug-fix/stages/04-implement/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "change-summary.md"
+          ]
+        },
+        {
+          "id": "browser-verify",
+          "context": "docs/agent-workspaces/workspaces/bug-fix/stages/05-browser-verify/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "verification.md"
+          ]
+        },
+        {
+          "id": "review",
+          "context": "docs/agent-workspaces/workspaces/bug-fix/stages/06-review/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "review-evidence.md"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feature-development",
+      "context": "docs/agent-workspaces/workspaces/feature-development/CONTEXT.md",
+      "stages": [
+        {
+          "id": "scope",
+          "context": "docs/agent-workspaces/workspaces/feature-development/stages/01-scope/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "feature-contract.md"
+          ]
+        },
+        {
+          "id": "ownership",
+          "context": "docs/agent-workspaces/workspaces/feature-development/stages/02-ownership/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "ownership-map.json"
+          ]
+        },
+        {
+          "id": "test-first",
+          "context": "docs/agent-workspaces/workspaces/feature-development/stages/03-test-first/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "failing-test-reference.md"
+          ]
+        },
+        {
+          "id": "implementation",
+          "context": "docs/agent-workspaces/workspaces/feature-development/stages/04-implementation/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "implementation-summary.md"
+          ]
+        },
+        {
+          "id": "verification",
+          "context": "docs/agent-workspaces/workspaces/feature-development/stages/05-verification/CONTEXT.md",
+          "executor": "agent",
+          "produces": [
+            "acceptance-evidence.md"
+          ]
+        }
+      ]
+    }
+  ]
+}

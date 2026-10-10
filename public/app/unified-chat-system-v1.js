@@ -5,6 +5,9 @@ const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia']
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
 const LEARNING_PLAN_KEY=`${PENDING_PREFIX}.living-school.plan.v1`;
+const LEARNING_QUEUE_KEY=`${PENDING_PREFIX}.living-school.curriculum.v1`;
+const LEARNING_WORKFLOW_SCHEMA='civweave.learning-journey-workflow.v1';
+const LEARNING_WORKFLOW_STAGES=Object.freeze(['intake','research','design','compile','validate','materialize']);
 const WEAVELING_ORCHESTRATOR_PATH='/extensions/civweave-weaveling-plan-json-v190.js';
 const MEMORY_FOLDERS=Object.freeze(Object.fromEntries(SYSTEMS.map(system=>[system,`civweave.guide-thread.${system}.v237`])));
 const THEMES=Object.freeze({
@@ -148,8 +151,35 @@ function curriculumRequest(options={}){
 }
 function packet(answer,nextAction='',extra={}){return{response:{answer,choice:{mode:'Learn',system:'living-school',room:'',nextAction},assumptions:Array.isArray(extra.assumptions)?extra.assumptions:[],requiresConsent:Boolean(extra.requiresConsent),confidence:Number(extra.confidence)||.99,approvalGate:extra.approvalGate||null},provider:extra.provider||'unified-chat-capability',model:extra.model||'living-school-learning-engine',action:extra.action||null,context:{guide:{system:'living-school',name:'Moss'},capability:'curriculum',canonicalArtifact:'Learning Journey'},fallbackFrom:null}}
 function readLearningPlan(){try{return parse(localStorage.getItem(LEARNING_PLAN_KEY),null)}catch{return null}}
-function saveLearningPlan(plan){try{localStorage.setItem(LEARNING_PLAN_KEY,JSON.stringify(plan))}catch{}return plan}
-function clearLearningPlan(){try{localStorage.removeItem(LEARNING_PLAN_KEY)}catch{}}
+function saveLearningPlan(plan){
+  try{localStorage.setItem(LEARNING_PLAN_KEY,JSON.stringify(plan));return plan}
+  catch(error){throw new Error('Could not preserve the Learning Journey plan on this device: '+clean(error?.message||error,300))}
+}
+function initLearningWorkflow(plan){
+  const stamp=now(),stages={};
+  for(const id of LEARNING_WORKFLOW_STAGES)stages[id]={status:'not-started',at:stamp};
+  stages.intake={status:'complete',at:stamp,artifact:'request'};
+  stages.design={status:'review',at:stamp,artifact:'modules',note:'High-level plan only, not full curriculum.'};
+  return{...plan,workflow:{schema:LEARNING_WORKFLOW_SCHEMA,stages,updatedAt:stamp}};
+}
+function recordLearningStage(id,stage,status,details={}){
+  const plan=readLearningPlan();
+  if(!plan||plan.id!==id||!LEARNING_WORKFLOW_STAGES.includes(stage))return null;
+  const workflow=plan.workflow?.schema===LEARNING_WORKFLOW_SCHEMA?plan.workflow:initLearningWorkflow(plan).workflow;
+  const info={...(workflow.stages?.[stage]||{}),status,at:now()};
+  if(details.artifact)info.artifact=clean(details.artifact,160);
+  if(details.note)info.note=clean(details.note,600);
+  if(details.provider)info.provider=clean(details.provider,120);
+  if(details.model)info.model=clean(details.model,240);
+  if(Number.isFinite(details.moduleCount))info.moduleCount=Math.max(0,Math.trunc(details.moduleCount));
+  if(Number.isFinite(details.sourceCount))info.sourceCount=Math.max(0,Math.trunc(details.sourceCount));
+  return saveLearningPlan({...plan,updatedAt:now(),workflow:{...workflow,updatedAt:now(),stages:{...workflow.stages,[stage]:info}}});
+}
+function setLearningState(id,state,extra={}){
+  const plan=readLearningPlan();
+  if(!plan||plan.id!==id)return null;
+  return saveLearningPlan({...plan,...extra,state,updatedAt:now()});
+}
 function learningPlanControl(text){for(const[action,pattern]of Object.entries(LEARNING_PLAN_CONTROL))if(pattern.test(clean(text,4000)))return action;return''}
 function selectedPlanningConfig(){
   try{
@@ -182,16 +212,20 @@ function normalizeModelPlan(value,request,existingPlan=null,route={}){
   const title=clean(value.title,240)||request.title,capability=clean(value.capability||value.goal,2400)||request.capability,proof=clean(value.proof||value.completionEvidence||value.demonstration,3000)||request.proof;
   const assumptions=(Array.isArray(value.assumptions)?value.assumptions:[]).map(item=>clean(item,700)).filter(Boolean).slice(0,6);
   const stamp=now(),base=existingPlan&&typeof existingPlan==='object'?existingPlan:{};
-  return{...base,schema:'civweave.learning-journey-plan.v2',id:base.id||`learning-plan-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,state:'review',createdAt:base.createdAt||stamp,updatedAt:stamp,approvedAt:null,requiresExplicitApproval:true,request:{...request,title,capability,level,mode,proof,count:modules.length,outline:modules.map(({title,focus,outcome})=>({title,focus,outcome}))},modules,assumptions,authoring:{mode:'selected-ai-high-level-plan',provider:clean(route.provider,120)||'unknown',model:clean(route.model,240),revision:VERSION}};
+  const plan={...base,schema:'civweave.learning-journey-plan.v2',id:base.id||`learning-plan-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,state:'review',createdAt:base.createdAt||stamp,updatedAt:stamp,approvedAt:null,requiresExplicitApproval:true,request:{...request,title,capability,level,mode,proof,count:modules.length,outline:modules.map(({title,focus,outcome})=>({title,focus,outcome}))},modules,assumptions,authoring:{mode:'selected-ai-high-level-plan',provider:clean(route.provider,120)||'unknown',model:clean(route.model,240),revision:VERSION}};
+  return initLearningWorkflow(plan);
 }
 function learningPlanText(plan){
   const request=plan?.request||{},modules=Array.isArray(plan?.modules)?plan.modules:[],outline=modules.length?`\n\nOutline:\n${modules.map((module,index)=>`${index+1}. ${clean(module.title,220)}\n   Focus: ${clean(module.focus,700)}\n   Demonstrate: ${clean(module.outcome,700)}`).join('\n')}`:'';
   const assumptions=(plan?.assumptions||[]).length?`\n\nAssumptions:\n${plan.assumptions.map(item=>`- ${clean(item,500)}`).join('\n')}`:'';
-  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: REVIEW. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.`;
+  const status=plan.state==='completed'?'COMPLETED. The Learning Journey is saved in Living School.':plan.state==='queued'?'QUEUED. The approved plan is preserved until the learning engine can run.':plan.state==='failed'?'FAILED. Your approved plan is retained for retry.':'REVIEW. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.';
+  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: ${status}`;
 }
 function learningPlanResponse(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for review.','Tell Moss what you want to learn or demonstrate.');
-  return packet(learningPlanText(plan),'Review or revise this plan. When it is right, explicitly approve the Learning Journey to generate its learning content.',{assumptions:plan.assumptions||[],requiresConsent:true,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:{kind:'learning-journey-plan-approval',planId:plan.id,state:plan.state||'review',required:true,actions:['review','revise','approve']},action:{kind:'living-school-learning-plan',system:'living-school',state:plan.state||'review',title:plan.request.title,capability:plan.request.capability,canonicalArtifact:'Learning Journey'}});
+  const finished=plan.state==='completed',queued=plan.state==='queued';
+  const next=finished?'Open the saved Learning Journey.':queued?'Open Living School to start the queued approved plan.':'Review or revise the plan, then explicitly approve it to generate learning content.';
+  return packet(learningPlanText(plan),next,{assumptions:plan.assumptions||[],requiresConsent:!finished&&!queued,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:finished||queued?null:{kind:'learning-journey-plan-approval',planId:plan.id,state:plan.state||'review',required:true,actions:['review','revise','approve']},action:{kind:'living-school-learning-plan',system:'living-school',state:plan.state||'review',title:plan.request.title,capability:plan.request.capability,canonicalArtifact:'Learning Journey',workflow:plan.workflow?.schema===LEARNING_WORKFLOW_SCHEMA?plan.workflow:null}});
 }
 async function generateLivingSchoolPlan(options={},existingPlan=null,revisionText=''){
   const request=curriculumRequest(options);
@@ -217,27 +251,89 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
     return packet(`Moss could not generate the high-level Learning Journey plan with the selected AI: ${clean(error?.message||error,1200)} No learning content was generated or queued.`,'Retry the plan or choose another AI model.',{provider:requestedProvider||'learning-plan-model-error',model:clean(config.model,240)});
   }
 }
+function checkMaterializedLearningJourney(result,request){
+  const school=result?.school||result||{},modules=Array.isArray(school.modules)?school.modules:[];
+  const saved=stateForLivingSchool()?.school,savedModules=Array.isArray(saved?.modules)?saved.modules:[];
+  if(!clean(school.id,160)||!clean(school.capability,1200)||!modules.length)throw new Error('The engine did not return a complete Learning Journey and canonical artifact ID.');
+  if(school.generation?.fallback||clean(school.generation?.provider,120).toLowerCase()==='deterministic')throw new Error('The learning engine returned an unverified deterministic fallback, not a completed AI Learning Journey.');
+  const recovery=clean(result?.generationRecovery?.status,100).toLowerCase();
+  if(recovery&&recovery!=='complete')throw new Error('The learning engine reported '+recovery+' generation; incomplete modules require recovery.');
+  if(!saved||saved.id!==school.id||savedModules.length!==modules.length||!savedModules.length)throw new Error('The generated Learning Journey could not be verified in canonical saved state.');
+  if(request?.newPath&&clean(saved.capability,1200)!==clean(request.capability,1200))throw new Error('The saved Learning Journey does not match the requested new capability.');
+  return{school,modules,sourceCount:Number(result?.sourceCount)||0,provider:clean(school.generation?.provider,120),model:clean(school.generation?.model,240)};
+}
+async function executeApprovedLearningJourney(plan,request){
+  const engine=globalThis.LivingSchoolCleanroomV218;
+  if(typeof engine?.generateCurriculumFromChat!=='function')throw new Error('The canonical Living School learning engine is unavailable.');
+  const id=clean(plan?.id,160);
+  if(id){setLearningState(id,'generating');recordLearningStage(id,'research','running',{artifact:'living-school.research'});}
+  const onWorkflowStage=(stage,detail={})=>{
+    if(!id)return;
+    if(stage==='researching')recordLearningStage(id,'research','running',{artifact:'living-school.research'});
+    if(stage==='generating'){
+      const state=stateForLivingSchool();
+      recordLearningStage(id,'research','complete',{artifact:'living-school.sources',sourceCount:Array.isArray(state?.sources)?state.sources.length:0});
+      recordLearningStage(id,'design','running',{artifact:'living-school.generationRecovery.unstructured'});
+      recordLearningStage(id,'compile','running',{artifact:'living-school.school.modules'});
+    }
+    if(stage==='repairing-quiz')recordLearningStage(id,'compile','running',{note:'Canonical generator is completing quiz questions.'});
+  };
+  try{
+    const result=await engine.generateCurriculumFromChat({...request,workflowRunId:id,onWorkflowStage});
+    const output=checkMaterializedLearningJourney(result,request);
+    if(id){
+      recordLearningStage(id,'design','complete',{artifact:'living-school.generationRecovery.unstructured',moduleCount:output.modules.length,provider:output.provider,model:output.model});
+      recordLearningStage(id,'compile','complete',{artifact:'living-school.school.modules',moduleCount:output.modules.length,provider:output.provider,model:output.model});
+      recordLearningStage(id,'validate','complete',{artifact:'living-school.school',moduleCount:output.modules.length,note:'Saved ID, modules, capability and generation status verified.'});
+      recordLearningStage(id,'materialize','complete',{artifact:'living-school.school',moduleCount:output.modules.length,sourceCount:output.sourceCount});
+      setLearningState(id,'completed',{materialized:{schoolId:output.school.id,moduleCount:output.modules.length,verifiedAt:now()}});
+    }
+    return output;
+  }catch(error){
+    if(id){
+      try{
+        const stages=readLearningPlan()?.workflow?.stages||{};
+        const failed=stages.research?.status==='running'?'research':stages.compile?.status==='running'?'compile':'materialize';
+        recordLearningStage(id,failed,'failed',{note:clean(error?.message||error,600)});
+        setLearningState(id,'failed',{lastFailure:{stage:failed,message:clean(error?.message||error,900),at:now()}});
+      }catch(storageError){console.warn('[Civweave] Could not preserve Learning Journey failure receipt:',storageError)}
+    }
+    throw error;
+  }
+}
 async function runLivingSchoolCurriculum(options={}){
   const plan=options.reviewPlan&&typeof options.reviewPlan==='object'?options.reviewPlan:null;
   const request=plan?.request?{...plan.request}:curriculumRequest(options);
-  if(!request.capability)return packet('I can build the Learning Journey, but I still need the observable capability the learner should be able to demonstrate.','Name the capability, then ask Moss to generate the Learning Journey plan.');
+  if(!request.capability)return packet('Moss needs an observable capability before generating the Learning Journey.','Describe what you want to learn.');
   if(options.requireApprovedPlan!==false&&!plan?.approvedAt)return learningPlanResponse(plan||readLearningPlan());
+  if(plan?.state==='completed')return learningPlanResponse(plan);
   const engine=globalThis.LivingSchoolCleanroomV218;
   if(typeof engine?.generateCurriculumFromChat!=='function'){
-    try{localStorage.setItem(`${PENDING_PREFIX}.living-school.curriculum.v1`,JSON.stringify({...request,autoRun:true,approvedAt:plan.approvedAt,approvedPlanId:plan.id,queuedAt:now()}))}catch{}
-    clearLearningPlan();
-    return packet('The Learning Journey plan is approved. I queued its materialization; Living School will generate the learning content when the learning engine is available.','Open Living School when you want to review the generated Learning Journey.',{action:{kind:'living-school-curriculum-queued',system:'living-school',state:'queued',title:request.title,capability:request.capability,intent:request.intent,approvedPlanId:plan.id,canonicalArtifact:'Learning Journey'}});
+    if(!plan?.id||!plan.approvedAt)return packet('The learning engine is not ready and there is no approved plan to queue.','Retry once Living School is available.');
+    try{
+      localStorage.setItem(LEARNING_QUEUE_KEY,JSON.stringify({...request,autoRun:true,approvedAt:plan.approvedAt,approvedPlanId:plan.id,queuedAt:now()}));
+      setLearningState(plan.id,'queued');
+    }catch(error){
+      try{localStorage.removeItem(LEARNING_QUEUE_KEY)}catch{}
+      return packet('Moss could not safely queue the approved plan: '+clean(error?.message||error,700),'Keep the review and retry when local storage is available.',{provider:'living-school-queue-error'});
+    }
+    return packet('The Learning Journey plan is approved and safely queued. The review remains saved while Living School becomes available.','Open Living School to start the approved build.',{action:{kind:'living-school-curriculum-queued',system:'living-school',state:'queued',title:request.title,capability:request.capability,approvedPlanId:plan.id,canonicalArtifact:'Learning Journey'}});
   }
   try{
-    const result=await engine.generateCurriculumFromChat(request),school=result?.school||result||{},modules=Array.isArray(school.modules)?school.modules:[];
-    try{localStorage.removeItem(`${PENDING_PREFIX}.living-school.curriculum.v1`)}catch{}
-    clearLearningPlan();
-    return packet(`I materialized the approved Learning Journey “${clean(school.title||request.title,240)}” through Living School's learning engine. It has ${modules.length||request.count} module${(modules.length||request.count)===1?'':'s'} for “${clean(school.capability||request.capability,500)}”.`,modules[0]?.title?`Open Module 1: ${clean(modules[0].title,180)}.`:'Review the generated Learning Journey.',{provider:'living-school-learning-engine',model:school.generation?.model||school.generation?.provider||'canonical-learning-engine',action:{kind:'living-school-curriculum-generated',system:'living-school',state:'completed',schoolId:school.id||'',title:school.title||request.title,moduleCount:modules.length||request.count,capability:school.capability||request.capability,source:'unified-chat',intent:request.intent,approvedPlanId:plan.id,canonicalArtifact:'Learning Journey'}});
-  }catch(error){return packet(`The Living School learning engine stopped before it could materialize the approved Learning Journey “${request.title}”: ${clean(error?.message||error,1000)} Nothing was marked generated.`,'Review the Learning Journey plan or model settings, then retry materialization.',{provider:'living-school-learning-engine-error',action:{kind:'living-school-curriculum-generation-failed',system:'living-school',state:'failed',error:clean(error?.message||error,800),approvedPlanId:plan?.id||'',canonicalArtifact:'Learning Journey'}})}
+    const output=await executeApprovedLearningJourney(plan,request),school=output.school,modules=output.modules;
+    try{const pending=parse(localStorage.getItem(LEARNING_QUEUE_KEY),null);if(!pending||pending.approvedPlanId===plan?.id)localStorage.removeItem(LEARNING_QUEUE_KEY)}catch{}
+    return packet('I materialized and verified the approved Learning Journey "'+clean(school.title||request.title,240)+'" through Living School. It has '+modules.length+' saved modules.','Open the saved Learning Journey in Living School.',{provider:'living-school-learning-engine',model:output.model||'canonical-learning-engine',action:{kind:'living-school-curriculum-generated',system:'living-school',state:'completed',schoolId:school.id,title:school.title||request.title,moduleCount:modules.length,capability:school.capability||request.capability,source:'unified-chat',intent:request.intent,approvedPlanId:plan?.id||'',canonicalArtifact:'Learning Journey'}});
+  }catch(error){
+    return packet('Living School could not verify completion of the approved Learning Journey: '+clean(error?.message||error,1000)+' The approved plan and stage results are preserved.','Review the failed stage or model settings and retry.',{provider:'living-school-learning-engine-error',action:{kind:'living-school-curriculum-generation-failed',system:'living-school',state:'failed',error:clean(error?.message||error,800),approvedPlanId:plan?.id||'',canonicalArtifact:'Learning Journey'}});
+  }
 }
 async function approveLivingSchoolPlan(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for approval.','Tell Moss what you want to learn or demonstrate.');
-  const approved={...plan,state:'approved',approvedAt:now(),updatedAt:now()};
+  const latest=readLearningPlan();
+  if(latest?.id===plan.id&&latest.state==='generating')return packet('This Learning Journey is already generating. Moss will preserve its progress and report the outcome.','Review the stage progress in the approved plan.');
+  if(latest?.id===plan.id&&latest.state==='completed')return learningPlanResponse(latest);
+  if(plan.state==='completed')return learningPlanResponse(plan);
+  const approved={...plan,state:'approved',approvedAt:plan.approvedAt||now(),updatedAt:now()};
   saveLearningPlan(approved);
   return runLivingSchoolCurriculum({reviewPlan:approved,requireApprovedPlan:true});
 }
@@ -253,7 +349,7 @@ registerCapability('living-school',async(request,next)=>{
   if(TEST.test(text))return packet('Test received. Moss is online. I did not create learning content or change a Learning Journey.','Tell Moss what you want to learn or demonstrate.');
   const plan=readLearningPlan(),control=learningPlanControl(text);
   if(plan&&control==='review')return learningPlanResponse(plan);
-  if(plan&&control==='approve')return approveLivingSchoolPlan(plan);
+  if(plan&&control==='approve')return plan.state==='completed'?learningPlanResponse(plan):approveLivingSchoolPlan(plan);
   if(plan&&control==='revise'){
     saveLearningPlan({...plan,state:'revision-requested',updatedAt:now()});
     return packet(`${learningPlanText(plan)}\n\nTell me what you want changed. Moss will use the selected AI to regenerate only the high-level plan and keep it in REVIEW.`,'Describe the change you want in the high-level plan.',{requiresConsent:true,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:{kind:'learning-journey-plan-approval',planId:plan.id,state:'review',required:true,actions:['review','revise','approve']}});
@@ -322,9 +418,25 @@ function patchLoader(){
 }
 async function consumePending(){
   if(pendingRun||typeof globalThis.LivingSchoolCleanroomV218?.generateCurriculumFromChat!=='function')return pendingRun;
-  const key=`${PENDING_PREFIX}.living-school.curriculum.v1`,request=parse(localStorage.getItem(key),null);
+  const request=parse(localStorage.getItem(LEARNING_QUEUE_KEY),null);
   if(!request?.autoRun||!request?.approvedAt||!clean(request.capability))return null;
-  pendingRun=globalThis.LivingSchoolCleanroomV218.generateCurriculumFromChat(request).then(result=>{localStorage.removeItem(key);try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school',`Your approved Learning Journey “${clean(result?.school?.title||request.title,180)}” is ready.`,{open:false})}catch{};return result}).catch(error=>{try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school',`The approved Learning Journey build stopped: ${clean(error?.message||error,800)} Nothing was marked generated.`,{open:false})}catch{};return null}).finally(()=>{pendingRun=null});
+  const saved=readLearningPlan(),plan=saved?.id===request.approvedPlanId&&saved?.approvedAt?saved:null;
+  if(saved?.id===request.approvedPlanId&&saved.state==='completed'){
+    try{localStorage.removeItem(LEARNING_QUEUE_KEY)}catch{}
+    return null;
+  }
+  pendingRun=(async()=>{
+    try{
+      const output=await executeApprovedLearningJourney(plan,request);
+      localStorage.removeItem(LEARNING_QUEUE_KEY);
+      try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school','Your approved Learning Journey "'+clean(output.school.title||request.title,180)+'" is generated and saved.',{open:false})}catch{}
+      return output;
+    }catch(error){
+      try{localStorage.removeItem(LEARNING_QUEUE_KEY)}catch{}
+      try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school','The approved Learning Journey build stopped: '+clean(error?.message||error,800)+' The approved plan remains available for retry.',{open:false})}catch{}
+      return null;
+    }finally{pendingRun=null}
+  })();
   return pendingRun;
 }
 function synchronize(){normalizeSurface();patchLoader();patchAssistant();consumePending();return true}
@@ -335,7 +447,7 @@ function bindLifecycle(){
 }
 function start(){bindLifecycle();synchronize();document.documentElement.dataset.civweaveChatSystem='unified-v1'}
 
-const api=Object.freeze({version:VERSION,systems:SYSTEMS,themes:THEMES,memoryFolders:MEMORY_FOLDERS,memoryFolder,activeTheme,registerCapability,normalizeSurface,synchronize,ensureWeavelingOrchestrator,curriculumIntent,learningJourneyIntent,curriculumRequest,readLearningPlan,generateLivingSchoolPlan,learningPlanResponse,approveLivingSchoolPlan,runLivingSchoolCurriculum,architecture:'one-core-five-themes-five-memory-folders',artifactLanguage:{'living-school':'Learning Journey'},learningPlanAuthoring:'selected-ai-local-capable',learningJourneyMaterialization:'review-then-explicit-approval',inputOwners:1,polling:false});
+const api=Object.freeze({version:VERSION,systems:SYSTEMS,themes:THEMES,memoryFolders:MEMORY_FOLDERS,memoryFolder,activeTheme,registerCapability,normalizeSurface,synchronize,ensureWeavelingOrchestrator,curriculumIntent,learningJourneyIntent,curriculumRequest,readLearningPlan,generateLivingSchoolPlan,learningPlanResponse,approveLivingSchoolPlan,runLivingSchoolCurriculum,architecture:'one-core-five-themes-five-memory-folders',artifactLanguage:{'living-school':'Learning Journey'},learningPlanAuthoring:'selected-ai-local-capable',learningJourneyMaterialization:'review-then-explicit-approval',learningJourneyWorkflowReceipts:LEARNING_WORKFLOW_SCHEMA,inputOwners:1,polling:false});
 globalThis.CivweaveUnifiedChatSystemV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
