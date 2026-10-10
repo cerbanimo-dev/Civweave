@@ -149,7 +149,7 @@ async function search(){
       seen.add(key);
       return true;
     }).slice(0,10);
-    lastSourceRows=unique.map(card=>({title:card.title,notes:card.excerpt,canonicalUrl:card.url,schoolName:card.school,license:card.license,revision:card.revision,source:card.source}));
+    lastSourceRows=unique.map(card=>({title:card.title,notes:card.excerpt,canonicalUrl:card.url,schoolName:card.school,license:card.license,revision:card.revision,source:card.source,tier:card.tier}));
     for(const card of unique)results.append(sourceCard(card,upstream));
     if(!unique.length)results.append(element('p','No matching locally stored passages were found. Download relevant sources while connected; do not infer safety or identification from an empty search.'));
     status.textContent=unique.length+' saved excerpt(s) found.'+(errors.length?' Some offline indexes were unavailable: '+errors.join(' | '):' Source freshness was not checked online.');

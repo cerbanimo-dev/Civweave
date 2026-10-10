@@ -60,7 +60,7 @@ export function normalizeReferenceCards(rows=[],tier='foundation'){
       title,excerpt,url,school:clean(row?.schoolName||row?.school_name||row?.schoolSlug||row?.school_slug||'Downloaded library',150),
       license:clean(row?.license,100),revision:clean(row?.revision,100),
       source:clean(row?.source,160),key:clean(row?.key,200),
-      tier:clean(tier,35),availability:'offline-excerpt',
+      tier:clean(row?.tier||tier,35),availability:'offline-excerpt',
       verifiedIdentification:false
     }));
     if(result.length>=12)break;
