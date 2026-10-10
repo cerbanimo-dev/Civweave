@@ -67,3 +67,50 @@ export function normalizeReferenceCards(rows=[],tier='foundation'){
   }
   return result;
 }
+
+
+// Canonical ICM-ready handoff. Media, EXIF, coordinates and untrusted model output
+// never become verified observations in this deterministic v1 packet.
+export const FIELD_PACKET_SCHEMA='civweave.survival-field-packet.v1';
+export function verificationChecklist(input={}){
+  const concerns=Array.isArray(input?.concerns)?input.concerns:[];
+  const checklist=[
+    'Check again for immediate hazards, injuries, exits, and changes to your surroundings.',
+    'Separate firsthand observations from suggestions, assumptions and unverified claims.'
+  ];
+  if(concerns.includes('plant')){
+    checklist.push('Document the leaf arrangement, stem, flowers or fruit, and habitat.');
+    checklist.push('Compare toxic lookalikes using independent regional field references; one image is not enough.');
+    checklist.push('Do not eat or consume a plant, mushroom or berry based on this tool or source excerpts.');
+  }
+  if(concerns.includes('pipe')){
+    checklist.push('Check for electrical, gas, structural or contaminated-water hazards before inspecting damage.');
+    checklist.push('Verify isolation and repair steps using the relevant manual or a qualified professional.');
+  }
+  checklist.push('Missing or conflicting information stays unknown.');
+  return Object.freeze(checklist);
+}
+export function buildFieldPacket(input={},referenceRows=[]){
+  const priority=planAssessment(input);
+  const notes=Array.isArray(input?.observations)?input.observations:[];
+  const userReported=[...new Set(notes.map(value=>clean(value,350)).filter(Boolean))].slice(0,20);
+  const accepted=['title','excerpt','url','school','license','revision','source','tier','availability','verifiedIdentification'];
+  const references=normalizeReferenceCards(referenceRows).map(card=>Object.fromEntries(accepted.map(key=>[key,card[key]])));
+  const unknowns=['unverified-surroundings','live-environmental-conditions'];
+  if(priority.photoStatus==='not-analyzed')unknowns.push('visual-identification-not-performed');
+  if(priority.reportedConcerns.includes('plant'))unknowns.push('edibility-and-lookalikes-unverified');
+  return Object.freeze({
+    schema:FIELD_PACKET_SCHEMA,
+    mode:'survival',
+    authority:'deterministic',
+    priority,
+    observations:{userReported,aiInferred:[],confirmedFromImage:[]},
+    photo:{status:priority.photoStatus,bytesIncluded:false,analyzed:false},
+    references,
+    unknowns,
+    verification:{status:'requires-human-check',prompts:verificationChecklist(input)},
+    privacy:{exportRequiresAction:true,persistedToDevice:false,publishedToGuild:false,includesLocation:false},
+    handoff:{target:'shared-guide-capability',automatic:false,runtimeWorkflowEnabled:false},
+    generatedClaims:{identity:null,edibility:null,diagnosis:null,clearance:null}
+  });
+}

@@ -1,4 +1,4 @@
-import {CONCERNS,planAssessment,buildReferenceQuery,normalizeReferenceCards} from './survival-mode.mjs';
+import {CONCERNS,planAssessment,buildReferenceQuery,normalizeReferenceCards,buildFieldPacket,verificationChecklist} from './survival-mode.mjs';
 
 const byId=id=>document.getElementById(id);
 const concernRoot=byId('concerns');
@@ -14,6 +14,7 @@ const queryField=byId('reference-query');
 const searchButton=byId('search-references');
 let objectUrl='';
 let currentAssessment=planAssessment();
+let lastSourceRows=[];
 
 function element(name,text,cls=''){
   const node=document.createElement(name);
@@ -54,6 +55,7 @@ function inputAssessment(){
   return planAssessment({
     concerns:[...concernRoot.querySelectorAll('input:checked')].map(node=>node.value),
     resources:byId('resources').value.split(','),
+    observations:byId('observations').value.split(/\r?\n/),
     photoAttached:Boolean(photo.files?.length)
   });
 }
@@ -64,6 +66,12 @@ function renderPriority(assessment){
   priorityContent.append(element('p',assessment.nextStep));
   priorityContent.append(element('p','Important limitation: '+assessment.caution));
   priorityContent.append(element('p','Evidence: '+assessment.provenance,'muted small'));
+  const section=element('section');
+  section.append(element('h3','Verification checklist'));
+  const list=element('ul');
+  for(const line of verificationChecklist({concerns:assessment.reportedConcerns}))list.append(element('li',line));
+  section.append(list);
+  priorityContent.append(section);
   if(assessment.photoStatus==='not-analyzed'){
     priorityContent.append(element('p','Photo attached: preview only. No object, plant, or hazard was identified from it.','muted'));
   }
@@ -72,6 +80,9 @@ function renderPriority(assessment){
 form.addEventListener('submit',event=>{
   event.preventDefault();
   currentAssessment=inputAssessment();
+  lastSourceRows=[];
+  results.replaceChildren();
+  status.textContent='Search again to attach reference excerpts to this assessment.';
   renderPriority(currentAssessment);
   queryField.value=buildReferenceQuery(currentAssessment);
   priority.scrollIntoView({behavior:'auto',block:'start'});
@@ -138,6 +149,7 @@ async function search(){
       seen.add(key);
       return true;
     }).slice(0,10);
+    lastSourceRows=unique.map(card=>({title:card.title,notes:card.excerpt,canonicalUrl:card.url,schoolName:card.school,license:card.license,revision:card.revision,source:card.source}));
     for(const card of unique)results.append(sourceCard(card,upstream));
     if(!unique.length)results.append(element('p','No matching locally stored passages were found. Download relevant sources while connected; do not infer safety or identification from an empty search.'));
     status.textContent=unique.length+' saved excerpt(s) found.'+(errors.length?' Some offline indexes were unavailable: '+errors.join(' | '):' Source freshness was not checked online.');
@@ -147,3 +159,24 @@ searchButton.addEventListener('click',()=>{void search().catch(error=>{
   status.textContent='Local search failed: '+String(error?.message||error);
   searchButton.disabled=false;
 });});
+
+
+// No automatic persistence, location reading, model call, or Guild sharing.
+byId('download-field-record').addEventListener('click',()=>{
+  const input={
+    concerns:[...concernRoot.querySelectorAll('input:checked')].map(node=>node.value),
+    resources:byId('resources').value.split(','),
+    observations:byId('observations').value.split(/\r?\n/),
+    photoAttached:Boolean(photo.files?.length)
+  };
+  const packet=buildFieldPacket(input,lastSourceRows);
+  const blob=new Blob([JSON.stringify(packet,null,2)+'\n'],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='civweave-survival-field-record.json';
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});

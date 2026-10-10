@@ -4,7 +4,7 @@ import { buildPacket, readRegistry, safeRepoPath, validateRegistry } from './lib
 
 test('developer and runtime registries validate without fetching the network', () => {
   assert.equal(validateRegistry('dev').count, 2);
-  assert.equal(validateRegistry('runtime').count, 1);
+  assert.equal(validateRegistry('runtime').count, 2);
 });
 test('repository context paths cannot traverse or escape via absolute references', () => {
   for (const bad of ['../../etc/passwd', '/etc/passwd', 'docs//contracts/a', 'https://example.com/a', './AGENTS.md', 'docs/../AGENTS.md']) {
@@ -36,4 +36,15 @@ test('invalid registry states fail closed', () => {
   const missing = structuredClone(readRegistry('dev'));
   missing.workspaces[0].stages[0].context = 'docs/agent-workspaces/unknown/CONTEXT.md';
   assert.throws(() => validateRegistry('dev', missing));
+});
+
+
+test('Survival context is opt-in, deterministic and disabled',()=>{
+  const a=buildPacket('runtime','survival-assessment','prioritize');
+  const b=buildPacket('runtime','survival-assessment','prioritize');
+  assert.deepEqual(a,b);
+  assert.equal(a.executor,'deterministic');
+  assert.equal(a.runtimeEnabled,false);
+  assert.equal(a.nextStage,'research');
+  assert.match(a.instructions,/Immediate hazards/i);
 });

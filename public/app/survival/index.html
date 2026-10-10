@@ -30,13 +30,14 @@ button,.button{font:inherit;font-weight:750;border:1px solid #7cbd9b;border-radi
 <p class="muted">Choose only conditions you actually know or suspect. Unchecked does not mean safe.</p>
 <div id="concerns" class="choices" role="group" aria-label="Potential hazards and needs"></div>
 <p><label for="resources"><strong>Resources you have</strong> <span class="muted">(optional, separate with commas)</span></label><textarea id="resources" maxlength="1500" placeholder="Example: tarp, flashlight, bottled water, charged radio"></textarea></p>
+<p><label for="observations"><strong>What you can observe firsthand</strong> <span class="muted">(optional, one detail per line)</span></label><textarea id="observations" maxlength="2400" placeholder="Example: Water pooling beneath a fitting. Valve position unknown."></textarea></p>
 <p><label for="photo"><strong>Show your surroundings or a problem</strong> <span class="muted">(optional)</span></label><input id="photo" type="file" accept="image/*" capture="environment"></p>
 <p class="muted small">The photo stays in this page's temporary preview and is not uploaded, stored, interpreted, or sent to an AI service.</p>
 <img id="preview" alt="Selected local photograph preview">
 <div class="actions"><button type="submit">Prioritize my next step</button><button type="button" id="clear-photo" class="secondary">Remove photo</button></div>
 </form>
 <section id="priority" class="panel" aria-live="polite" hidden>
-<h2>2. Safety priority</h2><div id="priority-content"></div>
+<h2>2. Safety priority</h2><div id="priority-content"></div><div class="actions"><button id="download-field-record" type="button" class="secondary">Export field record (JSON)</button></div><p class="muted small">Manual export includes reported needs, notes and source excerpts, but not the photo or location. Review before sharing.</p>
 </section>
 <section id="references" class="panel">
 <h2>3. Check offline source material</h2>

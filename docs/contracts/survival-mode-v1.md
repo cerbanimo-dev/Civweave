@@ -28,3 +28,10 @@ The reference search reuses knowledge-school-runtime-v243.mjs and knowledge-libr
 ## Acceptance
 
 Run npm run test:survival. Test genuine cold offline PWA boot and source retrieval on a device before describing this as emergency-ready.
+
+
+## ICM compatibility and field packets
+
+Survival Mode follows the Interpretable Context Methodology foundation on the dependent feature branch. The inactive runtime workflow pack describes intake, observe, prioritize, research, verify and handoff stages with typed artifact expectations. The manifest remains runtimeEnabled: false and status: pilot-contract-only. The actual deterministic safety logic remains at the canonical survival-mode.mjs owner; no additional model or guide runtime is activated.
+
+buildFieldPacket produces civweave.survival-field-packet.v1: sanitized user-observation notes, risk priority, explicit unknowns, labeled offline excerpts, and image-status metadata. Image bytes, EXIF and coordinates are excluded. Export requires a direct user action, and the packet is not silently stored or transmitted.
