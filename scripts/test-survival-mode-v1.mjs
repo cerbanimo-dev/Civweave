@@ -112,3 +112,13 @@ test('ICM survival workflow is explicitly a disabled, typed staged contract',asy
   assert.equal(survival.stages.find(x=>x.id==='prioritize').executor,'deterministic');
   assert.equal(survival.stages.find(x=>x.id==='verify').executor,'human');
 });
+
+
+test('exported field evidence preserves the saved source tier and availability',()=>{
+  const record=buildFieldPacket({concerns:['pipe']},[
+    {title:'Repair reference',notes:'Check hazards first.',canonicalUrl:'https://example.org/repair',tier:'expanded/deep'}
+  ]);
+  assert.equal(record.references[0].tier,'expanded/deep');
+  assert.equal(record.references[0].availability,'offline-excerpt');
+  assert.equal(record.references[0].verifiedIdentification,false);
+});
