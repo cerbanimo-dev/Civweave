@@ -10,7 +10,7 @@ A visible control is not an invitation to attach a new event. A custom realm pag
 
 For every cross-cutting change, an agent must perform this sequence before editing:
 
-1. Trace the active route from `public/app/fullscreen-family-v104.html`.
+1. Trace the active route from `public/app/system-routes-v227.js` through `public/app/persistent-system-shell-v1.html`.
 2. Read `config/system-ownership.json` and identify the capability owner.
 3. Search every active entry and shared runtime for the canonical control, event, global API, storage key, and loader.
 4. Classify each match as **owner**, **subscriber**, **caller**, **compatibility shim**, or **retired code**.
@@ -134,6 +134,7 @@ A new cross-cutting owner requires all of the following in the same PR:
 If those artifacts are absent, the correct default is to find and extend an existing system.
 
 The objective is not fewer files for aesthetic reasons. It is one source of behavioral authority, with callers and subscribers orbiting it instead of a swarm of competing event handlers.
+
 ## Survival Mode
 
 Canonical assessment and reference policy: public/app/survival/survival-mode.mjs. Mobile caller: public/app/survival/app.mjs. The existing persistent-shell-actions-v1.js owns its launcher; this does not fork guide chat, navigation, or Settings. Offline seed/package: public/app/offline-package-v208.json. Photographs remain local previews, and downloaded passages never prove identification or edibility. The governing contract is docs/contracts/survival-mode-v1.md and its executable test is scripts/test-survival-mode-v1.mjs.

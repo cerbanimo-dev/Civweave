@@ -1,0 +1,70 @@
+{
+  "schema": "civweave.ai-workflow-pack.v1",
+  "runtimeEnabled": false,
+  "status": "pilot-contract-only",
+  "authorityFiles": [
+    "docs/contracts/mobile-interface-contract.md",
+    "docs/contracts/guide-artifact-language-v1.md",
+    "config/system-ownership.json",
+    "config/agent-work-context.json"
+  ],
+  "workflows": [
+    {
+      "id": "learning-journey",
+      "owner": "living-school",
+      "canonicalOwner": "public/app/unified-chat-system-v1.js",
+      "context": "public/app/ai-workflows/workflows/learning-journey/CONTEXT.md",
+      "stages": [
+        {
+          "id": "intake",
+          "executor": "ai",
+          "context": "public/app/ai-workflows/workflows/learning-journey/stages/01-intake/CONTEXT.md",
+          "produces": [
+            "intention.json"
+          ]
+        },
+        {
+          "id": "research",
+          "executor": "ai",
+          "context": "public/app/ai-workflows/workflows/learning-journey/stages/02-research/CONTEXT.md",
+          "produces": [
+            "source-packet.json"
+          ]
+        },
+        {
+          "id": "design",
+          "executor": "ai",
+          "context": "public/app/ai-workflows/workflows/learning-journey/stages/03-design/CONTEXT.md",
+          "produces": [
+            "learning-design.md",
+            "assessment-plan.json"
+          ]
+        },
+        {
+          "id": "compile",
+          "executor": "ai",
+          "context": "public/app/ai-workflows/workflows/learning-journey/stages/04-compile/CONTEXT.md",
+          "produces": [
+            "draft-module.json"
+          ]
+        },
+        {
+          "id": "validate",
+          "executor": "deterministic",
+          "context": "public/app/ai-workflows/workflows/learning-journey/stages/05-validate/CONTEXT.md",
+          "produces": [
+            "validated-module.json"
+          ]
+        },
+        {
+          "id": "materialize",
+          "executor": "deterministic",
+          "context": "public/app/ai-workflows/workflows/learning-journey/stages/06-materialize/CONTEXT.md",
+          "produces": [
+            "materialization-receipt.json"
+          ]
+        }
+      ]
+    }
+  ]
+}

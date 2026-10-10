@@ -117,11 +117,17 @@ Presentation routing is evidence about composition. It is not permission to rede
 | `ops/triggers/` | Deliberate workflow sentinel/touch files | Sentinels belong here, never as hidden files at repository root. |
 | `tools/civweave-dev-mcp/` | Developer-only local PWA inspection/source-edit MCP bridge | Maintainer observation, reproduction, source editing, and verification only; never an end-user/public runtime endpoint or runtime repair path. |
 | `docs/contracts/` | Canonical architecture/behavior contracts | Architectural authority. Update deliberately when the contract itself changes. |
+| `docs/agent-workspaces/` | Optional ICM coding-agent stage guidance and registry | Context routing only; cannot override canonical owners or runtime contracts. |
+| `public/app/ai-workflows/` | Dormant Moss staged-workflow pilot contracts | Not installed as an executing AI workflow; do not enable through metadata alone. |
 | `docs/architecture/` | Current ownership and repository maps | Navigation/ownership documentation; keep synchronized with active owners and routes. |
 | `docs/operations/` | Installation/hosting/deployment guidance | Operational documentation, not application ownership. |
 | `docs/roadmap/` | Agentic pipeline and long-horizon planning | Governs unscoped pipeline work, not explicit user tasks. |
 | `docs/history/` | Genuine historical records | Records only; never a source tree for retired implementations. |
 | `releases/{VERSION}/` | Materialized immutable shipping release selected by `VERSION` | Do not use as the normal edit target. Change canonical source and materialize a new shipping version. |
+
+## Staged AI context pilot
+
+The selective developer-workflow entry is `docs/agent-workspaces/CONTEXT.md`; `node scripts/ai-context.mjs --check` verifies its stage registry and the non-executing Moss workflow pack. The workflow manifest has `runtimeEnabled: false`. Runtime and persistence ownership remain with the canonical shared systems; this pilot adds no new active provider, chat, generation or storage path.
 
 ## Active installed-family route snapshot
 

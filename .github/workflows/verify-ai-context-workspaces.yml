@@ -1,0 +1,25 @@
+name: AI Context Workspaces
+
+on:
+  pull_request:
+  push:
+    branches:
+      - staging
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ai-context-workspaces:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Validate developer and runtime context contracts
+        run: node scripts/ai-context.mjs --check
+      - name: Verify traversal protection, authority, and handoffs
+        run: node --test scripts/test-ai-context-resolver.mjs
