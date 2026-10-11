@@ -65,6 +65,62 @@
           ]
         }
       ]
+    },
+    {
+      "id": "survival-assessment",
+      "owner": "civweave",
+      "canonicalOwner": "public/app/survival/survival-mode.mjs",
+      "context": "public/app/ai-workflows/workflows/survival-assessment/CONTEXT.md",
+      "stages": [
+        {
+          "id": "intake",
+          "executor": "human",
+          "context": "public/app/ai-workflows/workflows/survival-assessment/stages/01-intake/CONTEXT.md",
+          "produces": [
+            "field-intake.json"
+          ]
+        },
+        {
+          "id": "observe",
+          "executor": "human",
+          "context": "public/app/ai-workflows/workflows/survival-assessment/stages/02-observe/CONTEXT.md",
+          "produces": [
+            "observation-packet.json"
+          ]
+        },
+        {
+          "id": "prioritize",
+          "executor": "deterministic",
+          "context": "public/app/ai-workflows/workflows/survival-assessment/stages/03-prioritize/CONTEXT.md",
+          "produces": [
+            "priority-assessment.json"
+          ]
+        },
+        {
+          "id": "research",
+          "executor": "deterministic",
+          "context": "public/app/ai-workflows/workflows/survival-assessment/stages/04-research/CONTEXT.md",
+          "produces": [
+            "source-packet.json"
+          ]
+        },
+        {
+          "id": "verify",
+          "executor": "human",
+          "context": "public/app/ai-workflows/workflows/survival-assessment/stages/05-verify/CONTEXT.md",
+          "produces": [
+            "verification-status.json"
+          ]
+        },
+        {
+          "id": "handoff",
+          "executor": "deterministic",
+          "context": "public/app/ai-workflows/workflows/survival-assessment/stages/06-handoff/CONTEXT.md",
+          "produces": [
+            "field-record.json"
+          ]
+        }
+      ]
     }
   ]
 }

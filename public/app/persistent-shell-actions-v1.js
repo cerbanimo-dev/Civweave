@@ -6,6 +6,7 @@ const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
 const GUILD_SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
+const SURVIVAL_PATH='/app/survival/index.html';
 const CONTEXT_KEY='civweave.pending-system-context.v1';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const RETIRED_PATHS=Object.freeze({
@@ -48,6 +49,7 @@ function ensureGuildRuntime(){
 }
 async function openGuilds(){try{const api=await ensureGuildRuntime();await api.openNearbyGuilds();return true}catch(error){console.warn('[Civweave] Persistent Guild action fell back to the Guild lobby.',error);return guildFallback()}}
 function openMap(){location.assign('/finder?view=map&source=persistent-shell');return true}
+function openSurvival(){location.assign(SURVIVAL_PATH);return true}
 
 const navObserver=new MutationObserver(()=>{
   if(!observedNav||!observedNav.isConnected){observedNav=null;ensureMounted();return}
@@ -61,11 +63,11 @@ function bindNavObserver(nav){
 }
 function ensureMounted(){
   installStyle();bindLegacyRoutes();const nav=document.getElementById(NAV_ID);if(!nav){bindNavObserver(null);return false}bindNavObserver(nav);let actions=document.getElementById(ACTIONS_ID);if(actions&&actions.parentElement===nav)return true;
-  document.getElementById('cw-civweave-primary-actions-v441')?.remove();actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild and map');actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button>`;actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}});nav.append(actions);nav.dataset.persistentActions='guilds-map-all-systems-v5-nav-child-observer';return true
+  document.getElementById('cw-civweave-primary-actions-v441')?.remove();actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild, map, and survival tools');actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button><button type="button" data-cw-persistent-action="survival" aria-label="Open Survival Mode">Survival</button>`;actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}else if(action==='survival'){event.preventDefault();openSurvival()}});nav.append(actions);nav.dataset.persistentActions='guilds-map-survival-all-systems-v1';return true
 }
 const observer=new MutationObserver(records=>{if(records.some(record=>[...record.addedNodes,...record.removedNodes].some(node=>node?.nodeType===1&&(node.id===NAV_ID||node.querySelector?.(`#${NAV_ID}`)))))ensureMounted()});
 function boot(){bindLegacyRoutes();ensureMounted();const target=document.body||document.documentElement;observer.observe(target,{childList:true,subtree:false});for(const delay of [80,300,900,1800])setTimeout(ensureMounted,delay)}
 addEventListener('pageshow',ensureMounted);addEventListener('focus',ensureMounted);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,legacySystemFor,switchLegacyRoute,retiredRealmEntrypoints:false,canonicalRealmInterception:false,observerScope:'body-direct-children+navbar-childlist'});
+globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,openSurvival,legacySystemFor,switchLegacyRoute,retiredRealmEntrypoints:false,canonicalRealmInterception:false,observerScope:'body-direct-children+navbar-childlist'});
 })();
