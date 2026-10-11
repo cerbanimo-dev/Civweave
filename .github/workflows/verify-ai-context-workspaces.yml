@@ -19,11 +19,15 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Ensure compiled Moss stage instructions match source CONTEXT.md
+        run: node --check scripts/build-moss-context-pack-v1.mjs && node scripts/build-moss-context-pack-v1.mjs --check
       - name: Validate developer and runtime context contracts
         run: node scripts/ai-context.mjs --check
       - name: Verify traversal protection, authority, and handoffs
         run: node --test scripts/test-ai-context-resolver.mjs
       - name: Check changed Moss bridge syntax
-        run: node --check public/app/unified-chat-system-v1.js && node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+        run: node --check public/app/unified-chat-system-v1.js && node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs && node --check public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs
+      - name: Verify compiled offline Moss context and package boundary
+        run: node --test scripts/test-moss-compiled-design-context-v1.mjs
       - name: Verify Moss staged generation receipts and queue recovery
         run: node --test scripts/test-moss-icm-receipts-v1.mjs

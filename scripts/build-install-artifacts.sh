@@ -6,6 +6,7 @@ if [[ -f "$repo_dir/scripts/apply-confidence-weighted-validation-v1-safe.mjs" ]]
 else
   echo "[Civweave] Confidence-weighted validation transform is not present on this branch; current main supplies it at merge time."
 fi
+node "$repo_dir/scripts/build-moss-context-pack-v1.mjs" --check
 node "$repo_dir/scripts/sync-release-version-assets.mjs"
 node "$repo_dir/scripts/sync-release-coherence-v220.mjs"
 node "$repo_dir/scripts/generate-asset-lockboard-catalog-v239.mjs"
