@@ -121,7 +121,10 @@ export function buildFieldPacket(input={},referenceRows=[]){
 export function normalizeLocalVisionResult(input={}){
   const model='Xenova/vit-gpt2-image-captioning';
   const text=clean(input?.generated_text,400);
-  if(input?.model!==model||input?.remote===true||!text)return Object.freeze({
+  // An image caption cannot certify a hazardous action. Suppress affirmative
+  // safety claims entirely rather than relying only on a small disclaimer.
+  const falseSafetyClaim=/\b(?:edible|non[- ]?poisonous|not\s+(?:poisonous|toxic|dangerous)|no\s+(?:dangerous|hazardous|live)\s+\w+|(?:completely|definitely|certainly)\s+safe|safe\s+(?:to\s+)?(?:eat|drink|consume|touch|handle|enter|use)|water\s+is\s+(?:safe|potable))\b/i.test(text);
+  if(input?.model!==model||input?.remote===true||!text||falseSafetyClaim)return Object.freeze({
     status:'unavailable',caption:'',model:'',verified:false,
     edibility:null,diagnosis:null,safetyClearance:null
   });
