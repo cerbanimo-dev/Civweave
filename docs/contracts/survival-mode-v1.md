@@ -42,3 +42,6 @@ buildFieldPacket produces civweave.survival-field-packet.v1: sanitized user-obse
 A separate dormant worker at public/app/survival/vision-worker.mjs can load the already-vendored Transformers.js v4 runtime and the optional Xenova/vit-gpt2-image-captioning ONNX model. The user must click Prepare local vision model before any optional model download. The worker requires WebGPU; no network inference API receives photographs. The browser model cache may be reused offline, but eviction, unavailable GPU, incomplete downloads and browser runtime limits must fail visibly. Captions are short unverified image descriptions, not diagnosis or plant identification; they are never fed to planAssessment and are excluded from the field record. Manual triage and downloaded references remain usable if the worker fails.
 
 The model's Apache-compatible distribution and exact model artifact integrity should be verified and pack-pinned before calling this emergency-ready. No device model benchmarks or cold-airplane-mode acceptance are claimed from this PR.
+
+
+The user can explicitly prefill (not execute) a downloaded-library query from a provisional caption. The suggestion is editable, never alters risk precedence, and is excluded from the field record unless the user separately reports firsthand observations.

@@ -1,4 +1,4 @@
-import {CONCERNS,planAssessment,buildReferenceQuery,normalizeReferenceCards,buildFieldPacket,verificationChecklist,normalizeLocalVisionResult} from './survival-mode.mjs';
+import {CONCERNS,planAssessment,buildReferenceQuery,normalizeReferenceCards,buildFieldPacket,verificationChecklist,normalizeLocalVisionResult,buildVisionLookupDraft} from './survival-mode.mjs';
 
 const byId=id=>document.getElementById(id);
 const concernRoot=byId('concerns');
@@ -33,6 +33,8 @@ for(const concern of CONCERNS){
 function revokePreview(){
   visionInputVersion++;
   captionForVersion=-1;
+  lastCaption=null;
+  byId('use-caption-lookup').disabled=true;
   byId('vision-result').replaceChildren();
   byId('vision-status').textContent='Photo cleared. Earlier model descriptions are no longer associated with this assessment.';
   if(objectUrl)URL.revokeObjectURL(objectUrl);
@@ -45,6 +47,8 @@ byId('clear-photo').addEventListener('click',revokePreview);
 photo.addEventListener('change',()=>{
   visionInputVersion++;
   captionForVersion=-1;
+  lastCaption=null;
+  byId('use-caption-lookup').disabled=true;
   byId('vision-result').replaceChildren();
   byId('vision-status').textContent='Photo changed. Describe the new photo only after explicit request.';
   if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl='';}
@@ -196,6 +200,8 @@ byId('download-field-record').addEventListener('click',()=>{
 const visionStatus=byId('vision-status'),visionResult=byId('vision-result');
 const prepareVision=byId('prepare-vision'),analyzePhoto=byId('analyze-photo'),stopVision=byId('stop-vision');
 let visionResolve=null,visionReject=null;
+let lastCaption=null;
+const draftLookup=byId('use-caption-lookup');
 function closeVision(message){
   visionRequest++;
   if(visionWorker){visionWorker.terminate();visionWorker=null;}
@@ -271,6 +277,8 @@ analyzePhoto.addEventListener('click',async()=>{
     const output=normalizeLocalVisionResult({generated_text:answer.caption,model:answer.model,remote:false});
     if(output.status!=='unverified-local-caption')throw new Error('The model did not return an accepted local description.');
     captionForVersion=inputVersion;
+    lastCaption=output;
+    draftLookup.disabled=false;
     const text=element('p','Unverified visual suggestion: '+output.caption);
     visionResult.append(text,element('p','Do not infer species, edibility, injury status, electricity status, water purity or structural safety from this text.','muted small'));
     visionStatus.textContent='Local caption completed. This does not verify an object or any safety condition.';
@@ -279,3 +287,18 @@ analyzePhoto.addEventListener('click',async()=>{
   }finally{analyzePhoto.disabled=!visionPrepared;}
 });
 addEventListener('pagehide',()=>closeVision(),{once:true});
+
+
+draftLookup.addEventListener('click',()=>{
+  if(captionForVersion!==visionInputVersion||!lastCaption){
+    visionStatus.textContent='That suggested description is no longer linked to the selected photo.';
+    draftLookup.disabled=true;return;
+  }
+  const input={concerns:[...concernRoot.querySelectorAll('input:checked')].map(node=>node.value)};
+  const query=buildVisionLookupDraft(lastCaption,input);
+  if(!query){visionStatus.textContent='No usable provisional lookup was generated.';return;}
+  queryField.value=query;
+  status.textContent='Provisional visual keywords added as an editable lookup. Review them before searching. No source claims have been verified.';
+  queryField.scrollIntoView({behavior:'auto',block:'center'});
+  queryField.focus();
+});

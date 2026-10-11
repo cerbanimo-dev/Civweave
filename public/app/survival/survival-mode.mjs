@@ -132,3 +132,13 @@ export function normalizeLocalVisionResult(input={}){
     verified:false,edibility:null,diagnosis:null,safetyClearance:null
   });
 }
+
+
+// A provisional caption may only seed an editable, user-initiated lookup.
+// It never changes risk precedence, identification or materialization status.
+export function buildVisionLookupDraft(vision,input={}){
+  if(vision?.status!=='unverified-local-caption'||vision?.verified!==false)return '';
+  const proposed=clean(vision?.caption,110).replace(/[^\p{L}\p{N}\s,.'-]/gu,' ').trim();
+  if(!proposed)return '';
+  return (buildReferenceQuery(input)+' '+proposed).slice(0,250);
+}
