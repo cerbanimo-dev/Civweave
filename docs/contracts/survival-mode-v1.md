@@ -35,3 +35,10 @@ Run npm run test:survival. Test genuine cold offline PWA boot and source retriev
 Survival Mode follows the Interpretable Context Methodology foundation on the dependent feature branch. The inactive runtime workflow pack describes intake, observe, prioritize, research, verify and handoff stages with typed artifact expectations. The manifest remains runtimeEnabled: false and status: pilot-contract-only. The actual deterministic safety logic remains at the canonical survival-mode.mjs owner; no additional model or guide runtime is activated.
 
 buildFieldPacket produces civweave.survival-field-packet.v1: sanitized user-observation notes, risk priority, explicit unknowns, labeled offline excerpts, and image-status metadata. Image bytes, EXIF and coordinates are excluded. Export requires a direct user action, and the packet is not silently stored or transmitted.
+
+
+## Experimental on-device image captioning
+
+A separate dormant worker at public/app/survival/vision-worker.mjs can load the already-vendored Transformers.js v4 runtime and the optional Xenova/vit-gpt2-image-captioning ONNX model. The user must click Prepare local vision model before any optional model download. The worker requires WebGPU; no network inference API receives photographs. The browser model cache may be reused offline, but eviction, unavailable GPU, incomplete downloads and browser runtime limits must fail visibly. Captions are short unverified image descriptions, not diagnosis or plant identification; they are never fed to planAssessment and are excluded from the field record. Manual triage and downloaded references remain usable if the worker fails.
+
+The model's Apache-compatible distribution and exact model artifact integrity should be verified and pack-pinned before calling this emergency-ready. No device model benchmarks or cold-airplane-mode acceptance are claimed from this PR.

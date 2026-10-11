@@ -114,3 +114,21 @@ export function buildFieldPacket(input={},referenceRows=[]){
     generatedClaims:{identity:null,edibility:null,diagnosis:null,clearance:null}
   });
 }
+
+
+// A caption is a probabilistic *proposal*, not a verified observation, species,
+// diagnosis or safety claim. The main assessment never consumes it as evidence.
+export function normalizeLocalVisionResult(input={}){
+  const model='Xenova/vit-gpt2-image-captioning';
+  const text=clean(input?.generated_text,400);
+  if(input?.model!==model||input?.remote===true||!text)return Object.freeze({
+    status:'unavailable',caption:'',model:'',verified:false,
+    edibility:null,diagnosis:null,safetyClearance:null
+  });
+  return Object.freeze({
+    status:'unverified-local-caption',
+    caption:text,model,
+    source:'device-local-model-generated',
+    verified:false,edibility:null,diagnosis:null,safetyClearance:null
+  });
+}

@@ -1,4 +1,4 @@
-import {CONCERNS,planAssessment,buildReferenceQuery,normalizeReferenceCards,buildFieldPacket,verificationChecklist} from './survival-mode.mjs';
+import {CONCERNS,planAssessment,buildReferenceQuery,normalizeReferenceCards,buildFieldPacket,verificationChecklist,normalizeLocalVisionResult} from './survival-mode.mjs';
 
 const byId=id=>document.getElementById(id);
 const concernRoot=byId('concerns');
@@ -15,6 +15,7 @@ const searchButton=byId('search-references');
 let objectUrl='';
 let currentAssessment=planAssessment();
 let lastSourceRows=[];
+let visionWorker=null,visionRequest=0,visionPrepared=false,visionInputVersion=0,captionForVersion=-1;
 
 function element(name,text,cls=''){
   const node=document.createElement(name);
@@ -30,6 +31,10 @@ for(const concern of CONCERNS){
   concernRoot.append(label);
 }
 function revokePreview(){
+  visionInputVersion++;
+  captionForVersion=-1;
+  byId('vision-result').replaceChildren();
+  byId('vision-status').textContent='Photo cleared. Earlier model descriptions are no longer associated with this assessment.';
   if(objectUrl)URL.revokeObjectURL(objectUrl);
   objectUrl='';
   photo.value='';
@@ -38,6 +43,10 @@ function revokePreview(){
 }
 byId('clear-photo').addEventListener('click',revokePreview);
 photo.addEventListener('change',()=>{
+  visionInputVersion++;
+  captionForVersion=-1;
+  byId('vision-result').replaceChildren();
+  byId('vision-status').textContent='Photo changed. Describe the new photo only after explicit request.';
   if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl='';}
   const file=photo.files?.[0];
   if(!file){preview.removeAttribute('src');preview.dataset.visible='false';return}
@@ -180,3 +189,93 @@ byId('download-field-record').addEventListener('click',()=>{
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
+
+
+// Vision is a dormant image-captioning executor, not a second guide or a safety
+// owner. Worker starts on explicit button click; it never runs on app bootstrap.
+const visionStatus=byId('vision-status'),visionResult=byId('vision-result');
+const prepareVision=byId('prepare-vision'),analyzePhoto=byId('analyze-photo'),stopVision=byId('stop-vision');
+let visionResolve=null,visionReject=null;
+function closeVision(message){
+  visionRequest++;
+  if(visionWorker){visionWorker.terminate();visionWorker=null;}
+  if(visionReject){visionReject(new Error('The local vision worker was stopped.'));visionReject=null;visionResolve=null;}
+  visionPrepared=false;
+  analyzePhoto.disabled=true;
+  prepareVision.disabled=false;
+  stopVision.disabled=true;
+  if(message)visionStatus.textContent=message;
+}
+function localVisionWorker(){
+  if(visionWorker)return visionWorker;
+  const worker=new Worker('/app/survival/vision-worker.mjs',{type:'module',name:'civweave-survival-caption'});
+  worker.onmessage=event=>{
+    const message=event.data||{};
+    if(message.type==='progress'&&message.id===visionRequest){
+      visionStatus.textContent=String(message.detail||'Preparing device vision…').slice(0,240);
+      return;
+    }
+    if(message.id!==visionRequest)return;
+    if(!visionResolve)return;
+    const resolve=visionResolve,reject=visionReject;
+    visionResolve=null;visionReject=null;
+    if(message.type==='result')resolve(message);
+    else reject(new Error(String(message.error||'The device vision model did not complete.').slice(0,320)));
+  };
+  worker.onerror=event=>{
+    const reject=visionReject;
+    visionResolve=null;visionReject=null;
+    closeVision('Local vision runtime failed. The original assessment remains available.');
+    if(reject)reject(new Error('The on-device vision worker failed to load.'));
+  };
+  visionWorker=worker;stopVision.disabled=false;
+  return worker;
+}
+function sendVision(type,payload={},transfer=[]){
+  if(visionResolve)throw new Error('A local vision action is already running.');
+  const id=++visionRequest,worker=localVisionWorker();
+  return new Promise((resolve,reject)=>{
+    visionResolve=resolve;visionReject=reject;
+    worker.postMessage({id,type,...payload},transfer);
+  });
+}
+prepareVision.addEventListener('click',async()=>{
+  prepareVision.disabled=true;
+  visionStatus.textContent='Initializing optional local vision model. No photo is sent while preparing.';
+  try{
+    const result=await sendVision('prepare',{allowDownload:Boolean(navigator.onLine)});
+    if(!result.ok)throw new Error('Vision preparation was not confirmed.');
+    visionPrepared=true;
+    analyzePhoto.disabled=false;
+    visionStatus.textContent='On-device vision model loaded. Choose Describe photo locally to run it.';
+  }catch(error){
+    closeVision('Vision unavailable: '+String(error?.message||error)+'. Manual assessment remains available.');
+  }finally{prepareVision.disabled=false;}
+});
+stopVision.addEventListener('click',()=>closeVision('Local vision stopped; no image analysis is running.'));
+analyzePhoto.addEventListener('click',async()=>{
+  const file=photo.files?.[0];
+  if(!visionPrepared||!file){visionStatus.textContent='Prepare vision and choose an image first.';return;}
+  if(!file.type.startsWith('image/')||file.size>12*1024*1024){
+    visionStatus.textContent='Choose a supported photo smaller than 12 MB.';return;
+  }
+  const inputVersion=visionInputVersion;
+  analyzePhoto.disabled=true;
+  visionResult.replaceChildren();
+  visionStatus.textContent='Describing the selected photo locally. Safety assessment will not change.';
+  try{
+    const bytes=await file.arrayBuffer();
+    if(inputVersion!==visionInputVersion){visionStatus.textContent='Photo changed during preparation; no caption was accepted.';return;}
+    const answer=await sendVision('caption',{image:bytes,mime:file.type},[bytes]);
+    if(inputVersion!==visionInputVersion){visionStatus.textContent='Photo changed during inference; the stale caption was discarded.';return;}
+    const output=normalizeLocalVisionResult({generated_text:answer.caption,model:answer.model,remote:false});
+    if(output.status!=='unverified-local-caption')throw new Error('The model did not return an accepted local description.');
+    captionForVersion=inputVersion;
+    const text=element('p','Unverified visual suggestion: '+output.caption);
+    visionResult.append(text,element('p','Do not infer species, edibility, injury status, electricity status, water purity or structural safety from this text.','muted small'));
+    visionStatus.textContent='Local caption completed. This does not verify an object or any safety condition.';
+  }catch(error){
+    visionStatus.textContent='Photo description unavailable: '+String(error?.message||error)+'. Continue using manual observations and downloaded sources.';
+  }finally{analyzePhoto.disabled=!visionPrepared;}
+});
+addEventListener('pagehide',()=>closeVision(),{once:true});

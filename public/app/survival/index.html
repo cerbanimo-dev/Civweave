@@ -35,6 +35,14 @@ button,.button{font:inherit;font-weight:750;border:1px solid #7cbd9b;border-radi
 <p class="muted small">The photo stays in this page's temporary preview and is not uploaded, stored, interpreted, or sent to an AI service.</p>
 <img id="preview" alt="Selected local photograph preview">
 <div class="actions"><button type="submit">Prioritize my next step</button><button type="button" id="clear-photo" class="secondary">Remove photo</button></div>
+<div class="panel" style="margin-bottom:0">
+<h2>Optional on-device image description</h2>
+<p class="muted">After downloading a separate vision model while connected, request a short suggested description. Image processing happens on this device. The description is not a species ID, diagnosis or safety assessment, and it never overrides the emergency priority above.</p>
+<p class="muted small">Experimental browser model. Requires WebGPU and available device memory. Initial setup downloads model weights (hundreds of MB); downloaded files remain subject to browser cache eviction. For offline use, prepare and test before an emergency.</p>
+<div class="actions"><button id="prepare-vision" type="button" class="secondary">Prepare local vision model</button><button id="analyze-photo" type="button" disabled>Describe photo locally</button><button id="stop-vision" type="button" class="secondary" disabled>Stop vision</button></div>
+<p id="vision-status" role="status" aria-live="polite" class="muted">Vision not loaded. Your photo has not been analyzed.</p>
+<div id="vision-result" aria-live="polite"></div>
+</div>
 </form>
 <section id="priority" class="panel" aria-live="polite" hidden>
 <h2>2. Safety priority</h2><div id="priority-content"></div><div class="actions"><button id="download-field-record" type="button" class="secondary">Export field record (JSON)</button></div><p class="muted small">Manual export includes reported needs, notes and source excerpts, but not the photo or location. Review before sharing.</p>

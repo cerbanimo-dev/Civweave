@@ -76,7 +76,9 @@
     "/app/knowledge-library-browser-v1.css",
     "/app/knowledge-library-browser-v1.mjs",
     "/app/survival/app.mjs",
-    "/app/survival/survival-mode.mjs"
+    "/app/survival/survival-mode.mjs",
+    "/app/survival/vision-worker.mjs",
+    "/app/survival/vision-policy.mjs"
   ],
   "lazyPacks": [
     {
