@@ -20,7 +20,7 @@ test('compiled design stage exactly matches approved local source, with correct 
 test('generated stage instructions inherit canonical boundaries and exclude untrusted research text',()=>{
   assert.match(compiled.constraints.join('\n'),/lower-trust evidence/);
   assert.match(compiled.constraints.join('\n'),/Do not invent SOURCE_IDs/);
-  assert.match(compiled.constraints.join('\n'),/cannot approve, persist, or award/);
+  assert.match(compiled.constraints.join('\n'),/does not imply user approval/);
   assert.doesNotMatch(compiled.instructions,/https?:\/\/|apiKey|tokenSecret|provider\s*:/i);
   assert.ok(compiled.instructions.length<2400);
 });
