@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {planAssessment,normalizeReferenceCards,buildReferenceQuery,buildFieldPacket,verificationChecklist,normalizeLocalVisionResult} from '../public/app/survival/survival-mode.mjs';
+import {planAssessment,normalizeReferenceCards,buildReferenceQuery,buildFieldPacket,verificationChecklist,normalizeLocalVisionResult,buildVisionLookupDraft} from '../public/app/survival/survival-mode.mjs';
 
 test('unassessed conditions are unknown, never declared safe',()=>{
   const assessment=planAssessment();
@@ -164,4 +164,14 @@ test('vision is opt-in: worker and assets are bundled but no runtime starts on l
   assert.match(worker,/offline|cached/i);
   assert.ok(pack.assets.includes('/app/survival/vision-worker.mjs'));
   assert.ok(pack.assets.includes('/app/survival/vision-policy.mjs'));
+});
+
+
+test('provisional visual descriptions may draft a reference lookup but never modify priority',()=>{
+  const provisional=normalizeLocalVisionResult({generated_text:'a broken sink pipe with dripping water',model:'Xenova/vit-gpt2-image-captioning'});
+  const lookup=buildVisionLookupDraft(provisional,{concerns:['pipe']});
+  assert.match(lookup,/plumb|pipe/i);
+  assert.match(lookup,/broken sink pipe/i);
+  assert.equal(planAssessment({concerns:['pipe'],visionResult:provisional}).priority,'caution');
+  assert.equal(buildVisionLookupDraft({status:'unavailable',caption:'dangerous plant'},{}),'');
 });
