@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Ensure compiled Moss stage instructions match source CONTEXT.md
+        run: node scripts/build-moss-context-pack-v1.mjs --check
       - name: Validate developer and runtime context contracts
         run: node scripts/ai-context.mjs --check
       - name: Verify traversal protection, authority, and handoffs
