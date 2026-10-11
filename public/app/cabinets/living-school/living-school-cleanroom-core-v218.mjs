@@ -89,6 +89,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
       'Return readable Markdown/plain text, not JSON.'
     ]
   };
+  const stageContextReceipt={schema:stagePacket.schema,workflow:stagePacket.workflow,stage:stagePacket.stage,source:stagePacket.source,nextStage:stagePacket.nextStage};
   const request={
     purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',
     config:{...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)},
@@ -101,12 +102,12 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
   try{
     const result=await runtime.generate(request),route=actualRoute(result,request.config),text=resultText(result);
     if(result?.status!=='success'||!text){
-      return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-failed',sourcePacket,error:clean(result?.error?.message||result?.error||`The research/design model ended with ${result?.status||'an error'}.`,1200)};
+      return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),stageContext:stageContextReceipt,source:'strong-design-failed',sourcePacket,error:clean(result?.error?.message||result?.error||`The research/design model ended with ${result?.status||'an error'}.`,1200)};
     }
-    return{status:'complete',content:clean(text,32000),provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-pass',error:'',sourcePacket:''};
+    return{status:'complete',content:clean(text,32000),provider:route.provider,model:route.model,generatedAt:now(),stageContext:stageContextReceipt,source:'strong-design-pass',error:'',sourcePacket:''};
   }catch(error){
     const route=actualRoute(null,request.config);
-    return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-failed',sourcePacket,error:clean(error?.message||error,1200)};
+    return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),stageContext:stageContextReceipt,source:'strong-design-failed',sourcePacket,error:clean(error?.message||error,1200)};
   }
 }
 

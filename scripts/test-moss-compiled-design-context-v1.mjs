@@ -30,6 +30,8 @@ test('Moss loads only the packaged compiled stage after approval, without taking
   assert.match(compact,/await import\('\.\.\/\.\.\/ai-workflows\/compiled\/moss-design-context-v1\.mjs'\)/);
   assert.match(compact,/source:'offline-stage-context-unavailable'/);
   assert.match(compact,/stagePacket\.instructions/);
+  assert.match(compact,/stageContext:stageContextReceipt/);
+  assert.match(compact,/source:'strong-design-pass'/);
   assert.match(compact,/await runtime\.generate\(request\)/);
   assert.doesNotMatch(compact,/localStorage|setItem|fetch\(/);
   const worker=read('public/service-worker.js');

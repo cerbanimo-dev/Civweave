@@ -26,7 +26,7 @@ jobs:
       - name: Verify traversal protection, authority, and handoffs
         run: node --test scripts/test-ai-context-resolver.mjs
       - name: Check changed Moss bridge syntax
-        run: node --check public/app/unified-chat-system-v1.js && node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+        run: node --check public/app/unified-chat-system-v1.js && node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs && node --check public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs
       - name: Verify compiled offline Moss context and package boundary
         run: node --test scripts/test-moss-compiled-design-context-v1.mjs
       - name: Verify Moss staged generation receipts and queue recovery
