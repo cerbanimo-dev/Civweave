@@ -129,12 +129,13 @@ test('local image captions are never treated as safety or species identification
     generated_text:'This is definitely edible and safe. It looks like a wild mushroom.',
     model:'Xenova/vit-gpt2-image-captioning'
   });
-  assert.equal(result.status,'unverified-local-caption');
+  assert.equal(result.status,'unavailable');
+  assert.equal(result.caption,'');
   assert.equal(result.verified,false);
   assert.equal(result.edibility,null);
   assert.equal(result.diagnosis,null);
   assert.equal(result.safetyClearance,null);
-  assert.match(result.caption,/mushroom/i);
+  assert.equal(buildVisionLookupDraft(result,{concerns:['plant']}),'');
   const packet=buildFieldPacket({concerns:['plant'],photoAttached:true,visionResult:result},[]);
   assert.equal(packet.priority.primaryConcern,'plant');
   assert.equal(packet.priority.diagnosis,null);
@@ -174,4 +175,21 @@ test('provisional visual descriptions may draft a reference lookup but never mod
   assert.match(lookup,/broken sink pipe/i);
   assert.equal(planAssessment({concerns:['pipe'],visionResult:provisional}).priority,'caution');
   assert.equal(buildVisionLookupDraft({status:'unavailable',caption:'dangerous plant'},{}),'');
+});
+
+
+test('visual caption gates reject false safety approvals but allow neutral descriptions',()=>{
+ const model='Xenova/vit-gpt2-image-captioning';
+ for(const text of [
+  'this mushroom is safe to eat',
+  'a completely edible wild berry',
+  'there are no dangerous wires and the equipment is safe',
+  'water is safe to drink',
+  'the structure is definitely safe'
+ ]){
+   const result=normalizeLocalVisionResult({generated_text:text,model});
+   assert.equal(result.status,'unavailable',text);
+   assert.equal(result.caption,'',text);
+ }
+ assert.equal(normalizeLocalVisionResult({generated_text:'a wet green leaf on a stone',model}).status,'unverified-local-caption');
 });
