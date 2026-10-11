@@ -41,12 +41,15 @@ export function renderedPacket(){
   return '// Generated from '+sourcePath+'; edit the source CONTEXT.md instead.\n'
     +'export const MOSS_DESIGN_STAGE_CONTEXT_V1=Object.freeze('+JSON.stringify(sourcePacket(),null,2)+');\n';
 }
-if(process.argv.includes('--check')){
-  if(read(targetPath)!==renderedPacket())throw new Error('Compiled Moss context is stale: run node scripts/build-moss-context-pack-v1.mjs --write');
-  console.log('Verified compiled Moss design stage is identical to its source instructions.');
-}else if(process.argv.includes('--write')){
-  writeFileSync(resolve(root,targetPath),renderedPacket());
-  console.log('Updated '+targetPath);
-}else{
-  throw new Error('Specify --check or --write. This compiler has no implicit write mode.');
+// The compiler is also imported by Node regression tests; only a direct CLI invocation writes or checks.
+if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+  if(process.argv.includes('--check')){
+    if(read(targetPath)!==renderedPacket())throw new Error('Compiled Moss context is stale: run node scripts/build-moss-context-pack-v1.mjs --write');
+    console.log('Verified compiled Moss design stage is identical to its source instructions.');
+  }else if(process.argv.includes('--write')){
+    writeFileSync(resolve(root,targetPath),renderedPacket());
+    console.log('Updated '+targetPath);
+  }else{
+    throw new Error('Specify --check or --write. This compiler has no implicit write mode.');
+  }
 }
