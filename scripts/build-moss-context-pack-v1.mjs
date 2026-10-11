@@ -16,7 +16,7 @@ function section(markdown,heading){
 export function sourcePacket(){
   const manifest=JSON.parse(read(manifestPath)),workflow=manifest.workflows?.find(row=>row.id==='learning-journey'),stage=workflow?.stages?.find(row=>row.id==='design');
   if(manifest.schema!=='civweave.ai-workflow-pack.v1'||manifest.runtimeEnabled!==false||workflow?.owner!=='living-school'||stage?.context!==sourcePath||stage?.executor!=='ai'||stage?.produces?.join(',')!=='learning-design.md,assessment-plan.json')throw new Error('Moss design workflow contract changed; review the compiler.');
-  const markdown=read(sourcePath).replace(/\\r\\n/g,'\\n');
+  const markdown=read(sourcePath).replace(/\r\n/g,'\n');
   if(!markdown.includes('Next stage: compile'))throw new Error('Incorrect Moss stage handoff.');
   return{
     schema:'civweave.ai-stage-context.v1',
@@ -34,12 +34,12 @@ export function sourcePacket(){
       'Do not invent SOURCE_IDs, citations, URLs, source access, or evidence.',
       'Return readable Markdown; do not return the final module JSON.'
     ],
-    instructions:'## Procedure\\n'+section(markdown,'Procedure')+'\\n\\n## Acceptance\\n'+section(markdown,'Acceptance')
+    instructions:'## Procedure\n'+section(markdown,'Procedure')+'\n\n## Acceptance\n'+section(markdown,'Acceptance')
   };
 }
 export function renderedPacket(){
-  return '// Generated from '+sourcePath+'; edit the source CONTEXT.md instead.\\n'
-    +'export const MOSS_DESIGN_STAGE_CONTEXT_V1=Object.freeze('+JSON.stringify(sourcePacket(),null,2)+');\\n';
+  return '// Generated from '+sourcePath+'; edit the source CONTEXT.md instead.\n'
+    +'export const MOSS_DESIGN_STAGE_CONTEXT_V1=Object.freeze('+JSON.stringify(sourcePacket(),null,2)+');\n';
 }
 if(process.argv.includes('--check')){
   if(read(targetPath)!==renderedPacket())throw new Error('Compiled Moss context is stale: run node scripts/build-moss-context-pack-v1.mjs --write');

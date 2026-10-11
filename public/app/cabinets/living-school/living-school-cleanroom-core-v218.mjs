@@ -71,7 +71,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
     // Lazy on generation: never load a model or context pack merely by opening chat/Settings.
     const module=await import('../../ai-workflows/compiled/moss-design-context-v1.mjs');
     stagePacket=module.MOSS_DESIGN_STAGE_CONTEXT_V1;
-    if(stagePacket?.schema!=='civweave.ai-stage-context.v1'||stagePacket?.workflow!=='learning-journey'||stagePacket?.stage!=='design'||stagePacket?.owner!=='living-school'||!stagePacket?.instructions?.includes('## Acceptance')||stagePacket.instructions.length>2400)throw new Error('Moss design context did not satisfy the approved stage contract.');
+    if(stagePacket?.schema!=='civweave.ai-stage-context.v1'||stagePacket?.workflow!=='learning-journey'||stagePacket?.stage!=='design'||stagePacket?.owner!=='living-school'||stagePacket?.executor!=='ai'||stagePacket?.nextStage!=='compile'||!Array.isArray(stagePacket?.constraints)||stagePacket.constraints.length!==5||!stagePacket?.instructions?.includes('## Acceptance')||stagePacket.instructions.length>2400)throw new Error('Moss design context did not satisfy the approved stage contract.');
   }catch(error){
     const route=actualRoute(null,config);
     return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),source:'offline-stage-context-unavailable',sourcePacket,error:'The installed Moss design instructions are unavailable or invalid: '+clean(error?.message||error,900)};
@@ -94,7 +94,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
     config:{...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)},
     context,
     messages:[
-      {role:'system',content:'You are Moss performing the research synthesis and instructional design pass for Living School. Produce a substantive human-readable teaching and curriculum design packet. Do not serialize the final application schema and do not return JSON.'+ '\\n\\nApproved local stage contract (built from CONTEXT.md):\\n'+stagePacket.instructions+'\\n\\nPriority rules:\\n'+stagePacket.constraints.join('\\n')},
+      {role:'system',content:'You are Moss performing the research synthesis and instructional design pass for Living School. Produce a substantive human-readable teaching and curriculum design packet. Do not serialize the final application schema and do not return JSON.'+ '\n\nApproved local stage contract (built from CONTEXT.md):\n'+stagePacket.instructions+'\n\nPriority rules:\n'+stagePacket.constraints.join('\n')},
       {role:'user',content:`Build the research-backed design packet for “${data.capability}”. Organize it as modules 1 through ${count}. The next pass is a local compiler, so make the educational content, source mapping, exercises, assessment intent, and video topic for each module explicit.`}
     ]
   };
