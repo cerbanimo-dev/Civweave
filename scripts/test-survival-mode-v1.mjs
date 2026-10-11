@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {planAssessment,normalizeReferenceCards,buildReferenceQuery,buildFieldPacket,verificationChecklist} from '../public/app/survival/survival-mode.mjs';
+import {planAssessment,normalizeReferenceCards,buildReferenceQuery,buildFieldPacket,verificationChecklist,normalizeLocalVisionResult} from '../public/app/survival/survival-mode.mjs';
 
 test('unassessed conditions are unknown, never declared safe',()=>{
   const assessment=planAssessment();
@@ -121,4 +121,46 @@ test('exported field evidence preserves the saved source tier and availability',
   assert.equal(record.references[0].tier,'expanded/deep');
   assert.equal(record.references[0].availability,'offline-excerpt');
   assert.equal(record.references[0].verifiedIdentification,false);
+});
+
+
+test('local image captions are never treated as safety or species identification',()=>{
+  const result=normalizeLocalVisionResult({
+    generated_text:'This is definitely edible and safe. It looks like a wild mushroom.',
+    model:'Xenova/vit-gpt2-image-captioning'
+  });
+  assert.equal(result.status,'unverified-local-caption');
+  assert.equal(result.verified,false);
+  assert.equal(result.edibility,null);
+  assert.equal(result.diagnosis,null);
+  assert.equal(result.safetyClearance,null);
+  assert.match(result.caption,/mushroom/i);
+  const packet=buildFieldPacket({concerns:['plant'],photoAttached:true,visionResult:result},[]);
+  assert.equal(packet.priority.primaryConcern,'plant');
+  assert.equal(packet.priority.diagnosis,null);
+  assert.deepEqual(packet.observations.aiInferred,[]);
+  assert.doesNotMatch(JSON.stringify(packet),/definitely edible/i);
+});
+test('captions must have exact local provenance and a nonempty result',()=>{
+  assert.equal(normalizeLocalVisionResult({generated_text:'a pipe',model:'unknown'}).status,'unavailable');
+  assert.equal(normalizeLocalVisionResult({generated_text:'',model:'Xenova/vit-gpt2-image-captioning'}).status,'unavailable');
+  assert.equal(normalizeLocalVisionResult({generated_text:'a pipe',model:'Xenova/vit-gpt2-image-captioning',remote:true}).status,'unavailable');
+});
+test('vision is opt-in: worker and assets are bundled but no runtime starts on load',async()=>{
+  const read=async path=>readFile(new URL('../'+path,import.meta.url),'utf8');
+  const page=await read('public/app/survival/index.html');
+  const ui=await read('public/app/survival/app.mjs');
+  const worker=await read('public/app/survival/vision-worker.mjs');
+  const pack=JSON.parse(await read('public/app/offline-package-v208.json'));
+  assert.match(page,/id="prepare-vision"/);
+  assert.match(page,/id="analyze-photo"/);
+  assert.match(ui,/vision-worker\.mjs/);
+  assert.match(ui,/addEventListener\('click'/);
+  assert.doesNotMatch(ui,/DOMContentLoaded.*analyz|void analyzePhoto\(\)/s);
+  assert.match(worker,/allowRemoteModels/);
+  assert.match(worker,/wasmBinary/);
+  assert.match(worker,/vit-gpt2-image-captioning/);
+  assert.match(worker,/offline|cached/i);
+  assert.ok(pack.assets.includes('/app/survival/vision-worker.mjs'));
+  assert.ok(pack.assets.includes('/app/survival/vision-policy.mjs'));
 });
