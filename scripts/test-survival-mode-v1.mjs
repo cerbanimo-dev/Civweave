@@ -159,7 +159,8 @@ test('vision is opt-in: worker and assets are bundled but no runtime starts on l
   assert.doesNotMatch(ui,/DOMContentLoaded.*analyz|void analyzePhoto\(\)/s);
   assert.match(worker,/allowRemoteModels/);
   assert.match(worker,/wasmBinary/);
-  assert.match(worker,/vit-gpt2-image-captioning/);
+  const policy=await read('public/app/survival/vision-policy.mjs');
+  assert.match(policy,/vit-gpt2-image-captioning/);
   assert.match(worker,/offline|cached/i);
   assert.ok(pack.assets.includes('/app/survival/vision-worker.mjs'));
   assert.ok(pack.assets.includes('/app/survival/vision-policy.mjs'));
