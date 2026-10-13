@@ -296,3 +296,7 @@ Update this file in the same change when any of the following moves materially:
 - verification commands that agents are expected to run.
 
 Do not turn this file into a historical changelog. Keep it describing the current repository. Git history records what the map used to say.
+
+## Survival Mode capability
+
+The canonical cross-realm survival-assessment owner is public/app/survival/survival-mode.mjs, presented at public/app/survival/index.html with temporary camera preview and source browsing in public/app/survival/app.mjs. The existing persistent-shell-actions-v1.js supplies its launcher, and offline-package-v208.json and optional service-worker assets seed the offline page. This is not a sixth realm or chat system. See docs/contracts/survival-mode-v1.md.
