@@ -60,7 +60,8 @@
     "release:materialize": "node scripts/materialize-canonical-release.mjs",
     "check:canonical-release": "node scripts/verify-canonical-launch-release.mjs",
     "test:open-learning-media": "node scripts/test-open-learning-media-runtime-v1.mjs && python scripts/test-open-learning-media-harvest-v1.py",
-    "test:local-host-capacity": "node scripts/test-local-host-capacity-v1.mjs"
+    "test:local-host-capacity": "node scripts/test-local-host-capacity-v1.mjs",
+    "test:survival": "node --test scripts/test-survival-mode-v1.mjs"
   },
   "overrides": {
     "sharp": "0.35.3"
