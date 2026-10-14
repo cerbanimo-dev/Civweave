@@ -5,6 +5,8 @@ import test from 'node:test';
 
 const html=fs.readFileSync(new URL('../public/app/persistent-system-shell-v1.html',import.meta.url),'utf8');
 const runtime=fs.readFileSync(new URL('../public/app/persistent-system-shell-v1.js',import.meta.url),'utf8');
+const worker=fs.readFileSync(new URL('../public/service-worker-v203.js',import.meta.url),'utf8');
+assert.match(worker,/cerbanimo-first-frame-v1/, 'Registered installed worker bytes must advance when the boot-critical HTML and integrity manifest change.');
 const launch=html.match(/<script id="cw-persistent-first-frame-rescue-v1">([\s\S]*?)<\/script>/)?.[1];
 assert.ok(launch,'Independent shell first-frame launch must be included inline in the HTML.');
 
