@@ -104,7 +104,7 @@ async function createEngine(modelId){
   let value,mtpEnabled=true;
   try{value=await instantiateEngine(mod,profile,true)}catch(mtpError){mtpEnabled=false;emit('civweave:litert-gemma4-mtp-fallback',{model:profile.id,message:String(mtpError?.message||mtpError),reason:'engine-create-with-submodel-failed'});value=await instantiateEngine(mod,profile,false)}
   engine=value;engineModelId=profile.id;engineUsesMtp=mtpEnabled;
-  emit('civweave:litert-gemma4-progress',{phase:'model-ready',model:profile.id,backend:'webgpu-gpu-artisan',loadMs:Math.round(now()-started),maxNumTokens:profile.contextTokens,webBindingSettings:'official-v0.14-gpu-artisan',oneEngineAtATime:true,mtpEnabled,jspi:true});
+  emit('civweave:litert-gemma4-progress',{phase:'model-ready',model:profile.id,backend:'webgpu-gpu-artisan',loadMs:Math.round(now()-started),maxNumTokens:profile.contextTokens,webBindingSettings:'official-v0.17.1-gpu-artisan',oneEngineAtATime:true,mtpEnabled,jspi:true});
   return value;
 }
 async function ensureEngine(modelId){
