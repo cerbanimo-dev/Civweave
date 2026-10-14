@@ -91,7 +91,8 @@ function fail(message){
   retry.addEventListener('click',()=>location.reload());
   const standalone=document.createElement('a');standalone.href=target.href;standalone.textContent='Open system content directly';standalone.style.cssText='display:inline-flex;padding:9px 12px;border:1px solid #9edcff;border-radius:9px;color:#9edcff';
   const diagnostic=document.createElement('small');diagnostic.style.cssText='display:block;margin-top:8px;opacity:.8;overflow-wrap:anywhere';
-  diagnostic.textContent='System: '+system+' · Frame: '+host?.contentWindow?.location?.pathname?.slice(0,160);
+  let framePath='unavailable';try{framePath=host?.contentWindow?.location?.pathname?.slice(0,160)||'unavailable'}catch{}
+  diagnostic.textContent='System: '+system+' · Frame: '+framePath;
   actions.append(retry,standalone);error.append(title,detail,actions,diagnostic);
   error.dataset.open='1';document.documentElement.dataset.cwFirstFrame='failed';
   return true;
