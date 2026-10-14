@@ -10,12 +10,12 @@ assert.match(worker,/cerbanimo-first-frame-v1/, 'Registered installed worker byt
 const launch=html.match(/<script id="cw-persistent-first-frame-rescue-v1">([\s\S]*?)<\/script>/)?.[1];
 assert.ok(launch,'Independent shell first-frame launch must be included inline in the HTML.');
 
-function harness({system='cerbanimo',valid=true,redirect=false}={}){
+function harness({system='cerbanimo',valid=true,redirect=false,actualSystem=system}={}){
   const handlers={},timers=[],children=[],nodes={};
   const element=(type='div')=>({type,style:{},dataset:{},hidden:false,children:[],textContent:'',append(...items){this.children.push(...items)},replaceChildren(...items){this.children=[...items]},addEventListener(type,fn){(this.handlers||= {})[type]=fn}});
   const frame=element('iframe'),loading=element(),error=element();
   loading.hidden=false;error.dataset.open='0';
-  frame.contentDocument=valid?{body:{},contentType:'text/html',readyState:'complete'}:{body:{},contentType:'text/plain',readyState:'complete'};
+  frame.contentDocument={body:{},documentElement:{dataset:{civweaveSystem:actualSystem}},contentType:valid?'text/html':'text/plain',readyState:'complete'};
   frame.contentWindow={location:{href:'about:blank',pathname:'about:blank'}};
   Object.defineProperty(frame,'src',{get(){return frame._src},set(value){frame._src=value;frame.contentWindow.location.href=redirect?'https://evil.test/elsewhere':value;frame.contentWindow.location.pathname=new URL(frame.contentWindow.location.href).pathname;}});
   const context={URL,URLSearchParams,
@@ -48,7 +48,7 @@ test('healthy embedded HTML hides startup overlay without shared runtime',()=>{
 });
 
 test('non-HTML and redirected responses expose recovery, never false success',()=>{
-  for(const options of [{valid:false},{redirect:true}]){
+  for(const options of [{valid:false},{redirect:true},{actualSystem:'fellowfare'}]){
     const h=harness(options);h.frame.handlers.load();
     assert.equal(h.loading.hidden,true);
     assert.equal(h.error.dataset.open,'1');
@@ -75,6 +75,7 @@ test('persistent runtime adopts preloaded frame and validates its content type',
   assert.match(runtime,/host\?\.dataset\.cwBootstrapHref===target\.href/);
   assert.match(runtime,/watchChildInteractive\(\{token,expectedHref:target\.href\}\)/);
   assert.match(runtime,/doc\.contentType==='text\/html'/);
+  assert.match(runtime,/doc\.documentElement\.dataset\.civweaveSystem===current/);
   assert.match(runtime,/if\(!childReadyEnough\(host,expectedHref\)\)return/);
   assert.match(runtime,/CivweaveShellRescueV1\?\.fail/);
   assert.match(runtime,/host\.src=target\.href/);
