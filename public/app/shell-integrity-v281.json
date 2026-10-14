@@ -25,6 +25,7 @@
     "/app/system-routes-v227.js": "e8cdc02d003630086bb0e065f6c15537feffc527a5f0bf8724e3587330e59541",
     "/app/themed-system-nav-v178.js": "4edb28392bf7e96f43c17ff553b2dcb074f59e3c574fed8eac9261c889af190f",
     "/app/persistent-shell-actions-v1.js": "65face4e246114120f7f40e3a688f03a5edc60a073fc39552530fd3681fbfbeb",
+    "/app/generation-lifecycle-v2.js": "8a8d87fa25f4c8311b189794ca9fa828b9cb13b7465f1a0db87b9319ab4acbb9",
     "/app/subsystem-avatar-state-v347.js": "39f515693167ecd793891ee700325ae43978393ed0c9be885c3358739138dfda",
     "/Civweave-weaveling-sprites.png": "172b050bee09e79874d0c0059a194a1bec80148ab6bb4cb150f3d7e8c3ff8906",
     "/Living-School-moss-sprites.png": "097d5cc5afd6803da076696cc3b349aee9cfe4723c13cc4b37a5a8d46444a356",
@@ -49,7 +50,6 @@
     "/app/human-chat-standalone-v2.js": "5f459c80dc7e749bab20de1ea64a1cc8dc218e9972c378bbc7bb28cef88b6657",
     "/app/installer-state-machine-v281.js": "f8a4998eec473e48e043331d15b3d4384c50da5f9a4da7322e083c7c75cfe1f0",
     "/app/installer-storage-guard-v281.js": "72e9f7f2522079a6862f8f3ca871ae8e01adb634b7ba034c736d0a0306da4e08",
-    "/app/offline-campus-status-v210.js": "d26e21ed39631f45e085004661853a3ebe2ce4f18be3f26c71beae88f500461c",
-    "/app/generation-lifecycle-v2.js": "8a8d87fa25f4c8311b189794ca9fa828b9cb13b7465f1a0db87b9319ab4acbb9"
+    "/app/offline-campus-status-v210.js": "d26e21ed39631f45e085004661853a3ebe2ce4f18be3f26c71beae88f500461c"
   }
 }
