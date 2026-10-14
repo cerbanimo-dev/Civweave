@@ -71,10 +71,11 @@ assert(/data-build="persistent-system-shell-v1-r\d+[^\"]*"/.test(shell),'Persist
 assert(shell.includes('/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding'),'Persistent shell must load the bounded generation lifecycle runtime.');
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent stage must explicitly fill the dynamic viewport above the universal navbar.');
 assert(!/#cw-persistent-system-stage\{[^}]*height:auto/.test(shell),'Persistent stage must never regress to intrinsic iframe height:auto.');
-assert(shell.includes('persistent-system-shell-v1-r28-paint-first-shell-boot'),'Persistent shell must carry the paint-first bootstrap generation.');
+assert(shell.includes('persistent-system-shell-v1-r30-independent-first-frame-rescue'),'Persistent shell must carry the independently executable first-frame recovery generation.');
+assert(shell.includes('cw-persistent-first-frame-rescue-v1'),'Shell must launch the selected system without awaiting external JavaScript.');
 for(const tag of [
   '<script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner" defer></script>',
-  '<script src="/app/persistent-system-shell-v1.js?v=1.1.2-canonical-local-settings-refresh" defer></script>',
+  '<script src="/app/persistent-system-shell-v1.js?v=1.1.4-independent-first-frame-rescue" defer></script>',
   '<script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail" defer></script>',
   '<script src="/app/persistent-shell-actions-v1.js?v=1.0.7-direct-routes-persistent-guild-map-nav" defer></script>',
   '<script src="/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding" defer></script>'
