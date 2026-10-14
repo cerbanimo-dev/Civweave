@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.5.0-litert-phone-runtime-v1-qwen35-flagships';
+const VERSION='1.5.1-litert-phone-runtime-v1-artisan-config-compat';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -58,7 +58,25 @@ async function loadModule(){
   }).catch(error=>{modulePromise=null;throw error});
   return modulePromise;
 }
-function artisanConfig(useSubmodel=true){return{num_output_candidates:1,wait_for_weight_uploads:true,num_decode_steps_per_sync:1,sequence_batch_size:0,supported_lora_ranks:[],max_top_k:64,enable_decode_logits:false,enable_external_embeddings:false,use_submodel:Boolean(useSubmodel)}}
+function artisanConfig(useSubmodel=true){
+  // LiteRT-LM 0.17.1 passes the complete GPU_ARTISAN struct to WebAssembly.
+  // Omitted Boolean fields cause "Missing field" errors before model initialization.
+  return {
+    num_output_candidates:1,
+    wait_for_weight_uploads:true,
+    num_decode_steps_per_sync:1,
+    sequence_batch_size:0,
+    supported_lora_ranks:[],
+    max_top_k:64,
+    enable_decode_logits:false,
+    enable_external_embeddings:false,
+    use_submodel:Boolean(useSubmodel),
+    prefer_texture_weights:!(/Mac/i.test(globalThis.navigator?.platform||'')),
+    set_enable_host_mapped_pointer:true,
+    disallow_8bit_convs:true,
+    use_autosized_ringbuffers:false
+  };
+}
 async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
   if(generationActive&&!afterGeneration&&reason!=='switch-model'){pendingUnloadReason=reason;return false}
   if(engineReleasePromise)return engineReleasePromise;
@@ -164,6 +182,11 @@ async function runFast(args={},forcedModelId=''){
     const metrics={runtime:'litert-lm-web-0.17.1',backend:'webgpu-gpu-artisan',model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
     lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
+  }catch(error){
+    // Propagate the actual executing model, not the model selected for chat.
+    if(error&&typeof error==='object')try{error.executionModel=profile.id}catch{}
+    emit('civweave:litert-gemma4-failed',{model:profile.id,code:error?.code||'LOCAL_LITERT_EXECUTION_FAILED',message:clean(error?.message||error,500)});
+    throw error;
   }finally{
     try{
       if(chat)try{await chat.delete()}catch{}
