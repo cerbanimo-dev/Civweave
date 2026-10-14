@@ -79,7 +79,7 @@ function watchChildInteractive({token=loadToken,expectedHref='' }={}){
     scheduleChildChrome('frame-interactive',{token,expectedHref});scheduleBacklights();
   },80);
 }
-function showError(message){if(globalThis.CivweaveShellRescueV1?.fail?.(message))return;hideLoading();const node=errorBox();if(node){node.textContent=String(message||'System did not finish loading.');node.dataset.open='1'}}
+function showError(message){clearInterval(readyPollTimer);readyPollTimer=0;if(globalThis.CivweaveShellRescueV1?.fail?.(message))return;hideLoading();const node=errorBox();if(node){node.textContent=String(message||'System did not finish loading.');node.dataset.open='1'}}
 
 function installBacklightStyle(){
   if(document.getElementById(UPDATE_STYLE_ID))return;
