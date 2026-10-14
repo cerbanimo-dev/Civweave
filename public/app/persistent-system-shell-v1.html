@@ -77,7 +77,7 @@ function validDocument(){
   try{
     const doc=host.contentDocument,href=host.contentWindow.location.href,actual=new URL(href,location.href);
     const path=url=>url.pathname.replace(/\.html$/,'');
-    return Boolean(doc?.body&&doc.contentType==='text/html'&&actual.origin===target.origin&&path(actual)===path(target)
+    return Boolean(doc?.body&&doc.contentType==='text/html'&&doc.documentElement?.dataset.civweaveSystem===system&&actual.origin===target.origin&&path(actual)===path(target)
       &&actual.searchParams.get('embed')==='1'&&actual.searchParams.get('persistentShell')==='1');
   }catch{return false}
 }
