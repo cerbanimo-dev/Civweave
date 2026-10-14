@@ -214,7 +214,7 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
     saveLearningPlan(plan);
     return learningPlanResponse(plan);
   }catch(error){
-    return packet(`Moss could not generate the high-level Learning Journey plan with the selected AI: ${clean(error?.message||error,1200)} No learning content was generated or queued.`,'Retry the plan or choose another AI model.',{provider:requestedProvider||'learning-plan-model-error',model:clean(config.model,240)});
+    return packet(`Moss could not generate the high-level Learning Journey plan with the selected AI: ${clean(error?.message||error,1200)} No learning content was generated or queued.`,'Retry the plan or choose another AI model.',{provider:requestedProvider||'learning-plan-model-error',model:clean(error?.executionModel||config.model,240)});
   }
 }
 async function runLivingSchoolCurriculum(options={}){
