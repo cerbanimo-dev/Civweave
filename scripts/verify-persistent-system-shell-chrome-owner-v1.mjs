@@ -23,6 +23,6 @@ assert.ok(shell.includes("SETTINGS_LOCAL_ROUTE_VERSION='1.1.3-settings-local-rou
 for(const id of ['cw-human-message-launcher-v1','cwp215-launcher','cw-persistent-guide-chat-v215'])assert.ok(shell.includes(id),`Child chrome suppression is missing ${id}.`);
 assert.ok(shell.includes('chromeObserver.observe(doc.documentElement,{childList:true,subtree:true})'),'Child realm launchers must remain suppressed after asynchronous iframe boot.');
 assert.ok(page.includes('/app/persistent-system-shell-v1.js?v=1.1.4-independent-first-frame-rescue'),'Persistent shell HTML must cache-bust the current chrome/settings owner revision.');
-assert.ok(page.includes('child launchers are suppressed by the shell owner'),'Persistent shell ownership comment must match runtime behavior.');
+assert.ok(page.includes('cw-persistent-first-frame-rescue-v1'),'Persistent shell must provide an independent first-frame recovery path even if its chrome owner fails to load.');
 
 console.log(JSON.stringify({ok:true,revision:'persistent-shell-chrome-owner-v1',updateSignal:'platform-backlight-v2',sharedQuickFeatures:['settings','chat'],childChatLauncherPolicy:'parent-only',localSettings:'canonical-v325-exact-version'},null,2));
