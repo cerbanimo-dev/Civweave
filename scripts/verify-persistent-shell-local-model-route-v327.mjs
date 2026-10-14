@@ -26,7 +26,7 @@ const coreWorker = fs.readFileSync(coreWorkerPath, 'utf8');
 const settingsWorker = fs.readFileSync(settingsWorkerPath, 'utf8');
 const settingsEntrypoint = fs.readFileSync(settingsEntrypointPath, 'utf8');
 const expectedVersion = '1.1.3-settings-local-route-v326-canonical-inert-hard-local';
-const expectedShellVersion = '1.1.2-canonical-local-settings-refresh';
+const expectedShellVersion = '1.1.4-independent-first-frame-rescue';
 const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.0-stage-full-route-v337';
 const parentFullRoute = '/app/settings-local-route-v331.js?cwAction=1&amp;v=1.1.8-persistent-shell-full-route-v343';
 const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.0-stage-full-route';

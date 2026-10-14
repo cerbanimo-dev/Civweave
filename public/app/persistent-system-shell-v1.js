@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.3-interactive-frame-ready';
+const VERSION='1.1.4-independent-first-frame-rescue';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -64,7 +64,7 @@ function childReadyEnough(host=frame(),expectedHref=''){
   if(!host||!frameMatchesExpected(host,expectedHref))return false;
   try{
     const doc=host.contentDocument;
-    return Boolean(doc?.documentElement&&(doc.readyState==='interactive'||doc.readyState==='complete'));
+    return Boolean(doc?.documentElement&&doc?.body&&doc.contentType==='text/html'&&doc.documentElement.dataset.civweaveSystem===current&&(doc.readyState==='interactive'||doc.readyState==='complete'));
   }catch{return false}
 }
 function watchChildInteractive({token=loadToken,expectedHref='' }={}){
@@ -79,7 +79,7 @@ function watchChildInteractive({token=loadToken,expectedHref='' }={}){
     scheduleChildChrome('frame-interactive',{token,expectedHref});scheduleBacklights();
   },80);
 }
-function showError(message){hideLoading();const node=errorBox();if(node){node.textContent=String(message||'System did not finish loading.');node.dataset.open='1'}}
+function showError(message){clearInterval(readyPollTimer);readyPollTimer=0;if(globalThis.CivweaveShellRescueV1?.fail?.(message))return;hideLoading();const node=errorBox();if(node){node.textContent=String(message||'System did not finish loading.');node.dataset.open='1'}}
 
 function installBacklightStyle(){
   if(document.getElementById(UPDATE_STYLE_ID))return;
@@ -248,9 +248,18 @@ function boot(){
   const host=frame();host?.addEventListener('load',()=>{
     const token=Number(host.dataset.cwLoadToken||0),expectedHref=String(host.dataset.cwExpectedHref||'');
     if(token!==loadToken||!frameMatchesExpected(host,expectedHref))return;
+    if(!childReadyEnough(host,expectedHref))return;
     clearTimeout(loadTimer);hideLoading();const node=errorBox();if(node)node.dataset.open='0';scheduleChildChrome('frame-load',{token,expectedHref});scheduleBacklights();
   });
-  const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'shell-boot'});
+  const query=new URLSearchParams(location.search),system=cleanSystem(query.get('system')),feature=query.get('feature')||'';
+  const target=contentUrl(system,{feature});
+  if(host?.dataset.cwBootstrapHref===target.href){
+    // Adopt the independent first-frame load rather than reloading a healthy realm.
+    mark(system);const token=++loadToken;
+    host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;
+    loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
+    watchChildInteractive({token,expectedHref:target.href});scheduleChildChrome('preloaded-frame',{token,expectedHref:target.href});scheduleBacklights();
+  }else navigate(system,{feature,replace:true,source:'shell-boot'});
   addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'history'});});
   scheduleBacklights();
 }

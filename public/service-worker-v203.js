@@ -1,4 +1,5 @@
 // GENERATED: one persistent five-system shell + shared canonical rail + Guild/Map actions + direct realm content inside the shell.
+// cerbanimo-first-frame-v1: bump canonical registered worker bytes so installed clients reverify corrected shell-integrity metadata and fetch independently bootable parent/realm content.
 // persistent-system-shell-v1: the universal navbar is top-level and survives system changes; only the content stage changes.
 // persistent-stage-viewport-r1: the iframe stage has explicit dynamic viewport height so intrinsic iframe sizing cannot expose the parent shell as a dark card.
 // canonical-home-v1: top-level home navigation enters the persistent shell; embedded home remains the validated v440 campus.

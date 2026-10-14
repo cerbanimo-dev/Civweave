@@ -1,0 +1,30 @@
+name: Verify persistent system first-frame recovery
+on:
+  pull_request:
+    paths:
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/persistent-system-shell-v1.js'
+      - 'scripts/test-persistent-shell-first-frame-rescue-v1.mjs'
+      - '.github/workflows/verify-persistent-first-frame-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/persistent-system-shell-v1.js'
+      - 'scripts/test-persistent-shell-first-frame-rescue-v1.mjs'
+      - '.github/workflows/verify-persistent-first-frame-v1.yml'
+jobs:
+  first-frame:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and first-frame recovery
+        run: |
+          node --check public/app/persistent-system-shell-v1.js
+          node --check scripts/test-persistent-shell-first-frame-rescue-v1.mjs
+          node --test scripts/test-persistent-shell-first-frame-rescue-v1.mjs
+          node scripts/verify-cerbanimo-universal-nav-stability-v1.mjs

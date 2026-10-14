@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r29-interactive-frame-ready" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r30-independent-first-frame-rescue" data-civweave-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -23,7 +23,7 @@ body{padding:0!important}
 <!-- External runtimes are deliberately deferred. The iframe, loading surface, and error surface below must be parsed before any network-loaded script can delay startup. -->
 <!-- Shell-critical code comes first so Settings/AI/chat can never gate navigation or the canonical rail. -->
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner" defer></script>
-<script src="/app/persistent-system-shell-v1.js?v=1.1.3-interactive-frame-ready" defer></script>
+<script src="/app/persistent-system-shell-v1.js?v=1.1.4-independent-first-frame-rescue" defer></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail" defer></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.7-direct-routes-persistent-guild-map-nav" defer></script>
 <script src="/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding" defer></script>
@@ -53,5 +53,65 @@ body{padding:0!important}
 <iframe id="cw-persistent-system-stage" title="Civweave system" src="about:blank" allow="clipboard-read; clipboard-write; geolocation; microphone"></iframe>
 <div id="cw-persistent-system-loading">OPENING SYSTEM…</div>
 <div id="cw-persistent-system-error" role="alert"></div>
+<script id="cw-persistent-first-frame-rescue-v1">
+/* Independent first-frame boot: works even if the shared navigation JS or optional AI/settings assets fail to load. */
+(()=>{
+'use strict';
+const routes={
+  civweave:['/app/working-campus-v440.html',{}],
+  'living-school':['/app/cabinets/living-school/index.html',{cabinet:'1'}],
+  cerbanimo:['/app/realm-console-v140.html',{system:'cerbanimo',cabinet:'1'}],
+  fellowfare:['/app/fellowfare-cabinet-v144.html',{cabinet:'1'}],
+  anarchadia:['/app/anarchadia-console-v139.html',{cabinet:'1'}]
+};
+const query=new URLSearchParams(location.search),requested=String(query.get('system')||'civweave').toLowerCase();
+const system=Object.prototype.hasOwnProperty.call(routes,requested)?requested:'civweave';
+const [pathname,params]=routes[system],target=new URL(pathname,location.origin);
+for(const [key,value] of Object.entries(params))target.searchParams.set(key,value);
+target.searchParams.set('installed','1');target.searchParams.set('embed','1');target.searchParams.set('persistentShell','1');
+if(query.get('feature'))target.searchParams.set('feature',query.get('feature'));
+const host=document.getElementById('cw-persistent-system-stage');
+const loading=document.getElementById('cw-persistent-system-loading');
+const error=document.getElementById('cw-persistent-system-error');
+function validDocument(){
+  try{
+    const doc=host.contentDocument,href=host.contentWindow.location.href,actual=new URL(href,location.href);
+    const path=url=>url.pathname.replace(/\.html$/,'');
+    return Boolean(doc?.body&&doc.contentType==='text/html'&&doc.documentElement?.dataset.civweaveSystem===system&&actual.origin===target.origin&&path(actual)===path(target)
+      &&actual.searchParams.get('embed')==='1'&&actual.searchParams.get('persistentShell')==='1');
+  }catch{return false}
+}
+function fail(message){
+  if(!loading||!error)return false;
+  loading.hidden=true;error.replaceChildren();
+  const title=document.createElement('strong');title.textContent='System launch failed';
+  const detail=document.createElement('p');detail.textContent=String(message||'The system could not be opened.');detail.style.margin='8px 0';
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+  const retry=document.createElement('button');retry.type='button';retry.textContent='Retry system';retry.style.cssText='padding:9px 12px;border-radius:9px;cursor:pointer';
+  retry.addEventListener('click',()=>location.reload());
+  const standalone=document.createElement('a');standalone.href=target.href;standalone.textContent='Open system content directly';standalone.style.cssText='display:inline-flex;padding:9px 12px;border:1px solid #9edcff;border-radius:9px;color:#9edcff';
+  const diagnostic=document.createElement('small');diagnostic.style.cssText='display:block;margin-top:8px;opacity:.8;overflow-wrap:anywhere';
+  let framePath='unavailable';try{framePath=host?.contentWindow?.location?.pathname?.slice(0,160)||'unavailable'}catch{}
+  diagnostic.textContent='System: '+system+' · Frame: '+framePath;
+  actions.append(retry,standalone);error.append(title,detail,actions,diagnostic);
+  error.dataset.open='1';document.documentElement.dataset.cwFirstFrame='failed';
+  return true;
+}
+globalThis.CivweaveShellRescueV1=Object.freeze({version:'1',fail,target:target.href,validDocument});
+host.dataset.cwBootstrapHref=target.href;
+host.src=target.href;
+document.documentElement.dataset.cwFirstFrame='requested';
+host.addEventListener('load',()=>{
+  if(globalThis.CivweavePersistentSystemShellV1?.current?.())return;
+  if(validDocument()){loading.hidden=true;error.dataset.open='0';document.documentElement.dataset.cwFirstFrame='embedded-ready'}
+  else fail('The embedded system returned an invalid document or redirected away from the requested system.');
+});
+setTimeout(()=>{
+  if(loading.hidden||error.dataset.open==='1')return;
+  if(validDocument()){loading.hidden=true;document.documentElement.dataset.cwFirstFrame='embedded-ready';return}
+  fail('The system did not respond within 8 seconds. The shared boot runtime or cached system assets may be unavailable.');
+},8000);
+})();
+</script>
 </body>
 </html>
