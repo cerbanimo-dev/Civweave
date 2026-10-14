@@ -64,7 +64,7 @@ function childReadyEnough(host=frame(),expectedHref=''){
   if(!host||!frameMatchesExpected(host,expectedHref))return false;
   try{
     const doc=host.contentDocument;
-    return Boolean(doc?.documentElement&&doc?.body&&doc.contentType==='text/html'&&(doc.readyState==='interactive'||doc.readyState==='complete'));
+    return Boolean(doc?.documentElement&&doc?.body&&doc.contentType==='text/html'&&doc.documentElement.dataset.civweaveSystem===current&&(doc.readyState==='interactive'||doc.readyState==='complete'));
   }catch{return false}
 }
 function watchChildInteractive({token=loadToken,expectedHref='' }={}){
