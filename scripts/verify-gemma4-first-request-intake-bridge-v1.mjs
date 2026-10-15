@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-first-request-intake-bridge-v1.js','utf8');
-assert.match(source,/1\.1\.0-gemma4-first-request-intake-bridge-v1-e4b-only/);
+assert.match(source,/1\.1\.1-gemma4-first-request-intake-bridge-v1-live-e4b/);
 assert.match(source,/livingSchoolLearningIntake:true/);
 const order=[];
 let priorCalls=0;
@@ -26,7 +26,7 @@ const context={
 };
 context.globalThis=context;
 context.CivweaveGemma4WeaveDraftPipelineV1={
-  version:'1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only',
+  version:'1.2.1-gemma4-weave-draft-pipeline-v1-raw-stream',
   install(){order.push('pipeline-install');const prior=context.CivweaveModelRuntime.generate;const generate=async request=>prior(request);generate.__civweaveWeaveDraftPipelineV1=this.version;generate.__prior=prior;context.CivweaveModelRuntime.generate=generate;return true},
   installRuntime(){return this.install()}
 };
