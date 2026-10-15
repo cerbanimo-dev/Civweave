@@ -1,15 +1,15 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-guide-generation-tracker-v1-boot-stage-telemetry';
+const VERSION='1.1.0-guide-generation-tracker-v1-configured-model-telemetry';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
-  {id:'intake',label:'E4B Intake',short:'Intake'},
-  {id:'draft',label:'E4B Plan Draft',short:'Draft'},
-  {id:'compile',label:'E4B JSON Compile',short:'Compile'},
+  {id:'intake',label:'Model intake',short:'Intake'},
+  {id:'draft',label:'Plan Draft',short:'Draft'},
+  {id:'compile',label:'Model JSON Compile',short:'Compile'},
   {id:'validate',label:'Validate',short:'Check'},
-  {id:'repair',label:'E4B Repair',short:'Repair'},
+  {id:'repair',label:'Plan Repair',short:'Repair'},
   {id:'saved',label:'Saved',short:'Saved'}
 ]);
 const TERMINAL=new Set(['complete','failed','stopped']);
@@ -56,7 +56,7 @@ function terminalLabel(){const name=artifactName();if(state.terminal==='failed')
 function panelHtml(){
   const rail=STAGES.map(stage=>{const item=state.stages[stage.id]||{state:'waiting'};return`<div class="cw-weave-node" data-stage="${stage.id}" data-state="${esc(item.state)}" title="${esc(item.label||stage.label)}${item.model?` · ${esc(item.model)}`:''}"><i class="cw-weave-dot"></i><span>${esc(stage.short)}</span></div>`}).join('');
   const counts=`<div class="cw-weave-counts"><span class="cw-weave-chip">Resources ${state.counts.resources}</span><span class="cw-weave-chip">Specialists ${state.counts.specialists}</span><span class="cw-weave-chip">Decision gates ${state.counts.gates}</span></div>`;
-  const sections=[['intake','E4B intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
+  const sections=[['intake','Model intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
   const detail=state.errorDetail?`<pre class="cw-weave-error">${esc(state.errorDetail)}</pre>`:'';
   const model=state.executionModel?` · Executing ${state.executionModel}`:'';const runtime=state.runtimePhase?` · ${state.runtimePhase}`:'';
   return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live ${esc(artifactName())}</strong><span>${esc(terminalLabel())}${esc(model)}${esc(runtime)}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="${state.expanded?'true':'false'}">${state.expanded?'Hide live process':'Show live process'}</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details ${state.expanded?'':'hidden'}>${detail}${sections}</div>`
@@ -64,22 +64,22 @@ function panelHtml(){
 function existingPanel(){const article=activeArticle(),host=article?.children?.[1]||article;return host?.querySelector?.(':scope > .cw-weave-tracker')||null}
 function ensurePanel(){installStyle();if(!state.showPipeline){existingPanel()?.remove?.();return null}const article=activeArticle();if(!article)return null;const host=article.children?.[1]||article;let panel=host.querySelector?.(':scope > .cw-weave-tracker');if(!panel){panel=document.createElement('div');panel.className='cw-weave-tracker';panel.dataset.pipelineId=state.pipelineId||state.requestId;host.append(panel)}panel.innerHTML=panelHtml();return panel}
 function refreshStream(phase){if(!state.showPipeline)return;const panel=ensurePanel();if(!panel)return;const section=panel.querySelector(`[data-stream="${phase}"]`);if(!section)return;section.hidden=false;const pre=section.querySelector('pre');if(pre){pre.textContent=state.streams[phase]||'Waiting…';try{pre.scrollTop=pre.scrollHeight}catch{}}}
-function setRuntimeStage(detail={}){const stage=detail.stage||bus()?.stageId?.(detail.label)||'draft',status=detail.state==='start'?'running':detail.state;if(!state.showPipeline){state.showPipeline=true;state.pendingObserved=true}if(stage==='draft'&&state.stages.intake.state==='queued')stageState('intake','complete');stageState(stage,status||'running',detail.label||STAGES.find(row=>row.id===stage)?.label,detail.model||'');if(status==='complete'&&stage==='intake'&&state.stages.draft.state==='waiting')stageState('draft','queued','Waiting for E4B draft');if(status==='failed'){state.terminal='failed'}if(status==='stopped'){state.terminal='stopped'}ensurePanel()}
+function setRuntimeStage(detail={}){const stage=detail.stage||bus()?.stageId?.(detail.label)||'draft',status=detail.state==='start'?'running':detail.state;if(!state.showPipeline){state.showPipeline=true;state.pendingObserved=true}if(stage==='draft'&&state.stages.intake.state==='queued')stageState('intake','complete');stageState(stage,status||'running',detail.label||STAGES.find(row=>row.id===stage)?.label,detail.model||'');if(status==='complete'&&stage==='intake'&&state.stages.draft.state==='waiting')stageState('draft','queued','Waiting for draft');if(status==='failed'){state.terminal='failed'}if(status==='stopped'){state.terminal='stopped'}ensurePanel()}
 function applyIntake(detail={}){
   state.showPipeline=true;state.pendingObserved=true;updateArtifacts(detail);
-  const model=detail.model||'gemma4-e4b-it-litert-web',phase=detail.phase;
-  if(phase==='classifying'||phase==='gathering')stageState('intake','running','E4B Intake',model);
+  const model=detail.model||'gemma4-local-it-litert-web',phase=detail.phase;
+  if(phase==='classifying'||phase==='gathering')stageState('intake','running','Model intake',model);
   if(phase==='streaming'){
-    stageState('intake','streaming','E4B Intake',model);
+    stageState('intake','streaming','Model intake',model);
     if(detail.token)state.streams.intake=clean(state.streams.intake+detail.token,50000);
   }
   if(phase==='complete'&&typeof detail.outputText==='string'){
     state.streams.intake=clean(detail.outputText,50000);
-    stageState('intake','complete','E4B Intake',model);
+    stageState('intake','complete','Model intake',model);
   }
-  if(['handoff','ready','answered'].includes(phase))stageState('intake','complete','E4B Intake',model);
+  if(['handoff','ready','answered'].includes(phase))stageState('intake','complete','Model intake',model);
   if(phase==='failed'){
-    state.terminal='failed';stageState('intake','failed','E4B Intake failed',model);
+    state.terminal='failed';stageState('intake','failed','Model intake failed',model);
     if(typeof detail.outputText==='string')state.streams.intake=clean(detail.outputText,50000);
     state.errorDetail=[detail.code,detail.error,detail.rawDiagnostics?JSON.stringify(detail.rawDiagnostics):''].filter(Boolean).join(' · ');
   }
@@ -88,17 +88,17 @@ function applyIntake(detail={}){
 }
 function applyPipeline(detail={}){
   state.showPipeline=true;state.pendingObserved=true;updateArtifacts(detail);if(detail.pipelineId)state.pipelineId=detail.pipelineId;
-  const phase=detail.phase,status=detail.state||'running',model=detail.model||'gemma4-e4b-it-litert-web';
-  if(phase==='pipeline'&&status==='start'){if(['queued','running'].includes(state.stages.intake.state))stageState('intake','complete');stageState('draft','queued','Waiting for E4B draft',model);ensurePanel();return}
+  const phase=detail.phase,status=detail.state||'running',model=detail.model||'gemma4-local-it-litert-web';
+  if(phase==='pipeline'&&status==='start'){if(['queued','running'].includes(state.stages.intake.state))stageState('intake','complete');stageState('draft','queued','Waiting for draft',model);ensurePanel();return}
   if(['draft','compile','repair'].includes(phase)){
-    stageState(phase,status==='streaming'?'streaming':status,phase==='draft'?'E4B Plan Draft':detail.label,model);
+    stageState(phase,status==='streaming'?'streaming':status,phase==='draft'?'Plan Draft':detail.label,model);
     if(detail.token)state.streams[phase]=clean(state.streams[phase]+detail.token,50000);
     else if(typeof detail.text==='string')state.streams[phase]=clean(detail.text,50000);
     if(status==='failed'){state.terminal='failed';state.errorDetail=[detail.code,detail.message,detail.rawDiagnostics?JSON.stringify(detail.rawDiagnostics):''].filter(Boolean).join(' · ')}
   }
   if(phase==='validate'){
     stageState('validate',status==='needs-repair'?'complete':status,detail.label||'Validate','deterministic');
-    if(status==='needs-repair')stageState('repair','running','E4B Repair',model);
+    if(status==='needs-repair')stageState('repair','running','Plan Repair',model);
     else if(state.stages.repair.state==='waiting')stageState('repair','skipped','Repair not needed');
     state.counts.resources=Number(detail.resourceCount)||0;state.counts.specialists=Number(detail.specialistCount)||0;state.counts.gates=Number(detail.decisionGateCount)||0;updateArtifacts(detail);
     if(Array.isArray(detail.errors)&&detail.errors.length)state.errorDetail=detail.errors.join(' · ');
@@ -115,13 +115,13 @@ function applyLifecycle(row={}){if(Number(row.at)&&Number(row.at)<state.startedM
     const label=clean(detail.stage,180),stage=/intake/i.test(label)?'intake':/repair/i.test(label)?'repair':/compil|json/i.test(label)?'compile':'draft';
     state.runtimePhase=clean(detail.phase,100).replaceAll('-',' ');
     state.showPipeline=true;state.pendingObserved=true;
-    if(['waiting','queued','running'].includes(state.stages[stage]?.state))stageState(stage,'running',label||'E4B Local Generation',detail.model||'');
+    if(['waiting','queued','running'].includes(state.stages[stage]?.state))stageState(stage,'running',label||'Model Local Generation',detail.model||'');
     ensurePanel();
   }else if(type==='civweave:litert-gemma4-failed'){
     state.runtimePhase='failed: '+clean(detail.code||'local engine error',110);
     state.errorDetail=[detail.message,detail.rawDiagnostics?JSON.stringify(detail.rawDiagnostics):''].filter(Boolean).join(' · ');
     ensurePanel();
-  }else if(type==='civweave:weaveling-intake-progress')applyIntake(detail);else if(type==='civweave:weave-pipeline')applyPipeline(detail);else if(type==='runtime-stage')setRuntimeStage(detail);else if(type==='runtime-token'){const phase=detail.stage||'draft';if(['draft','compile','repair'].includes(phase)){stageState(phase,'streaming',detail.label,detail.model);if(detail.text){state.streams[phase]=clean(state.streams[phase]+detail.text,50000);refreshStream(phase)}}}else if(type==='civweave:litert-gemma4-progress'&&detail.phase==='generating'){const model=clean(detail.model,120);setRuntimeStage({stage:state.stages.intake.state==='running'?'intake':state.stages.draft.state==='waiting'?'draft':state.activeStage||'draft',state:'running',model,label:state.stages.intake.state==='running'?'E4B Intake':'E4B Generation'})}else if(type==='civweave:generation-stop-requested'||type==='civweave:generation-cancelled'||type==='runtime-stop'){state.terminal='stopped';stageState(state.activeStage||'intake','stopped');ensurePanel()}}
+  }else if(type==='civweave:weaveling-intake-progress')applyIntake(detail);else if(type==='civweave:weave-pipeline')applyPipeline(detail);else if(type==='runtime-stage')setRuntimeStage(detail);else if(type==='runtime-token'){const phase=detail.stage||'draft';if(['draft','compile','repair'].includes(phase)){stageState(phase,'streaming',detail.label,detail.model);if(detail.text){state.streams[phase]=clean(state.streams[phase]+detail.text,50000);refreshStream(phase)}}}else if(type==='civweave:litert-gemma4-progress'&&detail.phase==='generating'){const model=clean(detail.model,120);setRuntimeStage({stage:state.stages.intake.state==='running'?'intake':state.stages.draft.state==='waiting'?'draft':state.activeStage||'draft',state:'running',model,label:state.stages.intake.state==='running'?'Model intake':'Local generation'})}else if(type==='civweave:generation-stop-requested'||type==='civweave:generation-cancelled'||type==='runtime-stop'){state.terminal='stopped';stageState(state.activeStage||'intake','stopped');ensurePanel()}}
 function latestRole(thread,role){const rows=Array.isArray(thread?.messages)?thread.messages:[];for(let i=rows.length-1;i>=0;i-=1)if(rows[i]?.role===role)return rows[i];return null}
 function latestAssistant(thread){return latestRole(thread,'assistant')}
 function fingerprint(row,thread){return`${clean(row?.text,200)}|${clean(row?.provider,80)}|${clean(row?.model,120)}|${clean(thread?.updatedAt,80)}`}
