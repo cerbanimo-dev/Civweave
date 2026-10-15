@@ -24,7 +24,7 @@ const fakeModule={
         assert.equal(config.prefillPrefaceOnInit,true,'Preface must be prefilled before starting first-token timer');
         return{
           async *sendMessageStreaming(input){
-            assert.equal(input.role,'user');
+            assert.equal(typeof input,'string');
             chunks.push(input.content);
             yield{content:[{type:'text',text:'Tarot'}]};
             yield{content:[{type:'text',text:' works'}]};
@@ -52,7 +52,7 @@ sandbox.globalThis=sandbox;
 vm.runInNewContext(source.replace(moduleImport,'Promise.resolve(globalThis.__mockModule)'),sandbox);
 const api=sandbox.CivweaveLiteRTGemma4FastRuntimeV1;
 const progress=[],output=[];
-const first=await api.runFast({systemPrompt:'You are Moss.',messages:[{role:'user',content:'Teach me tarot.'}],maxNewTokens:32,structuredTool:null,onToken:e=>output.push(e.text),onProgress:e=>progress.push(e.phase)},E4B);
+const first=await api.runFast({__civweaveStage:'Local Weave Draft',systemPrompt:'You are Moss.',messages:[{role:'user',content:'Teach me tarot.'}],maxNewTokens:32,structuredTool:null,onToken:e=>output.push(e.text),onProgress:e=>progress.push(e.phase)},E4B);
 assert.equal(first.outputText,'Tarot works');
 assert.equal(first.model.id,E4B);
 assert.equal(attempted[0].backend,undefined,'SDK-managed WebGPU must be first');
@@ -62,6 +62,7 @@ assert.ok(progress.includes('prefilling-preface'));
 assert.ok(progress.includes('awaiting-first-token'));
 assert.ok(progress.includes('first-stream-chunk'));
 assert.equal(api.state().engineMode,'standard');
+assert.equal(configs[0].sessionConfig.samplerParams,undefined);
 await api.unload();
 
 defaultFails=true;
