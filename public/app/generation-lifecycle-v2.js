@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.0-generation-lifecycle-v2-model-neutral-stages';
+const VERSION='1.3.0-generation-lifecycle-v2-standalone-local-probe';
 const HISTORY_KEY='civweave.generation-lifecycle.v1.history';
 const MAX_HISTORY=220;
 const STOP_GRACE_MS=120000;
@@ -130,6 +130,41 @@ function patchRuntime(win=globalThis){
     win.CivweaveLiteRTGemma4FastRuntimeV1=next;patchedWindows.set(win,next);return true;
   }catch{return false}
 }
+async function probeLocalModel({timeoutMs=90000}={}){
+  const target=globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||'';
+  const candidates=windows().map(win=>({win,api:win?.CivweaveLiteRTGemma4FastRuntimeV1})).filter(row=>typeof row.api?.runFast==='function');
+  const picked=candidates.find(row=>row.api?.state?.()?.engineModelId===target)||candidates.find(row=>row.api?.state?.()?.engineReady)||candidates[0];
+  if(!target||!picked){
+    const result={ok:false,model:target,code:'LOCAL_INFERENCE_PROBE_NOT_READY',message:'The configured local runtime is not loaded.'};
+    record('runtime-probe',result,'probe');return result;
+  }
+  if(picked.api?.state?.()?.generationActive){
+    const result={ok:false,model:target,code:'LOCAL_INFERENCE_PROBE_ENGINE_BUSY',message:'The previous inference has not released its GPU session. Restart the local runtime to recover.'};
+    record('runtime-probe',result,'probe');return result;
+  }
+  let timer=null,completed=false,phase='loading-engine',started=now(),firstTokenAt=0,output='';
+  const errorFor=()=>Object.assign(new Error(`The minimal local inference probe did not return a token within its deadline (last phase: ${phase}).`),{code:'LOCAL_INFERENCE_PROBE_TIMEOUT',executionModel:target,runtimePhase:phase});
+  const watchdog=new Promise((_,reject)=>{
+    timer=setTimeout(()=>{if(completed)return;try{picked.api.cancel?.()}catch{};reject(errorFor())},Math.max(20000,Math.min(150000,Number(timeoutMs)||90000)));
+  });
+  try{
+    const generation=picked.api.runFast({
+      __civweaveStage:'Local inference probe',systemPrompt:'Reply with the single word READY. No explanation.',
+      messages:[{role:'user',content:'Reply READY.'}],maxNewTokens:24,structuredTool:null,
+      onProgress:detail=>{phase=clean(detail?.phase||phase,120)},
+      onToken:detail=>{if(!firstTokenAt)firstTokenAt=now();output+=String(detail?.text??'')}
+    },target);
+    const answer=await Promise.race([generation,watchdog]);
+    completed=true;clearTimeout(timer);
+    const text=clean(answer?.outputText||output,200);
+    const result={ok:Boolean(text),model:answer?.model?.id||target,code:text?'OK':'LOCAL_INFERENCE_PROBE_EMPTY',phase,firstTokenMs:firstTokenAt?firstTokenAt-started:null,elapsedMs:now()-started,output:text};
+    record('runtime-probe',result,'probe');return result;
+  }catch(error){
+    completed=true;clearTimeout(timer);
+    const result={ok:false,model:error?.executionModel||target,code:error?.code||'LOCAL_INFERENCE_PROBE_FAILED',phase:error?.runtimePhase||phase,message:clean(error?.message||error,400),elapsedMs:now()-started};
+    record('runtime-probe',result,'probe');return result;
+  }
+}
 function releaseWindow(win){try{const api=win.CivweaveLiteRTGemma4FastRuntimeV1;if(api?.unload)void api.unload()}catch{}}
 function handleStop(){lastStopAt=now();for(const win of windows())releaseWindow(win)}
 function bindWindow(win=globalThis,source='window'){
@@ -160,7 +195,7 @@ function install(){
   }else refreshBindings();
   return true;
 }
-const api=Object.freeze({version:VERSION,install,record,history:()=>history.map(plain),latest,artifactName,inferArtifacts,normalizeArtifacts,mergeArtifacts,artifactKey,stageId,patchRuntime,lastStopAt:()=>lastStopAt});
+const api=Object.freeze({version:VERSION,install,record,history:()=>history.map(plain),latest,artifactName,inferArtifacts,normalizeArtifacts,mergeArtifacts,artifactKey,stageId,patchRuntime,probeLocalModel,lastStopAt:()=>lastStopAt});
 globalThis.CivweaveGenerationLifecycleV1=api;
 globalThis.CivweaveGenerationLifecycleV2=api;
 install();
