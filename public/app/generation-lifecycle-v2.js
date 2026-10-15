@@ -1,14 +1,16 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-generation-lifecycle-v2-event-bounded-frame-binding';
+const VERSION='1.1.1-generation-lifecycle-v2-transport-milestones';
 const HISTORY_KEY='civweave.generation-lifecycle.v1.history';
-const MAX_HISTORY=160;
+const MAX_HISTORY=220;
 const STOP_GRACE_MS=120000;
 const IDLE_WAIT_MS=90000;
 const SOURCE_EVENTS=Object.freeze([
   'civweave:weaveling-intake-progress',
   'civweave:weave-pipeline',
   'civweave:litert-gemma4-progress',
+  'civweave:local-model-stage-progress',
+  'civweave:litert-gemma4-failed',
   'civweave:litert-gemma4-complete',
   'civweave:generation-stop-requested',
   'civweave:generation-cancelled'
