@@ -284,8 +284,13 @@ async function classifyIntake(args={}){
   throwIfCancelled();
   const outputText=clean(result?.outputText||result?.text||streamed,48000);
   const raw=globalThis.CivweaveGemma4WeaveDraftPipelineV1?.parseJsonLoose?.(outputText)||parse(outputText,null);
-  if(!raw||typeof raw!=='object'||Array.isArray(raw)){
-    const error=Object.assign(new Error('Gemma 4 E4B intake returned invalid JSON; the raw response is available in Show failing message.'),{code:'CIVWEAVE_E4B_INTAKE_INVALID',executionModel:INTAKE_MODEL,rejectedText:outputText});
+  const validRouting=raw&&typeof raw==='object'&&!Array.isArray(raw)
+    &&['ordinary','learning','quest'].includes(raw.route)
+    &&typeof raw.ready==='boolean'&&typeof raw.continuation==='boolean'
+    &&typeof raw.objective==='string'&&Array.isArray(raw.facts)
+    &&Array.isArray(raw.missingContext)&&typeof raw.reply==='string';
+  if(!validRouting){
+    const error=Object.assign(new Error('Gemma 4 E4B intake returned invalid JSON or omitted required routing fields; the raw response is available in Show failing message.'),{code:'CIVWEAVE_E4B_INTAKE_INVALID',executionModel:INTAKE_MODEL,rejectedText:outputText});
     emit('civweave:weaveling-intake-progress',{phase:'failed',model:INTAKE_MODEL,outputText,error:error.message,code:error.code,deltaCount});
     throw error;
   }
