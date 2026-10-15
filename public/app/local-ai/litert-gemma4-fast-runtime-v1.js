@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.5.5-litert-phone-runtime-v1-whitespace-preserving-stream';
+const VERSION='1.6.0-litert-runtime-v1-backend-phases';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -174,6 +174,7 @@ async function runFast(args={},forcedModelId=''){
     const status=await fastStatus(profile.id);if(!status?.available)throw Object.assign(new Error(`${profile.label} is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});
     progress('loading-engine');
     const activeEngine=await ensureEngine(profile.id);ensureNotCancelled();
+    progress('engine-ready',{engineModelId,mtpEnabled:engineUsesMtp,contextTokens:profile.contextTokens});
     const requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,rows=normalizedMessages(systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
     const maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024));
     // Disable Gemma 4 thinking in the *free-streaming* stages as well as tool calls.
@@ -187,15 +188,18 @@ async function runFast(args={},forcedModelId=''){
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
     progress('creating-conversation',{prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,prefillPrefaceOnInit:false});
     chat=await activeEngine.createConversation(conversationConfig);activeChat=chat;ensureNotCancelled();
-    progress('generating',{backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
+    progress('conversation-ready',{backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
     if(formattedTool){
+      progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:true});
       const response=await chat.sendMessage(latest);ensureNotCancelled();
       firstTokenAt=now();
       const calls=chunkToolCalls(response);if(calls.length)toolCall=calls.at(-1);
       text=chunkText(response);
     }else{
+      progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:false});
       const stream=chat.sendMessageStreaming(latest);
-      for await(const chunk of stream){ensureNotCancelled();chunkCount++;const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
+      progress('awaiting-first-token',{inputCharacters:latest.content.length,prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0)});
+      for await(const chunk of stream){ensureNotCancelled();chunkCount++;if(chunkCount===1)progress('first-stream-chunk',{containsVisibleText:Boolean(chunkText(chunk))});const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
     }
     ensureNotCancelled();
     const formattedText=formattedTool?toolArgumentText(toolCall):'';
