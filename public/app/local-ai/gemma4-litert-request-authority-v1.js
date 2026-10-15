@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.9-gemma4-litert-request-authority-v1-compact-learning';
+const VERSION='1.2.0-local-litert-request-authority-v1-model-family-routing';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -9,10 +9,10 @@ const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1
 const FAST_RUNTIME_VERSION='1.5.5-litert-phone-runtime-v1-whitespace-preserving-stream';
 const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.5.5-whitespace-preserving-stream';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
-const TRACKER_VERSION='1.0.4-guide-generation-tracker-v1-boot-stage-telemetry';
-const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.4-boot-stage-telemetry';
-const WEAVE_PIPELINE_VERSION='1.2.2-gemma4-weave-draft-pipeline-v1-compact-learning';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.2.2-compact-learning';
+const TRACKER_VERSION='1.1.0-guide-generation-tracker-v1-configured-model-telemetry';
+const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.1.0-configured-model-telemetry';
+const WEAVE_PIPELINE_VERSION='1.3.1-weave-draft-pipeline-v1-task-stage-models';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.1-task-stage-models';
 const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
 const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
 const QWEN_FAST_MODEL='qwen35-4b-litert-web';
@@ -62,11 +62,11 @@ function selected(){
 }
 function selectedFast(){
   const pick=selected();
-  return Boolean(pick?.active&&FAST_IDS.has(clean(pick.id,240)));
+  return Boolean(pick?.active&&(globalThis.CivweaveLocalGenerationModelPolicyV1?.supportsSelected?.()||FAST_IDS.has(clean(pick.id,240))));
 }
 function qwenSelected(){const pick=selected();return Boolean(pick?.active&&QWEN_IDS.has(clean(pick.id,240)))}
-function fastRoleModel(){return qwenSelected()?QWEN_FAST_MODEL:GEMMA_FAST_MODEL}
-function deepRoleModel(){return qwenSelected()?QWEN_DEEP_MODEL:GEMMA_DEEP_MODEL}
+function fastRoleModel(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||(qwenSelected()?QWEN_FAST_MODEL:GEMMA_FAST_MODEL)}
+function deepRoleModel(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||(qwenSelected()?QWEN_DEEP_MODEL:GEMMA_DEEP_MODEL)}
 function emit(type,detail={}){
   try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}
 }
@@ -111,8 +111,8 @@ function installLearningPlanMetadataAdapter(){
   const generateLivingSchoolPlan=async(...args)=>{
     const result=await prior(...args),options=args[0]||{};
     if(options?.__civweaveE4BIntakeCompleted===true){
-      const deep=deepRoleModel();
-      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:deep,structuredGenerationModel:deep,intakeModel:deep,e4bIntakeModel:deep,deepGenerationModel:deep};
+      const deep=result?.executionModel||result?.actual?.model||deepRoleModel();
+      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:deep,structuredGenerationModel:deep,intakeModel:deep,deepGenerationModel:deep};
     }
     return result;
   };
@@ -185,7 +185,7 @@ function ensureTracker(){
 }
 async function ensureWeaveLayers(){
   await ensureTracker();
-  if(!weavePipelineReady())await loadScript(WEAVE_PIPELINE_SRC,weavePipelineReady,'E4B Weave Draft compiler');
+  if(!weavePipelineReady())await loadScript(WEAVE_PIPELINE_SRC,weavePipelineReady,'local planning compiler');
   globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.();
   if(!trackerReady()||!weavePipelineReady())throw Object.assign(new Error('The Weave Draft generation layers did not become ready.'),{code:'LOCAL_GEMMA4_WEAVE_PIPELINE_NOT_READY'});
   return true;
@@ -200,7 +200,7 @@ function installFamilyLoaderWeaveRebind(){
     if(selectedFast()){
       await ensureWeaveLayers();
       const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
-      if(!pipeline?.installRuntime?.())throw Object.assign(new Error('The family AI loader completed but the E4B Weave runtime did not reattach.'),{code:'LOCAL_GEMMA4_WEAVE_POST_LOADER_REBIND_FAILED'});
+      if(!pipeline?.installRuntime?.())throw Object.assign(new Error('The family AI loader completed but the local Weave runtime did not reattach.'),{code:'LOCAL_GEMMA4_WEAVE_POST_LOADER_REBIND_FAILED'});
       emit('civweave:gemma4-weave-post-loader-rebind',{selected:selected()?.id||'',runtimeBound:true});
     }
     return result;
