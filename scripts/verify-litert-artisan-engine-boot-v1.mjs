@@ -26,14 +26,14 @@ const fakeModule={
       // Force the actual MTP fallback; it must preserve the complete config.
       if(config.use_submodel)throw new Error('Test GPU does not support MTP');
       return{
-        createConversation:async()=>({
+        createConversation:async conversationConfig=>{assert.equal(conversationConfig.preface.extra_context.enable_thinking,false,'Gemma 4 E4B streaming must not generate hidden thought-only output');return ({
           sendMessageStreaming:async function*(){
             if(failDuringDecode)throw new Error('Simulated WebGPU decode error');
             yield {content:'{"title":"Tarot Memory System"}'};
           },
           getBenchmarkInfo:async()=>({}),
           delete:async()=>{}
-        }),
+        })},
         delete:async()=>{}
       };
     }
