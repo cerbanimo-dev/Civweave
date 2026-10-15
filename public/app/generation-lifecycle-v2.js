@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.3.0-generation-lifecycle-v2-standalone-local-probe';
+const VERSION='1.3.1-generation-lifecycle-v2-isolated-probe-events';
 const HISTORY_KEY='civweave.generation-lifecycle.v1.history';
 const MAX_HISTORY=220;
 const STOP_GRACE_MS=120000;
@@ -113,15 +113,15 @@ function patchRuntime(win=globalThis){
         if(!idle)throw Object.assign(new Error('The previous local generation is still shutting down after Stop. Retry once shutdown completes.'),{code:'CIVWEAVE_PREVIOUS_GENERATION_STOPPING'});
       }
       const priorToken=args?.onToken;
-      const nextArgs={...args,onToken:token=>{const text=clean(token?.text??token,12000);record('runtime-token',{stage,label,model,text,state:'streaming'},'litert');try{priorToken?.(token)}catch{}}};
-      record('runtime-stage',{stage,label,model,state:'start'},'litert');
+      const nextArgs={...args,onToken:token=>{const text=clean(token?.text??token,12000);if(!args.__civweaveProbe)record('runtime-token',{stage,label,model,text,state:'streaming'},'litert');try{priorToken?.(token)}catch{}}};
+      if(!args.__civweaveProbe)record('runtime-stage',{stage,label,model,state:'start'},'litert');
       try{
         const result=await baseRunFast(nextArgs,forcedModelId);
-        record('runtime-stage',{stage,label,model,state:'complete'},'litert');
+        if(!args.__civweaveProbe)record('runtime-stage',{stage,label,model,state:'complete'},'litert');
         return result;
       }catch(error){
         const stopped=error?.cancelled||error?.code==='CIVWEAVE_GENERATION_STOPPED'||now()-lastStopAt<3000;
-        record('runtime-stage',{stage,label,model,state:stopped?'stopped':'failed',code:error?.code||'',message:clean(error?.message||error,1200)},'litert');
+        if(!args.__civweaveProbe)record('runtime-stage',{stage,label,model,state:stopped?'stopped':'failed',code:error?.code||'',message:clean(error?.message||error,1200)},'litert');
         throw error;
       }
     };
@@ -149,7 +149,7 @@ async function probeLocalModel({timeoutMs=90000}={}){
   });
   try{
     const generation=picked.api.runFast({
-      __civweaveStage:'Local inference probe',systemPrompt:'Reply with the single word READY. No explanation.',
+      __civweaveStage:'Local inference probe',__civweaveProbe:true,systemPrompt:'Reply with the single word READY. No explanation.',
       messages:[{role:'user',content:'Reply READY.'}],maxNewTokens:24,structuredTool:null,
       onProgress:detail=>{phase=clean(detail?.phase||phase,120)},
       onToken:detail=>{if(!firstTokenAt)firstTokenAt=now();output+=String(detail?.text??'')}
