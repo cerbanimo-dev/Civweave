@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.0-guide-generation-tracker-v1-local-probe-ui';
+const VERSION='1.2.1-guide-generation-tracker-v1-cross-frame-probe';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -17,7 +17,17 @@ const clean=(value,max=50000)=>String(value??'').slice(0,max);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const now=()=>Date.now();
 let state=freshState(),finalAnimation=null,lastFinalFingerprint='',bound=false;
-function bus(){return globalThis.CivweaveGenerationLifecycleV1||null}
+function bus(){
+  // Tracker lives in the campus iframe, but v2/probe lives in parent shell.
+  try{
+    const parent=globalThis.parent;
+    if(parent&&parent!==globalThis&&parent.location?.origin===globalThis.location?.origin){
+      const api=parent.CivweaveGenerationLifecycleV2||parent.CivweaveGenerationLifecycleV1;
+      if(typeof api?.probeLocalModel==='function')return api;
+    }
+  }catch{}
+  return globalThis.CivweaveGenerationLifecycleV2||globalThis.CivweaveGenerationLifecycleV1||null;
+}
 function emptyArtifacts(){return{learningPlan:false,endeavour:false,manifest:false,proposal:false}}
 function inferArtifacts(text='',route=''){return bus()?.inferArtifacts?.(text,route)||{...emptyArtifacts(),learningPlan:route==='learning',endeavour:route==='quest'}}
 function mergeArtifacts(base={},extra={}){return bus()?.mergeArtifacts?.(base,extra)||{learningPlan:Boolean(base.learningPlan||extra.learningPlan),endeavour:Boolean(base.endeavour||extra.endeavour),manifest:Boolean(base.manifest||extra.manifest),proposal:Boolean(base.proposal||extra.proposal)}}
