@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.7.0-litert-runtime-v1-standard-backend-no-mtp';
+const VERSION='1.7.1-litert-runtime-v1-sdk-text-stream-and-safe-sampling';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -217,11 +217,17 @@ async function runFast(args={},forcedModelId=''){
     if(profile.family==='gemma4'||formattedTool)prefaceConfig.extra_context={enable_thinking:false};
     if(formattedTool)prefaceConfig.tools=[formattedTool];
     const sampler=profile.sampler||{k:64,p:.95,temperature:1};
-    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)}},preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
+    // Planning stages use the model-packaged sampler. A partial custom sampler
+    // without an explicit type is not necessary for inference and may make
+    // first-turn decode less portable across Android WebGPU implementations.
+    const sdkDefaultSampler=Boolean(args.__civweaveStage||args.__civweaveProbe||args.preferModelDefaultSampling);
+    const sessionConfig={maxOutputTokens};
+    if(!sdkDefaultSampler)sessionConfig.samplerParams={k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)};
+    const conversationConfig={sessionConfig,preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
-    progress('prefilling-preface',{prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:true,engineMode});
+    progress('prefilling-preface',{prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:true,engineMode,sdkDefaultSampler});
     chat=await activeEngine.createConversation(conversationConfig);activeChat=chat;ensureNotCancelled();
-    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
+    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),sdkDefaultSampler});
     if(formattedTool){
       progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:true});
       const response=await chat.sendMessage(latest);ensureNotCancelled();
@@ -230,7 +236,8 @@ async function runFast(args={},forcedModelId=''){
       text=chunkText(response);
     }else{
       progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:false});
-      const stream=chat.sendMessageStreaming(latest);
+      // Text-only streaming follows the documented LiteRT Web SDK call shape.
+      const stream=chat.sendMessageStreaming(latest.content);
       progress('awaiting-first-token',{inputCharacters:latest.content.length,prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),engineMode,mtpEnabled:false});
       for await(const chunk of stream){ensureNotCancelled();chunkCount++;if(chunkCount===1)progress('first-stream-chunk',{containsVisibleText:Boolean(chunkText(chunk))});const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
     }
