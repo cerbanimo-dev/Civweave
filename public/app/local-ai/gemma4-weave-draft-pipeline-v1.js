@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.3-weave-draft-pipeline-v1-context-budget-all';
+const VERSION='1.3.4-weave-draft-pipeline-v1-bounded-repair';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -255,9 +255,21 @@ function compactQuestPayload(schema,draft){
   };
   for(const cap of [1500,1100,800,500]){
     const result={kind:'quest',targetSchema:shape,weaveDraft:cut(cap)};
-    if(JSON.stringify(result).length<=3200)return result;
+    if(JSON.stringify(result).length<=2300)return result;
   }
   return{kind:'quest',targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[],properties:{title:{type:'string'},wish:{type:'string'},outcome:{type:'string'},assumptions:{type:'array'},paths:{type:'array',items:{type:'object',required:['type','realm','title','purpose','steps','completionCriteria','evidence']}}}},weaveDraft:cut(1100)};
+}
+function repairPromptPayload(kind,schema,draft,errors,priorCompile){
+  const max=kind==='learning'?4300:2600;
+  const base=kind==='learning'?compactLearningPayload(schema,draft):compactQuestPayload(schema,draft);
+  const input=typeof priorCompile==='string'?priorCompile:JSON.stringify(priorCompile??{});
+  for(const maxPrior of [1300,850,450,160]){
+    for(const maxDraft of [1100,600,240,0]){
+      const payload={...base,weaveDraft:String(base.weaveDraft||'').slice(0,maxDraft),validationErrors:errors.slice(0,8),priorCompile:input.slice(0,maxPrior)};
+      if(JSON.stringify(payload).length<=max)return payload;
+    }
+  }
+  return{kind,targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[]},validationErrors:errors.slice(0,6),priorCompile:input.slice(0,500),weaveDraft:String(draft||'').slice(0,350)};
 }
 async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,emit:runtimeEmit}={}){
   const kind=kindFor(purpose),pipelineId=uid(),startedAt=now();
@@ -282,7 +294,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
 
     if(errors.length){
       paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. The planning model is repairing those fields…`);
-      const repairPayload=kind==='learning'?{...compactLearningPayload(schema,draft),validationErrors:errors.slice(0,8),priorCompile:compiled||parseJsonLoose(compiledText)||clean(compiledText,1200)}:{...compactQuestPayload(schema,draft),validationErrors:errors.slice(0,10),priorCompile:compiled||parseJsonLoose(compiledText)||clean(compiledText,1800)};
+      const repairPayload=repairPromptPayload(kind,schema,draft,errors,compiled||parseJsonLoose(compiledText)||compiledText);
       const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
       errors=validateCompiled(compiled,schema,kind);
