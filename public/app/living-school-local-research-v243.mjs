@@ -1,8 +1,9 @@
 import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=subject-links-v266';
+import {evaluateResearchSource,filterResearchSources,researchPromptPolicy,INDICATOR_REVISION} from './research-source-policy-v1.mjs';
 
 const RESEARCHER='living-school-cleanroom-research-v218.1';
-const RELEVANCE_REVISION='living-school-subject-coverage-v266';
+const RELEVANCE_REVISION='living-school-subject-coverage-v266+source-provenance-v1';
 const QUERY_STOPWORDS=new Set(['this','that','with','from','into','before','after','their','what','when','where','should','could','would','make','create','write','learn','each','project','projects','lead','leader','foundational','fundamentals','knowledge','strategy','strategies','equip','equipped','objective','capability','beginner','guided']);
 const SEMANTIC_QUERY_GROUPS=[
   {match:/\b(?:urban\s+agricultur\w*|agricultur\w*|farm\w*|crop\w*|garden\w*|horticultur\w*|soil|irrigat\w*|food\s+grow\w*|growing\s+food|planting|vegetable\w*)\b/i,terms:['agriculture','garden','gardening','horticulture','farming','farm','crop','crops','soil','irrigation','plant','plants','vegetable']},
@@ -64,6 +65,7 @@ function sanitizeRows(capability,rows){
   const seen=new Set(),cleaned=[];
   for(const row of Array.isArray(rows)?rows:[]){
     const notes=sanitizePassage(row?.notes,capability),title=core.clean(row?.articleTitle||row?.title,320);if(!notes||!subjectRelevant(title,notes,capability))continue;
+    if(evaluateResearchSource(row).action==='exclude')continue;
     const fingerprint=notes.toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,260);
     if(seen.has(fingerprint))continue;seen.add(fingerprint);
     cleaned.push({...row,notes});
@@ -129,11 +131,12 @@ function liveResearchSchema(){return{type:'object',required:['summary','sources'
 async function researchLive(capability){
   const runtime=await runtimeReady(),config=runtime.readSharedConfig?.('agentic')||null,model=core.clean(config?.model||config?.modelId);
   if(!config||!/antigravity/i.test(model))throw new Error('The agentic profile is not configured for Antigravity live research.');
-  const result=await runtime.generate({purpose:'living-school-live-source-research-v260',executionProfile:'agentic',config,schema:liveResearchSchema(),context:{capability,requirements:['Use Antigravity web and YouTube tools when available.','Return only resources actually opened during this run.','Set liveFetched true only after inspection.','Every returned source must preserve its exact opened URL so curriculum citations can link back to it.','Prefer primary and authoritative sources, plus a counterpoint when contested.','Do not invent URLs, titles, quotations, dates, or access claims.']},messages:[{role:'system',content:'You are the Living School research agent working for Moss. Gather a compact source packet before curriculum generation. Return JSON only. A source that was not actually opened must not appear, and every source must retain the exact URL that was opened.'},{role:'user',content:`Research the sources needed to teach this capability safely and practically: ${capability}`}]});
+  const result=await runtime.generate({purpose:'living-school-live-source-research-v260',executionProfile:'agentic',config,schema:liveResearchSchema(),context:{capability,requirements:['Use Antigravity web and YouTube tools when available.','Return only resources actually opened during this run.','Set liveFetched true only after inspection.','Every returned source must preserve its exact opened URL so curriculum citations can link back to it.','Prefer primary and authoritative sources, plus a counterpoint when contested.','Do not invent URLs, titles, quotations, dates, or access claims.','Exclude published influence-operation source identities; independent reporting about those operations is permitted.']},messages:[{role:'system',content:'You are the Living School research agent working for Moss. Gather a compact source packet before curriculum generation. Return JSON only. A source that was not actually opened must not appear, and every source must retain the exact URL that was opened.\n'+researchPromptPolicy()},{role:'user',content:`Research the sources needed to teach this capability safely and practically: ${capability}`}]});
   if(result?.status!=='success')throw resultError(result,'Live research');
   const output=result.outputJson&&typeof result.outputJson==='object'?result.outputJson:{},sources=(Array.isArray(output.sources)?output.sources:[]).filter(source=>source?.liveFetched===true&&validHttp(source.url)&&core.clean(source.title)).slice(0,12).map(source=>({id:core.uid('source'),title:core.clean(source.title,240),url:core.clean(source.url,2000),quality:normalizeQuality(source.quality),use:normalizeUse(source.use),notes:core.clean(source.notes,3000),sourceType:core.clean(source.sourceType||'web',80),at:core.now(),researchedBy:RESEARCHER,provenance:'antigravity-live',verified:true,liveFetched:true,researchCapability:keyFor(capability),provenanceFlag:'LIVE SOURCE FETCHED'}));
-  if(!sources.length)throw new Error('Antigravity returned no sources it could confirm were opened.');
-  return{mode:'live-agentic',summary:core.clean(output.summary,3000),sources,provider:result.actual?.provider||result.provider||config.provider,model:result.actual?.model||result.model||model,flag:'LIVE SOURCES FETCHED',reason:''};
+  const checked=filterResearchSources(sources);
+  if(!checked.accepted.length)throw new Error('No eligible live sources remain after source identity and opening checks.');
+  return{mode:'live-agentic',summary:core.clean(output.summary,3000),sources:checked.accepted,excludedSources:checked.excluded.map(({source,verdict})=>({url:source.url,indicatorId:verdict.indicatorId,evidence:verdict.evidence})),provider:result.actual?.provider||result.provider||config.provider,model:result.actual?.model||result.model||model,flag:'LIVE SOURCES FETCHED',reason:''};
 }
 
 function localSynthesisSchema(){return{type:'object',required:['summary','sourceBriefs','gaps'],properties:{summary:{type:'string'},sourceBriefs:{type:'array',items:{type:'object',required:['sourceId','use','teachingPoints','cautions'],properties:{sourceId:{type:'string'},use:{type:'string'},teachingPoints:{type:'array',items:{type:'string'}},cautions:{type:'array',items:{type:'string'}}}}},gaps:{type:'array',items:{type:'string'}}}}}
@@ -163,16 +166,19 @@ async function researchTrainingFallback(capability,priorError){
 }
 function unavailablePacket(capability,error){return{mode:'research-unavailable',summary:'No usable research source is available right now. Living School will not start curriculum generation from an empty or status-only packet. Retry research when the provider is available, download a relevant knowledge school, or add a relevant source manually.',sources:[],provider:'none',model:'none',flag:'NO RESEARCH SOURCE AVAILABLE',reason:core.clean(error?.message||error,1400),retryable:true};}
 function manualPacket(s,capability){
-  const sources=(s.sources||[]).filter(source=>source?.researchedBy!==RESEARCHER&&(core.clean(source?.title,240)||core.clean(source?.notes,1200)));
+  const candidates=(s.sources||[]).filter(source=>source?.researchedBy!==RESEARCHER&&(core.clean(source?.title,240)||core.clean(source?.notes,1200)));
+  const sources=filterResearchSources(candidates).accepted;
   if(!sources.length)return null;
   return{mode:'manual-sources',summary:`Using ${sources.length} manually supplied source${sources.length===1?'':'s'} as the current research packet.`,sources,provider:'manual',model:'user-supplied source packet',flag:'MANUALLY SUPPLIED SOURCES',reason:''};
 }
 function applyPacket(s,capability,packet){
-  const key=keyFor(capability),manual=(s.sources||[]).filter(source=>source?.researchedBy!==RESEARCHER),researchSources=packet.sources||[];
-  const generatedResearchSources=packet.mode==='manual-sources'?[]:researchSources;
+  const key=keyFor(capability),manualReview=filterResearchSources((s.sources||[]).filter(source=>source?.researchedBy!==RESEARCHER));
+  const researchReview=filterResearchSources(packet.sources||[]),manual=manualReview.accepted;
+  const generatedResearchSources=packet.mode==='manual-sources'?[]:researchReview.accepted;
+  const excludedSources=[...(packet.excludedSources||[]),...manualReview.excluded.map(({source,verdict})=>({url:source.url||source.canonicalUrl||'',indicatorId:verdict.indicatorId,evidence:verdict.evidence})),...researchReview.excluded.map(({source,verdict})=>({url:source.url||source.canonicalUrl||'',indicatorId:verdict.indicatorId,evidence:verdict.evidence}))];
   s.sources=[...manual,...generatedResearchSources].slice(0,40);
-  s.research={capability:key,mode:packet.mode,summary:packet.summary,flag:packet.flag,provider:packet.provider,model:packet.model,reason:packet.reason||'',sourceCount:packet.mode==='manual-sources'?manual.length:generatedResearchSources.length,relevanceRevision:RELEVANCE_REVISION,completedAt:core.now(),synthesis:packet.synthesis||null,retryable:Boolean(packet.retryable)};
-  return packet.mode==='manual-sources'?{...packet,sources:manual}:packet;
+  s.research={capability:key,mode:packet.mode,summary:packet.summary,flag:packet.flag,provider:packet.provider,model:packet.model,reason:packet.reason||'',sourceCount:packet.mode==='manual-sources'?manual.length:generatedResearchSources.length,relevanceRevision:RELEVANCE_REVISION,policyRevision:INDICATOR_REVISION,excludedSourceCount:excludedSources.length,excludedSources,completedAt:core.now(),synthesis:packet.synthesis||null,retryable:Boolean(packet.retryable)};
+  return {...packet,sources:packet.mode==='manual-sources'?manual:generatedResearchSources,excludedSourceCount:excludedSources.length,excludedSources};
 }
 
 export async function researchCapability(capability,{force=false}={}){
