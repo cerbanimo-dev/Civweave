@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.1-guide-generation-tracker-v1-cross-frame-probe';
+const VERSION='1.2.2-guide-generation-tracker-v1-direct-fallback-probe';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -135,15 +135,73 @@ function applyLifecycle(row={}){if(Number(row.at)&&Number(row.at)<state.startedM
     state.errorDetail=[detail.message,detail.rawDiagnostics?JSON.stringify(detail.rawDiagnostics):''].filter(Boolean).join(' · ');
     ensurePanel();
   }else if(type==='civweave:weaveling-intake-progress')applyIntake(detail);else if(type==='civweave:weave-pipeline')applyPipeline(detail);else if(type==='runtime-stage')setRuntimeStage(detail);else if(type==='runtime-token'){const phase=detail.stage||'draft';if(['draft','compile','repair'].includes(phase)){stageState(phase,'streaming',detail.label,detail.model);if(detail.text){state.streams[phase]=clean(state.streams[phase]+detail.text,50000);refreshStream(phase)}}}else if(type==='civweave:litert-gemma4-progress'&&detail.phase==='generating'){const model=clean(detail.model,120);setRuntimeStage({stage:state.stages.intake.state==='running'?'intake':state.stages.draft.state==='waiting'?'draft':state.activeStage||'draft',state:'running',model,label:state.stages.intake.state==='running'?'Model intake':'Local generation'})}else if(type==='civweave:generation-stop-requested'||type==='civweave:generation-cancelled'||type==='runtime-stop'){state.terminal='stopped';stageState(state.activeStage||'intake','stopped');ensurePanel()}}
+function connectedWindows(){
+  const found=[globalThis];
+  try{
+    const parent=globalThis.parent;
+    if(parent&&parent!==globalThis&&parent.location.origin===globalThis.location.origin){
+      found.unshift(parent);
+      for(const frame of parent.document.querySelectorAll('iframe')){
+        try{
+          const child=frame.contentWindow;
+          if(child&&child.location.origin===globalThis.location.origin&&!found.includes(child))found.push(child);
+        }catch{}
+      }
+    }
+  }catch{}
+  return found;
+}
+async function directLocalProbe({timeoutMs=90000}={}){
+  const windows=connectedWindows();
+  let candidate=null,model='';
+  for(const win of windows){
+    try{
+      const id=win.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep');
+      if(id&&!model)model=id;
+      const runtime=win.CivweaveLiteRTGemma4FastRuntimeV1;
+      if(typeof runtime?.runFast==='function'){
+        const row={win,runtime,id:id||model||''};
+        if(!candidate||runtime.state?.()?.engineReady)candidate=row;
+      }
+    }catch{}
+  }
+  if(!candidate)return{ok:false,model,code:'LOCAL_PROBE_RUNTIME_MISSING',message:'No LiteRT runtime was initialized in the shell or campus. This is a local runtime loading failure.'};
+  const api=candidate.runtime;
+  const chosenModel=model||candidate.id;
+  if(!chosenModel)return{ok:false,code:'LOCAL_PROBE_MODEL_UNSELECTED',message:'The selected planning model cannot be resolved.'};
+  if(api.state?.()?.generationActive)return{ok:false,model:chosenModel,code:'LOCAL_PROBE_ENGINE_BUSY',phase:'busy',message:'An earlier GPU inference is still active. Restart the persistent app runtime.'};
+  const started=Date.now();let phase='checking-model',firstTokenAt=null,output='',settled=false,timer=null;
+  const timeout=new Promise((_,reject)=>{
+    timer=setTimeout(()=>{
+      if(settled)return;
+      try{api.cancel?.()}catch{}
+      reject(Object.assign(new Error('The minimal prompt also produced no response. This isolates the problem to local GPU inference, not Moss.'),{code:'LOCAL_PROBE_FIRST_TOKEN_TIMEOUT',executionModel:chosenModel}));
+    },Math.max(20000,Math.min(150000,timeoutMs)));
+  });
+  try{
+    const result=await Promise.race([api.runFast({
+      __civweaveStage:'Local inference probe',__civweaveProbe:true,
+      systemPrompt:'Respond using exactly one word: READY.',
+      messages:[{role:'user',content:'Say READY.'}],
+      maxNewTokens:32,structuredTool:null,
+      onProgress:event=>{phase=String(event?.phase||phase).slice(0,100)},
+      onToken:token=>{firstTokenAt??=Date.now();output+=String(token?.text||'')}
+    },chosenModel),timeout]);
+    settled=true;clearTimeout(timer);
+    const answer=String(result?.outputText||output).trim();
+    return{ok:Boolean(answer),model:result?.model?.id||chosenModel,code:answer?'OK':'LOCAL_PROBE_EMPTY_RESPONSE',phase,output:answer.slice(0,160),firstTokenMs:firstTokenAt==null?null:firstTokenAt-started,elapsedMs:Date.now()-started};
+  }catch(error){
+    settled=true;clearTimeout(timer);
+    return{ok:false,model:error?.executionModel||chosenModel,code:error?.code||'LOCAL_PROBE_FAILED',phase,message:String(error?.message||error).slice(0,350),elapsedMs:Date.now()-started};
+  }
+}
 async function probeClick(){
   if(state.probeBusy)return;
   const api=bus();
-  if(typeof api?.probeLocalModel!=='function'){
-    state.probeStatus='Local inference probe not loaded. Refresh staging to activate this version.';ensurePanel();return;
-  }
+  const probe=typeof api?.probeLocalModel==='function'?options=>api.probeLocalModel(options):directLocalProbe;
   state.probeBusy=true;state.probeStatus='Running short GPU inference outside the learning pipeline…';ensurePanel();
   try{
-    const result=await api.probeLocalModel({timeoutMs:90000});
+    const result=await probe({timeoutMs:90000});
     state.probeStatus=result.ok
       ?`PASS · ${result.model} · first token ${Math.round(result.firstTokenMs??result.elapsedMs)} ms · answer: ${result.output}`
       :`FAIL · ${result.code} · ${result.phase||''} · ${result.message||'No visible model output.'} ${result.code?.includes('BUSY')?'Restart local runtime before retrying.':''}`;
@@ -161,6 +219,10 @@ function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();add
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-probe]`)){void probeClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-runtime-restart]`)){
     state.probeStatus='Restarting local runtime to release the GPU session…';ensurePanel();
+    try{
+      const parent=globalThis.parent;
+      if(parent&&parent!==globalThis&&parent.location?.origin===globalThis.location?.origin){parent.location.reload();return}
+    }catch{}
     try{globalThis.location?.reload?.()}catch{}
   }
 })}
