@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.1-learning-plan-entry-authority-v1-dynamic-model';
+const VERSION='1.2.2-learning-plan-entry-authority-v1-generic-messages';
 const PURPOSE='living-school-learning-plan-review-v2';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','browser','smollm2','smollm3','qwen']);
@@ -77,7 +77,7 @@ function installUnified(){
     if(!selectedGemma())return prior(options,...rest);
     if(options?.__civweaveE4BIntakeCompleted!==true){
       const intake=bridge();
-      if(typeof intake?.directIntake!=='function')throw Object.assign(new Error('Local Gemma Learning Journey generation reached Moss before the mandatory local intake bridge was ready.'),{code:'CIVWEAVE_LEARNING_E4B_INTAKE_REQUIRED'});
+      if(typeof intake?.directIntake!=='function')throw Object.assign(new Error('Local Learning Journey generation reached Moss before the mandatory local intake bridge was ready.'),{code:'CIVWEAVE_LEARNING_E4B_INTAKE_REQUIRED'});
       emit('intake-required',{sourceSystem:clean(options?.systemId,80)||'living-school',model:modelFor()});
       const routed=await intake.directIntake(normalizedIntakeArgs(options));
       if(routed?.handled)return routed.result;
