@@ -54,7 +54,7 @@ assert.ok(localStorage.getItem('civweave.local-generation-failure.v1'));
 
 const textParts=[
   'actualPlanningModel(result)',
-  "return'gemma4-e4b-it-litert-web'",
+  "role.resolve('deep')",
   'model:actualPlanningModel(result)'
 ];
 for(const part of textParts)assert.ok(chatSource.includes(part),'The chat metadata mapping lost: '+part);
