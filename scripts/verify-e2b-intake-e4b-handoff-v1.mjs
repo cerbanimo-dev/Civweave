@@ -7,6 +7,7 @@ assert.match(source,/INTAKE_MODEL='gemma4-e4b-it-litert-web'/);
 assert.match(source,/DEEP_MODEL='gemma4-e4b-it-litert-web'/);
 assert.doesNotMatch(source,/gemma4-e2b-it-litert-web|E2B|e2b/,'structured authority must not depend on E2B');
 assert.match(source,/intakeFirst:true/);
+assert.doesNotMatch(source,/litert-constrained-tool|TASK_TIMEOUT_MS=600000/,'a silent ten-minute transport must not return');
 
 const storage=new Map(); let learningCalls=0; const modelCalls=[];
 const localStorage={getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value)),removeItem:key=>storage.delete(key)};
@@ -22,10 +23,18 @@ assert.equal(learningCalls,1);
 assert.equal(modelCalls[0].model,'gemma4-e4b-it-litert-web');
 assert.equal(modelCalls[0].tool,'','E4B intake should stream free JSON text rather than a non-streaming structured tool call');
 const schema={type:'object',required:['title'],properties:{title:{type:'string'}}};
+let weaveTransportCalls=0;
+sandbox.CivweaveGemma4WeaveDraftPipelineV1={weaveTransport:async(purpose,args)=>{
+  weaveTransportCalls++;
+  assert.equal(purpose,'living-school-learning-plan-review-v2');
+  assert.equal(args.config.model,'gemma4-e4b-it-litert-web');
+  return{text:'{"title":"Tarot Memory System"}',model:'gemma4-e4b-it-litert-web',streamed:true};
+}};
 const prepared=await api.prepareStructuredRequest({purpose:'living-school-learning-plan-review-v2',config:{provider:'downloaded-local',model:'gemma4-e2b-it-litert-web',maxTokens:900},schema});
 assert.equal(prepared.config.model,'gemma4-e4b-it-litert-web');
 const transported=await prepared.transport({config:prepared.config,messages:[{role:'system',content:'Return the plan.'},{role:'user',content:'Tarot memorization'}],schema,emit:()=>{}});
 assert.equal(transported.model,'gemma4-e4b-it-litert-web');
-assert.equal(modelCalls.at(-1).tool,'emit_learning_journey_plan');
+assert.equal(weaveTransportCalls,1,'the legacy silent E4B tool path must not run');
+assert.equal(modelCalls.length,1,'only E4B streamed intake used the mocked LiteRT directly');
 assert.ok(modelCalls.every(call=>call.model==='gemma4-e4b-it-litert-web'));
 console.log('PASS: selected E2B is bypassed; streaming E4B intake and structured generation use E4B only.');
