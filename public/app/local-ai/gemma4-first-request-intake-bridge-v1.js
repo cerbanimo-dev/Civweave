@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-gemma4-first-request-intake-bridge-v1-e4b-only';
+const VERSION='1.1.1-gemma4-first-request-intake-bridge-v1-live-e4b';
 const PIPELINE_VERSION='1.2.1-gemma4-weave-draft-pipeline-v1-raw-stream';
 const E4B='gemma4-e4b-it-litert-web';
 const GEMMA4=/^gemma4-e(?:2|4)b-it-(?:litert-web|q4f16|q2f16-mobile)$/i;
