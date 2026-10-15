@@ -17,7 +17,7 @@ const LocalFast={
     inferenceCalls++;
     args.onProgress?.({phase:'loading-engine',model});
     args.onProgress?.({phase:'creating-conversation',model});
-    args.onProgress?.({phase:'generating',model});
+    args.onProgress?.({phase:'awaiting-first-token',model});
     return new Promise(()=>{}); // Simulated wedged GPU/WASM decoder.
   },
   cancel:()=>{cancelCalls++}
@@ -45,7 +45,7 @@ first.fn();
 await assert.rejects(promise,error=>{
   assert.equal(error.code,'CIVWEAVE_LOCAL_FIRST_TOKEN_STALL');
   assert.equal(error.executionModel,E4B);
-  assert.equal(error.runtimePhase,'generating');
+  assert.equal(error.runtimePhase,'awaiting-first-token');
   assert.equal(error.rawDiagnostics.visibleTextDeltas,0);
   return true;
 });
