@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.170-guide-chat-surface-v350-parakeet-no-proxy-worker';
+const VERSION='1.0.171-guide-chat-surface-v350-e4b-execution-label';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
