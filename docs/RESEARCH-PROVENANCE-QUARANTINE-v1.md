@@ -22,6 +22,17 @@ node scripts/scan-research-provenance-v1.mjs /path/to/corpus.jsonl /path/to/repo
 
 Each input line should be a JSON object; the scanner recognizes `url`, `canonicalUrl`, `source_url`, `sourceUrl`, `articleUrl`, `permalink`, `authorUrl`, `author_url`, `creatorUrl`, `creator_url`, `accountUrl`, and `account_url`. Optional: `text`/`content`, `publishedAt`/`timestamp`, `id`/`document_id`. The output directory will contain `retained.jsonl`, `quarantined.jsonl`, `invalid-records.jsonl`, `lineage-candidates.json`, and `manifest.json`. **Do not commit personal or licensed corpus data to the repository.**
 
+## Historical 2012–2018 IRA archive (separate from current-account source gate)
+
+The new `scripts/ira-provenance-index-v1.py` lets you index the [FiveThirtyEight/Clemson archive](https://github.com/fivethirtyeight/russian-troll-tweets) offline, without bundling millions of historical posts into the phone app. Download the original `IRAhandle_tweets_*.csv` files yourself, then:
+
+```bash
+python scripts/ira-provenance-index-v1.py index --csv-dir /path/to/ira-csv --db /path/to/ira.sqlite
+python scripts/ira-provenance-index-v1.py scan --db /path/to/ira.sqlite --jsonl /path/to/training.jsonl --out /path/to/ira-report
+```
+
+This uses stable **historical tweet IDs** to quarantine an originating post, and high-length **exact text duplicates** only as *review candidates*. A current account with an old username is **not** excluded simply for sharing the historical handle. Output remains local, with retained, review and quarantine files. It is a historical research aid, not a live username blacklist, and it does not imply that copies in independent reporting must be removed.
+
 ## Evidence rules and limits
 
 1. Confirmed *source identity* means a named URL/handle/domain published in an independent platform's documented network investigation. It is not proof that every item ever published there is false or that a current username still belongs to the same operator. Revalidate handles when ownership could have changed.
