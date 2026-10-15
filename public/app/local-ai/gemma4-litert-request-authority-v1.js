@@ -1,18 +1,18 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.5-gemma4-litert-request-authority-v1-artisan-config-compat';
+const VERSION='1.1.6-gemma4-litert-request-authority-v1-streamed-e4b';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const FAST_RUNTIME_VERSION='1.5.1-litert-phone-runtime-v1-artisan-config-compat';
-const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.5.1-artisan-config-compat';
+const FAST_RUNTIME_VERSION='1.5.2-litert-phone-runtime-v1-output-diagnostics';
+const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.5.2-output-diagnostics';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
-const TRACKER_VERSION='1.0.2-guide-generation-tracker-v1-e4b-only-intake';
-const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.2-e4b-only-intake';
-const WEAVE_PIPELINE_VERSION='1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.2.0-e4b-only';
+const TRACKER_VERSION='1.0.3-guide-generation-tracker-v1-live-raw-e4b';
+const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.3-live-raw-e4b';
+const WEAVE_PIPELINE_VERSION='1.2.1-gemma4-weave-draft-pipeline-v1-raw-stream';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.2.1-raw-stream';
 const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
 const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
 const QWEN_FAST_MODEL='qwen35-4b-litert-web';
