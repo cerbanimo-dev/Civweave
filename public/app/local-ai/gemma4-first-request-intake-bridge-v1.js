@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.1-first-request-intake-bridge-v1-task-model-bind';
+const VERSION='1.2.2-first-request-intake-bridge-v1-neutral-messaging';
 const PIPELINE_VERSION='1.3.1-weave-draft-pipeline-v1-task-stage-models';
 const modelFor=()=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const supported=()=>Boolean(globalThis.CivweaveLocalGenerationModelPolicyV1?.supportsSelected?.());
@@ -55,20 +55,20 @@ async function ensureWeaveAuthority(args={}){
   try{first?.installFamilyLoaderWeaveRebind?.()}catch{}
   try{globalThis.CivweaveGuideGenerationTrackerV1?.install?.()}catch{}
   const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
-  if(pipeline?.version!==PIPELINE_VERSION)throw Object.assign(new Error('The local Weave Draft pipeline did not become ready before intake handoff.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_READY'});
+  if(pipeline?.version!==PIPELINE_VERSION)throw Object.assign(new Error('The configured Weave Draft pipeline did not become ready before intake handoff.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_READY'});
   try{pipeline.install?.()}catch{}
   let generate=globalThis.CivweaveModelRuntime?.generate;
   if(!hasLayer(generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION)){
     try{pipeline.installRuntime?.()}catch{}
     generate=globalThis.CivweaveModelRuntime?.generate;
   }
-  if(!hasLayer(generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION))throw Object.assign(new Error('The local Weave Draft pipeline is loaded but is not authoritative in the model runtime chain.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_ACTIVE'});
+  if(!hasLayer(generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION))throw Object.assign(new Error('The configured Weave Draft pipeline is loaded but is not authoritative in the model runtime chain.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_ACTIVE'});
   return pipeline;
 }
 function failurePacket(error){
   const code=clean(error?.code||'CIVWEAVE_FIRST_REQUEST_INTAKE_BRIDGE_FAILED',180),stage=clean(error?.stage,220),message=clean(error?.message||error,1400);
   const intakeFailure=/INTAKE/i.test(`${code} ${stage}`),model=clean(error?.executionModel||modelFor(),240);
-  return{response:{answer:`Weaveling could not complete the local ${intakeFailure?'local intake':'Weave generation'} path. Nothing was generated or queued.\n\nGeneration detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after the Gemma 4 local pack and the Weave pipeline are ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-first-request-bridge-failed',model,fallbackFrom:null,bridge:{failed:true,code,stage,model}};
+  return{response:{answer:`Weaveling could not complete the ${intakeFailure?'model intake':'Weave generation'} path. Nothing was generated or queued.\n\nGeneration detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Check the installed planning model and Weave pipeline; no model substitution was made.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-first-request-bridge-failed',model,fallbackFrom:null,bridge:{failed:true,code,stage,model}};
 }
 async function directIntake(args={}){
   await ensureWeaveAuthority(args);
