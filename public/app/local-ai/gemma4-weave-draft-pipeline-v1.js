@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.2-weave-draft-pipeline-v1-context-safe';
+const VERSION='1.3.3-weave-draft-pipeline-v1-context-budget-all';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -9,9 +9,9 @@ const QUEST_PURPOSE='civweave-weaveling-intention-json-v190';
 const PURPOSES=new Set([LEARNING_PURPOSE,QUEST_PURPOSE]);
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','browser','smollm2','smollm3','qwen']);
 const ARTIFACT_PREFIX='civweave.weave-draft-pipeline.v1';
-const DRAFT_TOKENS=Object.freeze({learning:700,quest:2100});
-const COMPILE_TOKENS=Object.freeze({learning:900,quest:2100});
-const REPAIR_TOKENS=Object.freeze({learning:800,quest:1700});
+const DRAFT_TOKENS=Object.freeze({learning:700,quest:1150});
+const COMPILE_TOKENS=Object.freeze({learning:900,quest:1300});
+const REPAIR_TOKENS=Object.freeze({learning:800,quest:1150});
 const MAX_STAGE_TEXT=16000;
 
 if(globalThis.CivweaveGemma4WeaveDraftPipelineV1?.version===VERSION){
@@ -247,6 +247,18 @@ function compactLearningPayload(schema,draft){
   }
   return{kind:'learning',targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[],properties:{title:{type:'string'},capability:{type:'string'},level:{type:'string'},mode:{type:'string'},proof:{type:'string'},modules:{type:'array',items:{type:'object',required:['title','focus','outcome']}}}},weaveDraft:clean(draft,1400)};
 }
+function compactQuestPayload(schema,draft){
+  const shape=compactSchema(schema&&typeof schema==='object'?schema:{type:'object'});
+  const cut=length=>{
+    const text=String(draft||'');
+    return text.length<=length?text:`${text.slice(0,Math.floor(length*.65))}\n[...details omitted for device context...]\n${text.slice(-Math.floor(length*.35))}`;
+  };
+  for(const cap of [1500,1100,800,500]){
+    const result={kind:'quest',targetSchema:shape,weaveDraft:cut(cap)};
+    if(JSON.stringify(result).length<=3200)return result;
+  }
+  return{kind:'quest',targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[],properties:{title:{type:'string'},wish:{type:'string'},outcome:{type:'string'},assumptions:{type:'array'},paths:{type:'array',items:{type:'object',required:['type','realm','title','purpose','steps','completionCriteria','evidence']}}}},weaveDraft:cut(1100)};
+}
 async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,emit:runtimeEmit}={}){
   const kind=kindFor(purpose),pipelineId=uid(),startedAt=now();
   if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
@@ -260,7 +272,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     saveArtifact({...lastArtifact,state:'drafted',draft});
 
     paint('The planning draft is ready. Compiling it into Civweave JSON…');
-    const compilePayload=kind==='learning'?compactLearningPayload(schema,draft):{kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},weaveDraft:clean(draft,13000)};
+    const compilePayload=kind==='learning'?compactLearningPayload(schema,draft):compactQuestPayload(schema,draft);
     const compiledText=await runLocal({pipelineId,purpose,kind,phase:'compile',label:'Local JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
     let compiled=canonicalize(parseJsonLoose(compiledText),kind);
 
@@ -270,7 +282,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
 
     if(errors.length){
       paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. The planning model is repairing those fields…`);
-      const repairPayload=kind==='learning'?{...compactLearningPayload(schema,draft),validationErrors:errors.slice(0,8),priorCompile:compiled||parseJsonLoose(compiledText)||clean(compiledText,1200)}:{kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},validationErrors:errors,priorCompile:compiled||parseJsonLoose(compiledText)||compiledText,weaveDraft:clean(draft,9000)};
+      const repairPayload=kind==='learning'?{...compactLearningPayload(schema,draft),validationErrors:errors.slice(0,8),priorCompile:compiled||parseJsonLoose(compiledText)||clean(compiledText,1200)}:{...compactQuestPayload(schema,draft),validationErrors:errors.slice(0,10),priorCompile:compiled||parseJsonLoose(compiledText)||clean(compiledText,1800)};
       const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
       errors=validateCompiled(compiled,schema,kind);
