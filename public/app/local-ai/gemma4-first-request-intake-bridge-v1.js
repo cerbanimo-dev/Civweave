@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.2-gemma4-first-request-intake-bridge-v1-compact-e4b';
-const PIPELINE_VERSION='1.2.2-gemma4-weave-draft-pipeline-v1-compact-learning';
-const E4B='gemma4-e4b-it-litert-web';
-const GEMMA4=/^gemma4-e(?:2|4)b-it-(?:litert-web|q4f16|q2f16-mobile)$/i;
+const VERSION='1.2.0-first-request-intake-bridge-v1-configured-model';
+const PIPELINE_VERSION='1.3.0-weave-draft-pipeline-v1-local-role-models';
+const modelFor=()=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
+const supported=()=>Boolean(globalThis.CivweaveLocalGenerationModelPolicyV1?.supportsSelected?.());
 
 if(globalThis.CivweaveGemma4FirstRequestIntakeBridgeV1?.version===VERSION){
   globalThis.CivweaveGemma4FirstRequestIntakeBridgeV1.install?.();
@@ -18,7 +18,7 @@ function emit(phase,detail={}){try{dispatchEvent(new CustomEvent('civweave:first
 function systemFor(args={}){return clean(args.systemId||args?.context?.guide?.system||'civweave',80).toLowerCase()||'civweave'}
 function selectedGemma(){
   try{if(globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.selectedFast?.())return true}catch{}
-  try{const pick=globalThis.CivweaveLocalModelDownloadV266?.selection?.();return Boolean(pick?.active&&GEMMA4.test(clean(pick.id,240)))}catch{return false}
+  try{const pick=globalThis.CivweaveLocalModelDownloadV266?.selection?.();return Boolean(pick?.active&&supported())}catch{return false}
 }
 function hasLayer(fn,flag,value=''){
   let current=fn,depth=0;
@@ -55,26 +55,26 @@ async function ensureWeaveAuthority(args={}){
   try{first?.installFamilyLoaderWeaveRebind?.()}catch{}
   try{globalThis.CivweaveGuideGenerationTrackerV1?.install?.()}catch{}
   const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
-  if(pipeline?.version!==PIPELINE_VERSION)throw Object.assign(new Error('The E4B Weave Draft pipeline did not become ready before intake handoff.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_READY'});
+  if(pipeline?.version!==PIPELINE_VERSION)throw Object.assign(new Error('The local Weave Draft pipeline did not become ready before intake handoff.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_READY'});
   try{pipeline.install?.()}catch{}
   let generate=globalThis.CivweaveModelRuntime?.generate;
   if(!hasLayer(generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION)){
     try{pipeline.installRuntime?.()}catch{}
     generate=globalThis.CivweaveModelRuntime?.generate;
   }
-  if(!hasLayer(generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION))throw Object.assign(new Error('The E4B Weave Draft pipeline is loaded but is not authoritative in the model runtime chain.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_ACTIVE'});
+  if(!hasLayer(generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION))throw Object.assign(new Error('The local Weave Draft pipeline is loaded but is not authoritative in the model runtime chain.'),{code:'CIVWEAVE_WEAVE_PIPELINE_NOT_ACTIVE'});
   return pipeline;
 }
 function failurePacket(error){
   const code=clean(error?.code||'CIVWEAVE_FIRST_REQUEST_INTAKE_BRIDGE_FAILED',180),stage=clean(error?.stage,220),message=clean(error?.message||error,1400);
-  const intakeFailure=/E4B|INTAKE/i.test(`${code} ${stage}`),model=intakeFailure?E4B:E4B;
-  return{response:{answer:`Weaveling could not complete the local ${intakeFailure?'E4B intake':'Weave generation'} path. Nothing was generated or queued.\n\nGeneration detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after the Gemma 4 E4B local pack and the Weave pipeline are ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-first-request-bridge-failed',model,fallbackFrom:null,bridge:{failed:true,code,stage,model}};
+  const intakeFailure=/modelFor()|INTAKE/i.test(`${code} ${stage}`),model=intakeFailure?modelFor():modelFor();
+  return{response:{answer:`Weaveling could not complete the local ${intakeFailure?'local intake':'Weave generation'} path. Nothing was generated or queued.\n\nGeneration detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after the Gemma 4 local pack and the Weave pipeline are ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-first-request-bridge-failed',model,fallbackFrom:null,bridge:{failed:true,code,stage,model}};
 }
 async function directIntake(args={}){
   await ensureWeaveAuthority(args);
   const authority=globalThis.CivweaveGemma4StructuredTaskAuthorityV1,normalized=intakeArgs(args);
   if(!authority?.intakeFirst||typeof authority?.intakeRespond!=='function'||!authority?.intakeEligible?.(normalized))return{handled:false,result:null};
-  emit('intake-start',{model:E4B,textLength:clean(args.text,12000).length,sourceSystem:systemFor(args)});
+  emit('intake-start',{model:modelFor(),textLength:clean(args.text,12000).length,sourceSystem:systemFor(args)});
   try{
     authority.syncStopButton?.();
     const result=await authority.intakeRespond(normalized);
@@ -114,6 +114,6 @@ function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{sched
 for(const name of ['civweave:assistant-runtime-ready','civweave:local-provider-authority-installed','civweave:local-guide-control-bypass-ready','civweave:structured-task-authority-ready','civweave:gemma4-litert-first-request-ready','civweave:guide-loader-reset','civweave:unified-chat-system-ready','pageshow'])addEventListener?.(name,schedule);
 for(const delay of [0,50,180,500,1200,2800,6000,12000,20000])setTimeout(schedule,delay);
 
-globalThis.CivweaveGemma4FirstRequestIntakeBridgeV1=Object.freeze({version:VERSION,pipelineVersion:PIPELINE_VERSION,eligible,isLivingSchoolLearning,intakeArgs,selectedGemma,hasLayer,ensureWeaveAuthority,directIntake,install,schedule,weaveRequired:true,livingSchoolLearningIntake:true,intakeModel:E4B,deepModel:E4B,state:()=>Object.freeze({installed:Boolean(installedTarget),selectedGemma:selectedGemma(),pipelineActive:hasLayer(globalThis.CivweaveModelRuntime?.generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION)})});
+globalThis.CivweaveGemma4FirstRequestIntakeBridgeV1=Object.freeze({version:VERSION,pipelineVersion:PIPELINE_VERSION,eligible,isLivingSchoolLearning,intakeArgs,selectedGemma,hasLayer,ensureWeaveAuthority,directIntake,install,schedule,weaveRequired:true,livingSchoolLearningIntake:true,get intakeModel(){return modelFor()},get deepModel(){return modelFor()},state:()=>Object.freeze({installed:Boolean(installedTarget),selectedGemma:selectedGemma(),pipelineActive:hasLayer(globalThis.CivweaveModelRuntime?.generate,'__civweaveWeaveDraftPipelineV1',PIPELINE_VERSION)})});
 schedule();
 })();
