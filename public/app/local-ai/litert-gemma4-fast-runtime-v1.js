@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.6.1-litert-runtime-v1-model-neutral-phone-profile';
+const VERSION='1.7.0-litert-runtime-v1-standard-backend-no-mtp';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -18,7 +18,7 @@ const GEMMA_FAST_ALIASES=new Set(PROFILES['gemma4-e2b-it-litert-web'].aliases);
 const GEMMA_DEEP_ALIASES=new Set(PROFILES['gemma4-e4b-it-litert-web'].aliases);
 if(globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===VERSION)return;
 let pendingUnloadReason='',engineReleasePromise=null;
-let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,wrapped=null,generationActive=false,lastMetrics=null,activeChat=null,cancelRequested=false;
+let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,engineMode='',wrapped=null,generationActive=false,lastMetrics=null,activeChat=null,cancelRequested=false;
 const now=()=>performance.now();
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
@@ -82,7 +82,7 @@ async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
   if(engineReleasePromise)return engineReleasePromise;
   if(enginePromise){try{await enginePromise}catch{}}
   const prior=engine,priorId=engineModelId,priorMtp=engineUsesMtp;
-  engine=null;engineModelId='';engineUsesMtp=false;
+  engine=null;engineModelId='';engineUsesMtp=false;engineMode='';
   engineReleasePromise=(async()=>{
     if(prior)try{await prior.delete?.()}catch{}
     if(priorId)emit('civweave:litert-gemma4-engine-released',{model:priorId,reason,mtpEnabled:priorMtp});
@@ -90,21 +90,37 @@ async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
   })();
   try{return await engineReleasePromise}finally{engineReleasePromise=null}
 }
-async function instantiateEngine(mod,profile,useSubmodel){
-  const stream=await modelStream(profile.id);
-  return mod.Engine.create({model:stream,backend:mod.Backend.GPU_ARTISAN,mainExecutorSettings:{maxNumTokens:profile.contextTokens,backendConfig:artisanConfig(useSubmodel)},benchmarkEnabled:true},'Civweave local assistant');
+async function instantiateEngine(mod,profile,mode='standard'){
+  const model=await modelStream(profile.id);
+  // The supported Web SDK uses Engine.create({model,mainExecutorSettings})
+  // and selects WebGPU automatically. Explicit GPU_ARTISAN backendConfig
+  // values were copied from a private struct and are unsafe across phones.
+  const settings={model,mainExecutorSettings:{maxNumTokens:profile.contextTokens},benchmarkEnabled:true};
+  if(mode==='compat'){
+    settings.backend=mod.Backend.GPU_ARTISAN;
+    settings.mainExecutorSettings.backendConfig=artisanConfig(false);
+  }
+  return mod.Engine.create(settings,'Civweave local assistant');
 }
 async function createEngine(modelId){
   const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT local model: ${modelId}`);
   if(!globalThis.navigator?.gpu)throw Object.assign(new Error(`${profile.label} requires WebGPU.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webgpu'});
-  if(!supportsJspi())throw Object.assign(new Error(`${profile.label} fast mode requires WebAssembly JSPI (Chromium 137+). Civweave will use the existing compatibility runtime instead.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webassembly-jspi'});
+  if(!supportsJspi())throw Object.assign(new Error(`${profile.label} requires WebAssembly JSPI.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webassembly-jspi'});
   const mod=await loadModule();
   if(engine&&engineModelId!==profile.id)await unloadEngine('switch-model');
-  const started=now();emit('civweave:litert-gemma4-progress',{phase:'loading-model',model:profile.id,backend:'webgpu-gpu-artisan',phoneProfile:'12gb-dual',mtpRequested:true,jspi:true});
-  let value,mtpEnabled=true;
-  try{value=await instantiateEngine(mod,profile,true)}catch(mtpError){mtpEnabled=false;emit('civweave:litert-gemma4-mtp-fallback',{model:profile.id,message:String(mtpError?.message||mtpError),reason:'engine-create-with-submodel-failed'});value=await instantiateEngine(mod,profile,false)}
-  engine=value;engineModelId=profile.id;engineUsesMtp=mtpEnabled;
-  emit('civweave:litert-gemma4-progress',{phase:'model-ready',model:profile.id,backend:'webgpu-gpu-artisan',loadMs:Math.round(now()-started),maxNumTokens:profile.contextTokens,webBindingSettings:'official-v0.17.1-gpu-artisan',oneEngineAtATime:true,mtpEnabled,jspi:true});
+  const started=now();emit('civweave:litert-gemma4-progress',{phase:'loading-model',model:profile.id,backend:'webgpu',mtpRequested:false,jspi:true});
+  let value,mode='standard';
+  try{value=await instantiateEngine(mod,profile,'standard')}
+  catch(standardError){
+    mode='compat';
+    emit('civweave:litert-gemma4-backend-fallback',{model:profile.id,reason:'standard-engine-create-failed',message:String(standardError?.message||standardError),mtpEnabled:false});
+    // Preserve device compatibility without activating untested MTP.
+    try{value=await instantiateEngine(mod,profile,'compat')}catch(error){
+      error.standardEngineError=String(standardError?.message||standardError);throw error;
+    }
+  }
+  engine=value;engineModelId=profile.id;engineUsesMtp=false;engineMode=mode;
+  emit('civweave:litert-gemma4-progress',{phase:'model-ready',model:profile.id,backend:'webgpu',engineMode:mode,loadMs:Math.round(now()-started),maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:false,jspi:true});
   return value;
 }
 async function ensureEngine(modelId){
@@ -115,16 +131,34 @@ async function ensureEngine(modelId){
   if(enginePromise&&enginePromiseModelId!==profile.id){try{await enginePromise}catch{}}
   if(engine&&engineModelId!==profile.id)await unloadEngine('switch-model');
   enginePromiseModelId=profile.id;
-  enginePromise=createEngine(profile.id).catch(error=>{engine=null;engineModelId='';engineUsesMtp=false;throw error}).finally(()=>{enginePromise=null;enginePromiseModelId=''});
+  enginePromise=createEngine(profile.id).catch(error=>{engine=null;engineModelId='';engineUsesMtp=false;engineMode='';throw error}).finally(()=>{enginePromise=null;enginePromiseModelId=''});
   return enginePromise;
 }
 function messageText(value){if(typeof value==='string')return clean(value,12000);return clean(value?.content??value?.text??'',12000)}
-function normalizedMessages(systemPrompt,messages=[]){
-  const rows=[];const system=clean(systemPrompt,12000).trim();if(system)rows.push({role:'system',content:system});
-  for(const row of (Array.isArray(messages)?messages:[]).slice(-10)){const role=/^(assistant|model)$/i.test(String(row?.role||''))?'assistant':'user',content=messageText(row).trim();if(content)rows.push({role,content})}
-  let chars=rows.reduce((sum,row)=>sum+row.content.length,0);
-  while(rows.length>2&&chars>16000){const removed=rows.splice(rows[0]?.role==='system'?1:0,1)[0];chars-=removed?.content?.length||0}
-  return rows;
+function normalizedMessages(systemPrompt,messages=[],maxInputChars=5000){
+  // Preserve complete system / current user instructions. Drop old chat
+  // turns rather than overflowing a small on-device KV cache.
+  const available=Math.max(900,Number(maxInputChars)||5000);
+  const system=clean(systemPrompt,Math.min(1700,Math.floor(available*.35))).trim();
+  const tail=(Array.isArray(messages)?messages:[]).slice(-4).map(row=>({
+    role:/^(assistant|model)$/i.test(String(row?.role||''))?'assistant':'user',
+    content:messageText(row).trim()
+  })).filter(row=>row.content);
+  const latest=tail.pop()||{role:'user',content:''};
+  // The final user instruction is mandatory. If it is itself longer than
+  // the available context, report this rather than sending broken JSON.
+  const maxLatest=available-system.length-96;
+  if(latest.content.length>maxLatest)throw Object.assign(
+    new Error(`The local prompt is too long (${latest.content.length} characters for a ${maxLatest} character budget). A shorter request or smaller schema is required.`),
+    {code:'LOCAL_PROMPT_CONTEXT_OVERFLOW',inputCharacters:latest.content.length,maxInputCharacters:maxLatest}
+  );
+  let remaining=available-system.length-latest.content.length;
+  const history=[];
+  while(tail.length&&remaining>200){
+    const row=tail.pop();if(row.content.length+64>remaining)break;
+    history.unshift(row);remaining-=row.content.length+64;
+  }
+  return [...(system?[{role:'system',content:system}]:[]),...history,latest];
 }
 function chunkText(chunk){
   if(!chunk)return'';
@@ -175,8 +209,7 @@ async function runFast(args={},forcedModelId=''){
     progress('loading-engine');
     const activeEngine=await ensureEngine(profile.id);ensureNotCancelled();
     progress('engine-ready',{engineModelId,mtpEnabled:engineUsesMtp,contextTokens:profile.contextTokens});
-    const requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,rows=normalizedMessages(systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
-    const maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024));
+    const requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024)),maxInputChars=Math.max(1500,Math.min(5000,Math.floor((profile.contextTokens-maxOutputTokens-128)*2.5))),rows=normalizedMessages(systemPrompt,args.messages,maxInputChars),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
     // Disable Gemma 4 thinking in the *free-streaming* stages as well as tool calls.
     // Otherwise a mobile token budget can be consumed by a non-user-visible
     // thought channel and the application sees no answer text at all.
@@ -184,11 +217,11 @@ async function runFast(args={},forcedModelId=''){
     if(profile.family==='gemma4'||formattedTool)prefaceConfig.extra_context={enable_thinking:false};
     if(formattedTool)prefaceConfig.tools=[formattedTool];
     const sampler=profile.sampler||{k:64,p:.95,temperature:1};
-    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)}},preface:prefaceConfig,prefillPrefaceOnInit:false,filterChannelContentFromKvCache:true};
+    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)}},preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
-    progress('creating-conversation',{prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,prefillPrefaceOnInit:false});
+    progress('prefilling-preface',{prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:true,engineMode});
     chat=await activeEngine.createConversation(conversationConfig);activeChat=chat;ensureNotCancelled();
-    progress('conversation-ready',{backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
+    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
     if(formattedTool){
       progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:true});
       const response=await chat.sendMessage(latest);ensureNotCancelled();
@@ -198,7 +231,7 @@ async function runFast(args={},forcedModelId=''){
     }else{
       progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:false});
       const stream=chat.sendMessageStreaming(latest);
-      progress('awaiting-first-token',{inputCharacters:latest.content.length,prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0)});
+      progress('awaiting-first-token',{inputCharacters:latest.content.length,prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),engineMode,mtpEnabled:false});
       for await(const chunk of stream){ensureNotCancelled();chunkCount++;if(chunkCount===1)progress('first-stream-chunk',{containsVisibleText:Boolean(chunkText(chunk))});const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
     }
     ensureNotCancelled();
@@ -256,5 +289,5 @@ for(const name of ['civweave:local-model-runtime-ready','civweave:gemma4-litert-
 addEventListener('civweave:local-model-selection',()=>{const pick=selected(),target=profileFor(pick?.id);if(engine&&(!pick?.active||!target||target.id!==engineModelId))void unloadEngine('selection-change')});
 addEventListener('pagehide',()=>{void unloadEngine('pagehide')});
 install();
-globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,get fastModelId(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||selected()?.id||''},fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,get engineContextTokens(){return profileFor(selected()?.id)?.contextTokens||0},oneEngineAtATime:true,mtpRequested:true,jspiRequired:true,get phoneProfile(){return profileFor(selected()?.id)?.family||'none'},formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,cancel,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
+globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,get fastModelId(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||selected()?.id||''},fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,get engineContextTokens(){return profileFor(selected()?.id)?.contextTokens||0},oneEngineAtATime:true,mtpRequested:true,jspiRequired:true,get phoneProfile(){return profileFor(selected()?.id)?.family||'none'},formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,cancel,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineMode,engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
 })();
