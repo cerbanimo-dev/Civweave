@@ -48,8 +48,8 @@ assert.match(runtime,/conversationConfig\.enableConstrainedDecoding=true/);
 assert.match(runtime,/prefaceConfig\.tools=\[formattedTool\]/);
 assert.match(runtime,/structuredToolCalling:true/);
 
-// Match the LiteRT-LM Web GPU_ARTISAN MTP configuration. If a
-// device rejects the submodel path, runtime creation must retry without MTP.
+// The public Web SDK backend is first. Private GPU_ARTISAN fields are
+// supplied only in a non-speculative compatibility attempt.
 assert.match(runtime,/num_output_candidates:1/);
 assert.match(runtime,/wait_for_weight_uploads:true/);
 assert.match(runtime,/num_decode_steps_per_sync:1/);
@@ -59,12 +59,16 @@ assert.match(runtime,/max_top_k:64/);
 assert.match(runtime,/enable_decode_logits:false/);
 assert.match(runtime,/enable_external_embeddings:false/);
 assert.match(runtime,/use_submodel:Boolean\(useSubmodel\)/);
+assert.match(runtime,/artisanConfig\(false\)/);
+assert.match(runtime,/prefillPrefaceOnInit:true/);
+assert.match(runtime,/maxInputChars/);
+assert.match(runtime,/mode='standard'/);
 for(const field of ['prefer_texture_weights','set_enable_host_mapped_pointer','disallow_8bit_convs','use_autosized_ringbuffers'])assert.match(runtime,new RegExp(field+':'),'LiteRT 0.17.1 GPU_ARTISAN config is missing '+field);
 assert.match(runtime,/use_autosized_ringbuffers:false/,'Ringbuffers should preserve full-history behavior until explicitly tested');
 assert.match(runtime,/error\.executionModel=profile\.id/,'Inference errors must identify the actual execution model');
-assert.match(runtime,/instantiateEngine\(mod,profile,true\)/);
-assert.match(runtime,/instantiateEngine\(mod,profile,false\)/);
-assert.match(runtime,/civweave:litert-gemma4-mtp-fallback/);
+assert.match(runtime,/instantiateEngine\(mod,profile,'standard'\)/);
+assert.match(runtime,/instantiateEngine\(mod,profile,'compat'\)/);
+assert.match(runtime,/civweave:litert-gemma4-backend-fallback/);
 assert.match(runtime,/webBindingSpeculativeDecodingConfigured:engineUsesMtp/);
 
 // Pages cannot ship LiteRT's >24 MiB Asyncify fallback binaries. The phone
@@ -83,14 +87,14 @@ assert.match(stageRuntime,/MAX_CLOUDFLARE_ASSET_BYTES=24\*1024\*1024/);
 
 console.log(JSON.stringify({
   ok:true,
-  profile:'phone-litert-dual-mtp-jspi-v2',
+  profile:'phone-litert-standard-webgpu-no-mtp',
   fastModel:'gemma4-e2b-it-litert-web',
   deepModel:'gemma4-e4b-it-litert-web',
   contextTokens:4096,
   maxOutputTokens:{e2b:2400,e4b:2800},
   engineResidency:'one-at-a-time',
   compatibilityFallback:'existing ONNX Q4/Q2',
-  mtp:'requested-with-safe-non-mtp-engine-fallback',
+  mtp:'disabled; compatibility backend has no submodel',
   webRuntime:'chromium-jspi-webgpu',
   formattedOutput:'constrained-tool-decoding',
   pagesAssetLimitMiB:24,
