@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only';
+const VERSION='1.2.1-gemma4-weave-draft-pipeline-v1-raw-stream';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
 const QUEST_PURPOSE='civweave-weaveling-intention-json-v190';
@@ -197,21 +197,36 @@ async function runE4B({pipelineId,purpose,kind,phase,label,systemPrompt,messages
   const run=typeof auth?.controlledFastRun==='function'?auth.controlledFastRun.bind(auth):null;
   const fast=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
   if(!run&&typeof fast?.runFast!=='function')throw Object.assign(new Error('Gemma 4 E4B LiteRT runtime is unavailable.'),{code:'CIVWEAVE_E4B_WEAVE_RUNTIME_UNAVAILABLE'});
-  let streamed='';let index=0;
+  let streamed='',index=0;
   dispatch({pipelineId,purpose,kind,phase,state:'running',label});
   const args={systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
-    const token=clean(event?.text,4000);if(!token)return;streamed+=token;dispatch({pipelineId,purpose,kind,phase,state:'streaming',label,token,index:index++,streamLength:streamed.length});
+    const token=String(event?.text??'');if(!token)return;
+    streamed=(streamed+token).slice(-48000);
+    dispatch({pipelineId,purpose,kind,phase,state:'streaming',label,token,index:index++,streamLength:streamed.length});
   }};
-  const result=run?await run(args,DEEP_MODEL,label,Number(auth?.taskTimeoutMs)||600000):await fast.runFast(args,DEEP_MODEL);
-  const text=clean(result?.outputText||result?.text||streamed,48000);
-  dispatch({pipelineId,purpose,kind,phase,state:'complete',label,text,streamLength:text.length});
-  return text;
+  try{
+    const result=run?await run(args,DEEP_MODEL,label,Number(auth?.taskTimeoutMs)||600000):await fast.runFast(args,DEEP_MODEL);
+    const output=String(result?.outputText??result?.text??streamed).slice(0,48000);
+    const text=clean(output,48000);
+    const prior=lastArtifact?.rawStages||{};
+    saveArtifact({...lastArtifact,rawStages:{...prior,[phase]:output},lastExecutedModel:DEEP_MODEL});
+    dispatch({pipelineId,purpose,kind,phase,state:'complete',label,text:output,streamLength:output.length,deltaCount:index});
+    return text;
+  }catch(error){
+    // Preserve the exact partial stream even if the model aborts or emits
+    // nothing. The user can inspect this without a subsequent successful plan.
+    const output=String(error?.rejectedText??streamed).slice(0,48000);
+    const prior=lastArtifact?.rawStages||{};
+    saveArtifact({...lastArtifact,rawStages:{...prior,[phase]:output},lastExecutedModel:DEEP_MODEL,failedStage:phase,rawDiagnostics:error?.rawDiagnostics||null});
+    dispatch({pipelineId,purpose,kind,phase,state:'failed',label,text:output,streamLength:output.length,deltaCount:index,code:error?.code||'E4B_STAGE_FAILED',message:clean(error?.message||error,1200),rawDiagnostics:error?.rawDiagnostics||null});
+    throw error;
+  }
 }
 async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,emit:runtimeEmit}={}){
   const kind=kindFor(purpose),pipelineId=uid(),startedAt=now();
   if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
   dispatch({pipelineId,purpose,kind,phase:'pipeline',state:'start',label:'Weave pipeline'});
-  saveArtifact({pipelineId,purpose,kind,state:'running',startedAt,draft:'',compiled:null,resourceManifest:[],specialistWork:[],decisionGates:[],validationErrors:[]});
+  saveArtifact({pipelineId,purpose,kind,state:'running',startedAt,draft:'',compiled:null,resourceManifest:[],specialistWork:[],decisionGates:[],validationErrors:[],rawStages:{},lastExecutedModel:DEEP_MODEL});
   try{
     paint(`E4B is freely drafting the ${kind==='learning'?'Learning Journey':'Quest'}…`);
     try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:DEEP_MODEL,mode:'weave-draft-pass'})}catch{}
