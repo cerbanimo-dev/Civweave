@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.1-structured-task-authority-v1-backend-first-token';
+const VERSION='1.4.2-structured-task-authority-v1-backend-evidence';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -107,7 +107,7 @@ async function intakeRuntime(timeoutMs=12000){
 function controlledFastRun(args,model,stage,timeoutMs){
   throwIfCancelled();
   return new Promise(async(resolve,reject)=>{
-    let settled=false,timer=null,stallTimer=null,phase='loading-runtime',lastProgressAt=Date.now(),tokens=0;
+    let settled=false,timer=null,stallTimer=null,phase='loading-runtime',lastProgressAt=Date.now(),tokens=0,lastRuntimeDetails={};
     const fast=await intakeRuntime().catch(error=>{settled=true;reject(error);return null});
     if(!fast||settled)return;
     const clearTimers=()=>{
@@ -124,7 +124,7 @@ function controlledFastRun(args,model,stage,timeoutMs){
       const error=timeoutError(stage,kind==='no-first-token'?90000:timeoutMs);
       error.code=kind==='no-first-token'?'CIVWEAVE_LOCAL_FIRST_TOKEN_STALL':'CIVWEAVE_LOCAL_STAGE_TIMEOUT';
       error.executionModel=model;error.runtimePhase=phase;
-      error.rawDiagnostics={stage,model,phase,visibleTextDeltas:tokens,idleMs:Date.now()-lastProgressAt,watchdog:kind};
+      error.rawDiagnostics={stage,model,phase,visibleTextDeltas:tokens,idleMs:Date.now()-lastProgressAt,watchdog:kind,runtimeDetails:lastRuntimeDetails};
       return error;
     };
     const cancel=(error=stopError())=>{
@@ -136,9 +136,10 @@ function controlledFastRun(args,model,stage,timeoutMs){
       return true;
     };
     const markProgress=detail=>{
+      lastRuntimeDetails=Object.fromEntries(Object.entries(detail||{}).filter(([key,value])=>['phase','engineMode','backend','mtpEnabled','contextTokens','maxOutputTokens','maxInputChars','inputCharacters','prefaceCharacters','constrainedDecoding','maxNumTokens','containsVisibleText'].includes(key)&&['string','number','boolean'].includes(typeof value)));
       phase=clean(detail?.phase||phase,100);
       lastProgressAt=Date.now();
-      emit('civweave:local-model-stage-progress',{stage,model,phase,visibleTextDeltas:tokens});
+      emit('civweave:local-model-stage-progress',{stage,model,phase,visibleTextDeltas:tokens,runtimeDetails:lastRuntimeDetails});
       if(['prompt-submitted','awaiting-first-token'].includes(phase)&&tokens===0){
         if(stallTimer!=null)clearTimeout(stallTimer);
         stallTimer=setTimeout(()=>cancel(timeout('no-first-token')),90000);
