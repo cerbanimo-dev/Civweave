@@ -1,6 +1,6 @@
 {
   "version": "1.0.106",
-  "revision": "canonical-ledger-contract-v1-fulfillment-v1-background-campus-v241-systems-mesh-v251-standard-only",
+  "revision": "canonical-ledger-contract-v1-fulfillment-v1-background-campus-v241-systems-mesh-v251-standard-only-source-provenance-v1",
   "payloadPolicy": "core-first-lazy-packs-v302",
   "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, canonical ledger contract, signed Reward Ledger, fulfillment settlement ledger, shared basic-value, economic-policy and valuation-review runtimes, systems-mesh runtimes, Cerbanimo commerce distribution contract, compact federation seed, deterministic offline map runtime, lightweight Node AI operator/marketplace UI, local browser-agent tool shell, mesh-first private messaging, Pocket Guild Node resilience controls, canonical Guild host onboarding, and benchmark-gated emergency shared-AI mesh hosting. Buttons and Acorns remain non-transferable earn/burn rewards; validated fulfillment settles as an independent requester burn plus fulfiller reward. Downloaded archive search, private messaging, Pocket Node state, and addressed emergency-AI mesh objects remain usable without network; live Browser Run, online PM relay, and cloud reconciliation are opportunistic network transports.",
   "seeds": [
@@ -66,6 +66,9 @@
     "/app/server-ai-settings-v301.js",
     "/app/browser-tool-v1.js",
     "/app/local-ai/browser-agent-v1.js",
+    "/app/living-school-local-research-v243.mjs",
+    "/app/research-source-policy-v1.mjs",
+    "/app/research-source-indicators-v1.mjs",
     "/app/knowledge-school-runtime-v243.mjs",
     "/app/knowledge-library-tiers-v1.mjs",
     "/app/knowledge-library-upstream-v1.mjs",
