@@ -26,7 +26,7 @@ const context={
 };
 context.globalThis=context;
 context.CivweaveGemma4WeaveDraftPipelineV1={
-  version:'1.2.1-gemma4-weave-draft-pipeline-v1-raw-stream',
+  version:'1.2.2-gemma4-weave-draft-pipeline-v1-compact-learning',
   install(){order.push('pipeline-install');const prior=context.CivweaveModelRuntime.generate;const generate=async request=>prior(request);generate.__civweaveWeaveDraftPipelineV1=this.version;generate.__prior=prior;context.CivweaveModelRuntime.generate=generate;return true},
   installRuntime(){return this.install()}
 };
