@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r15';
+const REVISION='weave-pipeline-takeover-v1-r16';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v471-live-probe';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r15';
+const CACHE='cwrecovery-v472-sdk-string-stream';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r16';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
