@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.0-weave-draft-pipeline-v1-local-role-models';
+const VERSION='1.3.1-weave-draft-pipeline-v1-task-stage-models';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -199,10 +199,10 @@ async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messag
   if(typeof auth?.requireDeepModel==='function')await auth.requireDeepModel();
   const run=typeof auth?.controlledFastRun==='function'?auth.controlledFastRun.bind(auth):null;
   const fast=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
-  if(!run&&typeof fast?.runFast!=='function')throw Object.assign(new Error('the local planning model LiteRT runtime is unavailable.'),{code:'CIVWEAVE_Local_WEAVE_RUNTIME_UNAVAILABLE'});
+  if(!run&&typeof fast?.runFast!=='function')throw Object.assign(new Error('The configured local planning runtime is unavailable.'),{code:'CIVWEAVE_E4B_WEAVE_RUNTIME_UNAVAILABLE'});
   let streamed='',index=0;
   dispatch({pipelineId,purpose,kind,phase,state:'running',label});
-  const args={systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
+  const args={__civweaveStage:label,systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
     const token=String(event?.text??'');if(!token)return;
     streamed=(streamed+token).slice(-48000);
     dispatch({pipelineId,purpose,kind,phase,state:'streaming',label,token,index:index++,streamLength:streamed.length});
@@ -234,10 +234,10 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     paint(`The local planning model is freely drafting the ${kind==='learning'?'Learning Journey':'Quest'}…`);
     try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:modelFor(),mode:'weave-draft-pass'})}catch{}
     const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:modelMessages(messages),maxNewTokens:DRAFT_TOKENS[kind]});
-    if(!draft)throw Object.assign(new Error('Local Weave Draft returned no planning content.'),{code:'CIVWEAVE_Local_WEAVE_DRAFT_EMPTY'});
+    if(!draft)throw Object.assign(new Error('Local Weave Draft returned no planning content.'),{code:'CIVWEAVE_E4B_WEAVE_DRAFT_EMPTY'});
     saveArtifact({...lastArtifact,state:'drafted',draft});
 
-    paint('Local has the plan. Compiling it into Civweave JSON…');
+    paint('The planning draft is ready. Compiling it into Civweave JSON…');
     const compilePayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},weaveDraft:clean(draft,kind==='learning'?4500:13000)};
     const compiledText=await runLocal({pipelineId,purpose,kind,phase:'compile',label:'Local JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
     let compiled=canonicalize(parseJsonLoose(compiledText),kind);
@@ -247,7 +247,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     dispatch({pipelineId,purpose,kind,phase:'validate',state:errors.length?'needs-repair':'complete',label:'Deterministic validation',errors:[...errors],resourceCount:compiled?.resourceManifest?.length||0,specialistCount:compiled?.specialistWork?.length||0,decisionGateCount:compiled?.decisionGates?.length||0});
 
     if(errors.length){
-      paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. Local is repairing only those fields…`);
+      paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. The planning model is repairing those fields…`);
       const repairPayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},validationErrors:errors,priorCompile:compiled||parseJsonLoose(compiledText)||compiledText,weaveDraft:clean(draft,kind==='learning'?4500:9000)};
       const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
@@ -257,7 +257,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
 
     if(errors.length){
       saveArtifact({...lastArtifact,state:'failed',draft,compiled,resourceManifest:compiled?.resourceManifest||[],specialistWork:compiled?.specialistWork||[],decisionGates:compiled?.decisionGates||[],validationErrors:errors});
-      throw Object.assign(new Error(`Local compiled the Weave Draft, but ${errors.length} required structure ${errors.length===1?'issue remains':'issues remain'}: ${errors.slice(0,6).join(' ')}`),{code:'CIVWEAVE_Local_WEAVE_COMPILE_INVALID',validationErrors:errors,pipelineId});
+      throw Object.assign(new Error(`Local compiled the Weave Draft, but ${errors.length} required structure ${errors.length===1?'issue remains':'issues remain'}: ${errors.slice(0,6).join(' ')}`),{code:'CIVWEAVE_E4B_WEAVE_COMPILE_INVALID',validationErrors:errors,pipelineId});
     }
 
     const resourceManifest=compiled.resourceManifest||[],specialistWork=compiled.specialistWork||[],decisionGates=compiled.decisionGates||[];
@@ -267,8 +267,8 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     const text=JSON.stringify(compiled);
     return{text,payload:{text,weavePipeline:{pipelineId,artifactKey:artifactKey(kind)}},model:modelFor(),provider:'downloaded-local',streamed:true,diagnostics:[{kind:'local-weave-draft-two-pass',model:modelFor(),purpose,pipelineId,repairUsed:Boolean(lastArtifact?.validationErrors?.length)}]};
   }catch(error){
-    dispatch({pipelineId,purpose,kind,phase:'pipeline',state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',label:'Pipeline stopped',code:error?.code||'CIVWEAVE_Local_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)});
-    if(lastArtifact?.pipelineId===pipelineId&&lastArtifact.state!=='failed')saveArtifact({...lastArtifact,state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',error:{code:error?.code||'CIVWEAVE_Local_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)}});
+    dispatch({pipelineId,purpose,kind,phase:'pipeline',state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',label:'Pipeline stopped',code:error?.code||'CIVWEAVE_E4B_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)});
+    if(lastArtifact?.pipelineId===pipelineId&&lastArtifact.state!=='failed')saveArtifact({...lastArtifact,state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',error:{code:error?.code||'CIVWEAVE_E4B_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)}});
     throw error;
   }
 }
