@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.1-gemma4-structured-task-authority-v1-streaming-intake';
+const VERSION='1.3.2-gemma4-structured-task-authority-v1-no-silent-fallback';
 const INTAKE_MODEL='gemma4-e4b-it-litert-web';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
-const TASK_TIMEOUT_MS=600000;
+const TASK_TIMEOUT_MS=240000;
 const INTAKE_TIMEOUT_MS=90000;
 const LEARNING_MAX_TOKENS=900;
 const QUEST_MIN_TOKENS=1800;
@@ -148,7 +148,7 @@ function deepConfig(config={},purpose=''){
     provider:'downloaded-local',route:'downloaded-local',model:DEEP_MODEL,
     timeoutMs:TASK_TIMEOUT_MS,
     maxTokens:learning?Math.max(640,Math.min(LEARNING_MAX_TOKENS,current||LEARNING_MAX_TOKENS)):Math.max(QUEST_MIN_TOKENS,current),
-    stream:false
+    stream:true
   };
 }
 function structuredTool(schema,purpose){return{
@@ -157,24 +157,16 @@ function structuredTool(schema,purpose){return{
   parameters:schema&&typeof schema==='object'?schema:{type:'object',properties:{}}
 }}
 function directE4BTransport(purpose){
-  const stage=purpose===LEARNING_PURPOSE?'Moss E4B Learning Journey plan':'Weaveling E4B Quest';
-  return async({config={},messages=[],schema=null,signal,emit:runtimeEmit}={})=>{
-    throwIfCancelled();
-    if(signal?.aborted)throw stopError();
-    await requireDeepModel();
-    const systemRow=(Array.isArray(messages)?messages:[]).find(row=>clean(row?.role,20).toLowerCase()==='system');
-    const modelMessages=(Array.isArray(messages)?messages:[]).filter(row=>clean(row?.role,20).toLowerCase()!=='system').map(row=>({role:row.role,content:row.content??row.text??''}));
-    try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:DEEP_MODEL,mode:'litert-constrained-tool'})}catch{}
-    const result=await controlledFastRun({
-      systemPrompt:clean(systemRow?.content||systemRow?.text,12000)||'Return only the required structured result.',
-      messages:modelMessages,
-      maxNewTokens:Math.max(64,Number(config.maxTokens)|| (purpose===LEARNING_PURPOSE?LEARNING_MAX_TOKENS:QUEST_MIN_TOKENS)),
-      structuredTool:structuredTool(schema,purpose)
-    },DEEP_MODEL,stage,Number(config.timeoutMs)||TASK_TIMEOUT_MS);
-    throwIfCancelled();
-    const text=clean(result?.outputText||result?.text,48000);
-    if(!text)throw Object.assign(new Error(`${stage} returned no structured arguments.`),{code:'CIVWEAVE_E4B_STRUCTURED_OUTPUT_EMPTY'});
-    return{text,payload:{text},model:DEEP_MODEL,provider:'downloaded-local',streamed:false,diagnostics:[{kind:'litert-constrained-tool',model:DEEP_MODEL,purpose}]};
+  // All entrypoints must use the same observable Draft -> Compile -> Validate
+  // transport. The legacy constrained-tool fallback silently blocks for 600s
+  // and bypasses both token events and the rejected-output inspector.
+  return async args=>{
+    const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
+    if(typeof pipeline?.weaveTransport!=='function')throw Object.assign(
+      new Error('E4B Weave Draft transport is unavailable. The non-streaming 600-second fallback is disabled.'),
+      {code:'CIVWEAVE_E4B_WEAVE_REQUIRED',executionModel:DEEP_MODEL}
+    );
+    return pipeline.weaveTransport(purpose,args||{});
   };
 }
 async function prepareStructuredRequest(request){
