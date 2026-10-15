@@ -1,14 +1,14 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.0-gemma4-structured-task-authority-v1-e4b-only';
+const VERSION='1.3.1-gemma4-structured-task-authority-v1-streaming-intake';
 const INTAKE_MODEL='gemma4-e4b-it-litert-web';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const TASK_TIMEOUT_MS=600000;
 const INTAKE_TIMEOUT_MS=90000;
 const LEARNING_MAX_TOKENS=900;
 const QUEST_MIN_TOKENS=1800;
-const INTAKE_MAX_TOKENS=520;
+const INTAKE_MAX_TOKENS=800;
 const INTAKE_KEY='civweave.weaveling.local-intake.v1';
 const INTAKE_TTL_MS=2*60*60*1000;
 const QUEST_PURPOSE='civweave-weaveling-intention-json-v190';
@@ -241,7 +241,7 @@ Facts must contain only information the Hero actually supplied. If continuation=
 For learning, phrase objective as an observable capability that can follow "I want to learn to ...". For quest, phrase objective as an outcome that can follow "I want to ...". For ordinary, objective may be empty.
 ready=true when there is enough information to produce a useful first-pass structure using explicit reasonable assumptions. Do not ask for preferences that can safely remain assumptions. ready=false only when one or two missing answers would materially change the shape of the generated work.
 If ready=false, reply asks at most two concise high-value questions. If route=ordinary, reply directly answers the user's message. If ready=true for learning or quest, reply may be a short handoff acknowledgement.
-Return only the required tool arguments.`}
+Return exactly one JSON object with the required fields; no markdown, analysis, or tool call.`}
 function normalizeIntake(raw={},args={},prior=null){
   const route=['ordinary','learning','quest'].includes(clean(raw.route,40).toLowerCase())?clean(raw.route,40).toLowerCase():'ordinary';
   const continuation=Boolean(prior&&raw.continuation);
@@ -263,10 +263,33 @@ async function classifyIntake(args={}){
   const prior=pendingIntake();
   const context={currentMessage:clean(args.text,5000),pendingIntake:prior?{route:prior.route,objective:prior.objective,facts:prior.facts,missingContext:prior.missingContext,latestText:prior.latestText}:null,recentConversation:recentRows(args.history)};
   emit('civweave:weaveling-intake-progress',{phase:'classifying',model:INTAKE_MODEL});
-  const result=await controlledFastRun({systemPrompt:intakeSystemPrompt(),messages:[{role:'user',content:`Classify this intake context:\n${JSON.stringify(context)}`}],maxNewTokens:INTAKE_MAX_TOKENS,structuredTool:intakeTool()},INTAKE_MODEL,'Weaveling E4B intake',INTAKE_TIMEOUT_MS);
+  // A constrained tool call cannot stream and can yield an empty result.
+  // Ask E4B to emit JSON as ordinary streamed text, then validate it deterministically.
+  let streamed='',deltaCount=0,result;
+  try{
+    result=await controlledFastRun({
+      systemPrompt:intakeSystemPrompt()+'\\nReturn one valid JSON object conforming to this schema: '+JSON.stringify(intakeTool().parameters),
+      messages:[{role:'user',content:`Classify this intake context:\n${JSON.stringify(context)}`}],
+      maxNewTokens:INTAKE_MAX_TOKENS,structuredTool:null,
+      onToken:event=>{
+        const token=String(event?.text??'');if(!token)return;
+        streamed=(streamed+token).slice(-48000);
+        emit('civweave:weaveling-intake-progress',{phase:'streaming',model:INTAKE_MODEL,token,index:deltaCount++,outputLength:streamed.length});
+      }
+    },INTAKE_MODEL,'Weaveling E4B intake',INTAKE_TIMEOUT_MS);
+  }catch(error){
+    emit('civweave:weaveling-intake-progress',{phase:'failed',model:INTAKE_MODEL,outputText:streamed,error:clean(error?.message||error,1200),code:error?.code||'CIVWEAVE_E4B_INTAKE_FAILED',deltaCount,rawDiagnostics:error?.rawDiagnostics||null});
+    throw error;
+  }
   throwIfCancelled();
-  const raw=parse(clean(result?.outputText||result?.text,12000),null);
-  if(!raw||typeof raw!=='object')throw Object.assign(new Error('Gemma 4 E4B intake did not return a valid routing record.'),{code:'CIVWEAVE_E4B_INTAKE_INVALID'});
+  const outputText=clean(result?.outputText||result?.text||streamed,48000);
+  const raw=globalThis.CivweaveGemma4WeaveDraftPipelineV1?.parseJsonLoose?.(outputText)||parse(outputText,null);
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)){
+    const error=Object.assign(new Error('Gemma 4 E4B intake returned invalid JSON; the raw response is available in Show failing message.'),{code:'CIVWEAVE_E4B_INTAKE_INVALID',executionModel:INTAKE_MODEL,rejectedText:outputText});
+    emit('civweave:weaveling-intake-progress',{phase:'failed',model:INTAKE_MODEL,outputText,error:error.message,code:error.code,deltaCount});
+    throw error;
+  }
+  emit('civweave:weaveling-intake-progress',{phase:'complete',model:INTAKE_MODEL,outputText,deltaCount});
   const record=normalizeIntake(raw,args,prior);
   saveIntake(record);
   if(record.route==='learning'&&record.ready)paintPending('E4B has enough context. Moss is drafting the Learning Journey with E4B…');
