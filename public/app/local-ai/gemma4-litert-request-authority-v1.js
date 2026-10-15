@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.8-local-litert-request-authority-v1-cross-frame-probe';
+const VERSION='1.2.9-local-litert-request-authority-v1-sdk-string-input';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const FAST_RUNTIME_VERSION='1.7.0-litert-runtime-v1-standard-backend-no-mtp';
-const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.7.0-standard-webgpu';
+const FAST_RUNTIME_VERSION='1.7.1-litert-runtime-v1-sdk-text-stream-and-safe-sampling';
+const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.7.1-sdk-text-stream';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.2.2-guide-generation-tracker-v1-direct-fallback-probe';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.2.2-direct-fallback-probe';
