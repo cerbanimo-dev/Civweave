@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.3-guide-generation-tracker-v1-live-raw-e4b';
-const REVISION='1.2.0-intake-stream-visible-diagnostics';
+const VERSION='1.0.4-guide-generation-tracker-v1-boot-stage-telemetry';
+const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
@@ -24,7 +24,7 @@ function mergeArtifacts(base={},extra={}){return bus()?.mergeArtifacts?.(base,ex
 function artifactName(){return bus()?.artifactName?.(state.artifacts)||'Generation'}
 function freshState(){return{
   requestId:`process-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,pipelineId:'',startedMs:now(),terminal:'',activeStage:'',showPipeline:false,expanded:true,pendingObserved:false,pendingKey:'',kind:'',artifacts:emptyArtifacts(),
-  stages:Object.fromEntries(STAGES.map(stage=>[stage.id,{state:'waiting',label:stage.label,model:''}])),streams:{intake:'',draft:'',compile:'',repair:'',final:''},errorDetail:'',executionModel:'',counts:{resources:0,specialists:0,gates:0},artifactKey:'',finalSource:''
+  stages:Object.fromEntries(STAGES.map(stage=>[stage.id,{state:'waiting',label:stage.label,model:''}])),streams:{intake:'',draft:'',compile:'',repair:'',final:''},runtimePhase:'',errorDetail:'',executionModel:'',counts:{resources:0,specialists:0,gates:0},artifactKey:'',finalSource:''
 }}
 function activeRoot(){return document.getElementById(ROOT_ID)}
 function activeArticle(){const root=activeRoot();return root?[...root.querySelectorAll('[data-log] article[data-role="assistant"]')].at(-1)||null:null}
@@ -56,10 +56,10 @@ function terminalLabel(){const name=artifactName();if(state.terminal==='failed')
 function panelHtml(){
   const rail=STAGES.map(stage=>{const item=state.stages[stage.id]||{state:'waiting'};return`<div class="cw-weave-node" data-stage="${stage.id}" data-state="${esc(item.state)}" title="${esc(item.label||stage.label)}${item.model?` · ${esc(item.model)}`:''}"><i class="cw-weave-dot"></i><span>${esc(stage.short)}</span></div>`}).join('');
   const counts=`<div class="cw-weave-counts"><span class="cw-weave-chip">Resources ${state.counts.resources}</span><span class="cw-weave-chip">Specialists ${state.counts.specialists}</span><span class="cw-weave-chip">Decision gates ${state.counts.gates}</span></div>`;
-  const sections=[['intake','E4B intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
+  const sections=[['intake','E4B intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
   const detail=state.errorDetail?`<pre class="cw-weave-error">${esc(state.errorDetail)}</pre>`:'';
-  const model=state.executionModel?` · Executing ${state.executionModel}`:'';
-  return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live ${esc(artifactName())}</strong><span>${esc(terminalLabel())}${esc(model)}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="${state.expanded?'true':'false'}">${state.expanded?'Hide live process':'Show live process'}</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details ${state.expanded?'':'hidden'}>${detail}${sections}</div>`
+  const model=state.executionModel?` · Executing ${state.executionModel}`:'';const runtime=state.runtimePhase?` · ${state.runtimePhase}`:'';
+  return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live ${esc(artifactName())}</strong><span>${esc(terminalLabel())}${esc(model)}${esc(runtime)}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="${state.expanded?'true':'false'}">${state.expanded?'Hide live process':'Show live process'}</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details ${state.expanded?'':'hidden'}>${detail}${sections}</div>`
 }
 function existingPanel(){const article=activeArticle(),host=article?.children?.[1]||article;return host?.querySelector?.(':scope > .cw-weave-tracker')||null}
 function ensurePanel(){installStyle();if(!state.showPipeline){existingPanel()?.remove?.();return null}const article=activeArticle();if(!article)return null;const host=article.children?.[1]||article;let panel=host.querySelector?.(':scope > .cw-weave-tracker');if(!panel){panel=document.createElement('div');panel.className='cw-weave-tracker';panel.dataset.pipelineId=state.pipelineId||state.requestId;host.append(panel)}panel.innerHTML=panelHtml();return panel}
@@ -111,7 +111,17 @@ function applyPipeline(detail={}){
   }
   ensurePanel();
 }
-function applyLifecycle(row={}){if(Number(row.at)&&Number(row.at)<state.startedMs-1500)return;const type=row.type,detail=row.detail||{};if(type==='civweave:weaveling-intake-progress')applyIntake(detail);else if(type==='civweave:weave-pipeline')applyPipeline(detail);else if(type==='runtime-stage')setRuntimeStage(detail);else if(type==='runtime-token'){const phase=detail.stage||'draft';if(['draft','compile','repair'].includes(phase)){stageState(phase,'streaming',detail.label,detail.model);if(detail.text){state.streams[phase]=clean(state.streams[phase]+detail.text,50000);refreshStream(phase)}}}else if(type==='civweave:litert-gemma4-progress'&&detail.phase==='generating'){const model=clean(detail.model,120);setRuntimeStage({stage:state.stages.intake.state==='running'?'intake':state.stages.draft.state==='waiting'?'draft':state.activeStage||'draft',state:'running',model,label:state.stages.intake.state==='running'?'E4B Intake':'E4B Generation'})}else if(type==='civweave:generation-stop-requested'||type==='civweave:generation-cancelled'||type==='runtime-stop'){state.terminal='stopped';stageState(state.activeStage||'intake','stopped');ensurePanel()}}
+function applyLifecycle(row={}){if(Number(row.at)&&Number(row.at)<state.startedMs-1500)return;const type=row.type,detail=row.detail||{};if(type==='civweave:local-model-stage-progress'){
+    const label=clean(detail.stage,180),stage=/intake/i.test(label)?'intake':/repair/i.test(label)?'repair':/compil|json/i.test(label)?'compile':'draft';
+    state.runtimePhase=clean(detail.phase,100).replaceAll('-',' ');
+    state.showPipeline=true;state.pendingObserved=true;
+    if(['waiting','queued','running'].includes(state.stages[stage]?.state))stageState(stage,'running',label||'E4B Local Generation',detail.model||'');
+    ensurePanel();
+  }else if(type==='civweave:litert-gemma4-failed'){
+    state.runtimePhase='failed: '+clean(detail.code||'local engine error',110);
+    state.errorDetail=[detail.message,detail.rawDiagnostics?JSON.stringify(detail.rawDiagnostics):''].filter(Boolean).join(' · ');
+    ensurePanel();
+  }else if(type==='civweave:weaveling-intake-progress')applyIntake(detail);else if(type==='civweave:weave-pipeline')applyPipeline(detail);else if(type==='runtime-stage')setRuntimeStage(detail);else if(type==='runtime-token'){const phase=detail.stage||'draft';if(['draft','compile','repair'].includes(phase)){stageState(phase,'streaming',detail.label,detail.model);if(detail.text){state.streams[phase]=clean(state.streams[phase]+detail.text,50000);refreshStream(phase)}}}else if(type==='civweave:litert-gemma4-progress'&&detail.phase==='generating'){const model=clean(detail.model,120);setRuntimeStage({stage:state.stages.intake.state==='running'?'intake':state.stages.draft.state==='waiting'?'draft':state.activeStage||'draft',state:'running',model,label:state.stages.intake.state==='running'?'E4B Intake':'E4B Generation'})}else if(type==='civweave:generation-stop-requested'||type==='civweave:generation-cancelled'||type==='runtime-stop'){state.terminal='stopped';stageState(state.activeStage||'intake','stopped');ensurePanel()}}
 function latestRole(thread,role){const rows=Array.isArray(thread?.messages)?thread.messages:[];for(let i=rows.length-1;i>=0;i-=1)if(rows[i]?.role===role)return rows[i];return null}
 function latestAssistant(thread){return latestRole(thread,'assistant')}
 function fingerprint(row,thread){return`${clean(row?.text,200)}|${clean(row?.provider,80)}|${clean(row?.model,120)}|${clean(thread?.updatedAt,80)}`}
