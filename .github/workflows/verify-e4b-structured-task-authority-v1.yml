@@ -7,6 +7,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
       - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
@@ -27,6 +28,7 @@ on:
       - 'scripts/verify-generation-failure-inspector-v1.mjs'
       - 'scripts/verify-e4b-generation-visibility-v1.mjs'
       - 'scripts/verify-e4b-stall-watchdog-v1.mjs'
+      - 'scripts/verify-local-generation-model-policy-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
   pull_request:
@@ -35,6 +37,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
       - 'public/app/local-ai/gemma4-first-request-intake-bridge-v1.js'
@@ -55,6 +58,7 @@ on:
       - 'scripts/verify-generation-failure-inspector-v1.mjs'
       - 'scripts/verify-e4b-generation-visibility-v1.mjs'
       - 'scripts/verify-e4b-stall-watchdog-v1.mjs'
+      - 'scripts/verify-local-generation-model-policy-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
 
@@ -74,6 +78,8 @@ jobs:
         run: node --check public/service-worker.js
       - name: Syntax check canonical registered worker
         run: node --check public/service-worker-v203.js
+      - name: Syntax check configurable local model policy
+        run: node --check public/app/local-ai/local-generation-model-policy-v1.js
       - name: Syntax check structured task authority
         run: node --check public/app/local-ai/gemma4-structured-task-authority-v1.js
       - name: Syntax check LiteRT request authority
@@ -112,5 +118,7 @@ jobs:
         run: node scripts/verify-e4b-generation-visibility-v1.mjs
       - name: Verify E4B first-token watchdog and disabled silent transport
         run: node scripts/verify-e4b-stall-watchdog-v1.mjs
+      - name: Verify configured model roles and no E4B hardcoding
+        run: node scripts/verify-local-generation-model-policy-v1.mjs
       - name: Verify installed PWA generation takeover
         run: node scripts/verify-weave-pipeline-installed-generation-v1.mjs
