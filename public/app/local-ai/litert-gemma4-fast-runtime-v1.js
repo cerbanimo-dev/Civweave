@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.5.4-litert-phone-runtime-v1-transport-watchdog';
+const VERSION='1.5.5-litert-phone-runtime-v1-whitespace-preserving-stream';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -135,7 +135,7 @@ function chunkText(chunk){
     // equivalent to user-facing output.
     if(!part||typeof part!=='object')return typeof part==='string'?part:'';
     if(part.type&&part.type!=='text')return'';
-    return clean(part.text??part.content??'',12000);
+    return String(part.text??part.content??'').slice(0,12000);
   }).join('');
   if(chunk.message)return chunkText(chunk.message);
   return clean(chunk.text??chunk.delta??'',12000);
