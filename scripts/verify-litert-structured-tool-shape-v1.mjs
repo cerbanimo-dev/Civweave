@@ -3,8 +3,8 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-litert-request-authority-v1.js','utf8');
-assert.match(source,/1\.1\.4-gemma4-litert-request-authority-v1-e4b-only-weave/);
-assert.match(source,/1\.0\.2-guide-generation-tracker-v1-e4b-only-intake/);
+assert.match(source,/1\.2\.6-local-litert-request-authority-v1-context-safe/);
+assert.match(source,/1\.2\.0-guide-generation-tracker-v1-local-probe-ui/);
 assert.match(source,/litert-web-dual-tool-shape-json-fallback/);
 assert.match(source,/You MUST respond by calling the \$\{tool\.name\} tool exactly once/);
 assert.match(source,/LITERT_FORMATTED_OUTPUT_MISSING/);
@@ -38,7 +38,7 @@ assert.equal(authority.weaveDraftPipeline,true);
 assert.equal(authority.liveGenerationTracker,true);
 assert.equal(authority.globalFinalResponseStreaming,true);
 assert.equal(authority.familyLoaderWeaveRebind,true);
-assert.equal(authority.trackerVersion,'1.0.2-guide-generation-tracker-v1-e4b-only-intake');
+assert.equal(authority.trackerVersion,'1.2.0-guide-generation-tracker-v1-local-probe-ui');
 
 // The LiteRT structured-tool adapter remains compatible with E2B as an ordinary local selection. E4B Learning/Quest generation
 // is covered separately by the Weave Draft regression and must not use this adapter.
@@ -88,18 +88,18 @@ assert.equal(authority.installLearningPlanMetadataAdapter(),true);
 const metadata=await sandbox.CivweaveUnifiedChatSystemV1.generateLivingSchoolPlan({__civweaveE4BIntakeCompleted:true});
 assert.equal(metadata.provider,'downloaded-local');
 assert.equal(metadata.model,'gemma4-e4b-it-litert-web');
-assert.equal(metadata.e4bIntakeModel,'gemma4-e4b-it-litert-web');
+assert.equal(metadata.deepGenerationModel,'gemma4-e4b-it-litert-web');
 
 // Regression: unified-chat awaits FamilyAILoader.ensure() immediately before it
 // captures CivweaveModelRuntime. The loader may replace the runtime object, so the
 // E4B Weave wrapper must be rebound before ensure() resolves back to Moss.
 storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'}));
-const WEAVE_VERSION='1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only';
+const WEAVE_VERSION='1.3.3-weave-draft-pipeline-v1-context-budget-all';
 let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
 sandbox.CivweaveGuideGenerationTrackerV1={
-  version:'1.0.2-guide-generation-tracker-v1-e4b-only-intake',
+  version:'1.2.0-guide-generation-tracker-v1-local-probe-ui',
   install:()=>{trackerInstalls+=1;return true}
 };
 sandbox.CivweaveModelRuntime={generate:async()=>({status:'initial-runtime'})};
