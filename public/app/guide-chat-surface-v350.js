@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.171-guide-chat-surface-v350-e4b-execution-label';
+const VERSION='1.0.172-guide-chat-surface-v350-e4b-runtime-attribution';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -231,7 +231,10 @@ function actualPlanningModel(result){
   const planning=/Moss could not generate the high-level Learning Journey plan|Learning Journey plan:|Moss could not start the selected AI for Learning Journey planning/i.test(answer);
   // Other chat turns still show the model that they actually use. This is
   // exclusively the mandatory E4B Learning Journey route, never general chat.
-  if(planning&&globalThis.CivweaveGemma4LearningPlanEntryAuthorityV1?.selectedGemma?.())return'gemma4-e4b-it-litert-web';
+  const local=String(result?.provider||result?.actual?.provider||'').toLowerCase()==='downloaded-local';
+  const configured=globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
+  const knownE4B=/Moss E4B Learning Journey plan|Gemma 4 E4B|E4B Weave Draft/i.test(answer);
+  if(planning&&(knownE4B||(local&&/^gemma4-e[24]b-it-litert-web$/.test(configured))))return'gemma4-e4b-it-litert-web';
   return result?.executionModel||result?.actual?.model||result?.model||'';
 }
 function explicitHandoffTarget(result,system){const target=clean(result?.handoff?.targetSystem||result?.handoffSystem||result?.response?.handoffSystem,80);return SYSTEMS.includes(target)&&target!==system?target:''}
