@@ -13,6 +13,11 @@ const SOURCE_EVENTS=Object.freeze([
   'civweave:generation-stop-requested',
   'civweave:generation-cancelled'
 ]);
+// An older system surface may load v1 after the canonical parent shell's v2.
+// Never overwrite the newer cross-frame probe and GPU telemetry with v1.
+if(typeof globalThis.CivweaveGenerationLifecycleV2?.probeLocalModel==='function'){
+  globalThis.CivweaveGenerationLifecycleV2.install?.();return;
+}
 if(globalThis.CivweaveGenerationLifecycleV1?.version===VERSION){globalThis.CivweaveGenerationLifecycleV1.install?.();return}
 const clean=(value,max=50000)=>String(value??'').trim().slice(0,max);
 const now=()=>Date.now();
