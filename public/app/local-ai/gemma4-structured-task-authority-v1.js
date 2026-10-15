@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.0-structured-task-authority-v1-configured-role-models';
+const VERSION='1.4.1-structured-task-authority-v1-backend-first-token';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -139,7 +139,7 @@ function controlledFastRun(args,model,stage,timeoutMs){
       phase=clean(detail?.phase||phase,100);
       lastProgressAt=Date.now();
       emit('civweave:local-model-stage-progress',{stage,model,phase,visibleTextDeltas:tokens});
-      if(phase==='generating'&&tokens===0){
+      if(['prompt-submitted','awaiting-first-token'].includes(phase)&&tokens===0){
         if(stallTimer!=null)clearTimeout(stallTimer);
         stallTimer=setTimeout(()=>cancel(timeout('no-first-token')),90000);
       }
@@ -289,7 +289,7 @@ async function classifyIntake(args={}){
   // Ask E4B to emit JSON as ordinary streamed text, then validate it deterministically.
   let streamed='',deltaCount=0,result;
   try{
-    result=await controlledFastRun({
+    result=await controlledFastRun({__civweaveStage:'Intake',
       systemPrompt:intakeSystemPrompt()+'\\nReturn one valid JSON object conforming to this schema: '+JSON.stringify(intakeTool().parameters),
       messages:[{role:'user',content:`Classify this intake context:\n${JSON.stringify(context)}`}],
       maxNewTokens:INTAKE_MAX_TOKENS,structuredTool:null,
@@ -298,7 +298,7 @@ async function classifyIntake(args={}){
         streamed=(streamed+token).slice(-48000);
         emit('civweave:weaveling-intake-progress',{phase:'streaming',model:intakeModel(),token,index:deltaCount++,outputLength:streamed.length});
       }
-    },intakeModel(),'Weaveling model intake',INTAKE_TIMEOUT_MS);
+    },intakeModel(),'Weaveling intake',INTAKE_TIMEOUT_MS);
   }catch(error){
     emit('civweave:weaveling-intake-progress',{phase:'failed',model:intakeModel(),outputText:streamed,error:clean(error?.message||error,1200),code:error?.code||'CIVWEAVE_E4B_INTAKE_FAILED',deltaCount,rawDiagnostics:error?.rawDiagnostics||null});
     throw error;
@@ -312,7 +312,7 @@ async function classifyIntake(args={}){
     &&typeof raw.objective==='string'&&Array.isArray(raw.facts)
     &&Array.isArray(raw.missingContext)&&typeof raw.reply==='string';
   if(!validRouting){
-    const error=Object.assign(new Error('Gemma 4 model intake returned invalid JSON or omitted required routing fields; the raw response is available in Show failing message.'),{code:'CIVWEAVE_E4B_INTAKE_INVALID',executionModel:intakeModel(),rejectedText:outputText});
+    const error=Object.assign(new Error('The selected local model returned invalid intake JSON or omitted required routing fields; the raw response is available in Show failing message.'),{code:'CIVWEAVE_E4B_INTAKE_INVALID',executionModel:intakeModel(),rejectedText:outputText});
     emit('civweave:weaveling-intake-progress',{phase:'failed',model:intakeModel(),outputText,error:error.message,code:error.code,deltaCount});
     throw error;
   }
@@ -344,7 +344,7 @@ async function handoffIntake(record,args={}){
     if(typeof unified?.generateLivingSchoolPlan!=='function')throw Object.assign(new Error('Moss high-level Learning Journey generation is unavailable.'),{code:'CIVWEAVE_LEARNING_PLAN_GENERATOR_NOT_READY'});
     let result=await unified.generateLivingSchoolPlan({...args,text:learningGenerationText(record),systemId:'living-school',sourceSystemId:'civweave',sourceGuide:'Weaveling',__civweaveE4BIntakeCompleted:true,intake:record});
     throwIfCancelled();
-    if(/could not generate the high-level Learning Journey plan/i.test(clean(result?.response?.answer,3000)))result={...result,provider:'downloaded-local',model:deepModel(),generationStage:'e4b-learning-plan'};
+    if(/could not generate the high-level Learning Journey plan/i.test(clean(result?.response?.answer,3000)))result={...result,provider:'downloaded-local',model:result?.executionModel||deepModel(),generationStage:'local-learning-plan'};
     saveIntake({...record,state:'handed-off',handedOffTo:'living-school',handedOffAt:new Date().toISOString()});
     return result;
   }
@@ -398,7 +398,7 @@ function installAssistant(){
     try{return await intakeRespond(args)}catch(error){
       const cancelled=cancellationPacket(error);if(cancelled)return cancelled;
       const message=clean(error?.message||error,1400);
-      return{response:{answer:`Weaveling could not complete the local model intake stage. Nothing was handed to the planning model.\n\nIntake detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after the The local model local pack is ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-e4b-intake-failed',model:intakeModel(),intake:{failed:true,error:message,code:error?.code||'CIVWEAVE_E4B_INTAKE_FAILED'},fallbackFrom:null};
+      return{response:{answer:`Weaveling could not complete the local model intake stage. Nothing was handed to the planning model.\n\nIntake detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Check that the configured local model is installed and ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-e4b-intake-failed',model:intakeModel(),intake:{failed:true,error:message,code:error?.code||'CIVWEAVE_E4B_INTAKE_FAILED'},fallbackFrom:null};
     }finally{activeRequest=null;syncStopButton()}
   };
   copyMetadata(respond,baseFn);
@@ -455,7 +455,7 @@ globalThis.CivweaveGemma4StructuredTaskAuthorityV1=Object.freeze({
   selectedLocal,intakeEligible,paintPending,modelStatus,requireIntakeModel,requireDeepModel,orchestrator,intakeRuntime,controlledFastRun,cancelActiveGeneration,deepConfig,structuredTool,directE4BTransport,prepareStructuredRequest,
   readIntake,pendingIntake,saveIntake,clearIntake,intakeTool,intakeSystemPrompt,normalizeIntake,classifyIntake,intakePacket,learningGenerationText,questGenerationText,handoffIntake,intakeRespond,
   installRuntime,installAssistant,installStopUI,syncStopButton,install,schedule,
-  policy:'The selected local model is the mandatory local intake/classification stage; only ready learning or quest intake records may hand off to local structured generation.',
+  policy:'The configured local planning model handles intake and structured generation; the fast chat selection is not silently substituted.',
   intakeFirst:true,fallbackToE4B:false,classificationByObject:true,visibleIntakeProgress:true,constrainedE4B:true,stopButton:true
 });
 schedule();
