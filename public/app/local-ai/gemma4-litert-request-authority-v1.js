@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.6-gemma4-litert-request-authority-v1-streamed-e4b';
+const VERSION='1.1.7-gemma4-litert-request-authority-v1-answered-stream';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const FAST_RUNTIME_VERSION='1.5.2-litert-phone-runtime-v1-output-diagnostics';
-const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.5.2-output-diagnostics';
+const FAST_RUNTIME_VERSION='1.5.3-litert-phone-runtime-v1-no-hidden-thinking';
+const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.5.3-no-hidden-thinking';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.0.3-guide-generation-tracker-v1-live-raw-e4b';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.3-live-raw-e4b';
