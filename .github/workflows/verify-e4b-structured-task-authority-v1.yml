@@ -7,6 +7,8 @@ on:
       - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
@@ -29,6 +31,9 @@ on:
       - 'scripts/verify-e4b-generation-visibility-v1.mjs'
       - 'scripts/verify-e4b-stall-watchdog-v1.mjs'
       - 'scripts/verify-local-generation-model-policy-v1.mjs'
+      - 'scripts/verify-litert-first-token-recovery-v1.mjs'
+      - 'scripts/verify-litert-artisan-engine-boot-v1.mjs'
+      - 'scripts/verify-gemma4-litert-phone-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
   pull_request:
@@ -37,6 +42,8 @@ on:
       - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
       - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
@@ -59,6 +66,9 @@ on:
       - 'scripts/verify-e4b-generation-visibility-v1.mjs'
       - 'scripts/verify-e4b-stall-watchdog-v1.mjs'
       - 'scripts/verify-local-generation-model-policy-v1.mjs'
+      - 'scripts/verify-litert-first-token-recovery-v1.mjs'
+      - 'scripts/verify-litert-artisan-engine-boot-v1.mjs'
+      - 'scripts/verify-gemma4-litert-phone-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
 
@@ -80,6 +90,10 @@ jobs:
         run: node --check public/service-worker-v203.js
       - name: Syntax check configurable local model policy
         run: node --check public/app/local-ai/local-generation-model-policy-v1.js
+      - name: Syntax check LiteRT GPU runtime
+        run: node --check public/app/local-ai/litert-gemma4-fast-runtime-v1.js
+      - name: Syntax check GPU runtime lifecycle
+        run: node --check public/app/generation-lifecycle-v2.js
       - name: Syntax check structured task authority
         run: node --check public/app/local-ai/gemma4-structured-task-authority-v1.js
       - name: Syntax check LiteRT request authority
@@ -120,5 +134,11 @@ jobs:
         run: node scripts/verify-e4b-stall-watchdog-v1.mjs
       - name: Verify configured model roles and no E4B hardcoding
         run: node scripts/verify-local-generation-model-policy-v1.mjs
+      - name: Verify default WebGPU engine and first-token generation
+        run: node scripts/verify-litert-first-token-recovery-v1.mjs
+      - name: Verify default GPU backend and safe compatibility fallback
+        run: node scripts/verify-litert-artisan-engine-boot-v1.mjs
+      - name: Verify local phone package contracts
+        run: node scripts/verify-gemma4-litert-phone-v1.mjs
       - name: Verify installed PWA generation takeover
         run: node scripts/verify-weave-pipeline-installed-generation-v1.mjs
