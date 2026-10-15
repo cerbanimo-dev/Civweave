@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.2-gemma4-structured-task-authority-v1-no-silent-fallback';
+const VERSION='1.3.3-gemma4-structured-task-authority-v1-first-token-watchdog';
 const INTAKE_MODEL='gemma4-e4b-it-litert-web';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const TASK_TIMEOUT_MS=240000;
@@ -105,28 +105,56 @@ async function intakeRuntime(timeoutMs=12000){
 function controlledFastRun(args,model,stage,timeoutMs){
   throwIfCancelled();
   return new Promise(async(resolve,reject)=>{
-    let settled=false,timer=null;
+    let settled=false,timer=null,stallTimer=null,phase='loading-runtime',lastProgressAt=Date.now(),tokens=0;
     const fast=await intakeRuntime().catch(error=>{settled=true;reject(error);return null});
     if(!fast||settled)return;
+    const clearTimers=()=>{
+      if(timer!=null)try{clearTimeout(timer)}catch{}
+      if(stallTimer!=null)try{clearTimeout(stallTimer)}catch{}
+    };
     const finish=(ok,value)=>{
-      if(settled)return;settled=true;
-      if(timer!=null&&typeof clearTimeout==='function')try{clearTimeout(timer)}catch{}
+      if(settled)return;settled=true;clearTimers();
       if(activeFastRun?.finish===finish)activeFastRun=null;
       syncStopButton();
       ok?resolve(value):reject(value);
     };
+    const timeout=(kind)=>{
+      const error=timeoutError(stage,kind==='no-first-token'?90000:timeoutMs);
+      error.code=kind==='no-first-token'?'CIVWEAVE_LOCAL_FIRST_TOKEN_STALL':'CIVWEAVE_LOCAL_STAGE_TIMEOUT';
+      error.executionModel=model;error.runtimePhase=phase;
+      error.rawDiagnostics={stage,model,phase,visibleTextDeltas:tokens,idleMs:Date.now()-lastProgressAt,watchdog:kind};
+      return error;
+    };
     const cancel=(error=stopError())=>{
       if(settled)return false;
+      if(error&&typeof error==='object'){error.executionModel=error.executionModel||model;error.runtimePhase=error.runtimePhase||phase}
       finish(false,error);
-      try{void fast.unload?.()}catch{}
-      emit('civweave:generation-cancelled',{stage,model,code:error.code||'CIVWEAVE_GENERATION_STOPPED'});
+      try{if(typeof fast.cancel==='function')fast.cancel();else void fast.unload?.()}catch{}
+      emit('civweave:generation-cancelled',{stage,model,code:error.code||'CIVWEAVE_GENERATION_STOPPED',runtimePhase:phase,rawDiagnostics:error?.rawDiagnostics||null});
       return true;
     };
+    const markProgress=detail=>{
+      phase=clean(detail?.phase||phase,100);
+      lastProgressAt=Date.now();
+      emit('civweave:local-model-stage-progress',{stage,model,phase,visibleTextDeltas:tokens});
+      if(phase==='generating'&&tokens===0){
+        if(stallTimer!=null)clearTimeout(stallTimer);
+        stallTimer=setTimeout(()=>cancel(timeout('no-first-token')),90000);
+      }
+    };
+    const priorProgress=args?.onProgress,priorToken=args?.onToken;
+    const runArgs={...args,onProgress:detail=>{markProgress(detail);try{priorProgress?.(detail)}catch{}},
+      onToken:detail=>{
+        tokens++;lastProgressAt=Date.now();
+        if(stallTimer!=null){clearTimeout(stallTimer);stallTimer=null}
+        try{priorToken?.(detail)}catch{}
+      }};
     activeFastRun={model,stage,finish,cancel};syncStopButton();
-    if(Number(timeoutMs)>0&&typeof setTimeout==='function')timer=setTimeout(()=>cancel(timeoutError(stage,timeoutMs)),timeoutMs);
-    try{
-      Promise.resolve(fast.runFast(args,model)).then(value=>finish(true,value),error=>finish(false,error));
-    }catch(error){finish(false,error)}
+    if(Number(timeoutMs)>0&&typeof setTimeout==='function')timer=setTimeout(()=>cancel(timeout('stage-limit')),timeoutMs);
+    try{Promise.resolve(fast.runFast(runArgs,model)).then(value=>finish(true,value),error=>{
+      if(error&&typeof error==='object'){error.executionModel=error.executionModel||model;error.runtimePhase=error.runtimePhase||phase}
+      finish(false,error);
+    })}catch(error){finish(false,error)}
   });
 }
 function cancelActiveGeneration(reason='user-stop'){
