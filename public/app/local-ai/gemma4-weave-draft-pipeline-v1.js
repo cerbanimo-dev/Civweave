@@ -1,16 +1,16 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.1-gemma4-weave-draft-pipeline-v1-raw-stream';
+const VERSION='1.2.2-gemma4-weave-draft-pipeline-v1-compact-learning';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
 const QUEST_PURPOSE='civweave-weaveling-intention-json-v190';
 const PURPOSES=new Set([LEARNING_PURPOSE,QUEST_PURPOSE]);
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','browser','smollm2','smollm3','qwen']);
 const ARTIFACT_PREFIX='civweave.weave-draft-pipeline.v1';
-const DRAFT_TOKENS=Object.freeze({learning:1500,quest:2100});
-const COMPILE_TOKENS=Object.freeze({learning:1400,quest:2100});
-const REPAIR_TOKENS=Object.freeze({learning:1200,quest:1700});
+const DRAFT_TOKENS=Object.freeze({learning:900,quest:2100});
+const COMPILE_TOKENS=Object.freeze({learning:1100,quest:2100});
+const REPAIR_TOKENS=Object.freeze({learning:1000,quest:1700});
 const MAX_STAGE_TEXT=16000;
 
 if(globalThis.CivweaveGemma4WeaveDraftPipelineV1?.version===VERSION){
@@ -181,10 +181,12 @@ function validateCompiled(value,schema,kind){
   return errors.slice(0,30);
 }
 function draftSystem(kind){
+  if(kind==='learning')return 'You are Moss, drafting a high-level Learning Journey for REVIEW only. Write a concise shareable plan, NOT JSON and NOT hidden reasoning. Include the topic, an observable learning goal, 3–5 short ordered modules (title, focus, demonstrable outcome), a final mastery demonstration, and any assumptions. Mention only necessary materials (such as a tarot deck); do not invent specialist or civic governance requirements. Do not write full lessons or quiz questions. Keep the draft under 450 words.';
   const subject=kind==='learning'?'high-level Learning Journey':'reviewable Quest';
   return `You are Gemma 4 E4B working in Civweave Weave Draft mode. Create the strongest useful ${subject} you can from the supplied request and context. This is a planning artifact, not JSON, not a tool call, and not private chain-of-thought. Give conclusions, structure, dependencies, and useful planning detail without narrating hidden reasoning.\n\nYou may organize the draft however you think is clearest. Content requirements:\n- State the intended outcome or observable capability.\n- Lay out the stages/modules/Quest beats and important dependencies.\n- Include a complete resource manifest: information, references, tools, materials, software, places, people, services, money/access, or other resources genuinely needed. If a category is unnecessary, say so rather than inventing a need.\n- Identify any specialist, licensed, regulated, certified, or otherwise professionally restricted work. State why it is required and what it blocks. If none is required, say none.\n- Identify decision gates. For collective/civic decisions, state the decision, useful options, prerequisites, what later beat is blocked, and that the vote must occur in Anarchadia before the blocked beat proceeds. If no collective vote is required, say none.\n- Distinguish user-supplied facts from assumptions; do not invent missing facts.\n- State completion/evidence criteria.\n${kind==='learning'?'- Keep this at high-level learning-plan depth. Do not write full lessons, quizzes, readings, or teaching content yet.':'- Use Living School only for learning, Cerbanimo for skilled work, FellowFare for resources/exchange, and Anarchadia for governance/consent/voting when actually needed.'}`;
 }
 function compilerSystem(kind){
+  if(kind==='learning')return 'You are Moss converting a short Learning Journey draft to ONE valid JSON object matching TARGET_SCHEMA. Include title, capability, level, mode, proof, assumptions, and 3–5 modules with title, focus, outcome. Also include resourceManifest, specialistWork, decisionGates as arrays; use empty arrays for genuinely unnecessary special requirements. No markdown, prose, private reasoning, lessons, or invented learner facts.';
   return `You are Gemma 4 E4B working as Civweave's compiler. Convert a completed Weave Draft into exactly one valid JSON object matching TARGET_SCHEMA. Do not output markdown, prose, a tool call, or code fences. Preserve the substance of the draft rather than redesigning it. Fill required fields that are clearly implied; leave genuinely unknown details as assumptions rather than inventing user facts.\n\nIn addition to TARGET_SCHEMA fields, ALWAYS include these companion arrays at the top level (additional properties are allowed):\n- resourceManifest: resources from the draft, each as an object with a useful name/category plus why/when needed when known. Empty array only when the draft genuinely requires no additional resources.\n- specialistWork: specialist/licensed/regulated work, each as an object with role/work, why required, licensedOrRegulated when known, and blockingBeat when known.\n- decisionGates: decisions, each as an object with decision, why, options, prerequisites, blockingBeat, voteRequired.\n\n${kind==='quest'?'For every decisionGates item where voteRequired is true, the target Quest paths MUST also contain an Anarchadia path with type "civic-governance". Its steps must contain the mandatory vote as a blocking Quest beat before the dependent work proceeds. Preserve or create governance review material consistent with those gates.':'For a Learning Journey, keep modules at review-plan depth and do not compile lesson content.'}`;
 }
 function repairSystem(kind){
@@ -235,7 +237,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     saveArtifact({...lastArtifact,state:'drafted',draft});
 
     paint('E4B has the plan. Compiling it into Civweave JSON…');
-    const compilePayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},weaveDraft:clean(draft,kind==='learning'?10000:13000)};
+    const compilePayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},weaveDraft:clean(draft,kind==='learning'?4500:13000)};
     const compiledText=await runE4B({pipelineId,purpose,kind,phase:'compile',label:'E4B JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
     let compiled=canonicalize(parseJsonLoose(compiledText),kind);
 
@@ -245,7 +247,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
 
     if(errors.length){
       paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. E4B is repairing only those fields…`);
-      const repairPayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},validationErrors:errors,priorCompile:compiled||parseJsonLoose(compiledText)||compiledText,weaveDraft:clean(draft,9000)};
+      const repairPayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},validationErrors:errors,priorCompile:compiled||parseJsonLoose(compiledText)||compiledText,weaveDraft:clean(draft,kind==='learning'?4500:9000)};
       const repairedText=await runE4B({pipelineId,purpose,kind,phase:'repair',label:'E4B Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
       errors=validateCompiled(compiled,schema,kind);
