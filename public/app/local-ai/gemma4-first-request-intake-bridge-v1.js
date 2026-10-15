@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-first-request-intake-bridge-v1-configured-model';
-const PIPELINE_VERSION='1.3.0-weave-draft-pipeline-v1-local-role-models';
+const VERSION='1.2.1-first-request-intake-bridge-v1-task-model-bind';
+const PIPELINE_VERSION='1.3.1-weave-draft-pipeline-v1-task-stage-models';
 const modelFor=()=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const supported=()=>Boolean(globalThis.CivweaveLocalGenerationModelPolicyV1?.supportsSelected?.());
 
