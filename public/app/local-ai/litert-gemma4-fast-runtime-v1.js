@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.5.3-litert-phone-runtime-v1-no-hidden-thinking';
+const VERSION='1.5.4-litert-phone-runtime-v1-transport-watchdog';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -18,7 +18,7 @@ const GEMMA_FAST_ALIASES=new Set(PROFILES['gemma4-e2b-it-litert-web'].aliases);
 const GEMMA_DEEP_ALIASES=new Set(PROFILES['gemma4-e4b-it-litert-web'].aliases);
 if(globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===VERSION)return;
 let pendingUnloadReason='',engineReleasePromise=null;
-let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,wrapped=null,generationActive=false,lastMetrics=null;
+let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,wrapped=null,generationActive=false,lastMetrics=null,activeChat=null,cancelRequested=false;
 const now=()=>performance.now();
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
@@ -164,12 +164,17 @@ async function runFast(args={},forcedModelId=''){
   const pick=selected(),profile=profileFor(forcedModelId||pick?.id);
   if(!profile)throw Object.assign(new Error('No supported Gemma 4 LiteRT profile is selected.'),{code:'LITERT_GEMMA4_PROFILE_MISSING'});
   if(generationActive)throw Object.assign(new Error('The LiteRT Gemma 4 engine is already generating.'),{code:'LOCAL_MODEL_BUSY'});
-  generationActive=true;
+  generationActive=true;cancelRequested=false;
+  const progress=(phase,detail={})=>{const payload={phase,model:profile.id,...detail};emit('civweave:litert-gemma4-progress',payload);try{args.onProgress?.(payload)}catch{}};
+  const ensureNotCancelled=()=>{if(cancelRequested)throw Object.assign(new Error('LiteRT generation cancelled.'),{code:'CIVWEAVE_GENERATION_STOPPED',executionModel:profile.id,cancelled:true})};
   const started=now();let chat=null,firstTokenAt=0,index=0,text='',toolCall=null,chunkCount=0,nontextChunks=0;
   const rawDiagnostics=()=>({model:profile.id,chunksObserved:chunkCount,textDeltas:index,nontextChunks,outputCharacters:text.length});
   try{
+    progress('checking-model');
     const status=await fastStatus(profile.id);if(!status?.available)throw Object.assign(new Error(`${profile.label} is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});
-    const activeEngine=await ensureEngine(profile.id),requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,rows=normalizedMessages(systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
+    progress('loading-engine');
+    const activeEngine=await ensureEngine(profile.id);ensureNotCancelled();
+    const requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,rows=normalizedMessages(systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
     const maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024));
     // Disable Gemma 4 thinking in the *free-streaming* stages as well as tool calls.
     // Otherwise a mobile token budget can be consumed by a non-user-visible
@@ -178,19 +183,21 @@ async function runFast(args={},forcedModelId=''){
     if(profile.family==='gemma4'||formattedTool)prefaceConfig.extra_context={enable_thinking:false};
     if(formattedTool)prefaceConfig.tools=[formattedTool];
     const sampler=profile.sampler||{k:64,p:.95,temperature:1};
-    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)}},preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
+    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)}},preface:prefaceConfig,prefillPrefaceOnInit:false,filterChannelContentFromKvCache:true};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
-    chat=await activeEngine.createConversation(conversationConfig);
-    emit('civweave:litert-gemma4-progress',{phase:'generating',model:profile.id,backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
+    progress('creating-conversation',{prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,prefillPrefaceOnInit:false});
+    chat=await activeEngine.createConversation(conversationConfig);activeChat=chat;ensureNotCancelled();
+    progress('generating',{backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
     if(formattedTool){
-      const response=await chat.sendMessage(latest);
+      const response=await chat.sendMessage(latest);ensureNotCancelled();
       firstTokenAt=now();
       const calls=chunkToolCalls(response);if(calls.length)toolCall=calls.at(-1);
       text=chunkText(response);
     }else{
       const stream=chat.sendMessageStreaming(latest);
-      for await(const chunk of stream){chunkCount++;const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
+      for await(const chunk of stream){ensureNotCancelled();chunkCount++;const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
     }
+    ensureNotCancelled();
     const formattedText=formattedTool?toolArgumentText(toolCall):'';
     if(formattedTool&&!formattedText)throw Object.assign(new Error(`LiteRT-LM constrained decoding completed without the required ${formattedTool.function.name} tool call.`),{code:'LITERT_FORMATTED_OUTPUT_MISSING',formattedOutput:true,toolName:formattedTool.function.name});
     const outputText=(formattedTool?formattedText:text).replace(/^\s*<think>[\s\S]*?<\/think>\s*/i,'').trim();
@@ -208,8 +215,9 @@ async function runFast(args={},forcedModelId=''){
   }finally{
     try{
       if(chat)try{await chat.delete()}catch{}
+      if(activeChat===chat)activeChat=null;
       if(pendingUnloadReason){const reason=pendingUnloadReason;pendingUnloadReason='';await unloadEngine(reason,{afterGeneration:true})}
-    }finally{generationActive=false}
+    }finally{generationActive=false;cancelRequested=false}
   }
 }
 async function accelerationTarget(selectedId){const profile=profileFor(selectedId);if(!profile)return null;if(selectedId===profile.id)return profile;return Boolean((await fastStatus(profile.id))?.available)?profile:null}
@@ -229,10 +237,20 @@ function install(){
   try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}
   wrapped=next;emit('civweave:litert-gemma4-fast-runtime-ready',{models:Object.keys(PROFILES),transparentAliases:[...ALIAS_TO_FAST.keys()],qwen35Models:[QWEN_FAST,QWEN_DEEP],qwen35GemmaRoleBridge:true,oneEngineAtATime:true,phoneProfile:'qwen35-flagship',mtpRequested:true,jspiRequired:true,formattedOutput:true,constrainedDecoding:true});return true;
 }
-async function unload(){await unloadEngine('manual-unload');lastMetrics=null;return true}
+function cancel(){
+  if(!generationActive)return false;
+  cancelRequested=true;
+  try{activeChat?.cancel?.()}catch{}
+  emit('civweave:litert-gemma4-cancel-requested',{model:engineModelId||enginePromiseModelId||'',reason:'user-or-no-progress'});
+  return true;
+}
+async function unload(){
+  if(generationActive)cancel();
+  await unloadEngine('manual-unload');lastMetrics=null;return true;
+}
 for(const name of ['civweave:local-model-runtime-ready','civweave:gemma4-litert-fast-extension-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 addEventListener('civweave:local-model-selection',()=>{const pick=selected(),target=profileFor(pick?.id);if(engine&&(!pick?.active||!target||target.id!==engineModelId))void unloadEngine('selection-change')});
 addEventListener('pagehide',()=>{void unloadEngine('pagehide')});
 install();
-globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,fastModelId:QWEN_FAST,fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,engineContextTokens:4096,oneEngineAtATime:true,mtpRequested:true,jspiRequired:true,phoneProfile:'qwen35-flagship',formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
+globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,fastModelId:QWEN_FAST,fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,engineContextTokens:4096,oneEngineAtATime:true,mtpRequested:true,jspiRequired:true,phoneProfile:'qwen35-flagship',formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,cancel,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
 })();
