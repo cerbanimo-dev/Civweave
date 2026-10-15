@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.5.1-litert-phone-runtime-v1-artisan-config-compat';
+const VERSION='1.5.2-litert-phone-runtime-v1-output-diagnostics';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -126,7 +126,20 @@ function normalizedMessages(systemPrompt,messages=[]){
   while(rows.length>2&&chars>16000){const removed=rows.splice(rows[0]?.role==='system'?1:0,1)[0];chars-=removed?.content?.length||0}
   return rows;
 }
-function chunkText(chunk){if(!chunk)return'';if(typeof chunk==='string')return chunk;if(typeof chunk.content==='string')return chunk.content;if(Array.isArray(chunk.content))return chunk.content.map(part=>clean(part?.text??part?.content??'',12000)).join('');return clean(chunk.text??chunk.delta??'',12000)}
+function chunkText(chunk){
+  if(!chunk)return'';
+  if(typeof chunk==='string')return chunk;
+  if(typeof chunk.content==='string')return chunk.content;
+  if(Array.isArray(chunk.content))return chunk.content.map(part=>{
+    // Only forward visible text parts; a tool call or thinking channel is not
+    // equivalent to user-facing output.
+    if(!part||typeof part!=='object')return typeof part==='string'?part:'';
+    if(part.type&&part.type!=='text')return'';
+    return clean(part.text??part.content??'',12000);
+  }).join('');
+  if(chunk.message)return chunkText(chunk.message);
+  return clean(chunk.text??chunk.delta??'',12000);
+}
 function structuredJsonContract(tool){
   const name=clean(tool?.function?.name||'civweave_result',120),schema=tool?.function?.parameters||{type:'object'};
   let serialized='{}';try{serialized=JSON.stringify(schema)}catch{}
@@ -152,7 +165,8 @@ async function runFast(args={},forcedModelId=''){
   if(!profile)throw Object.assign(new Error('No supported Gemma 4 LiteRT profile is selected.'),{code:'LITERT_GEMMA4_PROFILE_MISSING'});
   if(generationActive)throw Object.assign(new Error('The LiteRT Gemma 4 engine is already generating.'),{code:'LOCAL_MODEL_BUSY'});
   generationActive=true;
-  const started=now();let chat=null,firstTokenAt=0,index=0,text='',toolCall=null;
+  const started=now();let chat=null,firstTokenAt=0,index=0,text='',toolCall=null,chunkCount=0,nontextChunks=0;
+  const rawDiagnostics=()=>({model:profile.id,chunksObserved:chunkCount,textDeltas:index,nontextChunks,outputCharacters:text.length});
   try{
     const status=await fastStatus(profile.id);if(!status?.available)throw Object.assign(new Error(`${profile.label} is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});
     const activeEngine=await ensureEngine(profile.id),requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,rows=normalizedMessages(systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
@@ -171,12 +185,12 @@ async function runFast(args={},forcedModelId=''){
       text=chunkText(response);
     }else{
       const stream=chat.sendMessageStreaming(latest);
-      for await(const chunk of stream){const piece=chunkText(chunk);if(!piece)continue;if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
+      for await(const chunk of stream){chunkCount++;const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
     }
     const formattedText=formattedTool?toolArgumentText(toolCall):'';
     if(formattedTool&&!formattedText)throw Object.assign(new Error(`LiteRT-LM constrained decoding completed without the required ${formattedTool.function.name} tool call.`),{code:'LITERT_FORMATTED_OUTPUT_MISSING',formattedOutput:true,toolName:formattedTool.function.name});
     const outputText=(formattedTool?formattedText:text).replace(/^\s*<think>[\s\S]*?<\/think>\s*/i,'').trim();
-    if(!outputText)throw Object.assign(new Error(`${profile.label} completed without a usable answer. Retry with a smaller request.`),{code:'LOCAL_MODEL_EMPTY_OUTPUT'});
+    if(!outputText)throw Object.assign(new Error(`${profile.label} emitted no visible output (${chunkCount} chunks, ${index} text deltas). The raw stage diagnostics are available in Show failing message.`),{code:'LOCAL_MODEL_EMPTY_OUTPUT',rawDiagnostics:rawDiagnostics(),executionModel:profile.id,rejectedText:text});
     let benchmark={};try{benchmark=benchmarkMetrics(await chat.getBenchmarkInfo())}catch{}
     const completed=now(),generationMs=Math.round(completed-started),ttftMs=firstTokenAt?Math.round(firstTokenAt-started):null,decodeSeconds=Math.max(.001,(completed-(firstTokenAt||started))/1000),approxTokens=Math.max(1,Math.round(outputText.length/3.7)),measuredApproxTokensPerSecond=Number((approxTokens/decodeSeconds).toFixed(2));
     const metrics={runtime:'litert-lm-web-0.17.1',backend:'webgpu-gpu-artisan',model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
@@ -184,8 +198,8 @@ async function runFast(args={},forcedModelId=''){
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
   }catch(error){
     // Propagate the actual executing model, not the model selected for chat.
-    if(error&&typeof error==='object')try{error.executionModel=profile.id}catch{}
-    emit('civweave:litert-gemma4-failed',{model:profile.id,code:error?.code||'LOCAL_LITERT_EXECUTION_FAILED',message:clean(error?.message||error,500)});
+    if(error&&typeof error==='object')try{error.executionModel=profile.id;error.rawDiagnostics=error.rawDiagnostics||rawDiagnostics();error.rejectedText=error.rejectedText??text}catch{}
+    emit('civweave:litert-gemma4-failed',{model:profile.id,code:error?.code||'LOCAL_LITERT_EXECUTION_FAILED',message:clean(error?.message||error,500),rawDiagnostics:error?.rawDiagnostics||null});
     throw error;
   }finally{
     try{
