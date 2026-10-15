@@ -1,8 +1,9 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.2-gemma4-weave-draft-pipeline-v1-compact-learning';
-const DEEP_MODEL='gemma4-e4b-it-litert-web';
+const VERSION='1.3.0-weave-draft-pipeline-v1-local-role-models';
+const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
+const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
 const QUEST_PURPOSE='civweave-weaveling-intention-json-v190';
 const PURPOSES=new Set([LEARNING_PURPOSE,QUEST_PURPOSE]);
@@ -32,7 +33,7 @@ function kindFor(purpose){return purpose===LEARNING_PURPOSE?'learning':'quest'}
 function localProvider(request){return LOCAL_PROVIDERS.has(clean(request?.config?.provider||request?.config?.route,120).toLowerCase())}
 function targeted(request){return PURPOSES.has(clean(request?.purpose,180))&&localProvider(request)}
 function dispatch(detail={}){
-  const payload={version:VERSION,at:now(),model:DEEP_MODEL,...detail};
+  const payload={version:VERSION,at:now(),model:modelFor(),...detail};
   try{globalThis.dispatchEvent?.(new CustomEvent('civweave:weave-pipeline',{detail:payload}))}catch{}
   return payload;
 }
@@ -183,22 +184,22 @@ function validateCompiled(value,schema,kind){
 function draftSystem(kind){
   if(kind==='learning')return 'You are Moss, drafting a high-level Learning Journey for REVIEW only. Write a concise shareable plan, NOT JSON and NOT hidden reasoning. Include the topic, an observable learning goal, 3–5 short ordered modules (title, focus, demonstrable outcome), a final mastery demonstration, and any assumptions. Mention only necessary materials (such as a tarot deck); do not invent specialist or civic governance requirements. Do not write full lessons or quiz questions. Keep the draft under 450 words.';
   const subject=kind==='learning'?'high-level Learning Journey':'reviewable Quest';
-  return `You are Gemma 4 E4B working in Civweave Weave Draft mode. Create the strongest useful ${subject} you can from the supplied request and context. This is a planning artifact, not JSON, not a tool call, and not private chain-of-thought. Give conclusions, structure, dependencies, and useful planning detail without narrating hidden reasoning.\n\nYou may organize the draft however you think is clearest. Content requirements:\n- State the intended outcome or observable capability.\n- Lay out the stages/modules/Quest beats and important dependencies.\n- Include a complete resource manifest: information, references, tools, materials, software, places, people, services, money/access, or other resources genuinely needed. If a category is unnecessary, say so rather than inventing a need.\n- Identify any specialist, licensed, regulated, certified, or otherwise professionally restricted work. State why it is required and what it blocks. If none is required, say none.\n- Identify decision gates. For collective/civic decisions, state the decision, useful options, prerequisites, what later beat is blocked, and that the vote must occur in Anarchadia before the blocked beat proceeds. If no collective vote is required, say none.\n- Distinguish user-supplied facts from assumptions; do not invent missing facts.\n- State completion/evidence criteria.\n${kind==='learning'?'- Keep this at high-level learning-plan depth. Do not write full lessons, quizzes, readings, or teaching content yet.':'- Use Living School only for learning, Cerbanimo for skilled work, FellowFare for resources/exchange, and Anarchadia for governance/consent/voting when actually needed.'}`;
+  return `You are the local planning model working in Civweave Weave Draft mode. Create the strongest useful ${subject} you can from the supplied request and context. This is a planning artifact, not JSON, not a tool call, and not private chain-of-thought. Give conclusions, structure, dependencies, and useful planning detail without narrating hidden reasoning.\n\nYou may organize the draft however you think is clearest. Content requirements:\n- State the intended outcome or observable capability.\n- Lay out the stages/modules/Quest beats and important dependencies.\n- Include a complete resource manifest: information, references, tools, materials, software, places, people, services, money/access, or other resources genuinely needed. If a category is unnecessary, say so rather than inventing a need.\n- Identify any specialist, licensed, regulated, certified, or otherwise professionally restricted work. State why it is required and what it blocks. If none is required, say none.\n- Identify decision gates. For collective/civic decisions, state the decision, useful options, prerequisites, what later beat is blocked, and that the vote must occur in Anarchadia before the blocked beat proceeds. If no collective vote is required, say none.\n- Distinguish user-supplied facts from assumptions; do not invent missing facts.\n- State completion/evidence criteria.\n${kind==='learning'?'- Keep this at high-level learning-plan depth. Do not write full lessons, quizzes, readings, or teaching content yet.':'- Use Living School only for learning, Cerbanimo for skilled work, FellowFare for resources/exchange, and Anarchadia for governance/consent/voting when actually needed.'}`;
 }
 function compilerSystem(kind){
   if(kind==='learning')return 'You are Moss converting a short Learning Journey draft to ONE valid JSON object matching TARGET_SCHEMA. Include title, capability, level, mode, proof, assumptions, and 3–5 modules with title, focus, outcome. Also include resourceManifest, specialistWork, decisionGates as arrays; use empty arrays for genuinely unnecessary special requirements. No markdown, prose, private reasoning, lessons, or invented learner facts.';
-  return `You are Gemma 4 E4B working as Civweave's compiler. Convert a completed Weave Draft into exactly one valid JSON object matching TARGET_SCHEMA. Do not output markdown, prose, a tool call, or code fences. Preserve the substance of the draft rather than redesigning it. Fill required fields that are clearly implied; leave genuinely unknown details as assumptions rather than inventing user facts.\n\nIn addition to TARGET_SCHEMA fields, ALWAYS include these companion arrays at the top level (additional properties are allowed):\n- resourceManifest: resources from the draft, each as an object with a useful name/category plus why/when needed when known. Empty array only when the draft genuinely requires no additional resources.\n- specialistWork: specialist/licensed/regulated work, each as an object with role/work, why required, licensedOrRegulated when known, and blockingBeat when known.\n- decisionGates: decisions, each as an object with decision, why, options, prerequisites, blockingBeat, voteRequired.\n\n${kind==='quest'?'For every decisionGates item where voteRequired is true, the target Quest paths MUST also contain an Anarchadia path with type "civic-governance". Its steps must contain the mandatory vote as a blocking Quest beat before the dependent work proceeds. Preserve or create governance review material consistent with those gates.':'For a Learning Journey, keep modules at review-plan depth and do not compile lesson content.'}`;
+  return `You are the local planning model working as Civweave's compiler. Convert a completed Weave Draft into exactly one valid JSON object matching TARGET_SCHEMA. Do not output markdown, prose, a tool call, or code fences. Preserve the substance of the draft rather than redesigning it. Fill required fields that are clearly implied; leave genuinely unknown details as assumptions rather than inventing user facts.\n\nIn addition to TARGET_SCHEMA fields, ALWAYS include these companion arrays at the top level (additional properties are allowed):\n- resourceManifest: resources from the draft, each as an object with a useful name/category plus why/when needed when known. Empty array only when the draft genuinely requires no additional resources.\n- specialistWork: specialist/licensed/regulated work, each as an object with role/work, why required, licensedOrRegulated when known, and blockingBeat when known.\n- decisionGates: decisions, each as an object with decision, why, options, prerequisites, blockingBeat, voteRequired.\n\n${kind==='quest'?'For every decisionGates item where voteRequired is true, the target Quest paths MUST also contain an Anarchadia path with type "civic-governance". Its steps must contain the mandatory vote as a blocking Quest beat before the dependent work proceeds. Preserve or create governance review material consistent with those gates.':'For a Learning Journey, keep modules at review-plan depth and do not compile lesson content.'}`;
 }
 function repairSystem(kind){
-  return `You are Gemma 4 E4B repairing a Civweave JSON compile. Return ONLY one corrected JSON object. Keep all valid content from the prior compile and Weave Draft. Correct every listed validation error, preserve resourceManifest, specialistWork, and decisionGates, and do not add unsupported user facts. ${kind==='quest'?'Any voteRequired decision gate must also be represented as a mandatory blocking Anarchadia civic-governance Quest beat.':''}`;
+  return `You are the local planning model repairing a Civweave JSON compile. Return ONLY one corrected JSON object. Keep all valid content from the prior compile and Weave Draft. Correct every listed validation error, preserve resourceManifest, specialistWork, and decisionGates, and do not add unsupported user facts. ${kind==='quest'?'Any voteRequired decision gate must also be represented as a mandatory blocking Anarchadia civic-governance Quest beat.':''}`;
 }
 function modelMessages(messages=[]){return(Array.isArray(messages)?messages:[]).filter(row=>clean(row?.role,20).toLowerCase()!=='system').map(row=>({role:/assistant/i.test(clean(row?.role,20))?'assistant':'user',content:clean(row?.content??row?.text,12000)})).filter(row=>row.content).slice(-6)}
-async function runE4B({pipelineId,purpose,kind,phase,label,systemPrompt,messages,maxNewTokens}){
+async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messages,maxNewTokens}){
   const auth=authority();
   if(typeof auth?.requireDeepModel==='function')await auth.requireDeepModel();
   const run=typeof auth?.controlledFastRun==='function'?auth.controlledFastRun.bind(auth):null;
   const fast=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
-  if(!run&&typeof fast?.runFast!=='function')throw Object.assign(new Error('Gemma 4 E4B LiteRT runtime is unavailable.'),{code:'CIVWEAVE_E4B_WEAVE_RUNTIME_UNAVAILABLE'});
+  if(!run&&typeof fast?.runFast!=='function')throw Object.assign(new Error('the local planning model LiteRT runtime is unavailable.'),{code:'CIVWEAVE_Local_WEAVE_RUNTIME_UNAVAILABLE'});
   let streamed='',index=0;
   dispatch({pipelineId,purpose,kind,phase,state:'running',label});
   const args={systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
@@ -207,11 +208,11 @@ async function runE4B({pipelineId,purpose,kind,phase,label,systemPrompt,messages
     dispatch({pipelineId,purpose,kind,phase,state:'streaming',label,token,index:index++,streamLength:streamed.length});
   }};
   try{
-    const result=run?await run(args,DEEP_MODEL,label,Number(auth?.taskTimeoutMs)||600000):await fast.runFast(args,DEEP_MODEL);
+    const result=run?await run(args,modelFor(),label,Number(auth?.taskTimeoutMs)||600000):await fast.runFast(args,modelFor());
     const output=String(result?.outputText??result?.text??streamed).slice(0,48000);
     const text=clean(output,48000);
     const prior=lastArtifact?.rawStages||{};
-    saveArtifact({...lastArtifact,rawStages:{...prior,[phase]:output},lastExecutedModel:DEEP_MODEL});
+    saveArtifact({...lastArtifact,rawStages:{...prior,[phase]:output},lastExecutedModel:modelFor()});
     dispatch({pipelineId,purpose,kind,phase,state:'complete',label,text:output,streamLength:output.length,deltaCount:index});
     return text;
   }catch(error){
@@ -219,8 +220,8 @@ async function runE4B({pipelineId,purpose,kind,phase,label,systemPrompt,messages
     // nothing. The user can inspect this without a subsequent successful plan.
     const output=String(error?.rejectedText??streamed).slice(0,48000);
     const prior=lastArtifact?.rawStages||{};
-    saveArtifact({...lastArtifact,rawStages:{...prior,[phase]:output},lastExecutedModel:DEEP_MODEL,failedStage:phase,rawDiagnostics:error?.rawDiagnostics||null});
-    dispatch({pipelineId,purpose,kind,phase,state:'failed',label,text:output,streamLength:output.length,deltaCount:index,code:error?.code||'E4B_STAGE_FAILED',message:clean(error?.message||error,1200),rawDiagnostics:error?.rawDiagnostics||null});
+    saveArtifact({...lastArtifact,rawStages:{...prior,[phase]:output},lastExecutedModel:modelFor(),failedStage:phase,rawDiagnostics:error?.rawDiagnostics||null});
+    dispatch({pipelineId,purpose,kind,phase,state:'failed',label,text:output,streamLength:output.length,deltaCount:index,code:error?.code||'Local_STAGE_FAILED',message:clean(error?.message||error,1200),rawDiagnostics:error?.rawDiagnostics||null});
     throw error;
   }
 }
@@ -228,17 +229,17 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
   const kind=kindFor(purpose),pipelineId=uid(),startedAt=now();
   if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
   dispatch({pipelineId,purpose,kind,phase:'pipeline',state:'start',label:'Weave pipeline'});
-  saveArtifact({pipelineId,purpose,kind,state:'running',startedAt,draft:'',compiled:null,resourceManifest:[],specialistWork:[],decisionGates:[],validationErrors:[],rawStages:{},lastExecutedModel:DEEP_MODEL});
+  saveArtifact({pipelineId,purpose,kind,state:'running',startedAt,draft:'',compiled:null,resourceManifest:[],specialistWork:[],decisionGates:[],validationErrors:[],rawStages:{},lastExecutedModel:modelFor()});
   try{
-    paint(`E4B is freely drafting the ${kind==='learning'?'Learning Journey':'Quest'}…`);
-    try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:DEEP_MODEL,mode:'weave-draft-pass'})}catch{}
-    const draft=await runE4B({pipelineId,purpose,kind,phase:'draft',label:'E4B Weave Draft',systemPrompt:draftSystem(kind),messages:modelMessages(messages),maxNewTokens:DRAFT_TOKENS[kind]});
-    if(!draft)throw Object.assign(new Error('E4B Weave Draft returned no planning content.'),{code:'CIVWEAVE_E4B_WEAVE_DRAFT_EMPTY'});
+    paint(`The local planning model is freely drafting the ${kind==='learning'?'Learning Journey':'Quest'}…`);
+    try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:modelFor(),mode:'weave-draft-pass'})}catch{}
+    const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:modelMessages(messages),maxNewTokens:DRAFT_TOKENS[kind]});
+    if(!draft)throw Object.assign(new Error('Local Weave Draft returned no planning content.'),{code:'CIVWEAVE_Local_WEAVE_DRAFT_EMPTY'});
     saveArtifact({...lastArtifact,state:'drafted',draft});
 
-    paint('E4B has the plan. Compiling it into Civweave JSON…');
+    paint('Local has the plan. Compiling it into Civweave JSON…');
     const compilePayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},weaveDraft:clean(draft,kind==='learning'?4500:13000)};
-    const compiledText=await runE4B({pipelineId,purpose,kind,phase:'compile',label:'E4B JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
+    const compiledText=await runLocal({pipelineId,purpose,kind,phase:'compile',label:'Local JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
     let compiled=canonicalize(parseJsonLoose(compiledText),kind);
 
     paint('Validating the compiled Civweave structure…');
@@ -246,9 +247,9 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     dispatch({pipelineId,purpose,kind,phase:'validate',state:errors.length?'needs-repair':'complete',label:'Deterministic validation',errors:[...errors],resourceCount:compiled?.resourceManifest?.length||0,specialistCount:compiled?.specialistWork?.length||0,decisionGateCount:compiled?.decisionGates?.length||0});
 
     if(errors.length){
-      paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. E4B is repairing only those fields…`);
+      paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. Local is repairing only those fields…`);
       const repairPayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},validationErrors:errors,priorCompile:compiled||parseJsonLoose(compiledText)||compiledText,weaveDraft:clean(draft,kind==='learning'?4500:9000)};
-      const repairedText=await runE4B({pipelineId,purpose,kind,phase:'repair',label:'E4B Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
+      const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
       errors=validateCompiled(compiled,schema,kind);
       dispatch({pipelineId,purpose,kind,phase:'validate',state:errors.length?'failed':'complete',label:'Deterministic re-validation',errors:[...errors],resourceCount:compiled?.resourceManifest?.length||0,specialistCount:compiled?.specialistWork?.length||0,decisionGateCount:compiled?.decisionGates?.length||0});
@@ -256,7 +257,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
 
     if(errors.length){
       saveArtifact({...lastArtifact,state:'failed',draft,compiled,resourceManifest:compiled?.resourceManifest||[],specialistWork:compiled?.specialistWork||[],decisionGates:compiled?.decisionGates||[],validationErrors:errors});
-      throw Object.assign(new Error(`E4B compiled the Weave Draft, but ${errors.length} required structure ${errors.length===1?'issue remains':'issues remain'}: ${errors.slice(0,6).join(' ')}`),{code:'CIVWEAVE_E4B_WEAVE_COMPILE_INVALID',validationErrors:errors,pipelineId});
+      throw Object.assign(new Error(`Local compiled the Weave Draft, but ${errors.length} required structure ${errors.length===1?'issue remains':'issues remain'}: ${errors.slice(0,6).join(' ')}`),{code:'CIVWEAVE_Local_WEAVE_COMPILE_INVALID',validationErrors:errors,pipelineId});
     }
 
     const resourceManifest=compiled.resourceManifest||[],specialistWork=compiled.specialistWork||[],decisionGates=compiled.decisionGates||[];
@@ -264,16 +265,16 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     paint(`Weave compiled: ${resourceManifest.length} resource${resourceManifest.length===1?'':'s'} · ${specialistWork.length} specialist flag${specialistWork.length===1?'':'s'} · ${decisionGates.length} decision gate${decisionGates.length===1?'':'s'}…`);
     dispatch({pipelineId,purpose,kind,phase:'pipeline',state:'complete',label:'Saved',artifactKey:artifactKey(kind),resourceCount:resourceManifest.length,specialistCount:specialistWork.length,decisionGateCount:decisionGates.length});
     const text=JSON.stringify(compiled);
-    return{text,payload:{text,weavePipeline:{pipelineId,artifactKey:artifactKey(kind)}},model:DEEP_MODEL,provider:'downloaded-local',streamed:true,diagnostics:[{kind:'e4b-weave-draft-two-pass',model:DEEP_MODEL,purpose,pipelineId,repairUsed:Boolean(lastArtifact?.validationErrors?.length)}]};
+    return{text,payload:{text,weavePipeline:{pipelineId,artifactKey:artifactKey(kind)}},model:modelFor(),provider:'downloaded-local',streamed:true,diagnostics:[{kind:'local-weave-draft-two-pass',model:modelFor(),purpose,pipelineId,repairUsed:Boolean(lastArtifact?.validationErrors?.length)}]};
   }catch(error){
-    dispatch({pipelineId,purpose,kind,phase:'pipeline',state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',label:'Pipeline stopped',code:error?.code||'CIVWEAVE_E4B_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)});
-    if(lastArtifact?.pipelineId===pipelineId&&lastArtifact.state!=='failed')saveArtifact({...lastArtifact,state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',error:{code:error?.code||'CIVWEAVE_E4B_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)}});
+    dispatch({pipelineId,purpose,kind,phase:'pipeline',state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',label:'Pipeline stopped',code:error?.code||'CIVWEAVE_Local_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)});
+    if(lastArtifact?.pipelineId===pipelineId&&lastArtifact.state!=='failed')saveArtifact({...lastArtifact,state:error?.code==='CIVWEAVE_GENERATION_STOPPED'?'stopped':'failed',error:{code:error?.code||'CIVWEAVE_Local_WEAVE_PIPELINE_FAILED',message:clean(error?.message||error,1800)}});
     throw error;
   }
 }
 function deepConfig(config={},purpose=''){
   const kind=kindFor(purpose),current=Math.max(0,Number(config.maxTokens)||0);
-  return{...config,provider:'downloaded-local',route:'downloaded-local',model:DEEP_MODEL,timeoutMs:600000,maxTokens:Math.max(current,kind==='learning'?1200:1800),stream:false};
+  return{...config,provider:'downloaded-local',route:'downloaded-local',model:modelFor(config),timeoutMs:Number(authority()?.taskTimeoutMs)||240000,maxTokens:Math.max(current,kind==='learning'?1200:1800),stream:true};
 }
 async function prepareRequest(request={}){
   const purpose=clean(request.purpose,180);if(!targeted(request))return request;
@@ -305,9 +306,9 @@ for(const name of ['civweave:local-model-runtime-ready','civweave:assistant-runt
 for(const delay of [0,80,300,900,2200,5000,10000])setTimeout(schedule,delay);
 
 globalThis.CivweaveGemma4WeaveDraftPipelineV1=Object.freeze({
-  version:VERSION,deepModel:DEEP_MODEL,learningPurpose:LEARNING_PURPOSE,questPurpose:QUEST_PURPOSE,
+  version:VERSION,get deepModel(){return modelFor()},learningPurpose:LEARNING_PURPOSE,questPurpose:QUEST_PURPOSE,
   targeted,kindFor,firstBalancedJson,parseJsonLoose,companions,canonicalize,validateSchema,validateCompiled,draftSystem,compilerSystem,repairSystem,weaveTransport,prepareRequest,installRuntime,install,schedule,readArtifact,lastArtifact:()=>lastArtifact,
-  architecture:'E4B intake -> E4B free Weave Draft -> E4B JSON compile -> deterministic validation -> one E4B targeted repair if needed',
+  architecture:'Local intake -> Local free Weave Draft -> Local JSON compile -> deterministic validation -> one Local targeted repair if needed',
   constrainedToolRequired:false,
   privateChainOfThoughtExposed:false,
   resourceManifestRequired:true,
