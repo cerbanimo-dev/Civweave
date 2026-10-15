@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.5.2-litert-phone-runtime-v1-output-diagnostics';
+const VERSION='1.5.3-litert-phone-runtime-v1-no-hidden-thinking';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -171,8 +171,12 @@ async function runFast(args={},forcedModelId=''){
     const status=await fastStatus(profile.id);if(!status?.available)throw Object.assign(new Error(`${profile.label} is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});
     const activeEngine=await ensureEngine(profile.id),requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,rows=normalizedMessages(systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
     const maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024));
+    // Disable Gemma 4 thinking in the *free-streaming* stages as well as tool calls.
+    // Otherwise a mobile token budget can be consumed by a non-user-visible
+    // thought channel and the application sees no answer text at all.
     const prefaceConfig={messages:preface};
-    if(formattedTool){prefaceConfig.tools=[formattedTool];prefaceConfig.extra_context={enable_thinking:false}}
+    if(profile.family==='gemma4'||formattedTool)prefaceConfig.extra_context={enable_thinking:false};
+    if(formattedTool)prefaceConfig.tools=[formattedTool];
     const sampler=profile.sampler||{k:64,p:.95,temperature:1};
     const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)}},preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
