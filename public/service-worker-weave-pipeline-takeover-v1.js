@@ -1,11 +1,13 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r7';
+const REVISION='weave-pipeline-takeover-v1-r8';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v463-e4b-only-weave';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r7';
+const CACHE='cwrecovery-v464-e4b-visible-stream';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r8';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
+  '/app/persistent-system-shell-v1.js',
+  '/app/working-campus-v440.html',
   '/app/shared-guide-surface-v236.js',
   '/app/guide-chat-surface-v350.js',
   '/app/guide-generation-tracker-v1.js',
