@@ -7,6 +7,7 @@ on:
       - 'public/app/research-source-*.mjs'
       - 'public/app/living-school-local-research-v243.mjs'
       - 'scripts/scan-research-provenance-v1.mjs'
+      - 'scripts/ira-provenance-index-v1.py'
       - 'scripts/test-research-source-provenance-v1.mjs'
       - 'scripts/verify-living-school-selected-ai-research-fallback-v1.mjs'
       - '.github/workflows/verify-research-source-provenance-v1.yml'
@@ -33,3 +34,5 @@ jobs:
         run: node --test scripts/test-research-source-provenance-v1.mjs
       - name: Selected-model research fallback regression
         run: node scripts/verify-living-school-selected-ai-research-fallback-v1.mjs
+      - name: Historical IRA index syntax
+        run: python -m py_compile scripts/ira-provenance-index-v1.py
