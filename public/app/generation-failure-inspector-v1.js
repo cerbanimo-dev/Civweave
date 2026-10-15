@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-generation-failure-inspector-v1-all-stage-raw';
+const VERSION='1.1.1-generation-failure-inspector-v1-cross-frame-no-output';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-generation-failure-inspector-v1-style';
 const MAX_AGE_MS=20*60*1000;
@@ -61,11 +61,12 @@ function onPipeline(event){
     if(detail.token)state.text=clean(state.text+detail.token,48000);
     if(detail.text)state.text=clean(detail.text,48000);
     state.stage=detail.phase;
+    if(detail.state==='failed'){state.message=detail.message||'';state.rawDiagnostics=detail.rawDiagnostics||null}
   }
   if(detail.phase==='validate'&&Array.isArray(detail.errors)&&detail.errors.length)state.errors=detail.errors.map(item=>clean(item,1200)).filter(Boolean).slice(0,24);
   pipelineState.set(id,state);
   if(detail.phase==='pipeline'&&detail.state==='failed'){
-    record({outputText:state.text,errors:state.errors,code:detail.code,purpose:detail.purpose||state.purpose,stage:state.stage||'draft',model:detail.model||state.model,message:detail.message,source:'weave-pipeline'});
+    record({outputText:state.text,errors:state.errors,code:detail.code,purpose:detail.purpose||state.purpose,stage:state.stage||'draft',model:detail.model||state.model,message:detail.message||state.message,rawDiagnostics:state.rawDiagnostics||null,source:'weave-pipeline'});
     pipelineState.delete(id);
   }else if(detail.phase==='pipeline'&&['complete','stopped'].includes(detail.state))pipelineState.delete(id);
 }
@@ -112,10 +113,16 @@ function onThreadChanged(event){
 function install(){installRuntime();installStyle();return true}
 function schedule(reason='event'){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;install();emit('installed',{reason,runtime:Boolean(runtimeTarget)})})}
 addEventListener?.('civweave:weave-pipeline',onPipeline);
-addEventListener?.('civweave:weaveling-intake-progress',event=>{
+function onIntake(event){
   const d=event?.detail||{};
   if(d.phase!=='failed')return;
   record({outputText:d.outputText||'',model:d.model,stage:'intake',code:d.code,message:d.error,rawDiagnostics:d.rawDiagnostics,source:'e4b-intake'});
+}
+addEventListener?.('civweave:weaveling-intake-progress',onIntake);
+addEventListener?.('civweave:generation-lifecycle',event=>{
+  const row=event?.detail||{};
+  if(row.type==='civweave:weave-pipeline')onPipeline({detail:row.detail||{}});
+  if(row.type==='civweave:weaveling-intake-progress')onIntake({detail:row.detail||{}});
 });
 addEventListener?.('civweave:realm-guide-thread-changed',onThreadChanged);
 for(const name of ['civweave:assistant-runtime-ready','civweave:gemma4-litert-first-request-ready','civweave:guide-loader-reset','civweave:guide-chat-ready','pageshow'])addEventListener?.(name,()=>schedule(name));
