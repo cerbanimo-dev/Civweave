@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.1-weave-draft-pipeline-v1-task-stage-models';
+const VERSION='1.3.2-weave-draft-pipeline-v1-context-safe';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -9,9 +9,9 @@ const QUEST_PURPOSE='civweave-weaveling-intention-json-v190';
 const PURPOSES=new Set([LEARNING_PURPOSE,QUEST_PURPOSE]);
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','browser','smollm2','smollm3','qwen']);
 const ARTIFACT_PREFIX='civweave.weave-draft-pipeline.v1';
-const DRAFT_TOKENS=Object.freeze({learning:900,quest:2100});
-const COMPILE_TOKENS=Object.freeze({learning:1100,quest:2100});
-const REPAIR_TOKENS=Object.freeze({learning:1000,quest:1700});
+const DRAFT_TOKENS=Object.freeze({learning:700,quest:2100});
+const COMPILE_TOKENS=Object.freeze({learning:900,quest:2100});
+const REPAIR_TOKENS=Object.freeze({learning:800,quest:1700});
 const MAX_STAGE_TEXT=16000;
 
 if(globalThis.CivweaveGemma4WeaveDraftPipelineV1?.version===VERSION){
@@ -182,7 +182,7 @@ function validateCompiled(value,schema,kind){
   return errors.slice(0,30);
 }
 function draftSystem(kind){
-  if(kind==='learning')return 'You are Moss, drafting a high-level Learning Journey for REVIEW only. Write a concise shareable plan, NOT JSON and NOT hidden reasoning. Include the topic, an observable learning goal, 3–5 short ordered modules (title, focus, demonstrable outcome), a final mastery demonstration, and any assumptions. Mention only necessary materials (such as a tarot deck); do not invent specialist or civic governance requirements. Do not write full lessons or quiz questions. Keep the draft under 450 words.';
+  if(kind==='learning')return 'You are Moss, drafting a high-level Learning Journey for REVIEW only. Write a concise shareable plan, NOT JSON and NOT hidden reasoning. Include the topic, an observable learning goal, 3–5 short ordered modules (title, focus, demonstrable outcome), a final mastery demonstration, and any assumptions. Mention only necessary materials (such as a tarot deck); do not invent specialist or civic governance requirements. Do not write full lessons or quiz questions. Keep the draft under 250 words.';
   const subject=kind==='learning'?'high-level Learning Journey':'reviewable Quest';
   return `You are the local planning model working in Civweave Weave Draft mode. Create the strongest useful ${subject} you can from the supplied request and context. This is a planning artifact, not JSON, not a tool call, and not private chain-of-thought. Give conclusions, structure, dependencies, and useful planning detail without narrating hidden reasoning.\n\nYou may organize the draft however you think is clearest. Content requirements:\n- State the intended outcome or observable capability.\n- Lay out the stages/modules/Quest beats and important dependencies.\n- Include a complete resource manifest: information, references, tools, materials, software, places, people, services, money/access, or other resources genuinely needed. If a category is unnecessary, say so rather than inventing a need.\n- Identify any specialist, licensed, regulated, certified, or otherwise professionally restricted work. State why it is required and what it blocks. If none is required, say none.\n- Identify decision gates. For collective/civic decisions, state the decision, useful options, prerequisites, what later beat is blocked, and that the vote must occur in Anarchadia before the blocked beat proceeds. If no collective vote is required, say none.\n- Distinguish user-supplied facts from assumptions; do not invent missing facts.\n- State completion/evidence criteria.\n${kind==='learning'?'- Keep this at high-level learning-plan depth. Do not write full lessons, quizzes, readings, or teaching content yet.':'- Use Living School only for learning, Cerbanimo for skilled work, FellowFare for resources/exchange, and Anarchadia for governance/consent/voting when actually needed.'}`;
 }
@@ -201,7 +201,7 @@ async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messag
   const fast=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
   if(!run&&typeof fast?.runFast!=='function')throw Object.assign(new Error('The configured local planning runtime is unavailable.'),{code:'CIVWEAVE_E4B_WEAVE_RUNTIME_UNAVAILABLE'});
   let streamed='',index=0;
-  dispatch({pipelineId,purpose,kind,phase,state:'running',label});
+  dispatch({pipelineId,purpose,kind,phase,state:'running',label,model:modelFor(),promptCharacters:messages.reduce((n,row)=>n+String(row?.content||'').length,0)+systemPrompt.length});
   const args={__civweaveStage:label,systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
     const token=String(event?.text??'');if(!token)return;
     streamed=(streamed+token).slice(-48000);
@@ -225,6 +225,28 @@ async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messag
     throw error;
   }
 }
+function compactSchema(value,depth=0){
+  // A schema can exceed the entire local KV-cache before the model writes
+  // a token. Retain enforceable shape, not redundant prose descriptions.
+  if(!value||typeof value!=='object'||depth>5)return value;
+  const keep=['type','required','enum','const','minItems','maxItems','additionalProperties','pattern'];
+  const obj={};for(const key of keep)if(value[key]!==undefined)obj[key]=value[key];
+  if(value.items)obj.items=compactSchema(value.items,depth+1);
+  if(value.properties&&typeof value.properties==='object'){
+    obj.properties={};for(const [name,spec] of Object.entries(value.properties))obj.properties[name]=compactSchema(spec,depth+1);
+  }
+  return obj;
+}
+function compactLearningPayload(schema,draft){
+  const shape=compactSchema(schema&&typeof schema==='object'?schema:{type:'object'});
+  const base={kind:'learning',targetSchema:shape,weaveDraft:clean(draft,2900)};
+  // Graceful size reduction, never truncate a JSON string mid-object.
+  for(const limit of [2900,2200,1500,950,600]){
+    base.weaveDraft=clean(draft,limit);
+    if(JSON.stringify(base).length<=4100)return base;
+  }
+  return{kind:'learning',targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[],properties:{title:{type:'string'},capability:{type:'string'},level:{type:'string'},mode:{type:'string'},proof:{type:'string'},modules:{type:'array',items:{type:'object',required:['title','focus','outcome']}}}},weaveDraft:clean(draft,1400)};
+}
 async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,emit:runtimeEmit}={}){
   const kind=kindFor(purpose),pipelineId=uid(),startedAt=now();
   if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
@@ -233,12 +255,12 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
   try{
     paint(`The local planning model is freely drafting the ${kind==='learning'?'Learning Journey':'Quest'}…`);
     try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:modelFor(),mode:'weave-draft-pass'})}catch{}
-    const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:modelMessages(messages),maxNewTokens:DRAFT_TOKENS[kind]});
+    const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:kind==='learning'?modelMessages(messages).slice(-1):modelMessages(messages),maxNewTokens:DRAFT_TOKENS[kind]});
     if(!draft)throw Object.assign(new Error('Local Weave Draft returned no planning content.'),{code:'CIVWEAVE_E4B_WEAVE_DRAFT_EMPTY'});
     saveArtifact({...lastArtifact,state:'drafted',draft});
 
     paint('The planning draft is ready. Compiling it into Civweave JSON…');
-    const compilePayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},weaveDraft:clean(draft,kind==='learning'?4500:13000)};
+    const compilePayload=kind==='learning'?compactLearningPayload(schema,draft):{kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},weaveDraft:clean(draft,13000)};
     const compiledText=await runLocal({pipelineId,purpose,kind,phase:'compile',label:'Local JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
     let compiled=canonicalize(parseJsonLoose(compiledText),kind);
 
@@ -248,7 +270,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
 
     if(errors.length){
       paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. The planning model is repairing those fields…`);
-      const repairPayload={kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},validationErrors:errors,priorCompile:compiled||parseJsonLoose(compiledText)||compiledText,weaveDraft:clean(draft,kind==='learning'?4500:9000)};
+      const repairPayload=kind==='learning'?{...compactLearningPayload(schema,draft),validationErrors:errors.slice(0,8),priorCompile:compiled||parseJsonLoose(compiledText)||clean(compiledText,1200)}:{kind,targetSchema:schema&&typeof schema==='object'?schema:{type:'object'},validationErrors:errors,priorCompile:compiled||parseJsonLoose(compiledText)||compiledText,weaveDraft:clean(draft,9000)};
       const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
       errors=validateCompiled(compiled,schema,kind);
