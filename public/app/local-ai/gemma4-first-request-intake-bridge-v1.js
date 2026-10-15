@@ -67,7 +67,7 @@ async function ensureWeaveAuthority(args={}){
 }
 function failurePacket(error){
   const code=clean(error?.code||'CIVWEAVE_FIRST_REQUEST_INTAKE_BRIDGE_FAILED',180),stage=clean(error?.stage,220),message=clean(error?.message||error,1400);
-  const intakeFailure=/modelFor()|INTAKE/i.test(`${code} ${stage}`),model=intakeFailure?modelFor():modelFor();
+  const intakeFailure=/INTAKE/i.test(`${code} ${stage}`),model=clean(error?.executionModel||modelFor(),240);
   return{response:{answer:`Weaveling could not complete the local ${intakeFailure?'local intake':'Weave generation'} path. Nothing was generated or queued.\n\nGeneration detail: ${message}`,choice:{mode:'Plan',system:'civweave',room:'civweave.quad',nextAction:'Retry after the Gemma 4 local pack and the Weave pipeline are ready.'},assumptions:[],requiresConsent:false,confidence:1},requestedProvider:'downloaded-local',provider:'weaveling-first-request-bridge-failed',model,fallbackFrom:null,bridge:{failed:true,code,stage,model}};
 }
 async function directIntake(args={}){
