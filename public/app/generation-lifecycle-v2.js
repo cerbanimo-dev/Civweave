@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-generation-lifecycle-v2-transport-milestones';
+const VERSION='1.2.0-generation-lifecycle-v2-model-neutral-stages';
 const HISTORY_KEY='civweave.generation-lifecycle.v1.history';
 const MAX_HISTORY=220;
 const STOP_GRACE_MS=120000;
@@ -71,22 +71,20 @@ function record(type,detail={},source='window'){
 }
 function latest(type=''){for(let i=history.length-1;i>=0;i-=1)if(!type||history[i].type===type)return history[i];return null}
 function inferRuntimeStage(args={},forcedModelId=''){
-  const explicit=clean(args.__civweaveStage||args.stage||args.stageLabel,180);if(explicit)return explicit;
-  const prompt=clean(args.systemPrompt,16000).toLowerCase(),model=clean(forcedModelId,160).toLowerCase();
-  if(prompt.includes('fast e4b intake')||prompt.includes('route_civweave_request'))return'E4B Intake';
-  if(model.includes('e2b'))return'E2B Generation';
-  if(prompt.includes('targeted repair'))return'E4B Repair';
-  if(prompt.includes("civweave's compiler")||prompt.includes('convert a completed weave draft'))return'E4B JSON Compile';
-  if(prompt.includes('draft mode')||prompt.includes('planning artifact'))return'E4B Plan Draft';
-  if(model.includes('e4b'))return'E4B Generation';
+  const explicit=clean(args.__civweaveStage||args.stage||args.stageLabel,180);
+  if(explicit)return explicit;
+  const prompt=clean(args.systemPrompt,16000).toLowerCase();
+  if(/intake|route_civweave_request|classify this intake/.test(prompt))return'Intake';
+  if(/targeted repair|repair this payload/.test(prompt))return'Targeted repair';
+  if(/compiler|convert a completed weave draft|compile this payload/.test(prompt))return'JSON compile';
+  if(/draft|planning artifact/.test(prompt))return'Plan draft';
   return'Local generation';
 }
 function stageId(label=''){
   const value=clean(label,220).toLowerCase();
-  if(value.includes('intake')||value.includes('e2b'))return'intake';
+  if(value.includes('intake'))return'intake';
   if(value.includes('repair'))return'repair';
   if(value.includes('compile')||value.includes('json'))return'compile';
-  if(value.includes('draft')||value.includes('plan')||value.includes('e4b'))return'draft';
   return'draft';
 }
 function windows(){
