@@ -14,6 +14,7 @@ assert.ok(source.includes('Treat every returned note as model-derived and unveri
 const transformed=source
   .replace("import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';","const core=globalThis.__core;")
   .replace("import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=subject-links-v266';","const {searchDownloadedKnowledge}=globalThis.__knowledge;")
+  .replace("import {evaluateResearchSource,filterResearchSources,researchPromptPolicy,INDICATOR_REVISION} from './research-source-policy-v1.mjs';","const {evaluateResearchSource,filterResearchSources,researchPromptPolicy,INDICATOR_REVISION}=globalThis.__sourcePolicy;")
   .replace('export async function researchCapability','async function researchCapability')
   +'\nglobalThis.__livingSchoolResearchTestApi={researchCapability};\n';
 
@@ -62,6 +63,7 @@ const sandbox={
   globalThis:null,
   __core:core,
   __knowledge:{async searchDownloadedKnowledge(){return[]}},
+  __sourcePolicy:{evaluateResearchSource:()=>({action:'allow'}),filterResearchSources:rows=>({accepted:rows,excluded:[]}),researchPromptPolicy:()=>'',INDICATOR_REVISION:'meta-h2-2026-seed-20261015'},
   CivweaveFamilyAILoaderV105:{async ensure(){}},
   CivweaveModelRuntime:runtime
 };
