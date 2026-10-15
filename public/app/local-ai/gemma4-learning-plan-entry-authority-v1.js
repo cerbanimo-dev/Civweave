@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-learning-plan-entry-authority-v1-configured-model';
+const VERSION='1.2.1-learning-plan-entry-authority-v1-dynamic-model';
 const PURPOSE='living-school-learning-plan-review-v2';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','browser','smollm2','smollm3','qwen']);
