@@ -26,6 +26,7 @@ on:
       - 'scripts/verify-gemma4-learning-plan-entry-authority-v1.mjs'
       - 'scripts/verify-generation-failure-inspector-v1.mjs'
       - 'scripts/verify-e4b-generation-visibility-v1.mjs'
+      - 'scripts/verify-e4b-stall-watchdog-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
   pull_request:
@@ -53,6 +54,7 @@ on:
       - 'scripts/verify-gemma4-learning-plan-entry-authority-v1.mjs'
       - 'scripts/verify-generation-failure-inspector-v1.mjs'
       - 'scripts/verify-e4b-generation-visibility-v1.mjs'
+      - 'scripts/verify-e4b-stall-watchdog-v1.mjs'
       - 'scripts/verify-weave-pipeline-installed-generation-v1.mjs'
       - '.github/workflows/verify-e4b-structured-task-authority-v1.yml'
 
@@ -108,5 +110,7 @@ jobs:
         run: node scripts/verify-generation-failure-inspector-v1.mjs
       - name: Verify visible E4B streams and execution metadata
         run: node scripts/verify-e4b-generation-visibility-v1.mjs
+      - name: Verify E4B first-token watchdog and disabled silent transport
+        run: node scripts/verify-e4b-stall-watchdog-v1.mjs
       - name: Verify installed PWA generation takeover
         run: node scripts/verify-weave-pipeline-installed-generation-v1.mjs
