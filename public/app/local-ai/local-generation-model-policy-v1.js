@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-local-generation-model-policy-v1';
+const VERSION='1.0.1-local-generation-model-policy-v1-deep-intake';
 if(globalThis.CivweaveLocalGenerationModelPolicyV1?.version===VERSION)return;
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const clean=(s,max=240)=>String(s??'').trim().slice(0,max);
@@ -18,7 +18,7 @@ function supportsSelected(){return Boolean(pairFor(clean(selection()?.id)))}
 function resolve(role='deep',options={}){
   const selected=clean(options.selectedModel||options.config?.model||selection()?.id);
   const pair=pairFor(selected)||pairFor(clean(selection()?.id));
-  if(pair)return role==='intake'||role==='fast'?pair.fast:pair.deep;
+  if(pair)return role==='fast'?pair.fast:pair.deep;
   // Do not silently reassign an unrelated local model to a Gemma 4 model.
   return selected||'';
 }
