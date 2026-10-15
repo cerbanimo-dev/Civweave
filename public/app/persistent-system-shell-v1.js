@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.5-e4b-generation-diagnostics';
+const VERSION='1.1.6-e4b-stall-watchdog';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -19,7 +19,7 @@ const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.133-settings-v324-direct-local-model-view';
 const SETTINGS_LOCAL_ROUTE_VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
-const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.171-guide-chat-surface-v350-e4b-execution-label';
+const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.172-guide-chat-surface-v350-e4b-runtime-attribution';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
   'living-school':'#9cff73',
