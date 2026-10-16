@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.2-structured-task-authority-v1-backend-evidence';
+const VERSION='1.4.3-structured-task-authority-v1-stall-quarantines-gpu';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -124,6 +124,10 @@ function controlledFastRun(args,model,stage,timeoutMs){
       const error=timeoutError(stage,kind==='no-first-token'?90000:timeoutMs);
       error.code=kind==='no-first-token'?'CIVWEAVE_LOCAL_FIRST_TOKEN_STALL':'CIVWEAVE_LOCAL_STAGE_TIMEOUT';
       error.executionModel=model;error.runtimePhase=phase;
+      if(kind==='no-first-token'){
+        error.restartRequired=true;
+        error.message+=' Local GPU inference never produced a token. Restart the local runtime before repeating this request.';
+      }
       error.rawDiagnostics={stage,model,phase,visibleTextDeltas:tokens,idleMs:Date.now()-lastProgressAt,watchdog:kind,runtimeDetails:lastRuntimeDetails};
       return error;
     };
@@ -131,7 +135,7 @@ function controlledFastRun(args,model,stage,timeoutMs){
       if(settled)return false;
       if(error&&typeof error==='object'){error.executionModel=error.executionModel||model;error.runtimePhase=error.runtimePhase||phase}
       finish(false,error);
-      try{if(typeof fast.cancel==='function')fast.cancel();else void fast.unload?.()}catch{}
+      try{if(typeof fast.cancel==='function')fast.cancel(error?.code==='CIVWEAVE_LOCAL_FIRST_TOKEN_STALL'?'no-first-token':error?.code==='CIVWEAVE_LOCAL_STAGE_TIMEOUT'?'stage-limit':'user-stop');else void fast.unload?.()}catch{}
       emit('civweave:generation-cancelled',{stage,model,code:error.code||'CIVWEAVE_GENERATION_STOPPED',runtimePhase:phase,rawDiagnostics:error?.rawDiagnostics||null});
       return true;
     };
