@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.3.1-generation-lifecycle-v2-isolated-probe-events';
+const VERSION='1.3.2-generation-lifecycle-v2-gpu-restart-guard';
 const HISTORY_KEY='civweave.generation-lifecycle.v1.history';
 const MAX_HISTORY=220;
 const STOP_GRACE_MS=120000;
@@ -138,7 +138,12 @@ async function probeLocalModel({timeoutMs=90000}={}){
     const result={ok:false,model:target,code:'LOCAL_INFERENCE_PROBE_NOT_READY',message:'The configured local runtime is not loaded.'};
     record('runtime-probe',result,'probe');return result;
   }
-  if(picked.api?.state?.()?.generationActive){
+  const health=picked.api?.state?.();
+  if(health?.gpuQuarantine){
+    const result={ok:false,model:target,code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED',phase:health.gpuQuarantine.phase,message:'The prior inference timed out or the WebGPU queue failed. Restart the full Civweave runtime before testing again.',restartRequired:true};
+    record('runtime-probe',result,'probe');return result;
+  }
+  if(health?.generationActive){
     const result={ok:false,model:target,code:'LOCAL_INFERENCE_PROBE_ENGINE_BUSY',message:'The previous inference has not released its GPU session. Restart the local runtime to recover.'};
     record('runtime-probe',result,'probe');return result;
   }
@@ -161,7 +166,7 @@ async function probeLocalModel({timeoutMs=90000}={}){
     record('runtime-probe',result,'probe');return result;
   }catch(error){
     completed=true;clearTimeout(timer);
-    const result={ok:false,model:error?.executionModel||target,code:error?.code||'LOCAL_INFERENCE_PROBE_FAILED',phase:error?.runtimePhase||phase,message:clean(error?.message||error,400),elapsedMs:now()-started};
+    const result={ok:false,model:error?.executionModel||target,code:error?.code||'LOCAL_INFERENCE_PROBE_FAILED',phase:error?.runtimePhase||phase,message:clean(error?.message||error,400),elapsedMs:now()-started,restartRequired:Boolean(error?.restartRequired)};
     record('runtime-probe',result,'probe');return result;
   }
 }
