@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.8.0-litert-runtime-v1-gpu-fault-quarantine-minimal-probe';
+const VERSION='1.8.1-litert-runtime-v1-bare-sdk-probe';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -252,9 +252,14 @@ async function runFast(args={},forcedModelId=''){
     if(!sdkDefaultSampler)sessionConfig.samplerParams={k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)};
     const conversationConfig={sessionConfig,preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
-    progress('prefilling-preface',{prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:true,engineMode,sdkDefaultSampler});
-    chat=await activeEngine.createConversation(conversationConfig);activeChat=chat;ensureNotCancelled();
-    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),sdkDefaultSampler});
+    // The diagnostic probe deliberately uses Google's minimal public API:
+    // Engine.create({model, maxNumTokens}) -> createConversation() -> sendMessageStreaming('READY').
+    // If even this fails, the GPU queue/model is unavailable independent
+    // of Civweave's planning preface, tools, sampler, or learning schema.
+    const minimalProbe=Boolean(args.__civweaveProbe)&&!formattedTool;
+    progress(minimalProbe?'creating-minimal-conversation':'prefilling-preface',{prefaceCharacters:minimalProbe?0:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:!minimalProbe,engineMode,sdkDefaultSampler});
+    chat=await activeEngine.createConversation(minimalProbe?undefined:conversationConfig);activeChat=chat;ensureNotCancelled();
+    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),sdkDefaultSampler,minimalProbe});
     if(formattedTool){
       progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:true});
       const response=await chat.sendMessage(latest);ensureNotCancelled();
