@@ -8,7 +8,7 @@ assert.match(src,/TASK_TIMEOUT_MS=240000/);
 
 const E4B='gemma4-e4b-it-litert-web';
 const timers=new Map(),progress=[],storage=new Map();
-let nextId=1,cancelCalls=0,inferenceCalls=0;
+let nextId=1,cancelCalls=0,inferenceCalls=0,lastCancelReason='';
 const setTimeout=(fn,ms)=>{const id=nextId++;timers.set(id,{fn,ms});return id};
 const clearTimeout=id=>timers.delete(id);
 const LocalFast={
@@ -20,7 +20,7 @@ const LocalFast={
     args.onProgress?.({phase:'awaiting-first-token',model});
     return new Promise(()=>{}); // Simulated wedged GPU/WASM decoder.
   },
-  cancel:()=>{cancelCalls++}
+  cancel:reason=>{cancelCalls++;lastCancelReason=reason}
 };
 const context={console,Date,Math,JSON,Promise,Map,Set,Error,Boolean,Array,Number,String,RegExp,Object,
   setTimeout,clearTimeout,queueMicrotask:()=>{},
@@ -47,10 +47,13 @@ await assert.rejects(promise,error=>{
   assert.equal(error.executionModel,E4B);
   assert.equal(error.runtimePhase,'awaiting-first-token');
   assert.equal(error.rawDiagnostics.visibleTextDeltas,0);
+  assert.equal(error.restartRequired,true);
+  assert.match(error.message,/Restart the local runtime/);
   return true;
 });
 assert.equal(cancelCalls,1,'The GPU stream was not cancelled after a dead decoder');
+assert.equal(lastCancelReason,'no-first-token','The GPU runtime must quarantine the potentially wedged decoder');
 assert.ok(progress.some(e=>e.type==='civweave:local-model-stage-progress'&&e.detail.phase==='creating-conversation'));
-assert.ok(progress.some(e=>e.type==='civweave:local-model-stage-progress'&&e.detail.phase==='generating'));
+assert.ok(progress.some(e=>e.type==='civweave:local-model-stage-progress'&&e.detail.phase==='awaiting-first-token'));
 assert.equal([...timers.values()].filter(t=>t.ms===240000).length,0,'Watchdog failed to clear its timers');
 console.log(JSON.stringify({ok:true,executedModel:E4B,firstTokenDeadlineSeconds:90,hardStageDeadlineSeconds:240,cancelCalled:cancelCalls,silentToolFallbackBlocked:true},null,2));
