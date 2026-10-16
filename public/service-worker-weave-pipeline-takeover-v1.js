@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r17';
+const REVISION='weave-pipeline-takeover-v1-r18';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v473-gpu-queue-recovery';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r17';
+const CACHE='cwrecovery-v474-gpu-queue-cleanup';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r18';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
