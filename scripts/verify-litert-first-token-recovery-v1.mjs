@@ -6,7 +6,7 @@ const source=await readFile(new URL('../public/app/local-ai/litert-gemma4-fast-r
 const moduleImport='import(MODULE_URL)';
 assert.equal(source.split(moduleImport).length,2,'The Web SDK entrypoint changed; update this test rather than silently skipping it.');
 const E4B='gemma4-e4b-it-litert-web';
-let defaultFails=false;
+let defaultFails=false,failQueue=false;
 const attempted=[],configs=[],events=[],chunks=[];
 const fakeModule={
   Backend:{GPU_ARTISAN:'gpu-artisan'},
@@ -21,11 +21,12 @@ const fakeModule={
     return{
       createConversation:async config=>{
         configs.push(config);
-        assert.equal(config.prefillPrefaceOnInit,true,'Preface must be prefilled before starting first-token timer');
+        if(failQueue)throw new Error('Unknown wgpu::QueueWorkDoneStatus0');
+        if(config!==undefined)assert.equal(config.prefillPrefaceOnInit,true);
         return{
           async *sendMessageStreaming(input){
             assert.equal(typeof input,'string');
-            chunks.push(input.content);
+            chunks.push(input);
             yield{content:[{type:'text',text:'Tarot'}]};
             yield{content:[{type:'text',text:' works'}]};
           },
@@ -56,13 +57,16 @@ const first=await api.runFast({__civweaveStage:'Local Weave Draft',systemPrompt:
 assert.equal(first.outputText,'Tarot works');
 assert.equal(first.model.id,E4B);
 assert.equal(attempted[0].backend,undefined,'SDK-managed WebGPU must be first');
-assert.equal(attempted[0].mainExecutorSettings.maxNumTokens,3072);
+assert.equal(attempted[0].mainExecutorSettings.maxNumTokens,2048);
 assert.deepEqual(output,['Tarot',' works']);
 assert.ok(progress.includes('prefilling-preface'));
 assert.ok(progress.includes('awaiting-first-token'));
 assert.ok(progress.includes('first-stream-chunk'));
 assert.equal(api.state().engineMode,'standard');
 assert.equal(configs[0].sessionConfig.samplerParams,undefined);
+const minimal=await api.runFast({__civweaveProbe:true,messages:[{role:'user',content:'Say READY.'}],maxNewTokens:32},E4B);
+assert.equal(minimal.outputText,'Tarot works');
+assert.equal(configs[1],undefined,'The diagnostic must use bare createConversation() without any preface');
 await api.unload();
 
 defaultFails=true;
@@ -77,4 +81,14 @@ await assert.rejects(
   error=>error.code==='LOCAL_PROMPT_CONTEXT_OVERFLOW'&&error.executionModel===E4B
 );
 assert.equal(api.state().generationActive,false);
+failQueue=true;
+await assert.rejects(
+  ()=>api.runFast({__civweaveProbe:true,messages:[{role:'user',content:'Say READY.'}],maxNewTokens:32},E4B),
+  error=>error.code==='CIVWEAVE_LOCAL_GPU_QUEUE_FAILED'&&error.restartRequired&&error.rawGpuError==='Unknown wgpu::QueueWorkDoneStatus0'
+);
+assert.ok(api.state().gpuQuarantine,'A failed device must be quarantined, not reused');
+await assert.rejects(
+  ()=>api.runFast({__civweaveProbe:true,messages:[{role:'user',content:'Say READY.'}]},E4B),
+  error=>error.code==='CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED'
+);
 console.log(JSON.stringify({ok:true,model:E4B,defaultBackendFirst:true,noMtp:true,prefillBeforeFirstToken:true,promptOverflowDetected:true,compatibilityFallback:true},null,2));
