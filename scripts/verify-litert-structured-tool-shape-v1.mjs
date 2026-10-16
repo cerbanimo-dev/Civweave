@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-litert-request-authority-v1.js','utf8');
-assert.match(source,/1\.2\.11-local-litert-request-authority-v1-gpu-fault-handling/);
+assert.match(source,/1\.2\.12-local-litert-request-authority-v1-safe-queue-cleanup/);
 assert.match(source,/1\.2\.2-guide-generation-tracker-v1-direct-fallback-probe/);
 assert.match(source,/litert-web-dual-tool-shape-json-fallback/);
 assert.match(source,/You MUST respond by calling the \$\{tool\.name\} tool exactly once/);
