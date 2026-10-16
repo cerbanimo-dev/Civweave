@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.7.2-litert-runtime-v1-accurate-backend-metadata';
+const VERSION='1.8.0-litert-runtime-v1-gpu-fault-quarantine-minimal-probe';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -9,7 +9,7 @@ const QWEN_FAST='qwen35-4b-litert-web';
 const QWEN_DEEP='qwen35-9b-litert-web';
 const PROFILES=Object.freeze({
   'gemma4-e2b-it-litert-web':Object.freeze({id:'gemma4-e2b-it-litert-web',aliases:Object.freeze(['gemma4-e2b-it-litert-web','gemma4-e2b-it-q4f16','gemma4-e2b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E2B-it-litert-lm',contextTokens:4096,maxOutputTokens:2400,label:'Gemma 4 E2B LiteRT',family:'gemma4',constrainedTools:true,sampler:Object.freeze({k:64,p:.95,temperature:1})}),
-  'gemma4-e4b-it-litert-web':Object.freeze({id:'gemma4-e4b-it-litert-web',aliases:Object.freeze(['gemma4-e4b-it-litert-web','gemma4-e4b-it-q4f16','gemma4-e4b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E4B-it-litert-lm',contextTokens:3072,maxOutputTokens:2800,label:'Gemma 4 E4B LiteRT',family:'gemma4',constrainedTools:true,sampler:Object.freeze({k:64,p:.95,temperature:1})}),
+  'gemma4-e4b-it-litert-web':Object.freeze({id:'gemma4-e4b-it-litert-web',aliases:Object.freeze(['gemma4-e4b-it-litert-web','gemma4-e4b-it-q4f16','gemma4-e4b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E4B-it-litert-lm',contextTokens:2048,maxOutputTokens:2800,label:'Gemma 4 E4B LiteRT',family:'gemma4',constrainedTools:true,sampler:Object.freeze({k:64,p:.95,temperature:1})}),
   [QWEN_FAST]:Object.freeze({id:QWEN_FAST,aliases:Object.freeze([QWEN_FAST]),repo:'litert-community/Qwen3.5-4B',contextTokens:4096,maxOutputTokens:2400,label:'Qwen 3.5 4B LiteRT',family:'qwen35',constrainedTools:false,sampler:Object.freeze({k:20,p:.95,temperature:.6})}),
   [QWEN_DEEP]:Object.freeze({id:QWEN_DEEP,aliases:Object.freeze([QWEN_DEEP]),repo:'litert-community/Qwen3.5-9B-LiteRT',contextTokens:3072,maxOutputTokens:3200,label:'Qwen 3.5 9B LiteRT',family:'qwen35',constrainedTools:false,sampler:Object.freeze({k:20,p:.95,temperature:.6})})
 });
@@ -18,9 +18,34 @@ const GEMMA_FAST_ALIASES=new Set(PROFILES['gemma4-e2b-it-litert-web'].aliases);
 const GEMMA_DEEP_ALIASES=new Set(PROFILES['gemma4-e4b-it-litert-web'].aliases);
 if(globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===VERSION)return;
 let pendingUnloadReason='',engineReleasePromise=null;
-let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,engineMode='',wrapped=null,generationActive=false,lastMetrics=null,activeChat=null,cancelRequested=false;
+let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,engineMode='',wrapped=null,generationActive=false,lastMetrics=null,activeChat=null,cancelRequested=false,gpuQuarantine=null,lastPhase='idle';
 const now=()=>performance.now();
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
+// A QueueWorkDoneStatus error or lost WebGPU device is a failed GPU context,
+// not a formatting or model-answer error. Retrying on the same WASM module
+// can reuse that failed device and has repeatedly hung this app.
+function gpuQueueError(error){
+  const message=String(error?.message||error||'');
+  return /Unknown wgpu::QueueWorkDoneStatus\d*|GPUDevice(?:Lost|Error)|device[\s_-]*lost|webgpu.{0,50}(?:lost|queue|out.of.memory)|queue.{0,50}(?:lost|failed|error)|out.of.memory|GPU validation error/i.test(message);
+}
+function gpuFailure(error,phase=lastPhase){
+  const detail=clean(error?.message||error,500);
+  const result=Object.assign(new Error('The local WebGPU inference queue failed. The model did not complete a GPU operation. Restart the app runtime before trying this model again.'),{code:'CIVWEAVE_LOCAL_GPU_QUEUE_FAILED',gpuFault:true,restartRequired:true,rawGpuError:detail,runtimePhase:phase});
+  return result;
+}
+function quarantineGpu(error,phase=lastPhase){
+  if(!gpuQuarantine){
+    gpuQuarantine={code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED',phase,message:clean(error?.message||error,300),at:new Date().toISOString()};
+    emit('civweave:litert-gemma4-gpu-quarantined',gpuQuarantine);
+  }
+  cancelRequested=true;
+  try{activeChat?.cancel?.()}catch{}
+  return gpuQuarantine;
+}
+function healthyGpu(){
+  if(gpuQuarantine)throw Object.assign(new Error('The previous WebGPU session failed or stalled. Restart the Civweave app runtime to initialize a new GPU device; retries are blocked until restart.'),{code:gpuQuarantine.code,restartRequired:true,gpuFault:true,runtimePhase:gpuQuarantine.phase});
+}
+
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
 const selected=()=>{try{return globalThis.CivweaveLocalModelDownloadV266?.selection?.()||null}catch{return null}};
 const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
@@ -95,12 +120,12 @@ async function instantiateEngine(mod,profile,mode='standard'){
   // The supported Web SDK uses Engine.create({model,mainExecutorSettings})
   // and selects WebGPU automatically. Explicit GPU_ARTISAN backendConfig
   // values were copied from a private struct and are unsafe across phones.
-  const settings={model,mainExecutorSettings:{maxNumTokens:profile.contextTokens},benchmarkEnabled:true};
+  const settings={model,mainExecutorSettings:{maxNumTokens:profile.contextTokens},benchmarkEnabled:false};
   if(mode==='compat'){
     settings.backend=mod.Backend.GPU_ARTISAN;
     settings.mainExecutorSettings.backendConfig=artisanConfig(false);
   }
-  return mod.Engine.create(settings,'Civweave local assistant');
+  return mod.Engine.create(settings);
 }
 async function createEngine(modelId){
   const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT local model: ${modelId}`);
@@ -112,6 +137,7 @@ async function createEngine(modelId){
   let value,mode='standard';
   try{value=await instantiateEngine(mod,profile,'standard')}
   catch(standardError){
+    if(gpuQueueError(standardError))throw gpuFailure(standardError,'loading-model');
     mode='compat';
     emit('civweave:litert-gemma4-backend-fallback',{model:profile.id,reason:'standard-engine-create-failed',message:String(standardError?.message||standardError),mtpEnabled:false});
     // Preserve device compatibility without activating untested MTP.
@@ -197,9 +223,10 @@ function benchmarkMetrics(info){
 async function runFast(args={},forcedModelId=''){
   const pick=selected(),profile=profileFor(forcedModelId||pick?.id);
   if(!profile)throw Object.assign(new Error('No supported LiteRT model profile is selected.'),{code:'LITERT_GEMMA4_PROFILE_MISSING'});
+  healthyGpu();
   if(generationActive)throw Object.assign(new Error('The selected LiteRT model engine is already generating.'),{code:'LOCAL_MODEL_BUSY'});
   generationActive=true;cancelRequested=false;
-  const progress=(phase,detail={})=>{const payload={phase,model:profile.id,...detail};emit('civweave:litert-gemma4-progress',payload);try{args.onProgress?.(payload)}catch{}};
+  const progress=(phase,detail={})=>{lastPhase=phase;const payload={phase,model:profile.id,...detail};emit('civweave:litert-gemma4-progress',payload);try{args.onProgress?.(payload)}catch{}};
   const ensureNotCancelled=()=>{if(cancelRequested)throw Object.assign(new Error('LiteRT generation cancelled.'),{code:'CIVWEAVE_GENERATION_STOPPED',executionModel:profile.id,cancelled:true})};
   const started=now();let chat=null,firstTokenAt=0,index=0,text='',toolCall=null,chunkCount=0,nontextChunks=0;
   const rawDiagnostics=()=>({model:profile.id,chunksObserved:chunkCount,textDeltas:index,nontextChunks,outputCharacters:text.length});
@@ -252,6 +279,11 @@ async function runFast(args={},forcedModelId=''){
     lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
   }catch(error){
+    if(gpuQueueError(error)){
+      const original=error;
+      error=gpuFailure(original,lastPhase);
+      quarantineGpu(error,lastPhase);
+    }
     // Propagate the actual executing model, not the model selected for chat.
     if(error&&typeof error==='object')try{error.executionModel=profile.id;error.rawDiagnostics=error.rawDiagnostics||rawDiagnostics();error.rejectedText=error.rejectedText??text}catch{}
     emit('civweave:litert-gemma4-failed',{model:profile.id,code:error?.code||'LOCAL_LITERT_EXECUTION_FAILED',message:clean(error?.message||error,500),rawDiagnostics:error?.rawDiagnostics||null});
@@ -281,8 +313,9 @@ function install(){
   try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}
   wrapped=next;emit('civweave:litert-gemma4-fast-runtime-ready',{models:Object.keys(PROFILES),transparentAliases:[...ALIAS_TO_FAST.keys()],qwen35Models:[QWEN_FAST,QWEN_DEEP],qwen35GemmaRoleBridge:true,oneEngineAtATime:true,phoneProfile:profileFor(selected()?.id)?.family||'none',mtpRequested:false,jspiRequired:true,formattedOutput:true,constrainedDecoding:true});return true;
 }
-function cancel(){
-  if(!generationActive)return false;
+function cancel(reason='user-stop'){
+  if(reason==='no-first-token'||reason==='stage-limit')quarantineGpu(new Error(reason==='no-first-token'?'No first token arrived before the local watchdog deadline.':'Local GPU stage timed out.'),lastPhase);
+  if(!generationActive)return Boolean(gpuQuarantine);
   cancelRequested=true;
   try{activeChat?.cancel?.()}catch{}
   emit('civweave:litert-gemma4-cancel-requested',{model:engineModelId||enginePromiseModelId||'',reason:'user-or-no-progress'});
@@ -296,5 +329,5 @@ for(const name of ['civweave:local-model-runtime-ready','civweave:gemma4-litert-
 addEventListener('civweave:local-model-selection',()=>{const pick=selected(),target=profileFor(pick?.id);if(engine&&(!pick?.active||!target||target.id!==engineModelId))void unloadEngine('selection-change')});
 addEventListener('pagehide',()=>{void unloadEngine('pagehide')});
 install();
-globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,get fastModelId(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||selected()?.id||''},fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,get engineContextTokens(){return profileFor(selected()?.id)?.contextTokens||0},oneEngineAtATime:true,mtpRequested:false,jspiRequired:true,get phoneProfile(){return profileFor(selected()?.id)?.family||'none'},formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,cancel,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineMode,engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
+globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,get fastModelId(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||selected()?.id||''},fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,get engineContextTokens(){return profileFor(selected()?.id)?.contextTokens||0},oneEngineAtATime:true,mtpRequested:false,jspiRequired:true,get phoneProfile(){return profileFor(selected()?.id)?.family||'none'},formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,cancel,quarantineGpu,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineMode,engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics,lastPhase,gpuQuarantine:gpuQuarantine?{...gpuQuarantine}:null})});
 })();
