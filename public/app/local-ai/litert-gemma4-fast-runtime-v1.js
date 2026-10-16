@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.8.1-litert-runtime-v1-bare-sdk-probe';
+const VERSION='1.8.2-litert-runtime-v1-safe-dead-queue-cleanup';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -103,6 +103,12 @@ function artisanConfig(useSubmodel=true){
   };
 }
 async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
+  if(gpuQuarantine){
+    // Never await native delete() after a GPU queue is poisoned.
+    // Only a top-level app restart can reclaim the WASM/device.
+    engine=null;engineModelId='';engineUsesMtp=false;engineMode='';
+    pendingUnloadReason='';return true;
+  }
   if(generationActive&&!afterGeneration&&reason!=='switch-model'){pendingUnloadReason=reason;return false}
   if(engineReleasePromise)return engineReleasePromise;
   if(enginePromise){try{await enginePromise}catch{}}
@@ -295,9 +301,12 @@ async function runFast(args={},forcedModelId=''){
     throw error;
   }finally{
     try{
-      if(chat)try{await chat.delete()}catch{}
+      if(chat&&!gpuQuarantine)try{await chat.delete()}catch{}
       if(activeChat===chat)activeChat=null;
-      if(pendingUnloadReason){const reason=pendingUnloadReason;pendingUnloadReason='';await unloadEngine(reason,{afterGeneration:true})}
+      if(gpuQuarantine){
+        engine=null;engineModelId='';engineUsesMtp=false;engineMode='';
+        pendingUnloadReason='';
+      }else if(pendingUnloadReason){const reason=pendingUnloadReason;pendingUnloadReason='';await unloadEngine(reason,{afterGeneration:true})}
     }finally{generationActive=false;cancelRequested=false}
   }
 }
