@@ -70,7 +70,7 @@ function panelHtml(){
   const counts=`<div class="cw-weave-counts"><span class="cw-weave-chip">Resources ${state.counts.resources}</span><span class="cw-weave-chip">Specialists ${state.counts.specialists}</span><span class="cw-weave-chip">Decision gates ${state.counts.gates}</span></div>`;
   const sections=[['intake','Model intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='skipped'?'Not observed in this process.':state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
   const detail=state.errorDetail?`<pre class="cw-weave-error">${esc(state.errorDetail)}</pre>`:'';
-  const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing GPU model…':'Test local inference'}</button><button type="button" data-weave-runtime-restart>Restart local runtime</button><p>${esc(state.probeStatus||'Minimal one-word GPU test, independent of Moss and the JSON compiler.')}</p></div>`:'';
+  const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing GPU model…':'Test local inference'}</button><button type="button" data-weave-runtime-restart title="Reloads the app shell. A quarantined Android GPU may require force-stopping the app process.">Reload Civweave</button><p>${esc(state.probeStatus||'Minimal one-word GPU test, independent of Moss and the JSON compiler.')}</p></div>`:'';
   const model=state.executionModel?` · Model ${state.executionModel}`:'';const runtime=state.runtimePhase?` · Runtime: ${state.runtimePhase}`:'';
   return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live ${esc(artifactName())}</strong><span>${esc(terminalLabel())}${esc(model)}${esc(runtime)}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="${state.expanded?'true':'false'}">${state.expanded?'Hide live process':'Show live process'}</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details ${state.expanded?'':'hidden'}>${detail}${sections}${probe}</div>`
 }
@@ -170,7 +170,7 @@ async function directLocalProbe({timeoutMs=90000}={}){
   const chosenModel=model||candidate.id;
   if(!chosenModel)return{ok:false,code:'LOCAL_PROBE_MODEL_UNSELECTED',message:'The selected planning model cannot be resolved.'};
   const gpuState=api.state?.()||{};
-  if(gpuState.gpuQuarantine)return{ok:false,model:chosenModel,code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED',phase:gpuState.gpuQuarantine.phase,message:'The local GPU session is quarantined after a stall or WebGPU failure. Restart the full Civweave runtime before testing.',restartRequired:true};
+  if(gpuState.gpuQuarantine)return{ok:false,model:chosenModel,code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED',phase:gpuState.gpuQuarantine.phase,message:'The local GPU session is quarantined. An in-app reload might not reset the GPU; completely close or force-stop Civweave before another test. Do not clear app storage or downloaded models.',restartRequired:true};
   if(gpuState.generationActive)return{ok:false,model:chosenModel,code:'LOCAL_PROBE_ENGINE_BUSY',phase:'busy',message:'An earlier GPU inference is still active. Restart the persistent app runtime.'};
   const started=Date.now();let phase='checking-model',firstTokenAt=null,output='',settled=false,timer=null;
   const timeout=new Promise((_,reject)=>{
@@ -206,7 +206,7 @@ async function probeClick(){
     const result=await probe({timeoutMs:90000});
     state.probeStatus=result.ok
       ?`PASS · ${result.model} · first token ${Math.round(result.firstTokenMs??result.elapsedMs)} ms · answer: ${result.output}`
-      :`FAIL · ${result.code} · ${result.phase||''} · ${result.message||'No visible model output.'} ${result.restartRequired||/GPU|QUEUE|BUSY/.test(result.code||'')?'Restart local runtime before retrying.':''}`;
+      :`FAIL · ${result.code} · ${result.phase||''} · ${result.message||'No visible model output.'} ${result.restartRequired||/GPU|QUEUE|BUSY/.test(result.code||'')?'Fully close or force-stop the app before retrying.':''}`;
   }catch(error){state.probeStatus=`Probe error: ${clean(error?.message||error,400)}`}
   finally{state.probeBusy=false;ensurePanel()}
 }
@@ -220,7 +220,7 @@ function onThreadChanged(event){const thread=event?.detail?.thread;if(!thread)re
 function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();addEventListener('civweave:generation-lifecycle',event=>applyLifecycle(event?.detail||{}));if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-probe]`)){void probeClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-runtime-restart]`)){
-    state.probeStatus='Restarting local runtime to release the GPU session…';ensurePanel();
+    state.probeStatus='Reloading Civweave; if the GPU stays quarantined, fully close or force-stop the installed app before testing…';ensurePanel();
     try{
       const parent=globalThis.parent;
       if(parent&&parent!==globalThis&&parent.location?.origin===globalThis.location?.origin){parent.location.reload();return}
