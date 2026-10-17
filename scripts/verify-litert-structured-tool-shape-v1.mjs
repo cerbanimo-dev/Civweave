@@ -3,8 +3,8 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-litert-request-authority-v1.js','utf8');
-assert.match(source,/1\.2\.12-local-litert-request-authority-v1-safe-queue-cleanup/);
-assert.match(source,/1\.2\.2-guide-generation-tracker-v1-direct-fallback-probe/);
+assert.match(source,/1\.2\.15-local-litert-request-authority-v1-e4b-preflight/);
+assert.match(source,/1\.2\.3-guide-generation-tracker-v1-gpu-quarantine-status/);
 assert.match(source,/litert-web-dual-tool-shape-json-fallback/);
 assert.match(source,/You MUST respond by calling the \$\{tool\.name\} tool exactly once/);
 assert.match(source,/LITERT_FORMATTED_OUTPUT_MISSING/);
@@ -38,7 +38,7 @@ assert.equal(authority.weaveDraftPipeline,true);
 assert.equal(authority.liveGenerationTracker,true);
 assert.equal(authority.globalFinalResponseStreaming,true);
 assert.equal(authority.familyLoaderWeaveRebind,true);
-assert.equal(authority.trackerVersion,'1.2.0-guide-generation-tracker-v1-local-probe-ui');
+assert.equal(authority.trackerVersion,'1.2.3-guide-generation-tracker-v1-gpu-quarantine-status');
 
 // The LiteRT structured-tool adapter remains compatible with E2B as an ordinary local selection. E4B Learning/Quest generation
 // is covered separately by the Weave Draft regression and must not use this adapter.
@@ -94,12 +94,12 @@ assert.equal(metadata.deepGenerationModel,'gemma4-e4b-it-litert-web');
 // captures CivweaveModelRuntime. The loader may replace the runtime object, so the
 // E4B Weave wrapper must be rebound before ensure() resolves back to Moss.
 storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'}));
-const WEAVE_VERSION='1.3.4-weave-draft-pipeline-v1-bounded-repair';
+const WEAVE_VERSION='1.3.7-weave-draft-pipeline-v1-gpu-smoke-gate';
 let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
 sandbox.CivweaveGuideGenerationTrackerV1={
-  version:'1.2.0-guide-generation-tracker-v1-local-probe-ui',
+  version:'1.2.3-guide-generation-tracker-v1-gpu-quarantine-status',
   install:()=>{trackerInstalls+=1;return true}
 };
 sandbox.CivweaveModelRuntime={generate:async()=>({status:'initial-runtime'})};
