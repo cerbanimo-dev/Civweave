@@ -4,8 +4,8 @@ const VERSION='1.0.3-gemma4-current-registry-authority-v1-authority-version-alig
 const AUTH_KEY='CivweaveGemma4PhonePerformanceCoreV1';
 const REGISTRY_KEY='CivweaveLocalModelRegistryV266';
 const FAST_E2='gemma4-e2b-it-litert-web',FAST_E4='gemma4-e4b-it-litert-web',LEGACY_E2='gemma4-e2b-it-q4f16',LEGACY_E4='gemma4-e4b-it-q4f16';
-const REQUEST_AUTH_SRC='/app/local-ai/gemma4-litert-request-authority-v1.js?v=1.2.14-lean-learning-sessions';
-const REQUEST_AUTH_VERSION='1.2.14-local-litert-request-authority-v1-lean-learning-sessions';
+const REQUEST_AUTH_SRC='/app/local-ai/gemma4-litert-request-authority-v1.js?v=1.2.15-e4b-preflight';
+const REQUEST_AUTH_VERSION='1.2.15-local-litert-request-authority-v1-e4b-preflight';
 const COMPACT_QUEST_SRC='/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js?v=1.1.0-formatted-output';
 const COMPACT_QUEST_VERSION='1.1.0-gemma4-structured-quest-compact-envelope-v1-formatted-output';
 const freeze=value=>Object.freeze(value),same=(left=[],right=[])=>left.length===right.length&&left.every((value,index)=>value===right[index]);
