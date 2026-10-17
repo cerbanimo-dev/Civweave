@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.7-weave-draft-pipeline-v1-gpu-smoke-gate';
+const VERSION='1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
