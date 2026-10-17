@@ -30,7 +30,7 @@ const questSchema={
   }
 };
 
-async function controlledFastRun(args,model,label){
+async function controlledFastRun(args,model,label,timeoutMs){
   calls.push({model,label,structuredTool:args.structuredTool,maxNewTokens:args.maxNewTokens,latestPrompt:args.messages.at(-1)?.content||''});
   // Use the same E4B 2,048-token admission formula as LiteRT. Mocked
   // generation must never conceal a real-device prompt overflow.
@@ -41,7 +41,7 @@ async function controlledFastRun(args,model,label){
   assert.ok((args.messages.at(-1)?.content||'').length<=maxLatest,`${label} exceeds E4B input budget ${maxLatest}`);
   assert.equal(model,'gemma4-e4b-it-litert-web');
   assert.equal(args.structuredTool,null,'E4B draft/compile/repair must use free text generation, never constrained tools');
-  if(label==='Local GPU Smoke Test'){assert.equal(args.__civweaveProbe,true);assert.equal(args.__civweaveFirstTokenTimeoutMs,35000);return{status:'success',outputText:'READY'};}
+  if(label==='Local GPU Smoke Test'){assert.equal(args.__civweaveProbe,true);assert.equal(args.__civweaveFirstTokenTimeoutMs,35000);assert.equal(timeoutMs,180000,'cold E4B engine initialization must not be mistaken for first-token inference failure');return{status:'success',outputText:'READY'};}
   if(label==='Local Weave Draft'){
     const text=currentKind==='learning'
       ? 'Build tarot recall through card families, imagery anchors, spaced retrieval, comparison practice, and live interpretation. Resources include a tarot deck and a spaced-repetition system. No licensed specialist is required. No collective vote is required.'
