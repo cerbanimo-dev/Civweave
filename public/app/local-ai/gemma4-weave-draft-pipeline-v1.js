@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.6-weave-draft-pipeline-v1-lean-learning-sessions';
+const VERSION='1.3.7-weave-draft-pipeline-v1-gpu-smoke-gate';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -28,6 +28,7 @@ const authority=()=>globalThis.CivweaveGemma4StructuredTaskAuthorityV1||null;
 let runtimeTarget=null;
 let scheduled=false;
 let lastArtifact=null;
+const verifiedGpuRuntimes=new Map();
 
 function kindFor(purpose){return purpose===LEARNING_PURPOSE?'learning':'quest'}
 function localProvider(request){return LOCAL_PROVIDERS.has(clean(request?.config?.provider||request?.config?.route,120).toLowerCase())}
@@ -316,6 +317,46 @@ function repairPromptPayload(kind,schema,draft,errors,priorCompile,budget=2600){
   }
   throw contextFitError(kind,'repair',target);
 }
+
+async function preflightLocalLearningGpu({pipelineId,purpose,kind,signal}={}){
+  if(kind!=='learning')return;
+  const id=modelFor();
+  const runtime=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
+  const auth=authority();
+  if(!/^gemma4-e4b-it-litert-web$/i.test(id)||typeof runtime?.state!=='function'||typeof auth?.controlledFastRun!=='function')return;
+  if(verifiedGpuRuntimes.get(id)===runtime&&!runtime.state()?.gpuQuarantine)return;
+  if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
+  paint('Checking whether Gemma 4 E4B can produce one local GPU token before drafting…');
+  dispatch({pipelineId,purpose,kind,phase:'preflight',state:'running',label:'Independent E4B GPU smoke test',model:id});
+  const started=Date.now();
+  let lastProbePhase='',probeTokenCount=0;
+  try{
+    const result=await auth.controlledFastRun({
+      __civweaveProbe:true,__civweaveFirstTokenTimeoutMs:35000,
+      systemPrompt:'',messages:[{role:'user',content:'READY'}],maxNewTokens:24,structuredTool:null,
+      onProgress:detail=>{lastProbePhase=clean(detail?.phase,100)},
+      onToken:detail=>{if(String(detail?.text||''))probeTokenCount++}
+    },id,'Local GPU Smoke Test',45000);
+    const reply=clean(result?.outputText||result?.text,3000);
+    if(!reply)throw Object.assign(new Error('The GPU smoke test returned no visible text.'),{code:'LOCAL_GPU_PROBE_EMPTY'});
+    verifiedGpuRuntimes.set(id,runtime);
+    const diagnostic={ok:true,model:id,mode:'sdk-minimal',durationMs:Date.now()-started,visibleTextDeltas:probeTokenCount,outputCharacters:reply.length};
+    saveArtifact({...lastArtifact,gpuPreflight:diagnostic});
+    dispatch({pipelineId,purpose,kind,phase:'preflight',state:'complete',label:'Independent E4B GPU smoke test',...diagnostic});
+  }catch(cause){
+    const cancelled=cause?.code==='CIVWEAVE_GENERATION_STOPPED'||signal?.aborted;
+    const diagnostic={ok:false,model:id,mode:'sdk-minimal',durationMs:Date.now()-started,phase:lastProbePhase,causeCode:clean(cause?.code,120)||'UNKNOWN',rawDiagnostics:cause?.rawDiagnostics||null};
+    saveArtifact({...lastArtifact,gpuPreflight:diagnostic});
+    dispatch({pipelineId,purpose,kind,phase:'preflight',state:'failed',label:'Independent E4B GPU smoke test',...diagnostic});
+    if(cancelled)throw cause;
+    const error=Object.assign(new Error('Gemma 4 E4B failed the independent one-word LiteRT GPU test before Moss could draft. This is a device/WebGPU/model inference failure, not a tarot prompt or JSON error. Restart the full installed app before another GPU test; do not repeatedly retry while the GPU is quarantined.'),{
+      code:'CIVWEAVE_E4B_GPU_PREFLIGHT_FAILED',executionModel:id,stage:'Local GPU Smoke Test',restartRequired:true,
+      rawDiagnostics:diagnostic,causeCode:diagnostic.causeCode
+    });
+    throw error;
+  }
+}
+
 async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,emit:runtimeEmit}={}){
   const kind=kindFor(purpose),pipelineId=uid(),startedAt=now();
   if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
@@ -324,6 +365,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
   try{
     paint(`The local planning model is freely drafting the ${kind==='learning'?'Learning Journey':'Quest'}…`);
     try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:modelFor(),mode:'weave-draft-pass'})}catch{}
+    await preflightLocalLearningGpu({pipelineId,purpose,kind,signal});
     const draftMessages=kind==='learning'?[{role:'user',content:focusedLearningDraftMessage(messages,stageInputBudget(draftSystem(kind),DRAFT_TOKENS[kind]))}]:modelMessages(messages);
     const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:draftMessages,maxNewTokens:DRAFT_TOKENS[kind]});
     if(!draft)throw Object.assign(new Error('Local Weave Draft returned no planning content.'),{code:'CIVWEAVE_E4B_WEAVE_DRAFT_EMPTY'});
