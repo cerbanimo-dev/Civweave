@@ -41,6 +41,7 @@ async function controlledFastRun(args,model,label){
   assert.ok((args.messages.at(-1)?.content||'').length<=maxLatest,`${label} exceeds E4B input budget ${maxLatest}`);
   assert.equal(model,'gemma4-e4b-it-litert-web');
   assert.equal(args.structuredTool,null,'E4B draft/compile/repair must use free text generation, never constrained tools');
+  if(label==='Local GPU Smoke Test'){assert.equal(args.__civweaveProbe,true);assert.equal(args.__civweaveFirstTokenTimeoutMs,35000);return{status:'success',outputText:'READY'};}
   if(label==='Local Weave Draft'){
     const text=currentKind==='learning'
       ? 'Build tarot recall through card families, imagery anchors, spaced retrieval, comparison practice, and live interpretation. Resources include a tarot deck and a spaced-repetition system. No licensed specialist is required. No collective vote is required.'
@@ -94,7 +95,7 @@ const sandbox={
     paintPending:()=>true,
     taskTimeoutMs:600000
   },
-  CivweaveLiteRTGemma4FastRuntimeV1:{runFast:controlledFastRun},
+  CivweaveLiteRTGemma4FastRuntimeV1:{runFast:controlledFastRun,state:()=>({gpuQuarantine:null})},
   CivweaveModelRuntime:{generate:oldStructured}
 };
 sandbox.globalThis=sandbox;
@@ -113,7 +114,7 @@ assert.equal(parsed.modules.length,4);
 assert.equal(parsed.resourceManifest.length,2);
 assert.equal(parsed.specialistWork.length,0);
 assert.equal(parsed.decisionGates.length,0);
-assert.deepEqual(calls.map(call=>call.label),['Local Weave Draft','Local JSON Compile','Local Targeted Repair']);
+assert.deepEqual(calls.map(call=>call.label),['Local GPU Smoke Test','Local Weave Draft','Local JSON Compile','Local Targeted Repair']);
 assert.ok(calls.every(call=>call.model==='gemma4-e4b-it-litert-web'));
 assert.ok(calls.every(call=>call.structuredTool===null));
 assert.equal(baseRequests.at(-1).config.model,'gemma4-e4b-it-litert-web');
