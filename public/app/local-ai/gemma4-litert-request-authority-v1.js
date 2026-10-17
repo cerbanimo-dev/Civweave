@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.12-local-litert-request-authority-v1-safe-queue-cleanup';
+const VERSION='1.2.13-local-litert-request-authority-v1-context-packed';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -11,8 +11,8 @@ const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.2-s
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.2.3-guide-generation-tracker-v1-gpu-quarantine-status';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.2.3-gpu-quarantine';
-const WEAVE_PIPELINE_VERSION='1.3.4-weave-draft-pipeline-v1-bounded-repair';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.4-bounded-repair';
+const WEAVE_PIPELINE_VERSION='1.3.5-weave-draft-pipeline-v1-context-packed';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.5-context-packed';
 const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
 const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
 const QWEN_FAST_MODEL='qwen35-4b-litert-web';
