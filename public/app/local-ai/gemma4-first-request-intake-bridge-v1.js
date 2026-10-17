@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.8-first-request-intake-bridge-v1-e4b-preflight';
-const PIPELINE_VERSION='1.3.7-weave-draft-pipeline-v1-gpu-smoke-gate';
+const VERSION='1.2.9-first-request-intake-bridge-v1-cold-load-safe-probe';
+const PIPELINE_VERSION='1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe';
 const modelFor=()=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const supported=()=>Boolean(globalThis.CivweaveLocalGenerationModelPolicyV1?.supportsSelected?.());
 
