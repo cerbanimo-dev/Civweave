@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.4-weave-draft-pipeline-v1-bounded-repair';
+const VERSION='1.3.5-weave-draft-pipeline-v1-context-packed';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -194,14 +194,54 @@ function repairSystem(kind){
   return `You are the local planning model repairing a Civweave JSON compile. Return ONLY one corrected JSON object. Keep all valid content from the prior compile and Weave Draft. Correct every listed validation error, preserve resourceManifest, specialistWork, and decisionGates, and do not add unsupported user facts. ${kind==='quest'?'Any voteRequired decision gate must also be represented as a mandatory blocking Anarchadia civic-governance Quest beat.':''}`;
 }
 function modelMessages(messages=[]){return(Array.isArray(messages)?messages:[]).filter(row=>clean(row?.role,20).toLowerCase()!=='system').map(row=>({role:/assistant/i.test(clean(row?.role,20))?'assistant':'user',content:clean(row?.content??row?.text,12000)})).filter(row=>row.content).slice(-6)}
+
+function stageInputBudget(systemPrompt,maxNewTokens){
+  // Match the LiteRT admission formula with an additional 96-char margin.
+  const id=modelFor(),profiles=globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.profiles||{};
+  const fallback=/gemma4-e4b/i.test(id)?{contextTokens:2048,maxOutputTokens:2800}:null;
+  const profile=profiles[id]||fallback;
+  if(!profile?.contextTokens)return Infinity;
+  const output=Math.max(64,Math.min(Number(profile.maxOutputTokens)||2800,Number(maxNewTokens)||1024));
+  const available=Math.max(1500,Math.min(5000,Math.floor((profile.contextTokens-output-128)*2.5)));
+  const system=clean(systemPrompt,Math.min(1700,Math.floor(available*.35)));
+  return Math.max(0,available-system.length-192);
+}
+function focusedLearningDraftMessage(messages,budget=Infinity){
+  const latest=modelMessages(messages).at(-1)?.content||'';
+  const start=latest.indexOf('{');
+  if(start<0||!/Learning Journey plan/i.test(latest.slice(0,start)))return latest;
+  let context=null;try{context=JSON.parse(latest.slice(start))}catch{return latest}
+  if(context?.schema!=='civweave.learning-journey-plan-request.v2'||!isObject(context.request))return latest;
+  // Routing constraints are already in draftSystem(). Recent chat and empty
+  // wrapper fields should not displace the actual learner's request.
+  const req=context.request;
+  const core={sourceText:clean(req.sourceText,4000),title:clean(req.title,240),capability:clean(req.capability,2400),level:clean(req.level,40),mode:clean(req.mode,40),moduleCount:req.count||4};
+  const extended={...core,proof:clean(req.proof,900),revision:clean(context.revision,1300),existingPlan:context.existingPlan?{title:clean(context.existingPlan.title,240),capability:clean(context.existingPlan.capability,600),modules:(context.existingPlan.modules||[]).map(item=>({title:clean(item.title,90),outcome:clean(item.outcome,150)})).slice(0,8)}:undefined};
+  for(const item of [extended,{...core,revision:clean(context.revision,1300)},core,{sourceText:core.sourceText,capability:core.capability,moduleCount:core.moduleCount},{sourceText:core.sourceText}]){
+    const candidate=JSON.stringify({learningRequest:item});
+    if(candidate.length<=budget)return candidate;
+  }
+  throw Object.assign(new Error('The learner request exceeds the selected model context even after removing redundant routing metadata. Shorten the request or choose a model with more context.'),{code:'LOCAL_PROMPT_CONTEXT_OVERFLOW',inputCharacters:core.sourceText.length,maxInputCharacters:budget});
+}
+function minimumDeviceSchema(kind,schema){
+  const required=Array.isArray(schema?.required)?schema.required:[];
+  if(kind==='learning')return{type:'object',required,properties:{title:{type:'string'},capability:{type:'string'},level:{enum:['beginner','intermediate','advanced']},mode:{type:'string'},proof:{type:'string'},assumptions:{type:'array'},modules:{type:'array',minItems:3,items:{type:'object',required:['title','focus','outcome'],properties:{title:{type:'string'},focus:{type:'string'},outcome:{type:'string'}}}}}};
+  return{type:'object',required,properties:{title:{type:'string'},wish:{type:'string'},outcome:{type:'string'},assumptions:{type:'array'},paths:{type:'array',items:{type:'object',required:['type','realm','title','purpose','steps','completionCriteria','evidence']}}}};
+}
+function contextFitError(kind,phase,budget){
+  return Object.assign(new Error('The '+kind+' '+phase+' payload cannot fit the selected model input budget ('+budget+' characters). Choose a larger-context model or reduce the supplied material.'),{code:'LOCAL_PROMPT_CONTEXT_OVERFLOW',stage:phase,maxInputCharacters:budget});
+}
+
 async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messages,maxNewTokens}){
   const auth=authority();
   if(typeof auth?.requireDeepModel==='function')await auth.requireDeepModel();
   const run=typeof auth?.controlledFastRun==='function'?auth.controlledFastRun.bind(auth):null;
   const fast=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
   if(!run&&typeof fast?.runFast!=='function')throw Object.assign(new Error('The configured local planning runtime is unavailable.'),{code:'CIVWEAVE_E4B_WEAVE_RUNTIME_UNAVAILABLE'});
+  const promptBudget=stageInputBudget(systemPrompt,maxNewTokens);
+  if((messages.at(-1)?.content||'').length>promptBudget)throw contextFitError(kind,phase,promptBudget);
   let streamed='',index=0;
-  dispatch({pipelineId,purpose,kind,phase,state:'running',label,model:modelFor(),promptCharacters:messages.reduce((n,row)=>n+String(row?.content||'').length,0)+systemPrompt.length});
+  dispatch({pipelineId,purpose,kind,phase,state:'running',label,model:modelFor(),promptBudget,promptCharacters:messages.reduce((n,row)=>n+String(row?.content||'').length,0)+systemPrompt.length});
   const args={__civweaveStage:label,systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
     const token=String(event?.text??'');if(!token)return;
     streamed=(streamed+token).slice(-48000);
@@ -237,39 +277,44 @@ function compactSchema(value,depth=0){
   }
   return obj;
 }
-function compactLearningPayload(schema,draft){
-  const shape=compactSchema(schema&&typeof schema==='object'?schema:{type:'object'});
-  const base={kind:'learning',targetSchema:shape,weaveDraft:clean(draft,2900)};
-  // Graceful size reduction, never truncate a JSON string mid-object.
-  for(const limit of [2900,2200,1500,950,600]){
-    base.weaveDraft=clean(draft,limit);
-    if(JSON.stringify(base).length<=4100)return base;
-  }
-  return{kind:'learning',targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[],properties:{title:{type:'string'},capability:{type:'string'},level:{type:'string'},mode:{type:'string'},proof:{type:'string'},modules:{type:'array',items:{type:'object',required:['title','focus','outcome']}}}},weaveDraft:clean(draft,1400)};
-}
-function compactQuestPayload(schema,draft){
-  const shape=compactSchema(schema&&typeof schema==='object'?schema:{type:'object'});
-  const cut=length=>{
-    const text=String(draft||'');
-    return text.length<=length?text:`${text.slice(0,Math.floor(length*.65))}\n[...details omitted for device context...]\n${text.slice(-Math.floor(length*.35))}`;
-  };
-  for(const cap of [1500,1100,800,500]){
-    const result={kind:'quest',targetSchema:shape,weaveDraft:cut(cap)};
-    if(JSON.stringify(result).length<=2300)return result;
-  }
-  return{kind:'quest',targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[],properties:{title:{type:'string'},wish:{type:'string'},outcome:{type:'string'},assumptions:{type:'array'},paths:{type:'array',items:{type:'object',required:['type','realm','title','purpose','steps','completionCriteria','evidence']}}}},weaveDraft:cut(1100)};
-}
-function repairPromptPayload(kind,schema,draft,errors,priorCompile){
-  const max=kind==='learning'?4300:2600;
-  const base=kind==='learning'?compactLearningPayload(schema,draft):compactQuestPayload(schema,draft);
-  const input=typeof priorCompile==='string'?priorCompile:JSON.stringify(priorCompile??{});
-  for(const maxPrior of [1300,850,450,160]){
-    for(const maxDraft of [1100,600,240,0]){
-      const payload={...base,weaveDraft:String(base.weaveDraft||'').slice(0,maxDraft),validationErrors:errors.slice(0,8),priorCompile:input.slice(0,maxPrior)};
-      if(JSON.stringify(payload).length<=max)return payload;
+
+function compactLearningPayload(schema,draft,budget=4100){
+  const target=Math.min(4100,budget);
+  for(const shape of [compactSchema(schema&&typeof schema==='object'?schema:{type:'object'}),minimumDeviceSchema('learning',schema)]){
+    for(const cap of [1900,1500,1150,900,650,430,260]){
+      const candidate={kind:'learning',targetSchema:shape,weaveDraft:clean(draft,cap)};
+      if(JSON.stringify(candidate).length<=target)return candidate;
     }
   }
-  return{kind,targetSchema:{type:'object',required:Array.isArray(schema?.required)?schema.required:[]},validationErrors:errors.slice(0,6),priorCompile:input.slice(0,500),weaveDraft:String(draft||'').slice(0,350)};
+  throw contextFitError('learning','compile',target);
+}
+function compactQuestPayload(schema,draft,budget=2300){
+  const target=Math.min(2300,budget),shape=compactSchema(schema&&typeof schema==='object'?schema:{type:'object'});
+  const cut=cap=>{
+    const txt=String(draft||'');
+    return txt.length<=cap?txt:txt.slice(0,Math.floor(cap*.65))+'\n[...details omitted for device context...]\n'+txt.slice(-Math.floor(cap*.35));
+  };
+  for(const schemaShape of [shape,minimumDeviceSchema('quest',schema)]){
+    for(const cap of [1500,1100,800,500,300,140]){
+      const candidate={kind:'quest',targetSchema:schemaShape,weaveDraft:cut(cap)};
+      if(JSON.stringify(candidate).length<=target)return candidate;
+    }
+  }
+  throw contextFitError('quest','compile',target);
+}
+function repairPromptPayload(kind,schema,draft,errors,priorCompile,budget=2600){
+  const target=Math.min(kind==='learning'?4300:2600,budget);
+  const prior=typeof priorCompile==='string'?priorCompile:JSON.stringify(priorCompile??{});
+  const shapes=[compactSchema(schema&&typeof schema==='object'?schema:{type:'object'}),minimumDeviceSchema(kind,schema),{type:'object',required:Array.isArray(schema?.required)?schema.required:[]}];
+  for(const shape of shapes){
+    for(const priorCap of [1800,1300,850,450,160,0]){
+      for(const draftCap of [850,500,240,90,0]){
+        const candidate={kind,targetSchema:shape,validationErrors:errors.slice(0,8),priorCompile:prior.slice(0,priorCap),weaveDraft:clean(draft,draftCap)};
+        if(JSON.stringify(candidate).length<=target)return candidate;
+      }
+    }
+  }
+  throw contextFitError(kind,'repair',target);
 }
 async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,emit:runtimeEmit}={}){
   const kind=kindFor(purpose),pipelineId=uid(),startedAt=now();
@@ -279,12 +324,14 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
   try{
     paint(`The local planning model is freely drafting the ${kind==='learning'?'Learning Journey':'Quest'}…`);
     try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:modelFor(),mode:'weave-draft-pass'})}catch{}
-    const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:kind==='learning'?modelMessages(messages).slice(-1):modelMessages(messages),maxNewTokens:DRAFT_TOKENS[kind]});
+    const draftMessages=kind==='learning'?[{role:'user',content:focusedLearningDraftMessage(messages,stageInputBudget(draftSystem(kind),DRAFT_TOKENS[kind]))}]:modelMessages(messages);
+    const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:draftMessages,maxNewTokens:DRAFT_TOKENS[kind]});
     if(!draft)throw Object.assign(new Error('Local Weave Draft returned no planning content.'),{code:'CIVWEAVE_E4B_WEAVE_DRAFT_EMPTY'});
     saveArtifact({...lastArtifact,state:'drafted',draft});
 
     paint('The planning draft is ready. Compiling it into Civweave JSON…');
-    const compilePayload=kind==='learning'?compactLearningPayload(schema,draft):compactQuestPayload(schema,draft);
+    const compileBudget=stageInputBudget(compilerSystem(kind),COMPILE_TOKENS[kind])-'Compile this payload:\n'.length;
+    const compilePayload=kind==='learning'?compactLearningPayload(schema,draft,compileBudget):compactQuestPayload(schema,draft,compileBudget);
     const compiledText=await runLocal({pipelineId,purpose,kind,phase:'compile',label:'Local JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
     let compiled=canonicalize(parseJsonLoose(compiledText),kind);
 
@@ -294,7 +341,8 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
 
     if(errors.length){
       paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. The planning model is repairing those fields…`);
-      const repairPayload=repairPromptPayload(kind,schema,draft,errors,compiled||parseJsonLoose(compiledText)||compiledText);
+      const repairBudget=stageInputBudget(repairSystem(kind),REPAIR_TOKENS[kind])-'Repair this payload:\n'.length;
+      const repairPayload=repairPromptPayload(kind,schema,draft,errors,compiled||parseJsonLoose(compiledText)||compiledText,repairBudget);
       const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
       errors=validateCompiled(compiled,schema,kind);
