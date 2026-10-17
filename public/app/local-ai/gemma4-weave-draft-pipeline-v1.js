@@ -337,7 +337,7 @@ async function preflightLocalLearningGpu({pipelineId,purpose,kind,signal}={}){
       systemPrompt:'',messages:[{role:'user',content:'READY'}],maxNewTokens:24,structuredTool:null,
       onProgress:detail=>{lastProbePhase=clean(detail?.phase,100)},
       onToken:detail=>{if(String(detail?.text||''))probeTokenCount++}
-    },id,'Local GPU Smoke Test',45000);
+    },id,'Local GPU Smoke Test',180000);
     const reply=clean(result?.outputText||result?.text,3000);
     if(!reply)throw Object.assign(new Error('The GPU smoke test returned no visible text.'),{code:'LOCAL_GPU_PROBE_EMPTY'});
     verifiedGpuRuntimes.set(id,runtime);
@@ -350,7 +350,9 @@ async function preflightLocalLearningGpu({pipelineId,purpose,kind,signal}={}){
     saveArtifact({...lastArtifact,gpuPreflight:diagnostic});
     dispatch({pipelineId,purpose,kind,phase:'preflight',state:'failed',label:'Independent E4B GPU smoke test',...diagnostic});
     if(cancelled)throw cause;
-    const error=Object.assign(new Error('Gemma 4 E4B failed the independent one-word LiteRT GPU test before Moss could draft. This is a device/WebGPU/model inference failure, not a tarot prompt or JSON error. Restart the full installed app before another GPU test; do not repeatedly retry while the GPU is quarantined.'),{
+    const loadingFailure=cause?.code==='CIVWEAVE_LOCAL_STAGE_TIMEOUT'&&!/awaiting-first-token|prompt-submitted|first-stream-chunk/.test(lastProbePhase);
+    const explanation=loadingFailure?'Gemma 4 E4B did not finish initializing its on-device GPU engine before the independent test deadline.':'Gemma 4 E4B failed to produce a token even on an independent one-word LiteRT GPU test.';
+    const error=Object.assign(new Error(explanation+' Moss cannot create a Learning Journey until the selected local model works. This is not a tarot prompt or JSON error. Fully restart the app before another GPU test; do not retry while the GPU is quarantined.'),{
       code:'CIVWEAVE_E4B_GPU_PREFLIGHT_FAILED',executionModel:id,stage:'Local GPU Smoke Test',restartRequired:true,
       rawDiagnostics:diagnostic,causeCode:diagnostic.causeCode
     });
