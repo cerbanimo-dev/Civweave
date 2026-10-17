@@ -53,6 +53,7 @@ const CORE=[
   '/app/shared/civweave-parity-runtime.js','/app/shared/civweave-parity-ledger.json',
   '/app/services/anarchadia/workbench.html','/app/services/anarchadia/cabinet-workbench-v144.css','/app/services/anarchadia/cabinet-workbench-loader-v144.js','/app/services/anarchadia/styles.css','/app/services/anarchadia/src/app.js','/app/services/anarchadia/src/domain.js','/app/services/anarchadia/src/store.js','/app/services/anarchadia/src/export.js','/app/services/anarchadia/src/ai.js','/app/services/anarchadia/civweave-handoff-consumer.js','/app/services/anarchadia/civweave-presence.js','/app/services/anarchadia/docs/PROVISIONAL_CONSTITUTION.md',
   '/app/services/fellowfare/cabinet.html','/app/services/fellowfare/cabinet-embed.css','/app/services/fellowfare/cabinet-bridge.js','/app/services/fellowfare/styles.css','/app/services/fellowfare/app.js','/app/services/fellowfare/ai.js','/app/services/fellowfare/ledger.js','/app/services/fellowfare/shared/civweave-model-runtime.js','/app/services/fellowfare/civweave-handoff-consumer.js',
+  '/app/ai-workflows/compiled/moss-design-context-v1.mjs',
   '/app/learning-pack-seeds-v1.js',
   '/app/shared/learning-pack-runtime-v1.mjs',
   '/app/shared/learning-pack-resolver-v1.mjs',

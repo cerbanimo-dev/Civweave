@@ -11,7 +11,7 @@ Civweave is an offline-first, installable family of five connected workstations:
 The public host is deliberately small. It distributes and updates the device package, exposes optional network services, and keeps the installed software capable of operating locally.
 
 > [!IMPORTANT]
-> **Cabinet development currently lives under `public/app/`.** Start with `public/app/fullscreen-family-v104.html`, then follow the exact file it routes to for the realm you are changing. Do not choose a folder because its name merely sounds current.
+> **Installed application development lives under `public/app/`.** Trace the current route through `public/app/system-routes-v227.js` and `public/app/persistent-system-shell-v1.html`, then find the declared functional owner. Do not infer ownership from a cabinet filename.
 
 Agents and automated contributors must read [`AGENTS.md`](./AGENTS.md) before editing this repository.
 
@@ -38,23 +38,17 @@ High-level areas:
 
 Do not create a live `archive/` tree, retired implementation archive, root server alias, root symlink, hidden root trigger file, or convenience Markdown report at repository root. Git history is the archive. `scripts/verify-root-hygiene.mjs` and release-discipline checks enforce these boundaries.
 
-## Current cabinet entry map
+## Current installed-family entry map
 
-`public/app/fullscreen-family-v104.html` is the active installed cabinet-family dispatcher. It currently opens:
+`public/app/system-routes-v227.js` defines routes, and `public/app/persistent-system-shell-v1.html` hosts the shared shell. The canonical current route table is maintained in [the repository atlas](./docs/architecture/repository-map.md); inspect those actual files before editing. Presentation routes do not establish capability ownership.
 
-| System | Active entry |
-| --- | --- |
-| Civweave | `public/app/working-campus-v156.html` |
-| Living School | `public/app/cabinets/living-school/index.html` |
-| Cerbanimo | `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1` |
-| FellowFare | `public/app/fellowfare-cabinet-v144.html?cabinet=1` |
-| Anarchadia | `public/app/anarchadia-console-v139.html?cabinet=1` |
+## Developer AI context workspaces
 
-The dispatcher appends installed-package state when it routes. This table is a route snapshot, not an architectural ownership contract. Keep the canonical copy in [`docs/architecture/repository-map.md`](./docs/architecture/repository-map.md) synchronized when the dispatcher changes.
+Run `node scripts/ai-context.mjs --list` to inspect available developer and runtime-pilot stages. `docs/agent-workspaces/` provides selectively loaded task instructions; `public/app/ai-workflows/` contains a **non-executing** Moss stage-contract pilot. All authority and existing runtime owners remain unchanged. The pilot is not installed as a functioning new Learning Journey pipeline.
 
 ## Where current work belongs
 
-- `public/app/fullscreen-family-v104.html` - canonical installed family dispatcher.
+- `public/app/system-routes-v227.js` - installed family route declarations and `public/app/persistent-system-shell-v1.html` - persistent presentation shell.
 - `public/app/family-shell-v104.js` and `public/app/family-shell-v104.css` - shared cabinet chrome and navigation behavior.
 - `public/app/cabinets/<realm>/` - modular cabinet presentation implementations where actively routed. Living School is currently developed here.
 - `public/app/*-cabinet-v*`, `public/app/*-console-v*`, and `public/app/working-campus-v*` - active realm parent surfaces referenced by the dispatcher.

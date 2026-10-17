@@ -10,7 +10,7 @@ A visible control is not an invitation to attach a new event. A custom realm pag
 
 For every cross-cutting change, an agent must perform this sequence before editing:
 
-1. Trace the active route from `public/app/fullscreen-family-v104.html`.
+1. Trace the active route from `public/app/system-routes-v227.js` through `public/app/persistent-system-shell-v1.html`.
 2. Read `config/system-ownership.json` and identify the capability owner.
 3. Search every active entry and shared runtime for the canonical control, event, global API, storage key, and loader.
 4. Classify each match as **owner**, **subscriber**, **caller**, **compatibility shim**, or **retired code**.
