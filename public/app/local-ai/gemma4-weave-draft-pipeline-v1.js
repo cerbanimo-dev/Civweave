@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.5-weave-draft-pipeline-v1-context-packed';
+const VERSION='1.3.6-weave-draft-pipeline-v1-lean-learning-sessions';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -242,7 +242,7 @@ async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messag
   if((messages.at(-1)?.content||'').length>promptBudget)throw contextFitError(kind,phase,promptBudget);
   let streamed='',index=0;
   dispatch({pipelineId,purpose,kind,phase,state:'running',label,model:modelFor(),promptBudget,promptCharacters:messages.reduce((n,row)=>n+String(row?.content||'').length,0)+systemPrompt.length});
-  const args={__civweaveStage:label,systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
+  const args={__civweaveStage:label,__civweavePlanKind:kind,systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
     const token=String(event?.text??'');if(!token)return;
     streamed=(streamed+token).slice(-48000);
     dispatch({pipelineId,purpose,kind,phase,state:'streaming',label,token,index:index++,streamLength:streamed.length});
