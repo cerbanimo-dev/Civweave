@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r6';
-const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v462-mandatory-gemma-intake';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r6';
+const REVISION='weave-pipeline-takeover-v1-r8-production-e4b-only';
+const FIRST_PARTY_HOSTS=new Set(['civweave-staging.pages.dev','civweave.pages.dev','civweave.cc','www.civweave.cc']);
+const CACHE='cwrecovery-v464-production-e4b-only-weave';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r8-production-e4b-only';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/shared-guide-surface-v236.js',
@@ -32,12 +32,12 @@ const RELOAD_PATHS=new Set([
   '/app/working-campus-v440.html'
 ]);
 function markerRequest(){return new Request(new URL(MARKER,self.location.origin).href)}
-async function pending(){if(self.location.hostname!==STAGING_HOST)return false;try{return !(await (await caches.open(CACHE)).match(markerRequest()))}catch{return true}}
+async function pending(){if(!FIRST_PARTY_HOSTS.has(self.location.hostname))return false;try{return !(await (await caches.open(CACHE)).match(markerRequest()))}catch{return true}}
 async function purge(){for(const name of await caches.keys()){const cache=await caches.open(name);for(const request of await cache.keys()){let pathname='';try{pathname=new URL(request.url).pathname}catch{}if(PURGE_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true})}}}
 async function reloadControlledClients(){const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});for(const client of clients){try{const url=new URL(client.url);if(url.origin!==self.location.origin||!RELOAD_PATHS.has(url.pathname))continue;await client.navigate(client.url)}catch{}}}
-if(self.location.hostname===STAGING_HOST){
+if(FIRST_PARTY_HOSTS.has(self.location.hostname)){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await pending())await self.skipWaiting()})())});
   self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await pending()))return;await purge();await self.clients.claim();const cache=await caches.open(CACHE);await cache.put(markerRequest(),new Response(REVISION,{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await reloadControlledClients()})())});
 }
-self.CivweaveWeavePipelineTakeoverV1=Object.freeze({revision:REVISION,purgePaths:[...PURGE_PATHS],reloadPaths:[...RELOAD_PATHS]});
+self.CivweaveWeavePipelineTakeoverV1=Object.freeze({revision:REVISION,firstPartyHosts:[...FIRST_PARTY_HOSTS],purgePaths:[...PURGE_PATHS],reloadPaths:[...RELOAD_PATHS]});
 })();
