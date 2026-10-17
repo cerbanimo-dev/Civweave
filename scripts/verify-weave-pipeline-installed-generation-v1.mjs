@@ -16,7 +16,7 @@ assert.ok(rootWorker.includes("'/app/local-ai/gemma4-route-integrity-v1.js'"),'i
 assert.ok(rootWorker.includes("'/app/local-ai/gemma4-learning-plan-entry-authority-v1.js'"),'installer CORE does not include explicit Learning Journey entry authority');
 assert.ok(rootWorker.includes("'/app/generation-failure-inspector-v1.js'"),'installer CORE does not include rejected generation inspector');
 assert.ok(rootWorker.includes("'/app/local-ai/gemma4-weave-draft-pipeline-v1.js'"),'installer CORE does not include the E4B Weave Draft pipeline');
-assert.ok(shell.includes('/app/local-ai/gemma4-first-request-intake-bridge-v1.js?v=1.2.8-e4b-preflight'),'persistent shell does not load the current first-request intake bridge');
+assert.ok(shell.includes('/app/local-ai/gemma4-first-request-intake-bridge-v1.js?v=1.2.9-cold-load-safe-probe'),'persistent shell does not load the current first-request intake bridge');
 assert.ok(shell.includes('/app/local-ai/gemma4-route-integrity-v1.js?v=1.0.0-post-loader-original-text'),'persistent shell does not load post-loader original-text route integrity');
 assert.ok(shell.includes('/app/local-ai/gemma4-learning-plan-entry-authority-v1.js?v=1.2.2-generic-messages'),'persistent shell does not load explicit Learning Journey Weave entry');
 assert.ok(shell.includes('/app/generation-failure-inspector-v1.js?v=1.1.1-cross-frame-no-output'),'persistent shell does not load rejected generation inspector');
