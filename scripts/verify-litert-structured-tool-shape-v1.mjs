@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-litert-request-authority-v1.js','utf8');
-assert.match(source,/1\.2\.15-local-litert-request-authority-v1-e4b-preflight/);
+assert.match(source,/1\.2\.16-local-litert-request-authority-v1-cold-load-safe-probe/);
 assert.match(source,/1\.2\.3-guide-generation-tracker-v1-gpu-quarantine-status/);
 assert.match(source,/litert-web-dual-tool-shape-json-fallback/);
 assert.match(source,/You MUST respond by calling the \$\{tool\.name\} tool exactly once/);
@@ -94,7 +94,7 @@ assert.equal(metadata.deepGenerationModel,'gemma4-e4b-it-litert-web');
 // captures CivweaveModelRuntime. The loader may replace the runtime object, so the
 // E4B Weave wrapper must be rebound before ensure() resolves back to Moss.
 storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'}));
-const WEAVE_VERSION='1.3.7-weave-draft-pipeline-v1-gpu-smoke-gate';
+const WEAVE_VERSION='1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe';
 let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
