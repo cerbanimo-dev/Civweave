@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.8.2-litert-runtime-v1-safe-dead-queue-cleanup';
+const VERSION='1.8.3-litert-runtime-v1-lean-learning-sessions';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
@@ -257,15 +257,27 @@ async function runFast(args={},forcedModelId=''){
     const sessionConfig={maxOutputTokens};
     if(!sdkDefaultSampler)sessionConfig.samplerParams={k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)};
     const conversationConfig={sessionConfig,preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
+    // LiteRT's documented minimal WebGPU path uses one sendMessageStreaming()
+    // turn. On some mobile GPUs prefilled multi-message E4B sessions complete
+    // createConversation but never produce their first token. Keep the same
+    // E4B model, instructions, and thinking-off contract, but send the local
+    // Learning Journey stages as single-turn prompts instead of prefilled turns.
+    const leanLearningStage=Boolean(args.__civweaveStage&&args.__civweavePlanKind==='learning'&&profile.family==='gemma4'&&!formattedTool);
+    const leanPrompt=leanLearningStage?['Instructions:',systemPrompt.trim(),'Request:',latest.content].join('\n\n'):'';
+    if(leanLearningStage&&leanPrompt.length>maxInputChars-96)throw Object.assign(
+      new Error('The lightweight local learning prompt exceeds the model context. Reduce the learning material.'),
+      {code:'LOCAL_PROMPT_CONTEXT_OVERFLOW',inputCharacters:leanPrompt.length,maxInputCharacters:maxInputChars-96}
+    );
+    const leanConversationConfig={sessionConfig:{maxOutputTokens},preface:{extra_context:{enable_thinking:false}},prefillPrefaceOnInit:false};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
     // The diagnostic probe deliberately uses Google's minimal public API:
     // Engine.create({model, maxNumTokens}) -> createConversation() -> sendMessageStreaming('READY').
     // If even this fails, the GPU queue/model is unavailable independent
     // of Civweave's planning preface, tools, sampler, or learning schema.
     const minimalProbe=Boolean(args.__civweaveProbe)&&!formattedTool;
-    progress(minimalProbe?'creating-minimal-conversation':'prefilling-preface',{prefaceCharacters:minimalProbe?0:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:!minimalProbe,engineMode,sdkDefaultSampler});
-    chat=await activeEngine.createConversation(minimalProbe?undefined:conversationConfig);activeChat=chat;ensureNotCancelled();
-    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),sdkDefaultSampler,minimalProbe});
+    progress(minimalProbe?'creating-minimal-conversation':leanLearningStage?'creating-lean-learning-conversation':'prefilling-preface',{prefaceCharacters:minimalProbe||leanLearningStage?0:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:!minimalProbe&&!leanLearningStage,engineMode,sdkDefaultSampler,leanLearningStage});
+    chat=await activeEngine.createConversation(minimalProbe?undefined:leanLearningStage?leanConversationConfig:conversationConfig);activeChat=chat;ensureNotCancelled();
+    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),sdkDefaultSampler,minimalProbe,leanLearningStage});
     if(formattedTool){
       progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:true});
       const response=await chat.sendMessage(latest);ensureNotCancelled();
@@ -273,10 +285,10 @@ async function runFast(args={},forcedModelId=''){
       const calls=chunkToolCalls(response);if(calls.length)toolCall=calls.at(-1);
       text=chunkText(response);
     }else{
-      progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:false});
+      progress('prompt-submitted',{inputCharacters:leanLearningStage?leanPrompt.length:latest.content.length,constrainedDecoding:false,leanLearningStage});
       // Text-only streaming follows the documented LiteRT Web SDK call shape.
-      const stream=chat.sendMessageStreaming(latest.content);
-      progress('awaiting-first-token',{inputCharacters:latest.content.length,prefaceCharacters:preface.reduce((n,row)=>n+row.content.length,0),engineMode,mtpEnabled:false});
+      const stream=chat.sendMessageStreaming(leanLearningStage?leanPrompt:latest.content);
+      progress('awaiting-first-token',{inputCharacters:leanLearningStage?leanPrompt.length:latest.content.length,prefaceCharacters:leanLearningStage?0:preface.reduce((n,row)=>n+row.content.length,0),engineMode,mtpEnabled:false,leanLearningStage});
       for await(const chunk of stream){ensureNotCancelled();chunkCount++;if(chunkCount===1)progress('first-stream-chunk',{containsVisibleText:Boolean(chunkText(chunk))});const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
     }
     ensureNotCancelled();
@@ -286,7 +298,7 @@ async function runFast(args={},forcedModelId=''){
     if(!outputText)throw Object.assign(new Error(`${profile.label} emitted no visible output (${chunkCount} chunks, ${index} text deltas). The raw stage diagnostics are available in Show failing message.`),{code:'LOCAL_MODEL_EMPTY_OUTPUT',rawDiagnostics:rawDiagnostics(),executionModel:profile.id,rejectedText:text});
     let benchmark={};try{benchmark=benchmarkMetrics(await chat.getBenchmarkInfo())}catch{}
     const completed=now(),generationMs=Math.round(completed-started),ttftMs=firstTokenAt?Math.round(firstTokenAt-started):null,decodeSeconds=Math.max(.001,(completed-(firstTokenAt||started))/1000),approxTokens=Math.max(1,Math.round(outputText.length/3.7)),measuredApproxTokensPerSecond=Number((approxTokens/decodeSeconds).toFixed(2));
-    const metrics={runtime:'litert-lm-web-0.17.1',backend:'webgpu',engineMode,model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
+    const metrics={runtime:'litert-lm-web-0.17.1',backend:'webgpu',engineMode,model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,leanLearningStage,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
     lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
   }catch(error){
