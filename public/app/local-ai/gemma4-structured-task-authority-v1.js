@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.3-structured-task-authority-v1-stall-quarantines-gpu';
+const VERSION='1.4.4-structured-task-authority-v1-probe-short-watchdog';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -108,6 +108,7 @@ function controlledFastRun(args,model,stage,timeoutMs){
   throwIfCancelled();
   return new Promise(async(resolve,reject)=>{
     let settled=false,timer=null,stallTimer=null,phase='loading-runtime',lastProgressAt=Date.now(),tokens=0,lastRuntimeDetails={};
+    const firstTokenLimitMs=Math.max(10000,Math.min(90000,Number(args?.__civweaveFirstTokenTimeoutMs)||90000));
     const fast=await intakeRuntime().catch(error=>{settled=true;reject(error);return null});
     if(!fast||settled)return;
     const clearTimers=()=>{
@@ -121,7 +122,7 @@ function controlledFastRun(args,model,stage,timeoutMs){
       ok?resolve(value):reject(value);
     };
     const timeout=(kind)=>{
-      const error=timeoutError(stage,kind==='no-first-token'?90000:timeoutMs);
+      const error=timeoutError(stage,kind==='no-first-token'?firstTokenLimitMs:timeoutMs);
       error.code=kind==='no-first-token'?'CIVWEAVE_LOCAL_FIRST_TOKEN_STALL':'CIVWEAVE_LOCAL_STAGE_TIMEOUT';
       error.executionModel=model;error.runtimePhase=phase;
       if(kind==='no-first-token'){
@@ -146,7 +147,7 @@ function controlledFastRun(args,model,stage,timeoutMs){
       emit('civweave:local-model-stage-progress',{stage,model,phase,visibleTextDeltas:tokens,runtimeDetails:lastRuntimeDetails});
       if(['prompt-submitted','awaiting-first-token'].includes(phase)&&tokens===0){
         if(stallTimer!=null)clearTimeout(stallTimer);
-        stallTimer=setTimeout(()=>cancel(timeout('no-first-token')),90000);
+        stallTimer=setTimeout(()=>cancel(timeout('no-first-token')),firstTokenLimitMs);
       }
     };
     const priorProgress=args?.onProgress,priorToken=args?.onToken;
