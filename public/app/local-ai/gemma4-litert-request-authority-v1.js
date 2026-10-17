@@ -1,18 +1,18 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.13-local-litert-request-authority-v1-context-packed';
+const VERSION='1.2.14-local-litert-request-authority-v1-lean-learning-sessions';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const FAST_RUNTIME_VERSION='1.8.2-litert-runtime-v1-safe-dead-queue-cleanup';
-const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.2-safe-queue-cleanup';
+const FAST_RUNTIME_VERSION='1.8.3-litert-runtime-v1-lean-learning-sessions';
+const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.3-lean-learning-sessions';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.2.3-guide-generation-tracker-v1-gpu-quarantine-status';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.2.3-gpu-quarantine';
-const WEAVE_PIPELINE_VERSION='1.3.5-weave-draft-pipeline-v1-context-packed';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.5-context-packed';
+const WEAVE_PIPELINE_VERSION='1.3.6-weave-draft-pipeline-v1-lean-learning-sessions';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.6-lean-learning-sessions';
 const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
 const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
 const QWEN_FAST_MODEL='qwen35-4b-litert-web';
