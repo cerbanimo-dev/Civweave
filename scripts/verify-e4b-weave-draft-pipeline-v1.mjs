@@ -158,4 +158,17 @@ assert.equal(artifact.resourceManifest.length,2);
 assert.equal(artifact.specialistWork.length,1);
 assert.equal(artifact.decisionGates.length,1);
 
+// A failed GPU session must not be probed or allowed into the draft stage.
+sandbox.CivweaveLiteRTGemma4FastRuntimeV1.state=()=>({gpuQuarantine:{code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED'}});
+calls.length=0;
+await assert.rejects(
+  ()=>sandbox.CivweaveModelRuntime.generate({
+    purpose:'living-school-learning-plan-review-v2',
+    config:{provider:'downloaded-local',model:'gemma4-e4b-it-litert-web'},
+    schema:learningSchema,messages:[{role:'user',content:'Memorize tarot'}]
+  }),
+  error=>error?.code==='CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED'
+);
+assert.equal(calls.length,0,'quarantined GPU must not receive another test or draft request');
+
 console.log('E4B Weave Draft -> compile -> validate/repair pipeline regression passed.');
