@@ -324,7 +324,8 @@ async function preflightLocalLearningGpu({pipelineId,purpose,kind,signal}={}){
   const runtime=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
   const auth=authority();
   if(!/^gemma4-e4b-it-litert-web$/i.test(id)||typeof runtime?.state!=='function'||typeof auth?.controlledFastRun!=='function')return;
-  if(verifiedGpuRuntimes.get(id)===runtime&&!runtime.state()?.gpuQuarantine)return;
+  if(runtime.state()?.gpuQuarantine)throw Object.assign(new Error('The GPU session is quarantined following an earlier stall. Restart the full Civweave app before retesting.'),{code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED',executionModel:id,restartRequired:true});
+  if(verifiedGpuRuntimes.get(id)===runtime)return;
   if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
   paint('Checking whether Gemma 4 E4B can produce one local GPU token before drafting…');
   dispatch({pipelineId,purpose,kind,phase:'preflight',state:'running',label:'Independent E4B GPU smoke test',model:id});
