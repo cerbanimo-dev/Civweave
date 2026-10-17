@@ -31,7 +31,14 @@ const questSchema={
 };
 
 async function controlledFastRun(args,model,label){
-  calls.push({model,label,structuredTool:args.structuredTool,maxNewTokens:args.maxNewTokens});
+  calls.push({model,label,structuredTool:args.structuredTool,maxNewTokens:args.maxNewTokens,latestPrompt:args.messages.at(-1)?.content||''});
+  // Use the same E4B 2,048-token admission formula as LiteRT. Mocked
+  // generation must never conceal a real-device prompt overflow.
+  const maxOutput=Math.max(64,Math.min(2800,Number(args.maxNewTokens)||1024));
+  const available=Math.max(1500,Math.min(5000,Math.floor((2048-maxOutput-128)*2.5)));
+  const system=String(args.systemPrompt||'').trim().slice(0,Math.min(1700,Math.floor(available*.35)));
+  const maxLatest=available-system.length-96;
+  assert.ok((args.messages.at(-1)?.content||'').length<=maxLatest,`${label} exceeds E4B input budget ${maxLatest}`);
   assert.equal(model,'gemma4-e4b-it-litert-web');
   assert.equal(args.structuredTool,null,'E4B draft/compile/repair must use free text generation, never constrained tools');
   if(label==='Local Weave Draft'){
@@ -110,6 +117,25 @@ assert.deepEqual(calls.map(call=>call.label),['Local Weave Draft','Local JSON Co
 assert.ok(calls.every(call=>call.model==='gemma4-e4b-it-litert-web'));
 assert.ok(calls.every(call=>call.structuredTool===null));
 assert.equal(baseRequests.at(-1).config.model,'gemma4-e4b-it-litert-web');
+
+// Production-sized upstream envelopes include duplicated constraints and
+// recent chat history. Only the essential learner request should enter E4B.
+const verboseContext={
+  schema:'civweave.learning-journey-plan-request.v2',
+  request:{title:'Tarot Recall',capability:'Read and memorize all 78 tarot cards',level:'beginner',count:4,mode:'guided',proof:'Read a shuffled spread from memory',sourceText:'Can you teach me how to read and memorize the tarot?'},
+  revision:'',existingPlan:null,
+  recentConversation:Array.from({length:8},()=>({role:'user',text:'Historical conversation context irrelevant to the learning goal. '.repeat(8)})),
+  constraints:['Generate only a high-level Learning Journey plan for review.','Do not write lesson materials, exercises, source lists or curriculum content.','Make each module specific with an observable outcome.','Keep the plan in REVIEW until approval.']
+};
+const wrappedRequest='Design the high-level Learning Journey plan from this request:\\n'+JSON.stringify(verboseContext);
+assert.ok(wrappedRequest.length>2547,'the regression request must exceed the original 2547-character failure');
+calls.length=0;baseRequests.length=0;
+result=await sandbox.CivweaveModelRuntime.generate({purpose:'living-school-learning-plan-review-v2',config:{provider:'downloaded-local',model:'gemma4-e4b-it-litert-web',maxTokens:900},schema:learningSchema,messages:[{role:'user',content:wrappedRequest}]});
+parsed=JSON.parse(result.outputText);
+assert.equal(parsed.modules.length,4);
+assert.deepEqual(calls.map(call=>call.label),['Local Weave Draft','Local JSON Compile','Local Targeted Repair']);
+assert.ok(calls[0].latestPrompt.length<wrappedRequest.length/2,'draft should remove redundant routing fields');
+assert.match(calls[0].latestPrompt,/memorize the tarot/);
 
 currentKind='quest';calls.length=0;baseRequests.length=0;
 result=await sandbox.CivweaveModelRuntime.generate({purpose:'civweave-weaveling-intention-json-v190',config:{provider:'downloaded-local',model:'gemma4-e2b-it-litert-web',maxTokens:1200},schema:questSchema,messages:[{role:'user',content:'Help us create a community garden.'}]});
