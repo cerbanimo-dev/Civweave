@@ -24,6 +24,7 @@ let invalidWasm=false,failOnLoaderWasm=false;
 const wasmBytes=Uint8Array.from([0,97,115,109,1,0,0,0]);
 const htmlBytes=Uint8Array.from([60,33,100,111,99,116,121,112]);
 const modelManifest={coreVersion:'0.17.1',wasmFiles:['wasm/litertlm_wasm_internal.wasm'],omittedFiles:[{path:'wasm/litertlm_wasm_asyncify_internal.wasm'}]};
+let activeWorker=null;
 const fetchMock=async input=>{
   const url=String(typeof input==='string'?input:input?.url||input);
   if(url.includes('stage-manifest.json'))return{ok:true,status:200,url,headers:{get:()=> 'application/json'},json:async()=>modelManifest};
@@ -34,7 +35,7 @@ const fetchMock=async input=>{
 };
 
 const mockSDK={
-  loadLiteRtLm:async()=>{steps.push('wasm');if(failOnLoaderWasm)await self.fetch('/app/vendor/litert-lm/wasm/litertlm_wasm_asyncify_internal.wasm')},
+  loadLiteRtLm:async()=>{steps.push('wasm');if(failOnLoaderWasm)await activeWorker.fetch('/app/vendor/litert-lm/wasm/litertlm_wasm_asyncify_internal.wasm')},
   Engine:{create:async settings=>{
     steps.push('engine');assert.ok(settings.model);
     return{createConversation:async()=>{
@@ -44,6 +45,7 @@ const mockSDK={
   }}
 };
 const self={postMessage:row=>reports.push(row),location:{href:'https://civweave-staging.pages.dev/'},fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=self;
 const context={
   self,globalThis:self,Date,Promise,Error,Object,Boolean,String,Number,Math,
   performance:{now:()=>Date.now()},
@@ -69,6 +71,7 @@ assert.ok(reports.some(r=>r.phase==='wasm-inventory'&&r.omittedWasm?.includes('w
 const previousEngineCount=steps.filter(x=>x==='engine').length;
 invalidWasm=true;
 const badReports=[],badSelf={postMessage:row=>badReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=badSelf;
 vm.runInNewContext(instrumented,{...context,self:badSelf,globalThis:badSelf});
 await badSelf.onmessage({data:{
   modelId:'gemma4-e4b-it-litert-web',
@@ -80,6 +83,7 @@ assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount,'invalid W
 invalidWasm=false;
 failOnLoaderWasm=true;
 const loaderReports=[],loaderSelf={postMessage:row=>loaderReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=loaderSelf;
 vm.runInNewContext(instrumented,{...context,self:loaderSelf,globalThis:loaderSelf});
 await loaderSelf.onmessage({data:{
   modelId:'gemma4-e4b-it-litert-web',
