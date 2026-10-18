@@ -10,12 +10,19 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 </style></head>
 <body>
 <h1>Isolated LiteRT GPU test</h1>
-<p>Runs the already-downloaded Gemma model in a dedicated classic Web Worker compatible with the LiteRT WASM bootstrap. No Moss plan, prompt compiler, or AI fallback. This test does <b>not</b> download model weights.</p>
+<p>Tests Gemma in a dedicated classic Web Worker, independently of Moss or AI fallbacks. The original cached <code>-web</code> artifact requires a 160 MiB storage binding on a GPU limited to 128 MiB. You can compare Google's separately compiled <code>-gpu</code> E4B artifact by choosing a local file. No model is uploaded, and this page never downloads weights automatically.</p>
 <p><label for="model">Local model</label>
 <select id="model">
 <option value="e4">Gemma 4 E4B · currently installed Web artifact</option>
 <option value="e2">Gemma 4 E2B · currently installed Web artifact</option>
 </select></p>
+<p><label for="artifactKind">Model artifact source</label>
+<select id="artifactKind">
+<option value="official-gpu-file" selected>Official E4B -gpu file · recommended compatibility comparison</option>
+<option value="cached-web">Previously cached -web model · known 160 MiB binding failure</option>
+</select></p>
+<p><label for="officialGpuFile">Local official E4B GPU model file</label><input type="file" id="officialGpuFile" accept=".litertlm"></p>
+<p><small>Get the <a href="https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/39ef6157de767f9b0fe3ec311adf444b4c1ebd00/gemma-4-E4B-it-gpu.litertlm?download=true" rel="noopener noreferrer" target="_blank">official gemma-4-E4B-it-gpu.litertlm (2.97 GB)</a> in your browser, then select it above. The E4B -gpu artifact is documented as supported by the LiteRT-LM Web API; compatibility with your GPU is not yet established. Expected file size: 2,969,059,328 bytes. Existing -web weights remain untouched.</small></p>
 <p><label for="mode">Inference diagnostic</label>
 <select id="mode">
 <option value="bounded-stream">Bounded stream · 32 output tokens · thinking off (recommended)</option>
@@ -29,7 +36,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 <option value="1024">1024 tokens · intermediate comparison</option>
 <option value="2048">2048 tokens · original known 160 MiB buffer binding</option>
 </select></p>
-<p><small>A GPU storage binding must fit <em>within a single GPU binding</em>. This device reported a 128 MiB limit, while the original 2048-token E4B run requested 160 MiB. A smaller engine context might change the required buffer size; this test checks that without replacing model weights.</small></p>
+<p><small>Your 512-token test reproduced the same 160 MiB binding. Reducing context alone did not resolve the cached <code>-web</code> artifact's incompatibility. This comparison isolates model compilation by testing the official <code>-gpu</code> artifact at the same LiteRT runtime and WebGPU adapter limits.</small></p>
 <button id="test">Run clean GPU test</button><button id="stop" disabled>Stop worker</button><button id="persist">Request persistent storage</button>
 <p id="capabilities" aria-live="polite">Checking browser capabilities…</p>
 <p id="storage" aria-live="polite"></p>
@@ -42,6 +49,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
     e2:{id:'gemma4-e2b-it-litert-web',repo:'gemma-4-E2B-it-litert-lm',revision:'73d35ec36cf24347ab4eec1a46f0aafbb9c3a89d',artifact:'gemma-4-E2B-it-web.litertlm'}
   };
   const get=id=>document.getElementById(id),log=get('log'),button=get('test'),stop=get('stop');
+  const officialGpuFilename='gemma-4-E4B-it-gpu.litertlm',officialGpuBytes=2969059328;
   const line=text=>{log.textContent+=text+'\n';log.scrollTop=log.scrollHeight};
   let worker=null,timer=null,firstTokenTimer=null,started=0,visible='',heartbeatCount=0,lastHeartbeatMs=0;
   function reset(){if(timer)clearTimeout(timer);if(firstTokenTimer)clearTimeout(firstTokenTimer);timer=null;firstTokenTimer=null;try{worker?.terminate()}catch{}worker=null;button.disabled=false;stop.disabled=true}
@@ -62,18 +70,27 @@ small{color:#bed0e1}button:disabled{opacity:.5}
     if(worker)return;
     log.textContent='';visible='';heartbeatCount=0;lastHeartbeatMs=0;started=Date.now();button.disabled=true;stop.disabled=false;
     const model=models[get('model').value],url='https://huggingface.co/litert-community/'+model.repo+'/resolve/'+model.revision+'/'+model.artifact;
-    const mode=get('mode').value,contextTokens=Number(get('context').value);
-    line('Selected '+model.id+' · cached artifact: '+model.artifact+' · diagnostic: '+mode+' · engine context: '+contextTokens+' tokens');
+    const mode=get('mode').value,contextTokens=Number(get('context').value),artifactKind=get('artifactKind').value;
+    line('Selected '+model.id+' · source: '+artifactKind+' · diagnostic: '+mode+' · engine context: '+contextTokens+' tokens');
     try{
-      const cache=await caches.open('civweave-model-generative-v266');
-      const hit=await cache.match(url);
-      if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
-      line('Cache: present · starting worker…');
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.9-e4b-reduced-context-gpu-limit-probe',{type:'classic'});
+      let modelFile=null;
+      if(artifactKind==='official-gpu-file'){
+        if(model.id!=='gemma4-e4b-it-litert-web'){finish('FILE SELECTION ERROR: The official GPU file comparison currently supports E4B only. Choose E4B or switch to cached -web mode.');return}
+        modelFile=get('officialGpuFile').files?.[0]||null;
+        if(!modelFile){finish('FILE NEEDED: Download the separately compiled 2.97 GB official -gpu model from the link above, then choose it with the file picker. No download or cache change was made.');return}
+        if(modelFile.name!==officialGpuFilename||modelFile.size!==officialGpuBytes){finish('INCORRECT FILE: Expected '+officialGpuFilename+' ('+officialGpuBytes+' bytes); selected '+modelFile.name+' ('+modelFile.size+' bytes). Do not test another model artifact under the E4B GPU label.');return}
+        line('OFFICIAL GPU FILE · '+modelFile.name+' · '+modelFile.size+' bytes · streamed from selected local file; not uploaded or saved in Cache Storage.');
+      }else{
+        const cache=await caches.open('civweave-model-generative-v266');
+        const hit=await cache.match(url);
+        if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
+        line('Cache: present · starting worker…');
+      }
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.10-e4b-official-gpu-file-compare',{type:'classic'});
       worker.onmessage=event=>{
         const d=event.data||{};
         if(d.status==='phase'){if(d.phase==='awaiting-first-token'){if(firstTokenTimer)clearTimeout(firstTokenTimer);firstTokenTimer=setTimeout(()=>finish('TIMEOUT_FIRST_TOKEN: 90 seconds after conversation initialization · heartbeats '+heartbeatCount+' · '+(heartbeatCount?'worker event loop was responsive':'no worker heartbeat (possible WASM event-loop block)')+' · model cache preserved.'),90000)}line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.phase==='wasm-inventory'&&d.wasmCount!=null?' · version '+d.coreVersion+' · '+d.wasmCount+' WASM files · intentionally omitted: '+(d.omittedWasm||[]).join(', '):'')+(d.url?' · '+d.url:'')+(d.target?' → '+d.target:'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
-        if(d.status==='gpu-limits'){line('GPU STORAGE BINDING LIMIT · '+Math.round((d.maxStorageBufferBindingSize||0)/1048576)+' MiB; original E4B 2048-token bind: '+Math.round((d.observedRequiredBindingAt2048Bytes||0)/1048576)+' MiB'+(d.contextExperiment?' · reduced-context compatibility experiment':'')+(d.compatible===false?' · KNOWN INCOMPATIBLE':''));return}
+        if(d.status==='gpu-limits'){line('GPU STORAGE BINDING LIMIT · '+Math.round((d.maxStorageBufferBindingSize||0)/1048576)+' MiB'+(d.observedRequiredBindingAt2048Bytes?' · cached -web model previously requested '+Math.round(d.observedRequiredBindingAt2048Bytes/1048576)+' MiB':' · official -gpu model binding requirement UNKNOWN until inference')+(d.compatible===false?' · KNOWN INCOMPATIBLE':''));return}
         if(d.status==='gpu-device'){line('GPU DEVICE · SDK device observable: '+d.available+(d.available?' · maxStorageBufferBindingSize '+Math.round((d.maxStorageBufferBindingSize||0)/1048576)+' MiB · maxBufferSize '+d.maxBufferSize+' · features '+(d.features||[]).join(', '):''));return}
         if(d.status==='gpu-fatal'){finish('FAIL: '+d.code+' · '+d.message+' · engine context '+d.contextTokens+' tokens · first GPU validation error stopped the worker; model cache preserved.');return}
         if(d.status==='gpu-lost'||d.status==='gpu-warning'){line('GPU '+d.status.toUpperCase()+' · '+(d.reason||'')+' · '+(d.message||''));return}
@@ -85,7 +102,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
       };
       worker.onerror=event=>finish('FAIL: Worker script error · '+String(event.message||'unknown'));
       timer=setTimeout(()=>finish('TIMEOUT_TOTAL: 180 seconds · heartbeats '+heartbeatCount+'. Worker terminated; model cache preserved.'),180000);
-      worker.postMessage({modelId:model.id,modelUrl:url,mode,contextTokens});
+      worker.postMessage({modelId:model.id,modelUrl:url,mode,contextTokens,artifactKind,modelFile});
     }catch(error){finish('START FAILED: '+String(error))}
   };
 })();
