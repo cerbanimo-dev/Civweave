@@ -25,10 +25,12 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 <p><small>Get the <a href="https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/39ef6157de767f9b0fe3ec311adf444b4c1ebd00/gemma-4-E4B-it-gpu.litertlm?download=true" rel="noopener noreferrer" target="_blank">official gemma-4-E4B-it-gpu.litertlm (2.97 GB)</a> in your browser, then select it above. The -gpu artifact was tested and also requested a 160 MiB GPU storage binding with the standard backend. LiteRT-LM's JavaScript README lists -web as its supported web artifact, so using -gpu here is experimental. Expected file size: 2,969,059,328 bytes. Existing -web weights remain untouched.</small></p>
 <p><label for="backendMode">GPU executor comparison</label>
 <select id="backendMode">
-<option value="legacy-gpu-artisan" selected>Experimental GPU_ARTISAN · separate legacy executor (recommended next test)</option>
-<option value="standard-gpu">Standard WebGPU · known 160 MiB storage-binding failure</option>
+<option value="legacy-gpu-artisan" selected>Legacy GPU_ARTISAN · separate executor (first experiment)</option>
+<option value="no-gpu-weight-conversion">Standard GPU · disable on-GPU weight conversion (upstream workaround candidate)</option>
+<option value="no-shared-gpu-constants">Standard GPU · disable weight conversion and shared constants (upstream workaround candidate)</option>
+<option value="standard-gpu">Original standard GPU · known 160 MiB storage-binding failure</option>
 </select></p>
-<p><small>GPU_ARTISAN uses a separate LiteRT executor. Its buffer requirements are unknown; success is not guaranteed. If the first GPU validation error exceeds your limit, the test immediately stops. This does not modify normal Civweave generation.</small></p>
+<p><small>These tests exercise three *unverified* LiteRT GPU paths. The legacy GPU_ARTISAN executor uses a separate implementation; the conversion/shared-constants switches are suggested as possible workarounds in <a href="https://github.com/google-ai-edge/LiteRT-LM/issues/3866" target="_blank" rel="noopener noreferrer">upstream WebGPU issue #3866</a>. None raise the device's 128 MiB limit. The test stops on the first oversized binding without changing normal Civweave inference.</small></p>
 <p><label for="mode">Inference diagnostic</label>
 <select id="mode">
 <option value="bounded-stream">Bounded stream · 32 output tokens · thinking off (recommended)</option>
@@ -92,7 +94,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
         if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
         line('Cache: present · starting worker…');
       }
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.11-gpu-artisan-backend-compare',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.12-gpu-weight-variants',{type:'classic'});
       worker.onmessage=event=>{
         const d=event.data||{};
         if(d.status==='phase'){if(d.phase==='awaiting-first-token'){if(firstTokenTimer)clearTimeout(firstTokenTimer);firstTokenTimer=setTimeout(()=>finish('TIMEOUT_FIRST_TOKEN: 90 seconds after conversation initialization · heartbeats '+heartbeatCount+' · '+(heartbeatCount?'worker event loop was responsive':'no worker heartbeat (possible WASM event-loop block)')+' · model cache preserved.'),90000)}line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.phase==='wasm-inventory'&&d.wasmCount!=null?' · version '+d.coreVersion+' · '+d.wasmCount+' WASM files · intentionally omitted: '+(d.omittedWasm||[]).join(', '):'')+(d.url?' · '+d.url:'')+(d.target?' → '+d.target:'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
