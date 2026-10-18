@@ -245,7 +245,7 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
       };
       worker.onerror=e=>finish({ok:false,code:'WORKER_SCRIPT_ERROR',phase,message:String(e?.message||'The GPU worker could not load.').slice(0,300)});
       timer=setTimeout(()=>finish({ok:false,code:'WORKER_GPU_TEST_TIMEOUT',phase,message:'The isolated worker stopped reporting progress. The worker was terminated without altering any model files.'}),Math.max(30000,timeoutMs));
-      worker.postMessage({modelId:model,modelUrl,mode:'bounded-stream',contextTokens:model==='gemma4-e4b-it-litert-web'?512:2048});
+      worker.postMessage({modelId:model,modelUrl,mode:'bounded-stream',contextTokens:/^gemma4-e4b/i.test(model)?512:2048});
     }catch(error){finish({ok:false,code:'WORKER_START_FAILED',phase,message:String(error?.message||error).slice(0,350)})}
   });
 }
