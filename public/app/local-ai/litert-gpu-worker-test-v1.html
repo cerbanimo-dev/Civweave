@@ -54,14 +54,14 @@ small{color:#bed0e1}button:disabled{opacity:.5}
       const hit=await cache.match(url);
       if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
       line('Cache: present · starting worker…');
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.5-wasm-worker-relative-resolution',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.6-message-content-contract',{type:'classic'});
       worker.onmessage=event=>{
         const d=event.data||{};
         if(d.status==='phase'){line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.phase==='wasm-inventory'&&d.wasmCount!=null?' · version '+d.coreVersion+' · '+d.wasmCount+' WASM files · intentionally omitted: '+(d.omittedWasm||[]).join(', '):'')+(d.url?' · '+d.url:'')+(d.target?' → '+d.target:'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
         if(d.status==='asset'){line('WASM ASSET '+(d.valid===true?'OK':d.valid===false?'INVALID':'RESPONSE')+' · '+d.url+' · HTTP '+d.httpStatus+' · '+d.mime+(d.magic?' · '+d.magic:''));return}
                 if(d.status==='token'){visible+=String(d.text||'');line('TOKEN: '+String(d.text||''));return}
-        if(d.status==='complete'){finish('PASS: '+d.visibleTextDeltas+' visible token chunks · '+visible.slice(0,150));return}
-        if(d.status==='error')finish('FAIL: '+d.code+' at '+d.phase+' · '+d.message+(d.assetUrl?' · asset '+d.assetUrl+' HTTP '+d.httpStatus+' '+d.mime:''));
+        if(d.status==='complete'){finish((d.visibleTextDeltas>0&&visible?'PASS: ':'FAIL: ZERO VISIBLE OUTPUT · ')+d.visibleTextDeltas+' visible text chunks · '+d.chunks+' raw chunks · '+visible.slice(0,150));return}
+        if(d.status==='error')finish('FAIL: '+d.code+' at '+d.phase+' · '+d.message+(d.assetUrl?' · asset '+d.assetUrl+' HTTP '+d.httpStatus+' '+d.mime:'')+' · raw chunks '+(d.chunks||0)+' · visible '+(d.visibleTextDeltas||0)+' · shapes '+JSON.stringify(d.rawShapes||[]));
       };
       worker.onerror=event=>finish('FAIL: Worker script error · '+String(event.message||'unknown'));
       timer=setTimeout(()=>finish('TIMEOUT: '+Math.round((Date.now()-started)/1000)+' seconds. Worker terminated without clearing model cache.'),180000);
