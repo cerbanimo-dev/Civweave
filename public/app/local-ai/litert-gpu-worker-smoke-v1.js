@@ -55,7 +55,7 @@ function observeWasmFetches(){
     // script (/app/local-ai/) even if LiteRT was initialized with WASM_ROOT.
     // Rewrite only known LiteRT filenames to the canonical self-hosted path.
     const liteRtBinary=/^litertlm_wasm_(?:compat_)?(?:asyncify_)?internal\.wasm$/.test(basename);
-    const canonical=liteRtBinary?new URL(WASM_ROOT+basename,self.location.origin).href:'';
+    const canonical=liteRtBinary?new URL(WASM_ROOT+basename,self.location.href).href:'';
     const rewritten=liteRtBinary&&url!==canonical;
     if(tracked)send('phase',{phase:rewritten?'wasm-rewrite':'wasm-request',url:short(url,320),target:rewritten?canonical:undefined});
     let request=input;
