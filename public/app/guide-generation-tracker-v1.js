@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.3-guide-generation-tracker-v1-gpu-quarantine-status';
+const VERSION='1.2.4-guide-generation-tracker-v1-isolated-gpu-probe';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -70,7 +70,7 @@ function panelHtml(){
   const counts=`<div class="cw-weave-counts"><span class="cw-weave-chip">Resources ${state.counts.resources}</span><span class="cw-weave-chip">Specialists ${state.counts.specialists}</span><span class="cw-weave-chip">Decision gates ${state.counts.gates}</span></div>`;
   const sections=[['intake','Model intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='skipped'?'Not observed in this process.':state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
   const detail=state.errorDetail?`<pre class="cw-weave-error">${esc(state.errorDetail)}</pre>`:'';
-  const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing GPU model…':'Test local inference'}</button><button type="button" data-weave-runtime-restart title="Reloads the app shell. A quarantined Android GPU may require force-stopping the app process.">Reload Civweave</button><p>${esc(state.probeStatus||'Minimal one-word GPU test, independent of Moss and the JSON compiler.')}</p></div>`:'';
+  const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing GPU model…':'Test local inference'}</button><button type="button" data-weave-worker-probe ${state.probeBusy?'disabled':''}>Test isolated GPU worker</button><button type="button" data-weave-runtime-restart title="Reloads the app shell. A quarantined Android GPU may require force-stopping the app process.">Reload Civweave</button><p>${esc(state.probeStatus||'Minimal one-word GPU test, independent of Moss and the JSON compiler.')}</p></div>`:'';
   const model=state.executionModel?` · Model ${state.executionModel}`:'';const runtime=state.runtimePhase?` · Runtime: ${state.runtimePhase}`:'';
   return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live ${esc(artifactName())}</strong><span>${esc(terminalLabel())}${esc(model)}${esc(runtime)}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="${state.expanded?'true':'false'}">${state.expanded?'Hide live process':'Show live process'}</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details ${state.expanded?'':'hidden'}>${detail}${sections}${probe}</div>`
 }
@@ -197,6 +197,65 @@ async function directLocalProbe({timeoutMs=90000}={}){
     return{ok:false,model:error?.executionModel||chosenModel,code:error?.code||'LOCAL_PROBE_FAILED',phase,message:String(error?.message||error).slice(0,350),elapsedMs:Date.now()-started,restartRequired:Boolean(error?.restartRequired)};
   }
 }
+async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
+  if(typeof Worker!=='function')return{ok:false,code:'WORKER_UNSUPPORTED',phase:'startup',message:'Dedicated workers are unavailable in this browser.'};
+  const windows=connectedWindows();
+  let model='',modelUrl='';
+  for(const win of windows){
+    try{
+      const id=win.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep');
+      const extension=win.CivweaveGemma4LiteRTFastExtensionV1;
+      const info=Object.values(extension?.models||{}).find(item=>item.id===id);
+      if(!info)continue;
+      model=id;
+      modelUrl=win.CivweaveLocalModelRegistryV266?.directUrl?.(id,info.artifact)||new URL('https://huggingface.co/'+info.repo+'/resolve/'+info.revision+'/'+info.artifact).href;
+      break;
+    }catch{}
+  }
+  if(!modelUrl)return{ok:false,code:'WORKER_MODEL_METADATA_MISSING',phase:'setup',message:'Cannot resolve the installed E4B model cache key without changing the selected model.'};
+  let persistence='unavailable',quota=null;
+  try{
+    const storage=globalThis.navigator?.storage;
+    if(storage?.persisted)persistence=(await storage.persisted())?'granted':'not-granted';
+    if(storage?.persist&&persistence!=='granted')persistence=(await storage.persist())?'granted':'denied';
+    if(storage?.estimate){const usage=await storage.estimate();quota={usage:usage.usage,quota:usage.quota}}
+  }catch{}
+  return new Promise(resolve=>{
+    let worker=null,finished=false,phase='startup',visible='',timer=null,started=Date.now();
+    const finish=result=>{
+      if(finished)return;finished=true;
+      if(timer)clearTimeout(timer);
+      try{worker?.terminate()}catch{}
+      resolve({model,storagePersistence:persistence,storageEstimate:quota,elapsedMs:Date.now()-started,...result});
+    };
+    try{
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.0-worker-gpu-smoke',{type:'module'});
+      worker.onmessage=event=>{
+        const detail=event.data||{};
+        phase=String(detail.phase||phase);
+        if(detail.status==='phase'){onStatus('GPU worker · '+phase+' · '+detail.elapsedMs+'ms');return}
+        if(detail.status==='token'){visible+=String(detail.text||'');onStatus('GPU worker token: '+visible.slice(0,120));return}
+        if(detail.status==='complete'){finish({ok:Boolean(visible),code:visible?'OK':'WORKER_EMPTY_OUTPUT',phase,output:visible.slice(0,160),workerElapsedMs:detail.elapsedMs});return}
+        if(detail.status==='error')finish({ok:false,code:detail.code||'WORKER_GPU_ERROR',phase,message:detail.message||'Worker inference failed.',workerGpu:detail.workerGpu,jspi:detail.jspi});
+      };
+      worker.onerror=e=>finish({ok:false,code:'WORKER_SCRIPT_ERROR',phase,message:String(e?.message||'The GPU worker could not load.').slice(0,300)});
+      timer=setTimeout(()=>finish({ok:false,code:'WORKER_GPU_TEST_TIMEOUT',phase,message:'The isolated worker stopped reporting progress. The worker was terminated without altering any model files.'}),Math.max(30000,timeoutMs));
+      worker.postMessage({modelId:model,modelUrl});
+    }catch(error){finish({ok:false,code:'WORKER_START_FAILED',phase,message:String(error?.message||error).slice(0,350)})}
+  });
+}
+async function isolatedWorkerClick(){
+  if(state.probeBusy)return;
+  state.probeBusy=true;
+  state.probeStatus='Checking the same cached E4B model in a separate GPU worker; no model download…';
+  ensurePanel();
+  try{
+    const result=await isolatedWorkerProbe({onStatus:message=>{state.probeStatus=message;ensurePanel()}});
+    state.probeStatus=(result.ok?'PASS':'FAIL')+' · isolated worker · '+result.code+' · '+result.phase+' · '+(result.output||result.message||'No generated text')+' · storage '+result.storagePersistence+' · elapsed '+result.elapsedMs+'ms';
+  }catch(error){state.probeStatus='Worker diagnostic error: '+clean(error?.message||error,350)}
+  finally{state.probeBusy=false;ensurePanel()}
+}
+
 async function probeClick(){
   if(state.probeBusy)return;
   const api=bus();
@@ -219,6 +278,7 @@ function replayLifecycle(){const rows=bus()?.history?.()||[];for(const row of ro
 function onThreadChanged(event){const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;if(row.pending){const user=latestRole(thread,'user'),key=`${clean(user?.text,500)}|${clean(user?.createdAt||user?.at||thread.updatedAt,80)}`;if(!state.pendingObserved||state.pendingKey!==key||state.terminal){const stamp=Date.parse(user?.createdAt||user?.at||'')||Date.parse(thread?.updatedAt||'')||now();resetForRequest({text:user?.text||'',pendingKey:key,startedMs:stamp});replayLifecycle()}ensurePanel();return}const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;if(!state.terminal&&state.showPipeline)state.terminal=/could not|failed|error|no learning content was generated/i.test(clean(row.text,6000))?'failed':'complete';animateFinal(row.text,row);ensurePanel()}
 function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();addEventListener('civweave:generation-lifecycle',event=>applyLifecycle(event?.detail||{}));if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-probe]`)){void probeClick();return}
+  if(event.target?.closest?.(`#${ROOT_ID} [data-weave-worker-probe]`)){void isolatedWorkerClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-runtime-restart]`)){
     state.probeStatus='Reloading Civweave; if the GPU stays quarantined, fully close or force-stop the installed app before testing…';ensurePanel();
     try{
