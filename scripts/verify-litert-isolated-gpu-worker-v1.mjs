@@ -13,13 +13,14 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.7-bounded-inference-triage'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.7-bounded-inference-triage'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.8-e4b-storage-binding-capability-gate'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.8-e4b-storage-binding-capability-gate'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
 
 const reports=[],steps=[];
+let adapterBindingLimit=268435456;
 let invalidWasm=false,failOnLoaderWasm=false,loaderWasmName='litertlm_wasm_asyncify_internal.wasm',mockStreamMode='message-string';
 const wasmBytes=Uint8Array.from([0,97,115,109,1,0,0,0]);
 const htmlBytes=Uint8Array.from([60,33,100,111,99,116,121,112]);
@@ -49,7 +50,7 @@ activeWorker=self;
 const context={
   self,globalThis:self,Date,Promise,Error,Object,Boolean,String,Number,Math,
   performance:{now:()=>Date.now()},
-  navigator:{gpu:{}},
+  navigator:{gpu:{requestAdapter:async()=>({limits:{maxStorageBufferBindingSize:adapterBindingLimit,maxBufferSize:2147483648}})}},
   WebAssembly:{Suspending(){},promising(){}},
   caches:{open:async()=>({match:async()=>({ok:true,body:{}})})},
   URL,fetch:fetchMock,Uint8Array,setInterval:()=>1,clearInterval:()=>{}
@@ -112,6 +113,24 @@ assert.ok(reports.some(row=>row.status==='asset'&&row.httpStatus===200),'HTTP su
 assert.ok(reports.some(r=>r.status==='asset'&&r.valid===true&&r.magic.startsWith('00 61 73 6d')),'a real WASM magic signature is required before inference');
 assert.ok(reports.some(r=>r.phase==='wasm-inventory'&&r.omittedWasm?.includes('wasm/litertlm_wasm_asyncify_internal.wasm')));
 const previousEngineCount=steps.filter(x=>x==='engine').length;
+// The 160 MiB E4B compiled GPU binding must be rejected on a 128 MiB
+// adapter before cache reads, WASM initialization or GPU engine creation.
+adapterBindingLimit=134217728;
+const unsupportedRows=[];
+const unsupportedSelf={postMessage:row=>unsupportedRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=unsupportedSelf;
+vm.runInNewContext(instrumented,{...context,self:unsupportedSelf,globalThis:unsupportedSelf});
+await unsupportedSelf.onmessage({data:{
+  modelId:'gemma4-e4b-it-litert-web',
+  modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm'
+}});
+assert.equal(unsupportedRows.at(-1).code,'LITERT_E4B_GPU_STORAGE_BINDING_UNSUPPORTED');
+assert.equal(unsupportedRows.at(-1).phase,'gpu-limits');
+assert.equal(unsupportedRows.at(-1).requiredBindingBytes,167772160);
+assert.equal(unsupportedRows.at(-1).maximumBindingBytes,134217728);
+assert.ok(!unsupportedRows.some(row=>row.phase==='wasm-inventory'||row.phase==='engine'));
+assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount);
+adapterBindingLimit=268435456;
 invalidWasm=true;
 const badReports=[],badSelf={postMessage:row=>badReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
 activeWorker=badSelf;
