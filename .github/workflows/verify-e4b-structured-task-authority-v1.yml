@@ -8,6 +8,8 @@ on:
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
+      - 'scripts/verify-litert-isolated-gpu-worker-v1.mjs'
       - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
@@ -45,6 +47,8 @@ on:
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
+      - 'scripts/verify-litert-isolated-gpu-worker-v1.mjs'
       - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
@@ -96,6 +100,8 @@ jobs:
         run: node --check public/app/local-ai/local-generation-model-policy-v1.js
       - name: Syntax check LiteRT GPU runtime
         run: node --check public/app/local-ai/litert-gemma4-fast-runtime-v1.js
+      - name: Syntax check independent LiteRT GPU worker
+        run: node --check public/app/local-ai/litert-gpu-worker-smoke-v1.js
       - name: Syntax check GPU runtime lifecycle
         run: node --check public/app/generation-lifecycle-v2.js
       - name: Syntax check structured task authority
@@ -120,6 +126,8 @@ jobs:
         run: node --check public/app/local-guide-control-bypass-v1.js
       - name: Verify LiteRT structured tool shape
         run: node scripts/verify-litert-structured-tool-shape-v1.mjs
+      - name: Verify isolated LiteRT GPU worker stream
+        run: node scripts/verify-litert-isolated-gpu-worker-v1.mjs
       - name: Verify E4B-only intake and structured generation
         run: node scripts/verify-e4b-structured-task-authority-v1.mjs
       - name: Verify E4B Weave Draft compiler pipeline
