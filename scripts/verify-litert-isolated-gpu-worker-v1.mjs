@@ -90,6 +90,7 @@ await loaderSelf.onmessage({data:{
   modelId:'gemma4-e4b-it-litert-web',
   modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm'
 }});
+console.log('WASM loader URL rewrite trace:',JSON.stringify(loaderReports.map(({status,phase,url,target,resolvedUrl,code,message})=>({status,phase,url,target,resolvedUrl,code,message}))));
 assert.ok(loaderReports.some(r=>r.phase==='wasm-rewrite'&&r.url.includes('/app/local-ai/litertlm_wasm_asyncify_internal.wasm')&&r.target?.includes('/app/vendor/litert-lm/wasm/')),'rewrite worker-relative Emscripten wasm URL to canonical LiteRT asset');
 assert.ok(loaderReports.some(r=>r.status==='asset'&&r.phase==='wasm-request'&&r.resolvedUrl.includes('/app/vendor/litert-lm/wasm/')),'verify canonical wasm was fetched with expected MIME');
 
