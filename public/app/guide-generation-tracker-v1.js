@@ -234,6 +234,7 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
         const detail=event.data||{};
         phase=String(detail.phase||phase);
         if(detail.status==='phase'){onStatus('GPU worker · '+phase+' · '+detail.elapsedMs+'ms'+(detail.target?' · '+detail.url+' → '+detail.target:''));return}
+        if(detail.status==='gpu-lost'||detail.status==='gpu-warning'){onStatus('GPU runtime · '+detail.status+' · '+String(detail.message||detail.reason||'').slice(0,150));return}
         if(detail.status==='heartbeat'){onStatus('GPU worker heartbeat · '+Math.round((detail.sinceSubmissionMs||0)/1000)+'s after prompt · '+detail.chunks+' raw chunks');return}
         if(detail.status==='asset'){onStatus('WASM asset: '+(detail.valid===false?'INVALID':'response')+' · '+String(detail.url||'').slice(-140)+' · HTTP '+detail.httpStatus+' · '+detail.mime);return}
         if(detail.status==='token'){visible+=String(detail.text||'');onStatus('GPU worker token: '+visible.slice(0,120));return}
