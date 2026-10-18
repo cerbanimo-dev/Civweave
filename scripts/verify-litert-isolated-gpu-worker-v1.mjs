@@ -13,14 +13,14 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.4-wasm-assets-with-status-fix'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.4-wasm-assets-with-status-fix'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.5-wasm-worker-relative-resolution'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.5-wasm-worker-relative-resolution'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
 
 const reports=[],steps=[];
-let invalidWasm=false,failOnLoaderWasm=false;
+let invalidWasm=false,failOnLoaderWasm=false,loaderWasmName='litertlm_wasm_asyncify_internal.wasm';
 const wasmBytes=Uint8Array.from([0,97,115,109,1,0,0,0]);
 const htmlBytes=Uint8Array.from([60,33,100,111,99,116,121,112]);
 const modelManifest={coreVersion:'0.17.1',wasmFiles:['wasm/litertlm_wasm_internal.wasm'],omittedFiles:[{path:'wasm/litertlm_wasm_asyncify_internal.wasm',bytes:8,parts:['wasm/litertlm_wasm_asyncify_internal.wasm.part0']}]};
@@ -35,7 +35,7 @@ const fetchMock=async input=>{
 };
 
 const mockSDK={
-  loadLiteRtLm:async()=>{steps.push('wasm');if(failOnLoaderWasm)await activeWorker.fetch('/app/vendor/litert-lm/wasm/litertlm_wasm_asyncify_internal.wasm')},
+  loadLiteRtLm:async()=>{steps.push('wasm');if(failOnLoaderWasm)await activeWorker.fetch('/app/local-ai/'+loaderWasmName)},
   Engine:{create:async settings=>{
     steps.push('engine');assert.ok(settings.model);
     return{createConversation:async()=>{
@@ -90,7 +90,9 @@ await loaderSelf.onmessage({data:{
   modelId:'gemma4-e4b-it-litert-web',
   modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm'
 }});
-assert.ok(loaderReports.some(r=>r.phase==='wasm-request'&&r.url.includes('asyncify')),'capture the exact additional runtime WASM request');
+assert.ok(loaderReports.some(r=>r.phase==='wasm-rewrite'&&r.url.includes('/app/local-ai/litertlm_wasm_asyncify_internal.wasm')&&r.target?.includes('/app/vendor/litert-lm/wasm/')),'rewrite worker-relative Emscripten wasm URL to canonical LiteRT asset');
+assert.ok(loaderReports.some(r=>r.status==='asset'&&r.phase==='wasm-request'&&r.resolvedUrl.includes('/app/vendor/litert-lm/wasm/')),'verify canonical wasm was fetched with expected MIME');
+
 failOnLoaderWasm=false;
 
 
