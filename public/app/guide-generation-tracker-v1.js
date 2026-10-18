@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.5-guide-generation-tracker-v1-classic-wasm-worker';
+const VERSION='1.2.6-guide-generation-tracker-v1-wasm-asset-telemetry';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -229,14 +229,15 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
       resolve({model,storagePersistence:persistence,storageEstimate:quota,elapsedMs:Date.now()-started,...result});
     };
     try{
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.1-classic-wasm-loader',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.2-wasm-diagnostics',{type:'classic'});
       worker.onmessage=event=>{
         const detail=event.data||{};
         phase=String(detail.phase||phase);
         if(detail.status==='phase'){onStatus('GPU worker · '+phase+' · '+detail.elapsedMs+'ms');return}
+        if(detail.status==='asset'){onStatus('WASM asset: '+(detail.valid===false?'INVALID':'response')+' · '+String(detail.url||'').slice(-140)+' · HTTP '+detail.status+' · '+detail.mime);return}
         if(detail.status==='token'){visible+=String(detail.text||'');onStatus('GPU worker token: '+visible.slice(0,120));return}
         if(detail.status==='complete'){finish({ok:Boolean(visible),code:visible?'OK':'WORKER_EMPTY_OUTPUT',phase,output:visible.slice(0,160),workerElapsedMs:detail.elapsedMs});return}
-        if(detail.status==='error')finish({ok:false,code:detail.code||'WORKER_GPU_ERROR',phase,message:detail.message||'Worker inference failed.',workerGpu:detail.workerGpu,jspi:detail.jspi});
+        if(detail.status==='error')finish({ok:false,code:detail.code||'WORKER_GPU_ERROR',phase,message:(detail.message||'Worker inference failed.')+(detail.assetUrl?' · '+detail.assetUrl+' · HTTP '+detail.httpStatus+' '+detail.mime:''),workerGpu:detail.workerGpu,jspi:detail.jspi});
       };
       worker.onerror=e=>finish({ok:false,code:'WORKER_SCRIPT_ERROR',phase,message:String(e?.message||'The GPU worker could not load.').slice(0,300)});
       timer=setTimeout(()=>finish({ok:false,code:'WORKER_GPU_TEST_TIMEOUT',phase,message:'The isolated worker stopped reporting progress. The worker was terminated without altering any model files.'}),Math.max(30000,timeoutMs));
