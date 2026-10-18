@@ -44,8 +44,10 @@ async function main(){
     const url=get('/app/vendor/litert-lm/'+row.path);
     const response=await fetch(url,{headers:{Range:'bytes=0-7','Cache-Control':'no-cache'}});
     const bytes=response.ok?await head(response):[];
-    console.log('OMITTED fallback '+row.path+' · HTTP '+response.status+' · '+(response.headers.get('content-type')||'')+' · magic '+printBytes(bytes)+' · returnsHTML='+(bytes[0]===60));
+    const valid=response.ok&&magic(bytes)&&/application\/wasm/i.test(response.headers.get('content-type')||'');
+    console.log((valid?'PASS':'FAIL')+' reassembled fallback '+row.path+' · HTTP '+response.status+' · '+(response.headers.get('content-type')||'')+' · magic '+printBytes(bytes)+' · parts '+(row.parts||[]).length+' · bytes '+row.bytes);
+    if(!valid||!Array.isArray(row.parts)||!row.parts.length)failures++;
   }
-  if(failures)throw Error(failures+' published LiteRT WASM assets are not valid WebAssembly binaries.');
+  if(failures)throw Error(failures+' published LiteRT WASM assets (including reconstructed Asyncify fallbacks) are invalid.');
 }
 main().catch(error=>{console.error('STAGING_LITERT_WASM_ASSET_FAILURE: '+String(error?.stack||error));process.exitCode=1});
