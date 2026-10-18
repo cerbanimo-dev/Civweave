@@ -13,8 +13,8 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.10-e4b-official-gpu-file-compare'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.10-e4b-official-gpu-file-compare'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.11-gpu-artisan-backend-compare'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.11-gpu-artisan-backend-compare'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
@@ -36,6 +36,7 @@ const fetchMock=async input=>{
 };
 
 const mockSDK={
+  Backend:{GPU_ARTISAN:7},
   loadLiteRtLm:async()=>{steps.push('wasm');if(failOnLoaderWasm)await activeWorker.fetch('/app/local-ai/'+loaderWasmName)},
   Engine:{create:async settings=>{
     steps.push('engine');assert.ok(settings.model);engineSettings.push(settings);
@@ -130,8 +131,8 @@ assert.equal(unsupportedRows.at(-1).requiredBindingBytes,167772160);
 assert.equal(unsupportedRows.at(-1).maximumBindingBytes,134217728);
 assert.ok(!unsupportedRows.some(row=>row.phase==='wasm-inventory'||row.phase==='engine'));
 assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount);
-// A reduced context is an experiment: it must reach the GPU SDK even on a
-// 128 MiB adapter, since the 160 MiB binding may depend on context length.
+// 512 context tokens also triggered a 160 MiB binding on the real GPU.
+// The default GPU backend must reject that known-invalid pair before execution.
 const reducedRows=[],reducedSelf={postMessage:row=>reducedRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
 activeWorker=reducedSelf;
 vm.runInNewContext(instrumented,{...context,self:reducedSelf,globalThis:reducedSelf});
@@ -140,9 +141,27 @@ await reducedSelf.onmessage({data:{
   modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
   contextTokens:512
 }});
-assert.equal(reducedRows.at(-1).status,'complete');
+assert.equal(reducedRows.at(-1).status,'error');
+assert.equal(reducedRows.at(-1).code,'LITERT_E4B_GPU_STORAGE_BINDING_UNSUPPORTED');
+assert.ok(!reducedRows.some(row=>row.phase==='engine'));
+// The legacy GPU_ARTISAN executor is distinct. It must be allowed to run
+// with the same -web artifact without assuming the standard GPU bind size.
+const legacyRows=[],legacySelf={postMessage:row=>legacyRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=legacySelf;
+vm.runInNewContext(instrumented,{...context,self:legacySelf,globalThis:legacySelf});
+await legacySelf.onmessage({data:{
+  modelId:'gemma4-e4b-it-litert-web',
+  modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
+  backendMode:'legacy-gpu-artisan',contextTokens:512
+}});
+assert.equal(legacyRows.at(-1).status,'complete');
+assert.equal(legacyRows.at(-1).backendMode,'legacy-gpu-artisan');
+assert.ok(legacyRows.some(row=>row.phase==='backend-comparison'));
+assert.ok(legacyRows.some(row=>row.status==='gpu-limits'&&row.backendExperiment===true));
+assert.equal(engineSettings.at(-1).backend,7);
 assert.equal(engineSettings.at(-1).mainExecutorSettings.maxNumTokens,512);
-assert.ok(reducedRows.some(row=>row.status==='gpu-limits'&&row.contextExperiment===true));
+assert.equal(engineSettings.at(-1).mainExecutorSettings.backendConfig.use_submodel,false);
+assert.equal(engineSettings.at(-1).mainExecutorSettings.backendConfig.use_autosized_ringbuffers,false);
 adapterBindingLimit=268435456;
 // Official -gpu artifact may have different compiled kernels. It must be
 // tried from the selected File object and must not inherit -web's 160 MiB
