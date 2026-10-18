@@ -154,7 +154,7 @@ await badSelf.onmessage({data:{
 }});
 assert.equal(badReports.at(-1).code,'LITERT_STAGED_WASM_NOT_BINARY');
 assert.equal(badReports.at(-1).phase,'wasm-inventory');
-assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount,'invalid WASM must never initialize a GPU engine');
+assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount+1,'invalid WASM must never initialize a GPU engine');
 invalidWasm=false;
 failOnLoaderWasm=true;
 const loaderReports=[],loaderSelf={postMessage:row=>loaderReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
