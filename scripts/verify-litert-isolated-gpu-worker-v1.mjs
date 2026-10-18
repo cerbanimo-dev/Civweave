@@ -13,10 +13,10 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/worker-gpu-smoke-v1\.js\?v=1\.0\.1-classic-wasm-loader'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/worker-gpu-smoke-v1\.js\?v=1\.0\.1-classic-wasm-loader'\s*,\s*\{type:'classic'\}/);
-assert.doesNotMatch(trackerSource,/worker-gpu-smoke-v1\.js[^\n]*type:'module'/);
-assert.doesNotMatch(standaloneSource,/worker-gpu-smoke-v1\.js[^\n]*type:'module'/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.1-classic-wasm-loader'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.1-classic-wasm-loader'\s*,\s*\{type:'classic'\}/);
+assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
+assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
 
 const reports=[],steps=[];
