@@ -76,4 +76,4 @@ self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',event=>{event.waitUntil(self.clients.claim());});
 
 importScripts('/service-worker-v203.js?v=root-worker-bridge-v32-e4b-only-weave');
-importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r26');
+importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r27');
