@@ -100,6 +100,16 @@ function chunkShape(chunk){
     toolCalls:Array.isArray(chunk.tool_calls)?chunk.tool_calls.length:0
   };
 }
+function observeGpuDevice(mod){
+  try{
+    const gpu=mod.getGlobalLiteRtLm?.()?.liteRtLmWasm?.preinitializedWebGPUDevice;
+    send('gpu-device',{available:Boolean(gpu),features:gpu?.features?[...gpu.features].slice(0,24):[],maxBufferSize:Number(gpu?.limits?.maxBufferSize)||null});
+    if(!gpu)return;
+    gpu.lost?.then(info=>send('gpu-lost',{reason:short(info?.reason,100),message:short(info?.message,350)}))
+      .catch(error=>send('gpu-warning',{message:short(error?.message||error,300)}));
+    gpu.addEventListener?.('uncapturederror',event=>send('gpu-warning',{message:short(event?.error?.message||'Uncaptured WebGPU error',450)}));
+  }catch(error){send('gpu-warning',{message:'GPU instrumentation unavailable: '+short(error?.message||error,200)})}
+}
 const safeError=error=>({code:String(error?.code||'WORKER_GPU_TEST_FAILED'),message:String(error?.message||error).slice(0,700),assetUrl:short(error?.assetUrl||'',320),httpStatus:Number(error?.status)||null,mime:short(error?.mime||'',100),stack:String(error?.stack||'').slice(0,900)});
 self.onmessage=async event=>{
   if(started)return;started=true;origin=performance.now();
@@ -134,6 +144,7 @@ self.onmessage=async event=>{
     else throw Object.assign(new Error('LiteRT-LM WASM loader is missing.'),{code:'WORKER_WASM_LOADER_MISSING'});
     phase='engine';send('phase',{phase});
     engine=await mod.Engine.create({model:response.body,mainExecutorSettings:{maxNumTokens:2048},benchmarkEnabled:false});
+    observeGpuDevice(mod);
     phase='conversation';send('phase',{phase,mode});
     const bounded=mode!=='baseline-stream';
     const config=bounded?{
