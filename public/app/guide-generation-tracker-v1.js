@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.11-guide-generation-tracker-v1-bounded-gpu-triage';
+const VERSION='1.2.12-guide-generation-tracker-v1-e4b-gpu-binding-triage';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -229,11 +229,13 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
       resolve({model,storagePersistence:persistence,storageEstimate:quota,elapsedMs:Date.now()-started,...result});
     };
     try{
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.7-bounded-inference-triage',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.9-e4b-reduced-context-gpu-limit-probe',{type:'classic'});
       worker.onmessage=event=>{
         const detail=event.data||{};
         phase=String(detail.phase||phase);
         if(detail.status==='phase'){onStatus('GPU worker · '+phase+' · '+detail.elapsedMs+'ms'+(detail.target?' · '+detail.url+' → '+detail.target:''));return}
+        if(detail.status==='gpu-limits'){onStatus('GPU storage binding max '+Math.round((detail.maxStorageBufferBindingSize||0)/1048576)+' MiB · testing '+detail.engineContextTokens+'-token engine');return}
+        if(detail.status==='gpu-fatal'){finish({ok:false,code:detail.code,phase:'webgpu-binding-limit',message:detail.message,maximumBindingBytes:detail.maximumBindingBytes,requiredBindingBytes:detail.requiredBindingBytes});return}
         if(detail.status==='gpu-lost'||detail.status==='gpu-warning'){onStatus('GPU runtime · '+detail.status+' · '+String(detail.message||detail.reason||'').slice(0,150));return}
         if(detail.status==='heartbeat'){onStatus('GPU worker heartbeat · '+Math.round((detail.sinceSubmissionMs||0)/1000)+'s after prompt · '+detail.chunks+' raw chunks');return}
         if(detail.status==='asset'){onStatus('WASM asset: '+(detail.valid===false?'INVALID':'response')+' · '+String(detail.url||'').slice(-140)+' · HTTP '+detail.httpStatus+' · '+detail.mime);return}
@@ -243,7 +245,7 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
       };
       worker.onerror=e=>finish({ok:false,code:'WORKER_SCRIPT_ERROR',phase,message:String(e?.message||'The GPU worker could not load.').slice(0,300)});
       timer=setTimeout(()=>finish({ok:false,code:'WORKER_GPU_TEST_TIMEOUT',phase,message:'The isolated worker stopped reporting progress. The worker was terminated without altering any model files.'}),Math.max(30000,timeoutMs));
-      worker.postMessage({modelId:model,modelUrl,mode:'bounded-stream'});
+      worker.postMessage({modelId:model,modelUrl,mode:'bounded-stream',contextTokens:model==='gemma4-e4b-it-litert-web'?512:2048});
     }catch(error){finish({ok:false,code:'WORKER_START_FAILED',phase,message:String(error?.message||error).slice(0,350)})}
   });
 }
