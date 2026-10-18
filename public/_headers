@@ -108,5 +108,11 @@
 /app/guide-generation-tracker-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
 
+/app/local-ai/litert-gpu-worker-smoke-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/litert-gpu-worker-test-v1.html
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /app/local-guide-control-bypass-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
