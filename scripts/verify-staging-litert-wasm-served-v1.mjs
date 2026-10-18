@@ -48,6 +48,24 @@ async function main(){
     console.log((valid?'PASS':'FAIL')+' reassembled fallback '+row.path+' · HTTP '+response.status+' · '+(response.headers.get('content-type')||'')+' · magic '+printBytes(bytes)+' · parts '+(row.parts||[]).length+' · bytes '+row.bytes);
     if(!valid||!Array.isArray(row.parts)||!row.parts.length)failures++;
   }
+  // These aliases are not part of LiteRT's manifest. Emscripten's generated
+  // glue fetches the .wasm name relative to its execution context, which is
+  // /app/local-ai/ in a classic worker and can be /app/ for shell scripts.
+  for(const prefix of ['/app/local-ai/','/app/']){
+    for(const basename of [
+      'litertlm_wasm_internal.wasm',
+      'litertlm_wasm_compat_internal.wasm',
+      'litertlm_wasm_asyncify_internal.wasm',
+      'litertlm_wasm_compat_asyncify_internal.wasm'
+    ]){
+      const response=await fetch(get(prefix+basename),{headers:{Range:'bytes=0-7','Cache-Control':'no-cache'}});
+      const mime=response.headers.get('content-type')||'';
+      const bytes=response.ok?await head(response):[];
+      const valid=response.ok&&magic(bytes)&&/application\/wasm/i.test(mime);
+      console.log((valid?'PASS':'FAIL')+' LiteRT worker-relative alias '+prefix+basename+' · HTTP '+response.status+' · '+mime+' · magic '+printBytes(bytes)+' · resolved '+response.url);
+      if(!valid)failures++;
+    }
+  }
   if(failures)throw Error(failures+' published LiteRT WASM assets (including reconstructed Asyncify fallbacks) are invalid.');
 }
 main().catch(error=>{console.error('STAGING_LITERT_WASM_ASSET_FAILURE: '+String(error?.stack||error));process.exitCode=1});
