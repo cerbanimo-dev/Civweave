@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.13-guide-generation-tracker-v1-official-gpu-artifact-probe';
+const VERSION='1.2.14-guide-generation-tracker-v1-gpu-artisan-comparison';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -229,7 +229,7 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
       resolve({model,storagePersistence:persistence,storageEstimate:quota,elapsedMs:Date.now()-started,...result});
     };
     try{
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.10-e4b-official-gpu-file-compare',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.11-gpu-artisan-backend-compare',{type:'classic'});
       worker.onmessage=event=>{
         const detail=event.data||{};
         phase=String(detail.phase||phase);
