@@ -1,12 +1,68 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.1-e4b-classic-worker-wasm-loader';
+const VERSION='1.0.2-e4b-wasm-response-diagnostics';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
 let started=false;
 const send=(status,detail={})=>self.postMessage({status,version:VERSION,elapsedMs:Math.round(performance.now()-origin),...detail});
 let origin=performance.now();
-const safeError=error=>({code:String(error?.code||'WORKER_GPU_TEST_FAILED'),message:String(error?.message||error).slice(0,700),stack:String(error?.stack||'').slice(0,900)});
+const WASM_MANIFEST='/app/vendor/litert-lm/stage-manifest.json';
+function short(value,max=260){return String(value??'').slice(0,max)}
+function wasmError(code,message,detail={}){return Object.assign(new Error(message),{code,...detail})}
+function wasmMagic(bytes){return bytes?.length>=4&&bytes[0]===0&&bytes[1]===97&&bytes[2]===115&&bytes[3]===109}
+async function peekBytes(response){
+  const reader=response?.body?.getReader?.();
+  if(!reader)throw wasmError('WASM_RESPONSE_NOT_STREAMABLE','WASM asset response body is missing.');
+  const prefix=[];
+  try{
+    while(prefix.length<8){
+      const chunk=await reader.read();
+      if(chunk.done)break;
+      for(const byte of chunk.value||[]){prefix.push(byte);if(prefix.length>=8)break}
+    }
+  }finally{try{await reader.cancel()}catch{}}
+  return prefix;
+}
+async function verifyStagedWasmAssets(){
+  const response=await fetch(WASM_MANIFEST,{cache:'no-store'});
+  if(!response.ok||/text\/html/i.test(response.headers.get('content-type')||''))throw wasmError(
+    'LITERT_MANIFEST_MISSING','The published LiteRT runtime manifest returned an HTML page or a failed response.',{assetUrl:response.url||WASM_MANIFEST});
+  const manifest=await response.json();
+  const names=(manifest.wasmFiles||[]).filter(name=>/\.wasm$/i.test(name));
+  if(!names.length)throw wasmError('LITERT_WASM_MANIFEST_EMPTY','No WebAssembly binaries were listed in the LiteRT staging manifest.');
+  send('phase',{phase:'wasm-inventory',coreVersion:short(manifest.coreVersion,40),wasmCount:names.length,omittedWasm:(manifest.omittedFiles||[]).map(item=>item.path).filter(Boolean)});
+  for(const name of names){
+    const url='/app/vendor/litert-lm/'+name;
+    const asset=await fetch(url,{cache:'no-store',headers:{Range:'bytes=0-7'}});
+    const mime=short(asset.headers.get('content-type')||'',100),status=asset.status;
+    const prefix=asset.ok?await peekBytes(asset):[];
+    const valid=asset.ok&&wasmMagic(prefix);
+    send('asset',{phase:'wasm-inventory',url,status,mime,magic:prefix.map(b=>b.toString(16).padStart(2,'0')).join(' '),valid});
+    if(!valid)throw wasmError('LITERT_STAGED_WASM_NOT_BINARY',
+      'A published LiteRT WASM asset returned HTML, an error, or invalid WebAssembly bytes. This is a deployment/runtime asset problem, not a GPU inference failure: '+url,
+      {assetUrl:url,status,mime});
+  }
+}
+function observeWasmFetches(){
+  const nativeFetch=self.fetch?.bind(self);
+  if(typeof nativeFetch!=='function')return;
+  self.fetch=async(input,init)=>{
+    let url='';
+    try{url=new URL(typeof input==='string'?input:input?.url||String(input),self.location.href).href}catch{}
+    const tracked=/\.wasm(?:\?|$)/i.test(url);
+    if(tracked)send('phase',{phase:'wasm-request',url:short(url,320)});
+    const response=await nativeFetch(input,init);
+    if(tracked){
+      const mime=short(response.headers.get('content-type')||'',100);
+      send('asset',{phase:'wasm-request',url:short(url,320),status:response.status,mime,redirected:Boolean(response.redirected)});
+      if(!response.ok||/text\/html/i.test(mime))throw wasmError('LITERT_WASM_HTML_FALLBACK',
+        'The LiteRT WASM loader received HTML or an HTTP failure instead of WebAssembly: '+url,
+        {assetUrl:url,status:response.status,mime});
+    }
+    return response;
+  };
+}
+const safeError=error=>({code:String(error?.code||'WORKER_GPU_TEST_FAILED'),message:String(error?.message||error).slice(0,700),assetUrl:short(error?.assetUrl||'',320),httpStatus:Number(error?.status)||null,mime:short(error?.mime||'',100),stack:String(error?.stack||'').slice(0,900)});
 self.onmessage=async event=>{
   if(started)return;started=true;origin=performance.now();
   const modelId=String(event.data?.modelId||'');
@@ -27,6 +83,9 @@ self.onmessage=async event=>{
     const cache=await caches.open(CACHE);
     const response=await cache.match(modelUrl);
     if(!response?.ok||!response.body)throw Object.assign(new Error('The selected model artifact is not present in the existing local model cache. This diagnostic does not download replacement weights.'),{code:'WORKER_MODEL_CACHE_MISS'});
+    phase='wasm-inventory';send('phase',{phase});
+    await verifyStagedWasmAssets();
+    observeWasmFetches();
     phase='import';send('phase',{phase});
     const mod=await import(MODULE_URL);
     phase='wasm';send('phase',{phase});
