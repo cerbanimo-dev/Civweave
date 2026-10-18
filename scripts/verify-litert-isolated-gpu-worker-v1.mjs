@@ -13,8 +13,8 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.9-e4b-reduced-context-gpu-limit-probe'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.9-e4b-reduced-context-gpu-limit-probe'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.10-e4b-official-gpu-file-compare'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.10-e4b-official-gpu-file-compare'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
@@ -144,6 +144,33 @@ assert.equal(reducedRows.at(-1).status,'complete');
 assert.equal(engineSettings.at(-1).mainExecutorSettings.maxNumTokens,512);
 assert.ok(reducedRows.some(row=>row.status==='gpu-limits'&&row.contextExperiment===true));
 adapterBindingLimit=268435456;
+// Official -gpu artifact may have different compiled kernels. It must be
+// tried from the selected File object and must not inherit -web's 160 MiB
+// reject decision, even on a 128 MiB adapter.
+adapterBindingLimit=134217728;
+const gpuStream={from:'official-gpu-file-stream'};
+const gpuFile={name:'gemma-4-E4B-it-gpu.litertlm',size:2969059328,stream:()=>gpuStream};
+const officialRows=[],officialSelf={postMessage:row=>officialRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=officialSelf;
+vm.runInNewContext(instrumented,{...context,self:officialSelf,globalThis:officialSelf});
+await officialSelf.onmessage({data:{
+  modelId:'gemma4-e4b-it-litert-web',
+  modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
+  artifactKind:'official-gpu-file',
+  modelFile:gpuFile,
+  contextTokens:2048
+}});
+assert.equal(officialRows.at(-1).status,'complete');
+assert.ok(officialRows.some(row=>row.phase==='local-file'&&row.bytes===gpuFile.size));
+assert.ok(officialRows.some(row=>row.status==='gpu-limits'&&row.artifactKind==='official-gpu-file'&&row.compatible===null));
+assert.equal(engineSettings.at(-1).model,gpuStream,'official -gpu file must stream directly into LiteRT, without a cache write');
+const bogusRows=[],bogusSelf={postMessage:row=>bogusRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=bogusSelf;
+vm.runInNewContext(instrumented,{...context,self:bogusSelf,globalThis:bogusSelf});
+await bogusSelf.onmessage({data:{modelId:'gemma4-e4b-it-litert-web',artifactKind:'official-gpu-file',modelUrl:'https://huggingface.co/litert-community/fake',modelFile:{...gpuFile,size:123}}});
+assert.equal(bogusRows.at(-1).code,'INVALID_GPU_TEST_OFFICIAL_FILE');
+assert.equal(bogusRows.at(-1).phase,'input');
+adapterBindingLimit=268435456;
 invalidWasm=true;
 const badReports=[],badSelf={postMessage:row=>badReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
 activeWorker=badSelf;
@@ -154,7 +181,7 @@ await badSelf.onmessage({data:{
 }});
 assert.equal(badReports.at(-1).code,'LITERT_STAGED_WASM_NOT_BINARY');
 assert.equal(badReports.at(-1).phase,'wasm-inventory');
-assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount+1,'invalid WASM must never initialize a GPU engine');
+assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount+2,'invalid WASM must never initialize a GPU engine');
 invalidWasm=false;
 failOnLoaderWasm=true;
 const loaderReports=[],loaderSelf={postMessage:row=>loaderReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
