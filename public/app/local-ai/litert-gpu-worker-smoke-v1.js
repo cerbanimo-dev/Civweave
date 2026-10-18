@@ -1,10 +1,10 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.3-e4b-wasm-asyncify-preflight';
+const VERSION='1.0.4-e4b-wasm-assets-with-status-fix';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
 let started=false;
-const send=(status,detail={})=>self.postMessage({status,version:VERSION,elapsedMs:Math.round(performance.now()-origin),...detail});
+const send=(status,detail={})=>self.postMessage({...detail,status,version:VERSION,elapsedMs:Math.round(performance.now()-origin)});
 let origin=performance.now();
 const WASM_MANIFEST='/app/vendor/litert-lm/stage-manifest.json';
 function short(value,max=260){return String(value??'').slice(0,max)}
@@ -37,7 +37,7 @@ async function verifyStagedWasmAssets(){
     const mime=short(asset.headers.get('content-type')||'',100),status=asset.status;
     const prefix=asset.ok?await peekBytes(asset):[];
     const valid=asset.ok&&wasmMagic(prefix);
-    send('asset',{phase:'wasm-inventory',url,status,mime,magic:prefix.map(b=>b.toString(16).padStart(2,'0')).join(' '),valid});
+    send('asset',{phase:'wasm-inventory',url,httpStatus:status,mime,magic:prefix.map(b=>b.toString(16).padStart(2,'0')).join(' '),valid});
     if(!valid)throw wasmError('LITERT_STAGED_WASM_NOT_BINARY',
       'A published LiteRT WASM asset returned HTML, an error, or invalid WebAssembly bytes. This is a deployment/runtime asset problem, not a GPU inference failure: '+url,
       {assetUrl:url,status,mime});
@@ -54,7 +54,7 @@ function observeWasmFetches(){
     const response=await nativeFetch(input,init);
     if(tracked){
       const mime=short(response.headers.get('content-type')||'',100);
-      send('asset',{phase:'wasm-request',url:short(url,320),status:response.status,mime,redirected:Boolean(response.redirected)});
+      send('asset',{phase:'wasm-request',url:short(url,320),httpStatus:response.status,mime,redirected:Boolean(response.redirected)});
       if(!response.ok||/text\/html/i.test(mime))throw wasmError('LITERT_WASM_HTML_FALLBACK',
         'The LiteRT WASM loader received HTML or an HTTP failure instead of WebAssembly: '+url,
         {assetUrl:url,status:response.status,mime});
