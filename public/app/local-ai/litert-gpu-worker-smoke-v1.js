@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.4-e4b-wasm-assets-with-status-fix';
+const VERSION='1.0.5-e4b-wasm-worker-relative-resolution';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -49,15 +49,26 @@ function observeWasmFetches(){
   self.fetch=async(input,init)=>{
     let url='';
     try{url=new URL(typeof input==='string'?input:input?.url||String(input),self.location.href).href}catch{}
+    const basename=url.split(/[?#]/,1)[0].split('/').at(-1)||'';
     const tracked=/\.wasm(?:\?|$)/i.test(url);
-    if(tracked)send('phase',{phase:'wasm-request',url:short(url,320)});
-    const response=await nativeFetch(input,init);
+    // Emscripten can resolve an unqualified .wasm URL against the worker
+    // script (/app/local-ai/) even if LiteRT was initialized with WASM_ROOT.
+    // Rewrite only known LiteRT filenames to the canonical self-hosted path.
+    const liteRtBinary=/^litertlm_wasm_(?:compat_)?(?:asyncify_)?internal\.wasm$/.test(basename);
+    const canonical=liteRtBinary?new URL(WASM_ROOT+basename,self.location.origin).href:'';
+    const rewritten=liteRtBinary&&url!==canonical;
+    if(tracked)send('phase',{phase:rewritten?'wasm-rewrite':'wasm-request',url:short(url,320),target:rewritten?canonical:undefined});
+    let request=input;
+    if(rewritten){
+      request=typeof input==='string'?canonical:new Request(canonical,input);
+    }
+    const response=await nativeFetch(request,init);
     if(tracked){
       const mime=short(response.headers.get('content-type')||'',100);
-      send('asset',{phase:'wasm-request',url:short(url,320),httpStatus:response.status,mime,redirected:Boolean(response.redirected)});
+      send('asset',{phase:'wasm-request',url:short(url,320),resolvedUrl:canonical||url,httpStatus:response.status,mime,redirected:Boolean(response.redirected)});
       if(!response.ok||/text\/html/i.test(mime))throw wasmError('LITERT_WASM_HTML_FALLBACK',
         'The LiteRT WASM loader received HTML or an HTTP failure instead of WebAssembly: '+url,
-        {assetUrl:url,status:response.status,mime});
+        {assetUrl:canonical||url,status:response.status,mime});
     }
     return response;
   };
