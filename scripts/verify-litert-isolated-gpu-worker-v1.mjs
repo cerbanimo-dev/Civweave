@@ -13,8 +13,8 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.6-message-content-contract'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.6-message-content-contract'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.7-bounded-inference-triage'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.7-bounded-inference-triage'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
@@ -40,7 +40,7 @@ const mockSDK={
     steps.push('engine');assert.ok(settings.model);
     return{createConversation:async()=>{
       steps.push('conversation');
-      return{sendMessageStreaming:async function*(){steps.push('stream');if(mockStreamMode==='message-string')yield {role:'assistant',content:'READY'};else if(mockStreamMode==='text-parts')yield {role:'assistant',content:[{type:'text',text:'READY'}]};else if(mockStreamMode==='empty')return;else if(mockStreamMode==='nontext')yield {role:'assistant',channels:{analysis:'internal'},content:[{type:'audio',data:'not-visible'}]};else throw Error('bad mocked stream mode')},delete:async()=>{}};
+      return{sendMessage:async()=>{steps.push('blocking');return {role:'assistant',content:'READY'}},sendMessageStreaming:async function*(){steps.push('stream');if(mockStreamMode==='message-string')yield {role:'assistant',content:'READY'};else if(mockStreamMode==='text-parts')yield {role:'assistant',content:[{type:'text',text:'READY'}]};else if(mockStreamMode==='empty')return;else if(mockStreamMode==='nontext')yield {role:'assistant',channels:{analysis:'internal'},content:[{type:'audio',data:'not-visible'}]};else throw Error('bad mocked stream mode')},delete:async()=>{}};
     },delete:async()=>{}}
   }}
 };
@@ -52,7 +52,7 @@ const context={
   navigator:{gpu:{}},
   WebAssembly:{Suspending(){},promising(){}},
   caches:{open:async()=>({match:async()=>({ok:true,body:{}})})},
-  URL,fetch:fetchMock,Uint8Array
+  URL,fetch:fetchMock,Uint8Array,setInterval:()=>1,clearInterval:()=>{}
 };
 const instrumented=workerSource.replace('await import(MODULE_URL)','await Promise.resolve(globalThis.__mockSDK)');
 assert.notEqual(instrumented,workerSource);
@@ -89,6 +89,22 @@ for(const test of cases){
   }
 }
 mockStreamMode='message-string';
+activeWorker=self;
+// Compare one-turn streaming with the LiteRT non-streaming API in a fresh
+// worker. A successful blocking result proves model execution separately
+// from the underlying async streaming waitUntilDone implementation.
+const blockingRows=[],blockingSelf={postMessage:row=>blockingRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=blockingSelf;
+vm.runInNewContext(instrumented,{...context,self:blockingSelf,globalThis:blockingSelf});
+await blockingSelf.onmessage({data:{
+  modelId:'gemma4-e4b-it-litert-web',
+  modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
+  mode:'bounded-blocking'
+}});
+assert.equal(blockingRows.at(-1).status,'complete');
+assert.equal(blockingRows.at(-1).mode,'bounded-blocking');
+assert.ok(blockingRows.some(r=>r.status==='token'&&r.text==='READY'));
+assert.ok(steps.includes('blocking'));
 activeWorker=self;
 
 assert.equal(reports[0].importScriptsAvailable,true);
@@ -135,4 +151,4 @@ await moduleSelf.onmessage({data:{
 assert.equal(moduleReports.at(-1).code,'LITERT_CLASSIC_WORKER_REQUIRED');
 assert.equal(moduleReports.at(-1).phase,'capabilities');
 
-console.log('PASS: independent GPU worker streams model tokens and UI isolates diagnostics from the learning pipeline.');
+console.log('PASS: independent LiteRT GPU worker validates streaming, bounded non-streaming, JS event-loop heartbeats, and fails on empty text.');
