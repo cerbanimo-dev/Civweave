@@ -13,13 +13,13 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.8-e4b-storage-binding-capability-gate'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.8-e4b-storage-binding-capability-gate'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.9-e4b-reduced-context-gpu-limit-probe'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.9-e4b-reduced-context-gpu-limit-probe'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
 
-const reports=[],steps=[];
+const reports=[],steps=[],engineSettings=[];
 let adapterBindingLimit=268435456;
 let invalidWasm=false,failOnLoaderWasm=false,loaderWasmName='litertlm_wasm_asyncify_internal.wasm',mockStreamMode='message-string';
 const wasmBytes=Uint8Array.from([0,97,115,109,1,0,0,0]);
@@ -38,7 +38,7 @@ const fetchMock=async input=>{
 const mockSDK={
   loadLiteRtLm:async()=>{steps.push('wasm');if(failOnLoaderWasm)await activeWorker.fetch('/app/local-ai/'+loaderWasmName)},
   Engine:{create:async settings=>{
-    steps.push('engine');assert.ok(settings.model);
+    steps.push('engine');assert.ok(settings.model);engineSettings.push(settings);
     return{createConversation:async()=>{
       steps.push('conversation');
       return{sendMessage:async()=>{steps.push('blocking');return {role:'assistant',content:'READY'}},sendMessageStreaming:async function*(){steps.push('stream');if(mockStreamMode==='message-string')yield {role:'assistant',content:'READY'};else if(mockStreamMode==='text-parts')yield {role:'assistant',content:[{type:'text',text:'READY'}]};else if(mockStreamMode==='empty')return;else if(mockStreamMode==='nontext')yield {role:'assistant',channels:{analysis:'internal'},content:[{type:'audio',data:'not-visible'}]};else throw Error('bad mocked stream mode')},delete:async()=>{}};
@@ -130,6 +130,19 @@ assert.equal(unsupportedRows.at(-1).requiredBindingBytes,167772160);
 assert.equal(unsupportedRows.at(-1).maximumBindingBytes,134217728);
 assert.ok(!unsupportedRows.some(row=>row.phase==='wasm-inventory'||row.phase==='engine'));
 assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount);
+// A reduced context is an experiment: it must reach the GPU SDK even on a
+// 128 MiB adapter, since the 160 MiB binding may depend on context length.
+const reducedRows=[],reducedSelf={postMessage:row=>reducedRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=reducedSelf;
+vm.runInNewContext(instrumented,{...context,self:reducedSelf,globalThis:reducedSelf});
+await reducedSelf.onmessage({data:{
+  modelId:'gemma4-e4b-it-litert-web',
+  modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
+  contextTokens:512
+}});
+assert.equal(reducedRows.at(-1).status,'complete');
+assert.equal(engineSettings.at(-1).mainExecutorSettings.maxNumTokens,512);
+assert.ok(reducedRows.some(row=>row.status==='gpu-limits'&&row.contextExperiment===true));
 adapterBindingLimit=268435456;
 invalidWasm=true;
 const badReports=[],badSelf={postMessage:row=>badReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
