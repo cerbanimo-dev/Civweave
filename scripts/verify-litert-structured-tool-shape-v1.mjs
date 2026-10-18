@@ -38,7 +38,7 @@ assert.equal(authority.weaveDraftPipeline,true);
 assert.equal(authority.liveGenerationTracker,true);
 assert.equal(authority.globalFinalResponseStreaming,true);
 assert.equal(authority.familyLoaderWeaveRebind,true);
-assert.equal(authority.trackerVersion,'1.2.3-guide-generation-tracker-v1-gpu-quarantine-status');
+assert.equal(authority.trackerVersion,'1.2.4-guide-generation-tracker-v1-isolated-gpu-probe');
 
 // The LiteRT structured-tool adapter remains compatible with E2B as an ordinary local selection. E4B Learning/Quest generation
 // is covered separately by the Weave Draft regression and must not use this adapter.
@@ -99,7 +99,7 @@ let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
 sandbox.CivweaveGuideGenerationTrackerV1={
-  version:'1.2.3-guide-generation-tracker-v1-gpu-quarantine-status',
+  version:'1.2.4-guide-generation-tracker-v1-isolated-gpu-probe',
   install:()=>{trackerInstalls+=1;return true}
 };
 sandbox.CivweaveModelRuntime={generate:async()=>({status:'initial-runtime'})};
