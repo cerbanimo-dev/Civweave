@@ -22,6 +22,14 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 <option value="baseline-stream">Original stream · SDK defaults (comparison)</option>
 <option value="bounded-blocking">Bounded non-streaming · test SDK async streaming separately</option>
 </select></p>
+<p><label for="context">E4B engine context (GPU binding-size experiment)</label>
+<select id="context">
+<option value="512" selected>512 tokens · reduced GPU buffer context (start here)</option>
+<option value="256">256 tokens · smallest context test</option>
+<option value="1024">1024 tokens · intermediate comparison</option>
+<option value="2048">2048 tokens · original known 160 MiB buffer binding</option>
+</select></p>
+<p><small>A GPU storage binding must fit <em>within a single GPU binding</em>. This device reported a 128 MiB limit, while the original 2048-token E4B run requested 160 MiB. A smaller engine context might change the required buffer size; this test checks that without replacing model weights.</small></p>
 <button id="test">Run clean GPU test</button><button id="stop" disabled>Stop worker</button><button id="persist">Request persistent storage</button>
 <p id="capabilities" aria-live="polite">Checking browser capabilities…</p>
 <p id="storage" aria-live="polite"></p>
@@ -54,18 +62,20 @@ small{color:#bed0e1}button:disabled{opacity:.5}
     if(worker)return;
     log.textContent='';visible='';heartbeatCount=0;lastHeartbeatMs=0;started=Date.now();button.disabled=true;stop.disabled=false;
     const model=models[get('model').value],url='https://huggingface.co/litert-community/'+model.repo+'/resolve/'+model.revision+'/'+model.artifact;
-    const mode=get('mode').value;
-    line('Selected '+model.id+' · cached artifact: '+model.artifact+' · diagnostic: '+mode);
+    const mode=get('mode').value,contextTokens=Number(get('context').value);
+    line('Selected '+model.id+' · cached artifact: '+model.artifact+' · diagnostic: '+mode+' · engine context: '+contextTokens+' tokens');
     try{
       const cache=await caches.open('civweave-model-generative-v266');
       const hit=await cache.match(url);
       if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
       line('Cache: present · starting worker…');
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.7-bounded-inference-triage',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.9-e4b-reduced-context-gpu-limit-probe',{type:'classic'});
       worker.onmessage=event=>{
         const d=event.data||{};
         if(d.status==='phase'){if(d.phase==='awaiting-first-token'){if(firstTokenTimer)clearTimeout(firstTokenTimer);firstTokenTimer=setTimeout(()=>finish('TIMEOUT_FIRST_TOKEN: 90 seconds after conversation initialization · heartbeats '+heartbeatCount+' · '+(heartbeatCount?'worker event loop was responsive':'no worker heartbeat (possible WASM event-loop block)')+' · model cache preserved.'),90000)}line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.phase==='wasm-inventory'&&d.wasmCount!=null?' · version '+d.coreVersion+' · '+d.wasmCount+' WASM files · intentionally omitted: '+(d.omittedWasm||[]).join(', '):'')+(d.url?' · '+d.url:'')+(d.target?' → '+d.target:'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
-        if(d.status==='gpu-device'){line('GPU DEVICE · SDK device observable: '+d.available+(d.available?' · maxBufferSize '+d.maxBufferSize+' · features '+(d.features||[]).join(', '):''));return}
+        if(d.status==='gpu-limits'){line('GPU STORAGE BINDING LIMIT · '+Math.round((d.maxStorageBufferBindingSize||0)/1048576)+' MiB; original E4B 2048-token bind: '+Math.round((d.observedRequiredBindingAt2048Bytes||0)/1048576)+' MiB'+(d.contextExperiment?' · reduced-context compatibility experiment':'')+(d.compatible===false?' · KNOWN INCOMPATIBLE':''));return}
+        if(d.status==='gpu-device'){line('GPU DEVICE · SDK device observable: '+d.available+(d.available?' · maxStorageBufferBindingSize '+Math.round((d.maxStorageBufferBindingSize||0)/1048576)+' MiB · maxBufferSize '+d.maxBufferSize+' · features '+(d.features||[]).join(', '):''));return}
+        if(d.status==='gpu-fatal'){finish('FAIL: '+d.code+' · '+d.message+' · engine context '+d.contextTokens+' tokens · first GPU validation error stopped the worker; model cache preserved.');return}
         if(d.status==='gpu-lost'||d.status==='gpu-warning'){line('GPU '+d.status.toUpperCase()+' · '+(d.reason||'')+' · '+(d.message||''));return}
         if(d.status==='heartbeat'){heartbeatCount++;lastHeartbeatMs=d.elapsedMs;if(heartbeatCount<=2||heartbeatCount%3===0)line('HEARTBEAT '+heartbeatCount+' · '+d.sinceSubmissionMs+' ms after prompt · JS event loop responsive · raw chunks '+d.chunks);return}
         if(d.status==='asset'){line('WASM ASSET '+(d.valid===true?'OK':d.valid===false?'INVALID':'RESPONSE')+' · '+d.url+' · HTTP '+d.httpStatus+' · '+d.mime+(d.magic?' · '+d.magic:''));return}
@@ -75,7 +85,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
       };
       worker.onerror=event=>finish('FAIL: Worker script error · '+String(event.message||'unknown'));
       timer=setTimeout(()=>finish('TIMEOUT_TOTAL: 180 seconds · heartbeats '+heartbeatCount+'. Worker terminated; model cache preserved.'),180000);
-      worker.postMessage({modelId:model.id,modelUrl:url,mode});
+      worker.postMessage({modelId:model.id,modelUrl:url,mode,contextTokens});
     }catch(error){finish('START FAILED: '+String(error))}
   };
 })();
