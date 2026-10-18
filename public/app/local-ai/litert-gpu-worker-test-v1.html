@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Civweave · Isolated LiteRT GPU Test</title>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui}body{background:#0d1522;color:#f0f6ff;max-width:720px;padding:18px;margin:auto}
+h1{font-size:1.45rem}button,select{background:#213653;color:#fff;border:1px solid #709cc2;border-radius:9px;padding:10px;margin:4px}
+pre{background:#05101b;border:1px solid #3d5164;border-radius:10px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;min-height:100px}
+small{color:#bed0e1}button:disabled{opacity:.5}
+</style></head>
+<body>
+<h1>Isolated LiteRT GPU test</h1>
+<p>Runs the already-downloaded Gemma model in a new dedicated Web Worker. No Moss plan, prompt compiler, or AI fallback. This test does <b>not</b> download model weights.</p>
+<p><label for="model">Local model</label>
+<select id="model">
+<option value="e4">Gemma 4 E4B · currently installed Web artifact</option>
+<option value="e2">Gemma 4 E2B · currently installed Web artifact</option>
+</select></p>
+<button id="test">Run clean GPU test</button><button id="stop" disabled>Stop worker</button><button id="persist">Request persistent storage</button>
+<p id="capabilities" aria-live="polite">Checking browser capabilities…</p>
+<p id="storage" aria-live="polite"></p>
+<pre id="log" aria-live="polite"></pre>
+<p><small>For an uncontaminated comparison, force-stop Civweave before opening this page. Do not open a second AI session during the test. Worker loading and inference are separate stages. A passed test here does not guarantee that Moss's full pipeline succeeds.</small></p>
+<script>
+(()=>{
+  const models={
+    e4:{id:'gemma4-e4b-it-litert-web',repo:'gemma-4-E4B-it-litert-lm',revision:'4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4',artifact:'gemma-4-E4B-it-web.litertlm'},
+    e2:{id:'gemma4-e2b-it-litert-web',repo:'gemma-4-E2B-it-litert-lm',revision:'73d35ec36cf24347ab4eec1a46f0aafbb9c3a89d',artifact:'gemma-4-E2B-it-web.litertlm'}
+  };
+  const get=id=>document.getElementById(id),log=get('log'),button=get('test'),stop=get('stop');
+  const line=text=>{log.textContent+=text+'\n';log.scrollTop=log.scrollHeight};
+  let worker=null,timer=null,started=0,visible='';
+  function reset(){if(timer)clearTimeout(timer);timer=null;try{worker?.terminate()}catch{}worker=null;button.disabled=false;stop.disabled=true}
+  function finish(message){line(message);reset()}
+  get('capabilities').textContent='WebGPU: '+Boolean(navigator.gpu)+' · WebAssembly JSPI: '+Boolean(WebAssembly.Suspending&&WebAssembly.promising)+' · Worker: '+Boolean(window.Worker);
+  async function storageStatus(){try{
+    if(!navigator.storage?.estimate)return;
+    const estimate=await navigator.storage.estimate();
+    const persistent=await navigator.storage.persisted?.();
+    get('storage').textContent='Origin storage: '+Math.round((estimate.usage||0)/1048576)+' MiB used / '+Math.round((estimate.quota||0)/1048576)+' MiB quota · persistence: '+(persistent?'granted':'not granted');
+  }catch(error){get('storage').textContent=String(error)}}
+  void storageStatus();
+  get('persist').onclick=async()=>{
+    try{const accepted=await navigator.storage?.persist?.();line('Storage persistence request: '+(accepted?'GRANTED':'not granted'));await storageStatus()}catch(error){line('Storage persistence error: '+String(error))}
+  };
+  stop.onclick=()=>finish('Stopped by user.');
+  button.onclick=async()=>{
+    if(worker)return;
+    log.textContent='';visible='';started=Date.now();button.disabled=true;stop.disabled=false;
+    const model=models[get('model').value],url='https://huggingface.co/litert-community/'+model.repo+'/resolve/'+model.revision+'/'+model.artifact;
+    line('Selected '+model.id+' · cached artifact: '+model.artifact);
+    try{
+      const cache=await caches.open('civweave-model-generative-v266');
+      const hit=await cache.match(url);
+      if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
+      line('Cache: present · starting worker…');
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.0-worker-gpu-smoke',{type:'module'});
+      worker.onmessage=event=>{
+        const d=event.data||{};
+        if(d.status==='phase'){line('['+d.elapsedMs+' ms] '+d.phase+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
+        if(d.status==='token'){visible+=String(d.text||'');line('TOKEN: '+String(d.text||''));return}
+        if(d.status==='complete'){finish('PASS: '+d.visibleTextDeltas+' visible token chunks · '+visible.slice(0,150));return}
+        if(d.status==='error')finish('FAIL: '+d.code+' at '+d.phase+' · '+d.message);
+      };
+      worker.onerror=event=>finish('FAIL: Worker script error · '+String(event.message||'unknown'));
+      timer=setTimeout(()=>finish('TIMEOUT: '+Math.round((Date.now()-started)/1000)+' seconds. Worker terminated without clearing model cache.'),180000);
+      worker.postMessage({modelId:model.id,modelUrl:url});
+    }catch(error){finish('START FAILED: '+String(error))}
+  };
+})();
+</script>
+</body></html>
