@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.6-e4b-message-content-contract';
+const VERSION='1.0.7-e4b-bounded-inference-triage';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -105,10 +105,12 @@ self.onmessage=async event=>{
   if(started)return;started=true;origin=performance.now();
   const modelId=String(event.data?.modelId||'');
   const modelUrl=String(event.data?.modelUrl||'');
+  const mode=String(event.data?.mode||'bounded-stream');
+  if(!['bounded-stream','baseline-stream','bounded-blocking'].includes(mode)){send('error',{phase:'input',code:'INVALID_GPU_TEST_MODE',message:'Unknown diagnostic mode.'});return}
   if(!['gemma4-e4b-it-litert-web','gemma4-e2b-it-litert-web'].includes(modelId)||!modelUrl.startsWith('https://huggingface.co/litert-community/')){
     send('error',{phase:'input',code:'INVALID_GPU_TEST_MODEL',message:'An approved Gemma 4 LiteRT cached model is required.'});return;
   }
-  let engine=null,conversation=null,phase='capabilities',chunks=0,visible=0,rawShapes=[],nontextChunks=0;
+  let engine=null,conversation=null,phase='capabilities',chunks=0,visible=0,rawShapes=[],nontextChunks=0,heartbeat=null;
   try{
     const classicWorker=typeof self.importScripts==='function';
     send('phase',{phase,workerType:classicWorker?'classic':'module',importScriptsAvailable:classicWorker,workerGpu:Boolean(navigator.gpu),jspi:typeof WebAssembly.Suspending==='function'&&typeof WebAssembly.promising==='function'});
@@ -132,22 +134,45 @@ self.onmessage=async event=>{
     else throw Object.assign(new Error('LiteRT-LM WASM loader is missing.'),{code:'WORKER_WASM_LOADER_MISSING'});
     phase='engine';send('phase',{phase});
     engine=await mod.Engine.create({model:response.body,mainExecutorSettings:{maxNumTokens:2048},benchmarkEnabled:false});
-    phase='conversation';send('phase',{phase});
-    conversation=await engine.createConversation();
-    phase='awaiting-first-token';send('phase',{phase,inputCharacters:5});
-    for await(const chunk of conversation.sendMessageStreaming('READY')){
+    phase='conversation';send('phase',{phase,mode});
+    const bounded=mode!=='baseline-stream';
+    const config=bounded?{
+      sessionConfig:{maxOutputTokens:32},
+      preface:{extra_context:{enable_thinking:false}},
+      prefillPrefaceOnInit:false
+    }:undefined;
+    conversation=await engine.createConversation(config);
+    phase='awaiting-first-token';send('phase',{phase,inputCharacters:5,mode,maxOutputTokens:bounded?32:null});
+    // Heartbeats only run while the JS event loop is free. If they disappear
+    // during generation, the underlying synchronous WASM call may be blocking.
+    const submission=performance.now();
+    let heartbeatIndex=0;
+    heartbeat=setInterval(()=>send('heartbeat',{phase,mode,beat:++heartbeatIndex,
+      sinceSubmissionMs:Math.round(performance.now()-submission),chunks,visibleTextDeltas:visible}),10000);
+    if(mode==='bounded-blocking'){
+      const chunk=await conversation.sendMessage('READY');
       chunks++;
-      if(rawShapes.length<5)rawShapes.push(chunkShape(chunk));
+      rawShapes.push(chunkShape(chunk));
       const piece=visibleChunkText(chunk);
       if(piece){visible++;send('token',{phase,text:piece,chunk:chunks})}
       else nontextChunks++;
+    }else{
+      for await(const chunk of conversation.sendMessageStreaming('READY')){
+        chunks++;
+        if(rawShapes.length<5)rawShapes.push(chunkShape(chunk));
+        const piece=visibleChunkText(chunk);
+        if(piece){visible++;send('token',{phase,text:piece,chunk:chunks})}
+        else nontextChunks++;
+      }
     }
+    clearInterval(heartbeat);heartbeat=null;
     if(!visible)throw wasmError('LITERT_EMPTY_VISIBLE_OUTPUT',
       'LiteRT finished streaming without visible text. Stream shape and chunk counts are recorded; this is NOT a passing GPU inference test.',
       {rawDiagnostics:{chunksObserved:chunks,nontextChunks,rawShapes}});
-    send('complete',{phase:'complete',chunks,visibleTextDeltas:visible,nontextChunks});
-  }catch(error){send('error',{phase,...safeError(error),chunks,visibleTextDeltas:visible,nontextChunks,rawShapes:error?.rawDiagnostics?.rawShapes||rawShapes})}
+    send('complete',{phase:'complete',mode,chunks,visibleTextDeltas:visible,nontextChunks});
+  }catch(error){send('error',{phase,mode,...safeError(error),chunks,visibleTextDeltas:visible,nontextChunks,rawShapes:error?.rawDiagnostics?.rawShapes||rawShapes})}
   finally{
+    if(heartbeat)clearInterval(heartbeat);
     // A poisoned WebGPU queue can also hang native delete(). The parent must
     // terminate this diagnostic worker after receiving its result or deadline.
     if(conversation)try{await conversation.delete?.()}catch{}
