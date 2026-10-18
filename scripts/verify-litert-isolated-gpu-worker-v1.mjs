@@ -13,8 +13,8 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.2-wasm-diagnostics'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.2-wasm-diagnostics'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.4-wasm-assets-with-status-fix'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.4-wasm-assets-with-status-fix'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
@@ -23,7 +23,7 @@ const reports=[],steps=[];
 let invalidWasm=false,failOnLoaderWasm=false;
 const wasmBytes=Uint8Array.from([0,97,115,109,1,0,0,0]);
 const htmlBytes=Uint8Array.from([60,33,100,111,99,116,121,112]);
-const modelManifest={coreVersion:'0.17.1',wasmFiles:['wasm/litertlm_wasm_internal.wasm'],omittedFiles:[{path:'wasm/litertlm_wasm_asyncify_internal.wasm'}]};
+const modelManifest={coreVersion:'0.17.1',wasmFiles:['wasm/litertlm_wasm_internal.wasm'],omittedFiles:[{path:'wasm/litertlm_wasm_asyncify_internal.wasm',bytes:8,parts:['wasm/litertlm_wasm_asyncify_internal.wasm.part0']}]};
 let activeWorker=null;
 const fetchMock=async input=>{
   const url=String(typeof input==='string'?input:input?.url||input);
@@ -66,7 +66,7 @@ assert.equal(reports.at(-1).status,'complete');
 assert.ok(reports.some(r=>r.status==='token'&&r.text==='READY'));
 assert.equal(reports[0].workerType,'classic');
 assert.equal(reports[0].importScriptsAvailable,true);
-console.log('WASM smoke events:',JSON.stringify(reports.map(({status,phase,code,message,valid,magic,url})=>({status,phase,code,message,valid,magic,url}))));
+assert.ok(reports.some(row=>row.status==='asset'&&row.httpStatus===200),'HTTP success must not overwrite the asset event name');
 assert.ok(reports.some(r=>r.status==='asset'&&r.valid===true&&r.magic.startsWith('00 61 73 6d')),'a real WASM magic signature is required before inference');
 assert.ok(reports.some(r=>r.phase==='wasm-inventory'&&r.omittedWasm?.includes('wasm/litertlm_wasm_asyncify_internal.wasm')));
 const previousEngineCount=steps.filter(x=>x==='engine').length;
