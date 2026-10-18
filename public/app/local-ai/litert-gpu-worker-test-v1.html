@@ -16,6 +16,12 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 <option value="e4">Gemma 4 E4B · currently installed Web artifact</option>
 <option value="e2">Gemma 4 E2B · currently installed Web artifact</option>
 </select></p>
+<p><label for="mode">Inference diagnostic</label>
+<select id="mode">
+<option value="bounded-stream">Bounded stream · 32 output tokens · thinking off (recommended)</option>
+<option value="baseline-stream">Original stream · SDK defaults (comparison)</option>
+<option value="bounded-blocking">Bounded non-streaming · test SDK async streaming separately</option>
+</select></p>
 <button id="test">Run clean GPU test</button><button id="stop" disabled>Stop worker</button><button id="persist">Request persistent storage</button>
 <p id="capabilities" aria-live="polite">Checking browser capabilities…</p>
 <p id="storage" aria-live="polite"></p>
@@ -29,8 +35,8 @@ small{color:#bed0e1}button:disabled{opacity:.5}
   };
   const get=id=>document.getElementById(id),log=get('log'),button=get('test'),stop=get('stop');
   const line=text=>{log.textContent+=text+'\n';log.scrollTop=log.scrollHeight};
-  let worker=null,timer=null,started=0,visible='';
-  function reset(){if(timer)clearTimeout(timer);timer=null;try{worker?.terminate()}catch{}worker=null;button.disabled=false;stop.disabled=true}
+  let worker=null,timer=null,firstTokenTimer=null,started=0,visible='',heartbeatCount=0,lastHeartbeatMs=0;
+  function reset(){if(timer)clearTimeout(timer);if(firstTokenTimer)clearTimeout(firstTokenTimer);timer=null;firstTokenTimer=null;try{worker?.terminate()}catch{}worker=null;button.disabled=false;stop.disabled=true}
   function finish(message){line(message);reset()}
   get('capabilities').textContent='WebGPU: '+Boolean(navigator.gpu)+' · WebAssembly JSPI: '+Boolean(WebAssembly.Suspending&&WebAssembly.promising)+' · Worker: '+Boolean(window.Worker);
   async function storageStatus(){try{
@@ -46,26 +52,28 @@ small{color:#bed0e1}button:disabled{opacity:.5}
   stop.onclick=()=>finish('Stopped by user.');
   button.onclick=async()=>{
     if(worker)return;
-    log.textContent='';visible='';started=Date.now();button.disabled=true;stop.disabled=false;
+    log.textContent='';visible='';heartbeatCount=0;lastHeartbeatMs=0;started=Date.now();button.disabled=true;stop.disabled=false;
     const model=models[get('model').value],url='https://huggingface.co/litert-community/'+model.repo+'/resolve/'+model.revision+'/'+model.artifact;
-    line('Selected '+model.id+' · cached artifact: '+model.artifact);
+    const mode=get('mode').value;
+    line('Selected '+model.id+' · cached artifact: '+model.artifact+' · diagnostic: '+mode);
     try{
       const cache=await caches.open('civweave-model-generative-v266');
       const hit=await cache.match(url);
       if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
       line('Cache: present · starting worker…');
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.6-message-content-contract',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.7-bounded-inference-triage',{type:'classic'});
       worker.onmessage=event=>{
         const d=event.data||{};
-        if(d.status==='phase'){line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.phase==='wasm-inventory'&&d.wasmCount!=null?' · version '+d.coreVersion+' · '+d.wasmCount+' WASM files · intentionally omitted: '+(d.omittedWasm||[]).join(', '):'')+(d.url?' · '+d.url:'')+(d.target?' → '+d.target:'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
+        if(d.status==='phase'){if(d.phase==='awaiting-first-token'){if(firstTokenTimer)clearTimeout(firstTokenTimer);firstTokenTimer=setTimeout(()=>finish('TIMEOUT_FIRST_TOKEN: 90 seconds after conversation initialization · heartbeats '+heartbeatCount+' · '+(heartbeatCount?'worker event loop was responsive':'no worker heartbeat (possible WASM event-loop block)')+' · model cache preserved.'),90000)}line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.phase==='wasm-inventory'&&d.wasmCount!=null?' · version '+d.coreVersion+' · '+d.wasmCount+' WASM files · intentionally omitted: '+(d.omittedWasm||[]).join(', '):'')+(d.url?' · '+d.url:'')+(d.target?' → '+d.target:'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
+        if(d.status==='heartbeat'){heartbeatCount++;lastHeartbeatMs=d.elapsedMs;if(heartbeatCount<=2||heartbeatCount%3===0)line('HEARTBEAT '+heartbeatCount+' · '+d.sinceSubmissionMs+' ms after prompt · JS event loop responsive · raw chunks '+d.chunks);return}
         if(d.status==='asset'){line('WASM ASSET '+(d.valid===true?'OK':d.valid===false?'INVALID':'RESPONSE')+' · '+d.url+' · HTTP '+d.httpStatus+' · '+d.mime+(d.magic?' · '+d.magic:''));return}
-                if(d.status==='token'){visible+=String(d.text||'');line('TOKEN: '+String(d.text||''));return}
+                if(d.status==='token'){if(firstTokenTimer){clearTimeout(firstTokenTimer);firstTokenTimer=null}visible+=String(d.text||'');line('TOKEN: '+String(d.text||''));return}
         if(d.status==='complete'){finish((d.visibleTextDeltas>0&&visible?'PASS: ':'FAIL: ZERO VISIBLE OUTPUT · ')+d.visibleTextDeltas+' visible text chunks · '+d.chunks+' raw chunks · '+visible.slice(0,150));return}
-        if(d.status==='error')finish('FAIL: '+d.code+' at '+d.phase+' · '+d.message+(d.assetUrl?' · asset '+d.assetUrl+' HTTP '+d.httpStatus+' '+d.mime:'')+' · raw chunks '+(d.chunks||0)+' · visible '+(d.visibleTextDeltas||0)+' · shapes '+JSON.stringify(d.rawShapes||[]));
+        if(d.status==='error')finish('FAIL: '+d.code+' at '+d.phase+' · '+d.message+(d.assetUrl?' · asset '+d.assetUrl+' HTTP '+d.httpStatus+' '+d.mime:'')+' · raw chunks '+(d.chunks||0)+' · visible '+(d.visibleTextDeltas||0)+' · shapes '+JSON.stringify(d.rawShapes||[])+' · heartbeats '+heartbeatCount);
       };
       worker.onerror=event=>finish('FAIL: Worker script error · '+String(event.message||'unknown'));
-      timer=setTimeout(()=>finish('TIMEOUT: '+Math.round((Date.now()-started)/1000)+' seconds. Worker terminated without clearing model cache.'),180000);
-      worker.postMessage({modelId:model.id,modelUrl:url});
+      timer=setTimeout(()=>finish('TIMEOUT_TOTAL: 180 seconds · heartbeats '+heartbeatCount+'. Worker terminated; model cache preserved.'),180000);
+      worker.postMessage({modelId:model.id,modelUrl:url,mode});
     }catch(error){finish('START FAILED: '+String(error))}
   };
 })();
