@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.9-e4b-reduced-context-gpu-limit-probe';
+const VERSION='1.0.10-e4b-official-gpu-file-compare';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -12,6 +12,8 @@ const WASM_MANIFEST='/app/vendor/litert-lm/stage-manifest.json';
 // GPU RAM or maxBufferSize; smaller prompts cannot split an AOT GPU binding.
 const E4B_OBSERVED_BINDING_BYTES=167772160;
 const E4B_WEB_MODEL='gemma4-e4b-it-litert-web';
+const OFFICIAL_GPU_FILE='gemma-4-E4B-it-gpu.litertlm';
+const OFFICIAL_GPU_FILE_BYTES=2969059328;
 let activeContextTokens=2048;
 function short(value,max=260){return String(value??'').slice(0,max)}
 function wasmError(code,message,detail={}){return Object.assign(new Error(message),{code,...detail})}
@@ -106,16 +108,16 @@ function chunkShape(chunk){
     toolCalls:Array.isArray(chunk.tool_calls)?chunk.tool_calls.length:0
   };
 }
-async function verifyGpuBindingLimit(modelId,contextTokens){
+async function verifyGpuBindingLimit(modelId,contextTokens,artifactKind='cached-web'){
   const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
   if(!adapter)throw wasmError('WORKER_GPU_ADAPTER_UNAVAILABLE','The browser did not provide a WebGPU adapter.');
   const maximum=Number(adapter.limits?.maxStorageBufferBindingSize)||0;
   const deviceMaximumBuffer=Number(adapter.limits?.maxBufferSize)||null;
-  const required=modelId===E4B_WEB_MODEL?E4B_OBSERVED_BINDING_BYTES:null;
+  const required=modelId===E4B_WEB_MODEL&&artifactKind==='cached-web'?E4B_OBSERVED_BINDING_BYTES:null;
   // The observed 160 MiB request occurred with a 2048-token engine. We have
   // not yet established whether a smaller context reduces that bind group.
   const unsupported=Boolean(required&&maximum>0&&maximum<required&&contextTokens>=2048);
-  send('gpu-limits',{phase:'gpu-limits',modelId,engineContextTokens:contextTokens,maxStorageBufferBindingSize:maximum,maxBufferSize:deviceMaximumBuffer,observedRequiredBindingAt2048Bytes:required,compatible:unsupported?false:maximum>0&&(!required||maximum>=required)?true:null,contextExperiment:Boolean(required&&maximum<required&&contextTokens<2048)});
+  send('gpu-limits',{phase:'gpu-limits',modelId,artifactKind,engineContextTokens:contextTokens,maxStorageBufferBindingSize:maximum,maxBufferSize:deviceMaximumBuffer,observedRequiredBindingAt2048Bytes:required,compatible:unsupported?false:required&&maximum>=required?true:null,contextExperiment:Boolean(required&&maximum<required&&contextTokens<2048)});
   if(unsupported)throw wasmError('LITERT_E4B_GPU_STORAGE_BINDING_UNSUPPORTED',
     'The cached E4B WebGPU artifact binds 160 MiB in one shader resource, but this GPU supports at most '+Math.round(maximum/1048576)+' MiB per storage binding. This is a hard WebGPU limit, not a RAM/storage quota issue. Changing token count, stream mode or timeout cannot fix it; a different E4B GPU-compiled artifact with smaller bindings or an updated runtime/kernel is required.',
     {requiredBindingBytes:required,maximumBindingBytes:maximum,restartRequired:false});
@@ -151,7 +153,13 @@ self.onmessage=async event=>{
   const modelUrl=String(event.data?.modelUrl||'');
   const mode=String(event.data?.mode||'bounded-stream');
   const contextTokens=Number(event.data?.contextTokens??2048);
+  const artifactKind=String(event.data?.artifactKind||'cached-web');
+  const modelFile=event.data?.modelFile||null;
   activeContextTokens=contextTokens;
+  if(!['cached-web','official-gpu-file'].includes(artifactKind)){send('error',{phase:'input',code:'INVALID_GPU_TEST_ARTIFACT_KIND',message:'Unknown artifact selection.'});return}
+  if(artifactKind==='official-gpu-file'&&(modelId!==E4B_WEB_MODEL||modelFile?.name!==OFFICIAL_GPU_FILE||Number(modelFile?.size)!==OFFICIAL_GPU_FILE_BYTES||typeof modelFile?.stream!=='function')){
+    send('error',{phase:'input',code:'INVALID_GPU_TEST_OFFICIAL_FILE',message:'Select the official '+OFFICIAL_GPU_FILE+' ('+OFFICIAL_GPU_FILE_BYTES+' bytes) using the local file picker. The worker does not download model weights or upload the file.'});return;
+  }
   if(![256,512,1024,2048].includes(contextTokens)){send('error',{phase:'input',code:'INVALID_GPU_CONTEXT_TOKENS',message:'GPU test context must be 256, 512, 1024 or 2048 tokens.'});return}
   if(!['bounded-stream','baseline-stream','bounded-blocking'].includes(mode)){send('error',{phase:'input',code:'INVALID_GPU_TEST_MODE',message:'Unknown diagnostic mode.'});return}
   if(!['gemma4-e4b-it-litert-web','gemma4-e2b-it-litert-web'].includes(modelId)||!modelUrl.startsWith('https://huggingface.co/litert-community/')){
@@ -167,11 +175,20 @@ self.onmessage=async event=>{
     if(!navigator.gpu)throw Object.assign(new Error('WebGPU is unavailable in this dedicated worker.'),{code:'WORKER_WEBGPU_UNAVAILABLE'});
     if(typeof WebAssembly.Suspending!=='function'||typeof WebAssembly.promising!=='function')throw Object.assign(new Error('WebAssembly JSPI is unavailable in this worker.'),{code:'WORKER_JSPI_UNAVAILABLE'});
     phase='gpu-limits';send('phase',{phase});
-    await verifyGpuBindingLimit(modelId,contextTokens);
-    phase='cache';send('phase',{phase});
-    const cache=await caches.open(CACHE);
-    const response=await cache.match(modelUrl);
-    if(!response?.ok||!response.body)throw Object.assign(new Error('The selected model artifact is not present in the existing local model cache. This diagnostic does not download replacement weights.'),{code:'WORKER_MODEL_CACHE_MISS'});
+    await verifyGpuBindingLimit(modelId,contextTokens,artifactKind);
+    let modelInput;
+    if(artifactKind==='official-gpu-file'){
+      phase='local-file';send('phase',{phase,artifactKind,filename:modelFile.name,bytes:modelFile.size});
+      // File is structured-cloned, not uploaded or cached. The browser streams
+      // the user-selected local file into the same LiteRT Engine.create API.
+      modelInput=modelFile.stream();
+    }else{
+      phase='cache';send('phase',{phase});
+      const cache=await caches.open(CACHE);
+      const response=await cache.match(modelUrl);
+      if(!response?.ok||!response.body)throw Object.assign(new Error('The selected model artifact is not present in the existing local model cache. This diagnostic does not download replacement weights.'),{code:'WORKER_MODEL_CACHE_MISS'});
+      modelInput=response.body;
+    }
     phase='wasm-inventory';send('phase',{phase});
     await verifyStagedWasmAssets();
     observeWasmFetches();
@@ -182,9 +199,9 @@ self.onmessage=async event=>{
     else if(typeof mod.loadLiteRtLm==='function')await mod.loadLiteRtLm(WASM_ROOT);
     else throw Object.assign(new Error('LiteRT-LM WASM loader is missing.'),{code:'WORKER_WASM_LOADER_MISSING'});
     phase='engine';send('phase',{phase});
-    engine=await mod.Engine.create({model:response.body,mainExecutorSettings:{maxNumTokens:contextTokens},benchmarkEnabled:false});
+    engine=await mod.Engine.create({model:modelInput,mainExecutorSettings:{maxNumTokens:contextTokens},benchmarkEnabled:false});
     observeGpuDevice(mod);
-    phase='conversation';send('phase',{phase,mode,contextTokens});
+    phase='conversation';send('phase',{phase,mode,contextTokens,artifactKind});
     const bounded=mode!=='baseline-stream';
     const config=bounded?{
       sessionConfig:{maxOutputTokens:32},
