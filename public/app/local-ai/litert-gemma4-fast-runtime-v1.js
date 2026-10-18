@@ -1,8 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.8.3-litert-runtime-v1-lean-learning-sessions';
+const VERSION='1.8.4-litert-runtime-v1-gpu-binding-limit-gate';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
+// The current E4B -web GPU bundle uses a 160 MiB storage buffer binding.
+// A browser reporting a lower adapter maxStorageBufferBindingSize cannot
+// execute that GPU graph; maxBufferSize and available RAM are unrelated.
+const E4B_OBSERVED_BINDING_BYTES=167772160;
+const E4B_WEB_MODEL='gemma4-e4b-it-litert-web';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const QWEN_FAST='qwen35-4b-litert-web';
@@ -133,10 +138,26 @@ async function instantiateEngine(mod,profile,mode='standard'){
   }
   return mod.Engine.create(settings);
 }
+async function validateStorageBindingLimit(profile){
+  if(profile.id!==E4B_WEB_MODEL)return null;
+  const adapter=await globalThis.navigator?.gpu?.requestAdapter?.({powerPreference:'high-performance'});
+  if(!adapter)throw Object.assign(new Error('A WebGPU adapter is unavailable for the selected E4B model.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webgpu-adapter',executionModel:profile.id});
+  const maximum=Number(adapter.limits?.maxStorageBufferBindingSize)||0;
+  if(maximum&&maximum<E4B_OBSERVED_BINDING_BYTES){
+    const detail={requiredBindingBytes:E4B_OBSERVED_BINDING_BYTES,maximumBindingBytes:maximum,maxBufferSize:Number(adapter.limits?.maxBufferSize)||null,model:profile.id,modelArtifact:'gemma-4-E4B-it-web.litertlm',requiresRebuiltArtifact:true};
+    emit('civweave:litert-gemma4-gpu-incompatible',detail);
+    throw Object.assign(new Error('The selected E4B WebGPU artifact requires a 160 MiB shader storage binding, but this device permits only '+Math.round(maximum/1048576)+' MiB. This is a hardware/WebGPU per-binding limit, not a memory, token-limit, JSON, or Moss problem. The current E4B bundle needs a compatible GPU-compiled variant or upstream tiling fix; it cannot generate on this adapter.'),{
+      code:'CIVWEAVE_LITERT_E4B_STORAGE_BINDING_UNSUPPORTED',
+      executionModel:profile.id,capability:'maxStorageBufferBindingSize',...detail
+    });
+  }
+  return {maxStorageBufferBindingSize:maximum,requiredBindingBytes:E4B_OBSERVED_BINDING_BYTES};
+}
 async function createEngine(modelId){
   const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT local model: ${modelId}`);
   if(!globalThis.navigator?.gpu)throw Object.assign(new Error(`${profile.label} requires WebGPU.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webgpu'});
   if(!supportsJspi())throw Object.assign(new Error(`${profile.label} requires WebAssembly JSPI.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webassembly-jspi'});
+  await validateStorageBindingLimit(profile);
   const mod=await loadModule();
   if(engine&&engineModelId!==profile.id)await unloadEngine('switch-model');
   const started=now();emit('civweave:litert-gemma4-progress',{phase:'loading-model',model:profile.id,backend:'webgpu',mtpRequested:false,jspi:true});
