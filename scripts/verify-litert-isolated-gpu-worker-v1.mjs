@@ -14,7 +14,7 @@ assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
 assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.12-gpu-weight-variants'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.11-gpu-artisan-backend-compare'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.12-gpu-weight-variants'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
