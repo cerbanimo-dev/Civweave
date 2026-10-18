@@ -57,7 +57,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
       worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.1-classic-wasm-loader',{type:'classic'});
       worker.onmessage=event=>{
         const d=event.data||{};
-        if(d.status==='phase'){line('['+d.elapsedMs+' ms] '+d.phase+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
+        if(d.status==='phase'){line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
         if(d.status==='token'){visible+=String(d.text||'');line('TOKEN: '+String(d.text||''));return}
         if(d.status==='complete'){finish('PASS: '+d.visibleTextDeltas+' visible token chunks · '+visible.slice(0,150));return}
         if(d.status==='error')finish('FAIL: '+d.code+' at '+d.phase+' · '+d.message);
