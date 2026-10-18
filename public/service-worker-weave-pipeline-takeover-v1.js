@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r22';
+const REVISION='weave-pipeline-takeover-v1-r23';
 const STAGING_HOST='civweave-staging.pages.dev';
 const CACHE='cwrecovery-v474-gpu-queue-cleanup';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r22';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r23';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
@@ -18,6 +18,7 @@ const PURGE_PATHS=new Set([
   '/app/generation-failure-inspector-v1.js',
   '/app/family-ai-loader-v105.js',
   '/app/local-ai/litert-gemma4-fast-runtime-v1.js',
+  '/app/local-ai/litert-gpu-worker-smoke-v1.js',
   '/app/local-ai/gemma4-current-registry-authority-v1.js',
   '/app/local-ai/local-generation-model-policy-v1.js',
   '/app/local-ai/gemma4-litert-request-authority-v1.js',
