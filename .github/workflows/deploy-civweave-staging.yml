@@ -276,6 +276,9 @@ jobs:
           process.exit(4);
           NODE
 
+      - name: Verify published LiteRT WASM binaries and detect HTML fallbacks
+        run: node scripts/verify-staging-litert-wasm-served-v1.mjs
+
       - name: Write deployment summary
         if: always()
         shell: bash
