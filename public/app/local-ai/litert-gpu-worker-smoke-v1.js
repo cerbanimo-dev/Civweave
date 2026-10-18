@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.2-e4b-wasm-response-diagnostics';
+const VERSION='1.0.3-e4b-wasm-asyncify-preflight';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -28,7 +28,7 @@ async function verifyStagedWasmAssets(){
   if(!response.ok||/text\/html/i.test(response.headers.get('content-type')||''))throw wasmError(
     'LITERT_MANIFEST_MISSING','The published LiteRT runtime manifest returned an HTML page or a failed response.',{assetUrl:response.url||WASM_MANIFEST});
   const manifest=await response.json();
-  const names=(manifest.wasmFiles||[]).filter(name=>/\.wasm$/i.test(name));
+  const names=[...(manifest.wasmFiles||[]).filter(name=>/\.wasm$/i.test(name)),...(manifest.omittedFiles||[]).filter(row=>Array.isArray(row.parts)&&row.parts.length).map(row=>row.path)];
   if(!names.length)throw wasmError('LITERT_WASM_MANIFEST_EMPTY','No WebAssembly binaries were listed in the LiteRT staging manifest.');
   send('phase',{phase:'wasm-inventory',coreVersion:short(manifest.coreVersion,40),wasmCount:names.length,omittedWasm:(manifest.omittedFiles||[]).map(item=>item.path).filter(Boolean)});
   for(const name of names){
