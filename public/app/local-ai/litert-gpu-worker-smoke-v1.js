@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.11-e4b-gpu-artisan-backend-comparison';
+const VERSION='1.0.12-e4b-upstream-gpu-weight-preparation-variants';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -157,7 +157,7 @@ self.onmessage=async event=>{
   const backendMode=String(event.data?.backendMode||'standard-gpu');
   const modelFile=event.data?.modelFile||null;
   activeContextTokens=contextTokens;
-  if(!['standard-gpu','legacy-gpu-artisan'].includes(backendMode)){send('error',{phase:'input',code:'INVALID_GPU_TEST_BACKEND_MODE',message:'Unknown GPU backend comparison mode.'});return}
+  if(!['standard-gpu','legacy-gpu-artisan','no-gpu-weight-conversion','no-shared-gpu-constants'].includes(backendMode)){send('error',{phase:'input',code:'INVALID_GPU_TEST_BACKEND_MODE',message:'Unknown GPU backend comparison mode.'});return}
   if(!['cached-web','official-gpu-file'].includes(artifactKind)){send('error',{phase:'input',code:'INVALID_GPU_TEST_ARTIFACT_KIND',message:'Unknown artifact selection.'});return}
   if(artifactKind==='official-gpu-file'&&(modelId!==E4B_WEB_MODEL||modelFile?.name!==OFFICIAL_GPU_FILE||Number(modelFile?.size)!==OFFICIAL_GPU_FILE_BYTES||typeof modelFile?.stream!=='function')){
     send('error',{phase:'input',code:'INVALID_GPU_TEST_OFFICIAL_FILE',message:'Select the official '+OFFICIAL_GPU_FILE+' ('+OFFICIAL_GPU_FILE_BYTES+' bytes) using the local file picker. The worker does not download model weights or upload the file.'});return;
@@ -202,6 +202,16 @@ self.onmessage=async event=>{
     else throw Object.assign(new Error('LiteRT-LM WASM loader is missing.'),{code:'WORKER_WASM_LOADER_MISSING'});
     phase='engine';send('phase',{phase});
     const settings={model:modelInput,mainExecutorSettings:{maxNumTokens:contextTokens},benchmarkEnabled:false};
+    if(backendMode==='no-gpu-weight-conversion'||backendMode==='no-shared-gpu-constants'){
+      // Upstream LiteRT-LM #3866 identified the shared embedding/weights
+      // preparation path as a potential oversized storage binding source.
+      // These documented AdvancedSettings switches are *experimental*.
+      settings.mainExecutorSettings.advancedSettings={
+        convert_weights_on_gpu:false,
+        ...(backendMode==='no-shared-gpu-constants'?{share_constant_tensors:false}:{})
+      };
+      send('phase',{phase:'backend-comparison',backendMode,engineContextTokens:contextTokens,advancedSettings:settings.mainExecutorSettings.advancedSettings});
+    }
     if(backendMode==='legacy-gpu-artisan'){
       if(mod.Backend?.GPU_ARTISAN==null)throw wasmError('LITERT_GPU_ARTISAN_BACKEND_UNAVAILABLE','This LiteRT-LM build does not export Backend.GPU_ARTISAN.');
       // LiteRT 0.17.x exposes a separate legacy GPU_ARTISAN executor.
