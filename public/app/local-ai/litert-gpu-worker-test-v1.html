@@ -10,7 +10,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 </style></head>
 <body>
 <h1>Isolated LiteRT GPU test</h1>
-<p>Runs the already-downloaded Gemma model in a new dedicated Web Worker. No Moss plan, prompt compiler, or AI fallback. This test does <b>not</b> download model weights.</p>
+<p>Runs the already-downloaded Gemma model in a dedicated classic Web Worker compatible with the LiteRT WASM bootstrap. No Moss plan, prompt compiler, or AI fallback. This test does <b>not</b> download model weights.</p>
 <p><label for="model">Local model</label>
 <select id="model">
 <option value="e4">Gemma 4 E4B · currently installed Web artifact</option>
@@ -54,7 +54,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
       const hit=await cache.match(url);
       if(!hit?.ok){finish('CACHE MISS: The selected model must already be installed on this exact staging origin. No download attempted.');return}
       line('Cache: present · starting worker…');
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.0-worker-gpu-smoke',{type:'module'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.1-classic-wasm-loader',{type:'classic'});
       worker.onmessage=event=>{
         const d=event.data||{};
         if(d.status==='phase'){line('['+d.elapsedMs+' ms] '+d.phase+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
