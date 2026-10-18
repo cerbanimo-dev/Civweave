@@ -66,6 +66,7 @@ assert.equal(reports.at(-1).status,'complete');
 assert.ok(reports.some(r=>r.status==='token'&&r.text==='READY'));
 assert.equal(reports[0].workerType,'classic');
 assert.equal(reports[0].importScriptsAvailable,true);
+console.log('WASM smoke events:',JSON.stringify(reports.map(({status,phase,code,message,valid,magic,url})=>({status,phase,code,message,valid,magic,url}))));
 assert.ok(reports.some(r=>r.status==='asset'&&r.valid===true&&r.magic.startsWith('00 61 73 6d')),'a real WASM magic signature is required before inference');
 assert.ok(reports.some(r=>r.phase==='wasm-inventory'&&r.omittedWasm?.includes('wasm/litertlm_wasm_asyncify_internal.wasm')));
 const previousEngineCount=steps.filter(x=>x==='engine').length;
