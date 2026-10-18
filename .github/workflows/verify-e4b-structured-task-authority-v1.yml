@@ -10,6 +10,9 @@ on:
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
       - 'scripts/verify-litert-isolated-gpu-worker-v1.mjs'
+      - 'scripts/verify-litert-wasm-fallback-route-v1.mjs'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'functions/app/vendor/litert-lm/wasm/[file].js'
       - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
@@ -49,6 +52,9 @@ on:
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
       - 'scripts/verify-litert-isolated-gpu-worker-v1.mjs'
+      - 'scripts/verify-litert-wasm-fallback-route-v1.mjs'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'functions/app/vendor/litert-lm/wasm/[file].js'
       - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/local-ai/local-generation-model-policy-v1.js'
       - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
@@ -128,6 +134,8 @@ jobs:
         run: node scripts/verify-litert-structured-tool-shape-v1.mjs
       - name: Verify isolated LiteRT GPU worker stream
         run: node scripts/verify-litert-isolated-gpu-worker-v1.mjs
+      - name: Verify chunk-reconstructed LiteRT Asyncify WASM response
+        run: node scripts/verify-litert-wasm-fallback-route-v1.mjs
       - name: Verify E4B-only intake and structured generation
         run: node scripts/verify-e4b-structured-task-authority-v1.mjs
       - name: Verify E4B Weave Draft compiler pipeline
