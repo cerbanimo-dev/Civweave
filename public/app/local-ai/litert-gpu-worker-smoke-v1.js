@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.7-e4b-bounded-inference-triage';
+const VERSION='1.0.8-e4b-storage-binding-capability-gate';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -7,6 +7,11 @@ let started=false;
 const send=(status,detail={})=>self.postMessage({...detail,status,version:VERSION,elapsedMs:Math.round(performance.now()-origin)});
 let origin=performance.now();
 const WASM_MANIFEST='/app/vendor/litert-lm/stage-manifest.json';
+// The cached E4B -web artifact generated a 160 MiB storage bind group on a
+// 128 MiB-limit Android GPU. This is a per-bind-group resource limit, *not*
+// GPU RAM or maxBufferSize; smaller prompts cannot split an AOT GPU binding.
+const E4B_OBSERVED_BINDING_BYTES=167772160;
+const E4B_WEB_MODEL='gemma4-e4b-it-litert-web';
 function short(value,max=260){return String(value??'').slice(0,max)}
 function wasmError(code,message,detail={}){return Object.assign(new Error(message),{code,...detail})}
 function wasmMagic(bytes){return bytes?.length>=4&&bytes[0]===0&&bytes[1]===97&&bytes[2]===115&&bytes[3]===109}
@@ -100,17 +105,29 @@ function chunkShape(chunk){
     toolCalls:Array.isArray(chunk.tool_calls)?chunk.tool_calls.length:0
   };
 }
+async function verifyGpuBindingLimit(modelId){
+  const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+  if(!adapter)throw wasmError('WORKER_GPU_ADAPTER_UNAVAILABLE','The browser did not provide a WebGPU adapter.');
+  const maximum=Number(adapter.limits?.maxStorageBufferBindingSize)||0;
+  const deviceMaximumBuffer=Number(adapter.limits?.maxBufferSize)||null;
+  const required=modelId===E4B_WEB_MODEL?E4B_OBSERVED_BINDING_BYTES:null;
+  const unsupported=Boolean(required&&maximum>0&&maximum<required);
+  send('gpu-limits',{phase:'gpu-limits',modelId,maxStorageBufferBindingSize:maximum,maxBufferSize:deviceMaximumBuffer,observedRequiredBindingBytes:required,compatible:unsupported?false:maximum>0?true:null});
+  if(unsupported)throw wasmError('LITERT_E4B_GPU_STORAGE_BINDING_UNSUPPORTED',
+    'The cached E4B WebGPU artifact binds 160 MiB in one shader resource, but this GPU supports at most '+Math.round(maximum/1048576)+' MiB per storage binding. This is a hard WebGPU limit, not a RAM/storage quota issue. Changing token count, stream mode or timeout cannot fix it; a different E4B GPU-compiled artifact with smaller bindings or an updated runtime/kernel is required.',
+    {requiredBindingBytes:required,maximumBindingBytes:maximum,restartRequired:false});
+}
 function observeGpuDevice(mod){
   try{
     const gpu=mod.getGlobalLiteRtLm?.()?.liteRtLmWasm?.preinitializedWebGPUDevice;
-    send('gpu-device',{available:Boolean(gpu),features:gpu?.features?[...gpu.features].slice(0,24):[],maxBufferSize:Number(gpu?.limits?.maxBufferSize)||null});
+    send('gpu-device',{available:Boolean(gpu),features:gpu?.features?[...gpu.features].slice(0,24):[],maxBufferSize:Number(gpu?.limits?.maxBufferSize)||null,maxStorageBufferBindingSize:Number(gpu?.limits?.maxStorageBufferBindingSize)||null});
     if(!gpu)return;
     gpu.lost?.then(info=>send('gpu-lost',{reason:short(info?.reason,100),message:short(info?.message,350)}))
       .catch(error=>send('gpu-warning',{message:short(error?.message||error,300)}));
     gpu.addEventListener?.('uncapturederror',event=>send('gpu-warning',{message:short(event?.error?.message||'Uncaptured WebGPU error',450)}));
   }catch(error){send('gpu-warning',{message:'GPU instrumentation unavailable: '+short(error?.message||error,200)})}
 }
-const safeError=error=>({code:String(error?.code||'WORKER_GPU_TEST_FAILED'),message:String(error?.message||error).slice(0,700),assetUrl:short(error?.assetUrl||'',320),httpStatus:Number(error?.status)||null,mime:short(error?.mime||'',100),stack:String(error?.stack||'').slice(0,900)});
+const safeError=error=>({code:String(error?.code||'WORKER_GPU_TEST_FAILED'),message:String(error?.message||error).slice(0,700),assetUrl:short(error?.assetUrl||'',320),httpStatus:Number(error?.status)||null,mime:short(error?.mime||'',100),requiredBindingBytes:Number(error?.requiredBindingBytes)||null,maximumBindingBytes:Number(error?.maximumBindingBytes)||null,restartRequired:Boolean(error?.restartRequired),stack:String(error?.stack||'').slice(0,900)});
 self.onmessage=async event=>{
   if(started)return;started=true;origin=performance.now();
   const modelId=String(event.data?.modelId||'');
@@ -129,6 +146,8 @@ self.onmessage=async event=>{
     if(!classicWorker)throw Object.assign(new Error('The LiteRT WASM bootstrap needs a classic worker with importScripts().'),{code:'LITERT_CLASSIC_WORKER_REQUIRED'});
     if(!navigator.gpu)throw Object.assign(new Error('WebGPU is unavailable in this dedicated worker.'),{code:'WORKER_WEBGPU_UNAVAILABLE'});
     if(typeof WebAssembly.Suspending!=='function'||typeof WebAssembly.promising!=='function')throw Object.assign(new Error('WebAssembly JSPI is unavailable in this worker.'),{code:'WORKER_JSPI_UNAVAILABLE'});
+    phase='gpu-limits';send('phase',{phase});
+    await verifyGpuBindingLimit(modelId);
     phase='cache';send('phase',{phase});
     const cache=await caches.open(CACHE);
     const response=await cache.match(modelUrl);
