@@ -1,1 +1,14 @@
-
+# LiteRT-LM Emscripten resolves .wasm relative to the worker/HTML script.
+# Send those unqualified paths to the version-pinned self-hosted binaries.
+/app/local-ai/litertlm_wasm_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_internal.wasm 302
+/app/local-ai/litertlm_wasm_compat_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_compat_internal.wasm 302
+/app/local-ai/litertlm_wasm_asyncify_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_asyncify_internal.wasm 302
+/app/local-ai/litertlm_wasm_compat_asyncify_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_compat_asyncify_internal.wasm 302
+/app/litertlm_wasm_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_internal.wasm 302
+/app/litertlm_wasm_compat_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_compat_internal.wasm 302
+/app/litertlm_wasm_asyncify_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_asyncify_internal.wasm 302
+/app/litertlm_wasm_compat_asyncify_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_compat_asyncify_internal.wasm 302
+/litertlm_wasm_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_internal.wasm 302
+/litertlm_wasm_compat_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_compat_internal.wasm 302
+/litertlm_wasm_asyncify_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_asyncify_internal.wasm 302
+/litertlm_wasm_compat_asyncify_internal.wasm /app/vendor/litert-lm/wasm/litertlm_wasm_compat_asyncify_internal.wasm 302
