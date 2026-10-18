@@ -43,7 +43,7 @@ const sandbox={
   performance:{now:()=>Date.now()},queueMicrotask:()=>{},addEventListener:()=>{},
   CustomEvent:class{constructor(type,{detail}){this.type=type;this.detail=detail}},
   dispatchEvent:event=>{events.push(event);return true},
-  WebAssembly:{Suspending:()=>{},promising:()=>{}},navigator:{gpu:{},platform:'Android'},
+  WebAssembly:{Suspending:()=>{},promising:()=>{}},navigator:{gpu:{requestAdapter:async()=>({limits:{maxStorageBufferBindingSize:268435456,maxBufferSize:2147483648}})},platform:'Android'},
   caches:{open:async()=>({match:async()=>({ok:true,body:{}})})},
   CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'gemma4-e2b-it-litert-web'}),status:async()=>({available:true})},
   CivweaveLocalModelRegistryV266:{byId:()=>({artifacts:[{required:true,path:'model.litertlm'}]}),directUrl:()=>'/model.litertlm'},
