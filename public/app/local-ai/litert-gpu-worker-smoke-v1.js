@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.5-e4b-wasm-worker-relative-resolution';
+const VERSION='1.0.6-e4b-message-content-contract';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -73,6 +73,33 @@ function observeWasmFetches(){
     return response;
   };
 }
+function visibleChunkText(chunk){
+  if(!chunk)return'';
+  if(typeof chunk==='string')return chunk;
+  if(typeof chunk.content==='string')return chunk.content;
+  if(Array.isArray(chunk.content))return chunk.content.map(part=>{
+    if(typeof part==='string')return part;
+    if(!part||typeof part!=='object'||(part.type&&part.type!=='text'))return'';
+    return typeof part.text==='string'?part.text:typeof part.content==='string'?part.content:'';
+  }).join('');
+  if(chunk.message)return visibleChunkText(chunk.message);
+  if(typeof chunk.text==='string')return chunk.text;
+  if(typeof chunk.delta==='string')return chunk.delta;
+  return'';
+}
+function chunkShape(chunk){
+  if(typeof chunk==='string')return{kind:'string',length:chunk.length};
+  if(!chunk||typeof chunk!=='object')return{kind:typeof chunk};
+  return {
+    kind:'object',
+    keys:Object.keys(chunk).slice(0,15),
+    contentKind:Array.isArray(chunk.content)?'array':typeof chunk.content,
+    contentLength:typeof chunk.content==='string'?chunk.content.length:Array.isArray(chunk.content)?chunk.content.length:undefined,
+    partKinds:Array.isArray(chunk.content)?chunk.content.slice(0,8).map(part=>typeof part==='object'?String(part?.type||'unspecified'):typeof part):undefined,
+    channelKeys:chunk.channels&&typeof chunk.channels==='object'?Object.keys(chunk.channels).slice(0,10):[],
+    toolCalls:Array.isArray(chunk.tool_calls)?chunk.tool_calls.length:0
+  };
+}
 const safeError=error=>({code:String(error?.code||'WORKER_GPU_TEST_FAILED'),message:String(error?.message||error).slice(0,700),assetUrl:short(error?.assetUrl||'',320),httpStatus:Number(error?.status)||null,mime:short(error?.mime||'',100),stack:String(error?.stack||'').slice(0,900)});
 self.onmessage=async event=>{
   if(started)return;started=true;origin=performance.now();
@@ -81,7 +108,7 @@ self.onmessage=async event=>{
   if(!['gemma4-e4b-it-litert-web','gemma4-e2b-it-litert-web'].includes(modelId)||!modelUrl.startsWith('https://huggingface.co/litert-community/')){
     send('error',{phase:'input',code:'INVALID_GPU_TEST_MODEL',message:'An approved Gemma 4 LiteRT cached model is required.'});return;
   }
-  let engine=null,conversation=null,phase='capabilities',chunks=0,visible=0;
+  let engine=null,conversation=null,phase='capabilities',chunks=0,visible=0,rawShapes=[],nontextChunks=0;
   try{
     const classicWorker=typeof self.importScripts==='function';
     send('phase',{phase,workerType:classicWorker?'classic':'module',importScriptsAvailable:classicWorker,workerGpu:Boolean(navigator.gpu),jspi:typeof WebAssembly.Suspending==='function'&&typeof WebAssembly.promising==='function'});
@@ -110,14 +137,16 @@ self.onmessage=async event=>{
     phase='awaiting-first-token';send('phase',{phase,inputCharacters:5});
     for await(const chunk of conversation.sendMessageStreaming('READY')){
       chunks++;
-      for(const part of chunk?.content||[]){
-        if(part?.type==='text'&&typeof part.text==='string'&&part.text){
-          visible++;send('token',{phase,text:part.text,chunk:chunks});
-        }
-      }
+      if(rawShapes.length<5)rawShapes.push(chunkShape(chunk));
+      const piece=visibleChunkText(chunk);
+      if(piece){visible++;send('token',{phase,text:piece,chunk:chunks})}
+      else nontextChunks++;
     }
-    send('complete',{phase:'complete',chunks,visibleTextDeltas:visible});
-  }catch(error){send('error',{phase,...safeError(error),chunks,visibleTextDeltas:visible})}
+    if(!visible)throw wasmError('LITERT_EMPTY_VISIBLE_OUTPUT',
+      'LiteRT finished streaming without visible text. Stream shape and chunk counts are recorded; this is NOT a passing GPU inference test.',
+      {rawDiagnostics:{chunksObserved:chunks,nontextChunks,rawShapes}});
+    send('complete',{phase:'complete',chunks,visibleTextDeltas:visible,nontextChunks});
+  }catch(error){send('error',{phase,...safeError(error),chunks,visibleTextDeltas:visible,nontextChunks,rawShapes:error?.rawDiagnostics?.rawShapes||rawShapes})}
   finally{
     // A poisoned WebGPU queue can also hang native delete(). The parent must
     // terminate this diagnostic worker after receiving its result or deadline.
