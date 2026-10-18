@@ -13,7 +13,7 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.11-gpu-artisan-backend-compare'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.12-gpu-weight-variants'\s*,\s*\{type:'classic'\}/);
 assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.11-gpu-artisan-backend-compare'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
@@ -162,6 +162,26 @@ assert.equal(engineSettings.at(-1).backend,7);
 assert.equal(engineSettings.at(-1).mainExecutorSettings.maxNumTokens,512);
 assert.equal(engineSettings.at(-1).mainExecutorSettings.backendConfig.use_submodel,false);
 assert.equal(engineSettings.at(-1).mainExecutorSettings.backendConfig.use_autosized_ringbuffers,false);
+// Compare the two AdvancedSettings variants proposed by upstream #3866.
+// They must preserve the same E4B weights, standard GPU backend and context.
+for(const backendMode of ['no-gpu-weight-conversion','no-shared-gpu-constants']){
+  const comparisonRows=[],comparisonSelf={postMessage:row=>comparisonRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+  activeWorker=comparisonSelf;
+  vm.runInNewContext(instrumented,{...context,self:comparisonSelf,globalThis:comparisonSelf});
+  await comparisonSelf.onmessage({data:{
+    modelId:'gemma4-e4b-it-litert-web',
+    modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
+    backendMode,contextTokens:512
+  }});
+  assert.equal(comparisonRows.at(-1).status,'complete',backendMode);
+  const selectedSettings=engineSettings.at(-1);
+  assert.equal(selectedSettings.backend,undefined,backendMode);
+  assert.equal(selectedSettings.mainExecutorSettings.maxNumTokens,512,backendMode);
+  assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.convert_weights_on_gpu,false,backendMode);
+  assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.share_constant_tensors,backendMode==='no-shared-gpu-constants'?false:undefined,backendMode);
+  assert.ok(comparisonRows.some(row=>row.phase==='backend-comparison'));
+}
+
 adapterBindingLimit=268435456;
 // Official -gpu artifact may have different compiled kernels. It must be
 // tried from the selected File object and must not inherit -web's 160 MiB
@@ -200,7 +220,7 @@ await badSelf.onmessage({data:{
 }});
 assert.equal(badReports.at(-1).code,'LITERT_STAGED_WASM_NOT_BINARY');
 assert.equal(badReports.at(-1).phase,'wasm-inventory');
-assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount+2,'invalid WASM must never initialize a GPU engine');
+assert.equal(steps.filter(x=>x==='engine').length,previousEngineCount+4,'invalid WASM must never initialize a GPU engine');
 invalidWasm=false;
 failOnLoaderWasm=true;
 const loaderReports=[],loaderSelf={postMessage:row=>loaderReports.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
