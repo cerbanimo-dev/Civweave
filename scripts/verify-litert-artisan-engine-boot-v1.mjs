@@ -12,7 +12,7 @@ assert.equal(runtime.split(importCall).length,2,'The LiteRT module boundary chan
 
 const SELECTED='gemma4-e2b-it-litert-web',EXECUTING='gemma4-e4b-it-litert-web';
 const fields=['num_output_candidates','wait_for_weight_uploads','num_decode_steps_per_sync','sequence_batch_size','supported_lora_ranks','max_top_k','enable_decode_logits','enable_external_embeddings','use_submodel','prefer_texture_weights','set_enable_host_mapped_pointer','disallow_8bit_convs','use_autosized_ringbuffers'];
-const engineAttempts=[],events=[];let failDuringDecode=false,failStandard=false;
+const engineAttempts=[],events=[];let failDuringDecode=false,failStandard=false,adapterBindingLimit=268435456;
 const fakeModule={
   Backend:{GPU_ARTISAN:'gpu-artisan'},
   getOrLoadGlobalLiteRtLm:async()=>true,
@@ -53,7 +53,7 @@ const sandbox={
   queueMicrotask:()=>{},addEventListener:()=>{},
   CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail}},
   dispatchEvent:event=>{events.push(event.type);return true},
-  navigator:{gpu:{},platform:'Linux aarch64'},
+  navigator:{gpu:{requestAdapter:async()=>({limits:{maxStorageBufferBindingSize:adapterBindingLimit,maxBufferSize:2147483648}})},platform:'Linux aarch64'},
   WebAssembly:{Suspending:()=>{},promising:()=>{}},
   caches:{open:async()=>({match:async()=>({ok:true,body:{}})})},
   __mockLiteRtLmModule:fakeModule,
@@ -84,6 +84,19 @@ assert.deepEqual(engineAttempts.map(row=>row.compatibility),[false,false,true]);
 assert.ok(events.includes('civweave:litert-gemma4-backend-fallback'));
 
 
+// Reject the exact first-inference device limit observed on mobile without
+// touching the GPU graph; selecting E4B must not silently switch to E2B.
+await engine.unload();
+adapterBindingLimit=134217728;
+const attemptsBeforeUnsupported=engineAttempts.length;
+await assert.rejects(
+  ()=>engine.runFast({messages:[{role:'user',content:'Teach tarot'}]},EXECUTING),
+  error=>error.code==='CIVWEAVE_LITERT_E4B_STORAGE_BINDING_UNSUPPORTED'&&error.executionModel===EXECUTING&&error.maximumBindingBytes===134217728&&error.requiredBindingBytes===167772160,
+  'E4B must fail fast and identify the real per-binding WebGPU limit'
+);
+assert.equal(engineAttempts.length,attemptsBeforeUnsupported,'unsupported E4B may not create another GPU engine');
+assert.ok(events.includes('civweave:litert-gemma4-gpu-incompatible'));
+adapterBindingLimit=268435456;
 failDuringDecode=true;
 await assert.rejects(
   ()=>engine.runFast({messages:[{role:'user',content:'Remember tarot'}]},EXECUTING),
