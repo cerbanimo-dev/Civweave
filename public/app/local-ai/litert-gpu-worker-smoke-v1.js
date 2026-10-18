@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.0-e4b-isolated-gpu-smoke';
+const VERSION='1.0.1-e4b-classic-worker-wasm-loader';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -16,7 +16,11 @@ self.onmessage=async event=>{
   }
   let engine=null,conversation=null,phase='capabilities',chunks=0,visible=0;
   try{
-    send('phase',{phase,workerGpu:Boolean(navigator.gpu),jspi:typeof WebAssembly.Suspending==='function'&&typeof WebAssembly.promising==='function'});
+    const classicWorker=typeof self.importScripts==='function';
+    send('phase',{phase,workerType:classicWorker?'classic':'module',importScriptsAvailable:classicWorker,workerGpu:Boolean(navigator.gpu),jspi:typeof WebAssembly.Suspending==='function'&&typeof WebAssembly.promising==='function'});
+    // LiteRT-LM's current WASM bootstrap calls WorkerGlobalScope.importScripts().
+    // That API is prohibited in module workers, including after dynamic import().
+    if(!classicWorker)throw Object.assign(new Error('The LiteRT WASM bootstrap needs a classic worker with importScripts().'),{code:'LITERT_CLASSIC_WORKER_REQUIRED'});
     if(!navigator.gpu)throw Object.assign(new Error('WebGPU is unavailable in this dedicated worker.'),{code:'WORKER_WEBGPU_UNAVAILABLE'});
     if(typeof WebAssembly.Suspending!=='function'||typeof WebAssembly.promising!=='function')throw Object.assign(new Error('WebAssembly JSPI is unavailable in this worker.'),{code:'WORKER_JSPI_UNAVAILABLE'});
     phase='cache';send('phase',{phase});
