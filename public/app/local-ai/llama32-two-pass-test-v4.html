@@ -4,7 +4,7 @@
 <title>Civweave · Llama 3.2 3B · Asyncify WebGPU diagnostic v5 · crash guard</title>
 <style>:root{color-scheme:dark;font:16px/1.5 system-ui}body{max-width:760px;margin:auto;padding:20px;background:#0c1724;color:#edf5ff}textarea,button{font:inherit;background:#1c3146;border:1px solid #6095a8;color:inherit;border-radius:8px;padding:10px}a{color:#9fddff}fieldset{border:1px solid #456880;border-radius:10px;padding:12px;margin:14px 0}input[type=file]{display:block;margin:10px 0;max-width:100%}.cw-weight-link{display:block;margin:8px 0;word-break:break-word}.cw-small{font-size:.86rem;color:#bdcddd}textarea{width:95%;height:95px}button{margin:6px 8px 6px 0}button:disabled{opacity:.45}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#06101a;border:1px solid #355067;padding:12px;border-radius:10px;max-height:55vh;overflow:auto}small{color:#bacddd}</style></head>
 <body>
-<h1>Llama 3.2 3B · Two-pass JSON trial</h1><p class="cw-small"><strong>Diagnostic generation 5:</strong> the model cache is preserved. The missing WebGPU ONNX <code>ort-wasm-simd-threaded.asyncify.mjs</code> is now deployed with its matching WASM binary in staged chunks. This page checks the actual runtime files before starting inference.</p>
+<h1>Llama 3.2 3B · Two-pass JSON trial</h1><p class="cw-small"><strong>Diagnostic generation 5:</strong> Android crash guard added after ONNX model initialization terminated the browser before a GPU-ready event. A no-weights device preflight and persistent last-phase record now distinguish safe checks from an explicitly authorized large-memory retry. The model cache is preserved. The previously missing WebGPU ONNX <code>ort-wasm-simd-threaded.asyncify.mjs</code> is now deployed with its matching WASM binary in staged chunks. This page checks the actual runtime files before starting inference.</p>
 <p>Experiment only; does not modify normal Moss/Weaveling generation. Pass 1 freely drafts a short learning plan with Llama 3.2 3B Instruct. Pass 2 reuses the same loaded model with Hugging Face's token-level <strong>StructuredOutputProcessor</strong> to compile strict JSON. The schema masks invalid next tokens; independent parsing checks the completed result.</p>
 <p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Use the Download button below or Civweave Settings → AI Downloads to install the model. Download is a separate explicit action. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
 <p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
@@ -338,6 +338,6 @@ async function start(){
  }catch(error){if(!cancelled){line('FAIL · '+String(error?.message||error));finish('FAIL · '+String(error?.message||error))}}
 }
 button.onclick=start;stop.onclick=()=>{cancelled=true;finish('Stopped by user; worker terminated; model cache preserved.')};
-if(!lastAttempt)status.textContent='Ready · offline model availability verified when test starts';
+if(!lastAttempt||Date.now()-Number(lastAttempt.at||0)>=172800000)status.textContent='Ready · offline model availability verified when test starts';
 </script>
 </body></html>
