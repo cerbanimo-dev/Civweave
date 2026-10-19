@@ -8,8 +8,8 @@
 <p>Experiment only; does not modify normal Moss/Weaveling generation. Pass 1 freely drafts a short learning plan with Llama 3.2 3B Instruct. Pass 2 reuses the same loaded model with Hugging Face's token-level <strong>StructuredOutputProcessor</strong> to compile strict JSON. The schema masks invalid next tokens; independent parsing checks the completed result.</p>
 <p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Use the Download button below or Civweave Settings → AI Downloads to install the model. Download is a separate explicit action. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
 <p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
-<button id="download">Download directly into Civweave · ~2.4 GB</button><button id="cancelDownload" disabled>Cancel download</button>
-<p class="cw-small"><strong>Direct download mode:</strong> streams real network bytes into this origin's offline model cache, with file and byte progress. It does NOT use Background Fetch, which previously returned a misleading “Browser download started” status. Keep this tab visible while downloading. Existing cached files are reused.</p>
+<button id="download">Check files / show safe browser downloads</button><button id="cancelDownload" disabled>Cancel download</button>
+<p class="cw-small"><strong>Phone-safe mode:</strong> Android ended an earlier 2.4 GB in-page foreground download at 4%. For large model weights, use the browser's native Downloads links and import them in independent 8 MiB cache chunks, preserving completed chunks across page restarts. Do NOT use a monolithic in-page cache stream. This does NOT use Background Fetch, which previously returned a misleading “Browser download started” status. Keep this tab visible while downloading. Existing cached files are reused.</p>
 <p id="downloadProgress" aria-live="polite">Model not downloaded on this device.</p>
 <fieldset><legend>Alternative: Android / browser Downloads</legend><p>Use the actual browser download links below for the two large model-weight files, then select the completed files to import. These links are external Hugging Face files and are not silently queued into Civweave.</p>
 <div id="weightLinks"></div><label for="importFiles">Select the downloaded model files to import</label><input id="importFiles" type="file" multiple><button id="importWeights">Import selected files into Civweave</button><p class="cw-small">Import checks exact expected sizes and saves each file to offline Cache Storage using a streaming Blob, not a 2 GB JavaScript array. Afterwards, use Direct download to fetch only remaining small metadata files. Do not delete existing model caches.</p></fieldset><br><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
@@ -21,6 +21,7 @@
 <script src="/app/local-ai/model-registry-v266.js"></script>
 <script type="module">
 import {LEARNING_TRIAL_SCHEMA,validateStrictJson} from '/app/local-ai/llama32-structured-constraints-v1.js';
+import {importChunkedFile,chunkedStatus} from '/app/local-ai/llama32-chunked-model-storage-v1.js?v=1';
 const MODEL='llama32-3b-instruct-q4f16',CACHE='civweave-model-generative-v266';
 const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),download=$('download'),cancelDownload=$('cancelDownload'),log=$('log'),status=$('status'),sessionStatus=$('sessionStatus'),dlStatus=$('downloadProgress'),weightLinks=$('weightLinks'),importFiles=$('importFiles'),importWeights=$('importWeights');
 let worker=null,pending=null,seq=0,started=0,cancelled=false,downloads=null,sessionTicker=null,phaseName='idle',lastWorkerAt=0,sessionReady=false,lastAssetKey='',previousPhase='',printedAssets=0;
@@ -28,7 +29,7 @@ async function ensureDownloadManager(){
   if(globalThis.CivweaveLocalModelDownloadV266?.start)return globalThis.CivweaveLocalModelDownloadV266;
   await new Promise((resolve,reject)=>{
     const script=document.createElement('script');
-    script.src='/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync';
+    script.src='/app/local-ai/download-manager-v267.js?v=1.0.69-v323-llama-chunked';
     script.onload=()=>globalThis.CivweaveLocalModelDownloadV266?.start?resolve():reject(Error('Downloaded model manager did not initialize'));
     script.onerror=()=>reject(Error('Download manager could not load'));
     document.head.append(script);
@@ -93,6 +94,12 @@ async function directDownload(){
     downloads=await ensureDownloadManager();
     const existing=await downloads.status(MODEL);
     if(existing.available){dlStatus.textContent='Llama 3.2 3B is already downloaded and ready.';download.disabled=false;return}
+    if(existing.missing.some(row=>Number(row.sizeBytes||0)>=64*1024*1024)){
+      dlStatus.textContent='ANDROID CRASH PROTECTION · Do not stream multi-GB weights into Cache Storage on this page. Use the browser download links below, then import the files in resumable 8 MiB chunks. Completed files are preserved.';
+      document.querySelector('fieldset')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+      download.disabled=false;
+      return;
+    }
     // An old Background Fetch job can claim "downloading" without advancing
     // and may never have shown a browser download. Cancel it before streaming.
     const old=downloads.state(MODEL);
@@ -132,17 +139,32 @@ importWeights.onclick=async()=>{
       seen.add(row.path);
       if(row.sizeBytes&&file.size!==row.sizeBytes)throw Error(file.name+' has '+fmtBytes(file.size)+' but expected '+fmtBytes(row.sizeBytes)+'; do not import a partial download.');
       if(file.size<row.minBytes)throw Error(file.name+' is too small; download the actual model file, not a Git LFS pointer.');
-      dlStatus.textContent='Importing '+file.name+' · '+fmtBytes(file.size)+' · streaming into offline cache…';
       const url=globalThis.CivweaveLocalModelRegistryV266.directUrl(selected,row.path);
-      await cache.put(url,new Response(file,{status:200,headers:{'content-type':file.type||'application/octet-stream','content-length':String(file.size)}}));
-      const saved=await cache.match(url);
-      if(!saved?.ok||Number(saved.headers.get('content-length'))!==file.size)throw Error('Cache did not retain '+file.name+' at the expected size.');
-      dlStatus.textContent='Saved '+file.name+' · '+fmtBytes(file.size)+' into Civweave offline storage.';
+      if(file.size>=64*1024*1024){
+        dlStatus.textContent='Importing '+file.name+' · safely copying 8 MiB fragments…';
+        await importChunkedFile(cache,url,file,{onProgress:p=>{
+          if(p.chunk===1||p.chunk%4===0||p.chunk===p.chunks)
+            dlStatus.textContent='LOW-MEMORY IMPORT · '+file.name+' · '+fmtBytes(p.bytes)+' / '+fmtBytes(p.totalBytes)+' · fragment '+p.chunk+'/'+p.chunks+' saved; completed fragments survive a retry.';
+        }});
+        const saved=await chunkedStatus(cache,url,file.size);
+        if(!saved.available)throw Error('Chunked cache did not retain '+file.name+'; '+saved.reason);
+      }else{
+        await cache.put(url,new Response(file,{status:200,headers:{'content-type':file.type||'application/octet-stream','content-length':String(file.size)}}));
+        const saved=await cache.match(url);
+        if(!saved?.ok||Number(saved.headers.get('content-length'))!==file.size)throw Error('Cache did not retain '+file.name+' at the expected size.');
+      }
+      dlStatus.textContent='Saved '+file.name+' · '+fmtBytes(file.size)+' using low-memory offline storage.';
     }
     const manager=await ensureDownloadManager();
     const state=await manager.status(MODEL);
     if(state.available)dlStatus.textContent='All required files imported. Ready to test.';
-    else dlStatus.textContent='Imported '+files.length+' file(s) successfully. Press Download directly into Civweave to fetch '+state.missing.length+' remaining metadata/model file(s) without redownloading these weights.';
+    else if(state.missing.some(row=>Number(row.sizeBytes||0)>=64*1024*1024))
+      dlStatus.textContent='Imported '+files.length+' file(s). Other large model weight file(s) are still missing: '+state.missing.filter(row=>Number(row.sizeBytes||0)>=64*1024*1024).map(row=>row.path).join(', ')+'. Use browser Downloads and import those files.';
+    else{
+      dlStatus.textContent='Large weight files imported. Fetching only '+state.missing.length+' small metadata file(s) safely…';
+      await manager.start(MODEL,{preferBackground:false,onProgress:updateDownload});
+      watchProgress();
+    }
   }catch(error){dlStatus.textContent='IMPORT FAILED · '+String(error?.message||error)}
   finally{importWeights.disabled=false;download.disabled=false;importFiles.value=''}
 };
@@ -197,7 +219,13 @@ async function available(spec){
  const cache=await caches.open(CACHE),missing=[];
  for(const artifact of spec.artifacts.filter(x=>x.required)){
    const url=globalThis.CivweaveLocalModelRegistryV266.directUrl(spec,artifact.path);
-   if(!(await cache.match(url))?.ok)missing.push(artifact.path);
+   if(!(await cache.match(url))?.ok){
+     if(Number(artifact.sizeBytes||0)>=64*1024*1024&&/\\.onnx_data(?:_\\d+)?$/.test(artifact.path)){
+       const row=await chunkedStatus(cache,url,Number(artifact.sizeBytes||0));
+       if(row.available)continue;
+     }
+     missing.push(artifact.path);
+   }
  }
  return missing;
 }
@@ -244,7 +272,7 @@ async function start(){
    const companion=await fetch('/app/vendor/transformers-structured-output-v4/stage-manifest.json',{cache:'no-store'});
    if(!companion.ok)throw Error('Constrained decoding companion was not staged on this deployment.');
    const manifest=await companion.json();if(manifest.version!=='4.3.1')throw Error('Unexpected companion version: '+manifest.version);
-   worker=new Worker('/app/local-ai/llama32-diagnostic-worker-v4.js',{type:'module'});sessionTicker=setInterval(tick,1000);tick();
+   worker=new Worker('/app/local-ai/llama32-diagnostic-worker-v4.js?v=1.0.130-resumable-parts',{type:'module'});sessionTicker=setInterval(tick,1000);tick();
    worker.onmessage=event=>{
      const r=event.data||{};
      if(!pending||r.id!==pending.id)return;
