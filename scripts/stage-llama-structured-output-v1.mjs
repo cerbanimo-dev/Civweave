@@ -30,10 +30,10 @@ try{
   // Bind the processor to the same self-hosted Transformers.js classes used
   // by the Llama model worker; never fetch a runtime dependency from a CDN.
   const original=readFileSync(bundle,'utf8');
-  const peerImport=/from\\s*([\"'])@huggingface\\/transformers\\1/g;
-  const matches=[...original.matchAll(peerImport)];
-  if(matches.length!==1)throw new Error('Unexpected structured-output peer import shape: expected exactly one import, got '+matches.length);
-  const standalone=original.replace(peerImport,'from "../transformers-v4/transformers.min.js"');
+  const possiblePeerImports=['from "@huggingface/transformers"', "from '@huggingface/transformers'"];
+  const matches=possiblePeerImports.filter(needle=>original.includes(needle));
+  if(matches.length!==1)throw new Error('Unexpected structured-output peer import shape: expected one external import, got '+matches.length);
+  const standalone=original.replace(matches[0],'from "../transformers-v4/transformers.min.js"');
   if(standalone.includes('from "@huggingface/transformers"')||standalone.includes("from '@huggingface/transformers'"))throw new Error('Unresolved bare runtime peer dependency.');
   mkdirSync(output,{recursive:true});writeFileSync(target,standalone);
   const sha256=createHash('sha256').update(readFileSync(target)).digest('hex');
