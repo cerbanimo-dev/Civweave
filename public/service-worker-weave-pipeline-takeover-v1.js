@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r32';
+const REVISION='weave-pipeline-takeover-v1-r33';
 const STAGING_HOST='civweave-staging.pages.dev';
 const CACHE='cwrecovery-v474-gpu-queue-cleanup';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r32';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r33';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
@@ -20,6 +20,12 @@ const PURGE_PATHS=new Set([
   '/app/local-ai/litert-gemma4-fast-runtime-v1.js',
   '/app/local-ai/litert-gpu-worker-smoke-v1.js',
   '/app/local-ai/litert-gpu-worker-test-v1.html',
+  '/app/local-ai/llama32-two-pass-test-v4.html',
+  '/app/local-ai/llama32-diagnostic-worker-v4.js',
+  '/app/local-ai/llama32-diagnostic-worker-v3.js',
+  '/app/local-ai/worker-v266.js',
+  '/app/local-ai/llama32-chunked-model-storage-v1.js',
+  '/app/local-ai/download-manager-v267.js',
   '/app/local-ai/litertlm_wasm_internal.wasm',
   '/app/local-ai/litertlm_wasm_compat_internal.wasm',
   '/app/local-ai/litertlm_wasm_asyncify_internal.wasm',
