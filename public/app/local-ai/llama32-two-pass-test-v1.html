@@ -6,9 +6,9 @@
 <body>
 <h1>Llama 3.2 3B · Two-pass JSON trial</h1>
 <p>Experiment only; does not modify normal Moss/Weaveling generation. Pass 1 freely drafts a short learning plan with Llama 3.2 3B Instruct. Pass 2 reuses the same loaded model with Hugging Face's token-level <strong>StructuredOutputProcessor</strong> to compile strict JSON. The schema masks invalid next tokens; independent parsing checks the completed result.</p>
-<p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Install it once in Civweave Settings → AI Downloads. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
+<p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Use the Download button below or Civweave Settings → AI Downloads to install the model. Download is a separate explicit action. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
 <p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
-<button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
+<button id="download">Download Llama 3.2 3B · ~2.4 GB</button><button id="cancelDownload" disabled>Cancel download</button><br><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
 <p id="status" aria-live="polite">Checking model and runtime…</p>
 <pre id="log" aria-live="polite"></pre>
 <p><small>PASS requires nonempty draft text, completed grammar-constrained second generation, valid complete JSON, all required fields, and 3–4 modules. It does not prove plan quality or Moss integration. If your phone reports a WebGPU limit, the diagnostic will stop without silently swapping models.</small></p>
@@ -16,8 +16,53 @@
 <script type="module">
 import {LEARNING_TRIAL_SCHEMA,validateStrictJson} from '/app/local-ai/llama32-structured-constraints-v1.js';
 const MODEL='llama32-3b-instruct-q4f16',CACHE='civweave-model-generative-v266';
-const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),log=$('log'),status=$('status');
-let worker=null,pending=null,seq=0,started=0,cancelled=false;
+const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),download=$('download'),cancelDownload=$('cancelDownload'),log=$('log'),status=$('status');
+let worker=null,pending=null,seq=0,started=0,cancelled=false,downloads=null;
+async function ensureDownloadManager(){
+  if(globalThis.CivweaveLocalModelDownloadV266?.start)return globalThis.CivweaveLocalModelDownloadV266;
+  await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync';
+    script.onload=()=>globalThis.CivweaveLocalModelDownloadV266?.start?resolve():reject(Error('Downloaded model manager did not initialize'));
+    script.onerror=()=>reject(Error('Download manager could not load'));
+    document.head.append(script);
+  });
+  return globalThis.CivweaveLocalModelDownloadV266;
+}
+download.onclick=async()=>{
+  if(download.disabled)return;
+  download.disabled=true;
+  try{
+    if(!navigator.gpu)throw Error('WebGPU is unavailable on this device.');
+    const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(MODEL);
+    if(!spec?.installable)throw Error('The current registry does not expose Llama 3.2 3B. Refresh the staging page.');
+    downloads=await ensureDownloadManager();
+    const existing=await downloads.status(MODEL);
+    if(existing.available){status.textContent='Llama 3.2 3B is already downloaded. Run the two-pass test.';return}
+    status.textContent='Downloading Llama 3.2 3B · source '+spec.repo;
+    cancelDownload.disabled=false;
+    const state=await downloads.start(MODEL,{
+      preferBackground:true,
+      onProgress:progress=>{
+        const percent=Number(progress?.percent||0);
+        const phase=String(progress?.phase||progress?.status||'downloading');
+        status.textContent='Llama 3.2 3B · '+phase+' · '+percent+'%';
+      }
+    });
+    if(state?.status==='downloading'&&state.mode==='background-fetch'){
+      status.textContent='Browser download started. Keep the model files on this origin; return here after it finishes.';
+    }else{
+      status.textContent='Llama 3.2 3B download started; model cache is retained when the test page is closed.';
+    }
+  }catch(error){status.textContent='Model download error · '+String(error?.message||error)}
+  finally{download.disabled=false}
+};
+cancelDownload.onclick=async()=>{
+  if(!downloads)return;
+  try{await downloads.cancel(MODEL);status.textContent='Llama 3.2 3B download cancellation requested; completed files preserved.'}
+  catch(error){status.textContent='Cancel failed · '+String(error?.message||error)}
+  finally{cancelDownload.disabled=true}
+};
 function line(message){log.textContent+=message+'\n';log.scrollTop=log.scrollHeight}
 function finish(message){status.textContent=message;try{worker?.terminate()}catch{}worker=null;if(pending){pending.reject(Error(message));pending=null}button.disabled=false;stop.disabled=true}
 function call(spec,messages,maxNewTokens,structuredOutputSchema=null,timeoutMs=300000){
@@ -45,7 +90,7 @@ async function start(){
  try{
    if(!navigator.gpu)throw Error('This browser has no WebGPU interface.');
    const missing=await available(spec);
-   if(missing.length)throw Error('Model not fully downloaded on this origin. Open Civweave Settings → AI Downloads, install Llama 3.2 3B, then retry. Missing: '+missing.slice(0,5).join(', '));
+   if(missing.length)throw Error('Model not fully downloaded on this origin. Use Download Llama 3.2 3B above, then retry. Missing: '+missing.slice(0,5).join(', '));
    const companion=await fetch('/app/vendor/transformers-structured-output-v4/stage-manifest.json',{cache:'no-store'});
    if(!companion.ok)throw Error('Constrained decoding companion was not staged on this deployment.');
    const manifest=await companion.json();if(manifest.version!=='4.3.1')throw Error('Unexpected companion version: '+manifest.version);
