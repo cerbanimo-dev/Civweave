@@ -28,6 +28,15 @@ assert.match(worker,/structuredSchema\?structured\.value/);
 assert.match(page,/PASS 1 · free-form/);
 assert.match(page,/preferBackground:false/,'Llama test must never start Background Fetch silently');
 assert.match(page,/WEIGHT_FILES=\['onnx\/model_q4f16.onnx_data','onnx\/model_q4f16.onnx_data_1'\]/);
+const crashGuard=read('public/app/local-ai/llama32-two-pass-test-v4.html');
+assert.match(crashGuard,/civweave\.llama32\.gpu-active\.v1/,'v5 must persist the last phase across browser-process exits');
+assert.match(crashGuard,/if\(isMobile&&!allowMemoryRisk\.checked\)/,'mobile large-model crash risks require explicit opt-in');
+assert.match(crashGuard,/checkpoint\('worker-start',true\)/,'worker creation must persist an unclean-run checkpoint');
+assert.match(crashGuard,/checkpoint\(next,true\)/,'phase transitions must be persisted to diagnose crashes');
+assert.match(crashGuard,/if\(worker\)\{try\{localStorage\.setItem\(RESULT_KEY/,'normal completion must clear the crash checkpoint');
+assert.match(crashGuard,/inspect\.onclick=async\(\)=>/,'GPU preflight must not require a full ONNX model load');
+assert.doesNotMatch(crashGuard,/localStorage\.clear\(\)|caches\.delete\(CACHE\)/,'crash protection must not delete cached model weights');
+
 assert.match(page,/await cache.put\(url,new Response\(file/,'native browser downloads must be importable into offline cache');
 assert.match(page,/file.size!==row.sizeBytes/,'file imports must reject truncated weight shards');
 assert.doesNotMatch(page,/Browser download started\. Keep the model files on this origin/);
