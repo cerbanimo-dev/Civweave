@@ -13,8 +13,8 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.13-complete-advanced-settings'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.13-complete-advanced-settings'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.14-both-artifacts-limit-gate'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.14-both-artifacts-limit-gate'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
@@ -204,12 +204,22 @@ for(const backendMode of ['no-gpu-weight-conversion','no-shared-gpu-constants'])
 }
 
 adapterBindingLimit=268435456;
-// Official -gpu artifact may have different compiled kernels. It must be
-// tried from the selected File object and must not inherit -web's 160 MiB
-// reject decision, even on a 128 MiB adapter.
+// Both -gpu and -web artifacts requested a 160 MiB binding with standard
+// WebGPU. Official -gpu must be blocked under standard GPU, while alternative
+// weight-preparation settings remain an experiment on the same 128 MiB GPU.
 adapterBindingLimit=134217728;
 const gpuStream={from:'official-gpu-file-stream'};
 const gpuFile={name:'gemma-4-E4B-it-gpu.litertlm',size:2969059328,stream:()=>gpuStream};
+// The standard GPU is known incompatible for the independently tested -gpu file.
+const knownGpuRows=[],knownGpuSelf={postMessage:row=>knownGpuRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
+activeWorker=knownGpuSelf;
+vm.runInNewContext(instrumented,{...context,self:knownGpuSelf,globalThis:knownGpuSelf});
+await knownGpuSelf.onmessage({data:{
+  modelId:'gemma4-e4b-it-litert-web',modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
+  artifactKind:'official-gpu-file',modelFile:gpuFile,contextTokens:512
+}});
+assert.equal(knownGpuRows.at(-1).code,'LITERT_E4B_GPU_STORAGE_BINDING_UNSUPPORTED');
+assert.ok(!knownGpuRows.some(row=>row.phase==='local-file'||row.phase==='wasm-inventory'));
 const officialRows=[],officialSelf={postMessage:row=>officialRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
 activeWorker=officialSelf;
 vm.runInNewContext(instrumented,{...context,self:officialSelf,globalThis:officialSelf});
@@ -218,11 +228,12 @@ await officialSelf.onmessage({data:{
   modelUrl:'https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/4f479a5ff97de64f5c1711ec439a2cb89e6a8fb4/gemma-4-E4B-it-web.litertlm',
   artifactKind:'official-gpu-file',
   modelFile:gpuFile,
+  backendMode:'no-gpu-weight-conversion',
   contextTokens:2048
 }});
 assert.equal(officialRows.at(-1).status,'complete');
 assert.ok(officialRows.some(row=>row.phase==='local-file'&&row.bytes===gpuFile.size));
-assert.ok(officialRows.some(row=>row.status==='gpu-limits'&&row.artifactKind==='official-gpu-file'&&row.compatible===null));
+assert.ok(officialRows.some(row=>row.status==='gpu-limits'&&row.artifactKind==='official-gpu-file'&&row.compatible===null&&row.backendExperiment===true));
 assert.equal(engineSettings.at(-1).model,gpuStream,'official -gpu file must stream directly into LiteRT, without a cache write');
 const bogusRows=[],bogusSelf={postMessage:row=>bogusRows.push(row),location:self.location,fetch:fetchMock,importScripts:()=>{},__mockSDK:mockSDK};
 activeWorker=bogusSelf;
