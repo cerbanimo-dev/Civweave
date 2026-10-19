@@ -1,5 +1,5 @@
 'use strict';
-const WORKER_REVISION='1.0.129-v318-llama32-asyncify-runtime';
+const WORKER_REVISION='1.0.130-v319-llama32-resumable-model-parts';
 const CACHE='civweave-model-generative-v266';
 const RUNTIME_CACHE='civweave-local-runtime-v287';
 const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
@@ -25,7 +25,17 @@ function cacheAdapter(cache,spec){
   const localPrefix=`/models/${spec.repo}/`,repoPrefix=`https://huggingface.co/${spec.repo}/resolve/`;
   const miss=()=>new Response('',{status:404,statusText:'Downloaded model cache miss'});
   const withKnownLength=(response,path)=>{const known=Math.max(0,Number(artifactFor(spec,path)?.sizeBytes)||0);if(!response?.ok||response.headers.get('content-length')||!known)return response;const headers=new Headers(response.headers);headers.set('content-length',String(known));headers.set('x-civweave-artifact-length','registry-v300');return new Response(response.body,{status:response.status,statusText:response.statusText,headers})};
-  const find=async path=>{const hit=await cache.match(remoteUrl(spec,path));return hit?.ok?withKnownLength(hit,path):miss()};
+  const find=async path=>{
+    const url=remoteUrl(spec,path),hit=await cache.match(url);
+    if(hit?.ok)return withKnownLength(hit,path);
+    if(spec.id===LLAMA32_COMPILER&&/\\.onnx_data(?:_\\d+)?$/.test(path)){
+      const {chunkedResponse}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
+      const expected=Number(artifactFor(spec,path)?.sizeBytes||0);
+      const streamed=await chunkedResponse(cache,url,expected);
+      if(streamed)return streamed;
+    }
+    return miss();
+  };
   return{async match(request){const key=requestUrl(request);if(key.startsWith(localPrefix))return find(key.slice(localPrefix.length));if(key.startsWith(repoPrefix)){const rest=key.slice(repoPrefix.length),slash=rest.indexOf('/');if(slash>=0)return find(rest.slice(slash+1))}try{const hit=await cache.match(request);return hit?.ok?hit:undefined}catch{return undefined}},put:(request,response)=>cache.put(request,response)};
 }
 function friendlyError(error,spec,stage='inference'){
