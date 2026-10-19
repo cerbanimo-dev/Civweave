@@ -38,4 +38,5 @@ jobs:
           node scripts/stage-llama-structured-output-v1.mjs --force
           test -s public/app/vendor/transformers-structured-output-v4/index.js
           node --check public/app/vendor/transformers-structured-output-v4/index.js
+          node --input-type=module -e "const [{StructuredOutputProcessor},{LogitsProcessorList}]=await Promise.all([import('./public/app/vendor/transformers-structured-output-v4/index.js'),import('./public/app/vendor/transformers-v4/transformers.min.js')]); if(typeof StructuredOutputProcessor!=='function'||!(StructuredOutputProcessor.prototype instanceof LogitsProcessorList))throw Error('StructuredOutputProcessor does not extend the self-hosted Transformers.js LogitsProcessorList'); console.log('PASS: same self-hosted generation runtime classes');"
           node -e "const m=require('./public/app/vendor/transformers-structured-output-v4/stage-manifest.json');if(m.version!=='4.3.1')process.exit(2)"
