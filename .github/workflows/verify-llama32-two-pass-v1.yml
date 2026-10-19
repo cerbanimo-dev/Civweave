@@ -12,6 +12,9 @@ on:
       - 'public/app/local-ai/llama32-diagnostic-worker-v3.js'
       - 'public/app/local-ai/llama32-diagnostic-worker-v4.js'
       - 'public/app/local-ai/llama32-two-pass-test-v4.html'
+      - 'public/app/local-ai/llama32-chunked-model-storage-v1.js'
+      - 'public/app/local-ai/download-manager-v267.js'
+      - 'scripts/verify-llama32-chunked-model-storage-v1.mjs'
       - 'scripts/verify-llama32-asyncify-runtime-v1.mjs'
       - 'scripts/stage-transformers-v4-assets.mjs'
       - 'scripts/verify-llama32-session-progress-v3.mjs'
@@ -40,6 +43,7 @@ jobs:
           node --check scripts/stage-llama-structured-output-v1.mjs
           node --check scripts/build-cloudflare-pages.mjs
           node scripts/verify-llama32-two-pass-v1.mjs
+          node scripts/verify-llama32-chunked-model-storage-v1.mjs
           node scripts/verify-llama32-session-progress-v3.mjs
           node scripts/verify-llama32-asyncify-runtime-v1.mjs
           node --check public/app/local-ai/llama32-diagnostic-worker-v4.js
