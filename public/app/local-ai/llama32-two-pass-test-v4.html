@@ -203,7 +203,7 @@ async function available(spec){
 }
 async function preflightAsyncify(){
   const root='/app/vendor/transformers-v4/wasm/';
-  const manifestResponse=await fetch('/app/vendor/transformers-v4/stage-manifest.json',{cache:'no-store'});
+  const manifestResponse=await fetch('/app/vendor/transformers-v4/stage-manifest-asyncify-v8.json',{cache:'no-store'});
   if(!manifestResponse.ok)throw Error('ONNX runtime manifest returned HTTP '+manifestResponse.status+'; model files are still cached.');
   const type=String(manifestResponse.headers.get('content-type')||'').toLowerCase();
   if(type.includes('text/html'))throw Error('ONNX runtime manifest is an HTML fallback; staging has not published the new runtime.');

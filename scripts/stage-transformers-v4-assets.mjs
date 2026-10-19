@@ -20,6 +20,7 @@ const GEMMA4_LOGITS_BACKPORT='huggingface-transformers-js-pr-1681';
 const destination=path.join(root,'public','app','vendor','transformers-v4');
 const backendDestination=path.join(destination,'wasm');
 const manifestPath=path.join(destination,'stage-manifest.json');
+const asyncManifestPath=path.join(destination,'stage-manifest-asyncify-v8.json');
 const force=process.argv.includes('--force');
 const soft=process.argv.includes('--soft');
 const chunkName=(name,index)=>`${name}.part${index}`;
@@ -27,10 +28,12 @@ const GEMMA4_LOGITS_BUG=/(\.inputNames\.includes\("num_logits_to_keep"\)&&![A-Za
 
 async function exists(target){try{await fsp.access(target);return true}catch{return false}}
 async function staged(){
-  if(!await exists(manifestPath))return false;
+  if(!await exists(manifestPath)||!await exists(asyncManifestPath))return false;
   try{
     const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));
     if(manifest.schema!==STAGE_SCHEMA||manifest.purpose!=='gemma4-llama32-mobile-onnx-webgpu')return false;
+    const asyncManifest=JSON.parse(await fsp.readFile(asyncManifestPath,'utf8'));
+    if(asyncManifest.schema!==STAGE_SCHEMA||JSON.stringify(asyncManifest)!==JSON.stringify(manifest))return false;
     if(manifest.package!==PACKAGE||manifest.version!==VERSION||manifest.backendPackage!==ORT_PACKAGE||manifest.backendVersion!==ORT_VERSION)return false;
     if(manifest.gemma4NumLogitsBackport!==GEMMA4_LOGITS_BACKPORT)return false;
     if(!Array.isArray(manifest.wasmChunks)||manifest.wasmChunks.length<2)return false;
@@ -188,6 +191,7 @@ async function main(){
       asyncifyModule:ORT_ASYNC_MJS,asyncifyWasmSource:ORT_ASYNC_WASM,asyncifyWasmBytes:asyncSplit.bytes,asyncifyWasmChunks:asyncSplit.names,
       wasmChunkBytes:CHUNK_BYTES,stagedFiles,copied:stagedFiles.length,stagedAt:new Date().toISOString()
     },null,2));
+    await fsp.copyFile(manifestPath,asyncManifestPath);
     console.log(`[Civweave] Staged minimal Transformers.js ${VERSION} browser runtime with ONNX Runtime Web ${ORT_VERSION}: ${stagedFiles.length} files, JSEP: ${split.names.length} chunks (${split.bytes} bytes), Asyncify: ${asyncSplit.names.length} chunks (${asyncSplit.bytes} bytes), ${GEMMA4_LOGITS_BACKPORT} applied.`);
   }finally{await fsp.rm(temp,{recursive:true,force:true})}
 }

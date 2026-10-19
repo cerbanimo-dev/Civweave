@@ -107,7 +107,7 @@ async function backendProfile(spec){
 }
 async function configuredWasmChunks(spec){
   if(spec?.id!==LLAMA32_COMPILER)return spec;
-  const manifestUrl='/app/vendor/transformers-v4/stage-manifest.json';
+  const manifestUrl='/app/vendor/transformers-v4/stage-manifest-asyncify-v8.json';
   let response;
   try{response=await fetch(manifestUrl,{cache:'no-store'})}
   catch(error){throw new Error('Llama WebGPU Asyncify runtime manifest is unreachable: '+String(error?.message||error))}

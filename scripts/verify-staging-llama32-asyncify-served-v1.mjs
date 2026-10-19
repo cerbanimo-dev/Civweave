@@ -7,7 +7,7 @@ async function get(url,options={}){
   assert(!String(r.headers.get('content-type')||'').includes('text/html'),url+' returned the app-shell HTML fallback');
   return r;
 }
-const r=await get('/app/vendor/transformers-v4/stage-manifest.json');
+const r=await get('/app/vendor/transformers-v4/stage-manifest-asyncify-v8.json');
 const m=await r.json();
 assert.equal(m.schema,'civweave.transformers-stage.v8','Staging has the old ONNX runtime bundle');
 assert.equal(m.asyncifyModule,'ort-wasm-simd-threaded.asyncify.mjs');

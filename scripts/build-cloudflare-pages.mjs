@@ -188,6 +188,7 @@ const requiredRuntimeAssets = [
   resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'),
   resolve(sourceDir, 'app/vendor/transformers-v4/transformers.min.js'),
   resolve(sourceDir, 'app/vendor/transformers-v4/stage-manifest.json'),
+  resolve(sourceDir, 'app/vendor/transformers-v4/stage-manifest-asyncify-v8.json'),
   resolve(sourceDir, 'app/vendor/transformers-structured-output-v4/index.js'),
   resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.mjs'),
   resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.asyncify.mjs'),

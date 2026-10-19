@@ -5,7 +5,7 @@ const stage=read('scripts/stage-transformers-v4-assets.mjs');
 const build=read('scripts/build-cloudflare-pages.mjs');
 const registry=read('public/app/local-ai/model-registry-v266.js');
 const page=read('public/app/local-ai/llama32-two-pass-test-v4.html');
-const sourceManifest='public/app/vendor/transformers-v4/stage-manifest.json';
+const sourceManifest='public/app/vendor/transformers-v4/stage-manifest-asyncify-v8.json';
 assert.match(stage,/ORT_ASYNC_MJS='ort-wasm-simd-threaded\.asyncify\.mjs'/);
 assert.match(stage,/ORT_ASYNC_WASM='ort-wasm-simd-threaded\.asyncify\.wasm'/);
 assert.match(stage,/asyncifyWasmChunks:asyncSplit\.names/);
