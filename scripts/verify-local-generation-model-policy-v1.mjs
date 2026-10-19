@@ -11,7 +11,7 @@ const [policySource,structured,pipeline,tracker,chat]=await Promise.all([
   read('public/app/guide-chat-surface-v350.js')
 ]);
 let selected={active:true,id:'gemma4-e2b-it-litert-web'};
-const installed=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web','qwen35-4b-litert-web','qwen35-9b-litert-web']);
+const installed=new Set(['llama32-3b-instruct-q4f16','qwen35-4b-litert-web','qwen35-9b-litert-web']);
 const sandbox={console,Map,Set,Object,Array,JSON,String,Math,Date,Promise,
   localStorage:{getItem:()=>null},
   addEventListener:()=>{},dispatchEvent:()=>{},
@@ -24,16 +24,20 @@ const sandbox={console,Map,Set,Object,Array,JSON,String,Math,Date,Promise,
 sandbox.globalThis=sandbox;
 vm.runInNewContext(policySource,sandbox);
 const policy=sandbox.CivweaveLocalGenerationModelPolicyV1;
-assert.equal(policy.resolve('intake'),'gemma4-e4b-it-litert-web','intake must use deep rather than the selected fast model');
-assert.equal(policy.resolve('deep'),'gemma4-e4b-it-litert-web');
-assert.equal(policy.resolve('fast'),'gemma4-e2b-it-litert-web');
-assert.equal(await policy.requireRole('deep'),'gemma4-e4b-it-litert-web');
+assert.equal(policy.resolve('deep'),'gemma4-e2b-it-litert-web','retired E4B must never be silently selected');
+assert.equal(policy.supportsSelected(),false,'retired E4B family is not an active paired-model path');
+selected={active:true,id:'llama32-3b-instruct-q4f16'};
+assert.equal(policy.resolve('intake'),'llama32-3b-instruct-q4f16');
+assert.equal(policy.resolve('deep'),'llama32-3b-instruct-q4f16');
+assert.equal(policy.resolve('fast'),'llama32-3b-instruct-q4f16');
+assert.equal(await policy.requireRole('deep'),'llama32-3b-instruct-q4f16');
+assert.equal(policy.supportsSelected(),true);
 selected={active:true,id:'qwen35-4b-litert-web'};
 assert.equal(policy.resolve('deep'),'qwen35-9b-litert-web');
 assert.equal(policy.resolve('intake'),'qwen35-9b-litert-web');
 assert.equal(policy.resolve('fast'),'qwen35-4b-litert-web');
 assert.equal(await policy.requireRole('deep'),'qwen35-9b-litert-web');
-assert.equal(policy.resolve('deep',{config:{model:'gemma4-e2b-it-litert-web'}}),'gemma4-e4b-it-litert-web','explicit request must retain its configured family');
+assert.equal(policy.resolve('deep',{config:{model:'gemma4-e2b-it-litert-web'}}),'gemma4-e2b-it-litert-web','explicit model must not switch to E4B or Qwen implicitly');
 installed.delete('qwen35-9b-litert-web');
 await assert.rejects(()=>policy.requireRole('deep'),error=>error.code==='LOCAL_GENERATION_ROLE_MODEL_UNAVAILABLE'&&error.executionModel==='qwen35-9b-litert-web');
 selected={active:true,id:'some-custom-local-model'};
@@ -46,4 +50,4 @@ assert.match(structured,/CivweaveLocalGenerationModelPolicyV1/);
 assert.match(pipeline,/CivweaveLocalGenerationModelPolicyV1/);
 assert.match(tracker,/CivweaveLocalGenerationModelPolicyV1/);
 assert.match(chat,/CivweaveLocalGenerationModelPolicyV1/);
-console.log('PASS: configurable local fast/deep models, deep intake, Qwen and Gemma families, missing pack errors, independent models, no hard-coded planner IDs.');
+console.log('PASS: configurable local fast/deep models, deep intake, Qwen and Llama trial models, missing pack errors, independent models, no hard-coded planner IDs.');
