@@ -285,6 +285,9 @@ jobs:
       - name: Verify published LiteRT WASM binaries and detect HTML fallbacks
         run: node scripts/verify-staging-litert-wasm-served-v1.mjs
 
+      - name: Verify published Llama 3.2 Asyncify WebGPU JS and binary shards
+        run: node scripts/verify-staging-llama32-asyncify-served-v1.mjs
+
       - name: Write deployment summary
         if: always()
         shell: bash

@@ -144,12 +144,12 @@ for(const path of ['public/app/settings-local-route-v327.js','public/app/setting
   const legacy=await readFile(new URL('../'+path,import.meta.url),'utf8');
   assert.match(legacy, /llama32-3b-instruct-q4f16/,path+' lacks Llama trial');
   assert.match(legacy, /<details open><summary><b>Individual models/,path+' hides downloads');
-  assert.match(legacy, /llama32-two-pass-test-v1.html/,path+' lacks test link');
+  assert.match(legacy, /llama32-two-pass-test-v4.html/,path+' lacks test link');
 }
 assert.match(directSource,/llama32-3b-instruct-q4f16/,'current direct Settings lacks download');
 assert.match(directSource,/<details open><summary><b>Individual Civweave models/,'current direct Settings hides downloads');
 assert.match(directSource,/await m.start\(id,\{preferBackground:false,onProgress:/,'individual models must use observable foreground downloads and progressive bytes');
-assert.match(directSource,/llama32-two-pass-test-v1.html/,'current Settings lacks trial link');
+assert.match(directSource,/llama32-two-pass-test-v4.html/,'current Settings lacks trial link');
 const bridge=await readFile(new URL('../public/app/settings-local-route-v325.js',import.meta.url),'utf8');
 assert.match(bridge,/DIRECT_VERSION='1\.2\.1-settings-v325-direct-local-models-llama32-download'/);
 console.log('PASS: old v324 fallback and current v325 settings expose Llama 3.2 with downloads and constrained JSON trial.');
