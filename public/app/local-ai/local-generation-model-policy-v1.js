@@ -18,7 +18,8 @@ const pairFor=id=>PAIRS.find(pair=>[pair.fast,pair.deep,...pair.aliases].include
 function supportsSelected(){return Boolean(pairFor(clean(selection()?.id)))}
 function resolve(role='deep',options={}){
   const selected=clean(options.selectedModel||options.config?.model||selection()?.id);
-  const pair=pairFor(selected)||pairFor(clean(selection()?.id));
+  // Explicitly requested models must never inherit an unrelated saved pair.
+  const pair=pairFor(selected);
   if(pair)return role==='fast'?pair.fast:pair.deep;
   // Do not silently reassign an unrelated local model to a Gemma 4 model.
   return selected||'';
