@@ -237,7 +237,7 @@ async function executeAction(descriptor,button,layer){
     if([FAST_E2,FAST_E4].includes(id)){
       await ensureGemmaRuntime();const handoff=globalThis.CivweaveGemma4BrowserPackCoherenceV1;if(!handoff?.startModelDownload)throw new Error('Gemma 4 browser download controls are unavailable.');return handoff.startModelDownload(id,button);
     }
-    status(layer,`Starting ${spec.label}…`);await m.start(id,{preferBackground:id==='llama32-3b-instruct-q4f16'});status(layer,`${spec.label} download started.`);return true;
+    status(layer,`Starting ${spec.label}…`);await m.start(id,{preferBackground:false});status(layer,`${spec.label} download started.`);return true;
   }
   if(descriptor.name==='localCancel'){await m.cancel(id);status(layer,'Download cancelled.');return true}
   if(descriptor.name==='localUse'){

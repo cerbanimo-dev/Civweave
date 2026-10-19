@@ -12,7 +12,7 @@ const PANEL_ID='cw-local-ai-v324';
 const STYLE_ID='cw-local-ai-v324-style';
 const DOCK_ID='cw-local-ai-download-dock-v324';
 const SETTINGS_LAYER_ID='cw-settings-v320';
-const FOREGROUND_PHONE_MODELS=new Set(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16']);
+const FOREGROUND_PHONE_MODELS=new Set(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16','llama32-3b-instruct-q4f16']);
 const BROWSER_PACKS=new Set(['premier-phone','server-quality']);
 const LEGACY_BROWSER_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
 

@@ -148,8 +148,13 @@ for(const path of ['public/app/settings-local-route-v327.js','public/app/setting
 }
 assert.match(directSource,/llama32-3b-instruct-q4f16/,'current direct Settings lacks download');
 assert.match(directSource,/<details open><summary><b>Individual Civweave models/,'current direct Settings hides downloads');
-assert.match(directSource,/preferBackground:id==='llama32-3b-instruct-q4f16'/,'large new model must try background download');
+assert.match(directSource,/await m.start\(id,\{preferBackground:false\}\)/,'individual models must use observable foreground downloads');
 assert.match(directSource,/llama32-two-pass-test-v1.html/,'current Settings lacks trial link');
 const bridge=await readFile(new URL('../public/app/settings-local-route-v325.js',import.meta.url),'utf8');
 assert.match(bridge,/DIRECT_VERSION='1\.2\.1-settings-v325-direct-local-models-llama32-download'/);
 console.log('PASS: old v324 fallback and current v325 settings expose Llama 3.2 with downloads and constrained JSON trial.');
+
+for(const file of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){
+ const s=await readFile(new URL('../'+file,import.meta.url),'utf8');
+ assert.match(s,/FOREGROUND_PHONE_MODELS=new Set\(\['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16','llama32-3b-instruct-q4f16'\]\)/,file+' still queues invisible background downloads');
+}

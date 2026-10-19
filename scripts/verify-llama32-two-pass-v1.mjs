@@ -18,6 +18,11 @@ assert.match(worker,/options\.logits_processor=\[new StructuredOutputProcessor/)
 assert.match(worker,/do_sample:!structuredSchema/);
 assert.match(worker,/structuredSchema\?structured\.value/);
 assert.match(page,/PASS 1 · free-form/);
+assert.match(page,/preferBackground:false/,'Llama test must never start Background Fetch silently');
+assert.match(page,/WEIGHT_FILES=\['onnx\/model_q4f16.onnx_data','onnx\/model_q4f16.onnx_data_1'\]/);
+assert.match(page,/await cache.put\(url,new Response\(file/,'native browser downloads must be importable into offline cache');
+assert.match(page,/file.size!==row.sizeBytes/,'file imports must reject truncated weight shards');
+assert.doesNotMatch(page,/Browser download started\. Keep the model files on this origin/);
 assert.match(page,/PASS 2 · compile with 4\.3\.1 schema token masking/);
 assert.match(page,/if\(!compiled\?\.strictJson\|\|!compiled\?\.jsonValidated/);
 assert.match(stage,/--pack-destination/);

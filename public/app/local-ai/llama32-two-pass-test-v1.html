@@ -2,13 +2,17 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Civweave · Llama 3.2 3B Two-Pass JSON Trial</title>
-<style>:root{color-scheme:dark;font:16px/1.5 system-ui}body{max-width:760px;margin:auto;padding:20px;background:#0c1724;color:#edf5ff}textarea,button{font:inherit;background:#1c3146;border:1px solid #6095a8;color:inherit;border-radius:8px;padding:10px}textarea{width:95%;height:95px}button{margin:6px 8px 6px 0}button:disabled{opacity:.45}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#06101a;border:1px solid #355067;padding:12px;border-radius:10px;max-height:55vh;overflow:auto}small{color:#bacddd}</style></head>
+<style>:root{color-scheme:dark;font:16px/1.5 system-ui}body{max-width:760px;margin:auto;padding:20px;background:#0c1724;color:#edf5ff}textarea,button{font:inherit;background:#1c3146;border:1px solid #6095a8;color:inherit;border-radius:8px;padding:10px}a{color:#9fddff}fieldset{border:1px solid #456880;border-radius:10px;padding:12px;margin:14px 0}input[type=file]{display:block;margin:10px 0;max-width:100%}.cw-weight-link{display:block;margin:8px 0;word-break:break-word}.cw-small{font-size:.86rem;color:#bdcddd}textarea{width:95%;height:95px}button{margin:6px 8px 6px 0}button:disabled{opacity:.45}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#06101a;border:1px solid #355067;padding:12px;border-radius:10px;max-height:55vh;overflow:auto}small{color:#bacddd}</style></head>
 <body>
 <h1>Llama 3.2 3B · Two-pass JSON trial</h1>
 <p>Experiment only; does not modify normal Moss/Weaveling generation. Pass 1 freely drafts a short learning plan with Llama 3.2 3B Instruct. Pass 2 reuses the same loaded model with Hugging Face's token-level <strong>StructuredOutputProcessor</strong> to compile strict JSON. The schema masks invalid next tokens; independent parsing checks the completed result.</p>
 <p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Use the Download button below or Civweave Settings → AI Downloads to install the model. Download is a separate explicit action. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
 <p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
-<button id="download">Download Llama 3.2 3B · ~2.4 GB</button><button id="cancelDownload" disabled>Cancel download</button><br><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
+<button id="download">Download directly into Civweave · ~2.4 GB</button><button id="cancelDownload" disabled>Cancel download</button>
+<p class="cw-small"><strong>Direct download mode:</strong> streams real network bytes into this origin's offline model cache, with file and byte progress. It does NOT use Background Fetch, which previously returned a misleading “Browser download started” status. Keep this tab visible while downloading. Existing cached files are reused.</p>
+<p id="downloadProgress" aria-live="polite">Model not downloaded on this device.</p>
+<fieldset><legend>Alternative: Android / browser Downloads</legend><p>Use the actual browser download links below for the two large model-weight files, then select the completed files to import. These links are external Hugging Face files and are not silently queued into Civweave.</p>
+<div id="weightLinks"></div><label for="importFiles">Select the downloaded model files to import</label><input id="importFiles" type="file" multiple accept=".onnx_data,.onnx_data_1,.onnx,application/octet-stream"><button id="importWeights">Import selected files into Civweave</button><p class="cw-small">Import checks exact expected sizes and saves each file to offline Cache Storage using a streaming Blob, not a 2 GB JavaScript array. Afterwards, use Direct download to fetch only remaining small metadata files. Do not delete existing model caches.</p></fieldset><br><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
 <p id="status" aria-live="polite">Checking model and runtime…</p>
 <pre id="log" aria-live="polite"></pre>
 <p><small>PASS requires nonempty draft text, completed grammar-constrained second generation, valid complete JSON, all required fields, and 3–4 modules. It does not prove plan quality or Moss integration. If your phone reports a WebGPU limit, the diagnostic will stop without silently swapping models.</small></p>
@@ -16,7 +20,7 @@
 <script type="module">
 import {LEARNING_TRIAL_SCHEMA,validateStrictJson} from '/app/local-ai/llama32-structured-constraints-v1.js';
 const MODEL='llama32-3b-instruct-q4f16',CACHE='civweave-model-generative-v266';
-const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),download=$('download'),cancelDownload=$('cancelDownload'),log=$('log'),status=$('status');
+const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),download=$('download'),cancelDownload=$('cancelDownload'),log=$('log'),status=$('status'),dlStatus=$('downloadProgress'),weightLinks=$('weightLinks'),importFiles=$('importFiles'),importWeights=$('importWeights');
 let worker=null,pending=null,seq=0,started=0,cancelled=false,downloads=null;
 async function ensureDownloadManager(){
   if(globalThis.CivweaveLocalModelDownloadV266?.start)return globalThis.CivweaveLocalModelDownloadV266;
@@ -29,39 +33,115 @@ async function ensureDownloadManager(){
   });
   return globalThis.CivweaveLocalModelDownloadV266;
 }
-download.onclick=async()=>{
+const WEIGHT_FILES=['onnx/model_q4f16.onnx_data','onnx/model_q4f16.onnx_data_1'];
+const fmtBytes=n=>Number(n)>=1e9?(Number(n)/1e9).toFixed(2)+' GB':(Number(n)/1e6).toFixed(1)+' MB';
+let watcher=null,lastDownloadUpdate='';
+const spec=()=>globalThis.CivweaveLocalModelRegistryV266?.byId?.(MODEL);
+function updateDownload(state={}){
+  const phase=String(state.phase||state.status||'starting');
+  const file=String(state.artifact||'').replace(/^onnx\//,'');
+  const loaded=Number(state.bytesDownloaded||0),total=Number(state.totalBytes||spec()?.estimatedBytes||0);
+  const pc=total?Math.min(100,Math.floor(loaded/total*100)):0;
+  const label='Llama 3.2 3B · '+phase+(file?' · '+file:'')+' · '+fmtBytes(loaded)+' / '+fmtBytes(total)+' ('+pc+'%)';
+  if(dlStatus.textContent!==label)dlStatus.textContent=label;
+  if(['error','paused','aborted'].includes(String(state.status||''))){
+    dlStatus.textContent='Download '+state.status+' · '+String(state.error||'Check your connection. Retry to reuse completed files.');
+    stopWatch();
+  }
+  if(state.status==='ready'){
+    dlStatus.textContent='DOWNLOAD COMPLETE · '+fmtBytes(loaded)+' cached and verified. Ready to run the two-pass test.';
+    stopWatch();
+  }
+}
+function stopWatch(){
+  if(watcher){clearInterval(watcher);watcher=null}
+  cancelDownload.disabled=true;download.disabled=false;
+}
+async function checkDownloadState(){
+  const saved=downloads?.state?.(MODEL);
+  if(saved)updateDownload(saved);
+  if(saved?.status==='ready'){const verified=await downloads.status(MODEL);if(!verified.available)dlStatus.textContent='Cached state says ready but files are missing. Press Download to repair.';}
+}
+function watchProgress(){
+  if(watcher)clearInterval(watcher);
+  watcher=setInterval(()=>{void checkDownloadState().catch(e=>{dlStatus.textContent='Progress check failed: '+e.message})},1500);
+  void checkDownloadState();
+}
+function renderWeightLinks(){
+  const selected=spec();if(!selected){weightLinks.textContent='Registry unavailable; refresh staging.';return}
+  weightLinks.replaceChildren();
+  for(const path of WEIGHT_FILES){
+    const row=selected.artifacts.find(x=>x.path===path);
+    if(!row?.sizeBytes){weightLinks.textContent='Expected weight-file metadata is missing. Download is disabled until the model registry is corrected.';return}
+    const link=document.createElement('a');link.className='cw-weight-link';link.href=globalThis.CivweaveLocalModelRegistryV266.directUrl(selected,path);
+    link.target='_blank';link.rel='noopener noreferrer';
+    link.textContent='Download '+path.split('/').at(-1)+' · '+fmtBytes(row.sizeBytes)+' (Hugging Face)';
+    weightLinks.append(link);
+  }
+}
+renderWeightLinks();
+async function directDownload(){
   if(download.disabled)return;
   download.disabled=true;
   try{
     if(!navigator.gpu)throw Error('WebGPU is unavailable on this device.');
-    const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(MODEL);
-    if(!spec?.installable)throw Error('The current registry does not expose Llama 3.2 3B. Refresh the staging page.');
+    const selected=spec();
+    if(!selected?.installable)throw Error('The current registry does not expose Llama 3.2 3B. Refresh staging.');
     downloads=await ensureDownloadManager();
     const existing=await downloads.status(MODEL);
-    if(existing.available){status.textContent='Llama 3.2 3B is already downloaded. Run the two-pass test.';return}
-    status.textContent='Downloading Llama 3.2 3B · source '+spec.repo;
-    cancelDownload.disabled=false;
-    const state=await downloads.start(MODEL,{
-      preferBackground:true,
-      onProgress:progress=>{
-        const percent=Number(progress?.percent||0);
-        const phase=String(progress?.phase||progress?.status||'downloading');
-        status.textContent='Llama 3.2 3B · '+phase+' · '+percent+'%';
-      }
-    });
-    if(state?.status==='downloading'&&state.mode==='background-fetch'){
-      status.textContent='Browser download started. Keep the model files on this origin; return here after it finishes.';
-    }else{
-      status.textContent='Llama 3.2 3B download started; model cache is retained when the test page is closed.';
+    if(existing.available){dlStatus.textContent='Llama 3.2 3B is already downloaded and ready.';download.disabled=false;return}
+    // An old Background Fetch job can claim "downloading" without advancing
+    // and may never have shown a browser download. Cancel it before streaming.
+    const old=downloads.state(MODEL);
+    if(old?.mode==='background-fetch'){
+      dlStatus.textContent='Stopping previously queued Background Fetch before starting a visible direct transfer…';
+      try{await downloads.cancel(MODEL)}catch{}
     }
-  }catch(error){status.textContent='Model download error · '+String(error?.message||error)}
-  finally{download.disabled=false}
-};
+    dlStatus.textContent='Opening a direct streaming download; progress will display actual cached bytes…';
+    cancelDownload.disabled=false;
+    const state=await downloads.start(MODEL,{preferBackground:false,onProgress:p=>updateDownload(p)});
+    if(state?.mode==='background-fetch')throw Error('Unexpected Background Fetch path: refusing to display an unverified download.');
+    updateDownload(state||downloads.state(MODEL));
+    watchProgress();
+  }catch(error){dlStatus.textContent='DOWNLOAD FAILED · '+String(error?.message||error);stopWatch()}
+}
+download.onclick=()=>void directDownload();
 cancelDownload.onclick=async()=>{
   if(!downloads)return;
-  try{await downloads.cancel(MODEL);status.textContent='Llama 3.2 3B download cancellation requested; completed files preserved.'}
-  catch(error){status.textContent='Cancel failed · '+String(error?.message||error)}
-  finally{cancelDownload.disabled=true}
+  try{await downloads.cancel(MODEL);dlStatus.textContent='Download cancelled; completed cached files preserved.'}
+  catch(error){dlStatus.textContent='Cancel failed · '+String(error?.message||error)}
+  finally{stopWatch()}
+};
+importWeights.onclick=async()=>{
+  const selected=spec(),files=[...(importFiles.files||[])];
+  if(!selected?.installable){dlStatus.textContent='Download registry unavailable. Refresh staging.';return}
+  if(!files.length){dlStatus.textContent='Choose completed browser download files first.';return}
+  if(worker){dlStatus.textContent='Stop model inference before importing files.';return}
+  importWeights.disabled=true;download.disabled=true;
+  try{
+    const cache=await caches.open(CACHE),seen=new Set();
+    for(const file of files){
+      // Only accept an exact recognized filename and size. Never trust a
+      // browser-downloaded LFS/Xet pointer or a truncated partial download.
+      const row=selected.artifacts.find(a=>a.path.split('/').at(-1)===file.name);
+      if(!row||!row.required)throw Error('Unrecognized or optional model file: '+file.name);
+      if(seen.has(row.path))throw Error('Duplicate model file: '+file.name);
+      seen.add(row.path);
+      if(row.sizeBytes&&file.size!==row.sizeBytes)throw Error(file.name+' has '+fmtBytes(file.size)+' but expected '+fmtBytes(row.sizeBytes)+'; do not import a partial download.');
+      if(file.size<row.minBytes)throw Error(file.name+' is too small; download the actual model file, not a Git LFS pointer.');
+      dlStatus.textContent='Importing '+file.name+' · '+fmtBytes(file.size)+' · streaming into offline cache…';
+      const url=globalThis.CivweaveLocalModelRegistryV266.directUrl(selected,row.path);
+      await cache.put(url,new Response(file,{status:200,headers:{'content-type':file.type||'application/octet-stream','content-length':String(file.size)}}));
+      const saved=await cache.match(url);
+      if(!saved?.ok||Number(saved.headers.get('content-length'))!==file.size)throw Error('Cache did not retain '+file.name+' at the expected size.');
+      dlStatus.textContent='Saved '+file.name+' · '+fmtBytes(file.size)+' into Civweave offline storage.';
+    }
+    const manager=await ensureDownloadManager();
+    const state=await manager.status(MODEL);
+    if(state.available)dlStatus.textContent='All required files imported. Ready to test.';
+    else dlStatus.textContent='Imported '+files.length+' file(s) successfully. Press Download directly into Civweave to fetch '+state.missing.length+' remaining metadata/model file(s) without redownloading these weights.';
+  }catch(error){dlStatus.textContent='IMPORT FAILED · '+String(error?.message||error)}
+  finally{importWeights.disabled=false;download.disabled=false;importFiles.value=''}
 };
 function line(message){log.textContent+=message+'\n';log.scrollTop=log.scrollHeight}
 function finish(message){status.textContent=message;try{worker?.terminate()}catch{}worker=null;if(pending){pending.reject(Error(message));pending=null}button.disabled=false;stop.disabled=true}
