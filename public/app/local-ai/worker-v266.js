@@ -1,5 +1,5 @@
 'use strict';
-const WORKER_REVISION='1.0.128-v317-llama32-session-telemetry';
+const WORKER_REVISION='1.0.129-v318-llama32-asyncify-runtime';
 const CACHE='civweave-model-generative-v266';
 const RUNTIME_CACHE='civweave-local-runtime-v287';
 const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
@@ -105,19 +105,43 @@ async function backendProfile(spec){
   if(spec.requiresShaderF16&&!shaderF16)throw Object.assign(new Error('WebGPU shader-f16 is required by this mobile q2f16 model, but the active adapter does not expose shader-f16.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
   return{backend:'webgpu',gpu:{available:true,shaderF16,vendor:clean(info.vendor||'',120),architecture:clean(info.architecture||'',120),device:clean(info.device||'',120),description:clean(info.description||'',180),maxBufferSize:Number(adapter.limits?.maxBufferSize||0),maxStorageBufferBindingSize:Number(adapter.limits?.maxStorageBufferBindingSize||0)}};
 }
+async function configuredWasmChunks(spec){
+  if(spec?.id!==LLAMA32_COMPILER)return spec;
+  const manifestUrl='/app/vendor/transformers-v4/stage-manifest.json';
+  let response;
+  try{response=await fetch(manifestUrl,{cache:'no-store'})}
+  catch(error){throw new Error('Llama WebGPU Asyncify runtime manifest is unreachable: '+String(error?.message||error))}
+  if(!response.ok)throw new Error('Llama WebGPU Asyncify runtime manifest HTTP '+response.status);
+  let manifest;
+  try{manifest=await response.json()}catch{throw new Error('Llama WebGPU Asyncify runtime manifest returned invalid JSON (possibly an app-shell HTML fallback).')}
+  if(manifest.schema!=='civweave.transformers-stage.v8'||
+     manifest.asyncifyModule!=='ort-wasm-simd-threaded.asyncify.mjs'||
+     manifest.asyncifyWasmSource!=='ort-wasm-simd-threaded.asyncify.wasm'||
+     !Array.isArray(manifest.asyncifyWasmChunks)||manifest.asyncifyWasmChunks.length<2)
+     throw new Error('This deployment is missing the pinned ONNX Runtime Asyncify WebGPU module. The existing model weights are fine. Rebuild staging with both Asyncify JS and WASM artifacts.');
+  const names=manifest.asyncifyWasmChunks;
+  if(names.some((name,index)=>name!=='ort-wasm-simd-threaded.asyncify.wasm.part'+index))
+    throw new Error('Asyncify runtime WASM shards have an unexpected name or order.');
+  const chunks=names.map(name=>'/app/vendor/transformers-v4/wasm/'+name);
+  return{...spec,wasmChunks:chunks,wasmRuntimeBytes:Number(manifest.asyncifyWasmBytes||0)};
+}
 async function configureRuntime(hf,cache,spec){
   hf.env.allowLocalModels=true;
   hf.env.allowRemoteModels=false;
   hf.env.useBrowserCache=false;
   hf.env.useCustomCache=true;
   hf.env.customCache=cacheAdapter(cache,spec);
-  const profile=runtimeProfile(hf,spec),wasm=hf.env.backends?.onnx?.wasm||null;
-  if(wasm&&spec.wasmChunks?.length){
-    const binary=await splitWasmBinary(spec);
+  const runnableSpec=await configuredWasmChunks(spec);
+  const profile=runtimeProfile(hf,runnableSpec),wasm=hf.env.backends?.onnx?.wasm||null;
+  if(wasm&&runnableSpec.wasmChunks?.length){
+    const binary=await splitWasmBinary(runnableSpec);
+    if(runnableSpec.wasmRuntimeBytes&&binary?.byteLength!==runnableSpec.wasmRuntimeBytes)
+      throw new Error('Asyncify WASM bytes incomplete: got '+(binary?.byteLength||0)+' but the staged manifest requires '+runnableSpec.wasmRuntimeBytes);
     wasm.wasmBinary=binary;
     profile.wasmBinaryBytes=binary?.byteLength||0;
-    profile.wasmChunkCount=spec.wasmChunks.length;
+    profile.wasmChunkCount=runnableSpec.wasmChunks.length;
     profile.wasmBinaryCached=true;
+    profile.wasmFlavor=spec.id===LLAMA32_COMPILER?'asyncify':'jsep';
   }
   return profile;
 }
