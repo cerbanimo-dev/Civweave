@@ -4,7 +4,12 @@ const root='/app/vendor/transformers-v4/wasm/';
 async function get(url,options={}){
   const r=await fetch(new URL(url,origin),{cache:'no-store',headers:{'Cache-Control':'no-cache'},...options});
   assert(r.ok,url+' returned HTTP '+r.status);
-  assert(!String(r.headers.get('content-type')||'').includes('text/html'),url+' returned the app-shell HTML fallback');
+  const type=String(r.headers.get('content-type')||'');
+  if(String(url).split('?')[0].endsWith('.html')){
+    assert(type.includes('text/html'),url+' did not return its own HTML document');
+  }else{
+    assert(!type.includes('text/html'),url+' returned the app-shell HTML fallback');
+  }
   return r;
 }
 const r=await get('/app/vendor/transformers-v4/stage-manifest-asyncify-v8.json');
@@ -44,7 +49,9 @@ for(const [index,name] of m.asyncifyWasmChunks.entries()){
 }
 assert.equal(bytes,m.asyncifyWasmBytes,'Published Asyncify shards do not match the staged build manifest');
 const page=await get('/app/local-ai/llama32-two-pass-test-v4.html');
-assert.match(await page.text(),/preflightAsyncify/);
+const html=await page.text();
+assert.match(html,/preflightAsyncify/);
+assert.match(html,/Llama 3\.2 3B · Two-pass JSON trial/);
 const worker=await get('/app/local-ai/llama32-diagnostic-worker-v4.js');
 assert.match(await worker.text(),/configuredWasmChunks/);
 console.log('PASS: deployed staging serves the complete Asyncify WebGPU module and '+m.asyncifyWasmChunks.length+' WASM shards ('+bytes+' bytes) plus Llama diagnostic v4.');
