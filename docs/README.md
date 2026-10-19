@@ -2,6 +2,10 @@
 
 The repository root is a control surface, not a document archive. Current knowledge lives here behind stable folders and indexes.
 
+## Selective coding-agent context
+
+`agent-workspaces/` contains the ICM developer workspace registry and stage-specific CONTEXT.md files. Resolve a stage with `node scripts/ai-context.mjs --workspace bug-fix --stage reproduce`. These instructions do not override the canonical contracts or create separate AI runtimes.
+
 ## Current documentation
 
 - [`contracts/`](./contracts/) contains architecture and behavior contracts consumed by people, verifiers, and packaging.
