@@ -1,5 +1,5 @@
 'use strict';
-const WORKER_REVISION='1.0.127-v316-llama32-strict-compile';
+const WORKER_REVISION='1.0.128-v317-llama32-session-telemetry';
 const CACHE='civweave-model-generative-v266';
 const RUNTIME_CACHE='civweave-local-runtime-v287';
 const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
@@ -121,7 +121,34 @@ async function configureRuntime(hf,cache,spec){
   }
   return profile;
 }
-function progressReporter(id,name,started,base={}){let high=0;return value=>{const p=value||{},raw=Number(p.progress_total??p.progress),detail={...base,...p};if(Number.isFinite(raw)&&raw>=0){const pct=Math.max(0,Math.min(100,raw<=1?raw*100:raw));high=Math.max(high,pct);detail.artifactProgress=Number.isFinite(Number(p.progress))?Number(p.progress):null;detail.progress=high;detail.progressOverall=high}if(!detail.artifact&&p.file)detail.artifact=p.file;phase(id,name,started,detail)}}
+function progressReporter(id,name,started,base={}){
+  let high=0,lastAt=0,lastKey='',suppressed=0,lastArtifact='';
+  const isLlamaTrial=base.model===LLAMA32_COMPILER;
+  return value=>{
+    const p=value||{},raw=Number(p.progress_total??p.progress),detail={...base,...p};
+    if(Number.isFinite(raw)&&raw>=0){
+      const pct=Math.max(0,Math.min(100,raw<=1?raw*100:raw));
+      high=Math.max(high,pct);
+      detail.artifactProgress=Number.isFinite(Number(p.progress))?Number(p.progress):null;
+      detail.progress=high;
+      // Per-file 100% means bytes are found, NOT that an ONNX GPU session exists.
+      detail.progressOverall=isLlamaTrial?null:high;
+    }
+    if(!detail.artifact&&p.file)detail.artifact=p.file;
+    if(!isLlamaTrial){phase(id,name,started,detail);return}
+    const artifact=String(detail.artifact||'unknown').slice(-100);
+    const status=String(p.status||'loading');
+    const percent=Number.isFinite(raw)?Math.floor(Math.max(0,Math.min(100,raw<=1?raw*100:raw))):-1;
+    const key=name+'|'+artifact+'|'+status+'|'+Math.floor(percent/10);
+    const t=now(),significant=key!==lastKey&&(artifact!==lastArtifact||status==='done'||percent===0||percent>=100);
+    if(!significant&&t-lastAt<750){suppressed++;return}
+    if(key===lastKey&&t-lastAt<1000){suppressed++;return}
+    lastKey=key;lastArtifact=artifact;lastAt=t;
+    phase(id,name,started,{...detail,assetStatus:status,assetPercent:percent,suppressedProgressEvents:suppressed,
+      inferenceSessionReady:false,detail:'Cached/downloaded weight bytes do not mean the WebGPU inference session is initialized.'});
+    suppressed=0;
+  };
+}
 function externalDataSetting(spec){
   const counts={};
   for(const row of spec?.artifacts||[]){
@@ -223,7 +250,12 @@ async function ensure(spec,id,{benchmark=false}={}){
     tokenizer=await atStage('loading-tokenizer',spec,()=>hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:progressReporter(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend})}));
     const tokenizerLoadMs=Math.round(now()-tokenizerStarted),gemma4ChatTemplate=repairGemma4ChatTemplate(spec);
     if(isGemma4(spec))phase(id,'gemma4-chat-template',started,{model:spec.id,backend:profile.backend,...gemma4ChatTemplate});
-    phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly),progress:0,progressOverall:0});const modelStarted=now();
+    phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly),
+      progress:0,progressOverall:spec.id===LLAMA32_COMPILER?null:0,inferenceSessionReady:false});
+    if(spec.id===LLAMA32_COMPILER)phase(id,'initializing-onnx-session',started,{model:spec.id,backend:profile.backend,
+      message:'Model files are already cached; initializing a WebGPU ONNX inference session may require substantial temporary system memory.',
+      inferenceSessionReady:false});
+    const modelStarted=now();
     const modelOptions={revision:spec.revision,device:spec.device||profile.backend,dtype:spec.dtype,progress_callback:progressReporter(id,'loading-model',started,{model:spec.id,backend:profile.backend})};
     const externalData=externalDataSetting(spec);if(externalData)modelOptions.use_external_data_format=externalData;
     if(spec.textOnly)modelOptions.textOnly=true;
