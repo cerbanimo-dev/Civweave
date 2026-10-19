@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.13-e4b-complete-wasm-advanced-settings';
+const VERSION='1.0.14-e4b-both-artifacts-gpu-limit-gate';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -137,13 +137,15 @@ async function verifyGpuBindingLimit(modelId,contextTokens,artifactKind='cached-
   if(!adapter)throw wasmError('WORKER_GPU_ADAPTER_UNAVAILABLE','The browser did not provide a WebGPU adapter.');
   const maximum=Number(adapter.limits?.maxStorageBufferBindingSize)||0;
   const deviceMaximumBuffer=Number(adapter.limits?.maxBufferSize)||null;
-  const required=modelId===E4B_WEB_MODEL&&artifactKind==='cached-web'?E4B_OBSERVED_BINDING_BYTES:null;
+  // The user reproduced precisely the same 160 MiB bind with both the E4B -web
+  // and -gpu artifacts at 512 tokens. Neither works with standard WebGPU here.
+  const required=modelId===E4B_WEB_MODEL?E4B_OBSERVED_BINDING_BYTES:null;
   // The observed 160 MiB request occurred with a 2048-token engine. We have
   // not yet established whether a smaller context reduces that bind group.
   const unsupported=Boolean(required&&maximum>0&&maximum<required&&backendMode==='standard-gpu');
-  send('gpu-limits',{phase:'gpu-limits',modelId,artifactKind,backendMode,engineContextTokens:contextTokens,maxStorageBufferBindingSize:maximum,maxBufferSize:deviceMaximumBuffer,observedRequiredBindingAt2048Bytes:required,compatible:unsupported?false:required&&maximum>=required?true:null,backendExperiment:Boolean(required&&maximum<required&&backendMode!=='standard-gpu')});
+  send('gpu-limits',{phase:'gpu-limits',modelId,artifactKind,backendMode,engineContextTokens:contextTokens,maxStorageBufferBindingSize:maximum,maxBufferSize:deviceMaximumBuffer,observedRequiredBindingBytes:required,compatible:unsupported?false:required&&maximum>=required?true:null,backendExperiment:Boolean(required&&maximum<required&&backendMode!=='standard-gpu')});
   if(unsupported)throw wasmError('LITERT_E4B_GPU_STORAGE_BINDING_UNSUPPORTED',
-    'The cached E4B WebGPU artifact binds 160 MiB in one shader resource, but this GPU supports at most '+Math.round(maximum/1048576)+' MiB per storage binding. This is a hard WebGPU limit, not a RAM/storage quota issue. Changing token count, stream mode or timeout cannot fix it; a different E4B GPU-compiled artifact with smaller bindings or an updated runtime/kernel is required.',
+    'Both tested E4B -web and -gpu artifacts request a 160 MiB shader storage binding using standard WebGPU, but this device permits only '+Math.round(maximum/1048576)+' MiB per binding. Lowering context or changing the file did not solve this. Try a different LiteRT weight-preparation path in the isolated comparison; do not repeat the invalid standard-GPU run.',
     {requiredBindingBytes:required,maximumBindingBytes:maximum,restartRequired:false});
 }
 function observeGpuDevice(mod){
