@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-local-generation-model-policy-v1-deep-intake';
+const VERSION='1.0.2-local-generation-model-policy-v1-llama32-test';
 if(globalThis.CivweaveLocalGenerationModelPolicyV1?.version===VERSION)return;
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const clean=(s,max=240)=>String(s??'').trim().slice(0,max);
 const PAIRS=Object.freeze([
-  Object.freeze({fast:'gemma4-e2b-it-litert-web',deep:'gemma4-e4b-it-litert-web',aliases:Object.freeze(['gemma4-e2b-it-q4f16','gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q4f16','gemma4-e4b-it-q2f16-mobile'])}),
+  Object.freeze({fast:'llama32-3b-instruct-q4f16',deep:'llama32-3b-instruct-q4f16',aliases:Object.freeze([])}),
+  // Retired E4B pair is deliberately not a selectable deep-model default.
   Object.freeze({fast:'qwen35-4b-litert-web',deep:'qwen35-9b-litert-web',aliases:Object.freeze([])})
 ]);
 function selection(){

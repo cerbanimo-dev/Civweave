@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Civweave · Llama 3.2 3B Two-Pass JSON Trial</title>
+<style>:root{color-scheme:dark;font:16px/1.5 system-ui}body{max-width:760px;margin:auto;padding:20px;background:#0c1724;color:#edf5ff}textarea,button{font:inherit;background:#1c3146;border:1px solid #6095a8;color:inherit;border-radius:8px;padding:10px}textarea{width:95%;height:95px}button{margin:6px 8px 6px 0}button:disabled{opacity:.45}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#06101a;border:1px solid #355067;padding:12px;border-radius:10px;max-height:55vh;overflow:auto}small{color:#bacddd}</style></head>
+<body>
+<h1>Llama 3.2 3B · Two-pass JSON trial</h1>
+<p>Experiment only; does not modify normal Moss/Weaveling generation. Pass 1 freely drafts a short learning plan with Llama 3.2 3B Instruct. Pass 2 reuses the same loaded model with Hugging Face's token-level <strong>StructuredOutputProcessor</strong> to compile strict JSON. The schema masks invalid next tokens; independent parsing checks the completed result.</p>
+<p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Install it once in Civweave Settings → AI Downloads. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
+<p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
+<button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
+<p id="status" aria-live="polite">Checking model and runtime…</p>
+<pre id="log" aria-live="polite"></pre>
+<p><small>PASS requires nonempty draft text, completed grammar-constrained second generation, valid complete JSON, all required fields, and 3–4 modules. It does not prove plan quality or Moss integration. If your phone reports a WebGPU limit, the diagnostic will stop without silently swapping models.</small></p>
+<script src="/app/local-ai/model-registry-v266.js"></script>
+<script type="module">
+import {LEARNING_TRIAL_SCHEMA,validateStrictJson} from '/app/local-ai/llama32-structured-constraints-v1.js';
+const MODEL='llama32-3b-instruct-q4f16',CACHE='civweave-model-generative-v266';
+const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),log=$('log'),status=$('status');
+let worker=null,pending=null,seq=0,started=0,cancelled=false;
+function line(message){log.textContent+=message+'\n';log.scrollTop=log.scrollHeight}
+function finish(message){status.textContent=message;try{worker?.terminate()}catch{}worker=null;if(pending){pending.reject(Error(message));pending=null}button.disabled=false;stop.disabled=true}
+function call(spec,messages,maxNewTokens,structuredOutputSchema=null,timeoutMs=300000){
+  return new Promise((resolve,reject)=>{
+    if(!worker)return reject(Error('Worker was stopped'));
+    const id='llama32-'+(++seq);
+    const timer=setTimeout(()=>{if(pending?.id===id){pending=null;finish('TIMEOUT '+id+'; worker terminated; downloaded model unchanged.');reject(Error('Timed out'))}},timeoutMs);
+    pending={id,resolve:value=>{clearTimeout(timer);resolve(value)},reject:error=>{clearTimeout(timer);reject(error)}};
+    worker.postMessage({id,type:'generate',spec,messages,stream:true,thinking:false,temperature:.3,maxNewTokens,promptTokenBudget:1300,structuredOutputSchema});
+  });
+}
+async function available(spec){
+ const cache=await caches.open(CACHE),missing=[];
+ for(const artifact of spec.artifacts.filter(x=>x.required)){
+   const url=globalThis.CivweaveLocalModelRegistryV266.directUrl(spec,artifact.path);
+   if(!(await cache.match(url))?.ok)missing.push(artifact.path);
+ }
+ return missing;
+}
+async function start(){
+ if(worker)return;
+ log.textContent='';button.disabled=true;stop.disabled=false;cancelled=false;started=performance.now();
+ const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(MODEL);
+ if(!spec){finish('Registry missing Llama 3.2 3B. Refresh staging.');return}
+ try{
+   if(!navigator.gpu)throw Error('This browser has no WebGPU interface.');
+   const missing=await available(spec);
+   if(missing.length)throw Error('Model not fully downloaded on this origin. Open Civweave Settings → AI Downloads, install Llama 3.2 3B, then retry. Missing: '+missing.slice(0,5).join(', '));
+   const companion=await fetch('/app/vendor/transformers-structured-output-v4/stage-manifest.json',{cache:'no-store'});
+   if(!companion.ok)throw Error('Constrained decoding companion was not staged on this deployment.');
+   const manifest=await companion.json();if(manifest.version!=='4.3.1')throw Error('Unexpected companion version: '+manifest.version);
+   worker=new Worker('/app/local-ai/worker-v266.js?v=1.0.127-llama32-structured',{type:'module'});
+   worker.onmessage=event=>{
+     const r=event.data||{};
+     if(!pending||r.id!==pending.id)return;
+     if(r.type==='progress'){const p=r.progress||{};if(['loading-runtime','loading-model','model-ready','preparing-prompt','preparing-grammar','generating','json-validated'].includes(p.phase))line('['+Math.round((performance.now()-started)/1000)+'s] '+p.phase+(p.model?' · '+p.model:'')+(p.progressOverall!=null?' · '+Math.round(p.progressOverall)+'%':''));}
+     if(r.type==='token'&&r.token?.text)line('TEXT '+String(r.token.text).slice(0,180));
+     if(r.type==='error'){const error=r.error||{};const p=pending;pending=null;p.reject(Error((error.code||'LOCAL_ERROR')+' at '+(error.phase||'?')+': '+(error.rawMessage||error.message||'unknown')))}
+     if(r.type==='done'){const p=pending;pending=null;p.resolve(r.result)}
+   };
+   worker.onerror=e=>finish('Worker script error: '+String(e.message||'unknown'));
+   status.textContent='Pass 1 · free-form draft';
+   line('PASS 1 · free-form Llama 3.2 3B drafting');
+   const goal=$('goal').value.trim().slice(0,1500)||'Learn tarot';
+   const draft=await call(spec,[
+     {role:'system',content:'You are Moss, a concise curriculum planner. Write a short free-form draft containing a learning capability and 3 or 4 progressive modules. Do not use JSON.'},
+     {role:'user',content:goal}
+   ],220);
+   if(!draft?.text?.trim())throw Error('Draft returned no visible text.');
+   line('DRAFT COMPLETE · '+draft.text.slice(0,2200));
+   status.textContent='Pass 2 · token-constrained JSON compile';
+   line('PASS 2 · compile with 4.3.1 schema token masking; NO fallback to prompt-only JSON');
+   const compiled=await call(spec,[
+     {role:'system',content:'Convert the supplied learning draft to the specified JSON schema. Return a complete object with title, capability, modules (3–4 items with title/outcome), and assumptions (array). Preserve the draft, do not invent learner details. No markdown.'},
+     {role:'user',content:JSON.stringify({goal,draft:draft.text.slice(0,2200),schema:LEARNING_TRIAL_SCHEMA})}
+   ],640,LEARNING_TRIAL_SCHEMA);
+   const checked=validateStrictJson(compiled?.text||'',LEARNING_TRIAL_SCHEMA);
+   if(!compiled?.strictJson||!compiled?.jsonValidated||!checked.ok)throw Error('Strict compilation did not validate: '+checked.errors.join('; '));
+   line('JSON PASS · '+JSON.stringify(checked.value,null,2));
+   line('TIMINGS · free draft '+Number(draft.metrics?.totalMs||0)+' ms · constrained compile '+Number(compiled.metrics?.totalMs||0)+' ms');
+   finish('PASS · both Llama 3.2 3B runs completed, second pass constrained and validated. Model cache preserved.');
+ }catch(error){if(!cancelled){line('FAIL · '+String(error?.message||error));finish('FAIL · '+String(error?.message||error))}}
+}
+button.onclick=start;stop.onclick=()=>{cancelled=true;finish('Stopped by user; worker terminated; model cache preserved.')};
+status.textContent='Ready · offline model availability verified when test starts';
+</script>
+</body></html>

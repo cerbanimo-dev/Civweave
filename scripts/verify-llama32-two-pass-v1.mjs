@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validateStrictJson,LEARNING_TRIAL_SCHEMA} from '../public/app/local-ai/llama32-structured-constraints-v1.js';
+const read=path=>readFileSync(path,'utf8');
+const registry=read('public/app/local-ai/model-registry-v266.js');
+const worker=read('public/app/local-ai/worker-v266.js');
+const page=read('public/app/local-ai/llama32-two-pass-test-v1.html');
+const builder=read('scripts/build-cloudflare-pages.mjs');
+const stage=read('scripts/stage-llama-structured-output-v1.mjs');
+const policy=read('public/app/local-ai/local-generation-model-policy-v1.js');
+assert.match(registry,/id:'llama32-3b-instruct-q4f16'/);
+assert.match(registry,/model_q4f16\.onnx_data_1/);
+assert.match(registry,/license:'llama3\.2'/);
+assert.match(registry,/status:'retired',installable:false/);
+assert.match(policy,/deep:'llama32-3b-instruct-q4f16'/);
+assert.doesNotMatch(policy,/deep:'gemma4-e4b-it-litert-web'/);
+assert.match(worker,/options\.logits_processor=\[new StructuredOutputProcessor/);
+assert.match(worker,/do_sample:!structuredSchema/);
+assert.match(worker,/structuredSchema\?structured\.value/);
+assert.match(page,/PASS 1 · free-form/);
+assert.match(page,/PASS 2 · compile with 4\.3\.1 schema token masking/);
+assert.match(page,/if\(!compiled\?\.strictJson\|\|!compiled\?\.jsonValidated/);
+assert.match(stage,/--pack-destination/);
+assert.match(builder,/runNodeScriptAsync\(llamaStructuredStage/);
+const valid={title:'Tarot fundamentals',capability:'Read a three-card spread',modules:[{title:'Major arcana',outcome:'Recall basic meanings'},{title:'Minor arcana',outcome:'Recognize four suits'},{title:'Daily spreads',outcome:'Read three cards'}],assumptions:[]};
+assert.equal(validateStrictJson(JSON.stringify(valid),LEARNING_TRIAL_SCHEMA).ok,true);
+for(const content of ['some prose '+JSON.stringify(valid),JSON.stringify({...valid,modules:[]}),JSON.stringify({...valid,extra:true}),JSON.stringify({...valid,assumptions:'none'}),'{incomplete']){
+ assert.equal(validateStrictJson(content,LEARNING_TRIAL_SCHEMA).ok,false,content.slice(0,50));
+}
+new Function(worker);
+new Function(page.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import\s+.*;\s*$/gm,''));
+console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');

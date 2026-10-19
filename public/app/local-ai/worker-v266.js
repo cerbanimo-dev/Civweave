@@ -1,9 +1,12 @@
 'use strict';
-const WORKER_REVISION='1.0.126-v315-gemma4-template-logits';
+const WORKER_REVISION='1.0.127-v316-llama32-strict-compile';
 const CACHE='civweave-model-generative-v266';
 const RUNTIME_CACHE='civweave-local-runtime-v287';
 const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
 const WASM_V3='/app/vendor/transformers/wasm/';
+const LLAMA32_COMPILER='llama32-3b-instruct-q4f16';
+const STRUCTURED_PROCESSOR_URL='/app/vendor/transformers-structured-output-v4/index.js';
+const STRUCTURED_VALIDATOR_URL='/app/local-ai/llama32-structured-constraints-v1.js';
 const runtimeModules=new Map();
 const wasmBinaryCache=new Map();
 let hfRuntime=null,tokenizer=null,model=null,loaded=null,loading=null;
@@ -259,12 +262,28 @@ async function generate(message,id){
   if(working&&promptTokens>working)phase(id,'context-warning',requestStarted,{model:spec.id,promptTokens,workingContextTokens:working,contextWindowTokens:window});
   const timing={firstTokenAt:0,generatedTokens:0,index:0,decoded:''},generationStarted=now(),streamer=makeStreamer(id,Boolean(message.stream)&&!message.thinking,timing),temperature=Math.max(.01,Math.min(2,Number(message.temperature??.7)));
   currentPhase='generating';phase(id,currentPhase,requestStarted,{model:spec.id,backend:load.backend,streaming:Boolean(message.stream),thinking:Boolean(message.thinking),promptTokens,maxNewTokens,contextWindowTokens:window,workingContextTokens:working,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,wasmThreads:load.wasmThreads,crossOriginIsolated:load.crossOriginIsolated,wasmSimd:load.wasmSimd,runtime:load.runtime,gemma4ChatTemplate:load.gemma4ChatTemplate,gemma4LogitsSessions:load.gemma4LogitsSessions,nextTokenLogitsOnly:Boolean(isGemma4(spec))});
-  const options={...inputs,max_new_tokens:maxNewTokens,do_sample:true,temperature,top_k:Number(spec.generation?.topK||20),top_p:Number(spec.generation?.topP??.95),use_cache:true,return_dict_in_generate:true};
+  const structuredSchema=message.structuredOutputSchema||null;
+   if(structuredSchema&&spec.id!==LLAMA32_COMPILER)throw Object.assign(new Error('Strict schema-constrained generation is available only in the explicitly selected Llama 3.2 3B trial.'),{code:'STRUCTURED_COMPILER_MODEL_MISMATCH'});
+   const options={...inputs,max_new_tokens:maxNewTokens,do_sample:!structuredSchema,temperature,top_k:Number(spec.generation?.topK||20),top_p:Number(spec.generation?.topP??.95),use_cache:true,return_dict_in_generate:true};
+   if(structuredSchema){
+     currentPhase='preparing-grammar';phase(id,currentPhase,requestStarted,{model:spec.id,constrainedDecoding:true,schemaType:structuredSchema.type,companion:'huggingface-structured-output-4.3.1'});
+     const {StructuredOutputProcessor}=await import(STRUCTURED_PROCESSOR_URL);
+     if(typeof StructuredOutputProcessor!=='function')throw Object.assign(new Error('The local constrained-decoding companion was not staged.'),{code:'LOCAL_STRUCTURED_PROCESSOR_UNAVAILABLE'});
+     options.logits_processor=[new StructuredOutputProcessor(tokenizer,{type:'json_schema',json_schema:structuredSchema})];
+   }
   if(isGemma4(spec)&&hfRuntime?.Tensor)options.num_logits_to_keep=new hfRuntime.Tensor('int64',[1n],[]);
   if(streamer)options.streamer=streamer;
   const output=await model.generate(options),completed=now(),ids=generatedIds(output?.sequences,promptTokens);let text='';try{text=visibleAnswer(tokenizer.decode(ids,{skip_special_tokens:false}))}catch{}if(!text)text=visibleAnswer(timing.decoded);if(!text)throw new Error('The local model returned no final answer. Its output ended before a usable response.');
+   let structured=null;
+   if(structuredSchema){
+     currentPhase='validating-json';
+     const {validateStrictJson}=await import(STRUCTURED_VALIDATOR_URL);
+     structured=validateStrictJson(text,structuredSchema);
+     if(!structured.ok)throw Object.assign(new Error('Constrained JSON compilation failed validation: '+structured.errors.slice(0,5).join('; ')),{code:'LOCAL_STRUCTURED_JSON_INVALID',rejectedText:text,validationErrors:structured.errors});
+     phase(id,'json-validated',requestStarted,{model:spec.id,strict:true,constrainedDecoding:true,valid:true});
+   }
   const tokenCount=ids.length||timing.generatedTokens,generationMs=Math.round(completed-generationStarted),ttftMs=timing.firstTokenAt?Math.round(timing.firstTokenAt-generationStarted):null,decodeMs=Math.max(1,completed-(timing.firstTokenAt||generationStarted)),tokensPerSecond=tokenCount?Number((tokenCount/(decodeMs/1000)).toFixed(2)):0;
-  return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&!message.thinking&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true,nextTokenLogitsOnly:Boolean(isGemma4(spec)),workerRevision:WORKER_REVISION}};
+  return{text,json:structuredSchema?structured.value:parseJsonLoose(text),strictJson:Boolean(structuredSchema),jsonValidated:Boolean(structured?.ok),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&!message.thinking&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true,nextTokenLogitsOnly:Boolean(isGemma4(spec)),workerRevision:WORKER_REVISION}};
   }catch(error){throw annotate(error,currentPhase,spec)}
 }
 self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){await unload();post(id,'done',{result:{shutdown:true}});return}if(message.type==='prewarm'){post(id,'done',{result:await prewarm(message,id)});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);post(id,'done',{result:await generate(message,id)})}catch(error){const stage=error?.code==='LOCAL_MODEL_CONTEXT_EXCEEDED'?'context check':error?.phase||'inference',detail={message:friendlyError(error,message.spec,stage),name:error?.name||'Error',code:error?.code||'LOCAL_MODEL_FAILED',phase:error?.phase||stage,model:error?.model||message.spec?.id||'',modelLabel:error?.modelLabel||message.spec?.label||message.spec?.id||'',backend:error?.backend||message.spec?.device||'',rawMessage:clean(error?.message||error,1000),stack:clean(error?.stack,4000),sessionReleased:true};await unload();post(id,'error',{error:detail})}});
