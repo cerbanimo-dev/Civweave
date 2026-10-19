@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.15-guide-generation-tracker-v1-weight-conversion-diagnostics';
+const VERSION='1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -229,7 +229,7 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
       resolve({model,storagePersistence:persistence,storageEstimate:quota,elapsedMs:Date.now()-started,...result});
     };
     try{
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.13-complete-advanced-settings',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.14-both-artifacts-limit-gate',{type:'classic'});
       worker.onmessage=event=>{
         const detail=event.data||{};
         phase=String(detail.phase||phase);
