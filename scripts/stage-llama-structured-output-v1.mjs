@@ -25,8 +25,19 @@ try{
   if(unpack.status!==0)throw new Error('Could not extract the pinned package build: '+String(unpack.stderr||''));
   const bundle=join(temp,'package/dist/index.js');
   if(!existsSync(bundle)||statSync(bundle).size<2000)throw new Error('Constrained output bundle is absent or unexpectedly short.');
-  mkdirSync(output,{recursive:true});copyFileSync(bundle,target);
+  // The npm build marks @huggingface/transformers as an external peer import.
+  // Bare package specifiers cannot resolve in Civweave's standalone PWA.
+  // Bind the processor to the same self-hosted Transformers.js classes used
+  // by the Llama model worker; never fetch a runtime dependency from a CDN.
+  const original=readFileSync(bundle,'utf8');
+  const peerImport=/from\\s*([\"'])@huggingface\\/transformers\\1/g;
+  const matches=[...original.matchAll(peerImport)];
+  if(matches.length!==1)throw new Error('Unexpected structured-output peer import shape: expected exactly one import, got '+matches.length);
+  const standalone=original.replace(peerImport,'from "../transformers-v4/transformers.min.js"');
+  if(standalone.includes('from "@huggingface/transformers"')||standalone.includes("from '@huggingface/transformers'"))throw new Error('Unresolved bare runtime peer dependency.');
+  mkdirSync(output,{recursive:true});writeFileSync(target,standalone);
   const sha256=createHash('sha256').update(readFileSync(target)).digest('hex');
+  if(!standalone.includes('../transformers-v4/transformers.min.js'))throw new Error('Standalone companion was not rebound to local Transformers.js.');
   writeFileSync(manifest,JSON.stringify({schema:'civweave.structured-decoding-companion.v1',package:PACKAGE,version:VERSION,integrity:info.integrity,sha256,entry:'/app/vendor/transformers-structured-output-v4/index.js',offline:true},null,2)+'\n');
   console.log('Staged self-hosted structured-output processor '+VERSION+' ('+statSync(target).size+' bytes)');
 }finally{rmSync(temp,{recursive:true,force:true})}
