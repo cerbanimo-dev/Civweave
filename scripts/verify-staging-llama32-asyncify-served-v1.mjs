@@ -19,7 +19,26 @@ let bytes=0;
 for(const [index,name] of m.asyncifyWasmChunks.entries()){
   assert.equal(name,'ort-wasm-simd-threaded.asyncify.wasm.part'+index);
   const chunk=await get(root+name,{method:'HEAD'});
-  const size=Number(chunk.headers.get('content-length')||0);
+  // Cloudflare Pages can omit Content-Length from a successful HEAD response,
+  // especially for static binary assets served with chunked transfer encoding.
+  // HEAD=200 with size=0 is not evidence of an empty .wasm.part file.
+  let size=Number(chunk.headers.get('content-length')||0);
+  if(!size){
+    const actual=await get(root+name,{method:'GET',headers:{
+      'Cache-Control':'no-cache','Range':'bytes=0-0'
+    }});
+    const range=actual.headers.get('content-range')||'';
+    const match=range.match(/^bytes 0-0\\/(\\d+)$/i);
+    if(actual.status===206&&match){
+      size=Number(match[1]);
+      await actual.body?.cancel?.();
+    }else{
+      // The host ignored Range or omitted byte headers; validate actual bytes
+      // rather than trusting transport metadata or declaring false failure.
+      size=0;
+      for await (const part of actual.body||[]){size+=part.byteLength;assert(size<=24*1024*1024,'Oversized Asyncify WASM shard '+name)}
+    }
+  }
   assert(size>0&&size<=24*1024*1024,'Invalid published WASM chunk size '+name+': '+size);
   bytes+=size;
 }
