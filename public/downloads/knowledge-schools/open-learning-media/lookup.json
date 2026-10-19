@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-10-05T12:18:50Z",
+  "built_at": "2026-10-19T10:47:09Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -160,7 +160,7 @@
         "health-wellness",
         "philosophy-ethics"
       ],
-      "coverage": 0.6667,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -190,7 +190,7 @@
         "biology-life",
         "climate-environment"
       ],
-      "coverage": 0.6667,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -1436,102 +1436,6 @@
     ],
     "earth-geography": [
       {
-        "provider": "peertube",
-        "provider_id": "4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-        "title": "Topographical maps for all!",
-        "description": "LibrePlanet 2023 videos Presented by: Anonymous Anaximander c. 610 – c. 546 BC) was a pre-Socratic Greek philosopher who lived in Miletus, a city of Ionia (in modern-day Turkey). He belonged to the Milesian school and learned the teachings of his master Thales. He succeeded Thales and became the second master of that school where he counted Anaximenes and, arguably, Pythagoras amongst his pupils. He created a map of the world that contributed greatly to the advancement of geography. He was also involved in the politics of Miletus and was sent as a leader to one of its colonies. Description: Outdoor sports are enjoyed by many people but access is restricted by regulations. Unlike most countries where I live mapping activities are forbidden by state. The lack of accurately made topographical maps led many years of mine and fellow outdoor lovers wander around in the wilderness blindly. Dangerously depending on poorly made, inaccurate drawings of the field to circumvent the law or inaccessible, expensive and non-free mapping devices and software. Finally being fed up by this fact, I decided to seek the answer if free software and knowledge can liberate people's navigation. [Slides](//media.libreplanet.org/u/libreplanet/m/topographical-maps-for-all-slides/) [Audio-only version](//media.libreplanet.org/u/libreplanet/m/topographical-maps-for-all-audio-only/)",
-        "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 333684675,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 186076391,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 155856944,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-240-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 120216224,
-            "resolution": "240p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Free Software Foundation",
-          "source_title": "Topographical maps for all!",
-          "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "earth-geography": {
-            "score": 30,
-            "evidence": [
-              "geography",
-              "maps",
-              "mapping",
-              "geography",
-              "maps"
-            ]
-          }
-        },
-        "pedagogy": {
-          "earth-geography": {
-            "strong_title_matches": [
-              "maps"
-            ],
-            "strong_description_matches": [
-              "geography",
-              "maps",
-              "mapping"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 72
-          }
-        },
-        "selection": {
-          "earth-geography": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 72
-          }
-        }
-      },
-      {
         "provider": "wikimedia-commons",
         "provider_id": "File:Come and learn how free maps, free knowledge can help care for the world.webm",
         "title": "Come and learn how free maps, free knowledge can help care for the world",
@@ -1603,7 +1507,7 @@
         "provider": "peertube",
         "provider_id": "ba7baa17-7a0e-432c-ba49-c2cfb1f0096d",
         "title": "How to use Mergin Maps in Academia",
-        "description": "Mergin Maps is a mobile app for collecting, storing, and synchronizing data with students, built on QGIS. The Mergin Maps University Program offers a free Academic Plan for lecturers and students. This plan includes 5 GB of storage, a free book for teachers, unlimited workspaces, and the ability to add unlimited students to projects. To apply for the Academic Plan, you need to fill out a Google Form found on the Mergin Maps academia-plan webpage. The plan is valid for one calendar year and requires re-verification of academic status annually. See more: https://merginmaps.com/academic-plan #QGIS #MerginMaps #AcademicPlan #OpenSource #GIS #FieldDataCollection",
+        "description": "Mergin Maps is a mobile app for collecting, storing, and synchronizing data with students, built on QGIS. The Mergin Maps University Program offers a free Academic Plan for lecturers and students. This plan includes 5 GB of storage, a free book fo...",
         "source_url": "https://videos.qwast-gis.com/videos/watch/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -1847,6 +1751,95 @@
         }
       },
       {
+        "provider": "peertube",
+        "provider_id": "4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
+        "title": "Topographical maps for all!",
+        "description": "LibrePlanet 2023 videos Presented by: Anonymous Anaximander c. 610 – c. 546 BC) was a pre-Socratic Greek philosopher who lived in Miletus, a city of Ionia (in modern-day Turkey). He belonged to the Milesian school and learned the teachings of hi...",
+        "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 333684675,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 186076391,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 155856944,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-240-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 120216224,
+            "resolution": "240p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Free Software Foundation",
+          "source_title": "Topographical maps for all!",
+          "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "earth-geography": {
+            "score": 10,
+            "evidence": [
+              "maps",
+              "maps"
+            ]
+          }
+        },
+        "pedagogy": {
+          "earth-geography": {
+            "strong_title_matches": [
+              "maps"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "earth-geography": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
         "provider": "wikimedia-commons",
         "provider_id": "File:Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response.webm",
         "title": "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
@@ -2020,6 +2013,89 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:How_UK_Parliament_holds_government_to_account.webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "civics-society": {
+            "score": 10,
+            "evidence": [
+              "government",
+              "government"
+            ]
+          }
+        },
+        "pedagogy": {
+          "civics-society": {
+            "strong_title_matches": [
+              "government"
+            ],
+            "strong_description_matches": [
+              "government"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "civics-society": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "dc9f2888-24c2-479b-bbc0-95a99de26a6f",
+        "title": "S12 E28: U.S. Government Shutdown & Police Chases: 11/2/25: Last Week Tonight with John Oliver",
+        "description": "John Oliver discusses the government shutdown in the U.S., and how it’s related to both a crisis of food insecurity and surging healthcare costs. Then, he explains why the risks involved in police chases massively outweigh the benefits. Also, he details how J.D. Vance killed the last Pope. He did. He killed the last Pope. And no, we don’t have any “evidence.” But it’s so obvious, you shouldn’t need any. Subscribe to the #lastweektonight YouTube channel for more almost news as it almost happens: www.youtube.com/lastweektonight Or find us on your favorite social media platform we may or may not have discussed at length on the show: Instagram: https://www.instagram.com/lastweektonight TikTok: https://www.tiktok.com/@lastweektonighthbo Threads: https://www.threads.net/@lastweektonight Bluesky: https://bsky.app/profile/lastweektonight.com Facebook: https://www.facebook.com/lastweektonight Or visit our official site for all that other stuff at once: https://www.hbo.com/lastweektonight",
+        "source_url": "https://tube.fede.re/videos/watch/dc9f2888-24c2-479b-bbc0-95a99de26a6f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.fede.re/download/streaming-playlists/hls/videos/dc9f2888-24c2-479b-bbc0-95a99de26a6f-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 690299224,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.fede.re/download/streaming-playlists/hls/videos/dc9f2888-24c2-479b-bbc0-95a99de26a6f-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 364473072,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.fede.re/download/streaming-playlists/hls/videos/dc9f2888-24c2-479b-bbc0-95a99de26a6f-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 221778956,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "LastWeekTonight (unofficial mirror)",
+          "source_title": "S12 E28: U.S. Government Shutdown & Police Chases: 11/2/25: Last Week Tonight with John Oliver",
+          "source_url": "https://tube.fede.re/videos/watch/dc9f2888-24c2-479b-bbc0-95a99de26a6f",
+          "license": "Attribution",
+          "license_url": ""
         },
         "relevance": {
           "civics-society": {
@@ -2248,6 +2324,73 @@
     "biology-life": [
       {
         "provider": "peertube",
+        "provider_id": "4f88fd26-2d10-4a1e-bb2d-8e9961045eb5",
+        "title": "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
+        "description": "HongKong-PuiChing introduces synthetic biology through music, combining science and art. Lyrics: Synthetic Biology is the key Redesigning nature graciously It works to makes things work like it should To save our neighbourhood When times come that brings us misfortune No need to look too glum or blue Synthetic Biology comes into view To render us brand new In farms, in drugs, in space Factories and restaurants, and cyberspace A smile on every face With synbio in place While the harsh salt ruins it all And the plants can't grow at all With synbio in our call They push through and stand tall Music: Music by Anson Kwong Lyrics by Anson Kwong, Matthew Chan Performed by Anson Kwong, Matthew Chan Mixing by Matthew Chan Video: Concept by Matthew Chan Edited by Matthew Chan Background by Thamnguyen_TBVN from Pixabay Wiki: https://2026.igem.wiki/hongkong-puiching/",
+        "source_url": "https://video.igem.org/videos/watch/4f88fd26-2d10-4a1e-bb2d-8e9961045eb5",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.igem.org/download/streaming-playlists/hls/videos/4f88fd26-2d10-4a1e-bb2d-8e9961045eb5-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 72581553,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Matthew Chan",
+          "source_title": "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
+          "source_url": "https://video.igem.org/videos/watch/4f88fd26-2d10-4a1e-bb2d-8e9961045eb5",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "biology-life": {
+            "score": 10,
+            "evidence": [
+              "biology",
+              "biology"
+            ]
+          }
+        },
+        "pedagogy": {
+          "biology-life": {
+            "strong_title_matches": [
+              "biology"
+            ],
+            "strong_description_matches": [
+              "biology"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "biology-life": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "f38b2ae2-b316-489f-bfd9-f5fb8053c925",
         "title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "description": "This presentation dives deep into the journey of the Hydro Guardian! We'll explore the educational and human practices that shaped and refined our project. We were thrilled to engage with stakeholders through interviews, as this allowed us to gain...",
@@ -2295,87 +2438,6 @@
           "creator": "iGEM Teams",
           "source_title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
           "source_url": "https://video.igem.org/videos/watch/f38b2ae2-b316-489f-bfd9-f5fb8053c925",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "biology-life": {
-            "score": 10,
-            "evidence": [
-              "biology",
-              "biology"
-            ]
-          }
-        },
-        "pedagogy": {
-          "biology-life": {
-            "strong_title_matches": [
-              "biology"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "biology-life": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "93ff2046-d427-4f4b-8590-9de10877c4e6",
-        "title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
-        "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business le...",
-        "source_url": "https://video.igem.org/videos/watch/93ff2046-d427-4f4b-8590-9de10877c4e6",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://video.igem.org/download/streaming-playlists/hls/videos/93ff2046-d427-4f4b-8590-9de10877c4e6-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 145355657,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://video.igem.org/download/streaming-playlists/hls/videos/93ff2046-d427-4f4b-8590-9de10877c4e6-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 40189332,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://video.igem.org/download/streaming-playlists/hls/videos/93ff2046-d427-4f4b-8590-9de10877c4e6-240-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 13723685,
-            "resolution": "240p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "iGEM Teams",
-          "source_title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
-          "source_url": "https://video.igem.org/videos/watch/93ff2046-d427-4f4b-8590-9de10877c4e6",
           "license": "Attribution",
           "license_url": ""
         },
@@ -2563,9 +2625,708 @@
             "pedagogy_score": 44
           }
         }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5dcd4e29-4190-4945-ac16-1273520a9f71",
+        "title": "DNA polymorphism | Molecular basis of inheritance | Biology | Khan Academy",
+        "description": "What is DNA polymorphism, and what causes it? Khan Academy India explores how variations in only 0.1% of DNA create significant differences between individuals. The lesson defines DNA polymorphism, explains the criteria for its occurrence in popu...",
+        "source_url": "https://diler.tube/videos/watch/5dcd4e29-4190-4945-ac16-1273520a9f71",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/5dcd4e29-4190-4945-ac16-1273520a9f71-718.mp4",
+            "mime": "video/mp4",
+            "bytes": 16133959,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/5dcd4e29-4190-4945-ac16-1273520a9f71-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 13857565,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "DNA polymorphism | Molecular basis of inheritance | Biology | Khan Academy",
+          "source_url": "https://diler.tube/videos/watch/5dcd4e29-4190-4945-ac16-1273520a9f71",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "biology-life": {
+            "score": 10,
+            "evidence": [
+              "biology",
+              "biology"
+            ]
+          }
+        },
+        "pedagogy": {
+          "biology-life": {
+            "strong_title_matches": [
+              "biology"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "biology-life": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
       }
     ],
     "physics-foundations": [
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
+        "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 8378497,
+            "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "FuseSchool - Global Education",
+          "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 10,
+            "evidence": [
+              "chemistry",
+              "chemistry"
+            ]
+          },
+          "physics-foundations": {
+            "score": 20,
+            "evidence": [
+              "physics",
+              "energy",
+              "physics",
+              "energy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "chemistry"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "strong_title_matches": [
+              "energy"
+            ],
+            "strong_description_matches": [
+              "physics",
+              "energy"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "cca6c252-3a75-4bd4-b18d-eeaa52788566",
+        "title": "Electric current Grade 12 Physics NCERT Khan Academy (IN accent)",
+        "description": "Explore Electric current through electricity and magnetism examples. This video connects fields, circuits, forces, and electrical energy with clear visual reasoning.",
+        "source_url": "https://diler.tube/videos/watch/cca6c252-3a75-4bd4-b18d-eeaa52788566",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/cca6c252-3a75-4bd4-b18d-eeaa52788566-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 9896402,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/cca6c252-3a75-4bd4-b18d-eeaa52788566-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 10872518,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Electric current Grade 12 Physics NCERT Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/cca6c252-3a75-4bd4-b18d-eeaa52788566",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 34,
+            "evidence": [
+              "physics",
+              "electricity",
+              "energy",
+              "physics",
+              "forces",
+              "energy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [
+              "electricity",
+              "energy"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a980ae8b-7515-4d4a-9542-6e71880d9d0b",
+        "title": "Electric potential from multiple charges ｜ Grade 12 ｜ Physics ｜ NCERT ｜ Khan Academy (IN accent)",
+        "description": "Explore Electric potential from multiple charges through electricity and magnetism examples. This video connects fields, circuits, forces, and electrical energy with clear visual reasoning.",
+        "source_url": "https://diler.tube/videos/watch/a980ae8b-7515-4d4a-9542-6e71880d9d0b",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/a980ae8b-7515-4d4a-9542-6e71880d9d0b-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 8903305,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/a980ae8b-7515-4d4a-9542-6e71880d9d0b-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 9487401,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Electric potential from multiple charges ｜ Grade 12 ｜ Physics ｜ NCERT ｜ Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/a980ae8b-7515-4d4a-9542-6e71880d9d0b",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 34,
+            "evidence": [
+              "physics",
+              "electricity",
+              "energy",
+              "physics",
+              "forces",
+              "energy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [
+              "electricity",
+              "energy"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "bf00e06a-c574-4128-a8a3-1e7b2b9eb903",
+        "title": "Lenz's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
+        "description": "Explore Lenz's law through electricity and magnetism examples. This video connects fields, circuits, forces, and electrical energy with clear visual reasoning.",
+        "source_url": "https://diler.tube/videos/watch/bf00e06a-c574-4128-a8a3-1e7b2b9eb903",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/bf00e06a-c574-4128-a8a3-1e7b2b9eb903-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 10800959,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/bf00e06a-c574-4128-a8a3-1e7b2b9eb903-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 8747750,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Lenz's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/bf00e06a-c574-4128-a8a3-1e7b2b9eb903",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 34,
+            "evidence": [
+              "physics",
+              "electricity",
+              "energy",
+              "physics",
+              "forces",
+              "energy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [
+              "electricity",
+              "energy"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "b071adfd-f5e3-4224-bc62-782b522c3b50",
+        "title": "Fundamental and Derived quantities | Units and Measurements | Grade 11 | Physics | Khan Academy",
+        "description": "In this video, we explore the essential concepts of physical quantities, their classification into fundamental and derived quantities, and dive into the basics of dimensional equations. Whether you're new to physics or revisiting the fundamentals,...",
+        "source_url": "https://diler.tube/videos/watch/b071adfd-f5e3-4224-bc62-782b522c3b50",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/b071adfd-f5e3-4224-bc62-782b522c3b50-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 21260824,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/b071adfd-f5e3-4224-bc62-782b522c3b50-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 17663050,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Fundamental and Derived quantities | Units and Measurements | Grade 11 | Physics | Khan Academy",
+          "source_url": "https://diler.tube/videos/watch/b071adfd-f5e3-4224-bc62-782b522c3b50",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 10,
+            "evidence": [
+              "physics",
+              "physics"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [
+              "physics"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "64da4f3e-6df0-480a-a6ab-bced46a1f3e2",
+        "title": "Projectile on an incline | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
+        "description": "Learn Projectile on an incline with motion diagrams, graphs, and examples. This video connects position, velocity, acceleration, and force ideas in a physics context.",
+        "source_url": "https://diler.tube/videos/watch/64da4f3e-6df0-480a-a6ab-bced46a1f3e2",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/64da4f3e-6df0-480a-a6ab-bced46a1f3e2-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 30502451,
+            "resolution": "720p",
+            "fps": 15,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/64da4f3e-6df0-480a-a6ab-bced46a1f3e2-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 26077669,
+            "resolution": "480p",
+            "fps": 15,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Projectile on an incline | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/64da4f3e-6df0-480a-a6ab-bced46a1f3e2",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 14,
+            "evidence": [
+              "physics",
+              "physics",
+              "motion"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [
+              "physics"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "88430f99-77f4-47e6-8084-f683f3e0697f",
+        "title": "Elastic and inelastic collisions | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
+        "description": "Study Elastic and inelastic collisions through rotational or momentum-based examples. This video connects motion, forces, angular ideas, and conservation principles.",
+        "source_url": "https://diler.tube/videos/watch/88430f99-77f4-47e6-8084-f683f3e0697f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/88430f99-77f4-47e6-8084-f683f3e0697f-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 28488329,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/88430f99-77f4-47e6-8084-f683f3e0697f-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 23556339,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Elastic and inelastic collisions | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/88430f99-77f4-47e6-8084-f683f3e0697f",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 18,
+            "evidence": [
+              "physics",
+              "physics",
+              "forces",
+              "motion"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "0ec67e30-32e6-46b4-afbf-aee9916efef3",
+        "title": "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
+        "description": "Study Photon momentum through rotational or momentum-based examples. This video connects motion, forces, angular ideas, and conservation principles.",
+        "source_url": "https://diler.tube/videos/watch/0ec67e30-32e6-46b4-afbf-aee9916efef3",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/0ec67e30-32e6-46b4-afbf-aee9916efef3-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 3979489,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/0ec67e30-32e6-46b4-afbf-aee9916efef3",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 18,
+            "evidence": [
+              "physics",
+              "physics",
+              "forces",
+              "motion"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
       {
         "provider": "wikimedia-commons",
         "provider_id": "File:Physics Of Crystals by LesBrown.webm",
@@ -2775,6 +3536,84 @@
         }
       },
       {
+        "provider": "peertube",
+        "provider_id": "c24a0a16-d06d-4754-9aaa-188d61025acd",
+        "title": "Intro to Chemical reactions Chemical equation and reactions Chemistry Khan Academy",
+        "description": "Let's learn what are chemical reactions.",
+        "source_url": "https://diler.tube/videos/watch/c24a0a16-d06d-4754-9aaa-188d61025acd",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/c24a0a16-d06d-4754-9aaa-188d61025acd-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 13373455,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/c24a0a16-d06d-4754-9aaa-188d61025acd-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 11215606,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Intro to Chemical reactions Chemical equation and reactions Chemistry Khan Academy",
+          "source_url": "https://diler.tube/videos/watch/c24a0a16-d06d-4754-9aaa-188d61025acd",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 24,
+            "evidence": [
+              "chemistry",
+              "chemical reactions",
+              "chemistry",
+              "reactions"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry",
+              "chemical reactions"
+            ],
+            "strong_description_matches": [
+              "chemical reactions"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 76
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 76
+          }
+        }
+      },
+      {
         "provider": "wikimedia-commons",
         "provider_id": "File:Chemical Reactions GCSE Chemistry.webm",
         "title": "Chemical Reactions GCSE Chemistry",
@@ -2914,6 +3753,84 @@
         }
       },
       {
+        "provider": "peertube",
+        "provider_id": "23e16fc8-f87f-463a-ba35-a5f45353398d",
+        "title": "Inorganic chemistry course intro | Khan Academy",
+        "description": "norganic chemistry explores common features of s, p, d, and f block elements in the periodic table. But why study these you ask? In S block, while learning how to create hydrides helps us make fuel cell technologies, analysing ionisation energie...",
+        "source_url": "https://diler.tube/videos/watch/23e16fc8-f87f-463a-ba35-a5f45353398d",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/23e16fc8-f87f-463a-ba35-a5f45353398d-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 12139176,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/23e16fc8-f87f-463a-ba35-a5f45353398d-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 8106364,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Inorganic chemistry course intro | Khan Academy",
+          "source_url": "https://diler.tube/videos/watch/23e16fc8-f87f-463a-ba35-a5f45353398d",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 20,
+            "evidence": [
+              "chemistry",
+              "periodic table",
+              "chemistry",
+              "periodic table"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "chemistry",
+              "periodic table"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
         "provider": "wikimedia-commons",
         "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
         "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
@@ -2955,6 +3872,15 @@
               "chemistry",
               "chemistry"
             ]
+          },
+          "physics-foundations": {
+            "score": 20,
+            "evidence": [
+              "physics",
+              "energy",
+              "physics",
+              "energy"
+            ]
           }
         },
         "pedagogy": {
@@ -2970,12 +3896,30 @@
             "clickbait_title": false,
             "non_instructional_title": false,
             "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "strong_title_matches": [
+              "energy"
+            ],
+            "strong_description_matches": [
+              "physics",
+              "energy"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
           }
         },
         "selection": {
           "chemistry-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
+          },
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
           }
         }
       },
@@ -3030,6 +3974,311 @@
             ],
             "strong_description_matches": [
               "periodic table"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5b40adeb-8077-4587-8b23-7b71fe29d7c0",
+        "title": "Concentration cell | Grade 12 | Chemistry | NCERT | Khan Academy (IN accent)",
+        "description": "Learn Concentration cell through clear chemistry examples and visual reasoning. This video helps connect molecular structure, reactions, and chemical patterns.",
+        "source_url": "https://diler.tube/videos/watch/5b40adeb-8077-4587-8b23-7b71fe29d7c0",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/5b40adeb-8077-4587-8b23-7b71fe29d7c0-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 16113507,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/5b40adeb-8077-4587-8b23-7b71fe29d7c0-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 13503322,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Concentration cell | Grade 12 | Chemistry | NCERT | Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/5b40adeb-8077-4587-8b23-7b71fe29d7c0",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 14,
+            "evidence": [
+              "chemistry",
+              "chemistry",
+              "reactions"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "chemistry"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "d92cb275-9c4c-487b-96eb-d88a7f2d1394",
+        "title": "Gay Lussac's Law| Some basic principles of chemistry | Grade 11 | Chemistry | Khan Academy",
+        "description": "Unlock the secret behind how gases react in perfect volume ratios with Gay-Lussac’s law! This video breaks down the law using two classic chemical reactions — the formation of water and ammonia — revealing how nature follows precise mathematical p...",
+        "source_url": "https://diler.tube/videos/watch/d92cb275-9c4c-487b-96eb-d88a7f2d1394",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/d92cb275-9c4c-487b-96eb-d88a7f2d1394-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 16265276,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/d92cb275-9c4c-487b-96eb-d88a7f2d1394-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 12849231,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Gay Lussac's Law| Some basic principles of chemistry | Grade 11 | Chemistry | Khan Academy",
+          "source_url": "https://diler.tube/videos/watch/d92cb275-9c4c-487b-96eb-d88a7f2d1394",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 24,
+            "evidence": [
+              "chemistry",
+              "chemical reactions",
+              "chemistry",
+              "reactions"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "chemical reactions"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "447ba531-dd71-4d41-9c39-f8ef96dc6002",
+        "title": "Nickel-cadmium battery | Grade 12 | Chemistry | NCERT | Khan Academy (IN accent)",
+        "description": "Learn Nickel-cadmium battery through clear chemistry examples and visual reasoning. This video helps connect molecular structure, reactions, and chemical patterns.",
+        "source_url": "https://diler.tube/videos/watch/447ba531-dd71-4d41-9c39-f8ef96dc6002",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/447ba531-dd71-4d41-9c39-f8ef96dc6002-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 20434996,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/447ba531-dd71-4d41-9c39-f8ef96dc6002-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 16876145,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Nickel-cadmium battery | Grade 12 | Chemistry | NCERT | Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/447ba531-dd71-4d41-9c39-f8ef96dc6002",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 14,
+            "evidence": [
+              "chemistry",
+              "chemistry",
+              "reactions"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "chemistry"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "ccaaa63e-bf90-4546-b90a-0cb72652d960",
+        "title": "Oxidation and reduction | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)",
+        "description": "Learn Oxidation and reduction through clear chemistry examples and visual reasoning. This video helps connect molecular structure, reactions, and chemical patterns.",
+        "source_url": "https://diler.tube/videos/watch/ccaaa63e-bf90-4546-b90a-0cb72652d960",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/ccaaa63e-bf90-4546-b90a-0cb72652d960-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 20376377,
+            "resolution": "720p",
+            "fps": 15,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/ccaaa63e-bf90-4546-b90a-0cb72652d960-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 18063068,
+            "resolution": "480p",
+            "fps": 15,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Oxidation and reduction | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/ccaaa63e-bf90-4546-b90a-0cb72652d960",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 14,
+            "evidence": [
+              "chemistry",
+              "chemistry",
+              "reactions"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "chemistry"
             ],
             "educational_intent": true,
             "instructional_title": true,
@@ -3111,153 +4360,6 @@
           "chemistry-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 52
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "76846280-2d75-4397-8802-56d7a8ee2e14",
-        "title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-        "description": "Learn the basics about balancing equations, as a part of chemical calculations. The law of conservation of mass states that no atoms are lost or made during a chemical reaction. There are different ways of arranging the atoms. Chemical reac...",
-        "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 7276195,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 4512470,
-            "resolution": "480p",
-            "fps": 25,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-          "source_url": "https://diler.tube/videos/watch/76846280-2d75-4397-8802-56d7a8ee2e14",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "chemistry-foundations": {
-            "score": 14,
-            "evidence": [
-              "chemistry",
-              "chemistry",
-              "atoms"
-            ]
-          }
-        },
-        "pedagogy": {
-          "chemistry-foundations": {
-            "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "chemistry-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51",
-        "title": "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-        "description": "In this video, we’re going to learn about the loss of mass in a chemical reaction, how it happens and why we measure this. The total MASS of reactants will be the same as that of the products, as mass is always conserved in a chemical reaction...",
-        "source_url": "https://diler.tube/videos/watch/4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 10157813,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 6686295,
-            "resolution": "480p",
-            "fps": 25,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "How To Measure Loss Of Mass In A Reaction ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool",
-          "source_url": "https://diler.tube/videos/watch/4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "chemistry-foundations": {
-            "score": 10,
-            "evidence": [
-              "chemistry",
-              "chemistry"
-            ]
-          }
-        },
-        "pedagogy": {
-          "chemistry-foundations": {
-            "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "chemistry-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
           }
         }
       },
@@ -3949,6 +5051,295 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "7d2e9f22-2377-46ef-a84c-de163f98c279",
+        "title": "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
+        "description": "Subscribe to KLT: https://www.youtube.com/channel/UC7EFWpvc1wYuUwrtZ_BLi9A?sub_confirmation=1 Listen to KLT Music on Spotify: https://open.spotify.com/artist/3RvQsrlQFlGXHeLl1Vl9e0?si=Q-yVLAGmQEO-4hnbXvWe_Q&nd=1 Learn the 8 planets of our Solar System -- Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune -- with the Planet Song by KLT! Subscribe to my channel: https://www.youtube.com/channel/UC7EFWpvc1wYuUwrtZ_BLi9A?sub_confirmation=1 Check out my newest videos: https://youtube.com/playlist?list=PLmIHwWY0hiuyOsg6agHxBjlEoZcSlzsDS Here are my most popular videos: https://youtube.com/playlist?list=PLmIHwWY0hiuwJoMu_u77fQ9z14hG0cHzz Kids Learning Tube App for iPhone & iPad * https://apps.apple.com/us/app/kids-learning-tube/id1491094573?ls=1 Android Phone and Tablet * https://play.google.com/store/apps/details?id=com.w35ef400ff78.www https://kidslearningtubeshop.com/products/video-membership Watch Kids Learning Tube ad-free for $12 a YEAR! See the latest videos before anyone else in the world. Sign up today for ad-free video streaming for all Kids Learning Tube videos! KLT Website: https://kidslearningtubeshop.com/ T-Shirts, Blankets and More: https://kidslearningtubeshop.com/ Music Downloads: https://kidslearningtubeshop.com/collections/music Facebook: https://www.facebook.com/kidslearningtube Tweet Us: https://twitter.com/learningtube Instagram: https://instagram.com/kidslearningtube iTunes: http://itunes.apple.com/album/id1192890817?ls=1&app=itunes Lyrics: There are eight planets in our solar system We all revolve around the sun Learn about the different planets Now sing along and have some fun My name is Mercury I’m the second hottest planet The closest one to the sun A year on my surface is 88 days I’m the smallest but I’m lots of fun My name is Venus I’m",
+        "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/7d2e9f22-2377-46ef-a84c-de163f98c279",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/7d2e9f22-2377-46ef-a84c-de163f98c279-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 47309557,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/7d2e9f22-2377-46ef-a84c-de163f98c279-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 26245238,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/7d2e9f22-2377-46ef-a84c-de163f98c279-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 17508366,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/7d2e9f22-2377-46ef-a84c-de163f98c279-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 47294463,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/7d2e9f22-2377-46ef-a84c-de163f98c279-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 26228468,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/7d2e9f22-2377-46ef-a84c-de163f98c279-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 17492212,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "bonnardet_emeline",
+          "source_title": "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
+          "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/7d2e9f22-2377-46ef-a84c-de163f98c279",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "astronomy-space": {
+            "score": 10,
+            "evidence": [
+              "solar system",
+              "solar system"
+            ]
+          }
+        },
+        "pedagogy": {
+          "astronomy-space": {
+            "strong_title_matches": [
+              "solar system"
+            ],
+            "strong_description_matches": [
+              "solar system"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "astronomy-space": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a6008fec-a41d-47c5-ae4a-2fdd0ca01651",
+        "title": "The Solar System Song",
+        "description": "Provided to YouTube by CDBaby The Solar System Song · Kids TV 123 Educational Songs 1 ℗ 2018 A J Jenkins Released on: 2018-10-18 Auto-generated by YouTube.",
+        "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/a6008fec-a41d-47c5-ae4a-2fdd0ca01651",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/a6008fec-a41d-47c5-ae4a-2fdd0ca01651-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 13418891,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/a6008fec-a41d-47c5-ae4a-2fdd0ca01651-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 11172525,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/a6008fec-a41d-47c5-ae4a-2fdd0ca01651-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 8610893,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/a6008fec-a41d-47c5-ae4a-2fdd0ca01651-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 13405909,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/a6008fec-a41d-47c5-ae4a-2fdd0ca01651-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 11159543,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/a6008fec-a41d-47c5-ae4a-2fdd0ca01651-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 8597911,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "bonnardet_emeline",
+          "source_title": "The Solar System Song",
+          "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/a6008fec-a41d-47c5-ae4a-2fdd0ca01651",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "astronomy-space": {
+            "score": 10,
+            "evidence": [
+              "solar system",
+              "solar system"
+            ]
+          }
+        },
+        "pedagogy": {
+          "astronomy-space": {
+            "strong_title_matches": [
+              "solar system"
+            ],
+            "strong_description_matches": [
+              "solar system"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "astronomy-space": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "b06cd552-6f9f-4feb-9c26-8b8c353292ca",
+        "title": "The solar system ｜ Science ｜ Khan Academy (IN accent)",
+        "description": "Take a tour of the solar system and see the planets together in one clear visual overview. This lesson introduces the major planets and helps build an intuitive understanding of our solar system.",
+        "source_url": "https://diler.tube/videos/watch/b06cd552-6f9f-4feb-9c26-8b8c353292ca",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/b06cd552-6f9f-4feb-9c26-8b8c353292ca-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 13693241,
+            "resolution": "720p",
+            "fps": 60,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/b06cd552-6f9f-4feb-9c26-8b8c353292ca-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 10591661,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "The solar system ｜ Science ｜ Khan Academy (IN accent)",
+          "source_url": "https://diler.tube/videos/watch/b06cd552-6f9f-4feb-9c26-8b8c353292ca",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "astronomy-space": {
+            "score": 10,
+            "evidence": [
+              "solar system",
+              "solar system"
+            ]
+          }
+        },
+        "pedagogy": {
+          "astronomy-space": {
+            "strong_title_matches": [
+              "solar system"
+            ],
+            "strong_description_matches": [
+              "solar system"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "astronomy-space": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "2626cdaf-e341-4c3b-8719-724da79c9a55",
         "title": "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "description": "It makes sense to use a telescope to look up at the heavens, but what can we learn from using a microscope instead? Meteorites are natural objects that survive their fall to Earth from space. Almost all are fragments of ancient asteroids, forme...",
@@ -4615,8 +6006,8 @@
         "provider": "peertube",
         "provider_id": "b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
         "title": "Vartika: Inside nowadays Mathematics (Part 4)",
-        "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge....",
-        "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
+        "description": "How to place the Vartika mathematical operation inside current Mathematical World. Vartika being a basic operation, like the Addition operation, does create a basic change in Mathematics, while still perserving the current Mathematical knowleadge. Because Vartika is more basic than Addition.",
+        "source_url": "https://p.eertu.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC0",
@@ -4643,7 +6034,7 @@
         "attribution": {
           "creator": "danisanti",
           "source_title": "Vartika: Inside nowadays Mathematics (Part 4)",
-          "source_url": "https://peertube.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
+          "source_url": "https://p.eertu.be/videos/watch/b356b20b-d97b-4727-acc3-3b5ee5c17bb9",
           "license": "Public Domain Dedication",
           "license_url": ""
         },
@@ -4744,73 +6135,6 @@
       }
     ],
     "computing-basics": [
-      {
-        "provider": "peertube",
-        "provider_id": "a6ef600b-0be0-4ec7-89f1-e5c953a0a8ce",
-        "title": "Niklaus Wirth on Teaching Computer Science",
-        "description": "With a goal of improving how computer science is taught, Niklaus Wirth created some of the fieldís integral programming languages, including Algol68, Pascal, and Oberon.",
-        "source_url": "https://gnulinux.tube/videos/watch/a6ef600b-0be0-4ec7-89f1-e5c953a0a8ce",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://gnulinux.tube/download/streaming-playlists/hls/videos/a6ef600b-0be0-4ec7-89f1-e5c953a0a8ce-352-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 17681191,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Vartanian",
-          "source_title": "Niklaus Wirth on Teaching Computer Science",
-          "source_url": "https://gnulinux.tube/videos/watch/a6ef600b-0be0-4ec7-89f1-e5c953a0a8ce",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "computing-basics": {
-            "score": 10,
-            "evidence": [
-              "computer science",
-              "computer science"
-            ]
-          }
-        },
-        "pedagogy": {
-          "computing-basics": {
-            "strong_title_matches": [
-              "computer science"
-            ],
-            "strong_description_matches": [
-              "computer science"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "computing-basics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
       {
         "provider": "peertube",
         "provider_id": "ada53935-7f08-4375-a479-dc0dfe929ddf",
@@ -5468,7 +6792,7 @@
         "provider": "peertube",
         "provider_id": "2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "title": "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat...",
+        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat, a shading and to finish with a paint-over and post-effect. This is a tutorial doesn't dive into the details, but keeps an overview of the workflow, the goal is to give an idea of the full path and to give tips on the way. I hope showing my recipe will inspire you to start a drawing to test something you'll find interesting and find your own path. **Timeline:** - 00:19 Thumbnail (or Sketch) - 00:57 Drawing - 01:41 Silhouettes - 02:26 Color Flat - 03:31 Shading - 05:46 Paint-over and post effects License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com webcomic: www.peppercarrot.com Background music by Omfgdude \"Lofi-Hip-hop\" CC-0 / Public Domain - 2018 https://opengameart.org/content/lofi-hip-hop Special thanks to @RinCat@meow.cloud on the Fediverse for saving a corrupted MP4 recording of this video. Edited with Kdenlive 21.04 appimage on Fedora 37 KDE **Support:** - Patreon: https://www.patreon.com/join/davidrevoy? - Tipeee: https://fr.tipeee.com/pepper-carrot - Paypal: https://paypal.me/davidrevoy - Liberapay: https://liberapay.com/davidrevoy/ **Follow:** - Mastodon: https://framapiaf.org/@davidrevoy - Twitter: http://twitter.com/davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ **Website:** - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/ **Alternative channel:** - Peertube: https://peertube.touhoppai.moe/accounts/shichimi/videos - Youtube: https://www.youtube.com/",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -5542,9 +6866,10 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 10,
+            "score": 14,
             "evidence": [
-              "digital painting"
+              "digital painting",
+              "music"
             ]
           }
         },
@@ -5895,6 +7220,80 @@
           "health-wellness": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 45
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "d6af147d-898f-4ef8-b3d9-b96005cce9b5",
+        "title": "Vitamin deficiency diseases ｜ Nutrition ｜ Class 10 ｜ Life Science ｜ Telangana ｜ Khan Academy",
+        "description": "In this video, we uncover how small nutrients can make a big difference to health. The lesson explains what vitamins are, why they are called micronutrients, and how they quietly regulate vital processes such as vision, immunity, nerve function, ...",
+        "source_url": "https://diler.tube/videos/watch/d6af147d-898f-4ef8-b3d9-b96005cce9b5",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/d6af147d-898f-4ef8-b3d9-b96005cce9b5-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 32694253,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/d6af147d-898f-4ef8-b3d9-b96005cce9b5-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 17634995,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Vitamin deficiency diseases ｜ Nutrition ｜ Class 10 ｜ Life Science ｜ Telangana ｜ Khan Academy",
+          "source_url": "https://diler.tube/videos/watch/d6af147d-898f-4ef8-b3d9-b96005cce9b5",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "health-wellness": {
+            "score": 14,
+            "evidence": [
+              "nutrition",
+              "health",
+              "nutrition"
+            ]
+          }
+        },
+        "pedagogy": {
+          "health-wellness": {
+            "strong_title_matches": [
+              "nutrition"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "health-wellness": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
           }
         }
       }
@@ -7322,6 +8721,89 @@
         }
       },
       {
+        "provider": "peertube",
+        "provider_id": "d5e63fcd-0a00-4324-b7af-d79242288ecd",
+        "title": "UM-Macau: PoreGlow: Safeguarding Food Safety Against Live Listeria (2026) - Project Promotion",
+        "description": "**Title:** PoreGlow: Safeguarding Food Safety Against Live Listeria **Description:** UM-Macau iGEM team aims to develop PoreGlow, a modular biosensing system addressing slow Listeria monocytogenes detection in refrigerated food. Target LLO toxins pierce liposomes, releasing tags that recombine into green fluorescence alongside LOV and TEV modules for portable, equipment-free live-bacteria detection. Integrated with education, commercial outreach, and industry collaboration, this low-cost solution would safeguard the global food safety from kitchens to supermarkets. [Official Page](https://teams.igem.org/6101)",
+        "source_url": "https://video.igem.org/videos/watch/d5e63fcd-0a00-4324-b7af-d79242288ecd",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.igem.org/download/streaming-playlists/hls/videos/d5e63fcd-0a00-4324-b7af-d79242288ecd-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 17698668,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.igem.org/download/streaming-playlists/hls/videos/d5e63fcd-0a00-4324-b7af-d79242288ecd-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 7065455,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.igem.org/download/streaming-playlists/hls/videos/d5e63fcd-0a00-4324-b7af-d79242288ecd-240-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 2573574,
+            "resolution": "240p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "iGEM Teams",
+          "source_title": "UM-Macau: PoreGlow: Safeguarding Food Safety Against Live Listeria (2026) - Project Promotion",
+          "source_url": "https://video.igem.org/videos/watch/d5e63fcd-0a00-4324-b7af-d79242288ecd",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "cooking-food-safety": {
+            "score": 10,
+            "evidence": [
+              "food safety",
+              "food safety"
+            ]
+          }
+        },
+        "pedagogy": {
+          "cooking-food-safety": {
+            "strong_title_matches": [
+              "food safety"
+            ],
+            "strong_description_matches": [
+              "food safety"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "cooking-food-safety": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
         "provider": "wikimedia-commons",
         "provider_id": "File:Food Safety During Power Outages.webm",
         "title": "Food Safety During Power Outages",
@@ -7584,84 +9066,6 @@
       }
     ],
     "electronics-basics": [
-      {
-        "provider": "peertube",
-        "provider_id": "7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
-        "title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
-        "description": "That's it - new soldering equipment time in my lab! My previous station (Solomon SL20) served me well for 15 years if not more, but I grew more and more impatient with having to wait until it heats up, and I work with SMT electronics pretty often, so I needed a modern iron for precise tips and a hot air station. Will this one deliver? Sure so! The intro was recorded later on after I found out I lost audio on a good part of the footage. Had this issue once before, got no idea why it's the case. Still gotta pin that pesky little bugger down... Anyway, I had some time to work with the new station, both hot air and iron, and am really satisfied with it. 0:00 Intro From the Future! 1:16 It's There 1:58 Goodbye, Solomon 4:45 New Iron 7:50 Back To The Past... Unboxing 18:00 Station Outside 20:20 Moving the Hot Air Handle Holder 24:00 Front Panel 25:30 No Warranty to Void? Take It Apart! 31:20 Grounding Check 35:08 Back Together... and Testing It! 44:17 Hot Air Test 48:00 Desoldering Station Accessories 51:45 Afterword Support me on my Patreon page at https://www.patreon.com/KeritechElectronics or via PayPal https://paypal.me/keritech Instagram - https://www.instagram.com/KeriSzafir Hackaday - https://hackaday.io/keritech #ElectronicsCreators #Keritech #Electronics",
-        "source_url": "https://makertube.net/videos/watch/7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://makertube.net/download/streaming-playlists/hls/videos/7bb03b6d-9710-4a46-a2db-021c4af7dfd8-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 1221267030,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://makertube.net/download/streaming-playlists/hls/videos/7bb03b6d-9710-4a46-a2db-021c4af7dfd8-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 659077585,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Keri Szafir",
-          "source_title": "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
-          "source_url": "https://makertube.net/videos/watch/7bb03b6d-9710-4a46-a2db-021c4af7dfd8",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "electronics-basics": {
-            "score": 20,
-            "evidence": [
-              "electronics",
-              "soldering",
-              "electronics",
-              "soldering"
-            ]
-          }
-        },
-        "pedagogy": {
-          "electronics-basics": {
-            "strong_title_matches": [
-              "soldering"
-            ],
-            "strong_description_matches": [
-              "electronics",
-              "soldering"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 52
-          }
-        },
-        "selection": {
-          "electronics-basics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 52
-          }
-        }
-      },
       {
         "provider": "peertube",
         "provider_id": "1122173a-fe5a-4f38-a15e-060851f179bb",
@@ -9711,7 +11115,190 @@
         }
       }
     ],
-    "meditation-mindfulness": [],
+    "meditation-mindfulness": [
+      {
+        "provider": "peertube",
+        "provider_id": "0db5672a-75fa-4e09-b281-b5d5fe5e386d",
+        "title": "Fly Like a Butterfly- Kids Yoga and Mindfulness with @yogapalooza",
+        "description": "Please Subscribe so we can GROW 🌱💗🦋! Can you fly like a butterfly? Let's learn how in this fun kids video! Shop ► https://shop.yogapalooza.com/ Parents and Teachers! Please SUBSCRIBE to support our mission for more Happy + Healthy Kids ► http://tinyurl.com/yogapaloozasubscribe Wanna try more Yogapalooza favorites? Check out these top songs! Going to Meet an Alien 👽✨ - https://www.youtube.com/watch?v=0kanagmDoZw Going to the Jungle 🌴🐒 - https://www.youtube.com/watch?v=IGeC6UymoAY Rocketship Yoga Adventure 🚀🌌 - https://www.youtube.com/watch?v=FfX5c2HHJWs The Very Hungry Mouse 🐭🧀 - https://www.youtube.com/watch?v=0kanagmDoZw The Skeleton Shake 💀🎶 - https://www.youtube.com/watch?v=_KtF4xNmCZo The Yoga Alphabet 🔤🧘‍♀️ - https://www.youtube.com/watch?v=O0Bb5T2-b1A Silly to Calm: Quick Kids Yoga Movement Break 🤪➡️😌 - https://www.youtube.com/watch?v=29DQJWGwEnY Fly Like a Butterfly 🦋✨ - https://www.youtube.com/watch?v=oYI0TPJOuGk Back To School: Kids Yoga and Music 🎒🎶 - https://www.youtube.com/watch?v=5aMaOuWooJ4 Under the Sea: Kids Yoga Music Adventure 🦀🐬🦈 - https://www.youtube.com/watch?v=0kanagmDoZw About Yogapalooza - Your One-Stop Adventure in Kids Yoga & Mindfulness Our channel combines yoga and storytelling, making it an ideal place for kids to learn and enjoy. Teacher-approved positive screen time! Dance, move, stretch, sing, play, and relax with Yogapalooza! Positive screen time! 🧘 Your magic wand for calm, check out the complete Yogapalooza kit http://tinyurl.com/kityogapalooza Follow Yogapalooza online for more fun! Yogapalooza on Instagram: @yogapalooza Facebook: @barikoral Website: https://yogapalooza.com/ Stream Yogapalooza music here: YouTube: https://www.youtube.com/user/barikoral Spotify: https://open.spotify.com/artist/40GTTHyDAFn0HJ1vsk7CYZ?si=FfaWZxY2TriftG2o",
+        "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/0db5672a-75fa-4e09-b281-b5d5fe5e386d",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/0db5672a-75fa-4e09-b281-b5d5fe5e386d-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 23926939,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/0db5672a-75fa-4e09-b281-b5d5fe5e386d-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 16929582,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/0db5672a-75fa-4e09-b281-b5d5fe5e386d-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 10964514,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/0db5672a-75fa-4e09-b281-b5d5fe5e386d-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 23917901,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/0db5672a-75fa-4e09-b281-b5d5fe5e386d-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 16920336,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/0db5672a-75fa-4e09-b281-b5d5fe5e386d-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 10956004,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "bonnardet_emeline",
+          "source_title": "Fly Like a Butterfly- Kids Yoga and Mindfulness with @yogapalooza",
+          "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/0db5672a-75fa-4e09-b281-b5d5fe5e386d",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "meditation-mindfulness": {
+            "score": 10,
+            "evidence": [
+              "mindfulness",
+              "mindfulness"
+            ]
+          }
+        },
+        "pedagogy": {
+          "meditation-mindfulness": {
+            "strong_title_matches": [
+              "mindfulness"
+            ],
+            "strong_description_matches": [
+              "mindfulness"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "meditation-mindfulness": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "f3d18d0b-071a-4c52-8369-97a6e9baef4d",
+        "title": "Inner Smile Guided Meditation for Happiness & Relaxation",
+        "description": "\"[Inner Smile Guided Meditation for Happiness & Relaxation](https://www.youtube.com/watch?v=kETa8xGIakw)\" by [Kim Robinson Yoga](https://kimrobinsonyoga.com/) is licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/legalcode) --- A 10 min beginner-friendly mediation to release stress & cultivate happiness from within! ❤️ Support me on Patreon ❤️ 👉 https://bit.ly/krypateron 💎 Yin Yoga Online Course 👉 http://bit.ly/yin-mentalhealth 🌟 Yoga Nidra Online Program 👉 https://bit.ly/krypateron Hi yogis and welcome to the Channel! This practice brings about the sensation of a smile through the body. It is designed to provide you with deep relaxation and an inner sense of happiness & positivity. You can practice lying down on the floor, which makes it very suitable for beginners, or seated on a cushion. It aims to release any tension you might be holding in your abdomen, belly, face and jaw. In today's society, we're told to suck and hold in our bellies which can result in feelings of tension in this area & negative thoughts about yourself. We use the visualization of smiling, which is proven to release happy chemicals in the body. This meditation is especially healing for those with digestive disorders, chronic stress and anxiety. ✅ PLEASE SUBSCRIBE! It's the #1 way to support free yoga on the Internet 👉 http://bit.ly/kryogayt I upload two new yoga classes every week. Thanks for practicing with me 💜 Kim ◽️Website: http://www.kimrobinsonyoga.com ◽️ Instagram: https://www.instagram.com/kimrobinson_yoga/ ◽️ Facebook: https://www.facebook.com/krobinsonyoga ◽️ Twitter: https://twitter.com/kimrobinsonyoga 🔹🔹🔹🔹👇 ONLINE PROGRAMS 👇🔹🔹🔹🔹 ☯️ Yin Yoga for Mental Health Online Course ☯️ 👉 http://bit.ly/yin-mentalhealth 📿 Yoga Nidra for Mental Wellbeing Online Program 📿 👉 http",
+        "source_url": "https://p.eertu.be/videos/watch/f3d18d0b-071a-4c52-8369-97a6e9baef4d",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/f3d18d0b-071a-4c52-8369-97a6e9baef4d-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 33491610,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/f3d18d0b-071a-4c52-8369-97a6e9baef4d-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 24194442,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "danisanti",
+          "source_title": "Inner Smile Guided Meditation for Happiness & Relaxation",
+          "source_url": "https://p.eertu.be/videos/watch/f3d18d0b-071a-4c52-8369-97a6e9baef4d",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "meditation-mindfulness": {
+            "score": 10,
+            "evidence": [
+              "meditation",
+              "meditation"
+            ]
+          }
+        },
+        "pedagogy": {
+          "meditation-mindfulness": {
+            "strong_title_matches": [
+              "meditation"
+            ],
+            "strong_description_matches": [
+              "meditation"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "meditation-mindfulness": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      }
+    ],
     "communication-conflict": [
       {
         "provider": "wikimedia-commons",
@@ -9847,7 +11434,89 @@
       }
     ],
     "parenting-caregiving": [],
-    "gardening-plants": [],
+    "gardening-plants": [
+      {
+        "provider": "peertube",
+        "provider_id": "7648d606-2b33-4fd2-865c-6c426f5c90eb",
+        "title": "Gardening with a disability #125",
+        "description": "Having two large gardens is a trial run to see if my body can handle it. So far, I haven't missed a deadline. I adapt the techniques and tools to what my body can handle, but the most important lessons were on patience, pacing, and perfectionism. Ad-free version: https://video.katehildenbrand.com/c/katehildenbrand/videos Written version: https://rootsandcalluses.com/ DONATE: https://rootsandcalluses.com/support/ NOVELS: https://www.buymeacoffee.com/katehildenbrand/extras Or at the major book retailers. Your local store should be able to order them. WEBSITE: https://rootsandcalluses.com NEWSLETTER: https://rootsandcalluses.com/newsletter/ MASTODON: https://mastodon.social/@rootsandcalluses Ad-free version: https://video.katehildenbrand.com/c/katehildenbrand/videos Written version: https://rootsandcalluses.com/ DONATE: https://rootsandcalluses.com/support/ NOVELS: https://www.buymeacoffee.com/katehildenbrand/extras Or anywhere you buy ebooks WEBSITE: https://rootsandcalluses.com MASTODON: https://mastodon.social/@rootsandcalluses FOOTAGE: Drone footage was provided by my husband. All other footage was created by me or filmed for me. CHAPTERS: 00:00 Introduction 00:40 Temperature ping pong 01:34 Struggles with disability 04:24 The garden is therapy 05:24 Adapting in the garden",
+        "source_url": "https://video.katehildenbrand.com/videos/watch/7648d606-2b33-4fd2-865c-6c426f5c90eb",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://video.katehildenbrand.com/download/streaming-playlists/hls/videos/7648d606-2b33-4fd2-865c-6c426f5c90eb-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 505860956,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.katehildenbrand.com/download/streaming-playlists/hls/videos/7648d606-2b33-4fd2-865c-6c426f5c90eb-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 250103961,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.katehildenbrand.com/download/streaming-playlists/hls/videos/7648d606-2b33-4fd2-865c-6c426f5c90eb-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 131725396,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Kate Hildenbrand",
+          "source_title": "Gardening with a disability #125",
+          "source_url": "https://video.katehildenbrand.com/videos/watch/7648d606-2b33-4fd2-865c-6c426f5c90eb",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "gardening-plants": {
+            "score": 10,
+            "evidence": [
+              "gardening",
+              "gardening"
+            ]
+          }
+        },
+        "pedagogy": {
+          "gardening-plants": {
+            "strong_title_matches": [
+              "gardening"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "gardening-plants": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      }
+    ],
     "entrepreneurship-small-business": [
       {
         "provider": "peertube",
@@ -9992,6 +11661,70 @@
           "entrepreneurship-small-business": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Partners in Safety- An Insurance and Small Business Perspective.webm",
+        "title": "Partners in Safety- An Insurance and Small Business Perspective",
+        "description": "Falls are the number one cause of construction-worker fatalities, accounting for one-third of on-the-job deaths in the industry. Each year NIOSH, OSHA, and CPWR–The Center for Construction Research and Training lead a National Campaign to Prevent Falls in Construction ( http://www.stopconstructionfalls.com/ ). Builders Mutual talks about the role of the insurance industry (while working with small construction businesses) to prevent falls injuries and fatalities through this campaign and the National Stand-Down. They share the business perspective on the high cost of not being safe and benefits of investing in safety. Small businesses also discuss the benefits of participating in this National Campaign and Stand-Down. Comments on this video are allowed in accordance with our comment policy: https://www.cdc.gov/SocialMedia/Tools/CommentPolicy.html This video can also be viewed at https://www.cdc.gov/niosh/video/lo-res/partner-safety/PartnersForSafety_InsAndSmBizPerspective_LoRes.mp4",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Public domain",
+          "url": "",
+          "evidence": "Public domain | Public domain | pd |",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/2/28/Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 58274942,
+            "provider_sha1": "34bb5ab04934550b92f9f3cd73900dff714f5624",
+            "role": "original"
+          }
+        ],
+        "quality_score": 91,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Centers for Disease Control and Prevention",
+          "source_title": "Partners in Safety- An Insurance and Small Business Perspective",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm",
+          "license": "Public domain",
+          "license_url": ""
+        },
+        "relevance": {
+          "entrepreneurship-small-business": {
+            "score": 10,
+            "evidence": [
+              "small business",
+              "small business"
+            ]
+          }
+        },
+        "pedagogy": {
+          "entrepreneurship-small-business": {
+            "strong_title_matches": [
+              "small business"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 37
+          }
+        },
+        "selection": {
+          "entrepreneurship-small-business": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 37
           }
         }
       }
@@ -10449,10 +12182,142 @@
         }
       },
       {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Continuous — Teaching Ideas — 2.webm",
+        "title": "English Grammar — Present Continuous — Teaching Ideas — 2",
+        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. The TEFL lesson in this video can be found in our 140-hour online TEFL certification course.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 2841607,
+            "provider_sha1": "4cb8123a80ae5416ff295f1325cc9e110653f074",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Continuous — Teaching Ideas — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [
+              "English grammar"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Contiuous — Teaching Ideas — 3.webm",
+        "title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
+        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. . ///",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3557521,
+            "provider_sha1": "8c650a73239f91c3e60c171fc06603b5768e4232",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [
+              "English grammar"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
         "provider": "peertube",
         "provider_id": "7f7b757d-358e-4b92-a923-f016fa561023",
         "title": "Starting to learn Taiwanese: Language Learning Journey 1",
-        "description": "I recently started a language learning journey to learn Taiwanese (Tâi-gí). This is a brief overview of how I started and what I did to find resources and start studying. I also describe confusion I encountered due to the wide variety of Taiwanese...",
+        "description": "I recently started a language learning journey to learn Taiwanese (Tâi-gí). This is a brief overview of how I started and what I did to find resources and start studying. I also describe confusion I encountered due to the wide variety of Taiwanese accents and pronunciations and how I resolved the issue for now. 0:00 Introduction 0:54 Acquiring resources 1:37 Starting to study 3:21 Crisis of faith 4:33 Deep dive 5:41 Standard American English 6:50 Standard Taiwanese 8:04 Starting back up 8:38 Creating resources 9:50 Conclusion The video contains snippets of images and video of Taiwanese language learning web sites, books, and other resources. Note: The draft presentation seen in the video has a few errors where diacritics (accent marks) are over the wrong vowels. (Other English-language names that have been used for the Taiwanese language include: Taiwanese Hokkien, Southern Min, Minnan, Minnanyu, Minnanese, Hoklo, Holo, Formosan, Fujianese, Taigu, Taiyu, and \"Taiwan Taiwanese\"/\"Taiwan Taiyu\".) #Taiwanese #Tâigí #LanguageLearning",
         "source_url": "https://neat.tube/videos/watch/7f7b757d-358e-4b92-a923-f016fa561023",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -10536,6 +12401,134 @@
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Perfect — Teaching Ideas — 2.webm",
+        "title": "English Grammar — Present Perfect — Teaching Ideas — 2",
+        "description": "The teaching idea covered in this video is a fun group game that should generate a good deal of student talk time using the Present Perfect tense. The students will be in small groups and each student will have the question sheet with a number of pictures and word prompts. Students take turns forming their question with the aid of the prompts. The groups then give their answers using the Present Perfect. The prompts include: win/a competition, go/scuba-diving, meet/ a famous person The questions would be: Have you ever won a competition?, Have you ever been scuba-diving?, Have you ever met a famous person? Group members would answer, Yes I have...., No I haven't... After a given amount of time each group share their answers with the class. The teacher could then encourage the class to come up with their own prompts and repeat the game. One area within the EFL industry that is very popular is that of teaching individual students. A game like the activity above could be adapted for one student. There is a demand for one to one lessons particularly in the business world. These types of lessons allow the teacher to focus specifically on the particular needs and wants of one student. Another advantage for the teacher is that you are only teaching to one level. These students are usually highly motivated.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3849512,
+            "provider_sha1": "d87575989d8e9b454e05a0d4a7875f8c2f9104ab",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Perfect — Teaching Ideas — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Simple — Teaching Ideas — 1.webm",
+        "title": "English Grammar — Present Simple — Teaching Ideas — 1",
+        "description": "The teaching ideas in these ITTT videos are intended to be used in the Activate stage of a lesson. During this stage students are encouraged to use the language as freely and communicatively as possible. The focus is more on the fluency than on the accuracy of the language. When selecting any activity it is important to ensure that the timing is appropriate and that the activity is appropriate for the students' age, language levels, class size, interests and culture. The video looks at one of three teaching ideas for Present Simple. The activity is called \"Find someone who....\" Each student will be given a sheet with a number of facts/habits/routines. For example ...plays a musical instrument,.....does a lot of sport, ....has a brother and a sister. The students then mill around and interview each other asking, \"Do you play a musical instrument?\" \"Do you play a lot of sport?\" Do you have a brother and a sister?\" Students should respond using the Present Simple, \"Yes I do\",\"No I don't.\" The students record names next to the specific fact, for example, Jim plays a lot of sport. After a specified time the students will share their findings with the class.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/b/be/English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 6934862,
+            "provider_sha1": "58292eb5dc6395c157dbd1402c72d15beffea641",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Simple — Teaching Ideas — 1",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Simple_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
           }
         }
       },
@@ -10671,46 +12664,78 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
-        "title": "ESL - Expletive sentences (there, here, it)",
-        "description": "Expletive constructions are phrases or sentences that begin with “There are,” “There is,” “It is,” “It was, \"\"Here comes,\" etc. The verb “to be” is also part of many of these uninspired sentences. In this lesson, Mr. P. will give an easy explanat...",
-        "source_url": "https://diler.tube/videos/watch/c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
+        "provider_id": "b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6",
+        "title": "Jobs Song for Kids | What Do You Do? | Occupations | Kindergarten, Preschool, ESL | Fun Kids English",
+        "description": "★Get this song on iTunes: http://bit.ly/Buy-FKS2 Jobs Song! What do you do? Sing, teach and learn about jobs in this very fun animated kids music video! Which one of our characters would you like to be, the teacher, doctor, dentist, carpenter or pilot? What do YOU want to be when you’re older? Please tell us what you want to be, or what your job is, in the comments below! There are 5 different jobs to learn in this song: teacher, dentist, doctor, carpenter and pilot! LYRICS: What do you do? I'm a teacher. Everybody say your ABCs. A-B-C-D-E! What do you do? I'm a doctor. Everybody listen to your heartbeat! What do you do? I'm a dentist. Everybody brush, brush, brush your teeth! What do you do? I'm a carpenter. Everybody bang your hammer! What do you do? I'm a pilot. Everybody fly a big, big plane! Perfect for kindergarten, preschool, toddlers and the ESL & EFL classroom. Thank you very much for watching and sharing ^_^ ❤️ Subscribe for more Fun Kids Songs → http://bit.ly/FKESub Don't forget to click on the bell 🔔 next to the subscribed button to make sure you get notified whenever we release new videos. ★Join Us★ Facebook: https://www.facebook.com/funkidsenglish Twitter: https://twitter.com/funkidsenglish Google+: https://plus.google.com/u/0/+Funkidsenglish/about ★Download Fun Kids Songs★ iTunes: http://apple.co/1PyNAea Amazon: http://amzn.to/210rDIQ Google Play: http://bit.ly/1ltyVo4 CDBbaby: http://bit.ly/1WXSh5o ★Check out our great ESL & EFL learning materials for children including music CDs, phonics readers, story books & more at: http://www.funkidsenglish.com ★Get FREE resources like games, flashcards, wall posters and worksheets in the Fun Kids English Resource Center:: http://www.funkidsenglish.com Learn with our fun songs and chant videos made specifically for ",
+        "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
+          "spdx": "CC-BY",
+          "label": "Attribution",
           "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "evidence": "PeerTube API licence id 1: Attribution",
           "commercial_use": true,
           "derivatives": true,
-          "share_alike": true
+          "share_alike": false
         },
         "files": [
           {
-            "url": "https://diler.tube/download/web-videos/c93f88b8-89ae-46e7-a440-6d2f120b2bd3-1080.mp4",
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6-1080.mp4",
             "mime": "video/mp4",
-            "bytes": 56546586,
+            "bytes": 17924981,
             "resolution": "1080p",
-            "fps": 30,
+            "fps": 25,
             "role": "web-video"
           },
           {
-            "url": "https://diler.tube/download/web-videos/c93f88b8-89ae-46e7-a440-6d2f120b2bd3-480.mp4",
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6-720.mp4",
             "mime": "video/mp4",
-            "bytes": 30208836,
-            "resolution": "480p",
-            "fps": 30,
+            "bytes": 13957097,
+            "resolution": "720p",
+            "fps": 25,
             "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 9648334,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 17908315,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 13940035,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 9630424,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "streaming-file"
           }
         ],
-        "quality_score": 87,
+        "quality_score": 88,
         "content_hash": null,
         "hash_state": "compute-on-cache",
         "attribution": {
-          "creator": "jessa",
-          "source_title": "ESL - Expletive sentences (there, here, it)",
-          "source_url": "https://diler.tube/videos/watch/c93f88b8-89ae-46e7-a440-6d2f120b2bd3",
-          "license": "Attribution - Share Alike",
+          "creator": "bonnardet_emeline",
+          "source_title": "Jobs Song for Kids | What Do You Do? | Occupations | Kindergarten, Preschool, ESL | Fun Kids English",
+          "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/b538e000-d5fb-4e7f-b3c1-fa7a91c77bf6",
+          "license": "Attribution",
           "license_url": ""
         },
         "relevance": {
@@ -10725,6 +12750,136 @@
           "language-learning": {
             "strong_title_matches": [
               "ESL"
+            ],
+            "strong_description_matches": [
+              "ESL"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Continuous — Structure.webm",
+        "title": "English Grammar — Present Continuous — Structure",
+        "description": "This TEFL certification video explores the structure of the present continuous tense. Tense forms have specific structures that TEFL teachers will need to know before they get a TEFL job. Even if grammar wasn't a strong point at school, our TEFL training courses will give you the lessons you need to conduct meaningful and productive EFL lessons. ///",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3653409,
+            "provider_sha1": "28318443cccb3f7e1d2bafe833917481231a7a84",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Continuous — Structure",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "language-learning": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:English Grammar — Present Perfect — Structure — 2.webm",
+        "title": "English Grammar — Present Perfect — Structure — 2",
+        "description": "This ITTT video is the second part of a lesson looking at the structure of the Present Perfect tense. It reviews an example of the structure with a regular verb -- played. I/you/we/they have played. She/He/It has played. The video then examines some of the spelling patterns that are used with irregular verbs. For example, verbs ending with a consonant + y. cry changes to cried, try changes to tried. Another spelling pattern with irregular verbs ending with a consonant + a vowel + a consonant Shop changes to shopped, ship changes to shipped. When teaching this particular point, as with other grammar points, it is important to explain to students that there are exceptions to most rules in the English language. Where specific patterns exist we need to introduce them to our students.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 2410285,
+            "provider_sha1": "d5b798ec9e81c0524e060408e3dd2acb47b8ad2e",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "TEFL & TESOL Courses - ITTT",
+          "source_title": "English Grammar — Present Perfect — Structure — 2",
+          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "language-learning": {
+            "score": 14,
+            "evidence": [
+              "English grammar",
+              "grammar"
+            ]
+          }
+        },
+        "pedagogy": {
+          "language-learning": {
+            "strong_title_matches": [
+              "English grammar"
             ],
             "strong_description_matches": [],
             "educational_intent": true,

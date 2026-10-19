@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-packs.v1",
-  "built_at": "2026-10-05T12:18:50Z",
+  "built_at": "2026-10-19T10:47:09Z",
   "revision": "subject-media-packs-v2.5",
   "default_pack": "general-knowledge",
   "packs": [
@@ -149,7 +149,7 @@
         "health-wellness",
         "philosophy-ethics"
       ],
-      "coverage": 0.6667,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -179,7 +179,7 @@
         "biology-life",
         "climate-environment"
       ],
-      "coverage": 0.6667,
+      "coverage": 1.0,
       "available": true
     },
     {
