@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
+const VERSION='1.1.4-settings-local-route-v326-llama32-download';
 const ROUTE='downloaded-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
@@ -47,13 +47,13 @@ const PACK_CATALOGUE=Object.freeze([
 ]);
 
 const CATALOGUE=Object.freeze([
+  {id:'llama32-3b-instruct-q4f16',label:'Llama 3.2 3B Instruct · Two-Pass JSON Trial',tier:'PHONE TEST · Llama 3.2 3B',repo:'onnx-community/Llama-3.2-3B-Instruct-ONNX',estimatedBytes:2425000000,license:'llama3.2',contextWindowTokens:131072,workingContextTokens:2048,preferBackground:true},
   {id:'smollm2-135m-instruct-q8-wasm',label:'SmolLM2 135M Instruct',tier:'Phone Tiny',repo:'onnx-community/SmolLM2-135M-Instruct-ONNX',estimatedBytes:140453620,license:'Apache-2.0',contextWindowTokens:8192,workingContextTokens:768,preferBackground:false},
   {id:'smollm2-360m-instruct-q4f16',label:'SmolLM2 360M Instruct',tier:'Phone Light',repo:'onnx-community/SmolLM2-360M-Instruct-ONNX',estimatedBytes:272353302,license:'Apache-2.0',contextWindowTokens:8192,workingContextTokens:1536,preferBackground:true},
   {id:'qwen3-0.6b-q4f16',label:'Qwen 3 0.6B',tier:'Small',repo:'onnx-community/Qwen3-0.6B-ONNX',estimatedBytes:610000000,license:'Apache-2.0',contextWindowTokens:40960,workingContextTokens:4096,preferBackground:true},
   {id:'gemma3-1b-it-q4f16',label:'Gemma 3 1B IT',tier:'Standard',repo:'onnx-community/gemma-3-1b-it-ONNX',estimatedBytes:884000000,license:'Gemma',contextWindowTokens:32768,workingContextTokens:4096,preferBackground:false},
   {id:'qwen3-1.7b-q4f16',label:'Qwen 3 1.7B',tier:'Large',repo:'onnx-community/Qwen3-1.7B-ONNX',estimatedBytes:1470000000,license:'Apache-2.0',contextWindowTokens:40960,workingContextTokens:4096,preferBackground:true},
   {id:'gemma4-e2b-it-q2f16-mobile',label:'Gemma 4 E2B IT',tier:'Gemma Fast',repo:'onnx-community/gemma-4-E2B-it-qat-mobile-ONNX',estimatedBytes:2335000000,license:'Apache-2.0',contextWindowTokens:128000,workingContextTokens:8192,preferBackground:true},
-  {id:'gemma4-e4b-it-q2f16-mobile',label:'Gemma 4 E4B IT',tier:'Gemma Max',repo:'onnx-community/gemma-4-E4B-it-qat-mobile-ONNX',estimatedBytes:3365000000,license:'Apache-2.0',contextWindowTokens:128000,workingContextTokens:16384,preferBackground:true},
   {id:'smollm3-3b-q4f16',label:'SmolLM3 3B',tier:'Mini PC',repo:'HuggingFaceTB/SmolLM3-3B-ONNX',estimatedBytes:2160000000,license:'Apache-2.0',contextWindowTokens:65536,workingContextTokens:2048,preferBackground:false},
   {id:'qwen3-4b-q4f16',label:'Qwen 3 4B',tier:'PC 12',repo:'onnx-community/Qwen3-4B-ONNX',estimatedBytes:2860000000,license:'Apache-2.0',contextWindowTokens:40960,workingContextTokens:2048,preferBackground:false}
 ]);
@@ -65,7 +65,7 @@ const PREVIEW=Object.freeze([
 ]);
 
 const ACTION_FILES=[
-  ['/app/local-ai/model-registry-v266.js?v=1.0.115-v302-gemma3-v4',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId)],
+  ['/app/local-ai/model-registry-v266.js?v=1.0.117-v304-llama32-3b-trial',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId?.('llama32-3b-instruct-q4f16'))],
   ['/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.state&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true)],
@@ -295,7 +295,7 @@ function renderLocalModels(layerOrForm=document.getElementById(SETTINGS_LAYER_ID
     return`<div class="cw-local-row${active?' cw-local-active':''}" data-model-id="${esc(model.id)}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.repo)} · ${fmt(model.estimatedBytes)} · ${esc(model.license)}${active?' · ACTIVE':''}</p><p class="cw-local-meta">Model window <b>${Number(model.contextWindowTokens||0).toLocaleString()} tokens</b> · Civweave working default <b>${Number(model.workingContextTokens||0).toLocaleString()}</b></p><p class="cw-local-meta">${healthCopy}</p>${statusMarkup(st,available)}</div><div class="cw-local-actions">${actions(model,st,available,active)}</div></div>`;
   }).join('');
   const preview=PREVIEW.map(model=>`<div class="cw-local-row"><div><b>${esc(model.label)} · preview</b><p>${esc(model.reason)}</p></div></div>`).join('');
-  panel.innerHTML=`<div><h3>AI Downloads</h3><p>Choose a complete hardware-tier pack or manage individual local models. This view reads only small saved-state records; opening it does not touch model caches, GPUs, service workers, or inference runtimes.</p></div><div class="cw-clean-note">Pack/model code loads only after an explicit Download, Resume, Use, Remove, Cancel, Stop, or Import action. Large phone/server pack imports stay inside this Settings surface instead of navigating to the whole-app downloads page.</div><div data-local-status role="status" class="${noticeError?'cw-local-error':''}">${esc(notice)}</div><div class="cw-pack-grid">${packCards}</div><div class="cw-local-divider"></div><details><summary><b>Individual models</b></summary><div style="display:grid;gap:8px;margin-top:10px">${rows}</div></details><details><summary>Preview models</summary><div style="display:grid;gap:8px;margin-top:10px">${preview}</div></details><div class="cw-local-actions"><button type="button" data-local-disable ${currentSelection.active?'':'hidden'}>Stop using downloaded AI</button></div>`;
+  panel.innerHTML=`<div><h3>AI Downloads</h3><p>Choose a complete hardware-tier pack or manage individual local models. This view reads only small saved-state records; opening it does not touch model caches, GPUs, service workers, or inference runtimes.</p></div><div class="cw-clean-note">Pack/model code loads only after an explicit Download, Resume, Use, Remove, Cancel, Stop, or Import action. Large phone/server pack imports stay inside this Settings surface instead of navigating to the whole-app downloads page.</div><div data-local-status role="status" class="${noticeError?'cw-local-error':''}">${esc(notice)}</div><div class="cw-pack-grid">${packCards}</div><div class="cw-local-divider"></div><div class="cw-clean-note"><b>Llama 3.2 3B · new two-pass model trial</b><br>Open Individual models below to download the 2.4 GB ONNX model, then run <a href="/app/local-ai/llama32-two-pass-test-v1.html">the JSON-constrained generation test</a>. Previously downloaded E4B files are preserved; they are not required.</div><details open><summary><b>Individual models</b></summary><div style="display:grid;gap:8px;margin-top:10px">${rows}</div></details><details><summary>Preview models</summary><div style="display:grid;gap:8px;margin-top:10px">${preview}</div></details><div class="cw-local-actions"><button type="button" data-local-disable ${currentSelection.active?'':'hidden'}>Stop using downloaded AI</button></div>`;
   if(panel.dataset.cwLocalActionsBound!=='1'){
     panel.dataset.cwLocalActionsBound='1';
     panel.addEventListener('click',event=>void localAction(event,panel));
@@ -329,9 +329,15 @@ function ensureScript(src,ready){
     });
     if(existing){
       if(ready?.())return resolve(true);
-      existing.addEventListener('load',()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`)),{once:true});
-      existing.addEventListener('error',()=>reject(new Error(`${path} could not load.`)),{once:true});
-      return;
+      if(path==='/app/local-ai/model-registry-v266.js'){
+        // A loaded older registry cannot satisfy the new Llama selection.
+        // Reload only on user action, never while opening Settings.
+        try{existing.remove()}catch{}
+      }else{
+        existing.addEventListener('load',()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`)),{once:true});
+        existing.addEventListener('error',()=>reject(new Error(`${path} could not load.`)),{once:true});
+        return;
+      }
     }
     const script=document.createElement('script');
     script.src=src;

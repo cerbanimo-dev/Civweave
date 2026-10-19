@@ -137,3 +137,19 @@ const actionResponse=await runFetch('https://example.test/app/settings-local-rou
 assert.match(await actionResponse.text(),/action-route/,'Explicit fallback action routes must remain available for stale clients.');
 
 console.log(JSON.stringify({ok:true,revision:'settings-v325-direct-local-models',visibleVersion:'v325',managerReads,storageWrites,gatewayTransformed:true,displayShim:true,stableInPlaceActions:true,legacyActionRouteFallback:true,rootWorkerGeneration:'v25-settings-v337-direct-gateway'},null,2));
+
+// The visible settings renderer must expose the downloadable Llama model in
+// both current direct UI and older installed-PWA fallback UI.
+for(const path of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){
+  const legacy=await readFile(new URL('../'+path,import.meta.url),'utf8');
+  assert.match(legacy, /llama32-3b-instruct-q4f16/,path+' lacks Llama trial');
+  assert.match(legacy, /<details open><summary><b>Individual models/,path+' hides downloads');
+  assert.match(legacy, /llama32-two-pass-test-v1.html/,path+' lacks test link');
+}
+assert.match(directSource,/llama32-3b-instruct-q4f16/,'current direct Settings lacks download');
+assert.match(directSource,/<details open><summary><b>Individual Civweave models/,'current direct Settings hides downloads');
+assert.match(directSource,/preferBackground:id==='llama32-3b-instruct-q4f16'/,'large new model must try background download');
+assert.match(directSource,/llama32-two-pass-test-v1.html/,'current Settings lacks trial link');
+const bridge=await readFile(new URL('../public/app/settings-local-route-v325.js',import.meta.url),'utf8');
+assert.match(bridge,/DIRECT_VERSION='1\.2\.1-settings-v325-direct-local-models-llama32-download'/);
+console.log('PASS: old v324 fallback and current v325 settings expose Llama 3.2 with downloads and constrained JSON trial.');

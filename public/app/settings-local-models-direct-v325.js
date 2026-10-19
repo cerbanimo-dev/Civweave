@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.0-settings-v325-direct-local-models-premium-phone-cyberdeck';
+const VERSION='1.2.1-settings-v325-direct-local-models-llama32-download';
 const LAYER_ID='cw-settings-v320';
 const PANEL_ID='cw-local-models-direct-v325';
 const STYLE_ID='cw-local-models-direct-v325-style';
@@ -20,6 +20,7 @@ const PACKS=Object.freeze([
   {id:'server-quality',label:'Server Quality Pack',tier:'SERVER QUALITY',size:'~13.0 GB',summary:'Higher-quality Guild/server bundle using Civweave’s strongest currently executable local models.',primaryModel:'gemma4-e4b-it-q2f16-mobile'}
 ]);
 const MODELS=Object.freeze([
+  {id:'llama32-3b-instruct-q4f16',label:'Llama 3.2 3B Instruct · JSON compiler trial',tier:'PHONE TEST',size:'~2.4 GB',trial:true},
   {id:'smollm2-135m-instruct-q8-wasm',label:'SmolLM2 135M Instruct',tier:'Phone Tiny',size:'140 MB'},
   {id:'smollm2-360m-instruct-q4f16',label:'SmolLM2 360M Instruct',tier:'Phone Light',size:'272 MB'},
   {id:'qwen3-0.6b-q4f16',label:'Qwen 3 0.6B',tier:'Small',size:'610 MB'},
@@ -28,7 +29,6 @@ const MODELS=Object.freeze([
   {id:'qwen35-4b-litert-web',label:'Qwen 3.5 4B · LiteRT',tier:'Phone Flagship',size:'2.6 GB',browserPackId:'qwen-flagship-phone'},
   {id:'qwen35-9b-litert-web',label:'Qwen 3.5 9B · LiteRT',tier:'Phone Flagship Max',size:'9.5 GB',browserPackId:'qwen-flagship-phone'},
   {id:'gemma4-e2b-it-q2f16-mobile',label:'Gemma 4 E2B IT',tier:'Phone Alternate Fast',size:'~2.3 GB',browserPackId:'qwen-flagship-phone'},
-  {id:'gemma4-e4b-it-q2f16-mobile',label:'Gemma 4 E4B IT',tier:'Phone Alternate Deep',size:'~3.4 GB',browserPackId:'qwen-flagship-phone'},
   {id:'smollm3-3b-q4f16',label:'SmolLM3 3B',tier:'Mini PC',size:'2.2 GB'},
   {id:'qwen3-4b-q4f16',label:'Qwen 3 4B',tier:'PC 12',size:'2.9 GB'}
 ]);
@@ -44,7 +44,7 @@ const MAC_MINI_SETUPS=Object.freeze([
   Object.freeze({hardware:'M4 Pro / M5 Pro · 64 GB',summary:'Full cyberdeck tier: high-fidelity planning plus the dedicated 80B-total coding MoE.',links:Object.freeze([{label:'Qwen3.8-27B · MLX 8-bit',url:'https://huggingface.co/mlx-community/Qwen3.8-27B-8bit'},{label:'Qwen3-Coder-Next · MLX 4-bit',url:'https://huggingface.co/mlx-community/Qwen3-Coder-Next-4bit'}])})
 ]);
 const ACTION_FILES=Object.freeze([
-  ['/app/local-ai/model-registry-v266.js?v=1.0.116-v303-qwen35-phone-flagships',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId)],
+  ['/app/local-ai/model-registry-v266.js?v=1.0.117-v304-llama32-3b-trial',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId?.('llama32-3b-instruct-q4f16'))],
   ['/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true)],
@@ -153,7 +153,7 @@ function render(layer=document.getElementById(LAYER_ID)){
     const state=snap.downloads[model.id]||{},active=Boolean(snap.selection?.active&&snap.selection.id===model.id),health=snap.health[model.id],healthText=health?(health.ok?'Last health check passed':'Last health check failed'):'No measured run yet';
     return`<article class="cw-direct-model" data-model-id="${esc(model.id)}" data-active="${active?'true':'false'}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.size)} · ${esc(statusCopy(state,active))}${active?' · ACTIVE':''}</p><p>${esc(healthText)}</p></div><div class="cw-direct-actions">${modelAction(model,state,active)}</div></article>`;
   }).join('');
-  target.innerHTML=`<section id="${PANEL_ID}" class="cw-clean-panel" data-cw-direct-local-panel><div><h3>AI Downloads</h3><p>Saved choices are rendered immediately by Settings. Runtime and download code loads only when you choose an action.</p></div><div class="cw-direct-build">${esc(BUILD_LABEL)}</div><div class="cw-direct-note">The Premium Phone Pack keeps the executable chat/reasoning and voice stack in Civweave. Dedicated GGUF coding and Snapdragon diffusion remain optional companion installs so they do not compete for phone RAM.</div><div class="cw-direct-status" data-cw-direct-local-status role="status">Saved local model state loaded.</div><div class="cw-direct-pack-grid">${packMarkup}</div><details open><summary><b>Premium phone companions</b></summary><p>Optional tools for dedicated coding and local image generation. These links open outside Civweave; they are not claimed as browser-runtime models.</p><div class="cw-direct-link-grid">${phoneCompanionMarkup()}</div></details><details><summary><b>Mac mini / cyberdeck local AI setups</b></summary><p>Apple Silicon model suggestions by unified-memory tier. These are external MLX/Ollama setups, useful for Guild servers, workstations, and portable cyberdecks.</p><div class="cw-direct-link-grid">${macMiniMarkup()}</div></details><details><summary><b>Individual Civweave models</b></summary><div class="cw-direct-model-list">${modelMarkup}</div></details>${snap.selection?.active?'<div class="cw-direct-actions"><button type="button" data-cw-direct-local-action data-local-disable>Stop using downloaded AI</button></div>':''}</section>`;
+  target.innerHTML=`<section id="${PANEL_ID}" class="cw-clean-panel" data-cw-direct-local-panel><div><h3>AI Downloads</h3><p>Saved choices are rendered immediately by Settings. Runtime and download code loads only when you choose an action.</p></div><div class="cw-direct-build">${esc(BUILD_LABEL)}</div><div class="cw-direct-note">The Premium Phone Pack keeps the executable chat/reasoning and voice stack in Civweave. Dedicated GGUF coding and Snapdragon diffusion remain optional companion installs so they do not compete for phone RAM.</div><div class="cw-direct-status" data-cw-direct-local-status role="status">Saved local model state loaded.</div><div class="cw-direct-pack-grid">${packMarkup}</div><details open><summary><b>Premium phone companions</b></summary><p>Optional tools for dedicated coding and local image generation. These links open outside Civweave; they are not claimed as browser-runtime models.</p><div class="cw-direct-link-grid">${phoneCompanionMarkup()}</div></details><details><summary><b>Mac mini / cyberdeck local AI setups</b></summary><p>Apple Silicon model suggestions by unified-memory tier. These are external MLX/Ollama setups, useful for Guild servers, workstations, and portable cyberdecks.</p><div class="cw-direct-link-grid">${macMiniMarkup()}</div></details><div class="cw-direct-note"><b>New: Llama 3.2 3B two-pass test</b><br>Download the ~2.4 GB ONNX model from Individual Civweave models below, then <a href="/app/local-ai/llama32-two-pass-test-v1.html">run constrained JSON compilation</a>. This does not remove your installed Gemma models.</div><details open><summary><b>Individual Civweave models</b></summary><div class="cw-direct-model-list">${modelMarkup}</div></details>${snap.selection?.active?'<div class="cw-direct-actions"><button type="button" data-cw-direct-local-action data-local-disable>Stop using downloaded AI</button></div>':''}</section>`;
   form.dataset.directLocalModels='v325';layer.dataset.localModelsRenderer='direct-local-v325.3';return true;
 }
 function status(layer,text,error=false){const node=layer?.querySelector?.('[data-cw-direct-local-status]');if(!node)return;node.textContent=String(text||'');node.classList?.toggle?.('cw-direct-error',Boolean(error))}
@@ -167,7 +167,18 @@ function ensureScript(src,ready,label='Local model action module'){
   return new Promise((resolve,reject)=>{
     const path=new URL(src,location.href).pathname,existing=[...document.scripts].find(node=>{try{return new URL(node.src,location.href).pathname===path}catch{return false}});
     const done=()=>ready?.()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`));
-    if(existing){existing.addEventListener('load',done,{once:true});existing.addEventListener('error',()=>reject(new Error(`${label} could not load.`)),{once:true});queueMicrotask(()=>{if(ready?.())resolve(true)});return}
+    if(existing){
+      if(ready?.())return resolve(true);
+      if(path==='/app/local-ai/model-registry-v266.js'){
+        // Replace a stale registry on user action; a completed old script will
+        // never fire its load event again. Do not touch caches on view.
+        try{existing.remove()}catch{}
+      }else{
+        existing.addEventListener('load',done,{once:true});
+        existing.addEventListener('error',()=>reject(new Error(`${label} could not load.`)),{once:true});
+        return;
+      }
+    }
     const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveDirectLocalAction='v325';script.onload=done;script.onerror=()=>reject(new Error(`${label} could not load.`));document.head?.append(script);
   });
 }
@@ -226,7 +237,7 @@ async function executeAction(descriptor,button,layer){
     if([FAST_E2,FAST_E4].includes(id)){
       await ensureGemmaRuntime();const handoff=globalThis.CivweaveGemma4BrowserPackCoherenceV1;if(!handoff?.startModelDownload)throw new Error('Gemma 4 browser download controls are unavailable.');return handoff.startModelDownload(id,button);
     }
-    status(layer,`Starting ${spec.label}…`);await m.start(id,{preferBackground:false});status(layer,`${spec.label} download started.`);return true;
+    status(layer,`Starting ${spec.label}…`);await m.start(id,{preferBackground:id==='llama32-3b-instruct-q4f16'});status(layer,`${spec.label} download started.`);return true;
   }
   if(descriptor.name==='localCancel'){await m.cancel(id);status(layer,'Download cancelled.');return true}
   if(descriptor.name==='localUse'){
