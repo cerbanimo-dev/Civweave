@@ -418,7 +418,13 @@ async function localAction(event,panel){
       const spec=r.byId(id);
       if(!spec)throw new Error(`Unknown local model: ${id}`);
       showLocal(`Starting ${spec.label}…`);
-      await m.start(id,{preferBackground:!foregroundDownload(CATALOGUE.find(model=>model.id===id)||spec)});
+      await m.start(id,{preferBackground:!foregroundDownload(CATALOGUE.find(model=>model.id===id)||spec),onProgress:progress=>{
+          const bytes=Number(progress?.bytesDownloaded||0),total=Number(progress?.totalBytes||spec.estimatedBytes||0),pct=total?Math.floor(bytes/total*100):0;
+          const state=String(progress?.status||'');
+          if(state==='error'||state==='paused')showLocal(`${spec.label}: ${state} · ${String(progress.error||'')}`,true);
+          else if(state==='ready')showLocal(`${spec.label} ready. Select Use locally.`);
+          else showLocal(`${spec.label} · ${String(progress?.artifact||'downloading')} · ${pct}% · ${(bytes/1e6).toFixed(1)} / ${(total/1e6).toFixed(1)} MB`);
+        }});
       showLocal(`${spec.label} download started.`);
     }else if(button.hasAttribute('data-local-cancel')){
       await m.cancel(id);

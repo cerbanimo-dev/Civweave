@@ -237,7 +237,16 @@ async function executeAction(descriptor,button,layer){
     if([FAST_E2,FAST_E4].includes(id)){
       await ensureGemmaRuntime();const handoff=globalThis.CivweaveGemma4BrowserPackCoherenceV1;if(!handoff?.startModelDownload)throw new Error('Gemma 4 browser download controls are unavailable.');return handoff.startModelDownload(id,button);
     }
-    status(layer,`Starting ${spec.label}…`);await m.start(id,{preferBackground:false});status(layer,`${spec.label} download started.`);return true;
+    status(layer,`Starting ${spec.label} · direct streaming transfer…`);
+    await m.start(id,{preferBackground:false,onProgress:progress=>{
+      const loaded=Number(progress?.bytesDownloaded||0),total=Number(progress?.totalBytes||spec.estimatedBytes||0);
+      const pct=total?Math.floor(loaded/total*100):0,file=String(progress?.artifact||'');
+      const state=String(progress?.status||'');
+      if(state==='error'||state==='paused')status(layer,`${spec.label} · ${state} · ${String(progress.error||'')}`,true);
+      else if(state==='ready'){status(layer,`${spec.label} · download complete. Select Use locally.`);if(layer?.isConnected&&!layer.hidden)preserveScroll(layer,()=>render(layer))}
+      else status(layer,`${spec.label} · ${file||'downloading'} · ${pct}% · ${(loaded/1e6).toFixed(1)} / ${(total/1e6).toFixed(1)} MB`);
+    }});
+    status(layer,`${spec.label} · direct download running; the transfer status above updates as bytes arrive. Keep Settings open.`);return true;
   }
   if(descriptor.name==='localCancel'){await m.cancel(id);status(layer,'Download cancelled.');return true}
   if(descriptor.name==='localUse'){

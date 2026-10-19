@@ -12,7 +12,7 @@
 <p class="cw-small"><strong>Direct download mode:</strong> streams real network bytes into this origin's offline model cache, with file and byte progress. It does NOT use Background Fetch, which previously returned a misleading “Browser download started” status. Keep this tab visible while downloading. Existing cached files are reused.</p>
 <p id="downloadProgress" aria-live="polite">Model not downloaded on this device.</p>
 <fieldset><legend>Alternative: Android / browser Downloads</legend><p>Use the actual browser download links below for the two large model-weight files, then select the completed files to import. These links are external Hugging Face files and are not silently queued into Civweave.</p>
-<div id="weightLinks"></div><label for="importFiles">Select the downloaded model files to import</label><input id="importFiles" type="file" multiple accept=".onnx_data,.onnx_data_1,.onnx,application/octet-stream"><button id="importWeights">Import selected files into Civweave</button><p class="cw-small">Import checks exact expected sizes and saves each file to offline Cache Storage using a streaming Blob, not a 2 GB JavaScript array. Afterwards, use Direct download to fetch only remaining small metadata files. Do not delete existing model caches.</p></fieldset><br><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
+<div id="weightLinks"></div><label for="importFiles">Select the downloaded model files to import</label><input id="importFiles" type="file" multiple><button id="importWeights">Import selected files into Civweave</button><p class="cw-small">Import checks exact expected sizes and saves each file to offline Cache Storage using a streaming Blob, not a 2 GB JavaScript array. Afterwards, use Direct download to fetch only remaining small metadata files. Do not delete existing model caches.</p></fieldset><br><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
 <p id="status" aria-live="polite">Checking model and runtime…</p>
 <pre id="log" aria-live="polite"></pre>
 <p><small>PASS requires nonempty draft text, completed grammar-constrained second generation, valid complete JSON, all required fields, and 3–4 modules. It does not prove plan quality or Moss integration. If your phone reports a WebGPU limit, the diagnostic will stop without silently swapping models.</small></p>
@@ -42,7 +42,8 @@ function updateDownload(state={}){
   const file=String(state.artifact||'').replace(/^onnx\//,'');
   const loaded=Number(state.bytesDownloaded||0),total=Number(state.totalBytes||spec()?.estimatedBytes||0);
   const pc=total?Math.min(100,Math.floor(loaded/total*100)):0;
-  const label='Llama 3.2 3B · '+phase+(file?' · '+file:'')+' · '+fmtBytes(loaded)+' / '+fmtBytes(total)+' ('+pc+'%)';
+  const speed=Number(state.speedBps||0),eta=Number(state.etaSeconds||0);
+  const label='Llama 3.2 3B · '+phase+(file?' · '+file:'')+' · '+fmtBytes(loaded)+' / '+fmtBytes(total)+' ('+pc+'%)'+(speed?' · '+fmtBytes(speed)+'/s':'')+(eta?' · '+Math.ceil(eta/60)+' min estimated remaining':'');
   if(dlStatus.textContent!==label)dlStatus.textContent=label;
   if(['error','paused','aborted'].includes(String(state.status||''))){
     dlStatus.textContent='Download '+state.status+' · '+String(state.error||'Check your connection. Retry to reuse completed files.');
