@@ -21,6 +21,8 @@ new Function(page.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace
 if(process.argv.includes('--built')){
   const m=JSON.parse(read(sourceManifest));
   assert.equal(m.schema,'civweave.transformers-stage.v8');
+  const gemma=JSON.parse(read('public/app/vendor/transformers-v4/stage-manifest.json'));
+  assert.equal(gemma.schema,'civweave.transformers-stage.v7','Existing Gemma runtime repair must continue to accept staging manifest');
   assert.equal(m.asyncifyModule,'ort-wasm-simd-threaded.asyncify.mjs');
   assert(m.asyncifyWasmChunks.length>=2);
   for(const name of [m.asyncifyModule,...m.asyncifyWasmChunks]){

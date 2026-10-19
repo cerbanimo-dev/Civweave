@@ -15,7 +15,8 @@ const ORT_WASM='ort-wasm-simd-threaded.jsep.wasm';
 const ORT_ASYNC_MJS='ort-wasm-simd-threaded.asyncify.mjs';
 const ORT_ASYNC_WASM='ort-wasm-simd-threaded.asyncify.wasm';
 const CHUNK_BYTES=16*1024*1024;
-const STAGE_SCHEMA='civweave.transformers-stage.v8';
+const STAGE_SCHEMA='civweave.transformers-stage.v7';
+const LLAMA_ASYNC_SCHEMA='civweave.transformers-stage.v8';
 const GEMMA4_LOGITS_BACKPORT='huggingface-transformers-js-pr-1681';
 const destination=path.join(root,'public','app','vendor','transformers-v4');
 const backendDestination=path.join(destination,'wasm');
@@ -31,9 +32,11 @@ async function staged(){
   if(!await exists(manifestPath)||!await exists(asyncManifestPath))return false;
   try{
     const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));
-    if(manifest.schema!==STAGE_SCHEMA||manifest.purpose!=='gemma4-llama32-mobile-onnx-webgpu')return false;
+    if(manifest.schema!==STAGE_SCHEMA||manifest.purpose!=='gemma4-mobile-browser-runtime-only')return false;
     const asyncManifest=JSON.parse(await fsp.readFile(asyncManifestPath,'utf8'));
-    if(asyncManifest.schema!==STAGE_SCHEMA||JSON.stringify(asyncManifest)!==JSON.stringify(manifest))return false;
+    if(asyncManifest.schema!==LLAMA_ASYNC_SCHEMA||asyncManifest.purpose!=='gemma4-llama32-mobile-onnx-webgpu')return false;
+    const compatible={...asyncManifest,schema:STAGE_SCHEMA,purpose:'gemma4-mobile-browser-runtime-only'};
+    if(JSON.stringify(compatible)!==JSON.stringify(manifest))return false;
     if(manifest.package!==PACKAGE||manifest.version!==VERSION||manifest.backendPackage!==ORT_PACKAGE||manifest.backendVersion!==ORT_VERSION)return false;
     if(manifest.gemma4NumLogitsBackport!==GEMMA4_LOGITS_BACKPORT)return false;
     if(!Array.isArray(manifest.wasmChunks)||manifest.wasmChunks.length<2)return false;
@@ -185,13 +188,18 @@ async function main(){
     const stagedFiles=['transformers.min.js',`wasm/${ORT_MJS}`,...split.names.map(name=>`wasm/${name}`),
       `wasm/${ORT_ASYNC_MJS}`,...asyncSplit.names.map(name=>`wasm/${name}`)];
     await fsp.writeFile(manifestPath,JSON.stringify({
-      schema:STAGE_SCHEMA,package:PACKAGE,version:VERSION,backendPackage:ORT_PACKAGE,backendVersion:ORT_VERSION,purpose:'gemma4-llama32-mobile-onnx-webgpu',
+      schema:STAGE_SCHEMA,package:PACKAGE,version:VERSION,backendPackage:ORT_PACKAGE,backendVersion:ORT_VERSION,purpose:'gemma4-mobile-browser-runtime-only',
       gemma4NumLogitsBackport:GEMMA4_LOGITS_BACKPORT,gemma4NumLogitsToKeep:1,
       entry:'/app/vendor/transformers-v4/transformers.min.js',backendRoot:'/app/vendor/transformers-v4/wasm/',backendFiles:[ORT_MJS,...split.names,ORT_ASYNC_MJS,...asyncSplit.names],wasmSource:ORT_WASM,wasmBytes:split.bytes,wasmChunks:split.names,
       asyncifyModule:ORT_ASYNC_MJS,asyncifyWasmSource:ORT_ASYNC_WASM,asyncifyWasmBytes:asyncSplit.bytes,asyncifyWasmChunks:asyncSplit.names,
       wasmChunkBytes:CHUNK_BYTES,stagedFiles,copied:stagedFiles.length,stagedAt:new Date().toISOString()
     },null,2));
-    await fsp.copyFile(manifestPath,asyncManifestPath);
+    // Preserve the established Gemma v7 repair contract; the same pinned
+    // runtime files are additionally published under a cache-distinct v8
+    // manifest for Llama and old installed-PWA service workers.
+    const gemmaManifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));
+    await fsp.writeFile(asyncManifestPath,JSON.stringify({...gemmaManifest,
+      schema:LLAMA_ASYNC_SCHEMA,purpose:'gemma4-llama32-mobile-onnx-webgpu'},null,2));
     console.log(`[Civweave] Staged minimal Transformers.js ${VERSION} browser runtime with ONNX Runtime Web ${ORT_VERSION}: ${stagedFiles.length} files, JSEP: ${split.names.length} chunks (${split.bytes} bytes), Asyncify: ${asyncSplit.names.length} chunks (${asyncSplit.bytes} bytes), ${GEMMA4_LOGITS_BACKPORT} applied.`);
   }finally{await fsp.rm(temp,{recursive:true,force:true})}
 }
