@@ -10,6 +10,10 @@ on:
       - 'public/app/local-ai/llama32-two-pass-test-v1.html'
       - 'public/app/local-ai/llama32-two-pass-test-v3.html'
       - 'public/app/local-ai/llama32-diagnostic-worker-v3.js'
+      - 'public/app/local-ai/llama32-diagnostic-worker-v4.js'
+      - 'public/app/local-ai/llama32-two-pass-test-v4.html'
+      - 'scripts/verify-llama32-asyncify-runtime-v1.mjs'
+      - 'scripts/stage-transformers-v4-assets.mjs'
       - 'scripts/verify-llama32-session-progress-v3.mjs'
       - 'scripts/stage-llama-structured-output-v1.mjs'
       - 'scripts/verify-llama32-two-pass-v1.mjs'
@@ -23,7 +27,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,6 +41,12 @@ jobs:
           node --check scripts/build-cloudflare-pages.mjs
           node scripts/verify-llama32-two-pass-v1.mjs
           node scripts/verify-llama32-session-progress-v3.mjs
+          node scripts/verify-llama32-asyncify-runtime-v1.mjs
+          node --check public/app/local-ai/llama32-diagnostic-worker-v4.js
+      - name: Verify pinned WebGPU Asyncify runtime packaging
+        run: |
+          node scripts/stage-transformers-v4-assets.mjs --force
+          node scripts/verify-llama32-asyncify-runtime-v1.mjs --built
       - name: Stage pinned, self-hosted token masking companion
         run: |
           node scripts/stage-llama-structured-output-v1.mjs --force

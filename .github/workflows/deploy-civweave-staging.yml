@@ -56,6 +56,9 @@ jobs:
       - name: Build Cloudflare Pages package
         run: node scripts/build-cloudflare-pages.mjs
 
+      - name: Verify pinned Llama 3.2 WebGPU Asyncify artifacts
+        run: node scripts/verify-llama32-asyncify-runtime-v1.mjs --built
+
       - name: Record staging build identity
         shell: bash
         run: |
@@ -201,6 +204,9 @@ jobs:
 
       - name: Build staging package
         run: node scripts/build-cloudflare-pages.mjs
+
+      - name: Verify pinned Llama 3.2 WebGPU Asyncify artifacts
+        run: node scripts/verify-llama32-asyncify-runtime-v1.mjs --built
 
       - name: Record staging deployment identity
         shell: bash
