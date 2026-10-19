@@ -3,8 +3,8 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-litert-request-authority-v1.js','utf8');
-assert.match(source,/1\.2\.26-local-litert-request-authority-v1-gpu-weights-tests/);
-assert.match(source,/1\.2\.15-guide-generation-tracker-v1-weight-conversion-diagnostics/);
+assert.match(source,/1\.2\.27-local-litert-request-authority-v1-e4b-dual-artifact-limits/);
+assert.match(source,/1\.2\.16-guide-generation-tracker-v1-e4b-dual-artifact-limit/);
 assert.match(source,/litert-web-dual-tool-shape-json-fallback/);
 assert.match(source,/You MUST respond by calling the \$\{tool\.name\} tool exactly once/);
 assert.match(source,/LITERT_FORMATTED_OUTPUT_MISSING/);
@@ -38,7 +38,7 @@ assert.equal(authority.weaveDraftPipeline,true);
 assert.equal(authority.liveGenerationTracker,true);
 assert.equal(authority.globalFinalResponseStreaming,true);
 assert.equal(authority.familyLoaderWeaveRebind,true);
-assert.equal(authority.trackerVersion,'1.2.15-guide-generation-tracker-v1-weight-conversion-diagnostics');
+assert.equal(authority.trackerVersion,'1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit');
 
 // The LiteRT structured-tool adapter remains compatible with E2B as an ordinary local selection. E4B Learning/Quest generation
 // is covered separately by the Weave Draft regression and must not use this adapter.
@@ -99,7 +99,7 @@ let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
 sandbox.CivweaveGuideGenerationTrackerV1={
-  version:'1.2.15-guide-generation-tracker-v1-weight-conversion-diagnostics',
+  version:'1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit',
   install:()=>{trackerInstalls+=1;return true}
 };
 sandbox.CivweaveModelRuntime={generate:async()=>({status:'initial-runtime'})};
