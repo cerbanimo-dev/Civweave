@@ -1,0 +1,53 @@
+# Rook — FellowFare animation interpretation manifest
+character:
+  name: "Rook"
+  species: "Anthropomorphic rook/crow"
+  realm: "FellowFare"
+  role: "Trader / witness / fair-exchange scout"
+  visual_hooks: ["black feathers", "blue scarf", "gold utility belt", "cookie/token"]
+  animation_personality: ["bouncy bargaining", "observant pauses", "comic snack-based confidence", "sharp pointing"]
+sheet:
+  file: "FellowFare-rook-sprites.png"
+  dimensions_px: [1536, 1024]
+  rows: 4
+  columns: 5
+  indexing: "R{row}C{column}, 1-based"
+  note: "Concept/emote atlas: each cell is a key pose, not a production in-between frame."
+poses:
+  R1C1: {label: token_idle, description: "Neutral stance holding a cookie/token.", tags: [idle, token]}
+  R1C2: {label: laugh_offer, description: "Laughs and offers the token.", tags: [offer, laugh, trade]}
+  R1C3: {label: airborne_offer, description: "Hops with one wing raised and token aloft.", tags: [jump, attack, token]}
+  R1C4: {label: cheer, description: "Celebrates with token raised.", tags: [success, cheer]}
+  R1C5: {label: ponder, description: "Paw/wing to beak in thought.", tags: [think, inspect]}
+  R2C1: {label: think, description: "Quiet thinking pose with token.", tags: [think]}
+  R2C2: {label: confused, description: "Question marks and uncertain look.", tags: [confused]}
+  R2C3: {label: surprised, description: "Startled open-beak reaction.", tags: [surprise]}
+  R2C4: {label: worried, description: "Worried downward glance at token.", tags: [worry, revision]}
+  R2C5: {label: dejected, description: "Head bowed over the token.", tags: [sad, fail]}
+  R3C1: {label: cry, description: "Crying while clutching token.", tags: [cry, fail]}
+  R3C2: {label: angry, description: "Low, narrowed-eye defensive posture.", tags: [angry, defend]}
+  R3C3: {label: determined_charge, description: "Determined forward stance with token ready.", tags: [attack, charge]}
+  R3C4: {label: shining_offer, description: "Eyes closed proudly with token sparkling.", tags: [success, token, sparkle]}
+  R3C5: {label: wink_offer, description: "Winks while offering token forward.", tags: [offer, trade, charm]}
+  R4C1: {label: sleep, description: "Curled asleep around the token.", tags: [sleep]}
+  R4C2: {label: victory_jump, description: "Jumps and cheers with token held high.", tags: [success, jump]}
+  R4C3: {label: double_offer, description: "Open stance showing two tokens.", tags: [trade, support]}
+  R4C4: {label: point_target, description: "Points at the target while holding token.", tags: [point, target]}
+  R4C5: {label: scout_glass, description: "Wears goggles and inspects closely.", tags: [inspect, verify]}
+animation_groups:
+  idle: {type: loop, sequence: [R1C1, R1C2, R1C1, R1C5], target_duration_s: 2.2}
+  fair_trade_toss:
+    type: action
+    sequence: [R1C2, R4C4, R3C3, R1C3, R3C4]
+    target_duration_s: 1.2
+    notes: ["Use a cookie/coin token projectile.", "Impact can become a gold ring or receipt-stamp effect."]
+  witness_check: {type: loop, sequence: [R4C5, R1C5, R4C5], target_duration_s: 1.7}
+  revision_reaction: {type: reaction_chain, sequence: [R2C3, R2C4, R2C5], target_duration_s: 1.3}
+  rally: {type: loop, sequence: [R4C2, R1C4, R4C3], target_duration_s: 1.4}
+  defend: {type: action, sequence: [R3C2, R3C3, R4C4], target_duration_s: 1.0}
+  sleep_idle: {type: loop, sequence: [R4C1], target_duration_s: 3.0}
+production_notes:
+  recommended_fps: 12
+  anchor: "feet/base center"
+  secondary_motion: ["scarf lags hops", "wing tips flap on offers", "token arcs should be easy to track"]
+  battle_identity: "Rook converts fair exchange into a token/cookie strike, witness check, or defensive bargain."

@@ -1,0 +1,53 @@
+# Kamiya — Cerbanimo animation interpretation manifest
+character:
+  name: "Kamiya"
+  species: "Anthropomorphic fox"
+  realm: "Cerbanimo"
+  role: "Maker / courier / gift-bringer"
+  visual_hooks: ["orange fox", "blue scarf", "brass goggles", "tool belt", "blue-and-gold present"]
+  animation_personality: ["quick practical motions", "generous presentation gestures", "curious inspection", "bright maker-confidence"]
+sheet:
+  file: "Cerbanimo-kamiya-sprites.png"
+  dimensions_px: [1536, 1024]
+  rows: 4
+  columns: 5
+  indexing: "R{row}C{column}, 1-based"
+  note: "Concept/emote atlas: each cell is a key pose, not a production in-between frame."
+poses:
+  R1C1: {label: gift_idle, description: "Neutral stance holding a wrapped present.", tags: [idle, present, delivery]}
+  R1C2: {label: friendly_wave, description: "Waves while keeping the present tucked close.", tags: [wave, greet, present]}
+  R1C3: {label: maker_cheer, description: "Both arms up in a jumping celebration.", tags: [cheer, success, jump]}
+  R1C4: {label: seated_laugh, description: "Sits laughing with the gift in her lap.", tags: [laugh, sit, present]}
+  R1C5: {label: inspect, description: "Leans forward with a magnifying glass.", tags: [inspect, investigate, verify]}
+  R2C1: {label: think, description: "Paw at chin; weighing a practical problem.", tags: [think, plan]}
+  R2C2: {label: confused, description: "Question-mark confusion.", tags: [confused, question]}
+  R2C3: {label: startled, description: "Hands to cheeks, surprised by a result.", tags: [surprise, react]}
+  R2C4: {label: worried, description: "Hands clasped with worried eyes.", tags: [worry, revision, concern]}
+  R2C5: {label: tired_sit, description: "Eyes closed in a seated, deflated rest.", tags: [tired, recover, sit]}
+  R3C1: {label: cry, description: "Big tears while sitting.", tags: [cry, fail, reaction]}
+  R3C2: {label: shy_relief, description: "Small closed-eye smile with hands folded.", tags: [relief, shy]}
+  R3C3: {label: courier_dash, description: "Runs forward with scarf streaming.", tags: [run, dash, attack]}
+  R3C4: {label: proud_sparkle, description: "Confident pose framed by sparkles.", tags: [success, sparkle, proud]}
+  R3C5: {label: maker_tool, description: "Presents a glowing blue-gold device/tool.", tags: [tool, craft, magic, attack]}
+  R4C1: {label: sleep, description: "Curled asleep with Z marks.", tags: [sleep, idle]}
+  R4C2: {label: present_toss, description: "Raises the wrapped gift triumphantly.", tags: [present, throw, success, attack]}
+  R4C3: {label: hello_wave, description: "Open wave and ready stance.", tags: [wave, idle]}
+  R4C4: {label: point_route, description: "Points decisively toward a target.", tags: [point, direct, target]}
+  R4C5: {label: gentle_delivery, description: "Offers the present as a butterfly approaches.", tags: [present, gift, gentle]}
+animation_groups:
+  idle: {type: loop, sequence: [R1C1, R1C2, R1C1, R3C2], target_duration_s: 2.2}
+  inspect_validation: {type: loop, sequence: [R1C5, R2C1, R1C5], target_duration_s: 1.8}
+  gift_projectile_success:
+    type: action
+    sequence: [R1C1, R4C4, R3C3, R4C2, R3C4]
+    target_duration_s: 1.3
+    notes: ["Spawn the present projectile as R4C2 peaks.", "Projectile should arc toward the antagonist and burst into blue-gold sparkles on impact."]
+  maker_burst: {type: action, sequence: [R3C3, R3C5, R3C4], target_duration_s: 1.0}
+  revision_reaction: {type: reaction_chain, sequence: [R2C3, R2C4, R2C5], target_duration_s: 1.3}
+  celebrate: {type: loop, sequence: [R1C3, R3C4, R4C3], target_duration_s: 1.4}
+  sleep_idle: {type: loop, sequence: [R4C1], target_duration_s: 3.0}
+production_notes:
+  recommended_fps: 12
+  anchor: "feet/base center"
+  secondary_motion: ["scarf trails dashes by 1-2 frames", "tail overshoots stops", "goggles stay rigid"]
+  battle_identity: "Kamiya's signature validation-success move is a wrapped-present projectile."
