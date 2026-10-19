@@ -5,6 +5,11 @@ const read=path=>readFileSync(path,'utf8');
 const registry=read('public/app/local-ai/model-registry-v266.js');
 const worker=read('public/app/local-ai/worker-v266.js');
 const page=read('public/app/local-ai/llama32-two-pass-test-v1.html');
+const livePage=read('public/app/local-ai/llama32-two-pass-test-v3.html');
+assert.match(livePage,/handleProgress\(r\.progress\|\|\{\}\)/);
+assert.match(livePage,/sessionReady=true/);
+assert.match(livePage,/new Worker\('\/app\/local-ai\/worker-v266\.js\?v=1\.0\.128-llama32-session-telemetry/);
+
 const builder=read('scripts/build-cloudflare-pages.mjs');
 const stage=read('scripts/stage-llama-structured-output-v1.mjs');
 const policy=read('public/app/local-ai/local-generation-model-policy-v1.js');

@@ -10,7 +10,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 </style></head>
 <body>
 <h1>Isolated LiteRT GPU test</h1>
-<p style="border:1px solid #507c89;background:#1a2d3b;border-radius:10px;padding:14px"><strong>E4B testing retired.</strong> The next phone model trial uses Llama 3.2 3B with a two-pass draft followed by token-constrained JSON. <a style="color:#9fd7ff" href="/app/local-ai/llama32-two-pass-test-v1.html">Open the Llama 3.2 two-pass test</a>. Existing E4B weights are not removed automatically.</p>
+<p style="border:1px solid #507c89;background:#1a2d3b;border-radius:10px;padding:14px"><strong>E4B testing retired.</strong> The next phone model trial uses Llama 3.2 3B with a two-pass draft followed by token-constrained JSON. <a style="color:#9fd7ff" href="/app/local-ai/llama32-two-pass-test-v3.html">Open the Llama 3.2 two-pass test</a>. Existing E4B weights are not removed automatically.</p>
 <p>Isolated Gemma GPU compatibility test, independent of Moss and AI fallbacks. Both tested E4B artifacts requested a 160 MiB storage binding with the default LiteRT GPU backend, exceeding this phone's 128 MiB per-binding limit. The 160 MiB binding persisted with a 256-token engine, confirming that reducing context is not a workaround. The next experiment disables GPU weight conversion, which may change the GPU weight-preparation path. No change can raise the hardware binding limit. This test does not automatically download weights or upload files.</p>
 <p><label for="model">Local model</label>
 <select id="model">
