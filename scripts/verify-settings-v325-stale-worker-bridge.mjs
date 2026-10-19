@@ -7,10 +7,10 @@ const compat=await readFile(new URL('../public/app/settings-local-route-v323.js'
 const fresh=await readFile(new URL('../public/app/settings-local-route-v327.js',import.meta.url),'utf8');
 const actions=await readFile(new URL('../public/app/settings-local-route-v331.js',import.meta.url),'utf8');
 
-assert.match(source,/1\.1\.5-settings-local-route-v326-local-selection-authority/);
+assert.match(source,/1\.1\.6-settings-local-route-v326-llama32-download/);
 assert.match(source,/settings-v325-parent-source-recovery-v4-local-selection-authority/);
-assert.match(source,/DIRECT_VERSION='1\.1\.0-settings-v325-direct-local-models-stable-actions'/);
-assert.match(source,/settings-local-models-direct-v325\.js\?v=1\.1\.0-stable-in-place-actions/);
+assert.match(source,/DIRECT_VERSION='1\.2\.1-settings-v325-direct-local-models-llama32-download'/);
+assert.match(source,/settings-local-models-direct-v325\.js\?v=1\.2\.1-llama32-download/);
 assert.match(source,/STATUS_PLACEMENT_VERSION='1\.0\.1-settings-local-progress-card-owned-direct-aware'/);
 assert.match(source,/CIVWEAVE SETTINGS · v325/);
 assert.match(source,/settings-local-route-v331\.js\?cwAction=1/);
@@ -122,6 +122,6 @@ assert.equal(layer.dataset.settingsVisibleVersion,'v325');
 assert.match(target.innerHTML,/AI Downloads/);
 assert.match(target.innerHTML,/Saved local state loaded/);
 assert.doesNotMatch(target.innerHTML,/Reading saved local model choices/);
-assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js?v=1.1.0-stable-in-place-actions')),'The parent bridge must request the cache-distinct current direct renderer without waiting for a worker update.');
+assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js?v=1.2.1-llama32-download')),'The parent bridge must request the cache-distinct current direct renderer without waiting for a worker update.');
 
 console.log(JSON.stringify({ok:true,revision:'settings-v325-parent-source-recovery-v4-local-selection-authority',managerReads,visibleVersion:'v325',fallbackPainted:true,directRendererRequested:true,stableInPlaceActions:true,directCardProgress:true,canonicalLocalPersistence:true,validatedAliasesPreserved:true},null,2));
