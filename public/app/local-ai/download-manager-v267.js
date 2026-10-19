@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const VERSION='1.0.68-local-ai-download-v322-explicit-sync',CACHE='civweave-model-generative-v266',STATE_KEY='civweave.local-ai.downloads.v266',SELECTION_KEY='civweave.local-ai.selection.v266',BG='cw-local-ai-v267::',EVENT='civweave:local-model-download-progress';
+const VERSION='1.0.69-local-ai-download-v323-llama-chunked',CACHE='civweave-model-generative-v266',STATE_KEY='civweave.local-ai.downloads.v266',SELECTION_KEY='civweave.local-ai.selection.v266',BG='cw-local-ai-v267::',EVENT='civweave:local-model-download-progress';
 const R=()=>globalThis.CivweaveLocalModelRegistryV266,parse=(v,d)=>{try{return JSON.parse(v)??d}catch{return d}},now=()=>new Date().toISOString(),clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const fmt=b=>{b=Number(b||0);return b>=1e9?`${(b/1e9).toFixed(1)} GB`:b>=1e6?`${(b/1e6).toFixed(b>=100e6?0:1)} MB`:`${Math.max(1,Math.round(b/1e3))} KB`};
 const states=parse(localStorage.getItem(STATE_KEY),{}),jobs=new Map(),listeners=new Map(),validated=new Set();let lastSave=0,lastEmit=0;
@@ -23,7 +23,16 @@ async function validateArtifactResponse(a,r,u=''){
   }
   return{ok:true,reason:''};
 }
-async function artifactStatus(x,a){const c=await caches.open(CACHE),u=url(x,a),r=await c.match(u);if(!r?.ok)return{...a,ok:false,bytes:0,reason:'missing'};const valid=await validateArtifactResponse(a,r,u);if(!valid.ok){await c.delete(u);return{...a,ok:false,bytes:0,reason:valid.reason,corrupt:true}}const n=+r.headers.get('content-length')||a.minBytes||0;return{...a,ok:!n||n>=a.minBytes,bytes:n,reason:''}}
+async function artifactStatus(x,a){const c=await caches.open(CACHE),u=url(x,a),r=await c.match(u);if(!r?.ok){
+  if(x.id==='llama32-3b-instruct-q4f16'&&/\\.onnx_data(?:_\\d+)?$/.test(a.path)){
+    try{
+      const {chunkedStatus}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
+      const chunks=await chunkedStatus(c,u,Number(a.sizeBytes||0));
+      if(chunks.available)return{...a,ok:true,bytes:chunks.bytes,reason:'',storageMode:'chunked'};
+    }catch(error){console.warn('[Civweave] Chunked Llama model inventory unavailable',error)}
+  }
+  return{...a,ok:false,bytes:0,reason:'missing'};
+}const valid=await validateArtifactResponse(a,r,u);if(!valid.ok){await c.delete(u);return{...a,ok:false,bytes:0,reason:valid.reason,corrupt:true}}const n=+r.headers.get('content-length')||a.minBytes||0;return{...a,ok:!n||n>=a.minBytes,bytes:n,reason:''}}
 async function status(id){const x=spec(id),rows=[];for(const a of x.artifacts)rows.push(await artifactStatus(x,a));const available=rows.filter(a=>a.required).every(a=>a.ok),corrupt=rows.some(a=>a.corrupt);if(available&&states[id]?.status!=='ready'){const bytes=rows.filter(a=>a.ok).reduce((n,a)=>n+(+a.bytes||0),0)||x.estimatedBytes;set(id,{status:'ready',percent:100,bytesDownloaded:bytes,totalBytes:bytes,installedAt:states[id]?.installedAt||now(),error:''},true)}else if(!available&&corrupt){set(id,{status:'paused',error:'A cached model metadata file was invalid and has been removed. Civweave can repair just the missing artifact.'},true)}return{id,label:x.label,available,installed:available,corrupt,rows,missing:rows.filter(a=>a.required&&!a.ok),selected:selection().active&&selection().id===id,state:states[id]||null,cache:CACHE}}
 function bgId(x){return `${BG}${encodeURIComponent(x.id)}::${String(x.revision||'').slice(0,12)}`}
 function fromBg(id){if(!String(id).startsWith(BG))return'';try{return decodeURIComponent(String(id).split('::')[1]||'')}catch{return''}}
