@@ -213,7 +213,7 @@ async function start(){
    const companion=await fetch('/app/vendor/transformers-structured-output-v4/stage-manifest.json',{cache:'no-store'});
    if(!companion.ok)throw Error('Constrained decoding companion was not staged on this deployment.');
    const manifest=await companion.json();if(manifest.version!=='4.3.1')throw Error('Unexpected companion version: '+manifest.version);
-   worker=new Worker('/app/local-ai/worker-v266.js?v=1.0.128-llama32-session-telemetry',{type:'module'});sessionTicker=setInterval(tick,1000);tick();
+   worker=new Worker('/app/local-ai/llama32-diagnostic-worker-v3.js',{type:'module'});sessionTicker=setInterval(tick,1000);tick();
    worker.onmessage=event=>{
      const r=event.data||{};
      if(!pending||r.id!==pending.id)return;

@@ -9,6 +9,7 @@ on:
       - 'public/app/local-ai/llama32-structured-constraints-v1.js'
       - 'public/app/local-ai/llama32-two-pass-test-v1.html'
       - 'public/app/local-ai/llama32-two-pass-test-v3.html'
+      - 'public/app/local-ai/llama32-diagnostic-worker-v3.js'
       - 'scripts/verify-llama32-session-progress-v3.mjs'
       - 'scripts/stage-llama-structured-output-v1.mjs'
       - 'scripts/verify-llama32-two-pass-v1.mjs'

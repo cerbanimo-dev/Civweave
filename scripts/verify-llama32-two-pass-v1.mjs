@@ -8,7 +8,7 @@ const page=read('public/app/local-ai/llama32-two-pass-test-v1.html');
 const livePage=read('public/app/local-ai/llama32-two-pass-test-v3.html');
 assert.match(livePage,/handleProgress\(r\.progress\|\|\{\}\)/);
 assert.match(livePage,/sessionReady=true/);
-assert.match(livePage,/new Worker\('\/app\/local-ai\/worker-v266\.js\?v=1\.0\.128-llama32-session-telemetry/);
+assert.match(livePage,/new Worker\('\/app\/local-ai\/llama32-diagnostic-worker-v3\.js/);
 
 const builder=read('scripts/build-cloudflare-pages.mjs');
 const stage=read('scripts/stage-llama-structured-output-v1.mjs');

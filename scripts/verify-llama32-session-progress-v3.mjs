@@ -3,6 +3,8 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const worker=readFileSync('public/app/local-ai/worker-v266.js','utf8');
 const page=readFileSync('public/app/local-ai/llama32-two-pass-test-v3.html','utf8');
+const dedicated=readFileSync('public/app/local-ai/llama32-diagnostic-worker-v3.js','utf8');
+assert.equal(dedicated,worker,'Diagnostic worker must have exactly the tested source and no old-PWA cache fallback.');
 const beginning=worker.indexOf('function progressReporter(');
 const end=worker.indexOf('function externalDataSetting(',beginning);
 assert(beginning>=0&&end>beginning,'Could not extract the bounded worker progress reporter');
@@ -23,7 +25,7 @@ for(let i=0;i<6000;i++)feed({status:'done',file:'onnx/model_q4f16.onnx_data_1',p
 assert(received.length<=5,'Other large shards may complete without flooding');
 assert.match(worker,/phase\(id,'model-ready',started/,'Only actual from_pretrained completion may emit ready');
 assert.match(worker,/initializing-onnx-session/,'WebGPU session initialization must be separately visible');
-assert.match(page,/new Worker\('\/app\/local-ai\/worker-v266\.js\?v=1\.0\.128-llama32-session-telemetry/);
+assert.match(page,/new Worker\('\/app\/local-ai\/llama32-diagnostic-worker-v3\.js/);
 assert.match(page,/if\(next==='model-ready'\)/,'UI must distinguish artifact percentage from actual session readiness');
 assert.match(page,/printedAssets<25/,'UI must cap per-file progress logs');
 assert.match(page,/old\.length>24000\?old\.slice\(-16000\)/,'Rendered diagnostic log must stay bounded');
