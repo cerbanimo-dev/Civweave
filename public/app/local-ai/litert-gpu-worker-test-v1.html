@@ -10,7 +10,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 </style></head>
 <body>
 <h1>Isolated LiteRT GPU test</h1>
-<p>Isolated Gemma GPU compatibility test, independent of Moss and AI fallbacks. Both tested E4B artifacts requested a 160 MiB storage binding with the default LiteRT GPU backend, exceeding this phone's 128 MiB per-binding limit. The next experiment compares LiteRT's separate legacy GPU_ARTISAN backend, using the same already-downloaded model. This test does not automatically download weights or upload files.</p>
+<p>Isolated Gemma GPU compatibility test, independent of Moss and AI fallbacks. Both tested E4B artifacts requested a 160 MiB storage binding with the default LiteRT GPU backend, exceeding this phone's 128 MiB per-binding limit. The 160 MiB binding persisted with a 256-token engine, confirming that reducing context is not a workaround. The next experiment disables GPU weight conversion, which may change the GPU weight-preparation path. No change can raise the hardware binding limit. This test does not automatically download weights or upload files.</p>
 <p><label for="model">Local model</label>
 <select id="model">
 <option value="e4">Gemma 4 E4B · currently installed Web artifact</option>
@@ -25,8 +25,8 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 <p><small>Get the <a href="https://huggingface.co/litert-community/gemma-4-E4B-it-litert-lm/resolve/39ef6157de767f9b0fe3ec311adf444b4c1ebd00/gemma-4-E4B-it-gpu.litertlm?download=true" rel="noopener noreferrer" target="_blank">official gemma-4-E4B-it-gpu.litertlm (2.97 GB)</a> in your browser, then select it above. The -gpu artifact was tested and also requested a 160 MiB GPU storage binding with the standard backend. LiteRT-LM's JavaScript README lists -web as its supported web artifact, so using -gpu here is experimental. Expected file size: 2,969,059,328 bytes. Existing -web weights remain untouched.</small></p>
 <p><label for="backendMode">GPU executor comparison</label>
 <select id="backendMode">
-<option value="legacy-gpu-artisan" selected>Legacy GPU_ARTISAN · separate executor (first experiment)</option>
-<option value="no-gpu-weight-conversion">Standard GPU · disable on-GPU weight conversion (upstream workaround candidate)</option>
+<option value="no-gpu-weight-conversion" selected>Standard GPU · disable on-GPU weight conversion (next experiment)</option>
+<option value="legacy-gpu-artisan">Legacy GPU_ARTISAN · separate executor (comparison)</option>
 <option value="no-shared-gpu-constants">Standard GPU · disable weight conversion and shared constants (upstream workaround candidate)</option>
 <option value="standard-gpu">Original standard GPU · known 160 MiB storage-binding failure</option>
 </select></p>
@@ -44,7 +44,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
 <option value="1024">1024 tokens · intermediate comparison</option>
 <option value="2048">2048 tokens · original known 160 MiB buffer binding</option>
 </select></p>
-<p><small>Both model artifacts failed at 160 MiB even with 512 context tokens. This test now compares the GPU backend implementation while holding the model and short prompt constant. No additional model download is needed for cached -web mode.</small></p>
+<p><small>The 160 MiB binding was also observed at 256 tokens. Engine context length is not a way around this per-binding resource limit. Test alternative GPU preparation paths at a fixed context; if all still bind 160 MiB, this E4B LiteRT build cannot run on this device through WebGPU. No additional download is needed for cached -web mode.</small></p>
 <button id="test">Run clean GPU test</button><button id="stop" disabled>Stop worker</button><button id="persist">Request persistent storage</button>
 <p id="capabilities" aria-live="polite">Checking browser capabilities…</p>
 <p id="storage" aria-live="polite"></p>
@@ -100,7 +100,7 @@ small{color:#bed0e1}button:disabled{opacity:.5}
         if(d.status==='phase'){if(d.phase==='awaiting-first-token'){if(firstTokenTimer)clearTimeout(firstTokenTimer);firstTokenTimer=setTimeout(()=>finish('TIMEOUT_FIRST_TOKEN: 90 seconds after conversation initialization · heartbeats '+heartbeatCount+' · '+(heartbeatCount?'worker event loop was responsive':'no worker heartbeat (possible WASM event-loop block)')+' · model cache preserved.'),90000)}line('['+d.elapsedMs+' ms] '+d.phase+(d.phase==='capabilities'?' · worker type: '+(d.workerType||'unknown')+' · importScripts: '+Boolean(d.importScriptsAvailable):'')+(d.phase==='wasm-inventory'&&d.wasmCount!=null?' · version '+d.coreVersion+' · '+d.wasmCount+' WASM files · intentionally omitted: '+(d.omittedWasm||[]).join(', '):'')+(d.url?' · '+d.url:'')+(d.target?' → '+d.target:'')+(d.workerGpu===false?' · worker WebGPU unavailable':''));return}
         if(d.status==='gpu-limits'){line('GPU STORAGE BINDING LIMIT · '+Math.round((d.maxStorageBufferBindingSize||0)/1048576)+' MiB'+(d.observedRequiredBindingAt2048Bytes?' · cached -web model previously requested '+Math.round(d.observedRequiredBindingAt2048Bytes/1048576)+' MiB':' · official -gpu model binding requirement UNKNOWN until inference')+(d.compatible===false?' · KNOWN INCOMPATIBLE':d.backendExperiment?' · comparing alternate GPU backend':''));return}
         if(d.status==='gpu-device'){line('GPU DEVICE · SDK device observable: '+d.available+(d.available?' · maxStorageBufferBindingSize '+Math.round((d.maxStorageBufferBindingSize||0)/1048576)+' MiB · maxBufferSize '+d.maxBufferSize+' · features '+(d.features||[]).join(', '):''));return}
-        if(d.status==='gpu-fatal'){finish('FAIL: '+d.code+' · '+d.message+' · engine context '+d.contextTokens+' tokens · first GPU validation error stopped the worker; model cache preserved.');return}
+        if(d.status==='gpu-fatal'){const next=backendMode==='no-gpu-weight-conversion'?'Next comparison: Standard GPU · disable weight conversion and shared constants.':backendMode==='legacy-gpu-artisan'?'Next comparison: Standard GPU · disable on-GPU weight conversion.':backendMode==='no-shared-gpu-constants'?'No remaining browser GPU preparation workaround in this diagnostic; requires a kernel/model artifact with smaller bindings or another runtime.':'Use one of the alternative GPU executor comparisons instead of repeating the standard GPU test.';finish('FAIL: '+d.code+' · '+d.message+' · model '+model.id+' · source '+artifactKind+' · GPU backend '+backendMode+' · engine context '+d.contextTokens+' tokens · first GPU validation error stopped the worker; model cache preserved. '+next);return}
         if(d.status==='gpu-lost'||d.status==='gpu-warning'){line('GPU '+d.status.toUpperCase()+' · '+(d.reason||'')+' · '+(d.message||''));return}
         if(d.status==='heartbeat'){heartbeatCount++;lastHeartbeatMs=d.elapsedMs;if(heartbeatCount<=2||heartbeatCount%3===0)line('HEARTBEAT '+heartbeatCount+' · '+d.sinceSubmissionMs+' ms after prompt · JS event loop responsive · raw chunks '+d.chunks);return}
         if(d.status==='asset'){line('WASM ASSET '+(d.valid===true?'OK':d.valid===false?'INVALID':'RESPONSE')+' · '+d.url+' · HTTP '+d.httpStatus+' · '+d.mime+(d.magic?' · '+d.magic:''));return}
