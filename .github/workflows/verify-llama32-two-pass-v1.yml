@@ -1,0 +1,41 @@
+name: Verify Llama 3.2 two-pass JSON experiment
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/worker-v266.js'
+      - 'public/app/local-ai/llama32-structured-constraints-v1.js'
+      - 'public/app/local-ai/llama32-two-pass-test-v1.html'
+      - 'scripts/stage-llama-structured-output-v1.mjs'
+      - 'scripts/verify-llama32-two-pass-v1.mjs'
+      - 'scripts/build-cloudflare-pages.mjs'
+      - '.github/workflows/verify-llama32-two-pass-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static engine and JSON constraint checks
+        run: |
+          node --check public/app/local-ai/worker-v266.js
+          node --check public/app/local-ai/llama32-structured-constraints-v1.js
+          node --check scripts/stage-llama-structured-output-v1.mjs
+          node --check scripts/build-cloudflare-pages.mjs
+          node scripts/verify-llama32-two-pass-v1.mjs
+      - name: Stage pinned, self-hosted token masking companion
+        run: |
+          node scripts/stage-llama-structured-output-v1.mjs --force
+          test -s public/app/vendor/transformers-structured-output-v4/index.js
+          node --check public/app/vendor/transformers-structured-output-v4/index.js
+          node -e "const m=require('./public/app/vendor/transformers-structured-output-v4/stage-manifest.json');if(m.version!=='4.3.1')process.exit(2)"
