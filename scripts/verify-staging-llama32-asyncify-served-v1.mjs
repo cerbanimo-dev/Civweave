@@ -28,7 +28,7 @@ for(const [index,name] of m.asyncifyWasmChunks.entries()){
       'Cache-Control':'no-cache','Range':'bytes=0-0'
     }});
     const range=actual.headers.get('content-range')||'';
-    const match=range.match(/^bytes 0-0\\/(\\d+)$/i);
+    const match=range.match(new RegExp('^bytes 0-0/(\\d+)$','i'));
     if(actual.status===206&&match){
       size=Number(match[1]);
       await actual.body?.cancel?.();
