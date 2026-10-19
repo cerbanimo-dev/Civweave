@@ -1,5 +1,5 @@
 // Isolated diagnostic only. Never used for normal generation or model selection.
-const VERSION='1.0.12-e4b-upstream-gpu-weight-preparation-variants';
+const VERSION='1.0.13-e4b-complete-wasm-advanced-settings';
 const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
 const CACHE='civweave-model-generative-v266';
@@ -11,6 +11,30 @@ const WASM_MANIFEST='/app/vendor/litert-lm/stage-manifest.json';
 // 128 MiB-limit Android GPU. This is a per-bind-group resource limit, *not*
 // GPU RAM or maxBufferSize; smaller prompts cannot split an AOT GPU binding.
 const E4B_OBSERVED_BINDING_BYTES=167772160;
+// LiteRT 0.17.x WASM AdvancedSettings requires a complete native value_object.
+// Sending only experimental overrides fails at Engine.create() with
+// "Missing field: prefill_batch_sizes" before GPU inference begins.
+// These 14 JS-exposed fields mirror upstream wasm_binding_types.ts and the
+// corresponding C++ AdvancedSettings defaults. Diagnostic worker only.
+function completeWasmAdvancedSettings(overrides={}){
+  return {
+    prefill_batch_sizes:[],
+    num_output_candidates:1,
+    configure_magic_numbers:true,
+    verify_magic_numbers:false,
+    clear_kv_cache_before_prefill:true,
+    num_logits_to_print_after_decode:0,
+    gpu_madvise_original_shared_tensors:true,
+    is_benchmark:false,
+    preferred_device_substr:'',
+    num_threads_to_upload:-1,
+    num_threads_to_compile:-1,
+    convert_weights_on_gpu:true,
+    optimize_shader_compilation:true,
+    share_constant_tensors:true,
+    ...overrides
+  };
+}
 const E4B_WEB_MODEL='gemma4-e4b-it-litert-web';
 const OFFICIAL_GPU_FILE='gemma-4-E4B-it-gpu.litertlm';
 const OFFICIAL_GPU_FILE_BYTES=2969059328;
@@ -206,10 +230,10 @@ self.onmessage=async event=>{
       // Upstream LiteRT-LM #3866 identified the shared embedding/weights
       // preparation path as a potential oversized storage binding source.
       // These documented AdvancedSettings switches are *experimental*.
-      settings.mainExecutorSettings.advancedSettings={
+      settings.mainExecutorSettings.advancedSettings=completeWasmAdvancedSettings({
         convert_weights_on_gpu:false,
         ...(backendMode==='no-shared-gpu-constants'?{share_constant_tensors:false}:{})
-      };
+      });
       send('phase',{phase:'backend-comparison',backendMode,engineContextTokens:contextTokens,advancedSettings:settings.mainExecutorSettings.advancedSettings});
     }
     if(backendMode==='legacy-gpu-artisan'){
@@ -218,6 +242,8 @@ self.onmessage=async event=>{
       // It may use a different compiled path; this is ONLY a comparison.
       // No CPU or model swap occurs. Disable submodel and autosized buffers.
       settings.backend=mod.Backend.GPU_ARTISAN;
+      // Satisfy the same strict native struct for this comparison executor.
+      settings.mainExecutorSettings.advancedSettings=completeWasmAdvancedSettings();
       settings.mainExecutorSettings.backendConfig={
         num_output_candidates:1,wait_for_weight_uploads:true,
         num_decode_steps_per_sync:1,sequence_batch_size:0,
@@ -225,7 +251,7 @@ self.onmessage=async event=>{
         enable_decode_logits:false,enable_external_embeddings:false,
         use_submodel:false,use_autosized_ringbuffers:false
       };
-      send('phase',{phase:'backend-comparison',backendMode,engineContextTokens:contextTokens});
+      send('phase',{phase:'backend-comparison',backendMode,engineContextTokens:contextTokens,advancedSettings:settings.mainExecutorSettings.advancedSettings});
     }
     engine=await mod.Engine.create(settings);
     observeGpuDevice(mod);

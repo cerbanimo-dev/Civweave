@@ -229,7 +229,7 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
       resolve({model,storagePersistence:persistence,storageEstimate:quota,elapsedMs:Date.now()-started,...result});
     };
     try{
-      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.12-gpu-weight-variants',{type:'classic'});
+      worker=new Worker('/app/local-ai/litert-gpu-worker-smoke-v1.js?v=1.0.13-complete-advanced-settings',{type:'classic'});
       worker.onmessage=event=>{
         const detail=event.data||{};
         phase=String(detail.phase||phase);

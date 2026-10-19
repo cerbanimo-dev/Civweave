@@ -13,12 +13,22 @@ assert.match(trackerSource,/data-weave-worker-probe/);
 assert.match(trackerSource,/storage\.persist\(\)/);
 assert.match(trackerSource,/worker\?\.terminate\(\)/);
 assert.match(workerSource,/typeof self\.importScripts==='function'/);
-assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.12-gpu-weight-variants'\s*,\s*\{type:'classic'\}/);
-assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.12-gpu-weight-variants'\s*,\s*\{type:'classic'\}/);
+assert.match(trackerSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.13-complete-advanced-settings'\s*,\s*\{type:'classic'\}/);
+assert.match(standaloneSource,/litert-gpu-worker-smoke-v1\.js\?v=1\.0\.13-complete-advanced-settings'\s*,\s*\{type:'classic'\}/);
 assert.doesNotMatch(trackerSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 assert.doesNotMatch(standaloneSource,/litert-gpu-worker-smoke-v1\.js[^\n]*type:'module'/);
 
 
+// Emulate the strict Emscripten WASM AdvancedSettings value_object binding.
+// Previous mock accepted partial settings and masked "Missing field" crashes.
+const advancedFields=[
+  'prefill_batch_sizes','num_output_candidates','configure_magic_numbers',
+  'verify_magic_numbers','clear_kv_cache_before_prefill',
+  'num_logits_to_print_after_decode','gpu_madvise_original_shared_tensors',
+  'is_benchmark','preferred_device_substr','num_threads_to_upload',
+  'num_threads_to_compile','convert_weights_on_gpu',
+  'optimize_shader_compilation','share_constant_tensors'
+];
 const reports=[],steps=[],engineSettings=[];
 let adapterBindingLimit=268435456;
 let invalidWasm=false,failOnLoaderWasm=false,loaderWasmName='litertlm_wasm_asyncify_internal.wasm',mockStreamMode='message-string';
@@ -40,6 +50,12 @@ const mockSDK={
   loadLiteRtLm:async()=>{steps.push('wasm');if(failOnLoaderWasm)await activeWorker.fetch('/app/local-ai/'+loaderWasmName)},
   Engine:{create:async settings=>{
     steps.push('engine');assert.ok(settings.model);engineSettings.push(settings);
+    const adv=settings.mainExecutorSettings?.advancedSettings;
+    if(adv){
+      for(const field of advancedFields)if(!Object.hasOwn(adv,field))throw Error('Missing field: "'+field+'"');
+      assert.ok(Array.isArray(adv.prefill_batch_sizes));
+      assert.equal(Object.keys(adv).length,advancedFields.length,'unexpected AdvancedSettings shape');
+    }
     return{createConversation:async()=>{
       steps.push('conversation');
       return{sendMessage:async()=>{steps.push('blocking');return {role:'assistant',content:'READY'}},sendMessageStreaming:async function*(){steps.push('stream');if(mockStreamMode==='message-string')yield {role:'assistant',content:'READY'};else if(mockStreamMode==='text-parts')yield {role:'assistant',content:[{type:'text',text:'READY'}]};else if(mockStreamMode==='empty')return;else if(mockStreamMode==='nontext')yield {role:'assistant',channels:{analysis:'internal'},content:[{type:'audio',data:'not-visible'}]};else throw Error('bad mocked stream mode')},delete:async()=>{}};
@@ -161,6 +177,8 @@ assert.ok(legacyRows.some(row=>row.status==='gpu-limits'&&row.backendExperiment=
 assert.equal(engineSettings.at(-1).backend,7);
 assert.equal(engineSettings.at(-1).mainExecutorSettings.maxNumTokens,512);
 assert.equal(engineSettings.at(-1).mainExecutorSettings.backendConfig.use_submodel,false);
+assert.equal(engineSettings.at(-1).mainExecutorSettings.advancedSettings.convert_weights_on_gpu,true,'legacy backend uses default weight conversion');
+assert.equal(engineSettings.at(-1).mainExecutorSettings.advancedSettings.prefill_batch_sizes.length,0);
 assert.equal(engineSettings.at(-1).mainExecutorSettings.backendConfig.use_autosized_ringbuffers,false);
 // Compare the two AdvancedSettings variants proposed by upstream #3866.
 // They must preserve the same E4B weights, standard GPU backend and context.
@@ -178,7 +196,10 @@ for(const backendMode of ['no-gpu-weight-conversion','no-shared-gpu-constants'])
   assert.equal(selectedSettings.backend,undefined,backendMode);
   assert.equal(selectedSettings.mainExecutorSettings.maxNumTokens,512,backendMode);
   assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.convert_weights_on_gpu,false,backendMode);
-  assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.share_constant_tensors,backendMode==='no-shared-gpu-constants'?false:undefined,backendMode);
+  assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.share_constant_tensors,backendMode==='no-shared-gpu-constants'?false:true,backendMode);
+  assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.prefill_batch_sizes.length,0,backendMode);
+  assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.num_threads_to_upload,-1,backendMode);
+  assert.equal(selectedSettings.mainExecutorSettings.advancedSettings.configure_magic_numbers,true,backendMode);
   assert.ok(comparisonRows.some(row=>row.phase==='backend-comparison'));
 }
 
