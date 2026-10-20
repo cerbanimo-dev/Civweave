@@ -139,7 +139,7 @@ async function modelRuntimeFor(model){
   // Cold-start compatibility for the LiteRT family without binding this guide to a named model.
   const isKnownLiteRTId=id=>/-litert-web$/.test(String(id||''));
   const isLiteRT=runtimeFamily==='litert-lm-web'
-    ||(!runtimeFamily&&(Boolean(liteProfiles[model])||legacyLiteRTProfiles.has(model)));
+    ||(!runtimeFamily&&(Boolean(liteProfiles[model])||isKnownLiteRTId(model)));
   if(isLiteRT)return intakeRuntime();
   if(!['transformers-js-v3','transformers-js-v4'].includes(runtimeFamily))
     throw Object.assign(new Error('No supported local inference backend is registered for the selected model. LiteRT was not attempted.'),{code:'LOCAL_MODEL_RUNTIME_FAMILY_UNSUPPORTED',executionModel:model,runtimeFamily});
