@@ -94,7 +94,7 @@ assert.equal(metadata.deepGenerationModel,'gemma4-e4b-it-litert-web');
 // captures CivweaveModelRuntime. The loader may replace the runtime object, so the
 // E4B Weave wrapper must be rebound before ensure() resolves back to Moss.
 storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'}));
-const WEAVE_VERSION='1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe';
+const WEAVE_VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
 let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
