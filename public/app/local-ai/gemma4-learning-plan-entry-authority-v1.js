@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.2-learning-plan-entry-authority-v1-generic-messages';
+const VERSION='1.2.3-learning-plan-entry-authority-v1-backend-gate';
 const PURPOSE='living-school-learning-plan-review-v2';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','browser','smollm2','smollm3','qwen']);
@@ -12,7 +12,7 @@ let runtimeTarget=null;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 function emit(phase,detail={}){try{dispatchEvent(new CustomEvent('civweave:gemma4-learning-plan-entry',{detail:{version:VERSION,phase,at:new Date().toISOString(),...detail}}))}catch{}}
 function bridge(){return globalThis.CivweaveGemma4FirstRequestIntakeBridgeV1||null}
-function selectedGemma(){try{return Boolean(bridge()?.selectedGemma?.())}catch{return false}}
+function selectedGemma(){try{return Boolean(globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.selectedFast?.()&&bridge()?.selectedGemma?.())}catch{return false}}
 function localRequest(request={}){return request?.purpose===PURPOSE&&LOCAL_PROVIDERS.has(clean(request?.config?.provider||request?.config?.route,120).toLowerCase())}
 function pipeline(){return globalThis.CivweaveGemma4WeaveDraftPipelineV1||null}
 function directRuntimeResult(request,transport){
