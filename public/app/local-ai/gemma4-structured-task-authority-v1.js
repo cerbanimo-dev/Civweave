@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.7-structured-task-authority-v1-demand-core-bootstrap';
+const VERSION='1.4.8-structured-task-authority-v1-onnx-weave-loader';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -259,14 +259,25 @@ function structuredTool(schema,purpose){return{
   parameters:schema&&typeof schema==='object'?schema:{type:'object',properties:{}}
 }}
 function directE4BTransport(purpose){
-  // All entrypoints must use the same observable Draft -> Compile -> Validate
-  // transport. The legacy constrained-tool fallback silently blocks for 600s
-  // and bypasses both token events and the rejected-output inspector.
+  // The Weave Draft pipeline is shared by ONNX and LiteRT. The Gemma-specific
+  // first-request loader deliberately skips ONNX, so the shared compiler may
+  // not exist yet when a Llama Learning Journey reaches this transport.
+  // Reuse the existing canonical Weave-layer installer; do not start LiteRT,
+  // create a competing pipeline, or enable the non-streaming 600s fallback.
   return async args=>{
-    const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
-    if(typeof pipeline?.weaveTransport!=='function')throw Object.assign(
-      new Error('Local Weave Draft transport is unavailable. The non-streaming 600-second fallback is disabled.'),
-      {code:'CIVWEAVE_E4B_WEAVE_REQUIRED',executionModel:deepModel()}
+    const owner=globalThis.CivweaveGemma4LiteRTRequestAuthorityV1;
+    let pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
+    if(typeof pipeline?.weaveTransport!=='function'||(owner?.weavePipelineVersion&&pipeline.version!==owner.weavePipelineVersion)){
+      if(typeof owner?.ensureWeaveLayers!=='function')throw Object.assign(
+        new Error('The shared Weave Draft loader was not registered. Cannot initialize local planning without a compiler.'),
+        {code:'CIVWEAVE_WEAVE_PIPELINE_BOOTSTRAP_UNAVAILABLE',executionModel:deepModel()}
+      );
+      await owner.ensureWeaveLayers();
+      pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
+    }
+    if(typeof pipeline?.weaveTransport!=='function'||(owner?.weavePipelineVersion&&pipeline.version!==owner.weavePipelineVersion))throw Object.assign(
+      new Error('The shared Weave Draft compiler failed to initialize after its existing loader completed. No model was started.'),
+      {code:'CIVWEAVE_WEAVE_PIPELINE_BOOTSTRAP_FAILED',executionModel:deepModel(),actualVersion:pipeline?.version||''}
     );
     return pipeline.weaveTransport(purpose,args||{});
   };
