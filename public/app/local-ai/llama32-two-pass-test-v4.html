@@ -4,7 +4,7 @@
 <title>Civweave · Llama 3.2 3B · Asyncify WebGPU diagnostic v5 · crash guard</title>
 <style>:root{color-scheme:dark;font:16px/1.5 system-ui}body{max-width:760px;margin:auto;padding:20px;background:#0c1724;color:#edf5ff}textarea,button{font:inherit;background:#1c3146;border:1px solid #6095a8;color:inherit;border-radius:8px;padding:10px}a{color:#9fddff}fieldset{border:1px solid #456880;border-radius:10px;padding:12px;margin:14px 0}input[type=file]{display:block;margin:10px 0;max-width:100%}.cw-weight-link{display:block;margin:8px 0;word-break:break-word}.cw-small{font-size:.86rem;color:#bdcddd}textarea{width:95%;height:95px}button{margin:6px 8px 6px 0}button:disabled{opacity:.45}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#06101a;border:1px solid #355067;padding:12px;border-radius:10px;max-height:55vh;overflow:auto}small{color:#bacddd}</style></head>
 <body>
-<h1>Llama 3.2 3B · Two-pass JSON trial</h1><p class="cw-small"><strong>Diagnostic generation 5:</strong> Android crash guard added after ONNX model initialization terminated the browser before a GPU-ready event. A no-weights device preflight and persistent last-phase record now distinguish safe checks from an explicitly authorized large-memory retry. The model cache is preserved. The previously missing WebGPU ONNX <code>ort-wasm-simd-threaded.asyncify.mjs</code> is now deployed with its matching WASM binary in staged chunks. This page checks the actual runtime files before starting inference.</p>
+<h1>Llama 3.2 3B · Two-pass JSON trial</h1><p class="cw-small"><strong>Diagnostic generation 6:</strong> After repeated Android browser termination during large ONNX model initialization, the 3B WebGPU diagnostic is disabled on Android with this pinned Asyncify runtime. Read-only model-cache inspection and GPU limits remain available; the 2.42 GB cached weights are preserved. The model cache is preserved. The previously missing WebGPU ONNX <code>ort-wasm-simd-threaded.asyncify.mjs</code> is now deployed with its matching WASM binary in staged chunks. This page checks the actual runtime files before starting inference.</p>
 <p>Experiment only; does not modify normal Moss/Weaveling generation. Pass 1 freely drafts a short learning plan with Llama 3.2 3B Instruct. Pass 2 reuses the same loaded model with Hugging Face's token-level <strong>StructuredOutputProcessor</strong> to compile strict JSON. The schema masks invalid next tokens; independent parsing checks the completed result.</p>
 <p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Use the Download button below or Civweave Settings → AI Downloads to install the model. Download is a separate explicit action. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
 <p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
@@ -13,10 +13,10 @@
 <p id="downloadProgress" aria-live="polite">Checking existing offline cache entries (no model weights loaded)…</p>
 <fieldset><legend>Alternative: Android / browser Downloads</legend><p>Use the actual browser download links below for the two large model-weight files, then select the completed files to import. These links are external Hugging Face files and are not silently queued into Civweave.</p>
 <div id="weightLinks"></div><label for="importFiles">Select the downloaded model files to import</label><input id="importFiles" type="file" multiple><button id="importWeights">Import selected files into Civweave</button><p class="cw-small">Import checks exact expected sizes and saves each file to offline Cache Storage using a streaming Blob, not a 2 GB JavaScript array. Afterwards, use Direct download to fetch only remaining small metadata files. Do not delete existing model caches.</p></fieldset><br><fieldset><legend>Android GPU memory crash protection</legend>
-<p class="cw-small">Your previous 2.42 GB model attempt ended during ONNX WebGPU session creation, before model-ready. Android may terminate a renderer outright when native/GPU allocations exhaust its process budget. JavaScript timeouts cannot prevent or catch such a kill.</p>
+<p class="cw-small"><strong>Android 3B ONNX generation disabled until a safe runtime exists.</strong> The current April 2026 ONNX Runtime Asyncify build reads large external weight files into memory during session creation. <a href="https://github.com/microsoft/onnxruntime/issues/29455">Microsoft issue #29455</a> documents this loading-memory failure; <a href="https://github.com/microsoft/onnxruntime/pull/29477">PR #29477</a> fixes it for a newer <strong>JSPI + Blob-backed</strong> runtime, not this pinned Asyncify variant. Importing 8 MiB cache chunks protects downloads only; it does not lower inference memory. Inspecting cached weights is safe and never starts a GPU session.</p>
 <button type="button" id="inspect">Inspect GPU limits (no weights loaded)</button>
 <p id="crashNotice" class="cw-small" aria-live="polite"></p>
-<label><input type="checkbox" id="allowMemoryRisk"> I understand this 3B ONNX initialization may crash my Android browser again. Retry anyway.</label>
+<p id="androidStatus" class="cw-small" role="status">On Android, use Civweave Settings → AI Downloads to select a smaller compatible model for Moss. This page will not retry the crashing 3B GPU session.</p>
 </fieldset><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
 <p id="status" aria-live="polite">Checking model and runtime…</p>
 <p id="sessionStatus" aria-live="polite" class="cw-small">No GPU session running.</p>
@@ -28,7 +28,7 @@
 import {LEARNING_TRIAL_SCHEMA,validateStrictJson} from '/app/local-ai/llama32-structured-constraints-v1.js';
 import {importChunkedFile,chunkedStatus} from '/app/local-ai/llama32-chunked-model-storage-v1.js?v=1';
 const MODEL='llama32-3b-instruct-q4f16',CACHE='civweave-model-generative-v266';
-const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),download=$('download'),cancelDownload=$('cancelDownload'),log=$('log'),status=$('status'),sessionStatus=$('sessionStatus'),dlStatus=$('downloadProgress'),weightLinks=$('weightLinks'),importFiles=$('importFiles'),importWeights=$('importWeights'),inspect=$('inspect'),allowMemoryRisk=$('allowMemoryRisk'),crashNotice=$('crashNotice');
+const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),download=$('download'),cancelDownload=$('cancelDownload'),log=$('log'),status=$('status'),sessionStatus=$('sessionStatus'),dlStatus=$('downloadProgress'),weightLinks=$('weightLinks'),importFiles=$('importFiles'),importWeights=$('importWeights'),inspect=$('inspect'),crashNotice=$('crashNotice');
 let worker=null,pending=null,seq=0,started=0,cancelled=false,downloads=null,sessionTicker=null,phaseName='idle',lastWorkerAt=0,sessionReady=false,lastAssetKey='',previousPhase='',printedAssets=0,lastCheckpointAt=0;
 const ACTIVE_KEY='civweave.llama32.gpu-active.v1',RESULT_KEY='civweave.llama32.gpu-result.v1';
 const isMobile=/Android|Mobile|iPhone|iPad/i.test(navigator.userAgent||'');
@@ -44,7 +44,7 @@ const checkpoint=(next,force=false)=>{
 if(lastAttempt&&Date.now()-Number(lastAttempt.at||0)<172800000){
   crashNotice.textContent='UNCLEAN EXIT: Prior Llama 3B run did not record completion. Last stage '+String(lastAttempt.phase||'unknown')+
   '; GPU session ready: '+Boolean(lastAttempt.sessionReady)+'. Could be process kill, crash or abrupt tab closure. Existing model files are not deleted.';
-}else if(isMobile)crashNotice.textContent='Android identified. Large ONNX weights can exceed process memory even when storage quota is sufficient. Explicit opt-in required.';
+}else if(isMobile)crashNotice.textContent='Android detected. The pinned Asyncify ONNX 3B loader is not approved for repeated GPU initialization; no model weights deleted.';
 inspect.onclick=async()=>{
   log.textContent='';
   try{
@@ -237,7 +237,7 @@ function handleProgress(p){
   tick();
 }
 
-function finish(message){if(worker){try{localStorage.setItem(RESULT_KEY,JSON.stringify({at:Date.now(),phase:phaseName,sessionReady,report:String(message).slice(0,300)}));localStorage.removeItem(ACTIVE_KEY)}catch{}}status.textContent=message;try{worker?.terminate()}catch{}worker=null;if(pending){pending.reject(Error(message));pending=null}if(sessionTicker){clearInterval(sessionTicker);sessionTicker=null}sessionStatus.textContent=sessionReady?'ONNX session initialized during this run.':'No ONNX GPU session confirmed during this run.';button.disabled=false;stop.disabled=true}
+function finish(message){if(worker){try{localStorage.setItem(RESULT_KEY,JSON.stringify({at:Date.now(),phase:phaseName,sessionReady,report:String(message).slice(0,300)}));localStorage.removeItem(ACTIVE_KEY)}catch{}}status.textContent=message;try{worker?.terminate()}catch{}worker=null;if(pending){pending.reject(Error(message));pending=null}if(sessionTicker){clearInterval(sessionTicker);sessionTicker=null}sessionStatus.textContent=sessionReady?'ONNX session initialized during this run.':'No ONNX GPU session confirmed during this run.';button.disabled=!isMobile;stop.disabled=true}
 function call(spec,messages,maxNewTokens,structuredOutputSchema=null,timeoutMs=240000){
   return new Promise((resolve,reject)=>{
     if(!worker)return reject(Error('Worker was stopped'));
@@ -292,7 +292,7 @@ async function preflightAsyncify(){
 }
 async function start(){
  if(worker)return;
- if(isMobile&&!allowMemoryRisk.checked){status.textContent='CRASH PREVENTION: ONNX 3B previously crashed Android before GPU session readiness. No worker started. Use safe GPU preflight or explicitly acknowledge the risk to retry. Cached weights preserved.';return}
+ if(isMobile){status.textContent='ANDROID_RUNTIME_BLOCKED: the pinned ONNX Asyncify build lacks Blob-backed JSPI external-data loading. Prior 2.42 GB WebGPU initialization repeatedly killed this browser. No worker started; model weights remain cached.';return}
  log.textContent='';button.disabled=true;stop.disabled=false;cancelled=false;started=performance.now();lastWorkerAt=started;phaseName='starting';sessionReady=false;lastAssetKey='';previousPhase='';printedAssets=0;
  const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(MODEL);
  if(!spec){finish('Registry missing Llama 3.2 3B. Refresh staging.');return}
@@ -338,6 +338,9 @@ async function start(){
  }catch(error){if(!cancelled){line('FAIL · '+String(error?.message||error));finish('FAIL · '+String(error?.message||error))}}
 }
 button.onclick=start;stop.onclick=()=>{cancelled=true;finish('Stopped by user; worker terminated; model cache preserved.')};
+// Blob-backed range data requires the newer JSPI runtime; do not start
+// an unsafe Asyncify inference session even if earlier diagnostics passed.
+if(isMobile){button.disabled=isMobile;status.textContent='ANDROID_RUNTIME_BLOCKED · Only safe preflight and cache inventory enabled on this device.';}
 // An inventory check must report what this origin actually has rather than
 // claiming that a previously cached 2.42 GB download vanished. Checking
 // CacheStorage response metadata and 8 MiB chunk manifests never creates a GPU
@@ -354,7 +357,7 @@ async function refreshArtifactStatus(){
       status.textContent='Model installation incomplete on this origin. Use existing browser Downloads or import missing files, not another GPU retry.';
     }else{
       dlStatus.textContent='OFFLINE CACHE ENTRIES PRESENT · '+total+'/'+total+' required files found, including model weights. No model weights were loaded into RAM; GPU initialization is not verified.';
-      status.textContent='Cached model entries found. Run only with explicit Android crash-risk acknowledgment.';
+      status.textContent=isMobile?'ANDROID_RUNTIME_BLOCKED · 8/8 cached files are present, but the pinned ONNX loader cannot safely start Llama 3B on Android.':'Cached files present. ONNX GPU session readiness is still unverified.';
     }
     if(lastAttempt&&Date.now()-Number(lastAttempt.at||0)<172800000)
       status.textContent+=' Previous session ended uncleanly at '+String(lastAttempt.phase||'unknown')+'.';

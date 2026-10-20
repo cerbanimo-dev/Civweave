@@ -24,11 +24,14 @@ function activeSpec(){const selected=downloads()?.selection?.();return selected?
 // initialization on Android. A safe GPU-limit read cannot qualify as success.
 function assertLlama32AndroidReady(id){
   if(id!==LLAMA32||!/Android/i.test(String(navigator?.userAgent||'')))return;
-  const active=parse(localStorage.getItem(LLAMA32_ACTIVE),null);
-  const finished=parse(localStorage.getItem(LLAMA32_RESULT),null);
-  const passed=typeof finished?.report==='string'&&finished.report.startsWith('PASS · both Llama 3.2 3B runs completed')
-    &&Boolean(finished.sessionReady)&&Number(finished.at||0)>=Number(active?.at||0);
-  if(!passed)throw Object.assign(new Error('Llama 3.2 3B ONNX WebGPU has not passed the isolated two-pass diagnostic on this Android browser. Earlier initialization ended before GPU-ready and may terminate the entire browser. Civweave did not launch a model or remove its cache. Run the separate diagnostic successfully before choosing this model for Moss, or select another installed model. The safe device preflight alone does not qualify.'),{code:'LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED',executionModel:id,phase:'device-memory-guard'});
+  // Runtime 1.26.0-dev.20260416 uses Asyncify and materializes entire ONNX
+  // external weight files in memory before session creation. The July 2026
+  // upstream Blob/range loading fix (onnxruntime#29477) is JSPI-only and is
+  // NOT included in this pinned wasm build. Repeated Android renderer kills
+  // occurred before 'model-ready'. Never use a saved diagnostic PASS record
+  // to override a known incompatible large-model runtime.
+  throw Object.assign(new Error('Llama 3.2 3B ONNX WebGPU is blocked on Android with the current pinned Asyncify runtime. Repeated 2.42 GB session initialization killed the browser before GPU ready; cached model files are intact. This runtime materializes multi-GB external weights during session creation. Do not retry the isolated 3B diagnostic. A verified newer JSPI + Blob-backed external-data loader, or a different low-memory inference engine/model, is required. Choose a smaller installed model in Settings → AI Downloads.'),
+    {code:'LOCAL_LLAMA32_ANDROID_RUNTIME_UNSUPPORTED',executionModel:id,phase:'device-memory-guard'});
 }
 function cancellation(reason='runtime-shutdown'){return Object.assign(new Error(reason==='settings-open'?'Local inference stopped so AI settings can open safely.':'Local inference was cancelled.'),{code:'LOCAL_MODEL_CANCELLED',reason,terminal:true})}
 function ensureGeneration(epoch){if(epoch!==generationEpoch)throw cancellation('superseded-run');return true}

@@ -31,7 +31,10 @@ assert.match(page,/preferBackground:false/,'Llama test must never start Backgrou
 assert.match(page,/WEIGHT_FILES=\['onnx\/model_q4f16.onnx_data','onnx\/model_q4f16.onnx_data_1'\]/);
 const crashGuard=read('public/app/local-ai/llama32-two-pass-test-v4.html');
 assert.match(crashGuard,/civweave\.llama32\.gpu-active\.v1/,'v5 must persist the last phase across browser-process exits');
-assert.match(crashGuard,/if\(isMobile&&!allowMemoryRisk\.checked\)/,'mobile large-model crash risks require explicit opt-in');
+assert.match(crashGuard,/if\(isMobile\)\{status\.textContent='ANDROID_RUNTIME_BLOCKED/,'Android Llama loading must be blocked BEFORE any worker creation');
+assert.doesNotMatch(crashGuard,/allowMemoryRisk\.checked/,'an opt-in checkbox must not bypass a reproduced renderer OOM');
+assert.match(crashGuard,/button\.disabled=isMobile/,'repeatedly crashing Android run button must be visibly disabled');
+assert.match(crashGuard,/Blob-backed.*JSPI/i,'the incident must explain the missing memory-safe runtime capability');
 assert.match(crashGuard,/checkpoint\('worker-start',true\)/,'worker creation must persist an unclean-run checkpoint');
 assert.match(crashGuard,/checkpoint\(next,true\)/,'phase transitions must be persisted to diagnose crashes');
 assert.match(crashGuard,/if\(worker\)\{try\{localStorage\.setItem\(RESULT_KEY/,'normal completion must clear the crash checkpoint');
@@ -66,7 +69,7 @@ assert.match(authority,/await modelRuntimeFor\(model\)/,'controlled generation m
 assert.match(pipeline,/structuredOutputSchema:phase==='compile'\|\|phase==='repair'\?onnxCompiler\?schema:null:null/,'Llama compile needs token-level grammar');
 assert.match(pipeline,/onnxCompiler&&\(phase==='compile'\|\|phase==='repair'\)&&\(!result\?\.strictJson\|\|!result\?\.jsonValidated\)/,'strict JSON may never silently become prompt-only JSON');
 assert.match(spine,/function assertLlama32AndroidReady\(/,'prior Android renderer crashes must block ordinary app retries');
-assert.match(spine,/LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED/,'explicit safe refusal must identify the real memory risk');
+assert.match(spine,/LOCAL_LLAMA32_ANDROID_RUNTIME_UNSUPPORTED/,'known unsafe Android loader must be refused before worker creation');
 assert.match(spine,/expectedModelId/,'selected model must be bound to its runtime request');
 assert.match(spine,/structuredOutputSchema:requestOptions\.structuredOutputSchema/,'worker must receive the JSON grammar schema');
 assert.match(spine,/if\(strictModel\)/,'strict ONNX generation must not silently fall back to another model');
@@ -111,11 +114,15 @@ vm.runInContext(spine,context,{filename:'runtime-v266.js'});
 const core=context.CivweaveLocalModelRuntimeV266;
 values.set('civweave.llama32.gpu-active.v1',JSON.stringify({at:1000,phase:'loading-model',sessionReady:false}));
 await assert.rejects(()=>core.generate({expectedModelId:llamaId,strictModel:true,messages:[]}),
-  e=>e.code==='LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED');
+  e=>e.code==='LOCAL_LLAMA32_ANDROID_RUNTIME_UNSUPPORTED');
 assert.equal(gpuMessages.length,0,'Android crash guard must not create or load a Worker');
-await assert.rejects(()=>core.prewarm({}),e=>e.code==='LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED');
+await assert.rejects(()=>core.prewarm({}),e=>e.code==='LOCAL_LLAMA32_ANDROID_RUNTIME_UNSUPPORTED');
 assert.equal(gpuMessages.length,0,'prewarm cannot bypass the Android crash guard');
 values.set('civweave.llama32.gpu-result.v1',JSON.stringify({at:2000,sessionReady:true,report:'PASS · both Llama 3.2 3B runs completed, second pass constrained and validated.'}));
+await assert.rejects(()=>core.generate({expectedModelId:llamaId,strictModel:true,messages:[]}),
+  e=>e.code==='LOCAL_LLAMA32_ANDROID_RUNTIME_UNSUPPORTED','a prior PASS record must NOT bypass the pinned Asyncify memory safety gate');
+assert.equal(gpuMessages.length,0,'previous success cannot create an unsafe Android worker');
+context.navigator.userAgent='Desktop Chromium WebGPU';
 await assert.rejects(()=>core.generate({expectedModelId:'a different model',strictModel:true,messages:[]}),
   e=>e.code==='LOCAL_MODEL_SELECTION_MISMATCH');
 const enforcedSchema={type:'object',required:['title'],properties:{title:{type:'string'}}};
