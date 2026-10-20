@@ -20,7 +20,7 @@ const files=[
   ['/app/ai-capability-broker-v268.js?v=1.0.67-v271',()=>globalThis.CivweaveAICapabilityBrokerV268?.version==='1.0.67-ai-capability-broker-v271-semantics','CivweaveAICapabilityBrokerV268'],
   ['/app/fast-interactive-runtime-v192.js?v=1.0.124-v313-runtime-spine-contract',fastInteractiveReady,'CivweaveFastInteractiveV192'],
   ['/app/local-ai/model-registry-v266.js?v=1.0.119-v306-qwen35-4b',registryReady,'CivweaveLocalModelRegistryV266'],
-  ['/app/local-ai/download-manager-v267.js?v=1.0.70-v323-llama-inventory',downloadManagerReady,'CivweaveLocalModelDownloadV266'],
+  ['/app/local-ai/download-manager-v267.js?v=1.0.71-v324-qwen4-chunked-import',downloadManagerReady,'CivweaveLocalModelDownloadV266'],
   ['/app/local-ai/package-revision-guard-v307.js?v=1.0.121-v307',packageRevisionReady,'CivweaveLocalModelPackageRevisionGuardV307'],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',downloadPolicyReady,'CivweaveLocalModelDownloadPolicyV278'],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.121-v307',metadataReady,'CivweaveLocalModelMetadataRepairV276'],
@@ -29,7 +29,7 @@ const files=[
   ['/app/local-ai/runtime-bridge-v266.js?v=1.0.121-v307',bridgeReady,'CivweaveLocalModelBridgeV266'],
   ['/app/browser-tool-v1.js?v=1.0.0',()=>globalThis.CivweaveBrowserToolV1?.version==='1.0.0-browser-tool-v1','CivweaveBrowserToolV1'],
   ['/app/local-ai/browser-agent-v1.js?v=1.0.1',()=>globalThis.CivweaveLocalBrowserAgentV1?.version==='1.0.1-local-browser-agent-v1','CivweaveLocalBrowserAgentV1'],
-  ['/app/local-ai/settings-panel-v267.js?v=1.0.119-v323-phone-speed-report',settingsReady,'CivweaveLocalAISettingsV266'],
+  ['/app/local-ai/settings-panel-v267.js?v=1.0.120-v324-qwen4-file-import',settingsReady,'CivweaveLocalAISettingsV266'],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283','CivweaveLocalAIPrimaryRouteV283'],
   ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.82-v321-settings-open-idle',hardwareTierReady,'CivweaveLocalModelHardwareTierUIV278'],
   ['/app/local-ai/test-pulse-v269.js?v=1.0.116-v303-mobile-safe',()=>globalThis.CivweaveLocalModelTestPulseV269?.version==='1.0.116-local-model-test-pulse-v303-mobile-safe','CivweaveLocalModelTestPulseV269']
