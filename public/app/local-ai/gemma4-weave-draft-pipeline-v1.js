@@ -244,6 +244,7 @@ async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messag
   let streamed='',index=0;
   dispatch({pipelineId,purpose,kind,phase,state:'running',label,model:modelFor(),promptBudget,promptCharacters:messages.reduce((n,row)=>n+String(row?.content||'').length,0)+systemPrompt.length});
   const onnxCompiler=modelFor()==='llama32-3b-instruct-q4f16';
+  if(onnxCompiler&&!run)throw Object.assign(new Error('The selected Llama ONNX model requires the canonical structured-task runtime; LiteRT cannot execute this model.'),{code:'LOCAL_ONNX_RUNTIME_UNAVAILABLE',executionModel:modelFor()});
   const args={__civweaveStage:label,__civweavePlanKind:kind,systemPrompt,messages,maxNewTokens,
     structuredOutputSchema:phase==='compile'||phase==='repair'?onnxCompiler?schema:null:null,
     structuredTool:null,onToken:event=>{
