@@ -1,13 +1,15 @@
 (()=>{
 'use strict';
-const VERSION='1.0.2-local-generation-model-policy-v1-llama32-test';
+const VERSION='1.0.3-local-generation-model-policy-v1-user-selected-single-model';
 if(globalThis.CivweaveLocalGenerationModelPolicyV1?.version===VERSION)return;
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const clean=(s,max=240)=>String(s??'').trim().slice(0,max);
 const PAIRS=Object.freeze([
   Object.freeze({fast:'llama32-3b-instruct-q4f16',deep:'llama32-3b-instruct-q4f16',aliases:Object.freeze([])}),
-  // Retired E4B pair is deliberately not a selectable deep-model default.
-  Object.freeze({fast:'qwen35-4b-litert-web',deep:'qwen35-9b-litert-web',aliases:Object.freeze([])})
+  // Never silently require the 9B download for a 4B request. Each explicitly
+  // selected Qwen model performs both local roles until the user changes it.
+  Object.freeze({fast:'qwen35-4b-litert-web',deep:'qwen35-4b-litert-web',aliases:Object.freeze([])}),
+  Object.freeze({fast:'qwen35-9b-litert-web',deep:'qwen35-9b-litert-web',aliases:Object.freeze([])})
 ]);
 function selection(){
   try{const live=globalThis.CivweaveLocalModelDownloadV266?.selection?.();if(live?.active&&live.id)return live}catch{}
