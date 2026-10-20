@@ -23,7 +23,7 @@ const CORE=Object.freeze([
   }),
   Object.freeze({
     name:'CivweaveLocalModelRuntimeV266',
-    src:'/app/local-ai/runtime-v266.js?v=1.0.123-v325-runtime-family-guard&chatcore=v325',
+    src:'/app/local-ai/runtime-v266.js?v=1.0.124-v326-android-3b-memory-block&chatcore=v326',
     ready:()=>runtimeReady()
   })
 ]);
