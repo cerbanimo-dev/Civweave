@@ -21,6 +21,17 @@ on:
       - 'scripts/stage-llama-structured-output-v1.mjs'
       - 'scripts/verify-llama32-two-pass-v1.mjs'
       - 'scripts/build-cloudflare-pages.mjs'
+      - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/runtime-v266.js'
+      - '.github/workflows/verify-llama32-two-pass-v1.yml'
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/runtime-v266.js'
+      - 'scripts/verify-llama32-two-pass-v1.mjs'
       - '.github/workflows/verify-llama32-two-pass-v1.yml'
   workflow_dispatch:
 
