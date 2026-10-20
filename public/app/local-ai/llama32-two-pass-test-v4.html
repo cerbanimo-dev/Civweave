@@ -10,7 +10,7 @@
 <p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
 <button id="download">Check files / show safe browser downloads</button><button id="cancelDownload" disabled>Cancel download</button>
 <p class="cw-small"><strong>Phone-safe mode:</strong> Android ended an earlier 2.4 GB in-page foreground download at 4%. For large model weights, use the browser's native Downloads links and import them in independent 8 MiB cache chunks, preserving completed chunks across page restarts. Do NOT use a monolithic in-page cache stream. This does NOT use Background Fetch, which previously returned a misleading “Browser download started” status. Keep this tab visible while downloading. Existing cached files are reused.</p>
-<p id="downloadProgress" aria-live="polite">Model not downloaded on this device.</p>
+<p id="downloadProgress" aria-live="polite">Checking existing offline cache entries (no model weights loaded)…</p>
 <fieldset><legend>Alternative: Android / browser Downloads</legend><p>Use the actual browser download links below for the two large model-weight files, then select the completed files to import. These links are external Hugging Face files and are not silently queued into Civweave.</p>
 <div id="weightLinks"></div><label for="importFiles">Select the downloaded model files to import</label><input id="importFiles" type="file" multiple><button id="importWeights">Import selected files into Civweave</button><p class="cw-small">Import checks exact expected sizes and saves each file to offline Cache Storage using a streaming Blob, not a 2 GB JavaScript array. Afterwards, use Direct download to fetch only remaining small metadata files. Do not delete existing model caches.</p></fieldset><br><fieldset><legend>Android GPU memory crash protection</legend>
 <p class="cw-small">Your previous 2.42 GB model attempt ended during ONNX WebGPU session creation, before model-ready. Android may terminate a renderer outright when native/GPU allocations exhaust its process budget. JavaScript timeouts cannot prevent or catch such a kill.</p>
@@ -252,7 +252,7 @@ async function available(spec){
  for(const artifact of spec.artifacts.filter(x=>x.required)){
    const url=globalThis.CivweaveLocalModelRegistryV266.directUrl(spec,artifact.path);
    if(!(await cache.match(url))?.ok){
-     if(Number(artifact.sizeBytes||0)>=64*1024*1024&&/\\.onnx_data(?:_\\d+)?$/.test(artifact.path)){
+     if(Number(artifact.sizeBytes||0)>=64*1024*1024&&/\.onnx_data(?:_\d+)?$/.test(artifact.path)){
        const row=await chunkedStatus(cache,url,Number(artifact.sizeBytes||0));
        if(row.available)continue;
      }
@@ -338,6 +338,31 @@ async function start(){
  }catch(error){if(!cancelled){line('FAIL · '+String(error?.message||error));finish('FAIL · '+String(error?.message||error))}}
 }
 button.onclick=start;stop.onclick=()=>{cancelled=true;finish('Stopped by user; worker terminated; model cache preserved.')};
-if(!lastAttempt||Date.now()-Number(lastAttempt.at||0)>=172800000)status.textContent='Ready · offline model availability verified when test starts';
+// An inventory check must report what this origin actually has rather than
+// claiming that a previously cached 2.42 GB download vanished. Checking
+// CacheStorage response metadata and 8 MiB chunk manifests never creates a GPU
+// session, reads full model weights, or starts a network download.
+async function refreshArtifactStatus(){
+  const selected=spec();
+  if(!selected){dlStatus.textContent='Model registry unavailable. Reopen current staging.';status.textContent='Registry not ready';return}
+  try{
+    const missing=await available(selected);
+    const total=selected.artifacts.filter(row=>row.required).length;
+    const retained=Math.max(0,total-missing.length);
+    if(missing.length){
+      dlStatus.textContent='OFFLINE CACHE INCOMPLETE · '+retained+'/'+total+' required entries found on this origin. Missing/incomplete: '+missing.join(', ')+'. No model weights were loaded. Cached files were not deleted.';
+      status.textContent='Model installation incomplete on this origin. Use existing browser Downloads or import missing files, not another GPU retry.';
+    }else{
+      dlStatus.textContent='OFFLINE CACHE ENTRIES PRESENT · '+total+'/'+total+' required files found, including model weights. No model weights were loaded into RAM; GPU initialization is not verified.';
+      status.textContent='Cached model entries found. Run only with explicit Android crash-risk acknowledgment.';
+    }
+    if(lastAttempt&&Date.now()-Number(lastAttempt.at||0)<172800000)
+      status.textContent+=' Previous session ended uncleanly at '+String(lastAttempt.phase||'unknown')+'.';
+  }catch(error){
+    dlStatus.textContent='CACHE INVENTORY ERROR · '+String(error?.message||error)+'; nothing was deleted or downloaded.';
+    status.textContent='Unable to verify offline model inventory. No GPU session started.';
+  }
+}
+void refreshArtifactStatus();
 </script>
 </body></html>

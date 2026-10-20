@@ -24,7 +24,7 @@ async function validateArtifactResponse(a,r,u=''){
   return{ok:true,reason:''};
 }
 async function artifactStatus(x,a){const c=await caches.open(CACHE),u=url(x,a),r=await c.match(u);if(!r?.ok){
-  if(x.id==='llama32-3b-instruct-q4f16'&&/\\.onnx_data(?:_\\d+)?$/.test(a.path)){
+  if(x.id==='llama32-3b-instruct-q4f16'&&/\.onnx_data(?:_\d+)?$/.test(a.path)){
     try{
       const {chunkedStatus}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
       const chunks=await chunkedStatus(c,u,Number(a.sizeBytes||0));

@@ -49,4 +49,20 @@ assert.match(page,/existing\.missing\.some\(row=>Number\(row\.sizeBytes/);
 assert.match(page,/llama32-chunked-model-storage-v1\.js/);
 assert.match(worker,/chunkedResponse\(cache,url,expected\)/);
 assert.match(manager,/chunkedStatus\(c,u,Number\(a\.sizeBytes\|\|0\)\)/);
+// Cache lookup must recognize both ONNX external-data shard names. A double-
+// escaped JS regex silently rejects both names and reports cached chunks missing.
+const runtime=await readFile('public/app/local-ai/worker-v266.js','utf8');
+for(const [name,source] of [['two-pass page',page],['download manager',manager],['diagnostic worker',worker],['canonical worker',runtime]]){
+  const literals=[...source.matchAll(/\/(?:\\.|[^\/\n])+\/\.test\((?:a\.path|artifact\.path|path)\)/g)];
+  assert.equal(literals.length,1,name+' must use a single shard-suffix test');
+  const literal=literals[0][0].split('.test(')[0];
+  const matcher=new RegExp(literal.slice(1,-1));
+  assert.equal(matcher.test('onnx/model_q4f16.onnx_data'),true,name+' must recognize first external-data shard');
+  assert.equal(matcher.test('onnx/model_q4f16.onnx_data_1'),true,name+' must recognize numbered external-data shard');
+  assert.equal(matcher.test('onnx/model_q4f16.onnx'),false,name+' must not mistake graph metadata for weights');
+}
+assert.doesNotMatch(page,/Model not downloaded on this device\./,'Never report missing weights before checking the offline cache');
+assert.match(page,/async function refreshArtifactStatus\(/,'On-open read-only cache status must exist');
+assert.match(page,/void refreshArtifactStatus\(\)/,'On-open status must run without loading model weights');
+
 console.log('PASS: low-memory chunked import, resumability after abort, full streamed replay, strict source size, and eviction detection.');

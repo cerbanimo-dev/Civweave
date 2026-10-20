@@ -28,7 +28,7 @@ function cacheAdapter(cache,spec){
   const find=async path=>{
     const url=remoteUrl(spec,path),hit=await cache.match(url);
     if(hit?.ok)return withKnownLength(hit,path);
-    if(spec.id===LLAMA32_COMPILER&&/\\.onnx_data(?:_\\d+)?$/.test(path)){
+    if(spec.id===LLAMA32_COMPILER&&/\.onnx_data(?:_\d+)?$/.test(path)){
       const {chunkedResponse}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
       const expected=Number(artifactFor(spec,path)?.sizeBytes||0);
       const streamed=await chunkedResponse(cache,url,expected);
