@@ -178,11 +178,52 @@ for(const id of ['llama32-3b-instruct-q4f16','smollm2-135m-instruct-q8-wasm','qw
   assert.equal(lastRequest.structuredOutputSchema.type,'object');
 }
 for(const [filename,source] of [['persistent shell',shell],['Working Campus',campus]]){
-  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.5-runtime-family-gate/,filename+' must cache-bust the corrected dispatcher');
+  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.6-model-cache-inventory/,filename+' must cache-bust the corrected dispatcher');
   assert.match(source,/gemma4-litert-request-authority-v1\.js\?v=1\.2\.28-runtime-family-gate/,filename+' must cache-bust the corrected LiteRT admission');
 }
 assert.match(shell,/gemma4-first-request-intake-bridge-v1\.js\?v=1\.2\.10-runtime-family-gate/);
 assert.match(shell,/gemma4-learning-plan-entry-authority-v1\.js\?v=1\.2\.3-backend-gate/);
 assert.match(shell,/gemma4-weave-draft-pipeline-v1\.js\?v=1\.3\.9-runtime-family-gate/);
+
+
+// The next actual-device Moss error came from the download manager returning
+// unavailable. It must state WHICH cached files or chunks are missing, and
+// must not try a 2.42 GB GPU model as a probe for Cache Storage readiness.
+{
+  const id='llama32-3b-instruct-q4f16';
+  const calls={status:0,gpu:0,deleted:0};
+  let current={available:false,state:{status:'ready'},rows:[
+    {path:'config.json',required:true,ok:true},
+    {path:'onnx/model_q4f16.onnx_data',required:true,ok:false,reason:'chunk-missing',index:7},
+    {path:'onnx/model_q4f16.onnx_data_1',required:true,ok:false,reason:'chunk-manifest-missing'},
+  ],missing:[
+    {path:'onnx/model_q4f16.onnx_data',required:true,reason:'chunk-missing',index:7},
+    {path:'onnx/model_q4f16.onnx_data_1',required:true,reason:'chunk-manifest-missing'},
+  ]};
+  const sb={console,Date,Math,JSON,Object,Array,String,Boolean,RegExp,Promise,Map,Set,
+    queueMicrotask:()=>{},addEventListener:()=>{},dispatchEvent:()=>{},setTimeout:()=>0,clearTimeout:()=>{},
+    localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},
+    CivweaveLocalGenerationModelPolicyV1:{resolve:()=>id,supportsSelected:()=>true,display:x=>x},
+    CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id}),status:async()=>{calls.status++;return current}},
+    CivweaveLocalModelRuntimeV266:{generate:async()=>{calls.gpu++;throw Error('no inference should be attempted for incomplete model cache')}},
+    CivweaveLiteRTGemma4FastRuntimeV1:{runFast:async()=>{calls.gpu++;throw Error('no LiteRT fallback')}}};
+  sb.globalThis=sb;
+  vm.createContext(sb);
+  vm.runInContext(authority,sb,{filename:'gemma4-structured-task-authority-v1.js'});
+  await assert.rejects(()=>sb.CivweaveGemma4StructuredTaskAuthorityV1.requireDeepModel(),e=>{
+    assert.equal(e.code,'LOCAL_PLANNING_MODEL_REQUIRED');
+    assert.match(e.message,/onnx\/model_q4f16\.onnx_data \(chunk-missing at fragment 8\)/);
+    assert.match(e.message,/onnx\/model_q4f16\.onnx_data_1 \(chunk-manifest-missing\)/);
+    assert.match(e.message,/offline files are not verified/);
+    assert.equal(e.status.state.status,'ready','download state alone is not evidence that bytes exist');
+    return true;
+  });
+  assert.equal(calls.status,1);
+  assert.equal(calls.gpu,0);
+  current={available:true,rows:[{path:'onnx/model_q4f16.onnx_data',required:true,ok:true}],missing:[]};
+  assert.equal(await sb.CivweaveGemma4StructuredTaskAuthorityV1.requireDeepModel(),id,'complete cache must be admitted by inventory (subject to the separate Android GPU guard)');
+}
+assert.match(read('public/app/local-ai/download-manager-v267.js'),/reason:chunks.reason\|\|'chunk-incomplete'/,'chunked offline cache must surface exact missing-manifest/fragment reasons');
+assert.match(read('public/app/local-ai/download-manager-v267.js'),/reason:'chunk-inventory-unavailable'/,'inventory exceptions must not be disguised as a missing download');
 
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');

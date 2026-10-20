@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const VERSION='1.0.69-local-ai-download-v323-llama-chunked',CACHE='civweave-model-generative-v266',STATE_KEY='civweave.local-ai.downloads.v266',SELECTION_KEY='civweave.local-ai.selection.v266',BG='cw-local-ai-v267::',EVENT='civweave:local-model-download-progress';
+const VERSION='1.0.70-local-ai-download-v323-llama-inventory',CACHE='civweave-model-generative-v266',STATE_KEY='civweave.local-ai.downloads.v266',SELECTION_KEY='civweave.local-ai.selection.v266',BG='cw-local-ai-v267::',EVENT='civweave:local-model-download-progress';
 const R=()=>globalThis.CivweaveLocalModelRegistryV266,parse=(v,d)=>{try{return JSON.parse(v)??d}catch{return d}},now=()=>new Date().toISOString(),clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const fmt=b=>{b=Number(b||0);return b>=1e9?`${(b/1e9).toFixed(1)} GB`:b>=1e6?`${(b/1e6).toFixed(b>=100e6?0:1)} MB`:`${Math.max(1,Math.round(b/1e3))} KB`};
 const states=parse(localStorage.getItem(STATE_KEY),{}),jobs=new Map(),listeners=new Map(),validated=new Set();let lastSave=0,lastEmit=0;
@@ -29,7 +29,15 @@ async function artifactStatus(x,a){const c=await caches.open(CACHE),u=url(x,a),r
       const {chunkedStatus}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
       const chunks=await chunkedStatus(c,u,Number(a.sizeBytes||0));
       if(chunks.available)return{...a,ok:true,bytes:chunks.bytes,reason:'',storageMode:'chunked'};
-    }catch(error){console.warn('[Civweave] Chunked Llama model inventory unavailable',error)}
+      // A partially imported chunk file is not proof of completed weights.
+      // Expose the specific missing fragment, without reading model bytes.
+      return{...a,ok:false,bytes:0,reason:chunks.reason||'chunk-incomplete',
+        ...(Number.isSafeInteger(chunks.index)?{index:chunks.index}:{})};
+    }catch(error){
+      console.warn('[Civweave] Chunked Llama model inventory unavailable',error);
+      return{...a,ok:false,bytes:0,reason:'chunk-inventory-unavailable',
+        detail:String(error?.message||error).slice(0,160)};
+    }
   }
   return{...a,ok:false,bytes:0,reason:'missing'};
 }const valid=await validateArtifactResponse(a,r,u);if(!valid.ok){await c.delete(u);return{...a,ok:false,bytes:0,reason:valid.reason,corrupt:true}}const n=+r.headers.get('content-length')||a.minBytes||0;return{...a,ok:!n||n>=a.minBytes,bytes:n,reason:''}}
