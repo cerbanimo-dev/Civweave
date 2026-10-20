@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe';
+const VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -243,8 +243,10 @@ async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messag
   if((messages.at(-1)?.content||'').length>promptBudget)throw contextFitError(kind,phase,promptBudget);
   let streamed='',index=0;
   dispatch({pipelineId,purpose,kind,phase,state:'running',label,model:modelFor(),promptBudget,promptCharacters:messages.reduce((n,row)=>n+String(row?.content||'').length,0)+systemPrompt.length});
-  const onnxCompiler=modelFor()==='llama32-3b-instruct-q4f16';
-  if(onnxCompiler&&!run)throw Object.assign(new Error('The selected Llama ONNX model requires the canonical structured-task runtime; LiteRT cannot execute this model.'),{code:'LOCAL_ONNX_RUNTIME_UNAVAILABLE',executionModel:modelFor()});
+  const executionModel=modelFor(),modelSpec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(executionModel);
+  const onnxCompiler=executionModel==='llama32-3b-instruct-q4f16';
+  if(modelSpec?.runtime!=='litert-lm-web'&&!run)
+    throw Object.assign(new Error('The selected model requires its canonical ONNX/WASM runtime; the LiteRT fallback cannot execute it.'),{code:'LOCAL_MODEL_RUNTIME_FAMILY_UNAVAILABLE',executionModel,runtimeFamily:modelSpec?.runtime||''});
   const args={__civweaveStage:label,__civweavePlanKind:kind,systemPrompt,messages,maxNewTokens,
     structuredOutputSchema:phase==='compile'||phase==='repair'?onnxCompiler?schema:null:null,
     structuredTool:null,onToken:event=>{
