@@ -178,7 +178,7 @@ for(const id of ['llama32-3b-instruct-q4f16','smollm2-135m-instruct-q8-wasm','qw
   assert.equal(lastRequest.structuredOutputSchema.type,'object');
 }
 for(const [filename,source] of [['persistent shell',shell],['Working Campus',campus]]){
-  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.7-demand-core-bootstrap/,filename+' must cache-bust the corrected dispatcher');
+  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.8-onnx-weave-loader/,filename+' must cache-bust the corrected dispatcher');
   assert.match(source,/gemma4-litert-request-authority-v1\.js\?v=1\.2\.28-runtime-family-gate/,filename+' must cache-bust the corrected LiteRT admission');
 }
 assert.match(shell,/gemma4-first-request-intake-bridge-v1\.js\?v=1\.2\.10-runtime-family-gate/);
@@ -308,6 +308,8 @@ assert.match(chatCore,/llama32StructuredTrialId/,'core registry predicate must d
     'absence of a shared loader must produce an actionable error, not a silent 600-second fallback');
 }
 assert.match(read('public/app/local-ai/gemma4-structured-task-authority-v1.js'),/ensureWeaveLayers/,'ONNX learning-plan transport must initialize the existing canonical Weave layers on demand');
+const currentShell=read('public/app/persistent-system-shell-v1.html');
+assert.ok(currentShell.includes('gemma4-weave-draft-pipeline-v1.js?v=1.3.9-runtime-family-gate'),'persistent shell must retain shared Weave compiler');
 const actualCampus=read('public/app/working-campus-v440.html');
 assert.match(actualCampus,/gemma4-weave-draft-pipeline-v1\\.js\\?v=1\\.3\\.9-runtime-family-gate/,
  'Working Campus must load the Weave Draft pipeline even when LiteRT is not selected');
