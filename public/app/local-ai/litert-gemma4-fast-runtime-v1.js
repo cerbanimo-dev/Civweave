@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.8.4-litert-runtime-v1-gpu-binding-limit-gate';
+const VERSION='1.8.5-litert-runtime-v1-qwen4-chunked-phone-loader';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 // The current E4B -web GPU bundle uses a 160 MiB storage buffer binding.
@@ -72,9 +72,17 @@ function modelUrl(modelId){
   return{spec,artifact,url:registry().directUrl(spec,artifact.path)};
 }
 async function modelStream(modelId){
-  if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable for the LiteRT Gemma 4 model.');
-  const {url}=modelUrl(modelId),cache=await caches.open(MODEL_CACHE),response=await cache.match(url);
-  if(!response?.ok||!response.body)throw Object.assign(new Error(`${profileFor(modelId)?.label||modelId} is not downloaded yet. Install its performance upgrade from Local models first.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:modelId});
+  if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable for the selected LiteRT model.');
+  const {url,artifact}=modelUrl(modelId),cache=await caches.open(MODEL_CACHE);
+  let response=await cache.match(url);
+  // Qwen 4B phone imports are saved as independent 8 MiB Cache Storage
+  // fragments. Supply LiteRT-LM a lazy ReadableStream without rebuilding
+  // a 2.75 GB JS ArrayBuffer or Cache.put() response before model launch.
+  if(!response?.ok&&modelId===QWEN_FAST){
+    const {chunkedResponse}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
+    response=await chunkedResponse(cache,url,Number(artifact.sizeBytes||0));
+  }
+  if(!response?.ok||!response.body)throw Object.assign(new Error(`${profileFor(modelId)?.label||modelId} is not fully imported. Use native browser Downloads and the 8 MiB importer in Settings; do not redownload completed chunks.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:modelId});
   return response.body;
 }
 async function loadModule(){
