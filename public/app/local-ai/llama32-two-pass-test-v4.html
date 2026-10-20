@@ -61,7 +61,7 @@ async function ensureDownloadManager(){
   if(globalThis.CivweaveLocalModelDownloadV266?.start)return globalThis.CivweaveLocalModelDownloadV266;
   await new Promise((resolve,reject)=>{
     const script=document.createElement('script');
-    script.src='/app/local-ai/download-manager-v267.js?v=1.0.69-v323-llama-chunked';
+    script.src='/app/local-ai/download-manager-v267.js?v=1.0.70-v323-llama-inventory';
     script.onload=()=>globalThis.CivweaveLocalModelDownloadV266?.start?resolve():reject(Error('Downloaded model manager did not initialize'));
     script.onerror=()=>reject(Error('Download manager could not load'));
     document.head.append(script);
