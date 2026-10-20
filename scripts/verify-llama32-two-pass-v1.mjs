@@ -264,4 +264,52 @@ const chatCore=read('public/app/local-chat-runtime-v295.js');
 assert.ok(chatCore.includes('download-manager-v267.js?v=1.0.70-v323-llama-inventory'),'canonical local core must load the current chunk-aware download manager');
 assert.match(chatCore,/llama32StructuredTrialId/,'core registry predicate must demand Llama-capable registry');
 
+
+// Llama 3B now passes file readiness, but Gemma-first bootstrap skips ONNX
+// and never loads the shared Weave Draft pipeline. The transport must actively
+// load the existing canonical Weave layers without invoking LiteRT inference.
+{
+  const id='llama32-3b-instruct-q4f16';
+  let loads=0,litertGenerations=0,transportCalls=0;
+  const sandbox={console,Date,Math,JSON,Object,Array,String,Boolean,RegExp,Promise,Map,Set,
+    queueMicrotask:()=>{},addEventListener:()=>{},dispatchEvent:()=>{},setTimeout:()=>0,clearTimeout:()=>{},
+    localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},
+    CivweaveLocalGenerationModelPolicyV1:{resolve:()=>id,supportsSelected:()=>true,display:x=>x},
+    CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id}),status:async()=>({available:true,missing:[]})},
+    CivweaveLiteRTGemma4FastRuntimeV1:{runFast:async()=>{litertGenerations++;throw Error('LiteRT cannot execute ONNX')}},
+    CivweaveGemma4LiteRTRequestAuthorityV1:{async ensureWeaveLayers(){
+      loads++;
+      await Promise.resolve();
+      sandbox.CivweaveGemma4WeaveDraftPipelineV1={
+        version:'1.3.10-weave-draft-pipeline-v1-onnx-demand-load',
+        weaveTransport:async (purpose,args)=>{transportCalls++;return{purpose,args,text:'{}'}}
+      };
+      return true;
+    }}
+  };
+  sandbox.globalThis=sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(authority,sandbox,{filename:'gemma4-structured-task-authority-v1.js'});
+  const api=sandbox.CivweaveGemma4StructuredTaskAuthorityV1;
+  const request={schema:{type:'object'},messages:[{role:'user',content:'Memorize tarot'}]};
+  const transport=api.directE4BTransport('living-school-learning-plan-review-v2');
+  const result=await transport(request);
+  assert.equal(loads,1,'missing Weave must trigger the existing shared Weave-layer loader for ONNX');
+  assert.equal(transportCalls,1,'the installed Weave transport must run once');
+  assert.equal(result.text,'{}');
+  assert.equal(result.purpose,'living-school-learning-plan-review-v2');
+  assert.equal(result.args,request,'the selected model request must not be rewritten or dropped');
+  assert.equal(litertGenerations,0,'loading shared Weave layers must not initialize Gemma LiteRT inference');
+  await transport(request);
+  assert.equal(loads,1,'loaded transport should not restart the layer installer on every call');
+  delete sandbox.CivweaveGemma4WeaveDraftPipelineV1;
+  delete sandbox.CivweaveGemma4LiteRTRequestAuthorityV1;
+  await assert.rejects(transport(request),e=>e.code==='CIVWEAVE_WEAVE_PIPELINE_BOOTSTRAP_UNAVAILABLE',
+    'absence of a shared loader must produce an actionable error, not a silent 600-second fallback');
+}
+assert.match(read('public/app/local-ai/gemma4-structured-task-authority-v1.js'),/ensureWeaveLayers/,'ONNX learning-plan transport must initialize the existing canonical Weave layers on demand');
+const actualCampus=read('public/app/working-campus-v440.html');
+assert.match(actualCampus,/gemma4-weave-draft-pipeline-v1\\.js\\?v=1\\.3\\.10-onnx-demand-load/,
+ 'Working Campus must load the Weave Draft pipeline even when LiteRT is not selected');
+
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');
