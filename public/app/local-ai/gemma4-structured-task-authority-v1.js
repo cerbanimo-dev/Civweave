@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.4-structured-task-authority-v1-probe-short-watchdog';
+const VERSION='1.4.5-structured-task-authority-v1-runtime-family-gate';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -107,7 +107,16 @@ async function intakeRuntime(timeoutMs=12000){
 // Respect the selected model's runtime family. The ONNX Llama 3B trial is
 // NEVER a LiteRT profile; sending it to runFast() produces PROFILE_MISSING.
 async function modelRuntimeFor(model){
-  if(model!=='llama32-3b-instruct-q4f16')return intakeRuntime();
+  // Resolve from the registered model engine, never from a task/role label.
+  // The role policy may choose Llama, SmolLM or Qwen ONNX: none are LiteRT.
+  const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(model);
+  const runtimeFamily=String(spec?.runtime||'');
+  const liteProfiles=globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.profiles||{};
+  const isLiteRT=runtimeFamily==='litert-lm-web'
+    ||(!runtimeFamily&&Boolean(liteProfiles[model]));
+  if(isLiteRT)return intakeRuntime();
+  if(!['transformers-js-v3','transformers-js-v4'].includes(runtimeFamily))
+    throw Object.assign(new Error('No supported local inference backend is registered for the selected model. LiteRT was not attempted.'),{code:'LOCAL_MODEL_RUNTIME_FAMILY_UNSUPPORTED',executionModel:model,runtimeFamily});
   const chat=globalThis.CivweaveLocalChatRuntimeV295;
   if(typeof chat?.ready!=='function')throw Object.assign(new Error('The ONNX inference core is not available; Llama 3.2 3B cannot use the LiteRT runner.'),{code:'LOCAL_ONNX_RUNTIME_UNAVAILABLE',executionModel:model});
   await chat.ready();
@@ -122,7 +131,7 @@ async function modelRuntimeFor(model){
         maxNewTokens:Math.min(1200,Math.max(32,Number(args.maxNewTokens)||512)),
         promptTokenBudget:1300,temperature:.3,thinking:false,stream:!args.structuredOutputSchema,
         timeoutMs:240000,onToken:args.onToken,onProgress:args.onProgress});
-      if(result.executionId!==id)throw Object.assign(new Error('The requested ONNX model was silently substituted.'),{code:'LOCAL_ONNX_MODEL_MISMATCH',executionModel:result.executionId});
+      if(result.executionId!==id)throw Object.assign(new Error('The requested local model was silently substituted.'),{code:'LOCAL_MODEL_EXECUTION_MISMATCH',executionModel:result.executionId});
       return{outputText:result.text,text:result.text,strictJson:Boolean(result.strictJson),jsonValidated:Boolean(result.jsonValidated),
         model:{id},executionId:id,metrics:result.metrics||{}};
     },
