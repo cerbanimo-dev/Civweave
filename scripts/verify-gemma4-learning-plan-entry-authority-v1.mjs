@@ -19,7 +19,7 @@ const sandbox={
     parseJsonLoose:text=>JSON.parse(text),
     weaveTransport:async()=>{pipelineCalls+=1;const text=JSON.stringify({title:'Tarot Reading',capability:'Read and remember tarot cards',level:'beginner',proof:'Give an independent reading',modules:[{title:'Structure',focus:'Deck structure',outcome:'Identify deck structure'},{title:'Meanings',focus:'Card meanings',outcome:'Recall core meanings'},{title:'Reading',focus:'Card combinations',outcome:'Interpret a spread'}],assumptions:[],resourceManifest:[],specialistWork:[],decisionGates:[]});return{text,payload:{text},diagnostics:[]}}
   },
-  CivweaveGemma4LiteRTRequestAuthorityV1:{ensure:async()=>{ensureCalls+=1;return true}},
+  CivweaveGemma4LiteRTRequestAuthorityV1:{selectedFast:()=>true,ensure:async()=>{ensureCalls+=1;return true}},
   CivweaveLocalGenerationModelPolicyV1:{resolve:()=> 'gemma4-e4b-it-litert-web'},
   CivweaveFamilyAILoaderV105:{ensure:async()=>{sandbox.CivweaveModelRuntime={generate:legacyGenerate};return true}},
   CivweaveUnifiedChatSystemV1:{

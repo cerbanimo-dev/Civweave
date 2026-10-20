@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.9-first-request-intake-bridge-v1-cold-load-safe-probe';
-const PIPELINE_VERSION='1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe';
+const VERSION='1.2.10-first-request-intake-bridge-v1-runtime-family-gate';
+const PIPELINE_VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
 const modelFor=()=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const supported=()=>Boolean(globalThis.CivweaveLocalGenerationModelPolicyV1?.supportsSelected?.());
 
@@ -17,8 +17,10 @@ const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
 function emit(phase,detail={}){try{dispatchEvent(new CustomEvent('civweave:first-request-intake-bridge',{detail:{version:VERSION,phase,at:new Date().toISOString(),...detail}}))}catch{}}
 function systemFor(args={}){return clean(args.systemId||args?.context?.guide?.system||'civweave',80).toLowerCase()||'civweave'}
 function selectedGemma(){
-  try{if(globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.selectedFast?.())return true}catch{}
-  try{const pick=globalThis.CivweaveLocalModelDownloadV266?.selection?.();return Boolean(pick?.active&&supported())}catch{return false}
+  // The legacy name denotes the LiteRT fast-runtime bridge (Gemma/Qwen),
+  // never every policy-supported local model. In particular Llama 3B ONNX
+  // must not be forced through the Gemma-specific first-request bridge.
+  try{return Boolean(globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.selectedFast?.())}catch{return false}
 }
 function hasLayer(fn,flag,value=''){
   let current=fn,depth=0;
