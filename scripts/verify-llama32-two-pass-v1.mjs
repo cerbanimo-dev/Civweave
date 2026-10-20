@@ -59,7 +59,7 @@ const authority=read('public/app/local-ai/gemma4-structured-task-authority-v1.js
 const spine=read('public/app/local-ai/runtime-v266.js');
 const pipeline=read('public/app/local-ai/gemma4-weave-draft-pipeline-v1.js');
 assert.match(authority,/async function modelRuntimeFor\(model\)/,'local model family must select its owning backend');
-assert.match(authority,/runtime\.generate\(\{messages:/,'Llama must generate through the canonical local runtime');
+assert.match(authority,/runtime\.generate\(\{messages,/,'Llama must generate through the canonical local runtime');
 assert.match(authority,/structuredOutputSchema:args\.structuredOutputSchema/,'intake and compiler must preserve a constrained schema when supplied');
 assert.match(authority,/await modelRuntimeFor\(model\)/,'controlled generation must not assume every local model is LiteRT');
 assert.match(pipeline,/structuredOutputSchema:phase==='compile'\|\|phase==='repair'\?onnxCompiler\?schema:null:null/,'Llama compile needs token-level grammar');
