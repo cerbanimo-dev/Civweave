@@ -1,0 +1,45 @@
+name: Verify Phone Model Speed Pilot
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/model-performance-observer-v1.js'
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/local-generation-model-policy-v1.js'
+      - 'public/app/local-ai/settings-panel-v267.js'
+      - 'public/app/local-ai/runtime-v266.js'
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-phone-model-speed-pilot-v1.mjs'
+      - '.github/workflows/verify-phone-model-speed-pilot-v1.yml'
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/model-performance-observer-v1.js'
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/local-generation-model-policy-v1.js'
+      - 'public/app/local-ai/settings-panel-v267.js'
+      - 'public/app/local-ai/runtime-v266.js'
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-phone-model-speed-pilot-v1.mjs'
+      - '.github/workflows/verify-phone-model-speed-pilot-v1.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Model choice, artifact and performance regression
+        run: node scripts/verify-phone-model-speed-pilot-v1.mjs
+      - name: Parse production scripts
+        run: |
+          node --check public/app/local-ai/local-generation-model-policy-v1.js
+          node --check public/app/local-ai/model-registry-v266.js
+          node --check public/app/local-ai/model-performance-observer-v1.js
+          node --check public/app/local-ai/settings-panel-v267.js
+          node --check public/app/local-ai/runtime-v266.js
