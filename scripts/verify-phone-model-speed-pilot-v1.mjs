@@ -29,6 +29,19 @@ assert.equal(qwen.estimatedBytes,2754070624);
 assert.ok(qwen.artifacts[0].minBytes>2700000000,'reject stale 2.57GB artifact as ready');
 assert.equal(registry.byId('qwen3-1.7b-q4f16').installable,true,'lightweight browser fallback must remain installable');
 assert.equal(registry.byId('llama32-3b-instruct-q4f16').installable,true,'retain desktop 3B experiment');
+const loaderSource=read('public/app/local-ai/litert-gemma4-fast-runtime-v1.js');
+const downloadsSource=read('public/app/local-ai/download-manager-v267.js');
+const startupSource=read('public/app/local-ai/gemma4-litert-request-authority-v1.js');
+assert.match(downloadsSource,/x\.id==='qwen35-4b-litert-web'&&\/\\.litertlm\$\//,'Qwen4 chunk manifest must be verified as offline installation');
+assert.match(downloadsSource,/LOCAL_QWEN35_PHONE_NATIVE_IMPORT_REQUIRED/,'in-page multi-GB Android download must be blocked');
+assert.match(loaderSource,/modelId===QWEN_FAST/,'Qwen4 must accept chunked Cache Storage weights');
+assert.match(loaderSource,/chunkedResponse\(cache,url,Number\(artifact.sizeBytes\|\|0\)\)/,'LiteRT must stream real chunked bytes, never a monolithic JS allocation');
+assert.match(startupSource,/1\.8\.5-litert-runtime-v1-qwen4-chunked-phone-loader/,'local LiteRT authority must require the updated chunked runtime');
+assert.match(settings,/data-local-phone-import/,'Settings must have a user-activated native file import');
+assert.match(settings,/file.size!==artifact.sizeBytes/,'reject old/incomplete 2.57GB LiteRT files');
+assert.match(settings,/importChunkedFile\(cache,url,file/,'import Qwen only in resumable fragments');
+assert.doesNotMatch(settings,/manager\.start\('qwen35-4b-litert-web'\)/,'Settings view cannot auto-download Qwen 4B');
+
 vm.runInContext(policySource,sandbox,{filename:'local-generation-model-policy-v1.js'});
 const policy=sandbox.CivweaveLocalGenerationModelPolicyV1;
 for(const id of ['qwen35-4b-litert-web','qwen35-9b-litert-web','llama32-3b-instruct-q4f16','qwen3-1.7b-q4f16']){
