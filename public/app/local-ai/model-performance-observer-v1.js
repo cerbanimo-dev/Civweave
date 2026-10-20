@@ -22,7 +22,7 @@ function sample(model,backend,m={},{approximate=false,fallbackUsed=false}={}){
   // A fallback to a different engine may be measured, but not credited to
   // the requested model; record the actual engine and the fallback fact.
   if(!permittedModel(model))return;
-  const ttftMs=numeric(m.ttftMs),tokensPerSecond=numeric(m.tokensPerSecond??m.approxTokensPerSecond),totalMs=numeric(m.totalMs??m.generationMs);
+  const ttftMs=numeric(m.ttftMs),tokensPerSecond=numeric(m.lastDecodeTokensPerSecond??m.lastDecodeTokensPerSec??m.tokensPerSecond??m.approxTokensPerSecond),totalMs=numeric(m.totalMs??m.generationMs);
   const generatedTokens=numeric(m.generatedTokens??m.approxGeneratedTokens);
   if(totalMs==null&&ttftMs==null&&tokensPerSecond==null)return;
   updated(model,{sample:{at:Date.now(),backend:safeText(backend),ttftMs,tokensPerSecond,totalMs,generatedTokens,approximate:Boolean(approximate),fallbackUsed:Boolean(fallbackUsed)}});
