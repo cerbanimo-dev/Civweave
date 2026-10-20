@@ -20,7 +20,7 @@ const files=[
   ['/app/ai-capability-broker-v268.js?v=1.0.67-v271',()=>globalThis.CivweaveAICapabilityBrokerV268?.version==='1.0.67-ai-capability-broker-v271-semantics','CivweaveAICapabilityBrokerV268'],
   ['/app/fast-interactive-runtime-v192.js?v=1.0.124-v313-runtime-spine-contract',fastInteractiveReady,'CivweaveFastInteractiveV192'],
   ['/app/local-ai/model-registry-v266.js?v=1.0.121-v307-gemma3-q4',registryReady,'CivweaveLocalModelRegistryV266'],
-  ['/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync',downloadManagerReady,'CivweaveLocalModelDownloadV266'],
+  ['/app/local-ai/download-manager-v267.js?v=1.0.70-v323-llama-inventory',downloadManagerReady,'CivweaveLocalModelDownloadV266'],
   ['/app/local-ai/package-revision-guard-v307.js?v=1.0.121-v307',packageRevisionReady,'CivweaveLocalModelPackageRevisionGuardV307'],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',downloadPolicyReady,'CivweaveLocalModelDownloadPolicyV278'],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.121-v307',metadataReady,'CivweaveLocalModelMetadataRepairV276'],
