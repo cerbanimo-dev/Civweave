@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.6-structured-task-authority-v1-model-cache-inventory';
+const VERSION='1.4.7-structured-task-authority-v1-demand-core-bootstrap';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -73,20 +73,25 @@ function paintPending(text=''){
 async function modelStatus(id){
   // The shared guide can start before the local download manager finishes
   // loading. Do not falsely label a model "not installed" on a bootstrap race.
-  let manager=globalThis.CivweaveLocalModelDownloadV266;
+  let manager=globalThis.CivweaveLocalModelDownloadV266,bootError=null;
   if(typeof manager?.status!=='function'){
-    const start=Date.now();
-    while(Date.now()-start<2500){
-      await sleep(100);
-      manager=globalThis.CivweaveLocalModelDownloadV266;
-      if(typeof manager?.status==='function')break;
-    }
+    // The LiteRT owner deliberately bypasses ONNX selections, so it never
+    // starts the downloaded-local runtime for Llama. Bootstrap the existing
+    // canonical inference core (registry + cache manager + dormant runtime)
+    // before inspecting files; NO WebGPU adapter, Worker, or model allocation.
+    const core=globalThis.CivweaveLocalChatRuntimeV295;
+    try{
+      if(typeof core?.ensureInferenceCore==='function')await core.ensureInferenceCore();
+      else bootError=Object.assign(new Error('The downloaded-local inference core script is not loaded.'),{code:'LOCAL_CHAT_CORE_SCRIPT_UNAVAILABLE'});
+    }catch(error){bootError=error}
+    manager=globalThis.CivweaveLocalModelDownloadV266;
   }
-  if(typeof manager?.status!=='function')return{available:false,reason:'download-manager-unavailable'};
+  if(typeof manager?.status!=='function')return{available:false,reason:bootError?'download-manager-bootstrap-failed':'download-manager-unavailable',error:bootError};
   try{return await manager.status(id)}catch(error){return{available:false,reason:'model-status-error',error}}
 }
 function inventoryIssue(status){
-  if(status?.reason==='download-manager-unavailable')return 'The local download manager has not loaded. No model cache inspection was possible.';
+  if(status?.reason==='download-manager-unavailable')return 'The canonical local download manager is missing; no cache inspection was possible.';
+  if(status?.reason==='download-manager-bootstrap-failed')return 'The canonical local inference core could not initialize its download manager: '+clean(status.error?.message||status.error||'unknown initialization failure',450)+'. No model weights were loaded.';
   if(status?.reason==='model-status-error')return 'The offline cache could not be inspected: '+clean(status.error?.message||status.error||'unknown error',350);
   const missing=Array.isArray(status?.missing)?status.missing:[];
   const list=missing.slice(0,5).map(row=>{

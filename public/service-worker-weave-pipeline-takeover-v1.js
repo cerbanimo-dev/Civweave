@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r37';
+const REVISION='weave-pipeline-takeover-v1-r38';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v476-model-inventory';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r37';
+const CACHE='cwrecovery-v477-moss-core-bootstrap';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r38';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
@@ -26,6 +26,9 @@ const PURGE_PATHS=new Set([
   '/app/local-ai/worker-v266.js',
   '/app/local-ai/llama32-chunked-model-storage-v1.js',
   '/app/local-ai/download-manager-v267.js',
+  '/app/local-chat-runtime-v295.js',
+  '/app/local-ai/model-registry-v266.js',
+  '/app/local-ai/runtime-v266.js',
   '/app/local-ai/litertlm_wasm_internal.wasm',
   '/app/local-ai/litertlm_wasm_compat_internal.wasm',
   '/app/local-ai/litertlm_wasm_asyncify_internal.wasm',

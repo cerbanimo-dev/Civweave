@@ -178,7 +178,7 @@ for(const id of ['llama32-3b-instruct-q4f16','smollm2-135m-instruct-q8-wasm','qw
   assert.equal(lastRequest.structuredOutputSchema.type,'object');
 }
 for(const [filename,source] of [['persistent shell',shell],['Working Campus',campus]]){
-  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.6-model-cache-inventory/,filename+' must cache-bust the corrected dispatcher');
+  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.7-demand-core-bootstrap/,filename+' must cache-bust the corrected dispatcher');
   assert.match(source,/gemma4-litert-request-authority-v1\.js\?v=1\.2\.28-runtime-family-gate/,filename+' must cache-bust the corrected LiteRT admission');
 }
 assert.match(shell,/gemma4-first-request-intake-bridge-v1\.js\?v=1\.2\.10-runtime-family-gate/);
@@ -225,5 +225,43 @@ assert.match(shell,/gemma4-weave-draft-pipeline-v1\.js\?v=1\.3\.9-runtime-family
 }
 assert.match(read('public/app/local-ai/download-manager-v267.js'),/reason:chunks.reason\|\|'chunk-incomplete'/,'chunked offline cache must surface exact missing-manifest/fragment reasons');
 assert.match(read('public/app/local-ai/download-manager-v267.js'),/reason:'chunk-inventory-unavailable'/,'inventory exceptions must not be disguised as a missing download');
+
+
+// Incident: the Gemma LiteRT bootstrap correctly declines an ONNX selection,
+// but Moss must still initialize the one canonical downloaded-local core before
+// asking for Cache Storage availability. A passive timer is not a bootstrap.
+{
+  const selectedId='llama32-3b-instruct-q4f16';
+  let initialized=0,lookups=0,inference=0;
+  const sandbox={console,Date,Math,JSON,Object,Array,String,Boolean,RegExp,Promise,Map,Set,
+    queueMicrotask:()=>{},addEventListener:()=>{},dispatchEvent:()=>{},setTimeout:()=>0,clearTimeout:()=>{},
+    localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},
+    CivweaveLocalGenerationModelPolicyV1:{resolve:()=>selectedId,supportsSelected:()=>true,display:id=>id},
+    CivweaveLocalChatRuntimeV295:{ensureInferenceCore:async()=>{
+      initialized+=1;
+      sandbox.CivweaveLocalModelDownloadV266={status:async id=>{
+        lookups+=1;assert.equal(id,selectedId);
+        return{available:true,rows:[{path:'model.onnx',required:true,ok:true}],missing:[]};
+      }};
+      return true;
+    }},
+    CivweaveLocalModelRuntimeV266:{generate:async()=>{inference+=1;throw Error('must remain dormant')}},
+    CivweaveLiteRTGemma4FastRuntimeV1:{runFast:async()=>{inference+=1;throw Error('must not invoke LiteRT')}},};
+  sandbox.globalThis=sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(authority,sandbox,{filename:'gemma4-structured-task-authority-v1.js'});
+  assert.equal(await sandbox.CivweaveGemma4StructuredTaskAuthorityV1.requireDeepModel(),selectedId);
+  assert.equal(initialized,1,'Moss must actively bootstrap the canonical ONNX model core on first planning request');
+  assert.equal(lookups,1,'Moss must inspect model cache after installing its manager');
+  assert.equal(inference,0,'model readiness must NEVER create an inference session');
+}
+for(const [label,html] of [['persistent shell',shell],['working campus',campus]]){
+  assert.ok(html.includes('local-chat-runtime-v295.js?v=1.0.132-moss-readiness-core'),label+' must load the dormant canonical core before Moss');
+  assert.ok(html.indexOf('local-chat-runtime-v295.js?v=1.0.132-moss-readiness-core')<
+    html.indexOf('gemma4-structured-task-authority-v1.js'),label+' local core entry must precede structured request authority');
+}
+const chatCore=read('public/app/local-chat-runtime-v295.js');
+assert.ok(chatCore.includes('download-manager-v267.js?v=1.0.70-v323-llama-inventory'),'canonical local core must load the current chunk-aware download manager');
+assert.match(chatCore,/llama32StructuredTrialId/,'core registry predicate must demand Llama-capable registry');
 
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');

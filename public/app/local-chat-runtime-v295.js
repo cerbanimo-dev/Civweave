@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.119-local-chat-runtime-v305-task-aware-streaming';
+const VERSION='1.0.120-local-chat-runtime-v305-moss-core-readiness';
 const REVISION='v312-runtime-first-bootstrap';
 const SEL='civweave.local-ai.selection.v266';
 const HEALTH='civweave.local-ai.health.v286';
@@ -13,13 +13,13 @@ const LOCAL_EXECUTION_CONTRACT='Civweave already selected this downloaded local 
 const CORE=Object.freeze([
   Object.freeze({
     name:'CivweaveLocalModelRegistryV266',
-    src:'/app/local-ai/model-registry-v266.js?v=1.0.121-v307-gemma3-q4&chatcore=v325',
-    ready:()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId&&globalThis.CivweaveLocalModelRegistryV266?.installable&&globalThis.CivweaveLocalModelRegistryV266?.directUrl)
+    src:'/app/local-ai/model-registry-v266.js?v=1.0.118-v305-llama32-asyncify&chatcore=v326',
+    ready:()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId&&globalThis.CivweaveLocalModelRegistryV266?.installable&&globalThis.CivweaveLocalModelRegistryV266?.directUrl&&globalThis.CivweaveLocalModelRegistryV266?.llama32StructuredTrialId==='llama32-3b-instruct-q4f16')
   }),
   Object.freeze({
     name:'CivweaveLocalModelDownloadV266',
-    src:'/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync&chatcore=v325',
-    ready:()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.select)
+    src:'/app/local-ai/download-manager-v267.js?v=1.0.70-v323-llama-inventory&chatcore=v326',
+    ready:()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.select&&String(globalThis.CivweaveLocalModelDownloadV266?.version||'').startsWith('1.0.70-'))
   }),
   Object.freeze({
     name:'CivweaveLocalModelRuntimeV266',
