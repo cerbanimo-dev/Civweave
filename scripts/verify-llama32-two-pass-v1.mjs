@@ -127,4 +127,62 @@ assert.equal(compiled.jsonValidated,true);
 assert.deepEqual(JSON.parse(JSON.stringify(gpuMessages.find(x=>x.type==='generate')?.structuredOutputSchema)),enforcedSchema,'strict grammar must reach worker');
 core.shutdown({reason:'contract-complete'});
 
+
+// Reproduce the reported production regression: the local policy supports
+// Llama, but that must NOT install a Gemma/Qwen LiteRT first-request owner.
+const litertOwner=read('public/app/local-ai/gemma4-litert-request-authority-v1.js');
+const litertBridge=read('public/app/local-ai/gemma4-first-request-intake-bridge-v1.js');
+const litertLearning=read('public/app/local-ai/gemma4-learning-plan-entry-authority-v1.js');
+const shell=read('public/app/persistent-system-shell-v1.html');
+const campus=read('public/app/working-campus-v440.html');
+for(const id of ['llama32-3b-instruct-q4f16','smollm2-135m-instruct-q8-wasm','qwen35-4b-litert-web','gemma4-e4b-it-litert-web']){
+  const isLiteRT=/(?:gemma4|qwen35).*-litert-web$/.test(id),family=isLiteRT?'litert-lm-web':id.startsWith('llama')?'transformers-js-v4':'transformers-js-v3';
+  const sandbox={console,Date,Math,JSON,Object,Array,String,Boolean,RegExp,Promise,Map,Set,
+    queueMicrotask:()=>{},addEventListener:()=>{},dispatchEvent:()=>{},setTimeout:()=>0,clearTimeout:()=>{},
+    localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},
+    CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id})},
+    CivweaveLocalModelRegistryV266:{byId:()=>({id,runtime:family})},
+    // Deliberately TRUE for Llama: this previously incorrectly admitted LiteRT.
+    CivweaveLocalGenerationModelPolicyV1:{supportsSelected:()=>true,resolve:()=>id}};
+  sandbox.globalThis=sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(litertOwner,sandbox,{filename:'gemma4-litert-request-authority-v1.js'});
+  vm.runInContext(litertBridge,sandbox,{filename:'gemma4-first-request-intake-bridge-v1.js'});
+  vm.runInContext(litertLearning,sandbox,{filename:'gemma4-learning-plan-entry-authority-v1.js'});
+  assert.equal(sandbox.CivweaveGemma4LiteRTRequestAuthorityV1.selectedFast(),isLiteRT,id+' must be dispatched by its registered engine family');
+  assert.equal(sandbox.CivweaveGemma4FirstRequestIntakeBridgeV1.selectedGemma(),isLiteRT,id+' cannot enter a Gemma-specific bridge by policy alias');
+  assert.equal(sandbox.CivweaveGemma4LearningPlanEntryAuthorityV1.selectedGemma(),isLiteRT,id+' cannot enter Gemma-specific Moss adapter');
+}
+{
+  let calledLiteRT=0,calledONNX=0,lastRequest=null;
+  const id='llama32-3b-instruct-q4f16',sandbox={console,Date,Math,JSON,Object,Array,String,Boolean,RegExp,Promise,Map,Set,
+    queueMicrotask:()=>{},addEventListener:()=>{},dispatchEvent:()=>{},setTimeout:()=>0,clearTimeout:()=>{},
+    localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},
+    CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id})},
+    CivweaveLocalModelRegistryV266:{byId:()=>({id,runtime:'transformers-js-v4'})},
+    CivweaveLocalGenerationModelPolicyV1:{resolve:()=>id,supportsSelected:()=>true},
+    CivweaveLocalChatRuntimeV295:{ready:async()=>true},
+    CivweaveLocalModelRuntimeV266:{generate:async request=>{lastRequest=request;calledONNX+=1;throw Object.assign(new Error('Android model GPU initialization is not validated.'),{code:'LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED'})}},
+    CivweaveLiteRTGemma4FastRuntimeV1:{runFast:async()=>{calledLiteRT+=1;throw Error('LiteRT attempted for ONNX!')}}};
+  sandbox.globalThis=sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(authority,sandbox,{filename:'gemma4-structured-task-authority-v1.js'});
+  await assert.rejects(()=>sandbox.CivweaveGemma4StructuredTaskAuthorityV1.controlledFastRun({
+    systemPrompt:'You are Moss.',messages:[{role:'user',content:'Plan tarot study'}],maxNewTokens:128,
+    structuredOutputSchema:{type:'object',properties:{title:{type:'string'}}}
+  },id,'Local JSON Compile',200000),e=>e.code==='LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED');
+  assert.equal(calledLiteRT,0,'Llama must NEVER enter LiteRT profile-only runner');
+  assert.equal(calledONNX,1,'Llama must enter canonical ONNX runtime exactly once');
+  assert.equal(lastRequest.expectedModelId,id);
+  assert.equal(lastRequest.strictModel,true);
+  assert.equal(lastRequest.structuredOutputSchema.type,'object');
+}
+for(const [filename,source] of [['persistent shell',shell],['Working Campus',campus]]){
+  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.5-runtime-family-gate/,filename+' must cache-bust the corrected dispatcher');
+  assert.match(source,/gemma4-litert-request-authority-v1\.js\?v=1\.2\.28-runtime-family-gate/,filename+' must cache-bust the corrected LiteRT admission');
+}
+assert.match(shell,/gemma4-first-request-intake-bridge-v1\.js\?v=1\.2\.10-runtime-family-gate/);
+assert.match(shell,/gemma4-learning-plan-entry-authority-v1\.js\?v=1\.2\.3-backend-gate/);
+assert.match(shell,/gemma4-weave-draft-pipeline-v1\.js\?v=1\.3\.9-runtime-family-gate/);
+
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');
