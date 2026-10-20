@@ -233,7 +233,7 @@ function contextFitError(kind,phase,budget){
   return Object.assign(new Error('The '+kind+' '+phase+' payload cannot fit the selected model input budget ('+budget+' characters). Choose a larger-context model or reduce the supplied material.'),{code:'LOCAL_PROMPT_CONTEXT_OVERFLOW',stage:phase,maxInputCharacters:budget});
 }
 
-async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messages,maxNewTokens}){
+async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messages,maxNewTokens,schema=null}){
   const auth=authority();
   if(typeof auth?.requireDeepModel==='function')await auth.requireDeepModel();
   const run=typeof auth?.controlledFastRun==='function'?auth.controlledFastRun.bind(auth):null;
@@ -243,13 +243,19 @@ async function runLocal({pipelineId,purpose,kind,phase,label,systemPrompt,messag
   if((messages.at(-1)?.content||'').length>promptBudget)throw contextFitError(kind,phase,promptBudget);
   let streamed='',index=0;
   dispatch({pipelineId,purpose,kind,phase,state:'running',label,model:modelFor(),promptBudget,promptCharacters:messages.reduce((n,row)=>n+String(row?.content||'').length,0)+systemPrompt.length});
-  const args={__civweaveStage:label,__civweavePlanKind:kind,systemPrompt,messages,maxNewTokens,structuredTool:null,onToken:event=>{
+  const onnxCompiler=modelFor()==='llama32-3b-instruct-q4f16';
+  if(onnxCompiler&&!run)throw Object.assign(new Error('The selected Llama ONNX model requires the canonical structured-task runtime; LiteRT cannot execute this model.'),{code:'LOCAL_ONNX_RUNTIME_UNAVAILABLE',executionModel:modelFor()});
+  const args={__civweaveStage:label,__civweavePlanKind:kind,systemPrompt,messages,maxNewTokens,
+    structuredOutputSchema:phase==='compile'||phase==='repair'?onnxCompiler?schema:null:null,
+    structuredTool:null,onToken:event=>{
     const token=String(event?.text??'');if(!token)return;
     streamed=(streamed+token).slice(-48000);
     dispatch({pipelineId,purpose,kind,phase,state:'streaming',label,token,index:index++,streamLength:streamed.length});
   }};
   try{
     const result=run?await run(args,modelFor(),label,Number(auth?.taskTimeoutMs)||600000):await fast.runFast(args,modelFor());
+    if(onnxCompiler&&(phase==='compile'||phase==='repair')&&(!result?.strictJson||!result?.jsonValidated))
+      throw Object.assign(new Error('The selected Llama compiler did not return independently validated token-constrained JSON. Prompt-only JSON is not accepted.'),{code:'LOCAL_STRUCTURED_JSON_UNVERIFIED',executionModel:modelFor(),stage:phase});
     const output=String(result?.outputText??result?.text??streamed).slice(0,48000);
     const text=clean(output,48000);
     const prior=lastArtifact?.rawStages||{};
@@ -377,7 +383,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     paint('The planning draft is ready. Compiling it into Civweave JSON…');
     const compileBudget=stageInputBudget(compilerSystem(kind),COMPILE_TOKENS[kind])-'Compile this payload:\n'.length;
     const compilePayload=kind==='learning'?compactLearningPayload(schema,draft,compileBudget):compactQuestPayload(schema,draft,compileBudget);
-    const compiledText=await runLocal({pipelineId,purpose,kind,phase:'compile',label:'Local JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind]});
+    const compiledText=await runLocal({pipelineId,purpose,kind,phase:'compile',label:'Local JSON Compile',systemPrompt:compilerSystem(kind),messages:[{role:'user',content:`Compile this payload:\n${JSON.stringify(compilePayload)}`}],maxNewTokens:COMPILE_TOKENS[kind],schema});
     let compiled=canonicalize(parseJsonLoose(compiledText),kind);
 
     paint('Validating the compiled Civweave structure…');
@@ -388,7 +394,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
       paint(`The compile needs ${errors.length} structural fix${errors.length===1?'':'es'}. The planning model is repairing those fields…`);
       const repairBudget=stageInputBudget(repairSystem(kind),REPAIR_TOKENS[kind])-'Repair this payload:\n'.length;
       const repairPayload=repairPromptPayload(kind,schema,draft,errors,compiled||parseJsonLoose(compiledText)||compiledText,repairBudget);
-      const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind]});
+      const repairedText=await runLocal({pipelineId,purpose,kind,phase:'repair',label:'Local Targeted Repair',systemPrompt:repairSystem(kind),messages:[{role:'user',content:`Repair this payload:\n${JSON.stringify(repairPayload)}`}],maxNewTokens:REPAIR_TOKENS[kind],schema});
       compiled=canonicalize(parseJsonLoose(repairedText),kind);
       errors=validateCompiled(compiled,schema,kind);
       dispatch({pipelineId,purpose,kind,phase:'validate',state:errors.length?'failed':'complete',label:'Deterministic re-validation',errors:[...errors],resourceCount:compiled?.resourceManifest?.length||0,specialistCount:compiled?.specialistWork?.length||0,decisionGateCount:compiled?.decisionGates?.length||0});

@@ -4,7 +4,10 @@ import {readFileSync} from 'node:fs';
 const worker=readFileSync('public/app/local-ai/worker-v266.js','utf8');
 const page=readFileSync('public/app/local-ai/llama32-two-pass-test-v3.html','utf8');
 const dedicated=readFileSync('public/app/local-ai/llama32-diagnostic-worker-v3.js','utf8');
-assert.equal(dedicated,worker,'Diagnostic worker must have exactly the tested source and no old-PWA cache fallback.');
+assert.match(dedicated,/phase\(id,'model-ready',started/,'Historical v3 probe must still report actual model readiness, not cached weight completion.');
+// v4 is the currently active diagnostic and is asserted equal to the canonical
+// inference worker below. v3 predates the Asyncify/chunked-cache revisions and
+// should not be byte-identical to current source.
 const beginning=worker.indexOf('function progressReporter(');
 const end=worker.indexOf('function externalDataSetting(',beginning);
 assert(beginning>=0&&end>beginning,'Could not extract the bounded worker progress reporter');

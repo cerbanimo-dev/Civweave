@@ -104,12 +104,38 @@ async function intakeRuntime(timeoutMs=12000){
   throw Object.assign(new Error('The selected local model runtime did not become ready.'),{code:'CIVWEAVE_E4B_INTAKE_RUNTIME_NOT_READY'});
 }
 
+// Respect the selected model's runtime family. The ONNX Llama 3B trial is
+// NEVER a LiteRT profile; sending it to runFast() produces PROFILE_MISSING.
+async function modelRuntimeFor(model){
+  if(model!=='llama32-3b-instruct-q4f16')return intakeRuntime();
+  const chat=globalThis.CivweaveLocalChatRuntimeV295;
+  if(typeof chat?.ready!=='function')throw Object.assign(new Error('The ONNX inference core is not available; Llama 3.2 3B cannot use the LiteRT runner.'),{code:'LOCAL_ONNX_RUNTIME_UNAVAILABLE',executionModel:model});
+  await chat.ready();
+  const runtime=globalThis.CivweaveLocalModelRuntimeV266;
+  if(typeof runtime?.generate!=='function')throw Object.assign(new Error('The selected ONNX inference runtime did not initialize.'),{code:'LOCAL_ONNX_RUNTIME_UNAVAILABLE',executionModel:model});
+  return {
+    async runFast(args,id){
+      const messages=[...(args.systemPrompt?[{role:'system',content:String(args.systemPrompt)}]:[]),
+        ...(Array.isArray(args.messages)?args.messages:[])];
+      const result=await runtime.generate({messages,
+        expectedModelId:id,strictModel:true,structuredOutputSchema:args.structuredOutputSchema||null,
+        maxNewTokens:Math.min(1200,Math.max(32,Number(args.maxNewTokens)||512)),
+        promptTokenBudget:1300,temperature:.3,thinking:false,stream:!args.structuredOutputSchema,
+        timeoutMs:240000,onToken:args.onToken,onProgress:args.onProgress});
+      if(result.executionId!==id)throw Object.assign(new Error('The requested ONNX model was silently substituted.'),{code:'LOCAL_ONNX_MODEL_MISMATCH',executionModel:result.executionId});
+      return{outputText:result.text,text:result.text,strictJson:Boolean(result.strictJson),jsonValidated:Boolean(result.jsonValidated),
+        model:{id},executionId:id,metrics:result.metrics||{}};
+    },
+    cancel(reason='user-stop'){return runtime.shutdown?.({reason})},
+    unload(){return runtime.shutdown?.({reason:'released'})}
+  };
+}
 function controlledFastRun(args,model,stage,timeoutMs){
   throwIfCancelled();
   return new Promise(async(resolve,reject)=>{
     let settled=false,timer=null,stallTimer=null,phase='loading-runtime',lastProgressAt=Date.now(),tokens=0,lastRuntimeDetails={};
     const firstTokenLimitMs=Math.max(10000,Math.min(90000,Number(args?.__civweaveFirstTokenTimeoutMs)||90000));
-    const fast=await intakeRuntime().catch(error=>{settled=true;reject(error);return null});
+    const fast=await modelRuntimeFor(model).catch(error=>{settled=true;reject(error);return null});
     if(!fast||settled)return;
     const clearTimers=()=>{
       if(timer!=null)try{clearTimeout(timer)}catch{}
