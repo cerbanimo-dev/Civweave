@@ -18,8 +18,8 @@ const CORE=Object.freeze([
   }),
   Object.freeze({
     name:'CivweaveLocalModelDownloadV266',
-    src:'/app/local-ai/download-manager-v267.js?v=1.0.70-v323-llama-inventory&chatcore=v326',
-    ready:()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.select&&String(globalThis.CivweaveLocalModelDownloadV266?.version||'').startsWith('1.0.70-'))
+    src:'/app/local-ai/download-manager-v267.js?v=1.0.71-v324-qwen4-chunked-import&chatcore=v326',
+    ready:()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.select&&String(globalThis.CivweaveLocalModelDownloadV266?.version||'').startsWith('1.0.71-'))
   }),
   Object.freeze({
     name:'CivweaveLocalModelRuntimeV266',
