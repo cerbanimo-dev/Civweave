@@ -178,7 +178,7 @@ for(const id of ['llama32-3b-instruct-q4f16','smollm2-135m-instruct-q8-wasm','qw
   assert.equal(lastRequest.structuredOutputSchema.type,'object');
 }
 for(const [filename,source] of [['persistent shell',shell],['Working Campus',campus]]){
-  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.5-runtime-family-gate/,filename+' must cache-bust the corrected dispatcher');
+  assert.match(source,/gemma4-structured-task-authority-v1\.js\?v=1\.4\.6-model-cache-inventory/,filename+' must cache-bust the corrected dispatcher');
   assert.match(source,/gemma4-litert-request-authority-v1\.js\?v=1\.2\.28-runtime-family-gate/,filename+' must cache-bust the corrected LiteRT admission');
 }
 assert.match(shell,/gemma4-first-request-intake-bridge-v1\.js\?v=1\.2\.10-runtime-family-gate/);
