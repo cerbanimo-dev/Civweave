@@ -62,12 +62,12 @@ assert.match(authority,/async function modelRuntimeFor\(model\)/,'local model fa
 assert.match(authority,/runtime\.generate\(\{messages:/,'Llama must generate through the canonical local runtime');
 assert.match(authority,/structuredOutputSchema:args\.structuredOutputSchema/,'intake and compiler must preserve a constrained schema when supplied');
 assert.match(authority,/await modelRuntimeFor\(model\)/,'controlled generation must not assume every local model is LiteRT');
-assert.match(pipeline,/structuredOutputSchema:phase==='compile'\|\|phase==='repair'\?schema:null/,'Llama compile needs token-level grammar');
-assert.match(pipeline,/if\(onnxCompiler&&!result\?\.strictJson\)/,'strict JSON may never silently become prompt-only JSON');
+assert.match(pipeline,/structuredOutputSchema:phase==='compile'\|\|phase==='repair'\?onnxCompiler\?schema:null:null/,'Llama compile needs token-level grammar');
+assert.match(pipeline,/onnxCompiler&&\(phase==='compile'\|\|phase==='repair'\)&&\(!result\?\.strictJson\|\|!result\?\.jsonValidated\)/,'strict JSON may never silently become prompt-only JSON');
 assert.match(spine,/function assertLlama32AndroidReady\(/,'prior Android renderer crashes must block ordinary app retries');
 assert.match(spine,/LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED/,'explicit safe refusal must identify the real memory risk');
 assert.match(spine,/expectedModelId/,'selected model must be bound to its runtime request');
 assert.match(spine,/structuredOutputSchema:requestOptions\.structuredOutputSchema/,'worker must receive the JSON grammar schema');
-assert.match(spine,/if\(requestOptions\.strictModel\)/,'strict ONNX generation must not silently fall back to another model');
+assert.match(spine,/if\(strictModel\)/,'strict ONNX generation must not silently fall back to another model');
 
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');
