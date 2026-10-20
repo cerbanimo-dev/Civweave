@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.5-structured-task-authority-v1-runtime-family-gate';
+const VERSION='1.4.6-structured-task-authority-v1-model-cache-inventory';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -71,15 +71,39 @@ function paintPending(text=''){
 }
 
 async function modelStatus(id){
-  const manager=globalThis.CivweaveLocalModelDownloadV266;
+  // The shared guide can start before the local download manager finishes
+  // loading. Do not falsely label a model "not installed" on a bootstrap race.
+  let manager=globalThis.CivweaveLocalModelDownloadV266;
+  if(typeof manager?.status!=='function'){
+    const start=Date.now();
+    while(Date.now()-start<2500){
+      await sleep(100);
+      manager=globalThis.CivweaveLocalModelDownloadV266;
+      if(typeof manager?.status==='function')break;
+    }
+  }
   if(typeof manager?.status!=='function')return{available:false,reason:'download-manager-unavailable'};
-  try{return await manager.status(id)}catch(error){return{available:false,error}}
+  try{return await manager.status(id)}catch(error){return{available:false,reason:'model-status-error',error}}
+}
+function inventoryIssue(status){
+  if(status?.reason==='download-manager-unavailable')return 'The local download manager has not loaded. No model cache inspection was possible.';
+  if(status?.reason==='model-status-error')return 'The offline cache could not be inspected: '+clean(status.error?.message||status.error||'unknown error',350);
+  const missing=Array.isArray(status?.missing)?status.missing:[];
+  const list=missing.slice(0,5).map(row=>{
+    const why=clean(row?.reason||'missing',55);
+    const suffix=Number.isSafeInteger(row?.index)?' at fragment '+(row.index+1):'';
+    return clean(row?.path||'unknown file',110)+' ('+why+suffix+')';
+  });
+  const state=clean(status?.state?.status||'',55);
+  const counts=Array.isArray(status?.rows)?status.rows.filter(row=>row?.required&&row?.ok).length+'/'+status.rows.filter(row=>row?.required).length:'unknown';
+  if(missing.length)return 'Offline model cache is incomplete ('+counts+' required artifacts present). Missing: '+list.join(', ')+(missing.length>list.length?' and '+(missing.length-list.length)+' more.':'.')+(state?' Saved download state: '+state+'.':'')+' Existing cached files were preserved.';
+  return 'Offline model verification failed without a missing-file inventory. '+(state?'Saved download state: '+state+'. ':'')+'No files were downloaded or removed.';
 }
 async function requireModel(id,code,label){
   const status=await modelStatus(id);
   if(status?.available)return id;
-  const error=new Error(`${label} is required for this local AI stage but is not installed and ready.`);
-  error.code=code;error.model=id;error.status=status;throw error;
+  const error=new Error(`${label} is selected but its offline files are not verified. ${inventoryIssue(status)} Check Settings → AI Downloads or the isolated test cache inventory; do not retry GPU inference until verification succeeds.`);
+  error.code=code;error.model=id;error.status=status;error.missingArtifacts=status?.missing||[];throw error;
 }
 const requireIntakeModel=()=>requireModel(intakeModel(),'LOCAL_INTAKE_MODEL_REQUIRED',`${modelName(intakeModel())} intake`);
 const requireDeepModel=()=>requireModel(deepModel(),'LOCAL_PLANNING_MODEL_REQUIRED',`${modelName(deepModel())} planning`);
