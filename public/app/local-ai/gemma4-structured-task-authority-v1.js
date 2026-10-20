@@ -136,7 +136,8 @@ async function modelRuntimeFor(model){
   const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(model);
   const runtimeFamily=String(spec?.runtime||'');
   const liteProfiles=globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.profiles||{};
-  const legacyLiteRTProfiles=new Set(['gemma4-e4b-it-litert-web','qwen35-4b-litert-web','qwen35-9b-litert-web']);
+  // Cold-start compatibility for the LiteRT family without binding this guide to a named model.
+  const isKnownLiteRTId=id=>/-litert-web$/.test(String(id||''));
   const isLiteRT=runtimeFamily==='litert-lm-web'
     ||(!runtimeFamily&&(Boolean(liteProfiles[model])||legacyLiteRTProfiles.has(model)));
   if(isLiteRT)return intakeRuntime();
