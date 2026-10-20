@@ -6,8 +6,8 @@ const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.131-v325-family-rout
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const FAST_RUNTIME_VERSION='1.8.4-litert-runtime-v1-gpu-binding-limit-gate';
-const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.4-gpu-binding-limit';
+const FAST_RUNTIME_VERSION='1.8.5-litert-runtime-v1-qwen4-chunked-phone-loader';
+const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.5-qwen4-chunked-phone-loader';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.2.16-e4b-dual-artifact-limit';

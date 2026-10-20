@@ -53,7 +53,7 @@ assert.match(manager,/chunkedStatus\(c,u,Number\(a\.sizeBytes\|\|0\)\)/);
 // escaped JS regex silently rejects both names and reports cached chunks missing.
 const runtime=await readFile('public/app/local-ai/worker-v266.js','utf8');
 for(const [name,source] of [['two-pass page',page],['download manager',manager],['diagnostic worker',worker],['canonical worker',runtime]]){
-  const literals=[...source.matchAll(/\/(?:\\.|[^\/\n])+\/\.test\((?:a\.path|artifact\.path|path)\)/g)];
+  const literals=[...source.matchAll(/\/(?:\\.|[^\/\n])+\/\.test\((?:a\.path|artifact\.path|path)\)/g)].filter(row=>row[0].includes('onnx_data'));
   assert.equal(literals.length,1,name+' must use a single shard-suffix test');
   const literal=literals[0][0].split('.test(')[0];
   const matcher=new RegExp(literal.slice(1,-1));

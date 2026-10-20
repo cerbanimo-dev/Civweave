@@ -60,6 +60,22 @@ function freshFallbackWorker(error,from,to,onProgress){resetWorker(Object.assign
 async function runRequest(spec,requestOptions,generation){const compatibility=spec.device==='wasm',promptTokenBudget=compatibility?Math.min(512,Math.max(192,Number(requestOptions.promptTokenBudget||512))):requestOptions.promptTokenBudget,maxNewTokens=compatibility?Math.min(48,Math.max(8,Number(requestOptions.maxNewTokens||48))):requestOptions.maxNewTokens;return request('generate',{spec:workerSpec(spec),messages:requestOptions.messages,maxNewTokens,promptTokenBudget,temperature:requestOptions.temperature,thinking:Boolean(requestOptions.thinking),stream:Boolean(requestOptions.stream),benchmark:Boolean(requestOptions.benchmark),structuredOutputSchema:requestOptions.structuredOutputSchema||null},{timeoutMs:requestOptions.timeoutMs,onProgress:requestOptions.onProgress,onToken:requestOptions.onToken,generation})}
 async function installedTierFallbacks(selected,{executionProfile='interactive',onProgress}={}){const rows=[];for(const candidate of registry()?.fallbacks?.(selected)||[]){if(!candidate||candidate.device!=='webgpu'||!fallbackAllowed(selected,candidate,executionProfile)||quarantined(candidate.id))continue;const state=await downloads()?.status?.(candidate.id);if(!state?.available)continue;rows.push(candidate);onProgress?.({phase:'tier-fallback-available',requestedModel:selected.id,model:candidate.id,backend:candidate.device,runtime:candidate.runtime})}return rows}
 async function prewarm({onProgress}={}){const generation=generationEpoch,selected=activeSpec();if(!selected)return Object.freeze({ok:false,reason:'no-selection'});assertLlama32AndroidReady(selected.id);if(selected.device!=='webgpu')return Object.freeze({ok:false,reason:'compatibility-model-not-prewarmed'});if(quarantined(selected.id))return Object.freeze({ok:false,reason:'webgpu-quarantined',model:selected.id});if(!await ready(selected.id,{repair:false,onProgress}))return Object.freeze({ok:false,reason:'not-downloaded',model:selected.id});if(!await hasWebGPUAdapter())return Object.freeze({ok:false,reason:'no-webgpu',model:selected.id});ensureGeneration(generation);try{onProgress?.({phase:'prewarming-model',model:selected.id,backend:'webgpu',intentWarm:true});const result=await request('prewarm',{spec:workerSpec(selected)},{timeoutMs:Math.min(300000,Math.max(90000,Number(selected.healthTimeoutMs||180000))),onProgress,generation});residentModel=selected.id;scheduleResidency(selected.id);return Object.freeze({ok:true,model:selected.id,metrics:result?.metrics||result||{},leaseMs:residencyMs()})}catch(error){if(backendFailure(error))markQuarantined(selected.id,error?.message||error);resetWorker(error);throw error}}
+function reportLocalPerformance(result,selected,elapsedMs){
+  // Local-only measurements. No text, prompt or generated tokens are stored.
+  try{
+    const actual=String(result?.executionId||result?.model?.id||selected.id||'');
+    const raw=result?.metrics||{};
+    dispatchEvent(new CustomEvent('civweave:local-onnx-generate-complete',{detail:{
+      model:actual,selectedModel:selected.id,
+      fallbackUsed:Boolean(actual!==selected.id),backend:result?.backend||selected.device,
+      metrics:{ttftMs:Number.isFinite(raw.ttftMs)?raw.ttftMs:null,
+        tokensPerSecond:Number.isFinite(raw.tokensPerSecond)?raw.tokensPerSecond:null,
+        generatedTokens:Number.isFinite(raw.generatedTokens)?raw.generatedTokens:null,
+        totalMs:Number.isFinite(raw.totalMs)?raw.totalMs:Math.round(elapsedMs)},
+      at:Date.now()
+    }}));
+  }catch{}
+}
 async function generate({messages=[],maxNewTokens=1024,promptTokenBudget,temperature,thinking=false,benchmark=false,timeoutMs=180000,stream=false,onProgress,onToken,executionProfile='interactive',expectedModelId='',strictModel=false,structuredOutputSchema=null}={}){
   const generation=generationEpoch,selected=activeSpec();if(!selected)throw Object.assign(new Error('No downloaded local model is active.'),{code:'LOCAL_MODEL_NOT_SELECTED'});
   if(expectedModelId&&selected.id!==expectedModelId)throw Object.assign(new Error('The local model selection changed during generation. The request was stopped before initializing another model.'),{code:'LOCAL_MODEL_SELECTION_MISMATCH',expectedModelId,executionModel:selected.id});
@@ -73,6 +89,7 @@ async function generate({messages=[],maxNewTokens=1024,promptTokenBudget,tempera
     const exact=await runRequest(selected,requestOptions,generation);
     ensureGeneration(generation);
     residentModel=selected.id;scheduleResidency(selected.id);
+    reportLocalPerformance({...exact,executionId:selected.id},selected,performance.now()-started);
     return {...exact,id:selected.id,label:selected.label,executionId:selected.id,executionLabel:selected.label,backend:exact?.backend||selected.device,fallbackUsed:false,fallbackChain:[],residencyLeaseMs:residencyMs()};
   }
   let execution=selected,result=null,lastError=null;const fallbackChain=[];
@@ -93,6 +110,7 @@ async function generate({messages=[],maxNewTokens=1024,promptTokenBudget,tempera
     try{result=await runRequest(execution,requestOptions,generation)}catch(error){ensureGeneration(generation);resetWorker(error);if(lastError)error.cause=lastError;error.workerReleased=true;throw error}
   }
   const fallbackUsed=execution.id!==selected.id;residentModel=execution.id;scheduleResidency(execution.id);
+  reportLocalPerformance({...result,executionId:execution.id},selected,performance.now()-started);
   return{...result,id:selected.id,label:selected.label,executionId:execution.id,executionLabel:execution.label,backend:result?.backend||execution.device||'wasm',fallbackUsed,fallbackChain,capabilityDegraded:Boolean(fallbackUsed&&selected.capabilities?.agenticReasoning&&!execution.capabilities?.agenticReasoning),elapsedMs:Math.round(performance.now()-started),contextWindowTokens:execution.contextWindowTokens||selected.contextWindowTokens||0,workingContextTokens:execution.workingContextTokens||selected.workingContextTokens||0,residencyLeaseMs:residencyMs()};
 }
 function shutdown({reason='manual'}={}){clearResidency();generationEpoch+=1;webgpuProbe=null;const hadWork=Boolean(worker||pending.size),error=cancellation(reason);resetWorker(error);try{dispatchEvent(new CustomEvent('civweave:local-inference-stopped',{detail:{version:VERSION,reason,hadWork,terminal:true}}))}catch{}return hadWork}
