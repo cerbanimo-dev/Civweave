@@ -268,7 +268,7 @@ for(const [label,html] of [['persistent shell',shell],['working campus',campus]]
     html.indexOf('gemma4-structured-task-authority-v1.js'),label+' local core entry must precede structured request authority');
 }
 const chatCore=read('public/app/local-chat-runtime-v295.js');
-assert.ok(chatCore.includes('download-manager-v267.js?v=1.0.70-v323-llama-inventory'),'canonical local core must load the current chunk-aware download manager');
+assert.ok(chatCore.includes('download-manager-v267.js?v=1.0.71-v324-qwen4-chunked-import'),'canonical local core must load the current chunk-aware download manager');
 assert.match(chatCore,/llama32StructuredTrialId/,'core registry predicate must demand Llama-capable registry');
 
 
