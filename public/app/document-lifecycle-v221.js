@@ -8,7 +8,7 @@ if(globalThis.CivweaveDocumentLifecycleV221?.revision===REVISION)return;
 let active=true,viewPromise=null;
 const LOCAL_AI_VIEW_FILES=[
   ['/app/local-ai/model-registry-v266.js?v=1.0.119-v306-qwen35-4b',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.installable&&globalThis.CivweaveLocalModelRegistryV266?.byId)],
-  ['/app/local-ai/settings-panel-v267.js?v=1.0.119-v323-phone-speed-report',()=>Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalAISettingsV266?.openPath==='saved-state-view-v323'&&globalThis.CivweaveLocalAISettingsV266?.actionModulesOnDemand===true)]
+  ['/app/local-ai/settings-panel-v267.js?v=1.0.120-v324-qwen4-file-import',()=>Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalAISettingsV266?.openPath==='saved-state-view-v323'&&globalThis.CivweaveLocalAISettingsV266?.actionModulesOnDemand===true)]
 ];
 function afterPaint(task){const run=()=>setTimeout(task,0);if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(task,0)}
 function ensureScript(src,ready){if(ready?.())return Promise.resolve(true);return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsService='v323';const timer=setTimeout(()=>reject(new Error(`${src} did not become ready.`)),8000);script.onload=()=>{clearTimeout(timer);ready?.()?resolve(true):reject(new Error(`${src} loaded without becoming ready.`))};script.onerror=()=>{clearTimeout(timer);reject(new Error(`${src} could not load.`))};if(!active||!document.head?.isConnected){clearTimeout(timer);reject(new Error('Document is leaving.'));return}document.head.append(script)})}
