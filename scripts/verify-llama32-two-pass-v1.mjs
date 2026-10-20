@@ -51,4 +51,23 @@ for(const content of ['some prose '+JSON.stringify(valid),JSON.stringify({...val
 }
 new Function(worker);
 new Function(page.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import\s+.*;\s*$/gm,''));
+
+// Shared Moss / Weaveling generation must never send an ONNX selection to
+// Gemma/Qwen LiteRT's profile-only runner. The Llama compiler should use the
+// canonical downloaded-model WebGPU worker with real token-level constraints.
+const authority=read('public/app/local-ai/gemma4-structured-task-authority-v1.js');
+const spine=read('public/app/local-ai/runtime-v266.js');
+const pipeline=read('public/app/local-ai/gemma4-weave-draft-pipeline-v1.js');
+assert.match(authority,/async function modelRuntimeFor\(model\)/,'local model family must select its owning backend');
+assert.match(authority,/runtime\.generate\(\{messages:/,'Llama must generate through the canonical local runtime');
+assert.match(authority,/structuredOutputSchema:args\.structuredOutputSchema/,'intake and compiler must preserve a constrained schema when supplied');
+assert.match(authority,/await modelRuntimeFor\(model\)/,'controlled generation must not assume every local model is LiteRT');
+assert.match(pipeline,/structuredOutputSchema:phase==='compile'\|\|phase==='repair'\?schema:null/,'Llama compile needs token-level grammar');
+assert.match(pipeline,/if\(onnxCompiler&&!result\?\.strictJson\)/,'strict JSON may never silently become prompt-only JSON');
+assert.match(spine,/function assertLlama32AndroidReady\(/,'prior Android renderer crashes must block ordinary app retries');
+assert.match(spine,/LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED/,'explicit safe refusal must identify the real memory risk');
+assert.match(spine,/expectedModelId/,'selected model must be bound to its runtime request');
+assert.match(spine,/structuredOutputSchema:requestOptions\.structuredOutputSchema/,'worker must receive the JSON grammar schema');
+assert.match(spine,/if\(requestOptions\.strictModel\)/,'strict ONNX generation must not silently fall back to another model');
+
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');
