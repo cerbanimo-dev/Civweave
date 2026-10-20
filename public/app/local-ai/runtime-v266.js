@@ -4,7 +4,7 @@ const VERSION='1.0.115-local-ai-runtime-v302-session-handoff';
 const LEGACY_VERSION='1.0.87-local-ai-runtime-v287-gemma4-mobile';
 const REVISION='1.0.88-local-ai-runtime-v283-small-model-fast-path';
 const LEGACY_WORKER='/app/local-ai/worker-v266.js?v=1.0.86-v286';
-const WORKER='/app/local-ai/worker-v266.js?v=1.0.125-v314-smooth-fit';
+const WORKER='/app/local-ai/worker-v266.js?v=1.0.130-v319-llama32-resumable-model-parts';
 const QUARANTINE_KEY='civweave.local-ai.webgpu-quarantine.v299';
 const LLAMA32='llama32-3b-instruct-q4f16';
 const LLAMA32_ACTIVE='civweave.llama32.gpu-active.v1';
