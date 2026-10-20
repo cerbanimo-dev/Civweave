@@ -65,7 +65,7 @@ const PREVIEW=Object.freeze([
 ]);
 
 const ACTION_FILES=[
-  ['/app/local-ai/model-registry-v266.js?v=1.0.117-v304-llama32-3b-trial',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId?.('llama32-3b-instruct-q4f16'))],
+  ['/app/local-ai/model-registry-v266.js?v=1.0.119-v306-qwen35-4b',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId?.('llama32-3b-instruct-q4f16'))],
   ['/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.state&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true)],
