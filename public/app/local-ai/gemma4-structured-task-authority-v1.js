@@ -112,7 +112,7 @@ async function modelRuntimeFor(model){
   const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(model);
   const runtimeFamily=String(spec?.runtime||'');
   const liteProfiles=globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.profiles||{};
-  const legacyLiteRTProfiles=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web','qwen35-4b-litert-web','qwen35-9b-litert-web']);
+  const legacyLiteRTProfiles=new Set(['gemma4-e4b-it-litert-web','qwen35-4b-litert-web','qwen35-9b-litert-web']);
   const isLiteRT=runtimeFamily==='litert-lm-web'
     ||(!runtimeFamily&&(Boolean(liteProfiles[model])||legacyLiteRTProfiles.has(model)));
   if(isLiteRT)return intakeRuntime();
