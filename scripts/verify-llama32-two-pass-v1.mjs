@@ -69,7 +69,7 @@ assert.match(authority,/await modelRuntimeFor\(model\)/,'controlled generation m
 assert.match(pipeline,/structuredOutputSchema:phase==='compile'\|\|phase==='repair'\?onnxCompiler\?schema:null:null/,'Llama compile needs token-level grammar');
 assert.match(pipeline,/onnxCompiler&&\(phase==='compile'\|\|phase==='repair'\)&&\(!result\?\.strictJson\|\|!result\?\.jsonValidated\)/,'strict JSON may never silently become prompt-only JSON');
 assert.match(spine,/function assertLlama32AndroidReady\(/,'prior Android renderer crashes must block ordinary app retries');
-assert.match(spine,/LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED/,'explicit safe refusal must identify the real memory risk');
+assert.match(spine,/LOCAL_LLAMA32_ANDROID_RUNTIME_UNSUPPORTED/,'known unsafe Android loader must be refused before worker creation');
 assert.match(spine,/expectedModelId/,'selected model must be bound to its runtime request');
 assert.match(spine,/structuredOutputSchema:requestOptions\.structuredOutputSchema/,'worker must receive the JSON grammar schema');
 assert.match(spine,/if\(strictModel\)/,'strict ONNX generation must not silently fall back to another model');
