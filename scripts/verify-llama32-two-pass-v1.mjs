@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 import {validateStrictJson,LEARNING_TRIAL_SCHEMA} from '../public/app/local-ai/llama32-structured-constraints-v1.js';
 const read=path=>readFileSync(path,'utf8');
@@ -69,5 +70,61 @@ assert.match(spine,/LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED/,'explicit safe ref
 assert.match(spine,/expectedModelId/,'selected model must be bound to its runtime request');
 assert.match(spine,/structuredOutputSchema:requestOptions\.structuredOutputSchema/,'worker must receive the JSON grammar schema');
 assert.match(spine,/if\(strictModel\)/,'strict ONNX generation must not silently fall back to another model');
+
+
+// Behavior contract: a previous Android renderer crash must fail *before*
+// creating a GPU worker. A successful isolated two-pass diagnostic permits
+// exactly the selected ONNX model and sends the grammar to that worker.
+const values=new Map(),gpuMessages=[];
+const storage={
+  getItem:key=>values.has(key)?values.get(key):null,
+  setItem:(key,value)=>values.set(key,String(value)),
+  removeItem:key=>values.delete(key)
+};
+const llamaId='llama32-3b-instruct-q4f16';
+const llamaSpec={id:llamaId,label:'Llama 3B trial',installable:true,device:'webgpu',runtime:'transformers-js-v4',dtype:'q4f16',repo:'test/llama',revision:'test',artifacts:[],generation:{},healthTimeoutMs:240000};
+class FakeWorker{
+  events={};
+  constructor(){gpuMessages.push({event:'created'})}
+  addEventListener(name,fn){this.events[name]=fn}
+  postMessage(packet){
+    gpuMessages.push(packet);
+    queueMicrotask(()=>this.events.message({data:{id:packet.id,type:'done',result:{text:'{"title":"demo"}',strictJson:!!packet.structuredOutputSchema,jsonValidated:!!packet.structuredOutputSchema,backend:'webgpu'}}}));
+  }
+  terminate(){}
+}
+const context={
+  console,Date,Math,JSON,Object,Boolean,Number,String,Set,Map,Promise,
+  setTimeout,clearTimeout,queueMicrotask,performance:{now:()=>42},
+  localStorage:storage,sessionStorage:storage,
+  navigator:{userAgent:'Android; diagnostic test',gpu:{requestAdapter:async()=>({})},hardwareConcurrency:8},
+  document:{visibilityState:'visible'},
+  matchMedia:()=>({matches:false}),innerWidth:400,innerHeight:800,crossOriginIsolated:true,
+  addEventListener:()=>{},dispatchEvent:()=>true,CustomEvent:class{constructor(name,options){this.type=name;this.detail=options?.detail}},
+  Worker:FakeWorker,
+  CivweaveLocalModelRegistryV266:{byId:id=>id===llamaId?llamaSpec:null,cpuFallback:()=>null,fallbacks:()=>[]},
+  CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:llamaId}),status:async()=>({available:true})}
+};
+context.globalThis=context;
+vm.createContext(context);
+vm.runInContext(spine,context,{filename:'runtime-v266.js'});
+const core=context.CivweaveLocalModelRuntimeV266;
+values.set('civweave.llama32.gpu-active.v1',JSON.stringify({at:1000,phase:'loading-model',sessionReady:false}));
+await assert.rejects(()=>core.generate({expectedModelId:llamaId,strictModel:true,messages:[]}),
+  e=>e.code==='LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED');
+assert.equal(gpuMessages.length,0,'Android crash guard must not create or load a Worker');
+await assert.rejects(()=>core.prewarm({}),e=>e.code==='LOCAL_LLAMA32_ANDROID_PREFLIGHT_REQUIRED');
+assert.equal(gpuMessages.length,0,'prewarm cannot bypass the Android crash guard');
+values.set('civweave.llama32.gpu-result.v1',JSON.stringify({at:2000,sessionReady:true,report:'PASS · both Llama 3.2 3B runs completed, second pass constrained and validated.'}));
+await assert.rejects(()=>core.generate({expectedModelId:'a different model',strictModel:true,messages:[]}),
+  e=>e.code==='LOCAL_MODEL_SELECTION_MISMATCH');
+const enforcedSchema={type:'object',required:['title'],properties:{title:{type:'string'}}};
+const compiled=await core.generate({expectedModelId:llamaId,strictModel:true,messages:[{role:'user',content:'demo'}],structuredOutputSchema:enforcedSchema});
+assert.equal(compiled.executionId,llamaId);
+assert.equal(compiled.fallbackUsed,false);
+assert.equal(compiled.strictJson,true);
+assert.equal(compiled.jsonValidated,true);
+assert.deepEqual(JSON.parse(JSON.stringify(gpuMessages.find(x=>x.type==='generate')?.structuredOutputSchema)),enforcedSchema,'strict grammar must reach worker');
+core.shutdown({reason:'contract-complete'});
 
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');
