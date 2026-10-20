@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-first-request-intake-bridge-v1.js','utf8');
-assert.match(source,/1\.2\.9-first-request-intake-bridge-v1-cold-load-safe-probe/);
+assert.match(source,/1\.2\.10-first-request-intake-bridge-v1-runtime-family-gate/);
 assert.match(source,/livingSchoolLearningIntake:true/);
 const order=[];
 let priorCalls=0;
