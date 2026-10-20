@@ -21,7 +21,7 @@ assert.ok(shell.includes('/app/local-ai/gemma4-route-integrity-v1.js?v=1.0.0-pos
 assert.ok(shell.includes('/app/local-ai/gemma4-learning-plan-entry-authority-v1.js?v=1.2.3-backend-gate'),'persistent shell does not load explicit Learning Journey Weave entry');
 assert.ok(shell.includes('/app/generation-failure-inspector-v1.js?v=1.1.1-cross-frame-no-output'),'persistent shell does not load rejected generation inspector');
 assert.match(takeover,/weave-pipeline-takeover-v1-r36/,'takeover marker is not the current r8 streamed E4B generation');
-assert.match(takeover,/cwrecovery-v474-gpu-queue-cleanup/,'takeover does not use the current E4B-only cache marker');
+assert.match(takeover,/cwrecovery-v475-runtime-family-upgrade/,'takeover does not use the current E4B-only cache marker');
 
 for(const pathname of [
   '/app/persistent-system-shell-v1.html',
