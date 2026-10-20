@@ -26,7 +26,7 @@ const context={
 };
 context.globalThis=context;
 context.CivweaveGemma4WeaveDraftPipelineV1={
-  version:'1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe',
+  version:'1.3.9-weave-draft-pipeline-v1-runtime-family-gate',
   install(){order.push('pipeline-install');const prior=context.CivweaveModelRuntime.generate;const generate=async request=>prior(request);generate.__civweaveWeaveDraftPipelineV1=this.version;generate.__prior=prior;context.CivweaveModelRuntime.generate=generate;return true},
   installRuntime(){return this.install()}
 };
