@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.27-local-litert-request-authority-v1-e4b-dual-artifact-limits';
+const VERSION='1.2.28-local-litert-request-authority-v1-runtime-family-gate';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -11,8 +11,8 @@ const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.4-g
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.2.16-e4b-dual-artifact-limit';
-const WEAVE_PIPELINE_VERSION='1.3.8-weave-draft-pipeline-v1-cold-load-safe-probe';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.8-cold-load-safe-probe';
+const WEAVE_PIPELINE_VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.9-runtime-family-gate';
 const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
 const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
 const QWEN_FAST_MODEL='qwen35-4b-litert-web';
@@ -62,7 +62,13 @@ function selected(){
 }
 function selectedFast(){
   const pick=selected();
-  return Boolean(pick?.active&&(globalThis.CivweaveLocalGenerationModelPolicyV1?.supportsSelected?.()||FAST_IDS.has(clean(pick.id,240))));
+  // A policy-supported pair includes experimental Llama ONNX; policy support
+  // is NOT evidence that a LiteRT profile exists. Never bootstrap LiteRT
+  // or install its handlers for Transformers/ONNX/WASM selections.
+  const id=clean(pick?.id,240),spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(id);
+  if(!pick?.active)return false;
+  if(spec?.runtime)return spec.runtime==='litert-lm-web'&&FAST_IDS.has(id);
+  return FAST_IDS.has(id);
 }
 function qwenSelected(){const pick=selected();return Boolean(pick?.active&&QWEN_IDS.has(clean(pick.id,240)))}
 function fastRoleModel(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||(qwenSelected()?QWEN_FAST_MODEL:GEMMA_FAST_MODEL)}
