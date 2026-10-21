@@ -135,7 +135,7 @@ if (!shell.includes(`const SETTINGS_LOCAL_ROUTE_VERSION='${expectedVersion}'`)) 
 if (!shell.includes("const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`")) {
   fail('Persistent shell lost its v325 compatibility fallback bridge.');
 }
-if (!bridge.includes("const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=llama32-download'")) {
+if (!bridge.includes("const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=1.2.2-qwen-phone-settings'")) {
   fail('v325 compatibility bridge no longer has an explicit full-renderer action route.');
 }
 if (alias !== fresh) {
