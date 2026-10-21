@@ -5,6 +5,11 @@ import {readFile} from 'node:fs/promises';
 const source=await readFile('public/app/local-ai/gemma4-litert-request-authority-v1.js','utf8');
 assert.match(source,/1\.2\.28-local-litert-request-authority-v1-runtime-family-gate/);
 assert.match(source,/1\.2\.16-guide-generation-tracker-v1-e4b-dual-artifact-limit/);
+const trackerSource=await readFile('public/app/guide-generation-tracker-v1.js','utf8');
+const pipelineSource=await readFile('public/app/local-ai/gemma4-weave-draft-pipeline-v1.js','utf8');
+const trackerVersion=trackerSource.match(/const VERSION='([^']+)'/)?.[1];
+const pipelineVersion=pipelineSource.match(/const VERSION='([^']+)'/)?.[1];
+assert.ok(trackerVersion&&pipelineVersion,'canonical generation dependency versions must be declared');
 assert.match(source,/litert-web-dual-tool-shape-json-fallback/);
 assert.match(source,/You MUST respond by calling the \$\{tool\.name\} tool exactly once/);
 assert.match(source,/LITERT_FORMATTED_OUTPUT_MISSING/);
@@ -38,7 +43,8 @@ assert.equal(authority.weaveDraftPipeline,true);
 assert.equal(authority.liveGenerationTracker,true);
 assert.equal(authority.globalFinalResponseStreaming,true);
 assert.equal(authority.familyLoaderWeaveRebind,true);
-assert.equal(authority.trackerVersion,'1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit');
+assert.equal(authority.trackerVersion,trackerVersion,'request authority must target the canonical generation tracker');
+assert.equal(authority.weavePipelineVersion,pipelineVersion,'request authority must target the canonical planning compiler');
 
 // The LiteRT structured-tool adapter remains compatible with E2B as an ordinary local selection. E4B Learning/Quest generation
 // is covered separately by the Weave Draft regression and must not use this adapter.
@@ -94,12 +100,12 @@ assert.equal(metadata.deepGenerationModel,'gemma4-e4b-it-litert-web');
 // captures CivweaveModelRuntime. The loader may replace the runtime object, so the
 // E4B Weave wrapper must be rebound before ensure() resolves back to Moss.
 storage.set('civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'}));
-const WEAVE_VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
+const WEAVE_VERSION=pipelineVersion;
 let runtimeOwner='initial';
 let trackerInstalls=0;
 let weaveInstalls=0;
 sandbox.CivweaveGuideGenerationTrackerV1={
-  version:'1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit',
+  version:trackerVersion,
   install:()=>{trackerInstalls+=1;return true}
 };
 sandbox.CivweaveModelRuntime={generate:async()=>({status:'initial-runtime'})};

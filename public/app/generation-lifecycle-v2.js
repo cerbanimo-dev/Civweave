@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.3.2-generation-lifecycle-v2-gpu-restart-guard';
+const VERSION='1.3.3-generation-lifecycle-v2-preserve-stream-text';
 const HISTORY_KEY='civweave.generation-lifecycle.v1.history';
 const MAX_HISTORY=220;
 const STOP_GRACE_MS=120000;
@@ -113,7 +113,7 @@ function patchRuntime(win=globalThis){
         if(!idle)throw Object.assign(new Error('The previous local generation is still shutting down after Stop. Retry once shutdown completes.'),{code:'CIVWEAVE_PREVIOUS_GENERATION_STOPPING'});
       }
       const priorToken=args?.onToken;
-      const nextArgs={...args,onToken:token=>{const text=clean(token?.text??token,12000);if(!args.__civweaveProbe)record('runtime-token',{stage,label,model,text,state:'streaming'},'litert');try{priorToken?.(token)}catch{}}};
+      const nextArgs={...args,onToken:token=>{const text=String(token?.text??token??'').slice(0,12000);if(!args.__civweaveProbe)record('runtime-token',{stage,label,model,text,state:'streaming'},'litert');try{priorToken?.(token)}catch{}}};
       if(!args.__civweaveProbe)record('runtime-stage',{stage,label,model,state:'start'},'litert');
       try{
         const result=await baseRunFast(nextArgs,forcedModelId);

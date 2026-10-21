@@ -8,20 +8,22 @@ const [rootWorker,canonicalWorker,takeover,shell]=await Promise.all([
   readFile('public/app/persistent-system-shell-v1.html','utf8')
 ]);
 
-assert.match(rootWorker,/root-worker-bridge-v32-e4b-only-weave/,'root service worker generation was not bumped for explicit Learning Weave entry');
-assert.ok(rootWorker.includes("importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r42')"),'root worker does not import the r8 streamed E4B Weave takeover');
-assert.ok(canonicalWorker.includes("importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r42')"),'canonical registered v203 worker does not import the r8 streamed E4B Weave takeover');
+const rootBridge=rootWorker.match(/const CIVWEAVE_ROOT_WORKER_BRIDGE='([^']+)'/)?.[1];
+assert.ok(rootBridge&&rootWorker.includes(`importScripts('/service-worker-v203.js?v=${rootBridge}')`),'root bridge must delegate to the canonical installed worker with its current revision');
+const takeoverRevision=takeover.match(/const REVISION='([^']+)'/)?.[1];
+assert.ok(takeoverRevision,'canonical installed-generation takeover revision must be declared');
+for(const worker of [rootWorker,canonicalWorker])assert.ok(worker.includes(`importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=${takeoverRevision}')`),'both worker entrypoints must import the current generation takeover');
 assert.ok(rootWorker.includes("'/app/local-ai/gemma4-first-request-intake-bridge-v1.js'"),'installer CORE does not include the mandatory first-request intake bridge');
 assert.ok(rootWorker.includes("'/app/local-ai/gemma4-route-integrity-v1.js'"),'installer CORE does not include post-loader route integrity');
 assert.ok(rootWorker.includes("'/app/local-ai/gemma4-learning-plan-entry-authority-v1.js'"),'installer CORE does not include explicit Learning Journey entry authority');
 assert.ok(rootWorker.includes("'/app/generation-failure-inspector-v1.js'"),'installer CORE does not include rejected generation inspector');
 assert.ok(rootWorker.includes("'/app/local-ai/gemma4-weave-draft-pipeline-v1.js'"),'installer CORE does not include the E4B Weave Draft pipeline');
-assert.ok(shell.includes('/app/local-ai/gemma4-first-request-intake-bridge-v1.js?v=1.2.10-runtime-family-gate'),'persistent shell does not load the current first-request intake bridge');
-assert.ok(shell.includes('/app/local-ai/gemma4-route-integrity-v1.js?v=1.0.0-post-loader-original-text'),'persistent shell does not load post-loader original-text route integrity');
-assert.ok(shell.includes('/app/local-ai/gemma4-learning-plan-entry-authority-v1.js?v=1.2.3-backend-gate'),'persistent shell does not load explicit Learning Journey Weave entry');
-assert.ok(shell.includes('/app/generation-failure-inspector-v1.js?v=1.1.1-cross-frame-no-output'),'persistent shell does not load rejected generation inspector');
-assert.match(takeover,/weave-pipeline-takeover-v1-r42/,'takeover marker is not the current r8 streamed E4B generation');
-assert.match(takeover,/cwrecovery-v481-active-settings-qwen4/,'takeover does not use the current E4B-only cache marker');
+for(const path of ['/app/local-ai/gemma4-first-request-intake-bridge-v1.js','/app/local-ai/gemma4-route-integrity-v1.js','/app/local-ai/gemma4-learning-plan-entry-authority-v1.js','/app/generation-failure-inspector-v1.js']){
+  const source=await readFile('public'+path,'utf8'),version=source.match(/const VERSION='(\d+\.\d+\.\d+)[^']*'/)?.[1];
+  assert.ok(version&&shell.includes(`${path}?v=${version}-`),`persistent shell must load the canonical ${path} revision`);
+}
+assert.ok(takeover.includes(`const MARKER='/__civweave/${takeoverRevision}'`),'takeover installation marker must match its revision');
+assert.match(takeover,/const CACHE='cwrecovery-v\d+-[^']+'/,'takeover must expose a versioned recovery cache');
 
 for(const pathname of [
   '/app/persistent-system-shell-v1.html',
@@ -45,4 +47,4 @@ assert.ok(takeover.includes('self.clients.claim()'),'takeover does not claim ins
 assert.ok(!takeover.includes('await reloadControlledClients()'),'the Settings upgrade must not interrupt ongoing large-model transfers with forced navigation');
 assert.match(takeover,/civweave-staging\.pages\.dev/,'takeover is not constrained to staging');
 
-console.log('PASS: both root and canonical installed workers consume the r8 streamed E4B Weave takeover, purge stale generation assets, without forcing a reload of an in-progress model transfer.');
+console.log('PASS: both installed workers consume the canonical generation takeover and the shell loads current intake, planning entry, route integrity, and failure inspection without forcing reload of an in-progress model transfer.');

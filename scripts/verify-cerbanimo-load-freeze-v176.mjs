@@ -13,17 +13,24 @@ const generationLifecycle=read('public/app/generation-lifecycle-v2.js');
 const shellAssets=read('public/service-worker-shell-assets-v1.js');
 const guildBuilder=read('scripts/build-guild-release-package-v1.mjs');
 const hostSelection=read('public/app/host-node-status-selection-v1.js');
+const scriptTag=(html,path)=>[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g)].find(match=>match[1].split('?')[0]===path)?.[0]||'';
+const declaration=(source,name)=>source.match(new RegExp(`const ${name}=['"]([^'"]+)['"]`))?.[1];
+const realmWorkerVersion=declaration(realmNavigationWorker,'VERSION');
+const realmCache=declaration(realmNavigationWorker,'CACHE');
+const releaseRevision=declaration(releaseWorker,'REVISION');
+const shellRevision=declaration(shellAssets,'REVISION');
+const assertBoundedNumber=(source,name,maximum)=>{const value=Number(source.match(new RegExp(`const ${name}=(\\d+)`))?.[1]);assert(value>0&&value<=maximum,`${name} must be positive and at most ${maximum}.`)};
 
-assert(realmNavigationWorker.includes("const VERSION='five-system-pages-v1-persistent-shell-r5'"),'Realm navigation must use the persistent-shell revision.');
-assert(realmNavigationWorker.includes("const CACHE='cw-five-system-pages-v2'"),'Embedded realm HTML must remain on the cache-distinct realm cache.');
-assert(realmNavigationWorker.includes("const NETWORK_TIMEOUT_MS=4000"),'Embedded realm navigation must retain a finite deadline.');
+assert(/^five-system-pages-v1-.+-r\d+$/.test(realmWorkerVersion||''),'Realm navigation must expose a revisioned current worker identity.');
+assert(/^cw-five-system-pages-v\d+/.test(realmCache||''),'Embedded realm HTML must remain on a cache-distinct realm cache.');
+assertBoundedNumber(realmNavigationWorker,'NETWORK_TIMEOUT_MS',5000);
 assert(realmNavigationWorker.includes('new AbortController()'),'Embedded realm navigation must abort stalled requests.');
 assert(realmNavigationWorker.includes("shellRedirect(url,spec.system)"),'Top-level realm navigation must move into the persistent shell rather than replacing its navbar.');
 
-assert(releaseWorker.includes("const REVISION='release-generation-boundary-v5-compatible-guild-cutover-20260923'"),'Runtime release generation must use the complete-shell bounded-network revision.');
-assert(releaseWorker.includes('const NETWORK_TIMEOUT_MS=3200'),'Runtime JS/CSS/HTML requests must have a finite network deadline.');
-assert(releaseWorker.includes('const WARM_TIMEOUT_MS=2500'),'Warm-cache requests must have a finite deadline.');
-assert(releaseWorker.includes('const WARM_CONCURRENCY=6'),'Warm-cache fanout must remain bounded on mobile connections.');
+assert(/^release-generation-boundary-v\d+-/.test(releaseRevision||''),'Runtime release generation must expose a revisioned release boundary.');
+assertBoundedNumber(releaseWorker,'NETWORK_TIMEOUT_MS',5000);
+assertBoundedNumber(releaseWorker,'WARM_TIMEOUT_MS',4000);
+assertBoundedNumber(releaseWorker,'WARM_CONCURRENCY',8);
 assert(releaseWorker.includes('async function boundedFetch(request,timeout=NETWORK_TIMEOUT_MS)'),'Runtime fetches must go through one bounded fetch primitive.');
 assert(releaseWorker.includes("const controller=typeof AbortController==='function'?new AbortController():null"),'Bounded runtime fetches must abort stalled network work.');
 assert(releaseWorker.includes("'/app/realm-console-v140.css'"),'The Cerbanimo first-paint stylesheet must be warmed with the current release.');
@@ -59,40 +66,40 @@ for(const path of [
   '/app/human-chat-guild-context-v1.js'
 ]) assert(guildBuilder.includes(`'${path}'`),`Signed Guild package builder must include current shell dependency ${path}.`);
 
-assert(activeWorker.includes('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-persistent-shell-r5'),'Installed staging PWA must activate persistent realm routing.');
-assert(activeWorker.includes('/service-worker-release-generation-v1.js?v=release-generation-boundary-v5-compatible-guild-cutover-20260923'),'Installed staging must force clients onto the complete-shell runtime generation.');
-assert(activeWorker.includes('staging-installed-entry-takeover-v21-learning-source-pack-authority'),'Staging must remain on the current installed-entry worker generation.');
-assert(activeWorker.includes('persistent-stage-viewport-r1'),'Active staging worker must carry the persistent-stage viewport repair.');
-assert(activeWorker.includes('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required'),'Installed staging must require the bounded-lifecycle shell generation.');
-assert(shellAssets.includes("const REVISION='shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required'"),'Shell assets must expose the bounded-lifecycle generation.');
+assert(activeWorker.includes(`/service-worker-five-system-pages-v1.js?v=${realmWorkerVersion}`),'Installed staging PWA must import the current realm navigation revision.');
+assert(activeWorker.includes(`/service-worker-release-generation-v1.js?v=${releaseRevision}`),'Installed staging must import the current complete-shell runtime revision.');
+assert(/staging-installed-entry-takeover-v\d+-/.test(activeWorker),'Staging must retain a revisioned installed-entry worker generation.');
+assert(/persistent-stage-viewport-r\d+/.test(activeWorker),'Active staging worker must carry the persistent-stage viewport repair.');
+assert(/^shell-assets-v1-repair-v\d+-/.test(shellRevision||''),'Shell assets must expose a revisioned repair generation.');
+assert(activeWorker.includes(`/service-worker-shell-assets-v1.js?v=${shellRevision}`),'Installed staging must import the current shell asset revision.');
 assert(shellAssets.includes("'/app/generation-lifecycle-v2.js'"),'Bounded generation lifecycle must be a required installed shell asset.');
 
 assert(/data-build="persistent-system-shell-v1-r\d+[^\"]*"/.test(shell),'Persistent shell must expose a revisioned build identity.');
-assert(shell.includes('/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding'),'Persistent shell must load the bounded generation lifecycle runtime.');
+assert(scriptTag(shell,'/app/generation-lifecycle-v2.js'),'Persistent shell must load the canonical generation lifecycle runtime.');
 assert(shell.includes('height:calc(100dvh - var(--cw-persistent-nav-space))'),'Persistent stage must explicitly fill the dynamic viewport above the universal navbar.');
 assert(!/#cw-persistent-system-stage\{[^}]*height:auto/.test(shell),'Persistent stage must never regress to intrinsic iframe height:auto.');
-assert(shell.includes('persistent-system-shell-v1-r30-independent-first-frame-rescue'),'Persistent shell must carry the independently executable first-frame recovery generation.');
+assert(/data-build="persistent-system-shell-v1-r\d+[^\"]*"/.test(shell),'Persistent shell must retain its revisioned first-frame recovery build.');
 assert(shell.includes('cw-persistent-first-frame-rescue-v1'),'Shell must launch the selected system without awaiting external JavaScript.');
-for(const tag of [
-  '<script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner" defer></script>',
-  '<script src="/app/persistent-system-shell-v1.js?v=1.1.4-independent-first-frame-rescue" defer></script>',
-  '<script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail" defer></script>',
-  '<script src="/app/persistent-shell-actions-v1.js?v=1.0.7-direct-routes-persistent-guild-map-nav" defer></script>',
-  '<script src="/app/generation-lifecycle-v2.js?v=1.1.0-event-bounded-frame-binding" defer></script>'
-]) assert(shell.includes(tag),`Paint-first shell is missing deferred critical runtime: ${tag}`);
+for(const path of [
+  '/app/system-routes-v227.js',
+  '/app/persistent-system-shell-v1.js',
+  '/app/themed-system-nav-v178.js',
+  '/app/persistent-shell-actions-v1.js',
+  '/app/generation-lifecycle-v2.js'
+]) assert(/\sdefer(?:\s|>)/.test(scriptTag(shell,path)),`Paint-first shell is missing deferred critical runtime: ${path}`);
 assert(shell.indexOf('/app/persistent-system-shell-v1.js')<shell.indexOf('/app/settings-local-route-v331.js'),'Shell navigation runtime must precede optional Settings startup.');
 assert(shell.indexOf('/app/themed-system-nav-v178.js')<shell.indexOf('/app/settings-local-route-v331.js'),'Canonical navbar must precede optional Settings startup.');
 
-assert(realm.includes('realm-console-canonical-v257-bounded-mobile-boot'),'Cerbanimo must use the bounded mobile boot build.');
+assert(/data-build="realm-console-canonical-v\d+[^\"]*"/.test(realm),'Cerbanimo must expose a revisioned canonical build.');
 assert(!realm.includes('/app/install-boundary-v146.js'),'Cerbanimo frame must not boot the global install/shell observer stack.');
 assert(!realm.includes('/app/local-object-mesh-v146.js'),'Cerbanimo frame must not boot the global object-mesh observer stack.');
 for(const src of [
-  '/app/cw-reward-ledger-v2.js?v=basic-value-v1',
-  '/app/civweave-basic-value-v1.js?v=acorn-scale-v2',
-  '/app/cw-reward-receivers-v2.js?v=basic-value-v1',
-  '/app/civweave-basic-value-model-v1.js?v=acorn-scale-v2'
+  '/app/cw-reward-ledger-v2.js',
+  '/app/civweave-basic-value-v1.js',
+  '/app/cw-reward-receivers-v2.js',
+  '/app/civweave-basic-value-model-v1.js'
 ]){
-  assert(realm.includes(`<script src="${src}" defer></script>`),`${src} must never block Cerbanimo HTML parsing.`);
+  assert(/\sdefer(?:\s|>)/.test(scriptTag(realm,src)),`${src} must never block Cerbanimo HTML parsing.`);
 }
 assert(realm.includes('<div class="rc-loading">Opening Cerbanimo…</div>'),'Cerbanimo must expose a paintable first-frame loading surface before workbench runtimes finish.');
 

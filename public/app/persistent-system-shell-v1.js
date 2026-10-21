@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.8-llama32-download-route';
+const VERSION='1.1.9-directory-frame-validation';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -191,7 +191,7 @@ function frameMatchesExpected(host=frame(),expectedHref=''){
   try{
     const actual=new URL(host.contentWindow?.location?.href||'',location.href),target=new URL(expected,location.href);
     // Pages redirects .html documents to clean URLs; retain origin and query checks.
-    const path=url=>url.pathname.replace(/\.html$/,'');
+    const path=url=>url.pathname.replace(/\/index\.html$/,'/').replace(/\.html$/,'');
     return actual.origin===target.origin&&path(actual)===path(target)&&actual.search===target.search&&actual.hash===target.hash;
   }catch{return false}
 }

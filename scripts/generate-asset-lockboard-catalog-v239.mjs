@@ -146,11 +146,6 @@ const catalog = {
 writeFileSync(outputPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
 console.log(`Asset lockboard catalog: ${assets.length} image files, ${slots.length} image slots, ${catalog.missingReferenceCount} missing references.`);
 
-// Cloudflare's Pages build runs release synchronizers immediately before this
-// catalog step. Those synchronizers can change required shell files, so refresh
-// integrity/storage metadata here from the exact bytes that will be published.
+// Refresh derived integrity/storage metadata from the exact source bytes that
+// will be published. Canonical manifests and entry documents remain untouched.
 await import('./generate-prelive-metadata-v281.mjs');
-// The final PWA launch contract must be applied after prelive metadata because
-// the version synchronizer intentionally rewrites the manifest first. This step
-// also refreshes the manifest/start-document integrity hashes atomically.
-await import('./finalize-pwa-start-v436.mjs');

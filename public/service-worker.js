@@ -4,7 +4,7 @@
 // the lightweight v203 worker became canonical. Android can retain a site's
 // service-worker registration and CacheStorage after the PWA icon is removed,
 // so this path must never contain a frozen historical app shell.
-const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v32-e4b-only-weave';
+const CIVWEAVE_ROOT_WORKER_BRIDGE='root-worker-bridge-v33-cerbanimo-current-realm';
 
 // Compatibility-only package metadata consumed by build-mobile-install-kit.mjs.
 // Runtime ownership belongs entirely to service-worker-v203.js below.
@@ -75,5 +75,5 @@ const CORE=[
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',event=>{event.waitUntil(self.clients.claim());});
 
-importScripts('/service-worker-v203.js?v=root-worker-bridge-v32-e4b-only-weave');
-importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r42');
+importScripts('/service-worker-v203.js?v=root-worker-bridge-v33-cerbanimo-current-realm');
+importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r43');
