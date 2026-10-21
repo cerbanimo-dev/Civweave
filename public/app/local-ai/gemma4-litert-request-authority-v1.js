@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.3-gemma4-litert-request-authority-v1-family-loader-weave-rebind';
+const VERSION='1.1.4-gemma4-litert-request-authority-v1-e4b-only-weave';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -9,10 +9,10 @@ const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1
 const FAST_RUNTIME_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
-const TRACKER_VERSION='1.0.1-guide-generation-tracker-v1-live-pipeline-streams';
-const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.1-live-pipeline-streams';
-const WEAVE_PIPELINE_VERSION='1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.0.0-plan-compile-repair';
+const TRACKER_VERSION='1.0.2-guide-generation-tracker-v1-e4b-only-intake';
+const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.2-e4b-only-intake';
+const WEAVE_PIPELINE_VERSION='1.2.0-gemma4-weave-draft-pipeline-v1-e4b-only';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.2.0-e4b-only';
 const DEEP_MODEL='gemma4-e4b-it-litert-web';
 const FAST_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web']);
 const SELECTION_KEY='civweave.local-ai.selection.v266';
@@ -102,8 +102,8 @@ function installLearningPlanMetadataAdapter(){
   const prior=current.bind(api);
   const generateLivingSchoolPlan=async(...args)=>{
     const result=await prior(...args),options=args[0]||{};
-    if(options?.__civweaveE2BIntakeCompleted===true){
-      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:DEEP_MODEL,structuredGenerationModel:DEEP_MODEL,e2bIntakeModel:'gemma4-e2b-it-litert-web'};
+    if(options?.__civweaveE4BIntakeCompleted===true){
+      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:DEEP_MODEL,structuredGenerationModel:DEEP_MODEL,intakeModel:DEEP_MODEL,e4bIntakeModel:DEEP_MODEL,deepGenerationModel:DEEP_MODEL};
     }
     return result;
   };
