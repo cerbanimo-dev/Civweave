@@ -25,11 +25,11 @@ const controller = fs.readFileSync(controllerPath, 'utf8');
 const coreWorker = fs.readFileSync(coreWorkerPath, 'utf8');
 const settingsWorker = fs.readFileSync(settingsWorkerPath, 'utf8');
 const settingsEntrypoint = fs.readFileSync(settingsEntrypointPath, 'utf8');
-const expectedVersion = '1.1.4-settings-local-route-v326-llama32-download';
+const expectedVersion = '1.1.5-settings-local-route-v327-qwen-phone-fast';
 const expectedShellVersion = '1.1.8-llama32-download-route';
-const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.1-llama32-download';
-const parentFullRoute = '/app/settings-local-route-v331.js?cwAction=1&amp;v=1.2.1-llama32-download';
-const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.1-llama32-download';
+const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.2-qwen-phone-settings';
+const parentFullRoute = '/app/settings-local-route-v331.js?cwAction=1&amp;v=1.2.2-qwen-phone-settings';
+const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.2-qwen-phone-settings';
 
 const fail = message => { throw new Error(message); };
 
