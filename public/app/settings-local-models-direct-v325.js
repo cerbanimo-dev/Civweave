@@ -45,8 +45,8 @@ const MAC_MINI_SETUPS=Object.freeze([
   Object.freeze({hardware:'M4 Pro / M5 Pro · 64 GB',summary:'Full cyberdeck tier: high-fidelity planning plus the dedicated 80B-total coding MoE.',links:Object.freeze([{label:'Qwen3.8-27B · MLX 8-bit',url:'https://huggingface.co/mlx-community/Qwen3.8-27B-8bit'},{label:'Qwen3-Coder-Next · MLX 4-bit',url:'https://huggingface.co/mlx-community/Qwen3-Coder-Next-4bit'}])})
 ]);
 const ACTION_FILES=Object.freeze([
-  ['/app/local-ai/model-registry-v266.js?v=1.0.119-v306-qwen35-4b',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId?.('llama32-3b-instruct-q4f16'))],
-  ['/app/local-ai/download-manager-v267.js?v=1.0.71-v324-qwen4-chunked-import',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
+  ['/app/local-ai/model-registry-v266.js?v=1.0.119-v306-qwen35-4b',()=>Boolean(String(globalThis.CivweaveLocalModelRegistryV266?.version||'').startsWith('1.0.119-')&&globalThis.CivweaveLocalModelRegistryV266?.byId?.('qwen35-4b-litert-web'))],
+  ['/app/local-ai/download-manager-v267.js?v=1.0.71-v324-qwen4-chunked-import',()=>Boolean(String(globalThis.CivweaveLocalModelDownloadV266?.version||'').startsWith('1.0.71-')&&globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true)],
   ['/app/local-ai/specialized-model-capabilities-v1.js?v=1.1.0-model-packs',()=>Boolean(globalThis.CivweaveLocalSpecializedAI?.preferredTts==='supertonic-3-tts-int8')],
