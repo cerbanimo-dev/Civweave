@@ -8,7 +8,7 @@ const v203Source=await readFile(new URL('../public/service-worker-v203.js',impor
 const rootWorker=await readFile(new URL('../public/service-worker.js',import.meta.url),'utf8');
 
 assert.match(directSource,/CIVWEAVE SETTINGS · v325/);
-assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · premium phone \+ cyberdeck setups/);
+assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · Qwen 4B phone-first performance/);
 assert.match(directSource,/hardLoadingGuardMs:900/);
 assert.match(directSource,/data-local-pack-finish/,'Premier Phone finalization must be owned directly by the card renderer.');
 assert.match(directSource,/actionsStayInPlace:true/,'Local model actions must remain in the direct renderer.');
