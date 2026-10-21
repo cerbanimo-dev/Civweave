@@ -17,7 +17,7 @@ const UPDATE_STYLE_ID='cw-persistent-platform-update-backlights-v1';
 const SUBSYSTEM_STATE_KEY='civweave.subsystem-avatar-state.v347';
 const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.133-settings-v324-direct-local-model-view';
-const SETTINGS_LOCAL_ROUTE_VERSION='1.1.4-settings-local-route-v326-llama32-download';
+const SETTINGS_LOCAL_ROUTE_VERSION='1.1.5-settings-local-route-v327-qwen-phone-fast';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
 const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.173-guide-chat-surface-v350-execution-role-attribution';
 const UPDATE_COLORS=Object.freeze({

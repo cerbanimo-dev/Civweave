@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r41';
+const REVISION='weave-pipeline-takeover-v1-r42';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v480-qwen-phone-speed';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r41';
+const CACHE='cwrecovery-v481-active-settings-qwen4';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r42';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
@@ -30,6 +30,11 @@ const PURGE_PATHS=new Set([
   '/app/local-ai/model-registry-v266.js',
   '/app/local-ai/model-performance-observer-v1.js',
   '/app/local-ai/settings-panel-v267.js',
+  '/app/settings-direct-entry-v339.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-local-models-direct-v325.js',
+  '/app/settings-local-route-v327.js',
   '/app/document-lifecycle-v221.js',
   '/app/settings-local-route-v331.js',
   '/app/local-ai/runtime-v266.js',
@@ -68,7 +73,7 @@ async function purge(){for(const name of await caches.keys()){const cache=await 
 async function reloadControlledClients(){const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});for(const client of clients){try{const url=new URL(client.url);if(url.origin!==self.location.origin||!RELOAD_PATHS.has(url.pathname))continue;await client.navigate(client.url)}catch{}}}
 if(self.location.hostname===STAGING_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await pending())await self.skipWaiting()})())});
-  self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await pending()))return;await purge();await self.clients.claim();const cache=await caches.open(CACHE);await cache.put(markerRequest(),new Response(REVISION,{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await reloadControlledClients()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await pending()))return;await purge();await self.clients.claim();const cache=await caches.open(CACHE);await cache.put(markerRequest(),new Response(REVISION,{headers:{'content-type':'text/plain','cache-control':'no-store'}}));/* Do not navigate active tabs during r42: Qwen3 4B may be mid-download. A user restart loads the purged Settings scripts. */})())});
 }
 self.CivweaveWeavePipelineTakeoverV1=Object.freeze({revision:REVISION,purgePaths:[...PURGE_PATHS],reloadPaths:[...RELOAD_PATHS]});
 })();

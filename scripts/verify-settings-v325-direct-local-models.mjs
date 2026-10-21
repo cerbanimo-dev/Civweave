@@ -8,7 +8,7 @@ const v203Source=await readFile(new URL('../public/service-worker-v203.js',impor
 const rootWorker=await readFile(new URL('../public/service-worker.js',import.meta.url),'utf8');
 
 assert.match(directSource,/CIVWEAVE SETTINGS · v325/);
-assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · premium phone \+ cyberdeck setups/);
+assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · Qwen 4B phone-first performance/);
 assert.match(directSource,/hardLoadingGuardMs:900/);
 assert.match(directSource,/data-local-pack-finish/,'Premier Phone finalization must be owned directly by the card renderer.');
 assert.match(directSource,/actionsStayInPlace:true/,'Local model actions must remain in the direct renderer.');
@@ -17,7 +17,8 @@ assert.match(directSource,/premierPhoneFinalizer:true/,'Premier Phone must use t
 assert.doesNotMatch(directSource,/delegated\.click\(\)/,'Direct actions must never synthesize a second click.');
 assert.doesNotMatch(directSource,/route\.renderLocalModels\(layer\)/,'Direct actions must never swap to the full lifecycle renderer.');
 assert.doesNotMatch(directSource,/navigator\.serviceWorker/,'The direct display renderer must not touch the service worker.');
-assert.doesNotMatch(directSource,/\bcaches\./,'The direct display renderer must not inspect CacheStorage.');
+assert.match(directSource,/async function importPhoneQwenDirect/,'The Qwen file import must require a user file-picker action.');
+assert.match(directSource,/importChunkedFile/,'The selected file must be saved in cache fragments.');
 
 let managerReads=0;
 let storageWrites=0;
@@ -151,7 +152,7 @@ assert.match(directSource,/<details open><summary><b>Individual Civweave models/
 assert.match(directSource,/await m.start\(id,\{preferBackground:false,onProgress:/,'individual models must use observable foreground downloads and progressive bytes');
 assert.match(directSource,/llama32-two-pass-test-v4.html/,'current Settings lacks trial link');
 const bridge=await readFile(new URL('../public/app/settings-local-route-v325.js',import.meta.url),'utf8');
-assert.match(bridge,/DIRECT_VERSION='1\.2\.1-settings-v325-direct-local-models-llama32-download'/);
+assert.match(bridge,/DIRECT_VERSION='1\.2\.2-settings-v325-direct-local-models-qwen-phone-fast'/);
 console.log('PASS: old v324 fallback and current v325 settings expose Llama 3.2 with downloads and constrained JSON trial.');
 
 for(const file of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){
