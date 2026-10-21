@@ -17,7 +17,8 @@ assert.match(directSource,/premierPhoneFinalizer:true/,'Premier Phone must use t
 assert.doesNotMatch(directSource,/delegated\.click\(\)/,'Direct actions must never synthesize a second click.');
 assert.doesNotMatch(directSource,/route\.renderLocalModels\(layer\)/,'Direct actions must never swap to the full lifecycle renderer.');
 assert.doesNotMatch(directSource,/navigator\.serviceWorker/,'The direct display renderer must not touch the service worker.');
-assert.doesNotMatch(directSource,/\bcaches\./,'The direct display renderer must not inspect CacheStorage.');
+assert.match(directSource,/async function importPhoneQwenDirect/,'The Qwen file import must require a user file-picker action.');
+assert.match(directSource,/importChunkedFile/,'The selected file must be saved in cache fragments.');
 
 let managerReads=0;
 let storageWrites=0;
