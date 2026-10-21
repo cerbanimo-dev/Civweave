@@ -42,7 +42,7 @@ for(const pathname of [
 
 assert.ok(takeover.includes('self.skipWaiting()'),'takeover does not activate immediately');
 assert.ok(takeover.includes('self.clients.claim()'),'takeover does not claim installed clients');
-assert.ok(takeover.includes('client.navigate(client.url)'),'takeover does not reload controlled installed clients onto the new shell generation');
+assert.ok(!takeover.includes('await reloadControlledClients()'),'the Settings upgrade must not interrupt ongoing large-model transfers with forced navigation');
 assert.match(takeover,/civweave-staging\.pages\.dev/,'takeover is not constrained to staging');
 
-console.log('PASS: both root and canonical installed workers consume the r8 streamed E4B Weave takeover, purge stale generation assets, and reload with rejected-output inspection.');
+console.log('PASS: both root and canonical installed workers consume the r8 streamed E4B Weave takeover, purge stale generation assets, without forcing a reload of an in-progress model transfer.');
