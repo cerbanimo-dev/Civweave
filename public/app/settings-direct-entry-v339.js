@@ -2,7 +2,7 @@
 'use strict';
 const VERSION='1.4.1-settings-direct-entry-v342-event-driven';
 const LAYER_ID='cw-settings-v320';
-const DIRECT_RENDERER_SRC='/app/settings-local-models-direct-v325.js?v=1.0.2-settings-v339-direct-display';
+const DIRECT_RENDERER_SRC='/app/settings-local-models-direct-v325.js?v=1.2.2-qwen-phone-fast';
 const FULL_LOADER_SRC='/app/settings-local-loader-v337.js?v=1.4.0-settings-direct-entry-v339';
 let directPromise=null,loaderPromise=null,recovering=false,scheduled=false,lastDiagnosticAt=0;
 
