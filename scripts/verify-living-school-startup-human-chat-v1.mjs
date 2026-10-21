@@ -41,7 +41,7 @@ check('support runtime reports ready only after sequential support loads',living
 check('support runtime failures cannot return the workbench to the startup card',livingSchool.includes("supportReady.catch(error=>console.warn('[Living School support runtime]',error))"));
 
 const bubbleVersion=bubble.match(/const VERSION='([^']+)'/)?.[1];
-check('persistent shell directly owns the current human message launcher',Boolean(bubbleVersion)&&shell.includes(`/app/human-message-bubble-v1.js?v=${bubbleVersion}`));
+check('persistent shell directly owns the stable human message launcher',bubbleVersion==='1.1.1-human-message-chat-icon'&&shell.includes(`/app/human-message-bubble-v1.js?v=${bubbleVersion}`));
 check('shared guide loads the current human owner with matching readiness',sharedGuide.includes(`/app/human-message-bubble-v1.js?v=${bubbleVersion}`)&&sharedGuide.includes(`CivweaveHumanMessageBubbleV1?.version==='${bubbleVersion}'`));
 check('persistent shell directly owns human chat transport',shell.includes('/app/human-chat-network-v1.js?v=1.0.0-human-chat-network-v1'));
 check('persistent shell directly owns guild chat context',shell.includes('/app/human-chat-guild-context-v1.js?v=1.0.2-human-chat-standalone-v2'));

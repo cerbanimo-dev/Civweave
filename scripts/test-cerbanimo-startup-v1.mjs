@@ -2,11 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
+import {gunzipSync} from 'node:zlib';
 
-const [source,ledgerText]=await Promise.all([
+const [source,ledgerParts]=await Promise.all([
   fs.readFile(new URL('../public/app/realm-console-v140.js',import.meta.url),'utf8'),
-  fs.readFile(new URL('../public/app/shared/civweave-parity-ledger.json',import.meta.url),'utf8'),
+  Promise.all([1,2,3,4].map(part=>fs.readFile(new URL(`../public/app/shared/civweave-parity-ledger.part${part}.b64`,import.meta.url),'utf8'))),
 ]);
+// Use the canonical tracked catalog, without requiring a generated checkout artifact.
+const ledgerText=gunzipSync(Buffer.from(ledgerParts.join('').replace(/\s+/g,''),'base64')).toString('utf8');
 const STORE='civweave.realm-console.v140';
 const questSource=await fs.readFile(new URL('../public/app/cerbanimo-quest-engine-v144.js',import.meta.url),'utf8');
 const videoSource=await fs.readFile(new URL('../public/app/cerbanimo-video-task-contract-v1.mjs',import.meta.url),'utf8');

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.2-persistent-parent-chrome';
+const VERSION='1.1.1-human-message-chat-icon';
 // The persistent shell owns global human chat; content frames must not recreate its launcher.
 if(typeof window!=='undefined'&&window.self!==window.top&&new URLSearchParams(location.search).get('persistentShell')==='1')return;
 const BUBBLE_ID='cw-human-message-launcher-v1';
