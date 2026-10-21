@@ -5,6 +5,7 @@ on:
     branches: [staging, main]
     paths:
       - 'public/app/cerbanimo-task-tool-links-v1.mjs'
+      - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/realm-console-v140.html'
       - 'public/creator-suite/creator-suite-v1.js'
       - 'scripts/test-cerbanimo-task-tool-links-v1.mjs'
@@ -12,6 +13,7 @@ on:
   pull_request:
     paths:
       - 'public/app/cerbanimo-task-tool-links-v1.mjs'
+      - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/realm-console-v140.html'
       - 'public/creator-suite/creator-suite-v1.js'
       - 'scripts/test-cerbanimo-task-tool-links-v1.mjs'

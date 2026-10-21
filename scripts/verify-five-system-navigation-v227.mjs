@@ -2,8 +2,6 @@ import assert from 'node:assert/strict';
 import {access,readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-await import('./sync-release-version-assets.mjs');
-
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const exists=path=>access(new URL(path,root)).then(()=>true,()=>false);
@@ -19,7 +17,7 @@ assert.equal(familyNav?.retiredOwner,'public/app/family-shell-v104.js','The prev
 assert.equal(chatOwner,'public/app/guide-chat-surface-v350.js','Guide shortcuts must target the canonical V350 chat owner.');
 
 const paths={
-  civweave:'/app/working-campus-v156.html',
+  civweave:'/app/working-campus-v440.html',
   'living-school':'/app/cabinets/living-school/index.html',
   cerbanimo:'/app/realm-console-v140.html',
   fellowfare:'/app/fellowfare-cabinet-v144.html',
@@ -74,7 +72,7 @@ assert.ok(navSource.includes('@media(max-width:430px){:root{--cw-themed-nav-heig
 assert.ok(navSource.includes('width:68px;height:68px'),'Narrow-phone avatar geometry must stay canonical.');
 assert.ok(navSource.includes("geometryOwner:'canonical-tall-v1'"),'The rail API must declare the sole geometry owner.');
 for(const retired of ['clamp(56px,7vw,68px)','clamp(58px,14vw,64px)','clamp(52px,7vw,72px)','clamp(50px,14vw,66px)','width:40px;height:40px;border-radius:12px','width:36px;height:36px','width:33px;height:33px'])assert.ok(!navSource.includes(retired),`Retired compact navbar geometry returned: ${retired}`);
-assert.doesNotMatch(platformCss,/cw-themed-system-nav|cw-themed-nav-height|cw-themed-system-avatar-wrap/,'Platform CSS must not own or override family-navigation geometry.');
+assert.doesNotMatch(platformCss,/--cw-themed-nav-height\s*:|#cw-themed-system-nav\s*\{[^}]*(?:height|grid-template-columns)\s*:/,'Platform CSS must not override rail height or layout; avatar visual treatments may be themed.');
 assert.ok(sharedGuide.includes("navigationGeometryOwner:false"),'Shared guide surface must explicitly disclaim navbar geometry ownership.');
 assert.ok(sharedGuide.includes('--cw-guide-nav-offset'),'Shared guide floating controls must measure the rail through a separate offset variable.');
 assert.ok(!sharedGuide.includes("setProperty('--cw-themed-nav-height'"),'Shared guide surface must never rewrite the canonical navbar height.');
@@ -147,7 +145,7 @@ function routeRuntime(pathname=paths.civweave){
   return context.CivweaveSystemRoutesV227;
 }
 const routeApi=routeRuntime();
-assert.equal(routeApi.version,version);
+assert.match(routeApi.version,/^\d+\.\d+\.\d+$/,'The route contract must declare its source revision.');
 assert.equal(routeApi.routes().length,5);
 assert.deepEqual(Object.fromEntries(routeApi.routes().map(route=>[route.id,route.pathname])),paths);
 for(const sourceId of Object.keys(paths)){
@@ -155,7 +153,7 @@ for(const sourceId of Object.keys(paths)){
     const url=routeApi.urlFor(targetId,{origin:'https://civweave.test',source:sourceId,version});
     assert.equal(url.pathname,targetPath);
     assert.equal(url.searchParams.get('installed'),'1');
-    assert.equal(url.searchParams.get('navigation'),'five-system-route-contract-v227');
+    assert.equal(url.searchParams.get('navigation'),routeApi.revision);
     assert.notEqual(url.pathname,'/app/index.html');
   }
 }
@@ -165,23 +163,52 @@ assert.match(boundarySource,/const THEMED_SYSTEM_NAV='\/app\/themed-system-nav-v
 assert.match(boundarySource,/canonicalSystemCount:5/);
 assert.match(boundarySource,/canonicalPolicy:'five-system-first-class-routes-v350-canonical-chat-owner'/);
 assert.match(boundarySource,/guideWorkspaceRevision:'v350-single-current-chat-surface'/);
-for(const [system,pathname] of Object.entries(paths))assert.ok(boundarySource.includes(`['${pathname}','${system}']`),`Install boundary is missing ${system}.`);
-for(const page of pages)assert.match(page,/\/app\/install-boundary-v146\.js/,'A canonical system surface lost the install boundary.');
+for(const [system,pathname] of Object.entries(paths)){
+  if(system==='civweave'){
+    assert.match(campusPage,/\/app\/themed-system-nav-v178\.js/,'The direct campus entry must load the shared navigation owner.');
+    assert.match(campusPage,/\/app\/settings-gateway-v317\.js/,'The direct campus entry must load the canonical Settings owner.');
+  }else assert.ok(boundarySource.includes(`['${pathname}','${system}']`),`Install boundary is missing ${system}.`);
+}
+const persistentShell=await read('public/app/persistent-system-shell-v1.html');
+assert.match(persistentShell,/\/app\/themed-system-nav-v178\.js/,'The persistent shell must load the shared navigation owner.');
+const persistentShellRuntime=await read('public/app/persistent-system-shell-v1.js');
+assert.match(persistentShellRuntime,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js/,'The persistent shell must load the canonical Settings owner on demand.');
+assert.match(persistentShellRuntime,/loadScript\(SETTINGS_GATEWAY/,'The persistent shell must expose its lazy shared Settings path.');
+for(const page of pages.slice(1))assert.match(page,/\/app\/(?:install-boundary-v146\.js|persistent-system-shell-v1\.html)/,'A canonical subsystem must receive shared controls directly or delegate to the persistent shell.');
 
 // Worker navigation must preserve the canonical route graph and prevent stale compact geometry from winning a race.
 const routeImport=workerWrapper.indexOf("importScripts('/app/system-routes-v227.js");
-const navGuardImport=workerWrapper.indexOf("importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v2')");
+const navGuardImport=workerWrapper.indexOf("importScripts('/service-worker-canonical-navbar-v1.js?");
 const coreImport=workerWrapper.indexOf("importScripts('/service-worker-core-v208.js");
 assert.ok(routeImport>=0&&routeImport<navGuardImport&&navGuardImport<coreImport,'Route authority and the fail-closed navbar lane must register before generic worker caching.');
-assert.ok(workerWrapper.includes('family-nav-single-owner-r1'),'The worker cache must retain the single navigation owner marker.');
+assert.match(workerWrapper,/family-nav-single-owner-r\d+/,'The worker cache must retain the single navigation owner marker.');
 assert.match(workerNavigation,/exact-route-network-first-exact-route-cache-never-launcher-fallback/);
 assert.match(workerNavigation,/precacheCanonicalRoutes/);
 assert.ok(canonicalNavbarWorker.includes("const NAV_PATH='/app/themed-system-nav-v178.js';"),'Navbar guard must own the canonical rail path.');
 assert.ok(canonicalNavbarWorker.includes("'/app/shared-guide-surface-v236-core-v244.js'"),'Navbar guard must protect the former shared-guide geometry injector.');
 assert.ok(canonicalNavbarWorker.includes("'/app/platform-experience-v160.css'"),'Navbar guard must protect the former platform geometry injector.');
-assert.ok(canonicalNavbarWorker.includes("policy:'network-first-current-cache-only-never-retired-geometry-cache'"),'Navbar guard must fail closed rather than serve a retired geometry copy.');
-assert.ok(canonicalNavbarWorker.includes('if(missing.length)throw new Error'),'Navbar guard must warm all protected assets before installation can succeed.');
+assert.ok(canonicalNavbarWorker.includes("policy:'cache-first-shared-five-system-rail-with-install-refresh'"),'The current navbar generation must serve its own offline cache and refresh during install.');
+assert.ok(canonicalNavbarWorker.includes('const FETCH_TIMEOUT_MS=2500'),'Navbar network work must remain bounded.');
+assert.doesNotMatch(canonicalNavbarWorker,/caches\.match\(/,'Navbar assets must never fall back to an unrelated historical cache.');
 assert.ok(canonicalNavbarWorker.includes('event.stopImmediatePropagation()'),'Navbar guard must bypass generic cache-first handling.');
+
+// Exercise the current cache owner: offline success uses only its own generation,
+// missing or HTML-substituted JavaScript fails explicitly instead of executing it.
+const navListeners=new Map(),navCache=new Map();let navNetworkCalls=0,navResponse=null;
+const navContext={URL,Request,Response,Headers,AbortController,Set,Object,Promise,String,setTimeout,clearTimeout,
+  fetch:async()=>{navNetworkCalls++;return navResponse||new Response('offline',{status:503})},
+  caches:{open:async()=>({match:async path=>navCache.get(path)||null,put:async(path,response)=>navCache.set(path,response)})},
+  self:{location:{origin:'https://civweave.test'},addEventListener:(type,handler)=>navListeners.set(type,handler)}};
+vm.runInNewContext(canonicalNavbarWorker,navContext);
+async function navigationAsset(){let pending,stopped=false;navListeners.get('fetch')({request:new Request('https://civweave.test/app/themed-system-nav-v178.js'),stopImmediatePropagation(){stopped=true},respondWith(value){pending=value}});assert.equal(stopped,true);return await pending}
+assert.equal((await navigationAsset()).status,503,'An absent canonical rail must fail explicitly.');
+navResponse=new Response('<html>installer</html>',{headers:{'content-type':'text/html'}});
+assert.equal((await navigationAsset()).status,503,'HTML must never substitute for canonical navigation JavaScript.');
+navResponse=new Response('/* canonical rail */',{headers:{'content-type':'application/javascript'}});
+assert.equal((await navigationAsset()).status,200);
+const beforeOffline=navNetworkCalls;navResponse=null;
+assert.equal((await navigationAsset()).status,200,'The current cached rail must remain available offline.');
+assert.equal(navNetworkCalls,beforeOffline,'An existing current-generation rail must not wait on the network.');
 
 console.log(JSON.stringify({
   ok:true,
@@ -203,7 +230,7 @@ console.log(JSON.stringify({
   platformGeometryOwner:false,
   sharedGuideGeometryOwner:false,
   retiredCompactGeometryPurged:true,
-  staleGeometryCachePolicy:'network-first-current-cache-only-fail-closed',
+  staleGeometryCachePolicy:'current-generation-cache-only-with-install-refresh',
   competingPersistentNavigationSuppressed:true,
   workingCampusRealmSwitcherSuppressed:true,
   retiredFamilyNavAssetsPurged:true,

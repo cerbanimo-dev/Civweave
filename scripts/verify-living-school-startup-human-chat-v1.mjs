@@ -3,13 +3,14 @@ import {readFile} from 'node:fs/promises';
 
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
-const [livingSchool,shell,shellAssets,reportUi,bubble,standalone]=await Promise.all([
+const [livingSchool,shell,shellAssets,reportUi,bubble,standalone,sharedGuide]=await Promise.all([
   read('public/app/cabinets/living-school/index.html'),
   read('public/app/persistent-system-shell-v1.html'),
   read('public/service-worker-shell-assets-v1.js'),
   read('public/app/living-school-generation-report-ui-v1.js'),
   read('public/app/human-message-bubble-v1.js'),
-  read('public/app/human-chat-standalone-v2.js')
+  read('public/app/human-chat-standalone-v2.js'),
+  read('public/app/shared-guide-surface-v236.js')
 ]);
 
 const checks=[];
@@ -39,10 +40,11 @@ for(const path of [
 check('support runtime reports ready only after sequential support loads',livingSchool.includes('for(const src of supportScripts)await loadSupportScript(src)')&&livingSchool.includes("dataset.livingSchoolSupportRuntime='ready'"));
 check('support runtime failures cannot return the workbench to the startup card',livingSchool.includes("supportReady.catch(error=>console.warn('[Living School support runtime]',error))"));
 
-check('persistent shell directly owns the human message launcher',shell.includes('/app/human-message-bubble-v1.js?v=1.1.1-human-message-chat-icon'));
+const bubbleVersion=bubble.match(/const VERSION='([^']+)'/)?.[1];
+check('persistent shell directly owns the current human message launcher',Boolean(bubbleVersion)&&shell.includes(`/app/human-message-bubble-v1.js?v=${bubbleVersion}`));
+check('shared guide loads the current human owner with matching readiness',sharedGuide.includes(`/app/human-message-bubble-v1.js?v=${bubbleVersion}`)&&sharedGuide.includes(`CivweaveHumanMessageBubbleV1?.version==='${bubbleVersion}'`));
 check('persistent shell directly owns human chat transport',shell.includes('/app/human-chat-network-v1.js?v=1.0.0-human-chat-network-v1'));
 check('persistent shell directly owns guild chat context',shell.includes('/app/human-chat-guild-context-v1.js?v=1.0.2-human-chat-standalone-v2'));
-check('human launcher revision matches the directly loaded shell revision',bubble.includes("const VERSION='1.1.1-human-message-chat-icon'"));
 check('standalone human chat runtime remains available',standalone.includes("const VERSION='1.0.0-human-chat-standalone-v2'"));
 
 for(const path of [

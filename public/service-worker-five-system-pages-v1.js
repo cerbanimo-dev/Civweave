@@ -1,17 +1,18 @@
 'use strict';
 (()=>{
-const VERSION='five-system-pages-v1-persistent-shell-r5';
-const CACHE='cw-five-system-pages-v2';
+const VERSION='five-system-pages-v1-current-realm-validation-r6';
+const CACHE='cw-five-system-pages-v3-current-realm';
 const NETWORK_TIMEOUT_MS=4000;
 const SHELL_PATH='/app/persistent-system-shell-v1.html';
 const PATHS=Object.freeze({
   '/app/cabinets/living-school/index.html':{system:'living-school',markers:['data-civweave-system="living-school"','Opening Living School']},
-  '/app/realm-console-v140.html':{system:'cerbanimo',markers:['Civweave Realm Console','/app/realm-console-v140.js']},
+  '/app/realm-console-v140.html':{system:'cerbanimo',markers:['data-civweave-system="cerbanimo"','data-build="realm-console-canonical-v','/app/realm-console-v140.js']},
   '/app/fellowfare-cabinet-v144.html':{system:'fellowfare',markers:['data-civweave-system="fellowfare"','FellowFare Marketplace']},
   '/app/anarchadia-console-v139.html':{system:'anarchadia',markers:['data-civweave-system="anarchadia"','Anarchadia Citizen Console']}
 });
 const PATH_SET=new Set(Object.keys(PATHS));
-function validType(response){return response?.ok&&!String(response.headers.get('content-type')||'').toLowerCase().includes('application/json')}
+const PATH_ALIASES=new Map(Object.keys(PATHS).flatMap(path=>[[path,path],[path.replace(/index\.html$/,'').replace(/\.html$/,''),path]]));
+function validType(response){return response?.ok&&String(response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
 async function validated(response,pathname){
   if(!validType(response))return null;
   const text=await response.clone().text();
@@ -37,13 +38,17 @@ function shellRedirect(url,system){
   return Response.redirect(target.href,302);
 }
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith('cw-five-system-pages-')&&name!==CACHE).map(name=>caches.delete(name)))})()));
+function responseFor(request){
+  if(!['GET','HEAD'].includes(request.method)||request.mode!=='navigate')return null;
+  let url;try{url=new URL(request.url)}catch{return null}
+  const pathname=PATH_ALIASES.get(url.pathname);
+  if(url.origin!==self.location.origin||!pathname)return null;
+  const spec=PATHS[pathname],embedded=url.searchParams.get('embed')==='1'||url.searchParams.get('persistentShell')==='1';
+  return embedded?exact(request,pathname):Promise.resolve(shellRedirect(url,spec.system));
+}
 self.addEventListener('fetch',event=>{
-  const request=event.request;if(!['GET','HEAD'].includes(request.method)||request.mode!=='navigate')return;
-  let url;try{url=new URL(request.url)}catch{return}
-  if(url.origin!==self.location.origin||!PATH_SET.has(url.pathname))return;
-  event.stopImmediatePropagation();
-  const spec=PATHS[url.pathname],embedded=url.searchParams.get('embed')==='1'||url.searchParams.get('persistentShell')==='1';
-  event.respondWith(embedded?exact(request,url.pathname):Promise.resolve(shellRedirect(url,spec.system)));
+  const response=responseFor(event.request);if(!response)return;
+  event.stopImmediatePropagation();event.respondWith(response);
 });
-self.CivweaveFiveSystemPagesV1=Object.freeze({version:VERSION,cache:CACHE,shellPath:SHELL_PATH,paths:[...PATH_SET],networkTimeoutMs:NETWORK_TIMEOUT_MS,policy:'top-level-realm-navigation-redirects-to-one-persistent-shell-embedded-realm-content-remains-direct'});
+self.CivweaveFiveSystemPagesV1=Object.freeze({version:VERSION,cache:CACHE,shellPath:SHELL_PATH,paths:[...PATH_SET],networkTimeoutMs:NETWORK_TIMEOUT_MS,responseFor,policy:'top-level-realm-navigation-redirects-to-one-persistent-shell-embedded-realm-content-remains-direct'});
 })();

@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v5-compatible-guild-cutover-20260923';
+const REVISION='release-generation-boundary-v6-current-realm-navigation';
 const CACHE='cw-live-runtime-release-generation-v5-20260923';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
 const GUILD_CACHE_PREFIX='cw-guild-release-v1-';
@@ -377,6 +377,8 @@ async function responseFor(request,pathname){
   }
   // A selected Guild does not become exclusive application transport until a complete signed release is installed.
   // This keeps legacy/partially-upgraded Guilds from pinning clients to incomplete shell generations.
+  const realm=request.mode==='navigate'?self.CivweaveFiveSystemPagesV1?.responseFor?.(request):null;
+  if(realm)return realm;
   const live=await network(request,pathname);
   if(live)return live;
   const fresh=await freshCached(pathname,request.method);
@@ -414,7 +416,8 @@ async function purgeStaleRuntimeEntries(){
   const names=await caches.keys();
   const active=await dbGet('activeRelease');
   for(const name of names){
-    if(name===CACHE||name===active?.cacheName)continue;
+    // Canonical realm validation owns and retires its own current page cache.
+    if(name===CACHE||name===active?.cacheName||name===self.CivweaveFiveSystemPagesV1?.cache)continue;
     if(name.startsWith(CACHE_PREFIX)){await caches.delete(name);continue;}
     if(name.startsWith(GUILD_CACHE_PREFIX)){await caches.delete(name);continue;}
     const cache=await caches.open(name);

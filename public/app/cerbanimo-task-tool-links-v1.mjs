@@ -78,29 +78,11 @@ export function renderTaskToolLinks(){
   return cards.length;
 }
 
-let queued=false,observer=null;
-function schedule(){
-  if(queued)return;
-  queued=true;
-  const run=()=>{queued=false;renderTaskToolLinks()};
-  if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(run,0);
-}
-function relevantMutation(records){
-  return records.some(record=>Array.from(record.addedNodes||[]).some(node=>node?.nodeType===1&&(node.matches?.('#cq144-root,.cq144-task')||node.querySelector?.('#cq144-root,.cq144-task'))));
-}
 function init(){
   if(typeof document==='undefined')return;
   const params=new URLSearchParams(location.search);
   if(params.get('system')!=='cerbanimo')return;
-  try{addEventListener('cerbanimo:quest-engine-changed',schedule)}catch{}
-  const start=()=>{
-    if(observer)return;
-    const target=document.querySelector('#rc-app')||document.documentElement;
-    observer=new MutationObserver(records=>{if(relevantMutation(records))schedule()});
-    observer.observe(target,{childList:true,subtree:true});
-    schedule();
-  };
-  if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
+  if(document.readyState==='loading')addEventListener('DOMContentLoaded',renderTaskToolLinks,{once:true});else renderTaskToolLinks();
 }
 
 export const CivweaveCerbanimoTaskToolLinksV1=Object.freeze({TOOL_ORDER,TOOL_LABELS,toolsForTask,toolHref,renderTaskToolLinks});

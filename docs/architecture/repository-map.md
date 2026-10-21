@@ -263,6 +263,10 @@ Broad repository/runtime check:
 npm run check
 ```
 
+This gate validates checked-in source without generating release metadata or rewriting routes. Syntax verification discovers current repository JavaScript, excludes generated vendor/materialized trees, and retains the selected release's server syntax checks. The workflow regression checks the executable verification dependency graph for retired release mutators.
+
+Installer packaging also takes the checked-in Pages graph as its source. It generates installer assets and retains installer smoke checks; it does not run the retired route/version synchronizers that would replace current navigation.
+
 Release-discipline check:
 
 ```bash

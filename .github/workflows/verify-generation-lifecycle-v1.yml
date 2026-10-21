@@ -4,7 +4,7 @@ on:
   push:
     branches: [staging]
     paths:
-      - 'public/app/generation-lifecycle-v1.js'
+      - 'public/app/generation-lifecycle-v2.js'
       - 'public/app/guide-generation-tracker-v1.js'
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax check lifecycle bridge
-        run: node --check public/app/generation-lifecycle-v1.js
+        run: node --check public/app/generation-lifecycle-v2.js
       - name: Syntax check generation tracker
         run: node --check public/app/guide-generation-tracker-v1.js
       - name: Syntax check takeover worker

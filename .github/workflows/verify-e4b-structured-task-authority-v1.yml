@@ -6,6 +6,7 @@ on:
       - 'public/service-worker.js'
       - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
+      - 'scripts/test-generation-takeover-cache-v1.mjs'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
@@ -48,6 +49,7 @@ on:
       - 'public/service-worker.js'
       - 'public/service-worker-v203.js'
       - 'public/service-worker-weave-pipeline-takeover-v1.js'
+      - 'scripts/test-generation-takeover-cache-v1.mjs'
       - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
@@ -164,3 +166,5 @@ jobs:
         run: node scripts/verify-gemma4-litert-phone-v1.mjs
       - name: Verify installed PWA generation takeover
         run: node scripts/verify-weave-pipeline-installed-generation-v1.mjs
+      - name: Verify generation takeover preserves signed Guild packages
+        run: node --test scripts/test-generation-takeover-cache-v1.mjs

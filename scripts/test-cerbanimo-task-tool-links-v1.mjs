@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import vm from 'node:vm';
 import {toolsForTask,toolHref} from '../public/app/cerbanimo-task-tool-links-v1.mjs';
 
 const quest={id:'quest:private-42'};
@@ -27,14 +28,25 @@ assert.match(href,/task=task%3Aprivate-7/);
 assert.equal(href.includes('launch'),false,'task wording must not be copied into Creator Suite URLs');
 assert.throws(()=>toolHref('image',quest.id,'task:1'),/Unsupported Creator Suite task tool/);
 
+const engineSource=await fs.readFile(new URL('../public/app/cerbanimo-quest-engine-v144.js',import.meta.url),'utf8');
+const engineContext=vm.createContext({structuredClone});
+vm.runInContext(engineSource.replace('root.CivweaveCerbanimoQuestV144={','root.CivweaveCerbanimoQuestV144={taskCard,'),engineContext);
+const engine=engineContext.CivweaveCerbanimoQuestV144;
+const renderedQuest=engine.normalizeQuest({id:quest.id,tasks:[{id:'task:1',title:'Draft the launch proposal'}]});
+const renderedCard=engine.taskCard(renderedQuest,renderedQuest.tasks[0]);
+assert.match(renderedCard,/data-quest-id="quest:private-42"/,'canonical task cards must identify their owning quest so tool links can resolve them');
+assert.match(engineSource,/CivweaveCerbanimoTaskToolLinksV1\?\.renderTaskToolLinks\?\.\(/,'the quest render lifecycle must refresh links after replacing task cards');
+
 const consoleHtml=await fs.readFile(new URL('../public/app/realm-console-v140.html',import.meta.url),'utf8');
 assert.match(consoleHtml,/cerbanimo-task-tool-links-v1\.mjs/,'Cerbanimo must load the task tool-link enhancer');
+assert.match(consoleHtml,/cerbanimo-learning-packs-v1\.js/,'Cerbanimo must retain its lazy learning-pack launcher');
 const suiteSource=await fs.readFile(new URL('../public/creator-suite/creator-suite-v1.js',import.meta.url),'utf8');
 assert.match(suiteSource,/params\.get\(['"]tool['"]\)/,'Creator Suite must read the linked tool request');
 assert.match(suiteSource,/select\(launch\.tool\)/,'Creator Suite must open the requested Text, Audio, or Video tool');
 assert.match(suiteSource,/getLaunchContext:launchContext/,'Creator Suite must expose the non-content launch context');
 const linkSource=await fs.readFile(new URL('../public/app/cerbanimo-task-tool-links-v1.mjs',import.meta.url),'utf8');
 assert.doesNotMatch(linkSource,/setInterval\(/,'task tool links must not create a polling loop');
+assert.doesNotMatch(linkSource,/MutationObserver/,'task links must use the quest render lifecycle rather than observe and repair the DOM');
 assert.match(linkSource,/data-cq-task-tool/,'links must be attached to the existing task footer rather than creating a second task surface');
 
 console.log('Cerbanimo task cards expose privacy-bounded Creator Suite links only for actionable deliverables.');

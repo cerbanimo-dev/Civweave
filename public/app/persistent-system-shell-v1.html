@@ -23,10 +23,10 @@ body{padding:0!important}
 <!-- External runtimes are deliberately deferred. The iframe, loading surface, and error surface below must be parsed before any network-loaded script can delay startup. -->
 <!-- Shell-critical code comes first so Settings/AI/chat can never gate navigation or the canonical rail. -->
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner" defer></script>
-<script src="/app/persistent-system-shell-v1.js?v=1.1.8-llama32-download-route" defer></script>
+<script src="/app/persistent-system-shell-v1.js?v=1.1.9-directory-frame-validation" defer></script>
 <script src="/app/themed-system-nav-v178.js?v=1.0.163-five-system-navigation-v232-canonical-rail" defer></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.7-direct-routes-persistent-guild-map-nav" defer></script>
-<script src="/app/generation-lifecycle-v2.js?v=1.3.2-gpu-restart" defer></script>
+<script src="/app/generation-lifecycle-v2.js?v=1.3.3-preserve-stream-text" defer></script>
 <!-- Settings opens in the parent persistent shell. Prewarm its saved-state renderer only after shell navigation is guaranteed. -->
 <script>
 (()=>{try{delete globalThis.CivweaveSettingsLocalRouteV323}catch{try{globalThis.CivweaveSettingsLocalRouteV323=undefined}catch{}}})();
@@ -34,7 +34,7 @@ body{padding:0!important}
 <script src="/app/settings-local-route-v331.js?cwAction=1&amp;v=1.2.2-qwen-phone-settings" defer></script>
 <script src="/app/settings-local-loader-v337.js?v=1.2.2-qwen-phone-settings" defer></script>
 <!-- Guide, local-AI, diagnostics, and human chat are secondary shell capabilities and may not delay first navigation. -->
-<script src="/app/shared-guide-surface-v236.js?v=1.0.179-persistent-system-shell-owner" defer></script>
+<script src="/app/shared-guide-surface-v236.js?v=1.0.182-persistent-parent-chrome" defer></script>
 <script src="/app/local-ai/local-generation-model-policy-v1.js?v=1.0.3-selected-qwen-model" defer></script>
 <script src="/app/local-chat-runtime-v295.js?v=1.0.132-moss-readiness-core" defer></script>
 <script src="/app/local-ai/gemma4-current-registry-authority-v1.js?v=1.0.15-e4b-dual-artifact" defer></script>
@@ -48,7 +48,7 @@ body{padding:0!important}
 <script src="/app/local-ai/gemma4-route-integrity-v1.js?v=1.0.0-post-loader-original-text" defer></script>
 <script src="/app/local-ai/gemma4-learning-plan-entry-authority-v1.js?v=1.2.3-backend-gate" defer></script>
 <script src="/app/generation-failure-inspector-v1.js?v=1.1.1-cross-frame-no-output" defer></script>
-<script src="/app/human-message-bubble-v1.js?v=1.1.1-human-message-chat-icon" defer></script>
+<script src="/app/human-message-bubble-v1.js?v=1.1.2-persistent-parent-chrome" defer></script>
 <script src="/app/human-chat-network-v1.js?v=1.0.0-human-chat-network-v1" defer></script>
 <script src="/app/human-chat-guild-context-v1.js?v=1.0.2-human-chat-standalone-v2" defer></script>
 </head>
@@ -76,12 +76,14 @@ if(query.get('feature'))target.searchParams.set('feature',query.get('feature'));
 const host=document.getElementById('cw-persistent-system-stage');
 const loading=document.getElementById('cw-persistent-system-loading');
 const error=document.getElementById('cw-persistent-system-error');
+const normalizedPath=url=>url.pathname.replace(/\/index\.html$/,'/').replace(/\.html$/,'');
+function currentTarget(){try{return new URL(host?.dataset.cwExpectedHref||target.href,location.href)}catch{return target}}
+function currentSystem(expected=currentTarget()){return Object.entries(routes).find(([,entry])=>normalizedPath(new URL(entry[0],location.origin))===normalizedPath(expected))?.[0]||system}
 function validDocument(){
   try{
-    const doc=host.contentDocument,href=host.contentWindow.location.href,actual=new URL(href,location.href);
-    const path=url=>url.pathname.replace(/\.html$/,'');
-    return Boolean(doc?.body&&doc.contentType==='text/html'&&doc.documentElement?.dataset.civweaveSystem===system&&actual.origin===target.origin&&path(actual)===path(target)
-      &&actual.searchParams.get('embed')==='1'&&actual.searchParams.get('persistentShell')==='1');
+    const doc=host.contentDocument,href=host.contentWindow.location.href,actual=new URL(href,location.href),expected=currentTarget();
+    return Boolean(doc?.body&&doc.contentType==='text/html'&&doc.documentElement?.dataset.civweaveSystem===currentSystem(expected)&&actual.origin===expected.origin&&normalizedPath(actual)===normalizedPath(expected)
+      &&actual.search===expected.search&&actual.hash===expected.hash&&actual.searchParams.get('embed')==='1'&&actual.searchParams.get('persistentShell')==='1');
   }catch{return false}
 }
 function fail(message){
@@ -92,15 +94,15 @@ function fail(message){
   const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
   const retry=document.createElement('button');retry.type='button';retry.textContent='Retry system';retry.style.cssText='padding:9px 12px;border-radius:9px;cursor:pointer';
   retry.addEventListener('click',()=>location.reload());
-  const standalone=document.createElement('a');standalone.href=target.href;standalone.textContent='Open system content directly';standalone.style.cssText='display:inline-flex;padding:9px 12px;border:1px solid #9edcff;border-radius:9px;color:#9edcff';
+  const standalone=document.createElement('a');standalone.href=currentTarget().href;standalone.textContent='Open system content directly';standalone.style.cssText='display:inline-flex;padding:9px 12px;border:1px solid #9edcff;border-radius:9px;color:#9edcff';
   const diagnostic=document.createElement('small');diagnostic.style.cssText='display:block;margin-top:8px;opacity:.8;overflow-wrap:anywhere';
   let framePath='unavailable';try{framePath=host?.contentWindow?.location?.pathname?.slice(0,160)||'unavailable'}catch{}
-  diagnostic.textContent='System: '+system+' · Frame: '+framePath;
+  diagnostic.textContent='System: '+currentSystem()+' · Frame: '+framePath;
   actions.append(retry,standalone);error.append(title,detail,actions,diagnostic);
   error.dataset.open='1';document.documentElement.dataset.cwFirstFrame='failed';
   return true;
 }
-globalThis.CivweaveShellRescueV1=Object.freeze({version:'1',fail,target:target.href,validDocument});
+globalThis.CivweaveShellRescueV1=Object.freeze({version:'1.1-current-frame',fail,get target(){return currentTarget().href},validDocument});
 host.dataset.cwBootstrapHref=target.href;
 host.src=target.href;
 document.documentElement.dataset.cwFirstFrame='requested';

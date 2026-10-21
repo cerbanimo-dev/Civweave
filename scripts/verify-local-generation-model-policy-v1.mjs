@@ -38,6 +38,8 @@ assert.equal(policy.resolve('intake'),'qwen35-4b-litert-web');
 assert.equal(policy.resolve('fast'),'qwen35-4b-litert-web');
 assert.equal(await policy.requireRole('deep'),'qwen35-4b-litert-web');
 assert.equal(policy.resolve('deep',{config:{model:'gemma4-e2b-it-litert-web'}}),'gemma4-e2b-it-litert-web','explicit model must not switch to E4B or Qwen implicitly');
+assert.equal(policy.resolve('deep',{config:{model:'some-custom-local-model'}}),'some-custom-local-model','an explicit unrelated request model must not be replaced by the saved phone selection');
+assert.equal(policy.resolve('fast',{selectedModel:'some-custom-local-model'}),'some-custom-local-model','an explicit selectedModel override must remain authoritative');
 installed.delete('qwen35-9b-litert-web');
 assert.equal(await policy.requireRole('deep'),'qwen35-4b-litert-web','Qwen4 must not require uninstalled 9B');
 selected={active:true,id:'qwen35-9b-litert-web'};

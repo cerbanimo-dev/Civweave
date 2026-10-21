@@ -10,6 +10,26 @@ function boundary(file, start, end, globals = {}) {
   return vm.runInNewContext(`${source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)))}\n${start.match(/function (\w+)/)[1]}`, globals);
 }
 
+function litertHarness(createConversation){
+  const listeners=new Map();let selection={active:true,id:'gemma4-e2b-it-litert-web'},engineDeletes=0;
+  const context={console,performance,queueMicrotask,
+    addEventListener:(name,fn)=>listeners.set(name,[...(listeners.get(name)||[]),fn]),
+    dispatchEvent:event=>{for(const listener of listeners.get(event.type)||[])listener(event)},
+    CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},
+    WebAssembly:{Suspending:()=>{},promising:()=>{}},navigator:{gpu:{},platform:'Android'},
+    caches:{open:async()=>({match:async()=>({ok:true,body:{}})})},
+    CivweaveLocalModelDownloadV266:{selection:()=>selection,status:async()=>({available:true})},
+    CivweaveLocalModelRegistryV266:{byId:()=>({artifacts:[{required:true,path:'model.litertlm'}]}),directUrl:()=>'/model.litertlm'},
+    __mockLiteRT:{Backend:{GPU_ARTISAN:'gpu-artisan'},getOrLoadGlobalLiteRtLm:async()=>true,
+      Engine:{create:async()=>({createConversation,delete:async()=>{engineDeletes++}})}}
+  };
+  const source=read('local-ai/litert-gemma4-fast-runtime-v1.js'),entry='import(MODULE_URL)';
+  assert.equal(source.split(entry).length,2,'the real LiteRT module entrypoint must still be exercised');
+  context.globalThis=context;vm.runInNewContext(source.replace(entry,'Promise.resolve(globalThis.__mockLiteRT)'),context);
+  return{api:context.CivweaveLiteRTGemma4FastRuntimeV1,get engineDeletes(){return engineDeletes},
+    select(value){selection=value;context.dispatchEvent({type:'civweave:local-model-selection'})}};
+}
+
 test('Gemma thought channels never become a final answer, including truncated thought',()=>{
   const answer=boundary('local-ai/worker-v266.js','function visibleAnswer(', 'function makeStreamer(');
   assert.equal(answer('<|channel>thought\nprivate reasoning<channel|>Useful answer<turn|>'),'Useful answer');
@@ -119,15 +139,10 @@ test('Cerbanimo parity deadline covers a stalled response body',async()=>{
 test('Gemma LiteRT stays busy until its previous conversation is disposed',async()=>{
   let release,disposing;
   const started=new Promise(resolve=>disposing=resolve),deleted=new Promise(resolve=>release=resolve);
-  const context={generationActive:false,pendingUnloadReason:'',selected:()=>({id:'e2b'}),profileFor:id=>({id,maxOutputTokens:2400}),
-    fastStatus:async()=>({available:true}),now:()=>Date.now(),engineUsesMtp:false,lastMetrics:null,
-    normalizedMessages:()=>[{role:'user',content:'Hello'}],normalizeStructuredTool:()=>null,
-    emit(){},chunkText:x=>x,benchmarkMetrics:()=>({}),
-    ensureEngine:async()=>({createConversation:async()=>({async *sendMessageStreaming(){yield 'Hello.'},delete:async()=>{disposing();await deleted}})}),
-  };
-  const run=boundary('local-ai/litert-gemma4-fast-runtime-v1.js','async function runFast(', 'async function accelerationTarget(',context);
-  const first=run({});await started;
-  try{assert.equal(context.generationActive,true);await assert.rejects(run({}),error=>error.code==='LOCAL_MODEL_BUSY')}finally{release();await first}
+  const h=litertHarness(async()=>({async *sendMessageStreaming(){yield 'Hello.'},delete:async()=>{disposing();await deleted}}));
+  const first=h.api.runFast({messages:[{role:'user',content:'Hello'}]});await started;
+  try{assert.equal(h.api.state().generationActive,true);await assert.rejects(h.api.runFast({}),error=>error.code==='LOCAL_MODEL_BUSY')}finally{release();await first}
+  assert.equal(h.api.state().generationActive,false);
 });
 
 
@@ -138,6 +153,9 @@ test('persistent shell accepts Pages clean URLs but rejects stale or foreign fra
   assert.equal(matches(host(expected.replace('.html','')),expected),true);
   assert.equal(matches(host(expected.replace('cerbanimo','anarchadia')),expected),false);
   assert.equal(matches(host(expected.replace('localhost','foreign.example')),expected),false);
+  const school='http://localhost/app/cabinets/living-school/index.html?cabinet=1&installed=1&embed=1&persistentShell=1';
+  assert.equal(matches(host(school.replace('index.html','')),school),true,'Pages index.html redirects must validate as the same embedded system');
+  assert.equal(matches(host(school.replace('index.html','').replace('cabinet=1','cabinet=2')),school),false,'directory aliases must not accept stale query state');
 });
 
 test('every system exposes Settings through its existing shortcuts menu',()=>{
@@ -149,12 +167,12 @@ test('every system exposes Settings through its existing shortcuts menu',()=>{
 
 
 test('changing a Gemma selection defers engine disposal until generation ends',async()=>{
-  let deletes=0;
-  const context={generationActive:true,pendingUnloadReason:'',engineReleasePromise:null,enginePromise:null,
-    engine:{delete:async()=>{deletes++}},engineModelId:'e2b',engineUsesMtp:false,emit(){}};
-  const unload=boundary('local-ai/litert-gemma4-fast-runtime-v1.js','async function unloadEngine(', 'async function instantiateEngine(',context);
-  assert.equal(await unload('selection-change'),false);
-  assert.equal(deletes,0);assert.equal(context.pendingUnloadReason,'selection-change');
-  await unload('selection-change',{afterGeneration:true});
-  assert.equal(deletes,1);assert.equal(context.engine,null);
+  let release,begin;
+  const streaming=new Promise(resolve=>begin=resolve),finished=new Promise(resolve=>release=resolve);
+  const h=litertHarness(async()=>({async *sendMessageStreaming(){begin();await finished;yield 'Hello.'},delete:async()=>{}}));
+  const first=h.api.runFast({messages:[{role:'user',content:'Hello'}]});await streaming;
+  h.select({active:false,id:''});
+  assert.equal(h.engineDeletes,0);
+  release();await first;
+  assert.equal(h.engineDeletes,1);assert.equal(h.api.state().engineReady,false);
 });

@@ -17,3 +17,5 @@ jobs:
           node-version: '22'
       - name: Verify startup and human chat contracts
         run: node scripts/verify-living-school-startup-human-chat-v1.mjs
+      - name: Verify persistent content cannot recreate parent human chrome
+        run: node --test scripts/test-persistent-human-chrome-v1.mjs

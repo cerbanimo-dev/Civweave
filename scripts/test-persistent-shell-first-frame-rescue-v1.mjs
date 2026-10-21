@@ -47,6 +47,27 @@ test('healthy embedded HTML hides startup overlay without shared runtime',()=>{
   assert.equal(h.context.document.documentElement.dataset.cwFirstFrame,'embedded-ready');
 });
 
+test('Living School directory redirects are healthy in the independent first-frame rescue',()=>{
+  const h=harness({system:'living-school'});
+  h.frame.src=h.frame.src.replace('index.html','');
+  h.frame.handlers.load();
+  assert.equal(h.loading.hidden,true);
+  assert.equal(h.error.dataset.open,'0');
+  assert.equal(h.context.CivweaveShellRescueV1.validDocument(),true);
+});
+
+test('recovery diagnostics follow the currently requested frame after system navigation',()=>{
+  const h=harness({system:'cerbanimo'});
+  const next=new URL('/app/cabinets/living-school/index.html?cabinet=1&installed=1&embed=1&persistentShell=1',h.context.location.origin).href;
+  h.frame.dataset.cwExpectedHref=next;
+  h.frame.src=next.replace('index.html','');
+  h.frame.contentDocument.documentElement.dataset.civweaveSystem='living-school';
+  assert.equal(h.context.CivweaveShellRescueV1.validDocument(),true,'healthy current frames must not be compared with the initial Cerbanimo target');
+  h.context.CivweaveShellRescueV1.fail('Current navigation timed out.');
+  assert.equal(h.error.children[2].children[1].href,next);
+  assert.match(h.error.children[3].textContent,/System: living-school/);
+});
+
 test('non-HTML and redirected responses expose recovery, never false success',()=>{
   for(const options of [{valid:false},{redirect:true},{actualSystem:'fellowfare'}]){
     const h=harness(options);h.frame.handlers.load();

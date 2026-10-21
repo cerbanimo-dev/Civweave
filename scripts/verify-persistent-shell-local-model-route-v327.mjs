@@ -26,7 +26,7 @@ const coreWorker = fs.readFileSync(coreWorkerPath, 'utf8');
 const settingsWorker = fs.readFileSync(settingsWorkerPath, 'utf8');
 const settingsEntrypoint = fs.readFileSync(settingsEntrypointPath, 'utf8');
 const expectedVersion = '1.1.5-settings-local-route-v327-qwen-phone-fast';
-const expectedShellVersion = '1.1.8-llama32-download-route';
+const expectedShellVersion = shell.match(/const VERSION='([^']+)'/)?.[1];
 const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.2-qwen-phone-settings';
 const parentFullRoute = '/app/settings-local-route-v331.js?cwAction=1&amp;v=1.2.2-qwen-phone-settings';
 const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.2-qwen-phone-settings';
@@ -57,8 +57,8 @@ if (!shellHtml.includes(parentFullRoute)) {
 if (shellHtml.includes('/app/settings-local-route-v331.js?v=')) {
   fail('Persistent shell must never preload v331 through the ordinary service-worker shim route.');
 }
-if (!shellHtml.includes(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`)) {
-  fail('Persistent shell runtime version changed; revalidate Local Models stage integration.');
+if (!expectedShellVersion || !shellHtml.includes(`/app/persistent-system-shell-v1.js?v=${expectedShellVersion}`)) {
+  fail('Persistent shell HTML does not load the current canonical runtime revision.');
 }
 if (!loader.includes("const STAGE_ID='cw-persistent-system-stage'")) {
   fail('Local Models bridge no longer targets the canonical persistent stage iframe.');

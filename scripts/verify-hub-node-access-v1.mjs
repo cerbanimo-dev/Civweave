@@ -26,6 +26,9 @@ const [access, lobby, router, topbar, workspace, assistant, nodeEntry, serverEnt
 
 for (const source of [access, lobby, router, topbar, workspace, assistant]) new Function(source);
 const registry = JSON.parse(ownership), offlinePackage = JSON.parse(offline);
+const chatOwner = registry.systems['guide-chat'].owner;
+const [chatSurface, guildUsage] = await Promise.all([read(chatOwner), read('public/app/guild-chat-usage-v1.js')]);
+for (const source of [chatSurface, guildUsage]) new Function(source);
 
 class WebStorage {
   constructor() { this.map = new Map(); }
@@ -143,9 +146,19 @@ assert.match(locationMigration, /ALTER TABLE nodes ADD COLUMN location_json TEXT
 assert.match(statusFunction, /\/api\/node\/health/);
 assert.match(topbar, /NODE_STATUS_ID='cw-working-campus-node-v243'/);
 assert.match(topbar, /neurons left today/);
-assert.match(workspace, /data-neuron-status/);
-assert.match(workspace, /neurons last turn/);
-assert.match(workspace, /chats left/);
+assert.equal(registry.systems['guide-chat'].compatibilityLoader,'public/app/guide-workspace-v242.js');
+assert.ok(workspace.includes(`const TARGET='${chatOwner.replace(/^public/,'')}'`),'The previous workspace must load the registry-declared canonical guide surface.');
+assert.doesNotMatch(workspace,/document\.addEventListener/,'The compatibility loader must not regain input ownership.');
+for (const field of ['chargedNeurons','remainingNeurons','approximateTurnsLeft']) assert.match(chatSurface,new RegExp(`result\\?\\.usage\\?\\.${field}`),`${chatOwner} must retain ${field} on the actual guide response.`);
+assert.match(guildUsage, /data-civweave-guild-usage/,'The shared chat balance must retain its visible telemetry badge.');
+assert.match(guildUsage, /neurons.*conversations/,'The current badge must expose remaining neurons and estimated conversations.');
+assert.match(guildUsage, /civweave:ai-neuron-usage/,'New usage must refresh the shared balance.');
+browser.CivweaveHostNodeSessionV1.recordUsage({nodeId:'seed-nearby',chargedNeurons:12,quota:{includedRemainingNeurons:468}});
+vm.runInContext(guildUsage,browser,{filename:'guild-chat-usage-v1.js'});
+const chatBalance=browser.CivweaveGuildChatUsageV1.snapshot();
+assert.equal(chatBalance.remainingNeurons,468,'The chat balance must read current Guild telemetry.');
+assert.equal(chatBalance.approximateTurnsLeft,39,'Estimated conversations must use measured neurons per turn.');
+assert.equal(chatBalance.known,true);
 assert.match(assistant, /usage:result\.usage\|\|null/);
 assert.match(boundary, /HOST_NODE_SESSION/);
 assert.equal(registry.systems['host-node-access'].owner, 'public/app/host-node-session-v1.js');

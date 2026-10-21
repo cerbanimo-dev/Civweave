@@ -1,4 +1,4 @@
-const REVISION='cerbanimo-video-task-contract-v1.1-lazy';
+const REVISION='cerbanimo-video-task-contract-v1.2-current-state';
 const CONTRACT='./video-learning-contract-v1.mjs?v=video-atlas-v1';
 const FALLBACK_VIDEO_URL='https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
@@ -10,24 +10,33 @@ function youtubeId(value){try{const url=new URL(clean(value,600));if(url.hostnam
 function youtubeEmbedUrl(value){const id=youtubeId(value);return/^[\w-]{11}$/.test(id)?`https://www.youtube-nocookie.com/embed/${id}`:'';}
 function hasValidVideo(task){return Boolean(task?.video?.url&&youtubeEmbedUrl(task.video.url));}
 function locateTask(state,taskId){for(const quest of state?.quests||[]){const task=(quest.tasks||[]).find(item=>item.id===taskId);if(task)return{quest,task}}return null;}
+function videoQuery(quest,task){return`${quest.title||''} ${quest.objective||''} ${task.title||''} ${task.description||''} ${(task.acceptanceCriteria||[]).join(' ')}`;}
+function saveResolvedVideos(api,results){
+  const current=api.readState();let changed=false;
+  for(const result of results){
+    const quest=current.quests?.find(item=>item.id===result.questId),task=quest?.tasks?.find(item=>item.id===result.taskId);
+    if(!task||hasValidVideo(task)||videoQuery(quest,task)!==result.query||!hasValidVideo(result))continue;
+    task.video=result.video;task.videoContract=result.videoContract;changed=true;
+  }
+  if(changed){api.writeState(current);document.documentElement.dataset.cerbanimoVideoContract='required-per-task';}
+  return changed;
+}
 async function ensureTaskVideo(taskId){
   const api=engine();if(!api?.readState||!api?.writeState||applying)return false;
   const state=api.readState(),found=locateTask(state,taskId);if(!found||hasValidVideo(found.task))return false;
   applying=true;
   try{
-    const media=await contract();
-    found.task.video=await media.resolveRelevantVideo(`${found.quest.title||''} ${found.quest.objective||''} ${found.task.title||''} ${found.task.description||''} ${(found.task.acceptanceCriteria||[]).join(' ')}`);
-    found.task.videoContract={revision:REVISION,required:1,fallbackUrl:media.FALLBACK_VIDEO_URL||FALLBACK_VIDEO_URL,checkedAt:new Date().toISOString()};
-    api.writeState(state);document.documentElement.dataset.cerbanimoVideoContract='required-per-task';return true;
+    const query=videoQuery(found.quest,found.task),media=await contract(),video=await media.resolveRelevantVideo(query);
+    return saveResolvedVideos(api,[{questId:found.quest.id,taskId:found.task.id,query,video,videoContract:{revision:REVISION,required:1,fallbackUrl:media.FALLBACK_VIDEO_URL||FALLBACK_VIDEO_URL,checkedAt:new Date().toISOString()}}]);
   }finally{applying=false;}
 }
 async function ensureTaskVideos(){
   const api=engine();if(!api?.readState||!api?.writeState||applying)return false;
   applying=true;
   try{
-    const state=api.readState(),media=await contract();let changed=false;
-    for(const quest of state.quests||[]){for(const task of quest.tasks||[]){if(hasValidVideo(task))continue;task.video=await media.resolveRelevantVideo(`${quest.title||''} ${quest.objective||''} ${task.title||''} ${task.description||''} ${(task.acceptanceCriteria||[]).join(' ')}`);task.videoContract={revision:REVISION,required:1,fallbackUrl:media.FALLBACK_VIDEO_URL||FALLBACK_VIDEO_URL,checkedAt:new Date().toISOString()};changed=true;}}
-    if(changed)api.writeState(state);document.documentElement.dataset.cerbanimoVideoContract='required-per-task';return changed;
+    const state=api.readState(),media=await contract(),results=[];
+    for(const quest of state.quests||[]){for(const task of quest.tasks||[]){if(hasValidVideo(task))continue;const query=videoQuery(quest,task),video=await media.resolveRelevantVideo(query);results.push({questId:quest.id,taskId:task.id,query,video,videoContract:{revision:REVISION,required:1,fallbackUrl:media.FALLBACK_VIDEO_URL||FALLBACK_VIDEO_URL,checkedAt:new Date().toISOString()}});}}
+    return saveResolvedVideos(api,results);
   }finally{applying=false;}
 }
 function card(video,index){

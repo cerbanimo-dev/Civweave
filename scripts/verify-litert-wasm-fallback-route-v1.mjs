@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {pathToFileURL} from 'node:url';
 const route='functions/app/vendor/litert-lm/wasm/[file].js';
 const source=await readFile(route,'utf8');
 assert.match(source,/application\/wasm/);
 assert.match(source,/env\.ASSETS\.fetch/);
 assert.match(source,/ReadableStream/);
 assert.doesNotMatch(source,/await\s+response\.arrayBuffer\(/);
-const routeApi=await import(pathToFileURL(new URL('../'+route,import.meta.url).pathname).href);
+const routeApi=await import(new URL('../'+route,import.meta.url));
 const parts=['wasm/litertlm_wasm_asyncify_internal.wasm.part0','wasm/litertlm_wasm_asyncify_internal.wasm.part1'];
 const bytes=[Uint8Array.from([0,97,115,109,1,0,0,0]),Uint8Array.from([35,49,55])];
 let failPart=-1,loads=[];
