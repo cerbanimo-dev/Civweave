@@ -1,9 +1,9 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r41';
+const REVISION='weave-pipeline-takeover-v1-r42';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v480-qwen-phone-speed';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r41';
+const CACHE='cwrecovery-v481-active-settings-qwen4';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r42';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
@@ -30,6 +30,11 @@ const PURGE_PATHS=new Set([
   '/app/local-ai/model-registry-v266.js',
   '/app/local-ai/model-performance-observer-v1.js',
   '/app/local-ai/settings-panel-v267.js',
+  '/app/settings-direct-entry-v339.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-local-models-direct-v325.js',
+  '/app/settings-local-route-v327.js',
   '/app/document-lifecycle-v221.js',
   '/app/settings-local-route-v331.js',
   '/app/local-ai/runtime-v266.js',
