@@ -615,8 +615,8 @@
     let saved = null;
     try { saved = JSON.parse(global.localStorage?.getItem?.("civweave.mobile.gguf-primary.v1") || "null"); } catch {}
     if (!saved?.enabled || saved.schema !== "civweave.mobile.gguf-primary.v1" ||
-        config.provider !== "openai-compatible" || config.endpoint.replace(/\\/+$/, "") !== saved.endpoint ||
-        config.model !== saved.model || !/qwen[\\s._-]*3[._-]?5[\\s._-]*4b(?![a-z0-9])/i.test(config.model)) return null;
+        config.provider !== "openai-compatible" || config.endpoint.replace(/\/+$/, "") !== saved.endpoint ||
+        config.model !== saved.model || !/qwen[\s._-]*3[._-]?5[\s._-]*4b(?![a-z0-9])/i.test(config.model)) return null;
     try {
       const url = new URL(saved.endpoint);
       if (url.protocol !== "http:" || !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname.toLowerCase())) return null;
@@ -637,7 +637,7 @@
     try { base = new URL(helper.endpoint); }
     catch { return null; }
     if (base.protocol !== "http:" || !["127.0.0.1", "localhost", "[::1]"].includes(base.hostname.toLowerCase()) ||
-        helper.endpoint === lineup.endpoint || !/qwen[\\s._-]*3[._-]?5/i.test(String(helper.model || ""))) return null;
+        helper.endpoint === lineup.endpoint || !/qwen[\s._-]*3[._-]?5/i.test(String(helper.model || ""))) return null;
     const latest = [...messages].reverse().find(x => x.role === "user")?.content || "";
     if (!latest) return null;
     const controller = makeController(signal, 12000);
