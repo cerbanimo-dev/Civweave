@@ -2,6 +2,10 @@
 const MAGIC=[71,71,85,70],ENC=new TextEncoder();
 const FIXED=Object.freeze({0:1,1:1,2:2,3:2,4:4,5:4,6:4,7:1,10:8,11:8,12:8});
 const MAX_METADATA=200_000_000,MAX_TENSORS=100_000,MAX_SPLITS=64;
+// Qwen3.5 4B Q4_K_M keeps token_embd.weight at Q6_K (~521 MB), so the
+// former 480 MB default wrongly rejected a legitimate tensor. Keep each
+// complete tensor, plus shard headers, well below Wllama's 2 GB file limit.
+export const DEFAULT_SAFE_GGUF_SHARD_BYTES=1_800_000_000;
 const fail=message=>{throw new Error('GGUF_SPLIT: '+message)};
 const align=(n,to)=>Math.ceil(n/to)*to;
 const le=(value,n)=>{const a=new Uint8Array(n),v=new DataView(a.buffer);if(n===2)v.setUint16(0,value,true);if(n===4)v.setUint32(0,value,true);if(n===8)v.setBigUint64(0,BigInt(value),true);return a};
@@ -33,7 +37,7 @@ class Cursor{
     fail('unsupported GGUF value type '+type);
   }
 }
-export async function planGGUFSplit(file,{maxShardBytes=480_000_000}={}){
+export async function planGGUFSplit(file,{maxShardBytes=DEFAULT_SAFE_GGUF_SHARD_BYTES}={}){
   if(!file?.slice||!Number.isSafeInteger(file.size)||file.size<40)fail('not a readable GGUF file');
   if(maxShardBytes<50_000_000||maxShardBytes>1_900_000_000)fail('unsafe GGUF shard size');
   const cur=new Cursor(file),magic=await cur.bytes(4);
@@ -66,7 +70,11 @@ export async function planGGUFSplit(file,{maxShardBytes=480_000_000}={}){
   const lengths=new Map();
   for(let i=0;i<sorted.length;i++){
     const end=i+1<sorted.length?sorted[i+1].offset:totalData,n=end-sorted[i].offset;
-    if(n<=0||n>maxShardBytes||sorted[i].offset%alignment!==0||n%alignment!==0)fail('tensor offsets are invalid or a tensor is too large to split: '+sorted[i].name);
+    if(!Number.isSafeInteger(n)||n<=0||sorted[i].offset%alignment!==0||
+       (i+1<sorted.length&&n%alignment!==0))
+      fail('invalid tensor offsets near '+sorted[i].name+' (offset='+sorted[i].offset+', length='+n+', alignment='+alignment+').');
+    if(n>maxShardBytes)
+      fail('single tensor '+sorted[i].name+' is '+(n/1e6).toFixed(1)+' MB; max safe shard payload is '+(maxShardBytes/1e6).toFixed(1)+' MB. The original weights were not changed.');
     lengths.set(sorted[i],n);
   }
   const groups=[];let current=[],size=0;
@@ -76,7 +84,7 @@ export async function planGGUFSplit(file,{maxShardBytes=480_000_000}={}){
     current.push({...entry,length:n});size+=n;
   }
   if(current.length)groups.push(current);
-  if(groups.length>MAX_SPLITS||groups.length<2)fail('GGUF shard count is unsuitable');
+  if(groups.length>MAX_SPLITS||groups.length<2)fail('GGUF shard count is unsuitable for an oversized source model');
   const metadataBytes=metadata.reduce((sum,m)=>sum+m.end-m.start,0);
   if(metadataBytes>MAX_METADATA)fail('GGUF metadata too large');
   return{file,version,nTensors,nMeta,metadata,metadataBytes,alignment,dataStart,groups,totalBytes:file.size,maxShardBytes};
