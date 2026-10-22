@@ -69,7 +69,7 @@ async function start(selected){
     if(api.isModelLoaded?.()){await api.exit();instance=null;loadedUrl=''}
     const create=async gpuLayers=>{
       const current=await engine();
-      await current.loadModel(file,{n_ctx:4096,n_threads:1,n_batch:128,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
+      await current.loadModel(file,{n_ctx:6144,n_threads:1,n_batch:128,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
       loadedUrl=selected.url;
       return current;
     };
@@ -106,7 +106,7 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
     const stream=await api.createChatCompletion(params);
     for await(const chunk of stream){
       if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled.');
-      const text=clean(chunk?.choices?.[0]?.delta?.content||'');
+      const text=String(chunk?.choices?.[0]?.delta?.content??'');
       if(!text)continue;
       output+=text;chunks++;
       try{onToken?.(text,output)}catch{}
