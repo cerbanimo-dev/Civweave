@@ -52,7 +52,11 @@ export async function download(url,{onProgress}={}){
   finally{downloading=false}
 }
 export async function activate({url,id,label}){
-  const key=validateURL(url),file=await installed(key);
+  const key=validateURL(url);
+  const fileName=decodeURIComponent(new URL(key).pathname.split('/').pop()||'');
+  const expected=id==='qwen35-4b-iq2m-gguf'?/qwen[._-]?3[._-]?5[._-]?4b/i:id==='qwen35-2b-q4km-gguf'?/qwen[._-]?3[._-]?5[._-]?2b/i:null;
+  if(!expected||!expected.test(fileName))throw err('GGUF_IDENTITY_MISMATCH','The downloaded GGUF filename does not match the selected Qwen 3.5 model size.');
+  const file=await installed(key);
   if(!file)throw err('GGUF_NOT_DOWNLOADED','Download this GGUF within Civweave first. No server or alternate engine will be used.');
   const selected={schema:'civweave.mobile.gguf-browser.v2',enabled:true,engine:'wllama',model:clean(id||file.url.split('/').pop()).slice(0,120),label:clean(label||'GGUF on phone').slice(0,120),url:key,bytes:file.size,selectedAt:new Date().toISOString()};
   localStorage.setItem(GGUF_SELECTION_KEY,JSON.stringify(selected));
