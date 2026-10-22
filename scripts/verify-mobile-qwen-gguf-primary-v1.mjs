@@ -53,5 +53,8 @@ assert.match(runtime,/chat_template_kwargs: \{ enable_thinking: false \}/);
 assert.match(runtime,/const useStream = Boolean\(config.stream \|\| lineup\)/);
 assert.match(runtime,/mobile-helper-unavailable/);
 assert.match(settings,/data-mobile-qwen-connect/);
+const stableSlot = settings.indexOf('data-mobile-gguf-panel');
+const localSlot = settings.indexOf('data-settings-tab-panel="local-models"');
+assert.ok(stableSlot > 0 && localSlot > stableSlot, 'Phone GGUF setup must live before the replaceable Local Models tab.');
 assert.match(settings,/persist\(\{\.\.\.DEFAULTS,route:'openai-compatible'/);
 console.log('Verified native GGUF 4B phone-primary route, strict localhost model identity, optional helper isolation and source syntax.');
