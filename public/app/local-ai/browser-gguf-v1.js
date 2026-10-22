@@ -51,6 +51,113 @@ export async function download(url,{onProgress}={}){
   }catch(error){notify('failed',{url:key,error:clean(error?.message)});throw error}
   finally{downloading=false}
 }
+
+const IMPORT_CACHE='civweave-gguf-file-import-v1';
+const IMPORT_INDEX_KEY='civweave.mobile.gguf.import-index.v1';
+const MAX_GGUF_SHARD_BYTES=2_000_000_000;
+function importIndex(){
+  try { const value=JSON.parse(localStorage.getItem(IMPORT_INDEX_KEY)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{} }
+  catch{return{}}
+}
+function importName(name){
+  const value=String(name||'');
+  if(!/\.gguf$/i.test(value)||value.length>200||/[/\\]/.test(value))throw err('GGUF_FILE_NAME','Select GGUF files with ordinary .gguf filenames.');
+  return value;
+}
+function modelFromFile(name){
+  if(/qwen[._-]?3[._-]?5[._-]?4b(?!\d)/i.test(name))return {family:'4b',id:'qwen35-4b-imported-gguf',label:'Qwen 3.5 4B · imported GGUF'};
+  if(/qwen[._-]?3[._-]?5[._-]?2b(?!\d)/i.test(name))return {family:'2b',id:'qwen35-2b-imported-gguf',label:'Qwen 3.5 2B · imported GGUF'};
+  throw err('GGUF_MODEL_NAME','The file name must identify Qwen 3.5 4B or 2B. Other models are not enabled for this phone-primary path.');
+}
+function orderedFiles(input){
+  const files=Array.from(input||[]);
+  if(!files.length||files.length>24)throw err('GGUF_IMPORT_FILES','Select a GGUF file or up to 24 proper GGUF split shards together.');
+  const rows=files.map(file=>{
+    const name=importName(file?.name);
+    if(!file?.slice||!Number.isSafeInteger(file.size)||file.size<1)throw err('GGUF_IMPORT_FILE','A selected GGUF cannot be read by the browser.');
+    if(file.size>MAX_GGUF_SHARD_BYTES)throw err('GGUF_FILE_TOO_LARGE',
+      name+' is larger than the browser engine’s 2 GB per-file limit. Select proper llama-gguf-split shards of this same GGUF; do not download a different quantization. An unsplit original cannot be loaded here yet.');
+    const match=/^(.*)-(\d{5})-of-(\d{5})\.gguf$/i.exec(name);
+    return{file,name,match};
+  });
+  if(rows.length===1&&!rows[0].match)return rows;
+  const first=rows[0].match;
+  if(!first)throw err('GGUF_SPLIT_FORMAT','Multiple GGUF files must be proper llama-gguf-split shards named -00001-of-0000N.gguf.');
+  const count=Number(first[3]),prefix=first[1];
+  if(count!==rows.length||count<2)throw err('GGUF_SHARDS_MISSING','Select all '+count+' shards of the same GGUF together.');
+  if(rows.some(r=>!r.match||r.match[1]!==prefix||Number(r.match[3])!==count))
+    throw err('GGUF_SHARDS_MISMATCH','GGUF shards must have the same original model basename and shard count.');
+  rows.sort((a,b)=>Number(a.match[2])-Number(b.match[2]));
+  rows.forEach((row,i)=>{if(Number(row.match[2])!==i+1)throw err('GGUF_SHARDS_MISSING','Missing GGUF shard '+String(i+1).padStart(5,'0')+'.')});
+  return rows;
+}
+function cachePath(importId,index){
+  return new URL('/__civweave/gguf-file-import-v1/'+encodeURIComponent(importId)+'/'+String(index).padStart(5,'0')+'.gguf',location.origin).href;
+}
+async function blobsFor(record){
+  if(!record||!Array.isArray(record.files)||!record.files.length)throw err('GGUF_IMPORT_RECORD','No saved imported GGUF shards found.');
+  const cache=await caches.open(IMPORT_CACHE),blobs=[];
+  for(const item of record.files){
+    const response=await cache.match(cachePath(record.importId,item.index));
+    if(!response)throw err('GGUF_IMPORT_MISSING','An imported GGUF shard is absent from browser storage. Re-import the model without changing its quantization.');
+    const blob=await response.blob();
+    if(blob.size!==item.size)throw err('GGUF_IMPORT_DAMAGED','An imported GGUF shard has the wrong size. Re-import the original file.');
+    const magic=new Uint8Array(await blob.slice(0,4).arrayBuffer());
+    if(magic.length!==4||magic[0]!==71||magic[1]!==71||magic[2]!==85||magic[3]!==70)
+      throw err('GGUF_IMPORT_DAMAGED','A cached imported file does not contain a GGUF header.');
+    blobs.push(blob);
+  }
+  return blobs;
+}
+export async function importFiles(input,{onProgress}={}){
+  if(downloading)throw err('GGUF_DOWNLOAD_BUSY','Wait for the active GGUF transfer to finish.');
+  const rows=orderedFiles(input),model=modelFromFile(rows[0].name);
+  if(rows.some(row=>modelFromFile(row.name).family!==model.family))
+    throw err('GGUF_SHARDS_MISMATCH','All selected GGUF shards must refer to the same Qwen model.');
+  for(const row of rows){
+    const magic=new Uint8Array(await row.file.slice(0,4).arrayBuffer());
+    if(magic.length!==4||magic[0]!==71||magic[1]!==71||magic[2]!==85||magic[3]!==70)
+      throw err('GGUF_BAD_HEADER',row.name+' is not a GGUF model file.');
+  }
+  const importId='file-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+  const cache=await caches.open(IMPORT_CACHE),written=[],total=rows.reduce((sum,row)=>sum+row.file.size,0);
+  const record={schema:'civweave.gguf.import.v1',importId,model:model.id,label:model.label,sourceNames:rows.map(row=>row.name),bytes:total,files:[],importedAt:new Date().toISOString()};
+  let loaded=0;
+  try{
+    for(let i=0;i<rows.length;i++){
+      const row=rows[i],key=cachePath(importId,i);
+      notify('importing',{model:model.id,file:row.name,index:i+1,count:rows.length,loaded,total});
+      await cache.put(key,new Response(row.file,{headers:{'content-type':'application/octet-stream'}}));
+      written.push(key);
+      record.files.push({index:i,name:row.name,size:row.file.size});
+      loaded+=row.file.size;
+      try{onProgress?.({loaded,total,file:row.name,index:i+1,count:rows.length})}catch{}
+    }
+    await blobsFor(record);
+    const index=importIndex();
+    index[importId]=record;
+    localStorage.setItem(IMPORT_INDEX_KEY,JSON.stringify(index));
+    notify('imported',{model:record.model,loaded:total,total,count:rows.length});
+    return record;
+  }catch(error){
+    for(const key of written)try{await cache.delete(key)}catch{}
+    notify('import-failed',{model:record.model,reason:String(error?.message||error).slice(0,240)});
+    throw error;
+  }
+}
+export async function activateImported(importId){
+  const record=importIndex()[String(importId||'')];
+  if(!record||record.schema!=='civweave.gguf.import.v1')
+    throw err('GGUF_IMPORT_NOT_FOUND','The selected imported GGUF is not in Civweave browser storage.');
+  await blobsFor(record);
+  const selected={schema:'civweave.mobile.gguf-browser.v2',enabled:true,engine:'wllama',
+    source:'file',importId:record.importId,model:record.model,label:record.label,
+    url:'civweave-gguf-import:'+record.importId,bytes:record.bytes,selectedAt:new Date().toISOString()};
+  localStorage.setItem(GGUF_SELECTION_KEY,JSON.stringify(selected));
+  notify('selected',{model:selected.model,source:'file',bytes:selected.bytes});
+  return selected;
+}
+
 export async function activate({url,id,label}){
   const key=validateURL(url);
   const fileName=decodeURIComponent(new URL(key).pathname.split('/').pop()||'');
@@ -64,8 +171,10 @@ export async function activate({url,id,label}){
   return selected;
 }
 async function start(selected){
-  const file=await installed(selected.url);
-  if(!file)throw err('GGUF_CACHE_MISSING','The selected GGUF is not completely cached. Return to Settings to download it again.');
+  const source=selected.source==='file'
+    ?(await (async()=>{const record=importIndex()[selected.importId];if(!record||record.model!==selected.model)throw err('GGUF_IMPORT_NOT_FOUND','The selected imported GGUF is missing.');return blobsFor(record)})())
+    :await installed(selected.url);
+  if(!source)throw err('GGUF_CACHE_MISSING','The selected GGUF is not completely cached. Return to Settings to download it again.');
   if(instance?.isModelLoaded?.()&&loadedUrl===selected.url)return instance;
   if(loading)return loading;
   loading=(async()=>{
@@ -73,7 +182,7 @@ async function start(selected){
     if(api.isModelLoaded?.()){await api.exit();instance=null;loadedUrl=''}
     const create=async gpuLayers=>{
       const current=await engine();
-      await current.loadModel(file,{n_ctx:6144,n_threads:1,n_batch:128,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
+      await current.loadModel(source,{n_ctx:6144,n_threads:1,n_batch:128,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
       loadedUrl=selected.url;
       return current;
     };

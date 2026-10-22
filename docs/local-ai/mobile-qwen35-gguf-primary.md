@@ -2,6 +2,15 @@
 
 **No server is required.** Civweave stages Wllama 3.8.1 locally at `/app/vendor/wllama/esm/`. Wllama uses WebAssembly and experimental WebGPU in a browser worker, loads GGUF files from its device cache, and streams output through Civweave's existing shared AI runtime.
 
+## Import the GGUF already on your phone (no second download)
+
+In **Settings → AI & safety → On-device GGUF**, use **Choose existing GGUF file or shards**, then **Import selected GGUF files and use as primary**.
+
+- Files come from Android's file picker (for example **Downloads**). If the original model is in another app's private cache, export or copy its actual `.gguf` file to a folder the picker can access first.
+- Civweave copies the original GGUF bytes into browser-managed cache storage, checks GGUF headers and each saved shard's expected size, and selects it as the shared primary model without quantization changes. This uses additional device storage; it does not move or delete your downloaded original.
+- Wllama cannot open a **single unsplit GGUF larger than 2 GB**. If your already-downloaded Qwen 3.5 4B Q4 file exceeds that limit, use `llama-gguf-split` (from llama.cpp) to create proper GGUF-format shards, then select **all** shards together in the Android file picker. Merely splitting raw bytes is not sufficient. The import rejects oversized unsplit files explicitly instead of silently swapping to an IQ2 model.
+- The original GGUF architecture and GPU-backend support still have to be tested in Civweave's bundled Wllama engine. Successful native llama.cpp benchmark results do not automatically prove browser inference will work on that device.
+
 ## In-platform workflow
 
 1. Open staging Civweave → Settings → AI & safety → **On-device GGUF · phone primary**.
