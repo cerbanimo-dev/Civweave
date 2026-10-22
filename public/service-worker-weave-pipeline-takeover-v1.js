@@ -1,15 +1,23 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r44';
+const REVISION='weave-pipeline-takeover-v1-r45';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v483-qwen4-import-owner';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r44';
+const CACHE='cwrecovery-v484-chat-responsiveness';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r45';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
   '/app/working-campus-v440.html',
   '/app/shared-guide-surface-v236.js',
   '/app/human-message-bubble-v1.js',
+  '/app/human-chat-ble-controls-v1.js',
+  '/app/minilm-response-router-v347.js',
+  '/app/minilm-decision-strip-v1.js',
+  '/app/experience-orchestrator-v232.js',
+  '/app/emergency-ai-host-control-v1.mjs',
+  '/app/cabinets/living-school/index.html',
+  '/app/cabinets/living-school/',
+  '/app/local-provider-authority-v1.js',
   '/app/guide-chat-surface-v350.js',
   '/app/guide-generation-tracker-v1.js',
   '/app/generation-lifecycle-v1.js',
@@ -70,7 +78,7 @@ const RELOAD_PATHS=new Set([
 ]);
 function markerRequest(){return new Request(new URL(MARKER,self.location.origin).href)}
 async function pending(){if(self.location.hostname!==STAGING_HOST)return false;try{return !(await (await caches.open(CACHE)).match(markerRequest()))}catch{return true}}
-async function purge(){for(const name of await caches.keys()){if(name.startsWith('cw-guild-release-v1-'))continue;const cache=await caches.open(name);for(const request of await cache.keys()){let pathname='';try{pathname=new URL(request.url).pathname}catch{}if(PURGE_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true})}}}
+async function purge(){for(const name of await caches.keys()){if(name.startsWith('cw-guild-release-v1-')||name===self.CivweaveFiveSystemPagesV1?.cache)continue;const cache=await caches.open(name);for(const request of await cache.keys()){let pathname='';try{pathname=new URL(request.url).pathname}catch{}if(PURGE_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true})}}}
 async function reloadControlledClients(){const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});for(const client of clients){try{const url=new URL(client.url);if(url.origin!==self.location.origin||!RELOAD_PATHS.has(url.pathname))continue;await client.navigate(client.url)}catch{}}}
 if(self.location.hostname===STAGING_HOST){
   self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await pending())await self.skipWaiting()})())});

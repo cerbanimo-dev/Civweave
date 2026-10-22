@@ -17,7 +17,7 @@ function ensureRouter(){
       existing.addEventListener('error',()=>reject(new Error('Could not load the response-tier catalogue.')),{once:true});
       return;
     }
-    const script=document.createElement('script');script.src='/app/minilm-response-router-v347.js?v=1.0.0';script.async=true;script.dataset.cwEmergencyAiTierCatalog='v1';
+    const script=document.createElement('script');script.src='/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification';script.async=true;script.dataset.cwEmergencyAiTierCatalog='v1';
     script.onload=()=>resolve(globalThis.CivweaveResponseRouterV347||null);script.onerror=()=>reject(new Error('Could not load the response-tier catalogue.'));document.head.append(script);
   }).finally(()=>{if(!globalThis.CivweaveResponseRouterV347)routerPromise=null});
   return routerPromise;

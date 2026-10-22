@@ -27,6 +27,7 @@ on:
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
       - 'scripts/verify-minilm-response-router-v347.mjs'
+      - 'scripts/test-minilm-routing-deadline-v1.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   push:
     branches: ['**']
@@ -55,6 +56,7 @@ on:
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-human-message-bubble-v1.mjs'
       - 'scripts/verify-minilm-response-router-v347.mjs'
+      - 'scripts/test-minilm-routing-deadline-v1.mjs'
       - '.github/workflows/verify-unified-chat-system.yml'
   workflow_dispatch:
 
@@ -97,6 +99,9 @@ jobs:
           node --check scripts/verify-chat-launch-readiness-v295.mjs
           node --check scripts/verify-human-message-bubble-v1.mjs
           node --check scripts/verify-minilm-response-router-v347.mjs
+
+      - name: Verify bounded MiniLM routing
+        run: node --test scripts/test-minilm-routing-deadline-v1.mjs
 
       - name: Enforce one-core five-guide avatar contract
         shell: bash
