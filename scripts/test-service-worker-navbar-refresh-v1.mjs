@@ -10,7 +10,7 @@ const [rootWorker,wrapper,navbarWorker]=await Promise.all([
   read('public/service-worker-canonical-navbar-v1.js')
 ]);
 
-const ROOT_REV='root-worker-bridge-v22-canonical-navbar-refresh';
+const ROOT_REV='root-worker-bridge-v34-guild-origin-fallback-preservation';
 const NAV_REV='canonical-navbar-cache-first-v11-current-rail';
 const NAV_CACHE='cw-nav-canonical-v11-current-rail';
 
