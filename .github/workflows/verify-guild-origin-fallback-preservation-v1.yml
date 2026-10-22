@@ -7,6 +7,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'public/service-worker.js'
       - 'scripts/verify-guild-origin-fallback-preservation-v1.mjs'
+      - 'scripts/verify-guild-navigation-resource-fetch-v1.mjs'
       - 'scripts/test-mobile-guild-auto-update-v1.mjs'
       - '.github/workflows/verify-guild-origin-fallback-preservation-v1.yml'
   pull_request:
@@ -16,6 +17,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'public/service-worker.js'
       - 'scripts/verify-guild-origin-fallback-preservation-v1.mjs'
+      - 'scripts/verify-guild-navigation-resource-fetch-v1.mjs'
       - 'scripts/test-mobile-guild-auto-update-v1.mjs'
       - '.github/workflows/verify-guild-origin-fallback-preservation-v1.yml'
 jobs:
@@ -28,6 +30,8 @@ jobs:
           node-version: '22'
       - name: Verify offline legacy Guild origin fallback and signed-release isolation
         run: node scripts/verify-guild-origin-fallback-preservation-v1.mjs
+      - name: Verify browser navigation, cache quota fallback and signed release isolation
+        run: node scripts/verify-guild-navigation-resource-fetch-v1.mjs
       - name: Verify mobile Guild trust and auto-update contracts
         run: node scripts/test-mobile-guild-auto-update-v1.mjs
       - name: Parse service workers
