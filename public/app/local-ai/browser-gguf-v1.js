@@ -111,7 +111,23 @@ async function blobsFor(record){
 }
 export async function importFiles(input,{onProgress}={}){
   if(downloading)throw err('GGUF_DOWNLOAD_BUSY','Wait for the active GGUF transfer to finish.');
-  const rows=orderedFiles(input),model=modelFromFile(rows[0].name);
+  let incoming=Array.from(input||[]);
+  // The original Q4 model can be larger than Wllama's per-file ArrayBuffer
+  // limit. Convert it in-browser into standard GGUF tensor-aligned shards.
+  // Blob.slice keeps the original quantized tensor bytes unchanged.
+  if(incoming.length===1&&incoming[0]?.size>MAX_GGUF_SHARD_BYTES){
+    const original=incoming[0],family=modelFromFile(importName(original.name));
+    const splitter=await import('/app/local-ai/gguf-split-browser-v1.js?v=gguf-split-v1');
+    notify('auto-shard-plan',{model:family.id,bytes:original.size});
+    const plan=await splitter.planGGUFSplit(original,{maxShardBytes:480_000_000});
+    incoming=plan.groups.map((group,index)=>{
+      const blob=splitter.shardFromPlan(plan,index);
+      return new File([blob],splitter.splitName(original.name,index,plan.groups.length),{type:'application/octet-stream'});
+    });
+    notify('auto-shard-ready',{model:family.id,shards:incoming.length,bytes:original.size});
+    try{onProgress?.({loaded:0,total:original.size,file:'Prepared '+incoming.length+' lossless GGUF shards',index:0,count:incoming.length})}catch{}
+  }
+  const rows=orderedFiles(incoming),model=modelFromFile(rows[0].name);
   if(rows.some(row=>modelFromFile(row.name).family!==model.family))
     throw err('GGUF_SHARDS_MISMATCH','All selected GGUF shards must refer to the same Qwen model.');
   for(const row of rows){

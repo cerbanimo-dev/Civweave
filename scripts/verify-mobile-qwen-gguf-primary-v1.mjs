@@ -14,6 +14,13 @@ const [settings,runtime,gguf,build,stage,localCards]=await Promise.all([
 ]);
 new vm.Script(settings,{filename:'settings-gateway-v317.js'});
 new vm.Script(runtime,{filename:'civweave-model-runtime.js'});
+execFileSync(process.execPath,['--check','public/app/local-ai/gguf-split-browser-v1.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['scripts/test-gguf-browser-split-v1.mjs'],{stdio:'inherit'});
+assert.match(settings,/split oversized GGUF files into tensor-aligned shards automatically/);
+assert.match(gguf,/planGGUFSplit\(original/);
+assert.match(gguf,/shardFromPlan\(plan,index\)/);
+assert.match(gguf,/new File\(\[blob\],splitter\.splitName/);
+
 for(const source of ['public/app/local-ai/browser-gguf-v1.js','scripts/stage-wllama-browser-v1.mjs'])
   execFileSync(process.execPath,['--check',source]);
 
