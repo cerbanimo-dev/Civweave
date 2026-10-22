@@ -18,7 +18,7 @@ async function stage(){
     throw new Error('Pinned wllama package does not include expected browser JS/WASM assets.');
   await fs.rm(target,{recursive:true,force:true});
   await fs.mkdir(target,{recursive:true});
-  await fs.cp(src,target,{recursive:true,filter:from=>!/\\.(?:map|d\\.ts)$/.test(from)});
+  await fs.cp(src,target,{recursive:true,filter:from=>!from.endsWith('.map')&&!from.endsWith('.d.ts')});
   const wasm=await fs.stat(path.join(target,'wasm','wllama.wasm'));
   if(wasm.size<500_000||wasm.size>24*1024*1024)throw new Error('Wllama WASM size violates Cloudflare Pages staging limits: '+wasm.size);
   await fs.writeFile(path.join(target,'civweave-stage.json'),JSON.stringify({schema:'civweave.gguf-browser-stage.v1',package:PACKAGE,entry:'/app/vendor/wllama/esm/index.js',wasm:'/app/vendor/wllama/esm/wasm/wllama.wasm',wasmBytes:wasm.size},null,2)+'\n');
