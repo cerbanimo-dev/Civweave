@@ -4,6 +4,8 @@ import {readFileSync} from 'node:fs';
 
 const html=readFileSync('public/guild-release-recovery.html','utf8');
 const oldWorker=readFileSync('public/service-worker-release-generation-v1.js','utf8');
+const requiredRevision=oldWorker.match(/const REVISION='([^']+)'/)?.[1];
+assert.ok(requiredRevision,'canonical release worker revision must remain declared');
 const core=readFileSync('public/service-worker-core-v208.js','utf8');
 assert.match(html,/<title>Civweave · Safe Guild Release Recovery<\/title>/);
 assert.match(html,/<button[^>]+id="repair"/,'repair requires explicit click');
@@ -58,7 +60,7 @@ function setup({versionReady=true,campusHealthy=true}={}){
           :new Response('The selected Guild does not yet have a compatible signed Civweave release.',{status:503,headers:{'content-type':'text/plain'}});
       }
       return new Response(versionReady
-        ? "importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v8-navigation-resource-fetch');"
+        ? `importScripts('/service-worker-release-generation-v1.js?v=${requiredRevision}');`
         : "importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v6-current-realm-navigation');",
       {status:200,headers:{'content-type':'application/javascript'}});
     },

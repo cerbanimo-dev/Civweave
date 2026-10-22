@@ -12,7 +12,7 @@
 // shell-assets-v27: persistent shell, event-bounded generation lifecycle, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
 'use strict';
 // The canonical installed PWA registers this worker directly, so current-generation AI route takeovers must be imported here rather than only from the root compatibility worker.
-importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r45');
+importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r46');
 const V203_REGISTERED_SETTINGS_GENERATION='v339-settings-saved-state-first-worker-boundary';
 // The saved-state-first Settings bootstrap must run before the historical v325 override so the Local Models tab can render without waiting for lifecycle/runtime code.
 importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved-state-first-registered-worker-v1');
@@ -20,7 +20,7 @@ importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved
 importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
 // Staging takeover for the current Gemma phone stack. It runs before historical local-AI coherence so retired Q4 presentation scripts cannot reclaim Settings after a successful LiteRT import.
 importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v5-qwen-internal');
-importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v8-navigation-resource-fetch');
+importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v9-navigation-response-stream');
 importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');

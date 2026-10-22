@@ -7,7 +7,7 @@ const source=readFileSync(new URL('../public/service-worker-weave-pipeline-takeo
 const origin='https://civweave-staging.pages.dev';
 
 test('generation activation purges stale origin executables while preserving signed Guild packages and user data',async()=>{
-  const changed=['/app/persistent-system-shell-v1.html','/app/local-ai/litert-gemma4-fast-runtime-v1.js','/app/human-message-bubble-v1.js','/app/human-chat-ble-controls-v1.js','/app/minilm-response-router-v347.js'];
+  const changed=['/app/persistent-system-shell-v1.html','/app/local-ai/litert-gemma4-fast-runtime-v1.js','/app/human-message-bubble-v1.js','/app/human-chat-ble-controls-v1.js','/app/minilm-response-router-v347.js','/app/minilm-decision-strip-v1.js','/app/shared-chat-face-icons-v255.js','/app/themed-system-nav-v178.js','/app/persistent-shell-actions-v1.js','/app/host-node-session-v1.js','/app/guild-chat-usage-v1.js'];
   const data=['/app/local-ai/user-model.litertlm','/proofs/saved-image.bin'];
   const listeners={},deleted=[],stores=new Map();
   function cache(name,paths=[]){

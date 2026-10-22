@@ -47,6 +47,10 @@ const [routesSource,boundarySource,navSource,familyShell,workerWrapper,workerNav
 const campusParts=(await Promise.all(campusPartPaths.map(read))).join('');
 const campusRuntime=await read('public/app/working-campus-v156.js');
 const campusPage=pages[0];
+const [shellDock,utilitySource]=await Promise.all([
+  read('public/app/persistent-system-shell-v1.html'),
+  read('public/app/persistent-shell-actions-v1.js')
+]);
 
 for(const source of [routesSource,boundarySource,navSource,familyShell,workerNavigation,canonicalNavbarWorker,sharedGuide,campusRuntime,campusParts])new Function(source);
 
@@ -63,15 +67,19 @@ assert.match(familyShell,/familyNavigationOwner:'themed-system-nav-v178'/,'Famil
 assert.match(familyShell,/familyNavigationOwnership:false/,'Family shell must explicitly disclaim navigation ownership.');
 assert.doesNotMatch(familyShell,/cwf104-tray|data-cwf-system|cwf104-system/,'Family shell regained retired five-system navigation DOM.');
 
-assert.ok(navSource.includes(`const VERSION='${version}-five-system-navigation-v232-canonical-rail';`),'The current rail must stay on the canonical tall geometry revision.');
-assert.ok(navSource.includes(':root{--cw-themed-nav-height:clamp(92px,10vw,100px);--cw-themed-nav-bottom-gap:0px}'),'Desktop tall rail geometry must live in the canonical nav owner.');
-assert.ok(navSource.includes('width:84px;height:84px;border-radius:20px'),'Desktop avatar geometry must stay canonical.');
-assert.ok(navSource.includes('@media(max-width:680px){:root{--cw-themed-nav-height:clamp(88px,22vw,96px);--cw-themed-nav-bottom-gap:0px}'),'Phone tall rail geometry must stay canonical.');
-assert.ok(navSource.includes('width:76px;height:76px'),'Phone avatar geometry must stay canonical.');
-assert.ok(navSource.includes('@media(max-width:430px){:root{--cw-themed-nav-height:clamp(80px,22vw,88px);--cw-themed-nav-bottom-gap:0px}'),'Narrow-phone tall rail geometry must stay canonical.');
-assert.ok(navSource.includes('width:68px;height:68px'),'Narrow-phone avatar geometry must stay canonical.');
-assert.ok(navSource.includes("geometryOwner:'canonical-tall-v1'"),'The rail API must declare the sole geometry owner.');
-for(const retired of ['clamp(56px,7vw,68px)','clamp(58px,14vw,64px)','clamp(52px,7vw,72px)','clamp(50px,14vw,66px)','width:40px;height:40px;border-radius:12px','width:36px;height:36px','width:33px;height:33px'])assert.ok(!navSource.includes(retired),`Retired compact navbar geometry returned: ${retired}`);
+assert.match(navSource,/\.cw-nav-utilities\{[^}]*grid-column:1\/-1[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/,'Utilities must share one in-flow row inside the reserved dock.');
+assert.match(navSource,/utilities\.append\(tools\)/,'Tools must mount in the shared utility row.');
+assert.match(utilitySource,/utilities\.prepend\(actions\)/,'Guilds, Map and Survival must mount in the same utility row.');
+assert.doesNotMatch(navSource,/\.cw-nav-tools\{[^}]*position:absolute|bottom:calc\(100% \+ 64px\)/,'Tools must not float over realm content.');
+assert.doesNotMatch(utilitySource,/bottom:calc\(100% \+|padding-bottom:calc\(var\(--cw-themed-nav-height\)/,'Utility chrome must not add unreserved space above the dock.');
+assert.doesNotMatch(navSource,/\.cw-themed-system-copy\{[^}]*(?:clip:|width:1px|display:none)/,'System names must be readable rather than visually hidden.');
+assert.match(navSource,/\.cw-themed-system-copy small\{[^}]*white-space:normal/,'Long realm names must wrap on narrow devices.');
+assert.match(navSource,/@media\(max-width:680px\)[\s\S]*?flex-direction:column/,'Phone navigation must retain clear compact avatar and label targets.');
+assert.match(shellDock,/--cw-persistent-nav-space:calc\(var\(--cw-themed-nav-height,[^)]*\) \+ env\(safe-area-inset-bottom\)\)/,'The content frame must reserve the entire dock plus its safe area.');
+assert.ok(navSource.includes(`const VERSION='${version}-five-system-navigation-v233-responsive-dock';`),'The current rail must advertise its responsive dock revision.');
+assert.ok(navSource.includes("geometryOwner:'responsive-dock-v2'"),'The rail must remain the sole responsive geometry owner.');
+const decodedPlatformCss=platformCss.replace(/\\([0-9a-f]{1,6})\s?/gi,(_,hex)=>String.fromCodePoint(parseInt(hex,16)));
+assert.doesNotMatch(decodedPlatformCss,/#cw-themed-system-nav[^{}]*\{[^}]*(?:\bwidth:|\bheight:|\binset:|\bpadding:|\boverflow:|\bclip-path:|\bborder-radius:)/,'Escaped platform selectors must not override the canonical dock or avatar geometry.');
 assert.doesNotMatch(platformCss,/--cw-themed-nav-height\s*:|#cw-themed-system-nav\s*\{[^}]*(?:height|grid-template-columns)\s*:/,'Platform CSS must not override rail height or layout; avatar visual treatments may be themed.');
 assert.ok(sharedGuide.includes("navigationGeometryOwner:false"),'Shared guide surface must explicitly disclaim navbar geometry ownership.');
 assert.ok(sharedGuide.includes('--cw-guide-nav-offset'),'Shared guide floating controls must measure the rail through a separate offset variable.');
@@ -213,7 +221,7 @@ assert.equal(navNetworkCalls,beforeOffline,'An existing current-generation rail 
 console.log(JSON.stringify({
   ok:true,
   version,
-  revision:'five-guide-rail-current-quest-settings-v232-scorched-earth',
+  revision:'five-guide-responsive-dock-v233',
   systems:Object.keys(paths),
   guides:['Weaveling','Moss','Kamiya','Rook','Merlin'],
   routeMatrix:25,
@@ -229,7 +237,8 @@ console.log(JSON.stringify({
   geometryOwner:'themed-system-nav-v178',
   platformGeometryOwner:false,
   sharedGuideGeometryOwner:false,
-  retiredCompactGeometryPurged:true,
+  readableSystemLabels:true,
+  utilitiesInsideReservedDock:true,
   staleGeometryCachePolicy:'current-generation-cache-only-with-install-refresh',
   competingPersistentNavigationSuppressed:true,
   workingCampusRealmSwitcherSuppressed:true,

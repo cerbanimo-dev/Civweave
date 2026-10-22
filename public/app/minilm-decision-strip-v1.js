@@ -76,7 +76,7 @@ function sharedUsageSnapshot(){
   }catch{}
   return null;
 }
-function exactPathScript(src){const path=new URL(src,location.href).pathname;return[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}})||null}
+function exactPathScript(src){const path=new URL(src,location.href).pathname,matching=[...document.scripts].filter(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}});return matching.find(script=>script.dataset.civweaveBalanceRepair==='true')||matching[0]||null}
 function ensureBalanceRuntime(){
   const hostVersion=String(globalThis.CivweaveHostNodeSessionV1?.version||'');
   if(!hostVersion.startsWith('1.0.137-')){
