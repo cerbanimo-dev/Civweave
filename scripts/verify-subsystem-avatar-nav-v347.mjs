@@ -61,6 +61,19 @@ assert.doesNotMatch(sharedGuide,/--cw-themed-nav-height\s*:/,'Shared guide surfa
 assert.doesNotMatch(sharedGuide,/#cw-themed-system-nav \.cw-themed-system-link\{height:/,'Shared guide surface must never impose navbar link height.');
 
 assert.match(nav,/background-size:500% 400%,cover|background-size:500% 400%/,'Nav must crop the 5x4 avatar atlases.');
+  
+// Artwork must cover every system tile at desktop and phone sizes; expression sprites
+// stay prominent and must never be forcibly hidden by the portrait recovery helper.
+for(const portrait of ['weaveling','moss','kamiya','rook','merlin'])assert.ok(nav.includes(`/app/assets/ai/${portrait}.png`),`Missing full-card ${portrait} portrait`);
+assert.match(nav,/--system-art:url\('/,'Each navigation card must receive its own art background.');
+assert.match(nav,/\.cw-themed-system-link::before\{[^}]*background-image:[^}]*var\(--system-art\)[^}]*background-size:cover/,'Portrait art must span the entire tile, not only the sprite frame.');
+assert.match(nav,/\.cw-themed-system-avatar-wrap\{[^}]*width:60px;height:60px/,'Desktop navigation must display large sprites.');
+assert.match(nav,/@media\(max-width:680px\)[^\n]*width:52px;height:52px/,'Phone navigation must retain prominent sprites.');
+assert.ok(nav.includes("artRevision='full-tile-portraits-all-breakpoints-v1'"),'Dock must advertise the shared all-breakpoint art treatment.');
+const navMedia=await read('public/app/universal-nav-media-stability-v1.js');
+assert.doesNotMatch(navMedia,/sprite\.style\.setProperty\('display','none'/,'Media recovery must not suppress animated system sprites.');
+assert.match(navMedia,/sprite\.style\.removeProperty\('display'\)/,'Media recovery must restore the animated sprite layer.');
+
 assert.match(nav,/civweave:subsystem-avatar-state/);
 assert.match(nav,/civweave:avatar-expression/);
 assert.match(nav,/subsystemActive\(system\)/,'Subsystem state must override chat mood while active.');
