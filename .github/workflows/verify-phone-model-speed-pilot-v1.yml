@@ -11,6 +11,7 @@ on:
       - 'public/app/settings-local-route-v327.js'
       - 'public/app/settings-local-models-direct-v325.js'
       - 'scripts/verify-settings-qwen4-active-renderer-v1.mjs'
+      - 'scripts/verify-qwen4-import-owner-and-resume-v1.mjs'
       - 'public/app/local-ai/runtime-v266.js'
       - 'public/app/local-chat-runtime-v295.js'
       - 'public/app/persistent-system-shell-v1.html'
@@ -28,6 +29,7 @@ on:
       - 'public/app/settings-local-route-v327.js'
       - 'public/app/settings-local-models-direct-v325.js'
       - 'scripts/verify-settings-qwen4-active-renderer-v1.mjs'
+      - 'scripts/verify-qwen4-import-owner-and-resume-v1.mjs'
       - 'public/app/local-ai/runtime-v266.js'
       - 'public/app/local-chat-runtime-v295.js'
       - 'public/app/persistent-system-shell-v1.html'
@@ -46,6 +48,8 @@ jobs:
         run: node scripts/verify-phone-model-speed-pilot-v1.mjs
       - name: Verify active Settings renderer shows standalone phone model
         run: node scripts/verify-settings-qwen4-active-renderer-v1.mjs
+      - name: Qwen file picker ownership and resumable chunk storage
+        run: node scripts/verify-qwen4-import-owner-and-resume-v1.mjs
       - name: Parse production scripts
         run: |
           node --check public/app/local-ai/local-generation-model-policy-v1.js

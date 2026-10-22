@@ -153,7 +153,7 @@ assert.match(directSource,/<details open><summary><b>Individual Civweave models/
 assert.match(directSource,/await m.start\(id,\{preferBackground:false,onProgress:/,'individual models must use observable foreground downloads and progressive bytes');
 assert.match(directSource,/llama32-two-pass-test-v4.html/,'current Settings lacks trial link');
 const bridge=await readFile(new URL('../public/app/settings-local-route-v325.js',import.meta.url),'utf8');
-assert.match(bridge,/DIRECT_VERSION='1\.2\.2-settings-v325-direct-local-models-qwen-phone-fast'/);
+assert.match(bridge,/DIRECT_VERSION='1\.2\.3-settings-v325-direct-local-models-qwen-import-owner'/);
 console.log('PASS: old v324 fallback and current v325 settings expose Llama 3.2 with downloads and constrained JSON trial.');
 
 for(const file of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){

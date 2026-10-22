@@ -3,8 +3,8 @@
 const VERSION='1.2.0-settings-local-loader-v337-stage-full-route';
 const LAYER_ID='cw-settings-v320';
 const STAGE_ID='cw-persistent-system-stage';
-const ROUTE_VERSION='1.1.5-settings-local-route-v327-qwen-phone-fast';
-const ROUTE_SRC='/app/settings-local-route-v331.js?cwAction=1&v=1.2.2-qwen-phone-settings';
+const ROUTE_VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
+const ROUTE_SRC='/app/settings-local-route-v331.js?cwAction=1&v=1.2.3-qwen-import-owner';
 const realmPromises=new WeakMap();
 const attachedDocuments=new WeakSet();
 const attachedFrames=new WeakSet();
