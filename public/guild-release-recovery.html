@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131e">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>Civweave · Safe Guild Release Recovery</title>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui,sans-serif;color:#e8f5fc;background:#07131e}
+*{box-sizing:border-box}body{margin:0;padding:36px 18px;min-height:100vh;display:grid;place-items:center}
+main{width:min(100%,620px);padding:clamp(20px,5vw,35px);border:1px solid #7abedb55;border-radius:22px;background:#0d2230}
+h1{font-size:1.55rem;line-height:1.2;margin:.3em 0 .8em}p{color:#cadbe5}small{color:#82dce9;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
+button,a.action{display:block;width:100%;min-height:48px;padding:12px 15px;border-radius:12px;border:1px solid #8acee466;color:#e9fbff;background:#17394a;font:inherit;font-weight:750;text-align:center;cursor:pointer;margin-top:12px;text-decoration:none}
+button.primary{background:#98e2e6;color:#081b27;border:0}
+button:disabled{opacity:.6;cursor:wait}pre{white-space:pre-wrap;overflow-wrap:anywhere;min-height:70px;padding:13px;background:#06121b;border:1px solid #416476;border-radius:10px;font:13px/1.5 ui-monospace,monospace}
+ul{padding-left:22px;color:#c7dbe6}li{margin:.4em 0}
+</style>
+</head>
+<body>
+<main>
+<small>Civweave · Staging · recovery</small>
+<h1>Repair a Guild release that blocks Civweave</h1>
+<p>This page is deliberately outside Civweave's protected <code>/app/</code> runtime routes. It can load from the staging origin even when an older service worker returns the “selected Guild has no compatible signed release” error for the application.</p>
+<p><strong>No downloaded AI models, offline campus files, Guild keys, or saved data will be deleted.</strong> Repair changes only the <em>root service-worker registration</em>. Signed Guild release verification remains enforced.</p>
+<button type="button" id="inspect">Inspect installed service worker</button>
+<button type="button" id="repair" class="primary">Repair Civweave worker (keep data)</button>
+<a class="action" id="open" href="/app/installed-entry-v146.html?installed=1&amp;system=civweave&amp;source=guild-release-safe-recovery" hidden>Open Civweave after repair</a>
+<pre id="output" role="status" aria-live="polite">No repair attempted. Online access to this staging origin is required.</pre>
+<p><strong>This procedure does not:</strong> clear browsing data, unregister the PWA, wipe Cache Storage, reset IndexedDB, remove Guild trust anchors, or download model files.</p>
+</main>
+<script>
+(()=>{
+'use strict';
+const STAGING_HOST='civweave-staging.pages.dev';
+const REQUIRED_REVISION='release-generation-boundary-v7-origin-fallback-preservation';
+const ROOT_WORKER='/service-worker-v203.js';
+const DISPLAY_ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave&source=guild-release-safe-recovery';
+const $=id=>document.getElementById(id);
+const output=$('output'),repair=$('repair'),inspect=$('inspect'),open=$('open');
+const show=message=>{output.textContent=String(message)};
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const atStaging=()=>location.hostname===STAGING_HOST;
+const workerInfo=worker=>{
+  if(!worker)return 'none';
+  let url;try{url=new URL(worker.scriptURL)}catch{return 'unrecognized'}
+  return url.pathname+' · '+String(worker.state||'unknown');
+};
+async function currentRegistration(){
+  const registration=await navigator.serviceWorker.getRegistration('/');
+  if(!registration)return null;
+  const scope=new URL(registration.scope);
+  return scope.origin===location.origin&&scope.pathname==='/'?registration:null;
+}
+async function inspectOnly(){
+  if(!('serviceWorker'in navigator)){show('This browser does not support service workers.');return}
+  const registration=await currentRegistration();
+  const modelCacheNames='caches'in globalThis
+    ?(await caches.keys()).filter(n=>n.startsWith('civweave-model-'))
+    :[];
+  show('Root service worker: '+workerInfo(registration?.active)+'\nModel cache namespaces detected: '+modelCacheNames.length+
+    '\nNo files, model caches, or Guild data were read or changed.');
+}
+async function freshRootWorker(){
+  // The worker script is outside the old Guild-release interception boundary.
+  // Fetch before registration changes, so a missing deployment leaves the
+  // previously installed service worker completely untouched.
+  const request=new Request(ROOT_WORKER+'?safe_recovery='+Date.now(),{cache:'no-store',credentials:'same-origin'});
+  const response=await fetch(request);
+  if(!response.ok)throw Error('Staging worker file returned HTTP '+response.status+'. The deployment may still be unavailable.');
+  const text=await response.text();
+  if(!text.includes(REQUIRED_REVISION))throw Error('Staging worker does not include the required signed-Guild recovery revision. No registration changed.');
+  return true;
+}
+function promote(registration){
+  const wake=worker=>{if(!worker)return;try{worker.postMessage({type:'SKIP_WAITING'})}catch{}};
+  if(registration.waiting)wake(registration.waiting);
+  const pending=registration.installing;
+  if(pending){
+    if(pending.state==='installed')wake(pending);
+    else pending.addEventListener('statechange',()=>{if(pending.state==='installed')wake(pending)});
+  }
+}
+async function repairRoot(){
+  if(!atStaging())throw Error('This repair is restricted to the staging origin.');
+  if(!('serviceWorker'in navigator))throw Error('This browser does not support service workers.');
+  show('Checking current staging worker bytes from the network…');
+  await freshRootWorker();
+  // register() replaces the worker for this scope without unregister() and
+  // without erasing user caches. The old worker stays usable if install fails.
+  const url=ROOT_WORKER+'?v=1.0.163-guild-origin-rescue-'+Date.now();
+  show('Staging worker verified. Registering an updated root worker…');
+  const registration=await navigator.serviceWorker.register(url,{scope:'/',updateViaCache:'none'});
+  promote(registration);
+  const deadline=Date.now()+18000;
+  while(Date.now()<deadline){
+    promote(registration);
+    const active=registration.active;
+    if(active?.state==='activated'&&active.scriptURL.includes('guild-origin-rescue-')){
+      show('Updated Civweave root worker activated. All local data and model caches retained. You can now open Civweave.\nWorker: '+workerInfo(active));
+      open.href=DISPLAY_ENTRY;
+      open.hidden=false;
+      return true;
+    }
+    await sleep(250);
+  }
+  show('Updated worker registration submitted, but activation is still pending. Close other Civweave tabs, then select Inspect. No application data was removed.');
+  return false;
+}
+async function action(button,fn){
+  if(repair.disabled||inspect.disabled)return;
+  repair.disabled=true;inspect.disabled=true;
+  try{await fn()}catch(error){show('Repair did not complete: '+String(error?.message||error)+'\nNo model caches or Guild data were removed.')}
+  finally{repair.disabled=false;inspect.disabled=false}
+}
+inspect.addEventListener('click',()=>void action(inspect,inspectOnly));
+repair.addEventListener('click',()=>void action(repair,repairRoot));
+if(!atStaging()){repair.disabled=true;show('This is not the Civweave staging origin. No repair action is available.')}
+globalThis.CivweaveSafeGuildReleaseRecovery=Object.freeze({revision:'safe-guild-release-recovery-v1',origin:STAGING_HOST,modelCachesPreserved:true,autoRepair:false});
+})();
+</script>
+</body>
+</html>
