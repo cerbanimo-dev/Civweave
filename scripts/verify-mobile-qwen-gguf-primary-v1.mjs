@@ -16,6 +16,17 @@ new vm.Script(settings,{filename:'settings-gateway-v317.js'});
 new vm.Script(runtime,{filename:'civweave-model-runtime.js'});
 execFileSync(process.execPath,['--check','public/app/local-ai/gguf-split-browser-v1.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-gguf-browser-split-v1.mjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check','public/app/local-ai/browser-gguf-opfs-v1.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['scripts/test-gguf-opfs-import-v1.mjs'],{stdio:'inherit'});
+assert.match(settings,/data-embedded-gguf-cancel-import/);
+assert.match(settings,/ggufImportAbort\.signal/);
+assert.match(settings,/Saving shard/);
+assert.match(gguf,/writeGGUFShard\(dir,importId,i,row\.file/);
+assert.match(gguf,/readGGUFShards\(record\)/);
+const importStart=gguf.indexOf('export async function importFiles('),importEnd=gguf.indexOf('export async function activateImported(',importStart);
+assert.ok(importStart>=0&&importEnd>importStart);
+assert.doesNotMatch(gguf.slice(importStart,importEnd),/cache\.put\(/,'GGUF import must not stall on a multi-gigabyte Cache.put.');
+
 assert.match(settings,/split oversized GGUF files into tensor-aligned shards automatically/);
 assert.match(gguf,/planGGUFSplit\(original/);
 assert.match(gguf,/shardFromPlan\(plan,index\)/);
