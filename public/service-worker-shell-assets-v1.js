@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required';
+const REVISION='shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required-fulltile-art-v1';
 const OPTIONAL=['/app/installer-repair-only-v2.js'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
@@ -17,6 +17,11 @@ const REQUIRED_NAV_MEDIA=[
   '/Cerbanimo-kamiya-sprites.png',
   '/FellowFare-rook-sprites.png',
   '/Anarchadia-merlin-sprites.png',
+  '/app/assets/ai/weaveling.png',
+  '/app/assets/ai/moss.png',
+  '/app/assets/ai/kamiya.png',
+  '/app/assets/ai/rook.png',
+  '/app/assets/ai/merlin.png',
   '/app/assets/ai/chat/weaveling-face-v255.webp',
   '/app/assets/ai/chat/moss-face-v255.webp',
   '/app/assets/ai/chat/kamiya-face-v255.webp',
