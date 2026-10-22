@@ -107,13 +107,13 @@ function stateFrom(form){
   const endpoint=String(byName(form,'endpoint').value||'').trim()||(route==='gemini'?GEMINI_ENDPOINT:route==='ollama'?'http://127.0.0.1:11434/api/chat':'');
   return{route,provider:route,model,endpoint,consent:Boolean(byName(form,'consent').checked),apiKey:String(byName(form,'apiKey').value||'').trim()||existingKey(route),credentialMode:byName(form,'credentialMode').value==='device'?'device':'session',safeMode};
 }
-const GGUF_FAMILY=Object.freeze({primary:/qwen[\\s._-]*3[._-]?5[\\s._-]*4b(?![a-z0-9])/i,helper2b:/qwen[\\s._-]*3[._-]?5[\\s._-]*2b(?![a-z0-9])/i,helper08b:/qwen[\\s._-]*3[._-]?5[\\s._-]*0[._-]?8b(?![a-z0-9])/i});
+const GGUF_FAMILY=Object.freeze({primary:/qwen[\s._-]*3[._-]?5[\s._-]*4b(?![a-z0-9])/i,helper2b:/qwen[\s._-]*3[._-]?5[\s._-]*2b(?![a-z0-9])/i,helper08b:/qwen[\s._-]*3[._-]?5[\s._-]*0[._-]?8b(?![a-z0-9])/i});
 function checkedPhoneEndpoint(value){
   const raw=String(value||'').trim();
   let url;
   try{url=new URL(raw)}catch{throw Error('Enter a valid localhost GGUF server URL.')}
   if(url.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(url.hostname.toLowerCase())||url.username||url.password||url.search||url.hash)throw Error('Phone GGUF endpoints must use plain HTTP on this device (localhost or 127.0.0.1), with no credentials or query.');
-  const path=url.pathname.replace(/\\/+$/,'');
+  const path=url.pathname.replace(/\/+$/,'');
   if(path!==''&&path!=='/v1'&&path!=='/v1/chat/completions')throw Error('Use the server root, /v1, or /v1/chat/completions endpoint.');
   return url.origin+'/v1';
 }
