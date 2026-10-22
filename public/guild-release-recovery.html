@@ -65,7 +65,7 @@ async function freshRootWorker(){
   // The worker script is outside the old Guild-release interception boundary.
   // Fetch before registration changes, so a missing deployment leaves the
   // previously installed service worker completely untouched.
-  const request=new Request(ROOT_WORKER+'?safe_recovery='+Date.now(),{cache:'no-store',credentials:'same-origin'});
+  const request=new Request(new URL(ROOT_WORKER+'?safe_recovery='+Date.now(),location.origin),{cache:'no-store',credentials:'same-origin'});
   const response=await fetch(request);
   if(!response.ok)throw Error('Staging worker file returned HTTP '+response.status+'. The deployment may still be unavailable.');
   const text=await response.text();
