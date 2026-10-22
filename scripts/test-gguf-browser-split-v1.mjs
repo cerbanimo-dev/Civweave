@@ -46,4 +46,38 @@ for(let shardNo=0;shardNo<plan.groups.length;shardNo++){
     new Uint8Array(await file.slice(plan.dataStart+(shardNo*3+2)*individualBytes+(individualBytes-64),plan.dataStart+(shardNo*3+3)*individualBytes).arrayBuffer()));
 }
 await assert.rejects(planGGUFSplit(file,{maxShardBytes:10_000_000}),/unsafe GGUF shard size/);
+// Reproduce Qwen3.5 4B's Q6_K token embedding without allocating gigabytes:
+// 2560 * 248320 Q6_K elements = 521,472,000 bytes (210 bytes / 256 elements).
+// This metadata-only virtual file mimics an otherwise valid 2.7GB GGUF.
+// The former 480MB cap incorrectly rejected its token_embd.weight tensor.
+const qwenParts=[encoder.encode('GGUF'),u(3,4),u(3,8),u(1,8),
+  ...str('general.alignment'),u(4,4),u(32,4)];
+for(const [name,offset] of [
+  ['token_embd.weight',0],
+  ['blk.0.attn_qkv.weight',521_472_000],
+  ['blk.0.ffn_down.weight',1_600_000_000]
+]){
+  qwenParts.push(...str(name),u(2,4),u(2560,8),u(248320,8),u(14,4),u(offset,8));
+}
+const qwenHeaderSize=qwenParts.reduce((size,part)=>size+part.length,0);
+const qwenAlignedHeader=Math.ceil(qwenHeaderSize/32)*32;
+const qwenHeader=new Blob([...qwenParts,new Uint8Array(1_048_576-qwenHeaderSize)]);
+const sparseQwenFile={
+  size:qwenAlignedHeader+2_700_000_000,
+  slice(start,end){
+    if(start!==0||end>1_048_576)throw Error('Large Qwen regression reads only its header');
+    return qwenHeader.slice(start,end);
+  }
+};
+const qwenPlan=await planGGUFSplit(sparseQwenFile);
+assert.equal(qwenPlan.groups.length,2,'Realistic Qwen 4B embedding should fit in two <= 1.8GB shards.');
+assert.equal(qwenPlan.groups[0][0].name,'token_embd.weight');
+assert.equal(qwenPlan.groups[0][0].length,521_472_000);
+assert.equal(qwenPlan.groups[0].reduce((n,t)=>n+t.length,0),1_600_000_000);
+assert.ok(qwenPlan.groups.every(g=>g.reduce((n,t)=>n+t.length,0)<=1_800_000_000));
+await assert.rejects(
+  planGGUFSplit(sparseQwenFile,{maxShardBytes:480_000_000}),
+  /single tensor token_embd\.weight is 521\.5 MB; max safe shard payload is 480\.0 MB/
+);
+
 console.log('Lossless on-device GGUF splitter test passed: valid shard headers, split metadata, tensor boundaries and identical Q4 payload bytes.');
