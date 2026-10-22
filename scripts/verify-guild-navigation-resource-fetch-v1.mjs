@@ -8,7 +8,10 @@ const recovery=readFileSync('public/guild-release-recovery.html','utf8');
 const get=(start,end)=>{const i=source.indexOf(start),j=source.indexOf(end,i+start.length);assert.ok(i>=0&&j>i,'missing worker source '+start);return source.slice(i,j)};
 const body=get('async function network(request,pathname){','async function freshCached(pathname,method){');
 const gate=get('async function responseFor(request,pathname){','async function warmOne(cache,pathname){');
-const fetchListener=source.slice(source.lastIndexOf("self.addEventListener('fetch',event=>{"));
+const fetchStart=source.lastIndexOf("self.addEventListener('fetch',event=>{");
+const fetchEnd=source.indexOf('\n});',fetchStart);
+assert.ok(fetchStart>=0&&fetchEnd>fetchStart,'missing outer fetch listener');
+const fetchListener=source.slice(fetchStart,fetchEnd+4);
 assert.ok(fetchListener.includes('event.respondWith('),'real worker fetch handler must be used');
 function evaluate(js,vars={}){
   const env={console,URL,Response,Request,Headers,Promise,Date,Map,Set,...vars};
