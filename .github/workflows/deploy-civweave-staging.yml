@@ -282,6 +282,9 @@ jobs:
           process.exit(4);
           NODE
 
+      - name: Verify published embedded GGUF engine binaries
+        run: node scripts/verify-staging-gguf-runtime-served-v1.mjs
+
       - name: Verify published LiteRT WASM binaries and detect HTML fallbacks
         run: node scripts/verify-staging-litert-wasm-served-v1.mjs
 
