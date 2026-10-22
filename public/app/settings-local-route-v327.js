@@ -1,12 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.1.5-settings-local-route-v327-qwen-phone-fast';
+const VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
 const ROUTE='downloaded-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const HEALTH_KEY='civweave.local-ai.health.v286';
 const PERF_KEY='civweave.local-ai.performance.v1';
+const PHONE_IMPORT_KEY='civweave.qwen35-4b.import-progress.v1';
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
 const PANEL_ID='cw-local-ai-v324';
@@ -118,6 +119,9 @@ function snapshot(){
 
 function savedHealth(){try{return parse(localStorage.getItem(HEALTH_KEY),{})}catch{return{}}}
 function savedSpeed(){try{return parse(localStorage.getItem(PERF_KEY),{})}catch{return{}}}
+function savedPhoneImport(){try{return parse(localStorage.getItem(PHONE_IMPORT_KEY),{})}catch{return{}}}
+function recordPhoneImport(phase,message,chunk=0,chunks=0){try{localStorage.setItem(PHONE_IMPORT_KEY,JSON.stringify({phase,text:String(message).slice(0,400),chunk,chunks,at:Date.now()}))}catch{}}
+let phoneImportInFlight=false;
 function speedCopy(row){const samples=(Array.isArray(row?.samples)?row.samples:[]).slice(-5);if(!samples.length)return'Not measured in Civweave yet';const t=samples.filter(x=>Number.isFinite(x.tokensPerSecond)),f=samples.filter(x=>Number.isFinite(x.ttftMs));const mean=t.length?t.reduce((n,x)=>n+x.tokensPerSecond,0)/t.length:null;const first=f.length?f.reduce((n,x)=>n+x.ttftMs,0)/f.length:null;return [samples.length+' measured run(s)',mean===null?'':mean.toFixed(1)+(t.some(x=>x.approximate)?' approximate':'')+' tokens/s',first===null?'':'first token '+(first/1000).toFixed(1)+'s',row?.lastPlan?(row.lastPlan.validated?'Moss structure PASS':'Moss structure failed'):'plan not yet validated'].filter(Boolean).join(' · ')}
 function selectedLabel(){const current=selection();return current.active&&current.id?String(current.id):'No downloaded model selected'}
 
@@ -290,7 +294,7 @@ function renderLocalModels(layerOrForm=document.getElementById(SETTINGS_LAYER_ID
     target.append(panel);
   }
   const {all,selection:currentSelection,packs}=snapshot();
-  const health=savedHealth(),speed=savedSpeed();
+  const health=savedHealth(),speed=savedSpeed(),phoneImport=savedPhoneImport();
   const packCards=PACK_CATALOGUE.map(pack=>{
     const st=packs[pack.id]||{};
     const active=Boolean(currentSelection.active&&st.status==='ready'&&st.selectedModel===currentSelection.id);
@@ -302,7 +306,7 @@ function renderLocalModels(layerOrForm=document.getElementById(SETTINGS_LAYER_ID
     const available=st.status==='ready'||active;
     const h=health[model.id];
     const healthCopy=h?(h.ok?`Last health PASS${h.fallbackUsed?' via fallback':''} · TTFT ${((h.metrics?.ttftMs||0)/1000).toFixed(2)}s · ${Number(h.metrics?.tokensPerSecond||0).toFixed(2)} tok/s`:`Last health failed · ${esc(h.stage||'unknown stage')}`):'No measured run yet';
-    return`<div class="cw-local-row${active?' cw-local-active':''}" data-model-id="${esc(model.id)}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.repo)} · ${fmt(model.estimatedBytes)} · ${esc(model.license)}${active?' · ACTIVE':''}</p><p class="cw-local-meta">Model window <b>${Number(model.contextWindowTokens||0).toLocaleString()} tokens</b> · Civweave working default <b>${Number(model.workingContextTokens||0).toLocaleString()}</b></p><p class="cw-local-meta">${healthCopy}</p><p class="cw-local-meta"><strong>Actual local speed:</strong> ${esc(speedCopy(speed[model.id]))}</p>${model.id==='llama32-3b-instruct-q4f16'?'<p class="cw-local-meta"><strong>Android GPU blocked:</strong> pinned ONNX Asyncify loader repeatedly crashed. Cached weights are preserved; select another model.</p>':''}${statusMarkup(st,available)}</div><div class="cw-local-actions">${actions(model,st,available,active)}</div></div>`;
+    return`<div class="cw-local-row${active?' cw-local-active':''}" data-model-id="${esc(model.id)}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.repo)} · ${fmt(model.estimatedBytes)} · ${esc(model.license)}${active?' · ACTIVE':''}</p><p class="cw-local-meta">Model window <b>${Number(model.contextWindowTokens||0).toLocaleString()} tokens</b> · Civweave working default <b>${Number(model.workingContextTokens||0).toLocaleString()}</b></p><p class="cw-local-meta">${healthCopy}</p><p class="cw-local-meta"><strong>Actual local speed:</strong> ${esc(speedCopy(speed[model.id]))}</p>${model.id==='qwen35-4b-litert-web'&&phoneImport?.text?`<p class="cw-local-meta" data-qwen-phone-import-progress role="status"><strong>File import:</strong> ${esc(phoneImport.phase==='importing'&&!phoneImportInFlight?'Previous attempt · '+phoneImport.text+' · Reselect downloaded file to resume.':phoneImport.text)}</p>`:''}${model.id==='llama32-3b-instruct-q4f16'?'<p class="cw-local-meta"><strong>Android GPU blocked:</strong> pinned ONNX Asyncify loader repeatedly crashed. Cached weights are preserved; select another model.</p>':''}${statusMarkup(st,available)}</div><div class="cw-local-actions">${actions(model,st,available,active)}</div></div>`;
   }).join('');
   const preview=PREVIEW.map(model=>`<div class="cw-local-row"><div><b>${esc(model.label)} · preview</b><p>${esc(model.reason)}</p></div></div>`).join('');
   panel.innerHTML=`<div><h3>AI Downloads</h3><p>Choose a complete hardware-tier pack or manage individual local models. This view reads only small saved-state records; opening it does not touch model caches, GPUs, service workers, or inference runtimes.</p></div><div class="cw-clean-note">Pack/model code loads only after an explicit Download, Resume, Use, Remove, Cancel, Stop, or Import action. Large phone/server pack imports stay inside this Settings surface instead of navigating to the whole-app downloads page.</div><div data-local-status role="status" class="${noticeError?'cw-local-error':''}">${esc(notice)}</div><div class="cw-pack-grid">${packCards}</div><div class="cw-local-divider"></div><div class="cw-clean-note"><b>Phone-first Qwen testing</b><br>Use the Qwen 3.5 4B card below (not PC 12 · Qwen 3 4B). Download via the browser and import its exact 2.75 GB file in 8 MiB fragments. Select Use locally, then retry the tarot Learning Journey. Qwen 3 1.7B is the smaller comparison. Your already-downloading PC 12 Qwen 3 4B is a different model and its progress is preserved. Llama 3B Android GPU tests remain blocked; its <a href="/app/local-ai/llama32-two-pass-test-v4.html">read-only cache and GPU-limits diagnostic</a> is still available.</div><details open><summary><b>Individual models</b></summary><div style="display:grid;gap:8px;margin-top:10px">${rows}</div></details><details><summary>Preview models</summary><div style="display:grid;gap:8px;margin-top:10px">${preview}</div></details><div class="cw-local-actions"><button type="button" data-local-disable ${currentSelection.active?'':'hidden'}>Stop using downloaded AI</button></div>`;
@@ -376,15 +380,17 @@ function foregroundDownload(model){
 
 async function importPhoneQwen(event,panel){
   const input=event.target?.closest?.('input[data-local-phone-import]');
-  if(!input||!writable())return;
+  if(!input||!panel?.contains?.(input)||!writable()||phoneImportInFlight)return;
   const file=input.files?.[0];input.value='';
   if(!file)return;
+  phoneImportInFlight=true;
   try{
     const model=CATALOGUE.find(x=>x.id===input.dataset.localPhoneImport);
     if(!model?.nativeImport)throw new Error('Qwen 4B model import is not registered.');
     if(file.name!==model.artifact||file.size!==model.estimatedBytes)throw new Error('Choose the completed '+model.artifact+' ('+model.estimatedBytes+' bytes). No partial or different model may be imported.');
-    showLocal('Importing Qwen 4B as independent 8 MiB model-cache fragments; original download is preserved.');
-    await afterPaint();await ensureActionModules();
+    const startMessage='Importing Qwen 4B in 8 MiB fragments; downloaded file preserved.';
+    recordPhoneImport('importing',startMessage);showLocal(startMessage);
+    await afterPaint();for(const [src,ready]of ACTION_FILES.slice(0,2))await ensureScript(src,ready);
     const spec=registry()?.byId?.(model.id),artifact=spec?.artifacts?.find(x=>x.required);
     if(spec?.runtime!=='litert-lm-web'||artifact?.path!==model.artifact||artifact?.sizeBytes!==model.estimatedBytes)throw new Error('Qwen 4B artifact registry does not match the downloaded file.');
     const {importChunkedFile}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
@@ -392,14 +398,15 @@ async function importPhoneQwen(event,panel){
     let last=0;
     await importChunkedFile(cache,url,file,{onProgress:progress=>{
       if(Date.now()-last>250||progress.chunk===progress.chunks){
-        last=Date.now();showLocal('Qwen 4B · imported '+progress.chunk+'/'+progress.chunks+' fragments ('+fmt(progress.bytes)+' / '+fmt(progress.totalBytes)+').');
+        last=Date.now();const msg='Qwen 4B · '+progress.chunk+'/'+progress.chunks+' cached ('+fmt(progress.bytes)+' / '+fmt(progress.totalBytes)+').';recordPhoneImport('importing',msg,progress.chunk,progress.chunks);showLocal(msg);
       }
     }});
     const checked=await manager().status(model.id);
     if(!checked.available)throw new Error('Qwen 4B cache verification incomplete: '+(checked.missing||[]).map(x=>x.path+' '+x.reason).join('; '));
-    showLocal('Qwen 4B cached and verified. Choose Use locally. No model was started.');
+    recordPhoneImport('ready','Qwen 4B cache verified. Choose Use locally. No GPU inference started.');showLocal('Qwen 4B cached and verified. Choose Use locally. No model was started.');
     if(writable())renderLocalModels(panel.closest('[data-cw-settings-form]'));
-  }catch(error){showLocal(String(error?.message||error),true)}
+  }catch(error){const msg=String(error?.message||error);recordPhoneImport('error','Import failed: '+msg+' · Reselect downloaded file to resume retained fragments.');showLocal(msg,true)}
+  finally{phoneImportInFlight=false}
 }
 async function localAction(event,panel){
   const button=event.target.closest('button');
