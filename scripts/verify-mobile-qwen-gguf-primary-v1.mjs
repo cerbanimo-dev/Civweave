@@ -59,7 +59,7 @@ assert.match(gguf,/\.createChatCompletion\(params\)/);
 assert.match(gguf,/export async function importFiles\(/);
 assert.match(gguf,/export async function activateImported\(/);
 assert.match(gguf,/civweave-gguf-file-import-v1/);
-assert.match(gguf,/cache\.put\(key,new Response\(row\.file/);
+assert.match(gguf,/store\.writeGGUFShard\(dir,importId,i,row\.file/);
 assert.match(gguf,/current\.loadModel\(source,/);
 assert.match(gguf,/selected\.source==='file'/);
 assert.match(gguf,/MAX_GGUF_SHARD_BYTES=2_000_000_000/);
