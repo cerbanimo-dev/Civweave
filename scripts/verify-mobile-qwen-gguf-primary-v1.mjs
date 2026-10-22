@@ -4,12 +4,13 @@ import {execFileSync} from 'node:child_process';
 import vm from 'node:vm';
 
 const read=path=>readFile(path,'utf8');
-const [settings,runtime,gguf,build,stage]=await Promise.all([
+const [settings,runtime,gguf,build,stage,localCards]=await Promise.all([
   read('public/app/settings-gateway-v317.js'),
   read('public/app/shared/civweave-model-runtime.js'),
   read('public/app/local-ai/browser-gguf-v1.js'),
   read('scripts/build-cloudflare-pages.mjs'),
-  read('scripts/stage-wllama-browser-v1.mjs')
+  read('scripts/stage-wllama-browser-v1.mjs'),
+  read('public/app/settings-local-models-direct-v325.js')
 ]);
 new vm.Script(settings,{filename:'settings-gateway-v317.js'});
 new vm.Script(runtime,{filename:'civweave-model-runtime.js'});
@@ -51,5 +52,9 @@ assert.match(build,/stage-wllama-browser-v1\.mjs/);
 assert.match(build,/app\/vendor\/wllama\/esm\/wasm\/wllama\.wasm/);
 assert.match(stage,/@wllama\/wllama@3\.8\.1/);
 assert.match(stage,/--package-lock=false/);
+assert.match(localCards,/RECOMMENDED · GGUF ONLY/);
+assert.match(localCards,/data-direct-open-gguf/);
+assert.match(localCards,/LEGACY · NON-GGUF/);
+assert.doesNotMatch(localCards,/tier:'PHONE FIRST'/);
 
 console.log('Browser-only GGUF contracts: settings, verified cache, native worker runtime, no HTTP inference, and pinned asset stage passed.');
