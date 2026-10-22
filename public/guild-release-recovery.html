@@ -25,7 +25,9 @@ ul{padding-left:22px;color:#c7dbe6}li{margin:.4em 0}
 <p><strong>No downloaded AI models, offline campus files, Guild keys, or saved data will be deleted.</strong> Repair changes only the <em>root service-worker registration</em>. Signed Guild release verification remains enforced.</p>
 <button type="button" id="inspect">Inspect installed service worker</button>
 <button type="button" id="repair" class="primary">Repair Civweave worker (keep data)</button>
-<a class="action" id="open" href="/app/working-campus-v440.html?source=guild-release-safe-recovery-browser" hidden>Open Civweave Working Campus directly (browser)</a>
+<button type="button" id="document-open" class="primary">Open Working Campus without broken navigation</button>
+<p>This recovery option uses the same verified HTTP 200 application document that the check below can fetch. It renders the document in this browser tab without issuing the navigation that currently fails with ERR_FAILED. If startup scripts fail, reopen this recovery URL.</p>
+<a class="action" id="open" href="/app/working-campus-v440.html?source=guild-release-safe-recovery-browser" hidden>Retry conventional browser navigation (diagnostic)</a>
 <button type="button" id="test">Check whether the Working Campus responds</button>
 <pre id="output" role="status" aria-live="polite">No repair attempted. Online access to this staging origin is required.</pre>
 <p><strong>This procedure does not:</strong> clear browsing data, unregister the PWA, wipe Cache Storage, reset IndexedDB, remove Guild trust anchors, or download model files.</p>
@@ -38,7 +40,7 @@ const REQUIRED_REVISION='release-generation-boundary-v8-navigation-resource-fetc
 const ROOT_WORKER='/service-worker-v203.js';
 const DISPLAY_ENTRY='/app/working-campus-v440.html?source=guild-release-safe-recovery-browser';
 const $=id=>document.getElementById(id);
-const output=$('output'),repair=$('repair'),inspect=$('inspect'),open=$('open'),test=$('test');
+const output=$('output'),repair=$('repair'),inspect=$('inspect'),open=$('open'),test=$('test'),documentOpen=$('document-open');
 const show=message=>{output.textContent=String(message)};
 let lastRepair=null;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -130,17 +132,54 @@ async function checkCampus(){
     open.href=DISPLAY_ENTRY;
   }
 }
+async function openCampusWithoutNavigation(){
+  if(!atStaging())throw Error('Document recovery is restricted to staging.');
+  // This is the same protected app route and resource-mode fetch as the
+  // successful HTTP 200 health check. A complete signed Guild release stays
+  // exclusive because the installed release service worker still controls
+  // this GET; this action never changes Guild selection or trust anchors.
+  const target=new URL(DISPLAY_ENTRY,location.origin);
+  show('Fetching the Working Campus through the current release worker (no browser navigation)…');
+  const response=await fetch(new Request(target.href,{
+    method:'GET',cache:'no-store',credentials:'same-origin',redirect:'error'
+  }));
+  const responseUrl=new URL(response.url);
+  if(responseUrl.origin!==location.origin||responseUrl.pathname!==target.pathname)
+    throw Error('The application document redirected away from the requested same-origin campus.');
+  const type=String(response.headers.get('content-type')||'').toLowerCase();
+  if(!response.ok||!type.includes('text/html'))
+    throw Error('The installed release returned HTTP '+response.status+' · '+(type||'unknown content type'));
+  const html=await response.text();
+  // A status-200 captive portal or error page is not an application. Refuse
+  // to install an unrecognized document into the live browser page.
+  if(!html.includes('data-civweave-system="civweave"')
+      ||!html.includes('data-build="working-campus-v440')
+      ||!html.includes('Civweave Working Campus'))
+    throw Error('The response was HTML but not the verified Civweave Working Campus document.');
+  // This changes the URL in history without a navigation FetchEvent, then
+  // parses the already-fetched HTML as the live document. Relative and
+  // absolute resource URLs resolve as though the browser navigated to v440.
+  // On successful rendering, clicking within Civweave works normally.
+  // No registrations, IndexedDB records, CacheStorage entries, or model
+  // files are modified by this recovery method.
+  show('Verified Civweave campus HTML received. Opening without a navigation request…');
+  history.replaceState(history.state,'',target.pathname+target.search+target.hash);
+  document.open();
+  document.write(html);
+  document.close();
+}
 async function action(button,fn){
-  if(repair.disabled||inspect.disabled||test.disabled)return;
-  repair.disabled=true;inspect.disabled=true;test.disabled=true;
+  if(repair.disabled||inspect.disabled||test.disabled||documentOpen.disabled)return;
+  repair.disabled=true;inspect.disabled=true;test.disabled=true;documentOpen.disabled=true;
   try{await fn()}catch(error){show('Repair did not complete: '+String(error?.message||error)+'\nNo model caches or Guild data were removed.')}
-  finally{repair.disabled=false;inspect.disabled=false;test.disabled=false}
+  finally{repair.disabled=false;inspect.disabled=false;test.disabled=false;documentOpen.disabled=false}
 }
 inspect.addEventListener('click',()=>void action(inspect,inspectOnly));
 repair.addEventListener('click',()=>void action(repair,repairRoot));
 test.addEventListener('click',()=>void action(test,checkCampus));
-if(!atStaging()){repair.disabled=true;test.disabled=true;show('This is not the Civweave staging origin. No repair action is available.')}
-globalThis.CivweaveSafeGuildReleaseRecovery=Object.freeze({revision:'safe-guild-release-recovery-v3',origin:STAGING_HOST,modelCachesPreserved:true,autoRepair:false});
+documentOpen.addEventListener('click',()=>void action(documentOpen,openCampusWithoutNavigation));
+if(!atStaging()){repair.disabled=true;test.disabled=true;documentOpen.disabled=true;show('This is not the Civweave staging origin. No repair action is available.')}
+globalThis.CivweaveSafeGuildReleaseRecovery=Object.freeze({revision:'safe-guild-release-recovery-v4-document-swap',origin:STAGING_HOST,modelCachesPreserved:true,autoRepair:false});
 })();
 </script>
 </body>
