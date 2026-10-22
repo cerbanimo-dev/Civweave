@@ -7,7 +7,8 @@ const oldWorker=readFileSync('public/service-worker-release-generation-v1.js','u
 const core=readFileSync('public/service-worker-core-v208.js','utf8');
 assert.match(html,/<title>Civweave · Safe Guild Release Recovery<\/title>/);
 assert.match(html,/<button[^>]+id="repair"/,'repair requires explicit click');
-assert.match(html,/guild-release-recovery-v3/,'root landing is a separate recovery document');
+assert.match(html,/safe-guild-release-recovery-v4-document-swap/,'root landing carries navigation-free recovery');
+assert.match(html,/<button[^>]+id="document-open"/,'document swap requires an explicit user click');
 assert.match(html,/model caches, or Guild data were changed/);
 assert.doesNotMatch(html,/src="\/app\//,'page must not need Guild-owned application assets to load');
 const inline=html.match(/<script>([\s\S]+?)<\/script>/)?.[1];
@@ -22,8 +23,8 @@ assert.ok(!oldWorker.includes("pathname==='/guild-release-recovery.html'"),'resc
 assert.match(core,/request\.mode === 'navigate' \|\| url\.pathname === '\/'/,'unowned root rescue is served network-first');
 
 let calls,logs,controller;
-function setup({versionReady=true,campusHealthy=true}={}){
-  calls={network:0,register:[],cacheReads:0,cacheDeletes:0,unregister:0,campusChecks:0};
+function setup({versionReady=true,campusHealthy=true,campusType='text/html',campusRedirect=false}={}){
+  calls={network:0,register:[],cacheReads:0,cacheDeletes:0,unregister:0,campusChecks:0,documentOpen:0,documentWrite:[],documentClose:0,history:[],lastCampusRequest:null};
   const buttons={};
   const elm=id=>{
     if(buttons[id])return buttons[id];
@@ -37,7 +38,12 @@ function setup({versionReady=true,campusHealthy=true}={}){
     unregister(){calls.unregister++;throw Error('must not unregister')},
   };
   const scope={
-    document:{getElementById:elm},
+    document:{getElementById:elm,
+      open(){calls.documentOpen++;return this},
+      write(text){calls.documentWrite.push(text)},
+      close(){calls.documentClose++}
+    },
+    history:{state:null,replaceState(state,title,url){calls.history.push(url)}},
     location:{hostname:'civweave-staging.pages.dev',origin:'https://civweave-staging.pages.dev'},
     navigator:{serviceWorker:{
       getRegistration:async()=>reg,
@@ -53,9 +59,13 @@ function setup({versionReady=true,campusHealthy=true}={}){
       calls.network++;
       if(new URL(request.url).pathname==='/app/working-campus-v440.html'){
         calls.campusChecks++;
-        return campusHealthy
-          ?new Response('<!doctype html><title>Working Campus</title>',{status:200,headers:{'content-type':'text/html; charset=utf-8'}})
+        calls.lastCampusRequest=request;
+        const body='<!doctype html><html data-civweave-system="civweave" data-build="working-campus-v440-test"><head><title>Civweave Working Campus</title></head><body>Working Campus</body></html>';
+        const response=campusHealthy
+          ?new Response(body,{status:200,headers:{'content-type':campusType}})
           :new Response('The selected Guild does not yet have a compatible signed Civweave release.',{status:503,headers:{'content-type':'text/plain'}});
+        Object.defineProperty(response,'url',{value:campusRedirect?'https://unknown.example.invalid/redirected':request.url});
+        return response;
       }
       return new Response(versionReady
         ? "importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v8-navigation-resource-fetch');"
@@ -110,4 +120,39 @@ await new Promise(resolve=>setTimeout(resolve,25));
 assert.match(failing.elm('output').textContent,/HTTP 503/,'recovery page must display actual Guild error rather than silently redirect');
 assert.match(failing.elm('output').textContent,/selected Guild does not yet have a compatible signed/);
 assert.equal(failing.calls.cacheDeletes,0,'diagnostics must not erase model weights');
+// The HTTP 200 resource check must be used to render the campus in the
+// current tab WITHOUT a navigate-mode FetchEvent. This reproduces the
+// user's Android case where the same document succeeds via fetch but
+// yields net::ERR_FAILED when opened as a link.
+const documentSwap=setup();
+assert.equal(documentSwap.calls.documentOpen,0,'opening diagnostic page must not replace the document automatically');
+await documentSwap.elm('document-open').handlers.click();
+await new Promise(resolve=>setTimeout(resolve,25));
+assert.equal(documentSwap.calls.campusChecks,1);
+assert.equal(documentSwap.calls.lastCampusRequest.mode,'cors','campus recovery must use resource fetch, not browser navigation');
+assert.equal(documentSwap.calls.lastCampusRequest.credentials,'same-origin');
+assert.equal(documentSwap.calls.lastCampusRequest.redirect,'error','cross-site redirects are not allowed');
+assert.equal(documentSwap.calls.history.length,1,'history URL updates without a new browser navigation');
+assert.match(documentSwap.calls.history[0],/^\/app\/working-campus-v440\.html\?source=/);
+assert.equal(documentSwap.calls.documentOpen,1);
+assert.equal(documentSwap.calls.documentClose,1);
+assert.match(documentSwap.calls.documentWrite[0],/data-build="working-campus-v440/);
+assert.equal(documentSwap.calls.cacheDeletes,0);
+assert.equal(documentSwap.calls.unregister,0);
+assert.equal(documentSwap.calls.register.length,0,'document swap must not modify service-worker registration');
+const blocked=setup({campusHealthy:false});
+await blocked.elm('document-open').handlers.click();
+await new Promise(resolve=>setTimeout(resolve,25));
+assert.equal(blocked.calls.documentWrite.length,0,'do not render Guild 503/error pages');
+assert.equal(blocked.calls.history.length,0,'do not change URL when fetch fails');
+const redirected=setup({campusRedirect:true});
+await redirected.elm('document-open').handlers.click();
+await new Promise(resolve=>setTimeout(resolve,25));
+assert.equal(redirected.calls.documentOpen,0,'never render HTML from an unrelated origin');
+assert.equal(redirected.calls.history.length,0);
+const wrongType=setup({campusType:'text/plain'});
+await wrongType.elm('document-open').handlers.click();
+await new Promise(resolve=>setTimeout(resolve,25));
+assert.equal(wrongType.calls.documentWrite.length,0,'require HTML content type');
+assert.equal(wrongType.calls.history.length,0);
 console.log('PASS: old Guild-sw interception leaves root rescue navigable; guarded click updates worker with no model/cache/Guild deletion.');
