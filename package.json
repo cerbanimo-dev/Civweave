@@ -62,7 +62,8 @@
     "test:open-learning-media": "node scripts/test-open-learning-media-runtime-v1.mjs && python scripts/test-open-learning-media-harvest-v1.py",
     "test:local-host-capacity": "node scripts/test-local-host-capacity-v1.mjs",
     "test:survival": "node --test scripts/test-survival-mode-v1.mjs",
-    "check:runtime": "node scripts/verify-generation-lifecycle-v1.mjs && node scripts/verify-local-generation-model-policy-v1.mjs && node --test scripts/test-runtime-recovery-v1.mjs scripts/test-reward-receiver-startup-v1.mjs scripts/test-five-system-pages-worker-v1.mjs scripts/test-cerbanimo-startup-v1.mjs scripts/test-persistent-shell-first-frame-rescue-v1.mjs scripts/test-generation-takeover-cache-v1.mjs scripts/test-persistent-human-chrome-v1.mjs scripts/test-chat-observer-work-v1.mjs scripts/test-chat-chrome-layout-v1.mjs scripts/test-navigation-dock-v1.mjs scripts/test-release-navigation-response-v1.mjs scripts/test-minilm-routing-deadline-v1.mjs"
+    "check:runtime": "node scripts/verify-generation-lifecycle-v1.mjs && node scripts/verify-local-generation-model-policy-v1.mjs && node --test scripts/test-runtime-recovery-v1.mjs scripts/test-reward-receiver-startup-v1.mjs scripts/test-five-system-pages-worker-v1.mjs scripts/test-cerbanimo-startup-v1.mjs scripts/test-persistent-shell-first-frame-rescue-v1.mjs scripts/test-generation-takeover-cache-v1.mjs scripts/test-persistent-human-chrome-v1.mjs scripts/test-chat-observer-work-v1.mjs scripts/test-chat-chrome-layout-v1.mjs scripts/test-navigation-dock-v1.mjs scripts/test-release-navigation-response-v1.mjs scripts/test-minilm-routing-deadline-v1.mjs",
+    "verify:mobile-qwen-gguf": "node scripts/verify-mobile-qwen-gguf-primary-v1.mjs"
   },
   "overrides": {
     "sharp": "0.35.3"
