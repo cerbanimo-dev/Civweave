@@ -30,6 +30,7 @@ const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
 const transformerV4Stage = resolve(scriptDir, "stage-transformers-v4-assets.mjs");
 const llamaStructuredStage = resolve(scriptDir, "stage-llama-structured-output-v1.mjs");
 const liteRtLmStage = resolve(scriptDir, "stage-litert-lm-web-assets.mjs");
+const browserGGUFStage = resolve(scriptDir, "stage-wllama-browser-v1.mjs");
 const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
 const federationDataStage = resolve(scriptDir, "stage-federation-finder-data-v274.mjs");
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
@@ -167,6 +168,7 @@ await Promise.all([
   runNodeScriptAsync(transformerV4Stage, "Transformers.js 4.2 ONNX staging failed."),
   runNodeScriptAsync(llamaStructuredStage, "Llama 3.2 constrained JSON companion staging failed."),
   runNodeScriptAsync(liteRtLmStage, "LiteRT-LM WebGPU staging failed."),
+  runNodeScriptAsync(browserGGUFStage, "Browser GGUF inference engine staging failed."),
   runNodeScriptAsync(mapRuntimeStage, "Civweave Map v1 renderer staging failed."),
   runNodeScriptAsync(federationDataStage, "Federation Finder atlas staging failed."),
   runNodeScriptAsync(parityMaterializer, "Civweave parity ledger materialization failed."),
@@ -199,6 +201,9 @@ const requiredRuntimeAssets = [
   resolve(sourceDir, 'app/vendor/litert-lm/dist/index.js'),
   resolve(sourceDir, 'app/vendor/litert-lm/wasm-utils/dist/index.js'),
   resolve(sourceDir, 'app/vendor/litert-lm/stage-manifest.json'),
+  resolve(sourceDir, 'app/vendor/wllama/esm/index.js'),
+  resolve(sourceDir, 'app/vendor/wllama/esm/wasm/wllama.wasm'),
+  resolve(sourceDir, 'app/vendor/wllama/esm/civweave-stage.json'),
   resolve(sourceDir, 'app/vendor/maplibre-v5.13.0/maplibre-gl.js'),
   resolve(sourceDir, 'app/vendor/maplibre-v5.13.0/maplibre-gl.css'),
   resolve(sourceDir, 'app/vendor/pmtiles-v4.4.1/pmtiles.js'),
