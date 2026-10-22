@@ -376,7 +376,7 @@ function foregroundDownload(model){
 
 async function importPhoneQwen(event,panel){
   const input=event.target?.closest?.('input[data-local-phone-import]');
-  if(!input||!writable())return;
+  if(!input||!panel?.contains?.(input)||!writable())return;
   const file=input.files?.[0];input.value='';
   if(!file)return;
   try{
