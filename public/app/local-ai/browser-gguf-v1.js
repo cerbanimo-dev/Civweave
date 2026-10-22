@@ -119,7 +119,9 @@ export async function importFiles(input,{onProgress}={}){
     const original=incoming[0],family=modelFromFile(importName(original.name));
     const splitter=await import('/app/local-ai/gguf-split-browser-v1.js?v=gguf-split-v1');
     notify('auto-shard-plan',{model:family.id,bytes:original.size});
-    const plan=await splitter.planGGUFSplit(original,{maxShardBytes:480_000_000});
+    // Use the splitter's tested Qwen-safe target (1.8GB). Tensor-aligned GGUF
+    // shards must never cut a single quantized embedding tensor in half.
+    const plan=await splitter.planGGUFSplit(original);
     incoming=plan.groups.map((group,index)=>{
       const blob=splitter.shardFromPlan(plan,index);
       return new File([blob],splitter.splitName(original.name,index,plan.groups.length),{type:'application/octet-stream'});
