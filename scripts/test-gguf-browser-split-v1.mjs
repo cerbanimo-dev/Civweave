@@ -43,7 +43,7 @@ for(let shardNo=0;shardNo<plan.groups.length;shardNo++){
   // The last 18MB tensor payload must be an exact byte-for-byte copy;
   // splitting never requantizes or mutates original weights.
   assert.deepEqual(new Uint8Array(await shard.slice(shard.size-64).arrayBuffer()),
-    new Uint8Array(await file.slice(plan.dataStart+(shardNo*3+2)*individualBytes+(individualBytes-64)).arrayBuffer()));
+    new Uint8Array(await file.slice(plan.dataStart+(shardNo*3+2)*individualBytes+(individualBytes-64),plan.dataStart+(shardNo*3+3)*individualBytes).arrayBuffer()));
 }
 await assert.rejects(planGGUFSplit(file,{maxShardBytes:10_000_000}),/unsafe GGUF shard size/);
 console.log('Lossless on-device GGUF splitter test passed: valid shard headers, split metadata, tensor boundaries and identical Q4 payload bytes.');
