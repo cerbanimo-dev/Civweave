@@ -7,7 +7,7 @@ const oldWorker=readFileSync('public/service-worker-release-generation-v1.js','u
 const core=readFileSync('public/service-worker-core-v208.js','utf8');
 assert.match(html,/<title>Civweave · Safe Guild Release Recovery<\/title>/);
 assert.match(html,/<button[^>]+id="repair"/,'repair requires explicit click');
-assert.match(html,/guild-release-recovery-v2/,'root landing is a separate recovery document');
+assert.match(html,/guild-release-recovery-v3/,'root landing is a separate recovery document');
 assert.match(html,/model caches, or Guild data were changed/);
 assert.doesNotMatch(html,/src="\/app\//,'page must not need Guild-owned application assets to load');
 const inline=html.match(/<script>([\s\S]+?)<\/script>/)?.[1];
