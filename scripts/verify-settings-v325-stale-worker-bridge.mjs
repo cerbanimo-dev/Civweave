@@ -9,8 +9,8 @@ const actions=await readFile(new URL('../public/app/settings-local-route-v331.js
 
 assert.match(source,/1\.1\.6-settings-local-route-v326-llama32-download/);
 assert.match(source,/settings-v325-parent-source-recovery-v4-local-selection-authority/);
-assert.match(source,/DIRECT_VERSION='1\.2\.2-settings-v325-direct-local-models-qwen-phone-fast'/);
-assert.match(source,/settings-local-models-direct-v325\.js\?v=1\.2\.2-qwen-phone-fast/);
+assert.match(source,/DIRECT_VERSION='1\.2\.3-settings-v325-direct-local-models-qwen-import-owner'/);
+assert.match(source,/settings-local-models-direct-v325\.js\?v=1\.2\.3-qwen-import-owner/);
 assert.match(source,/STATUS_PLACEMENT_VERSION='1\.0\.1-settings-local-progress-card-owned-direct-aware'/);
 assert.match(source,/CIVWEAVE SETTINGS · v325/);
 assert.match(source,/settings-local-route-v331\.js\?cwAction=1/);
@@ -122,6 +122,6 @@ assert.equal(layer.dataset.settingsVisibleVersion,'v325');
 assert.match(target.innerHTML,/AI Downloads/);
 assert.match(target.innerHTML,/Saved local state loaded/);
 assert.doesNotMatch(target.innerHTML,/Reading saved local model choices/);
-assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js?v=1.2.2-qwen-phone-fast')),'The parent bridge must request the cache-distinct current direct renderer without waiting for a worker update.');
+assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js?v=1.2.3-qwen-import-owner')),'The parent bridge must request the cache-distinct current direct renderer without waiting for a worker update.');
 
 console.log(JSON.stringify({ok:true,revision:'settings-v325-parent-source-recovery-v4-local-selection-authority',managerReads,visibleVersion:'v325',fallbackPainted:true,directRendererRequested:true,stableInPlaceActions:true,directCardProgress:true,canonicalLocalPersistence:true,validatedAliasesPreserved:true},null,2));
