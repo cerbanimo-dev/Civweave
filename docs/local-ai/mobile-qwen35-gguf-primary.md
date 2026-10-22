@@ -1,33 +1,21 @@
-# Native Qwen 3.5 4B GGUF phone primary (staging)
+# Browser-only GGUF phone primary · staging
 
-The phone benchmark used **Qwen 3.5 4B in a native GGUF llama-server runtime**. This is **not** the same artifact or engine as the existing browser Qwen 3.5 4B LiteRT model. The app must connect to the native engine to use the benchmarked model.
+**No server is required.** Civweave stages Wllama 3.8.1 locally at `/app/vendor/wllama/esm/`. Wllama uses WebAssembly and experimental WebGPU in a browser worker, loads GGUF files from its device cache, and streams output through Civweave's existing shared AI runtime.
 
-## Phone setup
+## In-platform workflow
 
-1. Start the GGUF server used with Model Tester Mobile, listening on the phone's loopback interface, with its Qwen 3.5 4B weights loaded. If launching a compatible llama.cpp binary directly, the equivalent shape is:
+1. Open staging Civweave → Settings → AI & safety → **On-device GGUF · phone primary**.
+2. Choose a GGUF. The available built-in options are Qwen 3.5 4B **IQ2_M** (about 1.6 GB) and Qwen 3.5 2B **Q4_K_M** (about 1.3 GB).
+3. Press **Download GGUF into Civweave**. The bytes download into the browser's managed model cache, with progress in Settings.
+4. After download finishes, press **Use downloaded GGUF as primary**. This disables any previously active ONNX/LiteRT selection *without deleting its weights*, and persists the shared five-system AI selection.
+5. Open a guide and generate an answer. The runtime imports Wllama dynamically only for explicit GGUF use, loads the selected cached weights, and streams the answer. Browser WebGPU is attempted with limited offload, with a CPU/WASM retry on load failure. No inference API request goes to localhost or the internet. The previous loopback server integration is retired from the UI.
 
-   `llama-server -m /path/to/Qwen3.5-4B.gguf --host 127.0.0.1 --port 8080 --alias Qwen3.5-4B-GGUF`
+**Quantization limitation:** The benchmarked 4B's GGUF quantization may not match the browser-compatible 4B IQ2_M included here. A GGUF file larger than 2 GB must be **properly split with llama-gguf-split**; setting a Hugging Face URL to the first `-00001-of-000NN.gguf` shard is supported by Wllama, provided all shards exist at the source. Merely byte-slicing a single GGUF is not a valid replacement. Do not claim the former 30/31 score carries over to a different quantization or browser backend. Wllama's mobile WebGPU support is experimental and may be slower or fail on some phones.
 
-2. Open Civweave staging → Settings → **AI & safety** → **Phone primary · Qwen 3.5 4B GGUF**.
-3. Use `http://127.0.0.1:8080/v1` (the default) and press **Verify and use native 4B as phone primary**. Civweave checks `GET /v1/models` and requires a Qwen 3.5 **4B** identity before changing any shared AI settings.
-4. Return to the five systems and test a conversation, shared Quest, Moss Learning Journey, Kamiya Endeavor, Rook Manifest, and Merlin review-only proposal. This routing uses the shared OpenAI-compatible runtime; the native 4B is selected as the final-answer model for all five.
+For import/custom quantizations, set the download URL to a direct HTTPS Hugging Face `/resolve/.../*.gguf` link. The preset identity is not a proof of the chosen custom file's architecture; use only the correct Qwen 3.5 model file.
 
-**Browser network requirement:** The GGUF server must allow the staging origin to make cross-origin requests; Android Chrome may also prompt for local-network access. Civweave does not disable those browser protections or proxy the model through Cloudflare. If model discovery is blocked, the existing AI route is left unchanged. A native server may expose a different alias; the alias must identify Qwen 3.5 4B so model identity can be verified.
+The browser cache and existing downloads remain untouched when this option is not selected. The app neither installs nor requires any native GGUF server. An optional 2B GGUF can be downloaded, but loading two multi-gigabyte models concurrently is deliberately disabled on RAM-constrained phones; helper scheduling beyond the primary model remains a separate integration step.
 
-## Optional helpers
+## Verification
 
-- **Qwen 3.5 2B**: if a separate local GGUF server is running (for example `127.0.0.1:8081/v1`), enter its endpoint in the optional 2B field. It may provide short advisory task outlines for planning and structured-output requests.
-- **Qwen 3.5 0.8B**: the lower-cost alternative for advisory outlines when a 2B server is not configured. Enter a distinct endpoint (for example port 8082).
-- **Qwen 3.5 9B**: remains an explicitly selected high-memory alternative; not automatically loaded alongside the 4B on RAM-constrained phones.
-
-All endpoints must be on-device loopback. Helpers are probed for the correct size during setup and used **only if explicitly configured**. A failed helper is skipped; a failed primary is reported as an error rather than silently swapping to another model or sending content to a cloud provider. Helper text is untrusted, cannot authorize actions, and is never a final user response. Running multiple GGUF servers increases RAM use; leave helper fields empty when resources are tight.
-
-Downloaded browser models (LiteRT/ONNX/WASM) remain installed and manually selectable through Settings. Switching away from the native GGUF route disables its special helper routing without deleting weights or stored data.
-
-## Generation behavior and test boundaries
-
-The native GGUF route requests model-native chat with thinking disabled, streaming enabled, and the existing Civweave request/schema validation and repair boundaries. It does not inherit the browser LiteRT model's runtime limitations. The earlier 30/31 phone result was a synthetic benchmark; native five-system end-to-end integration still needs direct device testing.
-
-Regression check: `node scripts/verify-mobile-qwen-gguf-primary-v1.mjs`
-
-**No automatic server installation or GGUF model download** is performed by this staging change.
+Run `npm run verify:mobile-qwen-gguf`. The dedicated GitHub workflow checks syntax and that the shared runtime routes to Wllama *before* any OpenAI-compatible HTTP transport. Device-level runtime loading and five-system benchmarks must still be run on staging hardware.
