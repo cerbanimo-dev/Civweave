@@ -25,11 +25,11 @@ const controller = fs.readFileSync(controllerPath, 'utf8');
 const coreWorker = fs.readFileSync(coreWorkerPath, 'utf8');
 const settingsWorker = fs.readFileSync(settingsWorkerPath, 'utf8');
 const settingsEntrypoint = fs.readFileSync(settingsEntrypointPath, 'utf8');
-const expectedVersion = '1.1.5-settings-local-route-v327-qwen-phone-fast';
+const expectedVersion = '1.1.6-settings-local-route-v328-qwen-import-ownership';
 const expectedShellVersion = shell.match(/const VERSION='([^']+)'/)?.[1];
-const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.2-qwen-phone-settings';
-const parentFullRoute = '/app/settings-local-route-v331.js?cwAction=1&amp;v=1.2.2-qwen-phone-settings';
-const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.2-qwen-phone-settings';
+const fullRoute = '/app/settings-local-route-v331.js?cwAction=1&v=1.2.3-qwen-import-owner';
+const parentFullRoute = '/app/settings-local-route-v331.js?cwAction=1&amp;v=1.2.3-qwen-import-owner';
+const stageLoader = '/app/settings-local-loader-v337.js?v=1.2.3-qwen-import-owner';
 
 const fail = message => { throw new Error(message); };
 
@@ -135,7 +135,7 @@ if (!shell.includes(`const SETTINGS_LOCAL_ROUTE_VERSION='${expectedVersion}'`)) 
 if (!shell.includes("const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`")) {
   fail('Persistent shell lost its v325 compatibility fallback bridge.');
 }
-if (!bridge.includes("const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=1.2.2-qwen-phone-settings'")) {
+if (!bridge.includes("const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=1.2.3-qwen-import-owner'")) {
   fail('v325 compatibility bridge no longer has an explicit full-renderer action route.');
 }
 if (alias !== fresh) {
