@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v7-origin-fallback-preservation';
+const REVISION='release-generation-boundary-v8-navigation-resource-fetch';
 const CACHE='cw-live-runtime-release-generation-v6-20261021';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
 const ORIGIN_CACHE_PREFIXES=Object.freeze([CACHE_PREFIX,'civweave-shell-','civweave-runtime-','civweave-offline-']);
@@ -356,12 +356,28 @@ async function activeGuildResponse(pathname,method,active){
   return new Response('The active signed Guild release is incomplete for this runtime generation.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-guild-release':String(active.releaseId||'')}});
 }
 async function network(request,pathname){
+  // A navigation-mode Request is not equivalent to the normal same-origin
+  // resource fetch used by the browser's recovery diagnostic. Some installed
+  // mobile workers fail the nested navigation-mode fetch with ERR_FAILED even
+  // when a regular fetch of the identical document returns HTTP 200.
+  // Fetch current origin bytes as a standard same-origin GET; the signed
+  // Guild release path is checked BEFORE this function can be invoked.
+  let response;
   try{
-    const response=await boundedFetch(request,NETWORK_TIMEOUT_MS);
+    const source=request.mode==='navigate'
+      ?new Request(cacheKey(pathname),{method:'GET',cache:'no-store',credentials:'same-origin'})
+      :request;
+    response=await boundedFetch(source,NETWORK_TIMEOUT_MS);
     if(!valid(response,pathname))return null;
-    if(request.method==='GET')await(await caches.open(CACHE)).put(cacheKey(pathname),response.clone());
-    return request.method==='HEAD'?head(response):response;
   }catch{return null}
+  if(request.method==='GET'){
+    // A full browser storage quota may prevent this redundant shell write.
+    // Never discard successfully fetched executable HTML because a Cache
+    // Storage write failed; model caches must not be touched to make room.
+    try{await(await caches.open(CACHE)).put(cacheKey(pathname),response.clone())}
+    catch(error){try{console.warn('[Civweave release] Origin shell cache write failed; serving verified network response.',error?.message||error)}catch{}}
+  }
+  return request.method==='HEAD'?head(response):response;
 }
 async function freshCached(pathname,method){
   const response=await(await caches.open(CACHE)).match(cacheKey(pathname),{ignoreSearch:true});
@@ -482,7 +498,16 @@ self.addEventListener('fetch',event=>{
   if(request.mode==='navigate'&&!(pathname==='/'||pathname==='/index.html'||OWNED_PREFIXES.some(prefix=>pathname.startsWith(prefix))))return;
   event.stopImmediatePropagation();
   if(request.mode==='navigate')event.waitUntil(checkGuildRelease().catch(()=>null));
-  event.respondWith(responseFor(request,pathname));
+  // Never reject a navigation's respondWith promise: in Chromium this is
+  // surfaced as a blank ERR_FAILED page even when the origin itself is up.
+  // This response is a recovery message, not an unsigned release cutover.
+  event.respondWith(Promise.resolve().then(()=>responseFor(request,pathname)).catch(error=>{
+    const reason=String(error?.message||error||'unknown error').slice(0,280);
+    try{console.warn('[Civweave release] Navigation boundary failure',pathname,reason)}catch{}
+    if(request.mode!=='navigate')return new Response('Civweave runtime request failed: '+reason,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
+    const body='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave navigation recovery</title></head><body style="font:16px/1.5 system-ui;background:#07131e;color:#e8f5fc;padding:28px"><h1>Civweave could not open this page</h1><p>The installed Guild release boundary encountered a navigation error. Your models and saved data were not changed.</p><p><a style="color:#9eeeff" href="/guild-release-recovery.html">Open non-destructive service-worker recovery</a></p><p>Diagnostic: '+reason.replace(/[<>&"']/g,'')+'</p></body></html>';
+    return new Response(body,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-navigation-recovery':'worker-failure'}});
+  }));
 });
 self.CivweaveReleaseGenerationV1=Object.freeze({revision:REVISION,cache:CACHE,warmPaths:[...WARM_PATHS],networkTimeoutMs:NETWORK_TIMEOUT_MS,warmTimeoutMs:WARM_TIMEOUT_MS,warmConcurrency:WARM_CONCURRENCY,policy:'complete-signed-guild-release-is-exclusive-transport-legacy-or-incomplete-guilds-remain-on-current-origin-release-until-compatible-cutover'});
 })();
