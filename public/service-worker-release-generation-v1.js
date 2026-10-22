@@ -5,7 +5,8 @@ const CACHE='cw-live-runtime-release-generation-v6-20261021';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
 const ORIGIN_CACHE_PREFIXES=Object.freeze([CACHE_PREFIX,'civweave-shell-','civweave-runtime-','civweave-offline-']);
 // Must not treat an unsigned/partial Guild cache as the origin's installed release.
-const ORIGIN_BOOT_PATHS=Object.freeze(['/index.html','/app/pwa-start-v436.html','/app/persistent-system-shell-v1.html','/app/working-campus-v440.html']);
+// Require every current executable path to be warmed before pruning the old
+// complete runtime generation; four entry documents alone are insufficient.
 const GUILD_CACHE_PREFIX='cw-guild-release-v1-';
 const DB_NAME='civweave-decentralized-release-v1';
 const DB_VERSION=1;
@@ -410,14 +411,14 @@ async function warmOne(cache,pathname){
     return pathname;
   }catch{return null}
 }
-async function warm(){
+async function warm({guildChecked=false}={}){
   const guild=await guildConfig();
   if(guild){
     // A selected Guild is only exclusive after a fully verified, compatible
     // signed release is installed. Legacy/mobile Guilds may have no release
     // endpoint. Previously returning [] here left the origin's new live
     // cache empty; activation then erased its previous working shell.
-    await checkGuildRelease({force:true}).catch(()=>null);
+    if(!guildChecked)await checkGuildRelease({force:true}).catch(()=>null);
     if(await activeGuildRelease())return[];
   }
   const cache=await caches.open(CACHE),queue=[...WARM_PATHS],warmed=[];
@@ -435,7 +436,7 @@ async function originFallbackReady(){
   // The new release must be usable before deleting any old origin-shell
   // fallback. Opening an offline PWA with an unsigned selected Guild must
   // never erase its only installed executable entrypoint.
-  for(const path of ORIGIN_BOOT_PATHS)if(!await freshCached(path,'GET'))return false;
+  for(const path of WARM_PATHS)if(!await freshCached(path,'GET'))return false;
   return true;
 }
 async function purgeStaleRuntimeEntries(){
@@ -457,7 +458,7 @@ async function activationRepair(){
   // replacement exists, including when the network is unavailable.
   await purgeStaleRuntimeEntries();
   if(await guildConfig())await checkGuildRelease({force:true}).catch(()=>null);
-  if(!await activeGuildRelease()&&!await originFallbackReady())await warm().catch(()=>[]);
+  if(!await activeGuildRelease()&&!await originFallbackReady())await warm({guildChecked:true}).catch(()=>[]);
   await purgeStaleRuntimeEntries();
   await self.clients.claim();
 }
