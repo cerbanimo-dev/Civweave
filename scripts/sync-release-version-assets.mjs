@@ -11,7 +11,7 @@ if(pkg.version!==version)throw new Error(`package.json ${pkg.version} does not m
 const changed=[];
 async function patch(relative,transform){const file=path.join(root,relative),before=await readFile(file,'utf8'),after=transform(before);if(after===before)return;await writeFile(file,after,'utf8');changed.push(relative)}
 function replaceRequired(source,pattern,replacement,label){if(!pattern.test(source))throw new Error(`${label} was not found while synchronizing Civweave ${version}.`);return source.replace(pattern,replacement)}
-const ROUTE_QUERY=`system-routes-v227.js?v=${version}-five-system-route-contract-v229-single-shell-context`;
+const ROUTE_QUERY=`system-routes-v227.js?v=${version}-five-system-route-contract-v230-shared-navbar-owner`;
 const ROUTE_PATTERN=/system-routes-v227\.js\?v=\d+\.\d+\.\d+(?:(?:-five-system-route-contract-v22[789](?:-direct-shell|-single-shell-context)?)|-single-shell-context)/;
 
 await patch('public/index.html',source=>{source=replaceRequired(source,/<title>Civweave<\/title>/,'<title>Civweave</title>','launcher title');if(/civweave-brand\.js\?v=\d+\.\d+\.\d+/.test(source))source=source.replace(/civweave-brand\.js\?v=\d+\.\d+\.\d+/,`civweave-brand.js?v=${version}`);if(/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/.test(source))source=source.replace(/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`);return source});
