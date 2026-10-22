@@ -73,6 +73,8 @@ assert.ok(nav.includes("artRevision='full-tile-portraits-all-breakpoints-v1'"),'
 const navMedia=await read('public/app/universal-nav-media-stability-v1.js');
 assert.doesNotMatch(navMedia,/sprite\.style\.setProperty\('display','none'/,'Media recovery must not suppress animated system sprites.');
 assert.match(navMedia,/sprite\.style\.removeProperty\('display'\)/,'Media recovery must restore the animated sprite layer.');
+assert.match(navMedia,/\.cw-themed-system-fallback\{[^}]*z-index:0!important/,'The static fallback must remain behind the dynamic sprite.');
+assert.match(navMedia,/img\.style\.setProperty\('z-index','0','important'\)/,'Media repair must not elevate the static portrait over an expressive sprite.');
 
 assert.match(nav,/civweave:subsystem-avatar-state/);
 assert.match(nav,/civweave:avatar-expression/);
