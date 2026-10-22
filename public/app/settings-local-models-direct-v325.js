@@ -273,8 +273,12 @@ function hardGuard(layer=document.getElementById(LAYER_ID)){
   setTimeout(()=>{if(!layer?.isConnected||layer.hidden)return;const form=layer.querySelector('[data-cw-settings-form]'),target=form?.querySelector('[data-settings-tab-panel="local-models"]'),selected=form?.querySelector('[data-settings-tab="local-models"]')?.getAttribute('aria-selected')==='true';if(!selected)return;if(target?.querySelector('[data-local-model-slot-placeholder]')||/Reading saved local model choices/i.test(target?.textContent||''))target.innerHTML=`<section class="cw-clean-panel"><h3>Local models could not open</h3><p>The direct Settings renderer did not replace the loading placeholder.</p><div class="cw-direct-build">${esc(BUILD_LABEL)}</div></section>`},900);
 }
 async function importPhoneQwenDirect(event){
-  const input=event.target?.closest?.('#'+LAYER_ID+' input[data-local-phone-import]');
-  if(!input)return;
+  // Both the v324 full route and this v325 direct fallback can be loaded in
+  // the same document. Capture only this renderer's own input. Previously this
+  // global capture listener cleared input.value before the v324 change handler
+  // could read files[0], making the import appear to flash and do nothing.
+  const input=event.target?.closest?.('input[data-local-phone-import]');
+  if(!input||!input.closest('#'+PANEL_ID))return;
   const file=input.files?.[0];input.value='';if(!file)return;
   const layer=document.getElementById(LAYER_ID);
   try{
