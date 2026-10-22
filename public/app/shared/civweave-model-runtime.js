@@ -672,6 +672,25 @@
   }
 
   async function invokeOpenAI(config, messages, request, context, signal) {
+    // A separately downloaded, browser-resident GGUF takes precedence over
+    // the old optional native loopback route. This path makes NO HTTP API
+    // call: inference runs within Civweave's own wllama Web Worker.
+    let selectedGGUF=null;
+    try{selectedGGUF=JSON.parse(global.localStorage?.getItem?.('civweave.mobile.gguf-primary.v2')||'null')}catch{}
+    if(selectedGGUF?.enabled===true&&selectedGGUF?.engine==='wllama'&&
+       selectedGGUF.model===config.model&&config.endpoint==='http://127.0.0.1:8080/v1'){
+      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v1');
+      emit(context,'gguf-browser-loading',{model:config.model,backend:'wllama',networkInference:false});
+      const run=await browserGGUF.generate({
+        model:config.model,messages:normalizeChatMessages(messages),
+        temperature:config.temperature,maxTokens:config.maxTokens,
+        structured:request.responseFormat==='json'||Boolean(request.schema),
+        signal,onToken:(text,accumulatedText)=>emit(context,'partial',{text,accumulatedText,backend:'browser-gguf'})
+      });
+      return{text:run.text,model:run.model,streamed:run.streamed,backend:run.backend,
+        payload:{choices:[{message:{role:'assistant',content:run.text},finish_reason:'stop'}]},
+        diagnostics:[{code:'BROWSER_GGUF',message:'Inferred on this phone with Civweave GGUF WebAssembly/WebGPU runtime; no localhost server, LiteRT or cloud AI.'}]};
+    }
     const url = openAIChatUrl(config.endpoint, config);
     const structured = request.responseFormat === "json" || Boolean(request.schema);
     const lineup = nativePhoneLineup(config);
