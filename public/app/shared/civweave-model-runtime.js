@@ -679,7 +679,7 @@
     try{selectedGGUF=JSON.parse(global.localStorage?.getItem?.('civweave.mobile.gguf-primary.v2')||'null')}catch{}
     if(selectedGGUF?.enabled===true&&selectedGGUF?.engine==='wllama'&&
        selectedGGUF.model===config.model&&config.endpoint==='http://127.0.0.1:8080/v1'){
-      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v4-q4-embedding');
+      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v5-opfs-progress');
       emit(context,'gguf-browser-loading',{model:config.model,backend:'wllama',networkInference:false});
       const run=await browserGGUF.generate({
         model:config.model,messages:normalizeChatMessages(messages),

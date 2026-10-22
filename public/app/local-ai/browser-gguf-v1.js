@@ -6,7 +6,8 @@ export const GGUF_PRESETS=Object.freeze([
   Object.freeze({id:'qwen35-4b-iq2m-gguf',label:'Qwen 3.5 4B · GGUF IQ2_M',url:'https://huggingface.co/eaddario/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-IQ2_M.gguf',sizeHint:'~1.6 GB',primary:true,note:'Lower-quality quantization to fit the browser single-file size limit. Not identical to your GGUF benchmark.'}),
   Object.freeze({id:'qwen35-2b-q4km-gguf',label:'Qwen 3.5 2B · GGUF Q4_K_M',url:'https://huggingface.co/SoAIHQ/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf',sizeHint:'~1.3 GB',primary:false,note:'Optional smaller GGUF; only one model is kept loaded at a time.'})
 ]);
-let instance=null,loadedUrl='',loading=null,downloading=false;
+let instance=null,loadedUrl='',loading=null,downloading=false,importing=false;
+const OPFS='/app/local-ai/browser-gguf-opfs-v1.js?v=gguf-opfs-v1';
 const clean=value=>String(value??'').trim();
 function err(code,message){return Object.assign(new Error(message),{code})}
 function validateURL(value){
@@ -95,6 +96,10 @@ function cachePath(importId,index){
   return new URL('/__civweave/gguf-file-import-v1/'+encodeURIComponent(importId)+'/'+String(index).padStart(5,'0')+'.gguf',location.origin).href;
 }
 async function blobsFor(record){
+  if(record?.storage==='civweave.gguf.import-opfs.v1'){
+    const store=await import(OPFS);
+    return store.readGGUFShards(record);
+  }
   if(!record||!Array.isArray(record.files)||!record.files.length)throw err('GGUF_IMPORT_RECORD','No saved imported GGUF shards found.');
   const cache=await caches.open(IMPORT_CACHE),blobs=[];
   for(const item of record.files){
@@ -109,59 +114,79 @@ async function blobsFor(record){
   }
   return blobs;
 }
-export async function importFiles(input,{onProgress}={}){
-  if(downloading)throw err('GGUF_DOWNLOAD_BUSY','Wait for the active GGUF transfer to finish.');
-  let incoming=Array.from(input||[]);
-  // The original Q4 model can be larger than Wllama's per-file ArrayBuffer
-  // limit. Convert it in-browser into standard GGUF tensor-aligned shards.
-  // Blob.slice keeps the original quantized tensor bytes unchanged.
-  if(incoming.length===1&&incoming[0]?.size>MAX_GGUF_SHARD_BYTES){
-    const original=incoming[0],family=modelFromFile(importName(original.name));
-    const splitter=await import('/app/local-ai/gguf-split-browser-v1.js?v=gguf-split-v1');
-    notify('auto-shard-plan',{model:family.id,bytes:original.size});
-    // Use the splitter's tested Qwen-safe target (1.8GB). Tensor-aligned GGUF
-    // shards must never cut a single quantized embedding tensor in half.
-    const plan=await splitter.planGGUFSplit(original);
-    incoming=plan.groups.map((group,index)=>{
-      const blob=splitter.shardFromPlan(plan,index);
-      return new File([blob],splitter.splitName(original.name,index,plan.groups.length),{type:'application/octet-stream'});
-    });
-    notify('auto-shard-ready',{model:family.id,shards:incoming.length,bytes:original.size});
-    try{onProgress?.({loaded:0,total:original.size,file:'Prepared '+incoming.length+' lossless GGUF shards',index:0,count:incoming.length})}catch{}
-  }
-  const rows=orderedFiles(incoming),model=modelFromFile(rows[0].name);
-  if(rows.some(row=>modelFromFile(row.name).family!==model.family))
-    throw err('GGUF_SHARDS_MISMATCH','All selected GGUF shards must refer to the same Qwen model.');
-  for(const row of rows){
-    const magic=new Uint8Array(await row.file.slice(0,4).arrayBuffer());
-    if(magic.length!==4||magic[0]!==71||magic[1]!==71||magic[2]!==85||magic[3]!==70)
-      throw err('GGUF_BAD_HEADER',row.name+' is not a GGUF model file.');
-  }
-  const importId='file-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
-  const cache=await caches.open(IMPORT_CACHE),written=[],total=rows.reduce((sum,row)=>sum+row.file.size,0);
-  const record={schema:'civweave.gguf.import.v1',importId,model:model.id,label:model.label,sourceNames:rows.map(row=>row.name),bytes:total,files:[],importedAt:new Date().toISOString()};
-  let loaded=0;
+export async function importFiles(input,{onProgress,signal}={}){
+  if(downloading||importing)throw err('GGUF_IMPORT_BUSY','A GGUF model download or import is already running.');
+  importing=true;
+  let importId=null,store=null,written=[];
+  const emitProgress=details=>{
+    notify('importing',{model:details.model,loaded:details.loaded,total:details.total,
+      file:details.file,index:details.index,count:details.count,phase:details.phase});
+    try{onProgress?.(details)}catch{}
+  };
   try{
-    for(let i=0;i<rows.length;i++){
-      const row=rows[i],key=cachePath(importId,i);
-      notify('importing',{model:model.id,file:row.name,index:i+1,count:rows.length,loaded,total});
-      await cache.put(key,new Response(row.file,{headers:{'content-type':'application/octet-stream'}}));
-      written.push(key);
-      record.files.push({index:i,name:row.name,size:row.file.size});
-      loaded+=row.file.size;
-      try{onProgress?.({loaded,total,file:row.name,index:i+1,count:rows.length})}catch{}
+    let incoming=Array.from(input||[]);
+    if(signal?.aborted)throw err('GGUF_IMPORT_CANCELLED','Import was cancelled.');
+    // A GGUF tensor can exceed 500MB; the splitter preserves each quantized
+    // tensor intact, with correctly rewritten GGUF shard metadata and offsets.
+    if(incoming.length===1&&incoming[0]?.size>MAX_GGUF_SHARD_BYTES){
+      const original=incoming[0],family=modelFromFile(importName(original.name));
+      const splitter=await import('/app/local-ai/gguf-split-browser-v1.js?v=gguf-split-v1');
+      notify('auto-shard-plan',{model:family.id,bytes:original.size});
+      const plan=await splitter.planGGUFSplit(original);
+      incoming=plan.groups.map((group,index)=>{
+        const blob=splitter.shardFromPlan(plan,index);
+        return new File([blob],splitter.splitName(original.name,index,plan.groups.length),{type:'application/octet-stream'});
+      });
+      notify('auto-shard-ready',{model:family.id,shards:incoming.length,bytes:original.size});
+      emitProgress({model:family.id,loaded:0,total:original.size,
+        file:'Prepared '+incoming.length+' lossless GGUF shards',index:0,count:incoming.length,phase:'preparing'});
     }
-    await blobsFor(record);
+    const rows=orderedFiles(incoming),model=modelFromFile(rows[0].name);
+    if(rows.some(row=>modelFromFile(row.name).family!==model.family))
+      throw err('GGUF_SHARDS_MISMATCH','All selected GGUF shards must refer to the same Qwen model.');
+    for(const row of rows){
+      const magic=new Uint8Array(await row.file.slice(0,4).arrayBuffer());
+      if(magic.length!==4||magic[0]!==71||magic[1]!==71||magic[2]!==85||magic[3]!==70)
+        throw err('GGUF_BAD_HEADER',row.name+' is not a GGUF model file.');
+    }
+    const total=rows.reduce((sum,row)=>sum+row.file.size,0);
+    store=await import(OPFS);
+    await store.checkCapacity(total);
+    const dir=await store.directory();
+    importId='file-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+    const record={schema:'civweave.gguf.import.v1',storage:store.GGUF_OPFS_SCHEMA,
+      importId,model:model.id,label:model.label,
+      sourceNames:rows.map(row=>row.name),bytes:total,files:[],importedAt:new Date().toISOString()};
+    let completed=0;
+    for(let i=0;i<rows.length;i++){
+      if(signal?.aborted)throw err('GGUF_IMPORT_CANCELLED','Import cancelled. Your original GGUF file is unchanged.');
+      const row=rows[i];
+      // Track even an incomplete write, so errors never leave unpublished
+      // multi-GB shard files consuming the user's OPFS storage.
+      written.push(i);
+      const result=await store.writeGGUFShard(dir,importId,i,row.file,{signal,onProgress:part=>{
+        emitProgress({model:model.id,loaded:completed+part.written,total,
+          file:row.name,index:i+1,count:rows.length,part:part.part,parts:part.parts,phase:'writing'});
+      }});
+      completed+=row.file.size;
+      record.files.push({...result});
+      emitProgress({model:model.id,loaded:completed,total,
+        file:row.name,index:i+1,count:rows.length,phase:'shard-verified'});
+    }
+    emitProgress({model:model.id,loaded:total,total,
+      file:'Verifying saved GGUF shards',index:rows.length,count:rows.length,phase:'verifying'});
+    await store.readGGUFShards(record);
+    if(signal?.aborted)throw err('GGUF_IMPORT_CANCELLED','Import cancelled before model activation.');
     const index=importIndex();
     index[importId]=record;
     localStorage.setItem(IMPORT_INDEX_KEY,JSON.stringify(index));
-    notify('imported',{model:record.model,loaded:total,total,count:rows.length});
+    notify('imported',{model:record.model,loaded:total,total,count:rows.length,storage:'opfs'});
     return record;
   }catch(error){
-    for(const key of written)try{await cache.delete(key)}catch{}
-    notify('import-failed',{model:record.model,reason:String(error?.message||error).slice(0,240)});
+    if(importId&&store)await store.removeGGUFShards(importId,written);
+    notify('import-failed',{reason:String(error?.message||error).slice(0,240)});
     throw error;
-  }
+  }finally{importing=false}
 }
 export async function activateImported(importId){
   const record=importIndex()[String(importId||'')];
