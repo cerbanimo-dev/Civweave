@@ -8,7 +8,7 @@ The phone benchmark used **Qwen 3.5 4B in a native GGUF llama-server runtime**. 
 
    `llama-server -m /path/to/Qwen3.5-4B.gguf --host 127.0.0.1 --port 8080 --alias Qwen3.5-4B-GGUF`
 
-2. Open Civweave staging → Settings → **Local models** → **Phone primary · Qwen 3.5 4B GGUF**.
+2. Open Civweave staging → Settings → **AI & safety** → **Phone primary · Qwen 3.5 4B GGUF**.
 3. Use `http://127.0.0.1:8080/v1` (the default) and press **Verify and use native 4B as phone primary**. Civweave checks `GET /v1/models` and requires a Qwen 3.5 **4B** identity before changing any shared AI settings.
 4. Return to the five systems and test a conversation, shared Quest, Moss Learning Journey, Kamiya Endeavor, Rook Manifest, and Merlin review-only proposal. This routing uses the shared OpenAI-compatible runtime; the native 4B is selected as the final-answer model for all five.
 
