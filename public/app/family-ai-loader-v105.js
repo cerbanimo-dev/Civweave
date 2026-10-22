@@ -23,7 +23,7 @@ const VALUE_MODEL=[
 ];
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.117-standard-ai-only',()=>globalThis.CivweaveFastInteractiveV192];
 const SERVER_AI_ROUTER=['/app/server-ai-router-v301.js?v=1.0.117-guild-handoff',()=>globalThis.CivweaveServerAIRouterV301?.status?.().registered===true];
-const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.2.0-thread-network-gate',()=>globalThis.CivweaveResponseRouterV347];
+const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',()=>globalThis.CivweaveResponseRouterV347];
 const LOCAL_BOOTSTRAP=['/app/local-ai/bootstrap-v266.js?v=1.0.83-v282-inference-health',()=>globalThis.CivweaveLocalAIBootstrapV266];
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.5-minilm-local-route',()=>globalThis.CivweaveAssistantV141];
 const PATCHES=[

@@ -48,7 +48,8 @@ assert.ok(artifactIntentBody.indexOf('semanticRank(')<artifactIntentBody.indexOf
 const classifyBody=source.slice(source.indexOf('async function classify'),source.indexOf('\nfunction userText',source.indexOf('async function classify')));
 assert.ok(classifyBody.indexOf("semanticRank(text,TASK_PROTOTYPES")>=0,'task routing must call MiniLM');
 assert.ok(classifyBody.indexOf("semanticRank(text,TASK_PROTOTYPES")<classifyBody.indexOf('hardTaskClass(text,request)'),'MiniLM must classify task intent before deterministic hard-task fallback');
-assert.ok(loader.includes('/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary'),'shared guide loader must cache-bust the MiniLM-primary response router');
+const routerVersion=source.match(/const VERSION='([^']+)'/)?.[1]?.split('-')[0];
+assert.ok(routerVersion&&loader.includes(`/app/minilm-response-router-v347.js?v=${routerVersion}-`),'shared guide loader must cache-bust the current MiniLM response router');
 assert.ok(loader.includes('/app/unified-chat-system-v1.js?v=1.0.2-learning-continuation'),'shared guide loader must cache-bust the learning-continuation unified chat runtime');
 assert.ok(unified.includes("'civweave:assistant-runtime-ready'"),'unified chat must reattach after assistant runtime readiness');
 assert.ok(unified.includes("'civweave:response-router-installed'"),'unified chat must reattach after response-router replacement');

@@ -46,6 +46,8 @@ function harness({ releaseOwner = false, guildActive = false, stagingRecovery = 
       activeGuildResponse:async()=>new Response('signed Guild runtime',{headers:{'x-review-owner':'guild'}}),
       network:async()=>new Response('generic unvalidated runtime',{headers:{'x-review-owner':'generic'}}),
       freshCached:async()=>null,legacyFallback:async()=>null,checkGuildRelease:async()=>null,dbGet:async()=>null,
+      // Realm-cache retirement is tested with a complete origin replacement available.
+      originFallbackReady:async()=>true,
     });
     const release=read('service-worker-release-generation-v1.js');
     for(const name of ['CACHE','CACHE_PREFIX','GUILD_CACHE_PREFIX'])context[name]=release.match(new RegExp(`const ${name}=['"]([^'"]+)['"]`))?.[1];

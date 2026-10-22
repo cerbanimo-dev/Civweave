@@ -4,7 +4,7 @@ const VERSION='1.0.9';
 const REVISION='experience-orchestrator-v355-minilm-submit-gate';
 const DEFAULT_TTL_MS=18000;
 const PROTECTED_ROUTE_RE=/(?:^|\/)(?:checkout|payment|billing|auth|login|sign[-_]?in|sign[-_]?up|submit|confirmation?|destructive|recovery|error)(?:\/|$)/i;
-const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary',()=>globalThis.CivweaveResponseRouterV347];
+const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',()=>globalThis.CivweaveResponseRouterV347];
 const CHAT_MODULES=[
  ['/app/chat-fullscreen-v295.js',()=>globalThis.CivweaveChatFullscreenV295?.version==='1.0.108-chat-fullscreen-v299'&&globalThis.CivweaveChatFullscreenV295?.revision==='saved-tabs-grid-v351'],
  ['/app/saved-chat-store-v295.js?rev=1.0.164-thread-tabs-v352',()=>globalThis.CivweaveSavedChatStoreV295?.version==='1.0.164-saved-chat-store-v352'],

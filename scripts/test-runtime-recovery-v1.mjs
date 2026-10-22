@@ -176,3 +176,37 @@ test('changing a Gemma selection defers engine disposal until generation ends',a
   release();await first;
   assert.equal(h.engineDeletes,1);assert.equal(h.api.state().engineReady,false);
 });
+
+test('local chat attributes native fallback to the executing model while retaining the selected model',async()=>{
+  const selected='qwen3-4b-q4f16',fallback='smollm3-3b-q4f16',reason='The selected model could not initialize its WebGPU session.';
+  for(const [executed,reportedReason] of [[fallback,reason],[fallback,null],[selected,null]]){
+    const events=[],writes=[],selection={active:true,id:selected};
+    const localResult={text:'A response from the on-device execution boundary.',id:selected,executionId:executed,
+      fallbackUsed:executed!==selected,fallbackChain:executed!==selected?[executed]:[],fallbackReason:reportedReason,
+      usage:{outputTokens:9}};
+    const context={URL,queueMicrotask,setTimeout,clearTimeout,setInterval:()=>0,clearInterval(){},addEventListener(){},
+      dispatchEvent:event=>events.push(event),CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},
+      localStorage:{getItem:key=>key==='civweave.local-ai.selection.v266'?JSON.stringify(selection):null,setItem:(...args)=>writes.push(args)},
+      document:{scripts:[],querySelector:()=>null},location:{href:'https://staging.example/app/persistent-system-shell-v1.html'},
+      CivweaveLocalModelDownloadV266:{selection:()=>selection},
+      CivweaveLocalChatRuntimeV295:{revision:'v312-runtime-first-bootstrap',inferenceCoreFirst:true,fullBootstrapBlocking:false,
+        generate:async()=>localResult},
+      CivweaveAssistantV141:{respond:async()=>{throw new Error('The pinned local request must not reach another provider')}}};
+    vm.runInNewContext(read('local-provider-authority-v1.js'),context);
+    const result=await context.CivweaveAssistantV141.respond({text:'Explain the result.',systemId:'cerbanimo'});
+    assert.equal(result.model,executed,'the executed model must label the response');
+    assert.equal(result.provider,'downloaded-local');assert.equal(result.response.answer,localResult.text);
+    assert.equal(result.responseRouting.requestedModel,selected);assert.equal(result.responseRouting.model,executed);
+    assert.equal(result.responseRouting.localTierFallback,executed!==selected);
+    assert.deepEqual(Array.from(result.responseRouting.fallbackChain),localResult.fallbackChain);
+    assert.equal(result.usage.outputTokens,9);assert.equal(selection.id,selected);assert.deepEqual(writes,[]);
+    if(executed!==selected){
+      assert.equal(result.fallbackFrom.model,selected);
+      if(reportedReason)assert.equal(result.fallbackFrom.reason,reportedReason);
+      else{assert.match(result.fallbackFrom.reason,/smollm3-3b-q4f16/);assert.match(result.fallbackFrom.reason,/qwen3-4b-q4f16/)}
+      assert.equal(result.responseRouting.fallbackReason,result.fallbackFrom.reason);
+    }
+    else assert.equal(result.fallbackFrom,null);
+    assert.equal(events.find(event=>event.type==='civweave:response-route').detail.model,executed);
+  }
+});
