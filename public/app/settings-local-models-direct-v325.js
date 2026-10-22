@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.2-settings-v325-direct-local-models-qwen-phone-fast';
+const VERSION='1.2.3-settings-v325-direct-local-models-qwen-import-owner';
 const LAYER_ID='cw-settings-v320';
 const PANEL_ID='cw-local-models-direct-v325';
 const STYLE_ID='cw-local-models-direct-v325-style';
@@ -9,6 +9,10 @@ const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const HEALTH_KEY='civweave.local-ai.health.v286';
 const PERF_KEY='civweave.local-ai.performance.v1';
+const PHONE_IMPORT_KEY='civweave.qwen35-4b.import-progress.v1';
+let phoneImportInFlight=false;
+function phoneImportRecord(phase,message,chunk=0,chunks=0){try{localStorage.setItem(PHONE_IMPORT_KEY,JSON.stringify({phase,text:String(message).slice(0,400),chunk,chunks,at:Date.now()}))}catch{}}
+function phoneImportState(){try{return JSON.parse(localStorage.getItem(PHONE_IMPORT_KEY)||'{}')}catch{return{}}}
 const PREMIER='premier-phone';
 const FAST_E2='gemma4-e2b-it-litert-web';
 const FAST_E4='gemma4-e4b-it-litert-web';
@@ -146,7 +150,7 @@ function render(layer=document.getElementById(LAYER_ID)){
   if(!layer?.isConnected||layer.hidden)return false;
   installStyle();updateHeader(layer);
   const form=layer.querySelector('[data-cw-settings-form]'),target=form?.querySelector('[data-settings-tab-panel="local-models"]');if(!target)return false;
-  const snap=snapshot();const perf=(()=>{try{return JSON.parse(localStorage.getItem(PERF_KEY)||'{}')}catch{return{}}})();
+  const snap=snapshot();const perf=(()=>{try{return JSON.parse(localStorage.getItem(PERF_KEY)||'{}')}catch{return{}}})();const phoneImport=phoneImportState();
   const packMarkup=PACKS.map(pack=>{
     const state=snap.packs[pack.id]||{},active=Boolean(snap.selection?.active&&state.status==='ready'&&state.selectedModel===snap.selection.id);
     const premium=pack.id==='qwen-flagship-phone'?'<p><b>Roles:</b> general chat · voice-to-voice · deep logic/planning · architecture/code · optional image generation</p>':'';
@@ -155,10 +159,10 @@ function render(layer=document.getElementById(LAYER_ID)){
   const modelMarkup=MODELS.map(model=>{
     const state=snap.downloads[model.id]||{},active=Boolean(snap.selection?.active&&snap.selection.id===model.id),health=snap.health[model.id],healthText=health?(health.ok?'Last health check passed':'Last health check failed'):'No measured run yet';
     const row=perf[model.id]||{},recent=(Array.isArray(row.samples)?row.samples:[]).slice(-5),speeds=recent.filter(x=>Number.isFinite(x.tokensPerSecond)),ttfts=recent.filter(x=>Number.isFinite(x.ttftMs)),speed=speeds.length?(speeds.reduce((n,x)=>n+x.tokensPerSecond,0)/speeds.length).toFixed(1)+' tokens/s'+(speeds.some(x=>x.approximate)?' (approx)':''):'Not measured yet',ttft=ttfts.length?' · first token '+(ttfts.reduce((n,x)=>n+x.ttftMs,0)/ttfts.length/1000).toFixed(1)+'s':'';
-    return`<article class="cw-direct-model" data-model-id="${esc(model.id)}" data-active="${active?'true':'false'}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.size)} · ${esc(statusCopy(state,active))}${active?' · ACTIVE':''}</p><p>${esc(healthText)}</p><p>Actual speed: ${esc(speed+ttft)}${row.lastPlan?' · '+(row.lastPlan.validated?'Moss structure PASS':'Moss structure failed'):''}</p></div><div class="cw-direct-actions">${modelAction(model,state,active)}</div></article>`;
+    return`<article class="cw-direct-model" data-model-id="${esc(model.id)}" data-active="${active?'true':'false'}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.size)} · ${esc(statusCopy(state,active))}${active?' · ACTIVE':''}</p><p>${esc(healthText)}</p><p>Actual speed: ${esc(speed+ttft)}${row.lastPlan?' · '+(row.lastPlan.validated?'Moss structure PASS':'Moss structure failed'):''}</p>${model.id==='qwen35-4b-litert-web'&&phoneImport?.text?`<p data-qwen-phone-import-progress role="status">File import: ${esc(phoneImport.phase==='importing'&&!phoneImportInFlight?'Previous attempt · '+phoneImport.text+' · Reselect the file to resume.':phoneImport.text)}</p>`:''}</div><div class="cw-direct-actions">${modelAction(model,state,active)}</div></article>`;
   }).join('');
   target.innerHTML=`<section id="${PANEL_ID}" class="cw-clean-panel" data-cw-direct-local-panel><div><h3>AI Downloads</h3><p>Saved choices are rendered immediately by Settings. Runtime and download code loads only when you choose an action.</p></div><div class="cw-direct-build">${esc(BUILD_LABEL)}</div><div class="cw-direct-note">The Premium Phone Pack keeps the executable chat/reasoning and voice stack in Civweave. Dedicated GGUF coding and Snapdragon diffusion remain optional companion installs so they do not compete for phone RAM.</div><div class="cw-direct-status" data-cw-direct-local-status role="status">Saved local model state loaded.</div><div class="cw-direct-pack-grid">${packMarkup}</div><details open><summary><b>Premium phone companions</b></summary><p>Optional tools for dedicated coding and local image generation. These links open outside Civweave; they are not claimed as browser-runtime models.</p><div class="cw-direct-link-grid">${phoneCompanionMarkup()}</div></details><details><summary><b>Mac mini / cyberdeck local AI setups</b></summary><p>Apple Silicon model suggestions by unified-memory tier. These are external MLX/Ollama setups, useful for Guild servers, workstations, and portable cyberdecks.</p><div class="cw-direct-link-grid">${macMiniMarkup()}</div></details><div class="cw-direct-note"><b>New: Llama 3.2 3B two-pass test</b><br>Download the ~2.4 GB ONNX model from Individual Civweave models below, then <a href="/app/local-ai/llama32-two-pass-test-v4.html">run constrained JSON compilation</a>. This does not remove your installed Gemma models.</div><details open><summary><b>Individual Civweave models</b></summary><div class="cw-direct-model-list">${modelMarkup}</div></details>${snap.selection?.active?'<div class="cw-direct-actions"><button type="button" data-cw-direct-local-action data-local-disable>Stop using downloaded AI</button></div>':''}</section>`;
-  form.dataset.directLocalModels='v325';layer.dataset.localModelsRenderer='direct-local-v325.4';return true;
+  form.dataset.directLocalModels='v325';layer.dataset.localModelsRenderer='direct-local-v325.5';return true;
 }
 function status(layer,text,error=false){const node=layer?.querySelector?.('[data-cw-direct-local-status]');if(!node)return;node.textContent=String(text||'');node.classList?.toggle?.('cw-direct-error',Boolean(error))}
 function actionDescriptor(button){
@@ -278,26 +282,29 @@ async function importPhoneQwenDirect(event){
   // global capture listener cleared input.value before the v324 change handler
   // could read files[0], making the import appear to flash and do nothing.
   const input=event.target?.closest?.('input[data-local-phone-import]');
-  if(!input||!input.closest('#'+PANEL_ID))return;
+  if(!input||!input.closest('#'+PANEL_ID)||phoneImportInFlight)return;
   const file=input.files?.[0];input.value='';if(!file)return;
+  phoneImportInFlight=true;
   const layer=document.getElementById(LAYER_ID);
   try{
     const id=input.dataset.localPhoneImport;
     if(id!=='qwen35-4b-litert-web'||file.name!=='Qwen3.5-4B_mixed_int4.litertlm'||file.size!==2754070624)throw Error('Select the complete 2,754,070,624-byte Qwen3.5-4B_mixed_int4.litertlm file.');
-    status(layer,'Importing Qwen 4B in resumable 8 MiB fragments…');
-    await ensureActions();
+    phoneImportRecord('importing','Importing Qwen 4B as resumable 8 MiB fragments.');status(layer,'Importing Qwen 4B in resumable 8 MiB fragments…');
+    for(const [src,ready]of ACTION_FILES.slice(0,2))await ensureScript(src,ready,'Qwen phone import component');
     const m=manager(),r=registry(),spec=r?.byId?.(id),artifact=spec?.artifacts?.find(x=>x.required);
     if(!m||artifact?.sizeBytes!==file.size||artifact.path!==file.name)throw Error('Current Qwen 4B registry/download manager does not match this file.');
     const {importChunkedFile}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
     let last=0;
     await importChunkedFile(await caches.open(m.cache),r.directUrl(spec,artifact.path),file,{onProgress:p=>{
-      if(Date.now()-last>250||p.chunk===p.chunks){last=Date.now();status(layer,'Qwen 4B '+p.chunk+'/'+p.chunks+' cached fragments');}
+      if(Date.now()-last>250||p.chunk===p.chunks){last=Date.now();const msg='Qwen 4B '+p.chunk+'/'+p.chunks+' cached fragments';phoneImportRecord('importing',msg,p.chunk,p.chunks);status(layer,msg);}
     }});
     const verified=await m.status(id);
     if(!verified.available)throw Error('Model cache still incomplete after import.');
+    phoneImportRecord('ready','Qwen 4B verified; select Use locally. No GPU inference started.');
     preserveScroll(layer,()=>render(layer));
     status(layer,'Qwen 4B verified. Select Use locally; no GPU inference was started.');
-  }catch(error){status(layer,String(error?.message||error),true)}
+  }catch(error){const msg=String(error?.message||error);phoneImportRecord('error','Import failed: '+msg+' · Reselect the downloaded file to resume retained fragments.');status(layer,msg,true)}
+  finally{phoneImportInFlight=false}
 }
 document.addEventListener('change',event=>void importPhoneQwenDirect(event),true);
 function onDocumentClick(event){const layer=document.getElementById(LAYER_ID);if(!layer)return;const action=event.target?.closest?.(`#${LAYER_ID} [data-cw-direct-local-action]`);if(action){event.preventDefault();event.stopImmediatePropagation();void delegateAction(action,layer);return}const tab=event.target?.closest?.(`#${LAYER_ID} [data-settings-tab="local-models"]`);if(tab)queueMicrotask(()=>{render(layer);hardGuard(layer)})}
