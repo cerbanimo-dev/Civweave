@@ -1,60 +1,55 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
 import vm from 'node:vm';
 
-const settings = await readFile('public/app/settings-gateway-v317.js','utf8');
-const runtime = await readFile('public/app/shared/civweave-model-runtime.js','utf8');
+const read=path=>readFile(path,'utf8');
+const [settings,runtime,gguf,build,stage]=await Promise.all([
+  read('public/app/settings-gateway-v317.js'),
+  read('public/app/shared/civweave-model-runtime.js'),
+  read('public/app/local-ai/browser-gguf-v1.js'),
+  read('scripts/build-cloudflare-pages.mjs'),
+  read('scripts/stage-wllama-browser-v1.mjs')
+]);
 new vm.Script(settings,{filename:'settings-gateway-v317.js'});
 new vm.Script(runtime,{filename:'civweave-model-runtime.js'});
+for(const source of ['public/app/local-ai/browser-gguf-v1.js','scripts/stage-wllama-browser-v1.mjs'])
+  execFileSync(process.execPath,['--check',source]);
 
-const chunk=(source,from,to)=> {
-  const start=source.indexOf(from),end=source.indexOf(to,start+from.length);
-  assert.ok(start>=0&&end>start,'Missing phone GGUF integration section: '+from);
-  return source.slice(start,end);
-};
-const gatewaySection=chunk(settings,'const GGUF_FAMILY=','function selectLocalModel(selected){');
-const requests=[];
-const context={
-  URL,AbortController,setTimeout,clearTimeout,
-  fetch:async(url,options)=>{
-    requests.push({url,options});
-    return {ok:true,async json(){return {data:[{id:'Qwen3.5-4B-Q4_K_M.gguf'},{id:'Qwen3.5-2B-Q4_K_M.gguf'}]}}};
-  }
-};
-vm.createContext(context);
-vm.runInContext(gatewaySection+'\nthis.testPhone={checkedPhoneEndpoint,probePhoneGGUF,GGUF_FAMILY};',context);
-const {checkedPhoneEndpoint,probePhoneGGUF,GGUF_FAMILY}=context.testPhone;
-assert.equal(checkedPhoneEndpoint('http://127.0.0.1:8080/v1/'),'http://127.0.0.1:8080/v1');
-assert.equal(checkedPhoneEndpoint('http://localhost:8081/v1/chat/completions'),'http://localhost:8081/v1');
-for(const url of ['https://example.com/v1','http://192.168.1.7:8080/v1','http://127.0.0.1:8080/private','http://user:pass@127.0.0.1:8080/v1']){
-  assert.throws(()=>checkedPhoneEndpoint(url),'Remote or credential-bearing GGUF endpoint must be rejected: '+url);
-}
-assert.ok(GGUF_FAMILY.primary.test('Qwen3.5-4B-Q4_K_M.gguf'));
-assert.ok(!GGUF_FAMILY.primary.test('Qwen3.5-14B-Q4_K_M.gguf'));
-assert.ok(GGUF_FAMILY.helper2b.test('Qwen3.5-2B-Q4_K_M.gguf'));
-assert.ok(!GGUF_FAMILY.helper08b.test('Qwen3.5-2B-Q4_K_M.gguf'));
-assert.equal(await probePhoneGGUF('http://127.0.0.1:8080/v1','primary'),'Qwen3.5-4B-Q4_K_M.gguf');
-assert.ok(requests.length===1&&requests[0].url==='http://127.0.0.1:8080/v1/models');
-assert.equal(requests[0].options.credentials,'omit');
-context.fetch=async()=>({ok:true,async json(){return{data:[{id:'Qwen3.5-2B-Q4_K_M.gguf'}]}}});
-await assert.rejects(()=>probePhoneGGUF('http://127.0.0.1:8080/v1','primary'),/did not advertise/);
-
-const runtimeSection=chunk(runtime,'  // The native phone GGUF lane','  async function invokeOpenAI(config, messages, request, context, signal) {');
-const saved={schema:'civweave.mobile.gguf-primary.v1',enabled:true,endpoint:'http://127.0.0.1:8080/v1',model:'Qwen3.5-4B-Q4_K_M.gguf',helpers:[{role:'helper2b',endpoint:'http://127.0.0.1:8081/v1',model:'Qwen3.5-2B-Q4_K_M.gguf'}]};
-const rt={URL,global:{localStorage:{getItem:()=>JSON.stringify(saved)}}};
-vm.createContext(rt);
-vm.runInContext(runtimeSection+'\nthis.phoneRuntime={nativePhoneLineup,nativePhoneHelper};',rt);
-const config={provider:'openai-compatible',model:saved.model,endpoint:saved.endpoint};
-assert.equal(rt.phoneRuntime.nativePhoneLineup(config).model,saved.model,'Selected native GGUF must remain the execution model.');
-assert.equal(rt.phoneRuntime.nativePhoneLineup({...config,model:'Gemma4'}),null,'Never relabel another model as the benchmarked GGUF 4B.');
-assert.equal(rt.phoneRuntime.nativePhoneLineup({...config,endpoint:'http://10.0.0.7:8080/v1'}),null,'Native GGUF route must remain loopback-only.');
-assert.equal(rt.phoneRuntime.nativePhoneLineup({...config,provider:'gemini'}),null,'A cloud provider must not inherit local GGUF helper configuration.');
-assert.match(runtime,/chat_template_kwargs: \{ enable_thinking: false \}/);
-assert.match(runtime,/const useStream = Boolean\(config.stream \|\| lineup\)/);
-assert.match(runtime,/mobile-helper-unavailable/);
-assert.match(settings,/data-mobile-qwen-connect/);
-const stableSlot = settings.indexOf('data-mobile-gguf-panel');
-const localSlot = settings.indexOf('data-settings-tab-panel="local-models"');
-assert.ok(stableSlot > 0 && localSlot > stableSlot, 'Phone GGUF setup must live before the replaceable Local Models tab.');
+const keep=settings.indexOf('data-mobile-gguf-panel');
+const replaceable=settings.indexOf('data-settings-tab-panel="local-models"');
+assert.ok(keep>0&&replaceable>keep,'GGUF controls must stay in persistent AI & safety tab.');
+assert.match(settings,/data-embedded-gguf-download/);
+assert.match(settings,/data-embedded-gguf-activate/);
+assert.match(settings,/gguf\.download\(selected\.url/);
+assert.match(settings,/gguf\.activate\(selected\)/);
 assert.match(settings,/persist\(\{\.\.\.DEFAULTS,route:'openai-compatible'/);
-console.log('Verified native GGUF 4B phone-primary route, strict localhost model identity, optional helper isolation and source syntax.');
+assert.doesNotMatch(settings,/data-mobile-qwen-connect|checkedPhoneEndpoint|probePhoneGGUF/,'Server-only GGUF UI must be retired.');
+
+assert.match(gguf,/export const GGUF_SELECTION_KEY='civweave\.mobile\.gguf-primary\.v2'/);
+assert.match(gguf,/\.modelManager\.downloadModel\(/);
+assert.match(gguf,/\.modelManager\.getModels\(/);
+assert.match(gguf,/\.validate\(\)==='valid'/);
+assert.match(gguf,/\.loadModel\(file,/);
+assert.match(gguf,/\.createChatCompletion\(params\)/);
+assert.match(gguf,/enable_thinking:false/);
+assert.match(gguf,/n_gpu_layers:gpuLayers/);
+assert.match(gguf,/n_gpu_layers:[0-9]|create\(0\)/);
+assert.match(gguf,/Qwen3\.5-4B-IQ2_M\.gguf/);
+assert.match(gguf,/Qwen3\.5-2B-Q4_K_M\.gguf/);
+assert.match(gguf,/\.size>24\*1024\*1024|GGUF_NOT_DOWNLOADED/);
+assert.doesNotMatch(gguf,/llama-server|\.litertlm|127\.0\.0\.1|chat\/completions/,'Embedded engine must not depend on native server or LiteRT.');
+
+const browserDispatch=runtime.indexOf('const browserGGUF=await import(');
+const networkDispatch=runtime.indexOf('const url = openAIChatUrl(config.endpoint, config);',browserDispatch);
+assert.ok(browserDispatch>0&&networkDispatch>browserDispatch,'Browser GGUF must intercept before any native HTTP transport.');
+assert.match(runtime,/selectedGGUF\.model===config\.model/);
+assert.match(runtime,/browserGGUF\.generate\(/);
+assert.match(runtime,/emit\(context,'partial'/);
+assert.match(runtime,/networkInference:false/);
+assert.match(build,/stage-wllama-browser-v1\.mjs/);
+assert.match(build,/app\/vendor\/wllama\/esm\/wasm\/wllama\.wasm/);
+assert.match(stage,/@wllama\/wllama@3\.8\.1/);
+assert.match(stage,/--package-lock=false/);
+
+console.log('Browser-only GGUF contracts: settings, verified cache, native worker runtime, no HTTP inference, and pinned asset stage passed.');
