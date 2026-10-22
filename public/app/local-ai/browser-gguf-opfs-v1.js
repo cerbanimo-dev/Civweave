@@ -21,7 +21,7 @@ export async function directory(){
 }
 export async function checkCapacity(total){
   if(!Number.isSafeInteger(total)||total<1)throw problem('GGUF_IMPORT_SIZE','Invalid GGUF import size.');
-  const info=await globalThis.navigator?.storage?.estimate?.().catch(()=>null);
+  const info=await globalThis.navigator?.storage?.estimate?.()?.catch(()=>null);
   const available=Number(info?.quota)-Number(info?.usage);
   if(Number.isFinite(available)&&Number(info?.quota)>0&&available<total+64*1024*1024)
     throw problem('GGUF_STORAGE_FULL','Not enough browser storage for this exact GGUF. About '+(total/1e9).toFixed(2)+' GB is required, but only '+Math.max(0,available/1e9).toFixed(2)+' GB is available. Free browser storage without deleting the original Downloads file.');
