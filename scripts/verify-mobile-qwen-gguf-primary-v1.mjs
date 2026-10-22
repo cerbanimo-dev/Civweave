@@ -36,7 +36,7 @@ assert.match(gguf,/export const GGUF_SELECTION_KEY='civweave\.mobile\.gguf-prima
 assert.match(gguf,/\.modelManager\.downloadModel\(/);
 assert.match(gguf,/\.modelManager\.getModels\(/);
 assert.match(gguf,/\.validate\(\)==='valid'/);
-assert.match(gguf,/\.loadModel\(file,/);
+assert.match(gguf,/\.loadModel\(source,/);
 assert.match(gguf,/\.createChatCompletion\(params\)/);
 assert.match(gguf,/export async function importFiles\(/);
 assert.match(gguf,/export async function activateImported\(/);
@@ -77,7 +77,7 @@ const validatorEnd=gguf.indexOf('function cachePath(importId,index){',validatorS
 assert.ok(validatorStart>=0&&validatorEnd>validatorStart);
 const validateContext=vm.createContext({});
 const validateFunctions=gguf.slice(validatorStart,validatorEnd);
-const validator=new vm.Script("const err=(code,message)=>Object.assign(new Error(message),{code});"+validateFunctions+"\nthis.orderedFiles=orderedFiles;this.modelFromFile=modelFromFile;");
+const validator=new vm.Script("const MAX_GGUF_SHARD_BYTES=2_000_000_000;const err=(code,message)=>Object.assign(new Error(message),{code});"+validateFunctions+"\nthis.orderedFiles=orderedFiles;this.modelFromFile=modelFromFile;");
 validator.runInContext(validateContext);
 const small=(name,index,size=1024)=>({name,size,slice:()=>({arrayBuffer:async()=>new Uint8Array([71,71,85,70]).buffer})});
 const valid4b='Qwen3.5-4B-Q4_K_M.gguf';
