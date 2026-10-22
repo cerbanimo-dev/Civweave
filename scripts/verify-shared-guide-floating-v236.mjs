@@ -51,10 +51,9 @@ const checks=[
   }],
   ['radio launcher and expressive avatar nav keep one geometry owner',()=>{
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);
-    assert.ok(nav.includes(':root{--cw-themed-nav-height:clamp(92px,10vw,100px);--cw-themed-nav-bottom-gap:0px}'),'canonical tall nav geometry missing');
-    assert.ok(nav.includes('@media(max-width:680px){:root{--cw-themed-nav-height:clamp(88px,22vw,96px);--cw-themed-nav-bottom-gap:0px}'),'canonical phone nav geometry missing');
-    assert.ok(nav.includes('@media(max-width:430px){:root{--cw-themed-nav-height:clamp(80px,22vw,88px);--cw-themed-nav-bottom-gap:0px}'),'canonical narrow-phone nav geometry missing');
-    assert.ok(nav.includes("geometryOwner:'canonical-tall-v1'"),'themed nav must declare sole geometry ownership');
+    assert.ok(nav.includes("geometryOwner:'responsive-dock-v2'"),'themed nav must declare sole geometry ownership');
+    assert.match(nav,/\.cw-nav-utilities\{[^}]*grid-column:1\/-1/,'navigation utilities must remain inside the reserved dock');
+    assert.doesNotMatch(nav,/\.cw-themed-system-copy\{[^}]*clip:/,'system names must remain readable');
     assert.ok(guideCore.includes("navigationGeometryOwner:false"),'shared guide surface must disclaim navbar geometry ownership');
     assert.ok(guideCore.includes('--cw-guide-nav-offset'),'floating guide controls must use a read-only measured nav offset');
     assert.ok(!guideCore.includes("setProperty('--cw-themed-nav-height'"),'shared guide surface must not rewrite navbar height');

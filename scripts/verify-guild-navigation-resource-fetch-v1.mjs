@@ -5,6 +5,9 @@ const source=readFileSync('public/service-worker-release-generation-v1.js','utf8
 const worker=readFileSync('public/service-worker-v203.js','utf8');
 const root=readFileSync('public/service-worker.js','utf8');
 const recovery=readFileSync('public/guild-release-recovery.html','utf8');
+const revision=source.match(/const REVISION='([^']+)'/)?.[1];
+const rootRevision=root.match(/const CIVWEAVE_ROOT_WORKER_BRIDGE='([^']+)'/)?.[1];
+assert.ok(revision&&rootRevision,'canonical worker revisions must remain declared');
 const get=(start,end)=>{const i=source.indexOf(start),j=source.indexOf(end,i+start.length);assert.ok(i>=0&&j>i,'missing worker source '+start);return source.slice(i,j)};
 const body=get('async function network(request,pathname){','async function freshCached(pathname,method){');
 const gate=get('async function responseFor(request,pathname){','async function warmOne(cache,pathname){');
@@ -65,7 +68,7 @@ const context=evaluate(fetchListener,{
   OWNED_PREFIXES:['/app/'],
   checkGuildRelease:async()=>null,
   responseFor:async()=>{throw Error('IndexedDB release state read failed')},
-  REVISION:'release-generation-boundary-v8-navigation-resource-fetch'
+  REVISION:revision
 });
 const handler=events.find(event=>event.type==='fetch')?.fn;
 assert.equal(typeof handler,'function');
@@ -81,8 +84,8 @@ const failure=await outstanding;
 assert.equal(failure.status,503,'fail closed on exceptions in release selection');
 assert.match(failure.headers.get('content-type'),/text\/html/,'do not produce browser ERR_FAILED when a fetch promise rejects');
 assert.match(await failure.text(),/guild-release-recovery\.html/,'provide non-destructive recovery link');
-assert.match(worker,/release-generation-boundary-v8-navigation-resource-fetch/);
-assert.match(root,/root-worker-bridge-v35-navigation-resource-fetch/);
-assert.match(recovery,/REQUIRED_REVISION='release-generation-boundary-v8-navigation-resource-fetch'/);
+assert.ok(worker.includes(`/service-worker-release-generation-v1.js?v=${revision}`));
+assert.ok(root.includes(`/service-worker-v203.js?v=${rootRevision}`));
+assert.ok(recovery.includes(`REQUIRED_REVISION='${revision}'`));
 assert.doesNotMatch(source,/caches\.delete\([^)]*model/,'release navigation must not erase local models');
 console.log('PASS: browser navigation uses same-origin resource fetch; quota/cache errors do not discard fetched HTML; signed Guild remains exclusive; rejected fetch events show safe recovery page.');

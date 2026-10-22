@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v8-navigation-resource-fetch';
+const REVISION='release-generation-boundary-v9-navigation-response-stream';
 const CACHE='cw-live-runtime-release-generation-v6-20261021';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
 const ORIGIN_CACHE_PREFIXES=Object.freeze([CACHE_PREFIX,'civweave-shell-','civweave-runtime-','civweave-offline-']);
@@ -501,7 +501,16 @@ self.addEventListener('fetch',event=>{
   // Never reject a navigation's respondWith promise: in Chromium this is
   // surfaced as a blank ERR_FAILED page even when the origin itself is up.
   // This response is a recovery message, not an unsigned release cutover.
-  event.respondWith(Promise.resolve().then(()=>responseFor(request,pathname)).catch(error=>{
+  event.respondWith(Promise.resolve().then(()=>responseFor(request,pathname)).then(response=>{
+    // Pages clean-URL redirects leave redirect history on fetched and cached
+    // Responses. Fetch rejects that history for a navigation's manual redirect
+    // mode after respondWith resolves, outside the promise catch below. Rewrap
+    // the existing body stream without buffering HTML or altering signed bytes.
+    if(request.mode!=='navigate'||!response.redirected)return response;
+    const headers=new Headers(response.headers);
+    headers.delete('content-length');headers.delete('content-encoding');
+    return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+  }).catch(error=>{
     const reason=String(error?.message||error||'unknown error').slice(0,280);
     try{console.warn('[Civweave release] Navigation boundary failure',pathname,reason)}catch{}
     if(request.mode!=='navigate')return new Response('Civweave runtime request failed: '+reason,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});

@@ -4,6 +4,9 @@ import {readFileSync} from 'node:fs';
 const src=readFileSync('public/service-worker-release-generation-v1.js','utf8');
 const worker=readFileSync('public/service-worker-v203.js','utf8');
 const rootWorker=readFileSync('public/service-worker.js','utf8');
+const revision=src.match(/const REVISION='([^']+)'/)?.[1];
+const rootRevision=rootWorker.match(/const CIVWEAVE_ROOT_WORKER_BRIDGE='([^']+)'/)?.[1];
+assert.ok(revision&&rootRevision,'canonical release worker revisions must remain declared');
 const block=(start,end)=>{const a=src.indexOf(start),b=src.indexOf(end,a+start.length);assert(a>=0&&b>a,'missing release-generation code '+start);return src.slice(a,b)};
 const warm=block('async function warm({guildChecked=false}={}){','async function originFallbackReady(){');
 const ready=block('async function originFallbackReady(){','async function purgeStaleRuntimeEntries(){');
@@ -91,7 +94,7 @@ const responseCtx=execute(response+'\nthis.goResponse=responseFor;',{
   network:async()=>null,freshCached:async()=>null,
   legacyFallback:async()=>original.clone(),
   activeGuildResponse:async()=>{throw Error('no signed Guild release should be selected')},
-  REVISION:'release-generation-boundary-v8-navigation-resource-fetch',
+  REVISION:revision,
   Response
 });
 const recovered=await responseCtx.goResponse({method:'GET',mode:'navigate'},'/app/persistent-system-shell-v1.html');
@@ -101,6 +104,6 @@ assert.match(src,/verifyManifest\(manifest,bundle\)/,'signed release must still 
 assert.match(src,/Guild release signature was rejected/,'signature validation must remain intact');
 assert.match(src,/Guild release asset hash mismatch/,'release assets must remain verified');
 assert.match(src,/release-key-revocation\.v1/,'revocations must remain active');
-assert.match(worker,/service-worker-release-generation-v1\.js\?v=release-generation-boundary-v8-navigation-resource-fetch/);
-assert.match(rootWorker,/root-worker-bridge-v35-navigation-resource-fetch/);
+assert.ok(worker.includes(`/service-worker-release-generation-v1.js?v=${revision}`));
+assert.ok(rootWorker.includes(`/service-worker-v203.js?v=${rootRevision}`));
 console.log('PASS: selected unsigned Guild warms origin, failed update preserves installed shell and models, partial Guild cache excluded, signed release remains exclusive.');

@@ -1,15 +1,21 @@
 ;(()=>{
 'use strict';
-const REVISION='weave-pipeline-takeover-v1-r45';
+const REVISION='weave-pipeline-takeover-v1-r46';
 const STAGING_HOST='civweave-staging.pages.dev';
-const CACHE='cwrecovery-v484-chat-responsiveness';
-const MARKER='/__civweave/weave-pipeline-takeover-v1-r45';
+const CACHE='cwrecovery-v485-responsive-chat';
+const MARKER='/__civweave/weave-pipeline-takeover-v1-r46';
 const PURGE_PATHS=new Set([
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
   '/app/working-campus-v440.html',
   '/app/shared-guide-surface-v236.js',
   '/app/human-message-bubble-v1.js',
+  '/app/shared-chat-face-icons-v255.js',
+  '/app/themed-system-nav-v178.js',
+  '/app/persistent-shell-actions-v1.js',
+  '/app/platform-experience-v160.css',
+  '/app/host-node-session-v1.js',
+  '/app/guild-chat-usage-v1.js',
   '/app/human-chat-ble-controls-v1.js',
   '/app/minilm-response-router-v347.js',
   '/app/minilm-decision-strip-v1.js',
