@@ -22,6 +22,11 @@ const replaceable=settings.indexOf('data-settings-tab-panel="local-models"');
 assert.ok(keep>0&&replaceable>keep,'GGUF controls must stay in persistent AI & safety tab.');
 assert.match(settings,/data-embedded-gguf-download/);
 assert.match(settings,/data-embedded-gguf-activate/);
+assert.match(settings,/name="embeddedGGUFFiles"[^>]*multiple/);
+assert.match(settings,/data-embedded-gguf-import/);
+assert.match(settings,/gguf\.importFiles\(files/);
+assert.match(settings,/gguf\.activateImported\(record\.importId\)/);
+
 assert.match(settings,/gguf\.download\(selected\.url/);
 assert.match(settings,/gguf\.activate\(selected\)/);
 assert.match(settings,/persist\(\{\.\.\.DEFAULTS,route:'openai-compatible'/);
@@ -33,6 +38,15 @@ assert.match(gguf,/\.modelManager\.getModels\(/);
 assert.match(gguf,/\.validate\(\)==='valid'/);
 assert.match(gguf,/\.loadModel\(file,/);
 assert.match(gguf,/\.createChatCompletion\(params\)/);
+assert.match(gguf,/export async function importFiles\(/);
+assert.match(gguf,/export async function activateImported\(/);
+assert.match(gguf,/civweave-gguf-file-import-v1/);
+assert.match(gguf,/cache\.put\(key,new Response\(row\.file/);
+assert.match(gguf,/current\.loadModel\(source,/);
+assert.match(gguf,/selected\.source==='file'/);
+assert.match(gguf,/MAX_GGUF_SHARD_BYTES=2_000_000_000/);
+assert.match(gguf,/GGUF_SHARDS_MISSING/);
+
 assert.match(gguf,/enable_thinking:false/);
 assert.match(gguf,/n_gpu_layers:gpuLayers/);
 assert.match(gguf,/n_gpu_layers:[0-9]|create\(0\)/);
@@ -56,5 +70,29 @@ assert.match(localCards,/RECOMMENDED · GGUF ONLY/);
 assert.match(localCards,/data-direct-open-gguf/);
 assert.match(localCards,/LEGACY · NON-GGUF/);
 assert.doesNotMatch(localCards,/tier:'PHONE FIRST'/);
+
+// Execute the actual file/shard validation helpers with synthetic files.
+const validatorStart=gguf.indexOf('function importName(name){');
+const validatorEnd=gguf.indexOf('function cachePath(importId,index){',validatorStart);
+assert.ok(validatorStart>=0&&validatorEnd>validatorStart);
+const validateContext=vm.createContext({});
+const validateFunctions=gguf.slice(validatorStart,validatorEnd);
+const validator=new vm.Script("const err=(code,message)=>Object.assign(new Error(message),{code});"+validateFunctions+"\nthis.orderedFiles=orderedFiles;this.modelFromFile=modelFromFile;");
+validator.runInContext(validateContext);
+const small=(name,index,size=1024)=>({name,size,slice:()=>({arrayBuffer:async()=>new Uint8Array([71,71,85,70]).buffer})});
+const valid4b='Qwen3.5-4B-Q4_K_M.gguf';
+assert.equal(validateContext.modelFromFile(valid4b).family,'4b');
+assert.equal(validateContext.orderedFiles([small(valid4b)]).length,1);
+assert.throws(()=>validateContext.orderedFiles([small(valid4b,0,2_000_000_001)]),/2 GB per-file limit/);
+assert.throws(()=>validateContext.orderedFiles([small('Qwen3.5-4B-Q4_K_M-00001-of-00002.gguf')]),/Select all 2 shards/);
+const reversed=validateContext.orderedFiles([
+  small('Qwen3.5-4B-Q4_K_M-00002-of-00002.gguf'),
+  small('Qwen3.5-4B-Q4_K_M-00001-of-00002.gguf')
+]);
+assert.equal(reversed[0].name,'Qwen3.5-4B-Q4_K_M-00001-of-00002.gguf');
+assert.throws(()=>validateContext.orderedFiles([
+  small('Qwen3.5-4B-Q4_K_M-00001-of-00002.gguf'),
+  small('Qwen3.5-2B-Q4_K_M-00002-of-00002.gguf')
+]),/same original model basename/);
 
 console.log('Browser-only GGUF contracts: settings, verified cache, native worker runtime, no HTTP inference, and pinned asset stage passed.');
