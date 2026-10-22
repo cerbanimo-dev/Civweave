@@ -1,8 +1,11 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v6-current-realm-navigation';
-const CACHE='cw-live-runtime-release-generation-v5-20260923';
+const REVISION='release-generation-boundary-v7-origin-fallback-preservation';
+const CACHE='cw-live-runtime-release-generation-v6-20261021';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
+const ORIGIN_CACHE_PREFIXES=Object.freeze([CACHE_PREFIX,'civweave-shell-','civweave-runtime-','civweave-offline-']);
+// Must not treat an unsigned/partial Guild cache as the origin's installed release.
+const ORIGIN_BOOT_PATHS=Object.freeze(['/index.html','/app/pwa-start-v436.html','/app/persistent-system-shell-v1.html','/app/working-campus-v440.html']);
 const GUILD_CACHE_PREFIX='cw-guild-release-v1-';
 const DB_NAME='civweave-decentralized-release-v1';
 const DB_VERSION=1;
@@ -365,9 +368,20 @@ async function freshCached(pathname,method){
   return method==='HEAD'?head(response):response;
 }
 async function legacyFallback(pathname,method){
-  const response=await caches.match(cacheKey(pathname),{ignoreSearch:true});
-  if(!valid(response,pathname))return null;
-  return method==='HEAD'?head(response):response;
+  // The current installed, same-origin shell is a valid *pre-cutover*
+  // fallback. Search only known origin-created runtime caches. A global
+  // caches.match could inadvertently serve fragments of a partial or revoked
+  // signed Guild release, defeating complete-release cutover.
+  const key=cacheKey(pathname);
+  for(const name of await caches.keys()){
+    if(!ORIGIN_CACHE_PREFIXES.some(prefix=>name.startsWith(prefix)))continue;
+    try{
+      const response=await(await caches.open(name)).match(key,{ignoreSearch:true});
+      if(valid(response,pathname)&&!response.headers.has('x-civweave-guild-release'))
+        return method==='HEAD'?head(response):response;
+    }catch{}
+  }
+  return null;
 }
 async function responseFor(request,pathname){
   const guild=await guildConfig();
@@ -385,7 +399,7 @@ async function responseFor(request,pathname){
   if(fresh)return fresh;
   const legacy=await legacyFallback(pathname,request.method);
   if(legacy)return legacy;
-  return new Response(guild?'The selected Guild does not yet have a compatible signed Civweave release, and the current installed release is unavailable.':'Civweave runtime asset is unavailable offline on this device.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
+  return new Response(guild?'The selected Guild has no compatible signed release, and the existing origin install could not be loaded. Reopen Civweave online to repair the installed shell. Do not clear app storage or cached models.':'Civweave runtime asset is unavailable offline on this device. Reopen online to repair the installed shell without clearing app storage.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-recovery':'origin-install-missing'}});
 }
 async function warmOne(cache,pathname){
   try{
@@ -397,9 +411,14 @@ async function warmOne(cache,pathname){
   }catch{return null}
 }
 async function warm(){
-  if(await guildConfig()){
+  const guild=await guildConfig();
+  if(guild){
+    // A selected Guild is only exclusive after a fully verified, compatible
+    // signed release is installed. Legacy/mobile Guilds may have no release
+    // endpoint. Previously returning [] here left the origin's new live
+    // cache empty; activation then erased its previous working shell.
     await checkGuildRelease({force:true}).catch(()=>null);
-    return[];
+    if(await activeGuildRelease())return[];
   }
   const cache=await caches.open(CACHE),queue=[...WARM_PATHS],warmed=[];
   async function worker(){
@@ -412,27 +431,33 @@ async function warm(){
   await Promise.all(Array.from({length:count},()=>worker()));
   return warmed;
 }
+async function originFallbackReady(){
+  // The new release must be usable before deleting any old origin-shell
+  // fallback. Opening an offline PWA with an unsigned selected Guild must
+  // never erase its only installed executable entrypoint.
+  for(const path of ORIGIN_BOOT_PATHS)if(!await freshCached(path,'GET'))return false;
+  return true;
+}
 async function purgeStaleRuntimeEntries(){
-  const names=await caches.keys();
   const active=await dbGet('activeRelease');
-  for(const name of names){
-    // Canonical realm validation owns and retires its own current page cache.
+  const signedReady=Boolean(active&&await activeGuildRelease());
+  if(!signedReady&&!await originFallbackReady())return;
+  for(const name of await caches.keys()){
     if(name===CACHE||name===active?.cacheName||name===self.CivweaveFiveSystemPagesV1?.cache)continue;
     if(name.startsWith(CACHE_PREFIX)){await caches.delete(name);continue;}
     if(name.startsWith(GUILD_CACHE_PREFIX)){await caches.delete(name);continue;}
-    const cache=await caches.open(name);
-    const requests=await cache.keys();
-    await Promise.all(requests.map(async request=>{
-      let url;try{url=new URL(request.url)}catch{return}
-      if(url.origin!==self.location.origin||!ownedRuntimePath(url.pathname))return;
-      await cache.delete(request,{ignoreSearch:true});
-    }));
+    // Installed origin shell, offline campus, and independently managed
+    // model caches are never invalidated by a Guild release check. Separate
+    // versioned package managers own their own asset lifecycle.
   }
 }
 async function activationRepair(){
+  // A Guild with no signed package must retain its current origin shell
+  // while we attempt to refresh it. Avoid erasing caches before a safe
+  // replacement exists, including when the network is unavailable.
   await purgeStaleRuntimeEntries();
   if(await guildConfig())await checkGuildRelease({force:true}).catch(()=>null);
-  await new Promise(resolve=>setTimeout(resolve,750));
+  if(!await activeGuildRelease()&&!await originFallbackReady())await warm().catch(()=>[]);
   await purgeStaleRuntimeEntries();
   await self.clients.claim();
 }
