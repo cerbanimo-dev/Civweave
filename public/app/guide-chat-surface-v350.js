@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.181-guide-chat-surface-v350-native-stream-readiness';
+const VERSION='1.0.182-guide-chat-surface-v350-moss-tracker-bootstrap';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -345,8 +345,13 @@ async function submitActive(text){
       // assistant stack before the first request reaches the HTTP model.
       // This path never loads browser GGUF weights or starts a fallback.
       try{localStorage.setItem('civweave.native-server.last-request.v1',JSON.stringify({at:new Date().toISOString(),stage:'native-preflight',route:'openai-compatible',model:'qwen35-4b-native'}))}catch{}
+      // The canonical tracker may not yet be mounted on a cold native-server
+      // session. Reuse its existing loader; do not create a second progress UI.
+      try{await globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.ensureTracker?.()}catch(error){
+        console.warn('[Civweave] Optional live generation tracker unavailable:',error);
+      }
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.3-native-sse-capability-fix');
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.4-moss-visible-progress');
       if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
