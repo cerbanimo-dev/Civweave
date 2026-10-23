@@ -140,6 +140,32 @@ async function sendGuild(){
  }catch(error){status('Guild send failed: '+String(error?.message||error));el('guild-result').textContent='Send failed; no confirmed Guild receipt.'}
  finally{renderGuild()}
 }
+async function refreshGuildInbox(){
+ const target=el('guild-inbox'),guild=selectedGuild();
+ target.textContent='Reading the local signed Guild mesh…';
+ if(!guild){target.textContent='Select and authenticate with a Guild in Civweave first.';return}
+ try{
+  const mesh=await ensureMesh();const pocket=await import('./pocket-guild-node-v1.mjs');
+  const service=pocket.CivweavePocketGuildNodeV1,config=service.state();
+  let syncNote='No cloud relay attached; displaying local mesh only.';
+  if(config?.guildId===guild.guildId&&config?.primaryOrigin&&config?.membershipKey){
+   const synced=await service.syncPrimary();syncNote=synced.ok?'Cloud relay synchronized; local mesh now includes fetched objects.':'Cloud sync unsuccessful: '+(synced.error||synced.status);
+  }
+  const all=await mesh.listObjects(),rows=(all||[]).filter(o=>o?.kind==='civweave.seedling.guild-learning-submission.v1'&&o?.consent==='group'&&o?.audience?.includes('guild:'+guild.guildId)&&o?.payload?.guildId===guild.guildId).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))).slice(0,30);
+  target.replaceChildren();const msg=document.createElement('p');msg.textContent=syncNote+' '+rows.length+' signed submission(s) found.';target.append(msg);
+  for(const object of rows){
+   const bundle=object.payload;const wrapper=document.createElement('details');wrapper.className='entry';
+   const summary=document.createElement('summary');summary.textContent=(bundle.title||'Untitled')+' · '+(bundle.createdAt||object.createdAt||'');wrapper.append(summary);
+   const doc=document.createElement('div');doc.className='subtle';
+   const cap=document.createElement('p');cap.textContent='Learning goal: '+(bundle.plan?.request?.capability||'');doc.append(cap);
+   const modules=document.createElement('ol');for(const module of bundle.plan?.modules||[]){const li=document.createElement('li');li.textContent=(module.title||'')+' — '+(module.outcome||'');modules.append(li)}doc.append(modules);
+   const citations=document.createElement('p');citations.textContent='Sources ('+(bundle.sourceCatalog||[]).length+'):';doc.append(citations);
+   for(const source of bundle.sourceCatalog||[]){if(!externalUrl(source.url))continue;const a=document.createElement('a');a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=source.title||source.url;doc.append(a,document.createElement('br'))}
+   const note=document.createElement('p');note.textContent='Signed community object '+object.id+'. Review required; not approved, published, or materialized by Living School.';doc.append(note);
+   wrapper.append(doc);target.append(wrapper);
+  }
+ }catch(error){target.textContent='Unable to read Guild submissions: '+String(error?.message||error)}
+}
 function renderAll(){renderFields();renderModules();renderSources();renderMedia();renderGuild();preview()}
 for(const key of ['title','capability','level','mode','proof'])el(key).addEventListener('input',()=>{draft[key]=el(key).value;save()});
 el('add-module').addEventListener('click',()=>{if(draft.modules.length>=8)return status('Maximum eight modules.');draft.modules.push({id:'module-'+crypto.randomUUID(),title:'',focus:'',outcome:''});renderModules();save()});
@@ -148,6 +174,7 @@ el('search-wikipedia').addEventListener('click',()=>searchIndex('wikipedia'));el
 el('validate').addEventListener('click',valid);
 el('export-plan').addEventListener('click',()=>{if(valid())output('seedling-living-school-plan.json',livingSchoolPlan(draft))});
 el('export-bundle').addEventListener('click',()=>{if(valid())output('seedling-guild-learning-bundle.json',guildBundle(draft))});
-el('send-guild').addEventListener('click',sendGuild);el('reset').addEventListener('click',reset);
+el('send-guild').addEventListener('click',sendGuild);
+el('refresh-guild').addEventListener('click',refreshGuildInbox);el('reset').addEventListener('click',reset);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderGuild()});
 renderAll();status('Seedling Edition '+VERSION+' · Local draft restored. Verify sources before sharing.');
