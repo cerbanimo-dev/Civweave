@@ -297,7 +297,8 @@
   function fetchOptions(url, init = {}) {
     const options = { cache: "no-store", redirect: "error", credentials: "omit", ...init };
     const space = endpointAddressSpace(url);
-    if (["loopback", "local"].includes(space)) options.targetAddressSpace = "local";
+    if (space === "loopback") options.targetAddressSpace = "loopback";
+    else if (space === "local") options.targetAddressSpace = "local";
     return options;
   }
 
