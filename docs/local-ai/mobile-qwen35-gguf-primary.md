@@ -31,3 +31,11 @@ The browser cache and existing downloads remain untouched when this option is no
 ## Verification
 
 Run `npm run verify:mobile-qwen-gguf`. The dedicated GitHub workflow checks syntax and that the shared runtime routes to Wllama *before* any OpenAI-compatible HTTP transport. Device-level runtime loading and five-system benchmarks must still be run on staging hardware.
+
+## Native GGUF server alternative (Android / Termux)
+
+Civweave Settings → AI & safety now includes a closed-by-default **Native GGUF server · Android Termux** guide, with direct official Termux F-Droid/GitHub download links, the Termux `pkg install llama-cpp` command, the `termux-setup-storage` permission step, and a lossless reuse of the ORIGINAL `Qwen3.5-4B-Q4_K_M.gguf` in Android Downloads. Native llama-server binds only `127.0.0.1:8080`, uses a fixed `qwen35-4b-native` model alias, `--ctx-size 2048 --parallel 1`, and allows CORS only from `https://civweave-staging.pages.dev`. This does not start Android native processes from JavaScript. The user manually starts and retains Termux.
+
+Only the user's explicit **Check localhost server** button performs a GET `/v1/models` request; the next explicit **Generate 24-token test** performs a real POST `/v1/chat/completions`, and **Use tested server for five systems** is enabled after a successful completion. It writes the native OpenAI-compatible route only after verification; existing OPFS browser GGUF weights are not deleted. Remote/LAN servers require separate consent and secure configuration. Android/browser local-network and loopback access rules can block a native route from a PWA, so report precise connectivity failures rather than falsely claiming success.
+
+The in-browser Wllama option remains separate. It now requests upstream Wllama `return_progress` for prompt prefill telemetry, reduces context and parallel slots, and reports whether a first-visible-token stall happened before any worker events, during prefill, or after prefill. These improvements are diagnostic and memory-reducing, not a promise that Q4 inference will be fast on every Android GPU.
