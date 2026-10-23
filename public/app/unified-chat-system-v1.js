@@ -148,7 +148,14 @@ function curriculumRequest(options={}){
 }
 function packet(answer,nextAction='',extra={}){return{response:{answer,choice:{mode:'Learn',system:'living-school',room:'',nextAction},assumptions:Array.isArray(extra.assumptions)?extra.assumptions:[],requiresConsent:Boolean(extra.requiresConsent),confidence:Number(extra.confidence)||.99,approvalGate:extra.approvalGate||null},provider:extra.provider||'unified-chat-capability',model:extra.model||'living-school-learning-engine',action:extra.action||null,context:{guide:{system:'living-school',name:'Moss'},capability:'curriculum',canonicalArtifact:'Learning Journey'},fallbackFrom:null}}
 function readLearningPlan(){try{return parse(localStorage.getItem(LEARNING_PLAN_KEY),null)}catch{return null}}
-function saveLearningPlan(plan){try{localStorage.setItem(LEARNING_PLAN_KEY,JSON.stringify(plan))}catch{}return plan}
+function saveLearningPlan(plan){
+  localStorage.setItem(LEARNING_PLAN_KEY,JSON.stringify(plan));
+  const stored=readLearningPlan();
+  if(stored?.id!==plan?.id||stored?.state!==plan?.state)
+    throw new Error('The Living School REVIEW plan could not be verified in local storage. No approval was recorded.');
+  try{dispatchEvent(new CustomEvent('civweave:living-school-pending-plan-review',{detail:{id:stored.id,state:stored.state,capability:stored.request?.capability}}))}catch{}
+  return stored;
+}
 function clearLearningPlan(){try{localStorage.removeItem(LEARNING_PLAN_KEY)}catch{}}
 function learningPlanControl(text){for(const[action,pattern]of Object.entries(LEARNING_PLAN_CONTROL))if(pattern.test(clean(text,4000)))return action;return''}
 function selectedPlanningConfig(){
@@ -391,6 +398,8 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     stage('validate','complete',{label:'JSON, goal and module contract verified'});
     phase='saved';
     // Saving means REVIEW only; curriculum materialization remains gated.
+    // The shared pending-plan record is the Living School review queue;
+    // never misrepresent it as generated course content.
     saveLearningPlan({...plan,authoring:{...plan.authoring,pipelineId,formalStages:['intake','draft','compile','validate',...(repairText?['repair']:[]),'saved']}});
     stage('pipeline','complete',{label:'REVIEW plan saved; awaiting approval',artifactKey:'civweave.chat.capability.pending.living-school.plan.v1'});
     progress('saved',0,true);
