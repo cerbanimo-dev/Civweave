@@ -89,6 +89,12 @@ const LEARNING_PLAN_SCHEMA=Object.freeze({
     assumptions:{type:'array',maxItems:6,items:{type:'string'}}
   }
 });
+const NATIVE_LEARNING_PLAN_SCHEMA=Object.freeze({
+  ...LEARNING_PLAN_SCHEMA,
+  required:[...LEARNING_PLAN_SCHEMA.required,'mode'],
+  properties:{...LEARNING_PLAN_SCHEMA.properties,
+    modules:{...LEARNING_PLAN_SCHEMA.properties.modules,minItems:4,maxItems:6}}
+});
 const MUTATION_CLAIM=/(?:\b(?:i|we)(?:['’]ve|\s+have)\s+(?:drafted|created|built|generated|structured|saved|updated|revised|made)\b|\b(?:has\s+been|was)\s+(?:created|generated|built|saved|drafted|structured|revised)\b)/i;
 
 function rowsFor(options={}){
@@ -334,7 +340,7 @@ function normalizeNativePlanContract(result,seed,runtime){
   // The user request owns their preferred level and mode. This does not
   // supply any learning module, lesson, evidence or approval.
   if(typeof runtime?.validateSchema!=='function')return null;
-  const violations=runtime.validateSchema(plan,LEARNING_PLAN_SCHEMA);
+  const violations=runtime.validateSchema(plan,NATIVE_LEARNING_PLAN_SCHEMA);
   if(violations.length)return null;
   return plan;
 }
@@ -474,7 +480,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       '\nReturn 4 to 6 concrete subject-specific modules with observable outcomes. Include level "beginner", mode "guided" and assumptions [].';
     const compileResult=await run({
       purpose:'living-school-native-plan-compile-v1',phase:'compile',maxTokens:2300,
-      system:compileSystem,user:compileUser,schema:LEARNING_PLAN_SCHEMA,structured:true
+      system:compileSystem,user:compileUser,schema:NATIVE_LEARNING_PLAN_SCHEMA,structured:true
     });
     compiled=clean(compileResult?.outputText,16000);
     // A schema-invalid compiler answer is a recoverable intermediate stage.
@@ -497,6 +503,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       const candidate=normalized||modelJson(compileResult);
       if(!candidate)throw new Error('JSON compiler returned no valid plan object.');
       plan=normalizeModelPlan(candidate,seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      if(plan.modules.length<4||plan.modules.length>6)throw new Error('Compiler must produce 4–6 subject-specific modules for this Learning Journey.');
       if(normalized&&compileResult?.status==='invalid-response')
         stage('validate','normalized',{label:'Unambiguous JSON field normalization; topic and modules still checked',fields:['level','mode','assumptions']});
     }catch(error){validationError=error}
@@ -506,7 +513,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       stage('repair','running',{label:'Qwen · targeted plan repair'});
       const repairResult=await run({
         purpose:'living-school-native-plan-repair-v1',phase:'repair',maxTokens:2400,structured:true,
-        schema:LEARNING_PLAN_SCHEMA,
+        schema:NATIVE_LEARNING_PLAN_SCHEMA,
         system:'Repair a malformed or off-topic Learning Journey JSON object. Return a NEW valid JSON object only, with title, capability, level, mode, proof, assumptions and 4 to 6 subject-specific modules (title, focus, outcome). Keep the CURRENT GOAL and draft; correct only reported errors. No new topic or lessons.',
         user:'CURRENT GOAL: '+goal+'\nValidation error: '+clean(validationError.message,380)+
           '\nOriginal shareable draft:\n'+draft.slice(0,3500)+
@@ -526,6 +533,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       const repairedCandidate=normalizedRepair||modelJson(repairResult);
       if(!repairedCandidate)throw new Error('Repair stage returned no valid plan object.');
       plan=normalizeModelPlan(repairedCandidate,seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      if(plan.modules.length<4||plan.modules.length>6)throw new Error('Repaired JSON must contain 4–6 modules.');
       if(normalizedRepair&&repairResult?.status==='invalid-response')
         stage('repair','normalized',{label:'Corrected JSON enum/assumption formatting after model repair'});
       phase='validate';
