@@ -249,7 +249,7 @@ async function start(selected,onPhase=()=>{}){
 export async function generate({model,messages,temperature=.6,maxTokens=1024,structured=false,signal,onToken,onPhase=()=>{}}={}){
   const selected=current();
   if(!selected||selected.model!==model)throw err('GGUF_SELECTION_MISMATCH','Browser GGUF is not selected, or another model replaced the selected ID.');
-  if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation was cancelled before model loading.');
+  if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled before model loading.');
   let phase='model-loading';
   const updatePhase=(name,details={})=>{phase=name;try{onPhase?.(name,details)}catch{}};
   let api;
@@ -258,39 +258,62 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
     throw err('GGUF_LOAD_FAILED','Browser GGUF model load failed: '+clean(error?.message).slice(0,700));
   }
   if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled.');
-  let output='',chunks=0;
+  const watchdogModule=await import('/app/local-ai/gguf-generation-watch-v1.js?v=gguf-generation-watch-v1');
+  const watchdog=watchdogModule.createGGUFGenerationWatch({
+    signal,onProgress:(stage,details)=>updatePhase(stage,details)
+  });
+  let output='',chunks=0,finishReason=null;
   const params={
     model:selected.model,
     messages:(Array.isArray(messages)?messages:[]).map(row=>({role:['system','assistant','user'].includes(row?.role)?row.role:'user',content:clean(row?.content)})).filter(row=>row.content),
     temperature:Number.isFinite(Number(temperature))?Math.max(0,Math.min(1.5,Number(temperature))):.6,
-    max_tokens:Math.max(32,Math.min(4096,Number(maxTokens)||1024)),
-    stream:true,abortSignal:signal,
+    max_tokens:Math.max(24,Math.min(1024,Number(maxTokens)||1024)),
+    stream:true,abortSignal:watchdog.signal,
     chat_template_kwargs:{enable_thinking:false},
     ...(structured?{response_format:{type:'json_object'}}:{})
   };
-  notify('generating',{model:selected.model});
-  updatePhase('generating',{backend:'wllama',maxTokens:params.max_tokens});
+  notify('generating',{model:selected.model,maxTokens:params.max_tokens,structured});
+  updatePhase('waiting-first-token',{backend:'wllama',maxTokens:params.max_tokens,
+    timeoutMs:watchdogModule.GGUF_FIRST_VISIBLE_MS,structured});
   try{
-    const stream=await api.createChatCompletion(params);
-    for await(const chunk of stream){
-      if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled.');
-      const text=String(chunk?.choices?.[0]?.delta?.content??'');
-      if(!text)continue;
-      output+=text;chunks++;
-      if(chunks===1)updatePhase('first-token',{characters:text.length});
-      try{onToken?.(text,output)}catch{}
+    // Race each iterator read with the abort promise; even if a wasm/worker
+    // iterator ignores AbortSignal, a stalled UI can terminate the request.
+    const stream=await Promise.race([api.createChatCompletion(params),watchdog.cancelled]);
+    if(!stream?.[Symbol.asyncIterator])throw err('GGUF_STREAM_UNAVAILABLE','Wllama did not provide the expected streaming iterator.');
+    const iterator=stream[Symbol.asyncIterator]();
+    while(true){
+      const next=await Promise.race([iterator.next(),watchdog.cancelled]);
+      if(next.done)break;
+      const chunk=next.value,choice=chunk?.choices?.[0]||{},delta=choice.delta||{};
+      finishReason=choice.finish_reason||finishReason;
+      const visible=String(delta.content??'');
+      const hidden=String(delta.reasoning_content??delta.reasoning??'');
+      if(visible){
+        output+=visible;chunks++;
+        watchdog.chunk({visible:true});
+        // Only surface the visible content, not hidden model reasoning.
+        try{onToken?.(visible,output)}catch{}
+      }else if(hidden){
+        watchdog.chunk({hidden:true});
+      }
     }
-    if(!output.trim())throw err('GGUF_EMPTY','Embedded GGUF returned no visible answer.');
-    updatePhase('complete',{chunks});
-    notify('complete',{model:selected.model,chunks});
-    return{text:output,model:selected.model,streamed:true,backend:'browser-wllama',chunks};
+    if(!output.trim())throw err('GGUF_EMPTY','Wllama finished without any visible answer. Hidden-token count: '+watchdog.snapshot().hiddenChunks+'. Disable model thinking and retry with a shorter prompt.');
+    const metrics=watchdog.snapshot();
+    updatePhase('complete',{chunks,finishReason,firstTokenMs:metrics.firstTokenMs,
+      elapsedMs:metrics.elapsedMs});
+    notify('complete',{model:selected.model,chunks,finishReason});
+    return{text:output,model:selected.model,streamed:true,backend:'browser-wllama',chunks,finishReason,metrics};
   }catch(error){
-    const reason=clean(error?.message).slice(0,700);
-    notify('failed',{model:selected.model,phase,error:reason});
-    updatePhase('failed',{stage:phase,reason});
-    if(signal?.aborted)throw err('GGUF_ABORTED','GGUF '+phase+' was interrupted: '+clean(signal.reason?.message||reason).slice(0,450));
+    const reason=clean(error?.message).slice(0,700),metrics=watchdog.snapshot();
+    notify('failed',{model:selected.model,phase,error:reason,code:error?.code,metrics});
+    updatePhase('failed',{failedStage:phase,reason,code:error?.code||'GGUF_INFERENCE_FAILED',...metrics});
+    if(signal?.aborted)throw err('GGUF_ABORTED','GGUF '+phase+' was cancelled. Imported Q4 weights remain installed.');
+    // Do not hide the watchdog's actionable error behind a generic
+    // 'Operation aborted' from Wllama.
+    if(watchdog.signal.aborted&&watchdog.signal.reason?.code)
+      throw watchdog.signal.reason;
     throw err(error?.code||'GGUF_INFERENCE_FAILED','Browser GGUF '+phase+' failed: '+reason+'. Imported Q4 weights were not removed.');
-  }
+  }finally{watchdog.stop()}
 }
 export async function release(){
   if(loading)try{await loading}catch{}
