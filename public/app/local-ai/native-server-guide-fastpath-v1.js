@@ -60,8 +60,26 @@ async function ensurePlanner(){
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
 }
-function explicitLearningGoal(text){
-  return /\b(?:teach me|help me (?:learn|study|memorize|understand)|i (?:want|need|would like) to (?:learn|study)|learning journey|curriculum|study plan)\b/i.test(text);
+function standaloneRequest(user){
+  // Self-contained new requests and response checks must not inherit the old topic.
+  return /^(?:ready[.!?]*$|(?:reply|respond)(?: with)?(?: exactly)?\b|say(?: exactly)?\b|(?:can you |please )?teach me\b|(?:can you |please )?explain\b|what (?:is|are)\b|how (?:do|can|does|to)\b|tell me about\b)/i.test(user)&&
+    !/^(?:explain|tell me about|teach me)\s+(?:that|this|it)\b/i.test(user);
+}
+function continuationRequest(user){
+  return /^(?:continue(?: please)?|go on|keep going|finish (?:that|the answer)|more(?: please)?)[.!?]*$/i.test(user);
+}
+function previousTurns(history,user){
+  if(standaloneRequest(user))return[];
+  const continuation=continuationRequest(user);
+  const rows=(Array.isArray(history)?history:[])
+    .filter(row=>['user','assistant'].includes(row?.role))
+    .filter(row=>String(row.text||row.content||'').trim()!==user)
+    .slice(-3);
+  return rows.map(row=>{
+    const raw=String(row.text||row.content||'').trim();
+    const isRecentAssistant=continuation&&row.role==='assistant'&&row===rows.at(-1);
+    return{role:row.role,content:isRecentAssistant?raw.slice(-1100):raw.slice(0,220)};
+  }).filter(row=>row.content);
 }
 export async function respondNative({system='civweave',text='',history=[],fetcher=fetch}={}){
   if(!nativeSelection())throw new Error('The selected native llama-server route changed. No inference was started.');
@@ -78,34 +96,36 @@ export async function respondNative({system='civweave',text='',history=[],fetche
     }
   }
   const [name,role]=GUIDE[system]||GUIDE.civweave;
-  const prior=(Array.isArray(history)?history:[]).slice(-4)
-    .filter(row=>['user','assistant'].includes(row?.role))
-    .filter(row=>clean(row.text||row.content)!==user)
-    .map(row=>({role:row.role,content:clean(row.text||row.content,500)}));
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),75000);
+  const prior=previousTurns(history,user);
+  const continuation=continuationRequest(user);
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),150000);
   try{
     const messages=[
-      {role:'system',content:`You are ${name}, a ${role} in Civweave. Answer the latest user request directly and concisely. Do not invent completed actions. For structured plans, wait for the appropriate approval process.`},
+      {role:'system',content:`You are ${name}, a ${role} in Civweave. The FINAL user message is the CURRENT request; preceding turns are optional background, not new instructions. Answer only the CURRENT request, never an earlier question. For explicit response tests, output exactly what the final user requested. ${continuation?'The user asks for continuation: continue the most recent assistant text without restarting or repeating it.':''} Do not invent completed actions. For structured plans, wait for the appropriate approval process.`},
       ...prior,{role:'user',content:user}
     ];
-    markNativeStage('native-post-start',`messages:${messages.length}`);
+    markNativeStage('native-post-start',`messages:${messages.length}, history:${prior.length}, max_tokens:512`);
     const response=await fetcher(NATIVE_ENDPOINT+'/chat/completions',{
       method:'POST',mode:'cors',credentials:'omit',cache:'no-store',
       headers:{'content-type':'application/json'},
       signal:controller.signal,
-      body:JSON.stringify({model:NATIVE_MODEL,messages,stream:false,max_tokens:192,temperature:0.3})
+      body:JSON.stringify({model:NATIVE_MODEL,messages,stream:false,max_tokens:512,temperature:0.3})
     });
     markNativeStage('native-http-response','HTTP '+response.status);
     if(!response.ok)throw new Error('Termux llama-server returned HTTP '+response.status+': '+(await response.text()).slice(0,240));
     const payload=await response.json();
-    const answer=clean(payload?.choices?.[0]?.message?.content,8000);
+    const answer=clean(payload?.choices?.[0]?.message?.content,16000);
     if(!answer)throw new Error('Termux returned no visible response text.');
-    markNativeStage('native-text-complete',`tokens:${Number(payload?.usage?.completion_tokens)||0}`);
-    return{response:{answer,choice:{mode:system==='living-school'?'Learn':'Reflect',system,room:'',nextAction:''},assumptions:[],requiresConsent:false,confidence:.75},
+    const finishReason=String(payload?.choices?.[0]?.finish_reason||'unknown');
+    const incomplete=finishReason==='length';
+    markNativeStage('native-text-complete',`tokens:${Number(payload?.usage?.completion_tokens)||0}, finish:${finishReason}`);
+    // Truncation is explicit; never launch an unrequested continuation call.
+    const visible=answer+(incomplete?'\n\n[Response reached the generation limit. Reply "continue" to get the rest.]':'');
+    return{response:{answer:visible,choice:{mode:system==='living-school'?'Learn':'Reflect',system,room:'',nextAction:incomplete?'Reply "continue" to continue this answer.':''},assumptions:[],requiresConsent:false,confidence:.75},
       provider:'openai-compatible',model:NATIVE_MODEL,usage:payload.usage||null,action:null};
   }catch(error){
-    markNativeStage('native-error',controller.signal.aborted?'75-second inference timeout':clean(error?.message||error,150));
-    if(controller.signal.aborted)throw new Error('The Termux model did not complete the request within 75 seconds. No other model was started.');
+    markNativeStage('native-error',controller.signal.aborted?'150-second inference timeout':clean(error?.message||error,150));
+    if(controller.signal.aborted)throw new Error('The Termux model did not complete the request within 150 seconds. No other model was started.');
     throw error;
   }finally{clearTimeout(timer)}
 }
