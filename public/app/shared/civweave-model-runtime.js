@@ -1140,8 +1140,8 @@
   async function discoverOllamaModels(endpoint = "http://127.0.0.1:11434/api/chat", options = {}) {
     const config = normalizeConfig({ provider: "ollama", endpoint });
     const url = checkedUrl(config.endpoint || "http://127.0.0.1:11434/api/chat", config);
-    url.pathname = url.pathname.replace(/\\/api\\/(chat|generate)\\/?$/, "") || "/";
-    url.pathname = url.pathname.replace(/\\/+$/, "") + "/api/tags";
+    url.pathname = url.pathname.replace(/\/api\/(chat|generate)\/?$/, "") || "/";
+    url.pathname = url.pathname.replace(/\/+$/, "") + "/api/tags";
     const controller = makeController(options.signal, 12000);
     try {
       let response;
