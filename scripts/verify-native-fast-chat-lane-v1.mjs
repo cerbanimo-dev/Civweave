@@ -21,7 +21,7 @@ const selected={provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'
 let requested=0,req=null,planArgs=null,assistants=0;
 const globals={
   CivweaveSettingsV320:{readState:()=>selected},
-  CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,nativeMossVisibleStreamV3:true,nativeFormalPipelineStageEventsV1:true,generate:async()=>{throw Error('unexpected runtime call')}},
+  CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,nativeMossVisibleStreamV3:true,nativeFormalPipelineStageEventsV1:true,nativeFinishReasonGuardV1:true,generate:async()=>{throw Error('unexpected runtime call')}},
   CivweaveUnifiedChatSystemV1:{
     version:'1.2.8-unified-chat-system-v1-generous-outputs',
     handleNativeLivingSchoolRequest:async args=>{planArgs=args;return{response:{answer:args.text==='approve'?'Approved Learning Journey': 'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
