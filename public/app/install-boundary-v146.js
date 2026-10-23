@@ -11,7 +11,7 @@ const STALE_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-b
 const DEV_KEY='civweave.install-boundary.developer.v146';
 const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1';
 const KEYBOARD_VIEWPORT_POLICY='interactive-widget=resizes-content';
-const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228-install-only-pwa-v1-ledger-contract-v1-moss-capability-eager-v1-moss-plan-approval-button-v1`;
+const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228-install-only-pwa-v1-ledger-contract-v1-moss-capability-eager-v1-moss-plan-approval-button-v1-moss-gguf-provenance-gate-v1`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js';
 const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v323.js';

@@ -11,7 +11,7 @@ const [loader, livingSchool, router, spine] = await Promise.all([
 
 for (const source of [loader, router, spine]) new Function(source);
 
-assert.match(loader, /1\.0\.133-server-auto-shared-loader/);
+assert.match(loader, /1\.0\.135-moss-gguf-provenance-topic-gate/);
 assert.match(loader, /const SERVER_AI_ROUTER=\['\/app\/server-ai-router-v301\.js\?v=1\.0\.117-guild-handoff'/);
 assert.match(loader, /CivweaveServerAIRouterV301\?\.status\?\.\(\)\.registered===true/);
 

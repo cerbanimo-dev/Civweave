@@ -21,6 +21,9 @@ const sessionStorage=makeStorage();
 const context=vm.createContext({
   console,
   structuredClone,
+  AbortController,
+  setTimeout,
+  clearTimeout,
   URL,
   crypto:globalThis.crypto,
   location:{href:'https://civweave.example/app/',origin:'https://civweave.example',protocol:'https:',pathname:'/app/'},
