@@ -311,6 +311,8 @@ function normalizeNativePlanContract(result,seed,runtime){
   // Repair only type/enum presentation drift. Never synthesize modules,
   // change learning subject or accept truncated/invalid JSON as complete.
   if(!['success','invalid-response'].includes(result?.status))return null;
+  if(result?.actual?.provider!=='openai-compatible'||result?.actual?.model!=='qwen35-4b-native')return null;
+  if(['length','max_tokens'].includes(String(result?.finishReason||'').toLowerCase()))return null;
   let raw=modelJson(result);
   if((!raw||typeof raw!=='object'||Array.isArray(raw))&&typeof runtime?.parseJsonLoose==='function'){
     try{raw=runtime.parseJsonLoose(result?.outputText||'')}catch{}
