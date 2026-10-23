@@ -561,7 +561,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
 async function generateLivingSchoolPlan(options={},existingPlan=null,revisionText=''){
   const request=curriculumRequest(options);
   if(!request.capability&&!existingPlan?.request?.capability)return packet('I can generate the Learning Journey plan, but I still need the observable capability the learner should be able to demonstrate.','Tell Moss what you want to be able to do, then the selected AI will generate the high-level plan for review.');
-  const seed=existingPlan?.request?{...existingPlan.request,...request,capability:request.capability||existingPlan.request.capability,title:request.title||existingPlan.request.title}:{...request};
+  const seed=existingPlan?.request?{...existingPlan.request,...request,capability:existingPlan.request.capability,title:existingPlan.request.title,intent:'revise',newPath:false,replaceExisting:false}:{...request};
   // An explicit new learning goal is authoritative over any saved cabinet path,
   // chat history, previous plan, or model-returned title.
   const explicitGoal=learningJourneyIntent(options.text,options.history||[])?userCapability([{role:'user',text:clean(options.text,5000)}]):'';
