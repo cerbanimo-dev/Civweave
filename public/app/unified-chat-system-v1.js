@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.7-unified-chat-system-v1-native-formal-two-pass';
+const VERSION='1.2.8-unified-chat-system-v1-generous-outputs';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -326,7 +326,8 @@ function normalizeNativePlanContract(result,seed,runtime){
     plan.assumptions=plan.assumptions.trim()?[plan.assumptions.trim()]:[];
   // The user request owns their preferred level and mode. This does not
   // supply any learning module, lesson, evidence or approval.
-  const violations=runtime.validateSchema?.(plan,LEARNING_PLAN_SCHEMA)||[];
+  if(typeof runtime?.validateSchema!=='function')return null;
+  const violations=runtime.validateSchema(plan,LEARNING_PLAN_SCHEMA);
   if(violations.length)return null;
   return plan;
 }
@@ -351,7 +352,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       let lastProgress=0;
       const request={
         purpose,executionProfile:'interactive',signal:options.signal,
-        config:{...config,stream:true,maxTokens,temperature:.2,timeoutMs:180000},
+        config:{...config,stream:true,maxTokens,temperature:.2,timeoutMs:480000,context:4096},
         ...(structured?{responseFormat:'json',schema}:{}),
         maxRepairAttempts:0,
         messages:[{role:'system',content:system},{role:'user',content:user}],
@@ -375,19 +376,19 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     phase='draft';
     stage('draft','running',{label:'Qwen · shareable plan draft'});
     const draftResult=await run({
-      purpose:'living-school-native-plan-draft-v1',phase:'draft',maxTokens:680,
-      system:'You are Moss. Draft a concise shareable Learning Journey outline for the CURRENT goal only. This is visible user-facing draft, not hidden reasoning or JSON. State the topic and capability, then exactly three sequential modules (each title, focus, demonstrable outcome), and a practical final proof. Limit each module to 45 words. Finish every module completely. No lessons, unrelated topics or preambles.',
+      purpose:'living-school-native-plan-draft-v1',phase:'draft',maxTokens:1500,
+      system:'You are Moss. Draft a concise shareable Learning Journey outline for the CURRENT goal only. This is visible user-facing draft, not hidden reasoning or JSON. State the topic and capability, then four to six sequential modules (each title, focus, demonstrable outcome), and a practical final proof. Include 4 to 6 modules with specific and independently demonstrable outcomes. Finish each module completely. No lessons, unrelated topics or preambles.',
       user:'CURRENT GOAL: '+goal+'\nTopic anchor: '+topic+'\nBeginner · guided · REVIEW-only. Modules must mention the specific subject.'
     });
     if(draftResult?.status==='incomplete'||draftResult?.finishReason==='length'){
       draft=clean(draftResult?.outputText,12000);
       if(!draft)throw new Error('Draft reached max_tokens without producing useful text. No compiler was started.');
       stage('draft','needs-continuation',{label:'Draft reached token budget · continuing with same model',text:draft,
-        finishReason:draftResult.finishReason||'length',maxTokens:680});
+        finishReason:draftResult.finishReason||'length',maxTokens:1500});
       const tail=draft.slice(-1100);
       const continued=await run({
         purpose:'living-school-native-plan-draft-continuation-v1',
-        phase:'draft',maxTokens:480,appendPrefix:draft+'\n',
+        phase:'draft',maxTokens:1200,appendPrefix:draft+'\n',
         system:'Continue the visible Learning Journey outline that was cut off. Give ONLY the remaining words, complete Module 3, and add the final practical proof. Do not restart, repeat earlier modules, change subject or return JSON. Keep it concise.',
         user:'CURRENT GOAL: '+goal+'\nLast portion already shown:\n'+tail+
           '\nContinue from its exact stopping point. Complete the remaining outline without repeating the text above.'
@@ -407,12 +408,12 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     progress('draft',draft.length,true);
     phase='compile';
     stage('compile','running',{label:'Qwen · JSON compiler'});
-    const compileSystem='You are Moss converting a shareable learning plan to a STRICT JSON object. Use exact keys title, capability, level, mode, proof, modules, assumptions. Exactly 3 modules, each with title, focus and outcome. Keep CURRENT GOAL as the subject; do not introduce other subjects. Output JSON only; no thinking, commentary, markdown or lessons.';
+    const compileSystem='You are Moss converting a shareable learning plan to a STRICT JSON object. Use exact keys title, capability, level, mode, proof, modules, assumptions. Between 4 and 6 modules, each with title, focus and outcome. Keep CURRENT GOAL as the subject; do not introduce other subjects. Output JSON only; no thinking, commentary, markdown or lessons.';
     const compileUser='CURRENT GOAL: '+goal+'\nPlan title: '+clean(seed.title,100)+
-      '\nTopic anchor: '+topic+'\nConvert THIS draft faithfully:\n'+draft.slice(0,1700)+
-      '\nReturn 3 concrete subject-specific modules with observable outcomes. Include level "beginner", mode "guided" and assumptions [].';
+      '\nTopic anchor: '+topic+'\nConvert THIS draft faithfully:\n'+draft.slice(0,4300)+
+      '\nReturn 4 to 6 concrete subject-specific modules with observable outcomes. Include level "beginner", mode "guided" and assumptions [].';
     const compileResult=await run({
-      purpose:'living-school-native-plan-compile-v1',phase:'compile',maxTokens:1050,
+      purpose:'living-school-native-plan-compile-v1',phase:'compile',maxTokens:2300,
       system:compileSystem,user:compileUser,schema:LEARNING_PLAN_SCHEMA,structured:true
     });
     compiled=clean(compileResult?.outputText,16000);
@@ -436,12 +437,12 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       phase='repair';
       stage('repair','running',{label:'Qwen · targeted plan repair'});
       const repairResult=await run({
-        purpose:'living-school-native-plan-repair-v1',phase:'repair',maxTokens:1100,structured:true,
+        purpose:'living-school-native-plan-repair-v1',phase:'repair',maxTokens:2400,structured:true,
         schema:LEARNING_PLAN_SCHEMA,
-        system:'Repair a malformed or off-topic Learning Journey JSON object. Return a NEW valid JSON object only, with title, capability, level, mode, proof, assumptions and exactly 3 subject-specific modules (title, focus, outcome). Keep the CURRENT GOAL and draft; correct only reported errors. No new topic or lessons.',
+        system:'Repair a malformed or off-topic Learning Journey JSON object. Return a NEW valid JSON object only, with title, capability, level, mode, proof, assumptions and 4 to 6 subject-specific modules (title, focus, outcome). Keep the CURRENT GOAL and draft; correct only reported errors. No new topic or lessons.',
         user:'CURRENT GOAL: '+goal+'\nValidation error: '+clean(validationError.message,380)+
-          '\nOriginal shareable draft:\n'+draft.slice(0,1150)+
-          '\nPrevious JSON output:\n'+compiled.slice(0,1350)+'\nRepair as compact valid JSON.'
+          '\nOriginal shareable draft:\n'+draft.slice(0,3500)+
+          '\nPrevious JSON output:\n'+compiled.slice(0,3400)+'\nRepair as compact valid JSON.'
       });
       repairText=clean(repairResult?.outputText,16000);
       stage('repair',repairResult?.status==='success'?'complete':'failed',
