@@ -112,11 +112,23 @@ function outputText(result){
   return clean(result?.outputText||result?.text||result?.output||result?.generatedText||result?.message,120000);
 }
 // Only explicit user-authorized live research may send a query off-device.
-function researchRequested(args,messages){
-  if(args.offlineOnly===true||args.config?.offlineOnly===true)return false;
+// Network is a capability of the selected local model, not a separate AI route.
+// Only the latest user request controls research intent. Old messages and model
+// output must never trigger a new request. Explicit offline/deny always wins.
+function researchRequested(args={},messages=[]){
+  if(args.offlineOnly===true||args.config?.offlineOnly===true||
+     args.allowNetwork===false||args.config?.allowNetwork===false||
+     args.webSearch===false||args.config?.webSearch===false)return false;
   if(args.webSearch===true||args.externalResearch===true||args.browserSearch===true)return true;
-  const user=clean(args.text||[...messages].reverse().find(row=>row.role==='user')?.content,2500).toLowerCase();
-  return /\b(?:search (?:the )?(?:web|internet|online)|look (?:it |this )?up online|browse (?:the )?(?:web|internet)|research (?:this |it )?online|find (?:current|latest) (?:web )?sources)\b/.test(user);
+  const user=clean(args.text||[...messages].reverse().find(row=>row.role==='user')?.content,2500).trim().toLowerCase();
+  if(!user)return false;
+  // Directly requested research, including pages supplied by the user.
+  if(/\b(?:search (?:the )?(?:web|internet|online)|look (?:it |this )?up online|browse (?:the )?(?:web|internet)|research (?:this |it )?online|find (?:current|latest) (?:web )?sources|look up (?:the )?(?:latest|current|today)|check online|find sources (?:for|on))\b/.test(user))return true;
+  if(/\b(?:open|read|summari[sz]e|check|research|inspect)\b.{0,140}https?:\/\//.test(user))return true;
+  // Clear freshness intents; no model prompt or network call for generic chat.
+  const asks=/^(?:please\s+)?(?:what(?:'s| is| are| were| happened| has)|who(?:'s| is)|when(?:'s| is| does| will)|how(?:'s| is| much| many)|which|where|can you (?:tell|check|find)|give me|show me|find|tell me|update me|any (?:news|updates))\b/.test(user);
+  const fresh=/\b(?:today|yesterday|tonight|tomorrow|this week|this month|right now|currently|breaking news|latest news|recent (?:news|developments|events|updates)|up-to-date|as of (?:now|today)|newest (?:version|release)|latest (?:version|release|updates?|news|price|results?|developments?|score|figures?|schedule)|current (?:weather|price|rates?|news|events?|score|release|version|president|status|availability))\b/.test(user);
+  return asks&&fresh;
 }
 let browserResearchFlight=null;
 async function loadBrowserResearch(){
@@ -436,6 +448,7 @@ async function localRespond(args={}){
       messages.push({role:'user',content:text});
     }
     const liveResearch=researchRequested(args,messages);
+    if(liveResearch)setDecisionStrip(`Web research · ${requestedModel||'local model'} · using connected host search`,'local');
     const run=liveResearch?await runLocalResearch(runtime,args,messages,requestedModel):await runLocalModel(runtime,args,messages,requestedModel);
     const result=run.result;
     if(result?.status&&!['success','fallback'].includes(result.status)){
@@ -614,6 +627,7 @@ globalThis.CivweaveLocalProviderAuthorityV1=Object.freeze({
   configuredProvider,
   selectedLocal,
   localRespond,
+  researchRequested,
   implicitGuideNetwork,
   watchWeavelingOrchestrator,
   patchGemma4Registry,
