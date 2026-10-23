@@ -17,6 +17,10 @@ function sandbox(){
 }
 {
   const s=sandbox(),w=s.watcher();
+  w.prefill({processed:42,total:200,cached:8});
+  assert.equal(w.snapshot().prefillEvents,1);
+  assert.equal(w.snapshot().prefill.processed,42);
+  assert.equal(w.snapshot().prefill.total,200);
   assert.equal(w.snapshot().visibleChunks,0);
   s.fire(GGUF_FIRST_VISIBLE_MS);
   await assert.rejects(w.cancelled,{code:'GGUF_FIRST_VISIBLE_TOKEN_TIMEOUT'});
