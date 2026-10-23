@@ -23,7 +23,7 @@ const globals={
   CivweaveSettingsV320:{readState:()=>selected},
   CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,nativeMossVisibleStreamV3:true,nativeFormalPipelineStageEventsV1:true,nativeFinishReasonGuardV1:true,generate:async()=>{throw Error('unexpected runtime call')}},
   CivweaveUnifiedChatSystemV1:{
-    version:'1.2.8-unified-chat-system-v1-generous-outputs',
+    version:'1.2.9-unified-chat-system-v1-draft-completeness-gate',
     handleNativeLivingSchoolRequest:async args=>{planArgs=args;return{response:{answer:args.text==='approve'?'Approved Learning Journey': 'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
   },
   CivweaveFamilyAILoaderV105:{ensure:async()=>{assistants++;throw Error('full assistant bootstrap should be skipped')}}
@@ -125,7 +125,7 @@ assert.match(chat,/guide:respondingSystem,responderSystem:respondingSystem/);
 assert.match(chat,/await verifyNativePhoneServerTransport/);
 assert.match(runtime,/nativeDirect \? Boolean\(config\.stream\) : Boolean\(config\.stream \|\| lineup\)/);
 assert.match(runtime,/nativeDirectTermuxNoStream: true/);
-assert.match(campus,/long-moss-plan-budgets/);
-assert.match(shell,/long-moss-plan-budgets/);
+assert.match(campus,/draft-completeness/);
+assert.match(shell,/draft-completeness/);
 assert.match(diagnostic,/Show last Civweave native-request stage/);
 console.log('PASS: direct native HTTP, Moss review planner fast entry, no second model, no heavy bootstrap, stage diagnostics and invalid route rejection');
