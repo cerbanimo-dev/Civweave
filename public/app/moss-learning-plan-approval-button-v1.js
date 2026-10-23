@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-moss-learning-plan-decision-flow-v2';
+const VERSION='1.1.1-moss-learning-plan-review-detection-v3';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-moss-learning-plan-approval-button-v1-style';
 const SYSTEM='living-school';
@@ -76,7 +76,7 @@ function articles(root){return [...root.querySelectorAll('article[data-role="ass
 function reviewArticle(root,plan){
   return articles(root).find(article=>{
     const text=clean(article.querySelector('.cw350-bubble')?.textContent,12000);
-    return /Learning Journey plan:/i.test(text)&&/Status:\\s*REVIEW/i.test(text)&&text.includes(clean(plan.request?.title,220));
+    return /Learning Journey plan:/i.test(text)&&/Status:\s*REVIEW\b/i.test(text)&&text.includes(clean(plan.request?.title,220));
   })||null;
 }
 function findFollowUpArticle(root,kind,plan){
@@ -193,7 +193,7 @@ function start(){
   installStyle();render();
   for(const name of ['civweave:realm-guide-thread-changed','civweave:guide-chat-opened','civweave:guide-chat-ready','civweave:persistent-guide-chat-ready','civweave:assistant-runtime-ready','civweave:living-school-workbench-ready','pageshow'])addEventListener(name,()=>queueMicrotask(render));
   if(typeof MutationObserver==='function'){observer=new MutationObserver(()=>queueMicrotask(render));const target=document.getElementById(ROOT_ID)||document.body;if(target)observer.observe(target,{childList:true,subtree:true,attributes:true,attributeFilter:['data-guide']})}
-  document.documentElement.dataset.civweaveMossLearningPlanApproval='button-v1';
+  document.documentElement.dataset.civweaveMossLearningPlanApproval='review-decision-v3';
   try{dispatchEvent(new CustomEvent('civweave:moss-learning-plan-approval-button-ready',{detail:{version:VERSION}}))}catch{}
 }
 
