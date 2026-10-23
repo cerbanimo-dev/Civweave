@@ -15,7 +15,8 @@ assert.match(runtime,/nativeDirectTermuxStreamV2:\s*true/);
 assert.doesNotMatch(runtime,/compatibility\\n\s*nativeDirectTermuxStreamV2/,
   'Literal backslash-n inside a // comment hides the critical runtime export');
 assert.match(campus,/1\.0\.181-native-sse-capability-fix/);
-assert.match(loader,/1\.0\.11-native-sse-export-capability-fix/);
+assert.match(loader,/1\.0\.12-native-visible-learning-plan-stream/);
+assert.match(runtime,/nativeMossVisibleStreamV3:\s*true/);
 
 let loads=0;
 const storage={getItem:()=>null,setItem:()=>{},removeItem:()=>{}};
@@ -32,13 +33,14 @@ ctx.document={
   createElement:tag=>{assert.equal(tag,'script');return{remove(){}}},
   head:{append(script){
     loads++;
-    assert.match(script.src,/1\.0\.11-native-sse-export-capability-fix/);
+    assert.match(script.src,/1\.0\.12-native-visible-learning-plan-stream/);
     vm.runInContext(runtime,context,{filename:'civweave-model-runtime.js'});
     script.onload?.();
   }}
 };
 const context=vm.createContext(ctx);
 vm.runInContext(runtime,context,{filename:'shared-runtime'});
+assert.equal(ctx.CivweaveModelRuntime.nativeMossVisibleStreamV3,true,'native model stream must advertise visible JSON-token support');
 assert.equal(ctx.CivweaveModelRuntime.nativeDirectTermuxStreamV2,true,
   'The REAL executable runtime must expose streaming capability');
 assert.equal(typeof ctx.CivweaveModelRuntime.generate,'function');
