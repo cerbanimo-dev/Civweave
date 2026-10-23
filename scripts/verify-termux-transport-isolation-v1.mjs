@@ -46,6 +46,6 @@ assert.equal(ready.activeNativePhoneServer(),true);
 assert.equal(await ready.verifyNativePhoneServerTransport(),true);
 assert.equal(calls,1);
 assert.ok(guide.indexOf('await verifyNativePhoneServerTransport();')>=0&&guide.indexOf('await verifyNativePhoneServerTransport();')<guide.indexOf('await direct.respondNative'), 'Transport probe must precede direct native inference');
-assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.184-native-formal-stages/,'Campus must load updated guide');
+assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.185-long-moss-plan-budgets/,'Campus must load updated guide');
 assert.match(settings,/const browserGGUF=route==='openai-compatible'&&byName\(form,'model'\)\?\.value!=='qwen35-4b-native'/,'Settings must distinguish native route');
 console.log('PASS native alias never intercepted by Wllama; browser GGUF remains functional; bounded server probe runs before assistant initialization; standalone diagnostic is inert on load');
