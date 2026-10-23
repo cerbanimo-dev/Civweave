@@ -28,10 +28,12 @@ small,p{overflow-wrap:anywhere}.source-card{padding:9px;border-bottom:1px solid 
 <div id="search-results"></div>
 <div class="double"><div><label for="source-title">Source title</label><input id="source-title" placeholder="Article / book / paper title"></div><div><label for="source-url">Source URL</label><input id="source-url" type="url" placeholder="https://..."></div></div>
 <div class="double"><div><label for="source-author">Author / creator (optional)</label><input id="source-author"></div><div><label for="source-type">Type</label><select id="source-type"><option value="reference">Reference</option><option value="research">Research</option><option value="article">Article</option><option value="book">Book</option><option value="other">Other</option></select></div></div>
+<label for="source-module">Relevant module</label><select id="source-module"></select>
 <label for="source-notes">Why is this source useful?</label><textarea id="source-notes" placeholder="Source evaluation and relevant information"></textarea>
 <button id="add-source">Add cited source</button><div id="sources"></div>
 </section>
 <section><h2>04 · Attach image or video references</h2><p class="subtle">Images appear in the browser preview. YouTube and Vimeo embeds are available in browser preview; the X4 Pro will display a linked or pre-rendered frame, not stream video natively. Remote media is not cached offline by this prototype.</p>
+<div class="tools"><div><label for="media-search">Search Wikimedia Commons for illustrations</label><input id="media-search" placeholder="Botanical diagram, tarot illustrations..."></div><button id="search-commons" type="button">Find images</button></div><div class="actions"><a href="https://www.youtube.com/results?search_query=educational+demonstration" target="_blank" rel="noopener noreferrer">Explore educational videos on YouTube</a></div><div id="media-results"></div>
 <div class="double"><div><label for="media-type">Media type</label><select id="media-type"><option value="image">Image</option><option value="video">Video</option></select></div><div><label for="media-module">Associated module</label><select id="media-module"></select></div></div>
 <label for="media-url">Image URL or video page URL</label><input type="url" id="media-url" placeholder="https://...">
 <div class="double"><div><label for="media-title">Caption / title</label><input id="media-title"></div><div><label for="media-credit">Attribution / credit</label><input id="media-credit"></div></div>
