@@ -269,7 +269,7 @@ test('Ollama model discovery distinguishes loopback from LAN address space',asyn
 
 
 test('selected Ollama guide messages never activate downloaded-local model bootstrap',async()=>{
-  const loader=read('family-ai-loader-v105.js'),chat=read('guide-chat-surface-v350.js'),campus=read('working-campus-v156.part5.txt');
+  const loader=read('family-ai-loader-v105.js'),chat=read('guide-chat-surface-v350.js'),campus=read('working-campus-v156.part5.txt'),parent=read('persistent-system-shell-v1.html');
   const start=loader.indexOf('function configuredOllama('),end=loader.indexOf('function emitLocalDegraded(',start);
   assert.ok(start>0&&end>start,'Shared AI loader must provide the direct Ollama guide transport.');
   const segment=loader.slice(start,end);
@@ -301,6 +301,7 @@ test('selected Ollama guide messages never activate downloaded-local model boots
   assert.equal(response.response.answer,'Hello from Ollama');
   assert.equal(partial,'Hello from Ollama');
   assert.match(chat,/await globalThis\.CivweaveFamilyAILoaderV105\.respondOllama\(/,'Canonical floating guide must route Ollama directly.');
+  assert.match(parent,/family-ai-loader-v105\.js\?v=1\.0\.140-ollama-chat-no-browser-inference/,'Persistent desktop chat must load its provider dependency in the parent context.');
   assert.match(campus,/await loader\.respondOllama\(/,'Working Campus must use the same Ollama request path.');
   assert.match(campus,/const localSelection=ollamaRequested\?\{active:false\}:selectedLocalModel\(\)/,'A saved browser model must not override the selected Ollama route.');
   const chatSubmit=chat.slice(chat.indexOf('async function submitActive('),chat.indexOf('function switchGuide('));
