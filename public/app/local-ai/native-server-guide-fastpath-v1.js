@@ -76,7 +76,9 @@ function previousTurns(history,user){
     .filter(row=>String(row.text||row.content||'').trim()!==user)
     .slice(-3);
   return rows.map(row=>{
-    const raw=String(row.text||row.content||'').trim();
+    // UI-only truncation guidance must not be replayed as model-authored text.
+    const raw=String(row.text||row.content||'').trim()
+      .replace(/\n\n\[Response reached the generation limit\. Reply "continue" to get the rest\.\]$/, '');
     const isRecentAssistant=continuation&&row.role==='assistant'&&row===rows.at(-1);
     return{role:row.role,content:isRecentAssistant?raw.slice(-1100):raw.slice(0,220)};
   }).filter(row=>row.content);
