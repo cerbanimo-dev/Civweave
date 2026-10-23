@@ -56,6 +56,10 @@ assert.match(tracker,/Live \$\{esc\(artifactName\(\)\)\}/,'tracker title must us
 assert.doesNotMatch(tracker,/Live Weave pipeline/,'user-facing tracker must not be named Weave');
 assert.match(tracker,/civweave:generation-lifecycle/,'tracker must consume the durable lifecycle bus');
 assert.match(tracker,/runtime-stage/,'tracker must consume real LiteRT stage activity');
+assert.match(tracker,/living-school-learning-plan-review-v2/,'tracker must consume the selected Moss provider stream');
+assert.match(tracker,/civweave:moss-learning-plan-progress/,'tracker must consume semantic validation and save milestones');
+assert.match(tracker,/state\.streams\.intake=.*accumulatedText/,'tracker must populate RAW from accumulated provider output');
+assert.match(tracker,/stageState\('saved','complete'/,'saved stage must reflect an actual persisted plan');
 const lifecycleIndex=shell.indexOf('/app/generation-lifecycle-v2.js');
 assert.ok(lifecycleIndex>=0&&lifecycleIndex<shell.indexOf('/app/shared-guide-surface-v236.js'),'active lifecycle bridge must load before guide/runtime composition');
 const takeoverRevision=takeover.match(/const REVISION='([^']+)'/)?.[1];
