@@ -1,0 +1,33 @@
+name: Verify native Termux token streaming
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/local-ai/native-server-guide-fastpath-v1.js
+      - public/app/guide-chat-surface-v350.js
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/unified-chat-system-v1.js
+      - scripts/verify-native-termux-streaming-v1.mjs
+      - .github/workflows/verify-native-termux-streaming-v1.yml
+  pull_request:
+    paths:
+      - public/app/local-ai/native-server-guide-fastpath-v1.js
+      - public/app/guide-chat-surface-v350.js
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/unified-chat-system-v1.js
+      - scripts/verify-native-termux-streaming-v1.mjs
+      - .github/workflows/verify-native-termux-streaming-v1.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/app/guide-chat-surface-v350.js
+      - run: node --check public/app/shared/civweave-model-runtime.js
+      - run: node --check public/app/unified-chat-system-v1.js
+      - run: node scripts/verify-native-termux-streaming-v1.mjs
