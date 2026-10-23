@@ -133,11 +133,26 @@ async function runTool(env, input) {
   if (action === 'search') {
     const query = clean(input?.query, 1200);
     if (!query) throw Object.assign(new Error('Browser search requires a query.'), { status: 400 });
-    const searxng = await searchSearxng(env, query);
-    if (searxng) return searxng;
+    // SearXNG is strictly optional. Public instances often disable JSON (403);
+    // a denied request must not prevent the already-configured Browser Run tool
+    // from attempting search through an ordinary HTML results page.
+    let searxError = '';
+    if (clean(env.SEARXNG_BASE_URL, 2048)) {
+      try {
+        const searxng = await searchSearxng(env, query);
+        if (searxng) return searxng;
+      } catch (error) {
+        searxError = clean(error?.message || error, 400);
+      }
+    }
     const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-    const out = await quick(env, 'markdown', { url, gotoOptions: { waitUntil: 'domcontentloaded', timeout: 20_000 } });
-    return { action, query, url, source: 'browser-run-duckduckgo', ...out };
+    try {
+      const out = await quick(env, 'markdown', { url, gotoOptions: { waitUntil: 'domcontentloaded', timeout: 20_000 } });
+      return { action, query, url, source: 'browser-run-duckduckgo', fallbackFrom: searxError ? 'searxng' : null, ...out };
+    } catch (error) {
+      if (!searxError) throw error;
+      throw Object.assign(new Error('Both search paths failed: SearXNG: ' + searxError + '; Browser Run: ' + clean(error?.message || error, 400)), { status: error?.status || 502 });
+    }
   }
   if (action === 'open' || action === 'markdown') {
     const url = safeUrl(input?.url);
