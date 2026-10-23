@@ -49,6 +49,7 @@ vm.runInNewContext(source.replace(dynamic,'Promise.resolve(global.__testWllama)'
 const runtime=sandbox.CivweaveModelRuntime;
 const config={provider:'openai-compatible',model:key,endpoint:sentinel,timeoutMs:90000};
 const result=await runtime.generate({purpose:'living-school-learning-plan-review-v2',executionProfile:'interactive',config,messages:[{role:'user',content:'Say READY.'}]});
+if(result.status!=='success')console.error('GGUF test-model error:',JSON.stringify(result.error));
 assert.equal(result.status,'success');
 assert.equal(result.outputText,'READY');
 assert.equal(result.actual.model,key);
