@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.177-guide-chat-surface-v350-native-fastpath';
+const VERSION='1.0.178-guide-chat-surface-v350-turn-history-ownership';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -303,6 +303,11 @@ async function submitActive(text){
   busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');if(button)button.disabled=true;if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
   try{
+    // The current user turn has already been appended to the visible thread.
+    // Do not submit it as both a historical user message and the current turn.
+    const recentHistory=historyFor(system);
+    const pastHistory=recentHistory.at(-1)?.role==='user'&&recentHistory.at(-1)?.text===value
+      ?recentHistory.slice(0,-1):recentHistory;
     let result;
     if(activeNativePhoneServer()){
       // On a verified Termux route, do not initialize the entire Civweave
@@ -311,10 +316,10 @@ async function submitActive(text){
       try{localStorage.setItem('civweave.native-server.last-request.v1',JSON.stringify({at:new Date().toISOString(),stage:'native-preflight',route:'openai-compatible',model:'qwen35-4b-native'}))}catch{}
       await verifyNativePhoneServerTransport();
       const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.0-fast-native-inference');
-      result=await direct.respondNative({text:value,system,history:historyFor(system)});
+      result=await direct.respondNative({text:value,system,history:pastHistory});
     }else{
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('Shared assistant runtime is not ready.');
-      result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:historyFor(system)});
+      result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:pastHistory});
     }
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
     if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(system,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
