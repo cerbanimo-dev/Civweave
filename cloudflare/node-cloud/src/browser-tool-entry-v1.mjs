@@ -156,7 +156,7 @@ function browserSearchResults(value) {
     } catch { continue; }
     if(seen.has(target))continue;
     seen.add(target);
-    const tail=markdown.slice(match.index+match[0].length,match.index+match[0].length+500).split('\n').find(part=>part.trim()&&!/^[\\-#* ]+$/.test(part))||'';
+    const tail=markdown.slice(match.index+match[0].length,match.index+match[0].length+500).split('\n').find(part=>part.trim()&&!/^[#* -]+$/.test(part))||'';
     rows.push({title:clean(match[1].replace(/<[^>]*>/g,''),220),url:target,snippet:clean(tail,360),engine:'duckduckgo-html',liveFetched:true});
     if(rows.length>=8)break;
   }
