@@ -135,4 +135,47 @@ answer=await run();
 assert.match(answer.response.answer,/different subject than the current request/i);
 assert.equal(persisted.has(manifestKey),false);
 
+
+// All five avatar guides must route the canonical active browser GGUF instead
+// of a stale downloaded-local Gemma selection. Exercise actual source logic.
+const assistantSource=fs.readFileSync('public/app/assistant-runtime-v141.js','utf8');
+const guideSource=fs.readFileSync('public/app/guide-chat-surface-v350.js','utf8');
+const extract=(source,start,end)=>{
+  const a=source.indexOf(start),b=source.indexOf(end,a+start.length);
+  assert.ok(a>=0&&b>a,'Selected-provider function source not found: '+start);
+  return source.slice(a,b);
+};
+const assistantFn=extract(assistantSource,'function selectedConfig(){','async function ledger()');
+const guideFn=extract(guideSource,'function selectedLocal(){','function voiceState()');
+const candidateSettings={provider:'openai-compatible',route:'openai-compatible',model:ggufModel,endpoint:'http://127.0.0.1:8080/v1'};
+const candidateStorage=new Map([
+  ['civweave.mobile.gguf-primary.v2',JSON.stringify({enabled:true,engine:'wllama',model:ggufModel})],
+  ['civweave-model-profiles-v1',JSON.stringify({interactive:candidateSettings})]
+]);
+const authority=vm.createContext({
+  localStorage:{getItem:k=>candidateStorage.get(k)||null},
+  runtime:()=>({readSharedConfig:()=>candidateSettings}),
+  activeLocal:()=>({active:true,id:'gemma4-e2b-it-litert-web'}),
+  SK:'civweave.universal-ai.v127',MINILM_ID:'Xenova/all-MiniLM-L6-v2',
+  clean:(v,n=8000)=>String(v??'').trim().slice(0,n),
+  low:v=>String(v??'').toLowerCase(),
+  parse:(v,d)=>{try{return JSON.parse(v)??d}catch{return d}},
+  provider:v=>v,
+});
+vm.runInContext(assistantFn+'\nthis.evaluateSelected=selectedConfig;',authority);
+assert.equal(authority.evaluateSelected().model,ggufModel,'All avatar guides must choose GGUF, not stale Gemma.');
+assert.equal(authority.evaluateSelected().provider,'openai-compatible');
+const recovery=vm.createContext({
+  localStorage:{getItem:k=>{
+    if(k==='civweave.local-ai.selection.v266')return JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'});
+    return candidateStorage.get(k)||null
+  }},
+  LOCAL_SELECTION_KEY:'civweave.local-ai.selection.v266',
+  parse:(v,d)=>{try{return JSON.parse(v)??d}catch{return d}}
+});
+vm.runInContext(guideFn+'\nthis.evaluateFallback=selectedLocal;',recovery);
+assert.equal(recovery.evaluateFallback(),null,'Guide recovery must not start stale Gemma when Qwen browser GGUF is selected.');
+candidateStorage.set('civweave-model-profiles-v1',JSON.stringify({interactive:{provider:'server-auto',model:'civweave-server-auto-v1'}}));
+assert.equal(recovery.evaluateFallback()?.id,'gemma4-e2b-it-litert-web','An explicitly changed server-auto route must not be mistaken for active browser GGUF.');
+
 console.log('Moss Learning Journey bridge regression check passed.');
