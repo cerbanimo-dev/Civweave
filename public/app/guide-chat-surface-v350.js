@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.174-guide-chat-surface-v350-gguf-selected-primary';
+const VERSION='1.0.175-guide-chat-surface-v350-native-api-no-retry';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -66,10 +66,23 @@ function append(system,row){
   thread.messages.push({...row,id:row.id||uid('msg'),at:row.at||now()});thread.updatedAt=now();
   return writeThread(system,thread);
 }
+function configuredRoute(){
+  try{
+    const canonical=globalThis.CivweaveSettingsV320?.readState?.();
+    if(canonical?.route||canonical?.provider)return String(canonical.route||canonical.provider).toLowerCase();
+  }catch{}
+  try{
+    const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
+    const raw=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
+    return String(raw?.route||raw?.provider||'').toLowerCase();
+  }catch{return''}
+}
 function selectedLocal(){
   try{
-    // The imported browser GGUF supersedes legacy local-model activation.
-    // Never route a recovery or diagnostic prompt to stale Gemma weights.
+    // A saved downloaded-model ID is NOT authorization to run it if the
+    // active route is Ollama, a native llama-server or any other provider.
+    const route=configuredRoute();
+    if(route&& !['downloaded-local','generative-local','local-ai','browser','qwen','smollm2','smollm3'].includes(route))return null;
     const gguf=parse(localStorage.getItem('civweave.mobile.gguf-primary.v2'),null);
     const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
     const raw=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
@@ -78,6 +91,10 @@ function selectedLocal(){
     const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});
     return value?.active&&value?.id?value:null;
   }catch{return null}
+}
+function nativeApiRoute(){
+  const route=configuredRoute();
+  return route==='openai-compatible'||route==='ollama'||route==='local-api';
 }
 function voiceState(){try{return globalThis.CivweaveGuideVoiceV1?.state?.()||null}catch{return null}}
 function state(){const voice=voiceState();return Object.freeze({version:VERSION,pageSystem,activeWindow:activeSystem,activeSystem,open:openState,minimized,busy,canonicalOwner:true,presentation:'single-current-chat-surface',selectedLocalModel:selectedLocal()?.id||'',voice:{loaded:Boolean(globalThis.CivweaveGuideVoiceV1),listening:Boolean(voice?.listening),source:voice?.source||'',status:voiceStatus}})}
@@ -259,7 +276,12 @@ async function submitActive(text){
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
     if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(system,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
   }catch(error){
-    const fallback=await fallbackReply(system,value),thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
+    // A failed native-server request must NOT issue a second generation or
+    // awaken a stale downloaded-local runtime, which can exhaust Android RAM.
+    const fallback=nativeApiRoute()
+      ? {text:`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
+      : await fallbackReply(system,value);
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
   }finally{busy=false;if(button)button.disabled=false;render();emitState()}
   return true;
 }
