@@ -350,7 +350,7 @@ async function submitActive(text){
         console.warn('[Civweave] Optional generation tracker unavailable:',error);
       }
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.6-native-formal-review');
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.7-long-plan-budgets');
       if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
