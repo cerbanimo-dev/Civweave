@@ -7,6 +7,7 @@ const LAYER_ID='cw-settings-v320';
 const STYLE_ID='cw-settings-v320-style';
 const INPUT_SLOT='__civweaveSettingsV320Capture';
 const SETTINGS_UI='/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend';
+const MODEL_PROVIDER_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.3-ollama-loopback-v1';
 const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v325.js?v=1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -27,7 +28,7 @@ const GEMINI_ROUTING='capability-spine-v271';
 const APP_VERSION='1.0.8';
 const DEFAULTS=Object.freeze({route:'deterministic',provider:'deterministic',model:'civweave-deterministic-v188',endpoint:'',consent:false,apiKey:'',credentialMode:'session'});
 if(globalThis.CivweaveSettingsV320?.version===VERSION)return;
-let returnFocus=null,uiPromise=null,localPromise=null;
+let returnFocus=null,uiPromise=null,localPromise=null,modelRuntimePromise=null;
 const parse=(value,fallback={})=>{try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}};
 const getLocal=key=>{try{return localStorage.getItem(key)||''}catch{return''}};
 const setLocal=(key,value)=>{try{localStorage.setItem(key,value);return true}catch{return false}};
@@ -227,6 +228,15 @@ function persist(state){
 function close(reason='explicit'){const layer=document.getElementById(LAYER_ID);if(!layer||layer.hidden)return false;layer.hidden=true;layer.dataset.closeReason=reason;document.documentElement.dataset.settingsOpenState='closed';const target=returnFocus;returnFocus=null;if(target?.isConnected&&typeof target.focus==='function')try{target.focus({preventScroll:true})}catch{}try{dispatchEvent(new CustomEvent('civweave:model-settings-closed',{detail:{reason,version:VERSION,owner:'settings-v320'}}))}catch{}return true}
 function afterPaint(task){const run=()=>setTimeout(task,0);if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(task,0)}
 function append(src,ready,label){if(ready?.())return Promise.resolve(true);return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsService='v324';const timer=setTimeout(()=>reject(new Error(`${label} did not become ready.`)),8000);script.onload=()=>{clearTimeout(timer);ready?.()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`))};script.onerror=()=>{clearTimeout(timer);reject(new Error(`${label} could not load.`))};if(!document.head?.isConnected){clearTimeout(timer);reject(new Error(`${label} could not mount because the document is leaving.`));return}document.head.append(script)})}
+function ensureModelRuntime(){
+  const ready=()=>typeof globalThis.CivweaveModelRuntime?.discoverOllamaModels==='function';
+  if(ready())return Promise.resolve(globalThis.CivweaveModelRuntime);
+  if(modelRuntimePromise)return modelRuntimePromise;
+  modelRuntimePromise=append(MODEL_PROVIDER_RUNTIME,ready,'Shared Ollama provider runtime')
+    .then(()=>globalThis.CivweaveModelRuntime)
+    .finally(()=>{modelRuntimePromise=null});
+  return modelRuntimePromise;
+}
 function ensureSettingsUI(layer=document.getElementById(LAYER_ID)){if(!layer?.isConnected||layer.hidden)return Promise.resolve(false);const ready=()=>Boolean(globalThis.CivweaveServerAISettingsV301?.enhance);if(ready()){globalThis.CivweaveServerAISettingsV301.enhance(layer.querySelector('form'));layer.querySelector('[data-membership-slot-placeholder]')?.remove();return Promise.resolve(true)}if(uiPromise)return uiPromise;uiPromise=append(SETTINGS_UI,ready,'Shared Settings membership service').then(()=>{globalThis.CivweaveServerAISettingsV301?.enhance?.(layer.querySelector('form'));layer.querySelector('[data-membership-slot-placeholder]')?.remove();return true}).catch(error=>{const placeholder=layer.querySelector('[data-membership-slot-placeholder] p');if(placeholder)placeholder.textContent='Membership controls are unavailable in this session.';try{dispatchEvent(new CustomEvent('civweave:settings-ui-extension-unavailable',{detail:{version:VERSION,message:String(error?.message||error)}}))}catch{}return false}).finally(()=>{uiPromise=null});return uiPromise}
 function renderLocalRoute(layer){
   const local=globalThis.CivweaveSettingsLocalRouteV323;
@@ -274,8 +284,7 @@ function bind(layer){
     const endpoint=String(byName(form,'endpoint')?.value||'').trim()||'http://127.0.0.1:11434/api/chat';
     button.disabled=true;status.textContent=discover?'Finding installed Ollama models…':'Checking Ollama connectivity…';
     try{
-      const runtime=globalThis.CivweaveModelRuntime;
-      if(!runtime)throw new Error('Model runtime is not loaded. Reload Civweave before testing.');
+      const runtime=await ensureModelRuntime();
       const models=await runtime.discoverOllamaModels(endpoint);
       const list=form.querySelector('#cw-ollama-installed-models');
       list.replaceChildren(...models.map(item=>{const option=document.createElement('option');option.value=item.name;return option}));
