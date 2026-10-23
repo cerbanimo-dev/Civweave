@@ -333,11 +333,12 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
           if(event?.phase!=='partial')return;
           const size=Number(event.characters)||0;
           progress(runPhase,size,Boolean(event.complete));
-          if(runPhase==='draft'&&typeof event.accumulatedText==='string'){
+          if(typeof event.accumulatedText==='string'){
             const timestamp=Date.now();
-            if(event.complete||timestamp-lastProgress>=320){
+            if(event.complete||timestamp-lastProgress>=340){
               lastProgress=timestamp;
-              stage('draft','streaming',{text:clean(event.accumulatedText,12000)});
+              stage(runPhase,'streaming',{text:clean(event.accumulatedText,16000),
+                label:runPhase==='draft'?'Shareable model draft':runPhase==='compile'?'Provisional raw JSON (not yet validated)':'Provisional repair JSON'});
             }
           }
         }
