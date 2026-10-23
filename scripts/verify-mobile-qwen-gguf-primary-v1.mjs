@@ -19,6 +19,8 @@ execFileSync(process.execPath,['scripts/test-gguf-browser-split-v1.mjs'],{stdio:
 execFileSync(process.execPath,['--check','public/app/local-ai/browser-gguf-opfs-v1.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-gguf-opfs-import-v1.mjs'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-gguf-generation-watch-v1.mjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check','public/app/local-ai/native-gguf-server-setup-v1.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['scripts/test-native-gguf-server-setup-v1.mjs'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-gguf-moss-routing-v1.mjs'],{stdio:'inherit'});
 assert.match(settings,/data-embedded-gguf-cancel-import/);
 assert.match(settings,/ggufImportAbort\.signal/);
@@ -68,6 +70,12 @@ assert.match(gguf,/MAX_GGUF_SHARD_BYTES=2_000_000_000/);
 assert.match(gguf,/GGUF_SHARDS_MISSING/);
 
 assert.match(gguf,/enable_thinking:false/);
+assert.match(gguf,/return_progress:true/);
+assert.match(gguf,/n_parallel:1/);
+assert.match(gguf,/chunk\?\.prompt_progress/);
+assert.match(gguf,/watchdog\.prefill\?\.\(prefill\)/);
+assert.match(settings,/data-phone-native-server-panel/);
+assert.match(settings,/data-native-gguf-server/);
 assert.match(gguf,/createGGUFGenerationWatch\(/);
 assert.match(gguf,/Promise\.race\(\[iterator\.next\(\),watchdog\.cancelled\]\)/);
 assert.match(gguf,/delta\.reasoning_content/);
