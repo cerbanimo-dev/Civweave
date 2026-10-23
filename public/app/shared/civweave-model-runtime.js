@@ -304,8 +304,10 @@
     const controller = new AbortController();
     let timedOut = false;
     const onAbort = () => controller.abort(externalSignal?.reason || new DOMException("Generation cancelled", "AbortError"));
-    externalSignal?.addEventListener?.("abort", onAbort, { once: true });
+    if(externalSignal?.aborted)onAbort();
+    else externalSignal?.addEventListener?.("abort", onAbort, { once: true });
     const timer = setTimeout(() => {
+      if(controller.signal.aborted)return;
       timedOut = true;
       controller.abort(new DOMException("Generation timed out", "TimeoutError"));
     }, timeoutMs);
@@ -1009,7 +1011,11 @@
       }
       const externallyCancelled = Boolean(request.signal?.aborted);
       const timedOut = controller.timedOut();
-      return failureResult(externallyCancelled ? "cancelled" : timedOut ? "timeout" : "provider-error", error, { request, config, context, elapsedMs: Date.now() - started });
+      const effectiveError=externallyCancelled&&(!error?.message||/aborted without reason/i.test(error.message))
+        ?new Error('The active Civweave request was cancelled before '+safeString(context.purpose,100)+
+          '. Abort source: '+safeString(request.signal.reason?.message||request.signal.reason||'unknown',180))
+        :error;
+      return failureResult(externallyCancelled ? "cancelled" : timedOut ? "timeout" : "provider-error", effectiveError, { request, config, context, elapsedMs: Date.now() - started });
     } finally { controller.cleanup(); }
   }
 

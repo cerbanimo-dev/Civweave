@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.8-unified-chat-system-v1-generous-outputs';
+const VERSION='1.2.9-unified-chat-system-v1-draft-completeness-gate';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -88,6 +88,12 @@ const LEARNING_PLAN_SCHEMA=Object.freeze({
     }}},
     assumptions:{type:'array',maxItems:6,items:{type:'string'}}
   }
+});
+const NATIVE_LEARNING_PLAN_SCHEMA=Object.freeze({
+  ...LEARNING_PLAN_SCHEMA,
+  required:[...LEARNING_PLAN_SCHEMA.required,'mode'],
+  properties:{...LEARNING_PLAN_SCHEMA.properties,
+    modules:{...LEARNING_PLAN_SCHEMA.properties.modules,minItems:4,maxItems:6}}
 });
 const MUTATION_CLAIM=/(?:\b(?:i|we)(?:['’]ve|\s+have)\s+(?:drafted|created|built|generated|structured|saved|updated|revised|made)\b|\b(?:has\s+been|was)\s+(?:created|generated|built|saved|drafted|structured|revised)\b)/i;
 
@@ -326,12 +332,49 @@ function normalizeNativePlanContract(result,seed,runtime){
     plan.mode=seed.mode.toLowerCase();
   if(typeof plan.assumptions==='string')
     plan.assumptions=plan.assumptions.trim()?[plan.assumptions.trim()]:[];
+  // Qwen sometimes supplies multiple valid evidence statements as proof[].
+  // Join only non-empty strings, preserving the actual evidence verbatim.
+  if(Array.isArray(plan.proof)&&plan.proof.length>=1&&plan.proof.length<=12&&
+      plan.proof.every(x=>typeof x==='string'&&x.trim().length>0))
+    plan.proof=plan.proof.map(x=>x.trim()).join(' ');
   // The user request owns their preferred level and mode. This does not
   // supply any learning module, lesson, evidence or approval.
   if(typeof runtime?.validateSchema!=='function')return null;
-  const violations=runtime.validateSchema(plan,LEARNING_PLAN_SCHEMA);
+  const violations=runtime.validateSchema(plan,NATIVE_LEARNING_PLAN_SCHEMA);
   if(violations.length)return null;
   return plan;
+}
+const NATIVE_DRAFT_END='END OF LEARNING JOURNEY OUTLINE';
+function assessNativeDraft(text,finishReason=''){
+  const draft=clean(text,22000);
+  const headings=[...draft.matchAll(/(?:^|\n)\s*(?:#{1,6}\s*)?(?:\*\*)?Module\s+(\d{1,2})\s*[:.\-–—]/gim)];
+  const numbers=headings.map(m=>Number(m[1]));
+  const distinct=new Set(numbers);
+  const ordered=numbers.every((n,i)=>n===i+1);
+  const incomplete=[];
+  if(headings.length<4||headings.length>6||distinct.size!==headings.length||!ordered)
+    incomplete.push('Expected 4–6 sequential module headings, found '+headings.length+'.');
+  for(let i=0;i<headings.length;i++){
+    const start=headings[i].index+headings[i][0].length;
+    const end=i+1<headings.length?headings[i+1].index:draft.length;
+    const part=draft.slice(start,end);
+    if(!/(?:^|\n)\s*(?:[-*]\s*)?(?:\*\*)?Focus\s*:/im.test(part))
+      incomplete.push('Module '+numbers[i]+' lacks a Focus field.');
+    if(!/(?:^|\n)\s*(?:[-*]\s*)?(?:\*\*)?(?:Demonstrable\s+Outcome|Outcome)\s*:/im.test(part))
+      incomplete.push('Module '+numbers[i]+' lacks a demonstrable outcome.');
+  }
+  const proof=/\b(?:final\s+(?:proof|demonstration)|proof\s+of\s+capability|capstone\s+demonstration)\s*:/i.test(draft);
+  if(!proof)incomplete.push('The final proof/demonstration is missing.');
+  const marked=draft.includes(NATIVE_DRAFT_END);
+  const last=draft.replace(NATIVE_DRAFT_END,'').trim();
+  const endedNaturally=/[.!?]$/.test(last);
+  if(!marked&&!endedNaturally)incomplete.push('The draft ends without a completed sentence or end marker.');
+  if(!marked&&!/^(?:stop|eos|end_turn)$/i.test(String(finishReason||'')))
+    incomplete.push('The model did not confirm ordinary completion.');
+  return{complete:incomplete.length===0,issues:incomplete,moduleCount:headings.length,hasProof:proof,
+    endMarker:marked,finishReason:String(finishReason||'unknown'),
+    // Presentation-only marker is not a module, outcome, or approved course.
+    text:clean(draft.replace(NATIVE_DRAFT_END,''),20000)};
 }
 async function nativeFormalLearningPlan({runtime,config,seed,options,existingPlan}){
   const pipelineId='native-moss-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
@@ -379,33 +422,54 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     stage('draft','running',{label:'Qwen · shareable plan draft'});
     const draftResult=await run({
       purpose:'living-school-native-plan-draft-v1',phase:'draft',maxTokens:1500,
-      system:'You are Moss. Draft a concise shareable Learning Journey outline for the CURRENT goal only. This is visible user-facing draft, not hidden reasoning or JSON. State the topic and capability, then four to six sequential modules (each title, focus, demonstrable outcome), and a practical final proof. Include 4 to 6 modules with specific and independently demonstrable outcomes. Finish each module completely. No lessons, unrelated topics or preambles.',
+      system:'You are Moss. Draft the shareable user-facing Learning Journey outline for the CURRENT GOAL only. Do not output hidden reasoning or JSON. Write Topic, Intended Capability, then 4 to 6 sequential sections headed exactly "### Module N: Title", each containing distinct lines "Focus:" and "Demonstrable Outcome:". Finish with a line "Final Proof:" describing independent demonstration. Finish the final proof sentence completely, then print "END OF LEARNING JOURNEY OUTLINE". No lessons, unrelated topics or preambles.',
       user:'CURRENT GOAL: '+goal+'\nTopic anchor: '+topic+'\nBeginner · guided · REVIEW-only. Modules must mention the specific subject.'
     });
-    if(draftResult?.status==='incomplete'||draftResult?.finishReason==='length'){
-      draft=clean(draftResult?.outputText,12000);
-      if(!draft)throw new Error('Draft reached max_tokens without producing useful text. No compiler was started.');
-      stage('draft','needs-continuation',{label:'Draft reached token budget · continuing with same model',text:draft,
-        finishReason:draftResult.finishReason||'length',maxTokens:1500});
-      const tail=draft.slice(-1100);
+    draft=clean(draftResult?.outputText,16000);
+    if(!draft)throw new Error('The model produced no visible draft text. The JSON compiler was not started.');
+    const initialCheck=assessNativeDraft(draft,draftResult?.finishReason);
+    stage('draft','inspected',{label:initialCheck.complete?'Outline structurally complete':'Checking incomplete draft',
+      finishReason:initialCheck.finishReason,moduleCount:initialCheck.moduleCount,
+      completionTokens:Number(draftResult?.usage?.completionTokens||draftResult?.usage?.completion_tokens||0),
+      maxTokens:1500,issues:initialCheck.issues,text:draft});
+    if(draftResult?.status==='incomplete'||!initialCheck.complete){
+      stage('draft','needs-continuation',{
+        label:'Outline incomplete · one bounded continuation on selected Qwen',
+        reason:initialCheck.issues.join(' ')||draftResult?.error?.message||'output-token ceiling',
+        finishReason:initialCheck.finishReason,moduleCount:initialCheck.moduleCount,
+        completionTokens:Number(draftResult?.usage?.completionTokens||draftResult?.usage?.completion_tokens||0),
+        maxTokens:1500,text:draft
+      });
+      const tail=draft.slice(-1350);
       const continued=await run({
         purpose:'living-school-native-plan-draft-continuation-v1',
         phase:'draft',maxTokens:1200,appendPrefix:draft+'\n',
-        system:'Continue the visible Learning Journey outline that was cut off. Give ONLY the remaining words, complete Module 3, and add the final practical proof. Do not restart, repeat earlier modules, change subject or return JSON. Include the final practical proof. Keep it concise.',
-        user:'CURRENT GOAL: '+goal+'\nLast portion already shown:\n'+tail+
-          '\nContinue from its exact stopping point. Complete the remaining outline without repeating the text above.'
+        system:'You are Moss continuing a visible Learning Journey outline which is incomplete. Continue exactly from the stopping point without repeating prior text. Complete any unfinished module fields, then add as many new numbered modules as needed for a total of 4 to 6, each with "Focus:" and "Demonstrable Outcome:". Finish with "Final Proof:" and the exact final line "END OF LEARNING JOURNEY OUTLINE". Do not restart the outline, return JSON or change topic.',
+        user:'CURRENT GOAL: '+goal+'\nThe previous draft has '+initialCheck.moduleCount+
+          ' numbered modules. The validation issues are: '+initialCheck.issues.join(' ') +
+          '\nThe already-shown tail:\n'+tail+
+          '\nReturn ONLY new text that follows these exact words. Do not repeat the intro or previous modules.'
       });
       if(continued?.status==='incomplete'||continued?.finishReason==='length')
-        throw new Error('The draft and its one bounded continuation both reached max_tokens. Partial draft remains visible but was not sent to the JSON compiler.');
+        throw new Error('The draft and its bounded continuation reached their generation limits. The incomplete outline remains visible but was not compiled or saved.');
       const rest=assertNativePlanModel(continued,config,'Draft continuation');
       const start=rest.slice(0,110).replace(/\s+/g,' ').toLowerCase();
       if(start.length>=55&&draft.replace(/\s+/g,' ').toLowerCase().includes(start))
-        throw new Error('The model restarted the draft instead of continuing. Duplicate content was not accepted or compiled.');
-      draft=clean(draft+'\n'+rest,16000);
-      stage('draft','complete',{label:'Draft completed after one bounded continuation',text:draft});
+        throw new Error('Qwen restarted the outline instead of continuing. Duplicate content was not compiled.');
+      draft=clean(draft+'\n'+rest,20000);
+      const continuedCheck=assessNativeDraft(draft,continued?.finishReason);
+      stage('draft','inspected',{label:continuedCheck.complete?'Continued outline structurally complete':'Continued outline remains incomplete',
+        finishReason:continuedCheck.finishReason,moduleCount:continuedCheck.moduleCount,
+        completionTokens:Number(continued?.usage?.completionTokens||continued?.usage?.completion_tokens||0),
+        maxTokens:1200,issues:continuedCheck.issues,text:draft});
+      if(!continuedCheck.complete)
+        throw new Error('The continued draft is still incomplete: '+continuedCheck.issues.join(' ').slice(0,360)+
+          ' No JSON compilation or plan saving was attempted.');
+      draft=continuedCheck.text;
+      stage('draft','complete',{label:'Verified complete outline after continuation',text:draft,moduleCount:continuedCheck.moduleCount,finishReason:continuedCheck.finishReason});
     }else{
-      draft=assertNativePlanModel(draftResult,config,'Draft');
-      stage('draft','complete',{label:'Draft completed',text:draft});
+      draft=initialCheck.text;
+      stage('draft','complete',{label:'Verified complete outline',text:draft,moduleCount:initialCheck.moduleCount,finishReason:initialCheck.finishReason});
     }
     progress('draft',draft.length,true);
     phase='compile';
@@ -416,11 +480,19 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       '\nReturn 4 to 6 concrete subject-specific modules with observable outcomes. Include level "beginner", mode "guided" and assumptions [].';
     const compileResult=await run({
       purpose:'living-school-native-plan-compile-v1',phase:'compile',maxTokens:2300,
-      system:compileSystem,user:compileUser,schema:LEARNING_PLAN_SCHEMA,structured:true
+      system:compileSystem,user:compileUser,schema:NATIVE_LEARNING_PLAN_SCHEMA,structured:true
     });
     compiled=clean(compileResult?.outputText,16000);
-    stage('compile',compileResult?.status==='success'?'complete':'failed',
-      {label:'Raw JSON compiler output',text:compiled,code:compileResult?.error?.code||''});
+    // A schema-invalid compiler answer is a recoverable intermediate stage.
+    // It must not set the entire tracker to FAILED while local normalization
+    // or the explicit targeted repair is still pending.
+    stage('compile','complete',{
+      label:compileResult?.status==='success'?'Raw JSON compiled · awaiting validation':'Raw JSON received · awaiting normalization or repair',
+      text:compiled,code:compileResult?.error?.code||'',rawStatus:compileResult?.status||'unknown',
+      finishReason:compileResult?.finishReason||'unknown',
+      completionTokens:Number(compileResult?.usage?.completionTokens||compileResult?.usage?.completion_tokens||0),
+      maxTokens:2300
+    });
     progress('compile',compiled.length,true);
     phase='validate';
     stage('validate','running',{label:'Independent contract and topic check'});
@@ -431,6 +503,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       const candidate=normalized||modelJson(compileResult);
       if(!candidate)throw new Error('JSON compiler returned no valid plan object.');
       plan=normalizeModelPlan(candidate,seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      if(plan.modules.length<4||plan.modules.length>6)throw new Error('Compiler must produce 4–6 subject-specific modules for this Learning Journey.');
       if(normalized&&compileResult?.status==='invalid-response')
         stage('validate','normalized',{label:'Unambiguous JSON field normalization; topic and modules still checked',fields:['level','mode','assumptions']});
     }catch(error){validationError=error}
@@ -440,21 +513,27 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       stage('repair','running',{label:'Qwen · targeted plan repair'});
       const repairResult=await run({
         purpose:'living-school-native-plan-repair-v1',phase:'repair',maxTokens:2400,structured:true,
-        schema:LEARNING_PLAN_SCHEMA,
+        schema:NATIVE_LEARNING_PLAN_SCHEMA,
         system:'Repair a malformed or off-topic Learning Journey JSON object. Return a NEW valid JSON object only, with title, capability, level, mode, proof, assumptions and 4 to 6 subject-specific modules (title, focus, outcome). Keep the CURRENT GOAL and draft; correct only reported errors. No new topic or lessons.',
         user:'CURRENT GOAL: '+goal+'\nValidation error: '+clean(validationError.message,380)+
           '\nOriginal shareable draft:\n'+draft.slice(0,3500)+
           '\nPrevious JSON output:\n'+compiled.slice(0,3400)+'\nRepair as compact valid JSON.'
       });
       repairText=clean(repairResult?.outputText,16000);
-      stage('repair',repairResult?.status==='success'?'complete':'failed',
-        {label:'Raw targeted repair',text:repairText,code:repairResult?.error?.code||''});
+      stage('repair','complete',{
+        label:repairResult?.status==='success'?'Raw targeted repair received':'Raw repair received · awaiting validation',
+        text:repairText,code:repairResult?.error?.code||'',rawStatus:repairResult?.status||'unknown',
+        finishReason:repairResult?.finishReason||'unknown',
+        completionTokens:Number(repairResult?.usage?.completionTokens||repairResult?.usage?.completion_tokens||0),
+        maxTokens:2400
+      });
       progress('repair',repairText.length,true);
       const normalizedRepair=normalizeNativePlanContract(repairResult,seed,runtime);
       if(!normalizedRepair)assertNativePlanModel(repairResult,config,'Repair');
       const repairedCandidate=normalizedRepair||modelJson(repairResult);
       if(!repairedCandidate)throw new Error('Repair stage returned no valid plan object.');
       plan=normalizeModelPlan(repairedCandidate,seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      if(plan.modules.length<4||plan.modules.length>6)throw new Error('Repaired JSON must contain 4–6 modules.');
       if(normalizedRepair&&repairResult?.status==='invalid-response')
         stage('repair','normalized',{label:'Corrected JSON enum/assumption formatting after model repair'});
       phase='validate';
@@ -469,8 +548,12 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     progress('saved',0,true);
     return learningPlanResponse(readLearningPlan());
   }catch(error){
-    stage('pipeline',options.signal?.aborted?'stopped':'failed',
-      {label:'Native formal Learning Journey failed',message:'Stage '+phase+': '+clean(error?.message||error,800)});
+    stage('pipeline',options.signal?.aborted?'stopped':'failed',{
+      label:'Native formal Learning Journey '+(options.signal?.aborted?'cancelled':'failed'),
+      message:'Stage '+phase+': '+clean(error?.message||error,800),
+      abortReason:options.signal?.aborted?clean(options.signal.reason?.message||options.signal.reason||'no reason supplied',160):'',
+      stageAtFailure:phase
+    });
     throw error;
   }
 }
