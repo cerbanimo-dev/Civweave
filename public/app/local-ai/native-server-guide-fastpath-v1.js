@@ -121,7 +121,7 @@ export async function respondNative({system='civweave',text='',history=[],fetche
     markNativeStage('native-text-complete',`tokens:${Number(payload?.usage?.completion_tokens)||0}, finish:${finishReason}`);
     // Truncation is explicit; never launch an unrequested continuation call.
     const visible=answer+(incomplete?'\n\n[Response reached the generation limit. Reply "continue" to get the rest.]':'');
-    return{response:{answer:visible,choice:{mode:system==='living-school'?'Learn':'Reflect',system,room:'',nextAction:incomplete?'Reply "continue" to continue this answer.':''},assumptions:[],requiresConsent:false,confidence:.75},
+    return{response:{answer:visible,choice:{mode:system==='living-school'?'Learn':'Reflect',system,room:'',nextAction:''},assumptions:[],requiresConsent:false,confidence:.75},
       provider:'openai-compatible',model:NATIVE_MODEL,usage:payload.usage||null,action:null};
   }catch(error){
     markNativeStage('native-error',controller.signal.aborted?'150-second inference timeout':clean(error?.message||error,150));
