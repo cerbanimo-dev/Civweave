@@ -243,6 +243,7 @@
     for (const key of ["text", "output_text", "output", "response", "content", "message"]) {
       if (typeof payload[key] === "string") return payload[key];
     }
+    if (typeof payload.message?.content === "string") return payload.message.content;
     for (const key of ["data", "result"]) {
       if (payload[key] && typeof payload[key] === "object") {
         const nested = extractText(payload[key]);

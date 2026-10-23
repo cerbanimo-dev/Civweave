@@ -1,0 +1,28 @@
+name: Verify local API runtime
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'scripts/test-local-api-runtime-v1.mjs'
+      - '.github/workflows/verify-local-api-runtime-v1.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'scripts/test-local-api-runtime-v1.mjs'
+      - '.github/workflows/verify-local-api-runtime-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/app/shared/civweave-model-runtime.js
+      - run: node --test scripts/test-local-api-runtime-v1.mjs
