@@ -57,7 +57,10 @@ assert.match(moss,/options\.onProgress/);
 assert.match(runtime,/nativeDirectTermuxStreamV2: true/);
 assert.match(runtime,/NATIVE_HTTP_TRANSPORT_FAILED/);
 assert.match(runtime,/nativeDirect\?transport\(payload\):fetchOptions/);
-assert.match(runtime,/if\(nativeDirect\)\s*emit\(context,'partial'/);
+assert.match(runtime,/pendingText\s*\+=\s*delta/,'native stream must preserve incoming visible token deltas');
+assert.match(runtime,/backend:'native-server',text:pendingText,accumulatedText:output/,'native progress event must include raw generated text, not merely a character count');
+assert.match(runtime,/backend:'native-server'[^}]*complete:true/,'native stream must flush trailing text on completion');
+assert.match(guide,/ensureTracker\?\.\(\)/,'native chat must start the one canonical tracker before inference');
 const cancelled=new AbortController();
 cancelled.abort();
 await assert.rejects(api.readNativeStream({

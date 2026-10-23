@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.5-unified-chat-system-v1-topic-grounded-plan';
+const VERSION='1.2.6-unified-chat-system-v1-topic-grounded-visible-progress';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -278,6 +278,10 @@ function learningPlanResponse(plan){
   if(plan.state==='superseded')return packet(learningPlanText(plan),'This prior plan cannot be approved. Retry the most recent learning goal to generate a current REVIEW plan.',{provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan'});
   return packet(learningPlanText(plan),'Review or revise this plan. When it is right, explicitly approve the Learning Journey to generate its learning content.',{assumptions:plan.assumptions||[],requiresConsent:true,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:{kind:'learning-journey-plan-approval',planId:plan.id,state:plan.state||'review',required:true,actions:['review','revise','approve']},action:{kind:'living-school-learning-plan',system:'living-school',state:plan.state||'review',title:plan.request.title,capability:plan.request.capability,canonicalArtifact:'Learning Journey'}});
 }
+// The Moss learning capability owns its real progress milestones.
+function learningPlanProgress(phase,detail={}){
+  try{globalThis.dispatchEvent?.(new CustomEvent('civweave:moss-learning-plan-progress',{detail:{phase,...detail}}))}catch{}
+}
 async function generateLivingSchoolPlan(options={},existingPlan=null,revisionText=''){
   const request=curriculumRequest(options);
   if(!request.capability&&!existingPlan?.request?.capability)return packet('I can generate the Learning Journey plan, but I still need the observable capability the learner should be able to demonstrate.','Tell Moss what you want to be able to do, then the selected AI will generate the high-level plan for review.');
@@ -307,6 +311,8 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
   if(!runtime?.generate||!config)return packet('Moss could not reach the selected AI runtime for Learning Journey planning. No learning content was generated or queued.','Retry after the selected AI runtime is ready.',{provider:'learning-plan-model-unavailable',model:clean(config?.model,240)});
   const requestedProvider=clean(config.provider||config.route,120).toLowerCase(),planConfig={...config,maxTokens:Math.min(1800,Math.max(900,Number(config.maxTokens)||1200)),temperature:Math.min(.35,Math.max(.1,Number(config.temperature)||.25))},history=seed.intent==='new'?[]:rowsFor(options).slice(-8).map(row=>({role:row.role,text:clean(row.text,1200)}));
   const context={schema:'civweave.learning-journey-plan-request.v2',request:seed,revision:clean(revisionText,3000),existingPlan:existingPlan?{title:existingPlan.request?.title,capability:existingPlan.request?.capability,level:existingPlan.request?.level,mode:existingPlan.request?.mode,proof:existingPlan.request?.proof,modules:existingPlan.modules||[],assumptions:existingPlan.assumptions||[]}:null,recentConversation:history,constraints:['Generate only a high-level Learning Journey plan for review.','Do not write lessons, explanations, exercises, quizzes, readings, source lists, or curriculum content.','Make the module sequence specific to the Hero’s stated learning goal.','Each module entry needs a short title, a focus, and an observable outcome.','Keep the plan in REVIEW. Nothing is approved, activated, or materialized by this call.']};
+  let progressStage='intake';
+  learningPlanProgress('started',{goal:seed.capability,model:config.model,provider:requestedProvider});
   try{
     const ggufChoice=selectedPlanGGUF(planConfig);
     const nativeServer=nativePhoneServer(planConfig);
@@ -333,6 +339,8 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
     const result=await runtime.generate({purpose:'living-school-learning-plan-review-v2',executionProfile:'interactive',signal:options.signal,config:planConfig,schema:LEARNING_PLAN_SCHEMA,responseFormat:'json',context,
       ggufNoGrammar:Boolean(ggufChoice),maxRepairAttempts:compactLocal?0:1,
       onEvent:event=>{if(nativeServer&&event?.phase==='partial')try{options.onProgress?.({phase:'draft',characters:Number(event.characters)||0,complete:Boolean(event.complete)})}catch{}},task:{schema:'civweave.ai-task.v2',kind:'curriculum-plan-draft',systemId:'living-school',complexity:'routine',requirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:true,structuredOutput:true,vision:false,complexity:false}},capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,planning:true,structuredOutput:true},messages:conciseMessages||[{role:'system',content:'You are Moss, Living School’s Learning Journey guide. Use the selected AI model to design a concise, personalized, high-level learning plan for review. Return strict JSON matching the supplied schema. Do not teach the subject yet and do not generate curriculum content. The output must remain an inert REVIEW plan until the Hero explicitly approves it.'},{role:'user',content:`Design the high-level Learning Journey plan from this request:\n${JSON.stringify(context)}`}]});
+    learningPlanProgress('received',{text:clean(result?.outputText||(result?.outputJson&&JSON.stringify(result.outputJson))||'',24000),status:result?.status});
+    progressStage='validate';
     if(!['success','fallback'].includes(result?.status))throw new Error(result?.error?.message||result?.error||`The selected AI ended with ${result?.status||'an error'}.`);
     const provider=clean(result?.actual?.provider||result?.provider||config.provider||config.route,120),model=clean(result?.actual?.model||result?.model||config.model,240),actualProvider=provider.toLowerCase();
     if(ggufChoice){
@@ -345,9 +353,12 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
         throw new Error('The selected local AI model was bypassed or returned a fallback from '+(provider||'another provider')+'. Moss refused to save the plan.');
     }
     const plan=normalizeModelPlan(modelJson(result),seed,existingPlan,{provider,model});
+    learningPlanProgress('validated',{draft:learningPlanText(plan)});
     saveLearningPlan(plan);
+    learningPlanProgress('saved',{planId:plan.id});
     return learningPlanResponse(plan);
   }catch(error){
+    learningPlanProgress('failed',{stage:progressStage,message:clean(error?.message||error,1200)});
     return packet(`Moss could not generate the high-level Learning Journey plan with the selected AI: ${clean(error?.message||error,1200)} No learning content was generated or queued.`,'Retry the plan or choose another AI model.',{provider:requestedProvider||'learning-plan-model-error',model:clean(error?.executionModel||config.model,240)});
   }
 }
