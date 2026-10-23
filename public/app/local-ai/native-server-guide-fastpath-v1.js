@@ -3,7 +3,7 @@
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
 const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.9-native-server-no-helper-stream';
-const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.3-moss-native-direct-planning';
+const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.4-moss-native-learning-controls';
 let modelsPromise=null,plannerPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
@@ -55,7 +55,7 @@ async function ensurePlanner(){
     .catch(error=>{modelsPromise=null;throw error});
   await modelsPromise;
   if(!plannerPromise)plannerPromise=loadScript(MOSS_PLANNER,
-    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.3-unified-chat-system-v1-native-direct-planning','Moss planner')
+    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.4-unified-chat-system-v1-native-learning-controls','Moss planner')
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
@@ -67,13 +67,15 @@ export async function respondNative({system='civweave',text='',history=[],fetche
   if(!nativeSelection())throw new Error('The selected native llama-server route changed. No inference was started.');
   const user=clean(text,5000);if(!user)throw new Error('There was no text to send to the selected server.');
   markNativeStage('native-fast-lane',system);
-  if(system==='living-school'&&explicitLearningGoal(user)){
+  if(system==='living-school'){
     markNativeStage('moss-planner-loading');
     const planner=await ensurePlanner();
     markNativeStage('moss-planner-ready');
-    const result=await planner.generateLivingSchoolPlan({text:user,history,nativeFastLane:true});
-    markNativeStage('moss-plan-finished',result?.provider||'unknown');
-    return result;
+    const result=await planner.handleNativeLivingSchoolRequest({text:user,history,nativeFastLane:true});
+    if(result){
+      markNativeStage('moss-action-finished',result?.provider||'unknown');
+      return result;
+    }
   }
   const [name,role]=GUIDE[system]||GUIDE.civweave;
   const prior=(Array.isArray(history)?history:[]).slice(-4)
