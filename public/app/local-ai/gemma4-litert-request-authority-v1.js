@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.28-local-litert-request-authority-v1-runtime-family-gate';
+const VERSION='1.2.30-local-litert-request-authority-v1-moss-native-tracker-loader';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.131-v325-family-router';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
