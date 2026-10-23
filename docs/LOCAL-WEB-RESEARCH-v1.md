@@ -6,22 +6,45 @@ This release connects **explicitly requested live web research** from the downlo
 
 The search transport is hosted by a Civweave node (Cloudflare Worker); this release is **not** a direct browser-to-SearXNG connection and is not yet a browser-independent offline web search.
 
-## Host setup (no commercial search API key)
+## Default: search without a separate search server
 
-1. Operate a trusted, access-controlled SearXNG instance. Enable JSON output in its `settings.yml`:
+**SearXNG is optional, not required.** The existing Civweave node-cloud Worker
+already has a `BROWSER` binding. When `SEARXNG_BASE_URL` is unset, its
+`web_search` tool uses that Cloudflare Browser Run binding to retrieve the
+DuckDuckGo HTML results page. No commercial search API key or SearXNG
+installation is required. On currently supported Cloudflare plans, Browser Run
+has a limited included usage allowance; search engines may block automated
+requests and failure must be disclosed.
 
-   ```yaml
-   search:
-     formats:
-       - html
-       - json
-   ```
+The existing host-capacity session remains an access-control requirement in
+the browser/PWA application. The external service is not required for language
+model inference, only for access to arbitrary third-party web pages where
+browser CORS rules prevent direct reads.
 
-2. Provide the instance URL to the **node-cloud Worker** as the `SEARXNG_BASE_URL` environment binding. Example: `https://search.example.org/`. The operator must control that endpoint; do not select a random third-party instance or place credentials in the URL. The Worker requests `/search?q=...&format=json`, filters results and passes up to eight bounded source snippets to the local agent.
-3. Preserve the existing `NODE_FABRIC_SESSION_SECRET` binding and host-capacity-session flow. The Worker authenticates live search before dispatching to SearXNG. A user does not obtain a SearXNG credential or need their own search API key.
-4. Deploy the node-cloud Worker using its established deployment workflow. The `BROWSER` binding is optional for SearXNG **search**, but needed for live `open` and `links` actions and for the existing DuckDuckGo Browser Run search fallback. If neither SearXNG nor Browser Run is usable, live searches must visibly fail.
+If the optional SearXNG endpoint returns 403 (or any other upstream failure),
+the Worker now tries its existing Browser Run path. If both fail, the user sees
+an explicit error; the model may not claim live search succeeded.
 
-SearXNG may itself rely on external public search engines, which can rate-limit or block its requests. Keep SearXNG private to the operator, apply upstream rate limits, and monitor usage. Do not expose an unauthenticated public search proxy.
+## Optional operator-hosted SearXNG
+
+Operators who prefer a separate search index aggregator can add a *trusted*,
+rate-limited SearXNG instance by setting `SEARXNG_BASE_URL` in the
+node-cloud Worker environment. If chosen, ensure JSON format is enabled:
+
+```yaml
+search:
+  formats:
+    - html
+    - json
+```
+
+Public SearXNG instances commonly return 403 for JSON access. Do **not**
+default all users to a third-party instance without obtaining operator
+permission and verifying the service's permitted usage.
+
+Cloudflare Browser Run's `open` and `links` actions remain available
+through the existing binding. The Worker continues to validate source URLs
+and require member sessions for live tools.
 
 ## User flow
 
