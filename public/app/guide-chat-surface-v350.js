@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.173-guide-chat-surface-v350-execution-role-attribution';
+const VERSION='1.0.174-guide-chat-surface-v350-gguf-selected-primary';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -66,7 +66,19 @@ function append(system,row){
   thread.messages.push({...row,id:row.id||uid('msg'),at:row.at||now()});thread.updatedAt=now();
   return writeThread(system,thread);
 }
-function selectedLocal(){try{const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});return value?.active&&value?.id?value:null}catch{return null}}
+function selectedLocal(){
+  try{
+    // The imported browser GGUF supersedes legacy local-model activation.
+    // Never route a recovery or diagnostic prompt to stale Gemma weights.
+    const gguf=parse(localStorage.getItem('civweave.mobile.gguf-primary.v2'),null);
+    const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
+    const raw=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
+    if(gguf?.enabled&&gguf.engine==='wllama'&&raw?.model===gguf.model&&
+       (raw?.provider==='openai-compatible'||raw?.route==='openai-compatible'))return null;
+    const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});
+    return value?.active&&value?.id?value:null;
+  }catch{return null}
+}
 function voiceState(){try{return globalThis.CivweaveGuideVoiceV1?.state?.()||null}catch{return null}}
 function state(){const voice=voiceState();return Object.freeze({version:VERSION,pageSystem,activeWindow:activeSystem,activeSystem,open:openState,minimized,busy,canonicalOwner:true,presentation:'single-current-chat-surface',selectedLocalModel:selectedLocal()?.id||'',voice:{loaded:Boolean(globalThis.CivweaveGuideVoiceV1),listening:Boolean(voice?.listening),source:voice?.source||'',status:voiceStatus}})}
 function saveState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({...state(),seen:{...seen},updatedAt:now()}))}catch{}}
