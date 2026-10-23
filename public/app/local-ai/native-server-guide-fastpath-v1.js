@@ -190,7 +190,8 @@ export async function respondNative({system='civweave',text='',history=[],fetche
     markNativeStage('moss-planner-loading');
     const planner=await ensurePlanner();
     markNativeStage('moss-planner-ready');
-    const result=await planner.handleNativeLivingSchoolRequest({text:learningControl?normalizedLearningControl(user):user,history,nativeFastLane:true});
+    const result=await planner.handleNativeLivingSchoolRequest({text:learningControl?normalizedLearningControl(user):user,history,nativeFastLane:true,signal,
+      onProgress:progress=>{try{onToken?.('','',{kind:'moss-progress',characters:progress.characters,complete:progress.complete})}catch{}}});
     if(result){
       markNativeStage('moss-action-finished',result?.provider||'unknown');
       return result;
