@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.2.18-guide-generation-tracker-v1-gguf-visible-token-draft';
-const REVISION='1.3.0-accurate-not-reached-stages';
+const VERSION='1.2.19-guide-generation-tracker-v1-native-moss-visible-progress';
+const REVISION='1.3.1-native-moss-raw-schema-and-topic-tracking';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
@@ -172,6 +172,71 @@ function applyLifecycle(row={}){if(Number(row.at)&&Number(row.at)<state.startedM
     state.errorDetail=[detail.message,detail.rawDiagnostics?JSON.stringify(detail.rawDiagnostics):''].filter(Boolean).join(' · ');
     ensurePanel();
   }else if(type==='civweave:weaveling-intake-progress')applyIntake(detail);else if(type==='civweave:weave-pipeline')applyPipeline(detail);else if(type==='runtime-stage')setRuntimeStage(detail);else if(type==='runtime-token'){const phase=detail.stage||'draft';if(['draft','compile','repair'].includes(phase)){stageState(phase,'streaming',detail.label,detail.model);if(detail.text){state.streams[phase]=clean(state.streams[phase]+detail.text,50000);refreshStream(phase)}}}else if(type==='civweave:litert-gemma4-progress'&&detail.phase==='generating'){const model=clean(detail.model,120);setRuntimeStage({stage:state.stages.intake.state==='running'?'intake':state.stages.draft.state==='waiting'?'draft':state.activeStage||'draft',state:'running',model,label:state.stages.intake.state==='running'?'Model intake':'Local generation'})}else if(type==='civweave:generation-stop-requested'||type==='civweave:generation-cancelled'||type==='runtime-stop'){state.terminal='stopped';stageState(state.activeStage||'intake','stopped');ensurePanel()}}
+// A single-pass Moss JSON request is not the older multi-model Weave
+// pipeline. Track real provider bytes and leave Saved to the Moss capability.
+function applyLearningPlanModelEvent(detail={}){
+  if(detail.purpose!=='living-school-learning-plan-review-v2')return false;
+  state.showPipeline=true;state.pendingObserved=true;
+  state.artifacts=mergeArtifacts(state.artifacts,{learningPlan:true});
+  const model=clean(detail.model||'',240),phase=detail.phase;
+  if(['connecting','generating','background'].includes(phase)){
+    stageState('intake','running','Model JSON response',model);
+    state.runtimePhase=phase;
+  }else if(phase==='partial'){
+    stageState('intake','streaming','Visible model JSON',model);
+    if(typeof detail.accumulatedText==='string')state.streams.intake=clean(detail.accumulatedText,50000);
+    else if(detail.text)state.streams.intake=clean(state.streams.intake+detail.text,50000);
+    state.runtimePhase=detail.complete?'Model output complete':'Receiving model text';
+    refreshStream('intake');return true;
+  }else if(phase==='validating'||phase==='completed'){
+    stageState('intake','complete','Model JSON received',model);
+    if(state.stages.draft.state==='waiting'||state.stages.draft.state==='queued')
+      stageState('draft','complete','Plan output received',model);
+    if(state.stages.compile.state==='waiting')
+      stageState('compile','skipped','Single-pass JSON; no second compiler');
+    stageState('validate','running','Validating plan JSON and topic');
+  }else if(phase==='repairing'){
+    stageState('repair','running','Model JSON repair',model);
+  }else if(phase==='failed'){
+    state.terminal='failed';
+    stageState(state.activeStage||'intake','failed','Provider rejected plan',model);
+    state.errorDetail=clean(detail.error?.message||detail.error||'Provider generation failed.',1200);
+  }
+  ensurePanel();return true;
+}
+function applyLearningPlanProgress(detail={}){
+  state.showPipeline=true;state.pendingObserved=true;
+  state.artifacts=mergeArtifacts(state.artifacts,{learningPlan:true});
+  const phase=detail.phase;
+  if(phase==='started'){
+    stageState('intake','running','Model JSON response',detail.model||'');
+  }else if(phase==='received'){
+    if(typeof detail.text==='string'&&detail.text){
+      state.streams.intake=clean(detail.text,50000);
+      state.streams.draft=clean(detail.text,50000);
+    }
+    stageState('intake','complete','Model JSON received');
+    stageState('draft','complete','Plan output received (unverified)');
+    if(state.stages.compile.state==='waiting')stageState('compile','skipped','Single-pass JSON; no second compiler');
+    stageState('validate','running','Checking schema and current goal');
+  }else if(phase==='validated'){
+    state.streams.draft=clean(detail.draft,50000);
+    stageState('validate','complete','Schema and topic match');
+    if(state.stages.repair.state==='waiting')stageState('repair','skipped','No repair needed');
+    stageState('saved','queued','Waiting for persistence');
+  }else if(phase==='saved'){
+    state.terminal='complete';
+    stageState('saved','complete','Plan saved for review');
+    state.errorDetail='';
+  }else if(phase==='failed'){
+    state.terminal='failed';
+    const failedAt=detail.stage==='validate'?'validate':'intake';
+    stageState(failedAt,'failed',failedAt==='validate'?'Plan validation rejected':'Plan generation failed');
+    if(state.stages.repair.state==='waiting')stageState('repair','skipped','No repair executed');
+    state.errorDetail=clean(detail.message||'Plan generation failed.',1200);
+  }
+  ensurePanel();
+}
 function connectedWindows(){
   const found=[globalThis];
   try{
@@ -320,7 +385,7 @@ function animateFinal(text,row){const target=clean(text,30000);if(!target)return
 function replayLifecycle(){const rows=bus()?.history?.()||[];for(const row of rows)applyLifecycle(row)}
 function onThreadChanged(event){const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;if(row.pending){const user=latestRole(thread,'user'),key=`${clean(user?.text,500)}|${clean(user?.createdAt||user?.at||thread.updatedAt,80)}`;if(!state.pendingObserved||state.pendingKey!==key||state.terminal){const stamp=Date.parse(user?.createdAt||user?.at||'')||Date.parse(thread?.updatedAt||'')||now();resetForRequest({text:user?.text||'',pendingKey:key,startedMs:stamp});replayLifecycle()}ensurePanel();return}const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;if(!state.terminal&&state.showPipeline)state.terminal=/could not|failed|error|no learning content was generated/i.test(clean(row.text,6000))?'failed':'complete';animateFinal(row.text,row);ensurePanel()}
 function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();addEventListener('civweave:generation-lifecycle',event=>applyLifecycle(event?.detail||{}));addEventListener('civweave:model-event',event=>{
-  const detail=event?.detail||{},selected=embeddedGGUFSelection();
+  const detail=event?.detail||{};if(applyLearningPlanModelEvent(detail))return;const selected=embeddedGGUFSelection();
   if(!selected||detail.model!==selected.model)return;
   if(detail.phase==='partial'&&detail.backend==='browser-gguf'){
     // Show only visible generated text. Hidden thinking content is never
@@ -335,7 +400,7 @@ function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();add
   state.runtimePhase='GGUF · '+stage+(backend?' · '+backend:'');
   if(stage==='failed'&&detail.reason)state.errorDetail='GGUF '+clean(detail.reason,400);
   ensurePanel();
-});if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
+});addEventListener('civweave:moss-learning-plan-progress',event=>applyLearningPlanProgress(event?.detail||{}));if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-probe]`)){void probeClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-worker-probe]`)){void isolatedWorkerClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-runtime-restart]`)){
