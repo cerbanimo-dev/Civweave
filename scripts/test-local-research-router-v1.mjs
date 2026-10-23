@@ -83,8 +83,9 @@ assert.equal(answered.handled, true, 'cold Qwen should receive the research tool
 assert.equal(calls.length, 1, 'explicit research must deterministically search even when the model chooses finish');
 assert.equal(calls[0].action, 'search');
 assert.equal(answered.result.browserAgent.trace.some(x => x.action === 'live_search' && x.status === 'success'), true);
-assert.equal(answered.result.outputText, 'An answer with a source.');
-assert.deepEqual(deltas, ['An answer with a source.'], 'final text must stream only once');
+assert.match(answered.result.outputText, /^An answer with a source\\./);
+assert.match(answered.result.outputText, /Search results \\(not independently verified\\):/);
+assert.deepEqual(deltas, [answered.result.outputText], 'final text must stream only once');
 assert.ok(phases.includes('searching') && phases.includes('complete'), 'research stages must be observable');
 assert.ok(answered.result.browserAgent.sources.includes('https://example.org/fact'));
 
