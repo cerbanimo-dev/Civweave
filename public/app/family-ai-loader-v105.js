@@ -100,6 +100,45 @@ async function ensureLocalAI(){
   })().catch(error=>{localBootstrapPromise=null;throw error});
   return localBootstrapPromise;
 }
+function configuredOllama(){
+  const profiles=obj(MODEL_PROFILES_KEY),legacy=obj(UNIVERSAL_AI_KEY);
+  const persisted=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:legacy;
+  let canonical=null;
+  try{canonical=globalThis.CivweaveSettingsV320?.readState?.()||null}catch{}
+  const current=canonical?.route||canonical?.provider?{...persisted,...canonical}:persisted;
+  const route=clean(current?.route||current?.provider,80).toLowerCase();
+  if(route!=='ollama')return null;
+  const model=clean(current?.model,200),endpoint=clean(current?.endpoint,2048)||'http://127.0.0.1:11434/api/chat';
+  if(!model)throw new Error('Select an installed Ollama model in Settings before sending a message.');
+  return{provider:'ollama',route:'ollama',model,endpoint,stream:true,maxTokens:2048,context:4096,timeoutMs:120000,externalConsent:false};
+}
+async function respondOllama({text,system='civweave',history=[],onToken,signal}={}){
+  const config=configuredOllama();
+  if(!config)throw new Error('Ollama is not the selected AI route.');
+  // Only the shared HTTP provider runtime is needed. Do not load MiniLM,
+  // the assistant orchestration stack, or downloaded browser inference.
+  await loadScript(...PREREQUISITES[1]);
+  const runtime=globalThis.CivweaveModelRuntime;
+  if(typeof runtime?.generate!=='function')throw new Error('The Ollama provider runtime did not become ready.');
+  const systemId=LABEL[system]?system:'civweave',role=guideFor(systemId);
+  const rows=(Array.isArray(history)?history:[]).slice(-12).map(row=>({
+    role:row?.role==='assistant'||row?.role==='guide'?'assistant':'user',
+    content:clean(row?.text||row?.content,5000)
+  })).filter(row=>row.content);
+  const prompt=clean(text,12000);
+  if(rows.at(-1)?.role==='user'&&rows.at(-1)?.content===prompt)rows.pop();
+  const result=await runtime.generate({
+    purpose:'ollama-direct-chat-v1',executionProfile:'interactive',
+    config,responseFormat:'text',__civweaveSkipResponseRouter:true,
+    signal,
+    messages:[{role:'system',content:`You are ${role.name}, the ${role.role} of Civweave. Respond to the user's message directly. Never claim that you saved, activated, or executed an action unless it actually happened. Consequential actions require explicit approval.`},...rows,{role:'user',content:prompt}],
+    onEvent:event=>{if(event?.phase==='partial')onToken?.(event.text||'',event.accumulatedText||'',event)}
+  });
+  if(result?.status!=='success')throw new Error(clean(result?.error?.message||`Ollama returned ${result?.status||'no result'}.`,900));
+  const answer=clean(result.outputJson?.answer||result.outputText||'',12000);
+  if(!answer)throw new Error('Ollama returned no visible text.');
+  return{response:{answer,choice:{mode:'Reflect',system:systemId,nextAction:''},assumptions:[],requiresConsent:false,confidence:1},provider:'ollama',model:result.actual?.model||config.model,usage:result.usage||null,responseRouting:{schema:'civweave.response-route.v1',provider:'ollama',source:'selected-local-api',networkRequired:false},context:{guide:{system:systemId}}};
+}
 function emitLocalDegraded(error){lastLocalError=clean(error?.message||error||'The selected local AI runtime is unavailable.',900);try{console.warn('[Civweave local AI degraded]',lastLocalError)}catch{}try{dispatchEvent(new CustomEvent('civweave:local-ai-degraded',{detail:{version:VERSION,system:detect(),model:selectedLocal()?.id||'',message:lastLocalError,assistantAvailable:Boolean(globalThis.CivweaveAssistantV141),responseRouterAvailable:Boolean(globalThis.CivweaveResponseRouterV347),at:new Date().toISOString()}}))}catch{}return false}
 async function tryEnsureLocalAI(){if(!localRequested())return false;try{return await ensureLocalAI()}catch(error){return emitLocalDegraded(error)}}
 async function warmLocalAIOptional(timeoutMs=900){if(!localRequested())return false;return Promise.race([tryEnsureLocalAI(),sleep(timeoutMs).then(()=>false)])}
@@ -129,5 +168,5 @@ async function openSettings(launcher){const gateway=globalThis.CivweaveSettingsG
 function warm(){return ensure()}
 function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message));installStructuredFallbackGuard()}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();addEventListener('pageshow',boot);addEventListener('civweave:guide-workspace-ready',patchHeader);addEventListener('civweave:working-campus-plan-built',()=>requestEconomicReview('working-campus-plan-built'));addEventListener('cerbanimo:quest-engine-changed',()=>requestEconomicReview('cerbanimo-quest-changed'));for(const name of ['civweave:response-router-installed','civweave:model-runtime-ready','civweave:local-model-runtime-ready','civweave:local-model-bridge-installed'])addEventListener(name,()=>queueMicrotask(installStructuredFallbackGuard));
-globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
+globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,configuredOllama,respondOllama,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
 })();
