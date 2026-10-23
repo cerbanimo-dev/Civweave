@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.182-guide-chat-surface-v350-moss-topic-grounding';
+const VERSION='1.0.183-guide-chat-surface-v350-native-formal-plan';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -333,7 +333,7 @@ async function submitActive(text){
     };
     const onToken=(delta,accumulated,meta)=>{
       if(meta?.kind==='moss-progress')
-        latestText='Moss is drafting the Learning Journey plan… '+(Number(meta.characters)||0)+' characters received. Validation is pending.';
+        latestText='Moss · '+(meta.phase==='compile'?'Compiling JSON':meta.phase==='repair'?'Repairing JSON':meta.phase==='saved'?'Saved for REVIEW':'Drafting plan')+' · '+(Number(meta.characters)||0)+' characters received. Approval is still required.';
       else if(typeof accumulated==='string'&&accumulated)latestText=accumulated;
       if(!latestText)return;
       if(Date.now()-lastPaint>=80){if(paintTimer){clearTimeout(paintTimer);paintTimer=null;}paint();}
@@ -346,7 +346,7 @@ async function submitActive(text){
       // This path never loads browser GGUF weights or starts a fallback.
       try{localStorage.setItem('civweave.native-server.last-request.v1',JSON.stringify({at:new Date().toISOString(),stage:'native-preflight',route:'openai-compatible',model:'qwen35-4b-native'}))}catch{}
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.4-moss-topic-grounding');
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.5-native-formal-plan');
       if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
