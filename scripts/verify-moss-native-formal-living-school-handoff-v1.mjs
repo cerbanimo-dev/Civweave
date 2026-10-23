@@ -12,16 +12,38 @@ const key='civweave.chat.capability.pending.living-school.plan.v1';
 const memory=new Map(),events=[],calls=[],progress=[];
 const storage={getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)};
 const config={provider:'openai-compatible',route:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1'};
+const COMPLETE_DRAFT=[
+'# Learning Journey: Mastering the Tarot',
+'Topic: Tarot',
+'Intended Capability: Read and memorize tarot cards independently.',
+'### Module 1: Major Arcana',
+'Focus: Learn tarot Major Arcana names and images.',
+'Demonstrable Outcome: Recognize all 22 Major Arcana cards.',
+'### Module 2: Minor Arcana',
+'Focus: Learn tarot Wands, Cups, Swords and Pentacles.',
+'Demonstrable Outcome: Identify the suits and court cards.',
+'### Module 3: Positional Reading',
+'Focus: Combine card meanings in a three-card spread.',
+'Demonstrable Outcome: Interpret a simple three-card reading.',
+'### Module 4: Independent Recall',
+'Focus: Practice spaced recall of the tarot deck.',
+'Demonstrable Outcome: Interpret four randomly drawn cards unaided.',
+'Final Proof: Complete an independent reading and explain four cards.',
+'END OF LEARNING JOURNEY OUTLINE'
+].join('\n');
+const PREMATURE_DRAFT=COMPLETE_DRAFT.slice(0,COMPLETE_DRAFT.indexOf('### Module 3'));
+const REMAINING_DRAFT=COMPLETE_DRAFT.slice(COMPLETE_DRAFT.indexOf('### Module 3'));
 const valid={
  title:'Read And Memorize The Tarot',capability:'read and memorize tarot',
  level:'beginner',mode:'guided',proof:'Give a three-card tarot interpretation independently',
  modules:[
   {title:'Major Arcana',focus:'Learn tarot Major Arcana symbols',outcome:'Recognize 22 cards'},
   {title:'Minor Arcana',focus:'Learn the four tarot suits',outcome:'Recall card suit meanings'},
-  {title:'Tarot reading',focus:'Practice three-card tarot spreads',outcome:'Interpret a spread independently'}
+  {title:'Tarot reading',focus:'Practice three-card tarot spreads',outcome:'Interpret a spread independently'},
+  {title:'Independent Recall',focus:'Practice spaced review of tarot cards',outcome:'Interpret four drawn cards unaided'}
  ],assumptions:[]
 };
-let failingCompile=false,cappedDraft=false,cappedTwice=false,normalizableCompile=false,materializations=0;
+let failingCompile=false,cappedDraft=false,cappedTwice=false,prematureNormalStop=false,normalizableCompile=false,proofArrayCompile=false,materializations=0;
 const ctx={
  console,JSON,Date,Math,Object,Array,String,Number,Boolean,RegExp,Promise,Set,Map,URL,
  localStorage:storage,sessionStorage:storage,
@@ -38,12 +60,22 @@ const ctx={
      assert.equal(req.config.model,'qwen35-4b-native');
      assert.equal(req.config.stream,true);
      const stage=req.purpose.includes('-draft-')?'draft':req.purpose.includes('-compile-')?'compile':'repair';
+     const isContinuation=req.purpose==='living-school-native-plan-draft-continuation-v1';
      const text=stage==='draft'
-       ?'Read and memorize the tarot: Major Arcana and Minor Arcana, practice a three-card spread.'
+       ?isContinuation?REMAINING_DRAFT:(cappedDraft||prematureNormalStop)?PREMATURE_DRAFT:COMPLETE_DRAFT
        :JSON.stringify(valid);
      req.onEvent?.({phase:'partial',characters:text.length,
        accumulatedText:text,
        complete:true});
+     if(stage==='compile'&&proofArrayCompile){
+       const unusual={...valid,proof:[
+         'Recite the Major Arcana.',
+         'Interpret a three-card tarot spread independently.'
+       ]};
+       return{status:'invalid-response',outputText:JSON.stringify(unusual),outputJson:unusual,
+         actual:{provider:'openai-compatible',model:'qwen35-4b-native'},finishReason:'stop',
+         error:{code:'INVALID_SCHEMA',message:'proof must be string'}};
+     }
      if(stage==='compile'&&normalizableCompile){
         const inconsistent={...valid,level:'Beginner',mode:'Self-paced study',assumptions:'The learner has a tarot deck.'};
         return{status:'invalid-response',outputText:JSON.stringify(inconsistent),outputJson:inconsistent,
@@ -52,7 +84,7 @@ const ctx={
       }
       if(stage==='compile'&&failingCompile)return{status:'invalid-response',outputText:'{broken',error:{code:'INVALID_JSON',message:'bad json'}};
      if(cappedDraft&&req.purpose==='living-school-native-plan-draft-v1')
-       return{status:'incomplete',finishReason:'length',outputText:text.slice(0,38),
+       return{status:'incomplete',finishReason:'length',outputText:PREMATURE_DRAFT,
          actual:{provider:'openai-compatible',model:'qwen35-4b-native'},error:{code:'NATIVE_OUTPUT_TOKEN_LIMIT'}};
      if(cappedTwice&&req.purpose==='living-school-native-plan-draft-continuation-v1')
        return{status:'incomplete',finishReason:'length',outputText:text.slice(-25),
@@ -65,7 +97,8 @@ const ctx={
       ...(!['beginner','intermediate','advanced'].includes(p.level)?['level']:[]),
       ...(!['guided','browse','just-in-time'].includes(p.mode)?['mode']:[]),
       ...(!Array.isArray(p.assumptions)?['assumptions']:[]),
-      ...(!(Array.isArray(p.modules)&&p.modules.length>=3)?['modules']:[])
+      ...(!(Array.isArray(p.modules)&&p.modules.length>=4&&p.modules.length<=6)?['modules']:[]),
+      ...(typeof p.proof!=='string'?['proof']:[])
     ],
     parseJsonLoose:text=>{try{return JSON.parse(text)}catch{return null}}
  }
@@ -128,6 +161,25 @@ assert.deepEqual(moss.readLearningPlan()?.assumptions,['The learner has a tarot 
 assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='validate'&&e.state==='normalized'));
 assert.equal(materializations,0);
 normalizableCompile=false;
+// A coherent proof array is a type error, not a different learning topic.
+proofArrayCompile=true;calls.length=0;events.length=0;
+r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
+assert.equal(r.action?.state,'review');
+assert.equal(calls.length,2,'Proof-array field normalization must not force a third model call');
+assert.match(moss.readLearningPlan()?.request?.proof,/Major Arcana/);
+assert.match(moss.readLearningPlan()?.request?.proof,/three-card/);
+proofArrayCompile=false;
+
+// Even finish_reason=stop can occur before a valid structural outline is complete.
+prematureNormalStop=true;calls.length=0;events.length=0;
+r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
+assert.equal(r.action?.state,'review');
+assert.equal(calls.length,3,'Premature normal-stop draft must continue before any JSON compiler call');
+assert.equal(calls[1].purpose,'living-school-native-plan-draft-continuation-v1');
+assert.equal(calls[2].purpose,'living-school-native-plan-compile-v1');
+assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='draft'&&e.state==='needs-continuation'));
+assert.equal(materializations,0);
+prematureNormalStop=false;
 // A model that stops exactly at the token limit must never be treated as
 // having completed the visible draft or quietly sent to the compiler.
 failingCompile=false;cappedDraft=true;cappedTwice=false;
