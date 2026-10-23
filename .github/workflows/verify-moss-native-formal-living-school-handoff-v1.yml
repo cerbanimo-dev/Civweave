@@ -1,0 +1,34 @@
+name: Verify Moss native formal creation and Living School review
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/unified-chat-system-v1.js
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/guide-generation-tracker-v1.js
+      - public/app/cabinets/living-school/living-school-pending-plan-review-v1.js
+      - scripts/verify-moss-native-formal-living-school-handoff-v1.mjs
+      - .github/workflows/verify-moss-native-formal-living-school-handoff-v1.yml
+  pull_request:
+    paths:
+      - public/app/unified-chat-system-v1.js
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/guide-generation-tracker-v1.js
+      - public/app/cabinets/living-school/living-school-pending-plan-review-v1.js
+      - scripts/verify-moss-native-formal-living-school-handoff-v1.mjs
+      - .github/workflows/verify-moss-native-formal-living-school-handoff-v1.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/app/unified-chat-system-v1.js
+      - run: node --check public/app/guide-generation-tracker-v1.js
+      - run: node --check public/app/shared/civweave-model-runtime.js
+      - run: node scripts/verify-moss-native-formal-living-school-handoff-v1.mjs
+      - run: node scripts/verify-native-termux-streaming-v1.mjs
