@@ -51,5 +51,5 @@ assert.match(failure.text,/No second model was started/);
 assert.match(guide,/function selectedLocal\(\)/);
 assert.match(loader,/function localRequested\(\)/);
 assert.match(loader,/if\(primary&&!\['downloaded-local'/);
-assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.184-native-formal-stages/);
+assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.185-long-moss-plan-budgets/);
 console.log('PASS: native server failure does not retry through stale Gemma, explicit downloaded-local route remains supported');
