@@ -120,12 +120,12 @@ function researchRequested(args,messages){
 }
 let browserResearchFlight=null;
 async function loadBrowserResearch(){
-  if(globalThis.CivweaveLocalBrowserAgentV1?.handle&&globalThis.CivweaveBrowserToolV1?.live)return globalThis.CivweaveLocalBrowserAgentV1;
+  if(globalThis.CivweaveLocalBrowserAgentV1?.version==='1.0.2-local-browser-agent-v1-research-router'&&globalThis.CivweaveBrowserToolV1?.version==='1.0.1-browser-tool-v1-keyless-search')return globalThis.CivweaveLocalBrowserAgentV1;
   if(browserResearchFlight)return browserResearchFlight;
   browserResearchFlight=(async()=>{
     for(const [src,ready] of [
-      ['/app/browser-tool-v1.js?v=1.0.1-research-router',()=>Boolean(globalThis.CivweaveBrowserToolV1?.live)],
-      ['/app/local-ai/browser-agent-v1.js?v=1.0.2-research-router',()=>Boolean(globalThis.CivweaveLocalBrowserAgentV1?.handle)]
+      ['/app/browser-tool-v1.js?v=1.0.1-research-router',()=>globalThis.CivweaveBrowserToolV1?.version==='1.0.1-browser-tool-v1-keyless-search'],
+      ['/app/local-ai/browser-agent-v1.js?v=1.0.2-research-router',()=>globalThis.CivweaveLocalBrowserAgentV1?.version==='1.0.2-local-browser-agent-v1-research-router']
     ]){
       if(ready())continue;
       await new Promise((resolve,reject)=>{
