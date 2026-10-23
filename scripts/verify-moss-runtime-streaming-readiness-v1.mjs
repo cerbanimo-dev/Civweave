@@ -14,7 +14,7 @@ new vm.Script(fast);
 assert.match(runtime,/nativeDirectTermuxStreamV2:\s*true/);
 assert.doesNotMatch(runtime,/compatibility\\n\s*nativeDirectTermuxStreamV2/,
   'Literal backslash-n inside a // comment hides the critical runtime export');
-assert.match(campus,/1\.0\.181-native-sse-capability-fix/);
+assert.match(campus,/1\.0\.182-moss-tracker-bootstrap/);
 assert.match(loader,/1\.0\.12-native-visible-learning-plan-stream/);
 assert.match(runtime,/nativeMossVisibleStreamV3:\s*true/);
 
