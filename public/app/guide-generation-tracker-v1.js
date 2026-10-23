@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.2.18-guide-generation-tracker-v1-gguf-visible-token-draft';
-const REVISION='1.3.0-accurate-not-reached-stages';
+const VERSION='1.2.19-guide-generation-tracker-v1-native-formal-learning';
+const REVISION='1.3.1-native-intake-draft-compile-check';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
@@ -69,7 +69,7 @@ function inferArtifacts(text='',route=''){return bus()?.inferArtifacts?.(text,ro
 function mergeArtifacts(base={},extra={}){return bus()?.mergeArtifacts?.(base,extra)||{learningPlan:Boolean(base.learningPlan||extra.learningPlan),endeavour:Boolean(base.endeavour||extra.endeavour),manifest:Boolean(base.manifest||extra.manifest),proposal:Boolean(base.proposal||extra.proposal)}}
 function artifactName(){return bus()?.artifactName?.(state.artifacts)||'Generation'}
 function freshState(){return{
-  requestId:`process-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,pipelineId:'',startedMs:now(),terminal:'',activeStage:'',showPipeline:false,expanded:true,pendingObserved:false,pendingKey:'',kind:'',artifacts:emptyArtifacts(),
+  requestId:`process-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,pipelineId:'',startedMs:now(),terminal:'',nativeFormal:false,activeStage:'',showPipeline:false,expanded:true,pendingObserved:false,pendingKey:'',kind:'',artifacts:emptyArtifacts(),
   stages:Object.fromEntries(STAGES.map(stage=>[stage.id,{state:'waiting',label:stage.label,model:''}])),streams:{intake:'',draft:'',compile:'',repair:'',final:''},runtimePhase:'',errorDetail:'',executionModel:'',probeBusy:false,probeStatus:'',counts:{resources:0,specialists:0,gates:0},artifactKey:'',finalSource:''
 }}
 function activeRoot(){return document.getElementById(ROOT_ID)}
@@ -104,7 +104,7 @@ function terminalLabel(){const name=artifactName();if(state.terminal==='failed')
 function panelHtml(){
   const rail=STAGES.map(stage=>{const item=state.stages[stage.id]||{state:'waiting'};return`<div class="cw-weave-node" data-stage="${stage.id}" data-state="${esc(item.state)}" title="${esc(item.label||stage.label)}${item.model?` · ${esc(item.model)}`:''}"><i class="cw-weave-dot"></i><span>${esc(stage.short)}</span></div>`}).join('');
   const counts=`<div class="cw-weave-counts"><span class="cw-weave-chip">Resources ${state.counts.resources}</span><span class="cw-weave-chip">Specialists ${state.counts.specialists}</span><span class="cw-weave-chip">Decision gates ${state.counts.gates}</span></div>`;
-  const sections=[['intake','Model intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='skipped'?'Not observed in this process.':state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
+  const sections=[['intake','Model intake (raw)',state.nativeFormal?'Application-derived goal and routing snapshot (not model-generated)':'Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='skipped'?(key==='repair'?'No repair was necessary.':'Not required for this route.'):state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
   const detail=state.errorDetail?`<pre class="cw-weave-error">${esc(state.errorDetail)}</pre>`:'';
   const embeddedGGUF=embeddedGGUFSelection();
   const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing model…':embeddedGGUF?'Test selected GGUF inference':'Test local inference'}</button>${embeddedGGUF?'':`<button type="button" data-weave-worker-probe ${state.probeBusy?'disabled':''}>Test isolated GPU worker (LiteRT)</button>`}<button type="button" data-weave-runtime-restart title="Reloads the app shell without deleting model data.">Reload Civweave</button><p>${esc(state.probeStatus||(embeddedGGUF?'Minimal GGUF/Wllama generation, independent of Moss. Cold-loading may take several minutes; no LiteRT test is involved.':'Minimal one-word LiteRT GPU test, independent of Moss and the JSON compiler.'))}</p></div>`:'';
@@ -116,6 +116,7 @@ function ensurePanel(){installStyle();if(!state.showPipeline){existingPanel()?.r
 function refreshStream(phase){if(!state.showPipeline)return;const panel=ensurePanel();if(!panel)return;const section=panel.querySelector(`[data-stream="${phase}"]`);if(!section)return;section.hidden=false;const pre=section.querySelector('pre');if(pre){pre.textContent=state.streams[phase]||'Waiting…';try{pre.scrollTop=pre.scrollHeight}catch{}}}
 function setRuntimeStage(detail={}){const stage=detail.stage||bus()?.stageId?.(detail.label)||'draft',status=detail.state==='start'?'running':detail.state;if(!state.showPipeline){state.showPipeline=true;state.pendingObserved=true}if(stage==='draft'&&state.stages.intake.state==='queued')stageState('intake','complete');stageState(stage,status||'running',detail.label||STAGES.find(row=>row.id===stage)?.label,detail.model||'');if(status==='complete'&&stage==='intake'&&state.stages.draft.state==='waiting')stageState('draft','queued','Waiting for draft');if(status==='failed'){state.terminal='failed'}if(status==='stopped'){state.terminal='stopped'}ensurePanel()}
 function applyIntake(detail={}){
+  if(detail.origin==='native-local-api')state.nativeFormal=true;
   state.showPipeline=true;state.pendingObserved=true;updateArtifacts(detail);
   const model=detail.model||'gemma4-local-it-litert-web',phase=detail.phase;
   if(phase==='classifying'||phase==='gathering')stageState('intake','running','Model intake',model);
@@ -137,6 +138,7 @@ function applyIntake(detail={}){
   ensurePanel();
 }
 function applyPipeline(detail={}){
+  if(detail.origin==='native-local-api')state.nativeFormal=true;
   state.showPipeline=true;state.pendingObserved=true;updateArtifacts(detail);if(detail.pipelineId)state.pipelineId=detail.pipelineId;
   const phase=detail.phase,status=detail.state||'running',model=detail.model||'gemma4-local-it-litert-web';
   if(phase==='pipeline'&&status==='start'){if(state.stages.intake.state==='waiting')stageState('intake','skipped','Intake event not observed');else if(['queued','running'].includes(state.stages.intake.state))stageState('intake','complete');stageState('draft','queued','Waiting for draft',model);ensurePanel();return}
@@ -335,7 +337,15 @@ function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();add
   state.runtimePhase='GGUF · '+stage+(backend?' · '+backend:'');
   if(stage==='failed'&&detail.reason)state.errorDetail='GGUF '+clean(detail.reason,400);
   ensurePanel();
-});if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
+});
+  addEventListener('civweave:weaveling-intake-progress',event=>{
+    if(event?.detail?.origin==='native-local-api')applyIntake(event.detail);
+  });
+  addEventListener('civweave:weave-pipeline',event=>{
+    if(event?.detail?.origin==='native-local-api')applyPipeline(event.detail);
+  });
+  if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>{if(event?.detail?.origin!=='native-local-api')applyIntake(event?.detail||{})});addEventListener('civweave:weave-pipeline',event=>{if(event?.detail?.origin!=='native-local-api')applyPipeline(event?.detail||{})})}
+  addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-probe]`)){void probeClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-worker-probe]`)){void isolatedWorkerClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-runtime-restart]`)){
