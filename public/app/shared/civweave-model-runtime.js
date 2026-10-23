@@ -1182,6 +1182,7 @@
 
   const api = Object.freeze({
     version: VERSION,
+    nativeDirectTermuxNoStream: true,
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
