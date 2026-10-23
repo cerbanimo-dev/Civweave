@@ -101,7 +101,7 @@ function installAssistant(){
       return handoffResult(args,clean(error?.message||error||'generative-route-failed',900));
     }
   };
-  globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,__civweaveGuideForwardPolicyV1:true,forwardFailurePolicyVersion:VERSION,deterministicAnswerFallback:false,guildHandoffOnFailure:true,localProviderPinned:true});
+  globalThis.CivweaveAssistantV141={...assistant,respond,__civweaveGuideForwardPolicyV1:true,forwardFailurePolicyVersion:VERSION,deterministicAnswerFallback:false,guildHandoffOnFailure:true,localProviderPinned:true};
   wrappedAssistant=globalThis.CivweaveAssistantV141;
   return true;
 }

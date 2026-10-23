@@ -21,7 +21,7 @@ function install(){
   installFastRuntime();
   const assistant=globalThis.CivweaveAssistantV141,memory=api();
   if(!assistant?.respond||!memory)return false;
-  if(assistant.respond.__weavelingMemoryV269)return true;
+  if(assistant.respond.__weavelingMemoryV269||(assistant.weavelingMemory===memory&&assistant.weavelingMemoryRevision===VERSION))return true;
   const prior=assistant.respond.bind(assistant);
   const wrapped=async args=>{
     const text=String(args?.text||'').trim(),system=args?.systemId||'civweave';
