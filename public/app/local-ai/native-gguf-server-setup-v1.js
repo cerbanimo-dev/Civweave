@@ -5,7 +5,7 @@ export const SERVER_MODEL='qwen35-4b-native';
 export const COMMANDS=Object.freeze([
   'pkg update -y && pkg install -y llama-cpp',
   'termux-setup-storage\nls -lh "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf"',
-  'llama-server \\\n  -m "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf" \\\n  --alias qwen35-4b-native \\\n  --host 127.0.0.1 --port 8080 \\\n  --ctx-size 2048 --threads 4 --parallel 1 \\\n  --jinja \\\n  --chat-template-kwargs \'{"enable_thinking":false}\' \\\n  --cors-origins https://civweave-staging.pages.dev'
+  'llama-server \\\n  -m "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf" \\\n  --alias qwen35-4b-native \\\n  --host 127.0.0.1 --port 8080 \\\n  --ctx-size 2048 --threads 4 --parallel 1 \\\n  --jinja \\\n  --reasoning off \\\n  --cors-origins https://civweave-staging.pages.dev'
 ]);
 const setupHtml=[
  '<div class="cw-clean-note"><b>Android Termux · native llama.cpp</b>',
@@ -55,8 +55,7 @@ export async function checkServer({fetcher=fetch}={}){
 export async function generateServerTest({fetcher=fetch}={}){
   const result=await request('/chat/completions',{fetcher,body:{
     model:SERVER_MODEL,stream:false,max_tokens:24,temperature:0,
-    messages:[{role:'user',content:'Reply with exactly READY.'}],
-    chat_template_kwargs:{enable_thinking:false}
+    messages:[{role:'user',content:'Reply with exactly READY.'}]
   }});
   const content=result?.choices?.[0]?.message?.content;
   if(typeof content!=='string'||!content.trim())
