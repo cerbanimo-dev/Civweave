@@ -1201,7 +1201,8 @@
 
   const api = Object.freeze({
     version: VERSION,
-    nativeDirectTermuxNoStream: true, // legacy loader compatibility\n    nativeDirectTermuxStreamV2: true,
+    nativeDirectTermuxNoStream: true, // Legacy capability name retained for existing integrations.
+    nativeDirectTermuxStreamV2: true, // Native streaming and Moss draft progress are implemented.
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
