@@ -11,6 +11,23 @@ const [serverSource, agentSource, localSource, bootstrap] = await Promise.all([
   read('public/app/local-ai/bootstrap-v266.js')
 ]);
 
+// Execute the real (side-effect-free) local-provider search-intent classifier.
+const intentStart=localSource.indexOf('function researchRequested(');
+const intentEnd=localSource.indexOf('\nlet browserResearchFlight',intentStart);
+assert.ok(intentStart>=0&&intentEnd>intentStart,'local research-intent function must be present');
+const classify=vm.runInNewContext(localSource.slice(intentStart,intentEnd)+'\nresearchRequested',{
+  clean:(v,max=12000)=>String(v??'').trim().slice(0,max)
+});
+assert.equal(classify({text:'What happened today in AI?'},[]),true,'current events trigger automatic web search');
+assert.equal(classify({text:'What is the latest Qwen version?'},[]),true,'new model releases trigger automatic web search');
+assert.equal(classify({text:'What is the weather in Watertown?'},[]),true,'weather triggers automatic web search');
+assert.equal(classify({text:'Read https://example.org/article'},[]),true,'explicit URL reading uses research tool');
+assert.equal(classify({text:'Teach me tarot'},[{role:'user',content:'Search the web'}]),false,'history may not initiate network access');
+assert.equal(classify({text:'I want to write a plan today'},[]),false,'normal planning stays offline');
+assert.equal(classify({text:'What happened today?',offlineOnly:true},[]),false,'offline-only disables web');
+assert.equal(classify({text:'Search the web',allowNetwork:false},[]),false,'network denial overrides request');
+assert.equal(classify({text:'Search the web',webSearch:false},[]),false,'explicit no-search overrides request');
+
 // Test the actual server implementation with a fake upstream; never contact the internet.
 let requestedUrl = '';
 const server = vm.createContext({
