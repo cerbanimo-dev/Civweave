@@ -324,7 +324,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
   stage('pipeline','start',{label:'Native Learning Journey formal creation'});
   try{
     const goal=clean(seed.capability,350),topic=goalAnchors(seed)[0]||goal;
-    const run=async({purpose,phase:runPhase,system,user,maxTokens,schema=null,structured=false})=>{
+    const run=async({purpose,phase:runPhase,system,user,maxTokens,schema=null,structured=false,appendPrefix=''})=>{
       let lastProgress=0;
       const request={
         purpose,executionProfile:'interactive',signal:options.signal,
@@ -341,7 +341,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
             const timestamp=Date.now();
             if(event.complete||timestamp-lastProgress>=340){
               lastProgress=timestamp;
-              stage(runPhase,'streaming',{text:clean(visible,16000),
+              stage(runPhase,'streaming',{text:clean(appendPrefix+visible,16000),
                 label:runPhase==='draft'?'Shareable model draft':runPhase==='compile'?'Provisional raw JSON (not yet validated)':'Provisional repair JSON'});
             }
           }
@@ -352,12 +352,35 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     phase='draft';
     stage('draft','running',{label:'Qwen · shareable plan draft'});
     const draftResult=await run({
-      purpose:'living-school-native-plan-draft-v1',phase:'draft',maxTokens:260,
-      system:'You are Moss. Draft a concise shareable Learning Journey outline for the CURRENT goal only. This is the visible plan draft, not hidden reasoning and not JSON. State the topic, the intended capability, exactly 3 sequential modules (title, focus, demonstrable outcome), and a practical final proof. No lessons, unrelated topics or preambles.',
+      purpose:'living-school-native-plan-draft-v1',phase:'draft',maxTokens:680,
+      system:'You are Moss. Draft a concise shareable Learning Journey outline for the CURRENT goal only. This is visible user-facing draft, not hidden reasoning or JSON. State the topic and capability, then exactly three sequential modules (each title, focus, demonstrable outcome), and a practical final proof. Limit each module to 45 words. Finish every module completely. No lessons, unrelated topics or preambles.',
       user:'CURRENT GOAL: '+goal+'\nTopic anchor: '+topic+'\nBeginner · guided · REVIEW-only. Modules must mention the specific subject.'
     });
-    draft=assertNativePlanModel(draftResult,config,'Draft');
-    stage('draft','complete',{label:'Draft completed',text:draft});
+    if(draftResult?.status==='incomplete'||draftResult?.finishReason==='length'){
+      draft=clean(draftResult?.outputText,12000);
+      if(!draft)throw new Error('Draft reached max_tokens without producing useful text. No compiler was started.');
+      stage('draft','needs-continuation',{label:'Draft reached token budget · continuing with same model',text:draft,
+        finishReason:draftResult.finishReason||'length',maxTokens:680});
+      const tail=draft.slice(-1100);
+      const continued=await run({
+        purpose:'living-school-native-plan-draft-continuation-v1',
+        phase:'draft',maxTokens:480,appendPrefix:draft+'\n',
+        system:'Continue the visible Learning Journey outline that was cut off. Give ONLY the remaining words, complete Module 3, and add the final practical proof. Do not restart, repeat earlier modules, change subject or return JSON. Keep it concise.',
+        user:'CURRENT GOAL: '+goal+'\nLast portion already shown:\n'+tail+
+          '\nContinue from its exact stopping point. Complete the remaining outline without repeating the text above.'
+      });
+      if(continued?.status==='incomplete'||continued?.finishReason==='length')
+        throw new Error('The draft and its one bounded continuation both reached max_tokens. Partial draft remains visible but was not sent to the JSON compiler.');
+      const rest=assertNativePlanModel(continued,config,'Draft continuation');
+      const start=rest.slice(0,110).replace(/\s+/g,' ').toLowerCase();
+      if(start.length>=55&&draft.replace(/\s+/g,' ').toLowerCase().includes(start))
+        throw new Error('The model restarted the draft instead of continuing. Duplicate content was not accepted or compiled.');
+      draft=clean(draft+'\n'+rest,16000);
+      stage('draft','complete',{label:'Draft completed after one bounded continuation',text:draft});
+    }else{
+      draft=assertNativePlanModel(draftResult,config,'Draft');
+      stage('draft','complete',{label:'Draft completed',text:draft});
+    }
     progress('draft',draft.length,true);
     phase='compile';
     stage('compile','running',{label:'Qwen · JSON compiler'});
@@ -366,7 +389,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       '\nTopic anchor: '+topic+'\nConvert THIS draft faithfully:\n'+draft.slice(0,1700)+
       '\nReturn 3 concrete subject-specific modules with observable outcomes. Include level "beginner", mode "guided" and assumptions [].';
     const compileResult=await run({
-      purpose:'living-school-native-plan-compile-v1',phase:'compile',maxTokens:740,
+      purpose:'living-school-native-plan-compile-v1',phase:'compile',maxTokens:1050,
       system:compileSystem,user:compileUser,schema:LEARNING_PLAN_SCHEMA,structured:true
     });
     compiled=clean(compileResult?.outputText,16000);
@@ -385,7 +408,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       phase='repair';
       stage('repair','running',{label:'Qwen · targeted plan repair'});
       const repairResult=await run({
-        purpose:'living-school-native-plan-repair-v1',phase:'repair',maxTokens:760,structured:true,
+        purpose:'living-school-native-plan-repair-v1',phase:'repair',maxTokens:1100,structured:true,
         schema:LEARNING_PLAN_SCHEMA,
         system:'Repair a malformed or off-topic Learning Journey JSON object. Return a NEW valid JSON object only, with title, capability, level, mode, proof, assumptions and exactly 3 subject-specific modules (title, focus, outcome). Keep the CURRENT GOAL and draft; correct only reported errors. No new topic or lessons.',
         user:'CURRENT GOAL: '+goal+'\nValidation error: '+clean(validationError.message,380)+
