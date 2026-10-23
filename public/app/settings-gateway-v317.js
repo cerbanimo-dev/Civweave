@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.134-settings-v324-local-route-self-loading';
+const VERSION='1.0.135-settings-v324-native-gguf-route-distinct';
 const COMPAT_VERSION='1.0.134-settings-gateway-v317-compat';
 const SELECTOR='[data-open-unified-ai-settings]';
 const LAYER_ID='cw-settings-v320';
@@ -293,7 +293,7 @@ function bind(layer){
     if(!event.target?.open)return;
     const target=form.querySelector('[data-native-gguf-setup]');
     if(!target||target.dataset.nativeServerMounted==='1')return;
-    void import('/app/local-ai/native-gguf-server-setup-v1.js?v=native-gguf-server-setup-v1')
+    void import('/app/local-ai/native-gguf-server-setup-v1.js?v=termux-native-transport-diagnostic-v2')
       .then(module=>module.mountNativeServerSetup(target,{activate:({model,endpoint})=>{
         if(model!=='qwen35-4b-native'||endpoint!=='http://127.0.0.1:8080/v1')
           throw new Error('Native GGUF activation requires the tested loopback server and model alias.');
