@@ -32,7 +32,7 @@ const mock={
   clean:(s,n=12000)=>String(s||'').trim().slice(0,n),
   ensureRoot(){},append(system,row){thread.messages.push({...row});return thread},uid:()=>String(thread.messages.length+1),render(){},emitAvatar(){},
   guide:()=>({name:'Moss'}),historyFor:()=>[],readThread:()=>thread,writeThread:(system,value)=>{thread=value},
-  emitState(){},nativeApiRoute:()=>true,
+  emitState(){},nativeApiRoute:()=>true,verifyNativePhoneServerTransport:async()=>true,
   fallbackReply:async()=>{secondGeneration++;return{text:'Unexpected fallback',provider:'downloaded-local'}},
   realmApi:()=>null,explicitHandoffTarget:()=>'',dispatchEvent(){},CustomEvent:class{},
   globalThis:{
