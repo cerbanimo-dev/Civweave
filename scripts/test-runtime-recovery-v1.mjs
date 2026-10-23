@@ -266,3 +266,49 @@ test('Ollama model discovery distinguishes loopback from LAN address space',asyn
   await runtime.discoverOllamaModels('http://192.168.1.20:11434/api/chat');
   assert.equal(calls[1].options.targetAddressSpace,'local','LAN endpoints must advertise local address space.');
 });
+
+
+test('selected Ollama guide messages never activate downloaded-local model bootstrap',async()=>{
+  const loader=read('family-ai-loader-v105.js'),chat=read('guide-chat-surface-v350.js'),campus=read('working-campus-v156.part5.txt');
+  const start=loader.indexOf('function configuredOllama('),end=loader.indexOf('function emitLocalDegraded(',start);
+  assert.ok(start>0&&end>start,'Shared AI loader must provide the direct Ollama guide transport.');
+  const segment=loader.slice(start,end);
+  const scope={
+    globalThis:null,
+    MODEL_PROFILES_KEY:'civweave-model-profiles-v1',UNIVERSAL_AI_KEY:'civweave.universal-ai.v127',
+    PREREQUISITES:[['parity'],['shared-model-runtime']],
+    clean:(v,max=12000)=>String(v||'').slice(0,max),
+    obj:key=>key==='civweave-model-profiles-v1'?{interactive:{provider:'ollama',model:'gemma4:latest',endpoint:'http://127.0.0.1:11434/api/chat'}}:{},
+    loadScript:async(src)=>{assert.equal(src,'shared-model-runtime');scope.providerLoaded++;},
+    providerLoaded:0,
+    CivweaveModelRuntime:{generate:async request=>{
+      scope.call=request;
+      request.onEvent({phase:'partial',text:'Hello',accumulatedText:'Hello from Ollama'});
+      return{status:'success',actual:{provider:'ollama',model:'gemma4:latest'},outputText:'Hello from Ollama'};
+    }}
+  };
+  scope.globalThis=scope;
+  const respond=vm.runInNewContext(segment+'\nrespondOllama',scope);
+  let partial='';
+  const response=await respond({text:'Hello Weaveling',system:'civweave',history:[{role:'user',text:'Hello Weaveling'}],onToken:(_delta,full)=>partial=full});
+  assert.equal(scope.providerLoaded,1);
+  assert.equal(scope.call.config.provider,'ollama');
+  assert.equal(scope.call.config.model,'gemma4:latest');
+  assert.equal(scope.call.config.endpoint,'http://127.0.0.1:11434/api/chat');
+  assert.equal(scope.call.__civweaveSkipResponseRouter,true);
+  assert.equal(scope.call.responseFormat,'text');
+  assert.equal(scope.call.messages.filter(m=>m.role==='user').length,1,'Current turn must not be repeated in model history.');
+  assert.equal(response.response.answer,'Hello from Ollama');
+  assert.equal(partial,'Hello from Ollama');
+  assert.match(chat,/await globalThis\.CivweaveFamilyAILoaderV105\.respondOllama\(/,'Canonical floating guide must route Ollama directly.');
+  assert.match(campus,/await loader\.respondOllama\(/,'Working Campus must use the same Ollama request path.');
+  assert.match(campus,/const localSelection=ollamaRequested\?\{active:false\}:selectedLocalModel\(\)/,'A saved browser model must not override the selected Ollama route.');
+  const chatSubmit=chat.slice(chat.indexOf('async function submitActive('),chat.indexOf('function switchGuide('));
+  assert.ok(chatSubmit.indexOf('if(ollamaRequested)')<chatSubmit.indexOf('await globalThis.CivweaveFamilyAILoaderV105?.ensure?.()'),'Ollama must be handled before heavy assistant startup.');
+});
+
+test('stale browser selection cannot override the primary Ollama model in the shared assistant',()=>{
+  const assistant=read('assistant-runtime-v141.js');
+  const selected=assistant.slice(assistant.indexOf('function selectedConfig('),assistant.indexOf('async function ledger('));
+  assert.match(selected,/if\(\['ollama','openai-compatible','gemini'[^\n]+\.includes\(p\)\)/,'Network provider must precede downloaded model selection.');
+});
