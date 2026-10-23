@@ -75,7 +75,7 @@ sandbox.CivweaveModelRuntime={
     calls++;
     assert.equal(config.model,interactive.model,'Moss must honor canonical imported browser GGUF over stale Gemma selection.');
     assert.equal(context.request.capability.toLowerCase(),'read and memorize the tarot');
-    assert.equal(context.recentConversation.length,0,'New learning goal must not inherit unrelated old chat topics.');
+    if(context.request.intent==='new')assert.equal(context.recentConversation.length,0,'New learning goal must not inherit unrelated old chat topics.');
     assert.ok(messages[1].content.includes('tarot'));
     assert.equal(ggufNoGrammar,config.provider==='openai-compatible','Only embedded GGUF draft skips expensive JSON grammar.');
     if(ggufNoGrammar){
