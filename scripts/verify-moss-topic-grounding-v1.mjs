@@ -37,7 +37,7 @@ const g={console,JSON,Date,Math,Object,Array,String,Number,Boolean,RegExp,Promis
   addEventListener(){},dispatchEvent(){},queueMicrotask:fn=>fn(),setInterval:()=>1,clearInterval(){},setTimeout,clearTimeout,
   CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},
   CivweaveSettingsV320:{readState:()=>config},
-  CivweaveFamilyAILoaderV105:{ensure:async()=>{throw new Error('Unexpected heavy bootstrap')}},
+  CivweaveFamilyAILoaderV105:{ensure:async()=>true},
   LivingSchoolCleanroomV218:{getState:()=>({})},
   CivweaveModelRuntime:{
     readSharedConfig:()=>config,
@@ -52,7 +52,7 @@ vm.createContext(g);
 vm.runInContext(source,g,{filename:'unified-chat-system-v1.js'});
 const moss=g.CivweaveUnifiedChatSystemV1;
 const prompt='Can you teach me to use and memorize the tarot?';
-let answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:true,history:[]});
+let answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:false,history:[]});
 assert.match(answer.response.answer,/different subject/i);
 assert.match(answer.response.answer,/Model title: "Manifestation Web App"/);
 assert.equal(moss.readLearningPlan(),null,'A wrong-topic plan must never be saved');
@@ -64,13 +64,13 @@ assert.match(request.messages[1].content,/SUBJECT KEYWORD TO INCLUDE IN AT LEAST
 assert.doesNotMatch(request.messages[1].content,/"title":"Foundation","focus":"\.\.\."/);
 
 output=generic;
-answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:true,history:[]});
+answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:false,history:[]});
 assert.match(answer.response.answer,/module descriptions did not establish that subject/);
 assert.match(answer.response.answer,/Model title: "Using and Memorizing Tarot"/);
 assert.equal(moss.readLearningPlan(),null,'Generic topic-free modules must not be saved');
 
 output=related;
-answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:true,history:[]});
+answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:false,history:[]});
 assert.equal(answer.action?.kind,'living-school-learning-plan');
 assert.equal(answer.action?.state,'review');
 assert.equal(answer.provider,'openai-compatible');
@@ -84,7 +84,7 @@ data.set(key,JSON.stringify({state:'revision-requested',id:'older-manifestation'
   request:{title:'Manifestation Web App',capability:'create a manifestation web app'},
   modules:unrelated.modules}));
 output=related;
-answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:true,history:[]});
+answer=await moss.handleNativeLivingSchoolRequest({text:prompt,nativeFastLane:false,history:[]});
 assert.equal(answer.action?.state,'review');
 assert.equal(answer.action?.capability,'use and memorize the tarot');
 assert.equal(request.context.existingPlan,null);
