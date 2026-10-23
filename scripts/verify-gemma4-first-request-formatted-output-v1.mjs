@@ -44,7 +44,7 @@ const listeners=new Map();
 const storage=new Map([['civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-litert-web'})]]);
 const lowerRespond=async()=>{events.push(`assistant-lower-wrapper-${sandbox.CivweaveLocalChatRuntimeV295.__civweaveLiteRTGemma4FastV1?'ready':'missing'}`);return{ok:true}};
 lowerRespond.__civweaveLocalProviderAuthorityV1=true;
-lowerRespond.__civweaveLocalProviderAuthorityVersion='1.0.3-local-provider-authority-v1-inference-core-first';
+lowerRespond.__civweaveLocalProviderAuthorityVersion='1.0.4-local-provider-authority-v1-default-web-tools';
 lowerRespond.__cwLocalGuideControlBypassV1=true;
 lowerRespond.__cwLocalGuideControlBypassVersion='1.4.1-local-guide-control-bypass-v1-ai-quest-lazy-route';
 lowerRespond.__cwWeavelingAIQuestRequiredV1=true;
@@ -80,7 +80,7 @@ assert.equal(events.includes('fast-install'),false,'passive startup must not ins
 
 let top=sandbox.CivweaveAssistantV141.respond;
 assert.equal(top.__civweaveLocalProviderAuthorityV1,true,'Gemma top wrapper dropped local-provider authority ownership');
-assert.equal(top.__civweaveLocalProviderAuthorityVersion,'1.0.3-local-provider-authority-v1-inference-core-first');
+assert.equal(top.__civweaveLocalProviderAuthorityVersion,'1.0.4-local-provider-authority-v1-default-web-tools');
 assert.equal(top.__cwLocalGuideControlBypassV1,true,'Gemma top wrapper dropped Quest-router ownership');
 assert.equal(top.__cwLocalGuideControlBypassVersion,'1.4.1-local-guide-control-bypass-v1-ai-quest-lazy-route');
 assert.equal(top.__civweaveGemma4LiteRTStableComposition,true);
@@ -99,7 +99,7 @@ assert(events.indexOf('fast-install')<events.indexOf('assistant-lower-wrapper-re
 const priorGemma=sandbox.CivweaveAssistantV141.respond;
 const lateQuestRouter=async args=>{events.push(`late-quest-router-${args?.text===tarot?'tarot':'other'}`);return{provider:'downloaded-local',response:{answer:'quest-route'}}};
 lateQuestRouter.__civweaveLocalProviderAuthorityV1=true;
-lateQuestRouter.__civweaveLocalProviderAuthorityVersion='1.0.3-local-provider-authority-v1-inference-core-first';
+lateQuestRouter.__civweaveLocalProviderAuthorityVersion='1.0.4-local-provider-authority-v1-default-web-tools';
 lateQuestRouter.__cwLocalGuideControlBypassV1=true;
 lateQuestRouter.__cwLocalGuideControlBypassVersion='1.4.1-local-guide-control-bypass-v1-ai-quest-lazy-route';
 lateQuestRouter.__prior=priorGemma;
