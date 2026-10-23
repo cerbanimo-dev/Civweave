@@ -41,7 +41,7 @@ assert.equal(req.url,'http://127.0.0.1:8080/v1/chat/completions');
 assert.equal(req.options.mode,'cors');
 const body=JSON.parse(req.options.body);
 assert.equal(body.stream,false);
-assert.equal(body.max_tokens,192);
+assert.equal(body.max_tokens,512);
 assert.equal(body.model,'qwen35-4b-native');
 assert.equal(assistants,0);
 assert.equal(JSON.parse(stageData.get('civweave.native-server.last-request.v1')).stage,'native-text-complete');
