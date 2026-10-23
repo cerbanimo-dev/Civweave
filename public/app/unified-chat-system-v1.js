@@ -307,6 +307,29 @@ function assertNativePlanModel(result,config,stage){
     throw new Error(stage+' stage did not execute on the selected Termux model. Nothing was saved.');
   return clean(result.outputText,20000);
 }
+function normalizeNativePlanContract(result,seed,runtime){
+  // Repair only type/enum presentation drift. Never synthesize modules,
+  // change learning subject or accept truncated/invalid JSON as complete.
+  if(!['success','invalid-response'].includes(result?.status))return null;
+  let raw=modelJson(result);
+  if((!raw||typeof raw!=='object'||Array.isArray(raw))&&typeof runtime?.parseJsonLoose==='function'){
+    try{raw=runtime.parseJsonLoose(result?.outputText||'')}catch{}
+  }
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return null;
+  const plan={...raw};
+  if(typeof plan.level==='string')plan.level=plan.level.trim().toLowerCase();
+  if(typeof plan.mode==='string')plan.mode=plan.mode.trim().toLowerCase();
+  if(!['guided','just-in-time','browse'].includes(plan.mode)&&
+      typeof seed?.mode==='string'&&['guided','just-in-time','browse'].includes(seed.mode.toLowerCase()))
+    plan.mode=seed.mode.toLowerCase();
+  if(typeof plan.assumptions==='string')
+    plan.assumptions=plan.assumptions.trim()?[plan.assumptions.trim()]:[];
+  // The user request owns their preferred level and mode. This does not
+  // supply any learning module, lesson, evidence or approval.
+  const violations=runtime.validateSchema?.(plan,LEARNING_PLAN_SCHEMA)||[];
+  if(violations.length)return null;
+  return plan;
+}
 async function nativeFormalLearningPlan({runtime,config,seed,options,existingPlan}){
   const pipelineId='native-moss-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
   const meta={pipelineId,resourceCount:0,specialistCount:0,decisionGateCount:0};
@@ -400,8 +423,13 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     stage('validate','running',{label:'Independent contract and topic check'});
     let plan=null,validationError=null;
     try{
-      assertNativePlanModel(compileResult,config,'Compile');
-      plan=normalizeModelPlan(modelJson(compileResult),seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      const normalized=normalizeNativePlanContract(compileResult,seed,runtime);
+      if(!normalized)assertNativePlanModel(compileResult,config,'Compile');
+      const candidate=normalized||modelJson(compileResult);
+      if(!candidate)throw new Error('JSON compiler returned no valid plan object.');
+      plan=normalizeModelPlan(candidate,seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      if(normalized&&compileResult?.status==='invalid-response')
+        stage('validate','normalized',{label:'Unambiguous JSON field normalization; topic and modules still checked',fields:['level','mode','assumptions']});
     }catch(error){validationError=error}
     if(validationError){
       stage('validate','needs-repair',{label:'Plan check needs targeted repair',errors:[clean(validationError.message,700)]});
@@ -419,8 +447,13 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       stage('repair',repairResult?.status==='success'?'complete':'failed',
         {label:'Raw targeted repair',text:repairText,code:repairResult?.error?.code||''});
       progress('repair',repairText.length,true);
-      assertNativePlanModel(repairResult,config,'Repair');
-      plan=normalizeModelPlan(modelJson(repairResult),seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      const normalizedRepair=normalizeNativePlanContract(repairResult,seed,runtime);
+      if(!normalizedRepair)assertNativePlanModel(repairResult,config,'Repair');
+      const repairedCandidate=normalizedRepair||modelJson(repairResult);
+      if(!repairedCandidate)throw new Error('Repair stage returned no valid plan object.');
+      plan=normalizeModelPlan(repairedCandidate,seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      if(normalizedRepair&&repairResult?.status==='invalid-response')
+        stage('repair','normalized',{label:'Corrected JSON enum/assumption formatting after model repair'});
       phase='validate';
     }else stage('repair','skipped',{label:'No repair necessary'});
     stage('validate','complete',{label:'JSON, goal and module contract verified'});
