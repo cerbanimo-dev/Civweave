@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.138-native-server-transport-isolation'
+const VERSION='1.0.140-ollama-chat-no-browser-inference'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
