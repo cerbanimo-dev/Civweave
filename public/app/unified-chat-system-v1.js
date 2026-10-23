@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.4-unified-chat-system-v1-native-learning-controls';
+const VERSION='1.2.5-unified-chat-system-v1-topic-grounded-plan';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -202,14 +202,43 @@ function selectedPlanGGUF(config){
   return choice;
 }
 const GOAL_STOPWORDS=new Set(['help','learn','learning','teach','teaching','about','with','from','into','that','this','these','those','what','when','where','which','would','could','should','want','need','have','read','make','build','create','begin','first','beginner','plan','plans','course','skill','skills','people','them','their','then','using','through','memorize','memory','master','practice','study','understand','how','the','and','for','you','your','myself','yourself']);
-function planMatchesCurrentGoal(value,request){
-  const anchors=(clean(request?.capability,2400).toLowerCase().match(/[a-z][a-z0-9'-]{3,}/g)||[])
-    .filter(word=>!GOAL_STOPWORDS.has(word));
-  if(!anchors.length)return true; // Short or abstract goals cannot be reliably matched lexically.
-  const modelTopic=clean([value?.title,value?.capability||value?.goal].filter(Boolean).join(' '),4000).toLowerCase();
-  const modules=(Array.isArray(value?.modules)?value.modules:Array.isArray(value?.milestones)?value.milestones:Array.isArray(value?.stages)?value.stages:[]);
-  const moduleTopic=clean(modules.map(item=>[item?.title,item?.focus,item?.outcome,item?.goal].filter(Boolean).join(' ')).join(' '),10000).toLowerCase();
-  return anchors.some(word=>modelTopic.includes(word))&&anchors.some(word=>moduleTopic.includes(word));
+// Small models may use topic-specific vocabulary instead of repeating the
+// top-level label (tarot => Major Arcana, suits, spreads). The header remains
+// independently checked to prevent a stale subject from being accepted.
+const GOAL_VOCABULARY=Object.freeze({
+  tarot:['arcana','pentacles','wands','major arcana','minor arcana','card spread','spreads','high priestess']
+});
+function goalAnchors(request){
+  return [...new Set((clean(request?.capability,2400).toLowerCase().match(/[a-z][a-z0-9'-]{3,}/g)||[])
+    .filter(word=>!GOAL_STOPWORDS.has(word)))].slice(0,10);
+}
+function matchesTopic(text,terms){
+  const normalized=' '+clean(text,10000).toLowerCase().replace(/[^a-z0-9]+/g,' ')+' ';
+  return terms.some(term=>normalized.includes(' '+term.toLowerCase().replace(/[^a-z0-9]+/g,' ')+' '));
+}
+function goalMatchAssessment(value,request){
+  const anchors=goalAnchors(request);
+  const header=clean([value?.title,value?.capability||value?.goal].filter(Boolean).join(' '),4000);
+  const modules=Array.isArray(value?.modules)?value.modules:Array.isArray(value?.milestones)?value.milestones:Array.isArray(value?.stages)?value.stages:[];
+  const moduleText=clean(modules.map(item=>[item?.title,item?.focus,item?.outcome,item?.goal].filter(Boolean).join(' ')).join(' '),10000);
+  if(!anchors.length)return{matches:true,reason:'no-reliable-anchor',anchors};
+  const headerMatches=matchesTopic(header,anchors);
+  const related=[...new Set(anchors.flatMap(word=>GOAL_VOCABULARY[word]||[]))];
+  const moduleMatches=matchesTopic(moduleText,[...anchors,...related]);
+  return{matches:headerMatches&&moduleMatches,
+    reason:!headerMatches?'wrong-subject':!moduleMatches?'module-topic-not-grounded':'matched',
+    anchors,modelTitle:clean(value?.title,120),
+    moduleTitles:modules.slice(0,4).map(item=>clean(item?.title||item?.name,60))};
+}
+function planMatchesCurrentGoal(value,request){return goalMatchAssessment(value,request).matches}
+function goalMismatchError(value,request){
+  const assessment=goalMatchAssessment(value,request);
+  const topic=assessment.anchors.slice(0,3).join(', ')||clean(request?.capability,120);
+  const title=assessment.modelTitle||'(untitled)';
+  const modules=assessment.moduleTitles.filter(Boolean).join(' / ')||'(unnamed)';
+  if(assessment.reason==='wrong-subject')
+    return new Error('The local model drafted a plan for a different subject. Expected topic: '+topic+'. Model title: "'+title+'". Module titles: '+modules+'. No plan was saved.');
+  return new Error('The local model named the requested topic ('+topic+') but its module descriptions did not establish that subject. Model title: "'+title+'". Module titles: '+modules+'. No plan was saved. This is an off-topic or overly generic draft, not proof of stale chat history.');
 }
 function modelJson(result){
   if(result?.outputJson&&typeof result.outputJson==='object'&&!Array.isArray(result.outputJson))return result.outputJson;
@@ -224,7 +253,7 @@ function normalizePlanModule(item,index){
 }
 function normalizeModelPlan(value,request,existingPlan=null,route={}){
   if(!value||typeof value!=='object')throw new Error('The selected AI did not return a structured Learning Journey plan.');
-  if(request?.intent==='new'&&!planMatchesCurrentGoal(value,request))throw new Error('The generated Learning Journey describes a different subject than the current request. Nothing was saved. Retry the same learning goal; stale topic history will not be substituted.');
+  if(request?.intent==='new'&&!planMatchesCurrentGoal(value,request))throw goalMismatchError(value,request);
   const modules=(Array.isArray(value.modules)?value.modules:Array.isArray(value.milestones)?value.milestones:Array.isArray(value.stages)?value.stages:[]).map(normalizePlanModule).filter(Boolean).slice(0,8);
   if(modules.length<3)throw new Error('The selected AI returned too little high-level structure to review.');
   const level=['beginner','intermediate','advanced'].includes(clean(value.level,80).toLowerCase())?clean(value.level,80).toLowerCase():request.level;
@@ -290,14 +319,16 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
       planConfig.maxTokens=nativeServer?640:512;
       planConfig.temperature=.2;
     }
+    const topicAnchor=goalAnchors(seed)[0]||clean(seed.capability,100);
     const conciseMessages=compactLocal?[
-      {role:'system',content:'You are Moss, a learning guide. Output one short valid JSON object only. No markdown, preamble, thinking, or commentary. Use the exact field names title, capability, level, mode, proof, modules, assumptions. Three modules, each with title, focus, outcome. Everything MUST be about the present learning goal.'},
-      {role:'user',content:'Learning goal: '+clean(seed.capability,500)+
-        '\nTitle: '+clean(seed.title,120)+
-        '\nLevel: '+clean(seed.level,50)+
-        '\nMode: '+clean(seed.mode,50)+
-        '\nOutput exactly this compact JSON shape, substituting goal-specific text and a short observable proof: '+
-        '{"title":"'+clean(seed.title,120).replace(/["\\]/g,'')+'","capability":"'+clean(seed.capability,350).replace(/["\\]/g,'')+'","level":"beginner","mode":"guided","proof":"demonstrate the skill independently","modules":[{"title":"Foundation","focus":"...","outcome":"..."},{"title":"Practice","focus":"...","outcome":"..."},{"title":"Demonstration","focus":"...","outcome":"..."}],"assumptions":[]}. Do not change the learning topic.'}
+      {role:'system',content:'You are Moss, the Living School learning guide. Return ONE short JSON object only, with keys title, capability, level, mode, proof, modules, assumptions. Each of exactly 3 modules has title, focus and observable outcome. The current learning goal is authoritative. The JSON must be specific to that goal. Name the subject explicitly in the plan heading AND in at least one module focus or outcome. Do not copy generic example modules, and do not use another conversation topic. Do not generate lessons yet.'},
+      {role:'user',content:'CURRENT LEARNING GOAL: '+clean(seed.capability,350)+
+        '\nSUBJECT KEYWORD TO INCLUDE IN AT LEAST ONE MODULE FOCUS: '+topicAnchor+
+        '\nRequested title: '+clean(seed.title,120)+
+        '\nLevel: '+clean(seed.level,50)+'; mode: '+clean(seed.mode,50)+
+        '\nReturn a compact JSON object: {"title":"'+clean(seed.title,120).replace(/["\\]/g,'')+
+        '","capability":"'+clean(seed.capability,300).replace(/["\\]/g,'')+
+        '","level":"beginner","mode":"guided","proof":"observable practical demonstration","modules":[{"title":"topic-specific title","focus":"topic-specific focus","outcome":"observable goal"},{"title":"topic-specific title","focus":"topic-specific focus","outcome":"observable goal"},{"title":"topic-specific title","focus":"topic-specific focus","outcome":"observable goal"}],"assumptions":[]}. Replace EVERY example module string with specific terms about '+topicAnchor+'.'}
     ]:null;
     const result=await runtime.generate({purpose:'living-school-learning-plan-review-v2',executionProfile:'interactive',signal:options.signal,config:planConfig,schema:LEARNING_PLAN_SCHEMA,responseFormat:'json',context,
       ggufNoGrammar:Boolean(ggufChoice),maxRepairAttempts:compactLocal?0:1,
@@ -362,6 +393,10 @@ registerCapability('living-school',async(request,next)=>{
     saveLearningPlan({...plan,state:'revision-requested',updatedAt:now()});
     return packet(`${learningPlanText(plan)}\n\nTell me what you want changed. Moss will use the selected AI to regenerate only the high-level plan and keep it in REVIEW.`,'Describe the change you want in the high-level plan.',{requiresConsent:true,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:{kind:'learning-journey-plan-approval',planId:plan.id,state:'review',required:true,actions:['review','revise','approve']}});
   }
+  // A fresh explicit learning goal outranks an older plan left in
+  // revision-requested. Otherwise, repeated attempts can accidentally bring
+  // the previous subject back into the model's plan context.
+  if(learningJourneyIntent(text,history)&&!PLAN_REVISION.test(text))return generateLivingSchoolPlan(request);
   if(plan&&(plan.state==='revision-requested'||PLAN_REVISION.test(text)))return generateLivingSchoolPlan(request,plan,text);
   if(learningJourneyIntent(text,history))return generateLivingSchoolPlan(request);
   const before=JSON.stringify(stateForLivingSchool()?.school||null),result=await next(request);
