@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.2-unified-chat-system-v1-native-server-goal-pin';
+const VERSION='1.2.3-unified-chat-system-v1-native-direct-planning';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -263,8 +263,16 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
       saveLearningPlan({...prior,state:'superseded',supersededBy:explicitGoal,updatedAt:now()});
   }
   let config;try{config=selectedPlanningConfig()}catch(error){return packet('Moss could not read the selected AI route: '+clean(error?.message||error,700),'Reselect the model in Settings.',{provider:'learning-plan-route-error'})}
-  try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();config=selectedPlanningConfig()||config}catch(error){
-    return packet(`Moss could not start the selected AI for Learning Journey planning: ${clean(error?.message||error,900)}`,'Retry the plan or check the selected AI model.',{provider:'learning-plan-model-error',model:clean(config?.model,240)});
+  // The explicitly selected native Termux endpoint can use the shared
+  // model runtime directly. The full value/economy/assistant bootstrap is
+  // unnecessary for drafting an inert high-level plan and can block Android
+  // before a single POST reaches llama-server.
+  const nativeFastReady=Boolean(options.nativeFastLane&&nativePhoneServer(config)&&
+    typeof globalThis.CivweaveModelRuntime?.generate==='function');
+  if(!nativeFastReady){
+    try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();config=selectedPlanningConfig()||config}catch(error){
+      return packet(`Moss could not start the selected AI for Learning Journey planning: ${clean(error?.message||error,900)}`,'Retry the plan or check the selected AI model.',{provider:'learning-plan-model-error',model:clean(config?.model,240)});
+    }
   }
   const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate||!config)return packet('Moss could not reach the selected AI runtime for Learning Journey planning. No learning content was generated or queued.','Retry after the selected AI runtime is ready.',{provider:'learning-plan-model-unavailable',model:clean(config?.model,240)});
