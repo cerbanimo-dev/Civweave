@@ -55,10 +55,14 @@ function selectedConfig(){
   if(gguf?.enabled===true&&gguf.engine==='wllama'&&
      rawProvider==='openai-compatible'&&rawModel===gguf.model)
     return {...raw,provider:'openai-compatible',route:'openai-compatible',model:gguf.model,externalConsent:false};
-  const local=activeLocal();
-  if(local)return{provider:'downloaded-local',route:'downloaded-local',model:local.id,externalConsent:false};
   if(rawModel===MINILM_ID||rawProvider==='minilm'||rawProvider==='semantic-local'||rawProvider==='local-reflex'||rawProvider==='reflex')return{provider:'server-auto',route:'server-auto',model:'',externalConsent:false,migratedSidecar:true};
   const p=provider(rawProvider);
+  // An old browser-model selection is not permission to override a saved
+  // Ollama, Gemini, hosted, server-auto, or other non-browser provider.
+  if(['ollama','openai-compatible','gemini','server-auto','hosted','deterministic'].includes(p))
+    return{...raw,provider:p,route:p,externalConsent:Boolean(raw.externalConsent??raw.remoteConsent??old.consent)};
+  const local=activeLocal();
+  if(local)return{provider:'downloaded-local',route:'downloaded-local',model:local.id,externalConsent:false};
   return{...raw,provider:p,route:p,externalConsent:Boolean(raw.externalConsent??raw.remoteConsent??old.consent)};
 }
 async function ledger(){if(!ledgerPromise)ledgerPromise=globalThis.CivweaveParity?.load?.().catch(()=>null)||Promise.resolve(null);return ledgerPromise}
