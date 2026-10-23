@@ -1,0 +1,152 @@
+import {VERSION,STORAGE_KEY,OUTBOX_KEY,newDraft,validateDraft,livingSchoolPlan,guildBundle,normaliseSource,normaliseMedia,externalUrl,videoEmbed,downloadableJson} from './living-library-seedling-core-v1.mjs';
+
+const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const read=(key,f)=>{try{return JSON.parse(localStorage.getItem(key))||f}catch{return f}};
+const stored=read(STORAGE_KEY,null);
+let draft=stored?.id&&Array.isArray(stored.modules)?stored:newDraft(),researchResults=[];
+const now=()=>new Date().toISOString();
+const status=(message)=>{el('status').textContent=message};
+function save(){draft.updatedAt=now();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(draft))}catch(error){status('Draft storage failed: '+String(error?.message||error))}preview()}
+function getFields(){for(const key of ['title','capability','level','mode','proof'])draft[key]=el(key).value.trim()}
+function renderFields(){for(const key of ['title','capability','level','mode','proof'])el(key).value=draft[key]||''}
+function renderModules(){
+ el('modules').replaceChildren();
+ draft.modules.forEach((module,index)=>{
+  const box=document.createElement('div');box.className='module';
+  box.innerHTML='<div class="module-header"><h3>Module '+(index+1)+'</h3><button type="button" data-remove-module="'+index+'">Remove</button></div>'+
+  ['title','focus','outcome'].map(key=>'<label>'+({title:'Title',focus:'Learning focus',outcome:'Observable demonstration'}[key])+'</label><textarea maxlength="'+({title:220,focus:900,outcome:900}[key])+'" data-module="'+index+'" data-field="'+key+'"></textarea>').join('');
+  box.querySelectorAll('textarea').forEach(n=>{n.value=module[n.dataset.field]||'';n.addEventListener('input',()=>{module[n.dataset.field]=n.value;save()})});
+  box.querySelector('[data-remove-module]').addEventListener('click',()=>{if(draft.modules.length<=3)return status('The canonical Learning Journey review plan needs at least three modules.');draft.modules.splice(index,1);renderModules();renderMedia();save()});
+  el('modules').append(box);
+ });
+ const choices=draft.modules.map((m,i)=>'<option value="'+esc(m.id)+'">'+(i+1)+'. '+esc(m.title||'Untitled module')+'</option>').join('');
+ const current=el('media-module').value;el('media-module').innerHTML='<option value="">General</option>'+choices;el('media-module').value=draft.modules.some(m=>m.id===current)?current:'';
+}
+function renderSources(){
+ el('sources').replaceChildren();
+ for(const source of draft.sources){
+  const box=document.createElement('div');box.className='entry';
+  const link=document.createElement('a');link.href=source.url;link.textContent=source.title;link.rel='noopener noreferrer';link.target='_blank';
+  const heading=document.createElement('div');heading.className='entry-head';heading.append(link);
+  const remove=document.createElement('button');remove.className='remove';remove.textContent='Remove';remove.addEventListener('click',()=>{draft.sources=draft.sources.filter(row=>row.id!==source.id);renderSources();save()});heading.append(remove);box.append(heading);
+  const note=document.createElement('div');note.className='subtle';note.textContent=[source.type,source.creator,source.publisher,source.notes].filter(Boolean).join(' · ');box.append(note);el('sources').append(box);
+ }
+}
+function renderMedia(){
+ el('media').replaceChildren();
+ for(const medium of draft.media){
+  const box=document.createElement('div');box.className='entry';
+  const heading=document.createElement('div');heading.className='entry-head';
+  const label=document.createElement('a');label.textContent=medium.title||medium.url;label.href=medium.url;label.target='_blank';label.rel='noopener noreferrer';heading.append(label);
+  const remove=document.createElement('button');remove.className='remove';remove.textContent='Remove';remove.addEventListener('click',()=>{draft.media=draft.media.filter(row=>row.id!==medium.id);renderMedia();save()});heading.append(remove);box.append(heading);
+  const note=document.createElement('div');note.className='subtle';note.textContent=medium.kind+' · '+(draft.modules.find(m=>m.id===medium.moduleId)?.title||'General')+' · '+(medium.credit||'attribution not entered');box.append(note);el('media').append(box)
+ }
+}
+function preview(){
+ const container=el('preview');container.replaceChildren();
+ const title=document.createElement('h3');title.textContent=draft.title||'Untitled Learning Journey';container.append(title);
+ for(const [key,name] of [['capability','Capability'],['proof','Proof of capability']]){const p=document.createElement('p');const b=document.createElement('strong');b.textContent=name+': ';p.append(b,document.createTextNode(draft[key]||'Not defined'));container.append(p)}
+ const rule=document.createElement('hr');container.append(rule);
+ draft.modules.forEach((m,i)=>{const h=document.createElement('h4');h.textContent=(i+1)+'. '+(m.title||'Untitled module');container.append(h);for(const key of ['focus','outcome']){const p=document.createElement('p');p.textContent=(key==='focus'?'Focus: ':'Demonstrate: ')+(m[key]||'Not set');container.append(p)}
+ for(const medium of draft.media.filter(m=>m.moduleId===m.id)){} // Keep media attachment rendering outside structural plan fields
+ for(const medium of draft.media.filter(media=>media.moduleId===m.id))mediaPreview(medium,container);
+ });
+ for(const medium of draft.media.filter(m=>!m.moduleId))mediaPreview(medium,container);
+ if(draft.sources.length){const h=document.createElement('h4');h.textContent='Sources';container.append(h);const list=document.createElement('ol');for(const source of draft.sources){const item=document.createElement('li');const a=document.createElement('a');a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=source.title;item.append(a);list.append(item)}container.append(list)}
+}
+function mediaPreview(medium,container){
+ const figure=document.createElement('figure');
+ if(medium.kind==='image'){
+  const img=document.createElement('img');img.src=medium.url;img.alt=medium.title||'Linked image';img.loading='lazy';img.referrerPolicy='no-referrer';figure.append(img);
+ }else{
+  const embed=videoEmbed(medium.url);
+  if(embed){const iframe=document.createElement('iframe');iframe.src=embed;iframe.title=medium.title||'Embedded video';iframe.loading='lazy';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allow='fullscreen; encrypted-media; picture-in-picture';iframe.setAttribute('sandbox','allow-scripts allow-same-origin allow-presentation');figure.append(iframe)}
+  else{const link=document.createElement('a');link.href=medium.url;link.textContent='Watch linked video';link.target='_blank';link.rel='noopener noreferrer';figure.append(link)}
+ }
+ const caption=document.createElement('figcaption');caption.textContent=[medium.title,medium.credit,medium.rights].filter(Boolean).join(' · ');figure.append(caption);container.append(figure)
+}
+function output(filename,data){
+ const blob=new Blob([downloadableJson(data)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),10_000);
+}
+function valid(){getFields();save();const errors=validateDraft(draft);if(errors.length){status('Needs attention:\n• '+errors.join('\n• '));return false}status('Validated: '+draft.modules.length+' modules, '+draft.sources.length+' sources, '+draft.media.length+' media references. This is a review draft, not approved Living School content.');return true}
+function reset(){if(!confirm('Start a new Learning Journey? The current local draft will be replaced; export it first if needed.'))return;draft=newDraft();researchResults=[];el('search-results').replaceChildren();renderAll();save();status('Started a new local draft.')}
+async function searchIndex(which){
+ const query=el('search').value.trim();if(query.length<3)return status('Enter at least three search characters.');
+ const button=el(which==='wikipedia'?'search-wikipedia':'search-openalex');button.disabled=true;status('Searching public '+which+' index…');
+ try{
+  let items=[];
+  if(which==='wikipedia'){
+   const url='https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(query)+'&gsrlimit=8&prop=info&inprop=url&format=json&origin=*';
+   const response=await fetch(url);if(!response.ok)throw Error('Wikipedia returned HTTP '+response.status);const payload=await response.json();
+   items=Object.values(payload.query?.pages||{}).map(p=>({title:p.title,url:p.fullurl||'https://en.wikipedia.org/wiki/'+encodeURIComponent(p.title.replaceAll(' ','_')),creator:'',publisher:'Wikipedia',type:'reference'}));
+  }else{
+   const response=await fetch('https://api.openalex.org/works?search='+encodeURIComponent(query)+'&per-page=8');
+   if(!response.ok)throw Error('OpenAlex returned HTTP '+response.status);const payload=await response.json();
+   items=(payload.results||[]).filter(x=>x.primary_location?.landing_page_url||x.doi).map(x=>({title:x.display_name,url:x.primary_location?.landing_page_url||x.doi,creator:(x.authorships||[]).slice(0,3).map(a=>a.author?.display_name).filter(Boolean).join(', '),publisher:x.primary_location?.source?.display_name||'OpenAlex',type:'research'}))
+  }
+  researchResults=items.filter(s=>externalUrl(s.url));renderResults();status('Found '+researchResults.length+' suggestions. Add sources explicitly after reviewing their relevance.');
+ }catch(error){status('Research lookup unavailable: '+String(error?.message||error)+'. You can still add URLs manually.')}finally{button.disabled=false}
+}
+function renderResults(){const box=el('search-results');box.replaceChildren();for(const [i,source] of researchResults.entries()){const card=document.createElement('div');card.className='source-card';const a=document.createElement('a');a.textContent=source.title;a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';card.append(a);const p=document.createElement('div');p.className='subtle';p.textContent=source.publisher+' '+(source.creator||'');card.append(p);const b=document.createElement('button');b.textContent='Use this citation';b.addEventListener('click',()=>{el('source-title').value=source.title;el('source-url').value=source.url;el('source-author').value=source.creator||'';el('source-type').value=source.type;status('Citation fields populated. Inspect and click Add cited source to save it.')});card.append(b);box.append(card)}}
+function addSource(){try{if(draft.sources.length>=40)throw Error('Maximum 40 sources per Learning Journey.');const row=normaliseSource({title:el('source-title').value,url:el('source-url').value,creator:el('source-author').value,notes:el('source-notes').value,type:el('source-type').value});draft.sources.push(row);for(const id of ['source-title','source-url','source-author','source-notes'])el(id).value='';renderSources();save();status('Added source citation. Its claims and licensing remain for human verification.')}catch(e){status(e.message)}}
+function addMedia(){try{if(draft.media.length>=28)throw Error('Maximum 28 media references.');const row=normaliseMedia({kind:el('media-type').value,url:el('media-url').value,title:el('media-title').value,credit:el('media-credit').value,rights:el('media-rights').value,moduleId:el('media-module').value});draft.media.push(row);for(const id of ['media-url','media-title','media-credit','media-rights'])el(id).value='';renderMedia();save();status('Attached media reference. For offline X4 Pro use, convert and package an appropriately licensed local copy separately.')}catch(e){status(e.message)}}
+function selectedGuild(){
+ const selected=read('civweave.host-node.selection.v1',{});
+ let origin='';try{origin=new URL(selected.origin||'').origin}catch{}
+ const nodeId=String(selected.nodeId||'').trim();
+ const credentials=read('civweave.host-node.credentials.v1',{});
+ const session=credentials[origin+'#'+nodeId]||credentials[origin]||{};
+ if(!origin||!nodeId||!session.userId||!session.credential||selected.loginMode==='legacy-mobile-selection')return null;
+ return {guildId:nodeId,origin,displayName:selected.displayName||nodeId,userId:session.userId};
+}
+function renderGuild(){const selected=selectedGuild();const p=el('guild-context');p.textContent=selected?'Selected Guild: '+selected.displayName+' ('+selected.guildId+'). Logged-in session found.':'No authenticated Guild session found in this browser. Log into a Guild in the main Civweave app, then return here on the same origin.';el('send-guild').disabled=!selected}
+async function ensureMesh(){
+ if(globalThis.CivweaveLocalMeshV146)return globalThis.CivweaveLocalMeshV146;
+ await new Promise((resolve,reject)=>{const tag=document.createElement('script');tag.src='/app/local-object-mesh-v146.js';tag.onload=resolve;tag.onerror=()=>reject(Error('Signed local mesh could not load.'));document.head.append(tag)});
+ if(!globalThis.CivweaveLocalMeshV146?.createObject)throw Error('Signed mesh API missing.');
+ return globalThis.CivweaveLocalMeshV146;
+}
+async function sendGuild(){
+ getFields();save();const guild=selectedGuild();if(!guild)return status('Select and authenticate to a real Guild in the main Civweave app first.');
+ if(!valid())return;
+ if(!confirm('Submit this sourced Learning Journey for review to '+guild.displayName+'? This shares the plan, citations and media URLs with the Guild.'))return;
+ const button=el('send-guild');button.disabled=true;
+ try{
+  const bundle=guildBundle({...draft,guildId:guild.guildId});
+  if(new TextEncoder().encode(JSON.stringify(bundle)).length>900000)throw Error('Bundle too large for the Guild relay.');
+  const existing=read(OUTBOX_KEY,{});
+  const key=guild.guildId+':'+draft.id+':'+draft.updatedAt;
+  if(existing[key])throw Error('This revision has already been signed and queued. Revise it before sending again.');
+  const mesh=await ensureMesh();
+  const group='guild:'+guild.guildId;mesh.configure({groups:[group]});
+  const object=await mesh.createObject({kind:'civweave.seedling.guild-learning-submission.v1',purpose:'Human-authored Living School plan for Guild review; not approved or published.',consent:'group',audience:[group],hopLimit:4,publish:true,priority:70,payload:bundle});
+  existing[key]={id:object.id,guildId:guild.guildId,status:'signed-local-outbox',queuedAt:now()};
+  localStorage.setItem(OUTBOX_KEY,JSON.stringify(existing));
+  let delivery='Signed and queued locally for '+guild.displayName+'. Guild receipt NOT confirmed.';
+  try{
+   const pocket=await import('./pocket-guild-node-v1.mjs');
+   const service=pocket.CivweavePocketGuildNodeV1,configuration=service.state();
+   if(configuration?.guildId===guild.guildId&&configuration?.primaryOrigin&&configuration?.membershipKey){
+    const sync=await service.syncPrimary();
+    const latest=service.state();
+    const ack='delivery:'+object.id+':'+object.revisionHash;
+    if(sync?.ok&&latest?.primaryAcks?.[ack]){delivery='Cloud Guild relay acknowledged the signed submission. Guild review and Living School import are still pending.';existing[key].status='cloud-relay-acknowledged';localStorage.setItem(OUTBOX_KEY,JSON.stringify(existing))}
+    else delivery+=' Relay sync status: '+(sync?.status||'not-acknowledged');
+   } else delivery+=' Configure a Pocket Guild primary relay, or use a live peer, to deliver it.';
+  }catch(err){delivery+=' Relay not confirmed: '+String(err?.message||err)}
+  el('guild-result').textContent=delivery;status('Guild submission object: '+object.id+'. '+delivery)
+ }catch(error){status('Guild send failed: '+String(error?.message||error));el('guild-result').textContent='Send failed; no confirmed Guild receipt.'}
+ finally{renderGuild()}
+}
+function renderAll(){renderFields();renderModules();renderSources();renderMedia();renderGuild();preview()}
+for(const key of ['title','capability','level','mode','proof'])el(key).addEventListener('input',()=>{draft[key]=el(key).value;save()});
+el('add-module').addEventListener('click',()=>{if(draft.modules.length>=8)return status('Maximum eight modules.');draft.modules.push({id:'module-'+crypto.randomUUID(),title:'',focus:'',outcome:''});renderModules();save()});
+el('add-source').addEventListener('click',addSource);el('add-media').addEventListener('click',addMedia);
+el('search-wikipedia').addEventListener('click',()=>searchIndex('wikipedia'));el('search-openalex').addEventListener('click',()=>searchIndex('openalex'));
+el('validate').addEventListener('click',valid);
+el('export-plan').addEventListener('click',()=>{if(valid())output('seedling-living-school-plan.json',livingSchoolPlan(draft))});
+el('export-bundle').addEventListener('click',()=>{if(valid())output('seedling-guild-learning-bundle.json',guildBundle(draft))});
+el('send-guild').addEventListener('click',sendGuild);el('reset').addEventListener('click',reset);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderGuild()});
+renderAll();status('Seedling Edition '+VERSION+' · Local draft restored. Verify sources before sharing.');
