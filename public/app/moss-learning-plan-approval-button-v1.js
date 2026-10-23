@@ -83,7 +83,7 @@ function findFollowUpArticle(root,kind,plan){
   const pattern=kind==='retry'?/stopped before it could materialize|could not materialize the approved Learning Journey/i:/materialized the approved Learning Journey|I queued its materialization/i;
   return articles(root).find(article=>{
     const message=clean(article.querySelector('.cw350-bubble')?.textContent,12000);
-    return pattern.test(message)&&(!plan?.request?.title||message.includes(clean(plan.request.title,180)));
+    return pattern.test(message)&&(!plan?.request?.title||message.includes(clean(plan.request.title,180))||/Moss could not materialize the approved Learning Journey:/i.test(message));
   })||null;
 }
 function removeActions(){document.querySelectorAll?.('[data-moss-learning-plan-approval-v1]')?.forEach?.(node=>node.remove())}
@@ -162,7 +162,7 @@ async function decidePlanById(planId,decision,wrapper=null){
     wrapper?.remove?.();if(decision==='revise')queueMicrotask(()=>focusRevisionInput(activeMossRoot()));
     return true;
   }catch(error){appendResult(failureResult(error));return false}
-  finally{deciding=false;queueMicrotask(render)}
+  finally{deciding=false;if(readPlan()?.state==='review')wrapper?.querySelectorAll('button')?.forEach(control=>control.disabled=false);queueMicrotask(render)}
 }
 async function approvePlanById(planId,button=null,actions=null){
   if(approving||deciding)return false;
@@ -176,7 +176,7 @@ async function approvePlanById(planId,button=null,actions=null){
     const result=await api.approveLivingSchoolPlan(plan);actions?.remove?.();appendResult(result);
     return !['failed','error'].includes(clean(result?.action?.state,60).toLowerCase());
   }catch(error){appendResult(failureResult(error));return false}
-  finally{approving=false;queueMicrotask(render)}
+  finally{approving=false;if(readPlan()?.state==='review'&&actions){actions.querySelectorAll?.('button')?.forEach(control=>control.disabled=false);if(button)button.textContent='Approve'}queueMicrotask(render)}
 }
 async function retryPlanById(planId,button=null,wrapper=null){
   if(approving||deciding)return false;
