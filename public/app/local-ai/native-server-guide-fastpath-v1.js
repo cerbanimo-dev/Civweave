@@ -74,6 +74,14 @@ function learningRequest(user){
 function learningControlOutsideMoss(user){
   return /^(?:please\s+)?(?:approve|review|revise|show|edit|materialize|generate)\s+(?:(?:the|my|this)\s+)?(?:moss\s+)?(?:learning\s+journey|learning\s+plan|moss\s+plan)(?:\s+now)?[.!?]*$/i.test(user);
 }
+function normalizedLearningControl(user){
+  const action=user.trim().replace(/^please\s+/i,'').split(/\s+/)[0]?.toLowerCase();
+  if(action==='approve')return'approve learning journey';
+  if(action==='review'||action==='show')return'review learning journey';
+  if(action==='revise'||action==='edit')return'revise plan';
+  if(action==='materialize'||action==='generate')return'generate the learning journey';
+  return user;
+}
 function previousAssistantAnswer(history){
   const row=[...(Array.isArray(history)?history:[])].reverse().find(item=>item?.role==='assistant'&&!item?.pending&&!item?.modelError);
   return String(row?.text||row?.content||'').trim()
@@ -121,7 +129,7 @@ export async function respondNative({system='civweave',text='',history=[],fetche
     markNativeStage('moss-planner-loading');
     const planner=await ensurePlanner();
     markNativeStage('moss-planner-ready');
-    const result=await planner.handleNativeLivingSchoolRequest({text:user,history,nativeFastLane:true});
+    const result=await planner.handleNativeLivingSchoolRequest({text:learningControl?normalizedLearningControl(user):user,history,nativeFastLane:true});
     if(result){
       markNativeStage('moss-action-finished',result?.provider||'unknown');
       return result;
