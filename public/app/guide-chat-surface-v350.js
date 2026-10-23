@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.186-guide-chat-surface-v350-draft-completeness';
+const VERSION='1.0.187-guide-chat-surface-v350-ollama-direct';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
