@@ -7,7 +7,7 @@ if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
 const PREREQUISITES=[
   ['/app/shared/civweave-parity-runtime.js?v=1.0.4',()=>globalThis.CivweaveParity],
-  ['/app/shared/civweave-model-runtime.js?v=1.0.9-native-server-no-helper-stream',()=>globalThis.CivweaveModelRuntime],
+  ['/app/shared/civweave-model-runtime.js?v=1.0.10-native-termux-sse-and-structured-stream',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.4',()=>globalThis.CivweaveGuideContractsV141]
