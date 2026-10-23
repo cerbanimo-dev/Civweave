@@ -82,7 +82,7 @@ function selectTab(form,name){for(const button of form.querySelectorAll('[data-s
 function sync(form){
   const route=providerName(byName(form,'route')?.value),remote=!['deterministic','downloaded-local','server-auto'].includes(route),gemini=route==='gemini';
   const selectedGGUF=parse(getLocal('civweave.mobile.gguf-primary.v2'),null);
-  const browserGGUF=route==='openai-compatible'&&selectedGGUF?.enabled&&selectedGGUF?.engine==='wllama'&&
+  const browserGGUF=route==='openai-compatible'&&byName(form,'model')?.value!=='qwen35-4b-native'&&selectedGGUF?.enabled&&selectedGGUF?.engine==='wllama'&&
     byName(form,'model')?.value===selectedGGUF.model&&byName(form,'endpoint')?.value==='http://127.0.0.1:8080/v1';
   const selectedNote=form.querySelector('[data-embedded-gguf-selected-note]');
   if(selectedNote)selectedNote.hidden=!browserGGUF;
