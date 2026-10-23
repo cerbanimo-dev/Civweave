@@ -213,39 +213,50 @@ export async function activate({url,id,label}){
   notify('selected',{model:selected.model,url:key});
   return selected;
 }
-async function start(selected){
+async function start(selected,onPhase=()=>{}){
   const source=selected.source==='file'
     ?(await (async()=>{const record=importIndex()[selected.importId];if(!record||record.model!==selected.model)throw err('GGUF_IMPORT_NOT_FOUND','The selected imported GGUF is missing.');return blobsFor(record)})())
     :await installed(selected.url);
   if(!source)throw err('GGUF_CACHE_MISSING','The selected GGUF is not completely cached. Return to Settings to download it again.');
-  if(instance?.isModelLoaded?.()&&loadedUrl===selected.url)return instance;
+  if(instance?.isModelLoaded?.()&&loadedUrl===selected.url){onPhase('ready',{reused:true});return instance}
   if(loading)return loading;
   loading=(async()=>{
     const api=await engine();
     if(api.isModelLoaded?.()){await api.exit();instance=null;loadedUrl=''}
     const create=async gpuLayers=>{
       const current=await engine();
-      await current.loadModel(source,{n_ctx:6144,n_threads:1,n_batch:128,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
+      onPhase('loading',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers,bytes:selected.bytes});
+      await current.loadModel(source,{n_ctx:4096,n_threads:1,n_batch:64,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
       loadedUrl=selected.url;
+      onPhase('ready',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers});
       return current;
     };
     try{
       notify('loading',{model:selected.model,backend:'webgpu',gpuLayers:8});
       return await create(8);
     }catch(gpuError){
-      notify('gpu-fallback',{model:selected.model,reason:clean(gpuError?.message).slice(0,300)});
+      const gpuReason=clean(gpuError?.message).slice(0,500);
+      notify('gpu-fallback',{model:selected.model,reason:gpuReason});
+      onPhase('gpu-fallback',{reason:gpuReason});
       try{await instance?.exit()}catch{}
       instance=null;loadedUrl='';
       try{return await create(0)}
-      catch(cpuError){throw err('GGUF_LOAD_FAILED','GGUF could not start in browser WebGPU or CPU/WASM: '+clean(cpuError?.message))}
+      catch(cpuError){throw err('GGUF_LOAD_FAILED','Browser GGUF did not load. WebGPU: '+gpuReason+'; CPU/WASM: '+clean(cpuError?.message).slice(0,500)+'. Your imported Q4 weights remain on this device.')}
     }
   })().finally(()=>{loading=null});
   return loading;
 }
-export async function generate({model,messages,temperature=.6,maxTokens=1024,structured=false,signal,onToken}={}){
+export async function generate({model,messages,temperature=.6,maxTokens=1024,structured=false,signal,onToken,onPhase=()=>{}}={}){
   const selected=current();
   if(!selected||selected.model!==model)throw err('GGUF_SELECTION_MISMATCH','Browser GGUF is not selected, or another model replaced the selected ID.');
-  const api=await start(selected);
+  if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation was cancelled before model loading.');
+  let phase='model-loading';
+  const updatePhase=(name,details={})=>{phase=name;try{onPhase?.(name,details)}catch{}};
+  let api;
+  try{api=await start(selected,updatePhase)}catch(error){
+    if(error?.code)throw error;
+    throw err('GGUF_LOAD_FAILED','Browser GGUF model load failed: '+clean(error?.message).slice(0,700));
+  }
   if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled.');
   let output='',chunks=0;
   const params={
@@ -258,6 +269,7 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
     ...(structured?{response_format:{type:'json_object'}}:{})
   };
   notify('generating',{model:selected.model});
+  updatePhase('generating',{backend:'wllama',maxTokens:params.max_tokens});
   try{
     const stream=await api.createChatCompletion(params);
     for await(const chunk of stream){
@@ -265,12 +277,20 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
       const text=String(chunk?.choices?.[0]?.delta?.content??'');
       if(!text)continue;
       output+=text;chunks++;
+      if(chunks===1)updatePhase('first-token',{characters:text.length});
       try{onToken?.(text,output)}catch{}
     }
     if(!output.trim())throw err('GGUF_EMPTY','Embedded GGUF returned no visible answer.');
+    updatePhase('complete',{chunks});
     notify('complete',{model:selected.model,chunks});
     return{text:output,model:selected.model,streamed:true,backend:'browser-wllama',chunks};
-  }catch(error){notify('failed',{model:selected.model,error:clean(error?.message)});throw error}
+  }catch(error){
+    const reason=clean(error?.message).slice(0,700);
+    notify('failed',{model:selected.model,phase,error:reason});
+    updatePhase('failed',{stage:phase,reason});
+    if(signal?.aborted)throw err('GGUF_ABORTED','GGUF '+phase+' was interrupted: '+clean(signal.reason?.message||reason).slice(0,450));
+    throw err(error?.code||'GGUF_INFERENCE_FAILED','Browser GGUF '+phase+' failed: '+reason+'. Imported Q4 weights were not removed.');
+  }
 }
 export async function release(){
   if(loading)try{await loading}catch{}
