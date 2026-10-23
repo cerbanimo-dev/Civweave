@@ -45,11 +45,11 @@ export function markNativeStage(stage,detail=''){
 }
 async function ensurePlanner(){
   if(!modelsPromise)modelsPromise=loadScript(MODEL_RUNTIME,
-    ()=>typeof globalThis.CivweaveModelRuntime?.generate==='function','Shared model runtime')
+    ()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'&&globalThis.CivweaveModelRuntime?.nativeDirectTermuxNoStream===true,'Shared model runtime')
     .catch(error=>{modelsPromise=null;throw error});
   await modelsPromise;
   if(!plannerPromise)plannerPromise=loadScript(MOSS_PLANNER,
-    ()=>typeof globalThis.CivweaveUnifiedChatSystemV1?.generateLivingSchoolPlan==='function','Moss planner')
+    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.3-unified-chat-system-v1-native-direct-planning','Moss planner')
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
