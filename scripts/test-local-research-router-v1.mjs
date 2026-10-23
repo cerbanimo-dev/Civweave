@@ -54,6 +54,17 @@ const blockedSearx = await runTool({ ...browserEnv, SEARXNG_BASE_URL: 'https://s
 assert.equal(blockedSearx.source, 'browser-run-duckduckgo');
 assert.equal(blockedSearx.fallbackFrom, 'searxng');
 assert.equal(quickCalls, 2, 'both no-SearX and 403 fallback must invoke Browser Run');
+
+assert.equal(noSearx.results.length, 1, 'Browser Run markdown must produce a real source URL');
+assert.equal(noSearx.results[0].url, 'https://example.org/fact');
+assert.equal(blockedSearx.results[0].url, 'https://example.org/fact');
+const redirectUrl='https://duckduckgo.com/l/?uddg='+encodeURIComponent('https://example.org/article');
+const extracted = vm.runInContext('browserSearchResults', server)(
+  '[AI update]('+redirectUrl+')\\nRelevant snippet\\n[Internal](http://127.0.0.1/admin)\\n[DuckDuckGo](https://duckduckgo.com/?q=test)'
+);
+assert.equal(extracted.length,1,'search links must reject internal and search-engine navigation URLs');
+assert.equal(extracted[0].url,'https://example.org/article');
+
 for (const host of ['127.0.0.1', '192.168.1.1', '10.1.2.3', '169.254.169.254', 'localhost', '[::1]']) {
   assert.throws(() => safeUrl('http://' + host + '/secret'), undefined, host + ' must not be fetched');
 }
