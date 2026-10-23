@@ -28,10 +28,13 @@ assert.match(edge,/html\.duckduckgo\.com\/html\/\?q=/,'Live search must send onl
 assert.match(entry,/\/api\/browser\/tool/,'Node-cloud entry must expose the delegated browser endpoint.');
 assert.match(wrangler,/"browser"\s*:\s*\{[\s\S]*"binding"\s*:\s*"BROWSER"/,'Node-cloud must declare the Browser Run binding.');
 
-assert.match(bootstrap,/browser-tool-v1\.js\?v=1\.0\.0/,'Local AI bootstrap must load the browser tool.');
-assert.match(bootstrap,/browser-agent-v1\.js\?v=1\.0\.1/,'Local AI bootstrap must load the hardened browser agent.');
+assert.match(bootstrap,/browser-tool-v1\.js\?v=1\.0\.1-research-router/,'Local AI bootstrap must load the browser tool.');
+assert.match(bootstrap,/browser-agent-v1\.js\?v=1\.0\.2-research-router/,'Local AI bootstrap must load the hardened browser agent.');
 assert.equal(offline.assets.includes('/app/browser-tool-v1.js'),true,'Browser tool must be part of the offline core.');
 assert.equal(offline.assets.includes('/app/local-ai/browser-agent-v1.js'),true,'Local browser agent must be part of the offline core.');
 assert.equal(offline.assets.includes('/app/knowledge-school-runtime-v243.mjs'),true,'Offline archive search runtime must be cached.');
 
+assert.match(edge,/searchSearxng/,'Host search must support keyless SearXNG.');
+assert.match(agent,/BROWSER_UNVERIFIED_URL/,'Agent must reject unverified targets.');
+assert.match(agent,/civweave:local-browser-agent-progress/,'Agent must expose progress events.');
 console.log('local-browser-agent-v1 verification passed');
