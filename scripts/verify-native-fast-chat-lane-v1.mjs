@@ -126,6 +126,6 @@ assert.match(chat,/await verifyNativePhoneServerTransport/);
 assert.match(runtime,/nativeDirect \? Boolean\(config\.stream\) : Boolean\(config\.stream \|\| lineup\)/);
 assert.match(runtime,/nativeDirectTermuxNoStream: true/);
 assert.match(campus,/moss-native-visible-tracker/);
-assert.match(shell,/moss-topic-grounding/);
+assert.match(shell,/moss-native-visible-tracker/);
 assert.match(diagnostic,/Show last Civweave native-request stage/);
 console.log('PASS: direct native HTTP, Moss review planner fast entry, no second model, no heavy bootstrap, stage diagnostics and invalid route rejection');
