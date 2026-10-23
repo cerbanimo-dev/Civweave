@@ -580,19 +580,30 @@
     const structured = request.responseFormat === "json" || Boolean(request.schema);
     const useStream = Boolean(config.stream);
     emit(context, "connecting", { endpoint: redactUrl(url), structured, streamed: useStream });
-    const response = await fetch(url, fetchOptions(url, {
-      method: "POST",
-      headers: { "content-type": "application/json", ...(config.apiKey ? { authorization: `Bearer ${config.apiKey}` } : {}), ...config.headers },
-      body: JSON.stringify({
-        model: config.model,
-        messages: normalizeChatMessages(messages),
-        stream: useStream,
-        ...(structured ? { format: request.schema ? sanitizeSchema(request.schema, { provider: "generic" }) : "json" } : {}),
-        keep_alive: config.keepAlive,
-        options: { temperature: config.temperature, num_ctx: config.context },
-      }),
-      signal,
-    }));
+    let response;
+    try {
+      response = await fetch(url, fetchOptions(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", ...(config.apiKey ? { authorization: `Bearer ${config.apiKey}` } : {}), ...config.headers },
+        body: JSON.stringify({
+          model: config.model,
+          messages: normalizeChatMessages(messages),
+          stream: useStream,
+          ...(structured ? { format: request.schema ? sanitizeSchema(request.schema, { provider: "generic" }) : "json" } : {}),
+          keep_alive: config.keepAlive,
+          options: { temperature: config.temperature, num_ctx: config.context },
+        }),
+        signal,
+      }));
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      const local = ["loopback", "local"].includes(endpointAddressSpace(url));
+      throw runtimeError("OLLAMA_CONNECTION_FAILED",
+        local
+          ? "Cannot reach Ollama from this browser. Confirm Ollama is running, use the host address reachable from this device, allow the Civweave HTTPS origin in OLLAMA_ORIGINS, and inspect browser console for CORS, mixed-content or local-network permission blocks. No model output was received."
+          : "Cannot reach the configured Ollama endpoint. Check its HTTPS certificate, network access, server status and allowed browser origins. No model output was received.",
+        { cause: error, endpoint: redactUrl(url) });
+    }
     if (!response.ok) throw providerHttpError("Ollama", response.status, await readBoundedText(response).catch(() => ""));
     if (useStream) return { ...(await parseOllamaStream(response, context)), model: config.model, streamed: true };
     const text = await readBoundedText(response);
@@ -1126,11 +1137,34 @@
     return cache[configFingerprint(input)] || null;
   }
 
+  async function discoverOllamaModels(endpoint = "http://127.0.0.1:11434/api/chat", options = {}) {
+    const config = normalizeConfig({ provider: "ollama", endpoint });
+    const url = checkedUrl(config.endpoint || "http://127.0.0.1:11434/api/chat", config);
+    url.pathname = url.pathname.replace(/\/api\/(chat|generate)\/?$/, "") || "/";
+    url.pathname = url.pathname.replace(/\/+$/, "") + "/api/tags";
+    const controller = makeController(options.signal, 12000);
+    try {
+      let response;
+      try { response = await fetch(url.href, fetchOptions(url.href, { signal: controller.signal })); }
+      catch (error) {
+        if (controller.signal.aborted) throw error;
+        throw runtimeError("OLLAMA_DISCOVERY_UNREACHABLE", "Ollama model discovery was blocked or the server is unreachable. Check OLLAMA_ORIGINS, CORS, browser local-network permissions and the configured endpoint.");
+      }
+      if (!response.ok) throw providerHttpError("Ollama model discovery", response.status, await readBoundedText(response).catch(() => ""));
+      const payload = JSON.parse(await readBoundedText(response));
+      return (Array.isArray(payload.models) ? payload.models : []).map(model => ({
+        name: safeString(model.name || model.model, 200),
+        size: Number(model.size) || 0,
+      })).filter(model => model.name);
+    } finally { controller.cleanup(); }
+  }
+
   const api = Object.freeze({
     version: VERSION,
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
+    discoverOllamaModels,
     canonicalProvider,
     endpointLeavesDevice,
     sanitizeSchema,
