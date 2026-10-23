@@ -35,8 +35,11 @@ function localApiEndpoint(config={}){
   try{
     const url=new URL(clean(config.endpoint,2048));
     if(!['http:','https:'].includes(url.protocol))return false;
-    const host=url.hostname.toLowerCase().replace(/^\\[|\\]$/g,'');
-    return host==='localhost'||host==='::1'||/^127\\./.test(host)||/^10\\./.test(host)||/^192\\.168\\./.test(host)||/^172\\.(1[6-9]|2\\d|3[01])\\./.test(host)||host.endsWith('.local');
+    const host=url.hostname.toLowerCase().replaceAll('[','').replaceAll(']','');
+    const pieces=host.split('.'),second=Number(pieces[1]);
+    return host==='localhost'||host==='::1'||host.startsWith('127.')||
+      host.startsWith('10.')||host.startsWith('192.168.')||
+      (pieces[0]==='172'&&Number.isInteger(second)&&second>=16&&second<=31)||host.endsWith('.local');
   }catch{return false}
 }
 function authority(){
