@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.6-unified-chat-system-v1-topic-grounded-visible-progress';
+const VERSION='1.2.7-unified-chat-system-v1-native-formal-two-pass';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -148,7 +148,14 @@ function curriculumRequest(options={}){
 }
 function packet(answer,nextAction='',extra={}){return{response:{answer,choice:{mode:'Learn',system:'living-school',room:'',nextAction},assumptions:Array.isArray(extra.assumptions)?extra.assumptions:[],requiresConsent:Boolean(extra.requiresConsent),confidence:Number(extra.confidence)||.99,approvalGate:extra.approvalGate||null},provider:extra.provider||'unified-chat-capability',model:extra.model||'living-school-learning-engine',action:extra.action||null,context:{guide:{system:'living-school',name:'Moss'},capability:'curriculum',canonicalArtifact:'Learning Journey'},fallbackFrom:null}}
 function readLearningPlan(){try{return parse(localStorage.getItem(LEARNING_PLAN_KEY),null)}catch{return null}}
-function saveLearningPlan(plan){try{localStorage.setItem(LEARNING_PLAN_KEY,JSON.stringify(plan))}catch{}return plan}
+function saveLearningPlan(plan){
+  localStorage.setItem(LEARNING_PLAN_KEY,JSON.stringify(plan));
+  const stored=readLearningPlan();
+  if(stored?.id!==plan?.id||stored?.state!==plan?.state)
+    throw new Error('Living School REVIEW plan could not be verified in local storage.');
+  try{dispatchEvent(new CustomEvent('civweave:living-school-pending-plan-review',{detail:{id:stored.id,state:stored.state,capability:stored.request?.capability}}))}catch{}
+  return stored;
+}
 function clearLearningPlan(){try{localStorage.removeItem(LEARNING_PLAN_KEY)}catch{}}
 function learningPlanControl(text){for(const[action,pattern]of Object.entries(LEARNING_PLAN_CONTROL))if(pattern.test(clean(text,4000)))return action;return''}
 function selectedPlanningConfig(){
@@ -282,6 +289,132 @@ function learningPlanResponse(plan){
 function learningPlanProgress(phase,detail={}){
   try{globalThis.dispatchEvent?.(new CustomEvent('civweave:moss-learning-plan-progress',{detail:{phase,...detail}}))}catch{}
 }
+function emitNativePlanStage(details={}){
+  try{globalThis.dispatchEvent?.(new CustomEvent('civweave:weave-pipeline',{detail:{
+    origin:'native-local-api',kind:'learning',purpose:'living-school-learning-plan-review-v2',
+    model:'qwen35-4b-native',at:now(),...details
+  }}))}catch{}
+}
+function emitNativePlanIntake(details={}){
+  try{globalThis.dispatchEvent?.(new CustomEvent('civweave:weaveling-intake-progress',{detail:{
+    origin:'native-local-api',model:'qwen35-4b-native',route:'learning',
+    at:now(),...details
+  }}))}catch{}
+}
+function assertNativePlanModel(result,config,stage){
+  if(result?.status!=='success')throw new Error(stage+' stage failed: '+clean(result?.error?.message||result?.structured?.errors?.join('; ')||result?.status||'no response',700));
+  if(result?.actual?.provider!=='openai-compatible'||result?.actual?.model!==config.model)
+    throw new Error(stage+' stage did not execute on the selected Termux model. Nothing was saved.');
+  return clean(result.outputText,20000);
+}
+async function nativeFormalLearningPlan({runtime,config,seed,options,existingPlan}){
+  const pipelineId='native-moss-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+  const meta={pipelineId,resourceCount:0,specialistCount:0,decisionGateCount:0};
+  const progress=(phase,characters=0,complete=false)=>{
+    try{options.onProgress?.({phase,characters,complete,pipelineId})}catch{}
+  };
+  const stage=(phase,state,extra={})=>emitNativePlanStage({...meta,phase,state,...extra});
+  const intake={schema:'civweave.learning-journey-intake.native.v1',
+    currentGoal:clean(seed.capability,350),title:clean(seed.title,120),level:seed.level,
+    mode:seed.mode,route:'openai-compatible',model:config.model,
+    process:'intake (deterministic) → model draft → model JSON compile → check → conditional repair → save for REVIEW'};
+  let phase='intake',draft='',compiled='',repairText='';
+  emitNativePlanIntake({phase:'classifying'});
+  emitNativePlanIntake({phase:'complete',outputText:JSON.stringify(intake,null,2),intakeSource:'application-derived'});
+  stage('pipeline','start',{label:'Native Learning Journey formal creation'});
+  try{
+    const goal=clean(seed.capability,350),topic=goalAnchors(seed)[0]||goal;
+    const run=async({purpose,phase:runPhase,system,user,maxTokens,schema=null,structured=false})=>{
+      let lastProgress=0;
+      const request={
+        purpose,executionProfile:'interactive',signal:options.signal,
+        config:{...config,stream:true,maxTokens,temperature:.2,timeoutMs:180000},
+        ...(structured?{responseFormat:'json',schema}:{}),
+        maxRepairAttempts:0,
+        messages:[{role:'system',content:system},{role:'user',content:user}],
+        onEvent:event=>{
+          if(event?.phase!=='partial')return;
+          const size=Number(event.characters)||0;
+          progress(runPhase,size,Boolean(event.complete));
+          const visible=runPhase==='draft'?event.accumulatedText:event.rawJsonUnvalidated;
+          if(typeof visible==='string'){
+            const timestamp=Date.now();
+            if(event.complete||timestamp-lastProgress>=340){
+              lastProgress=timestamp;
+              stage(runPhase,'streaming',{text:clean(visible,16000),
+                label:runPhase==='draft'?'Shareable model draft':runPhase==='compile'?'Provisional raw JSON (not yet validated)':'Provisional repair JSON'});
+            }
+          }
+        }
+      };
+      return runtime.generate(request);
+    };
+    phase='draft';
+    stage('draft','running',{label:'Qwen · shareable plan draft'});
+    const draftResult=await run({
+      purpose:'living-school-native-plan-draft-v1',phase:'draft',maxTokens:260,
+      system:'You are Moss. Draft a concise shareable Learning Journey outline for the CURRENT goal only. This is the visible plan draft, not hidden reasoning and not JSON. State the topic, the intended capability, exactly 3 sequential modules (title, focus, demonstrable outcome), and a practical final proof. No lessons, unrelated topics or preambles.',
+      user:'CURRENT GOAL: '+goal+'\nTopic anchor: '+topic+'\nBeginner · guided · REVIEW-only. Modules must mention the specific subject.'
+    });
+    draft=assertNativePlanModel(draftResult,config,'Draft');
+    stage('draft','complete',{label:'Draft completed',text:draft});
+    progress('draft',draft.length,true);
+    phase='compile';
+    stage('compile','running',{label:'Qwen · JSON compiler'});
+    const compileSystem='You are Moss converting a shareable learning plan to a STRICT JSON object. Use exact keys title, capability, level, mode, proof, modules, assumptions. Exactly 3 modules, each with title, focus and outcome. Keep CURRENT GOAL as the subject; do not introduce other subjects. Output JSON only; no thinking, commentary, markdown or lessons.';
+    const compileUser='CURRENT GOAL: '+goal+'\nPlan title: '+clean(seed.title,100)+
+      '\nTopic anchor: '+topic+'\nConvert THIS draft faithfully:\n'+draft.slice(0,1700)+
+      '\nReturn 3 concrete subject-specific modules with observable outcomes. Include level "beginner", mode "guided" and assumptions [].';
+    const compileResult=await run({
+      purpose:'living-school-native-plan-compile-v1',phase:'compile',maxTokens:740,
+      system:compileSystem,user:compileUser,schema:LEARNING_PLAN_SCHEMA,structured:true
+    });
+    compiled=clean(compileResult?.outputText,16000);
+    stage('compile',compileResult?.status==='success'?'complete':'failed',
+      {label:'Raw JSON compiler output',text:compiled,code:compileResult?.error?.code||''});
+    progress('compile',compiled.length,true);
+    phase='validate';
+    stage('validate','running',{label:'Independent contract and topic check'});
+    let plan=null,validationError=null;
+    try{
+      assertNativePlanModel(compileResult,config,'Compile');
+      plan=normalizeModelPlan(modelJson(compileResult),seed,existingPlan,{provider:'openai-compatible',model:config.model});
+    }catch(error){validationError=error}
+    if(validationError){
+      stage('validate','needs-repair',{label:'Plan check needs targeted repair',errors:[clean(validationError.message,700)]});
+      phase='repair';
+      stage('repair','running',{label:'Qwen · targeted plan repair'});
+      const repairResult=await run({
+        purpose:'living-school-native-plan-repair-v1',phase:'repair',maxTokens:760,structured:true,
+        schema:LEARNING_PLAN_SCHEMA,
+        system:'Repair a malformed or off-topic Learning Journey JSON object. Return a NEW valid JSON object only, with title, capability, level, mode, proof, assumptions and exactly 3 subject-specific modules (title, focus, outcome). Keep the CURRENT GOAL and draft; correct only reported errors. No new topic or lessons.',
+        user:'CURRENT GOAL: '+goal+'\nValidation error: '+clean(validationError.message,380)+
+          '\nOriginal shareable draft:\n'+draft.slice(0,1150)+
+          '\nPrevious JSON output:\n'+compiled.slice(0,1350)+'\nRepair as compact valid JSON.'
+      });
+      repairText=clean(repairResult?.outputText,16000);
+      stage('repair',repairResult?.status==='success'?'complete':'failed',
+        {label:'Raw targeted repair',text:repairText,code:repairResult?.error?.code||''});
+      progress('repair',repairText.length,true);
+      assertNativePlanModel(repairResult,config,'Repair');
+      plan=normalizeModelPlan(modelJson(repairResult),seed,existingPlan,{provider:'openai-compatible',model:config.model});
+      phase='validate';
+    }else stage('repair','skipped',{label:'No repair necessary'});
+    stage('validate','complete',{label:'JSON, goal and module contract verified'});
+    phase='saved';
+    // Saving means REVIEW only; curriculum materialization remains gated.
+    // The shared pending-plan record is the Living School review queue;
+    // never misrepresent it as generated course content.
+    saveLearningPlan({...plan,authoring:{...plan.authoring,pipelineId,formalStages:['intake','draft','compile','validate',...(repairText?['repair']:[]),'saved']}});
+    stage('pipeline','complete',{label:'REVIEW plan saved; awaiting approval',artifactKey:'civweave.chat.capability.pending.living-school.plan.v1'});
+    progress('saved',0,true);
+    return learningPlanResponse(readLearningPlan());
+  }catch(error){
+    stage('pipeline',options.signal?.aborted?'stopped':'failed',
+      {label:'Native formal Learning Journey failed',message:'Stage '+phase+': '+clean(error?.message||error,800)});
+    throw error;
+  }
+}
 async function generateLivingSchoolPlan(options={},existingPlan=null,revisionText=''){
   const request=curriculumRequest(options);
   if(!request.capability&&!existingPlan?.request?.capability)return packet('I can generate the Learning Journey plan, but I still need the observable capability the learner should be able to demonstrate.','Tell Moss what you want to be able to do, then the selected AI will generate the high-level plan for review.');
@@ -317,6 +450,7 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
     const ggufChoice=selectedPlanGGUF(planConfig);
     const nativeServer=nativePhoneServer(planConfig);
     if(nativeServer){planConfig.stream=true;planConfig.timeoutMs=Math.max(Number(planConfig.timeoutMs)||0,150000)}
+    if(nativeServer&&options.nativeFastLane)return await nativeFormalLearningPlan({runtime,config:planConfig,seed,options,existingPlan});
     const compactLocal=Boolean(ggufChoice||nativeServer);
     // A phone-sized GGUF should draft a small plan without a long context
     // packet or a large on-the-fly grammar. The shared runtime still parses
