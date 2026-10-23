@@ -690,7 +690,7 @@
     // call: inference runs within Civweave's own wllama Web Worker.
     const selectedGGUF=selectedEmbeddedGGUF(config);
     if(selectedGGUF){
-      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v5-opfs-progress');
+      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v6-moss-timeout-probe');
       emit(context,'gguf-browser-loading',{model:config.model,backend:'wllama',networkInference:false});
       const run=await browserGGUF.generate({
         model:config.model,messages:normalizeChatMessages(messages),
