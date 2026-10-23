@@ -10,7 +10,7 @@ const [source,tracker,loader,settings]=await Promise.all([
 assert.match(source,/GGUF_BROWSER_MIN_TIMEOUT_MS = 480000/);
 assert.match(source,/selectedEmbeddedGGUF\(config\)/);
 assert.match(source,/config\.timeoutMs = Math\.max\(config\.timeoutMs, GGUF_BROWSER_MIN_TIMEOUT_MS\)/);
-assert.match(source,/onPhase:\(phase,details=\{\}\)=>emit\(context,'gguf-browser-phase'/);
+assert.match(source,/onPhase:\(stage,details=\{\}\)=>emit\(context,'gguf-browser-phase'/);
 assert.match(tracker,/async function browserGGUFProbe\(/);
 assert.match(tracker,/embeddedGGUFSelection\(\)\?browserGGUFProbe/);
 assert.match(tracker,/Test selected GGUF inference/);
