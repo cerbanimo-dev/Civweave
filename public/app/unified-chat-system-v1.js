@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.1-unified-chat-system-v1-gguf-provenance-goal-gate';
+const VERSION='1.2.2-unified-chat-system-v1-native-server-goal-pin';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -152,18 +152,39 @@ function saveLearningPlan(plan){try{localStorage.setItem(LEARNING_PLAN_KEY,JSON.
 function clearLearningPlan(){try{localStorage.removeItem(LEARNING_PLAN_KEY)}catch{}}
 function learningPlanControl(text){for(const[action,pattern]of Object.entries(LEARNING_PLAN_CONTROL))if(pattern.test(clean(text,4000)))return action;return''}
 function selectedPlanningConfig(){
-  // The canonical interactive selection wins for imported Wllama GGUF.
-  // Legacy local-model flags can outlive the user's selection and must not
-  // redirect Moss back into the retired Gemma LiteRT path.
+  // Settings v320 is the saved user decision; assistant wrappers may carry
+  // outdated routes from an earlier chat or a previously selected server-auto.
   const shared=globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive')||null;
+  let canonical=null;
+  try{canonical=globalThis.CivweaveSettingsV320?.readState?.()||null}catch{}
+  const route=clean(canonical?.provider||canonical?.route,80).toLowerCase();
+  if(route&&['ollama','openai-compatible','gemini','server-auto','downloaded-local','deterministic'].includes(route))
+    return{...(shared||{}),...canonical,provider:route,route};
   const selected=selectedBrowserGGUF();
-  if(selected&&shared?.provider==='openai-compatible'&&shared.model===selected.model)
-    return shared;
+  if(selected&&shared?.provider==='openai-compatible'&&shared.model===selected.model)return shared;
   try{
     const config=globalThis.CivweaveAssistantV141?.selectedConfig?.();
     if(config&&(config.provider||config.route||config.model))return config;
   }catch{}
   return shared&&(shared.provider||shared.route||shared.model)?shared:null;
+}
+function nativePhoneServer(config={}){
+  if(clean(config.provider||config.route,80).toLowerCase()!=='openai-compatible'||config.model!=='qwen35-4b-native')return false;
+  try{
+    const url=new URL(config.endpoint);
+    return url.protocol==='http:'&&['127.0.0.1','localhost'].includes(url.hostname)&&url.port==='8080'&&url.pathname.replace(/\/+$/,'')==='/v1';
+  }catch{return false}
+}
+function localPlanRoute(config={}){
+  const provider=clean(config.provider||config.route,80).toLowerCase();
+  if(LOCAL_PLAN_PROVIDERS.has(provider))return true;
+  if(!['ollama','openai-compatible','local-api'].includes(provider))return false;
+  try{
+    const url=new URL(config.endpoint),host=url.hostname.toLowerCase();
+    const second=Number(host.split('.')[1]);
+    return host==='localhost'||host==='[::1]'||host.startsWith('127.')||host.startsWith('10.')||
+      host.startsWith('192.168.')||(host.startsWith('172.')&&Number.isInteger(second)&&second>=16&&second<=31)||host.endsWith('.local');
+  }catch{return false}
 }
 function selectedBrowserGGUF(){
   try{
@@ -184,7 +205,9 @@ function planMatchesCurrentGoal(value,request){
     .filter(word=>!GOAL_STOPWORDS.has(word));
   if(!anchors.length)return true; // Short or abstract goals cannot be reliably matched lexically.
   const modelTopic=clean([value?.title,value?.capability||value?.goal].filter(Boolean).join(' '),4000).toLowerCase();
-  return anchors.some(word=>modelTopic.includes(word));
+  const modules=(Array.isArray(value?.modules)?value.modules:Array.isArray(value?.milestones)?value.milestones:Array.isArray(value?.stages)?value.stages:[]);
+  const moduleTopic=clean(modules.map(item=>[item?.title,item?.focus,item?.outcome,item?.goal].filter(Boolean).join(' ')).join(' '),10000).toLowerCase();
+  return anchors.some(word=>modelTopic.includes(word))&&anchors.some(word=>moduleTopic.includes(word));
 }
 function modelJson(result){
   if(result?.outputJson&&typeof result.outputJson==='object'&&!Array.isArray(result.outputJson))return result.outputJson;
@@ -211,22 +234,32 @@ function normalizeModelPlan(value,request,existingPlan=null,route={}){
   const capability=request.intent==='new'?(request.capability||clean(value.capability||value.goal,2400)):(clean(value.capability||value.goal,2400)||request.capability);
   const proof=clean(value.proof||value.completionEvidence||value.demonstration,3000)||request.proof;
   const assumptions=(Array.isArray(value.assumptions)?value.assumptions:[]).map(item=>clean(item,700)).filter(Boolean).slice(0,6);
-  const stamp=now(),base=existingPlan&&typeof existingPlan==='object'?existingPlan:{};
+  const stamp=now(),base=request.intent==='new'?{}:existingPlan&&typeof existingPlan==='object'?existingPlan:{};
   return{...base,schema:'civweave.learning-journey-plan.v2',id:base.id||`learning-plan-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,state:'review',createdAt:base.createdAt||stamp,updatedAt:stamp,approvedAt:null,requiresExplicitApproval:true,request:{...request,title,capability,level,mode,proof,count:modules.length,outline:modules.map(({title,focus,outcome})=>({title,focus,outcome}))},modules,assumptions,authoring:{mode:'selected-ai-high-level-plan',provider:clean(route.provider,120)||'unknown',model:clean(route.model,240),revision:VERSION}};
 }
 function learningPlanText(plan){
   const request=plan?.request||{},modules=Array.isArray(plan?.modules)?plan.modules:[],outline=modules.length?`\n\nOutline:\n${modules.map((module,index)=>`${index+1}. ${clean(module.title,220)}\n   Focus: ${clean(module.focus,700)}\n   Demonstrate: ${clean(module.outcome,700)}`).join('\n')}`:'';
   const assumptions=(plan?.assumptions||[]).length?`\n\nAssumptions:\n${plan.assumptions.map(item=>`- ${clean(item,500)}`).join('\n')}`:'';
-  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: REVIEW. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.`;
+  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: ${plan.state==='superseded'?'SUPERSEDED — a newer learning goal was requested; this older plan cannot be approved.':'REVIEW'}. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.`;
 }
 function learningPlanResponse(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for review.','Tell Moss what you want to learn or demonstrate.');
+  if(plan.state==='superseded')return packet(learningPlanText(plan),'This prior plan cannot be approved. Retry the most recent learning goal to generate a current REVIEW plan.',{provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan'});
   return packet(learningPlanText(plan),'Review or revise this plan. When it is right, explicitly approve the Learning Journey to generate its learning content.',{assumptions:plan.assumptions||[],requiresConsent:true,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:{kind:'learning-journey-plan-approval',planId:plan.id,state:plan.state||'review',required:true,actions:['review','revise','approve']},action:{kind:'living-school-learning-plan',system:'living-school',state:plan.state||'review',title:plan.request.title,capability:plan.request.capability,canonicalArtifact:'Learning Journey'}});
 }
 async function generateLivingSchoolPlan(options={},existingPlan=null,revisionText=''){
   const request=curriculumRequest(options);
   if(!request.capability&&!existingPlan?.request?.capability)return packet('I can generate the Learning Journey plan, but I still need the observable capability the learner should be able to demonstrate.','Tell Moss what you want to be able to do, then the selected AI will generate the high-level plan for review.');
   const seed=existingPlan?.request?{...existingPlan.request,...request,capability:request.capability||existingPlan.request.capability,title:request.title||existingPlan.request.title}:{...request};
+  // An explicit new learning goal is authoritative over any saved cabinet path,
+  // chat history, previous plan, or model-returned title.
+  const explicitGoal=learningJourneyIntent(options.text,options.history||[])?userCapability([{role:'user',text:clean(options.text,5000)}]):'';
+  if(explicitGoal){
+    seed.capability=explicitGoal;seed.title=titleCase(explicitGoal);seed.intent='new';
+    const prior=readLearningPlan();
+    if(prior?.state==='review'&&clean(prior.request?.capability,2400).toLowerCase()!==explicitGoal.toLowerCase())
+      saveLearningPlan({...prior,state:'superseded',supersededBy:explicitGoal,updatedAt:now()});
+  }
   let config;try{config=selectedPlanningConfig()}catch(error){return packet('Moss could not read the selected AI route: '+clean(error?.message||error,700),'Reselect the model in Settings.',{provider:'learning-plan-route-error'})}
   try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();config=selectedPlanningConfig()||config}catch(error){
     return packet(`Moss could not start the selected AI for Learning Journey planning: ${clean(error?.message||error,900)}`,'Retry the plan or check the selected AI model.',{provider:'learning-plan-model-error',model:clean(config?.model,240)});
@@ -237,14 +270,16 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
   const context={schema:'civweave.learning-journey-plan-request.v2',request:seed,revision:clean(revisionText,3000),existingPlan:existingPlan?{title:existingPlan.request?.title,capability:existingPlan.request?.capability,level:existingPlan.request?.level,mode:existingPlan.request?.mode,proof:existingPlan.request?.proof,modules:existingPlan.modules||[],assumptions:existingPlan.assumptions||[]}:null,recentConversation:history,constraints:['Generate only a high-level Learning Journey plan for review.','Do not write lessons, explanations, exercises, quizzes, readings, source lists, or curriculum content.','Make the module sequence specific to the Hero’s stated learning goal.','Each module entry needs a short title, a focus, and an observable outcome.','Keep the plan in REVIEW. Nothing is approved, activated, or materialized by this call.']};
   try{
     const ggufChoice=selectedPlanGGUF(planConfig);
+    const nativeServer=nativePhoneServer(planConfig);
+    const compactLocal=Boolean(ggufChoice||nativeServer);
     // A phone-sized GGUF should draft a small plan without a long context
     // packet or a large on-the-fly grammar. The shared runtime still parses
     // and independently validates the complete required Learning Plan schema.
-    if(ggufChoice){
-      planConfig.maxTokens=512;
+    if(compactLocal){
+      planConfig.maxTokens=nativeServer?640:512;
       planConfig.temperature=.2;
     }
-    const conciseMessages=ggufChoice?[
+    const conciseMessages=compactLocal?[
       {role:'system',content:'You are Moss, a learning guide. Output one short valid JSON object only. No markdown, preamble, thinking, or commentary. Use the exact field names title, capability, level, mode, proof, modules, assumptions. Three modules, each with title, focus, outcome. Everything MUST be about the present learning goal.'},
       {role:'user',content:'Learning goal: '+clean(seed.capability,500)+
         '\nTitle: '+clean(seed.title,120)+
@@ -254,7 +289,7 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
         '{"title":"'+clean(seed.title,120).replace(/["\\]/g,'')+'","capability":"'+clean(seed.capability,350).replace(/["\\]/g,'')+'","level":"beginner","mode":"guided","proof":"demonstrate the skill independently","modules":[{"title":"Foundation","focus":"...","outcome":"..."},{"title":"Practice","focus":"...","outcome":"..."},{"title":"Demonstration","focus":"...","outcome":"..."}],"assumptions":[]}. Do not change the learning topic.'}
     ]:null;
     const result=await runtime.generate({purpose:'living-school-learning-plan-review-v2',executionProfile:'interactive',config:planConfig,schema:LEARNING_PLAN_SCHEMA,responseFormat:'json',context,
-      ggufNoGrammar:Boolean(ggufChoice),maxRepairAttempts:ggufChoice?0:1,task:{schema:'civweave.ai-task.v2',kind:'curriculum-plan-draft',systemId:'living-school',complexity:'routine',requirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:true,structuredOutput:true,vision:false,complexity:false}},capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,planning:true,structuredOutput:true},messages:conciseMessages||[{role:'system',content:'You are Moss, Living School’s Learning Journey guide. Use the selected AI model to design a concise, personalized, high-level learning plan for review. Return strict JSON matching the supplied schema. Do not teach the subject yet and do not generate curriculum content. The output must remain an inert REVIEW plan until the Hero explicitly approves it.'},{role:'user',content:`Design the high-level Learning Journey plan from this request:\n${JSON.stringify(context)}`}]});
+      ggufNoGrammar:Boolean(ggufChoice),maxRepairAttempts:compactLocal?0:1,task:{schema:'civweave.ai-task.v2',kind:'curriculum-plan-draft',systemId:'living-school',complexity:'routine',requirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:true,structuredOutput:true,vision:false,complexity:false}},capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,planning:true,structuredOutput:true},messages:conciseMessages||[{role:'system',content:'You are Moss, Living School’s Learning Journey guide. Use the selected AI model to design a concise, personalized, high-level learning plan for review. Return strict JSON matching the supplied schema. Do not teach the subject yet and do not generate curriculum content. The output must remain an inert REVIEW plan until the Hero explicitly approves it.'},{role:'user',content:`Design the high-level Learning Journey plan from this request:\n${JSON.stringify(context)}`}]});
     if(!['success','fallback'].includes(result?.status))throw new Error(result?.error?.message||result?.error||`The selected AI ended with ${result?.status||'an error'}.`);
     const provider=clean(result?.actual?.provider||result?.provider||config.provider||config.route,120),model=clean(result?.actual?.model||result?.model||config.model,240),actualProvider=provider.toLowerCase();
     if(ggufChoice){
@@ -262,7 +297,10 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
         result.status==='success'&&result.diagnostics?.some(detail=>detail?.code==='BROWSER_GGUF');
       if(!attested)throw new Error('The selected imported Qwen GGUF was bypassed by '+provider+' ('+model+'). Moss refused to save the plan. No remote result can impersonate local GGUF inference.');
     }
-    if(LOCAL_PLAN_PROVIDERS.has(requestedProvider)&&!LOCAL_PLAN_PROVIDERS.has(actualProvider))throw new Error(`The selected local model was bypassed by ${provider||'another provider'}, so Moss refused to save that plan.`);
+    if(localPlanRoute(config)){
+      if(result.status!=='success'||actualProvider!==requestedProvider||model!==config.model)
+        throw new Error('The selected local AI model was bypassed or returned a fallback from '+(provider||'another provider')+'. Moss refused to save the plan.');
+    }
     const plan=normalizeModelPlan(modelJson(result),seed,existingPlan,{provider,model});
     saveLearningPlan(plan);
     return learningPlanResponse(plan);
@@ -290,6 +328,7 @@ async function runLivingSchoolCurriculum(options={}){
 }
 async function approveLivingSchoolPlan(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for approval.','Tell Moss what you want to learn or demonstrate.');
+  if(plan.state!=='review')return packet('This Learning Journey plan is not in REVIEW and cannot be approved. No learning content was generated.','Generate a current high-level plan for the learning goal you want.');
   const approved={...plan,state:'approved',approvedAt:now(),updatedAt:now()};
   saveLearningPlan(approved);
   return runLivingSchoolCurriculum({reviewPlan:approved,requireApprovedPlan:true});

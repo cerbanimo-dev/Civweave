@@ -29,9 +29,23 @@ function selectedLocal(){
   try{const value=globalThis.CivweaveLocalModelDownloadV266?.selection?.();if(value?.active&&value.id)return value}catch{}
   try{const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});return value?.active&&value.id?value:null}catch{return null}
 }
+function localApiEndpoint(config={}){
+  const route=routeOf(config);
+  if(!['ollama','openai-compatible','compatible','local-api'].includes(route))return false;
+  try{
+    const url=new URL(clean(config.endpoint,2048));
+    if(!['http:','https:'].includes(url.protocol))return false;
+    const host=url.hostname.toLowerCase().replaceAll('[','').replaceAll(']','');
+    const pieces=host.split('.'),second=Number(pieces[1]);
+    return host==='localhost'||host==='::1'||host.startsWith('127.')||
+      host.startsWith('10.')||host.startsWith('192.168.')||
+      (pieces[0]==='172'&&Number.isInteger(second)&&second>=16&&second<=31)||host.endsWith('.local');
+  }catch{return false}
+}
 function authority(){
   const persisted=persistedInteractive(),route=routeOf(persisted);
   if(route==='gemini')return{kind:'gemini',route,config:persisted};
+  if(localApiEndpoint(persisted))return{kind:'local-api',route,config:persisted};
   if(LOCAL_PROVIDERS.has(route))return{kind:'local',route,config:persisted,local:selectedLocal()};
   if(NETWORK_PROVIDERS.has(route))return{kind:'network',route:canonicalNetworkRoute(route),config:persisted};
   return{kind:'open',route,config:persisted};
@@ -51,6 +65,11 @@ function enforceConfig(request={}){
   if(!interactive(request)||explicitNetwork(request))return request;
   const auth=authority();if(auth.kind==='open')return request;
   const existing=request.config&&typeof request.config==='object'?request.config:{},incoming=canonicalNetworkRoute(routeOf(existing));
+  if(auth.kind==='local-api'){
+    const selected={...existing,...auth.config,provider:auth.route,route:auth.route,model:clean(auth.config.model,240),endpoint:clean(auth.config.endpoint,2048)};
+    if(incoming===auth.route&&clean(existing.model,240)===selected.model&&clean(existing.endpoint,2048)===selected.endpoint)return request;
+    return{...request,config:selected,__civweaveSelectedProviderAuthorityV1:true,providerAuthority:{schema:'civweave.selected-provider-authority.v1',selected:'local-api',crossProvider:false}};
+  }
   if(auth.kind==='gemini'){
     if(incoming==='gemini')return request;
     const selected={...existing,...auth.config,provider:'gemini',route:'gemini'};
@@ -81,19 +100,19 @@ function patchRuntime(){
 function patchAssistant(){
   const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)return false;
   if(assistant.selectedConfig?.__cwSelectedProviderAuthorityV1===VERSION)return true;
-  const previousSelected=typeof assistant.selectedConfig==='function'?assistant.selectedConfig.bind(assistant):()=>({}),selectedConfig=()=>{const auth=authority(),prior=previousSelected()||{};if(auth.kind==='open')return prior;if(auth.kind==='gemini')return{...prior,...auth.config,provider:'gemini',route:'gemini',model:clean(auth.config.model,240)||clean(prior.model,240)||'gemini-3.1-flash-lite'};if(auth.kind==='network')return networkSelection(auth,prior);const local=auth.local,route=LOCAL_PROVIDERS.has(auth.route)?auth.route:'downloaded-local';return{...prior,...auth.config,provider:route,route,model:clean(local?.id||auth.config.model||prior.model,240)}};
+  const previousSelected=typeof assistant.selectedConfig==='function'?assistant.selectedConfig.bind(assistant):()=>({}),selectedConfig=()=>{const auth=authority(),prior=previousSelected()||{};if(auth.kind==='open')return prior;if(auth.kind==='local-api')return{...prior,...auth.config,provider:auth.route,route:auth.route,model:clean(auth.config.model,240),endpoint:clean(auth.config.endpoint,2048)};if(auth.kind==='gemini')return{...prior,...auth.config,provider:'gemini',route:'gemini',model:clean(auth.config.model,240)||clean(prior.model,240)||'gemini-3.1-flash-lite'};if(auth.kind==='network')return networkSelection(auth,prior);const local=auth.local,route=LOCAL_PROVIDERS.has(auth.route)?auth.route:'downloaded-local';return{...prior,...auth.config,provider:route,route,model:clean(local?.id||auth.config.model||prior.model,240)}};
   selectedConfig.__cwSelectedProviderAuthorityV1=VERSION;
   globalThis.CivweaveAssistantV141={...assistant,selectedConfig,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION};return true;
 }
 function patchServer(){
   const api=globalThis.CivweaveServerAIRouterV301;if(!api?.handle)return false;
   if(api.handle.__cwSelectedProviderAuthorityV1===VERSION)return true;
-  const previous=api.handle.bind(api),handle=async request=>{const auth=authority();if((auth.kind==='gemini'||auth.kind==='local')&&interactive(request||{})&&!explicitNetwork(request||{})){emit('civweave:selected-provider-authority-blocked-server',{selected:auth.kind,purpose:clean(request?.purpose,200)});return blockedServerResult(request||{},auth)}return previous(request||{})};
+  const previous=api.handle.bind(api),handle=async request=>{const auth=authority();if((auth.kind==='gemini'||auth.kind==='local'||auth.kind==='local-api')&&interactive(request||{})&&!explicitNetwork(request||{})){emit('civweave:selected-provider-authority-blocked-server',{selected:auth.kind,purpose:clean(request?.purpose,200)});return blockedServerResult(request||{},auth)}return previous(request||{})};
   handle.__cwSelectedProviderAuthorityV1=VERSION;handle.__prior=api.handle;
   globalThis.CivweaveServerAIRouterV301=Object.freeze({...api,handle,__civweaveSelectedProviderAuthorityV1:true,selectedProviderAuthorityVersion:VERSION});return true;
 }
 function install(){patchRuntime();patchAssistant();patchServer();return true}
 for(const name of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:assistant-runtime-ready','civweave:server-ai-router-ready','civweave:model-config-changed','civweave:guide-loader-reset','civweave:guide-provider-policy-runtime','civweave:guide-provider-policy-assistant','civweave:local-provider-authority-ready','civweave:response-router-installed','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 install();let attempts=0;timer=setInterval(()=>{attempts+=1;install();if(attempts>=240)clearInterval(timer)},125);addEventListener('pagehide',()=>clearInterval(timer),{once:true});
-globalThis.CivweaveSelectedProviderAuthorityV1=Object.freeze({version:VERSION,install,authority,persistedInteractive,enforceConfig,explicitNetwork,selectedLocal,providerAuthority:'persisted-user-selection-first',crossProviderFallbackWithoutConsent:false,neuronSpendRequiresSelectedOrExplicitNetwork:true,allPersistedRoutesAuthoritative:true});
+globalThis.CivweaveSelectedProviderAuthorityV1=Object.freeze({version:VERSION,install,authority,persistedInteractive,enforceConfig,explicitNetwork,selectedLocal,providerAuthority:'persisted-user-selection-first',crossProviderFallbackWithoutConsent:false,neuronSpendRequiresSelectedOrExplicitNetwork:true,allPersistedRoutesAuthoritative:true,localApiEndpoint});
 })();
