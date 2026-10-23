@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.16-guide-generation-tracker-v1-e4b-dual-artifact-limit';
+const VERSION='1.2.17-guide-generation-tracker-v1-embedded-gguf-probe';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -27,6 +27,42 @@ function bus(){
     }
   }catch{}
   return globalThis.CivweaveGenerationLifecycleV2||globalThis.CivweaveGenerationLifecycleV1||null;
+}
+function embeddedGGUFSelection(){
+  try {
+    const saved=JSON.parse(localStorage.getItem('civweave.mobile.gguf-primary.v2')||'null');
+    const profiles=JSON.parse(localStorage.getItem('civweave-model-profiles-v1')||'null');
+    const active=profiles?.interactive||JSON.parse(localStorage.getItem('civweave.universal-ai.v127')||'null');
+    if(saved?.enabled===true&&saved.engine==='wllama'&&saved.model&&
+       active?.model===saved.model&&
+       (active?.provider==='openai-compatible'||active?.route==='openai-compatible'))
+      return saved;
+  }catch{}
+  return null;
+}
+async function browserGGUFProbe({timeoutMs=480000,onStatus=()=>{}}={}){
+  const selected=embeddedGGUFSelection();
+  if(!selected)return{ok:false,code:'GGUF_PROBE_NOT_SELECTED',message:'The currently selected AI does not match the saved browser GGUF selection. Re-select the imported GGUF in Settings; downloaded weights remain untouched.'};
+  const started=Date.now(),controller=new AbortController();
+  let timer=null,firstTokenAt=null,phase='preparing',text='';
+  try {
+    const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v6-moss-timeout-probe');
+    if(gguf.current()?.model!==selected.model)
+      return{ok:false,model:selected.model,code:'GGUF_PROBE_PREFERENCE_MISMATCH',message:'The browser GGUF preference changed before the probe. Open Settings and select the cached import.'};
+    timer=setTimeout(()=>controller.abort(new DOMException('GGUF inference test exceeded its eight-minute device budget.','TimeoutError')),timeoutMs);
+    const result=await gguf.generate({
+      model:selected.model,
+      messages:[{role:'user',content:'Reply with exactly the word READY.'}],
+      maxTokens:24,temperature:0.1,structured:false,signal:controller.signal,
+      onToken:(delta,full)=>{if(firstTokenAt==null)firstTokenAt=Date.now();text=full;onStatus('GGUF first visible text: '+clean(full,100))},
+      onPhase:(name,details)=>{phase=name;onStatus('GGUF '+name+(details?.backend?' · '+details.backend:'')+(details?.reason?' · '+clean(details.reason,180):''))}
+    });
+    return{ok:Boolean(result?.text?.trim()),model:selected.model,phase,code:result?.text?.trim()?'OK':'GGUF_PROBE_EMPTY',output:clean(result?.text,160),firstTokenMs:firstTokenAt==null?null:firstTokenAt-started,elapsedMs:Date.now()-started};
+  }catch(error){
+    return{ok:false,model:selected.model,phase,code:error?.code||'GGUF_PROBE_FAILED',
+      message:clean(error?.message||error,500),elapsedMs:Date.now()-started,
+      timedOut:controller.signal.aborted&&controller.signal.reason?.name==='TimeoutError'};
+  }finally{if(timer!==null)clearTimeout(timer)}
 }
 function emptyArtifacts(){return{learningPlan:false,endeavour:false,manifest:false,proposal:false}}
 function inferArtifacts(text='',route=''){return bus()?.inferArtifacts?.(text,route)||{...emptyArtifacts(),learningPlan:route==='learning',endeavour:route==='quest'}}
@@ -70,7 +106,8 @@ function panelHtml(){
   const counts=`<div class="cw-weave-counts"><span class="cw-weave-chip">Resources ${state.counts.resources}</span><span class="cw-weave-chip">Specialists ${state.counts.specialists}</span><span class="cw-weave-chip">Decision gates ${state.counts.gates}</span></div>`;
   const sections=[['intake','Model intake (raw)','Visible generated JSON routing output'],['draft','Working draft','Shareable generated plan (not internal reasoning)'],['compile','JSON compile','Actual generated compiler output'],['repair','Targeted repair','Only when structural validation requests it'],['final','Final response','User-facing response']].map(([key,title,sub])=>`<section class="cw-weave-stream" data-stream="${key}" ${!state.streams[key]&&key==='repair'?'hidden':''}><strong>${esc(title)}<span>${esc(sub)}</span></strong><pre>${esc(state.streams[key]||(state.stages[key]?.state==='skipped'?'Not observed in this process.':state.stages[key]?.state==='waiting'||state.stages[key]?.state==='queued'?'Not reached.':state.terminal==='failed'?'No visible text emitted at this stage.':'Waiting for model output…'))}</pre></section>`).join('');
   const detail=state.errorDetail?`<pre class="cw-weave-error">${esc(state.errorDetail)}</pre>`:'';
-  const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing GPU model…':'Test local inference'}</button><button type="button" data-weave-worker-probe ${state.probeBusy?'disabled':''}>Test isolated GPU worker</button><button type="button" data-weave-runtime-restart title="Reloads the app shell. A quarantined Android GPU may require force-stopping the app process.">Reload Civweave</button><p>${esc(state.probeStatus||'Minimal one-word GPU test, independent of Moss and the JSON compiler.')}</p></div>`:'';
+  const embeddedGGUF=embeddedGGUFSelection();
+  const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing model…':embeddedGGUF?'Test selected GGUF inference':'Test local inference'}</button>${embeddedGGUF?'':`<button type="button" data-weave-worker-probe ${state.probeBusy?'disabled':''}>Test isolated GPU worker (LiteRT)</button>`}<button type="button" data-weave-runtime-restart title="Reloads the app shell without deleting model data.">Reload Civweave</button><p>${esc(state.probeStatus||(embeddedGGUF?'Minimal GGUF/Wllama generation, independent of Moss. Cold-loading may take several minutes; no LiteRT test is involved.':'Minimal one-word LiteRT GPU test, independent of Moss and the JSON compiler.'))}</p></div>`:'';
   const model=state.executionModel?` · Model ${state.executionModel}`:'';const runtime=state.runtimePhase?` · Runtime: ${state.runtimePhase}`:'';
   return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live ${esc(artifactName())}</strong><span>${esc(terminalLabel())}${esc(model)}${esc(runtime)}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="${state.expanded?'true':'false'}">${state.expanded?'Hide live process':'Show live process'}</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details ${state.expanded?'':'hidden'}>${detail}${sections}${probe}</div>`
 }
@@ -250,6 +287,7 @@ async function isolatedWorkerProbe({timeoutMs=180000,onStatus=()=>{}}={}){
   });
 }
 async function isolatedWorkerClick(){
+  if(embeddedGGUFSelection()){state.probeStatus='The isolated LiteRT worker test does not apply to the imported GGUF. Use Test selected GGUF inference.';ensurePanel();return}
   if(state.probeBusy)return;
   state.probeBusy=true;
   state.probeStatus='Checking the same cached E4B model in a separate GPU worker; no model download…';
@@ -264,13 +302,13 @@ async function isolatedWorkerClick(){
 async function probeClick(){
   if(state.probeBusy)return;
   const api=bus();
-  const probe=typeof api?.probeLocalModel==='function'?options=>api.probeLocalModel(options):directLocalProbe;
-  state.probeBusy=true;state.probeStatus='Running short GPU inference outside the learning pipeline…';ensurePanel();
+  const probe=embeddedGGUFSelection()?browserGGUFProbe:typeof api?.probeLocalModel==='function'?options=>api.probeLocalModel(options):directLocalProbe;
+  state.probeBusy=true;state.probeStatus=embeddedGGUFSelection()?'Preparing exact imported GGUF for a short browser inference test; no downloads or LiteRT…':'Running short LiteRT GPU inference outside the learning pipeline…';ensurePanel();
   try{
-    const result=await probe({timeoutMs:90000});
+    const result=await probe({timeoutMs:embeddedGGUFSelection()?480000:90000,onStatus:message=>{state.probeStatus=message;ensurePanel()}});
     state.probeStatus=result.ok
       ?`PASS · ${result.model} · first token ${Math.round(result.firstTokenMs??result.elapsedMs)} ms · answer: ${result.output}`
-      :`FAIL · ${result.code} · ${result.phase||''} · ${result.message||'No visible model output.'} ${result.restartRequired||/GPU|QUEUE|BUSY/.test(result.code||'')?'Fully close or force-stop the app before retrying.':''}`;
+      :`FAIL · ${result.code} · ${result.phase||''} · ${result.message||'No visible model output.'} ${!embeddedGGUFSelection()&&(result.restartRequired||/GPU|QUEUE|BUSY/.test(result.code||''))?'Fully close or force-stop the app before retrying.':''}`;
   }catch(error){state.probeStatus=`Probe error: ${clean(error?.message||error,400)}`}
   finally{state.probeBusy=false;ensurePanel()}
 }
