@@ -2,8 +2,8 @@
 // Does not start Wllama, LiteRT, ONNX, Cloudflare or the general assistant loader.
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
-const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.12-native-visible-learning-plan-stream';
-const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.6-moss-topic-grounded-visible-progress';
+const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.13-native-formal-stages';
+const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.7-moss-native-formal-stages';
 let modelsPromise=null,plannerPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
@@ -51,11 +51,11 @@ export function markNativeStage(stage,detail=''){
 }
 async function ensurePlanner(){
   if(!modelsPromise)modelsPromise=loadScript(MODEL_RUNTIME,
-    ()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'&&globalThis.CivweaveModelRuntime?.nativeMossVisibleStreamV3===true,'Shared model runtime')
+    ()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'&&globalThis.CivweaveModelRuntime?.nativeFormalPipelineStageEventsV1===true,'Shared model runtime')
     .catch(error=>{modelsPromise=null;throw error});
   await modelsPromise;
   if(!plannerPromise)plannerPromise=loadScript(MOSS_PLANNER,
-    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.6-unified-chat-system-v1-topic-grounded-visible-progress','Moss planner')
+    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.7-unified-chat-system-v1-native-formal-two-pass','Moss planner')
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
@@ -191,7 +191,7 @@ export async function respondNative({system='civweave',text='',history=[],fetche
     const planner=await ensurePlanner();
     markNativeStage('moss-planner-ready');
     const result=await planner.handleNativeLivingSchoolRequest({text:learningControl?normalizedLearningControl(user):user,history,nativeFastLane:true,signal,
-      onProgress:progress=>{try{onToken?.('','',{kind:'moss-progress',characters:progress.characters,complete:progress.complete})}catch{}}});
+      onProgress:progress=>{try{onToken?.('','',{kind:'moss-progress',phase:progress.phase,characters:progress.characters,complete:progress.complete})}catch{}}});
     if(result){
       markNativeStage('moss-action-finished',result?.provider||'unknown');
       return result;
