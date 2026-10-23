@@ -45,6 +45,47 @@ assert.equal(body.max_tokens,512);
 assert.equal(body.model,'qwen35-4b-native');
 assert.equal(assistants,0);
 assert.equal(JSON.parse(stageData.get('civweave.native-server.last-request.v1')).stage,'native-text-complete');
+
+const oldTopic=[
+  {role:'user',text:'Can you teach me tarot?'},
+  {role:'assistant',text:'Tarot is a card system for readings.'},
+  {role:'user',text:'Reply with exactly READY'}
+];
+let lastIsolatedRequest=null;
+const isolatedFetch=async(_url,options)=>{
+  lastIsolatedRequest=JSON.parse(options.body);
+  return{ok:true,status:200,json:async()=>({
+    choices:[{finish_reason:'stop',message:{role:'assistant',content:'READY'}}],
+    usage:{completion_tokens:2}
+  })};
+};
+reply=await api.respondNative({text:'Reply with exactly READY',history:oldTopic,fetcher:isolatedFetch});
+assert.equal(reply.response.answer,'READY');
+assert.equal(lastIsolatedRequest.messages.length,2,'Explicit check must not inherit old tarot conversation');
+assert.equal(lastIsolatedRequest.messages.at(-1).content,'Reply with exactly READY');
+assert.equal(lastIsolatedRequest.max_tokens,512,'Raise low emergency 192-token cap');
+
+const cutOffFetch=async(_url,options)=>{
+  lastIsolatedRequest=JSON.parse(options.body);
+  return{ok:true,status:200,json:async()=>({
+    choices:[{finish_reason:'length',message:{role:'assistant',content:'Partial answer'}}],
+    usage:{completion_tokens:512}
+  })};
+};
+reply=await api.respondNative({
+  text:'Continue',
+  history:[{role:'user',text:'Explain tarot'}, {role:'assistant',text:'A'.repeat(1400)}],
+  fetcher:cutOffFetch
+});
+assert.equal(lastIsolatedRequest.messages.at(-1).content,'Continue');
+assert.equal(lastIsolatedRequest.messages.at(-2).role,'assistant');
+assert.equal(lastIsolatedRequest.messages.at(-2).content.length,1100,
+  'Continuation should preserve the end of the previous answer, within a bounded context');
+assert.match(reply.response.answer,/Response reached the generation limit/);
+assert.match(JSON.parse(stageData.get('civweave.native-server.last-request.v1')).detail,/finish:length/);
+assert.match(chat,/const pastHistory=recentHistory\.at\(-1\)/,
+  'Visible current user turn must be excluded from the history passed to the model');
+
 reply=await api.respondNative({text:'Can you teach me how to read and memorize the tarot?',system:'living-school'});
 assert.match(reply.response.answer,/Learning Journey/);
 assert.equal(planArgs.nativeFastLane,true);
