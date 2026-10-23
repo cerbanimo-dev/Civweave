@@ -14,6 +14,8 @@ assert.match(source,/onPhase:\(stage,details=\{\}\)=>emit\(context,'gguf-browser
 assert.match(tracker,/async function browserGGUFProbe\(/);
 assert.match(tracker,/embeddedGGUFSelection\(\)\?browserGGUFProbe/);
 assert.match(tracker,/Test selected GGUF inference/);
+assert.match(tracker,/addEventListener\('civweave:model-event'/);
+assert.match(tracker,/state\.runtimePhase='GGUF · '/);
 assert.match(tracker,/does not apply to the imported GGUF/);
 assert.match(loader,/1\.0\.5-gguf-moss-coldstart/);
 assert.match(settings,/data-embedded-gguf-selected-note/);
