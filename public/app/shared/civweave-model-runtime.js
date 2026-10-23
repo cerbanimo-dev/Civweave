@@ -1,7 +1,7 @@
 (function installCivweaveModelRuntime(global) {
   "use strict";
 
-  const VERSION = "1.0.0-rc6-context-switching";
+  const VERSION = "1.0.1-native-moss-formal-stage-stream";
   const RESULT_SCHEMA = "civweave-model-result-1.0";
   const CAPABILITY_SCHEMA = "civweave-model-capabilities-1.0";
   const SHARED_MODEL_STORAGE_KEY = "civweave-shared-model";
@@ -374,13 +374,13 @@
             output+=delta;
             if(nativeDirect){
               const tick=Date.now();
-              if(tick-lastUpdate>=250){lastUpdate=tick;emit(context,'partial',nativeStructured?{characters:output.length,structured:true}:{accumulatedText:output,characters:output.length,structured:false})}
+              if(tick-lastUpdate>=250){lastUpdate=tick;emit(context,'partial',nativeStructured?{characters:output.length,structured:true,rawJsonUnvalidated:output}:{accumulatedText:output,characters:output.length,structured:false})}
             }else emit(context,'partial',{text:delta,accumulatedText:output});
           }
           if (payload.usage) usage = extractUsage(payload);
         }
       }
-      if(nativeDirect)emit(context,'partial',nativeStructured?{characters:output.length,structured:true,complete:true}:{accumulatedText:output,characters:output.length,structured:false,complete:true});
+      if(nativeDirect)emit(context,'partial',nativeStructured?{characters:output.length,structured:true,rawJsonUnvalidated:output,complete:true}:{accumulatedText:output,characters:output.length,structured:false,complete:true});
       return { text: output, usage, payload: { text: output, usage } };
     } finally { reader.releaseLock(); }
   }
@@ -1203,6 +1203,7 @@
     version: VERSION,
     nativeDirectTermuxNoStream: true, // Legacy capability name retained for existing integrations.
     nativeDirectTermuxStreamV2: true, // Native streaming and Moss draft progress are implemented.
+    nativeFormalPipelineStageEventsV1: true,
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
