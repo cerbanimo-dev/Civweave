@@ -210,3 +210,59 @@ test('local chat attributes native fallback to the executing model while retaini
     assert.equal(events.find(event=>event.type==='civweave:response-route').detail.model,executed);
   }
 });
+
+
+test('Ollama diagnostics load the shared provider runtime only after an explicit click', async () => {
+  const source=read('settings-gateway-v317.js');
+  const start=source.indexOf('function ensureModelRuntime(');
+  const end=source.indexOf('function ensureSettingsUI(',start);
+  assert.ok(start>=0&&end>start,'Shared Settings must own an on-demand model runtime dependency.');
+  const block=source.slice(start,end);
+  const checks=source.slice(source.indexOf('async function checkOllama('),source.indexOf("form.querySelector('[data-ollama-discover]')"));
+  assert.match(checks,/await ensureModelRuntime\(\)/,'Both Ollama buttons must await the same runtime.');
+  const open=source.slice(source.indexOf('function open(launcher)'),source.indexOf('function ensure()'));
+  assert.doesNotMatch(open,/ensureModelRuntime\(/,'Opening Settings must not load the model provider.');
+  const provider={discoverOllamaModels:async()=>[]};
+  let loads=0;
+  const scope={
+    MODEL_PROVIDER_RUNTIME:'/app/shared/civweave-model-runtime.js?v=ollama-loopback-v1',
+    append:async (url,ready)=>{
+      loads++;
+      assert.match(url,/\/app\/shared\/civweave-model-runtime\.js/);
+      assert.equal(ready(),false);
+      await Promise.resolve();
+      scope.CivweaveModelRuntime=provider;
+      assert.equal(ready(),true);
+      return true;
+    }
+  };
+  scope.globalThis=scope;
+  const ensure=vm.runInNewContext('let modelRuntimePromise=null;'+block+'\nensureModelRuntime',scope);
+  const first=ensure(),second=ensure();
+  assert.equal(first,second,'Concurrent discovery clicks must share one runtime load.');
+  assert.equal(await first,provider);
+  assert.equal(await second,provider);
+  assert.equal(await ensure(),provider,'A loaded runtime must be reused.');
+  assert.equal(loads,1,'The runtime must load exactly once.');
+});
+
+test('Ollama model discovery distinguishes loopback from LAN address space',async()=>{
+  const calls=[];
+  const scope={URL,Response,AbortController,DOMException,TextEncoder,TextDecoder,setTimeout,clearTimeout,
+    location:{href:'https://civweave-staging.pages.dev/app/working-campus-v440.html',origin:'https://civweave-staging.pages.dev'},
+    fetch:async(url,options)=>{
+      calls.push({url,options});
+      return new Response(JSON.stringify({models:[{name:'gemma4:latest',size:123}]}),{status:200,headers:{'content-type':'application/json'}});
+    }
+  };
+  scope.globalThis=scope;
+  vm.runInNewContext(read('shared/civweave-model-runtime.js'),scope);
+  const runtime=scope.CivweaveModelRuntime;
+  assert.ok(runtime?.discoverOllamaModels,'Canonical provider runtime did not install.');
+  const models=await runtime.discoverOllamaModels('http://127.0.0.1:11434/api/chat');
+  assert.equal(models[0].name,'gemma4:latest');
+  assert.equal(calls[0].options.targetAddressSpace,'loopback','127.0.0.1 must advertise loopback to the browser.');
+  assert.match(calls[0].url,/127\.0\.0\.1:11434\/api\/tags/);
+  await runtime.discoverOllamaModels('http://192.168.1.20:11434/api/chat');
+  assert.equal(calls[1].options.targetAddressSpace,'local','LAN endpoints must advertise local address space.');
+});
