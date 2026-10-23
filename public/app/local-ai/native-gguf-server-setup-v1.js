@@ -5,7 +5,7 @@ export const SERVER_MODEL='qwen35-4b-native';
 export const COMMANDS=Object.freeze([
   'pkg update -y && pkg install -y llama-cpp',
   'termux-setup-storage\nls -lh "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf"',
-  'llama-server \\\n  -m "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf" \\\n  --alias qwen35-4b-native \\\n  --host 127.0.0.1 --port 8080 \\\n  --ctx-size 2048 --threads 4 --parallel 1 \\\n  --jinja \\\n  --reasoning off \\\n  --cors-origins https://civweave-staging.pages.dev'
+  'llama-server \\\n  -m "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf" \\\n  --alias qwen35-4b-native \\\n  --host 127.0.0.1 --port 8080 \\\n  --ctx-size 2048 --threads 4 --parallel 1 \\\n  --jinja \\\n  --reasoning off'
 ]);
 const setupHtml=[
  '<div class="cw-clean-note"><b>Android Termux · native llama.cpp</b>',
@@ -14,12 +14,12 @@ const setupHtml=[
  '<p><a href="https://f-droid.org/packages/com.termux/" target="_blank" rel="noopener noreferrer">Download Termux from F-Droid</a> · <a href="https://github.com/termux/termux-app/releases" target="_blank" rel="noopener noreferrer">Termux official GitHub releases</a></p>',
  '<p><b>2 · Install llama.cpp</b> in Termux, using the Termux package repository:</p><div data-server-command="0"></div>',
  '<p><b>3 · Allow Downloads access</b> and verify your exact GGUF is present. Approve the Android storage permission:</p><div data-server-command="1"></div>',
- '<p><b>4 · Run the local server</b> in Termux. It listens only on this phone, allows only the Civweave staging origin via CORS, and limits memory with 2,048 context tokens / one parallel slot:</p><div data-server-command="2"></div>',
+ '<p><b>4 · Run the local server</b> in Termux. It listens only on this phone and limits memory with 2,048 context tokens / one parallel slot. Older Termux llama.cpp builds do not support the --cors-origins argument; verify browser connectivity with the tests below:</p><div data-server-command="2"></div>',
  '<p>If your file has another name, edit the quoted <code>-m</code> path. Keep Termux running, and set reasonable battery permissions for longer sessions. Ctrl+C in Termux stops the server.</p>',
  '<p><b>5 · Verify and select</b> — test the model-list endpoint, then produce a few actual tokens before selecting this route for all five Civweave systems. No localhost requests happen automatically when Settings opens.</p>',
  '<div class="cw-clean-grid"><button type="button" data-server-check>Check localhost server</button><button type="button" data-server-test disabled>Generate 24-token test</button><button type="button" data-server-activate disabled>Use tested server for five systems</button></div>',
  '<output data-server-status role="status" aria-live="polite">Not checked. The current model selection is unchanged.</output>',
- '<p><b>If setup fails:</b> Update Termux packages. For a missing <code>llama-server</code> binary see the <a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/android.md" target="_blank" rel="noopener noreferrer">official Android build instructions</a>. A PWA can be blocked by Android/browser localhost permissions even when Termux works. The test reports failures without changing your route.</p>',
+ '<p><b>If setup fails:</b> Update Termux packages. For a missing <code>llama-server</code> binary see the <a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/android.md" target="_blank" rel="noopener noreferrer">official Android build instructions</a>. A PWA can be blocked by Android/browser localhost permissions or CORS even when Termux works. If localhost calls are blocked, inspect your installed llama-server version and test its browser response before updating or introducing a local-only proxy. The test reports failures without changing your route.</p>',
  '<p>For desktop and mini-PC installs, consult the <a href="https://github.com/ggml-org/llama.cpp/tree/master/tools/server" target="_blank" rel="noopener noreferrer">official llama-server documentation</a>; configure LAN or remote endpoints separately under AI route with appropriate authentication.</p></div>'
 ].join('');
 export function validateServerAddress(value){
