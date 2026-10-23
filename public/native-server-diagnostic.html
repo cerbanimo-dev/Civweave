@@ -31,8 +31,10 @@ small{color:#bed2da}
 <button id="catalog">1 · Check GET /v1/models (no generation)</button>
 <button id="preflight" disabled>2 · Check JSON POST /v1/models (no generation)</button>
 <button id="generation" disabled>3 · Explicitly generate 8 tokens (loads model)</button>
+<button id="stream" disabled>4 · Test visible SSE token streaming (32 tokens)</button>
+<button id="structured" disabled>5 · Test Moss JSON drafting transport (96 tokens)</button>
 <output id="results" role="status" aria-live="polite">No connection checks have run. The installed models and saved app data are untouched.</output>
-<p><small>Step 2 deliberately sends <code>POST /v1/models</code>, which is not an inference endpoint. HTTP 400, 404, or 405 is acceptable: receiving the status proves the browser could complete a JSON POST and its CORS preflight. Step 3 is the only action that runs the model.</small></p>
+<p><small>Step 2 deliberately sends <code>POST /v1/models</code>, which is not an inference endpoint. HTTP 400, 404, or 405 is acceptable: receiving the status proves the browser could complete a JSON POST and its CORS preflight. Steps 3–5 explicitly invoke the model; none runs automatically.</small></p>
 <p>Separately, in a second Termux session, run:</p>
 <pre>curl -i --max-time 8 http://127.0.0.1:8080/v1/models</pre>
 <p>If Termux curl succeeds but step 1 or 2 fails, examine the browser's local-network/CORS restrictions. If Termux curl fails, examine whether llama-server is still listening or was killed by Android.</p>
@@ -59,7 +61,7 @@ async function request(path,options={},limit=8000){
 }
 async function action(name){
   if(working)return;working=true;
-  for(const id of ['catalog','preflight','generation'])button(id).disabled=true;
+  for(const id of ['catalog','preflight','generation','stream','structured'])button(id).disabled=true;
   report('Starting '+name+'…');
   try{
     if(name==='catalog'){
@@ -77,6 +79,44 @@ async function action(name){
       });
       report('JSON POST transport: HTTP '+response.status+' in '+elapsed+' ms (any HTTP response proves browser transport; no inference was requested)');
       postPassed=true;
+    }else if(name==='stream'||name==='structured'){
+      const structured=name==='structured';
+      const started=performance.now();
+      const body={model:'qwen35-4b-native',
+        messages:[{role:'system',content:structured?'Return only compact valid JSON with a title and modules.':'Answer concisely.'},
+          {role:'user',content:structured?'Return JSON for two steps to memorize tarot cards.':'Write one short sentence about what tarot cards are.'}],
+        stream:true,stream_options:{include_usage:true},max_tokens:structured?96:32,temperature:0.2,
+        ...(structured?{response_format:{type:'json_object'}}:{})};
+      const {response,elapsed}=await request('/chat/completions',{method:'POST',
+        headers:{'content-type':'application/json'},body:JSON.stringify(body)},90000);
+      report((structured?'Moss JSON':'SSE streaming')+': HTTP '+response.status+' in '+elapsed+' ms');
+      if(!response.ok)throw Error((structured?'Moss JSON':'SSE')+' failed HTTP '+response.status+': '+(await response.text()).slice(0,500));
+      if(!response.body?.getReader)throw Error('Browser did not expose a readable stream.');
+      const reader=response.body.getReader(),decoder=new TextDecoder();
+      let buffer='',answer='',frames=0,firstToken=false,done=false,finish='';
+      while(true){
+        const part=await reader.read();if(part.done)break;
+        buffer+=decoder.decode(part.value,{stream:true}).replace(/\r\n/g,'\n');
+        const lines=buffer.split('\n');buffer=lines.pop()||'';
+        for(const line of lines){
+          if(!line.startsWith('data:'))continue;
+          const data=line.slice(5).trim();
+          if(data==='[DONE]'){done=true;continue}
+          if(!data)continue;
+          let frame;try{frame=JSON.parse(data)}catch{continue}
+          frames++;
+          if(frame.choices?.[0]?.finish_reason)finish=frame.choices[0].finish_reason;
+          const delta=frame.choices?.[0]?.delta?.content||'';
+          if(delta){
+            answer+=delta;
+            if(!firstToken){firstToken=true;report('First visible token at '+Math.round(performance.now()-started)+' ms')}
+            if(!structured)report('Token: '+delta.slice(0,80));
+          }
+          if(answer.length>12000)throw Error('Stream exceeded 12,000 characters.');
+        }
+      }
+      report('Stream complete · frames '+frames+' · characters '+answer.length+' · finish '+(finish||'unknown')+' · [DONE] '+done);
+      report((structured?'Draft JSON (unvalidated): ':'Text: ')+answer.slice(0,900));
     }else if(name==='generation'){
       const {response,elapsed}=await request('/chat/completions',{
         method:'POST',headers:{'content-type':'application/json'},
@@ -92,6 +132,8 @@ async function action(name){
     working=false;button('catalog').disabled=false;
     button('preflight').disabled=!catalogPassed;
     button('generation').disabled=!(catalogPassed&&postPassed);
+    button('stream').disabled=!(catalogPassed&&postPassed);
+    button('structured').disabled=!(catalogPassed&&postPassed);
   }
 }
 button('last-request').addEventListener('click',()=>{
@@ -104,6 +146,9 @@ button('last-request').addEventListener('click',()=>{
 button('catalog').addEventListener('click',()=>void action('catalog'));
 button('preflight').addEventListener('click',()=>void action('preflight'));
 button('generation').addEventListener('click',()=>void action('generation'));
+button('stream').addEventListener('click',()=>void action('stream'));
+button('structured').addEventListener('click',()=>void action('structured'));
+
 })();
 </script>
 </body>
