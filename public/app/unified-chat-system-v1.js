@@ -336,7 +336,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
           if(event?.phase!=='partial')return;
           const size=Number(event.characters)||0;
           progress(runPhase,size,Boolean(event.complete));
-          const visible=runPhase==='draft'?event.accumulatedText:event.rawJsonUnvalidated;
+          const visible=event.accumulatedText;
           if(typeof visible==='string'){
             const timestamp=Date.now();
             if(event.complete||timestamp-lastProgress>=340){
@@ -445,7 +445,8 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
   const requestedProvider=clean(config.provider||config.route,120).toLowerCase(),planConfig={...config,maxTokens:Math.min(1800,Math.max(900,Number(config.maxTokens)||1200)),temperature:Math.min(.35,Math.max(.1,Number(config.temperature)||.25))},history=seed.intent==='new'?[]:rowsFor(options).slice(-8).map(row=>({role:row.role,text:clean(row.text,1200)}));
   const context={schema:'civweave.learning-journey-plan-request.v2',request:seed,revision:clean(revisionText,3000),existingPlan:existingPlan?{title:existingPlan.request?.title,capability:existingPlan.request?.capability,level:existingPlan.request?.level,mode:existingPlan.request?.mode,proof:existingPlan.request?.proof,modules:existingPlan.modules||[],assumptions:existingPlan.assumptions||[]}:null,recentConversation:history,constraints:['Generate only a high-level Learning Journey plan for review.','Do not write lessons, explanations, exercises, quizzes, readings, source lists, or curriculum content.','Make the module sequence specific to the Hero’s stated learning goal.','Each module entry needs a short title, a focus, and an observable outcome.','Keep the plan in REVIEW. Nothing is approved, activated, or materialized by this call.']};
   let progressStage='intake';
-  learningPlanProgress('started',{goal:seed.capability,model:config.model,provider:requestedProvider});
+  if(!(options.nativeFastLane&&nativePhoneServer(planConfig)))
+    learningPlanProgress('started',{goal:seed.capability,model:config.model,provider:requestedProvider});
   try{
     const ggufChoice=selectedPlanGGUF(planConfig);
     const nativeServer=nativePhoneServer(planConfig);
