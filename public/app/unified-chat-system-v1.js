@@ -326,6 +326,11 @@ function normalizeNativePlanContract(result,seed,runtime){
     plan.mode=seed.mode.toLowerCase();
   if(typeof plan.assumptions==='string')
     plan.assumptions=plan.assumptions.trim()?[plan.assumptions.trim()]:[];
+  // Qwen sometimes supplies multiple valid evidence statements as proof[].
+  // Join only non-empty strings, preserving the actual evidence verbatim.
+  if(Array.isArray(plan.proof)&&plan.proof.length>=1&&plan.proof.length<=12&&
+      plan.proof.every(x=>typeof x==='string'&&x.trim().length>0))
+    plan.proof=plan.proof.map(x=>x.trim()).join(' ');
   // The user request owns their preferred level and mode. This does not
   // supply any learning module, lesson, evidence or approval.
   if(typeof runtime?.validateSchema!=='function')return null;
@@ -472,8 +477,16 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       system:compileSystem,user:compileUser,schema:LEARNING_PLAN_SCHEMA,structured:true
     });
     compiled=clean(compileResult?.outputText,16000);
-    stage('compile',compileResult?.status==='success'?'complete':'failed',
-      {label:'Raw JSON compiler output',text:compiled,code:compileResult?.error?.code||''});
+    // A schema-invalid compiler answer is a recoverable intermediate stage.
+    // It must not set the entire tracker to FAILED while local normalization
+    // or the explicit targeted repair is still pending.
+    stage('compile','complete',{
+      label:compileResult?.status==='success'?'Raw JSON compiled · awaiting validation':'Raw JSON received · awaiting normalization or repair',
+      text:compiled,code:compileResult?.error?.code||'',rawStatus:compileResult?.status||'unknown',
+      finishReason:compileResult?.finishReason||'unknown',
+      completionTokens:Number(compileResult?.usage?.completionTokens||compileResult?.usage?.completion_tokens||0),
+      maxTokens:2300
+    });
     progress('compile',compiled.length,true);
     phase='validate';
     stage('validate','running',{label:'Independent contract and topic check'});
@@ -500,8 +513,13 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
           '\nPrevious JSON output:\n'+compiled.slice(0,3400)+'\nRepair as compact valid JSON.'
       });
       repairText=clean(repairResult?.outputText,16000);
-      stage('repair',repairResult?.status==='success'?'complete':'failed',
-        {label:'Raw targeted repair',text:repairText,code:repairResult?.error?.code||''});
+      stage('repair','complete',{
+        label:repairResult?.status==='success'?'Raw targeted repair received':'Raw repair received · awaiting validation',
+        text:repairText,code:repairResult?.error?.code||'',rawStatus:repairResult?.status||'unknown',
+        finishReason:repairResult?.finishReason||'unknown',
+        completionTokens:Number(repairResult?.usage?.completionTokens||repairResult?.usage?.completion_tokens||0),
+        maxTokens:2400
+      });
       progress('repair',repairText.length,true);
       const normalizedRepair=normalizeNativePlanContract(repairResult,seed,runtime);
       if(!normalizedRepair)assertNativePlanModel(repairResult,config,'Repair');
@@ -522,8 +540,12 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
     progress('saved',0,true);
     return learningPlanResponse(readLearningPlan());
   }catch(error){
-    stage('pipeline',options.signal?.aborted?'stopped':'failed',
-      {label:'Native formal Learning Journey failed',message:'Stage '+phase+': '+clean(error?.message||error,800)});
+    stage('pipeline',options.signal?.aborted?'stopped':'failed',{
+      label:'Native formal Learning Journey '+(options.signal?.aborted?'cancelled':'failed'),
+      message:'Stage '+phase+': '+clean(error?.message||error,800),
+      abortReason:options.signal?.aborted?clean(options.signal.reason?.message||options.signal.reason||'no reason supplied',160):'',
+      stageAtFailure:phase
+    });
     throw error;
   }
 }
