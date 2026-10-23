@@ -1201,7 +1201,7 @@
 
   const api = Object.freeze({
     version: VERSION,
-    nativeDirectTermuxNoStream: true,
+    nativeDirectTermuxNoStream: true, // legacy loader compatibility\n    nativeDirectTermuxStreamV2: true,
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
