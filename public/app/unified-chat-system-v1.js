@@ -234,16 +234,17 @@ function normalizeModelPlan(value,request,existingPlan=null,route={}){
   const capability=request.intent==='new'?(request.capability||clean(value.capability||value.goal,2400)):(clean(value.capability||value.goal,2400)||request.capability);
   const proof=clean(value.proof||value.completionEvidence||value.demonstration,3000)||request.proof;
   const assumptions=(Array.isArray(value.assumptions)?value.assumptions:[]).map(item=>clean(item,700)).filter(Boolean).slice(0,6);
-  const stamp=now(),base=existingPlan&&typeof existingPlan==='object'?existingPlan:{};
+  const stamp=now(),base=request.intent==='new'?{}:existingPlan&&typeof existingPlan==='object'?existingPlan:{};
   return{...base,schema:'civweave.learning-journey-plan.v2',id:base.id||`learning-plan-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,state:'review',createdAt:base.createdAt||stamp,updatedAt:stamp,approvedAt:null,requiresExplicitApproval:true,request:{...request,title,capability,level,mode,proof,count:modules.length,outline:modules.map(({title,focus,outcome})=>({title,focus,outcome}))},modules,assumptions,authoring:{mode:'selected-ai-high-level-plan',provider:clean(route.provider,120)||'unknown',model:clean(route.model,240),revision:VERSION}};
 }
 function learningPlanText(plan){
   const request=plan?.request||{},modules=Array.isArray(plan?.modules)?plan.modules:[],outline=modules.length?`\n\nOutline:\n${modules.map((module,index)=>`${index+1}. ${clean(module.title,220)}\n   Focus: ${clean(module.focus,700)}\n   Demonstrate: ${clean(module.outcome,700)}`).join('\n')}`:'';
   const assumptions=(plan?.assumptions||[]).length?`\n\nAssumptions:\n${plan.assumptions.map(item=>`- ${clean(item,500)}`).join('\n')}`:'';
-  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: REVIEW. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.`;
+  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: ${plan.state==='superseded'?'SUPERSEDED — a newer learning goal was requested; this older plan cannot be approved.':'REVIEW'}. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.`;
 }
 function learningPlanResponse(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for review.','Tell Moss what you want to learn or demonstrate.');
+  if(plan.state==='superseded')return packet(learningPlanText(plan),'This prior plan cannot be approved. Retry the most recent learning goal to generate a current REVIEW plan.',{provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan'});
   return packet(learningPlanText(plan),'Review or revise this plan. When it is right, explicitly approve the Learning Journey to generate its learning content.',{assumptions:plan.assumptions||[],requiresConsent:true,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:{kind:'learning-journey-plan-approval',planId:plan.id,state:plan.state||'review',required:true,actions:['review','revise','approve']},action:{kind:'living-school-learning-plan',system:'living-school',state:plan.state||'review',title:plan.request.title,capability:plan.request.capability,canonicalArtifact:'Learning Journey'}});
 }
 async function generateLivingSchoolPlan(options={},existingPlan=null,revisionText=''){
@@ -253,7 +254,12 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
   // An explicit new learning goal is authoritative over any saved cabinet path,
   // chat history, previous plan, or model-returned title.
   const explicitGoal=learningJourneyIntent(options.text,options.history||[])?userCapability([{role:'user',text:clean(options.text,5000)}]):'';
-  if(explicitGoal){seed.capability=explicitGoal;seed.title=titleCase(explicitGoal);seed.intent='new'}
+  if(explicitGoal){
+    seed.capability=explicitGoal;seed.title=titleCase(explicitGoal);seed.intent='new';
+    const prior=readLearningPlan();
+    if(prior?.state==='review'&&clean(prior.request?.capability,2400).toLowerCase()!==explicitGoal.toLowerCase())
+      saveLearningPlan({...prior,state:'superseded',supersededBy:explicitGoal,updatedAt:now()});
+  }
   let config;try{config=selectedPlanningConfig()}catch(error){return packet('Moss could not read the selected AI route: '+clean(error?.message||error,700),'Reselect the model in Settings.',{provider:'learning-plan-route-error'})}
   try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();config=selectedPlanningConfig()||config}catch(error){
     return packet(`Moss could not start the selected AI for Learning Journey planning: ${clean(error?.message||error,900)}`,'Retry the plan or check the selected AI model.',{provider:'learning-plan-model-error',model:clean(config?.model,240)});
@@ -322,6 +328,7 @@ async function runLivingSchoolCurriculum(options={}){
 }
 async function approveLivingSchoolPlan(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for approval.','Tell Moss what you want to learn or demonstrate.');
+  if(plan.state!=='review')return packet('This Learning Journey plan is not in REVIEW and cannot be approved. No learning content was generated.','Generate a current high-level plan for the learning goal you want.');
   const approved={...plan,state:'approved',approvedAt:now(),updatedAt:now()};
   saveLearningPlan(approved);
   return runLivingSchoolCurriculum({reviewPlan:approved,requireApprovedPlan:true});
