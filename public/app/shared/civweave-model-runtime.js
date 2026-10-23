@@ -1,7 +1,7 @@
 (function installCivweaveModelRuntime(global) {
   "use strict";
 
-  const VERSION = "1.0.0-rc6-context-switching";
+  const VERSION = "1.0.1-moss-formal-stage-events";
   const RESULT_SCHEMA = "civweave-model-result-1.0";
   const CAPABILITY_SCHEMA = "civweave-model-capabilities-1.0";
   const SHARED_MODEL_STORAGE_KEY = "civweave-shared-model";
@@ -1212,6 +1212,7 @@
     nativeDirectTermuxNoStream: true, // Legacy capability name retained for existing integrations.
     nativeDirectTermuxStreamV2: true, // Native SSE stream support (existing capability).
     nativeMossVisibleStreamV3: true, // Provider deltas reach the shared RAW tracker.
+    nativeFormalPipelineStageEventsV1: true, // Two real model passes feed the formal Moss tracker.
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
