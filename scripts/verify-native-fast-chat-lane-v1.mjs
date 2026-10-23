@@ -21,7 +21,7 @@ const selected={provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'
 let requested=0,req=null,planArgs=null,assistants=0;
 const globals={
   CivweaveSettingsV320:{readState:()=>selected},
-  CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,generate:async()=>{throw Error('unexpected runtime call')}},
+  CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,generate:async()=>{throw Error('unexpected runtime call')}},
   CivweaveUnifiedChatSystemV1:{
     version:'1.2.4-unified-chat-system-v1-native-learning-controls',
     handleNativeLivingSchoolRequest:async args=>{planArgs=args;return{response:{answer:args.text==='approve'?'Approved Learning Journey': 'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
@@ -40,7 +40,7 @@ assert.equal(requested,1);
 assert.equal(req.url,'http://127.0.0.1:8080/v1/chat/completions');
 assert.equal(req.options.mode,'cors');
 const body=JSON.parse(req.options.body);
-assert.equal(body.stream,false);
+assert.equal(body.stream,true);
 assert.equal(body.max_tokens,512);
 assert.equal(body.model,'qwen35-4b-native');
 assert.equal(assistants,0);
@@ -123,9 +123,9 @@ assert.match(moss,/handleNativeLivingSchoolRequest/);
 assert.match(chat,/await direct\.respondNative/);
 assert.match(chat,/guide:respondingSystem,responderSystem:respondingSystem/);
 assert.match(chat,/await verifyNativePhoneServerTransport/);
-assert.match(runtime,/nativeDirect \? false : Boolean\(config\.stream \|\| lineup\)/);
+assert.match(runtime,/nativeDirect \? Boolean\(config\.stream\) : Boolean\(config\.stream \|\| lineup\)/);
 assert.match(runtime,/nativeDirectTermuxNoStream: true/);
-assert.match(campus,/native-moss-learning-handoff/);
-assert.match(shell,/native-moss-learning-handoff/);
+assert.match(campus,/native-termux-token-stream/);
+assert.match(shell,/native-termux-token-stream/);
 assert.match(diagnostic,/Show last Civweave native-request stage/);
 console.log('PASS: direct native HTTP, Moss review planner fast entry, no second model, no heavy bootstrap, stage diagnostics and invalid route rejection');

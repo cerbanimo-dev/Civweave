@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.179-guide-chat-surface-v350-moss-learning-handoff';
+const VERSION='1.0.180-guide-chat-surface-v350-native-token-stream';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -33,6 +33,7 @@ let activeSystem='civweave';
 let openState=false;
 let minimized=false;
 let busy=false;
+let nativeAbortController=null;
 let seen={};
 let root=null;
 let launcher=null;
@@ -228,6 +229,7 @@ function ensureRoot(){
   root=document.getElementById(ROOT_ID)||document.createElement('section');root.id=ROOT_ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Civweave guide chat');
   root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><button data-close type="button" aria-label="Close chat">×</button></header><nav class="cw242-window-switcher" aria-label="Guide chats">${switcherMarkup()}</nav><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-voice type="button" aria-label="Start offline voice" title="Start offline voice">◉</button><button data-send type="submit">Send</button></form>`;
   root.querySelector('[data-close]').addEventListener('click',close);
+  root.querySelector('[data-send]').addEventListener('click',()=>{if(busy&&nativeAbortController){nativeAbortController.abort();const control=root.querySelector('[data-send]');if(control){control.textContent='Stopping…';control.disabled=true;}}});
   root.querySelector('.cw242-window-switcher').addEventListener('click',event=>{const button=event.target.closest?.('[data-cw242-window]');if(button)switchGuide(button.dataset.cw242Window,{open:true,focus:true})});
   root.querySelector('[data-voice]').addEventListener('click',()=>{void toggleVoice()});
   root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitText(text,activeSystem)});
@@ -263,12 +265,24 @@ function render(){
   log.innerHTML=messages.map(row=>{
     const user=row?.role==='user',who=GUIDE[row?.guide||row?.responderSystem||activeSystem]||guide(activeSystem),meta=[row?.provider,row?.model].filter(Boolean).join(' · '),pending=Boolean(row?.pending);
     if(user)return`<article class="is-user" data-role="user" data-message-role="user" data-pending="false"><div class="cw350-bubble">${esc(row.text||'')}</div></article>`;
-    return`<article data-role="assistant" data-message-role="assistant" data-pending="${pending?'true':'false'}" class="${pending?'cw-ai-pending':''}"><img src="${esc(who.avatar)}" alt="${esc(who.name)}"><div><div class="cw350-bubble">${esc(row.text||'')}</div>${meta?`<div class="cw350-meta">${esc(meta)}</div>`:''}</div></article>`;
+    return`<article data-message-id="${esc(row.id||'')}" data-role="assistant" data-message-role="assistant" data-pending="${pending?'true':'false'}" class="${pending?'cw-ai-pending':''}"><img src="${esc(who.avatar)}" alt="${esc(who.name)}"><div><div class="cw350-bubble">${esc(row.text||'')}</div>${meta?`<div class="cw350-meta">${esc(meta)}</div>`:''}</div></article>`;
   }).join('');
   if(openState)markSeen(activeSystem);syncSwitcher();
   requestAnimationFrame(()=>{try{log.scrollTop=log.scrollHeight}catch{}});
   globalThis.CivweaveSavedChatUIV295?.render?.(activeSystem);
   return true;
+}
+function paintNativeStream(system,messageId,text){
+  // Update only the pending bubble. Rebuilding the entire thread on each
+  // token caused excessive main-thread work on Android.
+  if(activeSystem!==system||!root||!openState)return;
+  const rows=root.querySelectorAll('[data-log] article[data-pending="true"]');
+  for(const article of rows){
+    if(article.dataset.messageId!==messageId)continue;
+    const bubble=article.querySelector('.cw350-bubble');
+    if(bubble)bubble.textContent=text;
+    break;
+  }
 }
 function historyFor(system){return(readThread(system).messages||[]).filter(row=>!row.pending&&!row.modelError&&!/^(?:deterministic|manual)/.test(row.provider||'')&&['user','assistant'].includes(row.role)).slice(-16).map(row=>({role:row.role,text:clean(row.text,6000)}))}
 function localFailure(system,selection,error){const message=clean(error?.message||error||'The selected local model did not complete.',900);return{text:`${guide(system).name} could not run the selected local model ${selection?.id||''}: ${message}`,provider:'local-model-error',model:error?.executionModel||selection?.id||'',error:message}}
@@ -300,7 +314,11 @@ function actualPlanningModel(result){
 function explicitHandoffTarget(result,system){const target=clean(result?.handoff?.targetSystem||result?.handoffSystem||result?.response?.handoffSystem,80);return SYSTEMS.includes(target)&&target!==system?target:''}
 async function submitActive(text){
   const value=clean(text),system=activeSystem;if(!value||busy||!SYSTEMS.includes(system))return false;
-  busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');if(button)button.disabled=true;if(input)input.value='';
+  busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');
+  const nativeRequested=activeNativePhoneServer(),requestAbort=nativeRequested?new AbortController():null;
+  nativeAbortController=requestAbort;
+  if(button){button.disabled=!nativeRequested;button.type=nativeRequested?'button':'submit';button.textContent=nativeRequested?'Stop':'Send';}
+  if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
   try{
     // The current user turn has already been appended to the visible thread.
@@ -309,18 +327,33 @@ async function submitActive(text){
     const pastHistory=recentHistory.at(-1)?.role==='user'&&recentHistory.at(-1)?.text===value
       ?recentHistory.slice(0,-1):recentHistory;
     let result;
-    if(activeNativePhoneServer()){
+    let paintTimer=null,latestText='',lastPaint=0;
+    const paint=()=>{
+      paintTimer=null;lastPaint=Date.now();paintNativeStream(system,pendingId,latestText);
+    };
+    const onToken=(delta,accumulated,meta)=>{
+      if(meta?.kind==='moss-progress')
+        latestText='Moss is drafting the Learning Journey plan… '+(Number(meta.characters)||0)+' characters received. Validation is pending.';
+      else if(typeof accumulated==='string'&&accumulated)latestText=accumulated;
+      if(!latestText)return;
+      if(Date.now()-lastPaint>=80){if(paintTimer){clearTimeout(paintTimer);paintTimer=null;}paint();}
+      else if(!paintTimer)paintTimer=setTimeout(paint,80);
+    };
+    try {
+    if(nativeRequested){
       // On a verified Termux route, do not initialize the entire Civweave
       // assistant stack before the first request reaches the HTTP model.
       // This path never loads browser GGUF weights or starts a fallback.
       try{localStorage.setItem('civweave.native-server.last-request.v1',JSON.stringify({at:new Date().toISOString(),stage:'native-preflight',route:'openai-compatible',model:'qwen35-4b-native'}))}catch{}
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.1-learning-plan-routing-and-continuation');
-      result=await direct.respondNative({text:value,system,history:pastHistory});
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.2-termux-sse-and-moss-progress');
+      if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
+      result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('Shared assistant runtime is not ready.');
       result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:pastHistory});
     }
+    }finally{if(paintTimer)clearTimeout(paintTimer);}
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),respondingSystem=SYSTEMS.includes(result?.context?.guide?.system)?result.context.guide.system:system,replacement={role:'assistant',guide:respondingSystem,responderSystem:respondingSystem,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
     if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(respondingSystem,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
   }catch(error){
@@ -330,7 +363,7 @@ async function submitActive(text){
       ? {text:`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
       : await fallbackReply(system,value);
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
-  }finally{busy=false;if(button)button.disabled=false;render();emitState()}
+  }finally{busy=false;nativeAbortController=null;if(button){button.disabled=false;button.type='submit';button.textContent='Send';}render();emitState()}
   return true;
 }
 function switchGuide(system,options={}){

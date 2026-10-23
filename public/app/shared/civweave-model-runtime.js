@@ -350,11 +350,11 @@
     return conversation;
   }
 
-  async function parseOpenAIStream(response, context) {
+  async function parseOpenAIStream(response, context, nativeDirect = false) {
     if (!response.body?.getReader) return readBoundedText(response);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "", output = "", bytes = 0, usage = {};
+    let buffer = "", output = "", bytes = 0, usage = {}, lastUpdate = 0;
     try {
       while (true) {
         const { done, value } = await reader.read();
@@ -370,10 +370,17 @@
           if (!data || data === "[DONE]") continue;
           let payload; try { payload = JSON.parse(data); } catch { continue; }
           const delta = extractText(payload);
-          if (delta) { output += delta; emit(context, "partial", { text: delta, accumulatedText: output }); }
+          if(delta){
+            output+=delta;
+            if(nativeDirect){
+              const tick=Date.now();
+              if(tick-lastUpdate>=200){lastUpdate=tick;emit(context,'partial',{characters:output.length,structured:true})}
+            }else emit(context,'partial',{text:delta,accumulatedText:output});
+          }
           if (payload.usage) usage = extractUsage(payload);
         }
       }
+      if(nativeDirect)emit(context,'partial',{characters:output.length,structured:true,complete:true});
       return { text: output, usage, payload: { text: output, usage } };
     } finally { reader.releaseLock(); }
   }
@@ -728,7 +735,7 @@
     // Direct Termux Qwen runs exactly one POST. No auxiliary helper model,
     // SSE parsing or deprecated template override is needed for this route.
     const lineup = nativeDirect ? null : nativePhoneLineup(config);
-    const useStream = nativeDirect ? false : Boolean(config.stream || lineup);
+    const useStream = nativeDirect ? Boolean(config.stream) : Boolean(config.stream || lineup);
     const noteNative=(stage,detail='')=>{
       if(!nativeDirect)return;
       try{global.localStorage?.setItem?.('civweave.native-server.last-request.v1',JSON.stringify({
@@ -758,26 +765,38 @@
       ...(structured ? { response_format: { type: "json_object" } } : {}),
     };
     noteNative('native-http-post-start',`messages:${bodyMessages.length}, max_tokens:${body.max_tokens}`);
-    let response = await fetch(url, fetchOptions(url, {
-      method: "POST",
-      headers: { "content-type": "application/json", ...(config.apiKey ? { authorization: `Bearer ${config.apiKey}` } : {}), ...config.headers },
-      body: JSON.stringify(body),
-      signal,
-    }));
+    // The exact Termux origin uses the same options as the proven browser
+    // diagnostic, with no experimental Private Network Access override.
+    const transport=(payload)=>({
+      method:'POST',mode:'cors',cache:'no-store',credentials:'omit',
+      headers:{"content-type":"application/json",...(config.apiKey?{authorization:`Bearer ${config.apiKey}`}:{}),...config.headers},
+      body:JSON.stringify(payload),signal,
+    });
+    async function post(payload){
+      try{return await fetch(url,nativeDirect?transport(payload):fetchOptions(url,transport(payload)))}
+      catch(error){
+        noteNative('native-fetch-failed',error?.message||String(error));
+        if(nativeDirect)throw runtimeError('NATIVE_HTTP_TRANSPORT_FAILED',
+          'Termux JSON generation POST failed: '+safeString(error?.message||error,220)+
+          '. Verify /native-server-diagnostic.html JSON POST and 8-token test in this browser.');
+        throw error;
+      }
+    }
+    let response=await post(body);
     noteNative('native-http-headers','HTTP '+response.status);
     if (!response.ok && structured && [400, 422].includes(response.status)) {
       const first = await readBoundedText(response).catch(() => "");
       emit(context, "repairing", { reason: "provider-response-format-rejection", detail: safeString(first, 800) });
       delete body.response_format;
-      response = await fetch(url, fetchOptions(url, {
-        method: "POST",
-        headers: { "content-type": "application/json", ...(config.apiKey ? { authorization: `Bearer ${config.apiKey}` } : {}), ...config.headers },
-        body: JSON.stringify(body),
-        signal,
-      }));
+      response=await post(body);
     }
     if (!response.ok) throw providerHttpError("OpenAI-compatible provider", response.status, await readBoundedText(response).catch(() => ""));
-    if (useStream) return { ...(await parseOpenAIStream(response, context)), model: config.model, streamed: true };
+    if(useStream){
+      noteNative('native-stream-reading');
+      const streamed=await parseOpenAIStream(response,context,nativeDirect);
+      noteNative('native-stream-complete',`characters:${streamed.text.length}`);
+      return{...streamed,model:config.model,streamed:true};
+    }
     const text = await readBoundedText(response);
     noteNative('native-response-read',`bytes:${text.length}`);
     let payload; try { payload = JSON.parse(text || "{}"); } catch { throw runtimeError("INVALID_PROVIDER_JSON", "The OpenAI-compatible endpoint returned invalid transport JSON.", { recoverableText: text.slice(0, 12000) }); }
@@ -1182,7 +1201,7 @@
 
   const api = Object.freeze({
     version: VERSION,
-    nativeDirectTermuxNoStream: true,
+    nativeDirectTermuxNoStream: true, // legacy loader compatibility\n    nativeDirectTermuxStreamV2: true,
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
