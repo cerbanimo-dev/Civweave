@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-selected-provider-authority-v1-native-api-pin';
+const VERSION='1.1.0-selected-provider-authority-v1-all-routes';
 const PROFILE_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
