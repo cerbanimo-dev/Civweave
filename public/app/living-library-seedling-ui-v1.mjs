@@ -105,7 +105,7 @@ async function searchIndex(which){
  }catch(error){status('Research lookup unavailable: '+String(error?.message||error)+'. You can still add URLs manually.')}finally{button.disabled=false}
 }
 function renderResults(){const box=el('search-results');box.replaceChildren();for(const [i,source] of researchResults.entries()){const card=document.createElement('div');card.className='source-card';const a=document.createElement('a');a.textContent=source.title;a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';card.append(a);const p=document.createElement('div');p.className='subtle';p.textContent=source.publisher+' '+(source.creator||'');card.append(p);const b=document.createElement('button');b.textContent='Use this citation';b.addEventListener('click',()=>{el('source-title').value=source.title;el('source-url').value=source.url;el('source-author').value=source.creator||'';el('source-type').value=source.type;status('Citation fields populated. Inspect and click Add cited source to save it.')});card.append(b);box.append(card)}}
-const textOnly=value=>String(value??'').replace(/<[^>]*>/g,' ').replace(/&amp;/gi,'&').replace(/&nbsp;/gi,' ').replace(/&#39;/g,"'").replace(/&quot;/gi,'"').replace(/\\s+/g,' ').trim();
+const textOnly=value=>String(value??'').replace(/<[^>]*>/g,' ').replace(/&amp;/gi,'&').replace(/&nbsp;/gi,' ').replace(/&#39;/g,"'").replace(/&quot;/gi,'"').replace(/\s+/g,' ').trim();
 async function searchCommons(){
  const query=el('media-search').value.trim();
  if(query.length<3)return status('Enter at least three search characters for image discovery.');
