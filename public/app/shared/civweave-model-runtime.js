@@ -350,7 +350,7 @@
     return conversation;
   }
 
-  async function parseOpenAIStream(response, context, nativeDirect = false) {
+  async function parseOpenAIStream(response, context, nativeDirect = false, nativeStructured = false) {
     if (!response.body?.getReader) return readBoundedText(response);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -374,13 +374,13 @@
             output+=delta;
             if(nativeDirect){
               const tick=Date.now();
-              if(tick-lastUpdate>=200){lastUpdate=tick;emit(context,'partial',{characters:output.length,structured:true})}
+              if(tick-lastUpdate>=250){lastUpdate=tick;emit(context,'partial',nativeStructured?{characters:output.length,structured:true}:{accumulatedText:output,characters:output.length,structured:false})}
             }else emit(context,'partial',{text:delta,accumulatedText:output});
           }
           if (payload.usage) usage = extractUsage(payload);
         }
       }
-      if(nativeDirect)emit(context,'partial',{characters:output.length,structured:true,complete:true});
+      if(nativeDirect)emit(context,'partial',nativeStructured?{characters:output.length,structured:true,complete:true}:{accumulatedText:output,characters:output.length,structured:false,complete:true});
       return { text: output, usage, payload: { text: output, usage } };
     } finally { reader.releaseLock(); }
   }
@@ -793,7 +793,7 @@
     if (!response.ok) throw providerHttpError("OpenAI-compatible provider", response.status, await readBoundedText(response).catch(() => ""));
     if(useStream){
       noteNative('native-stream-reading');
-      const streamed=await parseOpenAIStream(response,context,nativeDirect);
+      const streamed=await parseOpenAIStream(response,context,nativeDirect,structured);
       noteNative('native-stream-complete',`characters:${streamed.text.length}`);
       return{...streamed,model:config.model,streamed:true};
     }
