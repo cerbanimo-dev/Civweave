@@ -354,7 +354,7 @@
     if (!response.body?.getReader) return readBoundedText(response);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "", output = "", bytes = 0, usage = {}, lastUpdate = 0;
+    let buffer = "", output = "", pendingText = "", bytes = 0, usage = {}, lastUpdate = 0;
     try {
       while (true) {
         const { done, value } = await reader.read();
@@ -373,14 +373,22 @@
           if(delta){
             output+=delta;
             if(nativeDirect){
+              // The Termux route must deliver visible model tokens, not just a
+              // character count. Coalesce frequent SSE chunks to bound DOM
+              // updates while retaining the exact text for the RAW panel.
+              pendingText+=delta;
               const tick=Date.now();
-              if(tick-lastUpdate>=200){lastUpdate=tick;emit(context,'partial',{characters:output.length,structured:true})}
+              if(tick-lastUpdate>=80){
+                lastUpdate=tick;
+                emit(context,'partial',{backend:'native-server',text:pendingText,accumulatedText:output,characters:output.length,structured:true});
+                pendingText='';
+              }
             }else emit(context,'partial',{text:delta,accumulatedText:output});
           }
           if (payload.usage) usage = extractUsage(payload);
         }
       }
-      if(nativeDirect)emit(context,'partial',{characters:output.length,structured:true,complete:true});
+      if(nativeDirect)emit(context,'partial',{backend:'native-server',text:pendingText,accumulatedText:output,characters:output.length,structured:true,complete:true});
       return { text: output, usage, payload: { text: output, usage } };
     } finally { reader.releaseLock(); }
   }
@@ -1202,7 +1210,8 @@
   const api = Object.freeze({
     version: VERSION,
     nativeDirectTermuxNoStream: true, // Legacy capability name retained for existing integrations.
-    nativeDirectTermuxStreamV2: true, // Native streaming and Moss draft progress are implemented.
+    nativeDirectTermuxStreamV2: true, // Native SSE stream support (existing capability).
+    nativeMossVisibleStreamV3: true, // Provider deltas reach the shared RAW tracker.
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
