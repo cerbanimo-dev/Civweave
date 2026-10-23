@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const REVISION='canonical-campus-startup-v227';
+const REVISION='canonical-campus-startup-v228-ollama-direct';
 const BRAND_REVISION='compact-shell-v235';
 const BRAND_CYCLE_REVISION='day-night-clock-v236';
 const BRAND_DAY='/app/logos/civweave-day-logo.jpg';
