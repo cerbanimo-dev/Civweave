@@ -48,7 +48,6 @@ function preview(){
  for(const [key,name] of [['capability','Capability'],['proof','Proof of capability']]){const p=document.createElement('p');const b=document.createElement('strong');b.textContent=name+': ';p.append(b,document.createTextNode(draft[key]||'Not defined'));container.append(p)}
  const rule=document.createElement('hr');container.append(rule);
  draft.modules.forEach((m,i)=>{const h=document.createElement('h4');h.textContent=(i+1)+'. '+(m.title||'Untitled module');container.append(h);for(const key of ['focus','outcome']){const p=document.createElement('p');p.textContent=(key==='focus'?'Focus: ':'Demonstrate: ')+(m[key]||'Not set');container.append(p)}
- for(const medium of draft.media.filter(m=>m.moduleId===m.id)){} // Keep media attachment rendering outside structural plan fields
  for(const medium of draft.media.filter(media=>media.moduleId===m.id))mediaPreview(medium,container);
  });
  for(const medium of draft.media.filter(m=>!m.moduleId))mediaPreview(medium,container);
@@ -116,7 +115,9 @@ async function sendGuild(){
   const bundle=guildBundle({...draft,guildId:guild.guildId});
   if(new TextEncoder().encode(JSON.stringify(bundle)).length>900000)throw Error('Bundle too large for the Guild relay.');
   const existing=read(OUTBOX_KEY,{});
-  const key=guild.guildId+':'+draft.id+':'+draft.updatedAt;
+  const revisionBytes=new TextEncoder().encode(JSON.stringify({title:draft.title,capability:draft.capability,level:draft.level,mode:draft.mode,proof:draft.proof,modules:draft.modules,sources:draft.sources,media:draft.media}));
+  const revisionHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',revisionBytes)),byte=>byte.toString(16).padStart(2,'0')).join('');
+  const key=guild.guildId+':'+draft.id+':'+revisionHash;
   if(existing[key])throw Error('This revision has already been signed and queued. Revise it before sending again.');
   const mesh=await ensureMesh();
   const group='guild:'+guild.guildId;mesh.configure({groups:[group]});
