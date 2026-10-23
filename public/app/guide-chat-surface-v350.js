@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.184-guide-chat-surface-v350-moss-formal-stages';
+const VERSION='1.0.185-guide-chat-surface-v350-long-moss-plans';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
