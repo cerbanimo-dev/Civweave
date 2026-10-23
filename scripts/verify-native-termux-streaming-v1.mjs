@@ -59,7 +59,7 @@ assert.match(runtime,/NATIVE_HTTP_TRANSPORT_FAILED/);
 assert.match(runtime,/nativeDirect\?transport\(payload\):fetchOptions/);
 assert.match(runtime,/pendingText\s*\+=\s*delta/,'native stream must preserve incoming visible token deltas');
 assert.match(runtime,/backend:'native-server',text:pendingText,accumulatedText:output/,'native progress event must include raw generated text, not merely a character count');
-assert.match(runtime,/complete:true,backend:'native-server'/,'native stream must flush trailing text on completion');
+assert.match(runtime,/backend:'native-server'[^}]*complete:true/,'native stream must flush trailing text on completion');
 assert.match(guide,/ensureTracker\?\.\(\)/,'native chat must start the one canonical tracker before inference');
 const cancelled=new AbortController();
 cancelled.abort();
