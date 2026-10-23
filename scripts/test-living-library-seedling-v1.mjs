@@ -20,6 +20,13 @@ test('Guild review bundle preserves sources and media and cannot approve or publ
  assert.equal(b.sourceCatalog[0].verification,'user-curated-unverified');
  assert.equal(b.mediaCatalog[0].offlineAvailable,false);
 });
+test('evidence and Guild export preserve module-linked source references',()=>{
+ const d=fixture();d.sources[0].moduleId=d.modules[1].id;
+ const bundle=guildBundle(d);
+ assert.equal(bundle.sourceCatalog[0].moduleId,d.modules[1].id);
+ const plan=livingSchoolPlan(d);
+ assert.equal(plan.modules.length,3);
+});
 test('invalid plans are blocked',()=>{
  const d=fixture();d.proof='';assert.match(validateDraft(d).join(' '),/observable proof/i);assert.throws(()=>livingSchoolPlan(d),/proof/i);
  const f=fixture();f.modules=f.modules.slice(0,2);assert.throws(()=>livingSchoolPlan(f),/3–8 modules/);
