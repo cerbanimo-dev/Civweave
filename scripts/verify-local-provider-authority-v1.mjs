@@ -74,7 +74,7 @@ assert.equal(api.staleLocalRuntimeEvicted,true);
 assert.equal(api.gemma4MobileRuntimeFloor,'4.3.0');
 assert.equal(api.bundledTransformersV4,'4.2.0');
 assert.match(loaderSource,/1\.0\.159-shared-guide-surface-v236-inference-core-first/);
-assert.match(loaderSource,/1\.0\.3-inference-core-first/);
+assert.match(loaderSource,/1\.0\.4-default-web-tools/);
 assert.match(loaderSource,/inferenceCoreFirst:true/);
 assert.match(loaderSource,/fullLocalBootstrapBlocking:false/);
 assert.match(loaderSource,/existing\.dataset\.civweaveReady==='true'/,'loader must evict a loaded dependency when its readiness/version contract is stale');
