@@ -42,7 +42,7 @@ const ctx={
        ?'Read and memorize the tarot: Major Arcana and Minor Arcana, practice a three-card spread.'
        :JSON.stringify(valid);
      req.onEvent?.({phase:'partial',characters:text.length,
-       ...(stage==='draft'?{accumulatedText:text}:{rawJsonUnvalidated:text}),
+       accumulatedText:text,
        complete:true});
      if(stage==='compile'&&failingCompile)return{status:'invalid-response',outputText:'{broken',error:{code:'INVALID_JSON',message:'bad json'}};
      return{status:'success',actual:{provider:'openai-compatible',model:'qwen35-4b-native'},
