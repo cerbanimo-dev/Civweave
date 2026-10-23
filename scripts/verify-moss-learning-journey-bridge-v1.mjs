@@ -71,12 +71,22 @@ sandbox.CivweaveFamilyAILoaderV105={ensure:async()=>true};
 sandbox.CivweaveAssistantV141={selectedConfig:()=>({provider:'downloaded-local',model:'gemma4-e2b-it-litert-web'})};
 sandbox.CivweaveModelRuntime={
   readSharedConfig:()=>interactive,
-  generate:async ({config,context,messages})=>{
+  generate:async ({config,context,messages,ggufNoGrammar,maxRepairAttempts,responseFormat,schema})=>{
     calls++;
     assert.equal(config.model,interactive.model,'Moss must honor canonical imported browser GGUF over stale Gemma selection.');
     assert.equal(context.request.capability.toLowerCase(),'read and memorize the tarot');
     assert.equal(context.recentConversation.length,0,'New learning goal must not inherit unrelated old chat topics.');
     assert.ok(messages[1].content.includes('tarot'));
+    assert.equal(ggufNoGrammar,config.provider==='openai-compatible','Only embedded GGUF draft skips expensive JSON grammar.');
+    if(ggufNoGrammar){
+      assert.equal(config.maxTokens,512,'Phone GGUF must use a small bound on tokens.');
+      assert.equal(maxRepairAttempts,0,'Phone GGUF must not enter another long automatic repair generation.');
+      assert.equal(responseFormat,'json');
+      assert.ok(schema?.properties?.modules?.items?.required?.includes('outcome'),'Independent schema verification must remain enabled.');
+      assert.ok(messages[1].content.length<1700,'Phone GGUF prompt must not include the old multi-KB context packet.');
+      assert.ok(messages[1].content.includes('modules'));
+    }
+
     return output;
   }
 };

@@ -237,7 +237,24 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
   const context={schema:'civweave.learning-journey-plan-request.v2',request:seed,revision:clean(revisionText,3000),existingPlan:existingPlan?{title:existingPlan.request?.title,capability:existingPlan.request?.capability,level:existingPlan.request?.level,mode:existingPlan.request?.mode,proof:existingPlan.request?.proof,modules:existingPlan.modules||[],assumptions:existingPlan.assumptions||[]}:null,recentConversation:history,constraints:['Generate only a high-level Learning Journey plan for review.','Do not write lessons, explanations, exercises, quizzes, readings, source lists, or curriculum content.','Make the module sequence specific to the Hero’s stated learning goal.','Each module entry needs a short title, a focus, and an observable outcome.','Keep the plan in REVIEW. Nothing is approved, activated, or materialized by this call.']};
   try{
     const ggufChoice=selectedPlanGGUF(planConfig);
-    const result=await runtime.generate({purpose:'living-school-learning-plan-review-v2',executionProfile:'interactive',config:planConfig,schema:LEARNING_PLAN_SCHEMA,responseFormat:'json',context,task:{schema:'civweave.ai-task.v2',kind:'curriculum-plan-draft',systemId:'living-school',complexity:'routine',requirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:true,structuredOutput:true,vision:false,complexity:false}},capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,planning:true,structuredOutput:true},messages:[{role:'system',content:'You are Moss, Living School’s Learning Journey guide. Use the selected AI model to design a concise, personalized, high-level learning plan for review. Return strict JSON matching the supplied schema. Do not teach the subject yet and do not generate curriculum content. The output must remain an inert REVIEW plan until the Hero explicitly approves it.'},{role:'user',content:`Design the high-level Learning Journey plan from this request:\n${JSON.stringify(context)}`}]});
+    // A phone-sized GGUF should draft a small plan without a long context
+    // packet or a large on-the-fly grammar. The shared runtime still parses
+    // and independently validates the complete required Learning Plan schema.
+    if(ggufChoice){
+      planConfig.maxTokens=512;
+      planConfig.temperature=.2;
+    }
+    const conciseMessages=ggufChoice?[
+      {role:'system',content:'You are Moss, a learning guide. Output one short valid JSON object only. No markdown, preamble, thinking, or commentary. Use the exact field names title, capability, level, mode, proof, modules, assumptions. Three modules, each with title, focus, outcome. Everything MUST be about the present learning goal.'},
+      {role:'user',content:'Learning goal: '+clean(seed.capability,500)+
+        '\nTitle: '+clean(seed.title,120)+
+        '\nLevel: '+clean(seed.level,50)+
+        '\nMode: '+clean(seed.mode,50)+
+        '\nOutput exactly this compact JSON shape, substituting goal-specific text and a short observable proof: '+
+        '{"title":"'+clean(seed.title,120).replace(/["\\]/g,'')+'","capability":"'+clean(seed.capability,350).replace(/["\\]/g,'')+'","level":"beginner","mode":"guided","proof":"demonstrate the skill independently","modules":[{"title":"Foundation","focus":"...","outcome":"..."},{"title":"Practice","focus":"...","outcome":"..."},{"title":"Demonstration","focus":"...","outcome":"..."}],"assumptions":[]}. Do not change the learning topic.'}
+    ]:null;
+    const result=await runtime.generate({purpose:'living-school-learning-plan-review-v2',executionProfile:'interactive',config:planConfig,schema:LEARNING_PLAN_SCHEMA,responseFormat:'json',context,
+      ggufNoGrammar:Boolean(ggufChoice),maxRepairAttempts:ggufChoice?0:1,task:{schema:'civweave.ai-task.v2',kind:'curriculum-plan-draft',systemId:'living-school',complexity:'routine',requirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:true,structuredOutput:true,vision:false,complexity:false}},capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,planning:true,structuredOutput:true},messages:conciseMessages||[{role:'system',content:'You are Moss, Living School’s Learning Journey guide. Use the selected AI model to design a concise, personalized, high-level learning plan for review. Return strict JSON matching the supplied schema. Do not teach the subject yet and do not generate curriculum content. The output must remain an inert REVIEW plan until the Hero explicitly approves it.'},{role:'user',content:`Design the high-level Learning Journey plan from this request:\n${JSON.stringify(context)}`}]});
     if(!['success','fallback'].includes(result?.status))throw new Error(result?.error?.message||result?.error||`The selected AI ended with ${result?.status||'an error'}.`);
     const provider=clean(result?.actual?.provider||result?.provider||config.provider||config.route,120),model=clean(result?.actual?.model||result?.model||config.model,240),actualProvider=provider.toLowerCase();
     if(ggufChoice){

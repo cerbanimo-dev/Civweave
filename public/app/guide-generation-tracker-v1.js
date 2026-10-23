@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.17-guide-generation-tracker-v1-embedded-gguf-probe';
+const VERSION='1.2.18-guide-generation-tracker-v1-gguf-visible-token-draft';
 const REVISION='1.3.0-accurate-not-reached-stages';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
@@ -321,7 +321,16 @@ function replayLifecycle(){const rows=bus()?.history?.()||[];for(const row of ro
 function onThreadChanged(event){const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;if(row.pending){const user=latestRole(thread,'user'),key=`${clean(user?.text,500)}|${clean(user?.createdAt||user?.at||thread.updatedAt,80)}`;if(!state.pendingObserved||state.pendingKey!==key||state.terminal){const stamp=Date.parse(user?.createdAt||user?.at||'')||Date.parse(thread?.updatedAt||'')||now();resetForRequest({text:user?.text||'',pendingKey:key,startedMs:stamp});replayLifecycle()}ensurePanel();return}const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;if(!state.terminal&&state.showPipeline)state.terminal=/could not|failed|error|no learning content was generated/i.test(clean(row.text,6000))?'failed':'complete';animateFinal(row.text,row);ensurePanel()}
 function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();addEventListener('civweave:generation-lifecycle',event=>applyLifecycle(event?.detail||{}));addEventListener('civweave:model-event',event=>{
   const detail=event?.detail||{},selected=embeddedGGUFSelection();
-  if(detail.phase!=='gguf-browser-phase'||!selected||detail.model!==selected.model)return;
+  if(!selected||detail.model!==selected.model)return;
+  if(detail.phase==='partial'&&detail.backend==='browser-gguf'){
+    // Show only visible generated text. Hidden thinking content is never
+    // included in these deltas. JSON will be validated before saving.
+    state.pendingObserved=true;state.showPipeline=true;
+    stageState('intake','streaming','GGUF visible JSON draft',selected.model);
+    state.streams.intake=clean(detail.accumulatedText??state.streams.intake+String(detail.text||''),50000);
+    refreshStream('intake');return;
+  }
+  if(detail.phase!=='gguf-browser-phase')return;
   const stage=clean(detail.stage||'working',80),backend=clean(detail.backend||'',50);
   state.runtimePhase='GGUF · '+stage+(backend?' · '+backend:'');
   if(stage==='failed'&&detail.reason)state.errorDetail='GGUF '+clean(detail.reason,400);

@@ -690,12 +690,14 @@
     // call: inference runs within Civweave's own wllama Web Worker.
     const selectedGGUF=selectedEmbeddedGGUF(config);
     if(selectedGGUF){
-      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v6-moss-timeout-probe');
+      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v7-watchdog-visible');
       emit(context,'gguf-browser-loading',{model:config.model,backend:'wllama',networkInference:false});
       const run=await browserGGUF.generate({
         model:config.model,messages:normalizeChatMessages(messages),
         temperature:config.temperature,maxTokens:config.maxTokens,
-        structured:request.responseFormat==='json'||Boolean(request.schema),
+        // Moss validates JSON independently; avoid slow Wllama JSON grammar
+        // for the bounded local plan when explicitly requested by its compiler.
+        structured:(request.responseFormat==='json'||Boolean(request.schema))&&request.ggufNoGrammar!==true,
         signal,onToken:(text,accumulatedText)=>emit(context,'partial',{text,accumulatedText,backend:'browser-gguf'}),
         onPhase:(stage,details={})=>emit(context,'gguf-browser-phase',{stage,model:config.model,...details})
       });
