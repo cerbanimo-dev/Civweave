@@ -695,7 +695,9 @@
       const run=await browserGGUF.generate({
         model:config.model,messages:normalizeChatMessages(messages),
         temperature:config.temperature,maxTokens:config.maxTokens,
-        structured:request.responseFormat==='json'||Boolean(request.schema),
+        // Moss validates JSON independently; avoid slow Wllama JSON grammar
+        // for the bounded local plan when explicitly requested by its compiler.
+        structured:(request.responseFormat==='json'||Boolean(request.schema))&&request.ggufNoGrammar!==true,
         signal,onToken:(text,accumulatedText)=>emit(context,'partial',{text,accumulatedText,backend:'browser-gguf'}),
         onPhase:(stage,details={})=>emit(context,'gguf-browser-phase',{stage,model:config.model,...details})
       });
