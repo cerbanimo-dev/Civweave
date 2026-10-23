@@ -10,7 +10,7 @@ export function createGGUFGenerationWatch({
   timerSet=setTimeout,timerClear=clearTimeout,now=Date.now
 }={}){
   const own=new AbortController(),started=now();
-  let firstVisibleAt=null,lastVisibleAt=null,hiddenChunks=0,visibleChunks=0,reason=null;
+  let firstVisibleAt=null,lastVisibleAt=null,hiddenChunks=0,visibleChunks=0,reason=null,lastPrefill=null,prefillEvents=0;
   const timers=new Set();
   const error=(code,message)=>{
     const e=new Error(message);e.code=code;return e;
@@ -51,6 +51,12 @@ export function createGGUFGenerationWatch({
   cancelled.catch(()=>{});
   return {
     signal:own.signal,cancelled,
+    prefill(progress={}){
+      if(own.signal.aborted)throw reason;
+      prefillEvents++;
+      lastPrefill={processed:Number(progress.processed||0),total:Number(progress.total||0),
+        cached:Number(progress.cached||0),elapsedMs:now()-started};
+    },
     chunk({visible=false,hidden=false}={}){
       if(own.signal.aborted)throw reason;
       if(visible){
@@ -64,7 +70,7 @@ export function createGGUFGenerationWatch({
           progress('hidden-progress',{hiddenChunks,elapsedMs:now()-started,visibleChunks});
       }
     },
-    snapshot(){return{visibleChunks,hiddenChunks,firstTokenMs:firstVisibleAt===null?null:firstVisibleAt-started,
+    snapshot(){return{visibleChunks,hiddenChunks,prefillEvents,prefill:lastPrefill,firstTokenMs:firstVisibleAt===null?null:firstVisibleAt-started,
       idleMs:lastVisibleAt===null?null:now()-lastVisibleAt,elapsedMs:now()-started,
       timedOut:Boolean(reason&&reason.code!=='GGUF_ABORTED'),errorCode:reason?.code||''}},
     stop(){clear();signal?.removeEventListener?.('abort',parentAbort)}
