@@ -23,7 +23,7 @@ const globals={
   CivweaveSettingsV320:{readState:()=>selected},
   CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,generate:async()=>{throw Error('unexpected runtime call')}},
   CivweaveUnifiedChatSystemV1:{
-    version:'1.2.5-unified-chat-system-v1-topic-grounded-plan',
+    version:'1.2.6-unified-chat-system-v1-topic-grounded-visible-progress',
     handleNativeLivingSchoolRequest:async args=>{planArgs=args;return{response:{answer:args.text==='approve'?'Approved Learning Journey': 'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
   },
   CivweaveFamilyAILoaderV105:{ensure:async()=>{assistants++;throw Error('full assistant bootstrap should be skipped')}}
