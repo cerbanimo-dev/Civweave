@@ -352,7 +352,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       let lastProgress=0;
       const request={
         purpose,executionProfile:'interactive',signal:options.signal,
-        config:{...config,stream:true,maxTokens,temperature:.2,timeoutMs:480000,context:4096},
+        config:{...config,stream:true,maxTokens,temperature:.2,timeoutMs:480000,context:6144},
         ...(structured?{responseFormat:'json',schema}:{}),
         maxRepairAttempts:0,
         messages:[{role:'system',content:system},{role:'user',content:user}],
@@ -389,7 +389,7 @@ async function nativeFormalLearningPlan({runtime,config,seed,options,existingPla
       const continued=await run({
         purpose:'living-school-native-plan-draft-continuation-v1',
         phase:'draft',maxTokens:1200,appendPrefix:draft+'\n',
-        system:'Continue the visible Learning Journey outline that was cut off. Give ONLY the remaining words, complete Module 3, and add the final practical proof. Do not restart, repeat earlier modules, change subject or return JSON. Keep it concise.',
+        system:'Continue the visible Learning Journey outline that was cut off. Give ONLY the remaining words, complete Module 3, and add the final practical proof. Do not restart, repeat earlier modules, change subject or return JSON. Include the final practical proof. Keep it concise.',
         user:'CURRENT GOAL: '+goal+'\nLast portion already shown:\n'+tail+
           '\nContinue from its exact stopping point. Complete the remaining outline without repeating the text above.'
       });
