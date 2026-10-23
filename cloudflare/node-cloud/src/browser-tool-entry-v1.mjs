@@ -80,14 +80,64 @@ async function quick(env, action, payload) {
   }
   return { result: boundValue(body.result), browserMs };
 }
+// The node operator supplies the trusted SearXNG instance; model output cannot choose a proxy.
+async function searchSearxng(env, query) {
+  const configured = clean(env.SEARXNG_BASE_URL, 2048);
+  if (!configured) return null;
+  let base;
+  try { base = new URL(configured); }
+  catch { throw Object.assign(new Error('SEARXNG_BASE_URL is not a valid URL.'), { status: 503 }); }
+  if (!['https:', 'http:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
+    throw Object.assign(new Error('SEARXNG_BASE_URL is not a supported search origin.'), { status: 503 });
+  }
+  const url = new URL('search', base.href.endsWith('/') ? base.href : base.href + '/');
+  url.searchParams.set('q', query);
+  url.searchParams.set('format', 'json');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const response = await fetch(url.href, {
+      headers: { accept: 'application/json' },
+      redirect: 'error',
+      signal: controller.signal,
+    });
+    if (!response.ok) throw Object.assign(new Error('Configured SearXNG search returned HTTP ' + response.status + '. Check that JSON output is enabled.'), { status: 502 });
+    const type = response.headers.get('content-type') || '';
+    if (!type.includes('application/json')) throw Object.assign(new Error('SearXNG did not return JSON. Enable the json format in settings.yml.'), { status: 502 });
+    const payload = await response.json();
+    if (!Array.isArray(payload?.results)) throw Object.assign(new Error('SearXNG response has no results array.'), { status: 502 });
+    const results = [];
+    const seen = new Set();
+    for (const row of payload.results.slice(0, 35)) {
+      let target;
+      try { target = safeUrl(row?.url); } catch { continue; }
+      if (seen.has(target)) continue;
+      seen.add(target);
+      results.push({
+        title: clean(row?.title, 280),
+        url: target,
+        snippet: clean(row?.content, 1600),
+        engine: clean(row?.engine, 90),
+        liveFetched: true,
+      });
+      if (results.length === 8) break;
+    }
+    return { action: 'search', query, source: 'searxng', results, browserMs: 0 };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function runTool(env, input) {
   const action = clean(input?.action, 40).toLowerCase();
   if (action === 'search') {
     const query = clean(input?.query, 1200);
     if (!query) throw Object.assign(new Error('Browser search requires a query.'), { status: 400 });
+    const searxng = await searchSearxng(env, query);
+    if (searxng) return searxng;
     const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
     const out = await quick(env, 'markdown', { url, gotoOptions: { waitUntil: 'domcontentloaded', timeout: 20_000 } });
-    return { action, query, url, ...out };
+    return { action, query, url, source: 'browser-run-duckduckgo', ...out };
   }
   if (action === 'open' || action === 'markdown') {
     const url = safeUrl(input?.url);
@@ -124,4 +174,4 @@ export async function handleBrowserToolRequest(request, env) {
   }
 }
 
-export const browserToolVersion = '1.0.0-browser-tool-entry-v1';
+export const browserToolVersion = '1.1.0-browser-tool-entry-v1-searxng';
