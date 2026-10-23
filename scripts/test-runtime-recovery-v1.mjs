@@ -276,6 +276,7 @@ test('selected Ollama guide messages never activate downloaded-local model boots
   const scope={
     globalThis:null,
     MODEL_PROFILES_KEY:'civweave-model-profiles-v1',UNIVERSAL_AI_KEY:'civweave.universal-ai.v127',
+    LABEL:{civweave:'Civweave'},guideFor:()=>({name:'Weaveling',role:'Quest guide'}),
     PREREQUISITES:[['parity'],['shared-model-runtime']],
     clean:(v,max=12000)=>String(v||'').slice(0,max),
     obj:key=>key==='civweave-model-profiles-v1'?{interactive:{provider:'ollama',model:'gemma4:latest',endpoint:'http://127.0.0.1:11434/api/chat'}}:{},
