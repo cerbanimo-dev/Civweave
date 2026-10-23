@@ -671,21 +671,33 @@
     } finally { controller.cleanup(); }
   }
 
+  const GGUF_BROWSER_SELECTION_KEY = 'civweave.mobile.gguf-primary.v2';
+  const GGUF_BROWSER_ENDPOINT = 'http://127.0.0.1:8080/v1'; // internal routing sentinel, NOT a network server
+  const GGUF_BROWSER_MIN_TIMEOUT_MS = 480000;
+  function selectedEmbeddedGGUF(config) {
+    let saved = null;
+    try { saved = JSON.parse(global.localStorage?.getItem?.(GGUF_BROWSER_SELECTION_KEY) || 'null'); } catch {}
+    if (!saved?.enabled || saved.engine !== 'wllama' || !saved.model) return null;
+    if (config.provider !== 'openai-compatible' || config.model !== saved.model) return null;
+    if (config.endpoint !== GGUF_BROWSER_ENDPOINT)
+      throw runtimeError('GGUF_ROUTE_MISMATCH','An imported browser GGUF is selected, but its internal runtime route was changed. Re-select the GGUF under Settings; Civweave will not send these weights or prompts to a remote endpoint.');
+    return saved;
+  }
+
   async function invokeOpenAI(config, messages, request, context, signal) {
     // A separately downloaded, browser-resident GGUF takes precedence over
     // the old optional native loopback route. This path makes NO HTTP API
     // call: inference runs within Civweave's own wllama Web Worker.
-    let selectedGGUF=null;
-    try{selectedGGUF=JSON.parse(global.localStorage?.getItem?.('civweave.mobile.gguf-primary.v2')||'null')}catch{}
-    if(selectedGGUF?.enabled===true&&selectedGGUF?.engine==='wllama'&&
-       selectedGGUF.model===config.model&&config.endpoint==='http://127.0.0.1:8080/v1'){
+    const selectedGGUF=selectedEmbeddedGGUF(config);
+    if(selectedGGUF){
       const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v5-opfs-progress');
       emit(context,'gguf-browser-loading',{model:config.model,backend:'wllama',networkInference:false});
       const run=await browserGGUF.generate({
         model:config.model,messages:normalizeChatMessages(messages),
         temperature:config.temperature,maxTokens:config.maxTokens,
         structured:request.responseFormat==='json'||Boolean(request.schema),
-        signal,onToken:(text,accumulatedText)=>emit(context,'partial',{text,accumulatedText,backend:'browser-gguf'})
+        signal,onToken:(text,accumulatedText)=>emit(context,'partial',{text,accumulatedText,backend:'browser-gguf'}),
+        onPhase:(phase,details={})=>emit(context,'gguf-browser-phase',{phase,model:config.model,...details})
       });
       return{text:run.text,model:run.model,streamed:run.streamed,backend:run.backend,
         payload:{choices:[{message:{role:'assistant',content:run.text},finish_reason:'stop'}]},
@@ -825,6 +837,12 @@
       ? { ...requestedConfig, ...selectedShared, apiKey: requestedConfig.apiKey || selectedShared.apiKey, externalConsent: requestedConfig.externalConsent ?? selectedShared.externalConsent }
       : requestedConfig;
     const config = normalizeConfig({ ...selectedShared, ...profileOverride });
+    // First cold load of a ~2.7GB GGUF on Android includes Wllama/WASM setup,
+    // possible WebGPU failure, CPU fallback, and then the first decoded token.
+    // The ordinary 90-second HTTP-provider deadline aborts before that work
+    // can complete. Set a bounded GGUF-only budget without affecting any other
+    // provider or permission contract. This is not a claim of successful load.
+    if (selectedEmbeddedGGUF(config)) config.timeoutMs = Math.max(config.timeoutMs, GGUF_BROWSER_MIN_TIMEOUT_MS);
     if (endpointLeavesDevice(config) && !config.externalConsent && request.requireExternalConsent !== false) {
       return failureResult("provider-error", runtimeError("REMOTE_CONSENT_REQUIRED", "External provider use requires explicit session consent."), { request, config, context: makeContext(request, config), elapsedMs: 0 });
     }
@@ -1060,7 +1078,17 @@
       base.probe = "browser-api";
       if (!base.available) base.notes.push("The browser LanguageModel API is unavailable.");
     }
-    if (options.probe && !["deterministic", "manual", "browser", "hosted"].includes(config.provider)) {
+    const selectedGGUF=selectedEmbeddedGGUF(config);
+    if(selectedGGUF){
+      base.probe='embedded-gguf-selection';
+      base.available=true; // selected/import manifest only; GPU execution is NOT implied
+      base.capabilities.local=true;
+      base.capabilities.toolCalling=false;
+      base.capabilities.imageInput=false;
+      base.capabilities.webSearch=false;
+      base.notes.push('GGUF runs in this browser. This is a saved-selection check, not an inference or GPU readiness check.');
+    }
+    if (options.probe && !selectedGGUF && !["deterministic", "manual", "browser", "hosted"].includes(config.provider)) {
       const controller = makeController(options.signal, Math.min(config.timeoutMs, 20000));
       try {
         let url, headers = { ...config.headers };
