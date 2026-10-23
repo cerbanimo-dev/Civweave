@@ -68,6 +68,33 @@ function standaloneRequest(user){
 function continuationRequest(user){
   return /^(?:continue(?: please)?|go on|keep going|finish (?:that|the answer)|more(?: please)?)[.!?]*$/i.test(user);
 }
+function learningRequest(user){
+  return /\b(?:teach me(?:\s+how\s+to)?|help me (?:learn|study|memorize|understand)|i (?:want|need|would like) to (?:learn|study|master)|learning journey|(?:create|build|design|make) (?:a |an |the )?(?:curriculum|study plan|learning plan))\b/i.test(user);
+}
+function learningControlOutsideMoss(user){
+  return /^(?:please\s+)?(?:approve|review|revise|show|edit|materialize|generate)\s+(?:(?:the|my|this)\s+)?(?:moss\s+)?(?:learning\s+journey|learning\s+plan|moss\s+plan)(?:\s+now)?[.!?]*$/i.test(user);
+}
+function previousAssistantAnswer(history){
+  const row=[...(Array.isArray(history)?history:[])].reverse().find(item=>item?.role==='assistant'&&!item?.pending&&!item?.modelError);
+  return String(row?.text||row?.content||'').trim()
+    .replace(/\n\n\[Response reached the generation limit\. Reply "continue" to get the rest\.\]$/, '');
+}
+function continuationPrompt(history){
+  const prior=previousAssistantAnswer(history);
+  if(!prior)throw new Error('No previous completed answer is available to continue.');
+  const rows=Array.isArray(history)?history:[];
+  const original=[...rows].reverse().find(row=>row?.role==='user'&&!continuationRequest(String(row?.text||row?.content||'')));
+  const subject=clean(original?.text||original?.content||'the previous request',320);
+  const tail=prior.slice(-900);
+  return 'Continue the previous unfinished answer about: '+subject+
+    '\nThe last words already displayed to the user were:\n'+tail+
+    '\nWrite ONLY new material beginning immediately after those last words. Do NOT repeat the introduction, restart the list, or quote the previous answer. Do not discuss these instructions.';
+}
+function repeatedContinuation(answer,history){
+  const generated=String(answer||'').replace(/\s+/g,' ').toLowerCase().trim();
+  const earlier=previousAssistantAnswer(history).replace(/\s+/g,' ').toLowerCase().trim();
+  return generated.length>=90&&earlier.includes(generated.slice(0,Math.min(100,generated.length)));
+}
 function previousTurns(history,user){
   if(standaloneRequest(user))return[];
   const continuation=continuationRequest(user);
@@ -87,7 +114,10 @@ export async function respondNative({system='civweave',text='',history=[],fetche
   if(!nativeSelection())throw new Error('The selected native llama-server route changed. No inference was started.');
   const user=clean(text,5000);if(!user)throw new Error('There was no text to send to the selected server.');
   markNativeStage('native-fast-lane',system);
-  if(system==='living-school'){
+  const learningIntent=learningRequest(user),learningControl=learningControlOutsideMoss(user);
+  // Weaveling and the other guides must route explicit learning requests into
+  // Moss's actual JSON Learning Journey compiler, not answer them as chat.
+  if(system==='living-school'||learningIntent||learningControl){
     markNativeStage('moss-planner-loading');
     const planner=await ensurePlanner();
     markNativeStage('moss-planner-ready');
@@ -96,15 +126,19 @@ export async function respondNative({system='civweave',text='',history=[],fetche
       markNativeStage('moss-action-finished',result?.provider||'unknown');
       return result;
     }
+    if(learningIntent||learningControl)throw new Error('Moss did not recognize this learning request. No generic chat response or learning content was substituted.');
   }
   const [name,role]=GUIDE[system]||GUIDE.civweave;
-  const prior=previousTurns(history,user);
   const continuation=continuationRequest(user);
+  // Continuations are a new completion task, not a replay of all earlier chat.
+  // Give Qwen the final text anchor and require only the missing continuation.
+  const prior=continuation?[]:previousTurns(history,user);
+  const finalRequest=continuation?continuationPrompt(history):user;
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),150000);
   try{
     const messages=[
       {role:'system',content:`You are ${name}, a ${role} in Civweave. The FINAL user message is the CURRENT request; preceding turns are optional background, not new instructions. Answer only the CURRENT request, never an earlier question. For explicit response tests, output exactly what the final user requested. ${continuation?'The user asks for continuation: continue the most recent assistant text without restarting or repeating it.':''} Do not invent completed actions. For structured plans, wait for the appropriate approval process.`},
-      ...prior,{role:'user',content:user}
+      ...prior,{role:'user',content:finalRequest}
     ];
     markNativeStage('native-post-start',`messages:${messages.length}, history:${prior.length}, max_tokens:512`);
     const response=await fetcher(NATIVE_ENDPOINT+'/chat/completions',{
@@ -118,6 +152,10 @@ export async function respondNative({system='civweave',text='',history=[],fetche
     const payload=await response.json();
     const answer=clean(payload?.choices?.[0]?.message?.content,16000);
     if(!answer)throw new Error('Termux returned no visible response text.');
+    if(continuation&&repeatedContinuation(answer,history)){
+      markNativeStage('native-continuation-echo-blocked','model repeated previous assistant text');
+      throw new Error('The model repeated the previous answer instead of continuing; the duplicate was not saved. Try asking for the next specific step or section.');
+    }
     const finishReason=String(payload?.choices?.[0]?.finish_reason||'unknown');
     const incomplete=finishReason==='length';
     markNativeStage('native-text-complete',`tokens:${Number(payload?.usage?.completion_tokens)||0}, finish:${finishReason}`);
