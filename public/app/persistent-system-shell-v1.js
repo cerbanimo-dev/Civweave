@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.9-directory-frame-validation';
+const VERSION='1.1.10-ollama-provider-runtime-loopback';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
