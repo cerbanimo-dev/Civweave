@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.137-native-server-and-prefill'
+const VERSION='1.0.138-native-server-transport-isolation'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
 const PREREQUISITES=[
   ['/app/shared/civweave-parity-runtime.js?v=1.0.4',()=>globalThis.CivweaveParity],
-  ['/app/shared/civweave-model-runtime.js?v=1.0.7-gguf-prefill-observer',()=>globalThis.CivweaveModelRuntime],
+  ['/app/shared/civweave-model-runtime.js?v=1.0.8-native-http-no-wllama-intercept',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.4',()=>globalThis.CivweaveGuideContractsV141]
