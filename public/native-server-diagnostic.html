@@ -26,6 +26,8 @@ small{color:#bed2da}
 <h1>Civweave · Termux network diagnostic</h1>
 <p>This page does not initialize Civweave, download models, or start inference automatically. Open it in the <strong>same Android browser or PWA</strong> where Civweave freezes. Leave Termux running.</p>
 <p>Expected model: <code>qwen35-4b-native</code><br>Endpoint: <code>http://127.0.0.1:8080/v1</code></p>
+<button id="last-request">Show last Civweave native-request stage (no inference)</button>
+<pre id="last-request-result" aria-live="polite">No request state read yet.</pre>
 <button id="catalog">1 · Check GET /v1/models (no generation)</button>
 <button id="preflight" disabled>2 · Check JSON POST /v1/models (no generation)</button>
 <button id="generation" disabled>3 · Explicitly generate 8 tokens (loads model)</button>
@@ -92,6 +94,13 @@ async function action(name){
     button('generation').disabled=!(catalogPassed&&postPassed);
   }
 }
+button('last-request').addEventListener('click',()=>{
+  let record=null;
+  try{record=JSON.parse(localStorage.getItem('civweave.native-server.last-request.v1')||'null')}catch{}
+  button('last-request-result').textContent=record
+    ?JSON.stringify(record,null,2)
+    :'No recent Civweave native-model stage is stored in this browser profile.';
+});
 button('catalog').addEventListener('click',()=>void action('catalog'));
 button('preflight').addEventListener('click',()=>void action('preflight'));
 button('generation').addEventListener('click',()=>void action('generation'));

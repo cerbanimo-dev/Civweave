@@ -723,8 +723,20 @@
     }
     const url = openAIChatUrl(config.endpoint, config);
     const structured = request.responseFormat === "json" || Boolean(request.schema);
-    const lineup = nativePhoneLineup(config);
-    const useStream = Boolean(config.stream || lineup);
+    const nativeDirect=config.provider==='openai-compatible'&&config.model==='qwen35-4b-native'&&
+      config.endpoint==='http://127.0.0.1:8080/v1';
+    // Direct Termux Qwen runs exactly one POST. No auxiliary helper model,
+    // SSE parsing or deprecated template override is needed for this route.
+    const lineup = nativeDirect ? null : nativePhoneLineup(config);
+    const useStream = nativeDirect ? false : Boolean(config.stream || lineup);
+    const noteNative=(stage,detail='')=>{
+      if(!nativeDirect)return;
+      try{global.localStorage?.setItem?.('civweave.native-server.last-request.v1',JSON.stringify({
+        at:new Date().toISOString(),stage,detail:safeString(detail,200),
+        route:'openai-compatible',model:'qwen35-4b-native'
+      }))}catch{}
+    };
+    noteNative('native-runtime-ready',context.purpose);
     emit(context, "connecting", { endpoint: redactUrl(url), structured, streamed: useStream, nativePhonePrimary: Boolean(lineup) });
     const normalized = normalizeChatMessages(messages);
     const hint = lineup ? await nativePhoneHelper(lineup, config, normalized, request, context, signal) : null;
@@ -745,12 +757,14 @@
       ...(useStream ? { stream_options: { include_usage: true } } : {}),
       ...(structured ? { response_format: { type: "json_object" } } : {}),
     };
+    noteNative('native-http-post-start',`messages:${bodyMessages.length}, max_tokens:${body.max_tokens}`);
     let response = await fetch(url, fetchOptions(url, {
       method: "POST",
       headers: { "content-type": "application/json", ...(config.apiKey ? { authorization: `Bearer ${config.apiKey}` } : {}), ...config.headers },
       body: JSON.stringify(body),
       signal,
     }));
+    noteNative('native-http-headers','HTTP '+response.status);
     if (!response.ok && structured && [400, 422].includes(response.status)) {
       const first = await readBoundedText(response).catch(() => "");
       emit(context, "repairing", { reason: "provider-response-format-rejection", detail: safeString(first, 800) });
@@ -765,7 +779,9 @@
     if (!response.ok) throw providerHttpError("OpenAI-compatible provider", response.status, await readBoundedText(response).catch(() => ""));
     if (useStream) return { ...(await parseOpenAIStream(response, context)), model: config.model, streamed: true };
     const text = await readBoundedText(response);
+    noteNative('native-response-read',`bytes:${text.length}`);
     let payload; try { payload = JSON.parse(text || "{}"); } catch { throw runtimeError("INVALID_PROVIDER_JSON", "The OpenAI-compatible endpoint returned invalid transport JSON.", { recoverableText: text.slice(0, 12000) }); }
+    noteNative('native-response-parsed',`tokens:${Number(payload?.usage?.completion_tokens)||0}`);
     return { text: extractText(payload), payload, usage: extractUsage(payload), model: payload.model || config.model, streamed: false };
   }
 
@@ -1166,6 +1182,7 @@
 
   const api = Object.freeze({
     version: VERSION,
+    nativeDirectTermuxNoStream: true,
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,

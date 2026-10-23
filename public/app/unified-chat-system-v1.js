@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.2-unified-chat-system-v1-native-server-goal-pin';
+const VERSION='1.2.4-unified-chat-system-v1-native-learning-controls';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -263,8 +263,16 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
       saveLearningPlan({...prior,state:'superseded',supersededBy:explicitGoal,updatedAt:now()});
   }
   let config;try{config=selectedPlanningConfig()}catch(error){return packet('Moss could not read the selected AI route: '+clean(error?.message||error,700),'Reselect the model in Settings.',{provider:'learning-plan-route-error'})}
-  try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();config=selectedPlanningConfig()||config}catch(error){
-    return packet(`Moss could not start the selected AI for Learning Journey planning: ${clean(error?.message||error,900)}`,'Retry the plan or check the selected AI model.',{provider:'learning-plan-model-error',model:clean(config?.model,240)});
+  // The explicitly selected native Termux endpoint can use the shared
+  // model runtime directly. The full value/economy/assistant bootstrap is
+  // unnecessary for drafting an inert high-level plan and can block Android
+  // before a single POST reaches llama-server.
+  const nativeFastReady=Boolean(options.nativeFastLane&&nativePhoneServer(config)&&
+    typeof globalThis.CivweaveModelRuntime?.generate==='function');
+  if(!nativeFastReady){
+    try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();config=selectedPlanningConfig()||config}catch(error){
+      return packet(`Moss could not start the selected AI for Learning Journey planning: ${clean(error?.message||error,900)}`,'Retry the plan or check the selected AI model.',{provider:'learning-plan-model-error',model:clean(config?.model,240)});
+    }
   }
   const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate||!config)return packet('Moss could not reach the selected AI runtime for Learning Journey planning. No learning content was generated or queued.','Retry after the selected AI runtime is ready.',{provider:'learning-plan-model-unavailable',model:clean(config?.model,240)});
@@ -429,7 +437,17 @@ function bindLifecycle(){
 }
 function start(){bindLifecycle();synchronize();document.documentElement.dataset.civweaveChatSystem='unified-v1'}
 
-const api=Object.freeze({version:VERSION,systems:SYSTEMS,themes:THEMES,memoryFolders:MEMORY_FOLDERS,memoryFolder,activeTheme,registerCapability,normalizeSurface,synchronize,ensureWeavelingOrchestrator,curriculumIntent,learningJourneyIntent,curriculumRequest,readLearningPlan,generateLivingSchoolPlan,learningPlanResponse,approveLivingSchoolPlan,runLivingSchoolCurriculum,architecture:'one-core-five-themes-five-memory-folders',artifactLanguage:{'living-school':'Learning Journey'},learningPlanAuthoring:'selected-ai-local-capable',learningJourneyMaterialization:'review-then-explicit-approval',inputOwners:1,polling:false});
+async function handleNativeLivingSchoolRequest(options={}){
+  // Reuse Moss's same review/revision/approval state machine without going
+  // through the heavyweight assistant bootstrap. Ordinary non-curriculum
+  // conversation returns null so the native chat lane can answer directly.
+  const handler=capabilityHandlers.get('living-school');
+  if(typeof handler!=='function')throw new Error('Moss learning policy is unavailable.');
+  const notCurriculum=Object.freeze({__nativeLivingSchoolNotCurriculum:true});
+  const result=await handler({...options,systemId:'living-school'},async()=>notCurriculum);
+  return result===notCurriculum?null:result;
+}
+const api=Object.freeze({version:VERSION,systems:SYSTEMS,themes:THEMES,memoryFolders:MEMORY_FOLDERS,memoryFolder,activeTheme,registerCapability,normalizeSurface,synchronize,ensureWeavelingOrchestrator,curriculumIntent,learningJourneyIntent,curriculumRequest,readLearningPlan,generateLivingSchoolPlan,handleNativeLivingSchoolRequest,learningPlanResponse,approveLivingSchoolPlan,runLivingSchoolCurriculum,architecture:'one-core-five-themes-five-memory-folders',artifactLanguage:{'living-school':'Learning Journey'},learningPlanAuthoring:'selected-ai-local-capable',learningJourneyMaterialization:'review-then-explicit-approval',inputOwners:1,polling:false});
 globalThis.CivweaveUnifiedChatSystemV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
