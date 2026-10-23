@@ -192,7 +192,7 @@ assert.equal(calls[0].config.context,6144,'Formal plans need a larger context');
 assert.equal(calls[0].config.timeoutMs,480000,'Long drafts need a realistic timeout');
 assert.equal(calls[1].config.maxTokens,1200,'Continuation must have a generous bounded budget');
 assert.equal(calls[2].config.maxTokens,2300,'Compile outputs need a larger JSON budget');
-assert.match(calls[1].messages[1].content,/Continue from its exact stopping point/);
+assert.match(calls[1].messages[1].content,/Return ONLY new text that follows these exact words/);
 assert.match(calls[2].messages[1].content,/Major Arcana/);
 assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='draft'&&e.state==='needs-continuation'));
 assert.equal(materializations,0);
