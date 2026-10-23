@@ -126,4 +126,45 @@ storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.string
 assert.equal(await api.retryPlanById(plan.id),true,'An approved plan must allow retry after generation failure.');
 assert.match(thread.messages.at(-1).text,/materialized the approved Learning Journey/);
 assert.match(approval,/previous\?\.dataset\.mode==='open'/,'Completion CTA must remain stable across MutationObserver renders.');
+
+// Prove the real REVIEW text (including its space) produces three visible
+// controls in a rendered chat article. Static string checks alone missed the
+// double-escaped regex that previously made a successful generation stall.
+plan={...plan,id:'learning-plan-visible-actions',state:'review',approvedAt:null};
+storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
+const fakeBody={children:[],append(...nodes){this.children.push(...nodes)}};
+const fakeArticle={querySelector(selector){
+  if(selector==='.cw350-bubble')return{textContent:'Learning Journey plan: “Tarot Foundations”\n\nGoal: read Tarot\n\nStatus: REVIEW. This is only the high-level plan.'};
+  if(selector===':scope > div')return fakeBody;
+  return null;
+},lastElementChild:fakeBody};
+const fakeRoot={dataset:{guide:'living-school'},querySelector(selector){
+  if(selector==='[data-moss-learning-plan-approval-v1]')
+    return fakeBody.children.find(child=>child.dataset?.mossLearningPlanApprovalV1)||null;
+  return null;
+},querySelectorAll(selector){
+  return selector==='article[data-role="assistant"]'?[fakeArticle]:[];
+}};
+sandbox.document.getElementById=id=>id==='cw-persistent-guide-chat-v215'?fakeRoot:null;
+sandbox.document.querySelectorAll=selector=>selector==='[data-moss-learning-plan-approval-v1]'
+  ?fakeBody.children.filter(child=>child.dataset?.mossLearningPlanApprovalV1):[];
+sandbox.document.createElement=tag=>({
+  tagName:tag.toUpperCase(),dataset:{},style:{},children:[],textContent:'',
+  setAttribute(){},addEventListener(){},append(...nodes){this.children.push(...nodes)},
+  remove(){const index=fakeBody.children.indexOf(this);if(index>=0)fakeBody.children.splice(index,1)}
+});
+assert.equal(api.render(),true,'Moss must recognize a saved REVIEW plan in a real chat bubble.');
+assert.equal(fakeBody.children.length,1,'The review actions must attach within the chat message.');
+const reviewCard=fakeBody.children[0];
+assert.equal(reviewCard.dataset.planId,plan.id);
+assert.equal(reviewCard.dataset.mode,'review');
+const mascot=reviewCard.children.find(child=>child.className==='cw350-learning-mascot');
+assert.ok(mascot,'The Moss image and next-step guidance must appear inline.');
+assert.match(mascot.children[0].src,/moss-face-v255\.webp/);
+const actionRow=reviewCard.children.find(child=>child.className==='cw350-learning-plan-actions');
+assert.deepEqual(Array.from(actionRow.children,child=>child.textContent),['Approve','Revise','Deny']);
+assert.equal(api.render(),true,'Repeat rendering should preserve existing review controls.');
+assert.equal(fakeBody.children.length,1,'Mutation observer renders must not duplicate action bars.');
+console.log('Moss REVIEW chat rendering and decision-button regression checks passed.');
+
 console.log('Moss Learning Journey decision and recovery regression checks passed.');
