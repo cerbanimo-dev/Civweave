@@ -21,7 +21,7 @@ const selected={provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'
 let requested=0,req=null,planArgs=null,assistants=0;
 const globals={
   CivweaveSettingsV320:{readState:()=>selected},
-  CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,generate:async()=>{throw Error('unexpected runtime call')}},
+  CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,nativeMossVisibleStreamV3:true,generate:async()=>{throw Error('unexpected runtime call')}},
   CivweaveUnifiedChatSystemV1:{
     version:'1.2.6-unified-chat-system-v1-topic-grounded-visible-progress',
     handleNativeLivingSchoolRequest:async args=>{planArgs=args;return{response:{answer:args.text==='approve'?'Approved Learning Journey': 'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
@@ -125,7 +125,7 @@ assert.match(chat,/guide:respondingSystem,responderSystem:respondingSystem/);
 assert.match(chat,/await verifyNativePhoneServerTransport/);
 assert.match(runtime,/nativeDirect \? Boolean\(config\.stream\) : Boolean\(config\.stream \|\| lineup\)/);
 assert.match(runtime,/nativeDirectTermuxNoStream: true/);
-assert.match(campus,/moss-topic-grounding/);
+assert.match(campus,/moss-native-visible-tracker/);
 assert.match(shell,/moss-topic-grounding/);
 assert.match(diagnostic,/Show last Civweave native-request stage/);
 console.log('PASS: direct native HTTP, Moss review planner fast entry, no second model, no heavy bootstrap, stage diagnostics and invalid route rejection');
