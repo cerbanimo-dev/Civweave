@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.3-local-provider-authority-v1-inference-core-first';
+const VERSION='1.0.4-local-provider-authority-v1-default-web-tools';
 const PROFILE_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
