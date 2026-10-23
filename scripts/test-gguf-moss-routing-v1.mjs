@@ -45,7 +45,7 @@ const sandbox={
 sandbox.globalThis=sandbox;
 const dynamic=/await import\('\/app\/local-ai\/browser-gguf-v1\.js\?v=[^']+'\)/;
 assert.match(source,dynamic);
-vm.runInNewContext(source.replace(dynamic,'Promise.resolve(global.__testWllama)'),sandbox,{filename:'civweave-model-runtime.js'});
+vm.runInNewContext(source.replace(dynamic,'global.__testWllama'),sandbox,{filename:'civweave-model-runtime.js'});
 const runtime=sandbox.CivweaveModelRuntime;
 const config={provider:'openai-compatible',model:key,endpoint:sentinel,timeoutMs:90000};
 const result=await runtime.generate({purpose:'living-school-learning-plan-review-v2',executionProfile:'interactive',config,messages:[{role:'user',content:'Say READY.'}]});
