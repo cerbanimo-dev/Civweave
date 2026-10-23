@@ -77,20 +77,40 @@ reply=await api.respondNative({
   history:[{role:'user',text:'Explain tarot'}, {role:'assistant',text:'A'.repeat(1400)}],
   fetcher:cutOffFetch
 });
-assert.equal(lastIsolatedRequest.messages.at(-1).content,'Continue');
-assert.equal(lastIsolatedRequest.messages.at(-2).role,'assistant');
-assert.equal(lastIsolatedRequest.messages.at(-2).content.length,1100,
-  'Continuation should preserve the end of the previous answer, within a bounded context');
+assert.equal(lastIsolatedRequest.messages.length,2,'Continuation must not resend full old chat');
+assert.match(lastIsolatedRequest.messages.at(-1).content,/Write ONLY new material/);
+assert.match(lastIsolatedRequest.messages.at(-1).content,/A{900}/,
+  'Continuation needs the bounded tail of the prior answer, not a reset to the original introduction');
 assert.match(reply.response.answer,/Response reached the generation limit/);
 assert.match(JSON.parse(stageData.get('civweave.native-server.last-request.v1')).detail,/finish:length/);
 assert.match(chat,/const pastHistory=recentHistory\.at\(-1\)/,
   'Visible current user turn must be excluded from the history passed to the model');
+
+const repeated='Welcome to the path of Tarot. '+('Major Arcana basics and symbols. ').repeat(15);
+await assert.rejects(api.respondNative({
+  text:'Continue',
+  history:[{role:'user',text:'Teach me about the tarot'}, {role:'assistant',text:repeated}],
+  fetcher:async()=>({ok:true,status:200,json:async()=>({
+    choices:[{finish_reason:'length',message:{role:'assistant',content:repeated}}],
+    usage:{completion_tokens:512}
+  })})
+}),/repeated the previous answer/i,
+  'Duplicated complete replies must not be accepted as new continuation');
+
 
 reply=await api.respondNative({text:'Can you teach me how to read and memorize the tarot?',system:'living-school'});
 assert.match(reply.response.answer,/Learning Journey/);
 assert.equal(planArgs.nativeFastLane,true);
 assert.equal(requested,1,'Moss routes to existing planner, not a separate unvalidated text prompt');
 assert.equal(assistants,0);
+reply=await api.respondNative({text:'Can you teach me how to read and memorize the tarot?',system:'civweave'});
+assert.match(reply.response.answer,/Learning Journey/);
+assert.equal(planArgs.nativeFastLane,true);
+assert.equal(planArgs.text,'Can you teach me how to read and memorize the tarot?');
+assert.equal(requested,1,'Weaveling must route teaching request into Moss instead of generic model');
+reply=await api.respondNative({text:'Approve Learning Journey',system:'civweave'});
+assert.equal(planArgs.text,'approve learning journey');
+assert.equal(requested,1,'Learning approval must go through the Moss state machine');
 reply=await api.respondNative({text:'approve',system:'living-school'});
 assert.match(reply.response.answer,/Approved Learning Journey/);
 assert.equal(planArgs.text,'approve');
@@ -101,10 +121,11 @@ assert.equal(requested,1);
 assert.match(moss,/options\.nativeFastLane&&nativePhoneServer\(config\)/);
 assert.match(moss,/handleNativeLivingSchoolRequest/);
 assert.match(chat,/await direct\.respondNative/);
+assert.match(chat,/guide:respondingSystem,responderSystem:respondingSystem/);
 assert.match(chat,/await verifyNativePhoneServerTransport/);
 assert.match(runtime,/nativeDirect \? false : Boolean\(config\.stream \|\| lineup\)/);
 assert.match(runtime,/nativeDirectTermuxNoStream: true/);
-assert.match(campus,/native-turn-priority-budget/);
-assert.match(shell,/native-turn-priority-budget/);
+assert.match(campus,/native-moss-learning-handoff/);
+assert.match(shell,/native-moss-learning-handoff/);
 assert.match(diagnostic,/Show last Civweave native-request stage/);
 console.log('PASS: direct native HTTP, Moss review planner fast entry, no second model, no heavy bootstrap, stage diagnostics and invalid route rejection');
