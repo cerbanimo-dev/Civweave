@@ -14,7 +14,7 @@ new vm.Script(fast);
 assert.match(runtime,/nativeDirectTermuxStreamV2:\s*true/);
 assert.doesNotMatch(runtime,/compatibility\\n\s*nativeDirectTermuxStreamV2/,
   'Literal backslash-n inside a // comment hides the critical runtime export');
-assert.match(campus,/1\.0\.185-long-moss-plan-budgets/);
+assert.match(campus,/1\.0\.186-draft-completeness/);
 assert.match(loader,/1\.0\.14-long-plan-finish-guard/);
 assert.match(runtime,/nativeMossVisibleStreamV3:\s*true/);
 
@@ -25,7 +25,7 @@ const ctx={console,Date,Math,JSON,Object,Array,Promise,URL,AbortController,TextE
   setTimeout,clearTimeout,CustomEvent:class{},dispatchEvent:()=>{},
   CivweaveSettingsV320:{readState:()=>({provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1'})},
   CivweaveUnifiedChatSystemV1:{
-    version:'1.2.8-unified-chat-system-v1-generous-outputs',
+    version:'1.2.9-unified-chat-system-v1-draft-completeness-gate',
     handleNativeLivingSchoolRequest:async()=>({response:{answer:'REVIEW'}})
   }};
 ctx.globalThis=ctx;
@@ -50,7 +50,7 @@ assert.equal(Object.isFrozen(ctx.CivweaveModelRuntime),true);
 ctx.CivweaveModelRuntime={version:'old-runtime',generate:async()=>({})};
 vm.runInContext(fast+'\n;globalThis.__loadPlanner=ensurePlanner;',context,{filename:'native-fastpath'});
 const planner=await ctx.__loadPlanner();
-assert.equal(planner.version,'1.2.8-unified-chat-system-v1-generous-outputs');
+assert.equal(planner.version,'1.2.9-unified-chat-system-v1-draft-completeness-gate');
 assert.equal(ctx.CivweaveModelRuntime.nativeDirectTermuxStreamV2,true);
 assert.equal(loads,1,'The older runtime should be upgraded exactly once');
 await ctx.__loadPlanner();
