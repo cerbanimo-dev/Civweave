@@ -21,7 +21,7 @@ const valid={
   {title:'Tarot reading',focus:'Practice three-card tarot spreads',outcome:'Interpret a spread independently'}
  ],assumptions:[]
 };
-let failingCompile=false,materializations=0;
+let failingCompile=false,cappedDraft=false,cappedTwice=false,materializations=0;
 const ctx={
  console,JSON,Date,Math,Object,Array,String,Number,Boolean,RegExp,Promise,Set,Map,URL,
  localStorage:storage,sessionStorage:storage,
@@ -45,6 +45,12 @@ const ctx={
        accumulatedText:text,
        complete:true});
      if(stage==='compile'&&failingCompile)return{status:'invalid-response',outputText:'{broken',error:{code:'INVALID_JSON',message:'bad json'}};
+     if(cappedDraft&&req.purpose==='living-school-native-plan-draft-v1')
+       return{status:'incomplete',finishReason:'length',outputText:text.slice(0,38),
+         actual:{provider:'openai-compatible',model:'qwen35-4b-native'},error:{code:'NATIVE_OUTPUT_TOKEN_LIMIT'}};
+     if(cappedTwice&&req.purpose==='living-school-native-plan-draft-continuation-v1')
+       return{status:'incomplete',finishReason:'length',outputText:text.slice(-25),
+         actual:{provider:'openai-compatible',model:'qwen35-4b-native'},error:{code:'NATIVE_OUTPUT_TOKEN_LIMIT'}};
      return{status:'success',actual:{provider:'openai-compatible',model:'qwen35-4b-native'},
        outputText:text,outputJson:stage==='draft'?undefined:valid};
    },
@@ -98,4 +104,29 @@ assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='repair'&&e.
 assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='repair'&&e.state==='complete'));
 assert(JSON.parse(memory.get(key)).authoring.formalStages.includes('repair'));
 assert.equal(materializations,0);
-console.log('PASS: two real Qwen stages, intake/draft/raw JSON/validation/review timeline, conditional repair, Living School REVIEW panel, no unapproved lessons');
+
+// A model that stops exactly at the token limit must never be treated as
+// having completed the visible draft or quietly sent to the compiler.
+failingCompile=false;cappedDraft=true;cappedTwice=false;
+calls.length=0;events.length=0;
+r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
+assert.equal(r.action?.state,'review');
+assert.equal(calls.length,3,'One capped draft needs exactly one continuation and then JSON compile');
+assert.equal(calls[0].config.maxTokens,680,'The first draft budget must exceed the old 260-token ceiling');
+assert.equal(calls[1].config.maxTokens,480,'Continuation must have a bounded budget');
+assert.equal(calls[2].config.maxTokens,1050,'Compiler has a separate sufficient JSON budget');
+assert.match(calls[1].messages[1].content,/Continue from its exact stopping point/);
+assert.match(calls[2].messages[1].content,/Major Arcana/);
+assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='draft'&&e.state==='needs-continuation'));
+assert.equal(materializations,0);
+
+cappedTwice=true;calls.length=0;events.length=0;
+const priorId=moss.readLearningPlan()?.id;
+r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
+assert.match(r.response.answer,/both reached max_tokens/);
+assert.equal(calls.length,2,'Two capped drafts must not launch the JSON compiler');
+assert.equal(moss.readLearningPlan()?.id,priorId,'Incomplete draft cannot replace saved REVIEW plan');
+assert(!events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='pipeline'&&e.state==='complete'));
+assert.equal(materializations,0);
+console.log('PASS: formal plan, conditional repair, bounded truncated draft continuation, honest failure, and unchanged REVIEW artifacts');
+
