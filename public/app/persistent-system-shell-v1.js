@@ -19,7 +19,7 @@ const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.137-ollama-provider-runtime-loopback';
 const SETTINGS_LOCAL_ROUTE_VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
-const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.186-draft-completeness';
+const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.187-ollama-direct';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
   'living-school':'#9cff73',
