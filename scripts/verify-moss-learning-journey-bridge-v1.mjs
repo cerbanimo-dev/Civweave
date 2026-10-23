@@ -192,6 +192,6 @@ const recovery=vm.createContext({
 vm.runInContext(guideFn+'\nthis.evaluateFallback=selectedLocal;',recovery);
 assert.equal(recovery.evaluateFallback(),null,'Guide recovery must not start stale Gemma when Qwen browser GGUF is selected.');
 candidateStorage.set('civweave-model-profiles-v1',JSON.stringify({interactive:{provider:'server-auto',model:'civweave-server-auto-v1'}}));
-assert.equal(recovery.evaluateFallback()?.id,'gemma4-e2b-it-litert-web','An explicitly changed server-auto route must not be mistaken for active browser GGUF.');
+assert.equal(recovery.evaluateFallback(),null,'An explicitly changed server-auto route must not awaken an unrelated downloaded-local model.');
 
 console.log('Moss Learning Journey bridge regression check passed.');
