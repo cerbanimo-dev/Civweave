@@ -58,7 +58,20 @@ function loadValueCore(){if(valueCorePromise)return valueCorePromise;valueCorePr
 function loadValueModel(){if(valueModelPromise)return valueModelPromise;valueModelPromise=loadValueCore().then(()=>loadSequence(VALUE_MODEL)).catch(error=>{valueModelPromise=null;throw error});return valueModelPromise}
 function selectedLocal(){const selected=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});return selected?.active&&selected?.id?selected:null}
 function configuredLocal(){const profiles=obj(MODEL_PROFILES_KEY),legacy=obj(UNIVERSAL_AI_KEY),configured=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:legacy,provider=clean(configured?.provider||configured?.route,80).toLowerCase();return['downloaded-local','generative-local','smollm2','smollm3','qwen','browser'].includes(provider)}
-function localRequested(){return Boolean(selectedLocal()||configuredLocal())}
+function localRequested(){
+  // An old downloaded-model selection may survive switching to Ollama or
+  // phone llama-server. Only the saved primary route may authorize preloading
+  // the heavy browser inference engine.
+  let primary='';
+  try{const state=globalThis.CivweaveSettingsV320?.readState?.();primary=clean(state?.route||state?.provider,80).toLowerCase()}catch{}
+  if(!primary){
+    const profiles=obj(MODEL_PROFILES_KEY),legacy=obj(UNIVERSAL_AI_KEY);
+    const config=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:legacy;
+    primary=clean(config?.route||config?.provider,80).toLowerCase();
+  }
+  if(primary&&!['downloaded-local','generative-local','smollm2','smollm3','qwen','browser'].includes(primary))return false;
+  return Boolean(selectedLocal()||configuredLocal());
+}
 function fallbackGuideSystem(request={}){const match=clean(request.purpose,220).match(/^(civweave|living-school|cerbanimo|fellowfare|anarchadia)-guide-chat-v350$/);return match?.[1]||''}
 function fallbackUserText(request={}){const rows=Array.isArray(request.messages)?request.messages:[];for(let index=rows.length-1;index>=0;index--)if(rows[index]?.role==='user')return clean(rows[index].content||rows[index].text,12000);return clean(request.prompt||request.input,12000)}
 function structuredFallbackContext(request,system){return{...request,context:{...(request.context||{}),guide:{...(request.context?.guide||{}),system}},task:{...(request.task||{}),kind:request.task?.kind||'dialogue',systemId:system,requirements:{...(request.task?.requirements||{}),planning:false}}}}
