@@ -200,7 +200,7 @@ assert.equal(materializations,0);
 cappedTwice=true;calls.length=0;events.length=0;
 const priorId=moss.readLearningPlan()?.id;
 r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
-assert.match(r.response.answer,/both reached max_tokens/);
+assert.match(r.response.answer,/bounded continuation reached their generation limits/);
 assert.equal(calls.length,2,'Two capped drafts must not launch the JSON compiler');
 assert.equal(moss.readLearningPlan()?.id,priorId,'Incomplete draft cannot replace saved REVIEW plan');
 assert(!events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='pipeline'&&e.state==='complete'));
