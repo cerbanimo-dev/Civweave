@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.175-guide-chat-surface-v350-native-api-no-retry';
+const VERSION='1.0.176-guide-chat-surface-v350-native-transport-guard';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -95,6 +95,38 @@ function selectedLocal(){
 function nativeApiRoute(){
   const route=configuredRoute();
   return route==='openai-compatible'||route==='ollama'||route==='local-api';
+}
+function activeNativePhoneServer(){
+  const route=configuredRoute();
+  if(route!=='openai-compatible')return false;
+  let state=null;
+  try{state=globalThis.CivweaveSettingsV320?.readState?.()||null}catch{}
+  if(!state){
+    try{
+      const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
+      state=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
+    }catch{}
+  }
+  return state?.model==='qwen35-4b-native'&&state?.endpoint==='http://127.0.0.1:8080/v1';
+}
+async function verifyNativePhoneServerTransport(){
+  if(!activeNativePhoneServer())return false;
+  // This fetch reads ONLY the model catalog. It cannot load GGUF weights or
+  // initiate model inference; a browser CORS failure ends before AI bootstrap.
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);
+  try{
+    const response=await fetch('http://127.0.0.1:8080/v1/models',{
+      method:'GET',mode:'cors',credentials:'omit',cache:'no-store',signal:controller.signal
+    });
+    if(!response.ok)throw new Error('llama-server model catalog returned HTTP '+response.status);
+    const body=await response.json(),models=Array.isArray(body?.data)?body.data:[];
+    if(!models.some(row=>row?.id==='qwen35-4b-native'))
+      throw new Error('llama-server responded, but qwen35-4b-native is not registered. Check --alias.');
+    return true;
+  }catch(error){
+    const reason=controller.signal.aborted?'local browser-to-Termux probe timed out after 7 seconds':clean(error?.message||error,300);
+    throw new Error('Native server connection failed before model loading: '+reason+'. Check /native-server-diagnostic.html in this browser; no secondary AI was started.');
+  }finally{clearTimeout(timer)}
 }
 function voiceState(){try{return globalThis.CivweaveGuideVoiceV1?.state?.()||null}catch{return null}}
 function state(){const voice=voiceState();return Object.freeze({version:VERSION,pageSystem,activeWindow:activeSystem,activeSystem,open:openState,minimized,busy,canonicalOwner:true,presentation:'single-current-chat-surface',selectedLocalModel:selectedLocal()?.id||'',voice:{loaded:Boolean(globalThis.CivweaveGuideVoiceV1),listening:Boolean(voice?.listening),source:voice?.source||'',status:voiceStatus}})}
@@ -271,6 +303,7 @@ async function submitActive(text){
   busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');if(button)button.disabled=true;if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
   try{
+    await verifyNativePhoneServerTransport();
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('Shared assistant runtime is not ready.');
     const result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:historyFor(system)});
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};

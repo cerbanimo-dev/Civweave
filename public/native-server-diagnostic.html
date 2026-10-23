@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="theme-color" content="#08131b">
+<title>Civweave native llama-server transport diagnostic</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#08131b;color:#edf8fb}
+body{margin:0;padding:22px;line-height:1.5}
+main{max-width:650px;margin:auto}
+h1{font-size:1.4rem;line-height:1.15}
+button,a{font:inherit;color:inherit}
+button{display:block;width:100%;text-align:left;padding:13px;margin:12px 0;background:#183647;border:1px solid #71b9ca;border-radius:10px}
+button:disabled{opacity:.45}
+code,pre{overflow-wrap:anywhere;white-space:pre-wrap}
+pre{padding:12px;background:#0c2330;border:1px solid #305362;border-radius:8px}
+output{display:block;min-height:120px;background:#101f2a;padding:12px;border:1px solid #315160;border-radius:10px;white-space:pre-wrap;font-size:.89rem}
+a{color:#84dcee}
+small{color:#bed2da}
+</style>
+</head>
+<body>
+<main>
+<h1>Civweave · Termux network diagnostic</h1>
+<p>This page does not initialize Civweave, download models, or start inference automatically. Open it in the <strong>same Android browser or PWA</strong> where Civweave freezes. Leave Termux running.</p>
+<p>Expected model: <code>qwen35-4b-native</code><br>Endpoint: <code>http://127.0.0.1:8080/v1</code></p>
+<button id="catalog">1 · Check GET /v1/models (no generation)</button>
+<button id="preflight" disabled>2 · Check JSON POST /v1/models (no generation)</button>
+<button id="generation" disabled>3 · Explicitly generate 8 tokens (loads model)</button>
+<output id="results" role="status" aria-live="polite">No connection checks have run. The installed models and saved app data are untouched.</output>
+<p><small>Step 2 deliberately sends <code>POST /v1/models</code>, which is not an inference endpoint. HTTP 400, 404, or 405 is acceptable: receiving the status proves the browser could complete a JSON POST and its CORS preflight. Step 3 is the only action that runs the model.</small></p>
+<p>Separately, in a second Termux session, run:</p>
+<pre>curl -i --max-time 8 http://127.0.0.1:8080/v1/models</pre>
+<p>If Termux curl succeeds but step 1 or 2 fails, examine the browser's local-network/CORS restrictions. If Termux curl fails, examine whether llama-server is still listening or was killed by Android.</p>
+<p><a href="/app/recovery-v426.html">Open Civweave recovery without clearing data</a></p>
+</main>
+<script>
+(()=>{
+'use strict';
+const BASE='http://127.0.0.1:8080/v1';
+const button=id=>document.getElementById(id);
+const output=button('results');
+const stamp=()=>new Date().toLocaleTimeString();
+const report=message=>{output.textContent+='\n['+stamp()+'] '+message;output.scrollTop=output.scrollHeight};
+let working=false,catalogPassed=false,postPassed=false;
+async function request(path,options={},limit=8000){
+  const controller=new AbortController(),started=performance.now(),timer=setTimeout(()=>controller.abort(),limit);
+  try{
+    const response=await fetch(BASE+path,{mode:'cors',credentials:'omit',cache:'no-store',...options,signal:controller.signal});
+    return{response,elapsed:Math.round(performance.now()-started)};
+  }catch(error){
+    const reason=controller.signal.aborted?'Timed out after '+limit+' ms':String(error?.message||error);
+    throw Error(reason+'. Look for CORS, Private Network Access, or network errors in the browser console.');
+  }finally{clearTimeout(timer)}
+}
+async function action(name){
+  if(working)return;working=true;
+  for(const id of ['catalog','preflight','generation'])button(id).disabled=true;
+  report('Starting '+name+'…');
+  try{
+    if(name==='catalog'){
+      const {response,elapsed}=await request('/models');
+      report('GET models: HTTP '+response.status+' in '+elapsed+' ms');
+      if(!response.ok)throw Error('Model catalog returned HTTP '+response.status);
+      const data=await response.json();
+      const models=Array.isArray(data?.data)?data.data.map(row=>row.id):[];
+      report('Models: '+JSON.stringify(models));
+      if(!models.includes('qwen35-4b-native'))throw Error('Configured model alias not present; restart llama-server with --alias qwen35-4b-native');
+      catalogPassed=true;postPassed=false;
+    }else if(name==='preflight'){
+      const {response,elapsed}=await request('/models',{
+        method:'POST',headers:{'content-type':'application/json'},body:'{}'
+      });
+      report('JSON POST transport: HTTP '+response.status+' in '+elapsed+' ms (any HTTP response proves browser transport; no inference was requested)');
+      postPassed=true;
+    }else if(name==='generation'){
+      const {response,elapsed}=await request('/chat/completions',{
+        method:'POST',headers:{'content-type':'application/json'},
+        body:JSON.stringify({model:'qwen35-4b-native',messages:[{role:'user',content:'Reply with READY.'}],stream:false,max_tokens:8,temperature:0})
+      },90000);
+      report('Generation: HTTP '+response.status+' in '+elapsed+' ms');
+      const raw=(await response.text()).slice(0,1400);
+      report('Response: '+raw);
+      if(!response.ok)throw Error('Inference returned HTTP '+response.status);
+    }
+  }catch(error){report('FAILED: '+String(error?.message||error))}
+  finally{
+    working=false;button('catalog').disabled=false;
+    button('preflight').disabled=!catalogPassed;
+    button('generation').disabled=!(catalogPassed&&postPassed);
+  }
+}
+button('catalog').addEventListener('click',()=>void action('catalog'));
+button('preflight').addEventListener('click',()=>void action('preflight'));
+button('generation').addEventListener('click',()=>void action('generation'));
+})();
+</script>
+</body>
+</html>

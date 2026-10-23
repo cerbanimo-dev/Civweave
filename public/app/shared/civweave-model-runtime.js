@@ -689,6 +689,11 @@
     let saved = null;
     try { saved = JSON.parse(global.localStorage?.getItem?.(GGUF_BROWSER_SELECTION_KEY) || 'null'); } catch {}
     if (!saved?.enabled || saved.engine !== 'wllama' || !saved.model) return null;
+    // The native Qwen Termux alias is a real HTTP server, not Wllama. Its
+    // endpoint overlaps the browser GGUF compatibility marker; do not load a
+    // cached browser model in response to a selected native-server request.
+    if (config.provider === 'openai-compatible' && config.model === 'qwen35-4b-native' &&
+        config.endpoint === GGUF_BROWSER_ENDPOINT) return null;
     if (config.provider !== 'openai-compatible' || config.model !== saved.model) return null;
     if (config.endpoint !== GGUF_BROWSER_ENDPOINT)
       throw runtimeError('GGUF_ROUTE_MISMATCH','An imported browser GGUF is selected, but its internal runtime route was changed. Re-select the GGUF under Settings; Civweave will not send these weights or prompts to a remote endpoint.');

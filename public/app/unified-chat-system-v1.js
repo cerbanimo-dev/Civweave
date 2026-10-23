@@ -195,6 +195,8 @@ function selectedBrowserGGUF(){
 function selectedPlanGGUF(config){
   const choice=selectedBrowserGGUF();
   if(!choice||config?.provider!=='openai-compatible'||config.model!==choice.model)return null;
+  // Native Termux alias must never be interpreted as an imported browser GGUF.
+  if(config.model==='qwen35-4b-native'&&config.endpoint==='http://127.0.0.1:8080/v1')return null;
   if(config.endpoint!=='http://127.0.0.1:8080/v1')
     throw new Error('The selected on-device GGUF has an inconsistent route; reselect it in Settings. The plan was not sent to another provider.');
   return choice;

@@ -1,0 +1,32 @@
+name: Verify Termux transport isolation
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/unified-chat-system-v1.js
+      - public/app/guide-chat-surface-v350.js
+      - public/app/settings-gateway-v317.js
+      - public/native-server-diagnostic.html
+      - scripts/verify-termux-transport-isolation-v1.mjs
+      - .github/workflows/verify-termux-transport-isolation-v1.yml
+  pull_request:
+    paths:
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/unified-chat-system-v1.js
+      - public/app/guide-chat-surface-v350.js
+      - public/app/settings-gateway-v317.js
+      - public/native-server-diagnostic.html
+      - scripts/verify-termux-transport-isolation-v1.mjs
+      - .github/workflows/verify-termux-transport-isolation-v1.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-termux-transport-isolation-v1.mjs
