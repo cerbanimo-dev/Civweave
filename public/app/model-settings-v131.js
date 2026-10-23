@@ -71,9 +71,10 @@ renderNative=function modelAwareRenderNative(capability){
 
     <section class="model-route-panel" data-model-route-panel="ollama" ${s.route==="ollama"?"":"hidden"}>
       <div class="provider-note">Connects to a model on this device or local network.</div>
-      <label>Model<input name="ollamaModel" maxlength="200" value="${esc(s.ollamaModel)}"></label>
+      <label>Model<input name="ollamaModel" maxlength="200" value="${esc(s.ollamaModel)}" list="civweave-ollama-installed-models"></label>
+      <datalist id="civweave-ollama-installed-models"></datalist>
       <label>Endpoint<input name="ollamaEndpoint" maxlength="2048" value="${esc(s.ollamaEndpoint)}"></label>
-      <div class="native-actions"><button type="button" data-model-test>Test local model</button></div>
+      <div class="native-actions"><button type="button" data-ollama-discover>Find installed Ollama models</button><button type="button" data-model-test>Test local model</button></div>
       <div class="model-test-status" data-model-test-status role="status">No connection test has been run in this session.</div>
     </section>
 
@@ -168,11 +169,29 @@ const test=async(form,button)=>{
     report("model-test-failed",{route:setup.route,message:error.message,code:error.code||null});
   }finally{button.disabled=false}
 };
+const discoverInstalledOllama=async(button)=>{
+  const form=button.closest('[data-native-form="model"]');
+  if(!form)return;
+  const runtime=globalThis.CivweaveModelRuntime;
+  const status=form.querySelector('[data-model-route-panel="ollama"] [data-model-test-status]');
+  if(!runtime?.discoverOllamaModels){status.textContent="Ollama discovery is unavailable until the updated model runtime loads.";status.className="model-test-status is-error";return}
+  button.disabled=true;status.textContent="Checking installed Ollama models…";status.className="model-test-status";
+  try{
+    const models=await runtime.discoverOllamaModels(form.elements.ollamaEndpoint?.value||"http://127.0.0.1:11434/api/chat");
+    const list=form.querySelector("#civweave-ollama-installed-models");
+    list.replaceChildren(...models.map(model=>{const option=document.createElement("option");option.value=model.name;return option}));
+    status.textContent=models.length?`Found ${models.length} installed model(s). Select one in the Model field; your selection is not changed automatically.`:"Ollama responded but reported no installed models.";
+    status.className="model-test-status "+(models.length?"is-ok":"is-error");
+  }catch(error){status.textContent=`Ollama discovery failed: ${error.message}`;status.className="model-test-status is-error"}
+  finally{button.disabled=false}
+};
 document.addEventListener("change",event=>{
   const form=event.target.closest?.('[data-native-form="model"]');
   if(form&&event.target.matches("[data-model-route-select],[data-antigravity-toggle]"))sync(form);
 });
 document.addEventListener("click",event=>{
+  const discoverButton=event.target.closest?.("[data-ollama-discover]");
+  if(discoverButton){discoverInstalledOllama(discoverButton);return}
   const button=event.target.closest?.("[data-model-test]");
   if(button){const form=button.closest('[data-native-form="model"]');if(form)test(form,button)}
 });
