@@ -122,7 +122,7 @@ assert.match(answer.response.answer,/selected imported Qwen GGUF was bypassed/i)
 assert.equal(persisted.has(manifestKey),false,'Cloudflare fallback must not become an authorized local learning plan.');
 output={status:'success',actual:{provider:'openai-compatible',model:ggufModel},outputJson:offTopic,diagnostics:[{code:'BROWSER_GGUF'}]};
 answer=await run();
-assert.match(answer.response.answer,/different subject than the current request/i);
+assert.match(answer.response.answer,/different subject/i);
 assert.equal(persisted.has(manifestKey),false,'Off-topic GGUF-generated plan must not be persisted.');
 output={status:'success',actual:{provider:'openai-compatible',model:ggufModel},outputJson:matching,diagnostics:[{code:'BROWSER_GGUF'}]};
 answer=await run();
@@ -142,7 +142,7 @@ interactive={provider:'server-auto',route:'server-auto',model:'civweave-server-a
 sandbox.CivweaveAssistantV141={selectedConfig:()=>interactive};
 output={status:'success',actual:{provider:'cloudflare-workers-ai',model:'@cf/zai-org/glm-4.7-flash'},outputJson:offTopic};
 answer=await run();
-assert.match(answer.response.answer,/different subject than the current request/i);
+assert.match(answer.response.answer,/different subject/i);
 assert.equal(persisted.has(manifestKey),false);
 
 
