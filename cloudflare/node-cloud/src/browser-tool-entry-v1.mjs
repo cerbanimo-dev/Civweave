@@ -128,6 +128,41 @@ async function searchSearxng(env, query) {
   }
 }
 
+// Convert Browser Run's HTML-search markdown into a bounded set of clickable,
+// validated result URLs. Model-generated URLs never enter this extraction step.
+function markdownBody(value) {
+  if (typeof value === 'string') return clean(value, 18000);
+  if (Array.isArray(value)) return value.map(markdownBody).filter(Boolean).join('\n').slice(0,18000);
+  if (!value || typeof value !== 'object') return '';
+  for (const key of ['markdown','content','text','result','data']) {
+    if (value[key]) return markdownBody(value[key]);
+  }
+  return '';
+}
+function browserSearchResults(value) {
+  const markdown=markdownBody(value),rows=[],seen=new Set();
+  const matches=markdown.matchAll(/\[([^\]\n]{4,220})\]\((https?:\/\/[^\s)]+)\)/g);
+  for(const match of matches) {
+    let target;
+    try {
+      let candidate=new URL(match[2].replaceAll('&amp;','&'));
+      if (/(^|\.)duckduckgo\.com$/i.test(candidate.hostname)) {
+        if (candidate.pathname!=='/l/' && candidate.pathname!=='/l') continue;
+        const redirected=candidate.searchParams.get('uddg');
+        if(!redirected)continue;
+        candidate=new URL(redirected);
+      }
+      target=safeUrl(candidate.href);
+    } catch { continue; }
+    if(seen.has(target))continue;
+    seen.add(target);
+    const tail=markdown.slice(match.index+match[0].length,match.index+match[0].length+500).split('\n').find(part=>part.trim()&&!/^[\\-#* ]+$/.test(part))||'';
+    rows.push({title:clean(match[1].replace(/<[^>]*>/g,''),220),url:target,snippet:clean(tail,360),engine:'duckduckgo-html',liveFetched:true});
+    if(rows.length>=8)break;
+  }
+  return rows;
+}
+
 async function runTool(env, input) {
   const action = clean(input?.action, 40).toLowerCase();
   if (action === 'search') {
@@ -148,7 +183,7 @@ async function runTool(env, input) {
     const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
     try {
       const out = await quick(env, 'markdown', { url, gotoOptions: { waitUntil: 'domcontentloaded', timeout: 20_000 } });
-      return { action, query, url, source: 'browser-run-duckduckgo', fallbackFrom: searxError ? 'searxng' : null, ...out };
+      return { action, query, url, source: 'browser-run-duckduckgo', fallbackFrom: searxError ? 'searxng' : null, ...out, results: browserSearchResults(out.result), liveFetched: true };
     } catch (error) {
       if (!searxError) throw error;
       throw Object.assign(new Error('Both search paths failed: SearXNG: ' + searxError + '; Browser Run: ' + clean(error?.message || error, 400)), { status: error?.status || 502 });
