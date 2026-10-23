@@ -29,7 +29,7 @@ for(const url of ['https://remote.example/v1','http://192.168.1.12:8080/v1',
   'http://127.0.0.1:8080/v1/../admin'])assert.throws(()=>validateServerAddress(url),/Android setup only tests|only tests/);
 
 const calls=[];
-const answer=({data,code=200})=>({ok:code>=200&&code<300,status:code,text:async()=>JSON.stringify(data)});
+const answer=(payload,code=200)=>({ok:code>=200&&code<300,status:code,text:async()=>JSON.stringify(payload)});
 const fetcher=async(url,options)=>{
   calls.push({url,options});
   if(url.endsWith('/models'))return answer({data:[{id:SERVER_MODEL}]});
