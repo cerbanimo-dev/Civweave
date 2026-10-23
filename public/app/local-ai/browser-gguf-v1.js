@@ -258,7 +258,7 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
     throw err('GGUF_LOAD_FAILED','Browser GGUF model load failed: '+clean(error?.message).slice(0,700));
   }
   if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled.');
-  const watchdogModule=await import('/app/local-ai/gguf-generation-watch-v1.js?v=gguf-generation-watch-v1');
+  const watchdogModule=await import('/app/local-ai/gguf-generation-watch-v1.js?v=gguf-generation-watch-v2-prefill');
   const watchdog=watchdogModule.createGGUFGenerationWatch({
     signal,onProgress:(stage,details)=>updatePhase(stage,details)
   });
