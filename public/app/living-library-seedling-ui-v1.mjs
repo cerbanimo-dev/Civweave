@@ -1,4 +1,5 @@
 import {VERSION,STORAGE_KEY,OUTBOX_KEY,newDraft,validateDraft,livingSchoolPlan,guildBundle,normaliseSource,normaliseMedia,externalUrl,videoEmbed,downloadableJson} from './living-library-seedling-core-v1.mjs';
+import {stageManualDraft,stageBundleForReview} from './living-library-seedling-bridge-v1.mjs';
 
 const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=(key,f)=>{try{return JSON.parse(localStorage.getItem(key))||f}catch{return f}};
@@ -69,6 +70,22 @@ function output(filename,data){
  const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),10_000);
 }
 function valid(){getFields();save();const errors=validateDraft(draft);if(errors.length){status('Needs attention:\n• '+errors.join('\n• '));return false}status('Validated: '+draft.modules.length+' modules, '+draft.sources.length+' sources, '+draft.media.length+' media references. This is a review draft, not approved Living School content.');return true}
+function stageForMoss(bundle=null,source='manual-editor'){
+ getFields();save();
+ try{
+  if(!bundle&&!valid())return false;
+  const perform=replace=>{
+   const result=bundle?stageBundleForReview(bundle,{replace,origin:source}):stageManualDraft(draft,{replace});
+   status('Staged “'+result.planTitle+'” for canonical Moss REVIEW. '+result.sourceCount+' sources and '+result.mediaCount+' media entries are preserved in the Seedling evidence record. No lessons have been generated or approved. Open Civweave → Moss → “Review plan”.');return true;
+  };
+  try{return perform(false)}
+  catch(error){
+   if(!/Another Living School plan is awaiting review/.test(String(error.message||error)))throw error;
+   if(!confirm('Another Learning Journey is pending review. Export that plan before replacing it. Replace the pending unapproved plan with this one?'))return false;
+   return perform(true);
+  }
+ }catch(error){status('Moss staging rejected: '+String(error.message||error));return false}
+}
 function reset(){if(!confirm('Start a new Learning Journey? The current local draft will be replaced; export it first if needed.'))return;draft=newDraft();researchResults=[];el('search-results').replaceChildren();renderAll();save();status('Started a new local draft.')}
 async function searchIndex(which){
  const query=el('search').value.trim();if(query.length<3)return status('Enter at least three search characters.');
@@ -162,6 +179,14 @@ async function refreshGuildInbox(){
    const citations=document.createElement('p');citations.textContent='Sources ('+(bundle.sourceCatalog||[]).length+'):';doc.append(citations);
    for(const source of bundle.sourceCatalog||[]){if(!externalUrl(source.url))continue;const a=document.createElement('a');a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=source.title||source.url;doc.append(a,document.createElement('br'))}
    const note=document.createElement('p');note.textContent='Signed community object '+object.id+'. Review required; not approved, published, or materialized by Living School.';doc.append(note);
+   const stageButton=document.createElement('button');stageButton.type='button';stageButton.textContent='Stage in Moss for review';stageButton.addEventListener('click',async()=>{
+    try{
+     const verification=await mesh.validateObject(object);
+     if(!verification?.ok)throw Error('The Guild object failed signature verification: '+(verification?.error||'unknown'));
+     if(!confirm('Import “'+(bundle.title||'Untitled')+'” from '+guild.displayName+' into Moss as an unapproved plan?'))return;
+     stageForMoss(bundle,'signed-guild-mesh');
+    }catch(error){status('Guild plan import rejected: '+String(error.message||error))}
+   });doc.append(stageButton);
    wrapper.append(doc);target.append(wrapper);
   }
  }catch(error){target.textContent='Unable to read Guild submissions: '+String(error?.message||error)}
@@ -172,6 +197,7 @@ el('add-module').addEventListener('click',()=>{if(draft.modules.length>=8)return
 el('add-source').addEventListener('click',addSource);el('add-media').addEventListener('click',addMedia);
 el('search-wikipedia').addEventListener('click',()=>searchIndex('wikipedia'));el('search-openalex').addEventListener('click',()=>searchIndex('openalex'));
 el('validate').addEventListener('click',valid);
+el('stage-moss').addEventListener('click',()=>stageForMoss());
 el('export-plan').addEventListener('click',()=>{if(valid())output('seedling-living-school-plan.json',livingSchoolPlan(draft))});
 el('export-bundle').addEventListener('click',()=>{if(valid())output('seedling-guild-learning-bundle.json',guildBundle(draft))});
 el('send-guild').addEventListener('click',sendGuild);
