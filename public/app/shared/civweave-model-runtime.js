@@ -988,7 +988,7 @@
           } catch (error) { validationErrors = [error.message || "Invalid JSON."]; }
         }
         if (validationErrors.length) {
-          const result = { ...baseResult(context, config, Date.now() - started), status: "invalid-response", outputText, recoverablePayload: outputJson, usage: raw.usage || {}, stream: { requested: config.stream, used: Boolean(raw.streamed) }, structured: { requested: true, valid: false, repairAttempts, errors: validationErrors.slice(0, 24) }, fallback: { used: false }, diagnostics: raw.diagnostics || [], error: { code: "INVALID_STRUCTURED_OUTPUT", message: "The provider response did not satisfy the requested JSON contract." } };
+          const result = { ...baseResult(context, config, Date.now() - started), status: "invalid-response", outputText, recoverablePayload: outputJson, finishReason:rawFinishReason, usage: raw.usage || {}, stream: { requested: config.stream, used: Boolean(raw.streamed) }, structured: { requested: true, valid: false, repairAttempts, errors: validationErrors.slice(0, 24) }, fallback: { used: false }, actual: { provider: raw.provider || config.provider, model: raw.model || config.model }, diagnostics: raw.diagnostics || [], error: { code: "INVALID_STRUCTURED_OUTPUT", message: "The provider response did not satisfy the requested JSON contract." } };
           emit(context, "failed", { status: result.status, error: result.error, validationErrors: result.structured.errors });
           return result;
         }
