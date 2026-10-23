@@ -54,6 +54,17 @@ vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'local-provider-authority-v1.js'});
 const api=sandbox.CivweaveLocalProviderAuthorityV1;
 assert.ok(api,'authority API should install');
+
+assert.equal(api.researchRequested({text:'What happened today in AI research?'},[]),true,'freshness should automatically enable local web research');
+assert.equal(api.researchRequested({text:'What is the latest version of Qwen?'},[]),true,'latest-version question should use web research');
+assert.equal(api.researchRequested({text:'What is the weather in Watertown?'},[]),true,'live weather questions should use the web');
+assert.equal(api.researchRequested({text:'Read https://example.org/overview'},[]),true,'user-provided URLs can request live reading');
+assert.equal(api.researchRequested({text:'Please teach me to memorize tarot'},[{role:'user',content:'Search the web for tarot'}]),false,'old messages must never trigger live search');
+assert.equal(api.researchRequested({text:'I want to work on my plan today'},[]),false,'ordinary planning stays local');
+assert.equal(api.researchRequested({text:'What happened today?',offlineOnly:true},[]),false,'offline-only should always override auto research');
+assert.equal(api.researchRequested({text:'What is the latest release?',allowNetwork:false},[]),false,'explicit network denial overrides auto research');
+assert.equal(api.researchRequested({text:'Search the web for release notes',webSearch:false},[]),false,'explicit no-search overrides intent');
+
 assert.equal(api.localPinned(),true);
 assert.equal(api.localProviderPinned,true);
 assert.equal(api.cloudFallbackWhenLocal,false);
