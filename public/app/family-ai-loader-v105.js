@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.135-moss-gguf-provenance-topic-gate';
+const VERSION='1.0.136-gguf-moss-bounded-draft'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
 const PREREQUISITES=[
   ['/app/shared/civweave-parity-runtime.js?v=1.0.4',()=>globalThis.CivweaveParity],
-  ['/app/shared/civweave-model-runtime.js?v=1.0.5-gguf-moss-coldstart',()=>globalThis.CivweaveModelRuntime],
+  ['/app/shared/civweave-model-runtime.js?v=1.0.6-gguf-visible-watchdog',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.4',()=>globalThis.CivweaveGuideContractsV141]
