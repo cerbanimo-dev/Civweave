@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-browser-tool-v1';
+const VERSION='1.0.1-browser-tool-v1-keyless-search';
 if(globalThis.CivweaveBrowserToolV1?.version===VERSION)return;
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
 const MARKET_PREF_KEY='civweave.node-ai-marketplace.preferences.v1';
