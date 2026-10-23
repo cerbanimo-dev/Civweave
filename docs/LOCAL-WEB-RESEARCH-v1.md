@@ -2,7 +2,7 @@
 
 ## Status and boundaries
 
-This release connects **explicitly requested live web research** from the downloaded-local guide path to Civweave's existing local browser agent. Qwen3.5 4B and other models with a working local inference runtime use the same JSON tool controller. The model does **not** need a commercial AI API, a search API key, fine-tuning, or native function-call support. The existing host-capacity session **is** required for live search. Search queries and requested URLs leave the device; prompts, model weights and inference stay local. Ordinary chat stays on the previous path.
+This release makes web research a **standard, local-first capability** of Civweave's downloaded-local guides. Explicit searches and clear current-information questions are routed to Civweave's existing local browser agent. Qwen3.5 4B and other models with a working local inference runtime use the same JSON tool controller. The model does **not** need a commercial AI API, a search API key, fine-tuning, or native function-call support. The existing host-capacity session **is** required for live search. Search queries and requested URLs leave the device; prompts, model weights and inference stay local. Ordinary chat stays on the previous path.
 
 The search transport is hosted by a Civweave node (Cloudflare Worker); this release is **not** a direct browser-to-SearXNG connection and is not yet a browser-independent offline web search.
 
@@ -50,9 +50,9 @@ and require member sessions for live tools.
 
 1. Select an installed local language model such as Qwen3.5 4B in Civweave.
 2. Pair/connect a working host-capacity session for live browser tools.
-3. Ask the guide **"Search the web for [topic]"** or enable the explicit `webSearch` request flag from the caller.
-4. The guide sends only the bounded latest user query to the node for search, then passes search results to its local research controller. The model can request `archive_search`, `live_search`, `open`, `links`, or `finish`.
-5. Source URLs must originate from retrieved evidence or URLs supplied by the user before opening. The model can synthesize only after receiving tool observations. The agent emits `civweave:local-browser-agent-progress` stages (intake, searching, results, model-choice, synthesis, complete), plus existing `onProgress` callbacks.
+3. Ask a guide a current-information question such as **"What's the latest Qwen release?"** or **"What's the weather today?"**. An explicit **"Search the web for [topic]"** also works. General conversation and planning don't trigger an internet request.
+4. For clear research intent (or an explicit `webSearch:true` caller flag), the guide sends only a bounded query to the connected node for search. A caller can disable all automatic research with `allowNetwork:false`, `webSearch:false`, or `offlineOnly:true`. No conversation history is sent to the search backend. The model can request `archive_search`, `live_search`, `open`, `links`, or `finish`.
+5. The Browser Run default extracts bounded, validated web result URLs from DuckDuckGo HTML without an external SearXNG instance. Source URLs must originate from retrieved evidence or URLs supplied by the user before opening. The model can synthesize only after receiving tool observations. The agent emits `civweave:local-browser-agent-progress` stages (intake, searching, results, model-choice, synthesis, complete), plus existing `onProgress` callbacks.
 6. If no live transport/session exists, the guide returns a meaningful live-search-unavailable error; it must **not** silently claim archived knowledge is a live search.
 
 Offline downloaded-library research remains available through `CivweaveBrowserToolV1.searchArchive()` without a host session.
