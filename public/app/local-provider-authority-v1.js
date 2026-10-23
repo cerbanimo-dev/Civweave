@@ -128,7 +128,8 @@ function researchRequested(args={},messages=[]){
   // Clear freshness intents; no model prompt or network call for generic chat.
   const asks=/^(?:please\s+)?(?:what(?:'s| is| are| were| happened| has)|who(?:'s| is)|when(?:'s| is| does| will)|how(?:'s| is| much| many)|which|where|can you (?:tell|check|find)|give me|show me|find|tell me|update me|any (?:news|updates))\b/.test(user);
   const fresh=/\b(?:today|yesterday|tonight|tomorrow|this week|this month|right now|currently|breaking news|latest news|recent (?:news|developments|events|updates)|up-to-date|as of (?:now|today)|newest (?:version|release)|latest (?:version|release|updates?|news|price|results?|developments?|score|figures?|schedule)|current (?:weather|price|rates?|news|events?|score|release|version|president|status|availability))\b/.test(user);
-  return asks&&fresh;
+  const inherentlyLive=asks&&/\b(?:weather|forecast|traffic|flight status|stock (?:price|quote)|exchange rate|sports? score|election results?|breaking news)\b/.test(user);
+  return inherentlyLive||(asks&&(fresh||/\b(?:latest|newest)\b/.test(user)));
 }
 let browserResearchFlight=null;
 async function loadBrowserResearch(){
