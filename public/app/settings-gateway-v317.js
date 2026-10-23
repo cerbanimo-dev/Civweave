@@ -91,10 +91,12 @@ function sync(form){
     byName(form,'endpoint')?.value==='http://127.0.0.1:8080/v1';
   const nativeNote=form.querySelector('[data-native-server-selected-note]');
   if(nativeNote)nativeNote.hidden=!nativeServer;
-  const consentField=form.querySelector('.cw-clean-consent:has([name="consent"])');
+  const consentField=byName(form,'consent')?.closest?.('.cw-clean-consent');
   if(consentField)consentField.hidden=nativeServer;
   const secretField=form.querySelector('.cw-clean-secret-row');
   if(secretField)secretField.hidden=nativeServer;
+  const credentialLifetime=byName(form,'credentialMode')?.closest?.('label');
+  if(credentialLifetime)credentialLifetime.hidden=nativeServer;
   const compatibleOption=byName(form,'route')?.querySelector?.('option[value="openai-compatible"]');
   if(compatibleOption)compatibleOption.textContent=browserGGUF?'On-device GGUF · browser engine':nativeServer?'Native GGUF · Termux server':'OpenAI-compatible endpoint';
   const deterministic=form.querySelector('[data-panel="deterministic"]'),remotePanel=form.querySelector('[data-panel="remote"]');
