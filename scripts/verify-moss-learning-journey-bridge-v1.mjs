@@ -135,6 +135,12 @@ assert.equal(stored.authoring.model,ggufModel);
 assert.equal(stored.state,'review');
 assert.ok(!stored.approvedAt);
 assert.equal(calls,3);
+// A terse revision must retain the established Learning Journey goal.
+output={status:'success',actual:{provider:'openai-compatible',model:ggufModel},outputJson:matching,diagnostics:[{code:'BROWSER_GGUF'}]};
+const revision=await api.generateLivingSchoolPlan({text:'Change module two to emphasize reversed Tarot cards',history:[]},stored,'Change module two to emphasize reversed Tarot cards');
+assert.match(revision.response.answer,/Tarot/i);
+assert.equal(JSON.parse(persisted.get(manifestKey)).request.capability.toLowerCase(),'read and memorize the tarot','Revising a module must preserve the established Learning Journey goal.');
+assert.equal(calls,4);
 persisted.delete(manifestKey);
 // Even when the user elects server-auto, do not silently save a plan
 // whose subject changed from tarot to a previous manifestation/web-app task.
