@@ -9,11 +9,16 @@ assert.match(boundary,/const MOSS_PLAN_APPROVAL_BUTTON='\/app\/moss-learning-pla
 assert.ok(boundary.includes('GUIDE_WORKSPACE,UNIFIED_CHAT_SYSTEM,MOSS_PLAN_APPROVAL_BUTTON,SERVER_AI_OUTPUT_NORMALIZER'),'Moss approval button must load immediately after unified chat on first-class system surfaces.');
 assert.ok(boundary.includes('GUIDE_WORKSPACE,UNIFIED_CHAT_SYSTEM,MOSS_PLAN_APPROVAL_BUTTON,SERVER_AI_OUTPUT_NORMALIZER'),'Compatibility chat surfaces must retain the same direct approval-button load order.');
 assert.match(approval,/Approve Learning Journey/,'The review surface must expose an explicit Approve Learning Journey button.');
+assert.match(approval,/moss-face-v255\\.webp/,'The review surface must use the real Moss mascot artwork inline.');
+assert.match(approval,/actionButton\\(actions,'Revise'/,'The review surface must expose Revise.');
+assert.match(approval,/actionButton\\(actions,'Deny'/,'The review surface must expose Deny.');
+assert.match(approval,/Retry generation/,'A failed approved materialization must offer a retry.');
+assert.match(approval,/Open Learning Journey/,'A successful materialization must have an actionable next step.');
 assert.match(approval,/approveLivingSchoolPlan\(plan\)/,'The button must call the canonical Learning Journey approval/materialization API directly.');
 assert.doesNotMatch(approval,/submitText\s*\(/,'Approval must not be implemented by synthesizing a chat message.');
 assert.match(approval,/chatApprovalRequired:false/,'The runtime contract must declare that chat approval is not required.');
 
-const plan={
+let plan={
   id:'learning-plan-test-1',
   state:'review',
   request:{title:'Tarot Foundations',capability:'read Tarot',level:'beginner',mode:'guided',proof:'Complete a reading.',count:4},
@@ -55,6 +60,23 @@ const sandbox={
   },
   CivweaveUnifiedChatSystemV1:{
     readLearningPlan:()=>plan,
+    requestLivingSchoolPlanRevision:value=>{
+      assert.equal(value.id,plan.id);
+      plan={...plan,state:'revision-requested'};
+      storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
+      return{response:{answer:'Moss is waiting for your revisions.',choice:{nextAction:'Describe what should change.'}},action:{kind:'living-school-learning-plan-revision-requested',state:'revision-requested'}};
+    },
+    denyLivingSchoolPlan:value=>{
+      assert.equal(value.id,plan.id);
+      plan={...plan,state:'denied'};
+      storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
+      return{response:{answer:'Moss discarded the plan. Nothing was generated.',choice:{nextAction:'Enter a new learning goal.'}},action:{kind:'living-school-learning-plan-denied',state:'denied'}};
+    },
+    retryLivingSchoolPlanMaterialization:async planId=>{
+      assert.equal(planId,plan.id);
+      assert.equal(plan.state,'approved');
+      return{response:{answer:'I materialized the approved Learning Journey.',choice:{nextAction:'Open Living School.'}},action:{kind:'living-school-curriculum-generated',state:'completed'}};
+    },
     approveLivingSchoolPlan:async value=>{
       approvedPlan=value;
       return{response:{answer:'I materialized the approved Learning Journey “Tarot Foundations”.',choice:{mode:'Learn',system:'living-school',nextAction:'Open Module 1: One.'},approvalGate:null},provider:'living-school-learning-engine',model:'canonical-learning-engine',action:{kind:'living-school-curriculum-generated',state:'completed'}};
@@ -70,7 +92,7 @@ sandbox.globalThis=sandbox;
 vm.runInNewContext(approval,sandbox,{filename:'moss-learning-plan-approval-button-v1.js'});
 const api=sandbox.CivweaveMossLearningPlanApprovalButtonV1;
 assert.ok(api,'Moss Learning Journey approval-button runtime did not initialize.');
-assert.equal(api.approvalSurface,'button');
+assert.equal(api.approvalSurface,'approve-revise-deny');
 assert.equal(api.chatApprovalRequired,false);
 const ok=await api.approvePlanById(plan.id);
 assert.equal(ok,true,'Button approval must complete the direct approval call.');
@@ -80,4 +102,28 @@ assert.equal(thread.messages[0].role,'assistant');
 assert.match(thread.messages[0].text,/materialized the approved Learning Journey/);
 assert.doesNotMatch(thread.messages[0].text,/^Approved$/i);
 
-console.log('Moss Learning Journey approval button regression check passed.');
+// Independent decision buttons must not forge chat messages or start curriculum generation.
+const approvalCount=thread.messages.length;
+plan={...plan,id:'learning-plan-test-2',state:'review'};
+storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
+assert.equal(await api.decidePlanById(plan.id,'revise'),true);
+assert.equal(plan.state,'revision-requested');
+assert.equal(thread.messages.length,approvalCount+1);
+assert.equal(approvedPlan.id,'learning-plan-test-1','Revision must not approve or generate.');
+assert.match(thread.messages.at(-1).text,/Describe what should change/);
+assert.equal(await api.approvePlanById(plan.id),false,'A plan awaiting revisions must not be approved.');
+
+plan={...plan,id:'learning-plan-test-3',state:'review'};
+storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
+assert.equal(await api.decidePlanById(plan.id,'deny'),true);
+assert.equal(plan.state,'denied');
+assert.equal(approvedPlan.id,'learning-plan-test-1','Deny must not approve or generate.');
+assert.equal(await api.approvePlanById(plan.id),false,'A denied plan must be blocked from approval.');
+assert.match(thread.messages.at(-1).text,/Nothing was generated/);
+
+plan={...plan,id:'learning-plan-test-4',state:'approved',approvedAt:new Date().toISOString()};
+storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
+assert.equal(await api.retryPlanById(plan.id),true,'An approved plan must allow retry after generation failure.');
+assert.match(thread.messages.at(-1).text,/materialized the approved Learning Journey/);
+assert.match(approval,/previous\\?\\.dataset\\.mode==='open'/,'Completion CTA must remain stable across MutationObserver renders.');
+console.log('Moss Learning Journey decision and recovery regression checks passed.');
