@@ -226,9 +226,9 @@ async function start(selected,onPhase=()=>{}){
     const create=async gpuLayers=>{
       const current=await engine();
       onPhase('loading',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers,bytes:selected.bytes});
-      await current.loadModel(source,{n_ctx:4096,n_threads:1,n_batch:64,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
+      await current.loadModel(source,{n_ctx:2048,n_parallel:1,n_threads:1,n_batch:64,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
       loadedUrl=selected.url;
-      onPhase('ready',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers});
+      onPhase('ready',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers,n_ctx:2048,n_parallel:1});
       return current;
     };
     try{
@@ -262,13 +262,13 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
   const watchdog=watchdogModule.createGGUFGenerationWatch({
     signal,onProgress:(stage,details)=>updatePhase(stage,details)
   });
-  let output='',chunks=0,finishReason=null;
+  let output='',chunks=0,finishReason=null,prefill=null,firstStreamAt=null,streamEvents=0;
   const params={
     model:selected.model,
     messages:(Array.isArray(messages)?messages:[]).map(row=>({role:['system','assistant','user'].includes(row?.role)?row.role:'user',content:clean(row?.content)})).filter(row=>row.content),
     temperature:Number.isFinite(Number(temperature))?Math.max(0,Math.min(1.5,Number(temperature))):.6,
     max_tokens:Math.max(24,Math.min(1024,Number(maxTokens)||1024)),
-    stream:true,abortSignal:watchdog.signal,
+    stream:true,abortSignal:watchdog.signal,return_progress:true,cache_prompt:true,
     chat_template_kwargs:{enable_thinking:false},
     ...(structured?{response_format:{type:'json_object'}}:{})
   };
@@ -284,7 +284,19 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
     while(true){
       const next=await Promise.race([iterator.next(),watchdog.cancelled]);
       if(next.done)break;
-      const chunk=next.value,choice=chunk?.choices?.[0]||{},delta=choice.delta||{};
+      const chunk=next.value;
+      streamEvents++;
+      if(firstStreamAt===null)firstStreamAt=Date.now();
+      if(chunk?.prompt_progress){
+        const progress=chunk.prompt_progress;
+        const processed=Number(progress?.processed||0),total=Number(progress?.total||0),cached=Number(progress?.cache||0);
+        prefill={processed,total,cached,timeMs:Number(progress?.time_ms||0),elapsedMs:watchdog.snapshot().elapsedMs};
+        if(streamEvents<=3||streamEvents%16===0||processed>=total)
+          updatePhase('prefill',{processed,total,cached,progressPercent:total?Math.round(processed/total*100):null,
+            elapsedMs:prefill.elapsedMs,backend:'wllama'});
+        watchdog.prefill?.(prefill);
+      }
+      const choice=chunk?.choices?.[0]||{},delta=choice.delta||{};
       finishReason=choice.finish_reason||finishReason;
       const visible=String(delta.content??'');
       const hidden=String(delta.reasoning_content??delta.reasoning??'');
@@ -297,21 +309,27 @@ export async function generate({model,messages,temperature=.6,maxTokens=1024,str
         watchdog.chunk({hidden:true});
       }
     }
-    if(!output.trim())throw err('GGUF_EMPTY','Wllama finished without any visible answer. Hidden-token count: '+watchdog.snapshot().hiddenChunks+'. Disable model thinking and retry with a shorter prompt.');
+    if(!output.trim())throw err('GGUF_EMPTY','Wllama finished without visible text; stream events='+streamEvents+', hidden chunks='+watchdog.snapshot().hiddenChunks+', last prefill='+(prefill?prefill.processed+'/'+prefill.total:'not reported')+'. Your imported Q4 model remains available.');
     const metrics=watchdog.snapshot();
     updatePhase('complete',{chunks,finishReason,firstTokenMs:metrics.firstTokenMs,
-      elapsedMs:metrics.elapsedMs});
+      elapsedMs:metrics.elapsedMs,firstStreamMs:firstStreamAt===null?null:firstStreamAt-(Date.now()-metrics.elapsedMs),prefill});
     notify('complete',{model:selected.model,chunks,finishReason});
     return{text:output,model:selected.model,streamed:true,backend:'browser-wllama',chunks,finishReason,metrics};
   }catch(error){
     const reason=clean(error?.message).slice(0,700),metrics=watchdog.snapshot();
     notify('failed',{model:selected.model,phase,error:reason,code:error?.code,metrics});
-    updatePhase('failed',{failedStage:phase,reason,code:error?.code||'GGUF_INFERENCE_FAILED',...metrics});
+    updatePhase('failed',{failedStage:phase,reason,code:error?.code||'GGUF_INFERENCE_FAILED',
+      ...metrics,streamEvents,prefill,backend:'wllama'});
     if(signal?.aborted)throw err('GGUF_ABORTED','GGUF '+phase+' was cancelled. Imported Q4 weights remain installed.');
     // Do not hide the watchdog's actionable error behind a generic
     // 'Operation aborted' from Wllama.
-    if(watchdog.signal.aborted&&watchdog.signal.reason?.code)
-      throw watchdog.signal.reason;
+    if(watchdog.signal.aborted&&watchdog.signal.reason?.code){
+      const cause=watchdog.signal.reason;
+      throw err(cause.code,cause.message+' Diagnostic: stream events='+streamEvents+
+        ', hidden chunks='+metrics.hiddenChunks+', prefill='+
+        (prefill?prefill.processed+'/'+prefill.total:'not reported')+
+        ', first stream event='+(firstStreamAt===null?'none':'observed')+'.');
+    }
     throw err(error?.code||'GGUF_INFERENCE_FAILED','Browser GGUF '+phase+' failed: '+reason+'. Imported Q4 weights were not removed.');
   }finally{watchdog.stop()}
 }
