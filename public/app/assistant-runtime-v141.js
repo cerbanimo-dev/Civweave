@@ -45,11 +45,18 @@ function provider(v){
 }
 function activeLocal(){try{const value=globalThis.CivweaveLocalModelDownloadV266?.selection?.();return value?.active&&value?.id?value:null}catch{return null}}
 function selectedConfig(){
-  const local=activeLocal();
-  if(local)return{provider:'downloaded-local',route:'downloaded-local',model:local.id,externalConsent:false};
   const old=parse(localStorage.getItem(SK),{route:'server-auto',provider:'server-auto',model:'',consent:false});
   let shared=null;try{shared=runtime()?.readSharedConfig?.('interactive')||null}catch{}
   const raw=shared||old,rawModel=clean(raw.model||raw.modelId,300),rawProvider=low(raw.provider||raw.route);
+  // The browser GGUF is a first-class on-device primary even though its
+  // transport compatibility config is named "openai-compatible". A stale
+  // downloaded-local Gemma selection must NOT supersede it.
+  const gguf=parse(localStorage.getItem('civweave.mobile.gguf-primary.v2'),null);
+  if(gguf?.enabled===true&&gguf.engine==='wllama'&&
+     rawProvider==='openai-compatible'&&rawModel===gguf.model)
+    return {...raw,provider:'openai-compatible',route:'openai-compatible',model:gguf.model,externalConsent:false};
+  const local=activeLocal();
+  if(local)return{provider:'downloaded-local',route:'downloaded-local',model:local.id,externalConsent:false};
   if(rawModel===MINILM_ID||rawProvider==='minilm'||rawProvider==='semantic-local'||rawProvider==='local-reflex'||rawProvider==='reflex')return{provider:'server-auto',route:'server-auto',model:'',externalConsent:false,migratedSidecar:true};
   const p=provider(rawProvider);
   return{...raw,provider:p,route:p,externalConsent:Boolean(raw.externalConsent??raw.remoteConsent??old.consent)};
