@@ -16,6 +16,12 @@ const GUIDE=Object.freeze({
 function nativeSelection(){
   let state=null;
   try{state=globalThis.CivweaveSettingsV320?.readState?.()}catch{}
+  if(!state){
+    try{
+      const profiles=JSON.parse(localStorage.getItem('civweave-model-profiles-v1')||'{}');
+      state=profiles?.interactive||null;
+    }catch{}
+  }
   return (state?.provider||state?.route)==='openai-compatible'&&
     state.model===NATIVE_MODEL&&state.endpoint===NATIVE_ENDPOINT;
 }
