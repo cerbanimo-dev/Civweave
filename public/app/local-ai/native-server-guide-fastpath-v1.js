@@ -132,7 +132,7 @@ export async function readNativeStream(response,{onToken,signal}={}){
   }
   if(!response.body?.getReader)throw nativeStreamError('The browser did not expose the server response stream.');
   const reader=response.body.getReader(),decoder=new TextDecoder();
-  let buffer='',block='',answer='',usage=null,finishReason='',doneEvent=false,bytes=0,frames=0;
+  let block='',answer='',usage=null,finishReason='',doneEvent=false,bytes=0,frames=0;
   function consume(frame){
     const parts=frame.split(/\r?\n/).filter(line=>line.startsWith('data:'))
       .map(line=>line.slice(5).trim());
@@ -154,8 +154,10 @@ export async function readNativeStream(response,{onToken,signal}={}){
     }
   }
   function process(chunk){block+=chunk;let boundary;
-    while((boundary=block.indexOf('\n\n'))!==-1){
-      const frame=block.slice(0,boundary);block=block.slice(boundary+2);consume(frame);
+    while((boundary=/\r?\n\r?\n/.exec(block))!==null){
+      const frame=block.slice(0,boundary.index);
+      block=block.slice(boundary.index+boundary[0].length);
+      consume(frame);
     }
   }
   try{
@@ -165,11 +167,9 @@ export async function readNativeStream(response,{onToken,signal}={}){
       if(done)break;
       bytes+=value.byteLength;
       if(bytes>1048576)throw nativeStreamError('The server stream exceeded 1 MiB.');
-      buffer+=decoder.decode(value,{stream:true}).replace(/\r\n/g,'\n');
-      // Keep incomplete UTF-8 and partial SSE frames until subsequent chunks.
-      process(buffer);buffer='';
+      process(decoder.decode(value,{stream:true}));
     }
-    process(decoder.decode().replace(/\r\n/g,'\n'));
+    process(decoder.decode());
     if(block.trim())consume(block);
     if(!answer)throw nativeStreamError('The server ended the stream without visible tokens.');
     if(!doneEvent&&!finishReason)throw nativeStreamError('The connection ended before a finish reason or [DONE].');
