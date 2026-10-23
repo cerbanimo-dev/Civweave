@@ -23,8 +23,8 @@ const globals={
   CivweaveSettingsV320:{readState:()=>selected},
   CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,generate:async()=>{throw Error('unexpected runtime call')}},
   CivweaveUnifiedChatSystemV1:{
-    version:'1.2.3-unified-chat-system-v1-native-direct-planning',
-    generateLivingSchoolPlan:async args=>{planArgs=args;return{response:{answer:'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
+    version:'1.2.4-unified-chat-system-v1-native-learning-controls',
+    handleNativeLivingSchoolRequest:async args=>{planArgs=args;return{response:{answer:args.text==='approve'?'Approved Learning Journey': 'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
   },
   CivweaveFamilyAILoaderV105:{ensure:async()=>{assistants++;throw Error('full assistant bootstrap should be skipped')}}
 };
@@ -50,10 +50,15 @@ assert.match(reply.response.answer,/Learning Journey/);
 assert.equal(planArgs.nativeFastLane,true);
 assert.equal(requested,1,'Moss routes to existing planner, not a separate unvalidated text prompt');
 assert.equal(assistants,0);
+reply=await api.respondNative({text:'approve',system:'living-school'});
+assert.match(reply.response.answer,/Approved Learning Journey/);
+assert.equal(planArgs.text,'approve');
+assert.equal(requested,1,'Moss approval controls must not be answered by generic chat');
 selected.provider='server-auto';
 await assert.rejects(api.respondNative({text:'Say READY'}),/route changed/);
 assert.equal(requested,1);
 assert.match(moss,/options\.nativeFastLane&&nativePhoneServer\(config\)/);
+assert.match(moss,/handleNativeLivingSchoolRequest/);
 assert.match(chat,/await direct\.respondNative/);
 assert.match(chat,/await verifyNativePhoneServerTransport/);
 assert.match(runtime,/nativeDirect \? false : Boolean\(config\.stream \|\| lineup\)/);
