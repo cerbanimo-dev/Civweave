@@ -17,11 +17,11 @@ function renderModules(){
   box.innerHTML='<div class="module-header"><h3>Module '+(index+1)+'</h3><button type="button" data-remove-module="'+index+'">Remove</button></div>'+
   ['title','focus','outcome'].map(key=>'<label>'+({title:'Title',focus:'Learning focus',outcome:'Observable demonstration'}[key])+'</label><textarea maxlength="'+({title:220,focus:900,outcome:900}[key])+'" data-module="'+index+'" data-field="'+key+'"></textarea>').join('');
   box.querySelectorAll('textarea').forEach(n=>{n.value=module[n.dataset.field]||'';n.addEventListener('input',()=>{module[n.dataset.field]=n.value;save()})});
-  box.querySelector('[data-remove-module]').addEventListener('click',()=>{if(draft.modules.length<=3)return status('The canonical Learning Journey review plan needs at least three modules.');draft.modules.splice(index,1);renderModules();renderMedia();save()});
+  box.querySelector('[data-remove-module]').addEventListener('click',()=>{if(draft.modules.length<=3)return status('The canonical Learning Journey review plan needs at least three modules.');const removed=draft.modules.splice(index,1)[0];for(const row of [...draft.sources,...draft.media])if(row.moduleId===removed.id)row.moduleId='';renderModules();renderSources();renderMedia();save()});
   el('modules').append(box);
  });
  const choices=draft.modules.map((m,i)=>'<option value="'+esc(m.id)+'">'+(i+1)+'. '+esc(m.title||'Untitled module')+'</option>').join('');
- const current=el('media-module').value;el('media-module').innerHTML='<option value="">General</option>'+choices;el('media-module').value=draft.modules.some(m=>m.id===current)?current:'';
+ for(const id of ['media-module','source-module']){const current=el(id).value;el(id).innerHTML='<option value="">General</option>'+choices;el(id).value=draft.modules.some(m=>m.id===current)?current:'';}
 }
 function renderSources(){
  el('sources').replaceChildren();
@@ -30,7 +30,7 @@ function renderSources(){
   const link=document.createElement('a');link.href=source.url;link.textContent=source.title;link.rel='noopener noreferrer';link.target='_blank';
   const heading=document.createElement('div');heading.className='entry-head';heading.append(link);
   const remove=document.createElement('button');remove.className='remove';remove.textContent='Remove';remove.addEventListener('click',()=>{draft.sources=draft.sources.filter(row=>row.id!==source.id);renderSources();save()});heading.append(remove);box.append(heading);
-  const note=document.createElement('div');note.className='subtle';note.textContent=[source.type,source.creator,source.publisher,source.notes].filter(Boolean).join(' · ');box.append(note);el('sources').append(box);
+  const note=document.createElement('div');note.className='subtle';note.textContent=[source.type,source.creator,source.publisher,draft.modules.find(m=>m.id===source.moduleId)?.title,source.notes].filter(Boolean).join(' · ');box.append(note);el('sources').append(box);
  }
 }
 function renderMedia(){
@@ -71,7 +71,7 @@ function output(filename,data){
 }
 function valid(){getFields();save();const errors=validateDraft(draft);if(errors.length){status('Needs attention:\n• '+errors.join('\n• '));return false}status('Validated: '+draft.modules.length+' modules, '+draft.sources.length+' sources, '+draft.media.length+' media references. This is a review draft, not approved Living School content.');return true}
 function stageForMoss(bundle=null,source='manual-editor'){
- getFields();save();
+ if(!bundle){getFields();save()}
  try{
   if(!bundle&&!valid())return false;
   const perform=replace=>{
@@ -105,7 +105,37 @@ async function searchIndex(which){
  }catch(error){status('Research lookup unavailable: '+String(error?.message||error)+'. You can still add URLs manually.')}finally{button.disabled=false}
 }
 function renderResults(){const box=el('search-results');box.replaceChildren();for(const [i,source] of researchResults.entries()){const card=document.createElement('div');card.className='source-card';const a=document.createElement('a');a.textContent=source.title;a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';card.append(a);const p=document.createElement('div');p.className='subtle';p.textContent=source.publisher+' '+(source.creator||'');card.append(p);const b=document.createElement('button');b.textContent='Use this citation';b.addEventListener('click',()=>{el('source-title').value=source.title;el('source-url').value=source.url;el('source-author').value=source.creator||'';el('source-type').value=source.type;status('Citation fields populated. Inspect and click Add cited source to save it.')});card.append(b);box.append(card)}}
-function addSource(){try{if(draft.sources.length>=40)throw Error('Maximum 40 sources per Learning Journey.');const row=normaliseSource({title:el('source-title').value,url:el('source-url').value,creator:el('source-author').value,notes:el('source-notes').value,type:el('source-type').value});draft.sources.push(row);for(const id of ['source-title','source-url','source-author','source-notes'])el(id).value='';renderSources();save();status('Added source citation. Its claims and licensing remain for human verification.')}catch(e){status(e.message)}}
+const textOnly=value=>String(value??'').replace(/<[^>]*>/g,' ').replace(/&amp;/gi,'&').replace(/&nbsp;/gi,' ').replace(/&#39;/g,"'").replace(/&quot;/gi,'"').replace(/\\s+/g,' ').trim();
+async function searchCommons(){
+ const query=el('media-search').value.trim();
+ if(query.length<3)return status('Enter at least three search characters for image discovery.');
+ const button=el('search-commons');button.disabled=true;status('Searching Wikimedia Commons...');
+ try{
+  const searchParams=new URLSearchParams({action:'query',generator:'search',gsrsearch:query,gsrnamespace:'6',gsrlimit:'8',prop:'imageinfo',iiprop:'url|extmetadata|mime',iiurlwidth:'280',format:'json',origin:'*'});
+  const response=await fetch('https://commons.wikimedia.org/w/api.php?'+searchParams.toString());
+  if(!response.ok)throw Error('Wikimedia Commons returned HTTP '+response.status);
+  const data=await response.json(),results=Object.values(data.query?.pages||{}).filter(p=>p.imageinfo?.[0]?.mime?.startsWith('image/'));
+  const root=el('media-results');root.replaceChildren();
+  for(const item of results){
+   const info=item.imageinfo[0],mediaUrl=externalUrl(info.url),thumb=externalUrl(info.thumburl||info.url);
+   if(!mediaUrl)continue;
+   const license=textOnly(info.extmetadata?.LicenseShortName?.value||'');
+   const credit=textOnly(info.extmetadata?.Artist?.value||'');
+   const sourcePage=externalUrl(info.descriptionurl);
+   const card=document.createElement('div');card.className='entry';
+   if(thumb){const img=document.createElement('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=thumb;img.alt=item.title;img.style.cssText='width:125px;max-height:110px;object-fit:contain;float:left;margin-right:12px';card.append(img)}
+   const label=document.createElement('div');label.textContent=item.title.replace(/^File:/,'');card.append(label);
+   const meta=document.createElement('p');meta.className='subtle';meta.textContent=(license||'License review required')+' · '+(credit||'Creator unverified').slice(0,140);card.append(meta);
+   if(sourcePage){const link=document.createElement('a');link.href=sourcePage;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Inspect original, author and license';card.append(link)}
+   const use=document.createElement('button');use.textContent='Use image reference';use.type='button';
+   use.addEventListener('click',()=>{el('media-type').value='image';el('media-url').value=mediaUrl;el('media-title').value=item.title.replace(/^File:/,'');el('media-credit').value=credit.slice(0,250);el('media-rights').value=(license||'Verify license')+(sourcePage?' · '+sourcePage:'');status('Image reference selected. Review license, creator and image content before adding.')});
+   card.append(document.createElement('br'),use);root.append(card)
+  }
+  status(results.length+' Commons image reference(s) found. You must inspect the original license and select the image.');
+ }catch(error){status('Image search unavailable: '+String(error?.message||error)+'. Add a URL manually instead.')}
+ finally{button.disabled=false}
+}
+function addSource(){try{if(draft.sources.length>=40)throw Error('Maximum 40 sources per Learning Journey.');const row=normaliseSource({title:el('source-title').value,url:el('source-url').value,creator:el('source-author').value,notes:el('source-notes').value,type:el('source-type').value,moduleId:el('source-module').value});draft.sources.push(row);for(const id of ['source-title','source-url','source-author','source-notes'])el(id).value='';renderSources();save();status('Added source citation. Its claims and licensing remain for human verification.')}catch(e){status(e.message)}}
 function addMedia(){try{if(draft.media.length>=28)throw Error('Maximum 28 media references.');const row=normaliseMedia({kind:el('media-type').value,url:el('media-url').value,title:el('media-title').value,credit:el('media-credit').value,rights:el('media-rights').value,moduleId:el('media-module').value});draft.media.push(row);for(const id of ['media-url','media-title','media-credit','media-rights'])el(id).value='';renderMedia();save();status('Attached media reference. For offline X4 Pro use, convert and package an appropriately licensed local copy separately.')}catch(e){status(e.message)}}
 function selectedGuild(){
  const selected=read('civweave.host-node.selection.v1',{});
@@ -194,6 +224,7 @@ async function refreshGuildInbox(){
 function renderAll(){renderFields();renderModules();renderSources();renderMedia();renderGuild();preview()}
 for(const key of ['title','capability','level','mode','proof'])el(key).addEventListener('input',()=>{draft[key]=el(key).value;save()});
 el('add-module').addEventListener('click',()=>{if(draft.modules.length>=8)return status('Maximum eight modules.');draft.modules.push({id:'module-'+crypto.randomUUID(),title:'',focus:'',outcome:''});renderModules();save()});
+el('search-commons').addEventListener('click',searchCommons);
 el('add-source').addEventListener('click',addSource);el('add-media').addEventListener('click',addMedia);
 el('search-wikipedia').addEventListener('click',()=>searchIndex('wikipedia'));el('search-openalex').addEventListener('click',()=>searchIndex('openalex'));
 el('validate').addEventListener('click',valid);
