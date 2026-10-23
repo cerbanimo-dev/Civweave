@@ -111,6 +111,43 @@ function outputText(result){
   if(json&&typeof json==='object')return clean(json.answer||json.text||json.message||'',120000);
   return clean(result?.outputText||result?.text||result?.output||result?.generatedText||result?.message,120000);
 }
+// Only explicit user-authorized live research may send a query off-device.
+function researchRequested(args,messages){
+  if(args.offlineOnly===true||args.config?.offlineOnly===true)return false;
+  if(args.webSearch===true||args.externalResearch===true||args.browserSearch===true)return true;
+  const user=clean(args.text||[...messages].reverse().find(row=>row.role==='user')?.content,2500).toLowerCase();
+  return /\b(?:search (?:the )?(?:web|internet|online)|look (?:it |this )?up online|browse (?:the )?(?:web|internet)|research (?:this |it )?online|find (?:current|latest) (?:web )?sources)\b/.test(user);
+}
+let browserResearchFlight=null;
+async function loadBrowserResearch(){
+  if(globalThis.CivweaveLocalBrowserAgentV1?.handle&&globalThis.CivweaveBrowserToolV1?.live)return globalThis.CivweaveLocalBrowserAgentV1;
+  if(browserResearchFlight)return browserResearchFlight;
+  browserResearchFlight=(async()=>{
+    for(const [src,ready] of [
+      ['/app/browser-tool-v1.js?v=1.0.1-research-router',()=>Boolean(globalThis.CivweaveBrowserToolV1?.live)],
+      ['/app/local-ai/browser-agent-v1.js?v=1.0.2-research-router',()=>Boolean(globalThis.CivweaveLocalBrowserAgentV1?.handle)]
+    ]){
+      if(ready())continue;
+      await new Promise((resolve,reject)=>{
+        const script=document.createElement('script');
+        const timer=setTimeout(()=>reject(Object.assign(new Error('Research component timed out: '+src),{code:'LOCAL_RESEARCH_LOAD_TIMEOUT'})),15000);
+        script.src=src;script.async=false;
+        script.onload=()=>{clearTimeout(timer);ready()?resolve():reject(new Error('Research component failed readiness: '+src))};
+        script.onerror=()=>{clearTimeout(timer);reject(new Error('Research component could not load: '+src))};
+        document.head.append(script);
+      });
+    }
+    return globalThis.CivweaveLocalBrowserAgentV1;
+  })().finally(()=>{browserResearchFlight=null});
+  return browserResearchFlight;
+}
+async function runLocalResearch(runtime,args,messages,requestedModel){
+  await runtime.ready?.(args.onProgress);
+  const agent=await loadBrowserResearch();
+  const handled=await agent.handle({...args,messages,webSearch:true,externalResearch:true});
+  if(!handled?.handled||!handled.result)throw Object.assign(new Error('Selected local model did not connect to the research tool router.'),{code:'LOCAL_RESEARCH_ROUTE_UNAVAILABLE'});
+  return {result:handled.result,requestedModel,executedModel:clean(handled.result.actual?.model||requestedModel,240),localTierFallback:false,fallbackReason:null};
+}
 function setDecisionStrip(text,state='local'){
   try{
     const node=document.querySelector?.('#cw-persistent-guide-chat-v215 [data-minilm-decision-strip]');
@@ -398,7 +435,8 @@ async function localRespond(args={}){
     if(text&&!(messages.at(-1)?.role==='user'&&messages.at(-1)?.content===text)){
       messages.push({role:'user',content:text});
     }
-    const run=await runLocalModel(runtime,args,messages,requestedModel);
+    const liveResearch=researchRequested(args,messages);
+    const run=liveResearch?await runLocalResearch(runtime,args,messages,requestedModel):await runLocalModel(runtime,args,messages,requestedModel);
     const result=run.result;
     if(result?.status&&!['success','fallback'].includes(result.status)){
       throw Object.assign(new Error(result?.error?.message||`Local provider ended with ${result.status}.`),{code:result?.error?.code||'LOCAL_MODEL_GENERATION_FAILED'});
@@ -409,7 +447,10 @@ async function localRespond(args={}){
       requestedModel,
       localTierFallback:run.localTierFallback,
       fallbackReason:run.fallbackReason||null,
-      fallbackChain:Array.isArray(result?.fallbackChain)?result.fallbackChain.map(id=>clean(id,240)).filter(Boolean):[]
+      fallbackChain:Array.isArray(result?.fallbackChain)?result.fallbackChain.map(id=>clean(id,240)).filter(Boolean):[],
+      networkRequired:liveResearch,
+      externalResearch:liveResearch,
+      researchSources:liveResearch?result?.browserAgent?.sources||[]:[]
     });
     return{
       response:{answer,choice:{mode:guide.mode,system,room:'',nextAction:''},assumptions:[],requiresConsent:false,confidence:.8},
@@ -419,7 +460,7 @@ async function localRespond(args={}){
       usage:result?.usage||null,
       responseRouting:route,
       fallbackFrom:run.localTierFallback?{provider:'downloaded-local',model:requestedModel,reason:run.fallbackReason}:null,
-      context:{localProviderAuthority:{version:VERSION,pinned:true,direct:true,inferenceCoreFirst:true}}
+      context:{localProviderAuthority:{version:VERSION,pinned:true,direct:true,inferenceCoreFirst:true},research:liveResearch?result?.browserAgent||null:null}
     };
   }catch(error){
     return localFailure(args,error);
