@@ -697,7 +697,7 @@
         temperature:config.temperature,maxTokens:config.maxTokens,
         structured:request.responseFormat==='json'||Boolean(request.schema),
         signal,onToken:(text,accumulatedText)=>emit(context,'partial',{text,accumulatedText,backend:'browser-gguf'}),
-        onPhase:(phase,details={})=>emit(context,'gguf-browser-phase',{phase,model:config.model,...details})
+        onPhase:(stage,details={})=>emit(context,'gguf-browser-phase',{stage,model:config.model,...details})
       });
       return{text:run.text,model:run.model,streamed:run.streamed,backend:run.backend,
         payload:{choices:[{message:{role:'assistant',content:run.text},finish_reason:'stop'}]},
