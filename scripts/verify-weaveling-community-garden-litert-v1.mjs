@@ -73,7 +73,7 @@ const sandbox={
 sandbox.globalThis=sandbox;
 const localProvider=async()=>{localCalls++;return{provider:'downloaded-local',response:{answer:'ordinary local chat'}}};
 localProvider.__civweaveLocalProviderAuthorityV1=true;
-localProvider.__civweaveLocalProviderAuthorityVersion='1.0.3-local-provider-authority-v1-inference-core-first';
+localProvider.__civweaveLocalProviderAuthorityVersion='1.0.4-local-provider-authority-v1-default-web-tools';
 localProvider.__prior=async()=>({provider:'deterministic-control'});
 sandbox.CivweaveAssistantV141={respond:localProvider};
 sandbox.CivweaveWeavelingPlanJsonV190={
