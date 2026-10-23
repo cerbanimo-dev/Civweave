@@ -46,17 +46,17 @@ function blockedIpv4(host) {
   const parts = host.split('.').map(Number);
   if (parts.length !== 4 || parts.some(part => !Number.isInteger(part) || part < 0 || part > 255)) return false;
   const [a, b] = parts;
-  return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a >= 224;
+  return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && (b === 0 || b === 168)) || (a === 198 && (b === 18 || b === 19 || (b === 51 && parts[2] === 100))) || (a === 203 && b === 0 && parts[2] === 113) || a >= 224;
 }
 function safeUrl(value) {
   let url;
   try { url = new URL(clean(value, 4000)); }
   catch { throw Object.assign(new Error('Browser tool requires a valid URL.'), { status: 400 }); }
   if (!['http:', 'https:'].includes(url.protocol)) throw Object.assign(new Error('Browser tool only permits HTTP(S) targets.'), { status: 400 });
-  if (url.username || url.password) throw Object.assign(new Error('Browser tool URLs may not contain embedded credentials.'), { status: 400 });
+  if (url.username || url.password || (url.port && !['80','443'].includes(url.port))) throw Object.assign(new Error('Browser tool URLs may not contain credentials or non-web ports.'), { status: 400 });
   const host = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-  if (!host || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.invalid')) throw Object.assign(new Error('Browser tool refuses local or private hostnames.'), { status: 403 });
-  if (blockedIpv4(host) || host === '::' || host === '::1' || /^f[cd][0-9a-f:]*$/i.test(host) || /^fe[89ab][0-9a-f:]*$/i.test(host)) throw Object.assign(new Error('Browser tool refuses private, loopback, link-local, multicast, or unspecified IP targets.'), { status: 403 });
+  if (!host || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.invalid') || host.endsWith('.onion') || host.endsWith('.test')) throw Object.assign(new Error('Browser tool refuses local or private hostnames.'), { status: 403 });
+  if (blockedIpv4(host) || host.includes(':') || host === '::' || host === '::1' || /^f[cd][0-9a-f:]*$/i.test(host) || /^fe[89ab][0-9a-f:]*$/i.test(host)) throw Object.assign(new Error('Browser tool refuses private, loopback, link-local, multicast, or unspecified IP targets.'), { status: 403 });
   url.hash = '';
   return url.href;
 }
