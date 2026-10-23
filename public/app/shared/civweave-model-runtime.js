@@ -1,7 +1,7 @@
 (function installCivweaveModelRuntime(global) {
   "use strict";
 
-  const VERSION = "1.0.1-moss-formal-stage-events";
+  const VERSION = "1.0.2-moss-token-limit-finish-detection";
   const RESULT_SCHEMA = "civweave-model-result-1.0";
   const CAPABILITY_SCHEMA = "civweave-model-capabilities-1.0";
   const SHARED_MODEL_STORAGE_KEY = "civweave-shared-model";
@@ -354,7 +354,7 @@
     if (!response.body?.getReader) return readBoundedText(response);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "", output = "", pendingText = "", bytes = 0, usage = {}, lastUpdate = 0;
+    let buffer = "", output = "", pendingText = "", bytes = 0, usage = {}, lastUpdate = 0, finishReason = "", sawDone = false;
     try {
       while (true) {
         const { done, value } = await reader.read();
@@ -367,8 +367,11 @@
           const trimmed = line.trim();
           if (!trimmed.startsWith("data:")) continue;
           const data = trimmed.slice(5).trim();
-          if (!data || data === "[DONE]") continue;
+          if (!data) continue;
+          if (data === "[DONE]") { sawDone = true; continue; }
           let payload; try { payload = JSON.parse(data); } catch { continue; }
+          if (payload?.error) throw runtimeError("NATIVE_SSE_SERVER_ERROR",safeString(payload.error?.message||payload.error,400));
+          if(payload?.choices?.[0]?.finish_reason)finishReason=String(payload.choices[0].finish_reason);
           const delta = extractText(payload);
           if(delta){
             output+=delta;
@@ -388,8 +391,12 @@
           if (payload.usage) usage = extractUsage(payload);
         }
       }
-      if(nativeDirect)emit(context,'partial',{backend:'native-server',text:pendingText,accumulatedText:output,characters:output.length,structured:true,complete:true});
-      return { text: output, usage, payload: { text: output, usage } };
+      if(nativeDirect){
+        if(!finishReason&&!sawDone)throw runtimeError('NATIVE_SSE_INTERRUPTED','The local model stream disconnected before reporting completion. Partial output is not a finished answer.');
+        emit(context,'partial',{backend:'native-server',text:pendingText,accumulatedText:output,characters:output.length,structured:true,complete:true,finishReason:finishReason||'unknown'});
+      }
+      return { text: output, usage,finishReason,
+        payload: { text: output, usage,choices:[{finish_reason:finishReason}],streamDone:sawDone } };
     } finally { reader.releaseLock(); }
   }
 
@@ -458,7 +465,7 @@
     const text = await readBoundedText(response);
     let payload; try { payload = JSON.parse(text || "{}"); } catch { payload = { text }; }
     if (!response.ok || payload?.ok === false) throw providerHttpError("Hosted AI", response.status, payload?.error?.message || payload?.error || text);
-    return { text: extractText(payload), payload, usage: extractUsage(payload), model: payload.model || config.model, streamed: false };
+    return { text: extractText(payload), payload, usage: extractUsage(payload), model: payload.model || config.model, streamed: false,finishReason:String(payload?.choices?.[0]?.finish_reason||'') };
   }
 
   function isAntigravityModel(model) {
@@ -802,7 +809,7 @@
     if(useStream){
       noteNative('native-stream-reading');
       const streamed=await parseOpenAIStream(response,context,nativeDirect);
-      noteNative('native-stream-complete',`characters:${streamed.text.length}`);
+      noteNative('native-stream-complete',`characters:${streamed.text.length},finish:${streamed.finishReason||'unknown'}`);
       return{...streamed,model:config.model,streamed:true};
     }
     const text = await readBoundedText(response);
@@ -939,6 +946,20 @@
     try {
       raw = await invokeAdapter(config, messages, request, context, controller.signal);
       let outputText = safeString(raw.text, MAX_RESPONSE_BYTES);
+      const rawFinishReason=safeString(raw?.finishReason||raw?.payload?.choices?.[0]?.finish_reason||'',80).toLowerCase();
+      const endedByLimit=rawFinishReason==='length'||rawFinishReason==='max_tokens';
+      // A valid-looking prefix is still incomplete when the server reports a
+      // token-limit stop. Expose the partial for inspection, never as a plan.
+      if(endedByLimit){
+        const result={...baseResult(context,config,Date.now()-started),status:'incomplete',
+          outputText,finishReason:rawFinishReason,usage:raw.usage||{},
+          stream:{requested:config.stream,used:Boolean(raw.streamed)},
+          structured:{requested:structured,valid:false,repairAttempts:0},
+          fallback:{used:false},actual:{provider:raw.provider||config.provider,model:raw.model||config.model},
+          error:{code:'NATIVE_OUTPUT_TOKEN_LIMIT',message:'The selected model stopped at max_tokens before the stage finished.'}};
+        emit(context,'failed',{status:result.status,error:result.error,finishReason:rawFinishReason});
+        return result;
+      }
       let outputJson;
       if (structured) {
         emit(context, "validating", {});
@@ -967,12 +988,12 @@
           } catch (error) { validationErrors = [error.message || "Invalid JSON."]; }
         }
         if (validationErrors.length) {
-          const result = { ...baseResult(context, config, Date.now() - started), status: "invalid-response", outputText, recoverablePayload: outputJson, usage: raw.usage || {}, stream: { requested: config.stream, used: Boolean(raw.streamed) }, structured: { requested: true, valid: false, repairAttempts, errors: validationErrors.slice(0, 24) }, fallback: { used: false }, diagnostics: raw.diagnostics || [], error: { code: "INVALID_STRUCTURED_OUTPUT", message: "The provider response did not satisfy the requested JSON contract." } };
+          const result = { ...baseResult(context, config, Date.now() - started), status: "invalid-response", outputText, recoverablePayload: outputJson, finishReason:rawFinishReason, usage: raw.usage || {}, stream: { requested: config.stream, used: Boolean(raw.streamed) }, structured: { requested: true, valid: false, repairAttempts, errors: validationErrors.slice(0, 24) }, fallback: { used: false }, actual: { provider: raw.provider || config.provider, model: raw.model || config.model }, diagnostics: raw.diagnostics || [], error: { code: "INVALID_STRUCTURED_OUTPUT", message: "The provider response did not satisfy the requested JSON contract." } };
           emit(context, "failed", { status: result.status, error: result.error, validationErrors: result.structured.errors });
           return result;
         }
       }
-      const result = { ...baseResult(context, config, Date.now() - started), status: "success", outputText, outputJson, usage: raw.usage || {}, stream: { requested: config.stream, used: Boolean(raw.streamed) }, structured: { requested: structured, valid: true, repairAttempts }, fallback: { used: false }, diagnostics: raw.diagnostics || [], actual: { provider: raw.provider || config.provider, model: raw.model || config.model } };
+      const result = { ...baseResult(context, config, Date.now() - started), status: "success", outputText, outputJson, finishReason:rawFinishReason, usage: raw.usage || {}, stream: { requested: config.stream, used: Boolean(raw.streamed) }, structured: { requested: structured, valid: true, repairAttempts }, fallback: { used: false }, diagnostics: raw.diagnostics || [], actual: { provider: raw.provider || config.provider, model: raw.model || config.model } };
       emit(context, "completed", { status: result.status, usage: result.usage, streamed: result.stream.used });
       return result;
     } catch (error) {
@@ -1213,6 +1234,7 @@
     nativeDirectTermuxStreamV2: true, // Native SSE stream support (existing capability).
     nativeMossVisibleStreamV3: true, // Provider deltas reach the shared RAW tracker.
     nativeFormalPipelineStageEventsV1: true, // Two real model passes feed the formal Moss tracker.
+    nativeFinishReasonGuardV1: true,
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,

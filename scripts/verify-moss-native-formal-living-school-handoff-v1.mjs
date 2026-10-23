@@ -21,7 +21,7 @@ const valid={
   {title:'Tarot reading',focus:'Practice three-card tarot spreads',outcome:'Interpret a spread independently'}
  ],assumptions:[]
 };
-let failingCompile=false,materializations=0;
+let failingCompile=false,cappedDraft=false,cappedTwice=false,normalizableCompile=false,materializations=0;
 const ctx={
  console,JSON,Date,Math,Object,Array,String,Number,Boolean,RegExp,Promise,Set,Map,URL,
  localStorage:storage,sessionStorage:storage,
@@ -44,11 +44,30 @@ const ctx={
      req.onEvent?.({phase:'partial',characters:text.length,
        accumulatedText:text,
        complete:true});
-     if(stage==='compile'&&failingCompile)return{status:'invalid-response',outputText:'{broken',error:{code:'INVALID_JSON',message:'bad json'}};
+     if(stage==='compile'&&normalizableCompile){
+        const inconsistent={...valid,level:'Beginner',mode:'Self-paced study',assumptions:'The learner has a tarot deck.'};
+        return{status:'invalid-response',outputText:JSON.stringify(inconsistent),outputJson:inconsistent,
+          actual:{provider:'openai-compatible',model:'qwen35-4b-native'},finishReason:'stop',
+          error:{code:'INVALID_SCHEMA',message:'Incorrect enum and array type'}};
+      }
+      if(stage==='compile'&&failingCompile)return{status:'invalid-response',outputText:'{broken',error:{code:'INVALID_JSON',message:'bad json'}};
+     if(cappedDraft&&req.purpose==='living-school-native-plan-draft-v1')
+       return{status:'incomplete',finishReason:'length',outputText:text.slice(0,38),
+         actual:{provider:'openai-compatible',model:'qwen35-4b-native'},error:{code:'NATIVE_OUTPUT_TOKEN_LIMIT'}};
+     if(cappedTwice&&req.purpose==='living-school-native-plan-draft-continuation-v1')
+       return{status:'incomplete',finishReason:'length',outputText:text.slice(-25),
+         actual:{provider:'openai-compatible',model:'qwen35-4b-native'},error:{code:'NATIVE_OUTPUT_TOKEN_LIMIT'}};
      return{status:'success',actual:{provider:'openai-compatible',model:'qwen35-4b-native'},
        outputText:text,outputJson:stage==='draft'?undefined:valid};
    },
-   readSharedConfig:()=>config
+   readSharedConfig:()=>config,
+    validateSchema:p=>[
+      ...(!['beginner','intermediate','advanced'].includes(p.level)?['level']:[]),
+      ...(!['guided','browse','just-in-time'].includes(p.mode)?['mode']:[]),
+      ...(!Array.isArray(p.assumptions)?['assumptions']:[]),
+      ...(!(Array.isArray(p.modules)&&p.modules.length>=3)?['modules']:[])
+    ],
+    parseJsonLoose:text=>{try{return JSON.parse(text)}catch{return null}}
  }
 };
 ctx.globalThis=ctx;
@@ -98,4 +117,41 @@ assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='repair'&&e.
 assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='repair'&&e.state==='complete'));
 assert(JSON.parse(memory.get(key)).authoring.formalStages.includes('repair'));
 assert.equal(materializations,0);
-console.log('PASS: two real Qwen stages, intake/draft/raw JSON/validation/review timeline, conditional repair, Living School REVIEW panel, no unapproved lessons');
+
+// Handle the exact safe formatting drift observed in the phone repair output.
+failingCompile=false;normalizableCompile=true;calls.length=0;events.length=0;
+r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
+assert.equal(r.action?.state,'review');
+assert.equal(calls.length,2,'Simple enum/assumptions normalization must not need a third model call');
+assert.equal(moss.readLearningPlan()?.request?.mode,'guided');
+assert.deepEqual(moss.readLearningPlan()?.assumptions,['The learner has a tarot deck.']);
+assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='validate'&&e.state==='normalized'));
+assert.equal(materializations,0);
+normalizableCompile=false;
+// A model that stops exactly at the token limit must never be treated as
+// having completed the visible draft or quietly sent to the compiler.
+failingCompile=false;cappedDraft=true;cappedTwice=false;
+calls.length=0;events.length=0;
+r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
+assert.equal(r.action?.state,'review');
+assert.equal(calls.length,3,'One capped draft needs exactly one continuation and then JSON compile');
+assert.equal(calls[0].config.maxTokens,1500,'Long plan drafts need at least 1500 output tokens');
+assert.equal(calls[0].config.context,6144,'Formal plans need a larger context');
+assert.equal(calls[0].config.timeoutMs,480000,'Long drafts need a realistic timeout');
+assert.equal(calls[1].config.maxTokens,1200,'Continuation must have a generous bounded budget');
+assert.equal(calls[2].config.maxTokens,2300,'Compile outputs need a larger JSON budget');
+assert.match(calls[1].messages[1].content,/Continue from its exact stopping point/);
+assert.match(calls[2].messages[1].content,/Major Arcana/);
+assert(events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='draft'&&e.state==='needs-continuation'));
+assert.equal(materializations,0);
+
+cappedTwice=true;calls.length=0;events.length=0;
+const priorId=moss.readLearningPlan()?.id;
+r=await moss.handleNativeLivingSchoolRequest({text:'Can you teach me how to read and memorize the tarot?',history:[],nativeFastLane:true});
+assert.match(r.response.answer,/both reached max_tokens/);
+assert.equal(calls.length,2,'Two capped drafts must not launch the JSON compiler');
+assert.equal(moss.readLearningPlan()?.id,priorId,'Incomplete draft cannot replace saved REVIEW plan');
+assert(!events.some(e=>e.type==='civweave:weave-pipeline'&&e.phase==='pipeline'&&e.state==='complete'));
+assert.equal(materializations,0);
+console.log('PASS: formal plan, conditional repair, bounded truncated draft continuation, honest failure, and unchanged REVIEW artifacts');
+
