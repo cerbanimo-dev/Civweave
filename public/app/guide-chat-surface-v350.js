@@ -315,9 +315,9 @@ function explicitHandoffTarget(result,system){const target=clean(result?.handoff
 async function submitActive(text){
   const value=clean(text),system=activeSystem;if(!value||busy||!SYSTEMS.includes(system))return false;
   busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');
-  const nativeRequested=activeNativePhoneServer(),requestAbort=nativeRequested?new AbortController():null;
+  const nativeRequested=activeNativePhoneServer(),ollamaRequested=configuredRoute()==='ollama',requestAbort=(nativeRequested||ollamaRequested)?new AbortController():null;
   nativeAbortController=requestAbort;
-  if(button){button.disabled=!nativeRequested;button.type=nativeRequested?'button':'submit';button.textContent=nativeRequested?'Stop':'Send';}
+  if(button){button.disabled=!(nativeRequested||ollamaRequested);button.type=(nativeRequested||ollamaRequested)?'button':'submit';button.textContent=(nativeRequested||ollamaRequested)?'Stop':'Send';}
   if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
   try{
@@ -340,7 +340,9 @@ async function submitActive(text){
       else if(!paintTimer)paintTimer=setTimeout(paint,80);
     };
     try {
-    if(nativeRequested){
+    if(ollamaRequested){
+      result=await globalThis.CivweaveFamilyAILoaderV105.respondOllama({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
+    }else if(nativeRequested){
       // On a verified Termux route, do not initialize the entire Civweave
       // assistant stack before the first request reaches the HTTP model.
       // This path never loads browser GGUF weights or starts a fallback.
