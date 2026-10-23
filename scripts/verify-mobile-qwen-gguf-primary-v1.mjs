@@ -18,6 +18,7 @@ execFileSync(process.execPath,['--check','public/app/local-ai/gguf-split-browser
 execFileSync(process.execPath,['scripts/test-gguf-browser-split-v1.mjs'],{stdio:'inherit'});
 execFileSync(process.execPath,['--check','public/app/local-ai/browser-gguf-opfs-v1.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-gguf-opfs-import-v1.mjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['scripts/test-gguf-moss-routing-v1.mjs'],{stdio:'inherit'});
 assert.match(settings,/data-embedded-gguf-cancel-import/);
 assert.match(settings,/ggufImportAbort\.signal/);
 assert.match(settings,/Saving shard/);
@@ -76,7 +77,8 @@ assert.doesNotMatch(gguf,/llama-server|\.litertlm|127\.0\.0\.1|chat\/completions
 const browserDispatch=runtime.indexOf('const browserGGUF=await import(');
 const networkDispatch=runtime.indexOf('const url = openAIChatUrl(config.endpoint, config);',browserDispatch);
 assert.ok(browserDispatch>0&&networkDispatch>browserDispatch,'Browser GGUF must intercept before any native HTTP transport.');
-assert.match(runtime,/selectedGGUF\.model===config\.model/);
+assert.match(runtime,/config\.model !== saved\.model/);
+assert.match(runtime,/GGUF_BROWSER_MIN_TIMEOUT_MS = 480000/);
 assert.match(runtime,/browserGGUF\.generate\(/);
 assert.match(runtime,/emit\(context,'partial'/);
 assert.match(runtime,/networkInference:false/);
