@@ -9,9 +9,9 @@ assert.match(boundary,/const MOSS_PLAN_APPROVAL_BUTTON='\/app\/moss-learning-pla
 assert.ok(boundary.includes('GUIDE_WORKSPACE,UNIFIED_CHAT_SYSTEM,MOSS_PLAN_APPROVAL_BUTTON,SERVER_AI_OUTPUT_NORMALIZER'),'Moss approval button must load immediately after unified chat on first-class system surfaces.');
 assert.ok(boundary.includes('GUIDE_WORKSPACE,UNIFIED_CHAT_SYSTEM,MOSS_PLAN_APPROVAL_BUTTON,SERVER_AI_OUTPUT_NORMALIZER'),'Compatibility chat surfaces must retain the same direct approval-button load order.');
 assert.match(approval,/Approve Learning Journey/,'The review surface must expose an explicit Approve Learning Journey button.');
-assert.match(approval,/moss-face-v255\\.webp/,'The review surface must use the real Moss mascot artwork inline.');
-assert.match(approval,/actionButton\\(actions,'Revise'/,'The review surface must expose Revise.');
-assert.match(approval,/actionButton\\(actions,'Deny'/,'The review surface must expose Deny.');
+assert.match(approval,/moss-face-v255\.webp/,'The review surface must use the real Moss mascot artwork inline.');
+assert.match(approval,/actionButton\(actions,'Revise'/,'The review surface must expose Revise.');
+assert.match(approval,/actionButton\(actions,'Deny'/,'The review surface must expose Deny.');
 assert.match(approval,/Retry generation/,'A failed approved materialization must offer a retry.');
 assert.match(approval,/Open Learning Journey/,'A successful materialization must have an actionable next step.');
 assert.match(approval,/approveLivingSchoolPlan\(plan\)/,'The button must call the canonical Learning Journey approval/materialization API directly.');
@@ -125,5 +125,5 @@ plan={...plan,id:'learning-plan-test-4',state:'approved',approvedAt:new Date().t
 storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
 assert.equal(await api.retryPlanById(plan.id),true,'An approved plan must allow retry after generation failure.');
 assert.match(thread.messages.at(-1).text,/materialized the approved Learning Journey/);
-assert.match(approval,/previous\\?\\.dataset\\.mode==='open'/,'Completion CTA must remain stable across MutationObserver renders.');
+assert.match(approval,/previous\?\.dataset\.mode==='open'/,'Completion CTA must remain stable across MutationObserver renders.');
 console.log('Moss Learning Journey decision and recovery regression checks passed.');
