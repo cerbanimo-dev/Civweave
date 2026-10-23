@@ -136,10 +136,11 @@ function render(){
     const retry=actionButton(actions,'Retry generation','retry',()=>void retryPlanById(plan.id,retry,wrapper));
     wrapper.append(actions);body.append(wrapper);return true;
   }
+  if(plan?.state==='revision-requested'||plan?.state==='denied'){removeActions();return false}
+  const thread=readThread(),recent=[...(thread.messages||[])].reverse().find(row=>row?.role==='assistant'&&!row.pending);
+  if(!['living-school-curriculum-generated','living-school-curriculum-queued'].includes(recent?.actionSnapshot?.kind)){removeActions();return false}
+  if(previous?.dataset.mode==='open')return true;
   removeActions();
-  if(plan?.state==='revision-requested'||plan?.state==='denied')return false;
-  const thread=readThread(),recent=[...(thread.messages||[])].reverse().find(row=>row?.role==='assistant'&&row?.actionSnapshot?.kind);
-  if(!['living-school-curriculum-generated','living-school-curriculum-queued'].includes(recent?.actionSnapshot?.kind))return false;
   const article=findFollowUpArticle(root,'open',null);if(!article)return false;
   const body=article.querySelector(':scope > div')||article.lastElementChild;if(!body)return false;
   const wrapper=document.createElement('section');wrapper.dataset.mossLearningPlanApprovalV1='true';wrapper.dataset.mode='open';
