@@ -25,7 +25,7 @@ const ctx={console,Date,Math,JSON,Object,Array,Promise,URL,AbortController,TextE
   setTimeout,clearTimeout,CustomEvent:class{},dispatchEvent:()=>{},
   CivweaveSettingsV320:{readState:()=>({provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1'})},
   CivweaveUnifiedChatSystemV1:{
-    version:'1.2.4-unified-chat-system-v1-native-learning-controls',
+    version:'1.2.5-unified-chat-system-v1-moss-visible-progress',
     handleNativeLivingSchoolRequest:async()=>({response:{answer:'REVIEW'}})
   }};
 ctx.globalThis=ctx;
@@ -50,7 +50,7 @@ assert.equal(Object.isFrozen(ctx.CivweaveModelRuntime),true);
 ctx.CivweaveModelRuntime={version:'old-runtime',generate:async()=>({})};
 vm.runInContext(fast+'\n;globalThis.__loadPlanner=ensurePlanner;',context,{filename:'native-fastpath'});
 const planner=await ctx.__loadPlanner();
-assert.equal(planner.version,'1.2.4-unified-chat-system-v1-native-learning-controls');
+assert.equal(planner.version,'1.2.5-unified-chat-system-v1-moss-visible-progress');
 assert.equal(ctx.CivweaveModelRuntime.nativeDirectTermuxStreamV2,true);
 assert.equal(loads,1,'The older runtime should be upgraded exactly once');
 await ctx.__loadPlanner();
