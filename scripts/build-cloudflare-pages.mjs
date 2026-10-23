@@ -46,7 +46,9 @@ const githubRepo = process.env.GITHUB_REPOSITORY || 'cerbanimo-dev/Civweave';
 // Cloudflare Pages packaging path so production deploys the same checked-in
 // source graph that staging validates.
 console.log('[Civweave] Pages source is authoritative; skipping retired single-shell release synchronizers.');
-await import('./generate-prelive-metadata-v281.mjs');
+// Prelive integrity metadata is a source-controlled release artifact. Regenerate
+// it in the explicit release/CI workflow and commit the result, not during
+// Cloudflare Pages packaging: doing so could hide source/manifest drift.
 await import('./generate-asset-lockboard-catalog-v239.mjs');
 
 function walkFiles(directory) {
