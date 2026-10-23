@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.4-unified-chat-system-v1-native-learning-controls';
+const VERSION='1.2.5-unified-chat-system-v1-moss-visible-progress';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
