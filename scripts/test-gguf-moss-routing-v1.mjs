@@ -17,7 +17,7 @@ assert.match(tracker,/Test selected GGUF inference/);
 assert.match(tracker,/addEventListener\('civweave:model-event'/);
 assert.match(tracker,/state\.runtimePhase='GGUF · '/);
 assert.match(tracker,/does not apply to the imported GGUF/);
-assert.match(loader,/1\.0\.6-gguf-visible-watchdog/);
+assert.match(loader,/1\.0\.7-gguf-prefill-observer/);
 assert.match(settings,/data-embedded-gguf-selected-note/);
 assert.match(settings,/internal browser runtime|internal runtime|internal.*routing key/);
 
