@@ -38,6 +38,22 @@ assert.equal(search.results.length, 1, 'duplicate and private search targets mus
 assert.equal(search.results[0].url, 'https://example.org/article');
 assert.equal(new URL(requestedUrl).searchParams.get('q'), 'Qwen & Gemma');
 assert.equal(new URL(requestedUrl).searchParams.get('format'), 'json');
+// A public SearXNG 403 must fall back to the existing, keyless browser binding.
+let quickCalls = 0;
+server.fetch = async () => ({ ok: false, status: 403, headers: { get: () => 'text/plain' } });
+const browserEnv = { BROWSER: { quickAction: async (kind, data) => {
+  quickCalls++;
+  assert.equal(kind, 'markdown');
+  assert.ok(String(data.url).startsWith('https://html.duckduckgo.com/html/'));
+  return { ok: true, headers: { get: () => '200' }, json: async () => ({ success: true, result: '[Result](https://example.org/fact)' }) };
+} } };
+const noSearx = await runTool(browserEnv, { action: 'search', query: 'web research' });
+assert.equal(noSearx.source, 'browser-run-duckduckgo');
+assert.equal(noSearx.fallbackFrom, null);
+const blockedSearx = await runTool({ ...browserEnv, SEARXNG_BASE_URL: 'https://searx.example.net/' }, { action: 'search', query: 'web research' });
+assert.equal(blockedSearx.source, 'browser-run-duckduckgo');
+assert.equal(blockedSearx.fallbackFrom, 'searxng');
+assert.equal(quickCalls, 2, 'both no-SearX and 403 fallback must invoke Browser Run');
 for (const host of ['127.0.0.1', '192.168.1.1', '10.1.2.3', '169.254.169.254', 'localhost', '[::1]']) {
   assert.throws(() => safeUrl('http://' + host + '/secret'), undefined, host + ' must not be fetched');
 }
