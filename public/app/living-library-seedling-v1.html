@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101c1b">
+<title>Living Library: Seedling Edition — Learning Journey Studio</title>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;background:#101c1b;color:#ebf6ed}
+*{box-sizing:border-box}body{margin:0}a{color:#acdfbd}button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid #6b9787;border-radius:9px;background:#245446;color:white;padding:9px 13px}button:hover{background:#366d5b}button:disabled{opacity:.5;cursor:not-allowed}
+header{padding:24px max(18px,calc((100vw - 1120px)/2));border-bottom:1px solid #39524b;background:#162b28}header small{color:#a9c8ba;text-transform:uppercase;letter-spacing:.16em}h1{font-size:clamp(1.6rem,4vw,2.3rem);margin:.2em 0}h2{font-size:1.2rem;margin:.1em 0 .7em}h3{font-size:1rem;margin:.2em 0}
+main{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(295px,1fr);gap:22px;padding:20px 16px 100px}
+section,.panel{border:1px solid #35564b;border-radius:13px;background:#172723;padding:19px;margin-bottom:16px}
+label{display:block;font-size:.86rem;color:#d7edda;margin:9px 0 4px}input,select,textarea{display:block;width:100%;background:#0e1b19;color:#effbef;border:1px solid #526e60;border-radius:8px;padding:9px;min-width:0}textarea{min-height:76px;resize:vertical}input:focus,textarea:focus{outline:2px solid #c3f2cd}input::placeholder,textarea::placeholder{color:#839d8e}
+.double{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.subtle{color:#a7c2b6;font-size:.86rem}.module,.entry{padding:14px;margin:12px 0;border:1px solid #395c4d;border-radius:10px;background:#1a322b}.module-header,.entry-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.module-header button,.remove{background:#392a29;border-color:#865a53;padding:5px 9px;font-size:.8rem}.status{padding:11px 12px;border:1px solid #456c5a;border-radius:9px;background:#183629;white-space:pre-wrap;min-height:48px}.preview{background:#f0eee4;color:#202924;border-radius:8px;padding:18px;font-family:Georgia,serif}.preview h3{font-size:1.3rem}.preview a{color:#254e39}.preview figure{margin:14px 0}.preview img{max-width:100%;height:auto}.preview iframe{width:100%;aspect-ratio:16/9;border:0}.preview li{margin:.4em 0}.preview hr{border:0;border-top:1px solid #888}.tools{display:flex;gap:7px;align-items:end}.tools>div:first-child{flex:1}
+small,p{overflow-wrap:anywhere}.source-card{padding:9px;border-bottom:1px solid #496052}.source-card a{overflow-wrap:anywhere}.source-card button{margin-top:6px} .pill{display:inline-block;border:1px solid #6c927b;border-radius:20px;padding:2px 8px;font-size:.75rem}.note{padding:10px 12px;background:#26342d;border-left:3px solid #b5d6bb}
+@media(max-width:790px){main{grid-template-columns:1fr}.double{grid-template-columns:1fr}}
+</style></head><body>
+<header><small>Civweave / Living Library</small><h1>Seedling Edition</h1><p>Manually compose sourced Learning Journeys, attach images and videos, and submit signed review bundles to a selected Guild.</p><div class="subtle">Drafts stay in this browser until you explicitly export or send them. AI and Passport authorization are not wired into this studio yet.</div></header>
+<main>
+<div>
+<section><h2>01 · Learning Journey</h2>
+<label for="title">Title</label><input id="title" maxlength="240" placeholder="Read and memorize the tarot">
+<label for="capability">Observable learning capability</label><textarea id="capability" maxlength="2400" placeholder="Independently explain and interpret ..."></textarea>
+<div class="double"><div><label for="level">Level</label><select id="level"><option>beginner</option><option>intermediate</option><option>advanced</option></select></div><div><label for="mode">Mode</label><select id="mode"><option>guided</option><option value="just-in-time">just-in-time</option><option>browse</option></select></div></div>
+<label for="proof">Proof of capability / completion criterion</label><textarea id="proof" maxlength="3000" placeholder="Demonstrate without looking at the reference ..."></textarea>
+</section>
+<section><div class="module-header"><h2>02 · Modules</h2><button type="button" id="add-module">+ Add module</button></div><p class="subtle">Living School's current review-plan contract requires three to eight modules, each with a focus and demonstrable outcome.</p><div id="modules"></div></section>
+<section><h2>03 · Find and cite sources</h2><p class="subtle">Search public indexes or enter a reference manually. Search results are suggestions, not independently fact-checked evidence.</p>
+<div class="tools"><div><label for="search">Research query</label><input id="search" placeholder="Tarot history, botany, electrical repair..."></div><button id="search-wikipedia">Wikipedia</button><button id="search-openalex">OpenAlex</button></div>
+<div id="search-results"></div>
+<div class="double"><div><label for="source-title">Source title</label><input id="source-title" placeholder="Article / book / paper title"></div><div><label for="source-url">Source URL</label><input id="source-url" type="url" placeholder="https://..."></div></div>
+<div class="double"><div><label for="source-author">Author / creator (optional)</label><input id="source-author"></div><div><label for="source-type">Type</label><select id="source-type"><option value="reference">Reference</option><option value="research">Research</option><option value="article">Article</option><option value="book">Book</option><option value="other">Other</option></select></div></div>
+<label for="source-notes">Why is this source useful?</label><textarea id="source-notes" placeholder="Source evaluation and relevant information"></textarea>
+<button id="add-source">Add cited source</button><div id="sources"></div>
+</section>
+<section><h2>04 · Attach image or video references</h2><p class="subtle">Images appear in the browser preview. YouTube and Vimeo embeds are available in browser preview; the X4 Pro will display a linked or pre-rendered frame, not stream video natively. Remote media is not cached offline by this prototype.</p>
+<div class="double"><div><label for="media-type">Media type</label><select id="media-type"><option value="image">Image</option><option value="video">Video</option></select></div><div><label for="media-module">Associated module</label><select id="media-module"></select></div></div>
+<label for="media-url">Image URL or video page URL</label><input type="url" id="media-url" placeholder="https://...">
+<div class="double"><div><label for="media-title">Caption / title</label><input id="media-title"></div><div><label for="media-credit">Attribution / credit</label><input id="media-credit"></div></div>
+<label for="media-rights">License or usage permission (if known)</label><input id="media-rights" placeholder="e.g. CC BY-SA 4.0 or permission pending">
+<button id="add-media">Attach reference</button><div id="media"></div></section>
+</div>
+<aside>
+<section><h2>Draft & export</h2><p class="subtle">Stored on this device only; approval and curriculum generation happen later through Living School.</p>
+<div class="actions"><button id="validate">Check plan</button><button id="export-plan">Export Living School plan</button><button id="export-bundle">Export full bundle</button><button id="reset">New draft</button></div><div id="status" class="status" role="status">Editing a local draft.</div></section>
+<section><h2>Send to Guild</h2><p id="guild-context" class="subtle">Checking selected Guild…</p><div class="note">Sending requires a selected Guild with an existing logged-in member session. The signed community object can be queued locally; Cloud Guild delivery is only confirmed when the configured Pocket Node relay acknowledges it. A delivery receipt does not constitute Guild approval or publication.</div>
+<div class="actions"><button id="send-guild">Sign and send review bundle</button></div><p id="guild-result" class="subtle">Not sent.</p></section>
+<section><h2>Reading preview</h2><div id="preview" class="preview" aria-live="polite"></div></section>
+<section><h2>Getting started</h2><p class="subtle">The prototype builds <code>civweave.learning-journey-plan.v2</code> review plans. It deliberately does not auto-approve, mint credentials, spend AI allowance, or cast votes.</p><p class="subtle"><a href="/app/working-campus-v440.html">Open the main Civweave campus</a></p></section>
+</aside>
+</main>
+<script type="module" src="/app/living-library-seedling-ui-v1.mjs"></script>
+</body></html>
