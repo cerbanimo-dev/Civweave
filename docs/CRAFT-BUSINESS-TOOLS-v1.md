@@ -61,3 +61,8 @@ Never confuse `CivweaveCreatorToolsV1.registerEditor` with tool authorization. R
 - CADCraft CLI drawing info / SVG export share the localhost companion bridge authentication and no-shell isolated temporary file handling.
 - CAD drawing operations in the browser require an explicitly picked DXF/DWG file; AI tool calls require a fresh approval.
 - Real CADCraft releases, DWG fidelity and SVG correctness still need manual hardware/runtime verification.
+
+### PdfCraft bounded adapter
+- Implemented local PdfCraft CLI actions: read-only PDF info/text extraction and combining two explicitly chosen PDFs into a new file. Inputs are byte-validated, limited in aggregate to 8 MiB, processed in an isolated temporary workspace and never overwritten.
+- AI registry offers `combine` only with two selected files, and `info`/`text` only with one; each action requires human confirmation.
+- No digital signature, PDF annotation, OCR engine, cloud storage or real CLI fidelity guarantee in this initial adapter.
