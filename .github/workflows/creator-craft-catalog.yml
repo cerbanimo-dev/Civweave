@@ -20,3 +20,5 @@ jobs:
           node --check tools/creator-craft-bridge/server.mjs
           node --check public/creator-suite/wordcraft-connector-v1.js
           node --test scripts/test-creator-wordcraft-bridge-v1.mjs
+          node --check tools/creator-craft-bridge/cadcraft.mjs
+          node --test scripts/test-creator-cadcraft-bridge-v1.mjs
