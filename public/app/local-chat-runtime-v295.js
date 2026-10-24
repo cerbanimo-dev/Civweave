@@ -5,7 +5,7 @@ const VERSION='1.0.120-local-chat-runtime-v305-moss-core-readiness';
 const REVISION='v312-runtime-first-bootstrap';
 const SEL='civweave.local-ai.selection.v266';
 const HEALTH='civweave.local-ai.health.v286';
-const BOOT='/app/local-ai/bootstrap-v266.js?v=1.0.130-v325-inference-core-first';
+const BOOT='/app/local-ai/bootstrap-v266.js?v=1.0.131-idempotent-pulse';
 const BOOT_REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
 const CORE_LOAD_TIMEOUT_MS=18000;
 const BOOT_READY_TIMEOUT_MS=45000;

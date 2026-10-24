@@ -32,7 +32,7 @@ const files=[
   ['/app/local-ai/settings-panel-v267.js?v=1.0.120-v324-qwen4-file-import',settingsReady,'CivweaveLocalAISettingsV266'],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283','CivweaveLocalAIPrimaryRouteV283'],
   ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.82-v321-settings-open-idle',hardwareTierReady,'CivweaveLocalModelHardwareTierUIV278'],
-  ['/app/local-ai/test-pulse-v269.js?v=1.0.116-v303-mobile-safe',()=>globalThis.CivweaveLocalModelTestPulseV269?.version==='1.0.116-local-model-test-pulse-v303-mobile-safe','CivweaveLocalModelTestPulseV269']
+  ['/app/local-ai/test-pulse-v269.js?v=1.0.117-v303-idempotent-pulse',()=>globalThis.CivweaveLocalModelTestPulseV269?.version==='1.0.117-local-model-test-pulse-v303-mobile-safe','CivweaveLocalModelTestPulseV269']
 ];
 let readyState='loading',lastError='',lastComponent='',currentReady=null,flight=null,passNumber=0;
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));

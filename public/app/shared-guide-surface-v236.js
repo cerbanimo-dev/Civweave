@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.184-idempotent-settings';
+const VERSION='1.0.185-idempotent-local-pulse';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -27,7 +27,7 @@ function install(){
   load('/app/guide-forward-failure-policy-v1.js?v=1.0.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
   load('/app/local-chat-bounded-recovery-v1.js?v=1.1.0-gemma4-q4',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.1.0-local-chat-bounded-recovery-v1-gemma4-q4'&&globalThis.CivweaveLocalChatBoundedRecoveryV1?.gemma4CompatibleQ4===true);
-  load('/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first',()=>{
+  load('/app/local-chat-runtime-v295.js?v=1.0.131-idempotent-pulse',()=>{
     load('/app/local-ai/gemma4-pack-extension-v1.js?v=1.3.1-q4f16-ready',()=>{
       load('/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard',()=>{
         load('/app/local-ai/gemma4-inference-repair-v1.js?v=1.0.3-onnx-only',()=>{

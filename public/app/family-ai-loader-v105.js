@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.143-bounded-guide-startup'
+const VERSION='1.0.144-local-settings-pulse'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -24,7 +24,7 @@ const VALUE_MODEL=[
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.118-http-stream',()=>globalThis.CivweaveFastInteractiveV192];
 const SERVER_AI_ROUTER=['/app/server-ai-router-v301.js?v=1.0.117-guild-handoff',()=>globalThis.CivweaveServerAIRouterV301?.status?.().registered===true];
 const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',()=>globalThis.CivweaveResponseRouterV347];
-const LOCAL_BOOTSTRAP=['/app/local-ai/bootstrap-v266.js?v=1.0.83-v282-inference-health',()=>globalThis.CivweaveLocalAIBootstrapV266];
+const LOCAL_BOOTSTRAP=['/app/local-ai/bootstrap-v266.js?v=1.0.131-idempotent-pulse',()=>globalThis.CivweaveLocalAIBootstrapV266];
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.9-bounded-optional-context',()=>globalThis.CivweaveAssistantV141];
 const PATCHES=[
   ['/app/deterministic-mode-v175.js?v=deterministic-r1',()=>globalThis.CivweaveDeterministicModeV175],

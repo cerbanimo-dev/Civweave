@@ -7,6 +7,7 @@ const bleSource=readFileSync(new URL('../public/app/human-chat-ble-controls-v1.j
 const avatarSource=readFileSync(new URL('../public/app/avatar-expression-director-v345.js',import.meta.url),'utf8');
 const stripSource=readFileSync(new URL('../public/app/minilm-decision-strip-v1.js',import.meta.url),'utf8');
 const translationSource=readFileSync(new URL('../public/app/local-ai/translation-packs-v1.js',import.meta.url),'utf8');
+const pulseSource=readFileSync(new URL('../public/app/local-ai/test-pulse-v269.js',import.meta.url),'utf8');
 
 function harness({ble=false,avatar=false}={}){
   const observers=new Set(),pending=new Set(),microtasks=[],listeners=new Map(),events=[];
@@ -121,3 +122,76 @@ test('the decision strip recognizes pending balance scripts when cached runtime 
     assert.equal(appended.filter(path=>path===usagePath).length,stale.includes('usage')?1:0);
   }
 });
+
+test('local model health controls release the observer queue with a selected model',()=>{
+  const observers=new Set(),pending=new Set(),microtasks=[];let label='Test model',writes=0;
+  const notify=()=>{for(const observer of observers)pending.add(observer)};
+  const button={dataset:{localTestPulse:'qa-local'},get textContent(){return label},set textContent(value){label=String(value);writes++;notify()}};
+  const actions={querySelector:()=>button},row={dataset:{modelId:'qa-local'},querySelector:()=>actions};
+  const result={dataset:{},set innerHTML(value){notify()}};
+  const panel={querySelector:()=>result,querySelectorAll:selector=>selector==='[data-local-test-pulse]'?[button]:[row]};
+  class Observer{constructor(callback){this.callback=callback}observe(){observers.add(this)}disconnect(){observers.delete(this);pending.delete(this)}}
+  const context={document:{readyState:'complete',getElementById:id=>id==='cw-local-ai-v266'?panel:{}},
+    localStorage:{getItem:()=>null,setItem(){}},MutationObserver:Observer,queueMicrotask:callback=>microtasks.push(callback),addEventListener(){},
+    CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'qa-local'})}};
+  vm.runInNewContext(pulseSource,context,{filename:'test-pulse-v269.js'});
+  for(const callback of microtasks.splice(0))callback();
+  notify();
+  for(let rounds=0;rounds<100&&(pending.size||microtasks.length);rounds++){
+    const changed=[...pending];pending.clear();for(const observer of changed)observer.callback([{addedNodes:[{}]}]);
+    for(const callback of microtasks.splice(0))callback();
+  }
+  assert.equal(pending.size+microtasks.length,0,`model health controls repeated their own unchanged label ${writes} times`);
+  assert.equal(writes,0);
+});
+
+test('pending Rook chat settles with translation, model health, Nearby, avatar and route observers active together',async()=>{
+  const observers=new Set(),pending=new Map(),microtasks=[],listeners=new Map(),storage=new Map(),writes=new Map();
+  function notify(target){for(const observer of observers)pending.set(observer,[...(pending.get(observer)||[]),{type:'childList',target,addedNodes:[{}],removedNodes:[]}])}
+  function contentNode(name,initial=''){
+    let value=initial;const node={dataset:{},isConnected:true,setAttribute(){}};
+    for(const key of ['textContent','innerHTML'])Object.defineProperty(node,key,{get:()=>value,set:next=>{value=String(next);writes.set(name,(writes.get(name)||0)+1);notify(node)}});
+    return node;
+  }
+  const nearby=contentNode('nearby','Nearby'),modelButton=contentNode('model-button','Test model');modelButton.dataset.localTestPulse='qa-local';
+  const translation=contentNode('translation'),result=contentNode('health'),label=contentNode('route-label'),tracker=contentNode('route-tracker');
+  const modelRow={dataset:{modelId:'qa-local'},querySelector:()=>({querySelector:()=>modelButton})};
+  const settings={querySelector:selector=>selector==='#cw-translation-packs-v1'?translation:result,
+    querySelectorAll:selector=>selector==='[data-local-test-pulse]'?[modelButton]:[modelRow]};
+  const strip={dataset:{},querySelector:selector=>selector.includes('data-minilm-label')?label:selector.includes('data-guild-neuron-tracker')?tracker:null};
+  const row={dataset:{role:'assistant',pending:'true'},classList:{contains:()=>true},querySelector:()=>({textContent:'Rook is thinking…'})};
+  const chat={id:'cw-persistent-guide-chat-v215',dataset:{guide:'fellowfare'},querySelectorAll:()=>[row],querySelector:()=>strip};
+  class Observer{constructor(callback){this.callback=callback}observe(){observers.add(this)}disconnect(){observers.delete(this);pending.delete(this)}}
+  const context={URL,location:{href:'https://staging.example/app/persistent-system-shell-v1.html'},
+    document:{readyState:'complete',scripts:[],documentElement:{dataset:{},lang:'en'},querySelectorAll:()=>[],
+      getElementById:id=>id==='cw-human-chat-network-v1'?{querySelector:()=>({querySelector:()=>nearby})}:
+        id==='cw-persistent-guide-chat-v215'?chat:id==='cw-local-ai-v266'?settings:{}},
+    navigator:{language:'en'},localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},sessionStorage:{getItem:()=>null},
+    MutationObserver:Observer,queueMicrotask:callback=>microtasks.push(callback),setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,clearInterval(){},
+    addEventListener:(type,callback)=>listeners.set(type,[...(listeners.get(type)||[]),callback]),
+    dispatchEvent:event=>{for(const callback of listeners.get(event.type)||[])callback(event)},
+    CustomEvent:class{constructor(type,options={}){this.type=type;this.detail=options.detail}},fetch:()=>new Promise(()=>{}),
+    CivweaveContextRouterV344:{status:()=>({ready:false})},CivweaveBleObjectTransportV1:{status:()=>({peers:[]})},
+    CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'qa-local'})},
+    CivweaveHostNodeSessionV1:{version:'1.0.137-current',sessionFor:()=>({nodeId:'synthetic-guild'})},
+    CivweaveGuildChatUsageV1:{version:'1.0.2-current',snapshot:()=>({known:false}),refresh:()=>new Promise(()=>{})},
+    CivweaveResponseRouterV347:{classify(){}},CivweaveServerAIRouterV301:{version:'1.0.121-current'}};
+  vm.createContext(context);
+  for(const [filename,source] of [['Nearby',bleSource],['avatar',avatarSource],['translation',translationSource],['model-health',pulseSource],['route-strip',stripSource]])
+    vm.runInContext(source,context,{filename});
+  async function flush(){
+    for(let rounds=0;rounds<100&&(pending.size||microtasks.length);rounds++){
+      const changed=[...pending];pending.clear();for(const [observer,records] of changed)if(observers.has(observer))observer.callback(records);
+      for(const callback of microtasks.splice(0))callback();await Promise.resolve();
+    }
+    return pending.size+microtasks.length;
+  }
+  assert.equal(await flush(),0,'startup writes must settle across all loaded observers');
+  const before=Object.fromEntries(writes);
+  for(let turn=0;turn<10;turn++){notify(chat);assert.equal(await flush(),0,`pending chat mutation ${turn+1} must release the event loop`)}
+  assert.deepEqual(Object.fromEntries(writes),before,'unrelated pending rows need no hidden-panel or control replacement');
+  context.CivweaveTranslationPacksV1.setAutoEnabled(false);
+  assert.equal(await flush(),0,'a real translation change settles while a model remains selected');
+  assert.equal(writes.get('translation'),before.translation+1);assert.equal(writes.get('model-button')||0,0);
+});
+
