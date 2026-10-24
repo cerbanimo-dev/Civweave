@@ -25,6 +25,10 @@ test('catalog route is linked, optional-packaged and offline-cache declared',()=
   assert.match(read('index.html'),/href="\/creator-suite\/tools\.html"/);
   const manifest=JSON.parse(read('package-v1.json'));
   for(const path of ['/creator-suite/tools.html','/creator-suite/shared/craft-catalog-v1.js','/creator-suite/craft-tools-v1.js'])assert.ok(manifest.assets.includes(path),path);
+  const toolPage=read('tools.html');
+  assert.match(toolPage,/id="cadcraft-file"/);
+  assert.match(toolPage,/id="cadcraft-run"/);
+  assert.match(toolPage,/id="wordcraft-token"/);
   const sw=read('service-worker.js');
   for(const path of ['/creator-suite/tools.html','/creator-suite/shared/craft-catalog-v1.js','/creator-suite/craft-tools-v1.js'])assert.ok(sw.includes(path),path);
 });
