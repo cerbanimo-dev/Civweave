@@ -29,7 +29,7 @@ assert.match(router,/route:'server-local',status:'failed'/);
 assert.match(router,/const edge=await cloudflare\(next,trace\)/);
 
 assert.match(livingSchoolBudget,/3\.0\.2-living-school-generation-budget-v3-bounded-ai-assessments/);
-assert.match(livingSchoolBudget,/const DESIGN_TIMEOUT_MS=360000/);
+assert.match(livingSchoolBudget,/const DESIGN_TIMEOUT_MS=570000/,'Local curriculum design needs a bounded nine-and-a-half minute budget for slower Qwen-class inference.');
 assert.match(livingSchoolBudget,/const DESIGN_MAX_TOKENS=16384/);
 assert.match(livingSchoolBudget,/config\.timeoutMs=Math\.max\(Number\(config\.timeoutMs\)\|\|0,DESIGN_TIMEOUT_MS\)/);
 assert.match(livingSchoolBudget,/const MIN_LESSON_WORDS=120/,'longer transport budget must not weaken the curriculum depth gate');

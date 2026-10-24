@@ -9,6 +9,8 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/moss-learning-plan-approval-button-v1.js'
       - 'public/app/living-school-generation-budget-v3.js'
+      - 'public/app/working-campus-v156.part3.txt'
+      - 'scripts/verify-moss-curriculum-quest-library-v1.mjs'
       - 'public/app/living-school-generation-guard-v262.mjs'
       - 'public/app/living-school-quiz-contract-guard-v263.mjs'
       - 'public/app/living-school-cleanroom-actions-v243.mjs'
@@ -35,6 +37,8 @@ on:
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/moss-learning-plan-approval-button-v1.js'
       - 'public/app/living-school-generation-budget-v3.js'
+      - 'public/app/working-campus-v156.part3.txt'
+      - 'scripts/verify-moss-curriculum-quest-library-v1.mjs'
       - 'public/app/living-school-generation-guard-v262.mjs'
       - 'public/app/living-school-quiz-contract-guard-v263.mjs'
       - 'public/app/living-school-cleanroom-actions-v243.mjs'
@@ -77,10 +81,13 @@ jobs:
           node --check public/app/moss-learning-plan-approval-button-v1.js
           node --check scripts/verify-moss-learning-journey-bridge-v1.mjs
           node --check scripts/verify-moss-learning-plan-approval-button-v1.mjs
+          node --check scripts/verify-moss-curriculum-quest-library-v1.mjs
       - name: Verify Moss learning goal routing and capability load order
         run: node scripts/verify-moss-learning-journey-bridge-v1.mjs
       - name: Verify Moss direct approval button materialization
         run: node scripts/verify-moss-learning-plan-approval-button-v1.mjs
+      - name: Verify local curriculum deadline and saved Learning Journey visibility
+        run: node scripts/verify-moss-curriculum-quest-library-v1.mjs
       - name: Verify genuine AI assessment materialization and bounded failure
         run: node scripts/test-moss-assessment-materialization-v1.mjs
       - name: Verify practicum handoff and authoritative completion receipt
