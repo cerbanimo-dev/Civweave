@@ -19,6 +19,8 @@ for (const [where,configText] of [['production',productionRaw],['staging',stagin
   assert.equal(browser?.simple?.limit,8,where+' free browser-tool rate');
   assert.equal(ai?.simple?.limit,6,where+' paid or free AI generation rate unchanged');
   assert.notEqual(browser.namespace_id,ai.namespace_id,where+' tool use must not drain AI request tokens');
+  assert.equal(config.browser?.binding,'BROWSER',where+' Worker must have an actual browser binding');
+
 }
 assert.match(lobby,/data-cw-guild-free-web-benefit/,'Guild join should display the free benefit');
 assert.match(lobby,/free Citizen membership/,'Citizen seat must clearly include research');
