@@ -71,8 +71,9 @@ export function learningJourneySnapshot(read,schoolState={}){
       'failed',event.at,clean(detail.error||detail.reason,900));
   }
   rows.sort((a,b)=>(Date.parse(b.at)||0)-(Date.parse(a.at)||0));
-  const retry=plan?.state==='approved'&&!matching(current,plan.request)?
-    {id:'plan:'+plan.id,request:{...plan.request},approvedAt:plan.approvedAt}:queue&&!matching(current,queue)?
+  const completedFor=request=>matching(current,request)&&current.modules.length>=Math.max(1,Number(request?.count)||1);
+  const retry=plan?.state==='approved'&&!completedFor(plan.request)?
+    {id:'plan:'+plan.id,request:{...plan.request},approvedAt:plan.approvedAt}:queue&&!completedFor(queue)?
     {id:'queue:'+queue.approvedPlanId,request:{...queue},approvedAt:queue.approvedAt}:null;
   const focus=(!current?(plan?.request||queue||null):null);
   return {rows:rows.slice(0,20),retry,focus,plan,queue};
