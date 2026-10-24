@@ -215,10 +215,17 @@ export async function handleBrowserToolRequest(request, env) {
   let session;
   try { session = await verifyCapacitySession(env, bearer(request), nodeId); }
   catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 401); }
+  // A signed Citizen seat is enough: web tools are an included Guild benefit,
+  // not metered AI generation. Browser quotas are deliberately independent of
+  // Workers AI neurons and paid memberships.
+  if (env.GUILD_BROWSER_RATE_LIMITER?.limit) {
+    const limited = await env.GUILD_BROWSER_RATE_LIMITER.limit({ key: `browser:${nodeId}:${session.userId}` });
+    if (!limited?.success) return json({ ok: false, code: 'CIVWEAVE_GUILD_WEB_RATE_LIMIT', error: 'Guild free web research is temporarily rate-limited. Try again shortly.', retryAfter: 60 }, 429);
+  }
   const input = await request.json().catch(() => ({}));
   try {
     const output = await runTool(env, input);
-    return json({ ok: true, schema: 'civweave.browser-tool-result.v1', nodeId, userId: session.userId, source: 'cloudflare-browser-run', liveFetched: true, ...output });
+    return json({ ok: true, schema: 'civweave.browser-tool-result.v1', nodeId, userId: session.userId, benefit: 'guild-free-web-research', chargedNeurons: 0, chargedCents: 0, source: 'cloudflare-browser-run', liveFetched: true, ...output });
   } catch (error) {
     return json({ ok: false, schema: 'civweave.browser-tool-result.v1', error: String(error?.message || error), liveFetched: false }, Number.isSafeInteger(error?.status) ? error.status : 502);
   }
