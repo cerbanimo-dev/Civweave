@@ -38,6 +38,7 @@ assert(binding(production,'GUILD_API_RATE_LIMITER')?.simple?.limit===60,'product
 assert(binding(production,'GUILD_AI_RATE_LIMITER')?.simple?.limit===6,'production Guild AI limit is not 6/minute');
 assert(binding(staging,'GUILD_API_RATE_LIMITER')?.simple?.limit===60,'staging Guild API limit is not 60/minute');
 assert(binding(staging,'GUILD_AI_RATE_LIMITER')?.simple?.limit===6,'staging Guild AI limit is not 6/minute');
+assert(!worker.slice(worker.indexOf('function expensiveRequest('),worker.indexOf('async function digestKey(')).includes('/api/browser/tool'),'Guild free browser tools must not be classified as Workers AI requests');
 assert(binding(production,'GUILD_BROWSER_RATE_LIMITER')?.simple?.limit===8,'production Guild browser benefit must have a separate 8/minute fair-use limit');
 assert(binding(staging,'GUILD_BROWSER_RATE_LIMITER')?.simple?.limit===8,'staging Guild browser benefit must have a separate 8/minute fair-use limit');
 assert(binding(production,'GUILD_BROWSER_RATE_LIMITER')?.namespace_id!==binding(staging,'GUILD_BROWSER_RATE_LIMITER')?.namespace_id,'staging and production Guild browser namespaces must stay isolated');
