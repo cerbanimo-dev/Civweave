@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.8-structured-task-authority-v1-onnx-weave-loader';
+const VERSION='1.4.9-structured-task-authority-v1-idempotent-readiness';
 const rolePolicy=()=>globalThis.CivweaveLocalGenerationModelPolicyV1;
 const modelFor=(role='deep',config={})=>rolePolicy()?.resolve?.(role,{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||selectedLocal()?.id||'';
 const intakeModel=()=>modelFor('intake');
@@ -36,12 +36,14 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 function emit(type,detail={}){try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,intakeModel:intakeModel(),deepModel:deepModel(),at:new Date().toISOString(),...detail}}))}catch{}}
-function copyMetadata(target,source){for(const key of COMPOSITION_KEYS)if(source?.[key]!==undefined)try{target[key]=source[key]}catch{};return target}
+function copyMetadata(target,source){for(const key of new Set([...COMPOSITION_KEYS,...Object.keys(source||{})]))if(source?.[key]!==undefined)try{target[key]=source[key]}catch{};return target}
+function hasLayer(fn,flag){const seen=new Set();for(let depth=0;typeof fn==='function'&&depth<32&&!seen.has(fn);depth++,fn=fn.__prior){if(fn[flag]===VERSION)return true;seen.add(fn)}return false}
 function selectedLocal(){try{return globalThis.CivweaveLocalModelDownloadV266?.selection?.()||null}catch{return null}}
 function systemFor(args={}){return clean(args.systemId||args?.context?.guide?.system||'civweave',80).toLowerCase()||'civweave'}
 function localProvider(request){return LOCAL_PROVIDERS.has(clean(request?.config?.provider||request?.config?.route,120).toLowerCase())}
 function taskKind(purpose){return purpose===LEARNING_PURPOSE?'learning-plan':'quest'}
-function intakeEligible(args={}){const pick=selectedLocal();return systemFor(args)==='civweave'&&Boolean(clean(args.text,12000))&&Boolean(pick?.active&&rolePolicy()?.supportsSelected?.())}
+function localRequested(args={}){const provider=clean(args?.config?.provider||args?.config?.route,120).toLowerCase();if(provider)return LOCAL_PROVIDERS.has(provider);try{const loader=globalThis.CivweaveFamilyAILoaderV105;if(typeof loader?.localRequested==='function')return Boolean(loader.localRequested())}catch{return false}return true}
+function intakeEligible(args={}){const pick=selectedLocal();return localRequested(args)&&systemFor(args)==='civweave'&&Boolean(clean(args.text,12000))&&Boolean(pick?.active&&rolePolicy()?.supportsSelected?.())}
 function stopError(message='Generation stopped by the Hero.'){return Object.assign(new Error(message),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true})}
 function timeoutError(stage,timeoutMs){return Object.assign(new Error(`${stage} did not finish within ${Math.round(timeoutMs/1000)} seconds.`),{code:'CIVWEAVE_LOCAL_STAGE_TIMEOUT',stage,timeoutMs})}
 function requestCancelled(){return Boolean(activeRequest?.cancelled)}
@@ -452,15 +454,15 @@ async function intakeRespond(args={}){
 function installRuntime(){
   const runtime=globalThis.CivweaveModelRuntime,current=runtime?.generate;
   if(!runtime||typeof current!=='function')return false;
-  if(current.__civweaveStructuredTaskAuthorityV1===VERSION)return true;
+  if(hasLayer(current,'__civweaveStructuredTaskAuthorityV1'))return true;
   const baseFn=current.__civweaveStructuredTaskAuthorityV1&&current.__prior?current.__prior:current;
   const prior=baseFn.bind(runtime),generate=async request=>{
     let controller=null,nextRequest=request||{};
-    if(typeof AbortController==='function'&&!nextRequest.signal){controller=new AbortController();activeRuntimeControllers.add(controller);nextRequest={...nextRequest,signal:controller.signal};syncStopButton()}
+    if(localRequested(nextRequest)&&typeof AbortController==='function'&&!nextRequest.signal){controller=new AbortController();activeRuntimeControllers.add(controller);nextRequest={...nextRequest,signal:controller.signal};syncStopButton()}
     try{return await prior(await prepareStructuredRequest(nextRequest))}finally{if(controller){activeRuntimeControllers.delete(controller);syncStopButton()}}
   };
-  generate.__civweaveStructuredTaskAuthorityV1=VERSION;generate.__prior=baseFn;
   for(const key of Object.keys(baseFn))try{generate[key]=baseFn[key]}catch{}
+  generate.__civweaveStructuredTaskAuthorityV1=VERSION;generate.__prior=baseFn;
   try{runtime.generate=generate;if(runtime.generate===generate)return true}catch{}
   try{globalThis.CivweaveModelRuntime={...runtime,generate};return globalThis.CivweaveModelRuntime?.generate===generate}catch{return false}
 }
@@ -472,7 +474,7 @@ function cancellationPacket(error){
 function installAssistant(){
   const api=globalThis.CivweaveAssistantV141,current=api?.respond;
   if(!api||typeof current!=='function')return false;
-  if(current.__civweaveStructuredTaskAuthorityV1===VERSION)return true;
+  if(hasLayer(current,'__civweaveStructuredTaskAuthorityV1'))return true;
   const baseFn=current.__civweaveStructuredTaskAuthorityV1&&current.__prior?current.__prior:current;
   const prior=baseFn.bind(api),respond=async args=>{
     if(!intakeEligible(args))return prior(args);
@@ -504,6 +506,7 @@ function hasPendingGuideMessage(){
 function syncStopButton(){
   try{
     if(typeof document==='undefined')return false;
+    if(!activeRequest&&!activeFastRun&&!activeRuntimeControllers.size&&!localRequested())return false;
     const button=document.querySelector?.('#cw-persistent-guide-chat-v215 [data-send]');if(!button)return false;
     const running=Boolean(activeRequest||activeFastRun||activeRuntimeControllers.size||hasPendingGuideMessage());
     if(running){button.disabled=false;button.type='button';button.textContent='Stop';button.dataset.generationStop='true';button.setAttribute('aria-label','Stop generation');button.title='Stop generation'}
@@ -516,6 +519,7 @@ function installStopUI(){
   if(!globalThis.__civweaveGenerationStopUIV1){
     globalThis.__civweaveGenerationStopUIV1=true;
     document.addEventListener('click',event=>{
+      if(!activeRequest&&!activeFastRun&&!activeRuntimeControllers.size&&!localRequested())return;
       const button=event.target?.closest?.('#cw-persistent-guide-chat-v215 [data-send][data-generation-stop="true"]');if(!button)return;
       event.preventDefault();event.stopPropagation();try{event.stopImmediatePropagation?.()}catch{}
       globalThis.CivweaveGemma4StructuredTaskAuthorityV1?.cancelActiveGeneration?.('stop-button');
@@ -525,8 +529,10 @@ function installStopUI(){
   queueMicrotask(syncStopButton);return true;
 }
 function install(){
+  const priorRuntime=globalThis.CivweaveModelRuntime?.generate,priorAssistant=globalThis.CivweaveAssistantV141?.respond,priorStopUI=Boolean(globalThis.__civweaveGenerationStopUIV1);
   const runtime=installRuntime(),assistant=installAssistant(),stopUI=installStopUI();
-  if(runtime||assistant||stopUI)emit('civweave:structured-task-authority-ready',{runtime,assistant,stopUI,timeoutMs:TASK_TIMEOUT_MS,intakeTimeoutMs:INTAKE_TIMEOUT_MS,intakeFirst:true,intakeModel:intakeModel(),deepModel:deepModel(),learningMaxTokens:LEARNING_MAX_TOKENS,structuredTaskFallbackToE4B:false,visibleIntakeProgress:true,constrainedE4B:true,stopButton:true});
+  const changed=priorRuntime!==globalThis.CivweaveModelRuntime?.generate||priorAssistant!==globalThis.CivweaveAssistantV141?.respond||priorStopUI!==Boolean(globalThis.__civweaveGenerationStopUIV1);
+  if(changed&&(runtime||assistant||stopUI))emit('civweave:structured-task-authority-ready',{runtime,assistant,stopUI,timeoutMs:TASK_TIMEOUT_MS,intakeTimeoutMs:INTAKE_TIMEOUT_MS,intakeFirst:true,intakeModel:intakeModel(),deepModel:deepModel(),learningMaxTokens:LEARNING_MAX_TOKENS,structuredTaskFallbackToE4B:false,visibleIntakeProgress:true,constrainedE4B:true,stopButton:true});
   return runtime||assistant||stopUI;
 }
 function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;install()})}

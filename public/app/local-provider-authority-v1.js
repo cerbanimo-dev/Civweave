@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.3-local-provider-authority-v1-inference-core-first';
+const VERSION='1.0.4-local-provider-authority-v1-configured-route';
 const PROFILE_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
 const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
@@ -67,8 +67,12 @@ function configuredProvider(){
   const value=configuredInteractive();
   return clean(value.provider||value.route,80).toLowerCase();
 }
-function localPinned(){
-  return Boolean(selectedLocal()||LOCAL_PROVIDERS.has(configuredProvider()));
+function localPinned(request={}){
+  const explicit=clean(request?.config?.provider||request?.config?.route,80).toLowerCase();
+  const provider=explicit||configuredProvider();
+  // A cached download remains available after changing providers, but is not
+  // permission to replace the current or explicitly requested transport.
+  return provider?LOCAL_PROVIDERS.has(provider):Boolean(selectedLocal());
 }
 function systemFor(args={}){
   const value=clean(args.systemId||args?.context?.guide?.system,80).toLowerCase();
@@ -436,7 +440,7 @@ function installAssistant(){
   const baseFn=current.__civweaveLocalProviderAuthorityV1&&current.__prior?current.__prior:current;
   const previous=baseFn.bind(api);
   const respond=async args=>{
-    if(!localPinned()||explicitNetworkRequest(args)||localControl(args))return previous(args);
+    if(!localPinned(args)||explicitNetworkRequest(args)||localControl(args))return previous(args);
     return localRespond(args||{});
   };
   respond.__civweaveLocalProviderAuthorityV1=true;
@@ -461,7 +465,7 @@ function installServerGuard(){
   const baseFn=current.__civweaveLocalProviderAuthorityV1&&current.__prior?current.__prior:current;
   const previous=baseFn.bind(router);
   const handle=async request=>{
-    if(localPinned()&&implicitGuideNetwork(request)){
+    if(localPinned(request)&&implicitGuideNetwork(request)){
       const purpose=clean(request?.purpose,300);
       const model=clean(selectedLocal()?.id||configuredInteractive()?.model,240);
       emit('civweave:local-provider-authority-blocked-network',{purpose,model});

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.189-guide-chat-surface-v350-stable-finalization';
+const VERSION='1.0.190-guide-chat-surface-v350-artifact-review-controls';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -209,6 +209,7 @@ body:has(#${ROOT_ID}:not([hidden])) #${LAUNCHER_ID},body:has(#${ROOT_ID}:not([hi
 #${ROOT_ID} .cw242-unread{position:absolute;right:7px;top:6px;width:10px;height:10px;border:2px solid #08111d;border-radius:50%;background:var(--window-accent);box-shadow:0 0 9px var(--window-accent)}#${ROOT_ID} .cw242-unread[hidden]{display:none!important}
 #${ROOT_ID} .cw350-context{padding:7px 11px;border-bottom:1px solid #ffffff12;color:#9fb0c3;font-size:11px;background:#0002}#${ROOT_ID} [data-log]{min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}#${ROOT_ID} [data-log]:empty::before{content:'Start a conversation';margin:auto;color:#71839a;font-weight:750}
 #${ROOT_ID} article{display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;align-items:start}#${ROOT_ID} article.is-user{display:flex;justify-content:flex-end;padding-left:42px}#${ROOT_ID} article>img{width:32px;height:32px;border:1px solid var(--guide-accent);border-radius:10px;object-fit:cover}#${ROOT_ID} .cw350-bubble{max-width:88%;padding:9px 11px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff0b;white-space:pre-wrap;overflow-wrap:anywhere}#${ROOT_ID} .is-user .cw350-bubble{background:color-mix(in srgb,var(--guide-accent) 16%,#ffffff08);border-color:color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} .cw350-meta{margin-top:5px;color:#8394aa;font-size:10px}
+#${ROOT_ID} .cw350-artifact-gate{margin-top:9px;padding:10px;border:1px solid color-mix(in srgb,var(--guide-accent) 42%,transparent);border-radius:12px;background:#0002}#${ROOT_ID} .cw350-artifact-gate strong,#${ROOT_ID} .cw350-artifact-gate span{display:block}#${ROOT_ID} .cw350-artifact-gate span{margin-top:3px;color:#becada;font-size:12px}#${ROOT_ID} .cw350-artifact-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}#${ROOT_ID} .cw350-artifact-actions button{min-height:42px;padding:9px 12px;border:1px solid var(--guide-accent);border-radius:10px;background:color-mix(in srgb,var(--guide-accent) 22%,#182334);color:#fff;font:750 13px/1.2 system-ui;cursor:pointer}#${ROOT_ID} .cw350-artifact-actions button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 #${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit;caret-color:var(--guide-accent);outline:none}#${ROOT_ID} textarea:focus,#${ROOT_ID} textarea:focus-visible{border-color:var(--guide-accent)!important;outline:3px solid color-mix(in srgb,var(--guide-accent) 88%,#fff 12%)!important;outline-offset:2px;box-shadow:0 0 0 1px color-mix(in srgb,var(--guide-accent) 56%,transparent),0 0 18px color-mix(in srgb,var(--guide-accent) 30%,transparent)}#${ROOT_ID} [data-send],#${ROOT_ID} [data-voice]{border:1px solid var(--guide-accent);border-radius:12px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} [data-send]{min-width:76px;padding:0 14px}#${ROOT_ID} [data-voice]{min-width:54px;padding:0 10px;font-size:20px}#${ROOT_ID} [data-voice][data-listening="true"]{background:color-mix(in srgb,var(--guide-accent) 60%,#182334);box-shadow:0 0 18px color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} button{cursor:pointer}
 @media(max-width:720px){#${ROOT_ID}{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:100dvh;border:0;border-radius:0;grid-template-rows:auto auto auto minmax(0,1fr) auto}#${ROOT_ID}>header{grid-template-columns:44px minmax(0,1fr) 40px;padding-top:calc(7px + env(safe-area-inset-top))}#${ROOT_ID}>header img{width:44px;height:44px}#${ROOT_ID} .cw242-window-switcher{gap:4px;padding:7px 5px 8px}#${ROOT_ID} .cw242-window img{width:48px;height:48px;border-radius:12px}#${LAUNCHER_ID}{width:56px;height:56px}}
 @media(max-width:390px){#${ROOT_ID} .cw242-window-switcher{gap:2px;padding-left:3px;padding-right:3px}#${ROOT_ID} .cw242-window img{width:44px;height:44px}#${ROOT_ID} [data-send]{min-width:66px;padding:0 10px}#${ROOT_ID} [data-voice]{min-width:48px}}
@@ -259,6 +260,55 @@ function syncChrome(){
   const context=root.querySelector('[data-context]');if(context){const base=activeSystem===pageSystem?current.label:`${current.label} conversation · opened from ${guide(pageSystem).label}`;context.textContent=[base,voiceStatus||(voice?.listening?`Offline voice listening · say “Hey ${current.name}” or another guide name to switch context.`:'')].filter(Boolean).join(' · ')}
   syncSwitcher();
 }
+function savedArtifactItems(key){
+  try{const items=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(items)?items:[]}catch{return[]}
+}
+function artifactGateView(row){
+  if(row?.role==='user'||row?.pending)return null;
+  const gate=row?.approvalGate;
+  if(gate?.kind==='intention-activation'&&gate.planId){
+    const id=String(gate.planId),owner=globalThis.CivweaveIntentionUI,items=typeof owner?.items==='function'?owner.items():savedArtifactItems('civweave.intentions.v127'),item=items.find(value=>value?.id===id||value?.plan?.id===id);
+    if(!item)return{id,state:'missing',title:'Quest unavailable',description:'This Quest is no longer saved on this device.',commands:[]};
+    const state=String(item.state||item.plan?.state||'review'),commands=[['open-plan','Review Quest']];
+    if(state==='review'&&item.plan?.paths?.length)commands.push(['activate-plan','Activate Quest']);
+    return{id,state,title:state==='active'?'Quest active':state==='completed'?'Quest completed':'Quest review',description:state==='review'?'Review the saved Quest before activating its paths.':`Saved status: ${state}.`,commands};
+  }
+  if(gate?.kind==='realm-action-approval'&&gate.actionId){
+    const id=String(gate.actionId),owner=globalThis.CivweaveGuideContractsV141,action=typeof owner?.get==='function'?owner.get(id):savedArtifactItems('civweave.realm-actions.v141').find(value=>value?.id===id);
+    if(!action)return{id,state:'missing',title:'Draft unavailable',description:'This draft is no longer saved on this device.',commands:[]};
+    const state=String(action.state||'review'),missing=Array.isArray(action.missingRequired)?action.missingRequired:[],review=['draft','clarifying','review'].includes(state),commands=[['open-action','Review draft']];
+    if(review&&!missing.length&&action.approval?.required)commands.push(['approve-action',String(action.approval.label||'Approve')]);
+    return{id,state,title:missing.length?'Draft needs details':review?'Approval required':state.charAt(0).toUpperCase()+state.slice(1),description:missing.length?`Missing: ${missing.join(', ')}.`:review?'The saved draft awaits your review.':`Saved status: ${state}.`,commands};
+  }
+  // Learning Journey decisions are presented by their existing Moss owner.
+  return null;
+}
+function syncArtifactGate(article,row){
+  const view=artifactGateView(row);let panel=article.querySelector('.cw350-artifact-gate');
+  if(!view){panel?.remove();return;}
+  if(!panel){
+    panel=document.createElement('section');panel.className='cw350-artifact-gate';
+    const title=document.createElement('strong'),description=document.createElement('span'),actions=document.createElement('div');actions.className='cw350-artifact-actions';
+    panel.append(title,description,actions);article.querySelector('.cw350-bubble')?.parentElement?.append(panel);
+  }
+  if(panel.dataset.state!==view.state)panel.dataset.state=view.state;
+  const title=panel.querySelector('strong'),description=panel.querySelector('span'),actions=panel.querySelector('.cw350-artifact-actions');
+  if(title.textContent!==view.title)title.textContent=view.title;
+  if(description.textContent!==view.description)description.textContent=view.description;
+  const previous=new Map([...actions.children].map(button=>[`${button.dataset.gate}:${button.dataset.id}`,button]));
+  for(const[command,label]of view.commands){
+    const key=`${command}:${view.id}`;let button=previous.get(key);previous.delete(key);
+    if(!button){button=document.createElement('button');button.type='button';button.dataset.gate=command;button.dataset.id=view.id;actions.append(button);}
+    if(button.textContent!==label)button.textContent=label;
+  }
+  for(const button of previous.values())button.remove();
+}
+function syncArtifactGates(){
+  if(!root)return;
+  const log=root.querySelector('[data-log]');if(!log)return;
+  const messages=readThread(activeSystem).messages||[],rows=new Map(messages.map((row,index)=>[String(row.id||`history-${activeSystem}-${index}`),row]));
+  for(const article of log.children)syncArtifactGate(article,rows.get(article.dataset.messageId));
+}
 function render(){
   if(!root)return false;syncChrome();const log=root.querySelector('[data-log]');if(!log)return false;
   const thread=readThread(activeSystem),messages=Array.isArray(thread.messages)?thread.messages:[];
@@ -288,6 +338,7 @@ function render(){
     let metadata=article.querySelector('.cw350-meta');
     if(!user&&meta){if(!metadata){metadata=document.createElement('div');metadata.className='cw350-meta';bubble.parentElement.append(metadata);}if(metadata.textContent!==meta)metadata.textContent=meta;}
     else metadata?.remove();
+    syncArtifactGate(article,row);
     if(article!==cursor)log.insertBefore(article,cursor);else cursor=cursor.nextElementSibling;
   });
   for(const article of existing.values())article.remove();
@@ -439,6 +490,8 @@ function start(){
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   void ensureSpecializedRegistry().catch(()=>{});
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
+  for(const name of ['civweave:actions-changed','civweave:intentions-changed'])addEventListener(name,syncArtifactGates);
+  addEventListener('storage',event=>{if(['civweave.realm-actions.v141','civweave.intentions.v127'].includes(event.key))syncArtifactGates()});
   addEventListener('civweave:guide-voice-state',event=>{const detail=event.detail||{};voiceStatus=clean(detail.error||'',300);if(root)syncChrome();emitState()});
   document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';
   document.documentElement.dataset.civweaveGuideArtifactLanguage='canonical-v1';

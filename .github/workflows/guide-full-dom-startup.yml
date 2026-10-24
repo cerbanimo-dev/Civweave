@@ -1,0 +1,42 @@
+name: Guide Full DOM Startup
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/**'
+      - 'public/extensions/**'
+      - 'scripts/helpers/guide-full-dom-worker-v1.mjs'
+      - 'scripts/test-guide-full-dom-startup-v1.mjs'
+      - 'scripts/test-local-authority-lifecycle-v1.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/guide-full-dom-startup.yml'
+  push:
+    branches: [main, staging]
+    paths:
+      - 'public/app/**'
+      - 'public/extensions/**'
+      - 'scripts/helpers/guide-full-dom-worker-v1.mjs'
+      - 'scripts/test-guide-full-dom-startup-v1.mjs'
+      - 'scripts/test-local-authority-lifecycle-v1.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/guide-full-dom-startup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-page:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Verify startup, selected HTTP routing, saved draft review and approval
+        run: node --test scripts/test-local-authority-lifecycle-v1.mjs scripts/test-guide-full-dom-startup-v1.mjs

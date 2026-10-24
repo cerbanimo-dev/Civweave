@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.32-local-litert-request-authority-v1-tracker-final-owner';
+const VERSION='1.2.33-local-litert-request-authority-v1-configured-provider';
 const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.131-v325-family-router';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
@@ -61,6 +61,7 @@ function selected(){
   }catch{return null}
 }
 function selectedFast(){
+  try{const loader=globalThis.CivweaveFamilyAILoaderV105;if(typeof loader?.localRequested==='function'&&!loader.localRequested())return false}catch{return false}
   const pick=selected();
   // A policy-supported pair includes experimental Llama ONNX; policy support
   // is NOT evidence that a LiteRT profile exists. Never bootstrap LiteRT
@@ -260,11 +261,12 @@ async function ensure({onProgress,reason='local-request'}={}){
   return ensureFlight;
 }
 function copyCompositionMetadata(target,source){
-  for(const key of COMPOSITION_KEYS){
+  for(const key of new Set([...COMPOSITION_KEYS,...Object.keys(source||{})])){
     if(source?.[key]!==undefined)target[key]=source[key];
   }
   return target;
 }
+function hasLayer(fn,flag){const seen=new Set();for(let depth=0;typeof fn==='function'&&depth<32&&!seen.has(fn);depth++,fn=fn.__prior){if(fn[flag]===VERSION)return true;seen.add(fn)}return false}
 function installAssistant(){
   installFastStructuredToolAdapter();
   installLearningPlanMetadataAdapter();
@@ -273,7 +275,7 @@ function installAssistant(){
   try{globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.()}catch{}
   const api=globalThis.CivweaveAssistantV141;
   if(!api?.respond)return false;
-  if(api.respond.__civweaveGemma4LiteRTFirstRequest===VERSION){assistantTarget=api;return true}
+  if(hasLayer(api.respond,'__civweaveGemma4LiteRTFirstRequest')){assistantTarget=api;return true}
   const prior=api.respond;
   const respond=async args=>{
     if(selectedFast())await ensure({onProgress:args?.onProgress,reason:'guide-request'});

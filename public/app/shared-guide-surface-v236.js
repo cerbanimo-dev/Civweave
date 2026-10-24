@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.185-idempotent-local-pulse';
+const VERSION='1.0.186-configured-provider-authority';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -22,7 +22,7 @@ function install(){
   load('/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
   load('/app/guide-generation-floor-v1.js?v=1.3.0-local-planner-authority',null,()=>globalThis.CivweaveGuideGenerationFloorV1?.version==='1.3.0-guide-generation-floor-v1-local-planner-authority');
   load('/app/minilm-decision-strip-v1.js?v=1.3.1-live-guild-balance',null,()=>globalThis.CivweaveMiniLMDecisionStripV1?.version==='1.3.1-minilm-decision-strip-live-guild-balance');
-  load('/app/family-ai-loader-v105.js?v=1.0.132-standard-ai-lazy-local',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
+  load('/app/family-ai-loader-v105.js?v=1.0.144-local-settings-pulse',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
   load('/app/guide-forward-failure-policy-v1.js?v=1.0.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
@@ -32,7 +32,7 @@ function install(){
       load('/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard',()=>{
         load('/app/local-ai/gemma4-inference-repair-v1.js?v=1.0.3-onnx-only',()=>{
           load('/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output',()=>{
-            load('/app/local-provider-authority-v1.js?v=1.0.3-inference-core-first',()=>{
+            load('/app/local-provider-authority-v1.js?v=1.0.4-configured-route',()=>{
               load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
                 load('/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.1-explicit-local-http',()=>{
                   load('/app/local-guide-control-bypass-v1.js?v=1.4.3-mandatory-intake-direct',()=>{

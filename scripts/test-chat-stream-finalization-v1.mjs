@@ -56,7 +56,7 @@ class Element {
   remove() { if (this.parentElement) { const siblings = this.parentElement.children; siblings.splice(siblings.indexOf(this), 1); this.parentElement = null; } }
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
   querySelectorAll(selector) {
-    const found = [], match = node => selector.startsWith('.') ? node.className.split(/\s+/).includes(selector.slice(1)) : selector === 'img' ? node.tagName === 'IMG' : selector === 'article[data-pending="true"]' ? node.tagName === 'ARTICLE' && node.dataset.pending === 'true' : false;
+    const found = [], match = node => selector.startsWith('.') ? node.className.split(/\s+/).includes(selector.slice(1)) : ['img', 'button', 'strong', 'span', 'output'].includes(selector) ? node.tagName === selector.toUpperCase() : selector === 'article[data-pending="true"]' ? node.tagName === 'ARTICLE' && node.dataset.pending === 'true' : false;
     for (const child of this.children) { if (match(child)) found.push(child); found.push(...child.querySelectorAll(selector)); }
     return found;
   }
@@ -65,20 +65,87 @@ class Element {
 function harness() {
   const log = new Element('div');
   let rows = [{ id: 'user-1', role: 'user', text: 'Hello' }, { id: 'reply-1', role: 'assistant', guide: 'civweave', text: 'Thinking', pending: true }];
-  const guide = { name: 'Weaveling', avatar: '/weaveling.png' };
+  const guide = { name: 'Weaveling', avatar: '/weaveling.png' }, actions = new Map(), intentions = new Map();
   const scope = {
     root: { querySelector: () => log, querySelectorAll: () => log.querySelectorAll('article[data-pending="true"]') },
     activeSystem: 'civweave', openState: true, GUIDE: { civweave: guide }, guide: () => guide,
     document: { createElement: tag => new Element(tag) },
     readThread: () => ({ messages: rows }), syncChrome() {}, markSeen() {}, syncSwitcher() {},
     requestAnimationFrame: callback => callback(), esc: value => String(value),
+    globalThis: { CivweaveGuideContractsV141: { get: id => actions.get(id) }, CivweaveIntentionUI: { items: () => [...intentions.values()] } },
   };
-  const start = source.indexOf('function render(){');
+  const start = source.indexOf('function savedArtifactItems(');
   const end = source.indexOf('async function fallbackReply(', start);
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), scope);
-  return { log, scope, setRows: value => { rows = value; }, get rows() { return rows; } };
+  return { log, scope, actions, intentions, setRows: value => { rows = value; }, get rows() { return rows; } };
 }
+
+test('saved action gates expose shared review controls without repainting the answer', () => {
+  const app = harness();
+  app.actions.set('manifest-1', { id: 'manifest-1', state: 'review', missingRequired: [], approval: { required: true, label: 'Publish Manifest' } });
+  app.setRows([{ id: 'reply-1', role: 'assistant', text: 'Manifest saved.', approvalGate: { kind: 'realm-action-approval', actionId: 'manifest-1', state: 'review' } }]);
+  app.scope.render();
+  const article = app.log.children[0], bubble = article.querySelector('.cw350-bubble'), panel = article.querySelector('.cw350-artifact-gate');
+  assert.ok(panel, 'The current chat must expose its saved artifact review gate.');
+  const buttons = panel.querySelectorAll('button');
+  assert.deepEqual(buttons.map(button => [button.dataset.gate, button.dataset.id, button.textContent]), [
+    ['open-action', 'manifest-1', 'Review draft'], ['approve-action', 'manifest-1', 'Publish Manifest'],
+  ], 'Controls delegate to the existing shared review event owner.');
+  const writes = bubble.textWrites;
+  app.scope.render();
+  assert.equal(article.querySelector('.cw350-artifact-gate'), panel);
+  assert.equal(panel.querySelectorAll('button')[1], buttons[1], 'An unchanged artifact keeps its controls.');
+  assert.equal(bubble.textWrites, writes);
+  app.actions.get('manifest-1').state = 'published';
+  app.scope.render();
+  assert.equal(panel.querySelectorAll('button').length, 1, 'Owner state supersedes the saved REVIEW row.');
+  assert.equal(panel.querySelector('strong').textContent, 'Published');
+  assert.equal(bubble.textWrites, writes, 'Approval status changes must leave the completed answer alone.');
+});
+
+test('artifact gates use current saved owners and never resurrect snapshots while rendering', () => {
+  const app = harness();
+  app.scope.globalThis.CivweaveGuideContractsV141.restore = () => assert.fail('Rendering must not restore an action.');
+  app.scope.globalThis.CivweaveIntentionPlanner = { restore: () => assert.fail('Rendering must not restore a Quest.') };
+  app.setRows([{ id: 'missing-action', role: 'assistant', text: 'Old Manifest.', approvalGate: { kind: 'realm-action-approval', actionId: 'deleted-1', state: 'review' }, actionSnapshot: { id: 'deleted-1', state: 'review' } }]);
+  app.scope.render();
+  assert.equal(app.log.children[0].querySelector('.cw350-artifact-gate').querySelector('strong').textContent, 'Draft unavailable');
+  assert.equal(app.log.querySelectorAll('button').length, 0);
+  app.intentions.set('quest-1', { id: 'quest-1', state: 'active', plan: { paths: [{ id: 'path-1' }] } });
+  app.setRows([{ id: 'quest-reply', role: 'assistant', text: 'Quest saved.', approvalGate: { kind: 'intention-activation', planId: 'quest-1', state: 'review' } }]);
+  app.scope.render();
+  const panel = app.log.children[0].querySelector('.cw350-artifact-gate');
+  assert.equal(panel.querySelector('strong').textContent, 'Quest active');
+  assert.deepEqual(panel.querySelectorAll('button').map(button => button.dataset.gate), ['open-plan']);
+  app.intentions.get('quest-1').state = 'review'; app.scope.render();
+  assert.deepEqual(panel.querySelectorAll('button').map(button => button.dataset.gate), ['open-plan', 'activate-plan']);
+});
+
+test('incomplete actions cannot be approved and Moss keeps its existing Learning Journey control owner', () => {
+  const app = harness();
+  app.actions.set('partial-1', { id: 'partial-1', state: 'clarifying', missingRequired: ['area'], approval: { required: true, label: 'Publish Manifest' } });
+  app.setRows([{ id: 'partial-reply', role: 'assistant', text: 'Need the area.', approvalGate: { kind: 'realm-action-approval', actionId: 'partial-1' } },
+    { id: 'moss-reply', role: 'assistant', text: 'Learning Journey plan:', approvalGate: { kind: 'learning-journey-plan-approval', planId: 'learning-1', state: 'review' } }]);
+  app.scope.render();
+  const panel = app.log.children[0].querySelector('.cw350-artifact-gate');
+  assert.equal(panel.querySelector('strong').textContent, 'Draft needs details');
+  assert.deepEqual(panel.querySelectorAll('button').map(button => button.dataset.gate), ['open-action']);
+  assert.equal(app.log.children[1].querySelector('.cw350-artifact-gate'), null, 'The existing Moss controls remain the sole Learning Journey decision owner.');
+});
+
+test('saved artifact review controls remain available before lazy AI owners load', () => {
+  const app = harness(), saved = new Map([
+    ['civweave.realm-actions.v141', JSON.stringify([{ id: 'saved-action', state: 'review', missingRequired: [], approval: { required: true, label: 'Publish Manifest' } }])],
+    ['civweave.intentions.v127', JSON.stringify([{ id: 'saved-quest', state: 'review', plan: { paths: [{ id: 'path-1' }] } }])],
+  ]);
+  app.scope.globalThis.CivweaveGuideContractsV141 = undefined; app.scope.globalThis.CivweaveIntentionUI = undefined;
+  app.scope.localStorage = { getItem: key => saved.get(key) || null };
+  app.setRows([{ id: 'saved-action-reply', role: 'assistant', text: 'Manifest saved.', approvalGate: { kind: 'realm-action-approval', actionId: 'saved-action' } },
+    { id: 'saved-quest-reply', role: 'assistant', text: 'Quest saved.', approvalGate: { kind: 'intention-activation', planId: 'saved-quest' } }]);
+  app.scope.render();
+  assert.deepEqual(app.log.querySelectorAll('button').map(button => button.dataset.gate), ['open-action', 'approve-action', 'open-plan', 'activate-plan']);
+});
 
 test('stream completion retains the article and bubble without rewriting the completed tokens', () => {
   const app = harness(); app.scope.render();

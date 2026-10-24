@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-anarchadia-v158';
+const VERSION='1.0.5-anarchadia-v158-provider-fidelity';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const CHAT_KEY='civweave.guide-chat.anarchadia.v153';
 const HUB_PROPOSALS='/lite/?system=anarchadia&room=anarchadia.proposals#proposals';
@@ -71,21 +71,26 @@ async function semanticReview(p){
 }
 function deterministicPatch(p){
   const criteria=p.acceptance.map(item=>`<li>${esc(item)}</li>`).join('');
-  const html=`<main class="change"><header><small>${esc(p.kind.toUpperCase())} PREVIEW</small><h1>${esc(p.title)}</h1></header><section><h2>Problem</h2><p>${esc(p.problem)}</p></section><section><h2>Expected result</h2><p>${esc(p.expected)}</p></section><section><h2>Acceptance</h2><ul>${criteria}</ul></section><button id="prove">Record local proof</button><output id="receipt" aria-live="polite"></output></main>`;
+  const html=`<main class="change"><header><small>REQUEST-SUMMARY SCAFFOLD</small><h1>${esc(p.title)}</h1><p>This scaffold records the request. It does not implement the requested feature.</p></header><section><h2>Problem</h2><p>${esc(p.problem)}</p></section><section><h2>Expected result</h2><p>${esc(p.expected)}</p></section><section><h2>Acceptance</h2><ul>${criteria}</ul></section><button id="prove">Record local proof</button><output id="receipt" aria-live="polite"></output></main>`;
   const css=`:root{font-family:system-ui;color:#f7f2ea;background:#07090d}.change{max-width:760px;margin:auto;padding:32px}.change header{border-bottom:2px solid #ff2f87}.change small{color:#1fd8ff}.change h1{color:#ff2f87}.change section{margin:18px 0;padding:16px;border:1px solid #333;background:#0d131b}.change button{padding:12px 16px;border:1px solid #8dff2b;background:#08110a;color:#8dff2b;font-weight:800}.change output{display:block;margin-top:12px;color:#ffc21a}`;
   const js=`document.querySelector('#prove').addEventListener('click',()=>{document.querySelector('#receipt').textContent='Preview proof recorded locally at '+new Date().toLocaleTimeString()+'. No external action occurred.'});`;
-  return {generator:'civweave-safe-scaffolder',summary:`Generated a bounded ${p.kind} preview for ${p.area}.`,files:[{path:'preview/index.html',content:html},{path:'preview/styles.css',content:css},{path:'preview/app.js',content:js}],preview:{html,css,js}};
+  return {generator:'civweave-safe-scaffolder',summary:`Request-summary scaffold for ${p.area}. This does not implement the requested feature.`,files:[{path:'preview/index.html',content:html},{path:'preview/styles.css',content:css},{path:'preview/app.js',content:js}],preview:{html,css,js}};
 }
 async function providerPatch(p){
-  const runtime=globalThis.CivweaveModelRuntime||parent?.CivweaveModelRuntime,config=runtime?.readSharedConfig?.('agentic');
-  if(!runtime?.generate||!config||['bundled','packaged','reflex','minilm','local-reflex'].includes(String(config.provider||config.route||'').toLowerCase()))return deterministicPatch(p);
+  const sharedRuntime=()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'?globalThis.CivweaveModelRuntime:parent?.CivweaveModelRuntime||globalThis.CivweaveModelRuntime;
+  let runtime=sharedRuntime();
+  if(typeof runtime?.generate!=='function'){await (globalThis.CivweaveFamilyAILoaderV105||parent?.CivweaveFamilyAILoaderV105)?.ensure?.();runtime=sharedRuntime()}
+  const config=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
+  if(!config)throw new Error('Select a model in shared Settings before generating this preview.');
+  if(['bundled','packaged','reflex','minilm','local-reflex'].includes(String(config.provider||config.route||'').toLowerCase()))return deterministicPatch(p);
+  if(typeof runtime?.generate!=='function')throw new Error('The shared model runtime is unavailable.');
   const schema={type:'object',required:['summary','files','preview'],properties:{summary:{type:'string'},files:{type:'array',items:{type:'object',required:['path','content'],properties:{path:{type:'string'},content:{type:'string'}}}},preview:{type:'object',required:['html','css','js'],properties:{html:{type:'string'},css:{type:'string'},js:{type:'string'}}}}};
-  try{
-    const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,context:{proposal:p,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview files.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate a small HTML/CSS/JS sandbox preview for the supplied change request. Return JSON matching the schema. Do not claim the change is installed in production.'},{role:'user',content:JSON.stringify(p)}]});
-    if(result?.status==='success'&&result.outputJson?.files?.length)return result.outputJson;
-  }catch{}
-  return deterministicPatch(p);
+  const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,context:{proposal:p,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview files.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate a small HTML/CSS/JS sandbox preview that implements the supplied change request and its acceptance criteria. Return JSON matching the schema. Do not substitute a request summary or claim the change is installed in production.'},{role:'user',content:JSON.stringify(p)}]});
+  if(result?.status!=='success')throw new Error(cleanProviderError(result));
+  if(!result.outputJson?.files?.length||!result.outputJson?.preview?.html)throw new Error('The selected model did not return the required preview files and HTML.');
+  return {...result.outputJson,generator:'configured-provider'};
 }
+function cleanProviderError(result){const reason=result?.error?.message||result?.error||result?.message;return typeof reason==='string'?reason.slice(0,1600):'The selected model could not generate the preview.'}
 function validatePatch(patch){
   const errors=[];if(!patch?.files?.length)errors.push('No files were generated.');
   for(const file of patch?.files||[]){if(!ALLOWED_EXT.test(file.path))errors.push(`Disallowed file type: ${file.path}`);if(file.content.length>120000)errors.push(`File exceeds preview limit: ${file.path}`);for(const rule of FORBIDDEN_CODE)if(rule.test(file.content))errors.push(`Forbidden code pattern in ${file.path}: ${rule}`)}
@@ -95,15 +100,15 @@ function srcdoc(preview){return `<!doctype html><html><head><meta charset="utf-8
 async function runPipeline(id){
   if(runningPipelines.has(id))return;
   const p=proposal(id);if(!p)return;
-  runningPipelines.add(id);p.status='working';p.failedStage=null;queueRender();
+  runningPipelines.add(id);delete p.patch;delete p.preview;delete p.validation;delete p.previewDecision;delete p.lastError;p.status='working';p.failedStage=null;queueRender();
   try{
     record(p,'intake','Request accepted into the local accountable-automation queue.');await sleep(90);
     record(p,'rail-check','Running deterministic rails and local semantic review.');p.semanticReview=await semanticReview(p);if(!railCheck(p)){p.status='blocked';p.failedStage='rail-check';save('proposal-blocked',`${p.title} is blocked by one or more rails.`,p.id);return}await sleep(90);
-    record(p,'code-generation','Generating a bounded patch with the configured provider or safe local scaffolder.');p.patch=await providerPatch(p);await sleep(90);
+    record(p,'code-generation','Generating the approved preview with the selected model.');p.patch=await providerPatch(p);await sleep(90);
     record(p,'validation','Validating generated paths, sizes, APIs, network behavior, and authority boundaries.');const validation=validatePatch(p.patch);p.validation=validation;if(!validation.valid){p.status='failed';p.failedStage='validation';save('proposal-validation-failed',`${p.title}: ${validation.errors.join('; ')}`,p.id);return}await sleep(90);
     record(p,'sandbox-install','Installing generated files into an isolated browser preview.');p.preview={srcdoc:srcdoc(p.patch.preview),installedAt:now(),generator:p.patch.generator||'configured-provider'};await sleep(90);
-    p.status='preview-ready';record(p,'preview-ready','Sandbox preview installed. Production remains unchanged until an explicit community decision.');setScreen('automation');toast('Preview ready. Open it when you are ready to inspect it.');
-  }finally{runningPipelines.delete(id);queueRender()}
+    p.status='preview-ready';record(p,'preview-ready',p.patch.generator==='civweave-safe-scaffolder'?'Request-summary scaffold installed from the selected bundled provider. The requested feature has not been implemented.':'Sandbox preview installed. Production remains unchanged until an explicit community decision.');setScreen('automation');toast(p.patch.generator==='civweave-safe-scaffolder'?'Request-summary scaffold ready. Inspect its limits before keeping it.':'Preview ready. Open it when you are ready to inspect it.');return{ok:true,proposal:p};
+  }catch(error){p.status='failed';p.failedStage=p.stage;p.lastError=String(error?.message||error).slice(0,1600);record(p,p.failedStage,`Preview generation failed: ${p.lastError}`);toast(`Preview generation failed: ${p.lastError}`);return{ok:false,error:p.lastError,proposal:p}}finally{runningPipelines.delete(id);queueRender()}
 }
 function openPreview(id){const p=proposal(id);if(!p?.preview?.srcdoc)return;$('#ac-preview-title').textContent=p.title;$('#ac-preview-frame').srcdoc=p.preview.srcdoc;const dialog=$('#ac-preview-dialog');if(dialog&&!dialog.open)dialog.showModal?.()}
 function signalVote(id){const p=proposal(id);if(!p)return;p.voteSignal=!p.voteSignal;save('vote-signal',`${p.title}: local non-binding support signal ${p.voteSignal?'recorded':'removed'}.`,p.id)}
