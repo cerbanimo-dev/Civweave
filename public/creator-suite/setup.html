@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111316"><title>Local Craft tools setup · Civweave</title>
+<link rel="manifest" href="/creator-suite/manifest.webmanifest">
+<link rel="stylesheet" href="/creator-suite/creator-suite-v1.css">
+<style>
+.guide{max-width:820px;margin:auto;padding:1rem 1rem 4rem;line-height:1.6}
+.guide section{border:1px solid #394550;background:#171c21;border-radius:1rem;padding:1rem;margin:1rem 0}
+.guide h2{margin:.15rem 0 .4rem}.guide h3{margin:1rem 0 .35rem}
+.guide code{font-family:ui-monospace,monospace;color:#c9e2fc}
+.guide pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:1rem;border-radius:.6rem;background:#0a0e11;color:#e9f1f8}
+.guide a{color:#bdddf9}.guide ul{padding-left:1.25rem}
+</style>
+</head>
+<body>
+<header class="cs-header"><div><p class="cs-kicker">Civweave Creator Suite</p><h1>Install local document tools</h1><p class="cs-subtitle">Optional, private, on-device processing using upstream Craft command-line tools.</p></div>
+<div class="cs-header-actions"><a class="cs-button cs-secondary" href="/creator-suite/tools.html">Back to Creative &amp; Business Tools</a></div></header>
+<main class="guide">
+<section>
+<h2>1. Install the tool you need</h2>
+<p>These are independent open-source applications. Civweave does not download or execute any installer on your behalf.</p>
+<ul>
+<li><a href="https://github.com/storytold/wordcraft/releases/latest" target="_blank" rel="noopener noreferrer">WordCraft official releases</a> — install the <code>wordcraft-cli</code> executable for document inspection, text extraction, and PDF export.</li>
+<li><a href="https://github.com/storytold/cadcraft/releases/latest" target="_blank" rel="noopener noreferrer">CADCraft official releases</a> — install the <code>cadcraft-cli</code> executable for DXF/DWG inspection and SVG export.</li>
+<li><a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">Node.js official installation</a> — version 22 or newer on the computer running the bridge.</li>
+</ul>
+<p>Validate downloads using checksums from the upstream release. CLI binaries must be discoverable on the computer's PATH or configured using <code>WORDCRAFT_CLI</code> and <code>CADCRAFT_CLI</code>.</p>
+</section>
+<section>
+<h2>2. Launch the optional Civweave companion</h2>
+<p>From a checked-out copy of Civweave containing <code>tools/creator-craft-bridge/server.mjs</code>, launch one of the commands below. The process listens only on your own computer.</p>
+<h3>Windows PowerShell</h3>
+<pre><code>$env:CIVWEAVE_CRAFT_ALLOWED_ORIGINS = 'https://civweave-staging.pages.dev'
+node tools/creator-craft-bridge/server.mjs</code></pre>
+<h3>Linux or macOS</h3>
+<pre><code>CIVWEAVE_CRAFT_ALLOWED_ORIGINS=https://civweave-staging.pages.dev node tools/creator-craft-bridge/server.mjs</code></pre>
+<p>Use the actual trusted Civweave URL in <code>CIVWEAVE_CRAFT_ALLOWED_ORIGINS</code> if different. The localhost development origins are also allowed by default. Do not enter an unfamiliar website origin.</p>
+<p>The companion prints a random token on launch. Keep the terminal open and paste that token into the connection box on the <a href="/creator-suite/tools.html">tool catalog page</a>. Select a file from your device and choose an available action. The original is not overwritten.</p>
+</section>
+<section>
+<h2>3. AI access remains approval-gated</h2>
+<p>Only tools backed by an installed CLI and a user-selected file are registered in the Creator Suite's local tool registry. Each AI-triggered operation asks for approval. The local adapter cannot read other files based on a model-generated pathname, and it cannot send or publish documents to a guild.</p>
+<p>The tools page is functional only on the <strong>same desktop computer</strong> as the running companion. Opening Civweave on your Android phone will not connect to a desktop's <code>127.0.0.1</code>. Phone-to-PC execution requires a separately authenticated HTTPS host-node integration; do not open the bridge's local port to the internet or your LAN.</p>
+</section>
+<section>
+<h2>Current limitations</h2>
+<p>This is an experimental native command-line connection, not a full browser editor port. Files are capped at 8 MiB, PDF/SVG exports at 12 MiB, and two jobs may run at once. Real WordCraft/CADCraft binary compatibility and document fidelity still require end-to-end verification. Conversion does not guarantee lossless round trips.</p>
+<p><a href="https://github.com/cerbanimo-dev/Civweave/blob/staging/tools/creator-craft-bridge/README.md" target="_blank" rel="noopener noreferrer">Detailed companion documentation</a></p>
+</section>
+</main>
+</body></html>
