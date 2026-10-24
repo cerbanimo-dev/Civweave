@@ -157,6 +157,13 @@ async function retryApprovedLearningJourney(target){
   const output=await generateCurriculumFromChat(request),school=output?.school;
   if(!school?.id||!Array.isArray(school.modules)||!school.modules.length||school.generation?.fallback)
     throw new Error('Generation did not produce a valid curriculum. The approved plan remains available for retry.');
+  const expected=Math.max(1,Math.min(8,Number(request.count)||4));
+  if(school.modules.length<expected||output.generationRecovery?.status==='partial'){
+    persist('living-school-approved-journey-partial',{schoolId:school.id,approvedPlanId:record.id,
+      completedModules:school.modules.length,requestedModules:expected});
+    toastMessage(`Saved ${school.modules.length}/${expected} modules. The approved plan and missing-module recovery remain available.`);
+    return school;
+  }
   const plan=readJson(PLAN_KEY,null);
   if(record.id==='plan:'+plan?.id&&plan.state==='approved')localStorage.removeItem(PLAN_KEY);
   const queued=readJson(QUEUE_KEY,null);
