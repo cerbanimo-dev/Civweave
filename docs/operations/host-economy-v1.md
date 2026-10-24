@@ -11,6 +11,29 @@ This contract keeps host residency, billing status, compute funding, Host Node S
 - Workers AI daily capacity is hard-capped at the account's 10,000 free neurons until funded overage exists.
 - Upgrading the Workers account alone does not expand the free neuron pool or permanent community population.
 
+## Free Citizen benefit: live web research for local AI
+
+A signed Guild capacity session issued to a free Citizen resident grants use of
+the Guild's web-search and webpage-reading tools, subject to availability and
+the dedicated fair-use limiter. **No Patreon/Patron membership, paid search
+API key, AI neurons, or AI top-up credits are required** for this tool service.
+Patrons also retain the same included browser-tools entitlement.
+
+The Guild node executes search and page reads via its existing Cloudflare
+Browser Run binding (or an optional operator-managed search backend). The user's
+language model runs locally; only explicit queries and requested URLs leave the
+device. The model must not describe unavailable search as successful.
+
+The browser tool's signed-session verifier authorizes both Citizen and Patron
+residents without branching on billing tier. Responses identify
+`benefit: guild-free-web-research`, `chargedNeurons: 0`, and
+`chargedCents: 0`. The separate `GUILD_BROWSER_RATE_LIMITER` allows up
+to **8 browser tool actions per Guild resident per minute** in both staging
+and production. This limit is separate from the Workers AI request limiter and
+does not increase the model's included AI quota. Browser Run and upstream
+search-engine limits can still make browsing temporarily unavailable; this is
+an included *fair-use* service, not unlimited guaranteed availability.
+
 ## Adaptive paid capacity
 
 A paid Workers plan only opens the overage pipe. Additional daily service and permanent community seats are unlocked from actual reserve funding.
