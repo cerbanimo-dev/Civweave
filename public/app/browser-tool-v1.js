@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-browser-tool-v1';
+const VERSION='1.0.1-browser-tool-v1-keyless-search';
 if(globalThis.CivweaveBrowserToolV1?.version===VERSION)return;
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
 const MARKET_PREF_KEY='civweave.node-ai-marketplace.preferences.v1';
@@ -60,7 +60,7 @@ async function live(action,input={},options={}){
   const payload={action:clean(action,40),...input};
   const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId},body:JSON.stringify(payload)});
   const body=await response.json().catch(()=>({}));
-  if(!response.ok||!body?.ok){const error=new Error(clean(body?.error||`Browser tool returned HTTP ${response.status}.`,1200));error.status=response.status;error.code='BROWSER_LIVE_FAILED';throw error}
+  if(!response.ok||!body?.ok){const error=new Error(clean(body?.error||`Browser tool returned HTTP ${response.status}.`,1200));error.status=response.status;error.code=clean(body?.code,90)||'BROWSER_LIVE_FAILED';error.retryAfter=Number(body?.retryAfter||0)||null;throw error}
   const result={...body,mode:'live',networkDisclosure:{sentToHost:payload.action==='search'?['search query']:['target URL'],modelInference:'remained on-device'}};
   emit('civweave:browser-live-tool',{action:payload.action,nodeId:session.nodeId,browserMs:Number(body.browserMs||0)});
   return result;
@@ -71,7 +71,7 @@ async function search(query,{limit=12,live:useLive=false,allowNetwork=false,arch
   const liveResult=await live('search',{query:clean(query,1200)},{allowNetwork:true});
   return{schema:'civweave.browser-search-result.v1',mode:'hybrid',query:clean(query,1800),archive,live:liveResult,liveFetched:true};
 }
-function status(){const session=usableCapacitySession();return Object.freeze({version:VERSION,online:globalThis.navigator?.onLine!==false,archiveProviders:[...archiveProviders.keys()],archiveSearch:true,liveBrowser:Boolean(session),liveNodeId:session?.nodeId||'',modelInference:'local-compatible',networkBoundary:'only explicit tool queries/URLs leave the device'});}
+function status(){const session=usableCapacitySession();return Object.freeze({version:VERSION,online:globalThis.navigator?.onLine!==false,archiveProviders:[...archiveProviders.keys()],archiveSearch:true,liveBrowser:Boolean(session),guildFreeBenefit:'live-web-research',chargedNeurons:0,chargedCents:0,browserFairUseActionsPerMinute:8,liveNodeId:session?.nodeId||'',modelInference:'local-compatible',networkBoundary:'only explicit tool queries/URLs leave the device'});}
 const api=Object.freeze({version:VERSION,registerArchiveProvider,searchArchive,live,search,status,get archiveProviders(){return Object.freeze([...archiveProviders.keys()])}});
 globalThis.CivweaveBrowserToolV1=api;
 emit('civweave:browser-tool-ready',{status:status()});

@@ -122,6 +122,7 @@ function installStyles() {
     .cw-host-slot small{display:block;color:#b4c7d3;font-size:.68rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
     .cw-host-slot strong{display:block;margin-top:5px;font-size:clamp(1.55rem,5vw,3rem);line-height:1;color:#fff;overflow-wrap:anywhere}
     .cw-host-slot span{display:block;margin-top:7px;color:#9eb2bf;font-size:.74rem;line-height:1.35}
+    .cw-host-node-benefit{position:relative;margin:0 0 12px;color:#d1f3eb;font-size:.82rem;line-height:1.5}
     .cw-host-node-note{position:relative;margin:0 0 16px;color:#c8d7df;font-size:.82rem;line-height:1.5}
     .cw-host-node-actions{position:relative;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .cw-host-node-actions button,.cw-host-node-actions a{min-height:44px;padding:9px 15px;border-radius:13px;border:1px solid #ffffff2a;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font:900 .82rem/1 system-ui,-apple-system,sans-serif}
@@ -159,9 +160,10 @@ function buildLobby() {
       <span class="cw-host-node-live" id="cw-host-node-live" data-state="checking">${host ? 'Checking status' : 'Choose a Guild'}</span>
     </div>
     <div class="cw-host-node-slots" aria-label="Guild membership capacity">
-      <article class="cw-host-slot"><small>Citizen slots</small><strong id="cw-host-free-slots">—</strong><span>Citizen residency available in this Guild.</span></article>
+      <article class="cw-host-slot"><small>Citizen slots</small><strong id="cw-host-free-slots">—</strong><span>Free Guild residency includes AI web search and source reading through the Guild connection. No paid membership, search API key, or AI credits required; fair-use limits and network availability apply.</span></article>
       <article class="cw-host-slot"><small>Patron slots</small><strong id="cw-host-paid-slots">—</strong><span>Additional Patron residency available in this Guild.</span></article>
     </div>
+    <p class="cw-host-node-benefit" data-cw-guild-free-web-benefit><strong>Included with free Citizen membership:</strong> Live web research for your local AI through your Guild's browser tools. Search queries and opened URLs use the host connection; model inference stays on your device. Subject to fair-use limits and host availability.</p>
     <p class="cw-host-node-note" id="cw-host-node-note">${host ? 'Reading the Guild’s live capacity before you join.' : 'Find the nearest Guild with Citizen or Patron capacity. Your exact location is never sent; Civweave rounds it before searching.'}</p>
     <div class="cw-host-node-actions">
       <button class="cw-host-node-join" id="cw-host-node-join" type="button" ${host ? 'disabled' : ''} data-mode="${host ? 'join' : 'search'}">${host ? (localFederated ? 'Use this Guild' : 'Join & log in') : 'Find an open Guild'}</button>

@@ -46,17 +46,17 @@ function blockedIpv4(host) {
   const parts = host.split('.').map(Number);
   if (parts.length !== 4 || parts.some(part => !Number.isInteger(part) || part < 0 || part > 255)) return false;
   const [a, b] = parts;
-  return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a >= 224;
+  return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && (b === 0 || b === 168)) || (a === 198 && (b === 18 || b === 19 || (b === 51 && parts[2] === 100))) || (a === 203 && b === 0 && parts[2] === 113) || a >= 224;
 }
 function safeUrl(value) {
   let url;
   try { url = new URL(clean(value, 4000)); }
   catch { throw Object.assign(new Error('Browser tool requires a valid URL.'), { status: 400 }); }
   if (!['http:', 'https:'].includes(url.protocol)) throw Object.assign(new Error('Browser tool only permits HTTP(S) targets.'), { status: 400 });
-  if (url.username || url.password) throw Object.assign(new Error('Browser tool URLs may not contain embedded credentials.'), { status: 400 });
+  if (url.username || url.password || (url.port && !['80','443'].includes(url.port))) throw Object.assign(new Error('Browser tool URLs may not contain credentials or non-web ports.'), { status: 400 });
   const host = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-  if (!host || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.invalid')) throw Object.assign(new Error('Browser tool refuses local or private hostnames.'), { status: 403 });
-  if (blockedIpv4(host) || host === '::' || host === '::1' || /^f[cd][0-9a-f:]*$/i.test(host) || /^fe[89ab][0-9a-f:]*$/i.test(host)) throw Object.assign(new Error('Browser tool refuses private, loopback, link-local, multicast, or unspecified IP targets.'), { status: 403 });
+  if (!host || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.invalid') || host.endsWith('.onion') || host.endsWith('.test')) throw Object.assign(new Error('Browser tool refuses local or private hostnames.'), { status: 403 });
+  if (blockedIpv4(host) || host.includes(':') || host === '::' || host === '::1' || /^f[cd][0-9a-f:]*$/i.test(host) || /^fe[89ab][0-9a-f:]*$/i.test(host)) throw Object.assign(new Error('Browser tool refuses private, loopback, link-local, multicast, or unspecified IP targets.'), { status: 403 });
   url.hash = '';
   return url.href;
 }
@@ -80,14 +80,114 @@ async function quick(env, action, payload) {
   }
   return { result: boundValue(body.result), browserMs };
 }
+// The node operator supplies the trusted SearXNG instance; model output cannot choose a proxy.
+async function searchSearxng(env, query) {
+  const configured = clean(env.SEARXNG_BASE_URL, 2048);
+  if (!configured) return null;
+  let base;
+  try { base = new URL(configured); }
+  catch { throw Object.assign(new Error('SEARXNG_BASE_URL is not a valid URL.'), { status: 503 }); }
+  if (!['https:', 'http:'].includes(base.protocol) || base.username || base.password || base.search || base.hash) {
+    throw Object.assign(new Error('SEARXNG_BASE_URL is not a supported search origin.'), { status: 503 });
+  }
+  const url = new URL('search', base.href.endsWith('/') ? base.href : base.href + '/');
+  url.searchParams.set('q', query);
+  url.searchParams.set('format', 'json');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const response = await fetch(url.href, {
+      headers: { accept: 'application/json' },
+      redirect: 'error',
+      signal: controller.signal,
+    });
+    if (!response.ok) throw Object.assign(new Error('Configured SearXNG search returned HTTP ' + response.status + '. Check that JSON output is enabled.'), { status: 502 });
+    const type = response.headers.get('content-type') || '';
+    if (!type.includes('application/json')) throw Object.assign(new Error('SearXNG did not return JSON. Enable the json format in settings.yml.'), { status: 502 });
+    const payload = await response.json();
+    if (!Array.isArray(payload?.results)) throw Object.assign(new Error('SearXNG response has no results array.'), { status: 502 });
+    const results = [];
+    const seen = new Set();
+    for (const row of payload.results.slice(0, 35)) {
+      let target;
+      try { target = safeUrl(row?.url); } catch { continue; }
+      if (seen.has(target)) continue;
+      seen.add(target);
+      results.push({
+        title: clean(row?.title, 280),
+        url: target,
+        snippet: clean(row?.content, 1600),
+        engine: clean(row?.engine, 90),
+        liveFetched: true,
+      });
+      if (results.length === 8) break;
+    }
+    return { action: 'search', query, source: 'searxng', results, browserMs: 0 };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Convert Browser Run's HTML-search markdown into a bounded set of clickable,
+// validated result URLs. Model-generated URLs never enter this extraction step.
+function markdownBody(value) {
+  if (typeof value === 'string') return clean(value, 18000);
+  if (Array.isArray(value)) return value.map(markdownBody).filter(Boolean).join('\n').slice(0,18000);
+  if (!value || typeof value !== 'object') return '';
+  for (const key of ['markdown','content','text','result','data']) {
+    if (value[key]) return markdownBody(value[key]);
+  }
+  return '';
+}
+function browserSearchResults(value) {
+  const markdown=markdownBody(value),rows=[],seen=new Set();
+  const matches=markdown.matchAll(/\[([^\]\n]{4,220})\]\((https?:\/\/[^\s)]+)\)/g);
+  for(const match of matches) {
+    let target;
+    try {
+      let candidate=new URL(match[2].replaceAll('&amp;','&'));
+      if (/(^|\.)duckduckgo\.com$/i.test(candidate.hostname)) {
+        if (candidate.pathname!=='/l/' && candidate.pathname!=='/l') continue;
+        const redirected=candidate.searchParams.get('uddg');
+        if(!redirected)continue;
+        candidate=new URL(redirected);
+      }
+      target=safeUrl(candidate.href);
+    } catch { continue; }
+    if(seen.has(target))continue;
+    seen.add(target);
+    const tail=markdown.slice(match.index+match[0].length,match.index+match[0].length+500).split('\n').find(part=>part.trim()&&!/^[#* -]+$/.test(part))||'';
+    rows.push({title:clean(match[1].replace(/<[^>]*>/g,''),220),url:target,snippet:clean(tail,360),engine:'duckduckgo-html',liveFetched:true});
+    if(rows.length>=8)break;
+  }
+  return rows;
+}
+
 async function runTool(env, input) {
   const action = clean(input?.action, 40).toLowerCase();
   if (action === 'search') {
     const query = clean(input?.query, 1200);
     if (!query) throw Object.assign(new Error('Browser search requires a query.'), { status: 400 });
+    // SearXNG is strictly optional. Public instances often disable JSON (403);
+    // a denied request must not prevent the already-configured Browser Run tool
+    // from attempting search through an ordinary HTML results page.
+    let searxError = '';
+    if (clean(env.SEARXNG_BASE_URL, 2048)) {
+      try {
+        const searxng = await searchSearxng(env, query);
+        if (searxng) return searxng;
+      } catch (error) {
+        searxError = clean(error?.message || error, 400);
+      }
+    }
     const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-    const out = await quick(env, 'markdown', { url, gotoOptions: { waitUntil: 'domcontentloaded', timeout: 20_000 } });
-    return { action, query, url, ...out };
+    try {
+      const out = await quick(env, 'markdown', { url, gotoOptions: { waitUntil: 'domcontentloaded', timeout: 20_000 } });
+      return { action, query, url, source: 'browser-run-duckduckgo', fallbackFrom: searxError ? 'searxng' : null, ...out, results: browserSearchResults(out.result), liveFetched: true };
+    } catch (error) {
+      if (!searxError) throw error;
+      throw Object.assign(new Error('Both search paths failed: SearXNG: ' + searxError + '; Browser Run: ' + clean(error?.message || error, 400)), { status: error?.status || 502 });
+    }
   }
   if (action === 'open' || action === 'markdown') {
     const url = safeUrl(input?.url);
@@ -115,13 +215,20 @@ export async function handleBrowserToolRequest(request, env) {
   let session;
   try { session = await verifyCapacitySession(env, bearer(request), nodeId); }
   catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 401); }
+  // A signed Citizen seat is enough: web tools are an included Guild benefit,
+  // not metered AI generation. Browser quotas are deliberately independent of
+  // Workers AI neurons and paid memberships.
+  if (env.GUILD_BROWSER_RATE_LIMITER?.limit) {
+    const limited = await env.GUILD_BROWSER_RATE_LIMITER.limit({ key: `browser:${nodeId}:${session.userId}` });
+    if (!limited?.success) return json({ ok: false, code: 'CIVWEAVE_GUILD_WEB_RATE_LIMIT', error: 'Guild free web research is temporarily rate-limited. Try again shortly.', retryAfter: 60 }, 429);
+  }
   const input = await request.json().catch(() => ({}));
   try {
     const output = await runTool(env, input);
-    return json({ ok: true, schema: 'civweave.browser-tool-result.v1', nodeId, userId: session.userId, source: 'cloudflare-browser-run', liveFetched: true, ...output });
+    return json({ ok: true, schema: 'civweave.browser-tool-result.v1', nodeId, userId: session.userId, benefit: 'guild-free-web-research', chargedNeurons: 0, chargedCents: 0, source: 'cloudflare-browser-run', liveFetched: true, ...output });
   } catch (error) {
     return json({ ok: false, schema: 'civweave.browser-tool-result.v1', error: String(error?.message || error), liveFetched: false }, Number.isSafeInteger(error?.status) ? error.status : 502);
   }
 }
 
-export const browserToolVersion = '1.0.0-browser-tool-entry-v1';
+export const browserToolVersion = '1.1.0-browser-tool-entry-v1-searxng';

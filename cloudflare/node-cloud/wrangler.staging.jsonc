@@ -19,8 +19,17 @@
       "name": "GUILD_AI_RATE_LIMITER",
       "namespace_id": "41102",
       "simple": { "limit": 6, "period": 60 }
+    },
+    {
+      "name": "GUILD_BROWSER_RATE_LIMITER",
+      "namespace_id": "41103",
+      "simple": { "limit": 8, "period": 60 }
     }
   ],
+  "browser": {
+    "binding": "BROWSER",
+    "remote": true
+  },
   "durable_objects": {
     "bindings": [
       { "name": "NODES", "class_name": "CivweaveCloudNode" },
