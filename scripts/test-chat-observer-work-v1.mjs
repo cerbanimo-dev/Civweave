@@ -165,7 +165,7 @@ test('pending Rook chat settles with translation, model health, Nearby, avatar a
   const context={URL,location:{href:'https://staging.example/app/persistent-system-shell-v1.html'},
     document:{readyState:'complete',scripts:[],documentElement:{dataset:{},lang:'en'},querySelectorAll:()=>[],
       getElementById:id=>id==='cw-human-chat-network-v1'?{querySelector:()=>({querySelector:()=>nearby})}:
-        id==='cw-persistent-guide-chat-v215'?chat:id==='cw-local-ai-v266'?settings:{}},
+        id==='cw-persistent-guide-chat-v215'?chat:id==='cw-local-ai-v266'?settings:id.includes('style')?{}:null},
     navigator:{language:'en'},localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},sessionStorage:{getItem:()=>null},
     MutationObserver:Observer,queueMicrotask:callback=>microtasks.push(callback),setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,clearInterval(){},
     addEventListener:(type,callback)=>listeners.set(type,[...(listeners.get(type)||[]),callback]),
@@ -194,4 +194,3 @@ test('pending Rook chat settles with translation, model health, Nearby, avatar a
   assert.equal(await flush(),0,'a real translation change settles while a model remains selected');
   assert.equal(writes.get('translation'),before.translation+1);assert.equal(writes.get('model-button')||0,0);
 });
-
