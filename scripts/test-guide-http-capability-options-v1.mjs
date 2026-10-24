@@ -8,6 +8,46 @@ const assistant = read('app/assistant-runtime-v141.js');
 const orchestrator = read('extensions/civweave-weaveling-plan-json-v190.js');
 const config = { provider: 'ollama', route: 'ollama', model: 'gemma4:latest', endpoint: 'http://127.0.0.1:11434/api/chat' };
 
+test('a separate chat Quest owns its wish and preserves the existing campus intention', async () => {
+  const oldWish = 'Learn and memorize the tarot', request = 'Create a Quest titled QA Local READY Note. Goal: write READY in a fictional local QA note.';
+  const saved = new Map([
+    ['civweave.working-campus.v1', JSON.stringify({ wish: oldWish, profile: {}, plan: null })],
+    ['civweave.intentions.v127', '[]'], ['civweave.realm-inbox.v1', '[]'],
+  ]);
+  const input = { value: oldWish }, seen = [], raw = {
+    title: 'QA Local READY Note', wish: oldWish, outcome: 'A fictional QA note contains READY.', assumptions: ['This is local digital QA.'],
+    paths: [{ type: 'civic-governance', realm: 'anarchadia', title: 'Record READY', purpose: 'Keep the fictional QA note.', steps: ['Write READY.'], completionCriteria: 'The note contains READY.', evidence: ['Local QA note'] }],
+    governance: { included: false },
+  };
+  const scope = {
+    console, Date, Math, structuredClone, DOMException, URL,
+    localStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, String(value)), removeItem: key => saved.delete(key) },
+    document: { readyState: 'loading', addEventListener() {}, documentElement: { dataset: {} }, getElementById: id => id === 'wish-input' ? input : null },
+    location: { pathname: '/app/working-campus-v440.html' },
+    addEventListener() {}, dispatchEvent() {}, queueMicrotask: callback => callback(),
+    CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options?.detail; } },
+    CivweaveModelRuntime: { readSharedConfig: () => config, generate: async request => { seen.push(request); return { status: 'success', structured: { valid: true }, outputJson: structuredClone(raw), actual: config }; } },
+  };
+  scope.globalThis = scope; vm.createContext(scope);
+  vm.runInContext(read('app/intention-planner-v141.js'), scope);
+  vm.runInContext(read('app/weaveling-plan-materialization-v265.js'), scope);
+  vm.runInContext(orchestrator, scope);
+  const api = { selectedConfig: () => config };
+  const first = await scope.CivweaveWeavelingPlanJsonV190.createModelPlan({ text: request, history: [] }, api);
+  assert.equal(first.plan.wish, request, 'The user request owns this Quest goal even when the model echoes an unrelated prior wish.');
+  assert.equal(seen[0].context.workingMemory.currentWish, request);
+  assert.equal(first.plan.paths.length, 1); assert.equal(first.plan.governance, null, 'A model-requested governance:false must remain absent.');
+  assert.equal(JSON.parse(saved.get('civweave.working-campus.v1')).wish, oldWish, 'Creating a separate chat Quest must not replace the campus intention.');
+  assert.equal(input.value, oldWish);
+  const revision = 'Revise that Quest to write lowercase ready instead.';
+  const second = await scope.CivweaveWeavelingPlanJsonV190.createModelPlan({ text: revision, history: [{ role: 'user', text: request }] }, api);
+  assert.equal(second.plan.wish, request, 'Revisions retain their Quest goal rather than borrowing the campus intention.');
+  assert.equal(seen[1].context.workingMemory.currentWish, request);
+  assert.equal(JSON.parse(saved.get('civweave.working-campus.v1')).wish, oldWish);
+  scope.CivweaveWeavelingPlanMaterializationV265.materialize(second.plan);
+  assert.equal(JSON.parse(saved.get('civweave.working-campus.v1')).wish, request, 'The default main-form materialization still selects its own intention.');
+});
+
 test('shared assistant forwards cancellation and streamed tokens to the selected HTTP provider', async () => {
   let request;
   const tokens = [];

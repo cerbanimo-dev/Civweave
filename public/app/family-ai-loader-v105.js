@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.144-local-settings-pulse'
+const VERSION='1.0.145-rook-material-revisions'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -38,9 +38,9 @@ const OPTIONAL=[
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
 ];
 const GUIDE_CAPABILITIES=[
-  ['/app/unified-chat-system-v1.js?v=1.2.9-moss-review-decision-v2',()=>globalThis.CivweaveUnifiedChatSystemV1],
+  ['/app/unified-chat-system-v1.js?v=1.2.10-request-wish-owner',()=>globalThis.CivweaveUnifiedChatSystemV1],
   ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.0-canonical-endeavors',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
-  ['/app/action-followthrough-v165.js?v=explicit-approval-r1',()=>globalThis.CivweaveActionFollowthroughV165],
+  ['/app/action-followthrough-v165.js?v=1.0.5-material-revisions',()=>globalThis.CivweaveActionFollowthroughV165],
   ['/app/guide-capability-passover-v1.js?v=1.1.3-canonical-prompt',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
 ];
 const LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};

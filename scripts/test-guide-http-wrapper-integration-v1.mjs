@@ -75,6 +75,30 @@ test('Ollama wrapper failures and cancellation propagate without a Guild request
   assert.equal(app.events.some(event => event.type === 'civweave:cloud-fallback-route'), false);
 });
 
+test('Rook Manifest revisions preserve unspecified materials and parse explicit material labels through the real wrappers', async () => {
+  const app=harness();
+  for(const path of ['shared/civweave-model-runtime.js','fast-interactive-runtime-v192.js','guide-contracts-v141.js','assistant-runtime-v141.js','action-followthrough-v165.js','unified-chat-system-v1.js','guide-capability-passover-v1.js'])app.load(path);
+  const ask=text=>app.context.CivweaveAssistantV141.respond({text,systemId:'fellowfare',handoffSystem:'fellowfare',history:[],onToken(){}});
+  const initial=await ask('Create a Manifest: QA notebook fixture; quantity: 2 notebooks; area: Albany, NY; timing: today; free gift.');
+  assert.equal(initial.action.fields.category,'Materials');
+  assert.deepEqual(Array.from(initial.action.fields.materials),['QA notebook fixture'],'initial material entries exclude command and metadata labels');
+  const originalNeed=initial.action.fields.need;
+  const revised=await ask('Revise the Manifest: quantity: 3 notebooks; area: Troy, NY; timing: tomorrow. Keep it a fictional free-gift QA listing with no contact or delivery.');
+  assert.equal(revised.action.id,initial.action.id);
+  assert.deepEqual(Array.from(revised.action.fields.materials),['QA notebook fixture']);
+  assert.equal(revised.action.fields.need,originalNeed);
+  assert.equal(revised.action.fields.quantity,'3 notebooks');
+  assert.equal(revised.action.fields.area,'Troy, NY');
+  const explicit=await ask('Revise the Manifest: materials: notebooks; quantity: 3 notebooks; area: Troy, NY; timing: tomorrow;');
+  assert.equal(explicit.action.id,initial.action.id);
+  assert.deepEqual(Array.from(explicit.action.fields.materials),['notebooks'],'an explicit material label replaces only its material entries');
+  assert.equal(explicit.action.fields.need,originalNeed);
+  assert.equal(explicit.action.fields.exchangeMethod,'Gift');
+  const approved=await ask('Approve the Manifest');
+  assert.equal(approved.action.state,'published');
+  assert.deepEqual(Array.from(approved.action.fields.materials),['notebooks'],'approval must not reparse the original source over reviewed materials');
+});
+
 test('knowledge installation after the stream subscriber can extend the shared runtime', async () => {
   const app = harness();
   app.load('shared/civweave-model-runtime.js');

@@ -103,3 +103,21 @@ test('ordinary unsignaled Ollama runtime calls preserve the canonical surface St
   assert.equal(forwarded.signal,undefined,'downloaded authority must not create an HTTP cancellation controller');
   assert.equal(button.dataset.generationStop,undefined);assert.equal(button.textContent,'Stop');
 });
+
+test('the guide control wrapper preserves later authority markers and its original prior link',()=>{
+  const app=scope({local:false});const original=app.context.CivweaveAssistantV141.respond;
+  original.__prior=async()=>({response:{answer:'Earlier authority'}});
+  Object.assign(original,{__civweaveLocalProviderAuthorityV1:true,__civweaveLocalProviderAuthorityVersion:'fixture-provider',
+    __civweaveFirstRequestIntakeBridgeV1:'fixture-intake',__civweaveGemma4LiteRTFirstRequest:'fixture-request',
+    __civweaveStructuredTaskAuthorityV1:'fixture-structured'});
+  vm.runInContext(readFileSync(new URL('../public/app/local-guide-control-bypass-v1.js',import.meta.url),'utf8'),app.context,{filename:'local-guide-control-bypass-v1.js'});
+  assert.equal(app.flush().pending,0);
+  const wrapped=app.context.CivweaveAssistantV141.respond;
+  for(const key of ['__civweaveFirstRequestIntakeBridgeV1','__civweaveGemma4LiteRTFirstRequest','__civweaveStructuredTaskAuthorityV1'])
+    assert.equal(wrapped[key],original[key],`preserve composition marker ${key}`);
+  assert.equal(wrapped.__prior,original,'copying inherited metadata cannot skip the wrapped function');
+  const outer=async args=>wrapped(args);outer.__prior=wrapped;outer.__civweaveLocalProviderAuthorityV1=true;
+  app.context.CivweaveAssistantV141.respond=outer;
+  app.context.CivweaveLocalGuideControlBypassV1.patch();
+  assert.equal(app.context.CivweaveAssistantV141.respond,outer,'an existing deeper control layer must not be wrapped repeatedly');
+});

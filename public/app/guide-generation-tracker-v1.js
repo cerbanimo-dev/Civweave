@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.2.21-guide-generation-tracker-v1-canonical-final-owner';
-const REVISION='1.3.2-final-metadata-without-token-replay';
+const VERSION='1.2.22-guide-generation-tracker-v1-idempotent-history';
+const REVISION='1.3.3-idempotent-lifecycle-history';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
@@ -17,6 +17,8 @@ const clean=(value,max=50000)=>String(value??'').slice(0,max);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const now=()=>Date.now();
 let state=freshState(),lastFinalFingerprint='',bound=false;
+const consumedLifecycleIds=new Set(),panelMarkup=new WeakMap();
+let replayingLifecycle=false,replayNeedsPanel=false;
 function bus(){
   // Tracker lives in the campus iframe, but v2/probe lives in parent shell.
   try{
@@ -69,13 +71,14 @@ function inferArtifacts(text='',route=''){return bus()?.inferArtifacts?.(text,ro
 function mergeArtifacts(base={},extra={}){return bus()?.mergeArtifacts?.(base,extra)||{learningPlan:Boolean(base.learningPlan||extra.learningPlan),endeavour:Boolean(base.endeavour||extra.endeavour),manifest:Boolean(base.manifest||extra.manifest),proposal:Boolean(base.proposal||extra.proposal)}}
 function artifactName(){return bus()?.artifactName?.(state.artifacts)||'Generation'}
 function freshState(){return{
-  requestId:`process-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,pipelineId:'',startedMs:now(),terminal:'',nativeFormal:false,activeStage:'',showPipeline:false,expanded:true,pendingObserved:false,pendingKey:'',kind:'',artifacts:emptyArtifacts(),
+  requestId:`process-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,pipelineId:'',guideSystem:'',messageId:'',startedMs:now(),terminal:'',nativeFormal:false,activeStage:'',showPipeline:false,expanded:true,pendingObserved:false,pendingKey:'',kind:'',artifacts:emptyArtifacts(),
   stages:Object.fromEntries(STAGES.map(stage=>[stage.id,{state:'waiting',label:stage.label,model:''}])),streams:{intake:'',draft:'',compile:'',repair:'',final:''},runtimePhase:'',errorDetail:'',executionModel:'',probeBusy:false,probeStatus:'',counts:{resources:0,specialists:0,gates:0},artifactKey:'',finalSource:''
 }}
 function activeRoot(){return document.getElementById(ROOT_ID)}
-function activeArticle(){const root=activeRoot();return root?[...root.querySelectorAll('[data-log] article[data-role="assistant"]')].at(-1)||null:null}
+function currentGuide(){return clean(activeRoot()?.dataset?.guide||globalThis.CivweaveGuideChatSurfaceV350?.activeWindow?.()||'',80)}
+function activeArticle(){const root=activeRoot();if(!root||state.guideSystem&&currentGuide()&&state.guideSystem!==currentGuide())return null;const rows=[...root.querySelectorAll('[data-log] article[data-role="assistant"]')];return state.messageId?rows.find(row=>row.dataset?.messageId===state.messageId)||null:rows.at(-1)||null}
 function stageState(id,status,label='',model=''){const row=state.stages[id]||{state:'waiting',label:id,model:''};state.stages[id]={...row,state:status,label:label||row.label,model:model||row.model};if(['running','streaming','queued'].includes(status))state.activeStage=id;if(model)state.executionModel=model}
-function resetForRequest({text='',route='',pendingKey='',startedMs=now()}={}){state=freshState();state.startedMs=startedMs;state.pendingKey=pendingKey;state.artifacts=inferArtifacts(text,route);state.showPipeline=Object.values(state.artifacts).some(Boolean);state.pendingObserved=true;if(state.showPipeline)stageState('intake','queued','Waiting for intake');lastFinalFingerprint=''}
+function resetForRequest({text='',route='',pendingKey='',startedMs=now(),system='',messageId=''}={}){state=freshState();consumedLifecycleIds.clear();state.guideSystem=clean(system||currentGuide(),80);state.messageId=clean(messageId,180);state.startedMs=startedMs;state.pendingKey=pendingKey;state.artifacts=inferArtifacts(text,route);state.showPipeline=Object.values(state.artifacts).some(Boolean);state.pendingObserved=true;if(state.showPipeline)stageState('intake','queued','Waiting for intake');lastFinalFingerprint=''}
 function updateArtifacts(detail={}){
   const route=detail.route||detail.kind||'';
   if(detail.artifactSet||detail.artifacts)state.artifacts=mergeArtifacts(state.artifacts,bus()?.normalizeArtifacts?.(detail.artifactSet||detail.artifacts)||emptyArtifacts());
@@ -112,8 +115,8 @@ function panelHtml(){
   return`<div class="cw-weave-track-head"><div class="cw-weave-track-title"><strong>Live ${esc(artifactName())}</strong><span>${esc(terminalLabel())}${esc(model)}${esc(runtime)}${state.finalSource?` · ${esc(state.finalSource)}`:''}</span></div><button type="button" class="cw-weave-track-summary" data-weave-expand aria-expanded="${state.expanded?'true':'false'}">${state.expanded?'Hide live process':'Show live process'}</button></div><div class="cw-weave-rail">${rail}</div>${counts}<div class="cw-weave-details" data-weave-details ${state.expanded?'':'hidden'}>${detail}${sections}${probe}</div>`
 }
 function existingPanel(){const article=activeArticle(),host=article?.children?.[1]||article;return host?.querySelector?.(':scope > .cw-weave-tracker')||null}
-function ensurePanel(){installStyle();if(!state.showPipeline){existingPanel()?.remove?.();return null}const article=activeArticle();if(!article)return null;const host=article.children?.[1]||article;let panel=host.querySelector?.(':scope > .cw-weave-tracker');if(!panel){panel=document.createElement('div');panel.className='cw-weave-tracker';panel.dataset.pipelineId=state.pipelineId||state.requestId;host.append(panel)}panel.innerHTML=panelHtml();return panel}
-function refreshStream(phase){if(!state.showPipeline)return;const panel=ensurePanel();if(!panel)return;const section=panel.querySelector(`[data-stream="${phase}"]`);if(!section)return;section.hidden=false;const pre=section.querySelector('pre');if(pre){pre.textContent=state.streams[phase]||'Waiting…';try{pre.scrollTop=pre.scrollHeight}catch{}}}
+function ensurePanel(){if(replayingLifecycle){replayNeedsPanel=true;return existingPanel()}installStyle();if(!state.showPipeline){existingPanel()?.remove?.();return null}const article=activeArticle();if(!article)return null;const host=article.children?.[1]||article;let panel=host.querySelector?.(':scope > .cw-weave-tracker');if(!panel){panel=document.createElement('div');panel.className='cw-weave-tracker';panel.dataset.pipelineId=state.pipelineId||state.requestId;host.append(panel)}const markup=panelHtml();if(panelMarkup.get(panel)!==markup){panel.innerHTML=markup;panelMarkup.set(panel,markup)}return panel}
+function refreshStream(phase){if(!state.showPipeline)return;const panel=ensurePanel();if(!panel||replayingLifecycle)return;const section=panel.querySelector(`[data-stream="${phase}"]`);if(!section)return;section.hidden=false;const pre=section.querySelector('pre');if(pre){const text=state.streams[phase]||'Waiting…';if(pre.textContent!==text)pre.textContent=text;try{pre.scrollTop=pre.scrollHeight}catch{}}}
 function setRuntimeStage(detail={}){const stage=detail.stage||bus()?.stageId?.(detail.label)||'draft',status=detail.state==='start'?'running':detail.state;if(!state.showPipeline){state.showPipeline=true;state.pendingObserved=true}if(stage==='draft'&&state.stages.intake.state==='queued')stageState('intake','complete');stageState(stage,status||'running',detail.label||STAGES.find(row=>row.id===stage)?.label,detail.model||'');if(status==='complete'&&stage==='intake'&&state.stages.draft.state==='waiting')stageState('draft','queued','Waiting for draft');if(status==='failed'){state.terminal='failed'}if(status==='stopped'){state.terminal='stopped'}ensurePanel()}
 function applyIntake(detail={}){
   if(detail.origin==='native-local-api')state.nativeFormal=true;
@@ -138,6 +141,7 @@ function applyIntake(detail={}){
   ensurePanel();
 }
 function applyPipeline(detail={}){
+  if(detail.phase==='install')return;
   if(detail.origin==='native-local-api')state.nativeFormal=true;
   state.showPipeline=true;state.pendingObserved=true;updateArtifacts(detail);if(detail.pipelineId)state.pipelineId=detail.pipelineId;
   const phase=detail.phase,status=detail.state||'running',model=detail.model||'gemma4-local-it-litert-web';
@@ -163,7 +167,7 @@ function applyPipeline(detail={}){
   }
   ensurePanel();
 }
-function applyLifecycle(row={}){if(Number(row.at)&&Number(row.at)<state.startedMs-1500)return;const type=row.type,detail=row.detail||{};if(type==='civweave:local-model-stage-progress'){
+function applyLifecycle(row={}){const id=clean(row.id,180);if(id){if(consumedLifecycleIds.has(id))return;consumedLifecycleIds.add(id);if(consumedLifecycleIds.size>256)consumedLifecycleIds.delete(consumedLifecycleIds.values().next().value)}if(Number(row.at)&&Number(row.at)<state.startedMs-1500)return;const type=row.type,detail=row.detail||{};if(type==='civweave:local-model-stage-progress'){
     const label=clean(detail.stage,180),stage=/intake/i.test(label)?'intake':/repair/i.test(label)?'repair':/compil|json/i.test(label)?'compile':'draft';
     state.runtimePhase=clean(detail.phase,100).replaceAll('-',' ');
     state.showPipeline=true;state.pendingObserved=true;
@@ -394,8 +398,23 @@ function recordFinal(text,row){
   state.finalSource=[clean(row?.provider,100),clean(row?.model,160)].filter(Boolean).join(' · ');
   state.streams.final=clean(text,30000);
 }
-function replayLifecycle(){const rows=bus()?.history?.()||[];for(const row of rows)applyLifecycle(row)}
-function onThreadChanged(event){const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;if(row.pending){const user=latestRole(thread,'user'),key=`${clean(user?.text,500)}|${clean(user?.createdAt||user?.at||thread.updatedAt,80)}`;if(!state.pendingObserved||state.pendingKey!==key||state.terminal){const stamp=Date.parse(user?.createdAt||user?.at||'')||Date.parse(thread?.updatedAt||'')||now();resetForRequest({text:user?.text||'',pendingKey:key,startedMs:stamp});replayLifecycle()}ensurePanel();return}const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;if(!state.terminal&&state.showPipeline)state.terminal=/could not|failed|error|no learning content was generated/i.test(clean(row.text,6000))?'failed':'complete';recordFinal(row.text,row);ensurePanel()}
+function replayLifecycle(){if(replayingLifecycle)return;replayingLifecycle=true;replayNeedsPanel=false;try{const rows=bus()?.history?.()||[];for(const row of rows)applyLifecycle(row)}finally{replayingLifecycle=false;if(replayNeedsPanel)ensurePanel();replayNeedsPanel=false}}
+function onThreadChanged(event){
+  const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;
+  const system=clean(event?.detail?.system||row.guide||row.responderSystem||currentGuide(),80);
+  if(row.pending){
+    // Restoring an old saved chat is not a new generation. Its pending row
+    // must not adopt another guide's recent lifecycle history.
+    if(globalThis.CivweaveGuideChatSurfaceV350?.state?.()?.busy===false)return;
+    const user=latestRole(thread,'user'),key=`${clean(user?.text,500)}|${clean(user?.createdAt||user?.at||thread.updatedAt,80)}`;
+    if(!state.pendingObserved||state.pendingKey!==key||state.terminal){const stamp=Date.parse(user?.createdAt||user?.at||'')||Date.parse(thread?.updatedAt||'')||now();resetForRequest({text:user?.text||'',pendingKey:key,startedMs:stamp,system,messageId:row.id});replayLifecycle()}
+    ensurePanel();return;
+  }
+  if(state.guideSystem&&system&&state.guideSystem!==system||state.messageId&&row.id&&state.messageId!==row.id)return;
+  const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;
+  if(!state.terminal&&state.showPipeline)state.terminal=/could not|failed|error|no learning content was generated/i.test(clean(row.text,6000))?'failed':'complete';
+  recordFinal(row.text,row);ensurePanel();
+}
 function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();addEventListener('civweave:generation-lifecycle',event=>applyLifecycle(event?.detail||{}));
   addEventListener('civweave:weaveling-intake-progress',event=>{
     if(event?.detail?.origin==='native-local-api')applyIntake(event.detail);

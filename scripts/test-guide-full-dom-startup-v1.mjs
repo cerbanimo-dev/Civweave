@@ -14,19 +14,18 @@ function page(entry,staleModel){return new Promise((resolve,reject)=>{
   worker.once('exit',code=>{clearTimeout(timeout);if(code)reject(new Error(`Full DOM worker exited with ${code}`))});
 })}
 
-test('full canonical v440 page settles and approves a real Ollama Manifest',{timeout:35000},async()=>{
-  const entry='/app/working-campus-v440.html';
+for(const entry of ['/app/working-campus-v440.html','/app/persistent-system-shell-v1.html'])test(`full canonical page settles and approves a real Ollama Manifest: ${entry}`,{timeout:35000},async()=>{
   const result=await page(entry,'qwen35-4b-litert-web');
   assert.equal(result.ok,true,result.error);
   assert.deepEqual(result.blocked,[],'startup must not exhaust a mutation or microtask budget');
   assert.deepEqual(result.errors,[],'all classic and module owners must execute successfully');
   assert.ok(result.heartbeat>5,'ordinary timer work remains responsive');
   assert.ok(result.resources.length>100,'exercise the complete page graph instead of isolated wrappers');
-  for(const owner of ['guide-chat-surface-v350.js','gemma4-structured-task-authority-v1.js','gemma4-litert-request-authority-v1.js','local-provider-authority-v1.js','guide-contracts-v141.js','shared-review-surface-v234.js'])
+  for(const owner of ['guide-chat-surface-v350.js','gemma4-structured-task-authority-v1.js','gemma4-litert-request-authority-v1.js','local-provider-authority-v1.js','guide-contracts-v141.js','shared-review-surface-v234.js','moss-learning-plan-approval-button-v1.js'])
     assert.ok(result.resources.some(resource=>resource.endsWith('/'+owner)),`missing real owner ${owner}`);
   assert.equal(result.inference,1,'one selected-provider request creates the draft; review and approval need no second generation');
   assert.equal(result.requestAuthorityReady,true,'registry readiness must agree with the loaded request authority version');
-  assert.equal(result.requestAuthorityVersion,'1.2.33-local-litert-request-authority-v1-configured-provider');
+  assert.equal(result.requestAuthorityVersion,'1.2.34-local-litert-request-authority-v1-idempotent-tracker');
   assert.equal(result.state.busy,false);
   assert.equal(result.state.selectedLocalModel,'','a stale downloaded choice must not override Ollama');
   assert.equal(result.actions.length,1);assert.equal(result.actions[0].state,'review');

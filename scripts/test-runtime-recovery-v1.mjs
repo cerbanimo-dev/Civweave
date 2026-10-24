@@ -320,7 +320,7 @@ test('selected Ollama guide messages reach shared capabilities without downloade
   await assert.rejects(respond({text:'Do not submit',signal:controller.signal}),/QA stop/);
   assert.equal(scope.assistantLoaded,before,'A cancelled request must not initialize or start a model.');
   assert.match(chat,/await globalThis\.CivweaveFamilyAILoaderV105\.respondOllama\(/,'Canonical floating guide must use the shared Ollama guide entry.');
-  assert.match(parent,/family-ai-loader-v105\.js\?v=1\.0\.144-local-settings-pulse/,'Persistent desktop chat must load its provider dependency in the parent context.');
+  assert.match(parent,/family-ai-loader-v105\.js\?v=1\.0\.145-rook-material-revisions/,'Persistent desktop chat must load its provider dependency in the parent context.');
   assert.match(campus,/await loader\.respondOllama\(/,'Working Campus must use the same Ollama request path.');
   assert.match(campus,/const localSelection=ollamaRequested\?\{active:false\}:selectedLocalModel\(\)/,'A saved browser model must not override the selected Ollama route.');
   const chatSubmit=chat.slice(chat.indexOf('async function submitActive('),chat.indexOf('function switchGuide('));

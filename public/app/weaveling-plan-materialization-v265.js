@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.1-weaveling-plan-materialization-v265-ai-only-quarantine';
+const VERSION='1.1.2-weaveling-plan-materialization-v265-preserve-campus-intention';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const QUARANTINE_KEY='civweave.quest-quarantine.v1';
@@ -70,11 +70,11 @@ function reviewItemFor(plan){
   const rows=parse(localStorage.getItem(INTENTIONS_KEY),[]);
   return Array.isArray(rows)?rows.find(row=>row?.id===plan?.id||row?.plan?.id===plan?.id)||null:null;
 }
-function materialize(plan,{source='weaveling-ai-structured-v265'}={}){
+function materialize(plan,{source='weaveling-ai-structured-v265',preserveCampusIntention=false}={}){
   if(!aiAuthoredPlan(plan))return rejectUnauthorized(plan,source);
   const current=parse(localStorage.getItem(WORKING_KEY),{}),at=now(),saved=clone(plan);
   saved.state='review';saved.updatedAt=at;
-  const next={...current,stage:'review',view:'quest',wish:clean(saved.wish||current.wish,8000),profile:saved.profile&&typeof saved.profile==='object'?clone(saved.profile):current.profile||{},plan:saved,reviewReady:{planId:saved.id,title:clean(saved.title,220)||'Reviewable Quest',at,source,aiGenerated:true},updatedAt:at};
+  const next={...current,stage:'review',view:'quest',wish:preserveCampusIntention?current.wish:clean(saved.wish||current.wish,8000),profile:saved.profile&&typeof saved.profile==='object'?clone(saved.profile):current.profile||{},plan:saved,reviewReady:{planId:saved.id,title:clean(saved.title,220)||'Reviewable Quest',at,source,aiGenerated:true},updatedAt:at};
   try{localStorage.setItem(WORKING_KEY,JSON.stringify(next))}catch{}
   document.documentElement.dataset.civweaveReviewableWeave='ai-ready-v265';
   document.documentElement.dataset.civweaveReviewableWeaveId=saved.id;
