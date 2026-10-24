@@ -2,10 +2,10 @@
 'use strict';
 const ENDPOINT='http://127.0.0.1:47871';
 const MAX_FILE_BYTES=8*1024*1024;
-let connected=false, unregister=null, activeFile=null, token='';
+let connected=false, unregister=null, cadUnregister=null, activeFile=null, cadFile=null, available={}, token='';
 function el(id){return document.getElementById(id);}
 function status(message,good=false){const node=el('wordcraft-status');if(node){node.textContent=message;node.style.color=good?'#a9e6b4':'#f2ce7e';}}
-function revoke(){connected=false;if(unregister){unregister();unregister=null;}}
+function revoke(){connected=false;available={};if(unregister){unregister();unregister=null;}if(cadUnregister){cadUnregister();cadUnregister=null;}}
 async function bridge(path,options={}){
   if(!token)throw new Error('Enter the token printed by your local bridge.');
   let response;
@@ -39,7 +39,7 @@ function download(name,mime,bytes){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function perform(action){
-  if(!connected)throw new Error('Connect to WordCraft first.');
+  if(!connected||!available.wordcraft)throw new Error('Connect to an installed WordCraft CLI first.');
   if(!activeFile)throw new Error('Select the document to process.');
   if(activeFile.size>MAX_FILE_BYTES)throw new Error('WordCraft MVP accepts files up to 8 MiB.');
   const {result}=await bridge('/v1/wordcraft',{method:'POST',body:JSON.stringify({
@@ -55,30 +55,67 @@ async function perform(action){
   el('wordcraft-output').textContent=text.slice(0,24000);
   return {schema:result.schema,action,text:text.slice(0,100000)};
 }
+async function performCadcraft(action){
+  if(!connected||!available.cadcraft)throw new Error('Connect to an installed CADCraft CLI first.');
+  if(!cadFile)throw new Error('Select a DXF or DWG drawing to process.');
+  if(cadFile.size>MAX_FILE_BYTES)throw new Error('CADCraft MVP accepts drawings up to 8 MiB.');
+  const {result}=await bridge('/v1/cadcraft',{method:'POST',body:JSON.stringify({
+    action,name:cadFile.name,contentBase64:inputBytesToBase64(await cadFile.arrayBuffer())
+  })});
+  if(action==='svg'){
+    if(!result?.contentBase64||result.mime!=='image/svg+xml')throw new Error('CADCraft did not return a valid SVG response.');
+    download(result.filename||'drawing.svg','image/svg+xml',decodeBase64(result.contentBase64));
+    return {schema:result.schema,action,filename:result.filename,downloaded:true};
+  }
+  if(typeof result?.details!=='string')throw new Error('CADCraft did not return drawing information.');
+  el('cadcraft-output').textContent=result.details.slice(0,24000);
+  return{schema:result.schema,action,details:result.details.slice(0,100000)};
+}
 function maybeRegister(){
   if(unregister){unregister();unregister=null;}
-  if(!connected||!activeFile||!globalThis.CivweaveCreatorToolsV1)return;
-  unregister=globalThis.CivweaveCreatorToolsV1.registerEditor('wordcraft',{
-    actions:[
-      {name:'inspect',description:'Inspect the currently selected document with installed WordCraft CLI; requires explicit user approval.'},
-      {name:'text',description:'Extract text from the currently selected document; requires explicit user approval.'},
-      {name:'pdf',description:'Export a PDF copy of the currently selected document; requires explicit user approval.'}
-    ],
-    execute:async(action,args,actor)=>{
-      const identity=String(actor?.id||'unknown AI').slice(0,120);
-      if(!window.confirm(identity+' requests WordCraft '+action+' on your selected file "'+activeFile.name+'". Allow this operation?')){
-        throw new Error('WordCraft operation was not approved by the user.');
+  if(cadUnregister){cadUnregister();cadUnregister=null;}
+  if(!connected||!globalThis.CivweaveCreatorToolsV1)return;
+  if(available.wordcraft&&activeFile){
+    unregister=globalThis.CivweaveCreatorToolsV1.registerEditor('wordcraft',{
+      actions:[
+        {name:'inspect',description:'Inspect the currently selected document with installed WordCraft CLI; requires explicit user approval.'},
+        {name:'text',description:'Extract text from the currently selected document; requires explicit user approval.'},
+        {name:'pdf',description:'Export a PDF copy of the currently selected document; requires explicit user approval.'}
+      ],
+      execute:async(action,args,actor)=>{
+        const identity=String(actor?.id||'unknown AI').slice(0,120);
+        if(!window.confirm(identity+' requests WordCraft '+action+' on your selected file "'+activeFile.name+'". Allow this operation?')){
+          throw new Error('WordCraft operation was not approved by the user.');
+        }
+        return await perform(action);
       }
-      return await perform(action);
-    }
-  });
+    });
+  }
+  if(available.cadcraft&&cadFile){
+    cadUnregister=globalThis.CivweaveCreatorToolsV1.registerEditor('cadcraft',{
+      actions:[
+        {name:'info',description:'Inspect the selected DXF or DWG drawing with CADCraft CLI; requires explicit approval.'},
+        {name:'svg',description:'Export the selected DXF or DWG drawing to a new SVG; requires explicit approval.'}
+      ],
+      execute:async(action,args,actor)=>{
+        const identity=String(actor?.id||'unknown AI').slice(0,120);
+        if(!window.confirm(identity+' requests CADCraft '+action+' on your selected drawing "'+cadFile.name+'". Allow?')){
+          throw new Error('CADCraft operation was not approved by the user.');
+        }
+        return await performCadcraft(action);
+      }
+    });
+  }
 }
 async function connect(){
   revoke();
   token=el('wordcraft-token').value.trim();
   const body=await bridge('/v1/capabilities');
-  if(!body.wordcraft?.installed)throw new Error('Bridge is running, but wordcraft-cli is not installed or not available on its PATH.');
-  connected=true;maybeRegister();status('Connected locally. Select a file and an action.',true);
+  available={wordcraft:Boolean(body.wordcraft?.installed),cadcraft:Boolean(body.cadcraft?.installed)};
+  if(!available.wordcraft&&!available.cadcraft)throw new Error('Bridge is running, but neither wordcraft-cli nor cadcraft-cli is available on its PATH.');
+  connected=true;maybeRegister();
+  status('Local bridge connected. WordCraft '+(available.wordcraft?'available':'not installed')+'; CADCraft '+(available.cadcraft?'available':'not installed')+'.',true);
+  if(el('cadcraft-status'))el('cadcraft-status').textContent=available.cadcraft?'CADCraft ready. Select a drawing.':'Install cadcraft-cli to use CAD drawing tools.';
 }
 function boot(){
   if(!el('wordcraft-connect'))return;
@@ -87,6 +124,17 @@ function boot(){
   el('wordcraft-file').addEventListener('change',event=>{
     activeFile=event.target.files?.[0]||null;maybeRegister();
     if(activeFile)status('Selected '+activeFile.name+' ('+activeFile.size+' bytes). '+(connected?'Ready.':'Connect the bridge first.'),connected);
+  });
+  if(el('cadcraft-file'))el('cadcraft-file').addEventListener('change',event=>{
+    cadFile=event.target.files?.[0]||null;maybeRegister();
+    if(cadFile)el('cadcraft-status').textContent='Selected '+cadFile.name+' ('+cadFile.size+' bytes).';
+  });
+  if(el('cadcraft-run'))el('cadcraft-run').addEventListener('click',async()=>{
+    const action=el('cadcraft-action').value;
+    el('cadcraft-run').disabled=true;
+    try{await performCadcraft(action);el('cadcraft-status').textContent=action==='svg'?'SVG drawing downloaded.':'Drawing inspected.';}
+    catch(error){el('cadcraft-status').textContent=error.message;}
+    finally{el('cadcraft-run').disabled=false;}
   });
   el('wordcraft-run').addEventListener('click',async()=>{
     const action=el('wordcraft-action').value;
