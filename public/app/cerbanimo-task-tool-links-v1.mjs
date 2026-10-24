@@ -1,5 +1,5 @@
-const TOOL_ORDER=Object.freeze(['text','audio','video','wordcraft','cadcraft']);
-const TOOL_LABELS=Object.freeze({text:'Open Text Creator',audio:'Open Audio Creator',video:'Open Video Creator',wordcraft:'Process Document',cadcraft:'Inspect / Export CAD Drawing'});
+const TOOL_ORDER=Object.freeze(['text','audio','video','wordcraft','cadcraft','pdfcraft']);
+const TOOL_LABELS=Object.freeze({text:'Open Text Creator',audio:'Open Audio Creator',video:'Open Video Creator',wordcraft:'Process Document',cadcraft:'Inspect / Export CAD Drawing',pdfcraft:'Inspect / Combine PDFs'});
 const PRODUCE_RE=/\b(create|make|produce|draft|write|compose|edit|revise|rewrite|record|render|export|publish|deliver|assemble|cut|mix|master|narrate|film|shoot|capture|author)\b/i;
 const TEXT_VERB_RE=/\b(write|draft|rewrite|author)\b/i;
 const AUDIO_VERB_RE=/\b(mix|master|narrate)\b/i;
@@ -13,6 +13,8 @@ const DOC_INPUT_RE=/\b(docx|odt|rtf|wordcraft|word document|word file|office doc
 const CAD_INPUT_RE=/\b(cadcraft|\.dxf|\.dwg|dxf|dwg|cad drawing|technical drawing|blueprint|floor plan)\b/i;
 const WORD_ACTION_RE=/\b(inspect|extract|convert|export|process|read|summarize|summarise|review|check)\b/i;
 const CAD_ACTION_RE=/\b(inspect|convert|export|review|check|analyze|analyse|measure|read|summarize|summarise)\b/i;
+const PDF_INPUT_RE=/\b(pdfcraft|pdfs?|portable document format)\b/i;
+const PDF_ACTION_RE=/\b(inspect|extract|combine|merge|read|review|check|analyze|analyse|summarize|summarise)\b/i;
 const clean=(value,max=2400)=>String(value??'').trim().slice(0,max);
 
 function taskCorpus(task={}){
@@ -33,7 +35,7 @@ export function toolHref(kind,questId='',taskId=''){
   const params=new URLSearchParams({tool:kind}),quest=clean(questId,180),task=clean(taskId,180);
   if(quest)params.set('quest',quest);
   if(task)params.set('task',task);
-  const path=(kind==='wordcraft'||kind==='cadcraft')?'/creator-suite/tools.html':'/creator-suite/';
+  const path=(kind==='wordcraft'||kind==='cadcraft'||kind==='pdfcraft')?'/creator-suite/tools.html':'/creator-suite/';
   return `${path}?${params.toString()}`;
 }
 
@@ -45,7 +47,8 @@ export function toolsForTask(quest={},task={}){
     audio:AUDIO_VERB_RE.test(corpus),
     video:VIDEO_VERB_RE.test(corpus),
     wordcraft:DOC_INPUT_RE.test(corpus)&&WORD_ACTION_RE.test(corpus),
-    cadcraft:CAD_INPUT_RE.test(corpus)&&CAD_ACTION_RE.test(corpus)
+    cadcraft:CAD_INPUT_RE.test(corpus)&&CAD_ACTION_RE.test(corpus),
+    pdfcraft:PDF_INPUT_RE.test(corpus)&&PDF_ACTION_RE.test(corpus)
   });
   for(const kind of TOOL_ORDER){
     if(explicit.has(kind)||implied[kind]||(hasProduceVerb&&TOOL_PATTERNS[kind]?.test(corpus)))kinds.push(kind);
