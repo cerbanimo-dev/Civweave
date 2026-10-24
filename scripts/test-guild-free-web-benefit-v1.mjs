@@ -28,8 +28,8 @@ const nodeId='guild-free-benefit-test',sessionSecret='node-session-test-secret-a
 const signSession=(userId,seatClass)=>{
   const domain='civweave.capacity-session.v1';
   const encoded=Buffer.from(JSON.stringify({v:1,nodeId,userId,seatClass,exp:Math.floor(Date.now()/1000)+3600})).toString('base64url');
-  const key=createHash('sha256').update(domain+'\\0'+sessionSecret).digest();
-  const signature=createHmac('sha256',key).update(domain+'\\n'+encoded).digest('base64url');
+  const key=createHash('sha256').update(domain+String.fromCharCode(0)+sessionSecret).digest();
+  const signature=createHmac('sha256',key).update(domain+String.fromCharCode(10)+encoded).digest('base64url');
   return encoded+'.'+signature;
 };
 let calls=0;
