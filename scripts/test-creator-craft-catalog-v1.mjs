@@ -28,12 +28,14 @@ test('catalog route is linked, optional-packaged and offline-cache declared',()=
   const setup=read('setup.html');
   assert.match(setup,/WordCraft official releases/);
   assert.match(setup,/CADCraft official releases/);
+  assert.match(setup,/PdfCraft official releases/);
   assert.match(setup,/Phone-to-PC execution requires a separately authenticated HTTPS host-node integration/);
   assert.match(read('tools.html'),/href="\/creator-suite\/setup.html"/);
   assert.ok(manifest.assets.includes('/creator-suite/setup.html'));
     const toolPage=read('tools.html');
   assert.match(toolPage,/id="cadcraft-file"/);
   assert.match(toolPage,/id="cadcraft-run"/);
+  assert.match(toolPage,/id="pdfcraft-files"/);
   assert.match(toolPage,/id="wordcraft-token"/);
   const sw=read('service-worker.js');
   assert.ok(sw.includes('/creator-suite/setup.html'));
