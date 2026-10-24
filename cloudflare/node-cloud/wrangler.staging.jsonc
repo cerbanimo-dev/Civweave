@@ -26,6 +26,10 @@
       "simple": { "limit": 8, "period": 60 }
     }
   ],
+  "browser": {
+    "binding": "BROWSER",
+    "remote": true
+  },
   "durable_objects": {
     "bindings": [
       { "name": "NODES", "class_name": "CivweaveCloudNode" },
