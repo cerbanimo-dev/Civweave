@@ -30,10 +30,16 @@ assert.deepEqual(kinds({title:'Research CAD drafting tools'}),[],'research tasks
 assert.deepEqual(kinds({title:'Make a spreadsheet budget'}),[],'GridCraft integration is cataloged but not executable');
 assert.deepEqual(kinds({title:'Review notes'}),[],'unrelated notes should not trigger document ingestion');
 assert.deepEqual(kinds({title:'Create a CAD poster',toolHints:['cadcraft']}),['cadcraft'],'explicit tool hints remain supported even when the automatic heuristic is conservative');
+assert.deepEqual(kinds({title:'Inspect the PDF before submission'}),['pdfcraft'],'PDF inspection needs the PdfCraft action');
+assert.deepEqual(kinds({title:'Combine two PDF documents into one'}),['pdfcraft'],'PDF merging routes to the working PDF connector');
+assert.deepEqual(kinds({title:'Sign this PDF digitally'}),[],'there is no signature tool in the initial PdfCraft bridge');
+assert.deepEqual(kinds({title:'Discuss how PDFs work'}),[],'passive PDF discussion should not launch a file processor');
 const officeHref=toolHref('wordcraft',quest.id,'task:private-7');
 assert.match(officeHref,/^\/creator-suite\/tools\.html\?tool=wordcraft/);
 assert.match(officeHref,/quest=quest%3Aprivate-42/);
 assert.equal(officeHref.includes('proposal'),false,'document content must not be placed into a cross-page URL');
+const pdfHref=toolHref('pdfcraft',quest.id,'task:private-7');
+assert.match(pdfHref,/^\/creator-suite\/tools\.html\?tool=pdfcraft/);
 const cadHref=toolHref('cadcraft',quest.id,'task:private-7');
 assert.match(cadHref,/^\/creator-suite\/tools\.html\?tool=cadcraft/);
 assert.throws(()=>toolHref('gridcraft',quest.id,'task:private-7'),/Unsupported Creator Suite task tool/,'catalog-only GridCraft must not become an executable task link');
@@ -68,6 +74,7 @@ assert.match(linkSource,/data-cq-task-tool/,'links must be attached to the exist
 const craftPage=await fs.readFile(new URL('../public/creator-suite/tools.html',import.meta.url),'utf8');
 assert.match(craftPage,/id="wordcraft-panel"/);
 assert.match(craftPage,/id="cadcraft-panel"/);
+assert.match(craftPage,/id="pdfcraft-panel"/);
 const craftRoute=await fs.readFile(new URL('../public/creator-suite/craft-tools-v1.js',import.meta.url),'utf8');
 assert.match(craftRoute,/URLSearchParams\(location\.search\)/);
 assert.match(craftRoute,/panel\.focus\(/);
