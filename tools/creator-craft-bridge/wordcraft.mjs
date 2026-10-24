@@ -9,6 +9,17 @@ const MAX_STDOUT_BYTES=2*1024*1024;
 const ACTIONS=new Set(['inspect','text','pdf']);
 const EXTENSIONS=new Set(['.docx','.odt','.rtf','.md','.txt']);
 
+function validBase64(value){
+  if(value.length%4!==0)return false;
+  let padding=0;
+  for(let i=0;i<value.length;i++){
+    const code=value.charCodeAt(i);
+    if(code===61){padding++;if(i<value.length-2||padding>2)return false;continue;}
+    if(padding>0)return false;
+    if(!((code>=65&&code<=90)||(code>=97&&code<=122)||(code>=48&&code<=57)||code===43||code===47))return false;
+  }
+  return true;
+}
 export class BridgeError extends Error {
   constructor(message,code='BRIDGE_ERROR',status=400){
     super(message);this.name='BridgeError';this.code=code;this.status=status;
@@ -24,7 +35,7 @@ function validateRequest(request){
   const ext=name.slice(name.lastIndexOf('.')).toLowerCase();
   if(!EXTENSIONS.has(ext))throw new BridgeError('Unsupported WordCraft input format.','UNSUPPORTED_FORMAT');
   if(typeof contentBase64!=='string'||contentBase64.length===0||contentBase64.length>Math.ceil(MAX_INPUT_BYTES/3)*4+4||
-    !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(contentBase64)){
+    !validBase64(contentBase64)){
     throw new BridgeError('Invalid or oversized base64 document.','INVALID_CONTENT',413);
   }
   const bytes=Buffer.from(contentBase64,'base64');
