@@ -50,3 +50,9 @@ Never confuse `CivweaveCreatorToolsV1.registerEditor` with tool authorization. R
 - Untrusted model output cannot write arbitrary paths or exceed document ownership rights.
 - Verify real DOCX/XLSX/PPTX/PDF round trips and mobile browser performance before release.
 - No invented tool execution success: receipt and UI show whether the operation was simulated, drafted, verified or committed.
+
+## WordCraft first executable adapter (PR #861 follow-up)
+- Local Node bridge: tools/creator-craft-bridge/server.mjs; bounded WordCraft CLI operations inspect, text, PDF conversion.
+- Setup: tools/creator-craft-bridge/README.md. Browser consent UI: /creator-suite/tools.html.
+- Requires independently installed WordCraft CLI and trusted exact origin configuration. It does not automatically connect a guild or AI model router.
+- Native CLI and HTTP tests use a stub executable. Real upstream CLI and browser/PNA tests remain manual acceptance gates.
