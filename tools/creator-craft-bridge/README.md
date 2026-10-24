@@ -1,4 +1,4 @@
-# Civweave WordCraft local bridge (experimental)
+# Civweave WordCraft + CADCraft local bridge (experimental)
 
 This is a **separate opt-in companion process** that connects the Civweave Creator Suite to a locally installed [WordCraft CLI](https://github.com/storytold/wordcraft). The bridge does not bundle the CLI, start a model, install system packages or connect to hosted ArtCraft.
 
@@ -11,7 +11,9 @@ The first, intentionally bounded adapter accepts a document chosen in the browse
 
 Accepted source extensions: DOCX, ODT, RTF, Markdown, TXT. Maximum source size: 8 MiB; max converted PDF: 12 MiB. The input is held only in a per-request temporary directory, cleaned up after processing. Originals are never overwritten and there is no network upload by the bridge itself.
 
-**Installations are not automatic:** download and install a trusted WordCraft CLI release from its upstream repository, or build wordcraft-cli from source. Ensure 'wordcraft-cli --version' works in the terminal running Civweave (or configure WORDCRAFT_CLI to its exact executable path). Validate downloaded binaries against upstream release checksums.
+The same bridge supports CADCraft for user-selected DXF/DWG drawings: cadcraft-cli info [temporary drawing] returns drawing details, and cadcraft-cli convert [temporary drawing] [temporary result.svg] exports a separate SVG. The CAD commands are also available behind the same per-request token and AI confirmation requirements.
+
+**Installations are not automatic:** download and install a trusted WordCraft CLI release from its upstream repository, or build wordcraft-cli from source. For CAD, install the upstream [CADCraft CLI](https://github.com/storytold/cadcraft) and check cadcraft-cli --version; you can set CADCRAFT_CLI to its executable. Ensure 'wordcraft-cli --version' works in the terminal running Civweave (or configure WORDCRAFT_CLI to its exact executable path). Validate downloaded binaries against upstream release checksums.
 
 ## Launch
 
@@ -48,9 +50,10 @@ For locally served Civweave, http://localhost:8788 and http://127.0.0.1:8788 are
 node --check tools/creator-craft-bridge/server.mjs
 node --check tools/creator-craft-bridge/wordcraft.mjs
 node --test scripts/test-creator-wordcraft-bridge-v1.mjs
+node --test scripts/test-creator-cadcraft-bridge-v1.mjs
 ~~~
 
-The test uses a tiny **fake CLI binary** to verify process execution, argument boundaries, API access checks and returned artifacts. It does *not* assert that the real WordCraft has passed a browser or document-fidelity round-trip test.
+The tests use a tiny **fake CLI binary** to verify process execution, argument boundaries, API access checks and returned artifacts. It does *not* assert that the real WordCraft has passed a browser or document-fidelity round-trip test.
 
 ## Next work
 
