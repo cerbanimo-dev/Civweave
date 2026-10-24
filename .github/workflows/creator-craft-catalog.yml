@@ -22,3 +22,6 @@ jobs:
           node --test scripts/test-creator-wordcraft-bridge-v1.mjs
           node --check tools/creator-craft-bridge/cadcraft.mjs
           node --test scripts/test-creator-cadcraft-bridge-v1.mjs
+          node --check tools/creator-craft-bridge/pdfcraft.mjs
+          node --test scripts/test-creator-pdfcraft-bridge-v1.mjs
+          node --test scripts/test-creator-ai-tools-v1.mjs
