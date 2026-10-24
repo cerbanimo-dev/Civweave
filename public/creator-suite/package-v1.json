@@ -1,6 +1,6 @@
 {
   "schema": "civweave.creator-suite-package.v1",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "name": "Civweave Creator Suite",
   "scope": "/creator-suite/",
   "entry": "/creator-suite/index.html",
@@ -46,6 +46,7 @@
     "/creator-suite/video-editor-v1.js",
     "/creator-suite/tools.html",
     "/creator-suite/shared/craft-catalog-v1.js",
-    "/creator-suite/craft-tools-v1.js"
+    "/creator-suite/craft-tools-v1.js",
+    "/creator-suite/wordcraft-connector-v1.js"
   ]
 }
