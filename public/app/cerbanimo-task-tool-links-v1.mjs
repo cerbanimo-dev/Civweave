@@ -1,5 +1,5 @@
-const TOOL_ORDER=Object.freeze(['text','audio','video']);
-const TOOL_LABELS=Object.freeze({text:'Open Text Creator',audio:'Open Audio Creator',video:'Open Video Creator'});
+const TOOL_ORDER=Object.freeze(['text','audio','video','wordcraft','cadcraft']);
+const TOOL_LABELS=Object.freeze({text:'Open Text Creator',audio:'Open Audio Creator',video:'Open Video Creator',wordcraft:'Process Document',cadcraft:'Inspect / Export CAD Drawing'});
 const PRODUCE_RE=/\b(create|make|produce|draft|write|compose|edit|revise|rewrite|record|render|export|publish|deliver|assemble|cut|mix|master|narrate|film|shoot|capture|author)\b/i;
 const TEXT_VERB_RE=/\b(write|draft|rewrite|author)\b/i;
 const AUDIO_VERB_RE=/\b(mix|master|narrate)\b/i;
@@ -9,6 +9,10 @@ const TOOL_PATTERNS=Object.freeze({
   audio:/\b(audio|podcast|voice[- ]?over|voice memo|narration|recording|song|music|track|sound|speech|mix)\b/i,
   video:/\b(video|film|reel|short|clip|footage|screencast|screen recording|movie)\b/i,
 });
+const DOC_INPUT_RE=/\b(docx|odt|rtf|wordcraft|word document|word file|office document)\b/i;
+const CAD_INPUT_RE=/\b(cadcraft|\.dxf|\.dwg|dxf|dwg|cad drawing|technical drawing|blueprint|floor plan)\b/i;
+const WORD_ACTION_RE=/\b(inspect|extract|convert|export|process|read|summarize|summarise|review|check)\b/i;
+const CAD_ACTION_RE=/\b(inspect|convert|export|review|check|analyze|analyse|measure|read|summarize|summarise)\b/i;
 const clean=(value,max=2400)=>String(value??'').trim().slice(0,max);
 
 function taskCorpus(task={}){
@@ -29,15 +33,22 @@ export function toolHref(kind,questId='',taskId=''){
   const params=new URLSearchParams({tool:kind}),quest=clean(questId,180),task=clean(taskId,180);
   if(quest)params.set('quest',quest);
   if(task)params.set('task',task);
-  return `/creator-suite/?${params.toString()}`;
+  const path=(kind==='wordcraft'||kind==='cadcraft')?'/creator-suite/tools.html':'/creator-suite/';
+  return `${path}?${params.toString()}`;
 }
 
 export function toolsForTask(quest={},task={}){
   if(!task?.id||task.status==='completed')return[];
   const corpus=taskCorpus(task),explicit=explicitKinds(task),hasProduceVerb=PRODUCE_RE.test(corpus),kinds=[];
-  const implied=Object.freeze({text:TEXT_VERB_RE.test(corpus),audio:AUDIO_VERB_RE.test(corpus),video:VIDEO_VERB_RE.test(corpus)});
+  const implied=Object.freeze({
+    text:TEXT_VERB_RE.test(corpus),
+    audio:AUDIO_VERB_RE.test(corpus),
+    video:VIDEO_VERB_RE.test(corpus),
+    wordcraft:DOC_INPUT_RE.test(corpus)&&WORD_ACTION_RE.test(corpus),
+    cadcraft:CAD_INPUT_RE.test(corpus)&&CAD_ACTION_RE.test(corpus)
+  });
   for(const kind of TOOL_ORDER){
-    if(explicit.has(kind)||implied[kind]||(hasProduceVerb&&TOOL_PATTERNS[kind].test(corpus)))kinds.push(kind);
+    if(explicit.has(kind)||implied[kind]||(hasProduceVerb&&TOOL_PATTERNS[kind]?.test(corpus)))kinds.push(kind);
   }
   return kinds.map(kind=>Object.freeze({kind,label:TOOL_LABELS[kind],href:toolHref(kind,quest?.id,task.id)}));
 }
