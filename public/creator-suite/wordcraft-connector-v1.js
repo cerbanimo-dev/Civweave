@@ -5,7 +5,7 @@ const MAX_FILE_BYTES=8*1024*1024;
 let connected=false, unregister=null, cadUnregister=null, activeFile=null, cadFile=null, available={}, token='';
 function el(id){return document.getElementById(id);}
 function status(message,good=false){const node=el('wordcraft-status');if(node){node.textContent=message;node.style.color=good?'#a9e6b4':'#f2ce7e';}}
-function revoke(){connected=false;available={};if(unregister){unregister();unregister=null;}if(cadUnregister){cadUnregister();cadUnregister=null;}}
+function revoke(){connected=false;available={};if(unregister){unregister();unregister=null;}if(cadUnregister){cadUnregister();cadUnregister=null;}window.dispatchEvent(new CustomEvent('civweave:craft-connection'));}
 async function bridge(path,options={}){
   if(!token)throw new Error('Enter the token printed by your local bridge.');
   let response;
@@ -106,6 +106,7 @@ function maybeRegister(){
       }
     });
   }
+  window.dispatchEvent(new CustomEvent('civweave:craft-connection'));
 }
 async function connect(){
   revoke();
