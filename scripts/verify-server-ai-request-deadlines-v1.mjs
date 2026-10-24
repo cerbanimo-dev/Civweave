@@ -28,7 +28,7 @@ assert.match(router,/let node=null;\s*try\{node=await serverLocal\(next,trace\)\
 assert.match(router,/route:'server-local',status:'failed'/);
 assert.match(router,/const edge=await cloudflare\(next,trace\)/);
 
-assert.match(livingSchoolBudget,/3\.0\.1-living-school-generation-budget-v3-design-transport-deadline/);
+assert.match(livingSchoolBudget,/3\.0\.2-living-school-generation-budget-v3-bounded-ai-assessments/);
 assert.match(livingSchoolBudget,/const DESIGN_TIMEOUT_MS=360000/);
 assert.match(livingSchoolBudget,/const DESIGN_MAX_TOKENS=16384/);
 assert.match(livingSchoolBudget,/config\.timeoutMs=Math\.max\(Number\(config\.timeoutMs\)\|\|0,DESIGN_TIMEOUT_MS\)/);

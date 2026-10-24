@@ -1,0 +1,34 @@
+name: Guide Artifact Lifecycle
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/cerbanimo-quest-engine-v144.js'
+      - 'public/app/cerbanimo-ai-validator-v159.js'
+      - 'public/app/guide-contracts-v141.js'
+      - 'scripts/test-guide-artifact-lifecycle-v1.mjs'
+      - '.github/workflows/guide-artifact-lifecycle.yml'
+  push:
+    branches: [main, staging]
+    paths:
+      - 'public/app/cerbanimo-quest-engine-v144.js'
+      - 'public/app/cerbanimo-ai-validator-v159.js'
+      - 'public/app/guide-contracts-v141.js'
+      - 'scripts/test-guide-artifact-lifecycle-v1.mjs'
+      - '.github/workflows/guide-artifact-lifecycle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify guide artifact creation, revision, approval, completion, and reopening
+        run: node --test scripts/test-guide-artifact-lifecycle-v1.mjs

@@ -7,8 +7,14 @@ on:
       - 'public/app/guide-provider-policy-v1.js'
       - 'public/app/guide-forward-failure-policy-v1.js'
       - 'public/app/weaveling-memory-bridge-v191.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
       - 'scripts/test-local-api-runtime-v1.mjs'
       - 'scripts/test-assistant-extension-startup-v1.mjs'
+      - 'scripts/test-chat-stream-finalization-v1.mjs'
+      - 'scripts/test-guide-http-capability-options-v1.mjs'
       - '.github/workflows/verify-local-api-runtime-v1.yml'
   push:
     branches: [staging, main]
@@ -17,8 +23,14 @@ on:
       - 'public/app/guide-provider-policy-v1.js'
       - 'public/app/guide-forward-failure-policy-v1.js'
       - 'public/app/weaveling-memory-bridge-v191.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
       - 'scripts/test-local-api-runtime-v1.mjs'
       - 'scripts/test-assistant-extension-startup-v1.mjs'
+      - 'scripts/test-chat-stream-finalization-v1.mjs'
+      - 'scripts/test-guide-http-capability-options-v1.mjs'
       - '.github/workflows/verify-local-api-runtime-v1.yml'
 
 permissions:
@@ -33,4 +45,4 @@ jobs:
         with:
           node-version: '22'
       - run: node --check public/app/shared/civweave-model-runtime.js
-      - run: node --test scripts/test-local-api-runtime-v1.mjs scripts/test-assistant-extension-startup-v1.mjs
+      - run: node --test scripts/test-local-api-runtime-v1.mjs scripts/test-assistant-extension-startup-v1.mjs scripts/test-chat-stream-finalization-v1.mjs scripts/test-guide-http-capability-options-v1.mjs

@@ -8,6 +8,14 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/moss-learning-plan-approval-button-v1.js'
+      - 'public/app/living-school-generation-budget-v3.js'
+      - 'public/app/living-school-generation-guard-v262.mjs'
+      - 'public/app/living-school-quiz-contract-guard-v263.mjs'
+      - 'public/app/living-school-cleanroom-actions-v243.mjs'
+      - 'public/app/living-school-grounded-compiler-v336.js'
+      - 'public/app/living-school-assessment-curator-v337.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs'
+      - 'scripts/test-moss-assessment-materialization-v1.mjs'
       - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
       - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
       - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
@@ -19,6 +27,14 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/unified-chat-system-v1.js'
       - 'public/app/moss-learning-plan-approval-button-v1.js'
+      - 'public/app/living-school-generation-budget-v3.js'
+      - 'public/app/living-school-generation-guard-v262.mjs'
+      - 'public/app/living-school-quiz-contract-guard-v263.mjs'
+      - 'public/app/living-school-cleanroom-actions-v243.mjs'
+      - 'public/app/living-school-grounded-compiler-v336.js'
+      - 'public/app/living-school-assessment-curator-v337.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs'
+      - 'scripts/test-moss-assessment-materialization-v1.mjs'
       - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
       - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
       - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
@@ -51,3 +67,5 @@ jobs:
         run: node scripts/verify-moss-learning-journey-bridge-v1.mjs
       - name: Verify Moss direct approval button materialization
         run: node scripts/verify-moss-learning-plan-approval-button-v1.mjs
+      - name: Verify genuine AI assessment materialization and bounded failure
+        run: node scripts/test-moss-assessment-materialization-v1.mjs

@@ -134,7 +134,7 @@ function normalizeSupplementalQuestion(item,moduleId,index){
   if(type==='short-answer'&&!rubric.length)return null;
   return{
     id:clean(item?.id,120)||`${moduleId}-ai-supplement-${index+1}`,
-    type,prompt,options,answer,
+    type,prompt,options,answer,provenance:'ai-generated',
     explanation:clean(item?.explanation,1800),
     concepts:(Array.isArray(item?.concepts)?item.concepts:[]).map(value=>clean(value,120)).filter(Boolean).slice(0,6),
     rubric,minWords:Math.max(8,Math.min(500,Number(item?.minWords||20)||20)),maxWords:Math.max(20,Math.min(1200,Number(item?.maxWords||280)||280))

@@ -2,7 +2,7 @@
 'use strict';
 if(globalThis.CivweaveLudHumanToolsV1)return;
 const VERSION='1.1.0-custom-fields';
-const CERBANIMO='/app/cerbanimo-quest-engine-v144.js?v=lud-human-tools-v1';
+const CERBANIMO='/app/cerbanimo-quest-engine-v144.js?v=quest-engine-r29-review-lifecycle';
 const MESH='/app/local-object-mesh-v146.js?v=lud-human-tools-v1';
 const VOTING='/app/proposal-voting-gate-v2.js?v=lud-human-tools-v1';
 const LIVING_KEY='civweave.living-school.cabinet.v151';

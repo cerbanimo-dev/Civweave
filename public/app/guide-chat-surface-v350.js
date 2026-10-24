@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.187-guide-chat-surface-v350-ollama-direct';
+const VERSION='1.0.188-guide-chat-surface-v350-stable-stream';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -261,12 +261,33 @@ function syncChrome(){
 }
 function render(){
   if(!root)return false;syncChrome();const log=root.querySelector('[data-log]');if(!log)return false;
-  const messages=Array.isArray(readThread(activeSystem).messages)?readThread(activeSystem).messages:[];
-  log.innerHTML=messages.map(row=>{
-    const user=row?.role==='user',who=GUIDE[row?.guide||row?.responderSystem||activeSystem]||guide(activeSystem),meta=[row?.provider,row?.model].filter(Boolean).join(' · '),pending=Boolean(row?.pending);
-    if(user)return`<article class="is-user" data-role="user" data-message-role="user" data-pending="false"><div class="cw350-bubble">${esc(row.text||'')}</div></article>`;
-    return`<article data-message-id="${esc(row.id||'')}" data-role="assistant" data-message-role="assistant" data-pending="${pending?'true':'false'}" class="${pending?'cw-ai-pending':''}"><img src="${esc(who.avatar)}" alt="${esc(who.name)}"><div><div class="cw350-bubble">${esc(row.text||'')}</div>${meta?`<div class="cw350-meta">${esc(meta)}</div>`:''}</div></article>`;
-  }).join('');
+  const thread=readThread(activeSystem),messages=Array.isArray(thread.messages)?thread.messages:[];
+  const existing=new Map([...log.children].map(article=>[article.dataset.messageId,article]));
+  let cursor=log.firstElementChild;
+  messages.forEach((row,index)=>{
+    const id=String(row.id||`history-${activeSystem}-${index}`),user=row?.role==='user',role=user?'user':'assistant';
+    const who=GUIDE[row?.guide||row?.responderSystem||activeSystem]||guide(activeSystem),meta=[row?.provider,row?.model].filter(Boolean).join(' · '),pending=Boolean(row?.pending);
+    let article=existing.get(id);existing.delete(id);
+    if(article&&article.dataset.role!==role){if(article===cursor)cursor=article.nextElementSibling;article.remove();article=null;}
+    if(!article){
+      article=document.createElement('article');
+      if(!user)article.append(document.createElement('img'));
+      const body=document.createElement('div'),bubble=document.createElement('div');bubble.className='cw350-bubble';body.append(bubble);article.append(body);
+    }
+    article.dataset.messageId=id;article.dataset.role=role;article.dataset.messageRole=role;article.dataset.pending=pending?'true':'false';
+    article.classList.toggle('is-user',user);article.classList.toggle('cw-ai-pending',pending);
+    const avatar=article.querySelector('img');
+    if(avatar){if(avatar.getAttribute('src')!==who.avatar)avatar.setAttribute('src',who.avatar);if(avatar.getAttribute('alt')!==who.name)avatar.setAttribute('alt',who.name);}
+    const bubble=article.querySelector('.cw350-bubble'),text=String(row.text||'');
+    // Finalization keeps the streamed bubble and any capability controls in
+    // place. Only write text when the final answer actually differs.
+    if(bubble&&bubble.textContent!==text)bubble.textContent=text;
+    let metadata=article.querySelector('.cw350-meta');
+    if(!user&&meta){if(!metadata){metadata=document.createElement('div');metadata.className='cw350-meta';bubble.parentElement.append(metadata);}if(metadata.textContent!==meta)metadata.textContent=meta;}
+    else metadata?.remove();
+    if(article!==cursor)log.insertBefore(article,cursor);else cursor=cursor.nextElementSibling;
+  });
+  for(const article of existing.values())article.remove();
   if(openState)markSeen(activeSystem);syncSwitcher();
   requestAnimationFrame(()=>{try{log.scrollTop=log.scrollHeight}catch{}});
   globalThis.CivweaveSavedChatUIV295?.render?.(activeSystem);
@@ -280,7 +301,7 @@ function paintNativeStream(system,messageId,text){
   for(const article of rows){
     if(article.dataset.messageId!==messageId)continue;
     const bubble=article.querySelector('.cw350-bubble');
-    if(bubble)bubble.textContent=text;
+    if(bubble&&bubble.textContent!==text)bubble.textContent=text;
     break;
   }
 }
@@ -311,7 +332,13 @@ function actualPlanningModel(result){
   const configured=role?.supportsSelected?.()&&String(result?.provider||'').toLowerCase()==='downloaded-local';
   return known||(configured?role.resolve('deep'):result?.model)||'';
 }
-function explicitHandoffTarget(result,system){const target=clean(result?.handoff?.targetSystem||result?.handoffSystem||result?.response?.handoffSystem,80);return SYSTEMS.includes(target)&&target!==system?target:''}
+function explicitHandoffTarget(result,system){
+  // Offering another guide's capability is not consent to copy private chat
+  // context or start that guide. The passover owner records acceptance first.
+  if(result?.handoff?.kind==='guide-capability-passover'&&!result.handoff.acceptedAt)return'';
+  const target=clean(result?.handoff?.targetSystem||result?.handoffSystem||result?.response?.handoffSystem,80);
+  return SYSTEMS.includes(target)&&target!==system?target:'';
+}
 async function submitActive(text){
   const value=clean(text),system=activeSystem;if(!value||busy||!SYSTEMS.includes(system))return false;
   busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');
@@ -334,7 +361,12 @@ async function submitActive(text){
     const onToken=(delta,accumulated,meta)=>{
       if(meta?.kind==='moss-progress')
         latestText='Moss · '+(meta.phase==='compile'?'Compiling JSON':meta.phase==='repair'?'Repairing plan':meta.phase==='saved'?'Saved for REVIEW':'Drafting outline')+' · '+(Number(meta.characters)||0)+' characters received. Approval required.';
-      else if(typeof accumulated==='string'&&accumulated)latestText=accumulated;
+      else if(typeof accumulated==='string'&&accumulated){
+        const stream=globalThis.CivweaveGuideStreamThinkingV249;
+        latestText=/weaveling-intention-json/i.test(meta?.purpose||'')
+          ?(stream?.visibleWeavelingPlan?.(accumulated)||'Preparing your Quest for review…')
+          :(stream?.splitThinking?.(accumulated)?.answer??accumulated);
+      }
       if(!latestText)return;
       if(Date.now()-lastPaint>=80){if(paintTimer){clearTimeout(paintTimer);paintTimer=null;}paint();}
       else if(!paintTimer)paintTimer=setTimeout(paint,80);
@@ -359,8 +391,8 @@ async function submitActive(text){
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('Shared assistant runtime is not ready.');
       result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:pastHistory});
     }
-    }finally{if(paintTimer)clearTimeout(paintTimer);}
-    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),respondingSystem=SYSTEMS.includes(result?.context?.guide?.system)?result.context.guide.system:system,replacement={role:'assistant',guide:respondingSystem,responderSystem:respondingSystem,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
+    }finally{if(paintTimer){clearTimeout(paintTimer);paint();}}
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),respondingSystem=SYSTEMS.includes(result?.context?.guide?.system)?result.context.guide.system:system,replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:respondingSystem,responderSystem:respondingSystem,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
     if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(respondingSystem,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
   }catch(error){
     // A failed native-server request must NOT issue a second generation or
@@ -368,7 +400,7 @@ async function submitActive(text){
     const fallback=nativeApiRoute()
       ? {text:`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
       : await fallbackReply(system,value);
-    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
   }finally{busy=false;nativeAbortController=null;if(button){button.disabled=false;button.type='submit';button.textContent='Send';}render();emitState()}
   return true;
 }

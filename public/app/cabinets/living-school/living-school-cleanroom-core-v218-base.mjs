@@ -47,7 +47,9 @@ function quizBank(index,title,capability){
 }
 export function isDeterministicQuizQuestion(question,index=-1){
   const id=clean(question?.id,160),provenance=clean(question?.provenance,120).toLowerCase();
-  if(provenance==='deterministic-compiler'||/-fallback-\d+$/i.test(id))return true;
+  if(provenance==='deterministic-compiler')return true;
+  if(provenance==='ai-generated')return false;
+  if(/-fallback-\d+$/i.test(id))return true;
   if(index<0)return false;
   const match=id.match(/^m(\d+)-(.+)$/i);
   return Boolean(match&&Number(match[1])===index+1&&DETERMINISTIC_QUIZ_IDS.has(match[2].toLowerCase()));

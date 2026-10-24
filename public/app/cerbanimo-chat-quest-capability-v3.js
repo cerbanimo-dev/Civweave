@@ -102,7 +102,7 @@ async function ensureQuestEngine(){
   if(globalThis.CivweaveCerbanimoQuestV144?.createQuestFromInput&&globalThis.CivweaveCerbanimoQuestV144?.addQuest)return globalThis.CivweaveCerbanimoQuestV144;
   const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname==='/app/cerbanimo-quest-engine-v144.js'}catch{return false}});
   if(existing){await new Promise(resolve=>{if(globalThis.CivweaveCerbanimoQuestV144)return resolve();existing.addEventListener('load',resolve,{once:true});setTimeout(resolve,1800)});return globalThis.CivweaveCerbanimoQuestV144||null}
-  await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/app/cerbanimo-quest-engine-v144.js?v=quest-engine-r25-frame-bounded';script.async=false;script.onload=resolve;script.onerror=()=>reject(new Error('Cerbanimo Endeavor Engine could not load.'));document.head?.append(script)});
+  await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/app/cerbanimo-quest-engine-v144.js?v=quest-engine-r29-review-lifecycle';script.async=false;script.onload=resolve;script.onerror=()=>reject(new Error('Cerbanimo Endeavor Engine could not load.'));document.head?.append(script)});
   return globalThis.CivweaveCerbanimoQuestV144||null;
 }
 async function createGeminiEndeavor(request={}){

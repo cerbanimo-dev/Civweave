@@ -34,7 +34,7 @@ function install(){
           load('/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output',()=>{
             load('/app/local-provider-authority-v1.js?v=1.0.3-inference-core-first',()=>{
               load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
-                load('/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.0-ai-quest-intent',()=>{
+                load('/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.1-explicit-local-http',()=>{
                   load('/app/local-guide-control-bypass-v1.js?v=1.4.3-mandatory-intake-direct',()=>{
                     load('/app/guide-stream-thinking-v249.js?v=1.0.124-finalization-guard',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.124-guide-stream-thinking-v249-finalization-guard');
                   },()=>globalThis.CivweaveLocalGuideControlBypassV1?.version==='1.4.3-local-guide-control-bypass-v1-mandatory-intake-direct');

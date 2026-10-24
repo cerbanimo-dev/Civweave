@@ -1,16 +1,16 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.140-ollama-chat-no-browser-inference'
+const VERSION='1.0.141-ollama-shared-capabilities'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
 const PREREQUISITES=[
   ['/app/shared/civweave-parity-runtime.js?v=1.0.4',()=>globalThis.CivweaveParity],
-  ['/app/shared/civweave-model-runtime.js?v=1.0.14-long-plan-finish-guard',()=>globalThis.CivweaveModelRuntime],
+  ['/app/shared/civweave-model-runtime.js?v=1.0.15-ollama-token-bound',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
-  ['/app/guide-contracts-v141.js?v=1.0.4',()=>globalThis.CivweaveGuideContractsV141]
+  ['/app/guide-contracts-v141.js?v=1.0.5-artifact-lifecycle',()=>globalThis.CivweaveGuideContractsV141]
 ];
 const VALUE_CORE=[
   ['/app/civweave-basic-value-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueV1],
@@ -25,7 +25,7 @@ const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.117-standard-ai
 const SERVER_AI_ROUTER=['/app/server-ai-router-v301.js?v=1.0.117-guild-handoff',()=>globalThis.CivweaveServerAIRouterV301?.status?.().registered===true];
 const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',()=>globalThis.CivweaveResponseRouterV347];
 const LOCAL_BOOTSTRAP=['/app/local-ai/bootstrap-v266.js?v=1.0.83-v282-inference-health',()=>globalThis.CivweaveLocalAIBootstrapV266];
-const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.6-gguf-selected-primary',()=>globalThis.CivweaveAssistantV141];
+const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.7-stream-options',()=>globalThis.CivweaveAssistantV141];
 const PATCHES=[
   ['/app/deterministic-mode-v175.js?v=deterministic-r1',()=>globalThis.CivweaveDeterministicModeV175],
   ['/app/weaveling-memory-bridge-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryBridgeV191],
@@ -36,6 +36,12 @@ const OPTIONAL=[
   ['/app/local-object-mesh-v146.js?v=1.0.4',()=>globalThis.CivweaveLocalMeshV146],
   ['/app/core-loop-v152.js?v=1.0.4',()=>globalThis.CivweaveCoreLoopV152],
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
+];
+const GUIDE_CAPABILITIES=[
+  ['/app/unified-chat-system-v1.js?v=1.2.9-moss-review-decision-v2',()=>globalThis.CivweaveUnifiedChatSystemV1],
+  ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.0-canonical-endeavors',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
+  ['/app/action-followthrough-v165.js?v=explicit-approval-r1',()=>globalThis.CivweaveActionFollowthroughV165],
+  ['/app/guide-capability-passover-v1.js?v=1.1.3-canonical-prompt',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
 ];
 const LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
 const GUIDE={civweave:{name:'Weaveling',role:'Central mirror and project-memory assistant'},'living-school':{name:'Moss',role:'Learning guide'},cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide'},fellowfare:{name:'Rook',role:'Quartermaster and exchange guide'},anarchadia:{name:'Merlin',role:'Civic, feature-request, and automation guide'}};
@@ -115,29 +121,28 @@ function configuredOllama(){
 async function respondOllama({text,system='civweave',history=[],onToken,signal}={}){
   const config=configuredOllama();
   if(!config)throw new Error('Ollama is not the selected AI route.');
-  // Only the shared HTTP provider runtime is needed. Do not load MiniLM,
-  // the assistant orchestration stack, or downloaded browser inference.
-  await loadScript(...PREREQUISITES[1]);
-  const runtime=globalThis.CivweaveModelRuntime;
-  if(typeof runtime?.generate!=='function')throw new Error('The Ollama provider runtime did not become ready.');
-  const systemId=LABEL[system]?system:'civweave',role=guideFor(systemId);
-  const rows=(Array.isArray(history)?history:[]).slice(-12).map(row=>({
+  if(signal?.aborted)throw signal.reason||new Error('Generation cancelled before the request was sent.');
+  // Ollama supplies the model transport; the existing shared assistant and
+  // capability owners still create, review and activate real artifacts.
+  // ensure() loads those owners without starting downloaded-model inference.
+  await ensure();
+  await loadSequence(GUIDE_CAPABILITIES);
+  await loadScript(...OPTIONAL[0]);
+  const unified=globalThis.CivweaveUnifiedChatSystemV1;
+  await unified.ensureWeavelingOrchestrator();
+  unified.synchronize();
+  globalThis.CivweaveGuideCapabilityPassoverV1.synchronize();
+  if(signal?.aborted)throw signal.reason||new Error('Generation cancelled before the request was sent.');
+  const assistant=globalThis.CivweaveAssistantV141;
+  if(typeof assistant?.respond!=='function')throw new Error('The shared assistant runtime did not become ready.');
+  const systemId=LABEL[system]?system:'civweave';
+  const rows=(Array.isArray(history)?history:[]).slice(-12).map(row=>({...row,
     role:row?.role==='assistant'||row?.role==='guide'?'assistant':'user',
-    content:clean(row?.text||row?.content,5000)
-  })).filter(row=>row.content);
+    text:clean(row?.text||row?.content,5000)
+  })).filter(row=>row.text);
   const prompt=clean(text,12000);
-  if(rows.at(-1)?.role==='user'&&rows.at(-1)?.content===prompt)rows.pop();
-  const result=await runtime.generate({
-    purpose:'ollama-direct-chat-v1',executionProfile:'interactive',
-    config,responseFormat:'text',__civweaveSkipResponseRouter:true,
-    signal,
-    messages:[{role:'system',content:`You are ${role.name}, the ${role.role} of Civweave. Respond to the user's message directly. Never claim that you saved, activated, or executed an action unless it actually happened. Consequential actions require explicit approval.`},...rows,{role:'user',content:prompt}],
-    onEvent:event=>{if(event?.phase==='partial')onToken?.(event.text||'',event.accumulatedText||'',event)}
-  });
-  if(result?.status!=='success')throw new Error(clean(result?.error?.message||`Ollama returned ${result?.status||'no result'}.`,900));
-  const answer=clean(result.outputJson?.answer||result.outputText||'',12000);
-  if(!answer)throw new Error('Ollama returned no visible text.');
-  return{response:{answer,choice:{mode:'Reflect',system:systemId,nextAction:''},assumptions:[],requiresConsent:false,confidence:1},provider:'ollama',model:result.actual?.model||config.model,usage:result.usage||null,responseRouting:{schema:'civweave.response-route.v1',provider:'ollama',source:'selected-local-api',networkRequired:false},context:{guide:{system:systemId}}};
+  if(rows.at(-1)?.role==='user'&&rows.at(-1)?.text===prompt)rows.pop();
+  return assistant.respond({text:prompt,systemId,handoffSystem:systemId,history:rows,config,signal,onToken});
 }
 function emitLocalDegraded(error){lastLocalError=clean(error?.message||error||'The selected local AI runtime is unavailable.',900);try{console.warn('[Civweave local AI degraded]',lastLocalError)}catch{}try{dispatchEvent(new CustomEvent('civweave:local-ai-degraded',{detail:{version:VERSION,system:detect(),model:selectedLocal()?.id||'',message:lastLocalError,assistantAvailable:Boolean(globalThis.CivweaveAssistantV141),responseRouterAvailable:Boolean(globalThis.CivweaveResponseRouterV347),at:new Date().toISOString()}}))}catch{}return false}
 async function tryEnsureLocalAI(){if(!localRequested())return false;try{return await ensureLocalAI()}catch(error){return emitLocalDegraded(error)}}

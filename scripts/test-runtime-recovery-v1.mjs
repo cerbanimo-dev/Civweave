@@ -268,45 +268,64 @@ test('Ollama model discovery distinguishes loopback from LAN address space',asyn
 });
 
 
-test('selected Ollama guide messages never activate downloaded-local model bootstrap',async()=>{
+test('selected Ollama guide messages reach shared capabilities without downloaded-local inference',async()=>{
   const loader=read('family-ai-loader-v105.js'),chat=read('guide-chat-surface-v350.js'),campus=read('working-campus-v156.part5.txt'),parent=read('persistent-system-shell-v1.html');
   const start=loader.indexOf('function configuredOllama('),end=loader.indexOf('function emitLocalDegraded(',start);
-  assert.ok(start>0&&end>start,'Shared AI loader must provide the direct Ollama guide transport.');
+  assert.ok(start>0&&end>start,'Shared AI loader must provide the selected Ollama guide entry.');
   const segment=loader.slice(start,end);
+  assert.match(loader,/\['\/app\/cerbanimo-chat-quest-capability-v2\.js\?[^']*',\(\)=>globalThis\.CivweaveCerbanimoChatQuestCapabilityV2\]/,'The parent guide needs Kamiya’s canonical capability registration.');
+  assert.match(loader,/\['\/app\/action-followthrough-v165\.js\?[^']*',\(\)=>globalThis\.CivweaveActionFollowthroughV165\]/,'Rook’s canonical approval owner must be available in the parent chat.');
   const scope={
     globalThis:null,
     MODEL_PROFILES_KEY:'civweave-model-profiles-v1',UNIVERSAL_AI_KEY:'civweave.universal-ai.v127',
-    LABEL:{civweave:'Civweave'},guideFor:()=>({name:'Weaveling',role:'Quest guide'}),
+    LABEL:{civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'},
     PREREQUISITES:[['parity'],['shared-model-runtime']],
+    GUIDE_CAPABILITIES:[['unified-chat'],['capability-passover']],OPTIONAL:[['intention-ui']],
     clean:(v,max=12000)=>String(v||'').slice(0,max),
     obj:key=>key==='civweave-model-profiles-v1'?{interactive:{provider:'ollama',model:'gemma4:latest',endpoint:'http://127.0.0.1:11434/api/chat'}}:{},
-    loadScript:async(src)=>{assert.equal(src,'shared-model-runtime');scope.providerLoaded++;},
-    providerLoaded:0,
-    CivweaveModelRuntime:{generate:async request=>{
-      scope.call=request;
-      request.onEvent({phase:'partial',text:'Hello',accumulatedText:'Hello from Ollama'});
-      return{status:'success',actual:{provider:'ollama',model:'gemma4:latest'},outputText:'Hello from Ollama'};
+    loadScript:async(src)=>{assert.equal(src,'intention-ui');},
+    loadSequence:async rows=>{assert.equal(rows,scope.GUIDE_CAPABILITIES);scope.loadedCapabilities++;},
+    ensure:async()=>{scope.assistantLoaded++;},assistantLoaded:0,loadedCapabilities:0,
+    CivweaveUnifiedChatSystemV1:{ensureWeavelingOrchestrator:async()=>{scope.orchestratorReady=true;},synchronize:()=>{scope.unifiedSynced=true;}},
+    CivweaveGuideCapabilityPassoverV1:{synchronize:()=>{scope.passoverSynced=true;}},
+    CivweaveModelRuntime:{generate:async()=>{throw new Error('The loader must not own a second model-generation path.');}},
+    CivweaveAssistantV141:{respond:async request=>{
+      assert.equal(scope.orchestratorReady,true);assert.equal(scope.unifiedSynced,true);assert.equal(scope.passoverSynced,true);
+      scope.call=request;request.onToken('Hello','Hello from Ollama');return scope.result;
     }}
   };
   scope.globalThis=scope;
   const respond=vm.runInNewContext(segment+'\nrespondOllama',scope);
   let partial='';
-  const response=await respond({text:'Hello Weaveling',system:'civweave',history:[{role:'user',text:'Hello Weaveling'}],onToken:(_delta,full)=>partial=full});
-  assert.equal(scope.providerLoaded,1);
+  const controller=new AbortController();
+  scope.result={response:{answer:'Hello from Ollama'},provider:'ollama',model:'gemma4:latest',plan:{id:'qa-quest',state:'review'},action:{id:'qa-action'},handoff:{targetSystem:'living-school'}};
+  const response=await respond({text:'Hello Weaveling',system:'civweave',history:[{role:'user',text:'Earlier question'},{role:'assistant',text:'Earlier answer'},{role:'user',text:'Hello Weaveling'}],signal:controller.signal,onToken:(_delta,full)=>partial=full});
+  assert.equal(scope.assistantLoaded,1);assert.equal(scope.loadedCapabilities,1);
   assert.equal(scope.call.config.provider,'ollama');
   assert.equal(scope.call.config.model,'gemma4:latest');
   assert.equal(scope.call.config.endpoint,'http://127.0.0.1:11434/api/chat');
-  assert.equal(scope.call.__civweaveSkipResponseRouter,true);
-  assert.equal(scope.call.responseFormat,'text');
-  assert.equal(scope.call.messages.filter(m=>m.role==='user').length,1,'Current turn must not be repeated in model history.');
+  assert.equal(scope.call.systemId,'civweave');assert.equal(scope.call.handoffSystem,'civweave');
+  assert.equal(scope.call.signal,controller.signal,'Stop must reach the canonical capability/model request.');
+  assert.equal(scope.call.history.length,2,'Current turn must not be repeated in model history.');
+  assert.equal(scope.call.history[0].text,'Earlier question');
+  assert.equal(response,scope.result,'Real plan, action, handoff, approval and provenance metadata must be preserved.');
   assert.equal(response.response.answer,'Hello from Ollama');
   assert.equal(partial,'Hello from Ollama');
-  assert.match(chat,/await globalThis\.CivweaveFamilyAILoaderV105\.respondOllama\(/,'Canonical floating guide must route Ollama directly.');
-  assert.match(parent,/family-ai-loader-v105\.js\?v=1\.0\.140-ollama-chat-no-browser-inference/,'Persistent desktop chat must load its provider dependency in the parent context.');
+  for(const system of Object.keys(scope.LABEL)){
+    await respond({text:`QA ${system}`,system,history:[],onToken(){}});
+    assert.equal(scope.call.systemId,system);assert.equal(scope.call.handoffSystem,system);
+  }
+  controller.abort(new Error('QA stop'));
+  const before=scope.assistantLoaded;
+  await assert.rejects(respond({text:'Do not submit',signal:controller.signal}),/QA stop/);
+  assert.equal(scope.assistantLoaded,before,'A cancelled request must not initialize or start a model.');
+  assert.match(chat,/await globalThis\.CivweaveFamilyAILoaderV105\.respondOllama\(/,'Canonical floating guide must use the shared Ollama guide entry.');
+  assert.match(parent,/family-ai-loader-v105\.js\?v=1\.0\.141-ollama-shared-capabilities/,'Persistent desktop chat must load its provider dependency in the parent context.');
   assert.match(campus,/await loader\.respondOllama\(/,'Working Campus must use the same Ollama request path.');
   assert.match(campus,/const localSelection=ollamaRequested\?\{active:false\}:selectedLocalModel\(\)/,'A saved browser model must not override the selected Ollama route.');
   const chatSubmit=chat.slice(chat.indexOf('async function submitActive('),chat.indexOf('function switchGuide('));
-  assert.ok(chatSubmit.indexOf('if(ollamaRequested)')<chatSubmit.indexOf('await globalThis.CivweaveFamilyAILoaderV105?.ensure?.()'),'Ollama must be handled before heavy assistant startup.');
+  assert.ok(chatSubmit.indexOf('if(ollamaRequested)')<chatSubmit.indexOf('await globalThis.CivweaveFamilyAILoaderV105?.ensure?.()'),'Ollama must retain its selected-provider entry and cancellation owner.');
+  assert.doesNotMatch(segment,/ensureLocalAI\(|tryEnsureLocalAI\(|runtime\.generate\(/,'The guide entry delegates to canonical capabilities without browser inference bootstrap or a second generation implementation.');
 });
 
 test('stale browser selection cannot override the primary Ollama model in the shared assistant',()=>{

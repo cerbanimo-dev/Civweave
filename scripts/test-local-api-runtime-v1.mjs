@@ -37,6 +37,7 @@ test('saved Ollama route returns nonstreaming chat content without a Guild or ex
     model: 'llama3.2', message: { role: 'assistant', content: 'Local model is ready.' }, done: true,
   }));
   const result = await runtime.generate({
+    config: { provider: 'ollama', model: 'llama3.2', endpoint, maxTokens: 8 },
     executionProfile: 'interactive', messages: [{ role: 'user', content: 'Reply briefly.' }],
   });
   assert.equal(result.status, 'success');
@@ -45,6 +46,7 @@ test('saved Ollama route returns nonstreaming chat content without a Guild or ex
   assert.equal(calls.length, 1);
   assert.equal(calls[0].body.model, 'llama3.2');
   assert.equal(calls[0].body.stream, false);
+  assert.equal(calls[0].body.options.num_predict, 8, 'Ollama must honor the caller output budget');
   assert.equal(calls[0].options.credentials, 'omit');
   assert.equal(calls[0].options.headers.authorization, undefined);
 });

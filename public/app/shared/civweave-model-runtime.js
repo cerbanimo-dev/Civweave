@@ -617,7 +617,7 @@
           stream: useStream,
           ...(structured ? { format: request.schema ? sanitizeSchema(request.schema, { provider: "generic" }) : "json" } : {}),
           keep_alive: config.keepAlive,
-          options: { temperature: config.temperature, num_ctx: config.context },
+          options: { temperature: config.temperature, num_ctx: config.context, num_predict: config.maxTokens },
         }),
         signal,
       }));
