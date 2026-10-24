@@ -1,5 +1,7 @@
 import {createServer} from 'node:http';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {resolve} from 'node:path';
 import {executeWordcraft,checkInstalled,BridgeError,MAX_INPUT_BYTES} from './wordcraft.mjs';
 
 const PORT=47871;
@@ -52,7 +54,7 @@ export function createWordcraftBridge({token,allowedOrigins=DEFAULT_ORIGINS,exec
     }
   });
 }
-if(process.argv[1]&&new URL(import.meta.url).pathname.replace(/\/+/g,'/')===process.argv[1].replace(/\\/g,'/')){
+if(process.argv[1]&&resolve(fileURLToPath(import.meta.url))===resolve(process.argv[1])){
   const token=process.env.CIVWEAVE_CRAFT_TOKEN||randomBytes(32).toString('base64url');
   const origins=String(process.env.CIVWEAVE_CRAFT_ALLOWED_ORIGINS||'').split(',').map(x=>x.trim()).filter(Boolean);
   const server=createWordcraftBridge({token,allowedOrigins:[...DEFAULT_ORIGINS,...origins]});
