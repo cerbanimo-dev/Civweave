@@ -15,7 +15,7 @@ This contract keeps host residency, billing status, compute funding, Host Node S
 
 A signed Guild capacity session issued to a free Citizen resident grants use of
 the Guild's web-search and webpage-reading tools, subject to availability and
-the dedicated fair-use limiter. **No Patreon/Patron membership, paid search
+the dedicated fair-use limiter. **No Patron membership, paid search
 API key, AI neurons, or AI top-up credits are required** for this tool service.
 Patrons also retain the same included browser-tools entitlement.
 
