@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='3.0.3-living-school-generation-budget-v3-local-design-deadline';
+const VERSION='3.0.2-living-school-generation-budget-v3-bounded-ai-assessments';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
