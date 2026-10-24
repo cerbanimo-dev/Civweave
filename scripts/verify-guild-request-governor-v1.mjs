@@ -38,6 +38,9 @@ assert(binding(production,'GUILD_API_RATE_LIMITER')?.simple?.limit===60,'product
 assert(binding(production,'GUILD_AI_RATE_LIMITER')?.simple?.limit===6,'production Guild AI limit is not 6/minute');
 assert(binding(staging,'GUILD_API_RATE_LIMITER')?.simple?.limit===60,'staging Guild API limit is not 60/minute');
 assert(binding(staging,'GUILD_AI_RATE_LIMITER')?.simple?.limit===6,'staging Guild AI limit is not 6/minute');
+assert(binding(production,'GUILD_BROWSER_RATE_LIMITER')?.simple?.limit===8,'production Guild browser benefit must have a separate 8/minute fair-use limit');
+assert(binding(staging,'GUILD_BROWSER_RATE_LIMITER')?.simple?.limit===8,'staging Guild browser benefit must have a separate 8/minute fair-use limit');
+assert(binding(production,'GUILD_BROWSER_RATE_LIMITER')?.namespace_id!==binding(staging,'GUILD_BROWSER_RATE_LIMITER')?.namespace_id,'staging and production Guild browser namespaces must stay isolated');
 assert(binding(production,'GUILD_API_RATE_LIMITER')?.namespace_id!==binding(staging,'GUILD_API_RATE_LIMITER')?.namespace_id,'staging and production API namespaces must stay isolated');
 assert(binding(production,'GUILD_AI_RATE_LIMITER')?.namespace_id!==binding(staging,'GUILD_AI_RATE_LIMITER')?.namespace_id,'staging and production AI namespaces must stay isolated');
 
@@ -88,5 +91,5 @@ assert(budget.origins['https://guild.example']?.dayCount===60,'network budget di
 console.log(JSON.stringify({
   ok:true,
   client:{perGuildDeviceMinute:60,perGuildDeviceDay:2400,duplicateGetNetworkCalls:1,throttled},
-  worker:{apiPerActorMinute:60,aiPerActorMinute:6,productionNamespaces:['41001','41002'],stagingNamespaces:['41101','41102']},
+  worker:{apiPerActorMinute:60,aiPerActorMinute:6,guildBrowserPerResidentMinute:8,productionNamespaces:['41001','41002','41003'],stagingNamespaces:['41101','41102','41103']},
 },null,2));
