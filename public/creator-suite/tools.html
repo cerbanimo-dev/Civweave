@@ -17,6 +17,14 @@
     .craft-card .craft-status{font-size:.85rem;color:#f2ce7e}
     .craft-card small{color:#a9b5c0}
     .craft-card a{margin-top:.25rem;color:#b7dfff;text-underline-offset:3px}
+
+    .bridge-panel{margin:1rem 0 1.5rem;padding:1rem;border:1px solid #34414b;background:#171c21;border-radius:1rem;display:grid;gap:.8rem}
+    .bridge-fields{display:flex;flex-wrap:wrap;align-items:end;gap:.65rem}
+    .bridge-fields label{display:grid;gap:.35rem;flex:1 1 170px}
+    .bridge-fields input,.bridge-fields select{min-width:0;width:100%;padding:.65rem;border:1px solid #475664;border-radius:.5rem;background:#0b1014;color:#fff}
+    .bridge-fields button{padding:.7rem 1rem;background:#eaf2f8;border:0;border-radius:.5rem;font-weight:700;cursor:pointer}
+    .bridge-panel pre{white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:22rem;background:#0b1014;padding:.75rem;border-radius:.5rem}
+    .bridge-panel p{margin:.25rem 0;color:#bfcbd3}
   </style>
 </head>
 <body>
@@ -30,9 +38,27 @@
       <button type="button" data-craft-filter="office" aria-pressed="false">Office</button>
       <button type="button" data-craft-filter="services" aria-pressed="false">Document services</button>
     </nav>
+    <section class="bridge-panel" aria-label="Local WordCraft bridge">
+      <h2>WordCraft · local document tools</h2>
+      <p>Inspect DOCX files, extract text or export a PDF with a separately installed WordCraft CLI. The source file stays on your computer. This connector is not hosted by Civweave and is unavailable until you launch the companion process and authorize it.</p>
+      <p><a href="https://github.com/cerbanimo-dev/Civweave/blob/staging/tools/creator-craft-bridge/README.md" target="_blank" rel="noopener noreferrer">Installation and security instructions (staging after merge)</a></p>
+      <div class="bridge-fields">
+        <label>One-session bridge token<input id="wordcraft-token" type="password" autocomplete="off" spellcheck="false" placeholder="Paste bridge token"></label>
+        <button id="wordcraft-connect" type="button">Connect local WordCraft</button>
+      </div>
+      <div class="bridge-fields">
+        <label>Your document<input id="wordcraft-file" type="file" accept=".docx,.odt,.rtf,.md,.txt"></label>
+        <label>Action<select id="wordcraft-action"><option value="inspect">Inspect structure</option><option value="text">Extract text</option><option value="pdf">Export separate PDF</option></select></label>
+        <button id="wordcraft-run" type="button">Run on selected file</button>
+      </div>
+      <p id="wordcraft-status" role="status" aria-live="polite">Start the loopback bridge on the same computer to enable this panel. No data is uploaded to Civweave servers.</p>
+      <pre id="wordcraft-output" aria-label="WordCraft result preview"></pre>
+    </section>
     <p id="craft-count" aria-live="polite">Loading tool catalog…</p>
     <section class="craft-grid" id="craft-list" aria-label="Upstream applications"></section>
   </main>
   <script src="/creator-suite/shared/craft-catalog-v1.js"></script>
+  <script src="/creator-suite/shared/ai-tools-v1.js"></script>
   <script src="/creator-suite/craft-tools-v1.js"></script>
+  <script src="/creator-suite/wordcraft-connector-v1.js"></script>
 </body></html>
