@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0';
+const VERSION='1.1.1';
 const REQUEST_SCHEMA='civweave.creator-tool-request.v1';
 const adapters=new Map();
 const MAX_ARGS_BYTES=256*1024;
@@ -12,8 +12,11 @@ function registerEditor(kind,adapter){
   if(!kind||!adapter||typeof adapter!=='object'||typeof adapter.execute!=='function')throw new Error('Creator editor adapter with execute() is required.');
   const actions=normalizeActions(adapter.actions);
   if(!actions.length)throw new Error('Creator editor adapter must declare at least one action.');
-  adapters.set(kind,{...adapter,actions});
-  return()=>adapters.delete(kind);
+  const registration={...adapter,actions};
+  adapters.set(kind,registration);
+  // Replacing a file-scoped adapter invalidates its former disposer.
+  // A stale async disconnect must not unregister a newer approved session.
+  return()=>adapters.get(kind)===registration?adapters.delete(kind):false;
 }
 function capabilities(){
   const editors={};
