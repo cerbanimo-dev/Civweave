@@ -66,6 +66,17 @@
       <p id="cadcraft-status" role="status" aria-live="polite">Install CADCraft CLI, start the local bridge and connect above.</p>
       <pre id="cadcraft-output" aria-label="CADCraft drawing details"></pre>
     </section>
+    <section class="bridge-panel" id="pdfcraft-panel" tabindex="-1" aria-label="Local PdfCraft bridge">
+      <h2>PdfCraft · PDF workflow tools</h2>
+      <p>Choose one PDF to inspect or extract text. Select exactly two PDFs to combine them into a new file. Originals remain unchanged; the total input limit is 8 MiB. Connect to the same local bridge above.</p>
+      <div class="bridge-fields">
+        <label>PDF file(s)<input id="pdfcraft-files" type="file" accept=".pdf,application/pdf" multiple></label>
+        <label>Action<select id="pdfcraft-action"><option value="info">Inspect PDF</option><option value="text">Extract text</option><option value="combine">Combine two PDFs</option></select></label>
+        <button id="pdfcraft-run" type="button">Run PDF action</button>
+      </div>
+      <p id="pdfcraft-status" role="status" aria-live="polite">Install PdfCraft CLI, start the local bridge and connect above.</p>
+      <pre id="pdfcraft-output" aria-label="PdfCraft PDF details or extracted text"></pre>
+    </section>
     <p id="craft-count" aria-live="polite">Loading tool catalog…</p>
     <section class="craft-grid" id="craft-list" aria-label="Upstream applications"></section>
   </main>
