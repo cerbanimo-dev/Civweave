@@ -12,6 +12,7 @@ export function createWordcraftBridge({token,allowedOrigins=DEFAULT_ORIGINS,exec
   if(typeof token!=='string'||token.length<32)throw new Error('A random bridge access token of at least 32 characters is required.');
   const origins=new Set(allowedOrigins);
   const secureToken=Buffer.from(token);
+  let activeJobs=0;
   const json=(res,status,body)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'});res.end(JSON.stringify(body));};
   return createServer(async(req,res)=>{
     const origin=req.headers.origin;
@@ -47,8 +48,12 @@ export function createWordcraftBridge({token,allowedOrigins=DEFAULT_ORIGINS,exec
       let request;
       try{request=JSON.parse(Buffer.concat(chunks).toString('utf8'));}
       catch{throw new BridgeError('Malformed JSON.','INVALID_JSON',400);}
-      const result=await(req.url==='/v1/wordcraft'?execute(request):cadExecute(request));
-      json(res,200,{ok:true,result});
+      if(activeJobs>=2)throw new BridgeError('Two document jobs are already running.','BRIDGE_BUSY',429);
+      activeJobs++;
+      try{
+        const result=await(req.url==='/v1/wordcraft'?execute(request):cadExecute(request));
+        json(res,200,{ok:true,result});
+      }finally{activeJobs--;}
     }catch(error){
       if(error instanceof BridgeError)json(res,error.status,{ok:false,code:error.code,error:error.message});
       else json(res,500,{ok:false,code:'INTERNAL_ERROR',error:'Document processing failed.'});
