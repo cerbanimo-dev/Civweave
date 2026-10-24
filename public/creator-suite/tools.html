@@ -54,6 +54,17 @@
       <p id="wordcraft-status" role="status" aria-live="polite">Start the loopback bridge on the same computer to enable this panel. No data is uploaded to Civweave servers.</p>
       <pre id="wordcraft-output" aria-label="WordCraft result preview"></pre>
     </section>
+    <section class="bridge-panel" aria-label="Local CADCraft bridge">
+      <h2>CADCraft · local drawing tools</h2>
+      <p>Use the same bridge token from the WordCraft section above. CADCraft supports drawing inspection and separate SVG exports using a locally installed cadcraft-cli executable. Input DXF/DWG files are never overwritten.</p>
+      <div class="bridge-fields">
+        <label>Drawing<input id="cadcraft-file" type="file" accept=".dxf,.dwg"></label>
+        <label>Action<select id="cadcraft-action"><option value="info">Inspect drawing</option><option value="svg">Export separate SVG</option></select></label>
+        <button id="cadcraft-run" type="button">Run on drawing</button>
+      </div>
+      <p id="cadcraft-status" role="status" aria-live="polite">Install CADCraft CLI, start the local bridge and connect above.</p>
+      <pre id="cadcraft-output" aria-label="CADCraft drawing details"></pre>
+    </section>
     <p id="craft-count" aria-live="polite">Loading tool catalog…</p>
     <section class="craft-grid" id="craft-list" aria-label="Upstream applications"></section>
   </main>
