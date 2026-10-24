@@ -2,10 +2,10 @@
 'use strict';
 const ENDPOINT='http://127.0.0.1:47871';
 const MAX_FILE_BYTES=8*1024*1024;
-let connected=false, unregister=null, cadUnregister=null, activeFile=null, cadFile=null, available={}, token='';
+let connected=false, unregister=null, cadUnregister=null, pdfUnregister=null, activeFile=null, cadFile=null, pdfFiles=[], available={}, token='';
 function el(id){return document.getElementById(id);}
 function status(message,good=false){const node=el('wordcraft-status');if(node){node.textContent=message;node.style.color=good?'#a9e6b4':'#f2ce7e';}}
-function revoke(){connected=false;available={};if(unregister){unregister();unregister=null;}if(cadUnregister){cadUnregister();cadUnregister=null;}window.dispatchEvent(new CustomEvent('civweave:craft-connection'));}
+function revoke(){connected=false;available={};if(unregister){unregister();unregister=null;}if(cadUnregister){cadUnregister();cadUnregister=null;}if(pdfUnregister){pdfUnregister();pdfUnregister=null;}window.dispatchEvent(new CustomEvent('civweave:craft-connection'));}
 async function bridge(path,options={}){
   if(!token)throw new Error('Enter the token printed by your local bridge.');
   let response;
@@ -71,9 +71,27 @@ async function performCadcraft(action){
   el('cadcraft-output').textContent=result.details.slice(0,24000);
   return{schema:result.schema,action,details:result.details.slice(0,100000)};
 }
+async function performPdfcraft(action){
+  if(!connected||!available.pdfcraft)throw new Error('Connect to an installed PdfCraft CLI first.');
+  if(!pdfFiles.length)throw new Error('Choose a PDF file first.');
+  if((action==='combine'&&pdfFiles.length!==2)||(action!=='combine'&&pdfFiles.length!==1))throw new Error('Choose exactly two PDFs to combine, or one to inspect or extract text.');
+  const size=pdfFiles.reduce((sum,file)=>sum+file.size,0);
+  if(size>MAX_FILE_BYTES)throw new Error('Combined PDF inputs are limited to 8 MiB.');
+  const files=await Promise.all(pdfFiles.map(async file=>({name:file.name,contentBase64:inputBytesToBase64(await file.arrayBuffer())})));
+  const {result}=await bridge('/v1/pdfcraft',{method:'POST',body:JSON.stringify({action,files})});
+  if(action==='combine'){
+    if(!result?.contentBase64||result.mime!=='application/pdf')throw new Error('PdfCraft did not return a valid PDF.');
+    download('combined.pdf','application/pdf',decodeBase64(result.contentBase64));
+    return{schema:result.schema,action,filename:'combined.pdf',downloaded:true};
+  }
+  if(typeof result?.content!=='string')throw new Error('PdfCraft returned invalid document information.');
+  el('pdfcraft-output').textContent=result.content.slice(0,24000);
+  return{schema:result.schema,action,content:result.content.slice(0,100000)};
+}
 function maybeRegister(){
   if(unregister){unregister();unregister=null;}
   if(cadUnregister){cadUnregister();cadUnregister=null;}
+  if(pdfUnregister){pdfUnregister();pdfUnregister=null;}
   if(!connected||!globalThis.CivweaveCreatorToolsV1)return;
   if(available.wordcraft&&activeFile){
     unregister=globalThis.CivweaveCreatorToolsV1.registerEditor('wordcraft',{
@@ -106,17 +124,32 @@ function maybeRegister(){
       }
     });
   }
+  if(available.pdfcraft&&pdfFiles.length){
+    pdfUnregister=globalThis.CivweaveCreatorToolsV1.registerEditor('pdfcraft',{
+      actions:(pdfFiles.length===2?['combine']:['info','text']).map(name=>({
+        name,description:'PdfCraft '+name+' on the selected PDF file(s). Explicit user approval required.'
+      })),
+      execute:async(action,args,actor)=>{
+        const identity=String(actor?.id||'unknown AI').slice(0,120);
+        if(!window.confirm(identity+' requests PdfCraft '+action+' on '+pdfFiles.length+' selected PDF file(s). Allow?')){
+          throw new Error('PdfCraft operation was not approved by the user.');
+        }
+        return await performPdfcraft(action);
+      }
+    });
+  }
   window.dispatchEvent(new CustomEvent('civweave:craft-connection'));
 }
 async function connect(){
   revoke();
   token=el('wordcraft-token').value.trim();
   const body=await bridge('/v1/capabilities');
-  available={wordcraft:Boolean(body.wordcraft?.installed),cadcraft:Boolean(body.cadcraft?.installed)};
-  if(!available.wordcraft&&!available.cadcraft)throw new Error('Bridge is running, but neither wordcraft-cli nor cadcraft-cli is available on its PATH.');
+  available={wordcraft:Boolean(body.wordcraft?.installed),cadcraft:Boolean(body.cadcraft?.installed),pdfcraft:Boolean(body.pdfcraft?.installed)};
+  if(!available.wordcraft&&!available.cadcraft&&!available.pdfcraft)throw new Error('Bridge is running, but no supported Craft CLI is available on its PATH.');
   connected=true;maybeRegister();
-  status('Local bridge connected. WordCraft '+(available.wordcraft?'available':'not installed')+'; CADCraft '+(available.cadcraft?'available':'not installed')+'.',true);
+  status('Local bridge connected. WordCraft '+(available.wordcraft?'available':'not installed')+'; CADCraft '+(available.cadcraft?'available':'not installed')+'; PdfCraft '+(available.pdfcraft?'available':'not installed')+'.',true);
   if(el('cadcraft-status'))el('cadcraft-status').textContent=available.cadcraft?'CADCraft ready. Select a drawing.':'Install cadcraft-cli to use CAD drawing tools.';
+  if(el('pdfcraft-status'))el('pdfcraft-status').textContent=available.pdfcraft?'PdfCraft ready. Choose PDF file(s).':'Install pdfcraft-cli to use PDF tools.';
 }
 function boot(){
   if(!el('wordcraft-connect'))return;
@@ -136,6 +169,17 @@ function boot(){
     try{await performCadcraft(action);el('cadcraft-status').textContent=action==='svg'?'SVG drawing downloaded.':'Drawing inspected.';}
     catch(error){el('cadcraft-status').textContent=error.message;}
     finally{el('cadcraft-run').disabled=false;}
+  });
+  if(el('pdfcraft-files'))el('pdfcraft-files').addEventListener('change',event=>{
+    pdfFiles=Array.from(event.target.files||[]);maybeRegister();
+    el('pdfcraft-status').textContent=pdfFiles.length+' PDF file(s) selected. '+(connected?'Ready.':'Connect the local bridge first.');
+  });
+  if(el('pdfcraft-run'))el('pdfcraft-run').addEventListener('click',async()=>{
+    const action=el('pdfcraft-action').value;
+    el('pdfcraft-run').disabled=true;
+    try{await performPdfcraft(action);el('pdfcraft-status').textContent=action==='combine'?'Combined PDF downloaded.':'PdfCraft '+action+' completed.';}
+    catch(error){el('pdfcraft-status').textContent=error.message;}
+    finally{el('pdfcraft-run').disabled=false;}
   });
   el('wordcraft-run').addEventListener('click',async()=>{
     const action=el('wordcraft-action').value;
