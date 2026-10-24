@@ -53,6 +53,12 @@ function matchingProjectReceipt(s,raw){
 function applyProjectReceipt(s,raw){
   const receipt=matchingProjectReceipt(s,raw),result=gate.applyReceipt(s.projectGate,receipt);
   if(!result.changed)throw new Error(`Receipt rejected: ${result.reason||'invalid'}`);
+  const currentReceiptId=result.gate.lastReceipt?.receiptId,accepted=gate.canUnlockFinalTest(result.gate);
+  if((s.final||s.credential)&&(!accepted||(s.final&&s.final.receiptId!==currentReceiptId)||(s.credential&&s.credential.receiptId!==currentReceiptId))){
+    const supersededAt=now();
+    s.learningHistory=[...(Array.isArray(s.learningHistory)?s.learningHistory:[]),{school:copy(s.school),progress:copy(s.progress||{}),practicum:copy(s.practicum),projectGate:copy(s.projectGate),receipts:copy(s.receipts||[]),final:s.final?{...copy(s.final),status:'superseded',supersededAt}:null,credential:s.credential?{...copy(s.credential),status:'superseded',supersededAt}:null,archivedAt:supersededAt,invalidatedByReceipt:receipt.receiptId}];
+    s.final=null;s.credential=null;
+  }
   s.projectGate=result.gate;s.receipts=[...s.receipts,receipt].slice(-100);persist('cerbanimo-receipt-applied');toast(`Project gate: ${result.gate.status}`);
 }
 
@@ -168,8 +174,8 @@ export const actions={
   'check-cerbanimo-receipt':async()=>{
     const s=state();upgradePendingPracticumRequests(s);
     const saved=readJson(PROJECT_RECEIPTS_KEY,[]),matches=(Array.isArray(saved)?saved:[]).filter(raw=>{try{matchingProjectReceipt(s,raw);return true}catch{return false}}).sort((left,right)=>Number(right.statusRevision||0)-Number(left.statusRevision||0)||Date.parse(right.lastEventAt||right.acknowledgedAt||0)-Date.parse(left.lastEventAt||left.acknowledgedAt||0));
-    const receipt=matches.find(row=>!s.projectGate?.receiptIds?.includes(row.receiptId));
-    if(!receipt)throw new Error('No new matching Cerbanimo receipt is available. Complete or review the linked Endeavor, then check again.');
+    const receipt=matches[0];
+    if(!receipt||s.projectGate?.receiptIds?.includes(receipt.receiptId))throw new Error('No new matching Cerbanimo receipt is available. Complete or review the linked Endeavor, then check again.');
     applyProjectReceipt(s,receipt);
   },
   'open-cerbanimo':async()=>{
@@ -185,6 +191,7 @@ export const actions={
   },
   'issue-credential':async()=>{
     const s=state();if(!s.final?.passed)throw new Error('Pass the final competency check first.');
+    if(!gate.canUnlockFinalTest(s.projectGate)||s.final.receiptId!==s.projectGate.lastReceipt?.receiptId)throw new Error('A current accepted Cerbanimo receipt matching the final competency check is required.');
     s.credential=s.credential||{schema:'civweave.learning-credential.v1',credentialId:uid('credential'),title:s.school?.title||'Living School capability',capability:s.school?.capability||'',learner:s.passport.displayName,schoolId:s.school?.id||'',receiptId:s.projectGate.lastReceipt?.receiptId||'',issuedAt:now()};
     persist('credential-issued',{credentialId:s.credential.credentialId});toast('Portable credential issued.');
   },

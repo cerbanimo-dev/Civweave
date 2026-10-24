@@ -1,5 +1,5 @@
 const REVISION='cerbanimo-video-task-contract-v1.2-current-state';
-const CONTRACT='./video-learning-contract-v1.mjs?v=video-atlas-v1';
+const CONTRACT='./video-learning-contract-v1.mjs?v=video-atlas-v1-extensible';
 const FALLBACK_VIDEO_URL='https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
 let applying=false,contractPromise=null,harnessPromise=null;

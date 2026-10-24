@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.2.20-guide-generation-tracker-v1-native-formal-stages';
-const REVISION='1.3.1-native-moss-raw-schema-and-topic-tracking';
+const VERSION='1.2.21-guide-generation-tracker-v1-canonical-final-owner';
+const REVISION='1.3.2-final-metadata-without-token-replay';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
@@ -16,7 +16,7 @@ const TERMINAL=new Set(['complete','failed','stopped']);
 const clean=(value,max=50000)=>String(value??'').slice(0,max);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const now=()=>Date.now();
-let state=freshState(),finalAnimation=null,lastFinalFingerprint='',bound=false;
+let state=freshState(),lastFinalFingerprint='',bound=false;
 function bus(){
   // Tracker lives in the campus iframe, but v2/probe lives in parent shell.
   try{
@@ -75,7 +75,7 @@ function freshState(){return{
 function activeRoot(){return document.getElementById(ROOT_ID)}
 function activeArticle(){const root=activeRoot();return root?[...root.querySelectorAll('[data-log] article[data-role="assistant"]')].at(-1)||null:null}
 function stageState(id,status,label='',model=''){const row=state.stages[id]||{state:'waiting',label:id,model:''};state.stages[id]={...row,state:status,label:label||row.label,model:model||row.model};if(['running','streaming','queued'].includes(status))state.activeStage=id;if(model)state.executionModel=model}
-function resetForRequest({text='',route='',pendingKey='',startedMs=now()}={}){if(finalAnimation){try{cancelAnimationFrame(finalAnimation)}catch{}finalAnimation=null}state=freshState();state.startedMs=startedMs;state.pendingKey=pendingKey;state.artifacts=inferArtifacts(text,route);state.showPipeline=Object.values(state.artifacts).some(Boolean);state.pendingObserved=true;if(state.showPipeline)stageState('intake','queued','Waiting for intake');lastFinalFingerprint=''}
+function resetForRequest({text='',route='',pendingKey='',startedMs=now()}={}){state=freshState();state.startedMs=startedMs;state.pendingKey=pendingKey;state.artifacts=inferArtifacts(text,route);state.showPipeline=Object.values(state.artifacts).some(Boolean);state.pendingObserved=true;if(state.showPipeline)stageState('intake','queued','Waiting for intake');lastFinalFingerprint=''}
 function updateArtifacts(detail={}){
   const route=detail.route||detail.kind||'';
   if(detail.artifactSet||detail.artifacts)state.artifacts=mergeArtifacts(state.artifacts,bus()?.normalizeArtifacts?.(detail.artifactSet||detail.artifacts)||emptyArtifacts());
@@ -97,7 +97,7 @@ function installStyle(){if(document.getElementById(STYLE_ID))return;const style=
 #${ROOT_ID} .cw-weave-counts{display:flex;flex-wrap:wrap;gap:5px;padding:0 9px 9px}#${ROOT_ID} .cw-weave-chip{padding:4px 7px;border:1px solid #ffffff1b;border-radius:999px;background:#ffffff08;color:#bcd0e4;font-size:9px;font-weight:750}#${ROOT_ID} .cw-weave-details{border-top:1px solid #ffffff13;padding:9px;background:#020811b0}#${ROOT_ID} .cw-weave-details[hidden]{display:none!important}
 #${ROOT_ID} .cw-weave-probe{padding:8px;margin-top:9px;border:1px solid #ffffff25;border-radius:10px;font:11px/1.45 system-ui}#${ROOT_ID} .cw-weave-probe button{border:1px solid #8eb1cf70;background:#102d43;color:#e2f2ff;border-radius:8px;padding:7px 9px;margin:2px 6px 2px 0;cursor:pointer}#${ROOT_ID} .cw-weave-probe p{margin:5px 0 0;white-space:normal;overflow-wrap:anywhere;color:#b0cfe2}
 #${ROOT_ID} .cw-weave-stream{margin:0 0 9px}#${ROOT_ID} .cw-weave-stream:last-child{margin-bottom:0}#${ROOT_ID} .cw-weave-stream>strong{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;color:#dfeeff;font-size:9px;letter-spacing:.04em;text-transform:uppercase}#${ROOT_ID} .cw-weave-stream>strong span{color:#8096ad;font-weight:650;text-transform:none;letter-spacing:0}#${ROOT_ID} .cw-weave-error{white-space:pre-wrap;overflow-wrap:anywhere;color:#ffbdbd;font:10px/1.4 ui-monospace,monospace;margin:0 0 8px}#${ROOT_ID} .cw-weave-stream pre{max-height:160px;overflow:auto;margin:0;padding:7px 8px;border:1px solid #ffffff12;border-radius:9px;background:#0007;color:#bfe3ff;font:10px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;scrollbar-width:thin}
-#${ROOT_ID} .cw-final-streaming::after{content:'▋';display:inline-block;margin-left:2px;color:var(--guide-accent,#d8dde7);animation:cwCursorBlink .65s steps(1,end) infinite}@keyframes cwGenerationPulse{from{transform:scale(.9);opacity:.76}to{transform:scale(1.08);opacity:1}}@keyframes cwCursorBlink{50%{opacity:.15}}@media(max-width:560px){#${ROOT_ID} .cw-weave-rail{gap:2px;padding-inline:6px}#${ROOT_ID} .cw-weave-node{font-size:7px}#${ROOT_ID} .cw-weave-dot{width:11px;height:11px}#${ROOT_ID} .cw-weave-stream pre{max-height:130px}}@media(prefers-reduced-motion:reduce){#${ROOT_ID} .cw-weave-node .cw-weave-dot,#${ROOT_ID} .cw-final-streaming::after{animation:none!important}}`;
+@keyframes cwGenerationPulse{from{transform:scale(.9);opacity:.76}to{transform:scale(1.08);opacity:1}}@media(max-width:560px){#${ROOT_ID} .cw-weave-rail{gap:2px;padding-inline:6px}#${ROOT_ID} .cw-weave-node{font-size:7px}#${ROOT_ID} .cw-weave-dot{width:11px;height:11px}#${ROOT_ID} .cw-weave-stream pre{max-height:130px}}@media(prefers-reduced-motion:reduce){#${ROOT_ID} .cw-weave-node .cw-weave-dot{animation:none!important}}`;
  document.head?.append(style)}
 function probeStyles(){return ''}
 function terminalLabel(){const name=artifactName();if(state.terminal==='failed')return`${name} failed`;if(state.terminal==='stopped')return`${name} stopped`;if(state.terminal==='complete')return`${name} ready`;const active=STAGES.find(row=>row.id===state.activeStage);return active?active.label:`Preparing ${name}`}
@@ -388,10 +388,14 @@ async function probeClick(){
 function latestRole(thread,role){const rows=Array.isArray(thread?.messages)?thread.messages:[];for(let i=rows.length-1;i>=0;i-=1)if(rows[i]?.role===role)return rows[i];return null}
 function latestAssistant(thread){return latestRole(thread,'assistant')}
 function fingerprint(row,thread){return`${clean(row?.text,200)}|${clean(row?.provider,80)}|${clean(row?.model,120)}|${clean(thread?.updatedAt,80)}`}
-function tokenPieces(text){return clean(text,30000).match(/\S+\s*|\s+/g)||[clean(text,30000)]}
-function animateFinal(text,row){const target=clean(text,30000);if(!target)return;const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;const start=()=>{const article=activeArticle(),bubble=article?.querySelector?.('.cw350-bubble,.cw237-bubble');if(!bubble)return false;state.finalSource=[clean(row?.provider,100),clean(row?.model,160)].filter(Boolean).join(' · ');state.streams.final='';if(state.showPipeline)ensurePanel();if(reduced){bubble.textContent=target;state.streams.final=target;refreshStream('final');return true}const pieces=tokenPieces(target),batch=Math.max(1,Math.ceil(pieces.length/180));let index=0,visible='';bubble.textContent='';bubble.classList.add('cw-final-streaming');const tick=()=>{const end=Math.min(pieces.length,index+batch);for(;index<end;index+=1)visible+=pieces[index];bubble.textContent=visible;state.streams.final=visible;refreshStream('final');if(index<pieces.length)finalAnimation=requestAnimationFrame(tick);else{bubble.textContent=target;bubble.classList.remove('cw-final-streaming');state.streams.final=target;refreshStream('final');finalAnimation=null}};finalAnimation=requestAnimationFrame(tick);return true};let tries=0;const attempt=()=>{tries+=1;if(!start()&&tries<8)setTimeout(attempt,20)};setTimeout(attempt,0)}
+function recordFinal(text,row){
+  // The shared chat surface has already rendered the response. Track its
+  // final metadata without clearing, rewriting, or replaying that answer.
+  state.finalSource=[clean(row?.provider,100),clean(row?.model,160)].filter(Boolean).join(' · ');
+  state.streams.final=clean(text,30000);
+}
 function replayLifecycle(){const rows=bus()?.history?.()||[];for(const row of rows)applyLifecycle(row)}
-function onThreadChanged(event){const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;if(row.pending){const user=latestRole(thread,'user'),key=`${clean(user?.text,500)}|${clean(user?.createdAt||user?.at||thread.updatedAt,80)}`;if(!state.pendingObserved||state.pendingKey!==key||state.terminal){const stamp=Date.parse(user?.createdAt||user?.at||'')||Date.parse(thread?.updatedAt||'')||now();resetForRequest({text:user?.text||'',pendingKey:key,startedMs:stamp});replayLifecycle()}ensurePanel();return}const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;if(!state.terminal&&state.showPipeline)state.terminal=/could not|failed|error|no learning content was generated/i.test(clean(row.text,6000))?'failed':'complete';animateFinal(row.text,row);ensurePanel()}
+function onThreadChanged(event){const thread=event?.detail?.thread;if(!thread)return;const row=latestAssistant(thread);if(!row)return;if(row.pending){const user=latestRole(thread,'user'),key=`${clean(user?.text,500)}|${clean(user?.createdAt||user?.at||thread.updatedAt,80)}`;if(!state.pendingObserved||state.pendingKey!==key||state.terminal){const stamp=Date.parse(user?.createdAt||user?.at||'')||Date.parse(thread?.updatedAt||'')||now();resetForRequest({text:user?.text||'',pendingKey:key,startedMs:stamp});replayLifecycle()}ensurePanel();return}const fp=fingerprint(row,thread);if(!state.pendingObserved||fp===lastFinalFingerprint)return;lastFinalFingerprint=fp;if(!state.terminal&&state.showPipeline)state.terminal=/could not|failed|error|no learning content was generated/i.test(clean(row.text,6000))?'failed':'complete';recordFinal(row.text,row);ensurePanel()}
 function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();addEventListener('civweave:generation-lifecycle',event=>applyLifecycle(event?.detail||{}));
   addEventListener('civweave:weaveling-intake-progress',event=>{
     if(event?.detail?.origin==='native-local-api')applyIntake(event.detail);
@@ -427,6 +431,6 @@ function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();add
   }
 })}
 function install(){bind();bus()?.install?.();replayLifecycle();if(state.showPipeline)queueMicrotask(ensurePanel);return true}
-globalThis.CivweaveGuideGenerationTrackerV1=Object.freeze({version:VERSION,revision:REVISION,install,state:()=>JSON.parse(JSON.stringify(state)),ensurePanel,resetForRequest,artifactName,stages:STAGES,finalResponseStreaming:true,deterministicResponseStreaming:true,expandableLiveProcess:true,privateChainOfThoughtExposed:false,pipelineOnlyWhenActive:true,dynamicArtifactNaming:true,crossFrameLifecycle:true});
+globalThis.CivweaveGuideGenerationTrackerV1=Object.freeze({version:VERSION,revision:REVISION,install,state:()=>JSON.parse(JSON.stringify(state)),ensurePanel,resetForRequest,artifactName,stages:STAGES,finalResponseStreaming:false,deterministicResponseStreaming:false,automaticFinalReplay:false,finalResponseOwner:'guide-chat-surface-v350',expandableLiveProcess:true,privateChainOfThoughtExposed:false,pipelineOnlyWhenActive:true,dynamicArtifactNaming:true,crossFrameLifecycle:true});
 install();
 })();

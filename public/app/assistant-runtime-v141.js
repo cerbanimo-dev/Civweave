@@ -65,7 +65,13 @@ function selectedConfig(){
   if(local)return{provider:'downloaded-local',route:'downloaded-local',model:local.id,externalConsent:false};
   return{...raw,provider:p,route:p,externalConsent:Boolean(raw.externalConsent??raw.remoteConsent??old.consent)};
 }
-async function ledger(){if(!ledgerPromise)ledgerPromise=globalThis.CivweaveParity?.load?.().catch(()=>null)||Promise.resolve(null);return ledgerPromise}
+async function ledger(){
+  if(!ledgerPromise)ledgerPromise=new Promise(resolve=>{
+    const timer=setTimeout(()=>resolve(null),1000),finish=value=>{clearTimeout(timer);resolve(value??null)};
+    try{Promise.resolve(globalThis.CivweaveParity?.load?.()).then(finish,()=>finish(null))}catch{finish(null)}
+  });
+  return ledgerPromise;
+}
 async function environment(system){const data=await ledger(),query=new URLSearchParams(location.search),saved=localStorage.getItem(`civweave.realm-room.${system}`),roomId=system==='civweave'?'civweave.quad':query.get('room')||saved||data?.systems?.find(item=>item.id===system)?.roomIds?.[0]||'',room=data?.index?.rooms?.get?.(roomId)||data?.rooms?.find?.(item=>item.id===roomId);return{systemId:system,roomId,roomLabel:room?.label||roomId||'The Quad',roomPurpose:room?.purpose||'',capabilityIds:Array.isArray(room?.capabilityIds)?room.capabilityIds:[]}}
 function kind(text){const value=low(text).replace(/[!?.,]+$/,'');if(/^(test|testing|ping|check|mic check)$/.test(value))return'test';if(/\b(are you (real|alive|sentient|a real boy)|who are you|what are you|are you a person)\b/.test(value))return'identity';if(/^(hi|hello|hey|good morning|good afternoon|good evening)$/.test(value))return'greeting';if(/^(thanks|thank you|thx|got it|okay|ok)$/.test(value))return'ack';return''}
 const mode=system=>system==='living-school'?'Learn':system==='cerbanimo'?'Build':system==='fellowfare'?'Acquire':system==='anarchadia'?'Govern':'Reflect';
@@ -76,15 +82,22 @@ function semanticRouter(){
   if(globalThis.CivweaveContextRouterV344)return Promise.resolve(globalThis.CivweaveContextRouterV344);
   if(semanticPromise)return semanticPromise;
   semanticPromise=new Promise(resolve=>{
+    const timer=setTimeout(()=>done(),800),done=()=>{clearTimeout(timer);resolve(globalThis.CivweaveContextRouterV344||null)};
     const existing=[...(document.scripts||[])].find(node=>String(node.src||'').includes('/app/minilm-context-router-v344.js'));
-    if(existing){const done=()=>resolve(globalThis.CivweaveContextRouterV344||null);if(globalThis.CivweaveContextRouterV344)done();else{existing.addEventListener('load',done,{once:true});existing.addEventListener('error',()=>resolve(null),{once:true})}return}
-    const script=document.createElement('script');script.src=MINILM_ROUTER;script.async=true;script.dataset.civweaveAssistantSemantic='v141';script.onload=()=>resolve(globalThis.CivweaveContextRouterV344||null);script.onerror=()=>resolve(null);document.head?.append(script);
+    if(existing){if(globalThis.CivweaveContextRouterV344)done();else{existing.addEventListener('load',done,{once:true});existing.addEventListener('error',done,{once:true})}return}
+    const script=document.createElement('script');script.src=MINILM_ROUTER;script.async=true;script.dataset.civweaveAssistantSemantic='v141';script.onload=done;script.onerror=done;document.head?.append(script);
   });
   return semanticPromise;
 }
 async function semanticRoute(text,system,history,env){
   const fallback=route(text,system),api=await semanticRouter();if(!api?.route)return fallback;
-  try{if(api.status?.().available&&!api.status?.().ready)await Promise.race([api.warm?.(),new Promise(resolve=>setTimeout(resolve,1000))]);const semantic=await api.route(text,{currentSystem:system,history,room:env?.roomLabel||env?.roomId||''});return semantic?.source==='minilm'?semantic:fallback}catch{return fallback}
+  try{
+    const semantic=await new Promise(resolve=>{
+      const timer=setTimeout(()=>resolve(null),1000),finish=value=>{clearTimeout(timer);resolve(value)};
+      Promise.resolve().then(async()=>{if(api.status?.().available&&!api.status?.().ready)await api.warm?.();return api.route(text,{currentSystem:system,history,room:env?.roomLabel||env?.roomId||''})}).then(finish,()=>finish(null));
+    });
+    return semantic?.source==='minilm'?semantic:fallback;
+  }catch{return fallback}
 }
 async function context(text,system,history,action=null){const env=await environment(system),r=await semanticRoute(text,system,history,env),data=await ledger(),destination=data?.systems?.find(item=>item.id===r.system),g=guide(system);return{schema:'civweave.structured-context.v4',userMessage:clean(text),currentContext:env,routingAnswer:{...r,room:destination?.roomIds?.[0]||env.roomId},contextRouter:{model:MINILM_ID,source:r.source||'rules',semantic:r.semantic||null},guide:{name:g.name,role:g.role,system,realm:LABEL[system]},recentConversation:(history||[]).slice(-12).map(item=>({role:item.role,text:clean(item.text||item.content,1200)})),requestedModel:selectedConfig(),actionDraft:action,consent:{rule:'Draft automatically; consequential execution requires affirmative consent.',consequentialActionDetected:Boolean(action?.approval?.required)}}}
 function wantsQuest(text){return /\b(plan|roadmap|steps?|build|make|create|design|develop|implement|prototype|repair|fix|organize|launch|project|feature|quest)\b/i.test(clean(text))}

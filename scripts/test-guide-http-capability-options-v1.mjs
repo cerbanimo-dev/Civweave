@@ -113,3 +113,24 @@ test('Ollama surface failure stops after one request and keeps the error visible
   assert.equal(rows.at(-1).provider,'model-error');
   assert.match(rows.at(-1).text,/Ollama endpoint unavailable/);
 });
+
+test('optional parity context cannot hold a selected provider request indefinitely',async()=>{
+  const scope={ledgerPromise:null,globalThis:{CivweaveParity:{load:()=>new Promise(()=>{})}},setTimeout:(fn,ms)=>setTimeout(fn,Math.min(ms,5)),clearTimeout};
+  const start=assistant.indexOf('async function ledger('),end=assistant.indexOf('\nasync function environment(',start);
+  const load=vm.runInNewContext(`${assistant.slice(start,end)};ledger`,scope);
+  const result=await Promise.race([load(),new Promise(resolve=>setTimeout(()=>resolve('HUNG'),30))]);
+  assert.equal(result,null,'Optional parity enrichment must degrade to the existing empty context');
+});
+
+test('a stale semantic script and stalled optional route cannot block model execution',async()=>{
+  const source=assistant.slice(assistant.indexOf('function semanticRouter('),assistant.indexOf('\nasync function context('));
+  const fallback={system:'fellowfare',source:'rules'};
+  const scope={globalThis:{},semanticPromise:null,MINILM_ROUTER:'/router.js',setTimeout:(fn,ms)=>setTimeout(fn,Math.min(ms,5)),clearTimeout,
+    document:{scripts:[{src:'/app/minilm-context-router-v344.js',addEventListener(){},removeEventListener(){}}]},route:()=>fallback};
+  const resolveRoute=vm.runInNewContext(`${source};semanticRoute`,scope);
+  const first=await Promise.race([resolveRoute('Create a Manifest','fellowfare',[],{}),new Promise(resolve=>setTimeout(()=>resolve('HUNG'),30))]);
+  assert.equal(first,fallback,'A loaded tag missing its API must reach the provider with rule context');
+  scope.globalThis.CivweaveContextRouterV344={status:()=>({ready:true}),route:()=>new Promise(()=>{})};
+  const second=await Promise.race([resolveRoute('Create a Manifest','fellowfare',[],{}),new Promise(resolve=>setTimeout(()=>resolve('HUNG'),30))]);
+  assert.equal(second,fallback,'The optional semantic decision also has a deadline');
+});

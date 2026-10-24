@@ -6,6 +6,7 @@ import test from 'node:test';
 const bleSource=readFileSync(new URL('../public/app/human-chat-ble-controls-v1.js',import.meta.url),'utf8');
 const avatarSource=readFileSync(new URL('../public/app/avatar-expression-director-v345.js',import.meta.url),'utf8');
 const stripSource=readFileSync(new URL('../public/app/minilm-decision-strip-v1.js',import.meta.url),'utf8');
+const translationSource=readFileSync(new URL('../public/app/local-ai/translation-packs-v1.js',import.meta.url),'utf8');
 
 function harness({ble=false,avatar=false}={}){
   const observers=new Set(),pending=new Set(),microtasks=[],listeners=new Map(),events=[];
@@ -61,6 +62,34 @@ test('Nearby and avatar owners settle together while an inference response remai
   const app=harness({ble:true,avatar:true});app.notify();const state=app.flush();
   assert.equal(state.pending,0,'chat observers must release the microtask queue for inference and browser input');
   assert.equal(state.buttonWrites,0);assert.ok(state.avatarEvents<=2);
+});
+
+test('translation settings release the mutation queue when an unrelated chat row is added',()=>{
+  const observers=new Set(),pending=new Set(),microtasks=[],storage=new Map();let markup='',writes=0;
+  const notify=()=>{for(const observer of observers)pending.add(observer)};
+  const panel={get innerHTML(){return markup},set innerHTML(value){markup=String(value);writes++;notify()}};
+  const host={querySelector:selector=>selector==='#cw-translation-packs-v1'?panel:null};
+  class Observer{constructor(callback){this.callback=callback}observe(){observers.add(this)}disconnect(){observers.delete(this);pending.delete(this)}}
+  const context={document:{readyState:'complete',documentElement:{lang:'en'},getElementById:id=>
+    id==='cw-local-ai-v266'?host:id==='cw-translation-packs-v1-style'?{}:null,querySelectorAll:()=>[]},
+    navigator:{language:'en'},localStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},MutationObserver:Observer,
+    queueMicrotask:callback=>microtasks.push(callback),addEventListener(){},dispatchEvent(){},CustomEvent:class{}};
+  vm.runInNewContext(translationSource,context,{filename:'translation-packs-v1.js'});
+  assert.equal(writes,1,'the existing settings panel renders once at startup');
+  notify(); // A Rook pending reply changes the same document subtree as the hidden settings panel.
+  function flush(){
+    for(let rounds=0;rounds<100&&(pending.size||microtasks.length);rounds++){
+      const changed=[...pending];pending.clear();for(const observer of changed)observer.callback([{addedNodes:[{}]}]);
+      for(const callback of microtasks.splice(0))callback();
+    }
+    return pending.size+microtasks.length;
+  }
+  assert.equal(flush(),0,`translation settings repeated their own identical DOM write`);
+  assert.equal(writes,1,'unchanged translation settings need no child replacement');
+  context.CivweaveTranslationPacksV1.setAutoEnabled(false);
+  assert.equal(writes,2,'a real settings change still refreshes the panel');
+  assert.equal(flush(),0,'a settings change also releases the observer queue');
+  notify();assert.equal(flush(),0);assert.equal(writes,2,'later chat rows leave the current settings panel intact');
 });
 
 test('the decision strip recognizes pending balance scripts when cached runtime APIs are stale',()=>{

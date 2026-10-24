@@ -1,4 +1,4 @@
-import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs';
+import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs?v=practicum-receipt-revocation-v1';
 import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 import {researchCapability} from './living-school-local-research-v243.mjs?v=research-links-v260';
 

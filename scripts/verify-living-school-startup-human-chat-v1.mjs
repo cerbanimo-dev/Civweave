@@ -16,7 +16,7 @@ const [livingSchool,shell,shellAssets,reportUi,bubble,standalone,sharedGuide]=aw
 const checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
-const workbenchImport="await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v3-bounded-assessments')";
+const workbenchImport="await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v4-receipt-revocation')";
 const supportWarm='const supportReady=ensureSupportRuntime()';
 const importAt=livingSchool.indexOf(workbenchImport);
 const warmAt=livingSchool.indexOf(supportWarm);

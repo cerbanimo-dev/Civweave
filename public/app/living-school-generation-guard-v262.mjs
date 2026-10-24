@@ -1,4 +1,4 @@
-import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
+import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v12-extensible';
 
 const REVISION='living-school-generation-guard-v264-pedagogy-bounded-assessments';
 const MAX_PACKET_CHARS=52000;

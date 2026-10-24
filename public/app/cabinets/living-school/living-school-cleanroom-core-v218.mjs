@@ -12,7 +12,7 @@ import {
   copy,
   progressFor,
 } from './living-school-cleanroom-core-v218-base.mjs';
-import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-atlas-v1';
+import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-atlas-v1-extensible';
 
 const RECOVERY_SCHEMA='civweave.living-school-generation-recovery.v1';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';

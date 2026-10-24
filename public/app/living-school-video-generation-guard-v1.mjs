@@ -1,6 +1,6 @@
-import{ensureLivingSchool,ensureModuleVideo,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1';
+import{ensureLivingSchool,ensureModuleVideo,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1-extensible';
 import{offerMediaPacksBeforeCurriculum}from'./living-school-media-pack-recommender-v1.mjs?v=foundation-authority-v17';
-import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v11-batched';
+import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v12-extensible';
 
 const REVISION='living-school-video-generation-guard-v1.3-batched-safe';
 const CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1';

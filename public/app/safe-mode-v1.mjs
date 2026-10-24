@@ -1,4 +1,4 @@
-const REVISION='civweave-safe-mode-v1.1-batched-admissions';
+const REVISION='civweave-safe-mode-v1.2-extensible-admissions';
 const STORAGE_KEY='civweave.safe-mode.v1';
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -102,7 +102,7 @@ function installRuntimeHarness(){
     }
     return result;
   };
-  globalThis.CivweaveModelRuntime=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),safeModeRevision:REVISION});return true;
+  globalThis.CivweaveModelRuntime={...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),safeModeRevision:REVISION};return true;
 }
 function installAssistantHarness(){
   const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond||assistant.safeModeRevision===REVISION)return false;
@@ -118,7 +118,7 @@ function installAssistantHarness(){
     if(!review.admitted)return pause(result,review);
     return{...result,action:{...result.action,safeAdmission:review},response:{...(result.response||{}),safeMode:{decision:'allow',review}}};
   };
-  globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,safeModeRevision:REVISION});return true;
+  globalThis.CivweaveAssistantV141={...assistant,respond,safeModeRevision:REVISION};return true;
 }
 let lifecycleBound=false;
 function installLifecycleBinding(){if(lifecycleBound||typeof globalThis.addEventListener!=='function')return;lifecycleBound=true;const patch=()=>queueMicrotask(()=>{installRuntimeHarness();installAssistantHarness()});for(const name of ['civweave:model-runtime-ready','civweave:assistant-runtime-ready','civweave:guide-loader-reset','civweave:local-model-bridge-installed','pageshow'])addEventListener(name,patch)}

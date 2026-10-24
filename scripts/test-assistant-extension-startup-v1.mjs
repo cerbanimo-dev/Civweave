@@ -115,3 +115,18 @@ test('platform assistant decoration remains extensible for shared capabilities',
   assert.doesNotThrow(()=>{decorated.respond=capability},'Platform theme decoration must not freeze the shared capability extension point');
   assert.equal((await decorated.respond({systemId:'civweave'})).persisted,true);
 });
+
+test('optional safety and learning decorators preserve shared extension points',async()=>{
+  const safe=readFileSync(new URL('../public/app/safe-mode-v1.mjs',import.meta.url),'utf8');
+  const start=safe.indexOf('function installRuntimeHarness('),end=safe.indexOf('\nlet lifecycleBound',start);
+  const globalThis={CivweaveAssistantV141:{respond:async()=>({response:{answer:'local'}})},CivweaveModelRuntime:{generate:async()=>({status:'success',outputText:'local'})}};
+  const scope={globalThis,REVISION:'qa',readSafeMode:()=>({enabled:false})};
+  vm.runInNewContext(`${safe.slice(start,end)};installRuntimeHarness();installAssistantHarness();`,scope);
+  assert.doesNotThrow(()=>{globalThis.CivweaveAssistantV141.respond=async()=>({approved:false})},'Optional safety behavior must allow later capability registration');
+  assert.doesNotThrow(()=>{globalThis.CivweaveModelRuntime.generate=async()=>({status:'success'})},'Optional runtime admission must allow later knowledge/stream registration');
+  const video=readFileSync(new URL('../public/app/video-learning-contract-v1.mjs',import.meta.url),'utf8');
+  const line=video.split('\n').find(value=>value.startsWith('export function installCerbanimoHarness(')).replace(/^export /,'');
+  const ctx={globalThis,REVISION:'video-qa',FALLBACK_VIDEO_URL:'/video',AVAILABILITY_URL:'/availability',openMedia:{revision:'qa'},document:{documentElement:{},querySelectorAll:()=>[]},MutationObserver:class{observe(){}},setInterval:()=>0,setTimeout:()=>0};
+  vm.runInNewContext(`${line};installCerbanimoHarness();`,ctx);
+  assert.doesNotThrow(()=>{globalThis.CivweaveAssistantV141.respond=async()=>({approved:false})},'Optional learning tools must allow later capability registration');
+});
