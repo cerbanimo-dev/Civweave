@@ -1,7 +1,7 @@
 (function installCivweaveModelRuntime(global) {
   "use strict";
 
-  const VERSION = "1.0.2-moss-token-limit-finish-detection";
+  const VERSION = "1.0.3-ollama-request-thinking";
   const RESULT_SCHEMA = "civweave-model-result-1.0";
   const CAPABILITY_SCHEMA = "civweave-model-capabilities-1.0";
   const SHARED_MODEL_STORAGE_KEY = "civweave-shared-model";
@@ -615,6 +615,7 @@
           model: config.model,
           messages: normalizeChatMessages(messages),
           stream: useStream,
+          ...(typeof request.think === "boolean" || typeof request.think === "string" ? { think: request.think } : {}),
           ...(structured ? { format: request.schema ? sanitizeSchema(request.schema, { provider: "generic" }) : "json" } : {}),
           keep_alive: config.keepAlive,
           options: { temperature: config.temperature, num_ctx: config.context, num_predict: config.maxTokens },

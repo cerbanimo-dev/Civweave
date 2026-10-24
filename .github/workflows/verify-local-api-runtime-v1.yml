@@ -12,6 +12,8 @@ on:
       - 'public/app/guide-forward-failure-hardening-v1.js'
       - 'public/app/assistant-runtime-v141.js'
       - 'public/app/action-followthrough-v165.js'
+      - 'public/app/cerbanimo-chat-quest-capability-v2.js'
+      - 'public/app/settings-gateway-v317.js'
       - 'public/app/platform-experience-v160.js'
       - 'public/app/safe-mode-v1.mjs'
       - 'public/app/video-learning-contract-v1.mjs'
@@ -25,6 +27,7 @@ on:
       - 'scripts/test-chat-stream-finalization-v1.mjs'
       - 'scripts/test-guide-http-capability-options-v1.mjs'
       - 'scripts/test-guide-http-wrapper-integration-v1.mjs'
+      - 'scripts/test-kamiya-authoring-lifecycle-v1.mjs'
       - '.github/workflows/verify-local-api-runtime-v1.yml'
   push:
     branches: [staging, main]
@@ -38,6 +41,8 @@ on:
       - 'public/app/guide-forward-failure-hardening-v1.js'
       - 'public/app/assistant-runtime-v141.js'
       - 'public/app/action-followthrough-v165.js'
+      - 'public/app/cerbanimo-chat-quest-capability-v2.js'
+      - 'public/app/settings-gateway-v317.js'
       - 'public/app/platform-experience-v160.js'
       - 'public/app/safe-mode-v1.mjs'
       - 'public/app/video-learning-contract-v1.mjs'
@@ -51,6 +56,7 @@ on:
       - 'scripts/test-chat-stream-finalization-v1.mjs'
       - 'scripts/test-guide-http-capability-options-v1.mjs'
       - 'scripts/test-guide-http-wrapper-integration-v1.mjs'
+      - 'scripts/test-kamiya-authoring-lifecycle-v1.mjs'
       - '.github/workflows/verify-local-api-runtime-v1.yml'
 
 permissions:
@@ -64,5 +70,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci --ignore-scripts
       - run: node --check public/app/shared/civweave-model-runtime.js
-      - run: node --test scripts/test-local-api-runtime-v1.mjs scripts/test-assistant-extension-startup-v1.mjs scripts/test-chat-stream-finalization-v1.mjs scripts/test-guide-http-capability-options-v1.mjs scripts/test-guide-http-wrapper-integration-v1.mjs
+      - run: node --test scripts/test-local-api-runtime-v1.mjs scripts/test-assistant-extension-startup-v1.mjs scripts/test-chat-stream-finalization-v1.mjs scripts/test-guide-http-capability-options-v1.mjs scripts/test-guide-http-wrapper-integration-v1.mjs scripts/test-kamiya-authoring-lifecycle-v1.mjs

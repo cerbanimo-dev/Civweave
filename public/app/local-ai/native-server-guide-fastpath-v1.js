@@ -2,7 +2,7 @@
 // Does not start Wllama, LiteRT, ONNX, Cloudflare or the general assistant loader.
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
-const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.14-long-plan-finish-guard';
+const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking';
 const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.10-request-wish-owner';
 let modelsPromise=null,plannerPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.187-moss-review-controls';
+const VERSION='1.0.188-ollama-endeavor-schema';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -22,7 +22,7 @@ function install(){
   load('/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
   load('/app/guide-generation-floor-v1.js?v=1.3.0-local-planner-authority',null,()=>globalThis.CivweaveGuideGenerationFloorV1?.version==='1.3.0-guide-generation-floor-v1-local-planner-authority');
   load('/app/minilm-decision-strip-v1.js?v=1.3.1-live-guild-balance',null,()=>globalThis.CivweaveMiniLMDecisionStripV1?.version==='1.3.1-minilm-decision-strip-live-guild-balance');
-  load('/app/family-ai-loader-v105.js?v=1.0.145-rook-material-revisions',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
+  load('/app/family-ai-loader-v105.js?v=1.0.146-ollama-endeavor-schema',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
   load('/app/guide-forward-failure-policy-v1.js?v=1.0.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
   load('/app/guide-forward-failure-hardening-v1.js?v=1.2.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));

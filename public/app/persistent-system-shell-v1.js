@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.12-request-wish-owner';
+const VERSION='1.1.13-ollama-request-thinking';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -16,10 +16,10 @@ const GUIDE_ROOT_ID='cw-persistent-guide-chat-v215';
 const UPDATE_STYLE_ID='cw-persistent-platform-update-backlights-v1';
 const SUBSYSTEM_STATE_KEY='civweave.subsystem-avatar-state.v347';
 const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
-const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.137-ollama-provider-runtime-loopback';
+const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.138-generation-timeout';
 const SETTINGS_LOCAL_ROUTE_VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
-const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.191-request-wish-owner';
+const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.192-ollama-request-thinking';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
   'living-school':'#9cff73',
