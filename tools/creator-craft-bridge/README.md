@@ -1,4 +1,4 @@
-# Civweave WordCraft + CADCraft local bridge (experimental)
+# Civweave WordCraft + CADCraft + PdfCraft local bridge (experimental)
 
 This is a **separate opt-in companion process** that connects the Civweave Creator Suite to a locally installed [WordCraft CLI](https://github.com/storytold/wordcraft). The bridge does not bundle the CLI, start a model, install system packages or connect to hosted ArtCraft.
 
@@ -13,7 +13,7 @@ Accepted source extensions: DOCX, ODT, RTF, Markdown, TXT. Maximum source size: 
 
 The same bridge supports CADCraft for user-selected DXF/DWG drawings: cadcraft-cli info [temporary drawing] returns drawing details, and cadcraft-cli convert [temporary drawing] [temporary result.svg] exports a separate SVG. The CAD commands are also available behind the same per-request token and AI confirmation requirements.
 
-**Installations are not automatic:** download and install a trusted WordCraft CLI release from its upstream repository, or build wordcraft-cli from source. For CAD, install the upstream [CADCraft CLI](https://github.com/storytold/cadcraft) and check cadcraft-cli --version; you can set CADCRAFT_CLI to its executable. Ensure 'wordcraft-cli --version' works in the terminal running Civweave (or configure WORDCRAFT_CLI to its exact executable path). Validate downloaded binaries against upstream release checksums.
+PdfCraft adds PDF inspection, text extraction and a separate combined PDF from exactly two selected inputs using the upstream pdfcraft-cli. Total source PDF size is limited to 8 MiB; the bridge does not edit signed originals or publish files. Install PdfCraft CLI from https://github.com/storytold/pdfcraft/releases/latest and check `pdfcraft-cli --version` or set `PDFCRAFT_CLI` to an executable path.\n\n**Installations are not automatic:** download and install a trusted WordCraft CLI release from its upstream repository, or build wordcraft-cli from source. For CAD, install the upstream [CADCraft CLI](https://github.com/storytold/cadcraft) and check cadcraft-cli --version; you can set CADCRAFT_CLI to its executable. Ensure 'wordcraft-cli --version' works in the terminal running Civweave (or configure WORDCRAFT_CLI to its exact executable path). Validate downloaded binaries against upstream release checksums.
 
 ## Launch
 
@@ -51,10 +51,11 @@ node --check tools/creator-craft-bridge/server.mjs
 node --check tools/creator-craft-bridge/wordcraft.mjs
 node --test scripts/test-creator-wordcraft-bridge-v1.mjs
 node --test scripts/test-creator-cadcraft-bridge-v1.mjs
+node --test scripts/test-creator-pdfcraft-bridge-v1.mjs
 ~~~
 
 The tests use a tiny **fake CLI binary** to verify process execution, argument boundaries, API access checks and returned artifacts. It does *not* assert that the real WordCraft has passed a browser or document-fidelity round-trip test.
 
 ## Next work
 
-Integrate this tool bridge into Civweave's authenticated host node, add a service-status handshake to the account-level AI broker, enforce permission receipts and file snapshots, and test real WordCraft DOCX-to-PDF output before enabling it across guilds. CADCraft, GridCraft and PdfCraft can reuse the gateway and consent model after distinct upstream CLI contracts are validated.
+Integrate this tool bridge into Civweave's authenticated host node, add a service-status handshake to the account-level AI broker, enforce permission receipts and file snapshots, and test real WordCraft DOCX-to-PDF output before enabling it across guilds. GridCraft and other Craft tools can reuse the gateway and consent model after distinct upstream CLI contracts are validated.
