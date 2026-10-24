@@ -58,7 +58,7 @@ export async function callCli(args,{command=process.env.WORDCRAFT_CLI||'wordcraf
   });
 }
 export async function checkInstalled(config={}){
-  try{return Boolean(await callCli(['--version'],{...config,timeoutMs:5000,maxOutputBytes:2048}));}
+  try{await callCli(['--version'],{...config,timeoutMs:5000,maxOutputBytes:2048});return true;}
   catch{return false;}
 }
 export async function executeWordcraft(request,cliConfig={}){
