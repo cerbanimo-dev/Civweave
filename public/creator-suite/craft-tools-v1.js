@@ -36,7 +36,7 @@ function start(){
   // Quest deep links carry IDs only. Never read task content, automatically pick
   // private files, or trigger privileged processing from a URL.
   const requested=new URLSearchParams(location.search).get('tool');
-  const panelId=({wordcraft:'wordcraft-panel',cadcraft:'cadcraft-panel'})[requested];
+  const panelId=({wordcraft:'wordcraft-panel',cadcraft:'cadcraft-panel',pdfcraft:'pdfcraft-panel'})[requested];
   if(panelId){
     const panel=document.getElementById(panelId);
     if(panel){
