@@ -1,12 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='3.0.2-living-school-generation-budget-v3-bounded-ai-assessments';
+const VERSION='3.0.3-living-school-generation-budget-v3-local-design-deadline';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
 const QUIZ_REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v263';
 const DEPTH_PURPOSE='living-school-module-depth-expansion-v262';
-const DESIGN_TIMEOUT_MS=360000;
+// Give locally hosted models time to finish the one required, source-grounded design pass.
+// The shared runtime separately caps a single call at 600000ms; stay below that ceiling.
+const DESIGN_TIMEOUT_MS=570000;
 const DESIGN_MAX_TOKENS=16384;
 const MIN_LESSON_WORDS=120;
 const stats={designCalls:0,duplicateDesignCallsBlocked:0,designTimeouts:0,structureCompiles:0,quizCallsBlocked:0,repairCallsBlocked:0,depthCallsBlocked:0,filteredSourceNoise:0,installCount:0,installedAt:'',lastBlockedAt:'',lastProvider:'',lastModel:''};
