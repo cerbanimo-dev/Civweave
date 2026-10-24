@@ -6,6 +6,19 @@ This release makes web research a **standard, local-first capability** of Civwea
 
 The search transport is hosted by a Civweave node (Cloudflare Worker); this release is **not** a direct browser-to-SearXNG connection and is not yet a browser-independent offline web search.
 
+## Guild free-Citizen entitlement
+
+Joining a Guild as a free Citizen is sufficient to use live web research for
+locally running AI. Authentication uses the same signed host-capacity session
+as the rest of Civweave; no paid membership or commercial search subscription
+is required. Successful browser-tool requests return
+`benefit: guild-free-web-research`, `chargedNeurons: 0` and
+`chargedCents: 0`. An independent per-resident browser-tool fair-use
+limiter (8 actions per minute) protects the Guild's shared browser budget.
+Browser Run usage is not free of infrastructure costs for the Guildkeeper;
+the benefit is free **to the member**. Host outages, rate limits, and search
+provider blocks must be surfaced explicitly.
+
 ## Default: search without a separate search server
 
 **SearXNG is optional, not required.** The existing Civweave node-cloud Worker
