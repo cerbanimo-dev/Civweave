@@ -63,3 +63,28 @@ test('browser connector includes per-action approval, explicit selection and no 
   assert.match(source,/registerEditor\('wordcraft'/);
   assert.doesNotMatch(source,/localStorage|sessionStorage|indexedDB|eval\(/);
 });
+
+test('HTTP bridge rejects a third simultaneous document job without queuing unbounded work',async t=>{
+  let started=0,release;
+  const hold=new Promise(resolve=>{release=resolve;});
+  let signal;
+  const twoStarted=new Promise(resolve=>{signal=resolve;});
+  const srv=createWordcraftBridge({token,installed:async()=>true,execute:async()=>{
+    started++;
+    if(started===2)signal();
+    await hold;
+    return{schema:'civweave.craft-result.v1',action:'text',text:'done'};
+  }});
+  await new Promise(resolve=>srv.listen(0,'127.0.0.1',resolve));
+  t.after(()=>new Promise(resolve=>srv.close(resolve)));
+  const url='http://127.0.0.1:'+srv.address().port+'/v1/wordcraft';
+  const send=()=>fetch(url,{method:'POST',headers:{authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({action:'text',...file})});
+  const first=send(),second=send();
+  await twoStarted;
+  const busy=await send();
+  assert.equal(busy.status,429);
+  assert.equal((await busy.json()).code,'BRIDGE_BUSY');
+  release();
+  assert.equal((await first).status,200);
+  assert.equal((await second).status,200);
+});
