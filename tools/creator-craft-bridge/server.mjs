@@ -3,11 +3,12 @@ import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 import {executeWordcraft,checkInstalled,BridgeError,MAX_INPUT_BYTES} from './wordcraft.mjs';
+import {executeCadcraft,checkCadcraftInstalled} from './cadcraft.mjs';
 
 const PORT=47871;
 const MAX_BODY_BYTES=Math.ceil(MAX_INPUT_BYTES/3)*4+4096;
 const DEFAULT_ORIGINS=['http://127.0.0.1:8788','http://localhost:8788'];
-export function createWordcraftBridge({token,allowedOrigins=DEFAULT_ORIGINS,execute=executeWordcraft,installed=checkInstalled}={}){
+export function createWordcraftBridge({token,allowedOrigins=DEFAULT_ORIGINS,execute=executeWordcraft,installed=checkInstalled,cadExecute=executeCadcraft,cadInstalled=checkCadcraftInstalled}={}){
   if(typeof token!=='string'||token.length<32)throw new Error('A random bridge access token of at least 32 characters is required.');
   const origins=new Set(allowedOrigins);
   const secureToken=Buffer.from(token);
@@ -32,10 +33,10 @@ export function createWordcraftBridge({token,allowedOrigins=DEFAULT_ORIGINS,exec
     }
     try{
       if(req.method==='GET'&&req.url==='/v1/capabilities'){
-        json(res,200,{ok:true,schema:'civweave.craft-bridge-capabilities.v1',wordcraft:{installed:await installed(),actions:['inspect','text','pdf'],maxInputBytes:MAX_INPUT_BYTES}});
+        json(res,200,{ok:true,schema:'civweave.craft-bridge-capabilities.v1',wordcraft:{installed:await installed(),actions:['inspect','text','pdf'],maxInputBytes:MAX_INPUT_BYTES},cadcraft:{installed:await cadInstalled(),actions:['info','svg'],maxInputBytes:MAX_INPUT_BYTES}});
         return;
       }
-      if(req.method!=='POST'||req.url!=='/v1/wordcraft'){json(res,404,{ok:false,code:'NOT_FOUND'});return;}
+      if(req.method!=='POST'||!['/v1/wordcraft','/v1/cadcraft'].includes(req.url)){json(res,404,{ok:false,code:'NOT_FOUND'});return;}
       if(!String(req.headers['content-type']||'').toLowerCase().startsWith('application/json'))throw new BridgeError('JSON request required.','CONTENT_TYPE',415);
       let size=0,chunks=[];
       for await(const chunk of req){
@@ -46,7 +47,7 @@ export function createWordcraftBridge({token,allowedOrigins=DEFAULT_ORIGINS,exec
       let request;
       try{request=JSON.parse(Buffer.concat(chunks).toString('utf8'));}
       catch{throw new BridgeError('Malformed JSON.','INVALID_JSON',400);}
-      const result=await execute(request);
+      const result=await(req.url==='/v1/wordcraft'?execute(request):cadExecute(request));
       json(res,200,{ok:true,result});
     }catch(error){
       if(error instanceof BridgeError)json(res,error.status,{ok:false,code:error.code,error:error.message});
