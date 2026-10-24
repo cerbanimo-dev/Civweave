@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.188-guide-chat-surface-v350-stable-stream';
+const VERSION='1.0.189-guide-chat-surface-v350-stable-finalization';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -282,6 +282,9 @@ function render(){
     // Finalization keeps the streamed bubble and any capability controls in
     // place. Only write text when the final answer actually differs.
     if(bubble&&bubble.textContent!==text)bubble.textContent=text;
+    let nextNode=article.querySelector('.cw350-next');
+    const nextAction=user?'':String(row.nextAction||'');
+    if(nextAction){if(!nextNode){nextNode=document.createElement('div');nextNode.className='cw350-next';bubble.parentElement.append(nextNode);}const nextText=`Next: ${nextAction}`;if(nextNode.textContent!==nextText)nextNode.textContent=nextText;}else nextNode?.remove();
     let metadata=article.querySelector('.cw350-meta');
     if(!user&&meta){if(!metadata){metadata=document.createElement('div');metadata.className='cw350-meta';bubble.parentElement.append(metadata);}if(metadata.textContent!==meta)metadata.textContent=meta;}
     else metadata?.remove();
@@ -306,6 +309,10 @@ function paintNativeStream(system,messageId,text){
   }
 }
 function historyFor(system){return(readThread(system).messages||[]).filter(row=>!row.pending&&!row.modelError&&!/^(?:deterministic|manual)/.test(row.provider||'')&&['user','assistant'].includes(row.role)).slice(-16).map(row=>({role:row.role,text:clean(row.text,6000)}))}
+function paintStream(system,text){
+  const pending=[...(readThread(system).messages||[])].reverse().find(row=>row?.role==='assistant'&&row.pending);
+  return pending?paintNativeStream(system,pending.id,text):false;
+}
 function localFailure(system,selection,error){const message=clean(error?.message||error||'The selected local model did not complete.',900);return{text:`${guide(system).name} could not run the selected local model ${selection?.id||''}: ${message}`,provider:'local-model-error',model:error?.executionModel||selection?.id||'',error:message}}
 async function fallbackReply(system,text){
   const selection=selectedLocal();
@@ -392,13 +399,13 @@ async function submitActive(text){
       result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:pastHistory});
     }
     }finally{if(paintTimer){clearTimeout(paintTimer);paint();}}
-    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),respondingSystem=SYSTEMS.includes(result?.context?.guide?.system)?result.context.guide.system:system,replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:respondingSystem,responderSystem:respondingSystem,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),respondingSystem=SYSTEMS.includes(result?.context?.guide?.system)?result.context.guide.system:system,replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:respondingSystem,responderSystem:respondingSystem,text:clean(result?.response?.answer,10000),nextAction:next,provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
     if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(respondingSystem,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
   }catch(error){
-    // A failed native-server request must NOT issue a second generation or
-    // awaken a stale downloaded-local runtime, which can exhaust Android RAM.
-    const fallback=nativeApiRoute()
-      ? {text:`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
+    // Stop and local HTTP failures end this request. A retry needs a new
+    // user action and must never awaken a stale downloaded-model runtime.
+    const fallback=(requestAbort?.signal.aborted||ollamaRequested||nativeApiRoute())
+      ? {text:requestAbort?.signal.aborted?'Generation stopped.':`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
       : await fallbackReply(system,value);
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
   }finally{busy=false;nativeAbortController=null;if(button){button.disabled=false;button.type='submit';button.textContent='Send';}render();emitState()}
@@ -438,7 +445,7 @@ function start(){
   try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,submitVoiceText,resolveGuideAddress,ensureSpecializedRegistry,ensureVoiceRuntime,toggleVoice,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,submitVoiceText,resolveGuideAddress,ensureSpecializedRegistry,ensureVoiceRuntime,toggleVoice,render,paintStream,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

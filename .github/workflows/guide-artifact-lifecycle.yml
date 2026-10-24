@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-ai-validator-v159.js'
+      - 'public/app/realm-console-v140.html'
       - 'public/app/guide-contracts-v141.js'
       - 'scripts/test-guide-artifact-lifecycle-v1.mjs'
       - '.github/workflows/guide-artifact-lifecycle.yml'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-ai-validator-v159.js'
+      - 'public/app/realm-console-v140.html'
       - 'public/app/guide-contracts-v141.js'
       - 'scripts/test-guide-artifact-lifecycle-v1.mjs'
       - '.github/workflows/guide-artifact-lifecycle.yml'

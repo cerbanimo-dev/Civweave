@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.3-knowledge-encyclopedia-bridge-v271';
+const VERSION='1.0.4-knowledge-encyclopedia-bridge-v271-cancellation';
 if(globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.version===VERSION)return;
 const state={version:VERSION,ready:false,error:'',installed:false};
 globalThis.CivweaveKnowledgeEncyclopediaBridgeV271=state;
@@ -44,18 +44,28 @@ function patchPlanner(api,classify){
   const wrapped=function(input,...rest){const text=typeof input==='string'?input:input?.text;if(classify(text)?.eligible)return null;return original(input,...rest)};
   wrapped.__cwKnowledgeV271=true;wrapped.__cwOriginal=original;api.maybeCreate=wrapped;
 }
+function throwIfCancelled(options,value){
+  const error=value?.error||value,cancelled=options?.signal?.aborted||error?.name==='AbortError'||/^(?:cancelled|canceled|aborted|abort_err)$/i.test(String(value?.status||''))||/^(?:cancelled|canceled|aborted|abort_err)$/i.test(String(error?.code||''));
+  if(!cancelled)return;
+  if(options?.signal?.aborted&&options.signal.reason!==undefined)throw options.signal.reason;
+  if(error?.name==='AbortError'&&error instanceof Error)throw error;
+  throw Object.assign(new Error(error?.message||'Generation cancelled.'),{name:'AbortError',code:'CANCELLED'});
+}
 function patchGenerate(runtime,encyclopedia){
   if(!runtime?.generate||runtime.generate.__cwKnowledgeV271)return;
   const original=runtime.generate.bind(runtime);
   const wrapped=async function(options={}){
     if(options?.purpose!=='civweave-guide-response-v141')return original(options);
+    throwIfCancelled(options);
     const text=clean(options?.context?.userMessage,4000),system=clean(options?.context?.guide?.system||options?.context?.currentContext?.systemId||'civweave',80);
     const classification=encyclopedia.classifyKnowledgeQuestion(text);
     if(!classification.eligible)return original(options);
     const knowledge=await encyclopedia.buildKnowledgeContext(text,system);
+    throwIfCancelled(options);
     const messages=[...(Array.isArray(options.messages)?options.messages:[]),{role:'system',content:knowledgeOverrideMessage(knowledge)}];
     let result;
-    try{result=await original({...options,context:{...(options.context||{}),knowledgeEncyclopedia:knowledge},messages})}catch(error){result={status:'error',error:{message:error?.message||String(error)}}}
+    try{result=await original({...options,context:{...(options.context||{}),knowledgeEncyclopedia:knowledge},messages})}catch(error){throwIfCancelled(options,error);result={status:'error',error:{message:error?.message||String(error)}}}
+    throwIfCancelled(options,result);
     if(['success','fallback'].includes(result?.status))return result;
     return{
       status:'success',

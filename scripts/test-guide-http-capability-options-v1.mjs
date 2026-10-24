@@ -68,3 +68,48 @@ test('Quest authoring respects saved Ollama over a stale browser-model selection
   assert.equal(generated.transport, undefined);
   assert.equal(events.length, 1);
 });
+
+for (const systemId of ['civweave','cerbanimo']) {
+  for (const aborted of [false,true]) {
+    test(`selected HTTP failure is visible without deterministic replacement: ${systemId}, aborted=${aborted}`, async () => {
+      const abort = new AbortController();
+      if (aborted) abort.abort(new Error('Stopped by user'));
+      const failure = new Error(aborted ? 'Stopped by user' : 'Ollama endpoint unavailable');
+      let drafted=0;
+      const scope={
+        SYS:['civweave','cerbanimo'],pathSystem:()=>systemId,
+        context:async()=>({guide:{system:systemId},currentContext:{roomId:''}}),kind:()=>'',
+        selectedConfig:()=>config, model:async()=>{throw failure},
+        contracts:()=>({compose:()=>{drafted++;return null}}),wantsQuest:()=>true,
+        clean:value=>String(value??''),conversational:()=>({answer:'canned replacement'}),
+        guide:()=>({name:'Kamiya'}),mode:()=>'',console:{warn(){}},
+      };
+      const start=assistant.indexOf('async function respond('),end=assistant.indexOf('\nfunction review(',start);
+      const respond=vm.runInNewContext(`${assistant.slice(start,end)};respond`,scope);
+      await assert.rejects(respond({text:'Create a QA item',systemId,config,signal:abort.signal}), /Stopped by user|Ollama endpoint unavailable/);
+      if(systemId==='cerbanimo')assert.equal(drafted,0,'A failed or stopped model must not create a substitute draft');
+    });
+  }
+}
+
+test('Ollama surface failure stops after one request and keeps the error visible',async()=>{
+  const source=read('app/guide-chat-surface-v350.js');
+  let fallbacks=0;
+  const rows=[],button={},scope={
+    activeSystem:'civweave',busy:false,SYSTEMS:['civweave'],AbortController,
+    clean:(value,max=12000)=>String(value??'').trim().slice(0,max),ensureRoot(){},
+    root:{querySelector:selector=>selector==='textarea'?{value:''}:button},
+    activeNativePhoneServer:()=>false,configuredRoute:()=> 'ollama',nativeApiRoute:()=>false,
+    append:(system,row)=>rows.push(row),uid:()=> 'pending-1',render(){},emitAvatar(){},emitState(){},
+    historyFor:()=>[],globalThis:{CivweaveFamilyAILoaderV105:{respondOllama:async()=>{throw new Error('Ollama endpoint unavailable')}}},
+    guide:()=>({name:'Weaveling'}),fallbackReply:async()=>{fallbacks++;return{text:'second request',provider:'ollama'}},
+    readThread:()=>({messages:rows}),writeThread(){},now:()=> 'today',nativeAbortController:null,
+    dispatchEvent(){},CustomEvent:class{},
+  };
+  const start=source.indexOf('async function submitActive('),end=source.indexOf('\nfunction switchGuide(',start);
+  const submit=vm.runInNewContext(`${source.slice(start,end)};submitActive`,scope);
+  await submit('Say hello');
+  assert.equal(fallbacks,0,'Retry requires a new explicit user request');
+  assert.equal(rows.at(-1).provider,'model-error');
+  assert.match(rows.at(-1).text,/Ollama endpoint unavailable/);
+});

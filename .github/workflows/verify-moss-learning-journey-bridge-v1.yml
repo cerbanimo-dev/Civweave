@@ -15,7 +15,14 @@ on:
       - 'public/app/living-school-grounded-compiler-v336.js'
       - 'public/app/living-school-assessment-curator-v337.js'
       - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/services/living-school/modules/cerbanimo-bridge.mjs'
+      - 'public/app/services/living-school/modules/project-gate.mjs'
       - 'scripts/test-moss-assessment-materialization-v1.mjs'
+      - 'scripts/test-learning-practicum-handoff-v1.mjs'
+      - 'scripts/test-learning-journey-replacement-v1.mjs'
       - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
       - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
       - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
@@ -34,7 +41,14 @@ on:
       - 'public/app/living-school-grounded-compiler-v336.js'
       - 'public/app/living-school-assessment-curator-v337.js'
       - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/services/living-school/modules/cerbanimo-bridge.mjs'
+      - 'public/app/services/living-school/modules/project-gate.mjs'
       - 'scripts/test-moss-assessment-materialization-v1.mjs'
+      - 'scripts/test-learning-practicum-handoff-v1.mjs'
+      - 'scripts/test-learning-journey-replacement-v1.mjs'
       - 'scripts/verify-moss-learning-journey-bridge-v1.mjs'
       - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
       - '.github/workflows/verify-moss-learning-journey-bridge-v1.yml'
@@ -69,3 +83,7 @@ jobs:
         run: node scripts/verify-moss-learning-plan-approval-button-v1.mjs
       - name: Verify genuine AI assessment materialization and bounded failure
         run: node scripts/test-moss-assessment-materialization-v1.mjs
+      - name: Verify practicum handoff and authoritative completion receipt
+        run: node scripts/test-learning-practicum-handoff-v1.mjs
+      - name: Verify replacement Journey completion isolation and recovery
+        run: node scripts/test-learning-journey-replacement-v1.mjs

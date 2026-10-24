@@ -1,5 +1,5 @@
-import{copy,state,persist,VERSION,clean,progressFor,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
-import{render}from'./living-school-cleanroom-render-v218.mjs?v=model-authority-v323';
+import{copy,state,persist,VERSION,clean,progressFor,freshState,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
+import{render}from'./living-school-cleanroom-render-v218.mjs?v=bounded-assessments-practicum-v1';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=bounded-ai-assessments-v1';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=bounded-ai-assessments-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
@@ -183,23 +183,34 @@ function chatCurriculumData(input={}){
 
 function snapshotLearningState(){
   const s=state();
-  return copy({school:s.school||null,progress:s.progress||{},activeModuleId:s.activeModuleId||'',pathContext:s.pathContext||null,research:s.research||null,sources:s.sources||[],visualInspection:s.visualInspection||null,generationRecovery:s.generationRecovery||null});
+  return copy({school:s.school||null,progress:s.progress||{},activeModuleId:s.activeModuleId||'',activePathId:s.activePathId||'',pathContext:s.pathContext||null,research:s.research||null,sources:s.sources||[],visualInspection:s.visualInspection||null,generationRecovery:s.generationRecovery||null,practicum:s.practicum||null,projectGate:s.projectGate||freshState().projectGate,receipts:s.receipts||[],final:s.final||null,credential:s.credential||null,settings:s.settings||{},learningHistory:s.learningHistory||[]});
 }
 function restoreLearningState(snapshot){
   if(!snapshot)return;
   const s=state();
-  s.school=copy(snapshot.school);s.progress=copy(snapshot.progress||{});s.activeModuleId=snapshot.activeModuleId||'';s.pathContext=copy(snapshot.pathContext);s.research=copy(snapshot.research);s.sources=copy(snapshot.sources||[]);s.visualInspection=copy(snapshot.visualInspection);s.generationRecovery=copy(snapshot.generationRecovery);
+  s.school=copy(snapshot.school);s.progress=copy(snapshot.progress||{});s.activeModuleId=snapshot.activeModuleId||'';s.activePathId=snapshot.activePathId||'';s.pathContext=copy(snapshot.pathContext);s.research=copy(snapshot.research);s.sources=copy(snapshot.sources||[]);s.visualInspection=copy(snapshot.visualInspection);s.generationRecovery=copy(snapshot.generationRecovery);s.practicum=copy(snapshot.practicum);s.projectGate=copy(snapshot.projectGate);s.receipts=copy(snapshot.receipts||[]);s.final=copy(snapshot.final);s.credential=copy(snapshot.credential);s.settings=copy(snapshot.settings||{});s.learningHistory=copy(snapshot.learningHistory||[]);
+}
+function preservePreviousPath(snapshot){
+  if(!snapshot?.school?.id)return;
+  const {learningHistory,...record}=snapshot;
+  state().learningHistory=[...(Array.isArray(learningHistory)?learningHistory:[]),{...copy(record),archivedAt:new Date().toISOString()}];
 }
 function prepareNewPath(data){
   const s=state(),snapshot=snapshotLearningState();
   s.school=null;
   s.progress={};
   s.activeModuleId='';
+  s.activePathId='';
   s.pathContext={title:data.title,capability:data.capability,proof:data.proof,source:'moss-shared-chat-new-path'};
   s.research=null;
   s.sources=[];
   s.visualInspection=null;
   s.generationRecovery=null;
+  s.practicum=null;
+  s.projectGate=freshState().projectGate;
+  s.receipts=[];
+  s.final=null;
+  s.credential=null;
   persist('living-school-new-path-replacement-started',{title:data.title,capability:data.capability,level:data.level,count:data.count,source:'moss-shared-chat'});
   return snapshot;
 }
@@ -222,7 +233,7 @@ async function generateCurriculumFromChat(input={}){
     reconcileProgressById(priorProgress);
     await ensureLivingSchool(school);
     persist('living-school-video-contract-applied',{reason:'chat-generation',moduleCount:school.modules?.length||0,requiredPerModule:1,fallbackUrl:FALLBACK_VIDEO_URL});
-    if(data.newPath)persist('living-school-new-path-replacement-completed',{schoolId:school.id,title:school.title,capability:school.capability,moduleCount:school.modules?.length||0,source:'moss-shared-chat'});
+    if(data.newPath){preservePreviousPath(previous);persist('living-school-new-path-replacement-completed',{schoolId:school.id,title:school.title,capability:school.capability,moduleCount:school.modules?.length||0,source:'moss-shared-chat'});}
     renderEnhanced();
     queueMicrotask(()=>renderLivingSchoolEmbed(document,school,state().activeModuleId));
     const result={school:copy(school),sourceCount:Number(state().sources?.length||0),research:copy(state().research||null),generationRecovery:copy(state().generationRecovery||null),activeModuleId:state().activeModuleId,intent:data.intent};

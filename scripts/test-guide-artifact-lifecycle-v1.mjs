@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {normalizeProjectReceipt,receiptUnlocksFinalTest} from '../public/app/services/living-school/modules/cerbanimo-bridge.mjs';
 
 const engineSource=fs.readFileSync(new URL('../public/app/cerbanimo-quest-engine-v144.js',import.meta.url),'utf8');
 const contractsSource=fs.readFileSync(new URL('../public/app/guide-contracts-v141.js',import.meta.url),'utf8');
@@ -127,4 +128,72 @@ test('Merlin feature requests and approved implementation handoffs preserve the 
   assert.match(linked.fields.smallestVisibleResult,/export saved chats/i);
   assert.equal(contracts.approve(action.id).ok,true);
   assert.equal(contracts.items().filter(item=>item.fields.sourceRequestId===action.id).length,1,'repeated approval is idempotent');
+});
+
+test('the active Cerbanimo route loads the one stable independent validator',()=>{
+  const html=fs.readFileSync(new URL('../public/app/realm-console-v140.html',import.meta.url),'utf8');
+  assert.equal((html.match(/src="\/app\/cerbanimo-ai-validator-v159\.js/g)||[]).length,1);
+  assert.doesNotMatch(html,/src="\/app\/cerbanimo-ai-validator-v156\.js/);
+});
+
+test('mounted Cerbanimo refreshes when the parent chat writes its canonical store',()=>{
+  const listeners=new Map(),frames=[];
+  const context=vm.createContext({console,structuredClone,URLSearchParams,location:{search:'?system=cerbanimo'},
+    document:{readyState:'loading',hidden:false,documentElement:{},querySelector:()=>null},
+    localStorage:{getItem:()=>null,setItem(){}},MutationObserver:class{observe(){}},
+    addEventListener:(name,fn)=>listeners.set(name,fn),requestAnimationFrame:fn=>frames.push(fn)});
+  vm.runInContext(engineSource.replace('root.CivweaveCerbanimoQuestV144={','root.CivweaveCerbanimoQuestV144={observe,'),context);
+  context.CivweaveCerbanimoQuestV144.observe();
+  frames.shift()();
+  assert.equal(typeof listeners.get('storage'),'function');
+  listeners.get('storage')({key:context.CivweaveCerbanimoQuestV144.STORE_KEY});
+  assert.equal(frames.length,1,'an external canonical store write schedules the owning renderer');
+});
+
+test('embedded Cerbanimo validation uses the parent shared runtime on explicit review',async()=>{
+  const {engine,context}=harness(engineSource),quest=fixture(engine),task=quest.tasks[0];
+  engine.applyTaskTransition(quest.id,task.id,'in-progress');engine.addProof(quest.id,task.id,{value:'alpha'});engine.applyTaskTransition(quest.id,task.id,'review');
+  let ensured=0,generated=0;
+  context.document={readyState:'loading',querySelector:()=>null};context.requestAnimationFrame=()=>0;context.location={origin:'https://civweave-staging.pages.dev'};
+  context.parent={location:{origin:context.location.origin},CivweaveFamilyAILoaderV105:{ensure:async()=>{ensured++}},CivweaveModelRuntime:{readSharedConfig:()=>({provider:'ollama',model:'gemma4:latest'}),generate:async()=>{generated++;return{status:'success',actual:{provider:'ollama',model:'gemma4:latest'},outputJson:{decision:'pass',confidence:.99,summary:'Fixture reviewed.',criteria:[],concerns:[],repairInstructions:[]}}}}};
+  vm.runInContext(validatorSource,context);
+  assert.equal(ensured,0,'loading validation UI does not start the model runtime');
+  await context.CerbanimoAIValidatorV159.validateTask(quest.id,task.id);
+  assert.equal(ensured,1);assert.equal(generated,1);
+  assert.equal(engine.readState().quests[0].tasks[0].review.provider,'ollama');
+});
+
+test('Moss practicum outbox imports once as a gated Endeavor and receipts require real independent acceptance',async()=>{
+  const {engine,context,storage}=harness(engineSource);
+  const packet={type:'civweave:project-handoff-requested',contractVersion:'civweave.cerbanimo-project.v1',sourceApplication:'living-school',requestId:'request-qa-practicum',schoolId:'school-qa-learning',projectRef:'practicum-qa-report',moduleId:'final-project',learnerId:'local-learner',title:'QA report practicum',creativeIntention:'Write alpha beta gamma.',project:{id:'practicum-qa-report',title:'QA report practicum',artifact:'alpha beta gamma',proof:'The three words appear in order.',capability:'Write a tiny report.'}};
+  storage.set('civweave.cerbanimo.project-handoff.outbox.v1',JSON.stringify([packet]));
+  engine.migrate();engine.migrate();
+  const quest=engine.readState().quests[0];
+  assert.ok(quest,'the active canonical engine consumes the outbox');
+  assert.equal(engine.readState().quests.length,1,'retry must not duplicate the Endeavor');
+  assert.equal(quest.status,'draft');
+  assert.equal(engine.applyTaskTransition(quest.id,quest.tasks[0].id,'in-progress').ok,false,'ratification precedes work');
+  let receipt=normalizeProjectReceipt(engine.projectReceipt(quest.id));
+  assert.equal(receipt.projectRef,packet.projectRef);
+  assert.equal(receipt.status,'submitted');
+  assert.equal(receiptUnlocksFinalTest(receipt),false);
+  assert.equal(engine.activateQuest(quest.id).ok,true);
+  context.document={readyState:'loading',querySelector:()=>null};context.requestAnimationFrame=()=>0;
+  context.CivweaveFamilyAILoaderV105={ensure:async()=>true};
+  context.CivweaveModelRuntime={readSharedConfig:()=>({provider:'ollama',model:'gemma4:latest'}),generate:async()=>({status:'success',actual:{provider:'ollama',model:'gemma4:latest'},requestId:'qa-independent-review',outputJson:{decision:'pass',confidence:.99,summary:'Fixture independent review.',criteria:[],concerns:[],repairInstructions:[],unmetCriteria:[]}})};
+  vm.runInContext(validatorSource,context);
+  const validator=context.CerbanimoAIValidatorV159;
+  for(const task of quest.tasks){engine.applyTaskTransition(quest.id,task.id,'in-progress');engine.addProof(quest.id,task.id,{value:packet.project.artifact});engine.applyTaskTransition(quest.id,task.id,'review');await validator.validateTask(quest.id,task.id)}
+  engine.submitQuest(quest.id);
+  assert.equal(receiptUnlocksFinalTest(normalizeProjectReceipt(engine.projectReceipt(quest.id))),false,'task acceptance alone does not imply final acceptance');
+  await validator.validateQuest(quest.id);
+  receipt=normalizeProjectReceipt(engine.projectReceipt(quest.id));
+  assert.equal(receiptUnlocksFinalTest(receipt),true);
+  assert.equal(receipt.demo,false);
+  assert.equal(receipt.reviewId,'qa-independent-review');
+  assert.ok(JSON.parse(storage.get('civweave.cerbanimo.project-receipts.v1')).some(item=>item.receiptId===receipt.receiptId));
+  engine.applyTaskTransition(quest.id,quest.tasks[0].id,'ready');
+  const reopened=normalizeProjectReceipt(engine.projectReceipt(quest.id));
+  assert.equal(receiptUnlocksFinalTest(reopened),false);
+  assert.ok(reopened.statusRevision>receipt.statusRevision);
 });

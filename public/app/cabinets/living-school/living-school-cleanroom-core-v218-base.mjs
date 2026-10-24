@@ -144,7 +144,7 @@ export function freshState(){
   return{
     schema:'living-school-cabinet-v151',runtimeSchema:VERSION,version:4,appVersion:VERSION,
     school:null,sources:[],research:null,activeModuleId:'module-1',progress:{},practicum:null,visualInspection:null,
-    projectGate:freshGate(),receipts:[],final:null,credential:null,
+    projectGate:freshGate(),receipts:[],final:null,credential:null,learningHistory:[],
     activePathId:'',pathContext:null,
     passport:{learnerId:uid('learner'),displayName:'Local learner',xp:0,ledger:[]},
     settings:{modelRoute:'shared',mode:'guided'},events:[]
@@ -157,6 +157,7 @@ export function normalizeState(value){
   next.sources=Array.isArray(source.sources)?source.sources:[];
   next.progress=source.progress&&typeof source.progress==='object'?source.progress:{};
   next.receipts=Array.isArray(source.receipts)?source.receipts:[];
+  next.learningHistory=Array.isArray(source.learningHistory)?source.learningHistory:[];
   next.events=Array.isArray(source.events)?source.events.slice(-300):[];
   next.passport={...base.passport,...(source.passport||{}),ledger:Array.isArray(source.passport?.ledger)?source.passport.ledger.slice(-800):[]};
   next.settings={...base.settings,...(source.settings||{})};

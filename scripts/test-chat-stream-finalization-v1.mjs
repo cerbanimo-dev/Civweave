@@ -4,6 +4,7 @@ import test from 'node:test';
 import vm from 'node:vm';
 
 const source = readFileSync(new URL('../public/app/guide-chat-surface-v350.js', import.meta.url), 'utf8');
+const streamSource = readFileSync(new URL('../public/app/guide-stream-thinking-v249.js', import.meta.url), 'utf8');
 
 test('capability passover offers leave the target guide private until accepted', () => {
   const start = source.indexOf('function explicitHandoffTarget(');
@@ -84,12 +85,13 @@ test('stream completion retains the article and bubble without rewriting the com
   const article = app.log.children[1], bubble = article.querySelector('.cw350-bubble');
   app.scope.paintNativeStream('civweave', 'reply-1', 'Hello from local AI');
   const writes = bubble.textWrites;
-  app.setRows([app.rows[0], { id: 'reply-1', role: 'assistant', text: 'Hello from local AI', provider: 'ollama', model: 'gemma4:latest' }]);
+  app.setRows([app.rows[0], { id: 'reply-1', role: 'assistant', text: 'Hello from local AI', nextAction: 'Review your saved Quest.', provider: 'ollama', model: 'gemma4:latest' }]);
   app.scope.render();
   assert.equal(app.log.children[1], article, 'completion must keep the streamed article');
   assert.equal(article.querySelector('.cw350-bubble'), bubble, 'completion must keep the streamed bubble');
   assert.equal(bubble.textWrites, writes, 'the final token text is already present');
   assert.equal(article.dataset.pending, 'false');
+  assert.equal(article.querySelector('.cw350-next').textContent, 'Next: Review your saved Quest.');
   assert.equal(article.querySelector('.cw350-meta').textContent, 'ollama · gemma4:latest');
   app.scope.render();
   assert.equal(bubble.textWrites, writes, 'later lifecycle updates must leave completed text alone');
@@ -105,4 +107,57 @@ test('appending a later turn preserves existing bubbles and their capability con
   assert.equal(article.querySelector('.cw350-bubble'), bubble);
   assert.equal(control.parentElement, article, 'subscriber capability controls must survive ordinary chat rendering');
   assert.equal(app.log.children.length, 3);
+});
+
+test('the stream subscriber delegates canonical painting and leaves the finished answer node intact', () => {
+  const app = harness(); app.scope.render();
+  const article = app.log.children[1], bubble = article.querySelector('.cw350-bubble');
+  const query = article.querySelector.bind(article);
+  article.querySelector = selector => selector === '.cw350-bubble,.cw237-bubble' ? bubble : query(selector);
+  const owner = { canonicalOwner: true, activeWindow: () => 'civweave', paintStream: (system, text) => app.scope.paintStream(system, text) };
+  const scope = { globalThis: { CivweaveGuideChatSurfaceV350: owner },
+    document: { querySelector: () => ({ querySelectorAll: () => [article] }), createElement: tag => new Element(tag) },
+    threadPending: () => true, finalizeIfDone() {}, esc: value => String(value),
+  };
+  const start = streamSource.indexOf('function thinkingMarkup('), end = streamSource.indexOf('\nfunction decorateInline(', start);
+  const decorate = vm.runInNewContext(`${streamSource.slice(start, end)};decorateWorkspace`, scope);
+  decorate('civweave', { thinking: 'Private reasoning', answer: 'Visible answer', done: false });
+  assert.equal(bubble.textContent, 'Visible answer');
+  const disclosure = bubble.parentElement.querySelector('.cw249-thinking');
+  assert.ok(disclosure, 'Thinking is presented outside the canonical answer node.');
+  assert.notEqual(disclosure.parentElement, bubble);
+  const writes = bubble.textWrites;
+  app.setRows([app.rows[0], { id: 'reply-1', role: 'assistant', text: 'Visible answer', provider: 'ollama' }]);
+  app.scope.render();
+  decorate('civweave', { thinking: 'Private reasoning', answer: '', done: true });
+  assert.equal(app.log.children[1], article);
+  assert.equal(article.querySelector('.cw350-bubble'), bubble);
+  assert.equal(bubble.textWrites, writes, 'Completion must not clear or repaint the streamed answer.');
+  assert.equal(bubble.parentElement.querySelector('.cw249-thinking'), disclosure, 'Disclosure updates preserve existing DOM.');
+  assert.equal(disclosure.open, false);
+});
+
+test('the local token bridge respects the selected provider and preserves all callback arguments', async () => {
+  const config = { provider: 'ollama', route: 'ollama' }, emitted = [], seen = [];
+  const meta = { purpose: 'qa-stream' };
+  const scope = {
+    globalThis: { CivweaveModelRuntime: { readSharedConfig: () => config },
+      CivweaveAssistantV141: { respond: async input => { input.onToken('piece', 'full answer', meta); return { response: { answer: 'full answer' } }; } } },
+    localStorage: { getItem: () => JSON.stringify({ active: true, id: 'stale-browser-model' }) },
+    LOCAL_SELECTION_KEY: 'selection', VERSION: 'qa', SYSTEMS: ['civweave'],
+    parse: (value, fallback) => { try { return JSON.parse(value); } catch { return fallback; } },
+    currentSystem: () => 'civweave', dispatchEvent: event => emitted.push(event),
+    CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
+  };
+  const start = streamSource.indexOf('function selectedLocal('), end = streamSource.indexOf('\nfunction rehydrate(', start);
+  const patch = vm.runInNewContext(`${streamSource.slice(start, end)};patchAssistant`, scope);
+  patch();
+  await scope.globalThis.CivweaveAssistantV141.respond({ systemId: 'civweave', onToken: (...args) => seen.push(args) });
+  assert.equal(seen[0][1], 'full answer'); assert.equal(seen[0][2], meta);
+  assert.equal(emitted.length, 0, 'A stale downloaded model must not relabel selected HTTP tokens.');
+  config.provider = config.route = 'downloaded-local';
+  await scope.globalThis.CivweaveAssistantV141.respond({ systemId: 'civweave', onToken: (...args) => seen.push(args) });
+  assert.equal(seen[1][1], 'full answer'); assert.equal(seen[1][2], meta);
+  assert.equal(emitted.length, 1);
+  assert.equal(emitted[0].detail.accumulatedText, 'full answer');
 });

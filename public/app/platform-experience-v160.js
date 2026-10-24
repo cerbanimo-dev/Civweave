@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-platform-experience-v160.1-quest-copy';
+const VERSION='1.0.6-platform-experience-v160-extensible-assistant';
 // Compatibility marker: VERSION='1.0.4-platform-experience-v160'
 if(globalThis.CivweavePlatformExperienceV160?.version===VERSION)return;
 const THEME_KEY='civweave.appearance.v160';
@@ -101,9 +101,8 @@ function patchAssistant(api){
     if(target&&result?.action&&result.response?.answer)result.response.answer=`Weaveling routed this to ${target==='anarchadia'?'Anarchadia':target==='fellowfare'?'FellowFare':target==='living-school'?'Living School':'Cerbanimo'}. ${result.response.answer}`;
     return result;
   };
-  // Provider policies freeze their assistant snapshots. Never mutate those snapshots:
-  // return a fresh frozen wrapper so later provider-policy installs can wrap it too.
-  return Object.freeze({...api,respond,__cw160ActionRouting:true});
+  // Keep the shared assistant extensible for its registered capability owners.
+  return {...api,respond,__cw160ActionRouting:true};
 }
 function buttonBudget(text){
   const value=clean(text,4000);

@@ -104,3 +104,14 @@ for (const policies of [
   });
   }
 }
+
+test('platform assistant decoration remains extensible for shared capabilities',async()=>{
+  const source=readFileSync(new URL('../public/app/platform-experience-v160.js',import.meta.url),'utf8');
+  const start=source.indexOf('function patchAssistant('),end=source.indexOf('\nfunction buttonBudget(',start);
+  const patch=vm.runInNewContext(`${source.slice(start,end)};patchAssistant`,{explicitActionSystem:()=>'',document:{documentElement:{dataset:{}}}});
+  const base={respond:async()=>({response:{answer:'local'}})};
+  const decorated=patch(base),prior=decorated.respond;
+  const capability=async args=>({...await prior(args),persisted:true});
+  assert.doesNotThrow(()=>{decorated.respond=capability},'Platform theme decoration must not freeze the shared capability extension point');
+  assert.equal((await decorated.respond({systemId:'civweave'})).persisted,true);
+});

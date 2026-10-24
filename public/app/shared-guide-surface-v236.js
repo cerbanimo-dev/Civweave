@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.182-persistent-parent-chrome';
+const VERSION='1.0.183-guide-http-stream';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -24,8 +24,8 @@ function install(){
   load('/app/minilm-decision-strip-v1.js?v=1.3.1-live-guild-balance',null,()=>globalThis.CivweaveMiniLMDecisionStripV1?.version==='1.3.1-minilm-decision-strip-live-guild-balance');
   load('/app/family-ai-loader-v105.js?v=1.0.132-standard-ai-lazy-local',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
-  load('/app/guide-forward-failure-policy-v1.js?v=1.0.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
-  load('/app/guide-forward-failure-hardening-v1.js?v=1.2.1-local-provider-pin',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
+  load('/app/guide-forward-failure-policy-v1.js?v=1.0.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailurePolicyV1));
+  load('/app/guide-forward-failure-hardening-v1.js?v=1.2.2-http-capabilities',null,()=>Boolean(globalThis.CivweaveGuideForwardFailureHardeningV1));
   load('/app/local-chat-bounded-recovery-v1.js?v=1.1.0-gemma4-q4',null,()=>globalThis.CivweaveLocalChatBoundedRecoveryV1?.version==='1.1.0-local-chat-bounded-recovery-v1-gemma4-q4'&&globalThis.CivweaveLocalChatBoundedRecoveryV1?.gemma4CompatibleQ4===true);
   load('/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first',()=>{
     load('/app/local-ai/gemma4-pack-extension-v1.js?v=1.3.1-q4f16-ready',()=>{
@@ -36,7 +36,7 @@ function install(){
               load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
                 load('/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.1-explicit-local-http',()=>{
                   load('/app/local-guide-control-bypass-v1.js?v=1.4.3-mandatory-intake-direct',()=>{
-                    load('/app/guide-stream-thinking-v249.js?v=1.0.124-finalization-guard',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.124-guide-stream-thinking-v249-finalization-guard');
+                    load('/app/guide-stream-thinking-v249.js?v=1.0.125-canonical-paint',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.125-guide-stream-thinking-v249-canonical-paint');
                   },()=>globalThis.CivweaveLocalGuideControlBypassV1?.version==='1.4.3-local-guide-control-bypass-v1-mandatory-intake-direct');
                 },()=>globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.0-weaveling-plan-json-v190-ai-quest-intent');
               },()=>Boolean(globalThis.CivweaveIntentionPlanner?.shouldCreate&&globalThis.CivweaveIntentionPlanner?.buildPlan));

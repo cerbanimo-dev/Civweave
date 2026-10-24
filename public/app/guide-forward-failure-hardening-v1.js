@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.1-guide-forward-failure-hardening-v1-local-provider-pin';
+const VERSION='1.2.2-guide-forward-failure-hardening-v1-http-capabilities';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const SERVER_ROUTER='/app/server-ai-router-v301.js?v=1.0.117-guild-only-handoff';
 const LOCAL_ROUTES=new Set(['downloaded-local','device-local']);
@@ -31,7 +31,8 @@ function currentInteractiveProvider(){
   catch{}
   try{const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{}),legacy=parse(localStorage.getItem('civweave.universal-ai.v127'),{}),active=profiles?.interactive||legacy;return clean(active?.provider||active?.route||'server-auto',80).toLowerCase()||'server-auto'}catch{return'server-auto'}
 }
-function localInteractiveConfigured(){return LOCAL_ROUTES.has(currentInteractiveProvider())}
+function selectedHttpConfigured(){return['ollama','openai-compatible'].includes(currentInteractiveProvider())}
+function localInteractiveConfigured(){return LOCAL_ROUTES.has(currentInteractiveProvider())||selectedHttpConfigured()}
 function installDeterministicCompatibility(){
   if(globalThis.CivweaveDeterministicModeV175){emit('civweave:legacy-deterministic-mode-present',{provider:currentInteractiveProvider()});return false}
   const route=(text,system='civweave')=>({system:validSystem(system),mode:guideMode(validSystem(system)),confidence:0,source:'deterministic-retired-cloud-fallback',evidence:[]});
@@ -87,6 +88,9 @@ function patchAssistant(){
   const previousFn=assistant.respond,legacyDeterministicWrapper=Boolean(previousFn.__deterministicModeV175&&!previousFn.__civweaveCloudFallbackV1),previous=previousFn.bind(assistant);
   const respond=async args=>{
     const request=args||{},provider=currentInteractiveProvider(),localPinned=LOCAL_ROUTES.has(provider);
+    // Explicit HTTP routes keep their real artifact/control results and
+    // errors. They must not silently start a different cloud request.
+    if(selectedHttpConfigured())return previous(request);
     if(legacyDeterministicWrapper&&['server-auto','hosted'].includes(provider))return cloudResult(request,'legacy-deterministic-wrapper-bypassed',null);
     try{
       const result=await previous(request);

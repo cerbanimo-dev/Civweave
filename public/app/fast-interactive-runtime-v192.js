@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.117-runtime-spine-v271-standard-ai-only';
+const VERSION='1.0.118-runtime-spine-v271-http-stream';
 const root=globalThis;
 if(root.CivweaveFastInteractiveV192?.version===VERSION)return;
 const middleware=new Map();
@@ -14,7 +14,12 @@ function optimizedRequest(request={}){
   // Structured plans need the budget selected by their capability owner.
   if(!(Number(config.timeoutMs)>0)&&!(Number(config.timeoutSeconds)>0))config.timeoutMs=60000;
   if(!(Number(config.maxTokens)>0)&&!(Number(config.max_tokens)>0))config.maxTokens=4096;
-  config.stream=false;
+  // HTTP chat already owns its explicit stream and token callback. Preserve
+  // that transport choice while retaining the existing nonstreaming policy
+  // for providers whose structured-output path does not support streaming.
+  const provider=String(config.provider||config.route||'').toLowerCase();
+  config.stream=['ollama','openai-compatible'].includes(provider)
+    ? Boolean(request.stream??config.stream):false;
   return{...request,config,responseFormat:'json'};
 }
 function ordered(){return[...middleware.values()].sort((a,b)=>(b.priority||0)-(a.priority||0)||a.id.localeCompare(b.id))}

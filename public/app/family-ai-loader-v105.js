@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.141-ollama-shared-capabilities'
+const VERSION='1.0.142-guide-http-lifecycle'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -21,15 +21,15 @@ const VALUE_MODEL=[
   ['/app/civweave-basic-value-review-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueReviewV1],
   ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1-idle-safe-v1',()=>globalThis.CivweaveBasicValueSystemsV1?.eventDriven===true]
 ];
-const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.117-standard-ai-only',()=>globalThis.CivweaveFastInteractiveV192];
+const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.118-http-stream',()=>globalThis.CivweaveFastInteractiveV192];
 const SERVER_AI_ROUTER=['/app/server-ai-router-v301.js?v=1.0.117-guild-handoff',()=>globalThis.CivweaveServerAIRouterV301?.status?.().registered===true];
 const RESPONSE_ROUTER=['/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',()=>globalThis.CivweaveResponseRouterV347];
 const LOCAL_BOOTSTRAP=['/app/local-ai/bootstrap-v266.js?v=1.0.83-v282-inference-health',()=>globalThis.CivweaveLocalAIBootstrapV266];
-const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.7-stream-options',()=>globalThis.CivweaveAssistantV141];
+const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.8-http-cancellation',()=>globalThis.CivweaveAssistantV141];
 const PATCHES=[
   ['/app/deterministic-mode-v175.js?v=deterministic-r1',()=>globalThis.CivweaveDeterministicModeV175],
   ['/app/weaveling-memory-bridge-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryBridgeV191],
-  ['/app/knowledge-encyclopedia-bridge-v271.js?v=knowledge-encyclopedia-v271',()=>globalThis.CivweaveKnowledgeEncyclopediaBridgeV271]
+  ['/app/knowledge-encyclopedia-bridge-v271.js?v=1.0.4-knowledge-encyclopedia-bridge-v271-cancellation',()=>globalThis.CivweaveKnowledgeEncyclopediaBridgeV271]
 ];
 const OPTIONAL=[
   ['/app/intention-ui-v138.js?v=1.0.4',()=>globalThis.CivweaveIntentionUI],

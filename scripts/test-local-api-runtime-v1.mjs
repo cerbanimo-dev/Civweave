@@ -29,7 +29,7 @@ function localRuntime(response) {
     },
   };
   vm.runInNewContext(source, context, { filename: 'civweave-model-runtime.js' });
-  return { runtime: context.CivweaveModelRuntime, calls };
+  return { runtime: context.CivweaveModelRuntime, calls, context };
 }
 
 test('saved Ollama route returns nonstreaming chat content without a Guild or external credential', async () => {
@@ -82,4 +82,28 @@ test('streaming Ollama chat still combines visible answer tokens', async () => {
   assert.equal(result.status, 'success');
   assert.equal(result.outputText, 'Local answer.');
   assert.equal(result.stream.used, true);
+});
+
+test('the real shared runtime spine preserves selected Ollama streaming and its token callback', async () => {
+  const frames = [
+    { message: { content: '{"answer":"Local ' }, done: false },
+    { message: { content: 'answer."}' }, done: false },
+    { message: { content: '' }, done: true },
+  ];
+  const app = localRuntime(() => new Response(frames.map(frame => JSON.stringify(frame) + '\n').join('')));
+  const spine = readFileSync(new URL('../public/app/fast-interactive-runtime-v192.js', import.meta.url), 'utf8');
+  vm.runInNewContext(spine, app.context, { filename: 'fast-interactive-runtime-v192.js' });
+  const partials = [];
+  const result = await app.context.CivweaveModelRuntime.generate({
+    purpose: 'civweave-guide-response-v141', executionProfile: 'interactive', responseFormat: 'json',
+    config: { provider: 'ollama', model: 'llama3.2', endpoint, stream: true, maxTokens: 64 },
+    messages: [{ role: 'user', content: 'Reply briefly as JSON.' }], maxRepairAttempts: 0,
+    onEvent: event => { if (event.phase === 'partial') partials.push(event.accumulatedText); },
+  });
+  assert.equal(app.calls[0].body.stream, true, 'The canonical spine must preserve the selected HTTP stream.');
+  assert.equal(app.calls.length, 1, 'A valid stream must not issue a repair or second provider request.');
+  assert.equal(result.status, 'success');
+  assert.equal(result.outputJson.answer, 'Local answer.');
+  assert.equal(result.stream.used, true);
+  assert.equal(partials.at(-1), '{"answer":"Local answer."}');
 });
