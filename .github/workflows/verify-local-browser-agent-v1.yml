@@ -12,6 +12,9 @@ on:
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/verify-local-browser-agent-v1.mjs'
       - 'scripts/test-local-research-router-v1.mjs'
+      - 'scripts/test-guild-free-web-benefit-v1.mjs'
+      - 'public/app/host-node-installer-lobby-v1.js'
+      - 'cloudflare/node-cloud/wrangler.staging.jsonc'
       - 'public/app/local-provider-authority-v1.js'
       - '.github/workflows/verify-local-browser-agent-v1.yml'
   workflow_dispatch:
@@ -39,3 +42,5 @@ jobs:
         run: node scripts/verify-local-browser-agent-v1.mjs
       - name: End-to-end local research regression
         run: node scripts/test-local-research-router-v1.mjs
+      - name: Guild free Citizen browser entitlement regression
+        run: node scripts/test-guild-free-web-benefit-v1.mjs
