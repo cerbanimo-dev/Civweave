@@ -19,6 +19,11 @@
       "name": "GUILD_AI_RATE_LIMITER",
       "namespace_id": "41002",
       "simple": { "limit": 6, "period": 60 }
+    },
+    {
+      "name": "GUILD_BROWSER_RATE_LIMITER",
+      "namespace_id": "41003",
+      "simple": { "limit": 8, "period": 60 }
     }
   ],
   "browser": {
