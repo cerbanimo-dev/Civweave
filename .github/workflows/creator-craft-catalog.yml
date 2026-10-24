@@ -16,3 +16,7 @@ jobs:
           node --check public/creator-suite/shared/craft-catalog-v1.js
           node --check public/creator-suite/craft-tools-v1.js
           node --test scripts/test-creator-craft-catalog-v1.mjs
+          node --check tools/creator-craft-bridge/wordcraft.mjs
+          node --check tools/creator-craft-bridge/server.mjs
+          node --check public/creator-suite/wordcraft-connector-v1.js
+          node --test scripts/test-creator-wordcraft-bridge-v1.mjs
