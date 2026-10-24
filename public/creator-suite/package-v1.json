@@ -1,6 +1,6 @@
 {
   "schema": "civweave.creator-suite-package.v1",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "name": "Civweave Creator Suite",
   "scope": "/creator-suite/",
   "entry": "/creator-suite/index.html",
