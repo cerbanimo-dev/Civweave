@@ -56,3 +56,8 @@ Never confuse `CivweaveCreatorToolsV1.registerEditor` with tool authorization. R
 - Setup: tools/creator-craft-bridge/README.md. Browser consent UI: /creator-suite/tools.html.
 - Requires independently installed WordCraft CLI and trusted exact origin configuration. It does not automatically connect a guild or AI model router.
 - Native CLI and HTTP tests use a stub executable. Real upstream CLI and browser/PNA tests remain manual acceptance gates.
+
+### CADCraft first bounded adapter
+- CADCraft CLI drawing info / SVG export share the localhost companion bridge authentication and no-shell isolated temporary file handling.
+- CAD drawing operations in the browser require an explicitly picked DXF/DWG file; AI tool calls require a fresh approval.
+- Real CADCraft releases, DWG fidelity and SVG correctness still need manual hardware/runtime verification.
