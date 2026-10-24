@@ -18,6 +18,9 @@ on:
       - 'public/app/living-school-assessment-curator-v337.js'
       - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-journey-index-v1.mjs'
+      - 'scripts/verify-living-school-journey-list-v1.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
       - 'public/app/services/living-school/modules/cerbanimo-bridge.mjs'
@@ -46,6 +49,9 @@ on:
       - 'public/app/living-school-assessment-curator-v337.js'
       - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-journey-index-v1.mjs'
+      - 'scripts/verify-living-school-journey-list-v1.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
       - 'public/app/services/living-school/modules/cerbanimo-bridge.mjs'
@@ -88,6 +94,8 @@ jobs:
         run: node scripts/verify-moss-learning-plan-approval-button-v1.mjs
       - name: Verify local curriculum deadline and saved Learning Journey visibility
         run: node scripts/verify-moss-curriculum-quest-library-v1.mjs
+      - name: Verify Living School pending, failed and approved journey list
+        run: node scripts/verify-living-school-journey-list-v1.mjs
       - name: Verify genuine AI assessment materialization and bounded failure
         run: node scripts/test-moss-assessment-materialization-v1.mjs
       - name: Verify practicum handoff and authoritative completion receipt
