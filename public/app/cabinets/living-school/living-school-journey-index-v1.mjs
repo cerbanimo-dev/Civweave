@@ -75,6 +75,7 @@ export function learningJourneySnapshot(read,schoolState={}){
   const retry=plan?.state==='approved'&&!completedFor(plan.request)?
     {id:'plan:'+plan.id,request:{...plan.request},approvedAt:plan.approvedAt}:queue&&!completedFor(queue)?
     {id:'queue:'+queue.approvedPlanId,request:{...queue},approvedAt:queue.approvedAt}:null;
-  const focus=(!current?(plan?.state==='approved'?plan.request:queue||null):null);
+  const failedRequest=recovery?.request?.capability&&['failed','partial'].includes(recovery.status)?recovery.request:null;
+  const focus=(!current?(plan?.state==='approved'?plan.request:queue||failedRequest):null);
   return {rows:rows.slice(0,20),retry,focus,plan,queue};
 }
