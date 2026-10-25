@@ -233,10 +233,11 @@ export async function researchCapability(capability,options={}){
     }
   }
 
+  // User-supplied references outrank the unverified model-training fallback.
+  const manual=manualPacket(s,normalized);if(manual)return applyPacket(s,normalized,manual);
   let modelError;
   try{const packet=await researchTrainingFallback(normalized,liveError,options);core.assertGenerationActive(options);return applyPacket(s,normalized,packet)}catch(error){if(core.generationCancelled(error,options))throw error;modelError=error}
   core.assertGenerationActive(options);
-  const manual=manualPacket(s,normalized);if(manual)return applyPacket(s,normalized,manual);
   const packet=unavailablePacket(normalized,new Error(`Live research: ${liveError?.message||liveError}; local schools: no usable passages; model fallback: ${modelError?.message||modelError}`));
   applyPacket(s,normalized,packet);
   core.persist('living-school-research-unavailable',{capability:normalized,reason:packet.reason,retryable:true,policy:'stop-before-curriculum-generation'});
