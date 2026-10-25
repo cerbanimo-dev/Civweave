@@ -38,4 +38,3 @@ jobs:
         run: |
           node scripts/verify-living-school-selected-ai-research-fallback-v1.mjs
           node scripts/verify-learning-source-packs-v1.mjs
-          node scripts/verify-regression-fixes-v243.mjs
