@@ -1,6 +1,10 @@
 name: Kingdom Pocket Scribe M4 — Android debug APK
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'pocket-scribe/m4/**'
+      - '.github/workflows/pocket-scribe-m4-android.yml'
   push:
     branches:
       - pocket-scribe/m4-kokoro-qwen-build
