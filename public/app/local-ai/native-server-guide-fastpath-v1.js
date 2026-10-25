@@ -5,6 +5,7 @@ export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
 const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking';
 const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.16-explicit-weave-path';
 const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.0-ai-authority-only';
+const QUEST_MATERIALIZER='/app/weaveling-plan-materialization-v265.js?v=1.1.2-preserve-campus-intention';
 const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.8-composite-intents';
 let modelsPromise=null,plannerPromise=null,questPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
@@ -79,6 +80,7 @@ async function ensureQuestPlanner(){
       'Shared model runtime').catch(error=>{modelsPromise=null;throw error});
     await modelsPromise;
     await loadScript(INTENTION_PLANNER,()=>typeof globalThis.CivweaveIntentionPlanner?.persist==='function','Quest intention planner');
+    await loadScript(QUEST_MATERIALIZER,()=>typeof globalThis.CivweaveWeavelingPlanMaterializationV265?.materialize==='function','Canonical Quest review materialization');
     await loadScript(QUEST_PLANNER,()=>typeof globalThis.CivweaveWeavelingPlanJsonV190?.createModelPlan==='function'&&
       typeof globalThis.CivweaveWeavelingPlanJsonV190?.planIntent==='function','Canonical Weaveling Quest planner');
     return globalThis.CivweaveWeavelingPlanJsonV190;
