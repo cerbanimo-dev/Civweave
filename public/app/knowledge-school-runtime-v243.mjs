@@ -1,4 +1,4 @@
-import {searchSupplementalArticles} from './learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v1';
+import {searchSupplementalArticles,stageMissingSupplementalForQuery} from './learning-source-pack-runtime-v1.mjs?v=unified-source-packs-v2-topic-gap';
 
 const VERSION='1.0.40-knowledge-school-runtime-v243-tiered-local-library';
 const INSTALLER='/app/knowledge-school-seeds-v1.js?v=local-reader-r2';
@@ -159,9 +159,9 @@ function schoolPriority(capability,records){
 
 export async function searchDownloadedKnowledge(capability,{limit=10,maxSchools=5}={}){
   const query=clean(capability,1800),tokens=words(query);if(!tokens.length)return[];
-  const store=await installer(),status=await store.status(),available=status.filter(record=>record.current),bySlug=new Map(available.map(record=>[record.school_slug,record])),slugs=schoolPriority(query,available).filter(slug=>bySlug.has(slug)).slice(0,maxSchools),results=[];
+  const store=await installer(),status=await store.status(),available=status.filter(record=>record.current),bySlug=new Map(available.map(record=>[record.school_slug,record])),priority=schoolPriority(query,available).slice(0,maxSchools),slugs=priority.filter(slug=>bySlug.has(slug)),results=[];
   try{
-    const supplemental=await searchSupplementalArticles(query,{schoolSlugs:slugs,limit:Math.max(10,limit)});
+    const supplemental=await searchSupplementalArticles(query,{schoolSlugs:priority,limit:Math.max(10,limit)});
     for(const row of supplemental)results.push({...row,score:Number(row.score||0)+24});
   }catch(error){console.warn('[Knowledge School supplemental reader]',error)}
   for(const slug of slugs){
@@ -180,6 +180,7 @@ export async function searchDownloadedKnowledge(capability,{limit=10,maxSchools=
   const minimumMatches=tokens.length>=2?2:1,seen=new Set();return results.sort((a,b)=>b.score-a.score).filter(item=>{const relevanceText=`${item.title||''} ${item.notes||''}`.toLowerCase(),matches=tokens.reduce((count,token)=>count+(relevanceText.includes(token)?1:0),0);if(matches<minimumMatches)return false;const key=(item.canonicalUrl||item.url||item.notes).toLowerCase().replace(/[^a-z0-9]+/g,' ').slice(0,220);if(seen.has(key))return false;seen.add(key);return true}).slice(0,limit)
 }
 
+export {stageMissingSupplementalForQuery};
 export function clearKnowledgeSchoolDatabaseCache(){seedCache.clear()}
 export const version=VERSION;
 globalThis.CivweaveKnowledgeSchoolRuntimeV243=Object.freeze({version:VERSION,search:searchDownloadedKnowledge,clear:clearKnowledgeSchoolDatabaseCache,engine:'dependency-free-sqlite-byte-search+tier-routing+canonical-source-links+supplemental-source-pack'});
