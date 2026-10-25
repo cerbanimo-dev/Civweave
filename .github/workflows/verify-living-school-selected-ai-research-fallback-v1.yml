@@ -7,6 +7,14 @@ on:
       - 'public/app/living-school-local-research-v243.mjs'
       - 'scripts/verify-living-school-selected-ai-research-fallback-v1.mjs'
       - '.github/workflows/verify-living-school-selected-ai-research-fallback-v1.yml'
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/living-school-local-research-v243.mjs'
+      - 'public/app/knowledge-school-runtime-v243.mjs'
+      - 'public/app/learning-source-pack-runtime-v1.mjs'
+      - 'scripts/verify-living-school-selected-ai-research-fallback-v1.mjs'
+      - '.github/workflows/verify-living-school-selected-ai-research-fallback-v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +31,11 @@ jobs:
       - name: Check syntax
         run: |
           node --check public/app/living-school-local-research-v243.mjs
+          node --check public/app/knowledge-school-runtime-v243.mjs
+          node --check public/app/learning-source-pack-runtime-v1.mjs
           node --check scripts/verify-living-school-selected-ai-research-fallback-v1.mjs
       - name: Verify selected AI fallback
-        run: node scripts/verify-living-school-selected-ai-research-fallback-v1.mjs
+        run: |
+          node scripts/verify-living-school-selected-ai-research-fallback-v1.mjs
+          node scripts/verify-learning-source-packs-v1.mjs
+          node scripts/verify-regression-fixes-v243.mjs
