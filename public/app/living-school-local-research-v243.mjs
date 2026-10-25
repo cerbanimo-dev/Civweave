@@ -1,5 +1,5 @@
 import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v267';
+import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v268';
 
 const RESEARCHER='living-school-cleanroom-research-v218.1';
 const RELEVANCE_REVISION='living-school-subject-coverage-v266';
