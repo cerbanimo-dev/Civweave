@@ -86,6 +86,41 @@ class Controller:
         self.model = ""
         self.context = 2048
 
+    def candidate_model_paths(self, name):
+        """Fixed, local model directories only; never accept a path from HTTP."""
+        filename = MODELS[name]["file"]
+        return (
+            ("Termux ~/models", self.model_dir / filename),
+            ("Android Downloads", self.home / "storage" / "downloads" / filename),
+            ("Termux llama.cpp/models", self.home / "llama.cpp" / "models" / filename),
+            ("Termux ~/Downloads", self.home / "Downloads" / filename),
+        )
+
+    def find_existing_model(self, name):
+        for _, candidate in self.candidate_model_paths(name):
+            if candidate.is_file() and not candidate.is_symlink():
+                return candidate
+        return None
+
+    def model_receipt(self, path):
+        # Receipts are internal even when the GGUF lives in Android Downloads.
+        digest = hashlib.sha256(str(path.resolve()).encode()).hexdigest()[:20]
+        return self.root / ("verified-" + digest + ".sha256")
+
+    def is_verified(self, name, path):
+        if path is None:
+            return False
+        markers = (self.model_receipt(path), path.with_name(path.name + ".sha256"))
+        for receipt in markers:
+            try:
+                if (receipt.is_file() and not receipt.is_symlink()
+                    and receipt.read_text().strip() == MODELS[name]["sha256"]
+                    and receipt.stat().st_mtime_ns >= path.stat().st_mtime_ns):
+                    return True
+            except OSError:
+                continue
+        return False
+
     def server_running(self):
         with self.lock:
             return self.proc is not None and self.proc.poll() is None
@@ -106,15 +141,14 @@ class Controller:
             owned = self.server_running()
             names = {}
             for key, info in MODELS.items():
-                model_path = self.model_dir / info["file"]
-                receipt = self.model_dir / (info["file"] + ".sha256")
-                present = model_path.is_file() and not model_path.is_symlink()
-                verified = (present and receipt.is_file()
-                            and receipt.read_text().strip() == info["sha256"]
-                            and receipt.stat().st_mtime_ns >= model_path.stat().st_mtime_ns)
+                model_path = self.find_existing_model(key)
+                location = next((label for label, candidate
+                                 in self.candidate_model_paths(key)
+                                 if model_path is not None and candidate == model_path), "")
                 names[key] = {
-                    "present": present,
-                    "verified": verified,
+                    "present": model_path is not None,
+                    "verified": self.is_verified(key, model_path),
+                    "location": location,
                     "bytes_approx": info["bytes_approx"],
                 }
             chosen = self.model
@@ -183,22 +217,22 @@ class Controller:
 
     def _verify(self, name):
         info = MODELS[name]
-        path = self.model_dir / info["file"]
-        if not path.is_file() or path.is_symlink():
-            raise RuntimeError("Model missing or unsafe path. Install the selected model first.")
+        path = self.find_existing_model(name)
+        if path is None:
+            raise RuntimeError("Model missing in approved Termux or Android Downloads directories.")
         size = path.stat().st_size
         self.update_job(message="Verifying " + info["file"], progress=0)
         actual = digest_file(path, lambda done: self.update_job(progress=min(99, int(100*done/size))))
         if not hmac.compare_digest(actual, info["sha256"]):
             raise RuntimeError("Model SHA-256 differs from the pinned source. Existing file was not changed.")
-        (self.model_dir / (info["file"] + ".sha256")).write_text(actual + "\n")
+        self.model_receipt(path).write_text(actual + "\n")
         self.update_job(message="SHA-256 verified", progress=100)
 
     def _download(self, name):
         info = MODELS[name]
         final = self.model_dir / info["file"]
-        if final.exists():
-            raise RuntimeError("A model already exists at this path. Use Verify; no automatic overwrite.")
+        if self.find_existing_model(name) is not None or final.exists():
+            raise RuntimeError("An existing model is already found. Use Verify; no automatic overwrite.")
         part = self.model_dir / (info["file"] + ".part")
         if part.is_symlink():
             raise RuntimeError("Unsafe partial-download path.")
@@ -252,12 +286,12 @@ class Controller:
         if self.server_responding():
             raise RuntimeError("Port 8080 is already occupied. Stop the manually started Termux server before starting Companion.")
         info = MODELS[name]
-        model_path = self.model_dir / info["file"]
+        model_path = self.find_existing_model(name)
         executable = shutil.which("llama-server")
         if not executable:
             raise RuntimeError("llama-cpp is not installed. Run Setup first.")
-        if not model_path.is_file() or model_path.is_symlink():
-            raise RuntimeError("GGUF not installed in ~/models. Download or place it there first.")
+        if model_path is None:
+            raise RuntimeError("No GGUF found in ~/models, Android Downloads or llama.cpp/models. Use Download if needed.")
         wake_lock = shutil.which("termux-wake-lock")
         if wake_lock:
             subprocess.run([wake_lock], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
