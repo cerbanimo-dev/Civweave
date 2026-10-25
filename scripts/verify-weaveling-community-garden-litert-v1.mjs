@@ -27,8 +27,8 @@ const paths=[
 for(const path of paths)syntax(path);
 
 const control=file('public/app/local-guide-control-bypass-v1.js');
-includes(control,'1.4.1-local-guide-control-bypass-v1-ai-quest-lazy-route','Quest route control');
-includes(control,"ORCHESTRATOR_VERSION='1.2.0-weaveling-plan-json-v190-ai-quest-intent'",'Quest route control');
+includes(control,'1.4.8-local-guide-control-bypass-v1-ordered-subsystems','Quest route control');
+includes(control,"ORCHESTRATOR_VERSION='1.2.7-weaveling-plan-json-v190-ordered-subsystems'",'Quest route control');
 includes(control,'__cwWeavelingAIQuestRequiredV1','Quest route control');
 includes(control,'likelyQuestIntent','Quest route control');
 includes(control,'ensureOrchestrator','Quest route control');
@@ -40,7 +40,7 @@ assert(!control.includes('specializeCommunityGarden'),'Hard-coded community-gard
 assert(!control.includes('localGenerationSkipped:true'),'Quest routing must not advertise skipped AI generation.');
 
 const orchestrator=file('public/extensions/civweave-weaveling-plan-json-v190.js');
-includes(orchestrator,'1.2.0-weaveling-plan-json-v190-ai-quest-intent','Quest orchestrator');
+includes(orchestrator,'1.2.7-weaveling-plan-json-v190-ordered-subsystems','Quest orchestrator');
 includes(orchestrator,'localStructuredTransport','Quest orchestrator');
 includes(orchestrator,"provider:'downloaded-local'",'Quest orchestrator');
 includes(orchestrator,"mode:'model-structured-json'",'Quest orchestrator');
@@ -77,7 +77,7 @@ localProvider.__civweaveLocalProviderAuthorityVersion='1.0.3-local-provider-auth
 localProvider.__prior=async()=>({provider:'deterministic-control'});
 sandbox.CivweaveAssistantV141={respond:localProvider};
 sandbox.CivweaveWeavelingPlanJsonV190={
-  version:'1.2.0-weaveling-plan-json-v190-ai-quest-intent',
+  version:'1.2.7-weaveling-plan-json-v190-ordered-subsystems',
   planIntent:text=>/community garden|basement arcade/i.test(text),
   createModelPlan:async args=>{structuredCalls++;return{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16',plan:{title:/arcade/i.test(args.text)?'AI basement arcade Quest':'AI community garden Quest'},questAuthoring:{aiGenerated:true}}},
   install:()=>true
@@ -102,15 +102,17 @@ for(const [a,b] of [
   ['civweave-weaveling-plan-json-v190.js','local-guide-control-bypass-v1.js'],
   ['local-guide-control-bypass-v1.js','guide-stream-thinking-v249.js']
 ])before(loader,a,b,'shared guide loader');
-includes(loader,'1.2.0-ai-quest-intent','shared guide loader');
-includes(loader,'1.4.1-ai-quest-lazy-route','shared guide loader');
+includes(loader,'1.2.7-ordered-subsystems','shared guide loader');
+includes(loader,'1.4.8-ordered-subsystems','shared guide loader');
+includes(loader,"CivweaveLocalGuideControlBypassV1?.version==='1.4.8-local-guide-control-bypass-v1-ordered-subsystems'",'shared guide loader must wait for current Quest authority, not retired release');
+assert(!loader.includes("CivweaveLocalGuideControlBypassV1?.version==='1.4.3-local-guide-control-bypass-v1-mandatory-intake-direct'"),'retired authority readiness guard must not stall current Quest routing');
 includes(loader,'aiQuestAuthoringRequired:true','shared guide loader');
 includes(loader,'structuredQuestOrchestratorSerialized:true','shared guide loader');
 includes(loader,'questIntentGreetingSafe:true','shared guide loader');
 includes(loader,'questOrchestratorRevisionPinned:true','shared guide loader');
 includes(loader,"questCustomizationOwner:'selected-ai-model'",'shared guide loader');
 includes(loader,'deterministicQuestFallback:false','shared guide loader');
-includes(loader,"gemma4LiteRTFastModelId:'gemma4-e2b-it-litert-web'",'shared guide loader');
+includes(loader,"gemma4LiteRTFastModelId:globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||''",'shared guide loader');
 
 const extension=file('public/app/local-ai/gemma4-litert-fast-extension-v1.js');
 includes(extension,"id:'gemma4-e2b-it-litert-web'",'LiteRT model extension');

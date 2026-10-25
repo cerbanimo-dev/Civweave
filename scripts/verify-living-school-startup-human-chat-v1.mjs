@@ -16,9 +16,9 @@ const [livingSchool,shell,shellAssets,reportUi,bubble,standalone,sharedGuide]=aw
 const checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
-const workbenchImport="await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v4-receipt-revocation')";
+const workbenchImport=livingSchool.match(/await import\('\/app\/cabinets\/living-school\/living-school-cleanroom-v218\.mjs\?v=[^']+'\)/)?.[0]||'';
 const supportWarm='const supportReady=ensureSupportRuntime()';
-const importAt=livingSchool.indexOf(workbenchImport);
+const importAt=workbenchImport?livingSchool.indexOf(workbenchImport):-1;
 const warmAt=livingSchool.indexOf(supportWarm);
 check('Living School identifies the workbench-first boot revision',livingSchool.includes('data-living-school-revision="structured-single-v221-boot-first-v2"'));
 check('workbench renderer starts before generation support warming',importAt>=0&&warmAt>importAt);

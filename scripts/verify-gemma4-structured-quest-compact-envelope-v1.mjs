@@ -8,7 +8,7 @@ const requestAuthoritySource=await readFile(new URL('../public/app/local-ai/gemm
 const fastRuntimeSource=await readFile(new URL('../public/app/local-ai/litert-gemma4-fast-runtime-v1.js',import.meta.url),'utf8');
 
 assert.match(registrySource,/gemma4-structured-quest-compact-envelope-v1\.js\?v=1\.1\.0-formatted-output/);
-assert.match(registrySource,/gemma4-litert-request-authority-v1\.js\?v=1\.0\.1-stable-composition/);
+assert.match(registrySource,/gemma4-litert-request-authority-v1\.js\?v=1\.2\.34-idempotent-tracker/);
 assert.match(requestAuthoritySource,/firstRequestOwnership:true/);
 assert.match(requestAuthoritySource,/genericTransformersBypass:true/);
 assert.match(requestAuthoritySource,/stableAssistantComposition:true/);

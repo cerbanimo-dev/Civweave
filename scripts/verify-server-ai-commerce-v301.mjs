@@ -31,12 +31,13 @@ const cloudRuntime = `${cloudEntryV1}\n${cloudEntryV2}\n${cloudEntryV3}\n${cloud
 const accountRuntime = `${accountEdge}\n${legacyAccountEdge}`;
 
 assert.match(version.trim(), /^\d+\.\d+\.\d+$/);
-assert.match(router, /1\.0\.116-server-ai-router-v301/);
+assert.match(router, /1\.0\.124-server-ai-router-v301-explicit-long-deadlines/);
 assert.match(settings, /1\.0\.118-server-ai-settings-v306-community-share/);
-assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.116-v301/);
+assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.124-route-deadlines/);
 assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.118-v306-community-share/);
 assert.match(router, /const ROUTE='server-auto'/);
-assert.match(router, /\['device-local','server-local','cloudflare-workers-ai'\]/);
+assert.match(router, /route:'device-local',status:'skipped-or-failed-over'/,'downloaded model handoff precedes server-auto');
+assert.ok(router.indexOf('await serverLocal(next,trace)')>=0 && router.indexOf('await cloudflare(next,trace)')>router.indexOf('await serverLocal(next,trace)'), 'paired local host must be attempted before paid Cloudflare fallback');
 assert.match(router, /s\.register\(MIDDLEWARE_ID,\{handle\},60\)/);
 assert.match(router, /localServerService\(candidate\)/);
 assert.match(router, /CivweaveNodeAIMeshV1/);
@@ -48,7 +49,7 @@ assert.match(router, /CivweaveHostNodeSessionV1/);
 assert.match(router, /recordUsage/);
 assert.match(router, /approximateTurnsLeft/);
 
-assert.match(spine, /1\.0\.116-runtime-spine-v271-server-auto-v301/);
+assert.match(spine, /1\.0\.118-runtime-spine-v271-http-stream/);
 assert.match(spine, /serverAuto\(request\)/);
 assert.match(spine, /function localResultNeedsFailover/);
 assert.match(spine, /completionValidation\?\.valid===false/);
@@ -136,7 +137,7 @@ assert.match(accountEdge, /server-ai-entry-v2\.mjs/);
 assert.match(accountEdge, /legacyAccountEdge\.fetch/);
 assert.match(legacyAccountEdge, /server-ai-entry-v1\.mjs/);
 assert.match(accountRuntime, /central-money-edge-required/);
-assert.match(wrangler, /"main": "src\/server-ai-entry-v6\.mjs"/);
+assert.match(wrangler, /"main": "src\/server-ai-entry-v7\.mjs"/);
 assert.match(wrangler, /"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-flash-lite"/);
 assert.match(wrangler, /"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave\.cc"/);
 

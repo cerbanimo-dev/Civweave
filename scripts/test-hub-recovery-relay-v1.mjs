@@ -57,7 +57,7 @@ try {
   const signup = await service.signup(nodeId, { userId, credential, email, passportId });
   assert.equal(signup.delivery.transport, 'inbound-email-proof');
   assert.equal(signup.delivery.mailbox, mailbox);
-  assert.match(signup.delivery.subject, /^Civweave Hub verify-email /);
+  assert.match(signup.delivery.subject, /^Civweave Guild verify-email /);
   assert.ok(!signup.delivery.subject.includes(nodeId), 'relay message must not expose the Hub/node id');
   await assert.rejects(
     () => service.completeInboundVerification(nodeId, signup.delivery.proofToken),
@@ -111,7 +111,7 @@ try {
   });
   await assert.rejects(
     () => service.completeInboundRecovery(nodeId, unknown.delivery.proofToken),
-    /No recoverable Hub account was confirmed/,
+    /No recoverable Guild account was confirmed/,
   );
 
   const wrong = await service.requestRecoveryForNode(nodeId, { email });
@@ -123,7 +123,7 @@ try {
   });
   await assert.rejects(
     () => service.completeInboundRecovery(nodeId, wrong.delivery.proofToken),
-    /does not match this Hub recovery request/,
+    /does not match this Guild recovery request/,
   );
 
   for (const proof of relay.values()) {

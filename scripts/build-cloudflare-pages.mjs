@@ -46,7 +46,8 @@ const githubRepo = process.env.GITHUB_REPOSITORY || 'cerbanimo-dev/Civweave';
 // Cloudflare Pages packaging path so production deploys the same checked-in
 // source graph that staging validates.
 console.log('[Civweave] Pages source is authoritative; skipping retired single-shell release synchronizers.');
-await import('./generate-prelive-metadata-v281.mjs');
+// Prelive metadata is materialized by release tooling and committed to source.
+// Deploy-time Pages packaging must not rewrite shell hashes or budget authority.
 await import('./generate-asset-lockboard-catalog-v239.mjs');
 
 function walkFiles(directory) {

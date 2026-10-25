@@ -42,6 +42,6 @@ assert(transformersV3.includes("purpose:'browser-runtime-only'"),'Transformers v
 assert(!transformersV3.includes("fsp.cp(source,destination"),'Transformers v3 must not copy the entire npm dist tree into Pages.');
 const transformersV4=read('scripts/stage-transformers-v4-assets.mjs');
 assert(transformersV4.includes("purpose:'gemma4-mobile-browser-runtime-only'"),'Transformers v4 must remain browser-runtime-only.');
-assert(transformersV4.includes("manifest.schema!=='civweave.transformers-stage.v6'"),'Transformers v4 must reject stale full-runtime stages and prune them once.');
+assert(transformersV4.includes("STAGE_SCHEMA='civweave.transformers-stage.v7'") && transformersV4.includes("LLAMA_ASYNC_SCHEMA='civweave.transformers-stage.v8'") && transformersV4.includes("manifest.schema!==STAGE_SCHEMA") && transformersV4.includes("asyncManifest.schema!==LLAMA_ASYNC_SCHEMA"),'Transformers v4 must reject stale runtime stage schemas, including the asyncify contract.');
 
 console.log('Cloudflare deploy discipline verified: no duplicate preview mirror, non-production automation skips Pages, runtime/data staging stays minimal and parallel, and optional school ZIP bytes remain outside the Pages publish payload.');
