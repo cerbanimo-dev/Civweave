@@ -69,8 +69,9 @@ export async function stageMissingSupplementalForQuery(query,{limit=4,schoolSlug
     const exact=title.length>=6&&clean(query,2400).toLowerCase().includes(title);
     return{row,score:titleHits*20+(exact?45:0)};
   }).filter(item=>item.score>=20).sort((a,b)=>b.score-a.score||a.row.id.localeCompare(b.row.id)).slice(0,Math.max(1,Math.min(6,Number(limit)||4)));
-  const results=[];
-  for(const {row} of matches)results.push(await fetchWikipediaArticle(row));
+  // Bounded parallel requests: three unavailable reference endpoints must not
+  // cause three consecutive 12-second timeouts before Moss reports failure.
+  const results=await Promise.all(matches.map(({row})=>fetchWikipediaArticle(row)));
   // Return inspected passages directly. A downloaded article must remain usable
   // even if a subsequent foundation-status lookup or broad search fails.
   const schoolNames=new Map((catalogs.articles.schools||[]).map(row=>[row.school_slug,row.school_name]));
