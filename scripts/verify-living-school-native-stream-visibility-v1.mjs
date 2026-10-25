@@ -24,7 +24,7 @@ const helperScope={
 };
 const nativeStream=vm.runInNewContext(helper+'\nwithNativeMossStream',helperScope);
 assert.equal(nativeStream(nativeConfig).stream,true,'Same-phone Qwen requests must stream');
-assert.equal(nativeConfig.stream,false,'Do not mutate the user's saved model settings');
+assert.equal(nativeConfig.stream,false,'Do not mutate saved model settings');
 assert.equal(nativeStream({...nativeConfig,model:'other-model'}).stream,false,'Do not change other models');
 assert.equal(nativeStream({...nativeConfig,endpoint:'http://192.168.1.5:8080/v1'}).stream,false,'Do not change remote or LAN endpoints');
 assert.equal(nativeStream({...nativeConfig,provider:'gemini'}).stream,false,'Do not change hosted providers');
