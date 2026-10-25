@@ -3,6 +3,11 @@ import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 
 const source = await readFile(new URL('../public/app/shared/civweave-model-runtime.js', import.meta.url), 'utf8');
+const familyLoader = await readFile(new URL('../public/app/family-ai-loader-v105.js', import.meta.url), 'utf8');
+const settingsGateway = await readFile(new URL('../public/app/settings-gateway-v317.js', import.meta.url), 'utf8');
+for (const [name, content] of [['family loader', familyLoader], ['canonical settings', settingsGateway]]) {
+  assert.match(content, /civweave-model-runtime\.js\?v=1\.0\.17-termux-smollm2-lowram/, name + ' must request the updated runtime cache key');
+}
 const storage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
 const sandbox = { console, Date, Promise, Math, JSON, URL, AbortController, setTimeout, clearTimeout, localStorage: storage, sessionStorage: storage, location: { href: 'https://civweave-staging.pages.dev/', origin: 'https://civweave-staging.pages.dev' } };
 sandbox.globalThis = sandbox;
