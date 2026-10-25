@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-anarchadia-v158-review-intake';
+const VERSION='1.0.7-anarchadia-v158-structured-preview-owner';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const CHAT_KEY='civweave.guide-chat.anarchadia.v153';
 const HUB_PROPOSALS='/lite/?system=anarchadia&room=anarchadia.proposals#proposals';
@@ -84,8 +84,10 @@ async function providerPatch(p){
   if(!config)throw new Error('Select a model in shared Settings before generating this preview.');
   if(['bundled','packaged','reflex','minilm','local-reflex'].includes(String(config.provider||config.route||'').toLowerCase()))return deterministicPatch(p);
   if(typeof runtime?.generate!=='function')throw new Error('The shared model runtime is unavailable.');
-  const schema={type:'object',required:['summary','files','preview'],properties:{summary:{type:'string'},files:{type:'array',items:{type:'object',required:['path','content'],properties:{path:{type:'string'},content:{type:'string'}}}},preview:{type:'object',required:['html','css','js'],properties:{html:{type:'string'},css:{type:'string'},js:{type:'string'}}}}};
-  const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,context:{proposal:p,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview files.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate a small HTML/CSS/JS sandbox preview that implements the supplied change request and its acceptance criteria. Return JSON matching the schema. Do not substitute a request summary or claim the change is installed in production.'},{role:'user',content:JSON.stringify(p)}]});
+  const schema={type:'object',required:['summary','files','preview'],properties:{summary:{type:'string'},files:{type:'array',minItems:1,maxItems:6,items:{type:'object',required:['path','content'],properties:{path:{type:'string'},content:{type:'string'}}}},preview:{type:'object',required:['html','css','js'],properties:{html:{type:'string'},css:{type:'string'},js:{type:'string'}}}}};
+  // This compiled candidate has native validation and a human Keep/Revert gate.
+  // A generic assistant reply review must not replace it with a second answer.
+  const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,__civweaveSkipResponseRouter:true,...(String(config.provider||config.route||'').toLowerCase()==='ollama'?{think:false}:{}),context:{proposal:p,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview files.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate the smallest self-contained HTML/CSS/JS sandbox preview that implements the supplied change request and its acceptance criteria. Use at most six small preview files and no external dependencies. Implement the requested interaction; return matching preview HTML, CSS, and JS with the actual working behavior. Return JSON matching the schema. Do not substitute a request summary or claim the change is installed in production.'},{role:'user',content:JSON.stringify(p)}]});
   if(result?.status!=='success')throw new Error(cleanProviderError(result));
   if(!result.outputJson?.files?.length||!result.outputJson?.preview?.html)throw new Error('The selected model did not return the required preview files and HTML.');
   return {...result.outputJson,generator:'configured-provider'};

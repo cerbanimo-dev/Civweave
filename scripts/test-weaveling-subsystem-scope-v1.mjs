@@ -21,7 +21,8 @@ test('a new explicit Quest transmits only its own project context and exact stru
   assert.doesNotMatch(prompt,/Prior digital note|prior digital note|tarot|Old rewards|Old project constraints/,'Unrelated saved projects and transcript turns must not become the new planning context.');
   assert.doesNotMatch(prompt,/Prefer 2-3 focused paths/,'The generator must not impose a subsystem quota.');
   assert.equal(sent.schema.properties.paths.minItems,1);assert.equal(sent.schema.properties.paths.maxItems,1);
-  assert.deepEqual(Array.from(sent.schema.properties.paths.items.properties.realm.enum),['anarchadia']);
+  assert.equal(sent.schema.properties.paths.items.properties.realm,undefined,'The model chooses one canonical path type instead of redundant realm/type tokens.');
+  assert.deepEqual(Array.from(sent.schema.properties.paths.items.properties.type.enum),['civic-governance']);
   assert.equal(sent.schema.properties.paths.items.properties.steps.maxItems,1);
   assert.deepEqual(Array.from(sent.schema.properties.governance.properties.included.enum),[false]);
 });
@@ -59,9 +60,26 @@ test('ordinary project needs remain a model decision while explicit exclusions a
   const app=harness(),mixed='Create a Quest to learn joinery and repair a chair using tools I own. No FellowFare path.';
   const raw=result();raw.paths=[path('living-school','learning'),path('cerbanimo','skilled-labor')];
   const model=harness(raw);await model.create(mixed);
-  assert.equal(model.calls[0].schema.properties.paths.maxItems,4,'Ordinary needs must not be routed by a keyword-only realm list.');
-  assert.deepEqual(Array.from(model.calls[0].schema.properties.paths.items.properties.realm.enum),['living-school','cerbanimo','anarchadia']);
+  assert.equal(model.calls[0].schema.properties.paths.maxItems,3,'The schema permits one path for each subsystem the user has not excluded.');
+  assert.deepEqual(Array.from(model.calls[0].schema.properties.paths.items.properties.type.enum),['learning','skilled-labor','civic-governance']);
   const scope=app.api.memory([],mixed).structuralConstraints;
   assert.equal(scope.pathCount,null);assert.equal(scope.allowedRealms,null);
   assert.deepEqual(Array.from(scope.excludedRealms),['fellowfare']);
+});
+
+test('type-only model authoring derives the canonical realm without changing semantic path choice',async()=>{
+  const raw=result();raw.paths=[path('living-school','learning')];delete raw.paths[0].realm;
+  const app=harness(raw),authored=await app.create('Create a Quest to understand and practise temperature conversions.');
+  assert.equal(authored.plan.paths[0].type,'learning');assert.equal(authored.plan.paths[0].realm,'living-school');
+  const schema=app.calls[0].schema.properties.paths.items;
+  assert.equal(schema.required.includes('realm'),false);
+  assert.match(schema.properties.type.description,/learning.*living-school/);
+  assert.match(app.calls[0].messages[0].content,/skilled-labor.*cerbanimo/);
+  assert.equal(app.calls[0].think,false,'Ollama artifact authoring uses its explicit non-thinking request mode.');
+});
+
+test('repeated paths for one subsystem cannot turn workflow stages into a false multi-system weave',async()=>{
+  const raw=result();raw.paths.push(path());const app=harness(raw);
+  await assert.rejects(app.create('Create a Quest to record the requested personal decision.'),/repeats.*civic-governance/);
+  assert.equal(JSON.parse(app.storage.get('civweave.intentions.v127')).length,1);
 });
