@@ -67,7 +67,7 @@ function requestScope(text=''){
   const exact=[...value.matchAll(new RegExp(`\\b(?:exactly|only)\\s+${number}\\s+(?:${names}\\s+)?paths?\\b`,'gi'))].at(-1),only=[...value.matchAll(new RegExp(`\\bonly\\s+(?:an?\\s+)?${names}\\s+paths?\\b`,'gi'))].at(-1),steps=[...value.matchAll(new RegExp(`\\b(?:with|exactly)\\s+${number}\\s+(?:checkpoints?|steps?)\\b`,'gi'))].at(-1);
   const requiredCount=[...value.matchAll(new RegExp(`\\b${number}\\s+required\\s+paths?\\b`,'gi'))].at(-1);
   const requestedPathCount=exact?count(exact[1]):requiredCount?count(requiredCount[1]):null;
-  const explicitRealmRequirements=/\\brequired\\s+paths?\\b/i.test(value)&&/\\bliving[ -]school\\b/i.test(value)&&/\\bcerbanimo\\b/i.test(value)?['living-school','cerbanimo']:[];
+  const explicitRealmRequirements=/\brequired\s+paths?\b/i.test(value)&&/\bliving[ -]school\b/i.test(value)&&/\bcerbanimo\b/i.test(value)?['living-school','cerbanimo']:[];
   const excluded=[...value.matchAll(new RegExp(`\\b(?:no|without|exclude|omit)\\s+(?:an?\\s+|any\\s+)?${names}\\b`,'gi'))].map(match=>realm(match[1]));
   return{pathCount:requestedPathCount,stepCount:steps?count(steps[1]):null,allowedRealms:exact?.[2]?[realm(exact[2])]:only?[realm(only[1])]:null,excludedRealms:[...new Set(excluded)],requiredRealms:[...new Set([...explicitRealmRequirements,...(combinedLearningProductionIntent(value)?['living-school','cerbanimo']:[])])],governanceIncluded:/\bgovernance\s*(?:[:=]\s*)?(?:included\s*[:=]?\s*)?false\b|\b(?:no|without|exclude|omit)\s+(?:an?\s+|additional\s+)?governance\b/i.test(value)?false:null};
 }
@@ -132,7 +132,7 @@ function nativeQuestPrompt(mem){
   const count=Number(scope.pathCount)||0;
   return[
     {role:'system',content:'You are Weaveling, Civweave Quest author. Return ONLY concise JSON matching the schema. The CURRENT WISH governs; never substitute an older goal. This Quest stays in REVIEW, never active. Correct path types: living-school=learning, cerbanimo=skilled-labor, fellowfare=material-acquirement, anarchadia=civic-governance. Every path needs title, purpose, 2-4 actionable steps, completionCriteria and supporting evidence. Plan future implementation work, not merely writing another plan. Use short strings and 1-2 assumptions. '+included+(count?'Exactly '+count+' paths. ':'')+'Do not activate.'},
-    {role:'user',content:'CURRENT WISH: '+clean(mem.currentWish,1800)+'\\nReturn the reviewable Quest JSON.'}
+    {role:'user',content:'CURRENT WISH: '+clean(mem.currentWish,1800)+'\nReturn the reviewable Quest JSON.'}
   ];
 }
 function latestItem(){const items=parse(localStorage.getItem(INTENTIONS_KEY),[]);return(Array.isArray(items)?items:[]).find(item=>item?.kind==='weave-plan'&&item?.state!=='completed')||null}
