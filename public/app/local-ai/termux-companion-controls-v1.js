@@ -44,7 +44,8 @@ export function mountTermuxCompanionControls(element,{store=sessionStorage}={}){
     '<label>Pairing token <input type="password" data-cw-token autocomplete="off" spellcheck="false" placeholder="Token from Termux"></label>',
     '<button type="button" data-cw-pair>Pair / refresh status</button>',
     '<p>Model <select data-cw-model><option value="qwen35-4b-native">Qwen3.5-4B Q4_K_M</option><option value="qwen35-2b-native">Qwen3.5-2B Q4_K_M</option></select></p>',
-    '<p>Context <select data-cw-context><option value="1024">1,024</option><option value="2048" selected>2,048</option><option value="4096">4,096</option></select></p>',
+    '<p>Context <select data-cw-context><option value="4096">4K · recovery</option><option value="8192">8K</option><option value="16384">16K</option><option value="32768" selected>32K · recommended</option><option value="65536">64K · experimental</option><option value="2048">2K · legacy</option><option value="1024">1K · legacy</option></select></p>',
+    '<p>32K reserves space for research passages and generated lessons; it uses more memory and may load or generate more slowly. Try 16K if Android kills the server. 64K is optional and should be tested carefully.</p>',
     '<div class="cw-clean-grid">',
     '<button type="button" data-cw-action="setup" disabled>Install/update llama.cpp</button>',
     '<button type="button" data-cw-action="verify" disabled>Verify selected model</button>',
@@ -79,7 +80,7 @@ export function mountTermuxCompanionControls(element,{store=sessionStorage}={}){
     const server=snapshot.managed_running?'Companion server running':snapshot.unmanaged_running?'Manual server occupies port 8080':snapshot.server_reachable?'AI server loading':'AI server stopped';
     const models=Object.entries(snapshot.models||{}).map(([name,info])=>
       name+': '+(info.present?((info.verified?'verified':'present, unverified')+(info.location?' · '+info.location:'')):'not found in supported folders')).join(' · ');
-    say(server+' · llama.cpp '+(snapshot.llama_installed?'installed':'not installed')+
+    say(server+(snapshot.managed_running?' · context '+Number(snapshot.context||0).toLocaleString()+' tokens':'')+' · llama.cpp '+(snapshot.llama_installed?'installed':'not installed')+
       ' · '+models+(job.action?' · '+job.action+': '+state+' — '+(job.message||''):''));
     controls(state!=='running'&&!busy);
     if(state==='running')watch();else stopWatching();

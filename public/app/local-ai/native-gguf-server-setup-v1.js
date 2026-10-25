@@ -5,7 +5,7 @@ export const SERVER_MODEL='qwen35-4b-native';
 export const COMMANDS=Object.freeze([
   'pkg update -y && pkg install -y llama-cpp',
   'termux-setup-storage\nls -lh "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf"',
-  'llama-server \\\n  -m "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf" \\\n  --alias qwen35-4b-native \\\n  --host 127.0.0.1 --port 8080 \\\n  --ctx-size 6144 --threads 4 --parallel 1 \\\n  --jinja \\\n  --reasoning off'
+  'llama-server \\\n  -m "$HOME/storage/downloads/Qwen3.5-4B-Q4_K_M.gguf" \\\n  --alias qwen35-4b-native \\\n  --host 127.0.0.1 --port 8080 \\\n  --ctx-size 32768 --threads 2 --parallel 1 \\\n  --jinja \\\n  --reasoning off'
 ]);
 const setupHtml=[
  '<div class="cw-clean-note"><b>Android Termux · native llama.cpp</b>',
@@ -14,7 +14,7 @@ const setupHtml=[
  '<p><a href="https://f-droid.org/packages/com.termux/" target="_blank" rel="noopener noreferrer">Download Termux from F-Droid</a> · <a href="https://github.com/termux/termux-app/releases" target="_blank" rel="noopener noreferrer">Termux official GitHub releases</a></p>',
  '<p><b>2 · Install llama.cpp</b> in Termux, using the Termux package repository:</p><div data-server-command="0"></div>',
  '<p><b>3 · Allow Downloads access</b> and verify your exact GGUF is present. Approve the Android storage permission:</p><div data-server-command="1"></div>',
- '<p><b>4 · Run the local server</b> in Termux. It listens only on this phone and uses a 6,144-token context / one parallel slot for longer Moss drafts and JSON plans. This uses more RAM than the previous 2,048-token configuration; stop the existing server with Ctrl+C before starting it with the updated command. For a memory-limited device, 4,096 context tokens are a fallback, but longer plan generations may reach the context limit. Older Termux llama.cpp builds do not support the --cors-origins argument; verify browser connectivity with the tests below:</p><div data-server-command="2"></div>',
+ '<p><b>4 · Run the local server</b> in Termux. It listens only on this phone and uses a 32,768-token context with one parallel slot for research-heavy Moss lessons. This uses more RAM than the previous 2,048-token configuration; stop the existing server with Ctrl+C before starting it with the updated command. If Android kills the server, retry with --ctx-size 16384, then 8192; 64K should be treated as an optional experiment. Older Termux llama.cpp builds do not support the --cors-origins argument; verify browser connectivity with the tests below:</p><div data-server-command="2"></div>',
  '<p>If your file has another name, edit the quoted <code>-m</code> path. Keep Termux running, and set reasonable battery permissions for longer sessions. Ctrl+C in Termux stops the server.</p>',
  '<p><b>5 · Verify and select</b> — test the model-list endpoint, then produce a few actual tokens before selecting this route for all five Civweave systems. No localhost requests happen automatically when Settings opens.</p>',
  '<div class="cw-clean-grid"><button type="button" data-server-check>Check localhost server</button><button type="button" data-server-test disabled>Generate 24-token test</button><button type="button" data-server-activate disabled>Use tested server for five systems</button></div>',
@@ -71,7 +71,7 @@ export function mountNativeServerSetup(target,{activate,copyText}={}){
   // Installed only by the user opening this Settings panel; import/mount does
   // not contact localhost or execute commands.
   const companionTarget=target.querySelector('[data-termux-companion-controls]');
-  if(companionTarget)void import('/app/local-ai/termux-companion-controls-v1.js?v=1.0.1-existing-gguf-discovery')
+  if(companionTarget)void import('/app/local-ai/termux-companion-controls-v1.js?v=long-context-32k-v2')
     .then(module=>module.mountTermuxCompanionControls(companionTarget))
     .catch(error=>{companionTarget.textContent='Termux Companion controls could not load: '+String(error?.message||error)});
 
