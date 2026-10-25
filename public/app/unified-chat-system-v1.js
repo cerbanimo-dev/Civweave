@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.17-unified-chat-system-v1-current-quest';
+const VERSION='1.2.18-unified-chat-system-v1-explicit-learning-goal';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -135,22 +135,26 @@ function recentSubject(rows){
 }
 function userCapability(rows){
   for(const row of [...rows].reverse().filter(row=>row.role==='user')){
-    const match=row.text.match(/\b(?:i\s+want\s+to|i\s+need\s+to|i\s+would\s+like\s+to|i['’]?d\s+like\s+to|goal\s+is\s+to|objective\s+is\s+to|be\s+able\s+to|capable\s+of|help\s+me\s+learn(?:\s+to)?|teach\s+me(?:\s+how\s+to)?|learn|master|practice|study)\s+(?:how\s+to\s+)?(.+)/i);
+    const labelled=row.text.match(/\b(?:observable\s+)?capability\s*:\s*(.+)/i);
+    if(labelled){const value=normalizeSubject(labelled[1]);if(value.length>3)return value}
+    const match=row.text.match(/\b(?:i\s+want\s+to|i\s+need\s+to|i\s+would\s+like\s+to|i['’]?d\s+like\s+to|goal\s+is\s+to|objective\s+is\s+to|be\s+able\s+to|capable\s+of|help\s+me\s+learn(?:\s+to)?|teach(?:\s+me(?:\s+how\s+to)?)?|learn|master|practice|study)\s+(?:how\s+to\s+)?(.+)/i);
     if(match){const value=normalizeSubject(match[1]);if(value.length>3)return value}
   }
   return'';
 }
 function titleCase(value){return clean(value,100).split(/\s+/).slice(0,8).map(word=>word?word[0].toUpperCase()+word.slice(1):word).join(' ')}
+function explicitLearningTitle(text){const match=clean(text,5000).match(/\b(?:titled\s+|title\s*:\s*)["“]?([^.!?\n]+?)(?:["”](?=\s|$)|[.!?\n]|$)/i);return clean(match?.[1],240)}
 function moduleCount(rows,current){
   if(Number(current)>0)return Math.max(1,Math.min(8,Number(current)));
-  for(const row of [...rows].reverse()){const match=row.text.match(/\b([1-8])\s*[- ]?(?:week|module|lesson|level)s?\b/i);if(match)return Number(match[1])}
+  const words=['one','two','three','four','five','six','seven','eight'];
+  for(const row of [...rows].reverse()){const match=row.text.match(/\b([1-8]|one|two|three|four|five|six|seven|eight)\s*[- ]?(?:(?:short|beginner|intermediate|advanced)\s+){0,3}(?:week|module|lesson|level)s?\b/i);if(match)return Number(match[1])||words.indexOf(match[1].toLowerCase())+1}
   return 4;
 }
 function curriculumRequest(options={}){
   const rows=rowsFor(options),state=stateForLivingSchool(),school=state?.school||{},path=state?.pathContext||{},text=clean(options.text,5000),continuing=CONTINUE.test(text),directCapability=learningJourneyIntent(text,options.history||[])?userCapability([{role:'user',text}]):'',subject=explicitSubject(text)||directCapability||(continuing?recentSubject(rows):'');
   const hasActive=Boolean(school?.title||school?.capability),newPath=Boolean(subject||/\bnew\s+(?:learning journey|curriculum|course|syllabus|learning path|learning pathway|learning program|learning plan|study plan|lesson plan|skill tree)\b/i.test(text)||!hasActive||(STRUCTURE.test(text)&&BUILD.test(text)&&!REVISE.test(text)));
   const capability=clean(newPath?(subject||recentSubject(rows)||userCapability(rows)):(school.capability||path.capability||recentSubject(rows)||userCapability(rows)),2400);
-  const title=clean(newPath?(titleCase(subject||capability)):(school.title||path.title||titleCase(capability)),240)||'Learning Journey';
+  const title=clean(newPath?(explicitLearningTitle(text)||titleCase(subject||capability)):(school.title||path.title||titleCase(capability)),240)||'Learning Journey';
   // Preserve only an explicitly supplied route or this course's own revision.
   // The materialization owner revalidates IDs against the activated Quest.
   const linked=options.weaveId&&options.pathId?options:!newPath?school:null,identity=linked?.weaveId&&linked?.pathId?{weaveId:clean(linked.weaveId,180),pathId:clean(linked.pathId,180)}:{};
@@ -578,7 +582,7 @@ async function generateLivingSchoolPlan(options={},existingPlan=null,revisionTex
   // chat history, previous plan, or model-returned title.
   const explicitGoal=learningJourneyIntent(options.text,options.history||[])?userCapability([{role:'user',text:clean(options.text,5000)}]):'';
   if(explicitGoal){
-    seed.capability=explicitGoal;seed.title=titleCase(explicitGoal);seed.intent='new';
+    seed.capability=explicitGoal;seed.title=explicitLearningTitle(options.text)||titleCase(explicitGoal);seed.intent='new';
     if(!(options.weaveId&&options.pathId)){delete seed.weaveId;delete seed.pathId}
     const prior=readLearningPlan();
     if(prior?.state==='review'&&clean(prior.request?.capability,2400).toLowerCase()!==explicitGoal.toLowerCase())
@@ -754,7 +758,7 @@ async function ensureWeavelingOrchestrator(){
     return hasResponseLayer(globalThis.CivweaveAssistantV141?.respond,'__weavelingPlanJsonV190');
   };
   if(globalThis.CivweaveWeavelingPlanJsonV190?.install)return install();
-  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.11-complete-outcome').then(install).catch(error=>{orchestratorPromise=null;throw error});
+  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.12-saved-quest-revision').then(install).catch(error=>{orchestratorPromise=null;throw error});
   return orchestratorPromise;
 }
 function patchAssistant(){

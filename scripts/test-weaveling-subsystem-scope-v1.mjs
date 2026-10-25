@@ -22,6 +22,22 @@ function harness(output=result()){
   return{context,storage,calls,api:context.CivweaveWeavelingPlanJsonV190,create:(text=request,history=[])=>context.CivweaveWeavelingPlanJsonV190.createModelPlan({text,history},{selectedConfig:()=>({provider:'ollama',model:'fixture'})})};
 }
 
+test('an explicit saved Quest revision keeps the canonical author even when it adds learning details',async()=>{
+  const app=harness();await app.create();let mossCalls=0;
+  app.context.CivweaveUnifiedChatSystemV1={runLivingSchoolCurriculum:async()=>{mossCalls++;return{response:{answer:'Wrong owner'}}}};
+  app.context.CivweaveAssistantV141={selectedConfig:()=>({provider:'ollama',model:'fixture'}),respond:async()=>{throw new Error('A saved Quest revision must not fall through to generic chat.')}};
+  app.api.install();
+  const revision='Revise the saved Quest: I want to learn how to inspect the evidence before finalizing its criteria.';
+  await app.context.CivweaveAssistantV141.respond({text:revision,systemId:'civweave',history:[{role:'user',text:request}]});
+  assert.equal(mossCalls,0,'Learning details within an explicit Quest revision must not replace its canonical owner.');
+  assert.equal(app.calls.length,2);assert.equal(app.calls[1].context.workingMemory.requestMode,'revision');
+  assert.equal(app.calls[1].context.workingMemory.currentWish,request);assert.ok(app.calls[1].context.workingMemory.currentPlan?.id);
+  const second='Update the saved Quest to make its evidence plan more precise.';
+  await app.create(second,[{role:'user',text:request},{role:'user',text:revision}]);
+  assert.equal(app.calls[2].context.workingMemory.currentWish,request,'A previous revision is context, not a replacement governing wish.');
+  assert.ok(app.calls[2].context.workingMemory.currentPlan?.id);
+});
+
 test('a new explicit Quest transmits only its own project context and exact structural scope',async()=>{
   const app=harness();await app.create(request,[{role:'user',text:'Create the prior digital note'},{role:'assistant',text:'Old rewards agreement'}]);
   const sent=app.calls[0],prompt=sent.messages.map(row=>row.content).join('\n');

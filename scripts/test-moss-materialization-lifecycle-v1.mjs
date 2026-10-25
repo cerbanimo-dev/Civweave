@@ -48,6 +48,16 @@ test('Stop during model-derived research cannot persist references or begin anot
   await assert.rejects(pending,error=>error===reason);assert.equal(calls,1);assert.equal(current.research,null);assert.deepEqual(current.sources,[]);
 });
 
+for(const provider of ['ollama','gemini'])test(`optional source fallback preserves ${provider} deadline, provenance, and thinking policy`,async()=>{
+  const calls=[],core={...base(),state:()=>({}),persist(){}};
+  const context=vm.createContext({...base(),core,CivweaveFamilyAILoaderV105:{ensure:async()=>true},CivweaveModelRuntime:{readSharedConfig:()=>({provider,model:'qa-selected',timeoutMs:600000,maxTokens:4096}),generate:async request=>{calls.push(request);return{status:'success',actual:{provider,model:'qa-selected'},outputJson:{summary:'Fixture unverified brief.',notes:[{title:'Celsius',content:'Fixture model-derived temperature note.'}]}}}}});
+  vm.runInContext(stripModules(read('living-school-local-research-v243.mjs'))+'\nglobalThis.__fallback=researchTrainingFallback;',context);
+  const packet=await context.__fallback('Convert Celsius temperatures',new Error('No local source.'));
+  assert.equal(calls.length,1);assert.equal(calls[0].config.timeoutMs,600000);assert.equal(calls[0].config.maxTokens,6144);
+  if(provider==='ollama')assert.equal(calls[0].think,false);else assert.equal(Object.hasOwn(calls[0],'think'),false);
+  assert.equal(packet.mode,'model-derived-unverified');assert.equal(packet.sources[0].provenance,'selected-model-training-data');assert.equal(packet.sources[0].verified,false);
+});
+
 test('Stop during one bounded assessment call cannot add questions to the pending course',async()=>{
   const controller=new AbortController(),reason=new Error('QA stopped assessment');let request,resolveModel;
   const current={school:oldSchool(),progress:{},settings:{}},pendingSchool={id:'pending-course',generation:{provider:'ollama'},modules:[{id:'pending-module',title:'Celsius',quiz:{questionsPerAttempt:3,bank:[]}}]};

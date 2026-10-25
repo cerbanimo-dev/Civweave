@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.153-current-quest'
+const VERSION='1.0.154-selected-ollama-budget'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -10,7 +10,7 @@ const PREREQUISITES=[
   ['/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
-  ['/app/guide-contracts-v141.js?v=1.0.5-artifact-lifecycle',()=>globalThis.CivweaveGuideContractsV141]
+  ['/app/guide-contracts-v141.js?v=1.0.6-manifest-revision',()=>globalThis.CivweaveGuideContractsV141]
 ];
 const VALUE_CORE=[
   ['/app/civweave-basic-value-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueV1],
@@ -38,7 +38,7 @@ const OPTIONAL=[
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
 ];
 const GUIDE_CAPABILITIES=[
-  ['/app/unified-chat-system-v1.js?v=1.2.17-current-quest',()=>globalThis.CivweaveUnifiedChatSystemV1],
+  ['/app/unified-chat-system-v1.js?v=1.2.18-explicit-learning-goal',()=>globalThis.CivweaveUnifiedChatSystemV1],
   ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.1-ollama-schema-lifecycle',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
   ['/app/action-followthrough-v165.js?v=1.0.5-material-revisions',()=>globalThis.CivweaveActionFollowthroughV165],
   ['/app/guide-capability-passover-v1.js?v=1.1.4-explicit-change-requests',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
@@ -116,7 +116,7 @@ function configuredOllama(){
   if(route!=='ollama')return null;
   const model=clean(current?.model,200),endpoint=clean(current?.endpoint,2048)||'http://127.0.0.1:11434/api/chat';
   if(!model)throw new Error('Select an installed Ollama model in Settings before sending a message.');
-  return{provider:'ollama',route:'ollama',model,endpoint,stream:true,maxTokens:2048,context:4096,timeoutMs:120000,externalConsent:false};
+  return{...current,provider:'ollama',route:'ollama',model,endpoint,stream:true,maxTokens:Number(current.maxTokens)||2048,context:Number(current.context||current.numCtx||current.num_ctx)||4096,timeoutMs:Number(current.timeoutMs)||Number(current.timeoutSeconds)*1000||120000,externalConsent:false};
 }
 async function respondOllama({text,system='civweave',history=[],onToken,signal}={}){
   const config=configuredOllama();

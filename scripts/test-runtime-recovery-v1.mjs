@@ -285,7 +285,7 @@ test('selected Ollama guide messages reach shared capabilities without downloade
     PREREQUISITES:[['parity'],['shared-model-runtime']],
     GUIDE_CAPABILITIES:[['unified-chat'],['capability-passover']],OPTIONAL:[['intention-ui']],
     clean:(v,max=12000)=>String(v||'').slice(0,max),
-    obj:key=>key==='civweave-model-profiles-v1'?{interactive:{provider:'ollama',model:'gemma4:latest',endpoint:'http://127.0.0.1:11434/api/chat'}}:{},
+    obj:key=>key==='civweave-model-profiles-v1'?{interactive:{provider:'ollama',model:'gemma4:latest',endpoint:'http://127.0.0.1:11434/api/chat',timeoutMs:600000,maxTokens:4096,context:8192}}:{},
     loadScript:async(src)=>{assert.equal(src,'intention-ui');},
     loadSequence:async rows=>{assert.equal(rows,scope.GUIDE_CAPABILITIES);scope.loadedCapabilities++;},
     ensure:async()=>{scope.assistantLoaded++;},assistantLoaded:0,loadedCapabilities:0,
@@ -307,6 +307,8 @@ test('selected Ollama guide messages reach shared capabilities without downloade
   assert.equal(scope.call.config.provider,'ollama');
   assert.equal(scope.call.config.model,'gemma4:latest');
   assert.equal(scope.call.config.endpoint,'http://127.0.0.1:11434/api/chat');
+  assert.equal(scope.call.config.timeoutMs,600000,'The Ollama entry must preserve the explicit shared generation deadline.');
+  assert.equal(scope.call.config.maxTokens,4096);assert.equal(scope.call.config.context,8192);
   assert.equal(scope.call.systemId,'civweave');assert.equal(scope.call.handoffSystem,'civweave');
   assert.equal(scope.call.signal,controller.signal,'Stop must reach the canonical capability/model request.');
   assert.equal(scope.call.history.length,2,'Current turn must not be repeated in model history.');

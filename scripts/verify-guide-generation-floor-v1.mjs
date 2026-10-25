@@ -110,7 +110,7 @@ const ordinary={purpose:'background-indexing',config:{maxTokens:96}};assert.equa
 
 assert.ok(source.loader.includes('/app/guide-generation-floor-v1.js'),'shared guide loader is not delivering the generation floor');
 assert.ok(source.loader.includes("version==='1.3.1-guide-generation-floor-v1-canonical-quest-prompt'"),'shared guide loader no longer recognizes the compatible generation-floor API');
-assert.ok(source.loader.includes('/app/local-guide-control-bypass-v1.js?v=1.4.10-complete-outcome'),'shared guide loader is not delivering the current local quest-control route');
+assert.ok(source.loader.includes('/app/local-guide-control-bypass-v1.js?v=1.4.11-saved-quest-revision'),'shared guide loader is not delivering the current local quest-control route');
 assert.ok(source.loader.includes('/app/guide-stream-thinking-v249.js?v=1.0.125-canonical-paint'),'shared guide loader is not delivering the current stream finalization guard');
 assert.ok(source.loader.includes('/app/local-ai/gemma4-inference-repair-v1.js?v=1.0.3-onnx-only'),'shared guide loader is not delivering the current Gemma inference repair');
 

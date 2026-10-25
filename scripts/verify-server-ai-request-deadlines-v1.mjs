@@ -28,10 +28,11 @@ assert.match(router,/let node=null;\s*try\{node=await serverLocal\(next,trace\)\
 assert.match(router,/route:'server-local',status:'failed'/);
 assert.match(router,/const edge=await cloudflare\(next,trace\)/);
 
-assert.match(livingSchoolBudget,/3\.0\.3-living-school-generation-budget-v3-materialization-cancellation/);
-assert.match(livingSchoolBudget,/const DESIGN_TIMEOUT_MS=570000/,'Local curriculum design needs a bounded nine-and-a-half minute budget for slower Qwen-class inference.');
+assert.match(livingSchoolBudget,/3\.0\.4-living-school-generation-budget-v3-selected-deadline/);
+assert.match(livingSchoolBudget,/const DESIGN_TIMEOUT_MS=570000/,'Local curriculum design retains a bounded fallback when no deadline is configured.');
 assert.match(livingSchoolBudget,/const DESIGN_MAX_TOKENS=16384/);
-assert.match(livingSchoolBudget,/config\.timeoutMs=Math\.max\(Number\(config\.timeoutMs\)\|\|0,DESIGN_TIMEOUT_MS\)/);
+assert.match(livingSchoolBudget,/config\.timeoutMs=configuredTimeout\(config,DESIGN_TIMEOUT_MS\)/,'Living School must preserve a finite positive selected deadline.');
+assert.doesNotMatch(livingSchoolBudget,/Promise\.race/,'The canonical inference runtime owns timeout and cancellation.');
 assert.match(livingSchoolBudget,/const MIN_LESSON_WORDS=120/,'longer transport budget must not weaken the curriculum depth gate');
 
 assert.match(mesh,/1\.2\.5-node-ai-mesh-v1-request-deadlines/);

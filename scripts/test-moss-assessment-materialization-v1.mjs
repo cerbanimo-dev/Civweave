@@ -34,6 +34,7 @@ Video Search Topic: Celsius Fahrenheit temperature conversion`;
 
 const calls=[];
 let incomplete=false;
+let selectedTimeout=600000;
 const questions=()=>[
   {id:'m1-mc-1',type:'multiple-choice',prompt:'What Fahrenheit value equals zero Celsius?',options:['32','0','100'],answer:'32',explanation:'Zero Celsius equals thirty two Fahrenheit.',concepts:['Celsius']},
   {id:'qa-multi-1',type:'multi-select',prompt:'Which steps convert Celsius to Fahrenheit?',options:['Multiply by nine fifths','Add thirty two','Subtract thirty two'],answer:['Multiply by nine fifths','Add thirty two'],explanation:'Scale the Celsius interval, then add the Fahrenheit offset.',concepts:['Conversion']},
@@ -51,7 +52,7 @@ const context={
   CivweaveLivingSchoolVideoGenerationGuardV1:{installed:true},
   CivweaveLivingSchoolRuntimeRouteV2:{providerNeutral:true},
   CivweaveModelRuntime:{
-    readSharedConfig:()=>({provider:'ollama',model:'qa-local-model'}),
+    readSharedConfig:()=>({provider:'ollama',model:'qa-local-model',timeoutMs:selectedTimeout}),
     async generate(request){
       calls.push(request);
       assert.equal(request.purpose,'living-school-quiz-delta-completion-v258');
@@ -59,7 +60,8 @@ const context={
       assert.equal(request.config.provider,'ollama');
       assert.equal(request.config.model,'qa-local-model');
       assert.ok(request.config.maxTokens>=4096&&request.config.maxTokens<=8192);
-      assert.ok(request.config.timeoutMs>=180000);
+      assert.equal(request.config.timeoutMs,selectedTimeout??180000,'Assessment must preserve the selected deadline.');
+      assert.equal(request.think,false,'Ollama structured assessments use their output budget for the actual questions.');
       assert.equal(request.context.modules.length,1);
       const transmitted=request.messages.map(message=>message.content||'').join('\n');
       assert.match(transmitted,/MODULE MATERIAL:/,'The first model request must carry the actual one-module content, not only internal context.');
@@ -118,6 +120,15 @@ twoModules.modules.push({...structuredClone(twoModules.modules[0]),id:'module-2'
 const completedTwo=await context.__completeSharedQuizBank({capability:'Convert Celsius and Fahrenheit weather readings.'},twoModules);
 assert.equal(calls.length,2,'Each module must receive exactly one assessment call, without a combined call or retries.');
 assert.ok(completedTwo.modules.every(module=>module.quiz.bank.length===5));
+
+selectedTimeout=15000;calls.length=0;
+const threeModules=school();for(const id of ['module-2','module-3'])threeModules.modules.push({...structuredClone(threeModules.modules[0]),id});
+const completedThree=await context.__completeSharedQuizBank({capability:'Convert Celsius and Fahrenheit weather readings.'},threeModules);
+assert.equal(calls.length,3,'Three modules use three sequential assessment calls, preserving a shorter selected deadline.');
+assert.ok(completedThree.modules.every(module=>module.quiz.bank.length===5));
+selectedTimeout=undefined;calls.length=0;await context.__completeSharedQuizBank({capability:'Convert Celsius and Fahrenheit weather readings.'},school());
+assert.equal(calls.length,1,'A missing assessment deadline retains its bounded fallback.');
+selectedTimeout=600000;
 
 incomplete=true;calls.length=0;
 await assert.rejects(context.__completeSharedQuizBank({capability:'Convert Celsius and Fahrenheit weather readings.'},school()),/incomplete|assessment/i);

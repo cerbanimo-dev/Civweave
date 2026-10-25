@@ -23,6 +23,21 @@ test('Moss high-level Ollama planning retains the full schema and explicitly dis
   assert.equal(request.think,false);assert.ok(request.schema.required.includes('modules'));assert.equal(request.schema.properties.modules.minItems,3);assert.equal(request.config.timeoutMs,90000);assert.equal(app.api.readLearningPlan()?.state,'review');
 });
 
+for(const text of [
+  'Create a new standalone Learning Journey titled QA Temperature Conversions. For this fictional QA learner, teach Celsius to Fahrenheit and back with a calculator, using exactly three short beginner modules: formulas and units; worked forward and reverse examples; checking results and explaining mistakes. Save the plan for review before generating the curriculum.',
+  'Observable capability: given a Celsius or Fahrenheit temperature, use a calculator to choose the right conversion formula, calculate the other unit, reverse-check the result, and explain an order-of-operations mistake. Title: QA Temperature Conversions. Exactly three beginner modules covering formulas and units, worked conversions, and error checking. Create the standalone Learning Journey plan for review.'
+])test('Moss accepts an explicit teaching request or capability label without asking for the same goal again: '+text.slice(0,35),async()=>{
+  const app=harness(),request=app.api.curriculumRequest({text,history:[]});
+  assert.match(request.capability,/Celsius/);
+  assert.equal(request.title,'QA Temperature Conversions');
+  assert.equal(request.count,3);
+  assert.equal('weaveId'in request,false);
+  await app.create({text});
+  assert.equal(app.calls.length,1,'an already supplied capability must reach the selected model once');
+  assert.equal(app.api.readLearningPlan()?.request.title,'QA Temperature Conversions');
+  assert.equal(app.api.readLearningPlan()?.state,'review');
+});
+
 test('Moss preserves caller model events without requiring the native phone route',async()=>{
   const events=[],controller=new AbortController();
   const app=harness({generate:async request=>{request.onEvent?.({phase:'connecting'});request.onEvent?.({phase:'partial',characters:42});return{status:'success',actual:{provider:'ollama',model:'qa-selected'},outputJson:modelPlan()}}});

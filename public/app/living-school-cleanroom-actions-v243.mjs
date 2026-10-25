@@ -1,6 +1,6 @@
 import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs?v=complete-course-gate-v1';
 import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor,curriculumWeaveIdentity,weavePathIdentity} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {researchCapability} from './living-school-local-research-v243.mjs?v=moss-subject-source-recovery-v268';
+import {researchCapability} from './living-school-local-research-v243.mjs?v=moss-subject-source-recovery-v269-selected-deadline';
 import {assertGenerationActive} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
@@ -164,6 +164,7 @@ async function completeSharedQuizBank(data,school,options={}){
   const result=await runtime.generate({
     signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,
     purpose:'living-school-quiz-delta-completion-v258',executionProfile:'interactive',config:repairConfig,schema:supplementalQuizSchema(),
+    ...(clean(config.provider||config.route,120).toLowerCase()==='ollama'?{think:false}:{}),
     context:{capability:data.capability,level:data.level,proofContract:data.proof,currentGeneration:{title:school.title,capability:school.capability,proof:school.proof},modules:repairRequest,constraints:['Do not rewrite any existing curriculum or quiz question.','Return only genuinely new questions for the listed module IDs.','Fill each listed missing question type first, then add enough additional questions to meet minimumBankSize.','Questions must test the actual supplied module content and capability, not generic learning-evidence boilerplate.','Do not repeat or lightly paraphrase an existing question.','Multiple-choice and multi-select questions need usable options and answers.','Short-answer questions need a visible rubric.']},
     messages:[{role:'system',content:'You are Moss performing a surgical completion pass on an already-generated Living School curriculum. Preserve the current generation exactly. Return strict JSON containing only the missing supplemental quiz questions. Do not regenerate modules, lessons, artifacts, or existing questions. Make each new question specific to the supplied module content.'},{role:'user',content:'Complete only the missing quiz-bank slots in the current generation. Keep every existing genuine AI question unchanged and return only the new questions needed to satisfy each listed module contract.'}]
   });

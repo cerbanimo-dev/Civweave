@@ -27,7 +27,29 @@ function anarchadia(text,ctx){
   return a;
 }
 function living(text,ctx){if(!/\b(teach|learn|show me how|explain|study|practice|lesson|curriculum)\b/i.test(text))return null;const uncertain=/\bduggy\b/i.test(text),a=base('living-school','learning-session',title(text,'Learning session'),text,ctx);a.fields={learningGoal:uncertain?'Confirm whether “duggy” means the Dougie dance or another skill.':clean(text,500),currentLevel:'Not yet stated',demonstration:'Perform or explain the skill on a fresh example.'};a.checkpoints=uncertain?['Confirm the exact skill.','Assess familiarity and accessibility constraints.','Teach one small movement or concept.','Practice with feedback.','Demonstrate independently.']:['Clarify the capability.','Explain one concept.','Complete one guided example.','Practice on a fresh example.'];a.acceptanceCriteria=['The learner demonstrates or explains the skill independently.'];a.evidence=['Guided practice','Fresh demonstration','Reflection'];a.approval={required:false,label:'Begin lesson'};a.state=uncertain?'clarifying':'active';if(uncertain)a.missingRequired=['exact skill name'];return a}
-function merge(a,text){let changed=false;if(a.system==='fellowfare'){const b=budget(text),x=exchange(text),place=requestArea(text),quantity=requestField(text,'quantity'),timing=requestField(text,'timing|when');if(b!=null){a.fields.budget=b;changed=true}if(x){a.fields.exchangeMethod=x;changed=true}if(b!=null||x)a.missingRequired=a.missingRequired.filter(v=>v!=='maximum budget or exchange method');if(place){a.fields.area=place;a.missingRequired=a.missingRequired.filter(v=>v!=='pickup or delivery area');changed=true}if(quantity){a.fields.quantity=quantity;changed=true}if(timing){a.fields.timing=timing;changed=true}}if(a.system==='living-school'&&a.missingRequired.includes('exact skill name')&&/\bdougie\b|\bdance\b/i.test(text)){a.fields.learningGoal='Learn the Dougie dance.';a.missingRequired=[];a.state='active';changed=true}if(a.system==='anarchadia'&&a.kind==='bug-report'&&a.missingRequired.includes('reproduction steps')&&clean(text).length>20){a.fields.reproductionSteps=clean(text);a.missingRequired=[];changed=true}if(changed){a.updatedAt=new Date().toISOString();if(!a.missingRequired.length&&a.state==='clarifying')a.state='review'}return changed}
+function reviseRequestProse(a,before){
+  const priorNeed=clean(a.fields.need),priorTitle=a.title;
+  const labels={quantity:'quantity',area:'area',location:'area','pickup area':'area','delivery area':'area',timing:'timing',when:'timing'};
+  const revise=value=>value.split(/([;\n])/).map(part=>{
+    const field=part.match(/^(\s*)(quantity|area|location|pickup area|delivery area|timing|when|budget|exchange|exchange method)\s*:\s*([\s\S]*)$/i);
+    if(field){const key=labels[field[2].toLowerCase()];return key?`${field[1]}${field[2]}: ${a.fields[key]}`:part}
+    for(const key of['quantity','area','timing']){
+      const previous=clean(before[key]),current=clean(a.fields[key]);
+      // Bare numbers belong to their labeled field, never every occurrence
+      // in the request (a quantity of 2 must not rewrite a $2 budget).
+      if(!previous||previous===current||previous==='Not yet specified'||!/[\p{L}]/u.test(previous))continue;
+      const escaped=previous.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      part=part.replace(new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}(?=$|[^\\p{L}\\p{N}])`,'giu'),(_match,prefix)=>prefix+current);
+    }
+    return part;
+  }).join('');
+  a.fields.need=revise(priorNeed);
+  // Rebuild a request-derived title from the complete revised need. Updating
+  // its truncated title alone can leave a stale partial location on the card.
+  a.title=priorTitle===title(priorNeed,'Manifest')?title(a.fields.need,'Manifest'):revise(priorTitle);
+  if(a.fingerprint)a.fingerprint=low(`${a.system}|${a.kind}|${a.title}`).slice(0,500);
+}
+function merge(a,text){let changed=false;if(a.system==='fellowfare'){const before={...a.fields},b=budget(text),x=exchange(text),place=requestArea(text),quantity=requestField(text,'quantity'),timing=requestField(text,'timing|when');if(b!=null){a.fields.budget=b;changed=true}if(x){a.fields.exchangeMethod=x;changed=true}if(b!=null||x)a.missingRequired=a.missingRequired.filter(v=>v!=='maximum budget or exchange method');if(place){a.fields.area=place;a.missingRequired=a.missingRequired.filter(v=>v!=='pickup or delivery area');changed=true}if(quantity){a.fields.quantity=quantity;changed=true}if(timing){a.fields.timing=timing;changed=true}if(changed)reviseRequestProse(a,before)}if(a.system==='living-school'&&a.missingRequired.includes('exact skill name')&&/\bdougie\b|\bdance\b/i.test(text)){a.fields.learningGoal='Learn the Dougie dance.';a.missingRequired=[];a.state='active';changed=true}if(a.system==='anarchadia'&&a.kind==='bug-report'&&a.missingRequired.includes('reproduction steps')&&clean(text).length>20){a.fields.reproductionSteps=clean(text);a.missingRequired=[];changed=true}if(changed){a.updatedAt=new Date().toISOString();if(!a.missingRequired.length&&a.state==='clarifying')a.state='review'}return changed}
 function persist(a){const list=items(),fp=low(`${a.system}|${a.kind}|${a.title}`).slice(0,500),old=list.find(x=>x.fingerprint===fp&&['draft','clarifying','review'].includes(x.state));if(old){a.id=old.id;a.createdAt=old.createdAt;Object.assign(old,a,{fingerprint:fp});save(list);return old}a.fingerprint=fp;list.unshift(a);save(list);return a}
 function restore(snapshot){if(!snapshot?.id)return null;const old=get(snapshot.id);if(old)return old;const list=items(),a=structuredClone(snapshot);a.updatedAt=new Date().toISOString();list.unshift(a);save(list);return a}
 function compose(text,system,ctx){const pending=open(system),revision=system==='fellowfare'&&/\b(revise|update|change|edit)\b/i.test(text);if(pending&&(pending.missingRequired?.length||revision)&&merge(pending,text)){const list=items(),i=list.findIndex(x=>x.id===pending.id);if(i>=0)list[i]=pending;save(list);return pending}const a=system==='cerbanimo'?cerbanimo(text,ctx):system==='fellowfare'?fellowfare(text,ctx):system==='anarchadia'?anarchadia(text,ctx):living(text,ctx);return a?persist(a):null}

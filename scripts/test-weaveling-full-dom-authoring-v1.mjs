@@ -18,3 +18,28 @@ test('the full browser graph sends one bounded Qwen Quest request and retains th
   assert.deepEqual(saved.plan.paths.map(path=>path.realm),['anarchadia','fellowfare','living-school','cerbanimo']);
   assert.equal(saved.plan.requiresExplicitActivation,true);assert.equal(result.stableBubble,true);
 });
+
+test('a saved Quest revision uses its canonical author and both generations retain the selected 600-second deadline',{timeout:65000},async()=>{
+  const result=await new Promise((resolve,reject)=>{
+    const worker=new Worker(new URL('./helpers/guide-full-dom-worker-v1.mjs',import.meta.url),{execArgv:['--experimental-vm-modules'],workerData:{entry:'/app/persistent-system-shell-v1.html',scenario:'quest-revision'}});
+    const timeout=setTimeout(()=>{worker.terminate();reject(new Error('Full Quest revision fixture stopped responding.'))},60000);
+    worker.once('message',value=>{clearTimeout(timeout);resolve(value)});worker.once('error',error=>{clearTimeout(timeout);reject(error)});
+    worker.once('exit',code=>{clearTimeout(timeout);if(code)reject(new Error(`Quest revision worker exited ${code}`))});
+  });
+  assert.equal(result.ok,true,result.error);assert.deepEqual(result.errors,[]);assert.deepEqual(result.blocked,[]);
+  assert.equal(result.inference,2,'One requested draft and one requested revision must each call the model once.');
+  for(const {body} of result.http){
+    assert.equal(body.model,'qwen3.5:4b');assert.equal(body.think,false);
+    assert.match(body.messages[0].content,/Weaveling, Civweave's Quest architect/,'Revisions must not fall through to generic chat.');
+  }
+  const memory=JSON.parse(result.http[1].body.messages.at(-1).content.split('\n')[1]);
+  assert.equal(memory.requestMode,'revision');assert.equal(memory.currentWish,result.originalRequest);
+  assert.equal(memory.currentRequest,result.revisionRequest);assert.ok(memory.currentPlan?.id,'The saved review must reach its revision author.');
+  const deadlines=result.requestTimers.filter(timer=>timer.owner.includes('makeController'));
+  assert.equal(deadlines.length,2);assert.deepEqual(deadlines.map(timer=>timer.ms),[600000,600000]);
+  assert.ok(deadlines.every(timer=>timer.cleared&&!timer.fired));
+  const saved=result.plans.find(item=>item.kind==='weave-plan');assert.equal(saved.state,'review');
+  assert.equal(saved.plan.wish,result.originalRequest);assert.equal(saved.plan.latestRequest,result.revisionRequest);
+  assert.deepEqual(saved.plan.paths.map(path=>path.realm),['anarchadia','fellowfare','living-school','cerbanimo']);
+  assert.equal(result.stableBubble,true);
+});

@@ -12,7 +12,7 @@ try{
   }
 }catch{}
 
-const VERSION='1.0.195-guide-chat-surface-v350-current-quest';
+const VERSION='1.0.196-guide-chat-surface-v350-ai-lifecycle';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -457,7 +457,7 @@ async function submitActive(text){
         console.warn('[Civweave] Optional generation tracker unavailable:',error);
       }
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.12-current-quest');
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.13-ai-lifecycle');
       if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{

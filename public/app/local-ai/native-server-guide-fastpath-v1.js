@@ -3,10 +3,10 @@
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
 const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.17-native-quest-schema';
-const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.17-current-quest';
+const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.18-explicit-learning-goal';
 const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.0-ai-authority-only';
 const QUEST_MATERIALIZER='/app/weaveling-plan-materialization-v265.js?v=1.1.3-current-selection';
-const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.11-complete-outcome';
+const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.12-saved-quest-revision';
 let modelsPromise=null,plannerPromise=null,questPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
@@ -58,7 +58,7 @@ async function ensurePlanner(){
     .catch(error=>{modelsPromise=null;throw error});
   await modelsPromise;
   if(!plannerPromise)plannerPromise=loadScript(MOSS_PLANNER,
-    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.17-unified-chat-system-v1-current-quest','Moss planner')
+    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.18-unified-chat-system-v1-explicit-learning-goal','Moss planner')
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
@@ -86,7 +86,7 @@ async function ensureQuestPlanner(){
     await loadScript(QUEST_MATERIALIZER,()=>typeof globalThis.CivweaveWeavelingPlanMaterializationV265?.materialize==='function','Canonical Quest review materialization');
     await loadScript(QUEST_PLANNER,()=>typeof globalThis.CivweaveWeavelingPlanJsonV190?.createModelPlan==='function'&&
       typeof globalThis.CivweaveWeavelingPlanJsonV190?.planIntent==='function'&&
-      globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.11-weaveling-plan-json-v190-complete-outcome','Canonical Weaveling Quest planner');
+      globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.12-weaveling-plan-json-v190-saved-quest-revision','Canonical Weaveling Quest planner');
     return globalThis.CivweaveWeavelingPlanJsonV190;
   })().catch(error=>{questPromise=null;throw error});
   return questPromise;

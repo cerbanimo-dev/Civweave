@@ -8,10 +8,26 @@ const library=read('public/app/working-campus-v156.part3.txt');
 const runtime=read('public/app/shared/civweave-model-runtime.js');
 
 const deadline=Number(budget.match(/const DESIGN_TIMEOUT_MS=(\d+);/)?.[1]);
-assert.ok(deadline>=540000&&deadline<600000,'Local curriculum deadline must exceed the old 6-minute abort and remain within shared runtime ceiling.');
+assert.equal(deadline,570000,'A missing configured design deadline retains the bounded fallback.');
 assert.match(runtime,/clamp\(input\.timeoutMs[^\n]*600000/,'Shared runtime must allow this design deadline.');
-assert.match(budget,/controller\.abort\(new DOMException\('Living School design timeout'/,'Timeouts must explicitly abort the provider request.');
 assert.match(budget,/if\(result\?\.status!=='success'\)return result/,'Failed generation must never be accepted as a completed curriculum.');
+
+for(const timeoutMs of [600000,15000,undefined,NaN]){
+  const calls=[],timers=[],controller=new AbortController(),configured={provider:'ollama',model:'qwen3.5:4b',timeoutMs},result={status:'timeout',error:{code:'TIMEOUT',message:'Fixture canonical deadline.'}};
+  const context=vm.createContext({console,Date,Math,JSON,Object,Array,String,Number,Promise,Set,Map,AbortController,DOMException,
+    setTimeout:(_callback,ms)=>{timers.push(ms);return timers.length},clearTimeout(){},queueMicrotask(){},addEventListener(){},dispatchEvent(){},CustomEvent:class{},
+    document:{documentElement:{dataset:{}},addEventListener(){}},CivweaveLivingSchoolGenerationGuardV262:{installed:true},CivweaveLivingSchoolQuizContractGuardV263:{installed:true},CivweaveLivingSchoolVideoGenerationGuardV1:{installed:true},CivweaveLivingSchoolRuntimeRouteV2:{providerNeutral:true},
+    CivweaveModelRuntime:{readSharedConfig:()=>configured,generate:async request=>{calls.push(request);return result}}});
+  vm.runInContext(budget,context);assert.equal(context.CivweaveLivingSchoolGenerationBudgetV3.install(),true);
+  const request={purpose:'living-school-research-grounded-curriculum-v218.1',config:{...configured,maxTokens:8192},signal:controller.signal,context:{moduleCount:3}};
+  assert.equal(await context.CivweaveModelRuntime.generate(request),result,'Canonical timeout results must remain visible.');
+  assert.equal(calls.length,1);assert.equal(calls[0].config.timeoutMs,Number.isFinite(timeoutMs)?timeoutMs:570000,'The user-selected deadline must survive the design budget.');
+  assert.equal(calls[0].context.designTimeoutMs,calls[0].config.timeoutMs);assert.equal(calls[0].config.maxTokens,16384);
+  assert.equal(calls[0].signal,controller.signal,'The shared runtime owns inference cancellation.');
+  assert.deepEqual(timers.filter(ms=>ms>1000),[],'The capability must not race the canonical runtime with a second inference timer.');
+  assert.equal(context.CivweaveLivingSchoolGenerationBudgetV3.stats().designTimeouts,1);
+  assert.equal((await context.CivweaveModelRuntime.generate(request)).error.code,'LIVING_SCHOOL_DUPLICATE_STRONG_DESIGN_BLOCKED');assert.equal(calls.length,1);
+}
 
 const start=library.indexOf('function savedLearningJourneys(){');
 const end=library.indexOf('function campusView(){',start);

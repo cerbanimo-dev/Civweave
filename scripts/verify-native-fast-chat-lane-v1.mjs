@@ -23,7 +23,7 @@ const globals={
   CivweaveSettingsV320:{readState:()=>selected},
   CivweaveModelRuntime:{nativeDirectTermuxNoStream:true,nativeDirectTermuxStreamV2:true,nativeMossVisibleStreamV3:true,nativeFormalPipelineStageEventsV1:true,nativeFinishReasonGuardV1:true,generate:async()=>{throw Error('unexpected runtime call')}},
   CivweaveUnifiedChatSystemV1:{
-    version:'1.2.17-unified-chat-system-v1-current-quest',
+    version:'1.2.18-unified-chat-system-v1-explicit-learning-goal',
     handleNativeLivingSchoolRequest:async args=>{planArgs=args;return{response:{answer:args.text==='approve'?'Approved Learning Journey': 'Learning Journey plan: Tarot',choice:{nextAction:'Review first'}},provider:'openai-compatible',model:'qwen35-4b-native'}}
   },
   CivweaveFamilyAILoaderV105:{ensure:async()=>{assistants++;throw Error('full assistant bootstrap should be skipped')}}
@@ -125,7 +125,7 @@ assert.match(chat,/guide:respondingSystem,responderSystem:respondingSystem/);
 assert.match(chat,/await verifyNativePhoneServerTransport/);
 assert.match(runtime,/nativeDirect \? Boolean\(config\.stream\) : Boolean\(config\.stream \|\| lineup\)/);
 assert.match(runtime,/nativeDirectTermuxNoStream: true/);
-assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.195-current-quest/);
-assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.195-current-quest/);
+assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.196-ai-lifecycle/);
+assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.196-ai-lifecycle/);
 assert.match(diagnostic,/Show last Civweave native-request stage/);
 console.log('PASS: direct native HTTP, Moss review planner fast entry, no second model, no heavy bootstrap, stage diagnostics and invalid route rejection');

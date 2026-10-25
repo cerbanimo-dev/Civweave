@@ -35,6 +35,19 @@ test('the existing guarded design call transports source passages and synthesis 
   assert.equal(request.context.sourceMaterialInjected,true);
 });
 
+for(const config of [
+  {provider:'ollama',model:'qwen3.5:4b',timeoutMs:600000},
+  {provider:'ollama',model:'qwen3.5:4b',timeoutMs:15000},
+  {provider:'gemini',model:'qa-gemini',timeoutMs:600000},
+  {provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',timeoutMs:600000},
+])test(`Moss design retains ${config.provider} deadline and request-specific thinking policy (${config.timeoutMs}ms)`,async()=>{
+  let request;const context=fixture(async value=>{request=value;return{status:'provider-error'}});
+  await context.__design(context.CivweaveModelRuntime,config,data,3,[source]);
+  assert.equal(request.config.timeoutMs,config.timeoutMs);assert.equal(request.config.maxTokens,8192);
+  if(config.provider==='ollama')assert.equal(request.think,false);else assert.equal(Object.hasOwn(request,'think'),false);
+  if(config.model==='qwen35-4b-native')assert.equal(request.config.stream,true,'The recent native SSE route remains streaming.');
+});
+
 test('the formatter transports the design, requested learning contract, and source mappings alongside its complete schema',async()=>{
   let request;
   const context=fixture(async value=>{request=value;return{status:'error',error:{message:'Transport inspection only'}}});

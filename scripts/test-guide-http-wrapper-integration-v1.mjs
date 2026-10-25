@@ -82,21 +82,33 @@ test('Rook Manifest revisions preserve unspecified materials and parse explicit 
   const initial=await ask('Create a Manifest: QA notebook fixture; quantity: 2 notebooks; area: Albany, NY; timing: today; free gift.');
   assert.equal(initial.action.fields.category,'Materials');
   assert.deepEqual(Array.from(initial.action.fields.materials),['QA notebook fixture'],'initial material entries exclude command and metadata labels');
-  const originalNeed=initial.action.fields.need;
   const revised=await ask('Revise the Manifest: quantity: 3 notebooks; area: Troy, NY; timing: tomorrow. Keep it a fictional free-gift QA listing with no contact or delivery.');
   assert.equal(revised.action.id,initial.action.id);
   assert.deepEqual(Array.from(revised.action.fields.materials),['QA notebook fixture']);
-  assert.equal(revised.action.fields.need,originalNeed);
+  assert.match(revised.action.fields.need,/QA notebook fixture/,'a logistics revision keeps the original need');
+  for(const value of [revised.action.title,revised.action.fields.need]){
+    assert.doesNotMatch(value,/2 notebooks|Albany|\btoday\b/i,'reviewed prose cannot contradict revised fields');
+    assert.match(value,/3 notebooks/);
+  }
+  assert.match(revised.action.fields.need,/Troy, NY/);
   assert.equal(revised.action.fields.quantity,'3 notebooks');
   assert.equal(revised.action.fields.area,'Troy, NY');
   const explicit=await ask('Revise the Manifest: materials: notebooks; quantity: 3 notebooks; area: Troy, NY; timing: tomorrow;');
   assert.equal(explicit.action.id,initial.action.id);
   assert.deepEqual(Array.from(explicit.action.fields.materials),['notebooks'],'an explicit material label replaces only its material entries');
-  assert.equal(explicit.action.fields.need,originalNeed);
+  assert.match(explicit.action.fields.need,/QA notebook fixture/);
+  assert.doesNotMatch(explicit.action.fields.need,/2 notebooks|Albany|\btoday\b/i);
   assert.equal(explicit.action.fields.exchangeMethod,'Gift');
   const approved=await ask('Approve the Manifest');
   assert.equal(approved.action.state,'published');
   assert.deepEqual(Array.from(approved.action.fields.materials),['notebooks'],'approval must not reparse the original source over reviewed materials');
+  const published=JSON.parse(app.values.get('civweave.fellowfare.pending-threads.v1'));
+  assert.equal(published.length,1);
+  assert.equal(published[0].title,explicit.action.title);
+  assert.equal(published[0].description,explicit.action.fields.need);
+  assert.equal(published[0].quantity,'3 notebooks');
+  assert.equal(published[0].area,'Troy, NY');
+  assert.doesNotMatch(published[0].title+' '+published[0].description,/2 notebooks|Albany|\btoday\b/i);
 });
 
 test('knowledge installation after the stream subscriber can extend the shared runtime', async () => {

@@ -92,6 +92,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
   const request={
     signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,
     purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',
+    ...(providerName(config)==='ollama'?{think:false}:{}),
     config:withNativeMossStream({...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)}),
     context,
     messages:[
