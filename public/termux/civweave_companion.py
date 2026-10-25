@@ -104,11 +104,19 @@ class Controller:
         with self.lock:
             job = self.job.copy()
             owned = self.server_running()
-            names = {key: {
-                "present": (self.model_dir / info["file"]).is_file(),
-                "verified": (self.model_dir / (info["file"] + ".sha256")).is_file(),
-                "bytes_approx": info["bytes_approx"],
-            } for key, info in MODELS.items()}
+            names = {}
+            for key, info in MODELS.items():
+                model_path = self.model_dir / info["file"]
+                receipt = self.model_dir / (info["file"] + ".sha256")
+                present = model_path.is_file() and not model_path.is_symlink()
+                verified = (present and receipt.is_file()
+                            and receipt.read_text().strip() == info["sha256"]
+                            and receipt.stat().st_mtime_ns >= model_path.stat().st_mtime_ns)
+                names[key] = {
+                    "present": present,
+                    "verified": verified,
+                    "bytes_approx": info["bytes_approx"],
+                }
             chosen = self.model
             context = self.context
         reachable = self.server_responding()
@@ -366,6 +374,9 @@ def main():
         pass
     finally:
         server.server_close()
+        # Do not orphan a model server when the Companion is stopped manually.
+        if controller.server_running():
+            controller._stop()
 
 
 if __name__ == "__main__":
