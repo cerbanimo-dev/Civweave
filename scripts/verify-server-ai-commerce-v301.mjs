@@ -137,7 +137,7 @@ assert.match(accountEdge, /server-ai-entry-v2\.mjs/);
 assert.match(accountEdge, /legacyAccountEdge\.fetch/);
 assert.match(legacyAccountEdge, /server-ai-entry-v1\.mjs/);
 assert.match(accountRuntime, /central-money-edge-required/);
-assert.match(wrangler, /"main": "src\/server-ai-entry-v6\.mjs"/);
+assert.match(wrangler, /"main": "src\/server-ai-entry-v7\.mjs"/);
 assert.match(wrangler, /"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-flash-lite"/);
 assert.match(wrangler, /"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave\.cc"/);
 
