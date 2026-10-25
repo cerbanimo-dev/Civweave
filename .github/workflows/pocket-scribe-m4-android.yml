@@ -23,6 +23,7 @@ jobs:
         run: |
           mkdir -p pocket-scribe/m4/workspace
           tar -xzf pocket-scribe/m4/source.tar.gz -C pocket-scribe/m4/workspace
+          tar -xzf pocket-scribe/m4/import-fix-0.4.1.tar.gz -C pocket-scribe/m4/workspace
           echo '{"type":"commonjs"}' > pocket-scribe/m4/workspace/package.json
       - uses: actions/setup-java@v4
         with:
@@ -46,12 +47,22 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_*.py' -q
           node tests/js/test_envelope.cjs
-      - name: Compile ARM64 debug APK
+      - name: Compile ARM64 debug APKs (normal and side-by-side diagnostic)
         working-directory: pocket-scribe/m4/workspace/android
-        run: gradle :app:assembleDebug --no-daemon --stacktrace --max-workers=2
+        run: |
+          mkdir -p ../../apk-artifacts
+          gradle :app:assembleDebug --no-daemon --stacktrace --max-workers=2
+          cp app/build/outputs/apk/debug/app-debug.apk ../../apk-artifacts/PocketScribe-0.4.1-normal-debug.apk
+          gradle :app:assembleDebug -PpocketDiagnostic=true --no-daemon --stacktrace --max-workers=2
+          cp app/build/outputs/apk/debug/app-debug.apk ../../apk-artifacts/PocketScribe-0.4.1-import-test.apk
+          MAIN_ID=$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging ../../apk-artifacts/PocketScribe-0.4.1-normal-debug.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
+          TEST_ID=$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging ../../apk-artifacts/PocketScribe-0.4.1-import-test.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
+          echo "Normal package: $MAIN_ID; diagnostic: $TEST_ID"
+          test "$MAIN_ID" = 'org.kingdom.pocketscribe'
+          test "$TEST_ID" = 'org.kingdom.pocketscribe.importtest'
       - uses: actions/upload-artifact@v4
         with:
-          name: kingdom-pocket-scribe-m4-kokoro-qwen-debug-apk
-          path: pocket-scribe/m4/workspace/android/app/build/outputs/apk/debug/app-debug.apk
+          name: kingdom-pocket-scribe-0.4.1-apks
+          path: pocket-scribe/m4/apk-artifacts/*.apk
           if-no-files-found: error
           retention-days: 14

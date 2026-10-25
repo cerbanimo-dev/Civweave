@@ -1,0 +1,1 @@
+Qwen importer diagnostics patch. Adds document size and storage checks, GGUF v3 header checks, persistent on-screen error messages, and a separate .importtest APK. Extract import-fix-0.4.1.tar.gz over source.tar.gz before building. Version 0.4.1 has not been tested on a physical S25+. Do not uninstall the prior app; side-by-side diagnostic avoids touching existing Kokoro/data.
