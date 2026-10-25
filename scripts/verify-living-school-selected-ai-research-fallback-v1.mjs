@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
+globalThis.document={getElementById:()=>null};globalThis.localStorage={getItem:()=>null,setItem(){}};
+const {assertGenerationActive,generationCancelled}=await import('../public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs');
 
 const path='public/app/living-school-local-research-v243.mjs';
 const source=fs.readFileSync(path,'utf8');
@@ -24,6 +26,7 @@ const persistRows=[];
 const generateCalls=[];
 let uid=0;
 const core={
+  assertGenerationActive,generationCancelled,
   clean(value,max=12000){return String(value??'').trim().slice(0,max)},
   state(){return state},
   uid(prefix='id'){uid+=1;return `${prefix}-${uid}`},

@@ -1,4 +1,4 @@
-import{ensureLivingSchool,ensureModuleVideo,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1-extensible';
+import{ensureLivingSchool,ensureModuleVideo,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1-subject-anchors';
 import{offerMediaPacksBeforeCurriculum}from'./living-school-media-pack-recommender-v1.mjs?v=foundation-authority-v17';
 import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v12-extensible';
 

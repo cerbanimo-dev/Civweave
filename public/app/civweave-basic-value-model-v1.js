@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueModelV1)return;
-const VERSION='1.4.0';
+const VERSION='1.4.1';
 const clean=value=>String(value??'').trim();
 const copy=value=>JSON.parse(JSON.stringify(value));
 const CONTRACT=`CIVWEAVE BASIC VALUE GUIDE civweave.basic-value-guide.v1
@@ -50,6 +50,8 @@ function recurseSchema(node,key='',root=false,seen=new WeakSet()){
 }
 function augmentSchema(schema){if(!schema||typeof schema!=='object')return schema;return recurseSchema(copy(schema),'',true)}
 function relevant(request={}){
+  // Native sandbox compilation produces source files, not labor or price records.
+  if(request.purpose==='anarchadia-code-generation')return false;
   const text=`${request.purpose||''} ${request.systemId||''} ${JSON.stringify(request.context||{})} ${(request.messages||[]).map(row=>row?.content||'').join(' ')}`.toLowerCase();
   return/(cerbanimo|living-school|fellowfare|civweave|task|quest|project|product|service|curriculum|tutor|mentor|learning|labor|market|price|value)/.test(text);
 }

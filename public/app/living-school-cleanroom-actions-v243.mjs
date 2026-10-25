@@ -1,6 +1,7 @@
 import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs?v=practicum-receipt-revocation-v1';
-import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {researchCapability} from './living-school-local-research-v243.mjs?v=research-links-v260';
+import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor,curriculumWeaveIdentity,weavePathIdentity} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
+import {researchCapability} from './living-school-local-research-v243.mjs?v=moss-materialization-lifecycle-v1';
+import {assertGenerationActive} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
 const stage=(handler,name,detail={})=>{try{handler?.(name,detail)}catch{}};
@@ -141,10 +142,12 @@ function normalizeSupplementalQuestion(item,moduleId,index){
   };
 }
 async function completeSharedQuizBank(data,school,options={}){
+  assertGenerationActive(options);
   stripLegacyFallbackQuestions(school);
   const needs=quizNeeds(school);
   if(!needs.length)return school;
   await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+  assertGenerationActive(options);
   const runtime=globalThis.CivweaveModelRuntime,config=runtime?.readSharedConfig?.('interactive')||null;
   if(!runtime?.generate||!config)throw new Error('The shared AI runtime is unavailable for the targeted quiz completion pass.');
   const repairRequest=needs.map(need=>({
@@ -157,11 +160,14 @@ async function completeSharedQuizBank(data,school,options={}){
   const repairConfig={...config,maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.2,0.3)};
   persist('living-school-ai-quiz-delta-requested',{source:clean(options.source,120)||'living-school-workbench',schoolId:school.id,modules:repairRequest.map(row=>({moduleId:row.moduleId,minimumAdditionalQuestions:row.minimumAdditionalQuestions,missingTypes:row.missingTypes}))});
   stage(options.onStage,'repairing-quiz',{schoolId:school.id,modules:repairRequest.length,mode:'targeted-delta'});
+  assertGenerationActive(options);
   const result=await runtime.generate({
+    signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,
     purpose:'living-school-quiz-delta-completion-v258',executionProfile:'interactive',config:repairConfig,schema:supplementalQuizSchema(),
     context:{capability:data.capability,level:data.level,proofContract:data.proof,currentGeneration:{title:school.title,capability:school.capability,proof:school.proof},modules:repairRequest,constraints:['Do not rewrite any existing curriculum or quiz question.','Return only genuinely new questions for the listed module IDs.','Fill each listed missing question type first, then add enough additional questions to meet minimumBankSize.','Questions must test the actual supplied module content and capability, not generic learning-evidence boilerplate.','Do not repeat or lightly paraphrase an existing question.','Multiple-choice and multi-select questions need usable options and answers.','Short-answer questions need a visible rubric.']},
     messages:[{role:'system',content:'You are Moss performing a surgical completion pass on an already-generated Living School curriculum. Preserve the current generation exactly. Return strict JSON containing only the missing supplemental quiz questions. Do not regenerate modules, lessons, artifacts, or existing questions. Make each new question specific to the supplied module content.'},{role:'user',content:'Complete only the missing quiz-bank slots in the current generation. Keep every existing genuine AI question unchanged and return only the new questions needed to satisfy each listed module contract.'}]
   });
+  assertGenerationActive(options,result);
   if(result?.status!=='success')throw new Error(result?.error?.message||result?.error||`Targeted quiz completion ended with ${result?.status||'an error'}.`);
   const output=result.outputJson&&typeof result.outputJson==='object'?result.outputJson:{},rows=Array.isArray(output.modules)?output.modules:[];
   for(const need of needs){
@@ -180,8 +186,10 @@ async function completeSharedQuizBank(data,school,options={}){
   return school;
 }
 async function generateSchoolWithAtomicSharedQuiz(data,options={}){
+  assertGenerationActive(options);
   data.modelRoute=selectedCurriculumRoute(data.modelRoute);
-  const school=await generateSchool(data),provider=clean(school.generation?.provider,80).toLowerCase(),requestedRoute=clean(data.modelRoute,120).toLowerCase();
+  const school=await generateSchool(data,options);assertGenerationActive(options);
+  const provider=clean(school.generation?.provider,80).toLowerCase(),requestedRoute=clean(data.modelRoute,120).toLowerCase();
   stripLegacyFallbackQuestions(school);
   if(requestedRoute==='shared'&&(school.generation?.fallback||provider==='deterministic')){
     const error=clean(school.generation?.error,1000);
@@ -199,6 +207,7 @@ async function generateSchoolWithAtomicSharedQuiz(data,options={}){
 }
 
 export async function generateCurriculumFromData(input={},options={}){
+  assertGenerationActive(options);
   const current=state(),callerModelRoute=clean(input.modelRoute,120)||clean(current.settings?.modelRoute,120)||'shared';
   const data={
     title:clean(input.title,240),
@@ -207,23 +216,30 @@ export async function generateCurriculumFromData(input={},options={}){
     count:input.count||4,
     mode:clean(input.mode,80)||'guided',
     modelRoute:selectedCurriculumRoute(callerModelRoute),
-    proof:clean(input.proof,3000)||'A working artifact, explanation, and independent receipt.'
+    proof:clean(input.proof,3000)||'A working artifact, explanation, and independent receipt.',
+    ...curriculumWeaveIdentity(input)
   };
   if(!data.capability)throw new Error('Name an observable capability.');
   const source=clean(options.source,120)||'living-school-workbench';
   const before=state();
-  before.pathContext={...(before.pathContext||{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source};
+  const {weaveId:_oldWeave,pathId:_oldPath,id:_oldSelection,...previousContext}=before.pathContext||{};
+  before.pathContext={...previousContext,...weavePathIdentity(data),...(data.weaveId?{id:data.weaveId}:{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source};
+  before.activePathId=data.weaveId||'';
   persist('living-school-curriculum-requested',{source,title:data.title,capability:data.capability,level:data.level,count:Number(data.count)||4,mode:data.mode,callerModelRoute,modelRoute:data.modelRoute,modelRouteAuthority:'shared-model-settings'});
 
   stage(options.onStage,'researching',{capability:data.capability});
-  const packet=await researchCapability(data.capability,{force:false});
+  const packet=await researchCapability(data.capability,{...options,force:false});
+  assertGenerationActive(options);
   persist('living-school-research-ready',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||state().research?.sourceCount||0,reused:Boolean(packet.reused),source});
 
   stage(options.onStage,'generating',{capability:data.capability,researchMode:packet.mode});
   const routeBeforeGeneration=data.modelRoute;
   data.modelRoute=selectedCurriculumRoute(data.modelRoute);
   if(routeBeforeGeneration!==data.modelRoute)persist('living-school-model-route-synchronized',{source,from:routeBeforeGeneration,to:data.modelRoute,provider:sharedProviderSelection(),authority:'shared-model-settings'});
-  const s=state(),school=await generateSchoolWithAtomicSharedQuiz(data,{source,onStage:options.onStage}),old=s.school?.modules||[],nextProgress={};
+  assertGenerationActive(options);
+  const s=state(),school=await generateSchoolWithAtomicSharedQuiz(data,{...options,source});assertGenerationActive(options);
+  delete school.weaveId;delete school.pathId;Object.assign(school,weavePathIdentity(data));
+  const old=s.school?.modules||[],nextProgress={};
   school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
   const generatedProvider=clean(school.generation?.provider,80).toLowerCase(),usedDeterministic=generatedProvider==='deterministic';
   const actualModelRoute=usedDeterministic?'deterministic':'shared',generatedModel=clean(school.generation?.model,160),generatedLabel=generatedModel||clean(school.generation?.provider,120)||'the model selected in shared AI settings';

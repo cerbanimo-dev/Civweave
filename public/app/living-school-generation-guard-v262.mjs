@@ -1,6 +1,6 @@
 import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v12-extensible';
 
-const REVISION='living-school-generation-guard-v264-pedagogy-bounded-assessments';
+const REVISION='living-school-generation-guard-v265-first-call-module-material';
 const MAX_PACKET_CHARS=52000;
 const CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
@@ -297,6 +297,7 @@ function modulePrompt(module,needed,types,round){
     'Make the prompt self-contained and explicitly anchored to the module subject or one of its named concepts.',
     'For selected-response questions, use plausible subject-matter misconceptions as distractors.',
     'Never use skipping practice, confidence alone, invented citations, ignoring objectives, unrelated artifacts, reviewable evidence, or module-completion compliance as distractors or answers.',
+    `MODULE MATERIAL:\n${clean(JSON.stringify(module||{}),26000)}`,
     `Completion round: ${round}.`
   ].join('\n');
 }

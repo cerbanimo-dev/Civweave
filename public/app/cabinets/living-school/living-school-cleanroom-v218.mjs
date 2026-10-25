@@ -1,16 +1,18 @@
-import{copy,state,persist,VERSION,clean,progressFor,freshState,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
+import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
+import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY}from'./living-school-journey-index-v1.mjs';
 import{render}from'./living-school-cleanroom-render-v218.mjs?v=bounded-assessments-practicum-v1';
-import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=practicum-receipt-revocation-v1';
-import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=bounded-ai-assessments-v1';
+import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=moss-explicit-weave-path-v1';
+import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
 import{installLivingSchoolVideoGenerationGuardV1}from'../../living-school-video-generation-guard-v1.mjs?v=video-atlas-v1';
-import{ensureLivingSchool,renderLivingSchoolEmbed,FALLBACK_VIDEO_URL}from'../../video-learning-contract-v1.mjs?v=video-atlas-v1-extensible';
+import{ensureLivingSchool,renderLivingSchoolEmbed,FALLBACK_VIDEO_URL}from'../../video-learning-contract-v1.mjs?v=video-atlas-v1-subject-anchors';
 import safeMode from'../../safe-mode-v1.mjs?v=safe-mode-v12-extensible';
+import{assertGenerationActive,generationCancelled}from'./living-school-cleanroom-core-v218.mjs';
 
 safeMode.install();
 document.documentElement.dataset.livingSchoolAiGuards='lazy';
 
-let busy=false,dispatchCount=0,videoContractBusy=false,aiGuardsPromise=null;
+let busy=false,retryStarting=false,dispatchCount=0,videoContractBusy=false,aiGuardsPromise=null;
 const LEVELS=new Set(['beginner','intermediate','advanced']);
 const MODES=new Set(['guided','just-in-time','browse']);
 const AI_ACTIONS=new Set(['research-sources','generate-curriculum','regenerate-ls-research','regenerate-ls-structure']);
@@ -146,12 +148,45 @@ actions['discard-ls-failed-drafts']=async target=>{
   target.disabled=true;const removed=discardLivingSchoolFailedDrafts();toastMessage(removed?`Removed ${removed} failed draft${removed===1?'':'s'}; completed modules were untouched.`:'No failed draft content remained to remove.');
 };
 
+async function retryApprovedLearningJourney(target){
+  const record=learningJourneySnapshot(readJson,state()).retry;
+  if(!record||record.id!==clean(target.dataset.journeyId,180)||!record.approvedAt)
+    throw new Error('An approved, incomplete Learning Journey is required before retrying.');
+  target.disabled=true;target.textContent='Regenerating approved Learning Journey…';
+  const request={...record.request,intent:record.request.intent||'new',
+    newPath:record.request.intent!=='revise',replaceExisting:record.request.intent!=='revise'};
+  const output=await generateCurriculumFromChat(request),school=output?.school;
+  if(!school?.id||!Array.isArray(school.modules)||!school.modules.length||school.generation?.fallback)
+    throw new Error('Generation did not produce a valid curriculum. The approved plan remains available for retry.');
+  const expected=Math.max(1,Math.min(8,Number(request.count)||4));
+  if(school.modules.length<expected||output.generationRecovery?.status==='partial'){
+    persist('living-school-approved-journey-partial',{schoolId:school.id,approvedPlanId:record.id,
+      completedModules:school.modules.length,requestedModules:expected});
+    toastMessage(`Saved ${school.modules.length}/${expected} modules. The approved plan and missing-module recovery remain available.`);
+    return school;
+  }
+  const plan=readJson(PLAN_KEY,null);
+  if(record.id==='plan:'+plan?.id&&plan.state==='approved')localStorage.removeItem(PLAN_KEY);
+  const queued=readJson(QUEUE_KEY,null);
+  if(queued?.approvedPlanId&&(record.id==='queue:'+queued.approvedPlanId||record.id==='plan:'+queued.approvedPlanId))
+    localStorage.removeItem(QUEUE_KEY);
+  persist('living-school-approved-journey-materialized',{schoolId:school.id,approvedPlanId:record.id,moduleCount:school.modules.length});
+  toastMessage('The approved Learning Journey is available in the curriculum and saved Learning Journeys list.');
+  return school;
+}
 async function handleLivingSchoolClick(event){
   const target=event.target?.closest?.('[data-ls-action]');
   if(!target)return;
   event.preventDefault();event.stopImmediatePropagation();
-  if(target.disabled||busy)return;
+  if(target.disabled||busy||retryStarting)return;
   const actionName=String(target.dataset.lsAction||'').trim();
+  if(actionName==='retry-approved-learning-journey'){
+    retryStarting=true;markDispatch();target.setAttribute('aria-busy','true');
+    try{await retryApprovedLearningJourney(target)}
+    catch(error){console.error('[Living School approved-journey retry]',error);toastMessage(String(error?.message||error))}
+    finally{retryStarting=false;target.removeAttribute('aria-busy');renderEnhanced();}
+    return;
+  }
   const action=actions[actionName];
   if(!action)return;
   busy=true;markDispatch();target.setAttribute('aria-busy','true');
@@ -168,7 +203,7 @@ async function handleLivingSchoolClick(event){
 
 function chatCurriculumData(input={}){
   const s=state(),newPath=input?.intent==='new'||input?.newPath===true||input?.replaceExisting===true,rawLevel=clean(input.level,80).toLowerCase(),rawMode=clean(input.mode,80).toLowerCase();
-  return{
+  const data={
     title:clean(input.title,240)||(newPath?'':clean(s.school?.title||s.pathContext?.title,240)),
     capability:clean(input.capability,2400)||(newPath?'':clean(s.school?.capability||s.pathContext?.capability,2400)),
     level:LEVELS.has(rawLevel)?rawLevel:newPath?'beginner':LEVELS.has(clean(s.school?.level,80).toLowerCase())?clean(s.school.level,80).toLowerCase():'beginner',
@@ -179,6 +214,7 @@ function chatCurriculumData(input={}){
     newPath,
     replaceExisting:newPath
   };
+  return{...data,...curriculumWeaveIdentity({...input,...data})};
 }
 
 function snapshotLearningState(){
@@ -200,8 +236,8 @@ function prepareNewPath(data){
   s.school=null;
   s.progress={};
   s.activeModuleId='';
-  s.activePathId='';
-  s.pathContext={title:data.title,capability:data.capability,proof:data.proof,source:'moss-shared-chat-new-path'};
+  s.activePathId=data.weaveId||'';
+  s.pathContext={...(data.weaveId&&data.pathId?{id:data.weaveId,weaveId:data.weaveId,pathId:data.pathId}:{}),title:data.title,capability:data.capability,proof:data.proof,source:'moss-shared-chat-new-path'};
   s.research=null;
   s.sources=[];
   s.visualInspection=null;
@@ -215,23 +251,28 @@ function prepareNewPath(data){
   return snapshot;
 }
 
-async function generateCurriculumFromChat(input={}){
+async function generateCurriculumFromChat(input={},options={}){
+  assertGenerationActive(options);
   if(busy)throw new Error('Living School is already processing another learning action.');
   const data=chatCurriculumData(input);
   if(!data.capability)throw new Error('Moss needs an observable capability before generating the curriculum.');
   await ensureAIGuards('moss-shared-chat');
-  const previous=data.newPath?prepareNewPath(data):null;
+  assertGenerationActive(options);
+  const previous=data.newPath?prepareNewPath(data):snapshotLearningState();
   busy=true;markDispatch();
   document.documentElement.dataset.livingSchoolChatAction='generating-curriculum';
   document.documentElement.dataset.livingSchoolPathIntent=data.intent;
   try{
     const priorProgress=copy(state().progress||{});
-    const school=await generateCurriculumFromData(data,{source:data.newPath?'moss-shared-chat-new-path':'moss-shared-chat',onStage:(stage,detail)=>{
+    const school=await generateCurriculumFromData(data,{...options,source:data.newPath?'moss-shared-chat-new-path':'moss-shared-chat',onStage:(stage,detail)=>{
+      try{options.onStage?.(stage,detail)}catch{}
       document.documentElement.dataset.livingSchoolChatStage=stage;
       try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-stage',{detail:{stage,...detail,title:data.title,capability:data.capability,intent:data.intent}}))}catch{}
     }});
+    assertGenerationActive(options);
     reconcileProgressById(priorProgress);
     await ensureLivingSchool(school);
+    assertGenerationActive(options);
     persist('living-school-video-contract-applied',{reason:'chat-generation',moduleCount:school.modules?.length||0,requiredPerModule:1,fallbackUrl:FALLBACK_VIDEO_URL});
     if(data.newPath){preservePreviousPath(previous);persist('living-school-new-path-replacement-completed',{schoolId:school.id,title:school.title,capability:school.capability,moduleCount:school.modules?.length||0,source:'moss-shared-chat'});}
     renderEnhanced();
@@ -240,7 +281,12 @@ async function generateCurriculumFromChat(input={}){
     try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-generated',{detail:{schoolId:school.id,title:school.title,moduleCount:school.modules.length,requestedModuleCount:school.requestedModuleCount||school.modules.length,capability:school.capability,source:data.newPath?'moss-shared-chat-new-path':'moss-shared-chat',intent:data.intent,videoContract:'required-per-module',generationStatus:state().generationRecovery?.status||'complete'}}))}catch{}
     return result;
   }catch(error){
-    if(data.newPath){restoreLearningState(previous);persist('living-school-new-path-replacement-rolled-back',{title:data.title,capability:data.capability,error:clean(error?.message||error,1000),source:'moss-shared-chat'});}
+    if(data.newPath||generationCancelled(error,options)){
+      const attemptedRecovery=copy(state().generationRecovery||null);
+      restoreLearningState(previous);
+      if(!generationCancelled(error,options)&&attemptedRecovery?.request?.capability===data.capability)state().generationRecovery=attemptedRecovery;
+      persist('living-school-new-path-replacement-rolled-back',{title:data.title,capability:data.capability,error:clean(error?.message||error,1000),source:'moss-shared-chat'});
+    }
     throw error;
   }finally{
     busy=false;
@@ -253,6 +299,12 @@ async function generateCurriculumFromChat(input={}){
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
 renderEnhanced();
+for(const key of [PLAN_KEY,QUEUE_KEY]){
+  // A pending plan may be approved in the parent persistent guide surface.
+  addEventListener('storage',event=>{if(event.key===key&&!busy)renderEnhanced()});
+}
+addEventListener('civweave:living-school-pending-plan-review',()=>{if(!busy)renderEnhanced()});
+addEventListener('pageshow',()=>{if(!busy)renderEnhanced()});
 document.documentElement.dataset.livingSchoolWorkbench='ready';
 applyVideoContract('startup').catch(error=>console.warn('[Living School video contract]',error));
 queueMicrotask(()=>renderLivingSchoolEmbed(document,state().school,state().activeModuleId));

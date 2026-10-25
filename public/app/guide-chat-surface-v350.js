@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.192-guide-chat-surface-v350-ollama-request-thinking';
+const VERSION='1.0.193-guide-chat-surface-v350-route-launcher-context';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -249,7 +249,7 @@ function syncSwitcher(){
 function syncChrome(){
   const current=guide(activeSystem),page=guide(pageSystem),voice=voiceState();
   document.documentElement.style.setProperty('--guide-accent',current.accent);
-  if(launcher){launcher.style.setProperty('--guide-accent',page.accent);const image=launcher.querySelector('img');if(image){image.src=page.avatar;image.alt=page.name}}
+  if(launcher){launcher.style.setProperty('--guide-accent',page.accent);launcher.setAttribute('aria-label',`Talk to ${page.name}`);const image=launcher.querySelector('img');if(image){image.src=page.avatar;image.alt=page.name}}
   if(!root)return;
   root.style.setProperty('--guide-accent',current.accent);root.style.setProperty('--guide-panel',current.panel);root.dataset.guide=activeSystem;root.dataset.pageSystem=pageSystem;
   const avatar=root.querySelector('[data-guide-avatar]');if(avatar){avatar.src=current.avatar;avatar.alt=current.name}
@@ -489,6 +489,7 @@ async function submitVoiceText(text,system=activeSystem){return submitText(text,
 function start(){
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   void ensureSpecializedRegistry().catch(()=>{});
+  addEventListener('civweave:system-route-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system)&&system!==pageSystem){pageSystem=system;syncChrome()}});
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
   for(const name of ['civweave:actions-changed','civweave:intentions-changed'])addEventListener(name,syncArtifactGates);
   addEventListener('storage',event=>{if(['civweave.realm-actions.v141','civweave.intentions.v127'].includes(event.key))syncArtifactGates()});

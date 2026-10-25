@@ -101,8 +101,10 @@ function localPacket(capability,rows){
   return{mode:'local-downloaded',summary:`Retrieved ${sources.length} subject-relevant, clean, deduplicated passages from downloaded knowledge schools on this device${linked?`, with ${linked} canonical article link${linked===1?'':'s'}`:''}.`,sources,provider:'local-knowledge-school',model:'dependency-free cached SQLite passage search · canonical source metadata · semantic subject expansion · sanitized passage view',flag:'DOWNLOADED LOCAL SOURCES',reason:''};
 }
 
-async function runtimeReady(){
+async function runtimeReady(options={}){
+  core.assertGenerationActive(options);
   await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+  core.assertGenerationActive(options);
   const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate)throw new Error('The shared model runtime is unavailable.');
   return runtime;
@@ -119,29 +121,33 @@ function transientProviderResult(result){
   return [429,500,502,503,504].includes(status)||/\b(?:429|500|502|503|504)\b|high demand|temporar(?:y|ily) unavailable|try again later/i.test(message);
 }
 async function generateWithOneTransientRetry(runtime,request,label){
+  core.assertGenerationActive(request);
   let result=await runtime.generate(request);
+  core.assertGenerationActive(request,result);
   if(result?.status==='success'||!transientProviderResult(result))return result;
   await sleep(900);
+  core.assertGenerationActive(request);
   result=await runtime.generate({...request,context:{...(request.context||{}),transientRetry:1}});
+  core.assertGenerationActive(request,result);
   return result;
 }
 function liveResearchSchema(){return{type:'object',required:['summary','sources'],properties:{summary:{type:'string'},sources:{type:'array',items:{type:'object',required:['title','url','quality','use','notes','liveFetched'],properties:{title:{type:'string'},url:{type:'string'},quality:{type:'string'},use:{type:'string'},notes:{type:'string'},sourceType:{type:'string'},liveFetched:{type:'boolean'}}}}}}}
-async function researchLive(capability){
-  const runtime=await runtimeReady(),config=runtime.readSharedConfig?.('agentic')||null,model=core.clean(config?.model||config?.modelId);
+async function researchLive(capability,options={}){
+  const runtime=await runtimeReady(options),config=runtime.readSharedConfig?.('agentic')||null,model=core.clean(config?.model||config?.modelId);
   if(!config||!/antigravity/i.test(model))throw new Error('The agentic profile is not configured for Antigravity live research.');
-  const result=await runtime.generate({purpose:'living-school-live-source-research-v260',executionProfile:'agentic',config,schema:liveResearchSchema(),context:{capability,requirements:['Use Antigravity web and YouTube tools when available.','Return only resources actually opened during this run.','Set liveFetched true only after inspection.','Every returned source must preserve its exact opened URL so curriculum citations can link back to it.','Prefer primary and authoritative sources, plus a counterpoint when contested.','Do not invent URLs, titles, quotations, dates, or access claims.']},messages:[{role:'system',content:'You are the Living School research agent working for Moss. Gather a compact source packet before curriculum generation. Return JSON only. A source that was not actually opened must not appear, and every source must retain the exact URL that was opened.'},{role:'user',content:`Research the sources needed to teach this capability safely and practically: ${capability}`}]});
-  if(result?.status!=='success')throw resultError(result,'Live research');
+  const result=await runtime.generate({signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,purpose:'living-school-live-source-research-v260',executionProfile:'agentic',config,schema:liveResearchSchema(),context:{capability,requirements:['Use Antigravity web and YouTube tools when available.','Return only resources actually opened during this run.','Set liveFetched true only after inspection.','Every returned source must preserve its exact opened URL so curriculum citations can link back to it.','Prefer primary and authoritative sources, plus a counterpoint when contested.','Do not invent URLs, titles, quotations, dates, or access claims.']},messages:[{role:'system',content:'You are the Living School research agent working for Moss. Gather a compact source packet before curriculum generation. Return JSON only. A source that was not actually opened must not appear, and every source must retain the exact URL that was opened.'},{role:'user',content:`Research the sources needed to teach this capability safely and practically: ${capability}`}]});
+  core.assertGenerationActive(options,result);if(result?.status!=='success')throw resultError(result,'Live research');
   const output=result.outputJson&&typeof result.outputJson==='object'?result.outputJson:{},sources=(Array.isArray(output.sources)?output.sources:[]).filter(source=>source?.liveFetched===true&&validHttp(source.url)&&core.clean(source.title)).slice(0,12).map(source=>({id:core.uid('source'),title:core.clean(source.title,240),url:core.clean(source.url,2000),quality:normalizeQuality(source.quality),use:normalizeUse(source.use),notes:core.clean(source.notes,3000),sourceType:core.clean(source.sourceType||'web',80),at:core.now(),researchedBy:RESEARCHER,provenance:'antigravity-live',verified:true,liveFetched:true,researchCapability:keyFor(capability),provenanceFlag:'LIVE SOURCE FETCHED'}));
   if(!sources.length)throw new Error('Antigravity returned no sources it could confirm were opened.');
   return{mode:'live-agentic',summary:core.clean(output.summary,3000),sources,provider:result.actual?.provider||result.provider||config.provider,model:result.actual?.model||result.model||model,flag:'LIVE SOURCES FETCHED',reason:''};
 }
 
 function localSynthesisSchema(){return{type:'object',required:['summary','sourceBriefs','gaps'],properties:{summary:{type:'string'},sourceBriefs:{type:'array',items:{type:'object',required:['sourceId','use','teachingPoints','cautions'],properties:{sourceId:{type:'string'},use:{type:'string'},teachingPoints:{type:'array',items:{type:'string'}},cautions:{type:'array',items:{type:'string'}}}}},gaps:{type:'array',items:{type:'string'}}}}}
-async function synthesizeLocalPacket(capability,packet,liveError){
-  const runtime=await runtimeReady(),config=runtime.readSharedConfig?.('interactive')||null;
+async function synthesizeLocalPacket(capability,packet,liveError,options={}){
+  const runtime=await runtimeReady(options),config=runtime.readSharedConfig?.('interactive')||null;
   if(!config)throw new Error('The interactive shared model is unavailable for local-source synthesis.');
   const localSources=packet.sources.map(source=>({id:source.id,title:source.title,url:source.url,schoolName:source.schoolName||'',notes:source.notes}));
-  const result=await generateWithOneTransientRetry(runtime,{purpose:'living-school-local-source-synthesis-v260',taskTier:'small',executionProfile:'interactive',config:{...config,maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.2,0.3)},schema:localSynthesisSchema(),context:{capability,liveResearchFailure:core.clean(liveError?.message||liveError,1200),localSources,requirements:['Use only the supplied local source IDs, canonical URLs, and passage text.','Preserve supplied source IDs and URLs exactly; do not invent, rewrite, or substitute links.','Do not invent quotations, authors, dates, studies, laws, or claims not supported by the supplied passages.','Build a teaching-oriented synthesis that distinguishes source-backed material from inference.','Identify gaps that would benefit from future live verification.','Do not rewrite or alter the source passages.']},messages:[{role:'system',content:'You are Moss synthesizing downloaded Living School references after live research was unavailable. The downloaded passages and their supplied canonical links are the evidence. Return strict JSON. Your synthesis may organize and explain them, but may not invent external facts or pretend the archive was checked live.'},{role:'user',content:`Using only the supplied downloaded school passages, build a compact educational synthesis for this capability: ${capability}. Preserve the supplied source IDs so the later curriculum can cite and link to the actual local references.`}]},'Local-source synthesis');
+  const result=await generateWithOneTransientRetry(runtime,{signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,purpose:'living-school-local-source-synthesis-v260',taskTier:'small',executionProfile:'interactive',config:{...config,maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.2,0.3)},schema:localSynthesisSchema(),context:{capability,liveResearchFailure:core.clean(liveError?.message||liveError,1200),localSources,requirements:['Use only the supplied local source IDs, canonical URLs, and passage text.','Preserve supplied source IDs and URLs exactly; do not invent, rewrite, or substitute links.','Do not invent quotations, authors, dates, studies, laws, or claims not supported by the supplied passages.','Build a teaching-oriented synthesis that distinguishes source-backed material from inference.','Identify gaps that would benefit from future live verification.','Do not rewrite or alter the source passages.']},messages:[{role:'system',content:'You are Moss synthesizing downloaded Living School references after live research was unavailable. The downloaded passages and their supplied canonical links are the evidence. Return strict JSON. Your synthesis may organize and explain them, but may not invent external facts or pretend the archive was checked live.'},{role:'user',content:`Using only the supplied downloaded school passages, build a compact educational synthesis for this capability: ${capability}. Preserve the supplied source IDs so the later curriculum can cite and link to the actual local references.`}]},'Local-source synthesis');
   if(result?.status!=='success')throw resultError(result,'Local-source synthesis');
   const output=result.outputJson&&typeof result.outputJson==='object'?result.outputJson:{},known=new Set(packet.sources.map(source=>source.id));
   const sourceBriefs=(Array.isArray(output.sourceBriefs)?output.sourceBriefs:[]).filter(row=>known.has(core.clean(row?.sourceId,180))).slice(0,20).map(row=>({sourceId:core.clean(row.sourceId,180),use:normalizeUse(row.use),teachingPoints:(Array.isArray(row.teachingPoints)?row.teachingPoints:[]).map(value=>core.clean(value,900)).filter(Boolean).slice(0,8),cautions:(Array.isArray(row.cautions)?row.cautions:[]).map(value=>core.clean(value,900)).filter(Boolean).slice(0,6)}));
@@ -152,10 +158,10 @@ async function synthesizeLocalPacket(capability,packet,liveError){
 }
 
 function fallbackResearchSchema(){return{type:'object',required:['summary','notes'],properties:{summary:{type:'string'},notes:{type:'array',items:{type:'object',required:['title','use','content'],properties:{title:{type:'string'},use:{type:'string'},content:{type:'string'},uncertainty:{type:'string'}}}}}}}
-async function researchTrainingFallback(capability,priorError){
-  const runtime=await runtimeReady(),config=runtime.readSharedConfig?.('interactive')||null,provider=core.clean(config?.provider||config?.route).toLowerCase();
+async function researchTrainingFallback(capability,priorError,options={}){
+  const runtime=await runtimeReady(options),config=runtime.readSharedConfig?.('interactive')||null,provider=core.clean(config?.provider||config?.route).toLowerCase();
   if(!config)throw new Error('The configured interactive AI is unavailable for the model-derived research fallback.');
-  const result=await generateWithOneTransientRetry(runtime,{purpose:'living-school-training-data-research-fallback-v260',taskTier:'small',executionProfile:'interactive',config:{...config,maxTokens:Math.max(Number(config.maxTokens)||0,6144),temperature:Math.min(Number(config.temperature)||0.2,0.3)},schema:fallbackResearchSchema(),context:{capability,priorResearchFailure:core.clean(priorError?.message||priorError,1200),requirements:['Use model training knowledge only.','Do not claim internet, YouTube, browsing, retrieval, or current verification.','Do not invent URLs, citations, quotations, publication dates, laws, prices, or current availability.','Separate stable background knowledge from items requiring live verification.','Treat every returned note as model-derived and unverified regardless of provider.']},messages:[{role:'system',content:'You are Moss creating the final AI research fallback from the selected interactive model’s training knowledge because neither live research nor downloaded local schools produced usable references. Return JSON only. Every block must be visibly model-derived and unverified. Never invent citations or imply live verification.'},{role:'user',content:`Create a compact teaching brief for: ${capability}. Include concepts, practical cautions, and what must later be checked against live authoritative sources.`}]},'Research fallback');
+  const result=await generateWithOneTransientRetry(runtime,{signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,purpose:'living-school-training-data-research-fallback-v260',taskTier:'small',executionProfile:'interactive',config:{...config,maxTokens:Math.max(Number(config.maxTokens)||0,6144),temperature:Math.min(Number(config.temperature)||0.2,0.3)},schema:fallbackResearchSchema(),context:{capability,priorResearchFailure:core.clean(priorError?.message||priorError,1200),requirements:['Use model training knowledge only.','Do not claim internet, YouTube, browsing, retrieval, or current verification.','Do not invent URLs, citations, quotations, publication dates, laws, prices, or current availability.','Separate stable background knowledge from items requiring live verification.','Treat every returned note as model-derived and unverified regardless of provider.']},messages:[{role:'system',content:'You are Moss creating the final AI research fallback from the selected interactive model’s training knowledge because neither live research nor downloaded local schools produced usable references. Return JSON only. Every block must be visibly model-derived and unverified. Never invent citations or imply live verification.'},{role:'user',content:`Create a compact teaching brief for: ${capability}. Include concepts, practical cautions, and what must later be checked against live authoritative sources.`}]},'Research fallback');
   if(result?.status!=='success')throw resultError(result,'Research fallback');
   const output=result.outputJson&&typeof result.outputJson==='object'?result.outputJson:{},sources=(Array.isArray(output.notes)?output.notes:[]).filter(note=>core.clean(note?.title)&&core.clean(note?.content)).slice(0,10).map(note=>({id:core.uid('source'),title:`⚑ MODEL-DERIVED: ${core.clean(note.title,200)}`,url:'',quality:'model-derived · unverified',use:normalizeUse(note.use),notes:`${core.clean(note.content,2600)}${note.uncertainty?`\nNeeds live verification: ${core.clean(note.uncertainty,800)}`:''}`,sourceType:'model-training-knowledge',at:core.now(),researchedBy:RESEARCHER,provenance:'selected-model-training-data',verified:false,liveFetched:false,researchCapability:keyFor(capability),provenanceFlag:'NO LIVE OR LOCAL SOURCE · MODEL TRAINING DATA'}));
   if(!sources.length)throw new Error('The selected interactive AI returned no usable model-derived research notes.');
@@ -175,7 +181,9 @@ function applyPacket(s,capability,packet){
   return packet.mode==='manual-sources'?{...packet,sources:manual}:packet;
 }
 
-export async function researchCapability(capability,{force=false}={}){
+export async function researchCapability(capability,options={}){
+  core.assertGenerationActive(options);
+  const {force=false}=options;
   const normalized=core.clean(capability,1200);
   if(!normalized)throw new Error('Name an observable capability before researching.');
   const s=core.state(),key=keyFor(normalized),cacheableModes=new Set(['live-agentic','local-synthesized','local-downloaded','manual-sources']);
@@ -189,10 +197,11 @@ export async function researchCapability(capability,{force=false}={}){
   }
 
   let liveError;
-  try{return applyPacket(s,normalized,await researchLive(normalized))}catch(error){liveError=error}
+  try{const packet=await researchLive(normalized,options);core.assertGenerationActive(options);return applyPacket(s,normalized,packet)}catch(error){if(core.generationCancelled(error,options))throw error;liveError=error}
 
   let rows=[];const localSearchQuery=researchSearchQuery(normalized);
-  try{rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5})}catch(error){console.warn('[Living School downloaded research]',error)}
+  try{rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5})}catch(error){if(core.generationCancelled(error,options))throw error;console.warn('[Living School downloaded research]',error)}
+  core.assertGenerationActive(options);
   core.persist('living-school-local-research-query',{capability:normalized,searchQuery:localSearchQuery,aliases:semanticQueryTerms(normalized),resultCount:rows.length,relevanceRevision:RELEVANCE_REVISION});
   if(rows.length){
     let packet=localPacket(normalized,rows);
@@ -201,14 +210,16 @@ export async function researchCapability(capability,{force=false}={}){
         packet={...packet,reason:`Live research unavailable: ${core.clean(liveError?.message||liveError,700)} Local source synthesis intentionally skipped during curriculum generation; the full downloaded passages are supplied directly to the curriculum design model.`};
         core.persist('living-school-local-synthesis-skipped',{capability:normalized,sourceCount:packet.sources.length,reason:'curriculum-generation-direct-source-grounding',policy:'strong-design-model-receives-raw-downloaded-passages'});
       }else{
-        try{packet=await synthesizeLocalPacket(normalized,packet,liveError)}catch(error){packet={...packet,reason:`Live research unavailable: ${core.clean(liveError?.message||liveError,700)} Local synthesis unavailable: ${core.clean(error?.message||error,700)}`};}
+        try{packet=await synthesizeLocalPacket(normalized,packet,liveError,options)}catch(error){if(core.generationCancelled(error,options))throw error;packet={...packet,reason:`Live research unavailable: ${core.clean(liveError?.message||liveError,700)} Local synthesis unavailable: ${core.clean(error?.message||error,700)}`};}
       }
+      core.assertGenerationActive(options);
       return applyPacket(s,normalized,packet);
     }
   }
 
   let modelError;
-  try{return applyPacket(s,normalized,await researchTrainingFallback(normalized,liveError))}catch(error){modelError=error}
+  try{const packet=await researchTrainingFallback(normalized,liveError,options);core.assertGenerationActive(options);return applyPacket(s,normalized,packet)}catch(error){if(core.generationCancelled(error,options))throw error;modelError=error}
+  core.assertGenerationActive(options);
   const manual=manualPacket(s,normalized);if(manual)return applyPacket(s,normalized,manual);
   const packet=unavailablePacket(normalized,new Error(`Live research: ${liveError?.message||liveError}; local schools: no usable passages; model fallback: ${modelError?.message||modelError}`));
   applyPacket(s,normalized,packet);

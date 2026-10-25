@@ -1,12 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='3.0.2-living-school-generation-budget-v3-bounded-ai-assessments';
+const VERSION='3.0.3-living-school-generation-budget-v3-materialization-cancellation';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
 const QUIZ_REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v263';
 const DEPTH_PURPOSE='living-school-module-depth-expansion-v262';
-const DESIGN_TIMEOUT_MS=360000;
+// Give locally hosted models time to finish the one required, source-grounded design pass.
+// The shared runtime separately caps a single call at 600000ms; stay below that ceiling.
+const DESIGN_TIMEOUT_MS=570000;
 const DESIGN_MAX_TOKENS=16384;
 const MIN_LESSON_WORDS=120;
 const stats={designCalls:0,duplicateDesignCallsBlocked:0,designTimeouts:0,structureCompiles:0,quizCallsBlocked:0,repairCallsBlocked:0,depthCallsBlocked:0,filteredSourceNoise:0,installCount:0,installedAt:'',lastBlockedAt:'',lastProvider:'',lastModel:''};
@@ -114,13 +116,15 @@ function designTimeoutResult(request){
   return{schema:'civweave-model-result-1.0',requestId:request?.requestId||`ls-design-timeout-${Date.now().toString(36)}`,purpose:DESIGN_PURPOSE,status:'error',outputText:'',outputJson:null,usage:{inputTokens:0,outputTokens:0,totalTokens:0,costCents:0,remainingCents:0},stream:{requested:false,used:false},actual:{provider:route.provider,model:route.model},error:{code:'LIVING_SCHOOL_DESIGN_TIMEOUT',message},diagnostics:[message],livingSchoolGenerationBudget:{version:VERSION,designTimeout:true,timeoutMs:DESIGN_TIMEOUT_MS,designProviderCalls:1,providerNeutral:true}};
 }
 async function runOneDesignCall(original,request){
+  if(request?.signal?.aborted){request.signal.throwIfAborted?.();throw Object.assign(new Error('Learning Journey design cancelled.'),{name:'AbortError'})}
   if(designConsumed)return blocked(request,'design','Living School blocked a second curriculum design request in the same curriculum action.','LIVING_SCHOOL_DUPLICATE_STRONG_DESIGN_BLOCKED');
   markDesignConsumed();stats.designCalls+=1;publish();
   const prepared=boundedRequest(request,'complex'),controller=new AbortController(),parent=prepared?.signal;let timer=0,timedOut=false;
   const selected=routeMeta({},prepared);stats.lastProvider=selected.provider;stats.lastModel=selected.model;publish();
   const forwardAbort=()=>{try{controller.abort(parent?.reason)}catch{}};try{parent?.addEventListener?.('abort',forwardAbort,{once:true})}catch{}
+  if(parent?.aborted)forwardAbort();
   const timeout=new Promise(resolve=>{timer=setTimeout(()=>{timedOut=true;stats.designTimeouts+=1;publish();try{controller.abort(new DOMException('Living School design timeout','AbortError'))}catch{try{controller.abort()}catch{}}resolve(designTimeoutResult(prepared))},DESIGN_TIMEOUT_MS)});
-  const call=Promise.resolve().then(()=>original({...prepared,signal:controller.signal})).catch(error=>{if(timedOut)return designTimeoutResult(prepared);throw error});
+  const call=Promise.resolve().then(()=>{controller.signal.throwIfAborted?.();if(controller.signal.aborted)throw Object.assign(new Error('Learning Journey design cancelled.'),{name:'AbortError'});return original({...prepared,signal:controller.signal})}).catch(error=>{if(timedOut)return designTimeoutResult(prepared);throw error});
   let result;try{result=await Promise.race([call,timeout])}finally{clearTimeout(timer);try{parent?.removeEventListener?.('abort',forwardAbort)}catch{}}
   const actual=routeMeta(result,prepared);stats.lastProvider=actual.provider;stats.lastModel=actual.model;publish();
   if(result?.status!=='success')return result;

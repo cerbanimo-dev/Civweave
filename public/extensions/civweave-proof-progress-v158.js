@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveProofProgressV158)return;
-const VERSION='1.0.6-proof-progress-v158-workable-quest-paths';
+const VERSION='1.0.8-proof-progress-v158-campus-projection';
 const KEYS={
   campus:'civweave.working-campus.v1',
   intentions:'civweave.intentions.v127',
@@ -32,20 +32,18 @@ function identifiers(record={}){
 }
 function related(record,plan,path){
   const exact=`${plan.id}:${path.id}`;
-  if(String(record?.sourceActionId||record?.source?.sourceId||'')===exact)return true;
+  if([record?.sourceActionId,record?.sourceId,record?.source?.sourceId].some(value=>String(value||'')===exact))return true;
   const ids=identifiers(record);
-  if(ids.includes(String(plan.id)))return true;
-  const title=clean(record.title||record.name||record.label);
-  return Boolean(title&&(title===clean(path.title)||clean(path.title).includes(title)||title.includes(clean(path.title))));
+  const paths=[record?.pathId,record?.context?.pathId,record?.metadata?.pathId,record?.payload?.pathId,record?.payload?.path?.id,record?.handoff?.pathId].filter(Boolean).map(String);
+  return ids.includes(String(plan.id))&&paths.includes(String(path.id));
 }
 function latest(records){return [...records].sort((a,b)=>Date.parse(b.updatedAt||b.completedAt||b.createdAt||0)-Date.parse(a.updatedAt||a.completedAt||a.createdAt||0))[0]||null}
 function proofItems(record={}){return list(record.proofs||record.evidence||record.artifacts||record.receipts||record.submissions)}
-function acceptedReview(review={}){return review.state==='accepted'||review.decision==='pass'||review.pass===true||review.accepted===true}
 
 function livingCompletion(plan,path){
   const state=read(KEYS.living,null),school=state?.school;
   if(!school)return{complete:false,source:'living-school',reason:'No curriculum proof has been submitted.'};
-  if(identifiers(school).length&&!related(school,plan,path))return{complete:false,source:'living-school',reason:'The current curriculum belongs to another Quest.'};
+  if(!related(school,plan,path))return{complete:false,source:'living-school',reason:'The current curriculum has no exact link to this Quest path.'};
   const modules=list(school.modules);
   if(!modules.length)return{complete:false,source:'living-school',reason:'The curriculum has no modules to verify.'};
   const passed=modules.filter(module=>{const progress=state.progress?.[module.id]||{},weighted=progress.validationConfidence;if(weighted?.schema==='civweave.validation-confidence.v1')return weighted.verifiedPass===true;return progress.assessmentPassed===true||progress.verified===true||COMPLETE.has(clean(progress.status));});
@@ -53,29 +51,28 @@ function livingCompletion(plan,path){
 }
 function cerbanimoCompletion(plan,path){
   const state=read(KEYS.cerbanimo,{}),quests=list(state.quests),exact=`${plan.id}:${path.id}`;
-  const exactQuest=quests.find(quest=>String(quest?.sourceActionId||'')===exact),relatedQuests=quests.filter(quest=>related(quest,plan,path));
-  const quest=exactQuest||latest(relatedQuests.length?relatedQuests:(quests.length===1?quests:[]));
+  const quest=quests.find(quest=>String(quest?.sourceActionId||'')===exact);
   if(!quest)return{complete:false,source:'cerbanimo',completedIndexes:[],reason:'No quest tied to this Quest has submitted proof.'};
   const tasks=list(quest.tasks);
   if(!tasks.length)return{complete:false,source:'cerbanimo',completedIndexes:[],reason:'The quest has no tasks to verify.'};
   const completedIndexes=[];
   const proven=tasks.filter((task,index)=>{
-    const completed=COMPLETE.has(clean(task.status));
-    const hasProof=proofItems(task).length>0||acceptedReview(task.review);
-    if(completed&&hasProof)completedIndexes.push(index);
-    return completed&&hasProof;
+    const accepted=task.status==='completed'&&proofItems(task).length>0&&task.review?.state==='accepted'&&task.review?.validator==='ai';
+    if(accepted)completedIndexes.push(index);
+    return accepted;
   });
+  const finalAccepted=quest.status==='completed'&&quest.review?.state==='accepted'&&quest.review?.validator==='ai';
   return{
-    complete:proven.length===tasks.length,
+    complete:proven.length===tasks.length&&finalAccepted,
     source:'cerbanimo',
     completedIndexes,
     proofIds:proven.map(task=>task.id),
-    reason:proven.length===tasks.length?'Every quest task has submitted and accepted proof.':`${proven.length}/${tasks.length} quest tasks have accepted proof.`
+    reason:proven.length===tasks.length?(finalAccepted?'Every Endeavor work unit and final review have accepted independent AI proof.':'Every Endeavor work unit has accepted AI proof; final independent AI acceptance is still required.'):`${proven.length}/${tasks.length} Endeavor work units have accepted independent AI proof.`
   };
 }
 function fellowfareQuestRecords(){const state=read(KEYS.fellowfareQuest,{records:[]});return Array.isArray(state)?state:list(state?.records)}
 function fellowfareCompletion(plan,path){
-  const questRecord=latest(fellowfareQuestRecords().filter(record=>record?.weaveId===plan.id&&(record?.pathId===path.id||clean(record?.title)===clean(path.title))));
+  const questRecord=latest(fellowfareQuestRecords().filter(record=>record?.weaveId===plan.id&&record?.pathId===path.id));
   if(questRecord){
     const steps=list(questRecord.steps),completedIndexes=steps.filter(step=>clean(step?.status)==='evidence-recorded'||COMPLETE.has(clean(step?.status))).map(step=>Number(step.index)).filter(Number.isFinite).sort((a,b)=>a-b);
     const total=Math.max(list(path.steps).length,steps.length),complete=total>0&&completedIndexes.length>=total&&COMPLETE.has(clean(questRecord.status));
@@ -83,9 +80,7 @@ function fellowfareCompletion(plan,path){
   }
   const legacy=read(KEYS.fellowfare,{}),market=read(KEYS.fellowfareMarket,{});
   const records=[...list(legacy.requests),...list(legacy.threads),...list(legacy.listings),...list(legacy.offers),...list(legacy.trades),...list(legacy.exchanges),...list(legacy.orders),...list(market.listings),...list(market.orders)];
-  const matching=records.filter(record=>related(record,plan,path));
-  const candidates=matching.length?matching:(records.length===1?records:[]);
-  const completeRows=candidates.filter(record=>COMPLETE.has(clean(record.status)));
+  const completeRows=records.filter(record=>related(record,plan,path)&&COMPLETE.has(clean(record.status)));
   return{
     complete:completeRows.length>0,
     source:'fellowfare',
@@ -99,7 +94,7 @@ function anarchadiaRecords(){
 }
 function anarchadiaCompletion(plan,path){
   const records=anarchadiaRecords();
-  const matching=records.filter(record=>record?.weaveId===plan.id&&(record?.pathId===path.id||clean(record?.title)===clean(path.title)));
+  const matching=records.filter(record=>record?.weaveId===plan.id&&record?.pathId===path.id);
   const record=latest(matching);
   if(!record)return{complete:false,source:'anarchadia',completedIndexes:[],reason:'No Anarchadia governance evidence has been recorded for this Quest path.'};
   const steps=list(record.steps),completedIndexes=steps.filter(step=>clean(step?.status)==='evidence-recorded'||COMPLETE.has(clean(step?.status))).map(step=>Number(step.index)).filter(Number.isFinite).sort((a,b)=>a-b);
@@ -143,9 +138,9 @@ function updateInbox(plan){
   let changed=false;
   for(const row of rows){
     if(row.payload?.weaveId!==plan.id)continue;
-    const path=list(plan.paths).find(item=>item.id===row.payload?.path?.id)||list(plan.paths).find(item=>item.realm===row.target);
+    const path=list(plan.paths).find(item=>item.id===row.payload?.path?.id);
     if(!path)continue;
-    row.payload.path=structuredClone(path);row.status=path.status==='completed'?'completed':row.status;row.updatedAt=plan.updatedAt;changed=true;
+    row.payload.path=structuredClone(path);row.status=path.status==='completed'?'completed':row.status==='completed'?(plan.state==='review'?'review':'accepted'):row.status;row.updatedAt=plan.updatedAt;changed=true;
   }
   if(changed)localStorage.setItem(KEYS.inbox,JSON.stringify(rows));
 }
@@ -208,7 +203,7 @@ function boot(){
   addEventListener('focus',syncProgress);
   addEventListener('visibilitychange',()=>{if(!document.hidden)syncProgress()});
   addEventListener('storage',event=>{if(Object.values(KEYS).includes(event.key))syncProgress()});
-  for(const name of ['civweave:rewards-changed','civweave:reward-bridge','civweave:peer-review-recorded','civweave:domain-synced','civweave:anarchadia-quest-work-changed','civweave:fellowfare-quest-work-changed','civweave:cerbanimo-quest-path-materialized','fellowfare:marketplace-changed'])addEventListener(name,syncProgress);
+  for(const name of ['civweave:rewards-changed','civweave:reward-bridge','civweave:peer-review-recorded','civweave:domain-synced','civweave:intentions-changed','civweave:working-campus-plan-built','civweave:anarchadia-quest-work-changed','civweave:fellowfare-quest-work-changed','civweave:cerbanimo-quest-path-materialized','cerbanimo:quest-engine-changed','fellowfare:marketplace-changed'])addEventListener(name,syncProgress);
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 globalThis.CivweaveProofProgressV158=Object.freeze({VERSION,KEYS,proofState,syncProgress,lockCheckpointInputs,completionFor,cerbanimoCompletion,fellowfareCompletion,anarchadiaCompletion});

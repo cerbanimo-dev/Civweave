@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-anarchadia-v158-provider-fidelity';
+const VERSION='1.0.8-anarchadia-v158-intake-only-preview';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const CHAT_KEY='civweave.guide-chat.anarchadia.v153';
 const HUB_PROPOSALS='/lite/?system=anarchadia&room=anarchadia.proposals#proposals';
@@ -84,8 +84,11 @@ async function providerPatch(p){
   if(!config)throw new Error('Select a model in shared Settings before generating this preview.');
   if(['bundled','packaged','reflex','minilm','local-reflex'].includes(String(config.provider||config.route||'').toLowerCase()))return deterministicPatch(p);
   if(typeof runtime?.generate!=='function')throw new Error('The shared model runtime is unavailable.');
-  const schema={type:'object',required:['summary','files','preview'],properties:{summary:{type:'string'},files:{type:'array',items:{type:'object',required:['path','content'],properties:{path:{type:'string'},content:{type:'string'}}}},preview:{type:'object',required:['html','css','js'],properties:{html:{type:'string'},css:{type:'string'},js:{type:'string'}}}}};
-  const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,context:{proposal:p,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview files.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate a small HTML/CSS/JS sandbox preview that implements the supplied change request and its acceptance criteria. Return JSON matching the schema. Do not substitute a request summary or claim the change is installed in production.'},{role:'user',content:JSON.stringify(p)}]});
+  const schema={type:'object',required:['summary','files','preview'],properties:{summary:{type:'string'},files:{type:'array',minItems:1,maxItems:6,items:{type:'object',required:['path','content'],properties:{path:{type:'string'},content:{type:'string'}}}},preview:{type:'object',required:['html','css','js'],properties:{html:{type:'string'},css:{type:'string'},js:{type:'string'}}}}};
+  const proposal=Object.fromEntries(['kind','title','problem','expected','area','acceptance','risk','evidence'].map(key=>[key,p[key]]));
+  // This compiled candidate has native validation and a human Keep/Revert gate.
+  // A generic assistant reply review must not replace it with a second answer.
+  const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,__civweaveSkipResponseRouter:true,...(String(config.provider||config.route||'').toLowerCase()==='ollama'?{think:false}:{}),context:{proposal,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview files.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate the smallest self-contained HTML/CSS/JS sandbox preview that implements the supplied change request and its acceptance criteria. Use at most six small preview files and no external dependencies. Implement the requested interaction; return matching preview HTML, CSS, and JS with the actual working behavior. Return JSON matching the schema. Do not substitute a request summary or claim the change is installed in production.'},{role:'user',content:JSON.stringify(proposal)}]});
   if(result?.status!=='success')throw new Error(cleanProviderError(result));
   if(!result.outputJson?.files?.length||!result.outputJson?.preview?.html)throw new Error('The selected model did not return the required preview files and HTML.');
   return {...result.outputJson,generator:'configured-provider'};
@@ -113,7 +116,7 @@ async function runPipeline(id){
 function openPreview(id){const p=proposal(id);if(!p?.preview?.srcdoc)return;$('#ac-preview-title').textContent=p.title;$('#ac-preview-frame').srcdoc=p.preview.srcdoc;const dialog=$('#ac-preview-dialog');if(dialog&&!dialog.open)dialog.showModal?.()}
 function signalVote(id){const p=proposal(id);if(!p)return;p.voteSignal=!p.voteSignal;save('vote-signal',`${p.title}: local non-binding support signal ${p.voteSignal?'recorded':'removed'}.`,p.id)}
 function openHub(){save('hub-vote-opened','Navigating to the Anarchadia proposal hub.',null,{render:false});try{if(window.parent&&window.parent!==window)window.parent.location.href=HUB_PROPOSALS;else location.href=HUB_PROPOSALS}catch{location.href=HUB_PROPOSALS}}
-function startRequest(kind){requestKind=kind;const form=$('#ac-request-form');form.reset();form.kind.value=kind;form.autoRun.checked=true;$('#ac-request-kicker').textContent=kind==='bugfix'?'BUGFIX INTAKE':'FEATURE INTAKE';$('#ac-request-title').textContent=kind==='bugfix'?'Report a bugfix':'Request a feature';setScreen('request')}
+function startRequest(kind){requestKind=kind;const form=$('#ac-request-form');form.reset();const kindField=form.elements.namedItem('kind');if(kindField)kindField.value=kind;$('#ac-request-kicker').textContent=kind==='bugfix'?'BUGFIX INTAKE':'FEATURE INTAKE';$('#ac-request-title').textContent=kind==='bugfix'?'Report a bugfix':'Request a feature';setScreen('request')}
 function submitRequest(event){event.preventDefault();const data=new FormData(event.currentTarget),acceptance=String(data.get('acceptance')||'').split(/\n+/).map(v=>v.trim()).filter(Boolean),p={id:uid('proposal'),kind:String(data.get('kind')||requestKind),title:String(data.get('title')||'').trim(),problem:String(data.get('problem')||'').trim(),expected:String(data.get('expected')||'').trim(),area:String(data.get('area')||'Civweave'),acceptance,risk:String(data.get('risk')||'').trim(),evidence:String(data.get('evidence')||'').trim(),status:'draft',stage:'intake',pipeline:[],createdAt:now(),updatedAt:now(),voteSignal:false};state.proposals.unshift(p);save('proposal-created',`${p.kind}: ${p.title}`,p.id);setScreen('automation');if(data.get('autoRun'))runPipeline(p.id)}
 
 function readChat(){const rows=parse(localStorage.getItem(CHAT_KEY),[]);return Array.isArray(rows)?rows:[]}
