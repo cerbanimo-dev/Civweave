@@ -1,4 +1,4 @@
-name: Kingdom Pocket Scribe M4 — Android debug APK
+name: Pocket Scribe 0.4.3 — Android offline setup APK
 on:
   workflow_dispatch:
   pull_request:
@@ -26,6 +26,7 @@ jobs:
           tar -xzf pocket-scribe/m4/import-fix-0.4.1.tar.gz -C pocket-scribe/m4/workspace
           (cd pocket-scribe/m4/workspace && xz -dc ../qwen-runtime-fix-0.4.2.diff.xz | patch -p1 --fuzz=0)
           sed -i 's/mp.n_gpu_layers=0;mp.use_mmap=true;/mp.n_gpu_layers=0;/' pocket-scribe/m4/workspace/android/app/src/main/cpp/qwen_jni.cpp
+          tar -xzf pocket-scribe/m4/offline-setup-0.4.3.tar.gz -C pocket-scribe/m4/workspace
           echo '{"type":"commonjs"}' > pocket-scribe/m4/workspace/package.json
       - uses: actions/setup-java@v4
         with:
@@ -54,17 +55,17 @@ jobs:
         run: |
           mkdir -p ../../apk-artifacts
           gradle :app:assembleDebug --no-daemon --stacktrace --max-workers=2
-          cp app/build/outputs/apk/debug/app-debug.apk ../../apk-artifacts/PocketScribe-0.4.2-normal-debug.apk
-          gradle :app:assembleDebug -PpocketDiagnostic=true --no-daemon --stacktrace --max-workers=2
-          cp app/build/outputs/apk/debug/app-debug.apk ../../apk-artifacts/PocketScribe-0.4.2-import-test.apk
-          MAIN_ID=$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging ../../apk-artifacts/PocketScribe-0.4.2-normal-debug.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
-          TEST_ID=$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging ../../apk-artifacts/PocketScribe-0.4.2-import-test.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
+          cp app/build/outputs/apk/debug/app-debug.apk ../../apk-artifacts/PocketScribe-0.4.3-normal-debug.apk
+          gradle :app:assembleDebug -PpocketSetupTest=true --no-daemon --stacktrace --max-workers=2
+          cp app/build/outputs/apk/debug/app-debug.apk ../../apk-artifacts/PocketScribe-0.4.3-setup-test.apk
+          MAIN_ID=$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging ../../apk-artifacts/PocketScribe-0.4.3-normal-debug.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
+          TEST_ID=$("$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging ../../apk-artifacts/PocketScribe-0.4.3-setup-test.apk | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
           echo "Normal package: $MAIN_ID; diagnostic: $TEST_ID"
           test "$MAIN_ID" = 'org.kingdom.pocketscribe'
-          test "$TEST_ID" = 'org.kingdom.pocketscribe.runtimetest'
+          test "$TEST_ID" = 'org.kingdom.pocketscribe.setup043'
       - uses: actions/upload-artifact@v4
         with:
-          name: kingdom-pocket-scribe-0.4.2-apks
+          name: kingdom-pocket-scribe-0.4.3-offline-setup-apks
           path: pocket-scribe/m4/apk-artifacts/*.apk
           if-no-files-found: error
           retention-days: 14
