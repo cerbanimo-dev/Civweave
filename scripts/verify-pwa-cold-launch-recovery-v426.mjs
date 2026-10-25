@@ -26,7 +26,7 @@ assert.match(recoveryHtml, /REPAIR_DEVICE_PACKAGE/);
 assert.match(recoveryHtml, /Reset startup state only/);
 assert.doesNotMatch(recoveryHtml, /localStorage\.clear|indexedDB\.deleteDatabase|caches\.delete/);
 assert.match(worker, /service-worker-local-ai-coherence-v307\.js/);
-assert.match(worker, /service-worker-boot-recovery-v426\.js\?v=boot-recovery-v428/);
+assert.match(worker, /service-worker-boot-recovery-v426\.js\?v=boot-recovery-v432-lifecycle-deferred/);
 assert.ok(worker.indexOf('service-worker-boot-recovery-v426.js') > worker.indexOf('service-worker-navigation-safety-v224.js'), 'boot recovery must wrap final stable entry path');
 assert.match(recoveryWorker, /LAUNCH_BUDGET_MS=2200/);
 assert.match(recoveryWorker, /RECOVERY_CACHE='cwrecovery-v426'/);
