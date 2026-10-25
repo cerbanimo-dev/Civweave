@@ -1,4 +1,4 @@
-import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs?v=practicum-receipt-revocation-v1';
+import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs?v=complete-course-gate-v1';
 import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor,curriculumWeaveIdentity,weavePathIdentity} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 import {researchCapability} from './living-school-local-research-v243.mjs?v=moss-materialization-lifecycle-v1';
 import {assertGenerationActive} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';

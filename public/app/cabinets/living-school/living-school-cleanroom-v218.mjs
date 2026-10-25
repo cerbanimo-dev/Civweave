@@ -1,7 +1,7 @@
 import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
 import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY}from'./living-school-journey-index-v1.mjs';
-import{render}from'./living-school-cleanroom-render-v218.mjs?v=bounded-assessments-practicum-v1';
-import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=moss-explicit-weave-path-v1';
+import{render}from'./living-school-cleanroom-render-v218.mjs?v=complete-course-gate-v1';
+import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=moss-complete-course-gate-v1';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
 import{installLivingSchoolVideoGenerationGuardV1}from'../../living-school-video-generation-guard-v1.mjs?v=video-atlas-v1';

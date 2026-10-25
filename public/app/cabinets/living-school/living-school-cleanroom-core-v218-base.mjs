@@ -1,6 +1,6 @@
 import * as gate from '../../services/living-school/modules/project-gate.mjs';
 
-export const VERSION='living-school-cleanroom-v218.3-explicit-weave-path';
+export const VERSION='living-school-cleanroom-v218.4-complete-course-gate';
 export const STATE_KEY='civweave.living-school.cabinet.v151';
 const OLD_KEY='civweave.living-school.cabinet.v150';
 const INTAKE_KEY='civweave.living-school.intake.v152';
@@ -194,7 +194,14 @@ export function setProgress(percent){if(progressLabel)progressLabel.textContent=
 export const activeModule=()=>currentState.school?.modules?.find(item=>item.id===currentState.activeModuleId)||currentState.school?.modules?.[0]||null;
 export const progressFor=moduleId=>currentState.progress[moduleId]||{lessonComplete:false,assessmentPassed:false,attempts:[],evidence:[]};
 export const completedModules=()=>currentState.school?.modules?.filter(item=>progressFor(item.id).assessmentPassed).length||0;
-export const finalUnlocked=()=>gate.canUnlockFinalTest?.(currentState.projectGate)||Boolean(currentState.projectGate?.status==='accepted'&&currentState.projectGate?.lastReceipt);
+export function allModuleAssessmentsPassed(){
+  const modules=currentState.school?.modules||[],ids=modules.map(module=>clean(module?.id,180));
+  return Boolean(ids.length&&ids.every(Boolean)&&new Set(ids).size===ids.length&&ids.every(id=>currentState.progress[id]?.assessmentPassed===true));
+}
+export function finalUnlocked(){
+  const project=currentState.projectGate,receipt=project?.lastReceipt,schoolId=clean(currentState.school?.id,180),practicumId=clean(currentState.practicum?.id,180),requestId=clean(project?.requestId,180);
+  return Boolean(allModuleAssessmentsPassed()&&schoolId&&practicumId&&requestId&&gate.canUnlockFinalTest(project)&&receipt?.status==='accepted'&&receipt.schoolId===schoolId&&receipt.projectRef===practicumId&&project.projectRef===practicumId&&receipt.requestId===requestId);
+}
 export function award(amount,reason,ref){currentState.passport={...currentState.passport,xp:Number(currentState.passport.xp||0)+amount,ledger:[...(currentState.passport.ledger||[]),{id:uid('xp'),amount,reason,ref,at:now()}].slice(-800)}}
 export function progressPercent(){
   const modules=currentState.school?.modules||[],count=Math.max(1,modules.length);

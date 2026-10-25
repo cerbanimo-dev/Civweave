@@ -3,7 +3,7 @@ import '../../shared/civweave-validation-confidence-v1.js';
 import * as rubric from '../../services/living-school/modules/rubric-engine.mjs';
 import * as gate from '../../services/living-school/modules/project-gate.mjs';
 import * as bridge from '../../services/living-school/modules/cerbanimo-bridge.mjs';
-import{state,replaceState,persist,toast,award,activeModule,progressFor,availablePaths,fields,field,formFor,clean,uid,now,copy,readJson,writeJson,STATE_KEY,OUTBOX_KEY,freshState,normalizeState,researchCapability,generateSchool,quizQuestions}from'./living-school-cleanroom-core-v218.mjs';
+import{state,replaceState,persist,toast,award,activeModule,progressFor,availablePaths,fields,field,formFor,clean,uid,now,copy,readJson,writeJson,STATE_KEY,OUTBOX_KEY,freshState,normalizeState,researchCapability,generateSchool,quizQuestions,allModuleAssessmentsPassed,finalUnlocked}from'./living-school-cleanroom-core-v218.mjs';
 
 const answerNodes=(scope,index)=>[...scope.querySelectorAll(`[name="quiz-${index}"]`)];
 const quizAnswer=(scope,index,type)=>{
@@ -183,15 +183,17 @@ export const actions={
     location.assign('/app/realm-console-v140.html?system=cerbanimo&cabinet=1&source=living-school-practicum');
   },
   'evaluate-final':async target=>{
-    const s=state();if(!(gate.canUnlockFinalTest?.(s.projectGate)||Boolean(s.projectGate?.status==='accepted'&&s.projectGate?.lastReceipt)))throw new Error('An accepted Cerbanimo receipt is required.');
+    const s=state();if(!allModuleAssessmentsPassed())throw new Error('Pass every current module assessment before the final competency check.');
+    if(!finalUnlocked())throw new Error('A current accepted Cerbanimo receipt matching this Learning Journey practicum request is required.');
     const answer=clean(field('finalAnswer',formFor(target)),16000);if(!answer)throw new Error('Write the final explanation.');
     const evaluation=rubric.evaluateShortAnswer?.({prompt:'Explain capability, evidence, uncertainty, and revision.',response:answer,lessonExcerpt:`Capability: ${s.school?.capability||''}. Artifact: ${s.practicum?.artifact||''}.`,criteria:[{id:'capability',label:'Capability',points:3,role:'principle',required:true},{id:'evidence',label:'Evidence',points:4,role:'evidence',required:true},{id:'limits',label:'Limits',points:3,role:'action',required:true}],minWords:30,maxWords:420})||{ok:answer.split(/\s+/).length>=30,uncertain:false,score:80,feedback:'Local final review.'};
     const finalId=uid('final'),validation=validationForFinal(evaluation,s.projectGate.lastReceipt,finalId),passed=validation.verifiedPass&&!evaluation.uncertain,first=passed&&!s.final?.passed;s.final={id:finalId,answer,score:Number(evaluation.score||0),passed,validationConfidence:validation,feedback:evaluation.feedback,receiptId:s.projectGate.lastReceipt?.receiptId,at:now()};
     if(first)award(25,'Final competency passed',s.final.id);persist('final-assessment-evaluated',{passed});toast(passed?'Final competency passed.':'Saved for revision.');
   },
   'issue-credential':async()=>{
-    const s=state();if(!s.final?.passed)throw new Error('Pass the final competency check first.');
-    if(!gate.canUnlockFinalTest(s.projectGate)||s.final.receiptId!==s.projectGate.lastReceipt?.receiptId)throw new Error('A current accepted Cerbanimo receipt matching the final competency check is required.');
+    const s=state();if(!allModuleAssessmentsPassed())throw new Error('Pass every current module assessment before issuing a credential.');
+    if(!s.final?.passed)throw new Error('Pass the final competency check first.');
+    if(!finalUnlocked()||s.final.receiptId!==s.projectGate.lastReceipt?.receiptId)throw new Error('A current accepted Cerbanimo receipt matching the final competency check is required.');
     s.credential=s.credential||{schema:'civweave.learning-credential.v1',credentialId:uid('credential'),title:s.school?.title||'Living School capability',capability:s.school?.capability||'',learner:s.passport.displayName,schoolId:s.school?.id||'',receiptId:s.projectGate.lastReceipt?.receiptId||'',issuedAt:now()};
     persist('credential-issued',{credentialId:s.credential.credentialId});toast('Portable credential issued.');
   },
