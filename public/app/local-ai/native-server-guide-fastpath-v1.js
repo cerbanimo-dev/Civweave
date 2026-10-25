@@ -2,7 +2,7 @@
 // Does not start Wllama, LiteRT, ONNX, Cloudflare or the general assistant loader.
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
-const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking';
+const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.17-native-quest-schema';
 const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.16-explicit-weave-path';
 const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.0-ai-authority-only';
 const QUEST_MATERIALIZER='/app/weaveling-plan-materialization-v265.js?v=1.1.2-preserve-campus-intention';
@@ -75,14 +75,18 @@ async function ensureQuestPlanner(){
   if(!questPromise)questPromise=(async()=>{
     // The native lane loads canonical ownership code, not a second assistant
     // runtime or an independent Quest generator.
-    if(!modelsPromise)modelsPromise=loadScript(MODEL_RUNTIME,
-      ()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'&&globalThis.CivweaveModelRuntime?.nativeFinishReasonGuardV1===true,
-      'Shared model runtime').catch(error=>{modelsPromise=null;throw error});
+    const questRuntimeReady=()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'&&
+      globalThis.CivweaveModelRuntime?.nativeFinishReasonGuardV1===true&&
+      globalThis.CivweaveModelRuntime?.nativeQuestSchemaV1===true;
+    if(!modelsPromise)modelsPromise=loadScript(MODEL_RUNTIME,questRuntimeReady,
+      'Shared Quest model runtime').catch(error=>{modelsPromise=null;throw error});
     await modelsPromise;
+    if(!questRuntimeReady())await loadScript(MODEL_RUNTIME,questRuntimeReady,'Quest model runtime');
     await loadScript(INTENTION_PLANNER,()=>typeof globalThis.CivweaveIntentionPlanner?.persist==='function','Quest intention planner');
     await loadScript(QUEST_MATERIALIZER,()=>typeof globalThis.CivweaveWeavelingPlanMaterializationV265?.materialize==='function','Canonical Quest review materialization');
     await loadScript(QUEST_PLANNER,()=>typeof globalThis.CivweaveWeavelingPlanJsonV190?.createModelPlan==='function'&&
-      typeof globalThis.CivweaveWeavelingPlanJsonV190?.planIntent==='function','Canonical Weaveling Quest planner');
+      typeof globalThis.CivweaveWeavelingPlanJsonV190?.planIntent==='function'&&
+      globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.8-weaveling-plan-json-v190-composite-intents','Canonical Weaveling Quest planner');
     return globalThis.CivweaveWeavelingPlanJsonV190;
   })().catch(error=>{questPromise=null;throw error});
   return questPromise;
