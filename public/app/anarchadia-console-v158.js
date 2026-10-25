@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-anarchadia-v158-provider-fidelity';
+const VERSION='1.0.6-anarchadia-v158-review-intake';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const CHAT_KEY='civweave.guide-chat.anarchadia.v153';
 const HUB_PROPOSALS='/lite/?system=anarchadia&room=anarchadia.proposals#proposals';
@@ -113,7 +113,7 @@ async function runPipeline(id){
 function openPreview(id){const p=proposal(id);if(!p?.preview?.srcdoc)return;$('#ac-preview-title').textContent=p.title;$('#ac-preview-frame').srcdoc=p.preview.srcdoc;const dialog=$('#ac-preview-dialog');if(dialog&&!dialog.open)dialog.showModal?.()}
 function signalVote(id){const p=proposal(id);if(!p)return;p.voteSignal=!p.voteSignal;save('vote-signal',`${p.title}: local non-binding support signal ${p.voteSignal?'recorded':'removed'}.`,p.id)}
 function openHub(){save('hub-vote-opened','Navigating to the Anarchadia proposal hub.',null,{render:false});try{if(window.parent&&window.parent!==window)window.parent.location.href=HUB_PROPOSALS;else location.href=HUB_PROPOSALS}catch{location.href=HUB_PROPOSALS}}
-function startRequest(kind){requestKind=kind;const form=$('#ac-request-form');form.reset();form.kind.value=kind;form.autoRun.checked=true;$('#ac-request-kicker').textContent=kind==='bugfix'?'BUGFIX INTAKE':'FEATURE INTAKE';$('#ac-request-title').textContent=kind==='bugfix'?'Report a bugfix':'Request a feature';setScreen('request')}
+function startRequest(kind){requestKind=kind;const form=$('#ac-request-form');form.reset();const kindField=form.elements.namedItem('kind');if(kindField)kindField.value=kind;$('#ac-request-kicker').textContent=kind==='bugfix'?'BUGFIX INTAKE':'FEATURE INTAKE';$('#ac-request-title').textContent=kind==='bugfix'?'Report a bugfix':'Request a feature';setScreen('request')}
 function submitRequest(event){event.preventDefault();const data=new FormData(event.currentTarget),acceptance=String(data.get('acceptance')||'').split(/\n+/).map(v=>v.trim()).filter(Boolean),p={id:uid('proposal'),kind:String(data.get('kind')||requestKind),title:String(data.get('title')||'').trim(),problem:String(data.get('problem')||'').trim(),expected:String(data.get('expected')||'').trim(),area:String(data.get('area')||'Civweave'),acceptance,risk:String(data.get('risk')||'').trim(),evidence:String(data.get('evidence')||'').trim(),status:'draft',stage:'intake',pipeline:[],createdAt:now(),updatedAt:now(),voteSignal:false};state.proposals.unshift(p);save('proposal-created',`${p.kind}: ${p.title}`,p.id);setScreen('automation');if(data.get('autoRun'))runPipeline(p.id)}
 
 function readChat(){const rows=parse(localStorage.getItem(CHAT_KEY),[]);return Array.isArray(rows)?rows:[]}

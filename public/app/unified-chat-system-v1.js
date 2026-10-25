@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.12-unified-chat-system-v1-moss-materialization-lifecycle';
+const VERSION='1.2.13-unified-chat-system-v1-weave-request-scope';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -750,7 +750,7 @@ async function ensureWeavelingOrchestrator(){
     return hasResponseLayer(globalThis.CivweaveAssistantV141?.respond,'__weavelingPlanJsonV190');
   };
   if(globalThis.CivweaveWeavelingPlanJsonV190?.install)return install();
-  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.2-request-wish-owner').then(install).catch(error=>{orchestratorPromise=null;throw error});
+  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.3-request-scope').then(install).catch(error=>{orchestratorPromise=null;throw error});
   return orchestratorPromise;
 }
 function patchAssistant(){

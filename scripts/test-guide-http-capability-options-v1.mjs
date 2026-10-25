@@ -93,7 +93,7 @@ test('Quest authoring respects saved Ollama over a stale browser-model selection
     clean: (value, max = 12000) => String(value ?? '').trim().slice(0, max),
     isAIProvider: value => value === 'ollama',
     preferredTaskModel: () => { throw new Error('HTTP Quest must not inspect or load browser model packs'); },
-    resolvedPlanningText: value => value, memory: () => ({}), prompt: () => [], PLAN_SCHEMA: {},
+    resolvedPlanningText: value => value, memory: () => ({}), prompt: () => [], PLAN_SCHEMA: {}, planSchemaFor: () => ({}),
     normalizePlan: value => value, planResponse: item => item,
     localStructuredTransport: () => { throw new Error('HTTP Quest must not use downloaded-model transport'); },
   };

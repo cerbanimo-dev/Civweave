@@ -27,6 +27,21 @@ function harness(runtime,{parentRuntime,loader}={}){
   return{window,close:()=>window.close(),stored:()=>JSON.parse(window.localStorage.getItem(key)),run:()=>window.AnarchadiaCitizenConsoleV158.runPipeline('qa-preview'),flush:async()=>{for(let pass=0;pass<8;pass++){while(frames.length)frames.shift()(0);await Promise.resolve()}}};
 }
 
+test('Merlin opens the current review-only feature form without a removed auto-run control',()=>{
+  const env=harness(null),errors=[];
+  try{
+    const document=env.window.document;
+    document.querySelector('#ac-request-form').innerHTML='<input name="kind" type="hidden"><input name="title">';
+    document.body.insertAdjacentHTML('beforeend','<div id="ac-request-kicker"></div><h2 id="ac-request-title"></h2><button data-request-kind="feature">Feature request</button>');
+    env.window.addEventListener('error',event=>{errors.push(event.error);event.preventDefault()});
+    document.querySelector('[data-request-kind]').click();
+    assert.equal(errors.length,0,'Opening the current form must not reference removed controls.');
+    assert.equal(document.querySelector('#ac-app').dataset.screen,'request');
+    assert.equal(document.querySelector('#ac-request-form').elements.namedItem('kind').value,'feature');
+    assert.equal(env.stored().proposals.length,1,'Opening intake does not generate or submit a proposal.');
+  }finally{env.close()}
+});
+
 test('Merlin uses the selected interactive Ollama model when an agentic profile is absent',async()=>{
   const selected={provider:'ollama',model:'qa-ollama',endpoint:'http://127.0.0.1:11434/api/chat'},calls=[];
   const env=harness({readSharedConfig:profile=>profile==='interactive'?selected:null,generate:async request=>{calls.push(request);return{status:'success',actual:selected,outputJson:structuredClone(patch)}}});
