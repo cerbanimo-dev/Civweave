@@ -43,13 +43,17 @@ MODELS = {
 }
 
 
+ALLOWED_CONTEXTS = (1024, 2048, 4096, 8192, 16384, 32768, 65536)
+DEFAULT_CONTEXT = 32768
+
+
 def model_options(body):
     name = body.get("model", "qwen35-4b-native")
     if type(name) is not str or name not in MODELS:
         raise ValueError("Choose one of the two approved Qwen models.")
-    raw = body.get("context", 2048)
-    if type(raw) is not int or raw not in (1024, 2048, 4096):
-        raise ValueError("Context must be 1024, 2048, or 4096.")
+    raw = body.get("context", DEFAULT_CONTEXT)
+    if type(raw) is not int or raw not in ALLOWED_CONTEXTS:
+        raise ValueError("Context must be one of the approved sizes: 1024, 2048, 4096, 8192, 16384, 32768, or 65536.")
     return name, raw
 
 
@@ -84,7 +88,7 @@ class Controller:
         self.proc = None
         self.job = {"state": "idle", "action": "", "message": "", "progress": None}
         self.model = ""
-        self.context = 2048
+        self.context = DEFAULT_CONTEXT
 
     def candidate_model_paths(self, name):
         """Fixed, local model directories only; never accept a path from HTTP."""
