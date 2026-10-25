@@ -31,9 +31,9 @@ const cloudRuntime = `${cloudEntryV1}\n${cloudEntryV2}\n${cloudEntryV3}\n${cloud
 const accountRuntime = `${accountEdge}\n${legacyAccountEdge}`;
 
 assert.match(version.trim(), /^\d+\.\d+\.\d+$/);
-assert.match(router, /1\.0\.116-server-ai-router-v301/);
+assert.match(router, /1\.0\.124-server-ai-router-v301-explicit-long-deadlines/);
 assert.match(settings, /1\.0\.118-server-ai-settings-v306-community-share/);
-assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.116-v301/);
+assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.124-route-deadlines/);
 assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.118-v306-community-share/);
 assert.match(router, /const ROUTE='server-auto'/);
 assert.match(router, /\['device-local','server-local','cloudflare-workers-ai'\]/);
@@ -48,7 +48,7 @@ assert.match(router, /CivweaveHostNodeSessionV1/);
 assert.match(router, /recordUsage/);
 assert.match(router, /approximateTurnsLeft/);
 
-assert.match(spine, /1\.0\.116-runtime-spine-v271-server-auto-v301/);
+assert.match(spine, /1\.0\.118-runtime-spine-v271-http-stream/);
 assert.match(spine, /serverAuto\(request\)/);
 assert.match(spine, /function localResultNeedsFailover/);
 assert.match(spine, /completionValidation\?\.valid===false/);
