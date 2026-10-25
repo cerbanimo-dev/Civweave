@@ -34,13 +34,14 @@ const integrity=JSON.parse(integrityText);
 const declared=integrity?.assets&&typeof integrity.assets==='object'?integrity.assets:{};
 
 const missing=[];
+const missingDigests=[];
 const mismatched=[];
 for(const pathname of required){
   const file=path.join(publicDir,pathname.replace(/^\/+/,''));
   const bytes=await fs.readFile(file);
   const actual=crypto.createHash('sha256').update(bytes).digest('hex');
   const expected=String(declared[pathname]||'');
-  if(!expected)missing.push(pathname);
+  if(!expected){missing.push(pathname);missingDigests.push({pathname,actual});}
   else if(actual!==expected)mismatched.push({pathname,expected,actual});
 }
 const extra=Object.keys(declared).filter(pathname=>!required.includes(pathname));
@@ -52,6 +53,7 @@ if(Number(integrity.requiredAssetCount)!==required.length||missing.length||misma
     declaredCount:Number(integrity.requiredAssetCount),
     actualRequiredCount:required.length,
     missing,
+    missingDigests,
     mismatched,
     extra
   },null,2));
