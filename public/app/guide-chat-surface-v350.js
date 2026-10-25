@@ -417,7 +417,11 @@ async function submitActive(text){
       paintTimer=null;lastPaint=Date.now();paintNativeStream(system,pendingId,latestText);
     };
     const onToken=(delta,accumulated,meta)=>{
-      if(meta?.kind==='moss-progress')
+      if(meta?.kind==='quest-progress'){
+        const phase=meta.phase==='saved'?'Saved for REVIEW':meta.phase==='generating'?'Creating Quest':'Preparing cross-realm Quest';
+        latestText='Weaveling · '+phase+(meta.characters?' · '+Number(meta.characters)+' characters drafted':'')+'. Activation requires approval.';
+      }
+      else if(meta?.kind==='moss-progress')
         latestText='Moss · '+(meta.phase==='compile'?'Compiling JSON':meta.phase==='repair'?'Repairing plan':meta.phase==='saved'?'Saved for REVIEW':'Drafting outline')+' · '+(Number(meta.characters)||0)+' characters received. Approval required.';
       else if(typeof accumulated==='string'&&accumulated){
         const stream=globalThis.CivweaveGuideStreamThinkingV249;
@@ -442,7 +446,7 @@ async function submitActive(text){
         console.warn('[Civweave] Optional generation tracker unavailable:',error);
       }
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.10-ollama-request-thinking');
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.11-canonical-quest-owner');
       if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
