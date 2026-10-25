@@ -10,7 +10,7 @@ assert.match(entryHtml, /setTimeout\(\(\)=>showRecovery\([^)]*\),4500\)/);
 assert.match(entryHtml, /civweave\.boot-recovery\.attempt\.v426/);
 assert.match(entryHtml, /\/app\/recovery-v426\.html/);
 const escapedVersion=version.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-assert.match(entryHtml,new RegExp(`/app/installed-entry-v146\\.js\\?v=${escapedVersion}-boot-recovery-v426(?:-[^"\\s]+)*"\\s+defer`),'installed bootstrap HTML must carry the current boot-recovery identity and may compose later runtime identities');
+assert.match(entryHtml,new RegExp(`/app/installed-entry-v146\\.js\\?v=${escapedVersion}-boot-recovery-v428(?:-[^"\\s]+)*"\\s+defer`),'installed bootstrap HTML must carry the current boot-recovery identity and may compose later runtime identities');
 assert.ok(entryHtml.indexOf('<body>') < entryHtml.indexOf('installed-entry-v146.js'), 'recovery UI must parse before external bootstrap');
 assert.doesNotMatch(entryHtml, /cw-reward-ledger-v2\.js|cw-reward-receivers-v2\.js|cerbanimo-commerce-distribution-v1\.js/);
 assert.match(entryJs, /RELEASE_TIMEOUT_MS=1500/);
