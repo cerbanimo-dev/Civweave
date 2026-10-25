@@ -7,6 +7,13 @@ const read=path=>readFileSync(new URL(`../public/${path}`,import.meta.url),'utf8
 const request='Create a Quest titled QA READY Decision v2. Goal: record the personal, non-binding fictional QA decision READY. Exactly one Anarchadia path with one checkpoint: the saved evidence note reads READY. One Hero, zero budget, no other participants, no rights changes, no rewards, no external actions. Set governance included false. Save for review.';
 const path=(realm='anarchadia',type='civic-governance')=>({realm,type,title:'Record the personal decision',purpose:'Keep the requested non-binding personal decision.',steps:['Save the READY decision note.'],completionCriteria:'The saved decision note reads READY.',evidence:['The local READY decision note']});
 const result=()=>({title:'QA READY Decision v2',wish:request,outcome:'The personal fictional decision READY is recorded.',assumptions:['This is fictional local QA.'],paths:[path()],governance:{included:false}});
+const realmTypes={'living-school':'learning',cerbanimo:'skilled-labor',fellowfare:'material-acquirement',anarchadia:'civic-governance'};
+function slotResult(included=['anarchadia']){
+  const raw=result();delete raw.paths;raw.subsystems=Object.fromEntries(Object.entries(realmTypes).map(([realm,type])=>{
+    const order=included.indexOf(realm)+1,content=order?path(realm,type):{title:'',purpose:'',steps:[],completionCriteria:'',evidence:[]};delete content.realm;delete content.type;
+    return[realm,{included:order>0,reason:order?`${realm} contributes the requested outcome.`:`No ${realm} need was requested.`,order,...content}];
+  }));return raw;
+}
 function harness(output=result()){
   const old={id:'old-note',kind:'weave-plan',state:'review',plan:{id:'old-note',title:'Prior digital note',wish:'Create the prior digital note',outcome:'The prior digital note is saved.',paths:[path('cerbanimo','skilled-labor')],governance:{title:'Old rewards agreement'},sourceConversation:['Create the prior digital note']}};
   const storage=new Map([['civweave.intentions.v127',JSON.stringify([old])],['civweave.working-campus.v1',JSON.stringify({wish:'Learn and memorize the tarot',profile:{constraints:'Old project constraints'},plan:old.plan})],['civweave.realm-inbox.v1',JSON.stringify([{title:'Old rewards handoff',payload:{weaveId:'old-note'}}])]]),calls=[];
@@ -20,11 +27,19 @@ test('a new explicit Quest transmits only its own project context and exact stru
   const sent=app.calls[0],prompt=sent.messages.map(row=>row.content).join('\n');
   assert.doesNotMatch(prompt,/Prior digital note|prior digital note|tarot|Old rewards|Old project constraints/,'Unrelated saved projects and transcript turns must not become the new planning context.');
   assert.doesNotMatch(prompt,/Prefer 2-3 focused paths/,'The generator must not impose a subsystem quota.');
-  assert.equal(sent.schema.properties.paths.minItems,1);assert.equal(sent.schema.properties.paths.maxItems,1);
-  assert.equal(sent.schema.properties.paths.items.properties.realm,undefined,'The model chooses one canonical path type instead of redundant realm/type tokens.');
-  assert.deepEqual(Array.from(sent.schema.properties.paths.items.properties.type.enum),['civic-governance']);
-  assert.equal(sent.schema.properties.paths.items.properties.steps.maxItems,1);
+  const slots=sent.schema.properties.subsystems;
+  assert.equal(sent.schema.properties.paths,undefined,'Model authoring must consider each subsystem once rather than repeat array entries.');
+  assert.deepEqual(Array.from(slots.required),Object.keys(realmTypes));
+  for(const realm of Object.keys(realmTypes)){
+    const slot=slots.properties[realm];
+    assert.deepEqual(Array.from(slot.properties.included.enum),[realm==='anarchadia']);
+    assert.equal(slot.properties.type,undefined);assert.equal(slot.properties.realm,undefined,'A slot already owns its canonical realm and type.');
+    assert.ok(slot.required.includes('reason'));assert.ok(slot.required.includes('order'));
+  }
+  assert.equal(slots.properties.anarchadia.properties.steps.maxItems,1);
   assert.deepEqual(Array.from(sent.schema.properties.governance.properties.included.enum),[false]);
+  assert.match(prompt,/entire requested final outcome/i);
+  assert.match(prompt,/review.only.*later.*work/is,'Saving for review must not reduce the planned outcome to its first approval gate.');
 });
 
 for(const [label,change]of [
@@ -60,22 +75,82 @@ test('ordinary project needs remain a model decision while explicit exclusions a
   const app=harness(),mixed='Create a Quest to learn joinery and repair a chair using tools I own. No FellowFare path.';
   const raw=result();raw.paths=[path('living-school','learning'),path('cerbanimo','skilled-labor')];
   const model=harness(raw);await model.create(mixed);
-  assert.equal(model.calls[0].schema.properties.paths.maxItems,3,'The schema permits one path for each subsystem the user has not excluded.');
-  assert.deepEqual(Array.from(model.calls[0].schema.properties.paths.items.properties.type.enum),['learning','skilled-labor','civic-governance']);
+  const slots=model.calls[0].schema.properties.subsystems.properties;
+  assert.deepEqual(Array.from(slots.fellowfare.properties.included.enum),[false]);
+  assert.equal(slots['living-school'].properties.included.enum,undefined,'Unconstrained subsystem inclusion remains the model decision.');
   const scope=app.api.memory([],mixed).structuralConstraints;
   assert.equal(scope.pathCount,null);assert.equal(scope.allowedRealms,null);
   assert.deepEqual(Array.from(scope.excludedRealms),['fellowfare']);
 });
 
-test('type-only model authoring derives the canonical realm without changing semantic path choice',async()=>{
+test('legacy type-only paths still derive the canonical realm without changing semantic path choice',async()=>{
   const raw=result();raw.paths=[path('living-school','learning')];delete raw.paths[0].realm;
   const app=harness(raw),authored=await app.create('Create a Quest to understand and practise temperature conversions.');
   assert.equal(authored.plan.paths[0].type,'learning');assert.equal(authored.plan.paths[0].realm,'living-school');
-  const schema=app.calls[0].schema.properties.paths.items;
-  assert.equal(schema.required.includes('realm'),false);
-  assert.match(schema.properties.type.description,/learning.*living-school/);
+  const schema=app.calls[0].schema.properties.subsystems.properties['living-school'];
+  assert.equal(schema.properties.type,undefined);assert.equal(schema.properties.realm,undefined);
+  assert.match(schema.description,/learning.*living-school/);
   assert.match(app.calls[0].messages[0].content,/skilled-labor.*cerbanimo/);
   assert.equal(app.calls[0].think,false,'Ollama artifact authoring uses its explicit non-thinking request mode.');
+});
+
+test('four mandatory decisions preserve a single model-selected path and explain exclusions',async()=>{
+  const raw=slotResult(['living-school']),app=harness(raw),authored=await app.create('Create a Quest to understand and practise temperature conversions.');
+  assert.deepEqual(Array.from(authored.plan.paths,row=>[row.realm,row.type]),[['living-school','learning']]);
+  assert.deepEqual(JSON.parse(JSON.stringify(authored.plan.subsystemDecisions)),Object.fromEntries(Object.entries(raw.subsystems).map(([realm,slot])=>[realm,{included:slot.included,reason:slot.reason,order:slot.order}])));
+  const saved=JSON.parse(app.storage.get('civweave.intentions.v127')).find(row=>row.id===authored.plan.id);
+  assert.deepEqual(saved.plan.subsystemDecisions,JSON.parse(JSON.stringify(authored.plan.subsystemDecisions)));
+  assert.equal(app.calls.length,1);
+});
+
+test('the shared runtime preserves and validates the four-slot authoring schema without unions',async()=>{
+  const app=harness(slotResult());await app.create();
+  const runtimeContext=vm.createContext({Date,console});vm.runInContext(read('app/shared/civweave-model-runtime.js'),runtimeContext);
+  const runtime=runtimeContext.CivweaveModelRuntime,schema=runtime.sanitizeSchema(app.calls[0].schema,{provider:'ollama'});
+  assert.equal(runtime.validateSchema(slotResult(),schema).length,0);
+  assert.equal(schema.properties.subsystems.properties.anarchadia.properties.steps.items.type,'string','Nested path fields must survive the runtime schema depth/node limits.');
+  const invalid=slotResult();invalid.subsystems.cerbanimo.included=true;
+  assert.match(runtime.validateSchema(invalid,schema).join('\n'),/cerbanimo.included/);
+  assert.doesNotMatch(JSON.stringify(schema),/"(?:anyOf|oneOf)"/,'The shared runtime must not collapse alternative routing branches.');
+});
+
+test('included subsystem paths follow the model prerequisite order rather than fixed slot key order',async()=>{
+  const sequence=['anarchadia','living-school','fellowfare','cerbanimo'],app=harness(slotResult(sequence));
+  const authored=await app.create('Create a Quest with a shared agreement, learning, needed resource exchange and productive work. Save for review.');
+  assert.deepEqual(Array.from(authored.plan.paths,row=>row.realm),sequence);
+  assert.equal(authored.plan.state,'review');assert.equal(authored.plan.requiresExplicitActivation,true);
+  assert.deepEqual(Array.from(app.calls[0].schema.properties.subsystems.required),Object.keys(realmTypes));
+  assert.match(app.calls[0].messages[0].content,/agreements before.*acquisition.*construction/i);
+});
+
+for(const [label,change,pattern]of [
+  ['missing subsystem decision',raw=>delete raw.subsystems.cerbanimo,/subsystem.*cerbanimo/i],
+  ['missing reason',raw=>raw.subsystems.cerbanimo.reason='',/reason/i],
+  ['duplicate included order',raw=>{raw.subsystems.cerbanimo={...raw.subsystems.anarchadia,order:1}},/order/i],
+  ['excluded slot with an order',raw=>raw.subsystems.cerbanimo.order=2,/order/i],
+  ['contradictory slot ownership',raw=>raw.subsystems.anarchadia.type='learning',/type|realm/i],
+  ['all subsystems excluded',raw=>{raw.subsystems.anarchadia={...slotResult([]).subsystems.anarchadia}},/incomplete/i],
+  ['mixed authoring shapes',raw=>raw.paths=[path()],/authoring|shape/i],
+])test(`invalid subsystem decision is rejected before persistence: ${label}`,async()=>{
+  const raw=slotResult();change(raw);const app=harness(raw);
+  await assert.rejects(app.create('Create a Quest to record a personal decision.'),pattern);
+  assert.equal(JSON.parse(app.storage.get('civweave.intentions.v127')).length,1);assert.equal(app.calls.length,1,'No hidden model retry or fabricated path can replace invalid decisions.');
+});
+
+test('slot authoring retains explicit exclusions, counts and checkpoint validation',async()=>{
+  const cases=[
+    [slotResult(['anarchadia','cerbanimo']),request,/scope|paths/i],
+    [slotResult(['fellowfare']),'Create a Quest to record a personal decision. No FellowFare path.',/scope/i],
+    [slotResult(['anarchadia']),request,/checkpoint/i],
+  ];cases[2][0].subsystems.anarchadia.steps.push('An extra checkpoint.');
+  for(const[raw,text,pattern]of cases){const app=harness(raw);await assert.rejects(app.create(text),pattern);assert.equal(app.calls.length,1);assert.equal(JSON.parse(app.storage.get('civweave.intentions.v127')).length,1)}
+});
+
+test('legacy path arrays keep their authored sequence and existing validation',async()=>{
+  const raw=result();raw.paths=[path('fellowfare','material-acquirement'),path('living-school','learning')];
+  const app=harness(raw),authored=await app.create('Create a Quest with the requested resource exchange followed by learning.');
+  assert.deepEqual(Array.from(authored.plan.paths,row=>row.realm),['fellowfare','living-school']);
+  assert.equal(authored.plan.subsystemDecisions,undefined);
 });
 
 test('repeated paths for one subsystem cannot turn workflow stages into a false multi-system weave',async()=>{

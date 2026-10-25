@@ -206,6 +206,10 @@ function markdownReport(results, metadata) {
     lines.push(`## ${result.scenario.id}`, '', `Status: ${result.status}; ${(result.timing.elapsedMs / 1000).toFixed(1)}s; transport attempts sent: ${result.transport.filter(call => call.sent).length}.`, '', `Prompt: ${result.scenario.prompt}`, '', `Expected realms: ${(result.review.expectedRealms || []).join(', ') || 'unspecified'}. Observed: ${result.review.observedRealms.join(', ') || 'none'}.`, '', `Structural checks: ${result.objective.allPassed == null ? 'not evaluated (no plan)' : result.objective.allPassed ? 'passed; semantic review remains open' : 'failed'}.`);
     if (result.error) lines.push('', `Authoring error: ${result.error.message}`);
     for (const check of result.objective.checks.filter(item => !item.passed)) lines.push('', `Failed structural check: ${check.id}`);
+    if (result.plan?.subsystemDecisions) {
+      lines.push('', 'Subsystem decisions:', '');
+      for (const [realm, decision] of Object.entries(result.plan.subsystemDecisions)) lines.push(`- ${realm}: ${decision.included ? `included, order ${decision.order}` : 'excluded'}. ${decision.reason}`);
+    }
     for (const row of result.plan?.paths || []) {
       lines.push('', `### ${row.title} (${row.realm} / ${row.type})`, '', row.purpose, '');
       for (const step of row.steps) lines.push(`- ${step}`);

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.150-type-owned-routing'
+const VERSION='1.0.151-subsystem-decisions'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -17,7 +17,7 @@ const VALUE_CORE=[
   ['/app/civweave-economic-policy-v1.js?v=economic-review-v1',()=>globalThis.CivweaveEconomicPolicyV1]
 ];
 const VALUE_MODEL=[
-  ['/app/civweave-basic-value-model-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueModelV1],
+  ['/app/civweave-basic-value-model-v1.js?v=1.4.1-compiled-preview-scope',()=>globalThis.CivweaveBasicValueModelV1],
   ['/app/civweave-basic-value-review-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueReviewV1],
   ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1-idle-safe-v1',()=>globalThis.CivweaveBasicValueSystemsV1?.eventDriven===true]
 ];
@@ -38,7 +38,7 @@ const OPTIONAL=[
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
 ];
 const GUIDE_CAPABILITIES=[
-  ['/app/unified-chat-system-v1.js?v=1.2.14-type-owned-routing',()=>globalThis.CivweaveUnifiedChatSystemV1],
+  ['/app/unified-chat-system-v1.js?v=1.2.15-subsystem-decisions',()=>globalThis.CivweaveUnifiedChatSystemV1],
   ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.1-ollama-schema-lifecycle',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
   ['/app/action-followthrough-v165.js?v=1.0.5-material-revisions',()=>globalThis.CivweaveActionFollowthroughV165],
   ['/app/guide-capability-passover-v1.js?v=1.1.4-explicit-change-requests',()=>globalThis.CivweaveGuideCapabilityPassoverV1]

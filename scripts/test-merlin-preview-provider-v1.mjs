@@ -5,7 +5,7 @@ import {JSDOM} from 'jsdom';
 
 const source=fs.readFileSync(new URL('../public/app/anarchadia-console-v158.js',import.meta.url),'utf8');
 const reviewSource=fs.readFileSync(new URL('../public/app/anarchadia-change-review-v165.js',import.meta.url),'utf8');
-const sharedSources=['shared/civweave-model-runtime.js','fast-interactive-runtime-v192.js','minilm-response-router-v347.js'].map(file=>({file,source:fs.readFileSync(new URL(`../public/app/${file}`,import.meta.url),'utf8')}));
+const sharedSources=['shared/civweave-model-runtime.js','fast-interactive-runtime-v192.js','minilm-response-router-v347.js','civweave-basic-value-model-v1.js'].map(file=>({file,source:fs.readFileSync(new URL(`../public/app/${file}`,import.meta.url),'utf8')}));
 const key='civweave.anarchadia.citizen-console.v139';
 const fixture=()=>({id:'qa-preview',kind:'feature',title:'QA READY note',problem:'The fictional QA note is empty.',expected:'Show a button that writes READY into this sandbox note.',area:'Civweave',acceptance:['Clicking the button displays READY.'],risk:'Local fictional preview only.',approval:{state:'approved'},status:'approved',stage:'intake',pipeline:[],createdAt:new Date().toISOString()});
 const patch={summary:'A working READY note.',files:[{path:'preview/index.html',content:'<button id="ready">Write READY</button><output id="note"></output>'},{path:'preview/app.js',content:'document.querySelector("#ready").onclick=()=>{document.querySelector("#note").textContent="READY"};'}],preview:{html:'<button id="ready">Write READY</button><output id="note"></output>',css:'',js:'document.querySelector("#ready").onclick=()=>{document.querySelector("#note").textContent="READY"};'}};
@@ -80,6 +80,8 @@ test('native structured preview uses one actual shared-runtime HTTP call and pre
     assert.equal(calls[0].body.model,'qa-actual-agentic','The configured agentic profile remains authoritative.');
     assert.equal(calls[0].body.think,false,'Only this explicit Ollama authoring request disables optional reasoning.');
     assert.equal(calls[0].body.format.properties.files.maxItems,6,'The real transport schema bounds file count.');
+    assert.equal(calls[0].body.format.properties.valuation,undefined,'Compiled preview source files are not economic valuation records.');
+    assert.doesNotMatch(calls[0].body.messages.map(row=>row.content).join('\n'),/CIVWEAVE BASIC VALUE GUIDE/,'An unrelated economic system contract must not replace the code authoring instructions.');
     const item=env.stored().proposals[0];
     assert.equal(item.status,'preview-ready');
     assert.equal(item.patch.preview.html,patch.preview.html);
