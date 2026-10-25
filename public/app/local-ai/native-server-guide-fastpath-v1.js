@@ -4,7 +4,9 @@ export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
 const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking';
 const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.16-explicit-weave-path';
-let modelsPromise=null,plannerPromise=null;
+const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.0-ai-authority-only';
+const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.8-composite-intents';
+let modelsPromise=null,plannerPromise=null,questPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
   civweave:['Weaveling','Civweave general assistant'],
@@ -59,6 +61,56 @@ async function ensurePlanner(){
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
+}
+
+function plausibleQuestRequest(system,user){
+  if(system!=='civweave')return false;
+  // Only consult the canonical Quest owner when a planning/build intent is
+  // explicit. Pure learning and regular chat stay on their existing lanes.
+  return /\b(?:create|draft|generate|make|build|design|develop|plan|prepare|organize|start|launch)\b[\s\S]{0,120}\b(?:quest|cross[- ]realm|project|application|app|software|website|roadmap)\b/i.test(user)||
+    /\b(?:teach|learn|memorize|study)\b[\s\S]{0,220}\b(?:then|afterwards?|after that)\b[\s\S]{0,120}\b(?:create|build|develop|design|plan|code|make)\b/i.test(user);
+}
+async function ensureQuestPlanner(){
+  if(!questPromise)questPromise=(async()=>{
+    // The native lane loads canonical ownership code, not a second assistant
+    // runtime or an independent Quest generator.
+    if(!modelsPromise)modelsPromise=loadScript(MODEL_RUNTIME,
+      ()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'&&globalThis.CivweaveModelRuntime?.nativeFinishReasonGuardV1===true,
+      'Shared model runtime').catch(error=>{modelsPromise=null;throw error});
+    await modelsPromise;
+    await loadScript(INTENTION_PLANNER,()=>typeof globalThis.CivweaveIntentionPlanner?.persist==='function','Quest intention planner');
+    await loadScript(QUEST_PLANNER,()=>typeof globalThis.CivweaveWeavelingPlanJsonV190?.createModelPlan==='function'&&
+      typeof globalThis.CivweaveWeavelingPlanJsonV190?.planIntent==='function','Canonical Weaveling Quest planner');
+    return globalThis.CivweaveWeavelingPlanJsonV190;
+  })().catch(error=>{questPromise=null;throw error});
+  return questPromise;
+}
+async function maybeCreateOfficialQuest({system,user,history,signal,onToken}){
+  if(!plausibleQuestRequest(system,user))return null;
+  markNativeStage('quest-owner-loading');
+  const owner=await ensureQuestPlanner();
+  const composite=Boolean(owner.combinedLearningProductionIntent?.(user));
+  const planning=Boolean(owner.planIntent?.(user,history,{currentContext:{systemId:'civweave'}}));
+  if(!composite&&!planning)return null;
+  markNativeStage('quest-generation-start',composite?'learning-and-production':'cross-system');
+  try{onToken?.('','',{kind:'quest-progress',phase:'planning',characters:0})}catch{}
+  const result=await owner.createModelPlan({
+    text:user,history,signal,latestRequest:user,
+    onEvent:event=>{
+      if(event?.phase!=='partial')return;
+      const value=String(event.accumulatedText||'');
+      try{onToken?.('','',{kind:'quest-progress',phase:'generating',characters:value.length})}catch{}
+    }
+  },{
+    selectedConfig:()=>({provider:'openai-compatible',route:'openai-compatible',model:NATIVE_MODEL,
+      endpoint:NATIVE_ENDPOINT,stream:true,timeoutMs:900000,temperature:0.2}),
+    context:async()=>({currentContext:{systemId:'civweave'},routingAnswer:{room:'civweave.quad'}})
+  });
+  if(result?.plan?.state==='review'){
+    markNativeStage('quest-review-saved',result.plan.id||'');
+    try{onToken?.('','',{kind:'quest-progress',phase:'saved',characters:0})}catch{}
+  }else markNativeStage('quest-generation-failed',result?.response?.answer||'No plan saved.');
+  return result;
 }
 function standaloneRequest(user){
   // Self-contained new requests and response checks must not inherit the old topic.
@@ -183,6 +235,10 @@ export async function respondNative({system='civweave',text='',history=[],fetche
   if(!nativeSelection())throw new Error('The selected native llama-server route changed. No inference was started.');
   const user=clean(text,5000);if(!user)throw new Error('There was no text to send to the selected server.');
   markNativeStage('native-fast-lane',system);
+  // Cross-realm Quests take precedence over single-realm learning, because
+  // their full objective can contain both Moss and Cerbanimo prerequisites.
+  const quest=await maybeCreateOfficialQuest({system,user,history,signal,onToken});
+  if(quest)return quest;
   const learningIntent=learningRequest(user),learningControl=learningControlOutsideMoss(user);
   // Weaveling and the other guides must route explicit learning requests into
   // Moss's actual JSON Learning Journey compiler, not answer them as chat.
