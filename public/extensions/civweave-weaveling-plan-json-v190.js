@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.7-weaveling-plan-json-v190-ordered-subsystems';
+const VERSION='1.2.8-weaveling-plan-json-v190-composite-intents';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const CAMPUS_KEY='civweave.working-campus.v1';
 const HANDOFF_KEY='civweave.realm-inbox.v1';
