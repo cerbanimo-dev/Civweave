@@ -112,7 +112,7 @@ includes(loader,'questIntentGreetingSafe:true','shared guide loader');
 includes(loader,'questOrchestratorRevisionPinned:true','shared guide loader');
 includes(loader,"questCustomizationOwner:'selected-ai-model'",'shared guide loader');
 includes(loader,'deterministicQuestFallback:false','shared guide loader');
-includes(loader,"gemma4LiteRTFastModelId:'gemma4-e2b-it-litert-web'",'shared guide loader');
+includes(loader,"gemma4LiteRTFastModelId:globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||''",'shared guide loader');
 
 const extension=file('public/app/local-ai/gemma4-litert-fast-extension-v1.js');
 includes(extension,"id:'gemma4-e2b-it-litert-web'",'LiteRT model extension');
