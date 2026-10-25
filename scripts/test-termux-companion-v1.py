@@ -72,6 +72,40 @@ class CompanionTests(unittest.TestCase):
                          origin=self.origin, body={"command": "rm -rf /"})
         self.assertEqual(err.exception.code, 404)
 
+    def test_discovers_existing_download_without_copy(self):
+        downloads = Path(self.tmp.name) / "storage" / "downloads"
+        downloads.mkdir(parents=True)
+        file = downloads / module.MODELS["qwen35-4b-native"]["file"]
+        file.write_bytes(b"existing model fixture")
+        selected = self.app.find_existing_model("qwen35-4b-native")
+        self.assertEqual(selected, file)
+        state = self.app.status()
+        self.assertTrue(state["models"]["qwen35-4b-native"]["present"])
+        self.assertEqual(state["models"]["qwen35-4b-native"]["location"], "Android Downloads")
+        self.assertFalse(state["models"]["qwen35-4b-native"]["verified"])
+        with self.assertRaisesRegex(RuntimeError, "already exists|already found|present"):
+            self.app._download("qwen35-4b-native")
+        self.assertFalse((Path(self.tmp.name) / "models" / file.name).exists())
+        with self.assertRaisesRegex(RuntimeError, "SHA-256"):
+            self.app._verify("qwen35-4b-native")
+        self.assertEqual(file.read_bytes(), b"existing model fixture")
+
+    def test_existing_model_under_llama_cpp_tree(self):
+        directory = Path(self.tmp.name) / "llama.cpp" / "models"
+        directory.mkdir(parents=True)
+        model = directory / module.MODELS["qwen35-4b-native"]["file"]
+        model.write_bytes(b"old model fixture")
+        self.assertEqual(self.app.find_existing_model("qwen35-4b-native"), model)
+        self.assertEqual(self.app.status()["models"]["qwen35-4b-native"]["location"],
+                         "Termux llama.cpp/models")
+
+    def test_rejects_symlinked_candidate(self):
+        directory = Path(self.tmp.name) / "models"
+        target = Path(self.tmp.name) / "real.gguf"
+        target.write_bytes(b"file")
+        (directory / module.MODELS["qwen35-4b-native"]["file"]).symlink_to(target)
+        self.assertIsNone(self.app.find_existing_model("qwen35-4b-native"))
+
     def test_no_shell_commands_can_be_injected(self):
         with self.assertRaises(ValueError):
             self.app.run_action("start", {"model": "../../etc/passwd"})
