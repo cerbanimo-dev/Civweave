@@ -1,0 +1,1 @@
+Isolated Kingdom Pocket Scribe M4 phone app source. Android debug APK generated through .github/workflows/pocket-scribe-m4-android.yml; source.tar.gz contains complete standalone app and tests. This branch is intentionally not merged into Civweave main.
