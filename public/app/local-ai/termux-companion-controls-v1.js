@@ -64,13 +64,14 @@ export function mountTermuxCompanionControls(element,{store=sessionStorage}={}){
     progress=find('[data-cw-progress]'),model=find('[data-cw-model]'),
     context=find('[data-cw-context]');
   const buttons=[...element.querySelectorAll('[data-cw-action]')];
-  let token=store?.getItem(SECRET_STORAGE)||'',busy=false,poll=null;
+  let token=store?.getItem(SECRET_STORAGE)||'',busy=false,poll=null,jobRunning=false;
   secretInput.value=token;
   find('[data-cw-command]').textContent=COMMANDS;
   const say=message=>{result.textContent=String(message||'').slice(0,600)};
   const controls=enabled=>buttons.forEach(button=>button.disabled=!enabled);
   function showState(snapshot){
     const job=snapshot.job||{},state=job.state||'idle';
+    jobRunning=state==='running';
     progress.hidden=state!=='running';
     if(state==='running'&&typeof job.progress==='number')progress.value=job.progress;
     else progress.removeAttribute('value');
@@ -104,7 +105,7 @@ export function mountTermuxCompanionControls(element,{store=sessionStorage}={}){
       token=entered;store?.setItem(SECRET_STORAGE,token);
       showState(snapshot);
     }catch(error){token='';store?.removeItem(SECRET_STORAGE);say('Pairing failed: '+error.message)}
-    finally{busy=false}
+    finally{busy=false;controls(Boolean(token)&&!jobRunning)}
   });
   buttons.forEach(button=>button.addEventListener('click',async()=>{
     if(busy||!token)return;
