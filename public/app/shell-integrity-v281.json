@@ -2,7 +2,7 @@
   "version": "1.0.163",
   "revision": "shell-integrity-v281",
   "algorithm": "sha256",
-  "requiredAssetCount": 47,
+  "requiredAssetCount": 52,
   "assets": {
     "/index.html": "a22739a649650ec46822c87fbcb68f55cc2125c923ad46466c589904428f1613",
     "/install-v130.css": "dfb524c1fae9d5cd3b7125b668e92fc7d4fedd43afa785f5f52e23d4c627a367",
@@ -50,6 +50,11 @@
     "/app/human-chat-standalone-v2.js": "5f459c80dc7e749bab20de1ea64a1cc8dc218e9972c378bbc7bb28cef88b6657",
     "/app/installer-state-machine-v281.js": "f8a4998eec473e48e043331d15b3d4384c50da5f9a4da7322e083c7c75cfe1f0",
     "/app/installer-storage-guard-v281.js": "72e9f7f2522079a6862f8f3ca871ae8e01adb634b7ba034c736d0a0306da4e08",
-    "/app/offline-campus-status-v210.js": "d26e21ed39631f45e085004661853a3ebe2ce4f18be3f26c71beae88f500461c"
+    "/app/offline-campus-status-v210.js": "d26e21ed39631f45e085004661853a3ebe2ce4f18be3f26c71beae88f500461c",
+    "/app/assets/ai/weaveling.png": "a5db55a1f96f58e62dd99823f31956f1a806d03690130c57a0b6754b043cd3a9",
+    "/app/assets/ai/moss.png": "869abec06410954479ea3dd6e0ad33fa37fe0aabb66a2964164c44a1b647fb45",
+    "/app/assets/ai/kamiya.png": "fd96e7255603e7084ad687a7600aa945002040d18739563159ea0f144a564206",
+    "/app/assets/ai/rook.png": "79f62aee1946bd85cdfbafed935553983fade970f900993eefad17a4668598d7",
+    "/app/assets/ai/merlin.png": "6c39fe3c14343c6607f55c3a9e2a318354c9c877ac5506aab77cb37e41970f62"
   }
 }
