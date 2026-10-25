@@ -1253,6 +1253,7 @@
     nativeMossVisibleStreamV3: true, // Provider deltas reach the shared RAW tracker.
     nativeFormalPipelineStageEventsV1: true, // Two real model passes feed the formal Moss tracker.
     nativeFinishReasonGuardV1: true,
+    nativeQuestSchemaV1: true, // Native-only llama JSON Schema request and explicit Quest deadline.
     resultSchema: RESULT_SCHEMA,
     capabilitySchema: CAPABILITY_SCHEMA,
     normalizeConfig,
