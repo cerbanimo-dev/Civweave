@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.148-weave-request-scope'
+const VERSION='1.0.149-explicit-change-requests'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -41,7 +41,7 @@ const GUIDE_CAPABILITIES=[
   ['/app/unified-chat-system-v1.js?v=1.2.13-weave-request-scope',()=>globalThis.CivweaveUnifiedChatSystemV1],
   ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.1-ollama-schema-lifecycle',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
   ['/app/action-followthrough-v165.js?v=1.0.5-material-revisions',()=>globalThis.CivweaveActionFollowthroughV165],
-  ['/app/guide-capability-passover-v1.js?v=1.1.3-canonical-prompt',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
+  ['/app/guide-capability-passover-v1.js?v=1.1.4-explicit-change-requests',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
 ];
 const LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
 const GUIDE={civweave:{name:'Weaveling',role:'Central mirror and project-memory assistant'},'living-school':{name:'Moss',role:'Learning guide'},cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide'},fellowfare:{name:'Rook',role:'Quartermaster and exchange guide'},anarchadia:{name:'Merlin',role:'Civic, feature-request, and automation guide'}};
