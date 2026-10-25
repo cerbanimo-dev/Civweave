@@ -104,6 +104,8 @@ for(const [a,b] of [
 ])before(loader,a,b,'shared guide loader');
 includes(loader,'1.2.7-ordered-subsystems','shared guide loader');
 includes(loader,'1.4.8-ordered-subsystems','shared guide loader');
+includes(loader,"CivweaveLocalGuideControlBypassV1?.version==='1.4.8-local-guide-control-bypass-v1-ordered-subsystems'",'shared guide loader must wait for current Quest authority, not retired release');
+assert(!loader.includes("CivweaveLocalGuideControlBypassV1?.version==='1.4.3-local-guide-control-bypass-v1-mandatory-intake-direct'"),'retired authority readiness guard must not stall current Quest routing');
 includes(loader,'aiQuestAuthoringRequired:true','shared guide loader');
 includes(loader,'structuredQuestOrchestratorSerialized:true','shared guide loader');
 includes(loader,'questIntentGreetingSafe:true','shared guide loader');
