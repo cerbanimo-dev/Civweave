@@ -15,7 +15,10 @@ const origin='https://civweave-staging.pages.dev';
 const stats={resources:[],requests:[],http:[],requestTimers:[],storageEvents:[],inference:0,blocked:[],errors:[],events:new Map(),observers:[],microtasks:new Map()};
 let collectingNativeTimers=false;
 const nativePreview=workerData.scenario==='native-preview';
-const selectedModel=nativePreview?'qwen3.5:4b':'gemma4:latest';
+const questScenario=workerData.scenario==='quest';
+const selectedModel=nativePreview||questScenario?'qwen3.5:4b':'gemma4:latest';
+const questOrder=['anarchadia','fellowfare','living-school','cerbanimo'];
+const questPacket={title:'QA shared shelf',wish:'Build a shared shelf.',outcome:'A reviewed shared shelf is planned.',assumptions:['Fictional fixture; no work executed.'],subsystems:Object.fromEntries(questOrder.map(realm=>[realm,{included:true,reason:`The fixture needs ${realm}.`,title:`QA ${realm}`,purpose:`The ${realm} contribution.`,steps:[`Complete the ${realm} contribution.`],completionCriteria:`The ${realm} contribution is reviewable.`,evidence:[`Evidence for ${realm}.`]}])),pathOrder:questOrder,governance:{included:false,title:'',purpose:'',agreements:[],reviewQuestion:''}};
 const previewHtml='<main><h1>QA READY badge</h1><span class="badge">READY</span><button id="mark-ready">Mark READY</button><output id="ready-note">WAITING</output></main>';
 const previewCss='.badge{background:green;color:white;padding:4px}';
 const previewJs='document.querySelector("#mark-ready").onclick=()=>{document.querySelector("#ready-note").textContent="READY"};';
@@ -86,6 +89,10 @@ function install(window){
         stats.inference++;
         const call={url:url.href,body:JSON.parse(options.body),aborted:false};stats.http.push(call);
         options.signal?.addEventListener('abort',()=>{call.aborted=true;call.abortReason=String(options.signal.reason?.message||options.signal.reason||'')},{once:true});
+        if(questScenario){
+          const payload={model:selectedModel,message:{role:'assistant',content:JSON.stringify(questPacket)},done:true,done_reason:'stop'};
+          return call.body.stream?new Response(JSON.stringify(payload)+'\n',{headers:{'content-type':'application/x-ndjson'}}):Response.json(payload);
+        }
         if(nativePreview){
           await new Promise((resolve,reject)=>{
             const timer=setTimeout(resolve,Number(workerData.httpDelayMs)||0);
@@ -116,7 +123,7 @@ function install(window){
   window.HTMLCanvasElement.prototype.getContext=()=>null;
   if(window.HTMLDialogElement){window.HTMLDialogElement.prototype.showModal=function(){this.open=true};window.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new window.Event('close'))}}
   const cache=new Map();window.caches={open:async()=>({match:async key=>cache.get(String(key))?.clone(),put:async(key,value)=>cache.set(String(key),value),delete:async key=>cache.delete(String(key)),keys:async()=>[]}),keys:async()=>[],match:async()=>undefined,delete:async()=>true};
-  const config={provider:'ollama',route:'ollama',model:selectedModel,endpoint:'http://127.0.0.1:11434/api/chat',baseUrl:'http://127.0.0.1:11434',...(nativePreview?{timeoutMs:300000,maxTokens:4096}:{})};
+  const config={provider:'ollama',route:'ollama',model:selectedModel,endpoint:'http://127.0.0.1:11434/api/chat',baseUrl:'http://127.0.0.1:11434',...(nativePreview||questScenario?{timeoutMs:300000,maxTokens:4096}:{})};
   try{
     window.localStorage.setItem('civweave.universal-ai.v127',JSON.stringify(config));
     window.localStorage.setItem('civweave-model-profiles-v1',JSON.stringify({interactive:config}));
@@ -168,7 +175,20 @@ try{
     parentPort.postMessage({ok:true,heartbeat,inference:stats.inference,http:stats.http,requestTimers:stats.requestTimers,storageEvents:stats.storageEvents,blocked:stats.blocked,resources:[...new Set(stats.resources)],sourcesBeforeApproval,runtimeBeforeApproval,requests:stats.requests,events:Object.fromEntries(stats.events),errors:stats.errors,proposal:stored().find(row=>row.id===item.id),reviewState,inferenceBeforeApproval,parentSpine:window.CivweaveFastInteractiveV192?.diagnostics?.(),childSpine:child.CivweaveFastInteractiveV192?.diagnostics?.(),toast:document.querySelector('#ac-toast')?.textContent});
     process.exit(0);
   }
-  const api=window.CivweaveGuideChatSurfaceV350;api.openWindow('fellowfare');await sleep(100);
+  const api=window.CivweaveGuideChatSurfaceV350;
+  if(questScenario){
+    api.openWindow('civweave');await sleep(100);
+    const input=window.document.querySelector('#cw-persistent-guide-chat-v215 textarea');
+    input.value='Create a Quest to build a small shared shelf. I need to learn safe measuring and assembly, obtain boards within $25, and agree with another participant on size, spending and roles before buying or building. Save for review without executing work.';
+    input.closest('form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));
+    await until(()=>!api.state().busy);await sleep(350);
+    const chat=window.document.querySelector('#cw-persistent-guide-chat-v215');
+    const plans=JSON.parse(window.localStorage.getItem('civweave.intentions.v127')||'[]'),bubble=chat.querySelector('[data-log] article:last-child .cw350-bubble'),answer=bubble?.textContent;
+    await sleep(300);
+    parentPort.postMessage({ok:true,heartbeat,inference:stats.inference,http:stats.http,blocked:stats.blocked,resources:[...new Set(stats.resources)],errors:stats.errors,plans,text:chat.textContent,stableBubble:bubble===chat.querySelector('[data-log] article:last-child .cw350-bubble')&&answer===bubble?.textContent});
+    process.exit(0);
+  }
+  api.openWindow('fellowfare');await sleep(100);
   const input=window.document.querySelector('#cw-persistent-guide-chat-v215 textarea');
   if(!input)throw new Error('Canonical Rook composer did not mount');
   input.value='Create a Manifest for QA notebooks. quantity: 2 notebooks; area: Albany, NY; timing: tomorrow; exchange: free. Local QA only.';

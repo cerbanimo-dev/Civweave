@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.196-current-quest';
+const VERSION='1.0.197-canonical-quest';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 let partyRequested=false;
@@ -21,7 +21,7 @@ function install(){
   load('/app/mobile-chat-visual-viewport-v1.js?v=1.0.1-long-thread-fit',null,()=>Boolean(globalThis.CivweaveMobileChatVisualViewportV1));
   load('/app/server-ai-router-v301.js?v=1.0.121-guild-telemetry',null,()=>globalThis.CivweaveServerAIRouterV301?.version==='1.0.121-server-ai-router-v301-guild-telemetry');
   load('/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',null,()=>Boolean(globalThis.CivweaveResponseRouterV347));
-  load('/app/guide-generation-floor-v1.js?v=1.3.0-local-planner-authority',null,()=>globalThis.CivweaveGuideGenerationFloorV1?.version==='1.3.0-guide-generation-floor-v1-local-planner-authority');
+  load('/app/guide-generation-floor-v1.js?v=1.3.1-canonical-quest-prompt',null,()=>globalThis.CivweaveGuideGenerationFloorV1?.version==='1.3.1-guide-generation-floor-v1-canonical-quest-prompt');
   load('/app/minilm-decision-strip-v1.js?v=1.3.1-live-guild-balance',null,()=>globalThis.CivweaveMiniLMDecisionStripV1?.version==='1.3.1-minilm-decision-strip-live-guild-balance');
   load('/app/family-ai-loader-v105.js?v=1.0.153-current-quest',null,()=>Boolean(globalThis.CivweaveFamilyAILoaderV105));
   load('/app/guide-provider-policy-v1.js?v=1.0.0-server-auto-local-first',null,()=>Boolean(globalThis.CivweaveGuideProviderPolicyV1));
