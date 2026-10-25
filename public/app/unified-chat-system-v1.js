@@ -754,7 +754,7 @@ async function ensureWeavelingOrchestrator(){
     return hasResponseLayer(globalThis.CivweaveAssistantV141?.respond,'__weavelingPlanJsonV190');
   };
   if(globalThis.CivweaveWeavelingPlanJsonV190?.install)return install();
-  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.7-ordered-subsystems').then(install).catch(error=>{orchestratorPromise=null;throw error});
+  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.8-composite-intents').then(install).catch(error=>{orchestratorPromise=null;throw error});
   return orchestratorPromise;
 }
 function patchAssistant(){

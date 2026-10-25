@@ -9,6 +9,11 @@ on:
       - 'public/app/working-campus-v156.part5.txt'
       - 'public/service-worker-v156.js'
       - 'scripts/verify-weaveling-plan-json-v190.mjs'
+      - 'scripts/verify-native-server-quest-routing-v1.mjs'
+      - 'scripts/verify-native-server-quest-structure-v1.mjs'
+      - 'public/app/local-ai/native-server-guide-fastpath-v1.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/guide-chat-surface-v350.js'
       - 'scripts/verify-local-provider-authority-v1.mjs'
       - '.github/workflows/verify-weaveling-plan-json-v190.yml'
   workflow_dispatch:
@@ -30,8 +35,17 @@ jobs:
           node --check public/app/local-provider-authority-v1.js
           node --check public/app/shared-guide-surface-v236.js
           node --check scripts/verify-weaveling-plan-json-v190.mjs
+          node --check public/app/local-ai/native-server-guide-fastpath-v1.js
+          node --check public/app/shared/civweave-model-runtime.js
+          node --check public/app/guide-chat-surface-v350.js
+          node --check scripts/verify-native-server-quest-routing-v1.mjs
+          node --check scripts/verify-native-server-quest-structure-v1.mjs
           node --check scripts/verify-local-provider-authority-v1.mjs
       - name: Verify Gemini-authored weave and plain-language activation
         run: node scripts/verify-weaveling-plan-json-v190.mjs
+      - name: Verify Termux Quest fast-path integration
+        run: node scripts/verify-native-server-quest-routing-v1.mjs
+      - name: Verify constrained native Quest schema and review-only lifecycle
+        run: node scripts/verify-native-server-quest-structure-v1.mjs
       - name: Verify downloaded-local provider authority
         run: node scripts/verify-local-provider-authority-v1.mjs

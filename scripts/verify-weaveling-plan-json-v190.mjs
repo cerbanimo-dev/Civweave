@@ -84,6 +84,26 @@ assert(activateCalls===1,'Plain-language Activate did not operate the latest sav
 assert(activation.planControl?.action==='activate'&&activation.plan?.state==='active','Activation response did not expose the active Quest state.');
 assert(generateCalls===1,'Activation incorrectly made another AI generation call.');
 
+// A request to learn a skill AND later build a product is one cross-system
+// Quest with both learning and skilled-work lanes, not a Moss-only journey.
+const composite='Can you teach me how to read and memorize the tarot, then create a plan to create my own tarot app';
+const orchestrator=sandbox.CivweaveWeavelingPlanJsonV190;
+assert(orchestrator.combinedLearningProductionIntent(composite)===true,'Sequential learn-and-build request was not classified as a composite Quest.');
+assert(orchestrator.combinedLearningProductionIntent('Can you teach me how to read and memorize the tarot?')===false,'Pure learning request was incorrectly classified as a composite Quest.');
+assert(orchestrator.combinedLearningProductionIntent('Teach me how to create a tarot app.')===false,'A learning request about app development was incorrectly classified as a production request.');
+storage.setItem('civweave.intentions.v127','[]');
+sandbox.CivweaveModelRuntime.generate=async request=>{
+  captured=request;generateCalls++;
+  return {status:'provider-error',error:{message:'Composite routing probe stops before persistence.'},actual:{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16'}};
+};
+await sandbox.CivweaveAssistantV141.respond({text:composite,systemId:'civweave',history:[]});
+assert(captured?.purpose==='civweave-weaveling-intention-json-v190','Composite request was swallowed by Moss instead of Weaveling Quest planning.');
+const slots=captured?.schema?.properties?.subsystems?.properties;
+assert(slots?.['living-school']?.properties?.included?.enum?.[0]===true,'Composite Quest must require the learning lane.');
+assert(slots?.cerbanimo?.properties?.included?.enum?.[0]===true,'Composite Quest must require the production lane.');
+assert(captured.schema.properties.pathOrder.minItems>=2,'Composite Quest must order both required subsystem paths.');
+assert(JSON.parse(storage.getItem('civweave.intentions.v127')||'[]').length===0,'Failed composite generation must not persist a Quest.');
+
 storage.setItem('civweave.intentions.v127','[]');
 sandbox.CivweaveModelRuntime.generate=async request=>{generateCalls++;captured=request;return{status:'provider-error',structured:{requested:true,valid:false},outputText:'',error:{code:'LOCAL_MODEL_FAILED',message:'Selected AI failed to generate the Quest.'},actual:{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16'}}};
 const failed=await sandbox.CivweaveAssistantV141.respond({text:'Make a plan to organize a neighborhood tool library',systemId:'civweave',history:[]});

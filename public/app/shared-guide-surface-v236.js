@@ -36,11 +36,11 @@ function install(){
           load('/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output',()=>{
             load('/app/local-provider-authority-v1.js?v=1.0.4-configured-route',()=>{
               load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
-                load('/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.7-ordered-subsystems',()=>{
+                load('/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.8-composite-intents',()=>{
                   load('/app/local-guide-control-bypass-v1.js?v=1.4.8-ordered-subsystems',()=>{
                     load('/app/guide-stream-thinking-v249.js?v=1.0.125-canonical-paint',null,()=>globalThis.CivweaveGuideStreamThinkingV249?.version==='1.0.125-guide-stream-thinking-v249-canonical-paint');
                   },()=>globalThis.CivweaveLocalGuideControlBypassV1?.version==='1.4.3-local-guide-control-bypass-v1-mandatory-intake-direct');
-                },()=>globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.7-weaveling-plan-json-v190-ordered-subsystems');
+                },()=>globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.8-weaveling-plan-json-v190-composite-intents');
               },()=>Boolean(globalThis.CivweaveIntentionPlanner?.shouldCreate&&globalThis.CivweaveIntentionPlanner?.buildPlan));
             },()=>globalThis.CivweaveLocalProviderAuthorityV1?.version==='1.0.3-local-provider-authority-v1-inference-core-first');
           },()=>globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version==='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output');
