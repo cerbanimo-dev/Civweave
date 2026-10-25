@@ -21,6 +21,7 @@ const setupHtml=[
  '<output data-server-status role="status" aria-live="polite">Not checked. The current model selection is unchanged.</output>',
  '<p><a href="/native-server-diagnostic.html" target="_blank" rel="noopener noreferrer">Open isolated browser-to-Termux diagnostic (no model loaded automatically)</a></p>',
  '<p><b>If setup fails:</b> Update Termux packages. For a missing <code>llama-server</code> binary see the <a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/android.md" target="_blank" rel="noopener noreferrer">official Android build instructions</a>. A PWA can be blocked by Android/browser localhost permissions or CORS even when Termux works. If localhost calls are blocked, inspect your installed llama-server version and test its browser response before updating or introducing a local-only proxy. The test reports failures without changing your route.</p>',
+ '<details data-termux-companion-panel><summary><b>Manage Termux directly from Civweave · optional Companion</b></summary><div data-termux-companion-controls></div></details>',
  '<p>For desktop and mini-PC installs, consult the <a href="https://github.com/ggml-org/llama.cpp/tree/master/tools/server" target="_blank" rel="noopener noreferrer">official llama-server documentation</a>; configure LAN or remote endpoints separately under AI route with appropriate authentication.</p></div>'
 ].join('');
 export function validateServerAddress(value){
@@ -67,6 +68,13 @@ export function mountNativeServerSetup(target,{activate,copyText}={}){
   if(!target||target.dataset.nativeServerMounted==='1')return;
   target.dataset.nativeServerMounted='1';
   target.innerHTML=setupHtml;
+  // Installed only by the user opening this Settings panel; import/mount does
+  // not contact localhost or execute commands.
+  const companionTarget=target.querySelector('[data-termux-companion-controls]');
+  if(companionTarget)void import('/app/local-ai/termux-companion-controls-v1.js?v=1.0.0-paired-loopback')
+    .then(module=>module.mountTermuxCompanionControls(companionTarget))
+    .catch(error=>{companionTarget.textContent='Termux Companion controls could not load: '+String(error?.message||error)});
+
   COMMANDS.forEach((cmd,i)=>{
     const slot=target.querySelector('[data-server-command="'+i+'"]');if(!slot)return;
     const pre=document.createElement('pre');pre.textContent=cmd;

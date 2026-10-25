@@ -1,0 +1,56 @@
+name: Verify Termux Companion Controls
+
+on:
+  pull_request:
+    paths:
+      - 'public/termux/civweave_companion.py'
+      - 'public/app/local-ai/termux-companion-controls-v1.js'
+      - 'public/app/local-ai/native-gguf-server-setup-v1.js'
+      - 'scripts/test-termux-companion-v1.py'
+      - '.github/workflows/verify-termux-companion-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/termux/civweave_companion.py'
+      - 'public/app/local-ai/termux-companion-controls-v1.js'
+      - 'public/app/local-ai/native-gguf-server-setup-v1.js'
+      - 'scripts/test-termux-companion-v1.py'
+      - '.github/workflows/verify-termux-companion-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Python and JavaScript syntax
+        run: |
+          python -m py_compile public/termux/civweave_companion.py
+          node --check public/app/local-ai/termux-companion-controls-v1.js
+          node --check public/app/local-ai/native-gguf-server-setup-v1.js
+      - name: Verify loopback auth, origin restrictions, and command allowlist
+        run: python scripts/test-termux-companion-v1.py
+      - name: Verify PWA has no automatic local controls
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          const controls=readFileSync('public/app/local-ai/termux-companion-controls-v1.js','utf8');
+          const parent=readFileSync('public/app/local-ai/native-gguf-server-setup-v1.js','utf8');
+          assert.match(controls,/127\.0\.0\.1:8766/);
+          assert.match(controls,/X-Civweave-Token/);
+          assert.match(controls,/credentials:'omit'/);
+          assert.match(controls,/No unsolicited network request/);
+          assert.match(parent,/data-termux-companion-controls/);
+          assert.match(parent,/mountTermuxCompanionControls/);
+          console.log('PASS Termux controls are opt-in, paired, and embedded in canonical Settings.');
+          NODE
