@@ -15,7 +15,7 @@ assert.ok(source.includes('Treat every returned note as model-derived and unveri
 
 const transformed=source
   .replace("import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';","const core=globalThis.__core;")
-  .replace("import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v267';","const {searchDownloadedKnowledge,stageMissingSupplementalForQuery}=globalThis.__knowledge;")
+  .replace("import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v268';","const {searchDownloadedKnowledge,stageMissingSupplementalForQuery}=globalThis.__knowledge;")
   .replace('export async function researchCapability','async function researchCapability')
   +'\nglobalThis.__livingSchoolResearchTestApi={researchCapability};\n';
 
