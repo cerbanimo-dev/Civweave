@@ -123,7 +123,7 @@ try {
   });
   await assert.rejects(
     () => service.completeInboundRecovery(nodeId, wrong.delivery.proofToken),
-    /does not match this Hub recovery request/,
+    /does not match this Guild recovery request/,
   );
 
   for (const proof of relay.values()) {
