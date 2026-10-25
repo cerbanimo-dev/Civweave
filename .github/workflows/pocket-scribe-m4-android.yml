@@ -23,6 +23,7 @@ jobs:
         run: |
           mkdir -p pocket-scribe/m4/workspace
           tar -xzf pocket-scribe/m4/source.tar.gz -C pocket-scribe/m4/workspace
+          echo '{"type":"commonjs"}' > pocket-scribe/m4/workspace/package.json
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
