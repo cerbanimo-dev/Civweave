@@ -1,5 +1,5 @@
 import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=subject-links-v266';
+import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v267';
 
 const RESEARCHER='living-school-cleanroom-research-v218.1';
 const RELEVANCE_REVISION='living-school-subject-coverage-v266';
@@ -203,6 +203,22 @@ export async function researchCapability(capability,options={}){
   try{rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5})}catch(error){if(core.generationCancelled(error,options))throw error;console.warn('[Living School downloaded research]',error)}
   core.assertGenerationActive(options);
   core.persist('living-school-local-research-query',{capability:normalized,searchQuery:localSearchQuery,aliases:semanticQueryTerms(normalized),resultCount:rows.length,relevanceRevision:RELEVANCE_REVISION});
+  // Installed foundation schools may lack optional topic articles. Repair only a
+  // catalog-matched supplemental gap before considering model training knowledge.
+  if(!sanitizeRows(normalized,rows).length){
+    let recovery=null,recoveryError='';
+    try{
+      recovery=await stageMissingSupplementalForQuery(localSearchQuery,{limit:3});
+      core.assertGenerationActive(options);
+      if(recovery?.stored||recovery?.cached)rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5});
+    }catch(error){
+      if(core.generationCancelled(error,options))throw error;
+      recoveryError=core.clean(error?.message||error,800);
+      console.warn('[Living School subject-source recovery]',error);
+    }
+    core.assertGenerationActive(options);
+    core.persist('living-school-subject-source-recovery',{capability:normalized,searchQuery:localSearchQuery,attempted:recovery?.attempted||0,downloaded:recovery?.stored||0,alreadyCached:recovery?.cached||0,failed:recovery?.failed||0,error:recoveryError,errors:recovery?.errors||[],policy:'catalog-matched-articles-before-model-derived-fallback'});
+  }
   if(rows.length){
     let packet=localPacket(normalized,rows);
     if(packet.sources.length){
