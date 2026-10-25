@@ -25,6 +25,7 @@ jobs:
           tar -xzf pocket-scribe/m4/source.tar.gz -C pocket-scribe/m4/workspace
           tar -xzf pocket-scribe/m4/import-fix-0.4.1.tar.gz -C pocket-scribe/m4/workspace
           (cd pocket-scribe/m4/workspace && xz -dc ../qwen-runtime-fix-0.4.2.diff.xz | patch -p1 --fuzz=0)
+          sed -i 's/mp.n_gpu_layers=0;mp.use_mmap=true;/mp.n_gpu_layers=0;/' pocket-scribe/m4/workspace/android/app/src/main/cpp/qwen_jni.cpp
           echo '{"type":"commonjs"}' > pocket-scribe/m4/workspace/package.json
       - uses: actions/setup-java@v4
         with:
