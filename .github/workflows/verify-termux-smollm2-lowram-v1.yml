@@ -4,12 +4,14 @@ on:
     paths:
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/settings-gateway-v317.js'
       - 'scripts/verify-termux-smollm2-lowram-v1.mjs'
       - '.github/workflows/verify-termux-smollm2-lowram-v1.yml'
   pull_request:
     paths:
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/settings-gateway-v317.js'
       - 'scripts/verify-termux-smollm2-lowram-v1.mjs'
       - '.github/workflows/verify-termux-smollm2-lowram-v1.yml'
 jobs:
