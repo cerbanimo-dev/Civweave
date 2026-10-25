@@ -111,7 +111,7 @@ try {
   });
   await assert.rejects(
     () => service.completeInboundRecovery(nodeId, unknown.delivery.proofToken),
-    /No recoverable Hub account was confirmed/,
+    /No recoverable Guild account was confirmed/,
   );
 
   const wrong = await service.requestRecoveryForNode(nodeId, { email });
