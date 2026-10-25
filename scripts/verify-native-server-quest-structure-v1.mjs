@@ -11,7 +11,7 @@ const storage=new Map(),localStorage={
   setItem:(key,value)=>storage.set(key,String(value)),
   removeItem:key=>storage.delete(key)
 };
-let request=null,saves=0,saved=null;
+let request=null,saves=0,saved=null,materialized=0;
 let payload={title:'Master tarot and build a tarot app',wish,outcome:'Read tarot confidently and run the app',
   assumptions:['Access to a phone for development and testing.'],
   paths:[
@@ -27,6 +27,7 @@ const ctx={console,Date,Math,Promise,localStorage,structuredClone,queueMicrotask
     persist(plan){saves++;saved=plan;return{id:plan.id,plan}},
     activeIntentionTurns:()=>[],format:plan=>plan.title
   },
+  CivweaveWeavelingPlanMaterializationV265:{materialize:plan=>{materialized++;return plan;}},
   CivweaveModelRuntime:{generate:async input=>{
     request=input;
     return{status:'success',actual:{provider:'openai-compatible',model:'qwen35-4b-native'},
@@ -43,6 +44,7 @@ const result=await api.createModelPlan({text:wish,history:[]},opts);
 assert.equal(result.plan?.state,'review','Review-only Quest was not preserved.');
 assert.deepEqual(Array.from(result.plan.paths,p=>p.realm),['living-school','cerbanimo']);
 assert.equal(saves,1,'A complete AI-authored Quest was not persisted once.');
+assert.equal(materialized,1,'The canonical Quest review/materialization owner was skipped.');
 assert.equal(request?.schema?.properties?.paths?.minItems,2);
 assert.equal(request?.schema?.properties?.paths?.maxItems,2);
 assert.deepEqual(Array.from(request.context.workingMemory.structuralConstraints.requiredRealms),['living-school','cerbanimo']);
