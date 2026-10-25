@@ -11,6 +11,7 @@ import {
   persist,
   copy,
   progressFor,
+  weavePathIdentity,
 } from './living-school-cleanroom-core-v218-base.mjs';
 import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-atlas-v1-subject-anchors';
 import {assertGenerationActive,generationCancelled} from './living-school-cleanroom-core-v218-base.mjs';
@@ -53,7 +54,7 @@ function sourcePacketText(current,sources){
   ];
   return clean(lines.filter(Boolean).join('\n'),52000);
 }
-function requestedData(data,count){return{title:clean(data.title,240),capability:clean(data.capability,2400),level:clean(data.level,80)||'beginner',count,mode:clean(data.mode,80)||'guided',proof:clean(data.proof,3000)||'A working artifact, explanation, and independent receipt.'};}
+function requestedData(data,count){return{title:clean(data.title,240),capability:clean(data.capability,2400),level:clean(data.level,80)||'beginner',count,mode:clean(data.mode,80)||'guided',proof:clean(data.proof,3000)||'A working artifact, explanation, and independent receipt.',...(data.weaveId&&data.pathId?weavePathIdentity(data):{})};}
 function batchIndices(indices,size=BATCH_SIZE){const rows=[];for(let i=0;i<indices.length;i+=size)rows.push(indices.slice(i,i+size));return rows;}
 function generationIndex(module,indexFallback=0){const explicit=Number(module?.generationIndex);if(Number.isInteger(explicit)&&explicit>=0)return explicit;const match=clean(module?.id,120).match(/^module-(\d+)$/i);return match?Math.max(0,Number(match[1])-1):indexFallback;}
 function historyEntry(attempt,requestedCount,completedCount,failedCount,label='structured pass'){return{attempt,label,requestedCount,completedCount,failedCount,at:now()};}
@@ -62,7 +63,7 @@ function saveRecovery(report,eventType='living-school-generation-recovery-update
 }
 function defaultSchool(data,count){
   const current=state(),capability=clean(data.capability,1200);
-  return{id:current.school?.id||uid('school'),title:clean(data.title||capability,180)||'Untitled learning path',capability,level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof||'A working artifact, explanation, and independent receipt.',2400),createdAt:current.school?.createdAt||now(),updatedAt:now(),requestedModuleCount:count,modules:Array.from({length:count},(_,index)=>moduleFor(index,capability)),generation:{provider:'deterministic',model:'local curriculum compiler',generatedAt:now(),fallback:false,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-module-contract-v218.1'}};
+  return{id:current.school?.id||uid('school'),...(data.weaveId&&data.pathId?weavePathIdentity(data):{}),title:clean(data.title||capability,180)||'Untitled learning path',capability,level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof||'A working artifact, explanation, and independent receipt.',2400),createdAt:current.school?.createdAt||now(),updatedAt:now(),requestedModuleCount:count,modules:Array.from({length:count},(_,index)=>moduleFor(index,capability)),generation:{provider:'deterministic',model:'local curriculum compiler',generatedAt:now(),fallback:false,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-module-contract-v218.1'}};
 }
 
 async function generateDesignPacket(runtime,config,data,count,sources,previous='',options={}){
@@ -240,7 +241,7 @@ function moduleReport(count,completed,failures,prior=[]){
 }
 function candidateSchool(data,count,modules,design,route,requestId){
   const current=state(),ordered=[...modules].sort((a,b)=>generationIndex(a)-generationIndex(b));
-  return{id:uid('school'),title:clean(data.title||data.capability,180)||'Untitled learning path',capability:clean(data.capability,1200),level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof,2400),createdAt:now(),updatedAt:now(),requestedModuleCount:count,modules:ordered,generation:{provider:route.provider||'shared',model:route.model||'',generatedAt:now(),fallback:false,partial:ordered.length<count,completedModuleCount:ordered.length,failedModuleCount:count-ordered.length,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-strong-design-local-compile-v341',requestId,designProvider:design.provider,designModel:design.model}};
+  return{id:uid('school'),...(data.weaveId&&data.pathId?weavePathIdentity(data):{}),title:clean(data.title||data.capability,180)||'Untitled learning path',capability:clean(data.capability,1200),level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof,2400),createdAt:now(),updatedAt:now(),requestedModuleCount:count,modules:ordered,generation:{provider:route.provider||'shared',model:route.model||'',generatedAt:now(),fallback:false,partial:ordered.length<count,completedModuleCount:ordered.length,failedModuleCount:count-ordered.length,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-strong-design-local-compile-v341',requestId,designProvider:design.provider,designModel:design.model}};
 }
 function recoveryStatus(completed,count){return completed>=count?'complete':completed>0?'partial':'failed';}
 function designFailureReport(requestId,request,count,design){
@@ -302,6 +303,7 @@ export async function regenerateLivingSchoolStructure(){
   const pass=await runStructurePass(runtime,config,report.request,report.requestedCount,design,sources,targets);
   const candidate=report.candidate&&typeof report.candidate==='object'?copy(report.candidate):candidateSchool(report.request,report.requestedCount,[],design,{provider:'shared',model:''},report.requestId);
   const moduleMap=new Map((candidate.modules||[]).map((module,index)=>[generationIndex(module,index),module]));for(const row of pass.completed)moduleMap.set(row.index,row.module);
+  delete candidate.weaveId;delete candidate.pathId;Object.assign(candidate,weavePathIdentity(report.request));
   candidate.modules=[...moduleMap.entries()].sort((a,b)=>a[0]-b[0]).map(([,module])=>module);candidate.updatedAt=now();candidate.generation={...(candidate.generation||{}),provider:pass.completed[0]?.provider||candidate.generation?.provider||'shared',model:pass.completed[0]?.model||candidate.generation?.model||'',partial:candidate.modules.length<report.requestedCount,completedModuleCount:candidate.modules.length,failedModuleCount:Math.max(0,report.requestedCount-candidate.modules.length),generatedAt:now(),requestId:report.requestId,formatContract:'living-school-strong-design-local-compile-v341'};
   const nextModules=moduleReport(report.requestedCount,pass.completed,pass.failures,report.modules),completedCount=nextModules.filter(row=>row.status==='complete').length,failedCount=report.requestedCount-completedCount,nextAttempt=Number(report.structureAttempt||0)+1;
   report.modules=nextModules;report.batches=[...(report.batches||[]),...pass.batches].slice(-16);report.completedCount=completedCount;report.failedCount=failedCount;report.status=recoveryStatus(completedCount,report.requestedCount);report.structureAttempt=nextAttempt;report.updatedAt=now();report.candidate={...copy(candidate),modules:copy(candidate.modules)};report.history=[...(report.history||[]),historyEntry(nextAttempt,report.requestedCount,completedCount,failedCount,'local structured retry')].slice(-20);

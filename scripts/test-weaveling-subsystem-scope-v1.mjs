@@ -9,9 +9,9 @@ const path=(realm='anarchadia',type='civic-governance')=>({realm,type,title:'Rec
 const result=()=>({title:'QA READY Decision v2',wish:request,outcome:'The personal fictional decision READY is recorded.',assumptions:['This is fictional local QA.'],paths:[path()],governance:{included:false}});
 const realmTypes={'living-school':'learning',cerbanimo:'skilled-labor',fellowfare:'material-acquirement',anarchadia:'civic-governance'};
 function slotResult(included=['anarchadia']){
-  const raw=result();delete raw.paths;raw.subsystems=Object.fromEntries(Object.entries(realmTypes).map(([realm,type])=>{
-    const order=included.indexOf(realm)+1,content=order?path(realm,type):{title:'',purpose:'',steps:[],completionCriteria:'',evidence:[]};delete content.realm;delete content.type;
-    return[realm,{included:order>0,reason:order?`${realm} contributes the requested outcome.`:`No ${realm} need was requested.`,order,...content}];
+  const raw=result();delete raw.paths;raw.pathOrder=[...included];raw.governance={included:false,title:'',purpose:'',agreements:[],reviewQuestion:''};raw.subsystems=Object.fromEntries(Object.entries(realmTypes).map(([realm,type])=>{
+    const selected=included.includes(realm),content=selected?path(realm,type):{title:'',purpose:'',steps:[],completionCriteria:'',evidence:[]};delete content.realm;delete content.type;
+    return[realm,{included:selected,reason:selected?`${realm} contributes the requested outcome.`:`No ${realm} need was requested.`,...content}];
   }));return raw;
 }
 function harness(output=result()){
@@ -34,9 +34,13 @@ test('a new explicit Quest transmits only its own project context and exact stru
     const slot=slots.properties[realm];
     assert.deepEqual(Array.from(slot.properties.included.enum),[realm==='anarchadia']);
     assert.equal(slot.properties.type,undefined);assert.equal(slot.properties.realm,undefined,'A slot already owns its canonical realm and type.');
-    assert.ok(slot.required.includes('reason'));assert.ok(slot.required.includes('order'));
+    assert.ok(slot.required.includes('reason'));assert.equal(slot.required.includes('order'),false);assert.equal(slot.properties.order,undefined,'The sequence is authored once at the top level.');
+    assert.equal(slot.properties.reason.minLength,1,'Every decision needs an explanation, including excluded subsystems.');
   }
   assert.equal(slots.properties.anarchadia.properties.steps.maxItems,1);
+  assert.ok(sent.schema.required.includes('pathOrder'));assert.equal(sent.schema.properties.pathOrder.uniqueItems,true);
+  assert.equal(sent.schema.properties.pathOrder.minItems,1);assert.equal(sent.schema.properties.pathOrder.maxItems,1);
+  assert.deepEqual(Array.from(sent.schema.properties.pathOrder.items.enum),['anarchadia']);
   assert.deepEqual(Array.from(sent.schema.properties.governance.properties.included.enum),[false]);
   assert.match(prompt,/entire requested final outcome/i);
   assert.match(prompt,/review.only.*later.*work/is,'Saving for review must not reduce the planned outcome to its first approval gate.');
@@ -97,7 +101,7 @@ test('legacy type-only paths still derive the canonical realm without changing s
 test('four mandatory decisions preserve a single model-selected path and explain exclusions',async()=>{
   const raw=slotResult(['living-school']),app=harness(raw),authored=await app.create('Create a Quest to understand and practise temperature conversions.');
   assert.deepEqual(Array.from(authored.plan.paths,row=>[row.realm,row.type]),[['living-school','learning']]);
-  assert.deepEqual(JSON.parse(JSON.stringify(authored.plan.subsystemDecisions)),Object.fromEntries(Object.entries(raw.subsystems).map(([realm,slot])=>[realm,{included:slot.included,reason:slot.reason,order:slot.order}])));
+  assert.deepEqual(JSON.parse(JSON.stringify(authored.plan.subsystemDecisions)),Object.fromEntries(Object.entries(raw.subsystems).map(([realm,slot])=>[realm,{included:slot.included,reason:slot.reason,order:slot.included?raw.pathOrder.indexOf(realm)+1:0}])));
   const saved=JSON.parse(app.storage.get('civweave.intentions.v127')).find(row=>row.id===authored.plan.id);
   assert.deepEqual(saved.plan.subsystemDecisions,JSON.parse(JSON.stringify(authored.plan.subsystemDecisions)));
   assert.equal(app.calls.length,1);
@@ -121,20 +125,45 @@ test('included subsystem paths follow the model prerequisite order rather than f
   assert.equal(authored.plan.state,'review');assert.equal(authored.plan.requiresExplicitActivation,true);
   assert.deepEqual(Array.from(app.calls[0].schema.properties.subsystems.required),Object.keys(realmTypes));
   assert.match(app.calls[0].messages[0].content,/agreements before.*acquisition.*construction/i);
+  assert.match(app.calls[0].messages[0].content,/future.*purchase.*build.*steps/is,'An inert review plan must still describe the actual future work that its outcome requires.');
+  assert.match(app.calls[0].messages[0].content,/already knowing.*does not remove.*production/i,'Existing skills must not erase the requested productive deliverable.');
+});
+
+test('one top-level sequence derives persisted order without relying on repeated numerical slot labels',async()=>{
+  const sequence=['anarchadia','living-school','fellowfare','cerbanimo'],raw=slotResult(sequence);
+  raw.subsystems.anarchadia.order=1;raw.subsystems['living-school'].order=1;
+  const app=harness(raw),authored=await app.create('Create a Quest with the necessary shared, learning, resource and productive dependencies.');
+  assert.deepEqual(Array.from(authored.plan.paths,row=>row.realm),sequence);
+  assert.equal(authored.plan.subsystemDecisions['living-school'].order,2);
 });
 
 for(const [label,change,pattern]of [
   ['missing subsystem decision',raw=>delete raw.subsystems.cerbanimo,/subsystem.*cerbanimo/i],
   ['missing reason',raw=>raw.subsystems.cerbanimo.reason='',/reason/i],
-  ['duplicate included order',raw=>{raw.subsystems.cerbanimo={...raw.subsystems.anarchadia,order:1}},/order/i],
-  ['excluded slot with an order',raw=>raw.subsystems.cerbanimo.order=2,/order/i],
+  ['missing path sequence',raw=>delete raw.pathOrder,/path order/i],
+  ['duplicate sequence entry',raw=>raw.pathOrder.push('anarchadia'),/path order/i],
+  ['missing included subsystem in sequence',raw=>{raw.subsystems.cerbanimo={...raw.subsystems.anarchadia}},/path order/i],
+  ['excluded subsystem in sequence',raw=>raw.pathOrder.push('cerbanimo'),/path order/i],
+  ['unknown subsystem in sequence',raw=>raw.pathOrder.push('unknown-system'),/path order/i],
   ['contradictory slot ownership',raw=>raw.subsystems.anarchadia.type='learning',/type|realm/i],
-  ['all subsystems excluded',raw=>{raw.subsystems.anarchadia={...slotResult([]).subsystems.anarchadia}},/incomplete/i],
+  ['all subsystems excluded',raw=>{raw.subsystems.anarchadia={...slotResult([]).subsystems.anarchadia};raw.pathOrder=[]},/incomplete|path order/i],
   ['mixed authoring shapes',raw=>raw.paths=[path()],/authoring|shape/i],
 ])test(`invalid subsystem decision is rejected before persistence: ${label}`,async()=>{
   const raw=slotResult();change(raw);const app=harness(raw);
   await assert.rejects(app.create('Create a Quest to record a personal decision.'),pattern);
   assert.equal(JSON.parse(app.storage.get('civweave.intentions.v127')).length,1);assert.equal(app.calls.length,1,'No hidden model retry or fabricated path can replace invalid decisions.');
+});
+
+test('the real runtime rejects a missing governance field before normalization and admits an explicit empty excluded layer',async()=>{
+  const app=harness(slotResult());await app.create('Create a Quest with an explicitly requested shared consent agreement.');
+  const runtimeContext=vm.createContext({Date,console,URL,AbortController,setTimeout,clearTimeout});vm.runInContext(read('app/shared/civweave-model-runtime.js'),runtimeContext);
+  const runtime=runtimeContext.CivweaveModelRuntime,raw=slotResult(),sourceRequest=app.calls[0];let calls=0;
+  raw.governance={included:true,title:'Requested shared agreement',purpose:'Record the requested consent.',agreements:['Agree on the actual requested boundary.']};
+  const execute=()=>runtime.generate({...sourceRequest,config:{provider:'ollama',model:'fixture',timeoutMs:5000},maxRepairAttempts:0,transport:async()=>{calls++;return{text:JSON.stringify(raw),provider:'ollama',model:'fixture'}}});
+  const invalid=await execute();assert.equal(invalid.status,'invalid-response');assert.match(invalid.structured.errors.join('\n'),/governance.reviewQuestion/);assert.equal(calls,1);
+  raw.governance.reviewQuestion='Do the participants consent to the requested boundary?';
+  const valid=await execute();assert.equal(valid.status,'success');assert.equal(app.api.normalizePlan(valid.outputJson,{text:'Create a Quest with the requested shared consent.'}).governance.reviewQuestion,raw.governance.reviewQuestion);
+  raw.governance=slotResult().governance;const excluded=await execute();assert.equal(excluded.status,'success');assert.equal(app.api.normalizePlan(excluded.outputJson,{text:'Create a Quest with no governance.'}).governance,null);
 });
 
 test('slot authoring retains explicit exclusions, counts and checkpoint validation',async()=>{

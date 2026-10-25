@@ -3,7 +3,7 @@
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
 const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking';
-const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.15-subsystem-decisions';
+const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.16-explicit-weave-path';
 let modelsPromise=null,plannerPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
@@ -55,7 +55,7 @@ async function ensurePlanner(){
     .catch(error=>{modelsPromise=null;throw error});
   await modelsPromise;
   if(!plannerPromise)plannerPromise=loadScript(MOSS_PLANNER,
-    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.15-unified-chat-system-v1-subsystem-decisions','Moss planner')
+    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.16-unified-chat-system-v1-explicit-weave-path','Moss planner')
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;

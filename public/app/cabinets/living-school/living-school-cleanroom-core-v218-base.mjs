@@ -1,6 +1,6 @@
 import * as gate from '../../services/living-school/modules/project-gate.mjs';
 
-export const VERSION='living-school-cleanroom-v218.2-materialization-lifecycle';
+export const VERSION='living-school-cleanroom-v218.3-explicit-weave-path';
 export const STATE_KEY='civweave.living-school.cabinet.v151';
 const OLD_KEY='civweave.living-school.cabinet.v150';
 const INTAKE_KEY='civweave.living-school.intake.v152';
@@ -205,9 +205,26 @@ export function availablePaths(){
   const map=new Map(),intake=readJson(INTAKE_KEY,[]);
   for(const item of Array.isArray(intake)?intake:[]){const id=clean(item?.sourcePlanId||item?.intentionId||item?.id,180);if(!id)continue;map.set(id,{id,title:clean(item.title||item.capability||'Learning path',180),capability:clean(item.purpose||item.capability||item.title,1200),proof:clean(item.completionCriteria||item.proof||'A fresh demonstration and reviewable evidence.',2000),state:clean(item.status||item.state||'ready',80)})}
   const intentions=readJson(INTENTION_KEY,[]);
-  for(const item of Array.isArray(intentions)?intentions:[]){const plan=item.plan&&typeof item.plan==='object'?item.plan:item,candidates=Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{}),route=candidates.find(candidate=>candidate?.realm==='living-school'),id=clean(plan.id||item.id,180);if(!route||!id||map.has(id))continue;map.set(id,{id,title:clean(route.title||plan.title||'Learning path',180),capability:clean(route.purpose||plan.outcome||plan.wish||route.title,1200),proof:clean(route.completionCriteria||plan.completionCriteria||'A fresh demonstration and reviewable evidence.',2000),state:clean(plan.state||item.state||'review',80)})}
+  for(const item of Array.isArray(intentions)?intentions:[]){const plan=item.plan&&typeof item.plan==='object'?item.plan:item,candidates=Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{}),route=candidates.find(candidate=>candidate?.realm==='living-school'),id=clean(plan.id||item.id,180);if(!route||!id)continue;map.set(id,{id,...weavePathIdentity({weaveId:id,pathId:route.id}),title:clean(route.title||plan.title||'Learning path',180),capability:clean(route.purpose||plan.outcome||plan.wish||route.title,1200),proof:clean(route.completionCriteria||plan.completionCriteria||'A fresh demonstration and reviewable evidence.',2000),state:clean(plan.state||item.state||'review',80)})}
   if(currentState.pathContext?.id&&!map.has(currentState.pathContext.id))map.set(currentState.pathContext.id,currentState.pathContext);
   return[...map.values()];
+}
+// Only explicit route IDs can link learning proof to a saved, activated Quest.
+// Campus focus, titles, and the last Passport handoff are not identity authority.
+export function weavePathIdentity(candidate={}){
+  const weaveId=clean(candidate?.weaveId,180),pathId=clean(candidate?.pathId,180);
+  if(!weaveId||!pathId)return{};
+  const intentions=readJson(INTENTION_KEY,[]),item=(Array.isArray(intentions)?intentions:[]).find(item=>clean(item?.plan?.id||item?.id,180)===weaveId),plan=item?.plan&&typeof item.plan==='object'?item.plan:item;
+  if(!plan||!['active','completed'].includes(clean(plan.state||item?.state,80)))return{};
+  const paths=Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{});
+  return paths.some(path=>clean(path?.id,180)===pathId&&path?.realm==='living-school')?{weaveId,pathId}:{};
+}
+export function curriculumWeaveIdentity(input={}){
+  if(input.weaveId||input.pathId)return weavePathIdentity(input);
+  if(input.newPath===true||input.intent==='new'||input.replaceExisting===true)return{};
+  const capability=clean(input.capability,2400),selected=currentState.pathContext;
+  if(capability&&currentState.activePathId&&selected?.id===currentState.activePathId&&capability===clean(selected.capability,2400))return weavePathIdentity(selected);
+  return capability&&capability===clean(currentState.school?.capability,2400)?weavePathIdentity(currentState.school):{};
 }
 
 const cssEscape=name=>globalThis.CSS?.escape?globalThis.CSS.escape(name):String(name).replace(/[\\"]/g,'\\$&');

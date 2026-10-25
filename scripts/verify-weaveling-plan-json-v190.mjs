@@ -64,7 +64,8 @@ const result=await sandbox.CivweaveAssistantV141.respond({text:wish,systemId:'ci
 assert(captured,'AI structured planning request was not made.');
 assert(captured.purpose==='civweave-weaveling-intention-json-v190','Structured Quest purpose was not selected.');
 assert(captured.schema?.properties?.subsystems?.required?.length===4,'All four subsystem decisions were not supplied to the AI runtime.');
-assert(Object.values(captured.schema.properties.subsystems.properties).every(slot=>slot.required.includes('included')&&slot.required.includes('reason')&&slot.required.includes('order')&&!slot.properties.realm&&!slot.properties.type),'Each subsystem must own one decision and canonical routing without redundant model choices.');
+assert(Object.values(captured.schema.properties.subsystems.properties).every(slot=>slot.required.includes('included')&&slot.required.includes('reason')&&!slot.properties.order&&!slot.properties.realm&&!slot.properties.type),'Each subsystem must own one decision and canonical routing without redundant model choices.');
+assert(captured.schema.required.includes('pathOrder')&&captured.schema.properties.pathOrder.uniqueItems&&captured.schema.properties.pathOrder.items.enum.length===4,'The model must author one ordered sequence of included subsystems.');
 assert(typeof captured.transport==='function','Downloaded-local Quest generation did not receive the local-AI transport adapter.');
 assert(!('fallback'in captured),'Deterministic Quest fallback is still attached to the AI request.');
 assert(/user-specific Quest content/.test(captured.messages?.[0]?.content||''),'Quest prompt does not make the AI responsible for customization.');

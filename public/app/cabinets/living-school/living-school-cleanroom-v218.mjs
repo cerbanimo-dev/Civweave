@@ -1,7 +1,7 @@
-import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
+import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
 import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY}from'./living-school-journey-index-v1.mjs';
 import{render}from'./living-school-cleanroom-render-v218.mjs?v=bounded-assessments-practicum-v1';
-import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=moss-materialization-lifecycle-v1';
+import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=moss-explicit-weave-path-v1';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
 import{installLivingSchoolVideoGenerationGuardV1}from'../../living-school-video-generation-guard-v1.mjs?v=video-atlas-v1';
@@ -203,7 +203,7 @@ async function handleLivingSchoolClick(event){
 
 function chatCurriculumData(input={}){
   const s=state(),newPath=input?.intent==='new'||input?.newPath===true||input?.replaceExisting===true,rawLevel=clean(input.level,80).toLowerCase(),rawMode=clean(input.mode,80).toLowerCase();
-  return{
+  const data={
     title:clean(input.title,240)||(newPath?'':clean(s.school?.title||s.pathContext?.title,240)),
     capability:clean(input.capability,2400)||(newPath?'':clean(s.school?.capability||s.pathContext?.capability,2400)),
     level:LEVELS.has(rawLevel)?rawLevel:newPath?'beginner':LEVELS.has(clean(s.school?.level,80).toLowerCase())?clean(s.school.level,80).toLowerCase():'beginner',
@@ -214,6 +214,7 @@ function chatCurriculumData(input={}){
     newPath,
     replaceExisting:newPath
   };
+  return{...data,...curriculumWeaveIdentity({...input,...data})};
 }
 
 function snapshotLearningState(){
@@ -235,8 +236,8 @@ function prepareNewPath(data){
   s.school=null;
   s.progress={};
   s.activeModuleId='';
-  s.activePathId='';
-  s.pathContext={title:data.title,capability:data.capability,proof:data.proof,source:'moss-shared-chat-new-path'};
+  s.activePathId=data.weaveId||'';
+  s.pathContext={...(data.weaveId&&data.pathId?{id:data.weaveId,weaveId:data.weaveId,pathId:data.pathId}:{}),title:data.title,capability:data.capability,proof:data.proof,source:'moss-shared-chat-new-path'};
   s.research=null;
   s.sources=[];
   s.visualInspection=null;

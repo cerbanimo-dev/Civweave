@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.7-anarchadia-runtime-stability-v159-parent-navigation';
+const VERSION='1.0.8-anarchadia-runtime-stability-v159-current-quest-actions';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
@@ -57,7 +57,7 @@ function openGovernance(proposalId=''){location.assign(`/app/anarchadia-governan
 function openWorkbench(route='workbench'){location.assign(`/app/services/anarchadia/workbench.html?cabinet=1#${encodeURIComponent(route)}`)}
 function currentQuestPlan(){
   const campus=parse(localStorage.getItem(QUEST_KEYS.campus),{}),campusPlan=campus?.plan;
-  if(campusPlan&&['active','completed'].includes(campusPlan.state))return campusPlan;
+  if(campusPlan)return campusPlan;
   const intentions=list(parse(localStorage.getItem(QUEST_KEYS.intentions),[]));
   return intentions.find(item=>['active','completed'].includes(item?.plan?.state||item?.state))?.plan||null;
 }
@@ -88,14 +88,19 @@ function installQuestActionStyle(){
   const style=document.createElement('style');style.id='ac-quest-action-style-v159';style.textContent=`#ac-passport-paths .ac-path-card .ac-quest-path-action{width:100%;min-height:38px;margin-top:10px;border:1px solid #ff4aa466;border-radius:10px;background:linear-gradient(135deg,#ff2b911f,#f6d35412);color:inherit;font:800 11px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}#ac-passport-paths .ac-path-card .ac-quest-path-action:active{transform:translateY(1px)}`;document.head.append(style);
 }
 function mountQuestPathActions(){
-  const host=document.getElementById('ac-passport-paths'),plan=currentQuestPlan();if(!host||!plan)return false;
+  const host=document.getElementById('ac-passport-paths'),plan=currentQuestPlan();if(!host)return false;
+  if(!plan||!['active','completed'].includes(plan.state)){host.querySelectorAll('.ac-quest-path-action').forEach(button=>button.remove());return false}
   const paths=list(plan.paths),cards=[...host.querySelectorAll('.ac-path-card')];if(!paths.length||!cards.length)return false;
   installQuestActionStyle();
   cards.forEach((card,index)=>{
-    const path=paths[index];if(!path?.id||card.querySelector('.ac-quest-path-action'))return;
-    const button=document.createElement('button');button.type='button';button.className='ac-quest-path-action';button.dataset.questPathId=path.id;button.textContent=path.realm==='anarchadia'?'Work this Anarchadia path':`Open in ${realmLabel(path.realm)}`;
-    button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openQuestPath(plan,path)});
-    card.append(button);
+    const path=paths[index];let button=card.querySelector('.ac-quest-path-action');if(!path?.id){button?.remove();return}
+    if(button&&(button.dataset.questPathId!==path.id||button.dataset.questWeaveId!==plan.id)){button.remove();button=null}
+    if(!button){
+      button=document.createElement('button');button.type='button';button.className='ac-quest-path-action';button.dataset.questPathId=path.id;button.dataset.questWeaveId=plan.id;
+      button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const current=currentQuestPlan(),selected=current?.id===button.dataset.questWeaveId?list(current.paths).find(row=>row.id===button.dataset.questPathId):null;if(selected)openQuestPath(current,selected)});
+      card.append(button);
+    }
+    const label=path.realm==='anarchadia'?'Work this Anarchadia path':`Open in ${realmLabel(path.realm)}`;if(button.textContent!==label)button.textContent=label;
   });
   return true;
 }

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.163-five-system-navigation-v233-responsive-dock';
+const VERSION='1.0.163-five-system-navigation-v234-embedded-features';
 const NAV_ID='cw-themed-system-nav';
 const MENU_ID='cw-themed-system-nav-menu';
 const STYLE_ID='cw-themed-system-nav-style';
@@ -93,7 +93,6 @@ let menuSystem='';
 let hold=null;
 let suppressClickUntil=0;
 let onboardingSystem='';
-let requestedRetry=0;
 
 function itemFor(system){return SYSTEMS.find(item=>item.id===system)||null}
 function quickFor(system){const actions=QUICK[system]||[];return actions.some(action=>action.id==='settings')?actions:[...actions,{id:'settings',label:'Settings',hint:'AI pipeline, local models, and preferences'}]}
@@ -106,6 +105,10 @@ function clearEmbedded(){
   delete document.documentElement.dataset.cwThemedCurrent;
   document.body?.style.removeProperty('padding-bottom');
 }
+// Destination activation belongs to shared navigation even when its chrome is
+// hosted by the persistent parent. Async capabilities announce their own readiness.
+installRequestedFeatureLifecycle();
+globalThis.CivweaveFamilyNavigationV178=Object.freeze({version:VERSION,owner:true,domOwner:NAV_ID,menuOwner:MENU_ID,geometryOwner:'responsive-dock-v2',systems:SYSTEMS.map(item=>item.id),routeContract:'system-routes-v227',interaction:'tap-system-hold-shortcuts',holdMilliseconds:HOLD_MS,currentSystem,mount,ensureMounted,syncCurrentSelection,setExpression,quickActions:system=>quickFor(system).map(action=>({...action})),openQuickMenu,closeQuickMenu,activateFeature:launchFeature,applyRequestedFeature});
 if(EMBEDDED){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',clearEmbedded,{once:true}):clearEmbedded();return}
 function currentSystem(){
   const path=location.pathname,query=new URLSearchParams(location.search),found=ROUTES?.identify?.(path);
@@ -241,7 +244,11 @@ function activateLocalFeature(system,feature){
 }
 function launchFeature(system,feature){closeQuickMenu({restoreFocus:false});if(feature==='settings'&&openSettings())return true;if(system===currentSystem()&&activateLocalFeature(system,feature))return true;return routeSystem(system,feature)}
 function clearRequestedFeature(){const url=new URL(location.href);if(!url.searchParams.has('feature'))return;url.searchParams.delete('feature');history.replaceState(history.state,'',`${url.pathname}${url.search}${url.hash}`)}
-function applyRequestedFeature(){const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();if(!feature)return true;const system=currentSystem();if(!system)return false;if(activateLocalFeature(system,feature)){clearRequestedFeature();requestedRetry=0;return true}if(requestedRetry<1){requestedRetry+=1;setTimeout(()=>applyRequestedFeature(),720)}return false}
+function applyRequestedFeature(){const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();if(!feature)return true;const system=currentSystem();if(!system)return false;if(activateLocalFeature(system,feature)){clearRequestedFeature();return true}return false}
+function installRequestedFeatureLifecycle(){
+  for(const name of ['pageshow','popstate','civweave:working-campus-runtime-ready','civweave:living-school-workbench-ready','civweave:realm-console-ready','civweave:guide-chat-ready'])addEventListener(name,applyRequestedFeature);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyRequestedFeature,{once:true});else applyRequestedFeature();
+}
 function syncChrome(){syncCurrentSelection();syncUnread();syncOnboarding()}
 function mount(){
   const current=currentSystem();if(!current)return false;if(!document.body){document.addEventListener('DOMContentLoaded',mount,{once:true});return false}
@@ -261,7 +268,7 @@ function mount(){
     const tools=document.createElement('button');tools.type='button';tools.className='cw-nav-tools';tools.textContent='Tools & shortcuts';tools.setAttribute('aria-haspopup','menu');tools.setAttribute('aria-controls',MENU_ID);
     tools.addEventListener('click',()=>openQuickMenu(currentSystem(),{focus:true}));utilities.append(tools);
   }
-  ensureMenu();for(const item of SYSTEMS)armSpriteFog(item.id);syncChrome();for(const item of SYSTEMS)if(!linkFor(item.id)?.dataset.expression)setExpression(item.id,'neutral','boot');hydrate();void ensureStateMapper().then(hydrate);requestAnimationFrame(()=>applyRequestedFeature());return true;
+  ensureMenu();for(const item of SYSTEMS)armSpriteFog(item.id);syncChrome();for(const item of SYSTEMS)if(!linkFor(item.id)?.dataset.expression)setExpression(item.id,'neutral','boot');hydrate();void ensureStateMapper().then(hydrate);return true;
 }
 function ensureMounted(){if(EMBEDDED){clearEmbedded();return false}return mount()}
 
@@ -271,16 +278,14 @@ addEventListener('civweave:avatar-expression',event=>applyChat(event.detail||{})
 addEventListener('civweave:system-route-changed',()=>syncCurrentSelection());
 addEventListener('civweave:guide-chat-state',syncUnread);
 addEventListener('civweave:realm-guide-thread-changed',syncUnread);
-addEventListener('civweave:guide-chat-ready',()=>{syncUnread();applyRequestedFeature()});
-addEventListener('civweave:living-school-workbench-ready',applyRequestedFeature);
+addEventListener('civweave:guide-chat-ready',syncUnread);
 addEventListener('civweave:onboarding-step',event=>{onboardingSystem=String(event.detail?.system||'');syncOnboarding()});
 for(const name of ['civweave:onboarding-completed','civweave:onboarding-skipped'])addEventListener(name,()=>{onboardingSystem='';syncOnboarding()});
 addEventListener('storage',event=>{if(String(event.key||'').startsWith('civweave.guide-thread.'))syncUnread()});
-addEventListener('popstate',()=>{syncCurrentSelection();applyRequestedFeature()});addEventListener('hashchange',()=>syncCurrentSelection());
-addEventListener('pageshow',()=>{ensureMounted();syncUnread();applyRequestedFeature()});addEventListener('focus',()=>{ensureMounted();syncUnread()});
+addEventListener('popstate',()=>syncCurrentSelection());addEventListener('hashchange',()=>syncCurrentSelection());
+addEventListener('pageshow',()=>{ensureMounted();syncUnread()});addEventListener('focus',()=>{ensureMounted();syncUnread()});
 addEventListener('resize',()=>{if(menu&&!menu.hidden&&menuSystem)positionMenu(linkFor(menuSystem))},{passive:true});
 document.addEventListener('pointerdown',event=>{if(menu?.hidden)return;if(menu?.contains(event.target)||document.getElementById(NAV_ID)?.contains(event.target))return;closeQuickMenu({restoreFocus:false})},true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureMounted,{once:true});else ensureMounted();setTimeout(ensureMounted,120);setTimeout(ensureMounted,900);
 
-globalThis.CivweaveFamilyNavigationV178=Object.freeze({version:VERSION,owner:true,domOwner:NAV_ID,menuOwner:MENU_ID,geometryOwner:'responsive-dock-v2',systems:SYSTEMS.map(item=>item.id),routeContract:'system-routes-v227',interaction:'tap-system-hold-shortcuts',holdMilliseconds:HOLD_MS,currentSystem,mount,ensureMounted,syncCurrentSelection,setExpression,quickActions:system=>quickFor(system).map(action=>({...action})),openQuickMenu,closeQuickMenu,activateFeature:launchFeature,applyRequestedFeature});
 })();

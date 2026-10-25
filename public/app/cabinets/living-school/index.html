@@ -8,7 +8,7 @@
   <script src="/app/gemini-rate-governor-v1.js?v=1.0.0-gemini-provider-budget"></script>
   <link rel="preload" as="image" href="/app/assets/ai/moss.png">
   <link rel="preload" as="image" href="/app/assets/ai/weaveling-compass.png">
-  <script src="/app/themed-system-nav-v178.js?v=family-nav-single-owner-r1" defer></script>
+  <script src="/app/themed-system-nav-v178.js?v=1.0.163-embedded-features" defer></script>
   <script src="/app/japanese-mode-v1.js?v=japanese-mode-v1" defer></script>
   <script src="/app/system-radio-agent-v233.js?v=living-school-radio-entry-v233" defer></script>
   <script src="/app/radio-track-suggestions-v240.js?v=living-school-radio-entry-v241" defer></script>
@@ -148,7 +148,7 @@
   const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
   try{
     document.documentElement.dataset.livingSchoolWorkbench='loading';
-    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v5-materialization-lifecycle');
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v6-explicit-weave-path');
     bootComplete=true;
     clearTimeout(watchdog);
     document.documentElement.dataset.livingSchoolWorkbench='ready';

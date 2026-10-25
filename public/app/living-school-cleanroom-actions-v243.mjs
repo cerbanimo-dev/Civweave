@@ -1,5 +1,5 @@
 import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs?v=practicum-receipt-revocation-v1';
-import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
+import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor,curriculumWeaveIdentity,weavePathIdentity} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 import {researchCapability} from './living-school-local-research-v243.mjs?v=moss-materialization-lifecycle-v1';
 import {assertGenerationActive} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 
@@ -216,12 +216,15 @@ export async function generateCurriculumFromData(input={},options={}){
     count:input.count||4,
     mode:clean(input.mode,80)||'guided',
     modelRoute:selectedCurriculumRoute(callerModelRoute),
-    proof:clean(input.proof,3000)||'A working artifact, explanation, and independent receipt.'
+    proof:clean(input.proof,3000)||'A working artifact, explanation, and independent receipt.',
+    ...curriculumWeaveIdentity(input)
   };
   if(!data.capability)throw new Error('Name an observable capability.');
   const source=clean(options.source,120)||'living-school-workbench';
   const before=state();
-  before.pathContext={...(before.pathContext||{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source};
+  const {weaveId:_oldWeave,pathId:_oldPath,id:_oldSelection,...previousContext}=before.pathContext||{};
+  before.pathContext={...previousContext,...weavePathIdentity(data),...(data.weaveId?{id:data.weaveId}:{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source};
+  before.activePathId=data.weaveId||'';
   persist('living-school-curriculum-requested',{source,title:data.title,capability:data.capability,level:data.level,count:Number(data.count)||4,mode:data.mode,callerModelRoute,modelRoute:data.modelRoute,modelRouteAuthority:'shared-model-settings'});
 
   stage(options.onStage,'researching',{capability:data.capability});
@@ -235,6 +238,7 @@ export async function generateCurriculumFromData(input={},options={}){
   if(routeBeforeGeneration!==data.modelRoute)persist('living-school-model-route-synchronized',{source,from:routeBeforeGeneration,to:data.modelRoute,provider:sharedProviderSelection(),authority:'shared-model-settings'});
   assertGenerationActive(options);
   const s=state(),school=await generateSchoolWithAtomicSharedQuiz(data,{...options,source});assertGenerationActive(options);
+  delete school.weaveId;delete school.pathId;Object.assign(school,weavePathIdentity(data));
   const old=s.school?.modules||[],nextProgress={};
   school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
   const generatedProvider=clean(school.generation?.provider,80).toLowerCase(),usedDeterministic=generatedProvider==='deterministic';

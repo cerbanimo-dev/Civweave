@@ -10,7 +10,7 @@ const key='civweave.anarchadia.citizen-console.v139';
 const fixture=()=>({id:'qa-preview',kind:'feature',title:'QA READY note',problem:'The fictional QA note is empty.',expected:'Show a button that writes READY into this sandbox note.',area:'Civweave',acceptance:['Clicking the button displays READY.'],risk:'Local fictional preview only.',approval:{state:'approved'},status:'approved',stage:'intake',pipeline:[],createdAt:new Date().toISOString()});
 const patch={summary:'A working READY note.',files:[{path:'preview/index.html',content:'<button id="ready">Write READY</button><output id="note"></output>'},{path:'preview/app.js',content:'document.querySelector("#ready").onclick=()=>{document.querySelector("#note").textContent="READY"};'}],preview:{html:'<button id="ready">Write READY</button><output id="note"></output>',css:'',js:'document.querySelector("#ready").onclick=()=>{document.querySelector("#note").textContent="READY"};'}};
 
-function harness(runtime,{parentRuntime,loader}={}){
+function harness(runtime,{parentRuntime,loader,proposal=fixture()}={}){
   const dom=new JSDOM('<main id="ac-app" data-screen="home"></main><div id="ac-passport-id"></div><div id="ac-proposal-count"></div><div id="ac-participation"></div><div id="ac-momentum"></div><div id="ac-pipeline-list"></div><div id="ac-merlin-log"></div><form id="ac-request-form"></form><dialog id="ac-preview-dialog"></dialog><form id="ac-merlin-form"></form><div id="ac-toast" hidden></div>',{url:'https://civweave.test/app/anarchadia-console-v139.html',runScripts:'outside-only'});
   const {window}=dom;
   const nativeTimeout=window.setTimeout.bind(window);
@@ -23,7 +23,7 @@ function harness(runtime,{parentRuntime,loader}={}){
   if(runtime)window.CivweaveModelRuntime=runtime;
   if(loader)window.CivweaveFamilyAILoaderV105=loader;
   if(parentRuntime)Object.defineProperty(window,'parent',{value:{CivweaveModelRuntime:parentRuntime},configurable:true});
-  window.localStorage.setItem(key,JSON.stringify({schema:'civweave.anarchadia-console.v1',passportId:'QA',proposals:[fixture()],ledger:[],settings:{autoRun:false}}));
+  window.localStorage.setItem(key,JSON.stringify({schema:'civweave.anarchadia-console.v1',passportId:'QA',proposals:[proposal],ledger:[],settings:{autoRun:false}}));
   window.eval(source);
   return{window,close:()=>window.close(),stored:()=>JSON.parse(window.localStorage.getItem(key)),run:()=>window.AnarchadiaCitizenConsoleV158.runPipeline('qa-preview'),flush:async()=>{for(let pass=0;pass<8;pass++){while(frames.length)frames.shift()(0);await Promise.resolve()}}};
 }
@@ -72,7 +72,8 @@ function installActualSharedPipeline(window,{failure=false}={}){
 }
 
 test('native structured preview uses one actual shared-runtime HTTP call and preserves the compiled candidate',async()=>{
-  const env=harness(null);
+  const proposal={...fixture(),patch:{files:[{path:'OLD_INVALID_CANDIDATE',content:'OLD_INVALID_CANDIDATE'}]},pipeline:[{message:'PRIOR_FAILED_RUN_HISTORY'}],error:'PRIOR_FAILED_RUN_HISTORY'};
+  const env=harness(null,{proposal});
   try{
     const {calls}=installActualSharedPipeline(env.window);
     await env.run();
@@ -82,6 +83,7 @@ test('native structured preview uses one actual shared-runtime HTTP call and pre
     assert.equal(calls[0].body.format.properties.files.maxItems,6,'The real transport schema bounds file count.');
     assert.equal(calls[0].body.format.properties.valuation,undefined,'Compiled preview source files are not economic valuation records.');
     assert.doesNotMatch(calls[0].body.messages.map(row=>row.content).join('\n'),/CIVWEAVE BASIC VALUE GUIDE/,'An unrelated economic system contract must not replace the code authoring instructions.');
+    assert.doesNotMatch(calls[0].body.messages.map(row=>row.content).join('\n'),/OLD_INVALID_CANDIDATE|PRIOR_FAILED_RUN_HISTORY/,'A preview retry authors from the intake, without replaying old invalid source or pipeline history.');
     const item=env.stored().proposals[0];
     assert.equal(item.status,'preview-ready');
     assert.equal(item.patch.preview.html,patch.preview.html);
