@@ -37,6 +37,14 @@ function tierConfig(config,tier){
   const model=tier==='complex'?(router?.complexModel||'gemini-3.7-flash'):(router?.smallModel||'gemini-3.1-flash-lite');
   return{...next,provider:'gemini',route:'gemini',model};
 }
+// Force SSE only for the explicitly selected same-phone Qwen server. Other
+// providers retain their user-selected streaming behavior and routing.
+function withNativeMossStream(config={}){
+  const provider=providerName(config),model=clean(config.model,160);
+  const endpoint=clean(config.endpoint||config.baseUrl,320).replace(/\/+$/,'');
+  return provider==='openai-compatible'&&model==='qwen35-4b-native'&&
+    endpoint==='http://127.0.0.1:8080/v1'?{...config,stream:true}:config;
+}
 function resultText(result){
   const direct=[result?.outputText,result?.text,result?.output,result?.content,result?.responseText].find(value=>typeof value==='string'&&value.trim());
   if(direct)return clean(direct,64000);
@@ -84,7 +92,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
   const request={
     signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,
     purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',
-    config:{...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)},
+    config:withNativeMossStream({...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)}),
     context,
     messages:[
       {role:'system',content:'You are Moss performing the research synthesis and instructional design pass for Living School. Produce a substantive human-readable teaching and curriculum design packet. Do not serialize the final application schema and do not return JSON.'},
@@ -177,7 +185,7 @@ function structureSchema(index){
 async function structureBatch(runtime,config,data,count,design,sources,targets,options={}){
   assertGenerationActive(options);
   const index=targets[0];
-  const smallConfig={...tierConfig(config,'small'),maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)};
+  const smallConfig=withNativeMossStream({...tierConfig(config,'small'),maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)});
   const context={
     capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,requestedModuleNumbers:[index+1],proofContract:data.proof,
     designPacket:clean(design.content,32000),sources:compactSources(sources),

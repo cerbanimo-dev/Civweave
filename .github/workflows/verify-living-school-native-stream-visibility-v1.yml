@@ -1,0 +1,38 @@
+name: Verify Moss Native Stream Visibility
+
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'
+      - 'public/app/living-school-active-run-ui-v2.js'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'scripts/verify-living-school-native-stream-visibility-v1.mjs'
+      - '.github/workflows/verify-living-school-native-stream-visibility-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'
+      - 'public/app/living-school-active-run-ui-v2.js'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'scripts/verify-living-school-native-stream-visibility-v1.mjs'
+      - '.github/workflows/verify-living-school-native-stream-visibility-v1.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check syntax and run stream UI regression
+        run: |
+          node --check public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs
+          node --check public/app/living-school-active-run-ui-v2.js
+          node --check scripts/verify-living-school-native-stream-visibility-v1.mjs
+          node scripts/verify-living-school-native-stream-visibility-v1.mjs
+      - name: Verify provider-neutral generation
+        run: node scripts/verify-living-school-provider-neutral-generation-v3.mjs
