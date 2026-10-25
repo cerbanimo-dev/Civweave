@@ -57,7 +57,7 @@ try {
   const signup = await service.signup(nodeId, { userId, credential, email, passportId });
   assert.equal(signup.delivery.transport, 'inbound-email-proof');
   assert.equal(signup.delivery.mailbox, mailbox);
-  assert.match(signup.delivery.subject, /^Civweave Hub verify-email /);
+  assert.match(signup.delivery.subject, /^Civweave Guild verify-email /);
   assert.ok(!signup.delivery.subject.includes(nodeId), 'relay message must not expose the Hub/node id');
   await assert.rejects(
     () => service.completeInboundVerification(nodeId, signup.delivery.proofToken),
