@@ -153,6 +153,9 @@ test('persistent shell accepts Pages clean URLs but rejects stale or foreign fra
   assert.equal(matches(host(expected.replace('.html','')),expected),true);
   assert.equal(matches(host(expected.replace('cerbanimo','anarchadia')),expected),false);
   assert.equal(matches(host(expected.replace('localhost','foreign.example')),expected),false);
+  assert.equal(matches(host(expected+'#market'),expected),true,'A native tab hash must not detach parent chrome ownership.');
+  assert.equal(matches(host(expected+'&room=project-workbench#tasks'),expected),true,'Native view state may add query parameters without becoming a different content frame.');
+  assert.equal(matches(host(expected+'&feature=library'),expected),false,'A stale requested feature is a different launch.');
   const school='http://localhost/app/cabinets/living-school/index.html?cabinet=1&installed=1&embed=1&persistentShell=1';
   assert.equal(matches(host(school.replace('index.html','')),school),true,'Pages index.html redirects must validate as the same embedded system');
   assert.equal(matches(host(school.replace('index.html','').replace('cabinet=1','cabinet=2')),school),false,'directory aliases must not accept stale query state');
@@ -320,7 +323,7 @@ test('selected Ollama guide messages reach shared capabilities without downloade
   await assert.rejects(respond({text:'Do not submit',signal:controller.signal}),/QA stop/);
   assert.equal(scope.assistantLoaded,before,'A cancelled request must not initialize or start a model.');
   assert.match(chat,/await globalThis\.CivweaveFamilyAILoaderV105\.respondOllama\(/,'Canonical floating guide must use the shared Ollama guide entry.');
-  assert.match(parent,/family-ai-loader-v105\.js\?v=1\.0\.146-ollama-endeavor-schema/,'Persistent desktop chat must load its provider dependency in the parent context.');
+  assert.match(parent,/family-ai-loader-v105\.js\?v=[^"\s]+/,'Persistent desktop chat must load its provider dependency in the parent context.');
   assert.match(campus,/await loader\.respondOllama\(/,'Working Campus must use the same Ollama request path.');
   assert.match(campus,/const localSelection=ollamaRequested\?\{active:false\}:selectedLocalModel\(\)/,'A saved browser model must not override the selected Ollama route.');
   const chatSubmit=chat.slice(chat.indexOf('async function submitActive('),chat.indexOf('function switchGuide('));

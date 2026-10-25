@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.163-five-system-navigation-v234-embedded-features';
+const VERSION='1.0.164-five-system-navigation-v234-feature-consumption';
 const NAV_ID='cw-themed-system-nav';
 const MENU_ID='cw-themed-system-nav-menu';
 const STYLE_ID='cw-themed-system-nav-style';
@@ -93,6 +93,7 @@ let menuSystem='';
 let hold=null;
 let suppressClickUntil=0;
 let onboardingSystem='';
+let consumedFeature='';
 
 function itemFor(system){return SYSTEMS.find(item=>item.id===system)||null}
 function quickFor(system){const actions=QUICK[system]||[];return actions.some(action=>action.id==='settings')?actions:[...actions,{id:'settings',label:'Settings',hint:'AI pipeline, local models, and preferences'}]}
@@ -244,13 +245,14 @@ function activateLocalFeature(system,feature){
 }
 function launchFeature(system,feature){closeQuickMenu({restoreFocus:false});if(feature==='settings'&&openSettings())return true;if(system===currentSystem()&&activateLocalFeature(system,feature))return true;return routeSystem(system,feature)}
 function clearRequestedFeature(){const url=new URL(location.href);if(!url.searchParams.has('feature'))return;url.searchParams.delete('feature');history.replaceState(history.state,'',`${url.pathname}${url.search}${url.hash}`)}
-function applyRequestedFeature(){const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();if(!feature)return true;const system=currentSystem();if(!system)return false;if(activateLocalFeature(system,feature)){clearRequestedFeature();return true}return false}
+function applyRequestedFeature(){const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();if(!feature)return true;const system=currentSystem();if(!system)return false;const request=`${system}:${feature}`;if(EMBEDDED&&consumedFeature===request)return true;if(activateLocalFeature(system,feature)){if(EMBEDDED)consumedFeature=request;else clearRequestedFeature();return true}return false}
 function installRequestedFeatureLifecycle(){
   for(const name of ['pageshow','popstate','civweave:working-campus-runtime-ready','civweave:living-school-workbench-ready','civweave:realm-console-ready','civweave:guide-chat-ready'])addEventListener(name,applyRequestedFeature);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyRequestedFeature,{once:true});else applyRequestedFeature();
 }
 function syncChrome(){syncCurrentSelection();syncUnread();syncOnboarding()}
 function mount(){
+  if(EMBEDDED){clearEmbedded();return false}
   const current=currentSystem();if(!current)return false;if(!document.body){document.addEventListener('DOMContentLoaded',mount,{once:true});return false}
   installStyle();document.documentElement.classList.add('cw-themed-system-nav-active');document.documentElement.dataset.cwThemedCurrent=current;document.documentElement.dataset.familyNavigationOwner='themed-system-nav-v178';
   let nav=document.getElementById(NAV_ID);

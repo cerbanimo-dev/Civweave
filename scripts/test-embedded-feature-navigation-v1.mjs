@@ -29,7 +29,7 @@ test('embedded Quest Library waits for actual campus readiness and opens the can
   window.dispatchEvent(new window.CustomEvent('civweave:working-campus-runtime-ready'));
   assert.equal(window.CivweaveWorkingCampusV156.currentView(),'library');
   assert.equal(window.document.getElementById('view-title').textContent,'Quest Library');
-  assert.equal(new URL(window.location.href).searchParams.has('feature'),false);
+  assert.equal(new URL(window.location.href).searchParams.get('feature'),'library','The parent load identity must remain stable after consuming an embedded shortcut.');
   assert.equal(new URL(window.location.href).searchParams.get('keep'),'1');
   const workspace=window.document.getElementById('workspace').firstElementChild;
   window.dispatchEvent(new window.CustomEvent('civweave:working-campus-runtime-ready'));
@@ -43,7 +43,7 @@ test('embedded Quest Library waits for actual campus readiness and opens the can
 test('embedded content consumes a shortcut immediately when its capability already exists',t=>{
   const app=fixture(t),{window}=app;window.eval(campus);app.start();
   assert.equal(window.CivweaveWorkingCampusV156.currentView(),'library');
-  assert.equal(new URL(window.location.href).searchParams.has('feature'),false);
+  assert.equal(new URL(window.location.href).searchParams.get('feature'),'library');
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
 });
 
@@ -53,7 +53,7 @@ test('embedded Moss shortcuts wait for the existing workbench ready event',t=>{
   window.document.body.innerHTML='<details data-cw-pd-id="living-practicum"><summary>Apply learning in the world</summary><input></details>';
   window.dispatchEvent(new window.CustomEvent('civweave:living-school-workbench-ready'));
   const panel=window.document.querySelector('details');assert.equal(panel.open,true);assert.equal(panel.dataset.revealed,'true');
-  assert.equal(new URL(window.location.href).searchParams.has('feature'),false);
+  assert.equal(new URL(window.location.href).searchParams.get('feature'),'practicum');
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
   assert.deepEqual(app.timers,[]);
 });
@@ -75,7 +75,7 @@ test('embedded Cerbanimo waits for its asynchronous canonical workbench mount',{
   ledger.index={systems:new Map(ledger.systems.map(item=>[item.id,item])),capabilities:new Map(ledger.capabilities.map(item=>[item.id,item]))};
   const ready=new Promise(resolve=>window.addEventListener('civweave:realm-console-ready',resolve,{once:true}));release(ledger);await ready;
   assert.equal(new URL(window.location.href).searchParams.get('room'),'project-workbench');
-  assert.equal(new URL(window.location.href).searchParams.has('feature'),false);
+  assert.equal(new URL(window.location.href).searchParams.get('feature'),'project-workbench');
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
   assert.deepEqual(app.timers,[]);
 });
@@ -87,7 +87,7 @@ test('embedded FellowFare consumes the requested tab through its existing contro
   app.start();
   assert.equal(window.document.querySelector('[data-ffc-command="assemblies"]').hasAttribute('aria-current'),true);
   assert.equal(window.document.querySelector('[data-ffc-status]').textContent,'Opened orders.');
-  assert.equal(new URL(window.location.href).searchParams.has('feature'),false);
+  assert.equal(new URL(window.location.href).searchParams.get('feature'),'assemblies');
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
 });
 
@@ -96,7 +96,7 @@ test('embedded Anarchadia consumes a ledger shortcut after its existing controll
   window.eval(read('app/anarchadia-console-v158.js'));app.start();
   assert.equal(window.document.getElementById('ac-app').dataset.screen,'ledger');
   assert.equal(window.document.getElementById('screen-ledger').hidden,false);
-  assert.equal(new URL(window.location.href).searchParams.has('feature'),false);
+  assert.equal(new URL(window.location.href).searchParams.get('feature'),'ledger');
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
 });
 
@@ -105,6 +105,16 @@ test('loading the shared feature owner twice preserves one embedded lifecycle',t
   const owner=window.CivweaveFamilyNavigationV178;app.start();assert.equal(window.CivweaveFamilyNavigationV178,owner);
   window.eval(campus);window.dispatchEvent(new window.CustomEvent('civweave:working-campus-runtime-ready'));
   assert.equal(window.CivweaveWorkingCampusV156.currentView(),'library');
+  assert.deepEqual(app.timers,[]);
+});
+
+test('external mount calls cannot create shared chrome in an embedded destination',t=>{
+  const app=fixture(t),{window}=app;app.start();
+  assert.equal(window.CivweaveFamilyNavigationV178.ensureMounted(),false);
+  assert.equal(window.CivweaveFamilyNavigationV178.mount(),false);
+  assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
+  assert.equal(window.document.getElementById('cw-themed-system-nav-menu'),null);
+  assert.equal(window.document.getElementById('cw-themed-system-nav-style'),null);
   assert.deepEqual(app.timers,[]);
 });
 

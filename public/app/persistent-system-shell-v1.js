@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.14-route-launcher-context';
+const VERSION='1.1.15-parent-guide-owner';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -19,7 +19,7 @@ const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.138-generation-timeout';
 const SETTINGS_LOCAL_ROUTE_VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
-const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.193-route-launcher-context';
+const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.194-parent-guide-owner';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
   'living-school':'#9cff73',
@@ -190,9 +190,11 @@ function frameMatchesExpected(host=frame(),expectedHref=''){
   if(!expected)return true;
   try{
     const actual=new URL(host.contentWindow?.location?.href||'',location.href),target=new URL(expected,location.href);
-    // Pages redirects .html documents to clean URLs; retain origin and query checks.
+    // Native tabs own hashes and may add view parameters. Launch identity stays
+    // anchored to the system, embedding flags, and requested feature.
     const path=url=>url.pathname.replace(/\/index\.html$/,'/').replace(/\.html$/,'');
-    return actual.origin===target.origin&&path(actual)===path(target)&&actual.search===target.search&&actual.hash===target.hash;
+    const keys=new Set([...target.searchParams.keys(),'system','cabinet','installed','embed','persistentShell','feature']);
+    return actual.origin===target.origin&&path(actual)===path(target)&&[...keys].every(key=>actual.searchParams.get(key)===target.searchParams.get(key));
   }catch{return false}
 }
 function suppressChildChrome(reason='frame-load',{token=loadToken,expectedHref=''}={}){

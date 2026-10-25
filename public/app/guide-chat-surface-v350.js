@@ -1,7 +1,18 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.193-guide-chat-surface-v350-route-launcher-context';
+// Persistent content documents use the parent's exact chat object. They never
+// create a second transcript, launcher, streaming owner, or chat lifecycle.
+try{
+  const host=globalThis.parent,query=new URLSearchParams(location.search);
+  if(host&&host!==globalThis&&query.get('persistentShell')==='1'&&host.CivweavePersistentSystemShellV1){
+    const attach=()=>{const api=host.CivweaveGuideChatSurfaceV350||host.CivweavePersistentGuideChatV215;if(!api?.canonicalOwner)return false;globalThis.CivweaveGuideChatSurfaceV350=api;globalThis.CivweavePersistentGuideChatV215=api;return true};
+    if(!attach())host.addEventListener('civweave:guide-chat-ready',()=>{if(attach())dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{parentOwned:true}}))},{once:true});
+    return;
+  }
+}catch{}
+
+const VERSION='1.0.194-guide-chat-surface-v350-parent-guide-owner';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
