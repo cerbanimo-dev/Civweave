@@ -71,7 +71,7 @@ export function mountNativeServerSetup(target,{activate,copyText}={}){
   // Installed only by the user opening this Settings panel; import/mount does
   // not contact localhost or execute commands.
   const companionTarget=target.querySelector('[data-termux-companion-controls]');
-  if(companionTarget)void import('/app/local-ai/termux-companion-controls-v1.js?v=1.0.0-paired-loopback')
+  if(companionTarget)void import('/app/local-ai/termux-companion-controls-v1.js?v=1.0.1-existing-gguf-discovery')
     .then(module=>module.mountTermuxCompanionControls(companionTarget))
     .catch(error=>{companionTarget.textContent='Termux Companion controls could not load: '+String(error?.message||error)});
 

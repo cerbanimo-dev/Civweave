@@ -306,7 +306,7 @@ function bind(layer){
     if(!event.target?.open)return;
     const target=form.querySelector('[data-native-gguf-setup]');
     if(!target||target.dataset.nativeServerMounted==='1')return;
-    void import('/app/local-ai/native-gguf-server-setup-v1.js?v=termux-context-6144-long-moss-plans')
+    void import('/app/local-ai/native-gguf-server-setup-v1.js?v=termux-companion-model-discovery')
       .then(module=>module.mountNativeServerSetup(target,{activate:({model,endpoint})=>{
         if(model!=='qwen35-4b-native'||endpoint!=='http://127.0.0.1:8080/v1')
           throw new Error('Native GGUF activation requires the tested loopback server and model alias.');
