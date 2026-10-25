@@ -52,5 +52,8 @@ jobs:
           assert.match(controls,/No unsolicited network request/);
           assert.match(parent,/data-termux-companion-controls/);
           assert.match(parent,/mountTermuxCompanionControls/);
-          console.log('PASS Termux controls are opt-in, paired, and embedded in canonical Settings.');
+          assert.match(controls,/value="32768" selected/,'32K context must be the selected default');
+          assert.match(controls,/value="65536"/,'64K experimental context must be opt-in');
+          assert.match(parent,/--ctx-size 32768/,'Manual startup must match the selected 32K context');
+          console.log('PASS Termux controls are opt-in, paired, and expose safe 32K/64K context settings.');
           NODE
