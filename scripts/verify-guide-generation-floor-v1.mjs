@@ -108,8 +108,8 @@ const ordinary={purpose:'background-indexing',config:{maxTokens:96}};assert.equa
 
 assert.ok(source.loader.includes('/app/guide-generation-floor-v1.js'),'shared guide loader is not delivering the generation floor');
 assert.ok(source.loader.includes("version==='1.3.0-guide-generation-floor-v1-local-planner-authority'"),'shared guide loader no longer recognizes the compatible generation-floor API');
-assert.ok(source.loader.includes('/app/local-guide-control-bypass-v1.js?v=1.4.1-ai-quest-lazy-route'),'shared guide loader is not delivering the current local quest-control route');
-assert.ok(source.loader.includes('/app/guide-stream-thinking-v249.js?v=1.0.124-finalization-guard'),'shared guide loader is not delivering the current stream finalization guard');
+assert.ok(source.loader.includes('/app/local-guide-control-bypass-v1.js?v=1.4.8-ordered-subsystems')&&source.loader.includes("CivweaveLocalGuideControlBypassV1?.version==='1.4.8-local-guide-control-bypass-v1-ordered-subsystems'"),'shared guide loader must install and recognize the current local quest-control owner');
+assert.ok(source.loader.includes('/app/guide-stream-thinking-v249.js?v=1.0.125-canonical-paint'),'shared guide loader is not delivering the current stream finalization guard');
 assert.ok(source.loader.includes('/app/local-ai/gemma4-inference-repair-v1.js?v=1.0.3-onnx-only'),'shared guide loader is not delivering the current Gemma inference repair');
 
 assert.ok(source.control.includes('aiQuestAuthoringRequired:true'),'local guide control bypass lost structured Quest routing');
