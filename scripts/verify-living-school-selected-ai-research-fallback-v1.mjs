@@ -86,20 +86,20 @@ assert.ok(!persistRows.some(row=>row.type==='living-school-research-unavailable'
 
 
 const localState={sources:[],research:null},localEvents=[];
-let supplementalDownloaded=false,topicRecoveryCalls=0,unexpectedModelCalls=0;
+let topicRecoveryCalls=0,unexpectedModelCalls=0;
 const localSandbox={
   ...sandbox,
   __core:{...core,state(){return localState},persist(type,payload){localEvents.push({type,payload});return payload}},
   __knowledge:{
-    async searchDownloadedKnowledge(){
-      if(!supplementalDownloaded)return[];
-      return[{title:'Major Arcana',articleTitle:'Major Arcana',canonicalUrl:'https://en.wikipedia.org/wiki/Major_Arcana',schoolSlug:'philosophy-and-religion',schoolName:'School of Philosophy and Religion',notes:'The Major Arcana are twenty-two named cards in a tarot deck. The Fool, Magician and High Priestess are examples. Many tarot decks distinguish the Major Arcana from the four-suited Minor Arcana. These symbols and correspondences vary between tarot traditions, so named meanings need to be compared against a specified deck and tradition. An instructional source can explain the visual symbolism and the way the cards are arranged.'}];
-    },
+    async searchDownloadedKnowledge(){return[];},
     async stageMissingSupplementalForQuery(query){
       topicRecoveryCalls++;
       assert.match(query,/arcana/i);
-      supplementalDownloaded=true;
-      return{attempted:1,stored:1,cached:0,failed:0,errors:[]};
+      return{attempted:1,stored:1,cached:0,failed:0,errors:[],rows:[{
+        title:'Major Arcana',articleTitle:'Major Arcana',canonicalUrl:'https://en.wikipedia.org/wiki/Major_Arcana',
+        schoolSlug:'philosophy-and-religion',schoolName:'School of Philosophy and Religion',
+        notes:'The Major Arcana are twenty-two named cards in a tarot deck. The Fool, Magician and High Priestess are examples. Many tarot decks distinguish the Major Arcana from the four-suited Minor Arcana. These symbols and correspondences vary between tarot traditions, so named meanings need to be compared against a specified deck and tradition. An instructional source can explain the visual symbolism and the way the cards are arranged.'
+      }]};
     }
   },
   document:{documentElement:{dataset:{livingSchoolGenerationActive:'true'}},querySelector:()=>null},
@@ -119,5 +119,6 @@ assert.equal(topicRecoveryCalls,1);
 assert.equal(unexpectedModelCalls,0);
 assert.ok(localEvents.some(event=>event.type==='living-school-subject-source-recovery'&&event.payload.downloaded===1));
 assert.equal(localState.research.sourceCount,1);
+assert.ok(localEvents.some(event=>event.type==='living-school-subject-source-recovery'&&event.payload.recoveredPassages===1));
 
 console.log('Living School selected-AI research fallback and catalog-backed local gap recovery checks passed.');
