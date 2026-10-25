@@ -1,6 +1,6 @@
 import * as gate from '../../services/living-school/modules/project-gate.mjs';
 
-export const VERSION='living-school-cleanroom-v218.1-research-first-curriculum';
+export const VERSION='living-school-cleanroom-v218.2-materialization-lifecycle';
 export const STATE_KEY='civweave.living-school.cabinet.v151';
 const OLD_KEY='civweave.living-school.cabinet.v150';
 const INTAKE_KEY='civweave.living-school.intake.v152';
@@ -14,6 +14,11 @@ const progressLabel=document.getElementById('lsc218-progress-label');
 const progressBar=document.getElementById('lsc218-progress-bar');
 
 export const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
+export function generationCancelled(error,options={}){return Boolean(options.signal?.aborted||error?.name==='AbortError'||error?.code==='CANCELLED')}
+export function assertGenerationActive(options={},result=null){
+  if(options.signal?.aborted){options.signal.throwIfAborted?.();const error=new Error('Learning Journey materialization cancelled.');error.name='AbortError';throw error}
+  if(String(result?.status||'').toLowerCase()==='cancelled'){const error=new Error(clean(result?.error?.message,1200)||'Learning Journey materialization cancelled.');error.name='AbortError';throw error}
+}
 export const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 export const now=()=>new Date().toISOString();
 export const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;

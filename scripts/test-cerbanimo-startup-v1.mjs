@@ -13,10 +13,11 @@ const ledgerText=gunzipSync(Buffer.from(ledgerParts.join('').replace(/\s+/g,''),
 const STORE='civweave.realm-console.v140';
 const questSource=await fs.readFile(new URL('../public/app/cerbanimo-quest-engine-v144.js',import.meta.url),'utf8');
 const videoSource=await fs.readFile(new URL('../public/app/cerbanimo-video-task-contract-v1.mjs',import.meta.url),'utf8');
+const {mediaMatchesTopic}=await import('../public/app/video-learning-contract-v1.mjs');
 
 function videoHarness(){
   const storage=new Map();
-  let releaseVideo;
+  let releaseVideo,lookups=0;
   const pendingVideo=new Promise(resolve=>{releaseVideo=resolve});
   const context=vm.createContext({structuredClone,URL,queueMicrotask,
     localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,String(value))},
@@ -27,11 +28,11 @@ function videoHarness(){
   engine.addQuest(quest);
   Object.assign(context,{document:{documentElement:{dataset:{}},querySelector(){return null},querySelectorAll(){return[]},addEventListener(){}},
     addEventListener(){},MutationObserver:class{observe(){}},
-    __loadVideoContract:()=>Promise.resolve({resolveRelevantVideo:()=>pendingVideo}),
+    __loadVideoContract:()=>Promise.resolve({mediaMatchesTopic,resolveRelevantVideo:()=>{lookups++;return pendingVideo}}),
   });
   vm.runInContext(videoSource.replace('import(CONTRACT)','__loadVideoContract()'),context);
-  return{engine,quest,video:context.CerbanimoVideoTaskContractV1,
-    release:()=>releaseVideo({url:'https://www.youtube.com/watch?v=abcDEF12345',title:'Fixture companion'})};
+  return{engine,quest,video:context.CerbanimoVideoTaskContractV1,lookups:()=>lookups,
+    release:(video={url:'https://www.youtube.com/watch?v=abcDEF12345',title:'Fixture companion'})=>releaseVideo(video)};
 }
 
 function populatedQuestHarness(count=1000){
@@ -130,4 +131,30 @@ test('batch task video lookup also preserves intervening task transitions',async
   assert.equal(state.quests[0].tasks[0].status,'in-progress');
   assert.equal(state.receipts.length,2);
   assert.equal(state.quests[0].tasks[0].video?.url,'https://www.youtube.com/watch?v=abcDEF12345');
+});
+
+test('a previously saved unrelated task video is recurated without changing proof or review eligibility',async()=>{
+  const {engine,quest,video,release}=videoHarness(),taskId=quest.tasks[0].id;
+  engine.applyTaskTransition(quest.id,taskId,'in-progress');
+  engine.addProof(quest.id,taskId,{value:'The local QA note exists and contains READY.'});
+  const before=engine.readState(),task=before.quests[0].tasks[0];
+  before.quests[0].title='Create a digital note';before.quests[0].objective='Type READY and save the note.';
+  task.title='Open the digital note-taking tool';task.video={url:'https://www.youtube.com/watch?v=digitalIC01',title:'Digital Electronics and IC Technology',description:'Electronic circuits and engineering tools.'};
+  engine.writeState(before);
+  const hydration=video.ensureTaskVideo(taskId);
+  release({url:'https://www.youtube.com/watch?v=noteDEMO001',title:'Open a note-taking tool and save a note',description:'Type the required text in the note editor.'});
+  assert.equal(await hydration,true,'An old valid URL must still pass current subject relevance.');
+  const current=engine.readState(),saved=current.quests[0].tasks[0];
+  assert.equal(saved.video.url,'https://www.youtube.com/watch?v=noteDEMO001');
+  assert.equal(saved.status,'proof-ready');assert.equal(saved.proofs.length,1);
+  assert.equal(engine.canTransition(current.quests[0],saved,'review'),true,'Review eligibility continues to depend on actual work and proof.');
+});
+
+test('recuration preserves a relevant existing custom companion without another lookup',async()=>{
+  const {engine,quest,video,lookups}=videoHarness(),state=engine.readState();
+  state.quests[0].tasks[0].video={url:'https://www.youtube.com/watch?v=abcDEF12345',title:'Fixture companion',source:'user-selected'};
+  engine.writeState(state);
+  await video.ensureTaskVideo(quest.tasks[0].id);
+  assert.equal(lookups(),0);
+  assert.equal(engine.readState().quests[0].tasks[0].video.source,'user-selected');
 });

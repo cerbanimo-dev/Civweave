@@ -2,11 +2,14 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import {defaultProjectGate} from '../public/app/services/living-school/modules/project-gate.mjs';
+globalThis.document={getElementById:()=>null};globalThis.localStorage={getItem:()=>null,setItem(){}};
+const {assertGenerationActive,generationCancelled}=await import('../public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs');
 
 const old={school:{id:'old-school',title:'Previous Learning Journey',modules:[{id:'old-module'}]},progress:{'old-module':{lessonComplete:true,assessmentPassed:true}},activeModuleId:'old-module',activePathId:'old-path',pathContext:{title:'Previous Learning Journey'},research:{mode:'local-downloaded'},sources:[{id:'old-source'}],visualInspection:null,generationRecovery:null,practicum:{id:'old-practicum',artifact:'Previous artifact'},projectGate:{...defaultProjectGate(),status:'accepted',requestId:'old-request',projectRef:'old-practicum',lastReceipt:{receiptId:'old-receipt',acceptedAt:'2026-10-23T12:00:00Z'}},receipts:[{receiptId:'old-receipt'}],final:{passed:true},credential:{credentialId:'old-credential'},settings:{mode:'guided'},learningHistory:[{school:{id:'older-school'},credential:{credentialId:'older-credential'}}]};
 let current=structuredClone(old),fail=false;
 const input={title:'New QA Journey',capability:'Convert temperature readings.',count:1,newPath:true,intent:'new'};
 const context={console,Date,Math,JSON,Object,Array,String,Number,Boolean,RegExp,Promise,Set,Map,structuredClone,
+  assertGenerationActive,generationCancelled,
   state:()=>current,copy:structuredClone,freshState:()=>({projectGate:defaultProjectGate()}),
   clean:(value,max=12000)=>String(value??'').trim().slice(0,max),persist(){},
   document:{documentElement:{dataset:{}}},dispatchEvent(){},CustomEvent:class{},queueMicrotask(){},

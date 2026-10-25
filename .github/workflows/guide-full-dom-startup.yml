@@ -8,6 +8,8 @@ on:
       - 'scripts/helpers/guide-full-dom-worker-v1.mjs'
       - 'scripts/test-guide-full-dom-startup-v1.mjs'
       - 'scripts/test-local-authority-lifecycle-v1.mjs'
+      - 'scripts/test-anarchadia-path-navigation-v1.mjs'
+      - 'scripts/test-moss-*-v1.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/guide-full-dom-startup.yml'
@@ -19,6 +21,8 @@ on:
       - 'scripts/helpers/guide-full-dom-worker-v1.mjs'
       - 'scripts/test-guide-full-dom-startup-v1.mjs'
       - 'scripts/test-local-authority-lifecycle-v1.mjs'
+      - 'scripts/test-anarchadia-path-navigation-v1.mjs'
+      - 'scripts/test-moss-*-v1.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/guide-full-dom-startup.yml'
@@ -40,3 +44,5 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Verify startup, selected HTTP routing, saved draft review and approval
         run: node --test scripts/test-local-authority-lifecycle-v1.mjs scripts/test-guide-full-dom-startup-v1.mjs
+      - name: Verify Passport navigation and Moss authoring lifecycle
+        run: node --test scripts/test-anarchadia-path-navigation-v1.mjs scripts/test-moss-plan-lifecycle-v1.mjs scripts/test-moss-materialization-lifecycle-v1.mjs scripts/test-moss-assessment-materialization-v1.mjs scripts/test-moss-prompt-transport-v1.mjs scripts/test-cerbanimo-startup-v1.mjs scripts/test-video-learning-contract-v1.mjs

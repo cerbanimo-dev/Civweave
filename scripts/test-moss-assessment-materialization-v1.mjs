@@ -6,7 +6,7 @@ const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const storage=new Map();
 globalThis.localStorage={getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,String(value))};
 globalThis.document={getElementById:()=>null};
-const {normalizeAIQuiz}=await import('../public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs');
+const {normalizeAIQuiz,assertGenerationActive,generationCancelled}=await import('../public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs');
 
 const paragraph=`A weather reading uses a scale whose numbers locate temperature relative to fixed reference points. Celsius places the freezing point of water near zero and its boiling point near one hundred under ordinary reference conditions. Fahrenheit places those same reference points near thirty two and two hundred twelve. The scales therefore use different interval sizes as well as different zero points. To convert a Celsius reading, multiply it by nine fifths before adding thirty two. To convert a Fahrenheit reading, subtract thirty two before multiplying by five ninths. Applying these operations in the wrong order changes the result. Check a calculation against a familiar reference point before recording it. A weather log should retain the original observation, its scale, the conversion, and a sensible rounding choice. This preserves the distinction between a measurement and a calculation derived from it.`;
 const design=`## Module 1: Celsius and Fahrenheit
@@ -42,6 +42,7 @@ const questions=()=>[
   {id:'qa-mc-3',type:'multiple-choice',prompt:'Which Celsius reading corresponds to sixty eight Fahrenheit?',options:['20','36','100'],answer:'20',explanation:'Subtract thirty two and multiply by five ninths.',concepts:['Celsius']}
 ];
 const context={
+  assertGenerationActive,generationCancelled,
   console,Date,Math,Object,Array,String,Number,Boolean,RegExp,JSON,Promise,Set,Map,URL,AbortController,DOMException,setTimeout,clearTimeout,structuredClone,
   localStorage:globalThis.localStorage,document:{documentElement:{dataset:{}},addEventListener(){}},
   queueMicrotask(){},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},
@@ -60,6 +61,11 @@ const context={
       assert.ok(request.config.maxTokens>=4096&&request.config.maxTokens<=8192);
       assert.ok(request.config.timeoutMs>=180000);
       assert.equal(request.context.modules.length,1);
+      const transmitted=request.messages.map(message=>message.content||'').join('\n');
+      assert.match(transmitted,/MODULE MATERIAL:/,'The first model request must carry the actual one-module content, not only internal context.');
+      assert.match(transmitted,/Celsius places the freezing point of water near zero/,'The selected HTTP provider must receive the lesson facts needed to assess the subject.');
+      assert.match(transmitted,/multiply it by nine fifths before adding thirty two/);
+      assert.match(transmitted,/Convert Celsius and Fahrenheit weather readings using the correct order of operations/);
       if(incomplete==='empty')return null;
       const moduleId=request.context.modules[0].moduleId;
       const outputJson={modules:[{moduleId,questions:incomplete?questions().slice(0,1):questions()}]};

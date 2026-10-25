@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-anarchadia-runtime-stability-v159-quest-activation';
+const VERSION='1.0.7-anarchadia-runtime-stability-v159-parent-navigation';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
@@ -73,6 +73,10 @@ function openQuestPath(plan,path){
   prepareQuestHandoff(plan,path);
   const query=`weave=${encodeURIComponent(plan.id)}&path=${encodeURIComponent(path.id)}&source=anarchadia-passport`;
   const realm=String(path.realm||'').toLowerCase();
+  if(['living-school','cerbanimo','fellowfare'].includes(realm))try{
+    const parent=globalThis.parent,shell=parent&&parent!==globalThis?parent.CivweavePersistentSystemShellV1:null;
+    if(typeof shell?.navigate==='function'&&shell.navigate(realm,{source:'anarchadia-passport'}))return true;
+  }catch{}
   if(realm==='anarchadia'){location.assign(`/app/services/anarchadia/workbench.html?cabinet=1&${query}#overview`);return true}
   if(realm==='living-school'){location.assign(`/app/cabinets/living-school/index.html?cabinet=1&${query}`);return true}
   if(realm==='cerbanimo'){location.assign(`/app/realm-console-v140.html?system=cerbanimo&cabinet=1&${query}`);return true}

@@ -12,7 +12,8 @@ import {
   copy,
   progressFor,
 } from './living-school-cleanroom-core-v218-base.mjs';
-import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-atlas-v1-extensible';
+import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-atlas-v1-subject-anchors';
+import {assertGenerationActive,generationCancelled} from './living-school-cleanroom-core-v218-base.mjs';
 
 const RECOVERY_SCHEMA='civweave.living-school-generation-recovery.v1';
 const DESIGN_PURPOSE='living-school-research-grounded-curriculum-v218.1';
@@ -64,7 +65,8 @@ function defaultSchool(data,count){
   return{id:current.school?.id||uid('school'),title:clean(data.title||capability,180)||'Untitled learning path',capability,level:data.level||'beginner',mode:data.mode||'guided',proof:clean(data.proof||'A working artifact, explanation, and independent receipt.',2400),createdAt:current.school?.createdAt||now(),updatedAt:now(),requestedModuleCount:count,modules:Array.from({length:count},(_,index)=>moduleFor(index,capability)),generation:{provider:'deterministic',model:'local curriculum compiler',generatedAt:now(),fallback:false,sourceCount:current.sources?.length||0,researchMode:current.research?.mode||'none',formatContract:'living-school-module-contract-v218.1'}};
 }
 
-async function generateDesignPacket(runtime,config,data,count,sources,previous=''){
+async function generateDesignPacket(runtime,config,data,count,sources,previous='',options={}){
+  assertGenerationActive(options);
   const current=state(),sourcePacket=sourcePacketText(current,sources);
   const context={
     capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,proofContract:data.proof,
@@ -79,6 +81,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
     ]
   };
   const request={
+    signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,
     purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',
     config:{...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)},
     context,
@@ -88,12 +91,14 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
     ]
   };
   try{
-    const result=await runtime.generate(request),route=actualRoute(result,request.config),text=resultText(result);
+    const result=await runtime.generate(request);assertGenerationActive(options,result);
+    const route=actualRoute(result,request.config),text=resultText(result);
     if(result?.status!=='success'||!text){
       return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-failed',sourcePacket,error:clean(result?.error?.message||result?.error||`The research/design model ended with ${result?.status||'an error'}.`,1200)};
     }
     return{status:'complete',content:clean(text,32000),provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-pass',error:'',sourcePacket:''};
   }catch(error){
+    if(generationCancelled(error,options))throw error;
     const route=actualRoute(null,request.config);
     return{status:'failed',content:'',provider:route.provider,model:route.model,generatedAt:now(),source:'strong-design-failed',sourcePacket,error:clean(error?.message||error,1200)};
   }
@@ -168,7 +173,8 @@ function structureSchema(index){
     }
   };
 }
-async function structureBatch(runtime,config,data,count,design,sources,targets){
+async function structureBatch(runtime,config,data,count,design,sources,targets,options={}){
+  assertGenerationActive(options);
   const index=targets[0];
   const smallConfig={...tierConfig(config,'small'),maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)};
   const context={
@@ -185,22 +191,27 @@ async function structureBatch(runtime,config,data,count,design,sources,targets){
     ]
   };
   const result=await runtime.generate({
+    signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,
     purpose:STRUCTURE_PURPOSE,taskTier:'small',executionProfile:'interactive',config:smallConfig,context,schema:structureSchema(index),maxRepairAttempts:2,
     messages:[
       {role:'system',content:'You are Moss’s lightweight Living School formatter. Convert supplied researched instructional content into one complete application module without adding new research. Return only the schema-matching JSON object with moduleIndex and module properties.'},
-      {role:'user',content:`Construct module ${index+1} of ${count}. Preserve the educational substance of the design packet. The module must be complete enough to use immediately; do not insert placeholders or generic scaffold text.`}
+      {role:'user',content:`Construct module ${index+1} of ${count}. Preserve the educational substance of the design packet. The module must be complete enough to use immediately; do not insert placeholders or generic scaffold text.\n\nLEARNING REQUEST:\n${JSON.stringify(requestedData(data,count))}\n\nCONSTRUCTION CONSTRAINTS:\n${context.constraints.join('\n')}`},
+      {role:'user',content:`RESEARCHED DESIGN PACKET:\n${context.designPacket}`},
+      {role:'user',content:`SUPPLIED SOURCE MAPPING AND PASSAGES:\n${clean(JSON.stringify(context.sources),36000)}`}
     ]
   });
+  assertGenerationActive(options,result);
   return{result,text:resultText(result),route:actualRoute(result,smallConfig)};
 }
-async function runStructurePass(runtime,config,data,count,design,sources,targets){
+async function runStructurePass(runtime,config,data,count,design,sources,targets,options={}){
   const knownSourceIds=new Set(sources.map(source=>source.id)),completed=[],failures=[],batches=[];
   for(const indices of batchIndices(targets)){
+    assertGenerationActive(options);
     let result=null,text='',route={provider:providerName(config)||'shared',model:clean(config.model,180)},error='';
     try{
-      const response=await structureBatch(runtime,config,data,count,design,sources,indices);result=response.result;text=response.text;route=response.route;
+      const response=await structureBatch(runtime,config,data,count,design,sources,indices,options);result=response.result;text=response.text;route=response.route;
       if(result?.status!=='success'&&!text)error=clean(result?.error?.message||result?.error||`Formatting ended with ${result?.status||'an error'}.`,1200);
-    }catch(caught){error=clean(caught?.message||caught,1200)}
+    }catch(caught){if(generationCancelled(caught,options))throw caught;error=clean(caught?.message||caught,1200)}
     const rows=candidateRows(result,text,indices),byIndex=new Map(rows.map(row=>[row.index,row.module]));
     for(const index of indices){
       const raw=byIndex.get(index);
@@ -209,8 +220,9 @@ async function runStructurePass(runtime,config,data,count,design,sources,targets
         try{
           const normalized=normalizeModule(raw,index,data.capability,'ai');normalized.generationIndex=index;
           await ensureModuleVideo(normalized,{subjectContext:data.capability});
+          assertGenerationActive(options);
           if(!normalized.video)issues=['Required module video could not be resolved.'];else completed.push({index,module:normalized,provider:route.provider,model:route.model});
-        }catch(videoError){issues=[`Video requirement failed: ${clean(videoError?.message||videoError,1000)}`]}
+        }catch(videoError){if(generationCancelled(videoError,options))throw videoError;issues=[`Video requirement failed: ${clean(videoError?.message||videoError,1000)}`]}
       }
       if(issues.length)failures.push({index,status:raw?'partial':'failed',issues,raw:clean(raw?JSON.stringify(raw,null,2):(text||error),8000),provider:route.provider,model:route.model,at:now()});
     }
@@ -236,20 +248,24 @@ function designFailureReport(requestId,request,count,design){
   return{schema:RECOVERY_SCHEMA,requestId,status:'failed',request,requestedCount:count,completedCount:0,failedCount:count,structureAttempt:0,researchAttempt:1,createdAt:now(),updatedAt:now(),unstructured:{...design},modules:Array.from({length:count},(_,index)=>({index,status:'blocked',issues:[`Curriculum design did not complete, so local module compilation was not attempted. ${message}`],raw:'',provider:design?.provider||'',model:design?.model||'',at:now()})),batches:[],history:[historyEntry(0,count,0,count,'strong design failed')],candidate:null};
 }
 
-export async function generateSchool(data){
+export async function generateSchool(data,options={}){
+  assertGenerationActive(options);
   const current=state(),capability=clean(data.capability,1200),count=clip(data.count,1,8),fallback=defaultSchool(data,count);
   if(data.modelRoute!=='shared')return fallback;
   const requestId=uid('curriculum-run'),request=requestedData(data,count),sources=sourceRows(current);
   try{
     const runtime=await runtimeReady(),config=runtime.readSharedConfig?.('interactive');
+    assertGenerationActive(options);
     if(!config)throw new Error('Shared model configuration is unavailable.');
     const provider=providerName(config);if(deterministicProvider(provider))throw new Error('The selected shared route cannot generate full curriculum content.');
-    const design=await generateDesignPacket(runtime,config,request,count,sources);
+    const design=await generateDesignPacket(runtime,config,request,count,sources,'',options);
+    assertGenerationActive(options);
     if(design.status!=='complete'){
       const report=designFailureReport(requestId,request,count,design);saveRecovery(report,'living-school-generation-design-failed');
       return{...fallback,generation:{...fallback.generation,fallback:true,error:clean(design.error||'Gemini 3.7 curriculum design did not complete.',1800),formatContract:'living-school-strong-design-local-compile-v341',requestId,recoveryAvailable:true,designFailed:true}};
     }
-    const pass=await runStructurePass(runtime,config,request,count,design,sources,Array.from({length:count},(_,index)=>index));
+    const pass=await runStructurePass(runtime,config,request,count,design,sources,Array.from({length:count},(_,index)=>index),options);
+    assertGenerationActive(options);
     const modules=pass.completed.map(row=>row.module),route=pass.completed[0]?{provider:pass.completed[0].provider,model:pass.completed[0].model}:actualRoute(null,tierConfig(config,'small'));
     const school=candidateSchool(request,count,modules,design,route,requestId),completedCount=modules.length,failedCount=count-completedCount;
     const report={schema:RECOVERY_SCHEMA,requestId,status:recoveryStatus(completedCount,count),request,requestedCount:count,completedCount,failedCount,structureAttempt:1,researchAttempt:1,createdAt:now(),updatedAt:now(),unstructured:{...design},modules:moduleReport(count,pass.completed,pass.failures),batches:pass.batches,history:[historyEntry(1,count,completedCount,failedCount)],candidate:{...copy(school),modules:copy(modules)}};
@@ -257,6 +273,7 @@ export async function generateSchool(data){
     if(!modules.length)return{...fallback,generation:{...fallback.generation,fallback:true,error:pass.failures.map(row=>`module ${row.index+1}: ${row.issues.join('; ')}`).join(' | ').slice(0,1800)||'No structured modules completed.',formatContract:'living-school-strong-design-local-compile-v341',requestId,recoveryAvailable:true}};
     return school;
   }catch(error){
+    if(generationCancelled(error,options))throw error;
     const design={status:'failed',content:'',provider:'none',model:'none',generatedAt:now(),source:'generation-setup-failed',sourcePacket:sourcePacketText(current,sources),error:clean(error?.message||error,1200)};
     const report=designFailureReport(requestId,request,count,design);report.history=[historyEntry(0,count,0,count,'generation setup failed')];
     saveRecovery(report,'living-school-generation-first-pass-failed');
