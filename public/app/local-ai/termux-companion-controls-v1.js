@@ -55,6 +55,7 @@ export function mountTermuxCompanionControls(element,{store=sessionStorage}={}){
     '</div>',
     '<output role="status" aria-live="polite" data-cw-result>Not paired. No operations started.</output>',
     '<progress data-cw-progress max="100" hidden></progress>',
+    '<p>Existing model discovery checks ~/models, Android Downloads, and ~/llama.cpp/models. The original GGUF is reused without copying or redownloading. If you updated the Companion code, restart its Python process in Termux before refreshing status.</p>',
     '<p>To adopt an already-running manual server, stop that Termux session with Ctrl+C once; only Companion-started processes can be stopped or restarted here.</p>',
     '<p>For reboot recovery, install Termux:Boot separately and create its startup script. Android may still suspend background processes.</p>',
     '</div>'
@@ -77,7 +78,7 @@ export function mountTermuxCompanionControls(element,{store=sessionStorage}={}){
     else progress.removeAttribute('value');
     const server=snapshot.managed_running?'Companion server running':snapshot.unmanaged_running?'Manual server occupies port 8080':snapshot.server_reachable?'AI server loading':'AI server stopped';
     const models=Object.entries(snapshot.models||{}).map(([name,info])=>
-      name+': '+(info.present?(info.verified?'verified':'present, unverified'):'missing')).join(' · ');
+      name+': '+(info.present?((info.verified?'verified':'present, unverified')+(info.location?' · '+info.location:'')):'not found in supported folders')).join(' · ');
     say(server+' · llama.cpp '+(snapshot.llama_installed?'installed':'not installed')+
       ' · '+models+(job.action?' · '+job.action+': '+state+' — '+(job.message||''):''));
     controls(state!=='running'&&!busy);
