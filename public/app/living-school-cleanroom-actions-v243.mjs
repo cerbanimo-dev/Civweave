@@ -1,6 +1,6 @@
 import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs?v=complete-course-gate-v1';
 import {state,persist,toast,progressFor,fields,clean,generateSchool,moduleFor,curriculumWeaveIdentity,weavePathIdentity} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {researchCapability} from './living-school-local-research-v243.mjs?v=moss-materialization-lifecycle-v1';
+import {researchCapability} from './living-school-local-research-v243.mjs?v=moss-subject-source-recovery-v268';
 import {assertGenerationActive} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};

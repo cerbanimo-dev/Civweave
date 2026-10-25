@@ -1,5 +1,5 @@
 import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v267';
+import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v268';
 
 const RESEARCHER='living-school-cleanroom-research-v218.1';
 const RELEVANCE_REVISION='living-school-subject-coverage-v266';
@@ -199,25 +199,28 @@ export async function researchCapability(capability,options={}){
   let liveError;
   try{const packet=await researchLive(normalized,options);core.assertGenerationActive(options);return applyPacket(s,normalized,packet)}catch(error){if(core.generationCancelled(error,options))throw error;liveError=error}
 
-  let rows=[];const localSearchQuery=researchSearchQuery(normalized);
-  try{rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5})}catch(error){if(core.generationCancelled(error,options))throw error;console.warn('[Living School downloaded research]',error)}
+  let rows=[],localSearchError='';const localSearchQuery=researchSearchQuery(normalized);
+  try{rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5})}catch(error){if(core.generationCancelled(error,options))throw error;localSearchError=core.clean(error?.message||error,600);console.warn('[Living School downloaded research]',error)}
   core.assertGenerationActive(options);
   core.persist('living-school-local-research-query',{capability:normalized,searchQuery:localSearchQuery,aliases:semanticQueryTerms(normalized),resultCount:rows.length,relevanceRevision:RELEVANCE_REVISION});
   // Installed foundation schools may lack optional topic articles. Repair only a
   // catalog-matched supplemental gap before considering model training knowledge.
+  let recovery=null,recoveryError='';
   if(!sanitizeRows(normalized,rows).length){
-    let recovery=null,recoveryError='';
     try{
       recovery=await stageMissingSupplementalForQuery(localSearchQuery,{limit:3});
       core.assertGenerationActive(options);
-      if(recovery?.stored||recovery?.cached)rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5});
+      // Use the actual retrieved passages as first-class local sources. Do
+      // not make success depend on a second archive/catalog round trip.
+      if(Array.isArray(recovery?.rows)&&recovery.rows.length)rows=[...recovery.rows,...rows];
+      else if(recovery?.stored||recovery?.cached)rows=await searchDownloadedKnowledge(localSearchQuery,{limit:16,maxSchools:5});
     }catch(error){
       if(core.generationCancelled(error,options))throw error;
       recoveryError=core.clean(error?.message||error,800);
       console.warn('[Living School subject-source recovery]',error);
     }
     core.assertGenerationActive(options);
-    core.persist('living-school-subject-source-recovery',{capability:normalized,searchQuery:localSearchQuery,attempted:recovery?.attempted||0,downloaded:recovery?.stored||0,alreadyCached:recovery?.cached||0,failed:recovery?.failed||0,error:recoveryError,errors:recovery?.errors||[],policy:'catalog-matched-articles-before-model-derived-fallback'});
+    core.persist('living-school-subject-source-recovery',{capability:normalized,searchQuery:localSearchQuery,attempted:recovery?.attempted||0,downloaded:recovery?.stored||0,alreadyCached:recovery?.cached||0,recoveredPassages:recovery?.rows?.length||0,failed:recovery?.failed||0,error:recoveryError,localSearchError,errors:recovery?.errors||[],policy:'catalog-matched-articles-before-model-derived-fallback'});
   }
   if(rows.length){
     let packet=localPacket(normalized,rows);
@@ -238,7 +241,11 @@ export async function researchCapability(capability,options={}){
   let modelError;
   try{const packet=await researchTrainingFallback(normalized,liveError,options);core.assertGenerationActive(options);return applyPacket(s,normalized,packet)}catch(error){if(core.generationCancelled(error,options))throw error;modelError=error}
   core.assertGenerationActive(options);
-  const packet=unavailablePacket(normalized,new Error(`Live research: ${liveError?.message||liveError}; local schools: no usable passages; model fallback: ${modelError?.message||modelError}`));
+  const localReason=[localSearchError&&`lookup: ${localSearchError}`,
+    recoveryError&&`recovery: ${recoveryError}`,
+    recovery?.failed&&`article downloads failed (${recovery.failed}/${recovery.attempted}): ${(recovery.errors||[]).map(row=>`${row.id}: ${row.error}`).join('; ')}`,
+    !recovery?.attempted&&'no catalog-matched downloadable article'].filter(Boolean).join('; ');
+  const packet=unavailablePacket(normalized,new Error(`Live research: ${liveError?.message||liveError}; local schools: no usable passages${localReason?` (${localReason})`:''}; model fallback: ${modelError?.message||modelError}`));
   applyPacket(s,normalized,packet);
   core.persist('living-school-research-unavailable',{capability:normalized,reason:packet.reason,retryable:true,policy:'stop-before-curriculum-generation'});
   const error=new Error(`Living School research is temporarily unavailable, so Moss stopped before making the research/design or module-generation calls. ${core.clean(modelError?.message||modelError,900)}`);

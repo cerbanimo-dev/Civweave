@@ -13,6 +13,9 @@ on:
       - 'public/app/living-school-local-research-v243.mjs'
       - 'public/app/knowledge-school-runtime-v243.mjs'
       - 'public/app/learning-source-pack-runtime-v1.mjs'
+      - 'public/app/living-school-cleanroom-actions-v243.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
       - 'scripts/verify-living-school-selected-ai-research-fallback-v1.mjs'
       - '.github/workflows/verify-living-school-selected-ai-research-fallback-v1.yml'
   workflow_dispatch:
@@ -33,6 +36,9 @@ jobs:
           node --check public/app/living-school-local-research-v243.mjs
           node --check public/app/knowledge-school-runtime-v243.mjs
           node --check public/app/learning-source-pack-runtime-v1.mjs
+          node --check public/app/living-school-cleanroom-actions-v243.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs
           node --check scripts/verify-living-school-selected-ai-research-fallback-v1.mjs
       - name: Verify selected AI fallback
         run: |
