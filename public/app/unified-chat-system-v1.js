@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.16-unified-chat-system-v1-explicit-weave-path';
+const VERSION='1.2.17-unified-chat-system-v1-current-quest';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -754,7 +754,7 @@ async function ensureWeavelingOrchestrator(){
     return hasResponseLayer(globalThis.CivweaveAssistantV141?.respond,'__weavelingPlanJsonV190');
   };
   if(globalThis.CivweaveWeavelingPlanJsonV190?.install)return install();
-  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.8-composite-intents').then(install).catch(error=>{orchestratorPromise=null;throw error});
+  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.11-complete-outcome').then(install).catch(error=>{orchestratorPromise=null;throw error});
   return orchestratorPromise;
 }
 function patchAssistant(){

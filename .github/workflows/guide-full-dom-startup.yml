@@ -7,6 +7,7 @@ on:
       - 'public/extensions/**'
       - 'scripts/helpers/guide-full-dom-worker-v1.mjs'
       - 'scripts/test-guide-full-dom-startup-v1.mjs'
+      - 'scripts/test-merlin-full-dom-preview-v1.mjs'
       - 'scripts/test-local-authority-lifecycle-v1.mjs'
       - 'scripts/test-persistent-guide-owner-v1.mjs'
       - 'scripts/test-anarchadia-path-navigation-v1.mjs'
@@ -17,6 +18,7 @@ on:
       - 'scripts/test-guide-change-request-routing-v1.mjs'
       - 'scripts/test-weave-native-proof-progress-v1.mjs'
       - 'scripts/test-working-campus-proof-projection-v1.mjs'
+      - 'scripts/test-working-campus-current-selection-v1.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/guide-full-dom-startup.yml'
@@ -27,6 +29,7 @@ on:
       - 'public/extensions/**'
       - 'scripts/helpers/guide-full-dom-worker-v1.mjs'
       - 'scripts/test-guide-full-dom-startup-v1.mjs'
+      - 'scripts/test-merlin-full-dom-preview-v1.mjs'
       - 'scripts/test-local-authority-lifecycle-v1.mjs'
       - 'scripts/test-persistent-guide-owner-v1.mjs'
       - 'scripts/test-anarchadia-path-navigation-v1.mjs'
@@ -37,6 +40,7 @@ on:
       - 'scripts/test-guide-change-request-routing-v1.mjs'
       - 'scripts/test-weave-native-proof-progress-v1.mjs'
       - 'scripts/test-working-campus-proof-projection-v1.mjs'
+      - 'scripts/test-working-campus-current-selection-v1.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/guide-full-dom-startup.yml'
@@ -57,10 +61,10 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Verify startup, selected HTTP routing, saved draft review and approval
-        run: node --test scripts/test-local-authority-lifecycle-v1.mjs scripts/test-persistent-guide-owner-v1.mjs scripts/test-guide-full-dom-startup-v1.mjs
+        run: node --test scripts/test-local-authority-lifecycle-v1.mjs scripts/test-persistent-guide-owner-v1.mjs scripts/test-guide-full-dom-startup-v1.mjs scripts/test-merlin-full-dom-preview-v1.mjs
       - name: Verify Passport navigation and Moss authoring lifecycle
         run: node --test scripts/test-anarchadia-path-navigation-v1.mjs scripts/test-moss-plan-lifecycle-v1.mjs scripts/test-moss-weave-path-identity-v1.mjs scripts/test-moss-materialization-lifecycle-v1.mjs scripts/test-moss-assessment-materialization-v1.mjs scripts/test-moss-prompt-transport-v1.mjs scripts/test-cerbanimo-startup-v1.mjs scripts/test-video-learning-contract-v1.mjs
       - name: Verify Quest subsystem scope and guide navigation context
         run: node --test scripts/test-weaveling-subsystem-scope-v1.mjs scripts/test-guide-route-context-v1.mjs scripts/test-guide-change-request-routing-v1.mjs scripts/test-embedded-feature-navigation-v1.mjs
       - name: Verify accepted work updates and revokes Quest progress
-        run: node --test scripts/test-weave-native-proof-progress-v1.mjs scripts/test-working-campus-proof-projection-v1.mjs
+        run: node --test scripts/test-weave-native-proof-progress-v1.mjs scripts/test-working-campus-proof-projection-v1.mjs scripts/test-working-campus-current-selection-v1.mjs

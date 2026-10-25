@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.8-anarchadia-v158-intake-only-preview';
+const VERSION='1.0.9-preview-source-owner';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const CHAT_KEY='civweave.guide-chat.anarchadia.v153';
 const HUB_PROPOSALS='/lite/?system=anarchadia&room=anarchadia.proposals#proposals';
@@ -74,7 +74,16 @@ function deterministicPatch(p){
   const html=`<main class="change"><header><small>REQUEST-SUMMARY SCAFFOLD</small><h1>${esc(p.title)}</h1><p>This scaffold records the request. It does not implement the requested feature.</p></header><section><h2>Problem</h2><p>${esc(p.problem)}</p></section><section><h2>Expected result</h2><p>${esc(p.expected)}</p></section><section><h2>Acceptance</h2><ul>${criteria}</ul></section><button id="prove">Record local proof</button><output id="receipt" aria-live="polite"></output></main>`;
   const css=`:root{font-family:system-ui;color:#f7f2ea;background:#07090d}.change{max-width:760px;margin:auto;padding:32px}.change header{border-bottom:2px solid #ff2f87}.change small{color:#1fd8ff}.change h1{color:#ff2f87}.change section{margin:18px 0;padding:16px;border:1px solid #333;background:#0d131b}.change button{padding:12px 16px;border:1px solid #8dff2b;background:#08110a;color:#8dff2b;font-weight:800}.change output{display:block;margin-top:12px;color:#ffc21a}`;
   const js=`document.querySelector('#prove').addEventListener('click',()=>{document.querySelector('#receipt').textContent='Preview proof recorded locally at '+new Date().toLocaleTimeString()+'. No external action occurred.'});`;
-  return {generator:'civweave-safe-scaffolder',summary:`Request-summary scaffold for ${p.area}. This does not implement the requested feature.`,files:[{path:'preview/index.html',content:html},{path:'preview/styles.css',content:css},{path:'preview/app.js',content:js}],preview:{html,css,js}};
+  return compilePreviewPatch({summary:`Request-summary scaffold for ${p.area}. This does not implement the requested feature.`,preview:{html,css,js}},'civweave-safe-scaffolder');
+}
+function compilePreviewPatch(output,generator){
+  const source=output?.preview;
+  if(typeof output?.summary!=='string'||!source||typeof source.html!=='string'||!source.html.trim()||typeof source.css!=='string'||typeof source.js!=='string')throw new Error('The selected model did not return the required summary and preview HTML, CSS, and JS.');
+  const preview={html:source.html,css:source.css,js:source.js};
+  // Validation, governance export, and the sandbox use these exact sources.
+  // The model authors each source once; it cannot supply competing file content.
+  const files=[{path:'preview/index.html',content:preview.html},{path:'preview/styles.css',content:preview.css},{path:'preview/app.js',content:preview.js}];
+  return {...output,preview,files,generator};
 }
 async function providerPatch(p){
   const sharedRuntime=()=>typeof globalThis.CivweaveModelRuntime?.generate==='function'?globalThis.CivweaveModelRuntime:parent?.CivweaveModelRuntime||globalThis.CivweaveModelRuntime;
@@ -84,14 +93,13 @@ async function providerPatch(p){
   if(!config)throw new Error('Select a model in shared Settings before generating this preview.');
   if(['bundled','packaged','reflex','minilm','local-reflex'].includes(String(config.provider||config.route||'').toLowerCase()))return deterministicPatch(p);
   if(typeof runtime?.generate!=='function')throw new Error('The shared model runtime is unavailable.');
-  const schema={type:'object',required:['summary','files','preview'],properties:{summary:{type:'string'},files:{type:'array',minItems:1,maxItems:6,items:{type:'object',required:['path','content'],properties:{path:{type:'string'},content:{type:'string'}}}},preview:{type:'object',required:['html','css','js'],properties:{html:{type:'string'},css:{type:'string'},js:{type:'string'}}}}};
+  const schema={type:'object',additionalProperties:false,required:['summary','preview'],properties:{summary:{type:'string'},preview:{type:'object',additionalProperties:false,required:['html','css','js'],properties:{html:{type:'string'},css:{type:'string'},js:{type:'string'}}}}};
   const proposal=Object.fromEntries(['kind','title','problem','expected','area','acceptance','risk','evidence'].map(key=>[key,p[key]]));
   // This compiled candidate has native validation and a human Keep/Revert gate.
   // A generic assistant reply review must not replace it with a second answer.
-  const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,__civweaveSkipResponseRouter:true,...(String(config.provider||config.route||'').toLowerCase()==='ollama'?{think:false}:{}),context:{proposal,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview files.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate the smallest self-contained HTML/CSS/JS sandbox preview that implements the supplied change request and its acceptance criteria. Use at most six small preview files and no external dependencies. Implement the requested interaction; return matching preview HTML, CSS, and JS with the actual working behavior. Return JSON matching the schema. Do not substitute a request summary or claim the change is installed in production.'},{role:'user',content:JSON.stringify(proposal)}]});
+  const result=await runtime.generate({purpose:'anarchadia-code-generation',executionProfile:'agentic',config,schema,__civweaveSkipResponseRouter:true,...(String(config.provider||config.route||'').toLowerCase()==='ollama'?{think:false}:{}),context:{proposal,rails:RAILS.map(r=>r.label),constraints:['Return only bounded preview HTML, CSS, and JS.','No network calls.','No eval or dynamic Function.','No automatic production publishing.','No identity, authority, or consensus claims.']},messages:[{role:'system',content:'Generate a self-contained HTML/CSS/JS sandbox preview that implements the supplied change request and its acceptance criteria with no external dependencies. Implement the requested interaction with the actual working behavior. Return JSON containing only summary and preview, with preview.html, preview.css, and preview.js. Write each source once in those preview fields; do not return a files array or duplicate the code. Do not substitute a request summary or claim the change is installed in production.'},{role:'user',content:JSON.stringify(proposal)}]});
   if(result?.status!=='success')throw new Error(cleanProviderError(result));
-  if(!result.outputJson?.files?.length||!result.outputJson?.preview?.html)throw new Error('The selected model did not return the required preview files and HTML.');
-  return {...result.outputJson,generator:'configured-provider'};
+  return compilePreviewPatch(result.outputJson,'configured-provider');
 }
 function cleanProviderError(result){const reason=result?.error?.message||result?.error||result?.message;return typeof reason==='string'?reason.slice(0,1600):'The selected model could not generate the preview.'}
 function validatePatch(patch){

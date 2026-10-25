@@ -3,14 +3,23 @@ import {readFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {webcrypto} from 'node:crypto';
+import {createRequire} from 'node:module';
 import vm from 'node:vm';
 import {parentPort,workerData} from 'node:worker_threads';
 import {JSDOM,ResourceLoader,VirtualConsole} from 'jsdom';
 import {indexedDB,IDBKeyRange} from 'fake-indexeddb';
+const {implForWrapper}=createRequire(import.meta.url)('jsdom/lib/jsdom/living/generated/utils.js');
 
 const publicRoot=fileURLToPath(new URL('../../public/',import.meta.url));
 const origin='https://civweave-staging.pages.dev';
-const stats={resources:[],requests:[],inference:0,blocked:[],errors:[],events:new Map(),observers:[],microtasks:new Map()};
+const stats={resources:[],requests:[],http:[],requestTimers:[],storageEvents:[],inference:0,blocked:[],errors:[],events:new Map(),observers:[],microtasks:new Map()};
+let collectingNativeTimers=false;
+const nativePreview=workerData.scenario==='native-preview';
+const selectedModel=nativePreview?'qwen3.5:4b':'gemma4:latest';
+const previewHtml='<main><h1>QA READY badge</h1><span class="badge">READY</span><button id="mark-ready">Mark READY</button><output id="ready-note">WAITING</output></main>';
+const previewCss='.badge{background:green;color:white;padding:4px}';
+const previewJs='document.querySelector("#mark-ready").onclick=()=>{document.querySelector("#ready-note").textContent="READY"};';
+const nativePatch={summary:'A working sandbox READY interaction.',preview:{html:previewHtml,css:previewCss,js:previewJs}};
 const installed=new WeakSet(),modules=new WeakMap(),contexts=new WeakMap();
 const nodeLabel=node=>`${node?.nodeName||''}#${node?.id||''}.${String(node?.className||'').slice(0,80)}`;
 function localFile(url){const target=path.resolve(publicRoot,'.'+decodeURIComponent(new URL(url,origin).pathname));if(!target.startsWith(publicRoot))throw new Error('Fixture resource escaped public root');return target}
@@ -36,6 +45,24 @@ vm.runInContext=function(code,context,options={}){
 };
 function install(window){
   if(!window||installed.has(window))return;installed.add(window);
+  // jsdom 26 inserts iframe WindowProxies into this registry, but its Storage
+  // implementation excludes the writer by raw Window identity. Normalize the
+  // test platform so a write reaches other documents only, as in browsers.
+  const sameOrigin=window._currentOriginData?.windowsInSameOrigin;
+  if(sameOrigin)window._currentOriginData.windowsInSameOrigin=[...new Set(sameOrigin.map(target=>implForWrapper(target.localStorage)?._associatedWindow).filter(Boolean))];
+  if(nativePreview){
+    window.addEventListener('storage',event=>{if(event.key==='civweave.anarchadia.citizen-console.v139'){
+      stats.storageEvents.push({url:window.location.href,source:event.url,trusted:event.isTrusted});
+    }});
+  }
+  const nativeTimeout=window.setTimeout.bind(window),nativeClearTimeout=window.clearTimeout.bind(window),timers=new Map();
+  window.setTimeout=(callback,ms,...args)=>{
+    const record=collectingNativeTimers&&Number(ms)>=5000?{ms:Number(ms),owner:new Error().stack.split('\n').slice(2,6).join('\n'),cleared:false,fired:false}:null;
+    if(record)stats.requestTimers.push(record);
+    const id=nativeTimeout(()=>{if(record)record.fired=true;timers.delete(id);callback(...args)},ms);
+    if(record)timers.set(id,record);return id;
+  };
+  window.clearTimeout=id=>{const record=timers.get(id);if(record){record.cleared=true;timers.delete(id)}nativeClearTimeout(id)};
   const NativeObserver=window.MutationObserver;
   window.MutationObserver=class extends NativeObserver{constructor(callback){
     const data={owner:new Error().stack.split('\n').slice(2,5).join('\n'),count:0,targets:new Map()};
@@ -57,10 +84,23 @@ function install(window){
     if(url.hostname==='127.0.0.1'&&url.port==='11434'){
       if(url.pathname==='/api/chat'){
         stats.inference++;
+        const call={url:url.href,body:JSON.parse(options.body),aborted:false};stats.http.push(call);
+        options.signal?.addEventListener('abort',()=>{call.aborted=true;call.abortReason=String(options.signal.reason?.message||options.signal.reason||'')},{once:true});
+        if(nativePreview){
+          await new Promise((resolve,reject)=>{
+            const timer=setTimeout(resolve,Number(workerData.httpDelayMs)||0);
+            if(options.signal?.aborted){clearTimeout(timer);reject(options.signal.reason);return}
+            options.signal?.addEventListener('abort',()=>{clearTimeout(timer);reject(options.signal.reason)},{once:true});
+          });
+          if(workerData.failure)return Response.json({error:'QA native provider rejection'},{status:503});
+          const output=structuredClone(nativePatch);
+          if(workerData.forbiddenPreview)output.preview.js='fetch("https://example.test/forbidden")';
+          return Response.json({model:selectedModel,message:{role:'assistant',content:JSON.stringify(output)},done:true,done_reason:'stop'});
+        }
         const packet={answer:'QA Manifest saved for review.',choice:{mode:'Acquire',system:'fellowfare',room:'fellowfare.square',nextAction:'Review the Manifest'},assumptions:[],requiresConsent:true,confidence:.9};
-        return new Response(JSON.stringify({model:'gemma4:latest',message:{role:'assistant',content:JSON.stringify(packet)},done:true})+'\n',{headers:{'content-type':'application/x-ndjson'}});
+        return new Response(JSON.stringify({model:selectedModel,message:{role:'assistant',content:JSON.stringify(packet)},done:true})+'\n',{headers:{'content-type':'application/x-ndjson'}});
       }
-      return Response.json({models:[{name:'gemma4:latest',model:'gemma4:latest'}]});
+      return Response.json({models:[{name:selectedModel,model:selectedModel}]});
     }
     if(url.origin===origin)try{return new Response(readFileSync(localFile(url)),{headers:{'content-type':url.pathname.endsWith('.json')?'application/json':'text/plain'}})}catch{}
     return Response.json({ok:false,error:'Unavailable in offline DOM fixture'},{status:404});
@@ -76,7 +116,7 @@ function install(window){
   window.HTMLCanvasElement.prototype.getContext=()=>null;
   if(window.HTMLDialogElement){window.HTMLDialogElement.prototype.showModal=function(){this.open=true};window.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new window.Event('close'))}}
   const cache=new Map();window.caches={open:async()=>({match:async key=>cache.get(String(key))?.clone(),put:async(key,value)=>cache.set(String(key),value),delete:async key=>cache.delete(String(key)),keys:async()=>[]}),keys:async()=>[],match:async()=>undefined,delete:async()=>true};
-  const config={provider:'ollama',route:'ollama',model:'gemma4:latest',endpoint:'http://127.0.0.1:11434/api/chat',baseUrl:'http://127.0.0.1:11434'};
+  const config={provider:'ollama',route:'ollama',model:selectedModel,endpoint:'http://127.0.0.1:11434/api/chat',baseUrl:'http://127.0.0.1:11434',...(nativePreview?{timeoutMs:300000,maxTokens:4096}:{})};
   try{
     window.localStorage.setItem('civweave.universal-ai.v127',JSON.stringify(config));
     window.localStorage.setItem('civweave-model-profiles-v1',JSON.stringify({interactive:config}));
@@ -103,13 +143,31 @@ class LocalResources extends ResourceLoader{fetch(url,options){
 const console=new VirtualConsole();console.on('jsdomError',error=>stats.errors.push(error.detail?.stack||error.message));
 process.on('unhandledRejection',error=>stats.errors.push(error?.stack||String(error)));
 const entry=workerData.entry;
-const dom=new JSDOM(readFileSync(localFile(entry),'utf8'),{url:origin+entry+'?system=civweave&installed=1',resources:new LocalResources(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:console,beforeParse:install});
+const dom=new JSDOM(readFileSync(localFile(entry),'utf8'),{url:origin+entry+`?system=${workerData.system||'civweave'}&installed=1`,resources:new LocalResources(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:console,beforeParse:install});
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(predicate,timeout=15000){const start=Date.now();while(!predicate()){if(Date.now()-start>timeout)throw new Error('Full DOM fixture timed out');await sleep(25)}}
 let heartbeat=0;setInterval(()=>heartbeat++,20);
 try{
   const window=dom.window;
   await until(()=>window.CivweaveGuideChatSurfaceV350);await sleep(400);
+  if(nativePreview){
+    const host=window.document.querySelector('#cw-persistent-system-stage');
+    await until(()=>host?.contentWindow?.AnarchadiaCitizenConsoleV158&&host?.contentWindow?.AnarchadiaChangeReviewV165);
+    const child=host.contentWindow,document=child.document,key='civweave.anarchadia.citizen-console.v139';
+    const stored=()=>JSON.parse(child.localStorage.getItem(key)||'{}').proposals||[];
+    const sourcesBeforeApproval=[...new Set(stats.resources)],runtimeBeforeApproval={parent:window.CivweaveModelRuntime?.version,child:child.CivweaveModelRuntime?.version};
+    document.querySelector('[data-request-kind="feature"]').click();
+    const form=document.querySelector('#ac-request-form');
+    for(const [name,value] of Object.entries({title:'QA READY badge preview',problem:'The fictional sandbox has no status badge or READY interaction.',expected:'Show heading QA READY badge, a green READY badge, a Mark READY button, and a WAITING output that changes to READY when clicked.',area:'Civweave',acceptance:'The heading is visible.\nThe badge is green and reads READY.\nThe output initially reads WAITING.\nClick Mark READY to display READY.',risk:'Local fictional sandbox, zero budget, no network calls, no messages or purchases, reversible Keep or Revert only.',evidence:'Inspect WAITING, click Mark READY, inspect READY.'}))form.elements.namedItem(name).value=value;
+    form.dispatchEvent(new child.Event('submit',{bubbles:true,cancelable:true}));
+    const item=stored()[0],reviewState=item?.status,inferenceBeforeApproval=stats.inference;
+    const approve=document.querySelector(`[data-ac165-approve="${item.id}"]`);if(!approve)throw new Error('Native Merlin approval control did not mount.');
+    collectingNativeTimers=true;approve.click();
+    await until(()=>['preview-ready','failed','blocked'].includes(stored().find(row=>row.id===item.id)?.status),20000);
+    await sleep(350);collectingNativeTimers=false;
+    parentPort.postMessage({ok:true,heartbeat,inference:stats.inference,http:stats.http,requestTimers:stats.requestTimers,storageEvents:stats.storageEvents,blocked:stats.blocked,resources:[...new Set(stats.resources)],sourcesBeforeApproval,runtimeBeforeApproval,requests:stats.requests,events:Object.fromEntries(stats.events),errors:stats.errors,proposal:stored().find(row=>row.id===item.id),reviewState,inferenceBeforeApproval,parentSpine:window.CivweaveFastInteractiveV192?.diagnostics?.(),childSpine:child.CivweaveFastInteractiveV192?.diagnostics?.(),toast:document.querySelector('#ac-toast')?.textContent});
+    process.exit(0);
+  }
   const api=window.CivweaveGuideChatSurfaceV350;api.openWindow('fellowfare');await sleep(100);
   const input=window.document.querySelector('#cw-persistent-guide-chat-v215 textarea');
   if(!input)throw new Error('Canonical Rook composer did not mount');
@@ -135,5 +193,9 @@ try{
     published:JSON.parse(window.localStorage.getItem('civweave.fellowfare.pending-threads.v1')||'[]'),
     stableBubble:bubble===chat.querySelector('[data-log] article:last-child .cw350-bubble')&&finalAnswer===bubble?.textContent,
     topObservers:stats.observers.toSorted((a,b)=>b.count-a.count).slice(0,6).map(({owner,count,targets})=>({owner,count,targets:[...targets].toSorted((a,b)=>b[1]-a[1]).slice(0,3)}))});
-}catch(error){parentPort.postMessage({ok:false,error:error.stack||String(error),blocked:stats.blocked,events:Object.fromEntries(stats.events),errors:stats.errors,resources:[...new Set(stats.resources)]})}
+}catch(error){
+  const child=dom.window.document.querySelector('#cw-persistent-system-stage')?.contentWindow;
+  let proposal;try{proposal=JSON.parse(child?.localStorage.getItem('civweave.anarchadia.citizen-console.v139')||'{}').proposals?.[0]}catch{}
+  parentPort.postMessage({ok:false,error:error.stack||String(error),inference:stats.inference,http:stats.http,requestTimers:stats.requestTimers,storageEvents:stats.storageEvents,proposal,toast:child?.document.querySelector('#ac-toast')?.textContent,blocked:stats.blocked,events:Object.fromEntries(stats.events),errors:stats.errors,resources:[...new Set(stats.resources)]});
+}
 process.exit(0);

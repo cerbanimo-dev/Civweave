@@ -8,7 +8,8 @@ const reviewSource=fs.readFileSync(new URL('../public/app/anarchadia-change-revi
 const sharedSources=['shared/civweave-model-runtime.js','fast-interactive-runtime-v192.js','minilm-response-router-v347.js','civweave-basic-value-model-v1.js'].map(file=>({file,source:fs.readFileSync(new URL(`../public/app/${file}`,import.meta.url),'utf8')}));
 const key='civweave.anarchadia.citizen-console.v139';
 const fixture=()=>({id:'qa-preview',kind:'feature',title:'QA READY note',problem:'The fictional QA note is empty.',expected:'Show a button that writes READY into this sandbox note.',area:'Civweave',acceptance:['Clicking the button displays READY.'],risk:'Local fictional preview only.',approval:{state:'approved'},status:'approved',stage:'intake',pipeline:[],createdAt:new Date().toISOString()});
-const patch={summary:'A working READY note.',files:[{path:'preview/index.html',content:'<button id="ready">Write READY</button><output id="note"></output>'},{path:'preview/app.js',content:'document.querySelector("#ready").onclick=()=>{document.querySelector("#note").textContent="READY"};'}],preview:{html:'<button id="ready">Write READY</button><output id="note"></output>',css:'',js:'document.querySelector("#ready").onclick=()=>{document.querySelector("#note").textContent="READY"};'}};
+const patch={summary:'A working READY note.',preview:{html:'<button id="ready">Write READY</button><output id="note"></output>',css:'',js:'document.querySelector("#ready").onclick=()=>{document.querySelector("#note").textContent="READY"};'}};
+const expectedFiles=preview=>[{path:'preview/index.html',content:preview.html},{path:'preview/styles.css',content:preview.css},{path:'preview/app.js',content:preview.js}];
 
 function harness(runtime,{parentRuntime,loader,proposal=fixture()}={}){
   const dom=new JSDOM('<main id="ac-app" data-screen="home"></main><div id="ac-passport-id"></div><div id="ac-proposal-count"></div><div id="ac-participation"></div><div id="ac-momentum"></div><div id="ac-pipeline-list"></div><div id="ac-merlin-log"></div><form id="ac-request-form"></form><dialog id="ac-preview-dialog"></dialog><form id="ac-merlin-form"></form><div id="ac-toast" hidden></div>',{url:'https://civweave.test/app/anarchadia-console-v139.html',runScripts:'outside-only'});
@@ -64,7 +65,7 @@ function installActualSharedPipeline(window,{failure=false}={}){
     calls.push({url:String(url),body:JSON.parse(init.body)});
     if(failure)return new Response(JSON.stringify({error:'QA actual Ollama unavailable'}),{status:503,headers:{'content-type':'application/json'}});
     const output=structuredClone(patch);
-    if(calls.length>1){output.preview.html='<p>Unrequested replacement from the automatic assistant reviewer.</p>';output.files=[{path:'preview/index.html',content:output.preview.html}]}
+    if(calls.length>1)output.preview.html='<p>Unrequested replacement from the automatic assistant reviewer.</p>';
     return new Response(JSON.stringify({model:'qa-actual-agentic',message:{role:'assistant',content:JSON.stringify(output)},done:true,done_reason:'stop'}),{headers:{'content-type':'application/json'}});
   };
   for(const entry of sharedSources)window.eval(`${entry.source}\n//# sourceURL=${entry.file}`);
@@ -80,7 +81,9 @@ test('native structured preview uses one actual shared-runtime HTTP call and pre
     assert.equal(calls.length,1,'The native structured artifact must not start an additional generic assistant review job.');
     assert.equal(calls[0].body.model,'qa-actual-agentic','The configured agentic profile remains authoritative.');
     assert.equal(calls[0].body.think,false,'Only this explicit Ollama authoring request disables optional reasoning.');
-    assert.equal(calls[0].body.format.properties.files.maxItems,6,'The real transport schema bounds file count.');
+    assert.equal(calls[0].body.format.properties.files,undefined,'The model must author code once rather than duplicating it in a second file array.');
+    assert.deepEqual(calls[0].body.format.required,['summary','preview']);
+    assert.deepEqual(calls[0].body.format.properties.preview.required,['html','css','js']);
     assert.equal(calls[0].body.format.properties.valuation,undefined,'Compiled preview source files are not economic valuation records.');
     assert.doesNotMatch(calls[0].body.messages.map(row=>row.content).join('\n'),/CIVWEAVE BASIC VALUE GUIDE/,'An unrelated economic system contract must not replace the code authoring instructions.');
     assert.doesNotMatch(calls[0].body.messages.map(row=>row.content).join('\n'),/OLD_INVALID_CANDIDATE|PRIOR_FAILED_RUN_HISTORY/,'A preview retry authors from the intake, without replaying old invalid source or pipeline history.');
@@ -88,6 +91,7 @@ test('native structured preview uses one actual shared-runtime HTTP call and pre
     assert.equal(item.status,'preview-ready');
     assert.equal(item.patch.preview.html,patch.preview.html);
     assert.equal(item.patch.preview.js,patch.preview.js);
+    assert.deepEqual(item.patch.files,expectedFiles(patch.preview),'Persisted export files must contain the exact rendered preview sources.');
     assert.match(item.preview.srcdoc,/Write READY/);
     assert.doesNotMatch(item.preview.srcdoc,/Unrequested replacement/);
     assert.equal(item.validation.valid,true,'Native sandbox validation still runs before preview installation.');
@@ -99,6 +103,29 @@ test('native structured preview uses one actual shared-runtime HTTP call and pre
     assert.equal(env.stored().proposals[0].status,'review');
     assert.equal(env.stored().proposals[0].preview,undefined);
   }finally{env.close()}
+});
+
+test('one canonical preview source replaces contradictory provider file content before validation and persistence',async()=>{
+  const output={...structuredClone(patch),files:[{path:'unrequested/OLD_FILE.bin',content:'OLD_BENIGN_BUT_DIFFERENT_CODE'}]},env=harness({readSharedConfig:()=>({provider:'ollama',model:'qa-source'}),generate:async()=>({status:'success',outputJson:output})});
+  try{await env.run();const item=env.stored().proposals[0];assert.equal(item.status,'preview-ready');assert.deepEqual(item.patch.files,expectedFiles(output.preview));assert.doesNotMatch(JSON.stringify(item.patch),/OLD_BENIGN_BUT_DIFFERENT_CODE|OLD_FILE/);assert.equal(item.preview.srcdoc.includes(output.preview.html),true)}finally{env.close()}
+});
+
+for(const [field,code,path] of [['html','<script>document.cookie</script>','preview/index.html'],['css','</style><script>document.cookie</script><style>','preview/styles.css'],['js','fetch("https://example.test/forbidden")','preview/app.js']])test(`forbidden rendered ${field} is rejected even when old provider files are benign`,async()=>{
+  const output={...structuredClone(patch),files:[{path:'preview/index.html',content:'<p>Benign old file</p>'}]};output.preview[field]=code;
+  const env=harness({readSharedConfig:()=>({provider:'ollama',model:'qa-source'}),generate:async()=>({status:'success',outputJson:output})});
+  try{await env.run();const item=env.stored().proposals[0];assert.equal(item.status,'failed');assert.equal(item.failedStage,'validation');assert.equal(item.preview,undefined);assert.equal(item.validation.valid,false);assert.ok(item.validation.errors.some(error=>error.includes(path)&&error.includes('Forbidden code pattern')));assert.deepEqual(item.patch.files,expectedFiles(output.preview))}finally{env.close()}
+});
+
+test('larger valid preview sources remain intact within the existing per-file bound',async()=>{
+  const output=structuredClone(patch);output.preview.html='<main>'+('A'.repeat(100000))+'</main>';output.preview.css='/*'+('B'.repeat(50000))+'*/';output.preview.js='/*'+('C'.repeat(70000))+'*/';
+  const env=harness({readSharedConfig:()=>({provider:'ollama',model:'qa-source'}),generate:async()=>({status:'success',outputJson:output})});
+  try{await env.run();const item=env.stored().proposals[0];assert.equal(item.status,'preview-ready');assert.deepEqual(item.patch.files,expectedFiles(output.preview));assert.equal(item.patch.preview.html.length,output.preview.html.length);assert.equal(item.preview.srcdoc.includes(output.preview.js),true)}finally{env.close()}
+});
+
+test('oversized rendered code is rejected at the existing preview limit',async()=>{
+  const output={...structuredClone(patch),files:[{path:'preview/index.html',content:'small old file'}]};output.preview.html='A'.repeat(120001);
+  const env=harness({readSharedConfig:()=>({provider:'ollama',model:'qa-source'}),generate:async()=>({status:'success',outputJson:output})});
+  try{await env.run();const item=env.stored().proposals[0];assert.equal(item.status,'failed');assert.equal(item.failedStage,'validation');assert.ok(item.validation.errors.some(error=>error.includes('File exceeds preview limit: preview/index.html')));assert.equal(item.preview,undefined)}finally{env.close()}
 });
 
 test('actual shared-runtime provider rejection remains visible without a reviewer or replacement preview',async()=>{

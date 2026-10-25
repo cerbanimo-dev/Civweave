@@ -75,6 +75,49 @@ test('continuations keep the matching project while unrelated saved wishes remai
   assert.equal(app.api.memory([{role:'user',text:'Create the prior digital note'}],'try again').currentWish,'Create the prior digital note','An explicit retry keeps its own project scope.');
 });
 
+test('non-native authoring sends the new governing goal once and distinguishes future plans from execution now',async()=>{
+  const app=harness(),wish='Create a Quest to build the shared wooden shelf. Learn safe construction, obtain supplies within $25 and agree roles first. Save for review; do not purchase or execute work now.';
+  await app.create(wish);
+  const sent=app.calls[0],messages=sent.messages,working=JSON.parse(messages[1].content.slice(messages[1].content.indexOf('{'),messages[1].content.lastIndexOf('}')+1));
+  assert.equal(messages.map(row=>row.content).join('\n').split(wish).length-1,1,'The same new goal must not be repeated as currentRequest, resolvedPlanningRequest and currentWish.');
+  assert.equal(working.currentWish,wish);assert.equal(working.requestMode,'new');
+  assert.equal(working.currentRequest,undefined);assert.equal(working.resolvedPlanningRequest,undefined);
+  const words=messages[0].content.trim().split(/\s+/).length;
+  assert.ok(words>=350&&words<=600,`The non-native authoring instructions must stay concise, received ${words} words.`);
+  assert.match(messages[1].content,/plan.*future.*work.*do not execute/is,'The last user instruction must reinforce that later work is planned, never executed now.');
+  assert.match(sent.schema.properties.outcome.description,/final.*achieved|achieved.*final/i);
+  for(const slot of Object.values(sent.schema.properties.subsystems.properties)){
+    assert.match(slot.properties.included.description,/necessary.*final.*outcome/i);
+    assert.match(slot.properties.included.description,/execution permission/i);
+    assert.equal(slot.properties.reason.maxLength,240);
+  }
+});
+
+test('compacting the model payload preserves matching revision context and excludes unrelated goals',()=>{
+  const app=harness(),revision='Revise it: keep the note local and require the saved content READY.';
+  const mem=app.api.memory([{role:'user',text:'Create unrelated tarot cards.'},{role:'assistant',text:'Old unrelated answer.'},{role:'user',text:'Create the prior digital note'},{role:'assistant',text:'The note is ready for review.'}],revision);
+  const messages=app.api.prompt(mem),payload=JSON.parse(messages[1].content.slice(messages[1].content.indexOf('{'),messages[1].content.lastIndexOf('}')+1));
+  assert.equal(payload.requestMode,'revision');assert.equal(payload.currentWish,'Create the prior digital note');
+  assert.equal(payload.currentRequest,revision);assert.equal(payload.currentPlan.id,'old-note');
+  assert.ok(payload.recentConversation.some(row=>row.text==='The note is ready for review.'));
+  assert.doesNotMatch(messages.map(row=>row.content).join('\n'),/unrelated tarot|Old unrelated answer/i);
+});
+
+test('an explicit revision can remove a previously inferred learning dependency while retaining the productive goal',async()=>{
+  const goal='Can you teach me how to read and memorize the tarot, then create a plan to create my own tarot app';
+  const revision='Revise it: I already know tarot now. Omit Living School and keep only the app production work.';
+  const app=harness(slotResult(['cerbanimo'])),initial=app.api.memory([],goal).structuralConstraints;
+  assert.deepEqual(Array.from(initial.requiredRealms),['living-school','cerbanimo'],'Unrevised learn-and-build requests must still require both dependencies.');
+  const authored=await app.create(revision,[{role:'user',text:goal},{role:'assistant',text:'The tarot learning and app construction Quest is ready for review.'}]);
+  const sent=app.calls[0],scope=sent.context.workingMemory.structuralConstraints;
+  assert.deepEqual(Array.from(scope.excludedRealms),['living-school']);assert.deepEqual(Array.from(scope.requiredRealms),['cerbanimo']);
+  assert.deepEqual(Array.from(sent.schema.properties.subsystems.properties['living-school'].properties.included.enum),[false]);
+  assert.deepEqual(Array.from(sent.schema.properties.subsystems.properties.cerbanimo.properties.included.enum),[true]);
+  assert.equal(sent.context.workingMemory.currentWish,goal);assert.equal(sent.context.workingMemory.currentRequest,revision);
+  assert.ok(sent.messages[1].content.includes(goal),'The revision must retain the original project context.');
+  assert.deepEqual(Array.from(authored.plan.paths,row=>row.realm),['cerbanimo']);assert.equal(app.calls.length,1);
+});
+
 test('ordinary project needs remain a model decision while explicit exclusions are binding',async()=>{
   const app=harness(),mixed='Create a Quest to learn joinery and repair a chair using tools I own. No FellowFare path.';
   const raw=result();raw.paths=[path('living-school','learning'),path('cerbanimo','skilled-labor')];
@@ -116,6 +159,23 @@ test('the shared runtime preserves and validates the four-slot authoring schema 
   const invalid=slotResult();invalid.subsystems.cerbanimo.included=true;
   assert.match(runtime.validateSchema(invalid,schema).join('\n'),/cerbanimo.included/);
   assert.doesNotMatch(JSON.stringify(schema),/"(?:anyOf|oneOf)"/,'The shared runtime must not collapse alternative routing branches.');
+});
+
+test('model schema derives prerequisite sequence after writing the subsystem paths',async()=>{
+  const app=harness(slotResult());await app.create();
+  const sourceSchema=app.calls[0].schema,runtimeContext=vm.createContext({Date,console});vm.runInContext(read('app/shared/civweave-model-runtime.js'),runtimeContext);
+  const sanitized=runtimeContext.CivweaveModelRuntime.sanitizeSchema(sourceSchema,{provider:'ollama'});
+  for(const schema of [sourceSchema,sanitized]){
+    assert.ok(schema.required.indexOf('pathOrder')>schema.required.indexOf('subsystems'),'The model must inspect authored paths before choosing their dependency order.');
+    const properties=Object.keys(schema.properties);assert.ok(properties.indexOf('pathOrder')>properties.indexOf('subsystems'),'Transport schema property order must retain content before dependency order.');
+  }
+  const instruction=app.calls[0].messages[0].content;
+  assert.match(instruction,/After writing.*subsystem paths.*pathOrder/i);
+  assert.match(instruction,/completion dependenc/i);
+  assert.match(instruction,/date.*time.*respect.*sequence/i);
+  assert.match(instruction,/practice.*distinct.*final.*deliverable/i);
+  assert.match(instruction,/unknown participant.*remain unknown/i);
+  assert.match(instruction,/evidence.*agreed target/i);
 });
 
 test('included subsystem paths follow the model prerequisite order rather than fixed slot key order',async()=>{

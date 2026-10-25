@@ -1,12 +1,12 @@
 (()=>{
 'use strict';
-const REVISION='canonical-campus-startup-v230-proof-projection';
+const REVISION='canonical-campus-startup-v231-optional-governance';
 const BRAND_REVISION='compact-shell-v235';
 const BRAND_CYCLE_REVISION='day-night-clock-v236';
 const BRAND_DAY='/app/logos/civweave-day-logo.jpg';
 const BRAND_NIGHT='/app/logos/civweave-night-logo.jpg';
 const WEB_ENTRY_REVISION='web-install-entry-v232';
-const HUB_REVISION='weaveling-hub-v233';
+const HUB_REVISION='weaveling-hub-v233-current-selection';
 const STATE_REPAIR_REVISION='working-campus-state-repair-v239-current-quest';
 const HUB_SCRIPT='/app/weaveling-hub-v233.js';
 const routeScript='/app/system-routes-v227.js?v=1.0.164-single-shell-context';

@@ -15,9 +15,9 @@ globalThis.CivweaveSettingsV320={readState:()=>({provider:'openai-compatible',mo
 globalThis.CivweaveModelRuntime={nativeFinishReasonGuardV1:true,nativeQuestSchemaV1:true,generate:async()=>{throw Error('unexpected extra model call')}};
 globalThis.CivweaveIntentionPlanner={persist:()=>{throw Error('unrequested persistence')}};
 globalThis.CivweaveWeavelingPlanMaterializationV265={materialize:()=>{throw Error('No additional materialization in mocked routing test')}};
-globalThis.CivweaveUnifiedChatSystemV1={version:'1.2.16-unified-chat-system-v1-explicit-weave-path',handleNativeLivingSchoolRequest:async()=>{throw Error('Moss stole the Quest')}};
+globalThis.CivweaveUnifiedChatSystemV1={version:'1.2.17-unified-chat-system-v1-current-quest',handleNativeLivingSchoolRequest:async()=>{throw Error('Moss stole the Quest')}};
 globalThis.CivweaveWeavelingPlanJsonV190={
-  version:'1.2.8-weaveling-plan-json-v190-composite-intents',
+  version:'1.2.11-weaveling-plan-json-v190-complete-outcome',
   planIntent:text=>/quest|plan/i.test(text),
   combinedLearningProductionIntent:text=>/teach me.*then.*app/i.test(text),
   createModelPlan:async(args,api)=>{

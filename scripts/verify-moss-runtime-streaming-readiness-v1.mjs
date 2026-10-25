@@ -14,8 +14,8 @@ new vm.Script(fast);
 assert.match(runtime,/nativeDirectTermuxStreamV2:\s*true/);
 assert.doesNotMatch(runtime,/compatibility\\n\s*nativeDirectTermuxStreamV2/,
   'Literal backslash-n inside a // comment hides the critical runtime export');
-assert.match(campus,/1\.0\.186-draft-completeness/);
-assert.match(loader,/1\.0\.14-long-plan-finish-guard/);
+assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.195-current-quest/);
+assert.match(loader,/shared\/civweave-model-runtime\.js\?v=1\.0\.16-ollama-request-thinking/);
 assert.match(runtime,/nativeMossVisibleStreamV3:\s*true/);
 
 let loads=0;
@@ -25,7 +25,7 @@ const ctx={console,Date,Math,JSON,Object,Array,Promise,URL,AbortController,TextE
   setTimeout,clearTimeout,CustomEvent:class{},dispatchEvent:()=>{},
   CivweaveSettingsV320:{readState:()=>({provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1'})},
   CivweaveUnifiedChatSystemV1:{
-    version:'1.2.9-unified-chat-system-v1-draft-completeness-gate',
+    version:'1.2.17-unified-chat-system-v1-current-quest',
     handleNativeLivingSchoolRequest:async()=>({response:{answer:'REVIEW'}})
   }};
 ctx.globalThis=ctx;
@@ -33,7 +33,7 @@ ctx.document={
   createElement:tag=>{assert.equal(tag,'script');return{remove(){}}},
   head:{append(script){
     loads++;
-    assert.match(script.src,/1\.0\.14-long-plan-finish-guard/);
+    assert.match(script.src,/shared\/civweave-model-runtime\.js\?v=1\.0\.17-native-quest-schema/);
     vm.runInContext(runtime,context,{filename:'civweave-model-runtime.js'});
     script.onload?.();
   }}
@@ -50,7 +50,7 @@ assert.equal(Object.isFrozen(ctx.CivweaveModelRuntime),true);
 ctx.CivweaveModelRuntime={version:'old-runtime',generate:async()=>({})};
 vm.runInContext(fast+'\n;globalThis.__loadPlanner=ensurePlanner;',context,{filename:'native-fastpath'});
 const planner=await ctx.__loadPlanner();
-assert.equal(planner.version,'1.2.9-unified-chat-system-v1-draft-completeness-gate');
+assert.equal(planner.version,'1.2.17-unified-chat-system-v1-current-quest');
 assert.equal(ctx.CivweaveModelRuntime.nativeDirectTermuxStreamV2,true);
 assert.equal(loads,1,'The older runtime should be upgraded exactly once');
 await ctx.__loadPlanner();
