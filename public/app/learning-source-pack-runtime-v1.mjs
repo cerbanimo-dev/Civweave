@@ -71,7 +71,20 @@ export async function stageMissingSupplementalForQuery(query,{limit=4,schoolSlug
   }).filter(item=>item.score>=20).sort((a,b)=>b.score-a.score||a.row.id.localeCompare(b.row.id)).slice(0,Math.max(1,Math.min(6,Number(limit)||4)));
   const results=[];
   for(const {row} of matches)results.push(await fetchWikipediaArticle(row));
-  return{attempted:results.length,stored:results.filter(item=>item.ok&&!item.cached).length,cached:results.filter(item=>item.ok&&item.cached).length,failed:results.filter(item=>!item.ok).length,errors:results.filter(item=>!item.ok).map(item=>({id:item.record.id,error:item.error}))};
+  // Return inspected passages directly. A downloaded article must remain usable
+  // even if a subsequent foundation-status lookup or broad search fails.
+  const schoolNames=new Map((catalogs.articles.schools||[]).map(row=>[row.school_slug,row.school_name]));
+  const rows=results.filter(item=>item.ok&&clean(item.article?.extract,160000)).map((item,index)=>{
+    const article=item.article,title=clean(article.title||item.record.title,320),url=clean(article.canonicalUrl,2400);
+    return{title,articleTitle:title,url,canonicalUrl:url,notes:passageFor(article.extract,tokens),
+      score:100-index,schoolSlug:item.record.school_slug,
+      schoolName:schoolNames.get(item.record.school_slug)||item.record.school_slug,
+      table:'supplemental-article-cache',linkProvenance:'supplemental-wikipedia-canonical'};
+  });
+  return{attempted:results.length,stored:results.filter(item=>item.ok&&!item.cached).length,
+    cached:results.filter(item=>item.ok&&item.cached).length,
+    failed:results.filter(item=>!item.ok).length,
+    errors:results.filter(item=>!item.ok).map(item=>({id:item.record.id,error:item.error})),rows};
 }
 export function schoolSlugsForTopics(topicSlugs,topicMeta={}){return uniq((topicSlugs||[]).map(topic=>topicMeta?.[topic]?.school_slug).filter(Boolean))}
 export const revision=REVISION;
