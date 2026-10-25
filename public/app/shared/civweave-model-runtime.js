@@ -782,7 +782,9 @@
       stream: useStream,
       ...(lineup ? { chat_template_kwargs: { enable_thinking: false } } : {}),
       ...(useStream ? { stream_options: { include_usage: true } } : {}),
-      ...(structured ? { response_format: { type: "json_object" } } : {}),
+      ...(structured ? { response_format: nativeDirect && request.schema
+        ? { type: "json_schema", json_schema: { name: "civweave_quest", strict: true, schema: request.schema } }
+        : { type: "json_object" } } : {}),
     };
     noteNative('native-http-post-start',`messages:${bodyMessages.length}, max_tokens:${body.max_tokens}`);
     // The exact Termux origin uses the same options as the proven browser
@@ -916,6 +918,13 @@
     // can complete. Set a bounded GGUF-only budget without affecting any other
     // provider or permission contract. This is not a claim of successful load.
     if (selectedEmbeddedGGUF(config)) config.timeoutMs = Math.max(config.timeoutMs, GGUF_BROWSER_MIN_TIMEOUT_MS);
+    // Slow, locally running Qwen Quest authorship can exceed the 150-second
+    // conversational budget; restrict the longer deadline to this single
+    // explicitly requested local workflow. User cancellation still applies.
+    if (config.provider === "openai-compatible" && config.model === "qwen35-4b-native" &&
+        config.endpoint === "http://127.0.0.1:8080/v1" &&
+        request.purpose === "civweave-weaveling-intention-json-v190")
+      config.timeoutMs = 900000;
     if (endpointLeavesDevice(config) && !config.externalConsent && request.requireExternalConsent !== false) {
       return failureResult("provider-error", runtimeError("REMOTE_CONSENT_REQUIRED", "External provider use requires explicit session consent."), { request, config, context: makeContext(request, config), elapsedMs: 0 });
     }
