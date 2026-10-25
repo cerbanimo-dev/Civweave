@@ -106,6 +106,16 @@ class CompanionTests(unittest.TestCase):
         (directory / module.MODELS["qwen35-4b-native"]["file"]).symlink_to(target)
         self.assertIsNone(self.app.find_existing_model("qwen35-4b-native"))
 
+    def test_long_context_choices_and_safe_limits(self):
+        self.assertEqual(module.DEFAULT_CONTEXT, 32768)
+        self.assertEqual(module.model_options({}), ("qwen35-4b-native", 32768))
+        for size in (1024, 2048, 4096, 8192, 16384, 32768, 65536):
+            self.assertEqual(module.model_options({"context": size})[1], size)
+        for size in (-1, 0, 32767, 65537, 262144, 3.5, True, "32768"):
+            with self.assertRaises(ValueError):
+                module.model_options({"context": size})
+        self.assertEqual(self.app.status()["context"], 32768)
+
     def test_no_shell_commands_can_be_injected(self):
         with self.assertRaises(ValueError):
             self.app.run_action("start", {"model": "../../etc/passwd"})
