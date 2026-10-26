@@ -3,6 +3,21 @@
   "policy": "extend-existing-owner-never-add-parallel-owner",
   "requiredForAgentWork": true,
   "systems": {
+    "android-device-host-updates": {
+      "capability": "Optional directly distributed Android Device Host release verification and browser-mediated APK download",
+      "owner": "public/app/device-host-updates.mjs",
+      "presentation": "public/app/device-host-updates.html",
+      "presentationController": "public/app/device-host-update-ui.mjs",
+      "entryOwner": "public/app/settings-gateway-v317.js",
+      "releaseSchema": "civweave.android-host-release.v1",
+      "rules": [
+        "The trust root is pinned in reviewed source and never accepted from a remote release manifest.",
+        "A signed release must match the expected package, version, release origin, APK digest and byte count.",
+        "No installed version is inferred from browser cache or a release feed; native pairing will be authoritative.",
+        "Android owns installation and required user approval; browser download is not reported as installation.",
+        "No runtime application code replacement, silent APK installation or independent Settings event owner is allowed."
+      ]
+    },
     "content-provenance": {
       "capability": "Immutable creation provenance for Civweave artifacts and additive human-validation history",
       "owner": "public/app/content-provenance-v1.js",
