@@ -58,3 +58,34 @@ test('APK verification requires exact byte count and SHA256, not just a trusted 
   await assert.rejects(verifyApkBytes(bytes, {...metadata, sha256: '0'.repeat(64)}));
   await assert.rejects(verifyApkBytes(bytes, {...metadata, sizeBytes: bytes.length + 1}));
 });
+
+test('the Settings owner and offline installer package expose exactly the canonical updater', async () => {
+  const {readFile} = await import('node:fs/promises');
+  const settings = await readFile(new URL('../public/app/settings-gateway-v317.js', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../public/service-worker.js', import.meta.url), 'utf8');
+  const owner = JSON.parse(await readFile(new URL('../config/system-ownership.json', import.meta.url), 'utf8'));
+  assert.match(settings, /href="\\/app\\/device-host-updates\\.html"/);
+  for (const path of ['device-host-updates.html','device-host-updates.mjs','device-host-update-ui.mjs'])
+    assert.ok(worker.includes("'/app/" + path + "'"), 'mobile install CORE must include ' + path);
+  assert.equal(owner.systems['android-device-host-updates'].owner, 'public/app/device-host-updates.mjs');
+});
+
+test('release signing tool signs APK metadata with an external key, never embedding private material', async () => {
+  const {mkdtemp, writeFile, readFile} = await import('node:fs/promises');
+  const {tmpdir} = await import('node:os');
+  const {join} = await import('node:path');
+  const {signHostRelease} = await import('./sign-android-host-release.mjs');
+  const folder = await mkdtemp(join(tmpdir(), 'civweave-host-sign-'));
+  const apk = join(folder, 'civweave-host-fixture.apk');
+  const pem = join(folder, 'release-key.pem');
+  const out = join(folder, 'stable.json');
+  await writeFile(apk, 'Not a real APK: testing the signed metadata protocol');
+  await writeFile(pem, privateKey.export({format:'pem',type:'pkcs8'}));
+  const result = await signHostRelease({apk,'version-code':'8','version-name':'0.1.8',
+    'signing-key':pem,'key-id':'fixture','out':out});
+  const envelope = JSON.parse(await readFile(out,'utf8'));
+  assert.equal(result.keyId, 'fixture');
+  assert.equal((await verifySignedRelease(envelope,
+    {publicKeyBase64Url: result.publicKeyBase64Url, keyId:'fixture'})).versionCode, 8);
+  assert.ok(!JSON.stringify(envelope).includes('PRIVATE KEY'));
+});
