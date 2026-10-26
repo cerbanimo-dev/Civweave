@@ -22,6 +22,14 @@ small{color:#adccc9}nav{padding:14px 0}
 <h1>Android Device Host</h1>
 <p>Manage the optional native companion independently of Civweave's web updates. The browser can verify an APK and save it; Android controls installation and may ask for permission.</p>
 <section>
+<h2>Connect your Android Host</h2>
+<p>Open the Device Host app on this phone, generate a code, then enter it here. Pairing grants only read-only version discovery. No installation permissions are granted.</p>
+<label for="host-pair-code">Ten-character pairing code</label>
+<input id="host-pair-code" type="text" inputmode="text" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter code from host" style="display:block;width:100%;font:inherit;padding:12px;margin:10px 0;background:#091921;border:1px solid #729b92;border-radius:8px;color:#fff" />
+<button id="host-pair" type="button">Pair and read host version</button>
+<p id="host-pair-status" role="status" aria-live="polite">Not connected. Open the native host to get a code.</p>
+</section>
+<section>
 <h2>Direct distribution</h2>
 <p id="host-update-status" role="status" aria-live="polite">Preparing update controls…</p>
 <p><small id="host-update-version">Installed host version: not yet connected.</small></p>
