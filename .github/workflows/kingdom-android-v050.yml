@@ -1,6 +1,10 @@
 name: Kingdom v0.5.2 optimized Qwen ARM64 diagnostic APK
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'pocket-scribe/m4/kingdom-v052-optimized-cpu.py'
+      - '.github/workflows/kingdom-android-v050.yml'
   push:
     branches: [kingdom/android-v052-optimized-cpu]
     paths:
