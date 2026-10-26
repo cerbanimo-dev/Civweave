@@ -108,7 +108,7 @@ assert.equal(view.generatable[0].id,'plan:learning-plan-tarot');
 // text is evidence of approval; it must re-enter REVIEW.
 records.clear();
 const oldMessage={id:'message-100',role:'assistant',at:'2026-10-24T19:00:00Z',
- text:'Learning Journey plan: “Tarot Memorization”\\n\\nGoal: read and memorize the tarot\\nLevel: beginner\\nMode: guided\\nProof of capability: Read three cards independently\\n\\nOutline:\\n1. Major Arcana\\n   Focus: tarot archetypes\\n   Demonstrate: identify cards\\n2. Minor Arcana\\n   Focus: suits and elements\\n   Demonstrate: identify suits\\n\\nStatus: REVIEW. This is only a plan.'};
+ text:'Learning Journey plan: “Tarot Memorization”\n\nGoal: read and memorize the tarot\nLevel: beginner\nMode: guided\nProof of capability: Read three cards independently\n\nOutline:\n1. Major Arcana\n   Focus: tarot archetypes\n   Demonstrate: identify cards\n2. Minor Arcana\n   Focus: suits and elements\n   Demonstrate: identify suits\n\nStatus: REVIEW. This is only a plan.'};
 store('civweave.guide-thread.v350.living-school',{messages:[oldMessage]});
 const recovered=recoverableChatPlans(fetch);
 assert.equal(recovered.length,1);
