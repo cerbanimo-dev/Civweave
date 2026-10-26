@@ -107,6 +107,7 @@ Presentation routing is evidence about composition. It is not permission to rede
 | `public/app/shared/` | Shared browser/runtime contracts and cross-system code | Edit only when the shared capability belongs here; avoid realm-specific forks. |
 | `public/app/cabinets/` | Modular presentation surfaces where currently used | A cabinet may present capabilities but does not automatically own them. |
 | `public/extensions/` | Optional cross-cutting installed-package capabilities | Follow the extension’s explicit contract and callers. |
+| `native/android/device-host/` | Optional Android Device Host application and loopback-only pairing/version API | Its Kotlin implementation is not a second owner of Civweave UI or mesh protocols; only native device boundaries belong here. |
 | `public/` | PWA shell, installer, service workers, public static/runtime assets | Change canonical source here when the owning runtime really lives here; keep caches and manifests coherent. |
 | `server/` | Stable local/dev/federated/gateway entrypoints | Keep entrypoint names stable unless the release contract requires a coordinated change. |
 | `lib/` | Shared Node/service logic | Prefer shared domain logic here over duplicating it in entrypoints. |
