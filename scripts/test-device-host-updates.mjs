@@ -89,3 +89,30 @@ test('release signing tool signs APK metadata with an external key, never embedd
     {publicKeyBase64Url: result.publicKeyBase64Url, keyId:'fixture'})).versionCode, 8);
   assert.ok(!JSON.stringify(envelope).includes('PRIVATE KEY'));
 });
+
+test('local Android Host pairing requires an explicit code and never caches secret credentials', async () => {
+  const {pairHost, readHostStatus, HOST_API_ORIGIN} =
+    await import('../public/app/device-host-client.mjs');
+  const calls = [];
+  const fetcher = async (url, options) => {
+    calls.push({url, options});
+    if (url.endsWith('/v1/pair')) return {
+      ok: true, url, json: async () => ({schema:'civweave.device-host-pair.v1',token:'z'.repeat(43)})
+    };
+    return {ok:true,url,json:async()=>({schema:'civweave.device-host-status.v1',
+      packageName:'cc.civweave.devicehost',versionCode:2,versionName:'0.1.2',
+      capabilities:['android.host.status.v1']})};
+  };
+  await assert.rejects(pairHost('0000000000',fetcher));
+  await assert.rejects(pairHost('BADC0DE',fetcher));
+  const token = await pairHost('ABCDEFGHJK',fetcher);
+  assert.equal(token.length,43);
+  assert.equal(calls[0].url,HOST_API_ORIGIN+'/v1/pair');
+  assert.equal(calls[0].options.credentials,'omit');
+  const info=await readHostStatus(token,fetcher);
+  assert.equal(info.versionCode,2);
+  assert.equal(calls[1].options.headers.Authorization,'Bearer '+token);
+  await assert.rejects(readHostStatus('not-a-token',fetcher));
+  await assert.rejects(readHostStatus(token,async()=>({ok:true,url:HOST_API_ORIGIN+'/v1/status',
+    json:async()=>({schema:'civweave.device-host-status.v1',packageName:'attacker',versionCode:900})})));
+});
