@@ -92,7 +92,7 @@ assert.doesNotMatch(finalText,/SOURCE_ID tarot-12/,'Avoid injecting full downloa
 assert.doesNotMatch(finalText,/Repeated lengthy wrapper policy/,'Wrapper repetition must not reach native Qwen');
 assert.equal(sent[0].stream,true);
 const connection=events.find(event=>event.phase==='connecting');
-assert.equal(connection.promptCharacters,finalText.length);
+assert.equal(connection.promptCharacters,sent[0].messages.reduce((sum,row)=>sum+row.content.length,0));
 assert.equal(connection.originalPromptCharacters,originalChars);
 assert.equal(connection.evidenceSourceCount,6);
 assert.ok(events.some(event=>event.phase==='partial'));
