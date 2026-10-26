@@ -1,5 +1,5 @@
 import{state,root,escapeHtml as e,readJson,availablePaths,activeModule,progressFor,completedModules,progressPercent,setProgress,finalUnlocked,quizQuestions,hasCurrentResearch}from'./living-school-cleanroom-core-v218.mjs';
-import{learningJourneySnapshot}from'./living-school-journey-index-v1.mjs';
+import{learningJourneySnapshot}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
 
 const list=items=>`<ul>${(items||[]).map(item=>`<li>${e(item)}</li>`).join('')}</ul>`;
 const sourceFor=(s,id)=>s.sources.find(source=>source.id===id);
