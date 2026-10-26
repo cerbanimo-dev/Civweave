@@ -1,7 +1,7 @@
 (function installCivweaveModelRuntime(global) {
   "use strict";
 
-  const VERSION = "1.0.3-ollama-request-thinking";
+  const VERSION = "1.0.4-termux-durable-jobs";
   const RESULT_SCHEMA = "civweave-model-result-1.0";
   const CAPABILITY_SCHEMA = "civweave-model-capabilities-1.0";
   const SHARED_MODEL_STORAGE_KEY = "civweave-shared-model";
