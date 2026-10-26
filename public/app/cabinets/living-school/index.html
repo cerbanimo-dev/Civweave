@@ -117,7 +117,7 @@
     '/app/living-school-assessment-curator-v337.js',
     '/app/living-school-runtime-route-v2.js?v=2.3.0-provider-neutral',
     '/app/living-school-generation-budget-v3.js?v=3.0.4-selected-deadline',
-    '/app/living-school-active-run-ui-v2.js?v=2.1.0-native-stream-visible-v3',
+    '/app/living-school-active-run-ui-v2.js?v=2.1.1-prefill-budget-v4',
     '/app/living-school-generation-report-ui-v1.js?v=1.0.1-provider-neutral-idempotent',
     '/app/living-school-pack-offer-authority-v1.js?v=1.0.0'
   ];
@@ -148,7 +148,7 @@
   const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
   try{
     document.documentElement.dataset.livingSchoolWorkbench='loading';
-    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v8-selected-model-deadline');
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v9-qwen-design-prefill');
     bootComplete=true;
     clearTimeout(watchdog);
     document.documentElement.dataset.livingSchoolWorkbench='ready';
