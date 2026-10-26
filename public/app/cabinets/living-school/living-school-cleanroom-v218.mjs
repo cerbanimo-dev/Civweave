@@ -1,6 +1,6 @@
 import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
 import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY}from'./living-school-journey-index-v1.mjs';
-import{render}from'./living-school-cleanroom-render-v218.mjs?v=source-recovery-details-v269-selected-deadline';
+import{render}from'./living-school-cleanroom-render-v218.mjs?v=manual-approved-journey-selection-v1';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=source-recovery-details-v269-selected-deadline';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
@@ -150,8 +150,9 @@ actions['discard-ls-failed-drafts']=async target=>{
 
 async function retryApprovedLearningJourney(target){
   const record=learningJourneySnapshot(readJson,state()).retry;
-  if(!record||record.id!==clean(target.dataset.journeyId,180)||!record.approvedAt)
-    throw new Error('An approved, incomplete Learning Journey is required before retrying.');
+  if(!record||record.id!==clean(target.dataset.journeyId,180)||!record.approvedAt||
+    state().settings?.selectedJourneyPlanId!==record.id)
+    throw new Error('Select an approved, incomplete Learning Journey before choosing Generate.');
   target.disabled=true;target.textContent='Regenerating approved Learning Journey…';
   const request={...record.request,intent:record.request.intent||'new',
     newPath:record.request.intent!=='revise',replaceExisting:record.request.intent!=='revise'};
@@ -180,6 +181,14 @@ async function handleLivingSchoolClick(event){
   event.preventDefault();event.stopImmediatePropagation();
   if(target.disabled||busy||retryStarting)return;
   const actionName=String(target.dataset.lsAction||'').trim();
+  if(actionName==='select-approved-learning-journey'){
+    const chosen=learningJourneySnapshot(readJson,state()).retry;
+    if(!chosen||chosen.id!==clean(target.dataset.journeyId,180))return;
+    state().settings={...(state().settings||{}),selectedJourneyPlanId:chosen.id};
+    persist('living-school-approved-journey-selected',{id:chosen.id,capability:chosen.request?.capability,policy:'manual-plan-selection-no-generation'});
+    renderEnhanced();
+    return;
+  }
   if(actionName==='retry-approved-learning-journey'){
     retryStarting=true;markDispatch();target.setAttribute('aria-busy','true');
     try{await retryApprovedLearningJourney(target)}

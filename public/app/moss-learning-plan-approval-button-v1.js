@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.1-moss-learning-plan-review-detection-v3';
+const VERSION='1.1.2-manual-approved-plan-selection';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-moss-learning-plan-approval-button-v1-style';
 const SYSTEM='living-school';
@@ -79,6 +79,12 @@ function reviewArticle(root,plan){
     return /Learning Journey plan:/i.test(text)&&/Status:\s*REVIEW\b/i.test(text)&&text.includes(clean(plan.request?.title,220));
   })||null;
 }
+function approvedArticle(root,plan){
+  return articles(root).find(article=>{
+    const text=clean(article.querySelector('.cw350-bubble')?.textContent,12000);
+    return /Learning Journey plan:/i.test(text)&&/Status:\s*APPROVED\b/i.test(text)&&text.includes(clean(plan.request?.title,220));
+  })||null;
+}
 function findFollowUpArticle(root,kind,plan){
   const pattern=kind==='retry'?/stopped before it could materialize|could not materialize the approved Learning Journey/i:/materialized the approved Learning Journey|I queued its materialization/i;
   return articles(root).find(article=>{
@@ -96,7 +102,7 @@ function addMascot(body,status,title,description){
 }
 function actionButton(actions,label,action,handler){
   const button=document.createElement('button');button.type='button';button.dataset.mossAction=action;button.textContent=label;
-  button.setAttribute('aria-label',action==='approve'?'Approve Learning Journey and generate its learning content':action==='revise'?'Revise this Learning Journey before approval':action==='deny'?'Deny and discard this Learning Journey':'Open Living School');
+  button.setAttribute('aria-label',action==='approve'?'Approve the Learning Journey plan for later manual generation':action==='revise'?'Revise this Learning Journey before approval':action==='deny'?'Deny and discard this Learning Journey':'Open Living School');
   button.addEventListener('click',handler);actions.append(button);return button;
 }
 function focusRevisionInput(root){
@@ -118,7 +124,7 @@ function render(){
     const article=reviewArticle(root,plan);if(!article)return false;
     const body=article.querySelector(':scope > div')||article.lastElementChild;if(!body)return false;
     const wrapper=document.createElement('section');wrapper.dataset.mossLearningPlanApprovalV1='true';wrapper.dataset.planId=plan.id;wrapper.dataset.mode='review';
-    addMascot(wrapper,'review','Moss · Your plan is ready','Review the outline above. Approve to build lessons, Revise to make changes, or Deny to discard. No content is generated until you approve.');
+    addMascot(wrapper,'review','Moss · Your plan is ready','Review the outline above. Approve to save the plan; then open Living School, select the plan, and choose Generate. Nothing starts automatically.');
     const actions=document.createElement('div');actions.className='cw350-learning-plan-actions';
     const approve=actionButton(actions,'Approve','approve',()=>void approvePlanById(plan.id,approve,wrapper));approve.dataset.approveLearningJourney='true';
     actionButton(actions,'Revise','revise',()=>void decidePlanById(plan.id,'revise',wrapper));
@@ -126,14 +132,14 @@ function render(){
     wrapper.append(actions);body.append(wrapper);return true;
   }
   if(plan?.id&&plan.state==='approved'){
-    if(previous?.dataset.planId===plan.id&&previous.dataset.mode==='retry')return true;
+    if(previous?.dataset.planId===plan.id&&previous.dataset.mode==='select')return true;
     removeActions();
-    const article=findFollowUpArticle(root,'retry',plan);if(!article)return false;
+    const article=approvedArticle(root,plan)||findFollowUpArticle(root,'retry',plan);if(!article)return false;
     const body=article.querySelector(':scope > div')||article.lastElementChild;if(!body)return false;
-    const wrapper=document.createElement('section');wrapper.dataset.mossLearningPlanApprovalV1='true';wrapper.dataset.planId=plan.id;wrapper.dataset.mode='retry';
-    addMascot(wrapper,'error','Moss · Generation needs another try','Your approval is saved. Retry generating the learning content; you do not need to approve a second time.');
+    const wrapper=document.createElement('section');wrapper.dataset.mossLearningPlanApprovalV1='true';wrapper.dataset.planId=plan.id;wrapper.dataset.mode='select';
+    addMascot(wrapper,'ready','Moss · Plan approved','Your plan is saved. Open Living School, select this plan, and choose Generate when you are ready.');
     const actions=document.createElement('div');actions.className='cw350-learning-plan-actions';
-    const retry=actionButton(actions,'Retry generation','retry',()=>void retryPlanById(plan.id,retry,wrapper));
+    actionButton(actions,'Open Living School','open',()=>{location.assign('/app/cabinets/living-school/index.html')});
     wrapper.append(actions);body.append(wrapper);return true;
   }
   if(plan?.state==='revision-requested'||plan?.state==='denied'){removeActions();return false}

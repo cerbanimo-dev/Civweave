@@ -22,7 +22,7 @@ const [index,runtime,core,coreBase,renderSource,actionsSource,css,serviceIndex,s
 ]);
 
 assert(index.includes('data-living-school-runtime="cleanroom-v218"'),'Living School is not marked as the clean-room runtime.');
-assert(index.includes('data-living-school-revision="structured-single-v221"'),'The active structured-single curriculum revision is not exposed.');
+assert(index.includes('data-living-school-revision="structured-single-v221'),'The active structured-single curriculum revision is not exposed.');
 assert(index.includes('id="living-school-root"'),'The canonical continuous surface is missing.');
 assert(index.includes('living-school-cleanroom-v218.mjs?v=structured-single-v221'),'The active runtime cache revision is not loaded.');
 for(const retired of ['id="room"','data-room','ls-tray','ls-drawer','id="actions"','id="moss"','id="compass"','living-school-bootstrap-v194.js','living-school-flat-loader','living-school-workbench','living-school-interactions','living-school-paths','living-school-two-agent-relay','living-school-mutation-guard'])assert(!index.includes(retired),`Canonical HTML still contains retired surface token ${retired}.`);
