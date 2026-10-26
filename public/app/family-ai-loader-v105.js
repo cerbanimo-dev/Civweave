@@ -38,7 +38,7 @@ const OPTIONAL=[
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
 ];
 const GUIDE_CAPABILITIES=[
-  ['/app/unified-chat-system-v1.js?v=1.2.19-manual-learning-generation',()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.19-unified-chat-manual-learning-generation'],
+  ['/app/unified-chat-system-v1.js?v=1.2.20-moss-multi-plan-library',()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.19-unified-chat-manual-learning-generation'],
   ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.1-ollama-schema-lifecycle',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
   ['/app/action-followthrough-v165.js?v=1.0.5-material-revisions',()=>globalThis.CivweaveActionFollowthroughV165],
   ['/app/guide-capability-passover-v1.js?v=1.1.4-explicit-change-requests',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
