@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'public/app/device-host-updates*'
+      - 'public/app/device-host-client.mjs'
+      - 'native/android/device-host/**'
       - 'public/app/settings-gateway-v317.js'
       - 'public/service-worker.js'
       - 'scripts/test-device-host-updates.mjs'
@@ -24,7 +26,26 @@ jobs:
         run: |
           node --check public/app/device-host-updates.mjs
           node --check public/app/device-host-update-ui.mjs
+          node --check public/app/device-host-client.mjs
           node --check public/app/settings-gateway-v317.js
           node --check scripts/sign-android-host-release.mjs
       - name: Signed-release and ownership regression tests
         run: node --test scripts/test-device-host-updates.mjs
+  android-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Android SDK 35
+        run: sdkmanager --install "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Compile Android Device Host debug package (not for distribution)
+        run: gradle -p native/android/device-host :app:assembleDebug --no-daemon --stacktrace
