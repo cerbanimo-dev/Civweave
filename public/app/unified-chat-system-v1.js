@@ -172,7 +172,7 @@ function saveLearningPlan(plan){
   const existing=Array.isArray(saved?.plans)?saved.plans:[];
   const byId=new Map();
   for(const entry of [...existing,legacy,plan])
-    if(entry?.id&&entry?.request?.capability&&entry.schema===LEARNING_PLAN_SCHEMA)
+    if(entry?.id&&entry?.request?.capability&&entry.schema==='civweave.learning-journey-plan.v2')
       byId.set(entry.id,entry);
   const plans=[...byId.values()].sort((a,b)=>
     (Date.parse(b.updatedAt||b.createdAt)||0)-(Date.parse(a.updatedAt||a.createdAt)||0)).slice(0,50);
