@@ -139,7 +139,7 @@ const saveScope={
   dispatchEvent:()=>true,CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts.detail}},
   JSON,Date,Map
 };
-const save=vm.runInNewContext(unifiedSource.slice(first,last)+'\\nsaveLearningPlan',saveScope);
+const save=vm.runInNewContext(unifiedSource.slice(first,last)+'\nsaveLearningPlan',saveScope);
 const planA={...oldTarot,state:'approved'};
 const planB={...other,state:'review',approvedAt:null};
 save(planA);save(planB);
