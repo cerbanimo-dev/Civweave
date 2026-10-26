@@ -209,6 +209,20 @@ async function handleLivingSchoolClick(event){
     finally{retryStarting=false;target.removeAttribute('aria-busy');renderEnhanced();}
     return;
   }
+  if(actionName==='cancel-companion-generation'){
+    const job=readJson('civweave.termux-companion.curriculum-job.v1',null);
+    if(!/^[0-9a-f]{32}$/.test(job?.jobId||''))throw new Error('No accepted Companion job ID is available to cancel.');
+    const key=sessionStorage.getItem('civweave.termux-companion.session-pairing.v1')||'';
+    if(!/^[0-9a-f]{64}$/i.test(key))throw new Error('Pair Termux Companion in Settings before cancelling a background job.');
+    if(!confirm('Request cancellation of this exact Qwen job in Termux? Browser suspension alone does not cancel it.'))return;
+    const response=await fetch('http://127.0.0.1:8766/v1/generations/'+job.jobId+'/cancel',{
+      method:'POST',mode:'cors',cache:'no-store',credentials:'omit',
+      headers:{'X-Civweave-Token':key,'Content-Type':'application/json'},body:'{}'
+    });
+    if(!response.ok)throw new Error('Termux cancellation request failed: HTTP '+response.status);
+    toastMessage('Termux cancellation requested; Qwen may need to reach the next stream frame before stopping.');
+    return;
+  }
   if(actionName==='dismiss-companion-generation'){
     const job=readJson('civweave.termux-companion.curriculum-job.v1',null);
     if(job&&['running','queued','submitting'].includes(job.state))
