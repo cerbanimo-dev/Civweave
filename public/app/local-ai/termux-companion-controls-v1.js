@@ -56,6 +56,7 @@ export function mountTermuxCompanionControls(element,{store=sessionStorage}={}){
     '</div>',
     '<output role="status" aria-live="polite" data-cw-result>Not paired. No operations started.</output>',
     '<progress data-cw-progress max="100" hidden></progress>',
+    '<p><b>Background inference:</b> when paired with the updated Companion, Moss gives the Python service ownership of the long Qwen design pass. Keep the Termux service running; Android may suspend or kill Termux despite a wake lock. In Living School, use Resume background generation after unlocking or reopening the PWA.</p>',
     '<p>Existing model discovery checks ~/models, Android Downloads, and ~/llama.cpp/models. The original GGUF is reused without copying or redownloading. If you updated the Companion code, restart its Python process in Termux before refreshing status.</p>',
     '<p>To adopt an already-running manual server, stop that Termux session with Ctrl+C once; only Companion-started processes can be stopped or restarted here.</p>',
     '<p>For reboot recovery, install Termux:Boot separately and create its startup script. Android may still suspend background processes.</p>',
