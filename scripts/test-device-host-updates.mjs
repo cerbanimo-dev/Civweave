@@ -65,7 +65,7 @@ test('the Settings owner and offline installer package expose exactly the canoni
   const worker = await readFile(new URL('../public/service-worker.js', import.meta.url), 'utf8');
   const owner = JSON.parse(await readFile(new URL('../config/system-ownership.json', import.meta.url), 'utf8'));
   assert.ok(settings.includes('href="/app/device-host-updates.html"'));
-  for (const path of ['device-host-updates.html','device-host-updates.mjs','device-host-update-ui.mjs'])
+  for (const path of ['device-host-updates.html','device-host-updates.mjs','device-host-update-ui.mjs','device-host-client.mjs'])
     assert.ok(worker.includes("'/app/" + path + "'"), 'mobile install CORE must include ' + path);
   assert.equal(owner.systems['android-device-host-updates'].owner, 'public/app/device-host-updates.mjs');
 });
@@ -115,4 +115,20 @@ test('local Android Host pairing requires an explicit code and never caches secr
   await assert.rejects(readHostStatus('not-a-token',fetcher));
   await assert.rejects(readHostStatus(token,async()=>({ok:true,url:HOST_API_ORIGIN+'/v1/status',
     json:async()=>({schema:'civweave.device-host-status.v1',packageName:'attacker',versionCode:900})})));
+});
+
+test('native Android Host keeps the first protocol scoped to loopback and paired status', async () => {
+  const {readFile} = await import('node:fs/promises');
+  const base = new URL('../native/android/device-host/app/src/main/', import.meta.url);
+  const kotlin = await readFile(new URL('java/cc/civweave/devicehost/LoopbackHostServer.kt', base), 'utf8');
+  const manifest = await readFile(new URL('AndroidManifest.xml', base), 'utf8');
+  const gradle = await readFile(new URL('../native/android/device-host/app/build.gradle.kts', import.meta.url), 'utf8');
+  assert.ok(kotlin.includes('127.0.0.1') && kotlin.includes('/v1/status') && kotlin.includes('/v1/pair'));
+  assert.ok(kotlin.includes('access-control-allow-origin') || kotlin.includes('Access-Control-Allow-Origin'));
+  assert.ok(kotlin.includes('MessageDigest.isEqual'));
+  assert.ok(kotlin.includes('expiresAt') && kotlin.includes('badAttempts >= 5'));
+  assert.ok(!kotlin.includes('Runtime.getRuntime().exec('));
+  assert.ok(!kotlin.includes('PackageInstaller'));
+  assert.ok(!manifest.includes('REQUEST_INSTALL_PACKAGES'));
+  assert.match(gradle,/applicationId = "cc.civweave.devicehost"/);
 });
