@@ -123,8 +123,8 @@ internal class LoopbackHostServer : AutoCloseable {
             if (index == 31) return
         }
         val origin = headers["origin"]
-        // Native applications cannot forge a legitimate browser origin boundary.
-        // The pairing token is also mandatory for protected operations.
+        // Origin checks constrain browsers, not arbitrary native apps that can forge
+        // headers. The pairing bearer token is mandatory for protected operations.
         if (origin !in allowedOrigins) {
             respond(peer, 403, JSONObject().put("error", "origin-not-allowed"), null)
             return
