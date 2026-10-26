@@ -122,7 +122,7 @@ class Controller:
         files = sorted(self.generation_root.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
         for path in files[:20]:
             try:
-                if not re.fullmatch(r"[0-9a-f]{32}\\.json", path.name):
+                if not re.fullmatch(r"[0-9a-f]{32}\.json", path.name):
                     continue
                 job = json.loads(path.read_text(encoding="utf-8"))
                 if job.get("id") != path.stem:
@@ -230,7 +230,7 @@ class Controller:
                         continue
                     if line or not event_parts:
                         continue
-                    data = "\\n".join(event_parts)
+                    data = "\n".join(event_parts)
                     event_parts = []
                     if data == "[DONE]":
                         completed = True
