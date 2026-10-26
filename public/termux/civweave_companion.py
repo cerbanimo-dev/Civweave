@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import shutil
 import subprocess
@@ -89,6 +90,11 @@ class Controller:
         self.job = {"state": "idle", "action": "", "message": "", "progress": None}
         self.model = ""
         self.context = DEFAULT_CONTEXT
+        self.generations = {}
+        self.generation_root = self.root / 'generations'
+        self.generation_root.mkdir(mode=0o700, parents=True, exist_ok=True)
+        os.chmod(self.generation_root, 0o700)
+        self._restore_generations()
 
     def candidate_model_paths(self, name):
         """Fixed, local model directories only; never accept a path from HTTP."""
