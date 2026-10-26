@@ -1,0 +1,52 @@
+name: Verify Moss Manual Plan and Bounded Prefill
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-journey-index-v1.mjs'
+      - 'scripts/verify-moss-manual-plan-and-bounded-prefill-v1.mjs'
+      - '.github/workflows/verify-moss-manual-plan-bounded-prefill-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-journey-index-v1.mjs'
+      - 'scripts/verify-moss-manual-plan-and-bounded-prefill-v1.mjs'
+      - '.github/workflows/verify-moss-manual-plan-bounded-prefill-v1.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check syntax and manual generation regression
+        run: |
+          node --check public/app/unified-chat-system-v1.js
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/app/shared/civweave-model-runtime.js
+          node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-journey-index-v1.mjs
+          node --check scripts/verify-moss-manual-plan-and-bounded-prefill-v1.mjs
+          node scripts/verify-moss-manual-plan-and-bounded-prefill-v1.mjs
+      - name: Preserve native SSE and Qwen deadline contracts
+        run: |
+          node scripts/verify-native-moss-long-output-runtime-v1.mjs
+          node scripts/verify-moss-native-design-timeout-v1.mjs
+          node scripts/verify-living-school-native-stream-visibility-v1.mjs
