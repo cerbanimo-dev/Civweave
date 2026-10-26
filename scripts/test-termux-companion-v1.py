@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Local-only Termux Companion contract tests; no downloads or package installs."""
 import importlib.util
+import io
 import json
 import tempfile
+import time
 import threading
 import unittest
 import urllib.error
 import urllib.request
+from unittest.mock import patch
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
@@ -115,6 +118,70 @@ class CompanionTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 module.model_options({"context": size})
         self.assertEqual(self.app.status()["context"], 32768)
+
+    def test_background_generation_is_independent_and_durable(self):
+        body = {"model": "qwen35-4b-native",
+                "client_key": "c" * 32,
+                "messages": [{"role": "user", "content": "Write a lesson."}],
+                "max_tokens": 256, "temperature": 0.2}
+        frames = [
+            {"choices": [{"delta": {"content": "First passage. "}, "finish_reason": None}]},
+            {"choices": [{"delta": {"content": "Second passage."}, "finish_reason": None}]},
+            {"choices": [{"delta": {}, "finish_reason": "stop"}],
+             "usage": {"completion_tokens": 7, "prompt_tokens": 15}}
+        ]
+        stream = b"".join(b"data: " + json.dumps(frame).encode() + b"\\n\\n" for frame in frames)
+        stream += b"data: [DONE]\\n\\n"
+        def model_reply(request, **kwargs):
+            self.assertEqual(request.full_url, "http://127.0.0.1:8080/v1/chat/completions")
+            payload = json.loads(request.data)
+            self.assertEqual(payload["model"], "qwen35-4b-native")
+            self.assertTrue(payload["stream"])
+            return io.BytesIO(stream)
+        with patch.object(self.app, "server_responding", return_value=True), \\
+             patch.object(module.urllib.request, "urlopen", side_effect=model_reply):
+            accepted = self.app.submit_generation(body)
+            self.assertRegex(accepted["job_id"], r"^[0-9a-f]{32}$")
+            for _ in range(150):
+                snapshot = self.app.generation(accepted["job_id"])
+                if snapshot["state"] not in ("queued", "running"):
+                    break
+                time.sleep(0.02)
+            self.assertEqual(snapshot["state"], "completed", snapshot["error"])
+            self.assertEqual(snapshot["text"], "First passage. Second passage.")
+            self.assertEqual(snapshot["finish_reason"], "stop")
+            self.assertEqual(snapshot["usage"]["completion_tokens"], 7)
+            duplicate = self.app.submit_generation(body)
+            self.assertTrue(duplicate["reused"])
+            self.assertEqual(duplicate["job_id"], accepted["job_id"])
+        restored = module.Controller(Path(self.tmp.name))
+        self.assertEqual(restored.generation(accepted["job_id"])["text"], snapshot["text"])
+        self.assertEqual(restored.generation(accepted["job_id"])["state"], "completed")
+        self.assertNotIn("cancel_requested", restored.generation(accepted["job_id"]))
+
+    def test_generation_validation_and_authentication(self):
+        payload = {"model": "qwen35-4b-native", "client_key": "b" * 32,
+                   "messages": [{"role": "user", "content": "Valid."}],
+                   "max_tokens": 120}
+        for bad in [
+            {**payload, "model": "../../etc/passwd"},
+            {**payload, "client_key": "invalid"},
+            {**payload, "max_tokens": 20000},
+            {**payload, "messages": [{"role": "tool", "content": "execute code"}]},
+            {**payload, "messages": [{"role": "user", "content": "x" * 32001}]}
+        ]:
+            with self.assertRaises(ValueError):
+                self.app.submit_generation(bad)
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.request("/v1/generations", "POST", origin=self.origin, body=payload)
+        self.assertEqual(error.exception.code, 401)
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.request("/v1/generations", "POST", secret=self.app.token,
+                         origin="https://attacker.invalid", body=payload)
+        self.assertEqual(error.exception.code, 403)
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.request("/v1/generations/" + "f" * 32, secret=self.app.token, origin=self.origin)
+        self.assertEqual(error.exception.code, 404)
 
     def test_no_shell_commands_can_be_injected(self):
         with self.assertRaises(ValueError):
