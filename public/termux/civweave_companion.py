@@ -96,6 +96,199 @@ class Controller:
         os.chmod(self.generation_root, 0o700)
         self._restore_generations()
 
+    # Browser windows are observers, never the owner of a model request.
+    # Job status and partial output are atomically checkpointed on-device.
+    def _generation_path(self, job_id):
+        if not re.fullmatch(r"[0-9a-f]{32}", str(job_id)):
+            raise ValueError("Invalid generation ID.")
+        return self.generation_root / (job_id + ".json")
+
+    def _checkpoint_generation(self, job):
+        public = {key: value for key, value in job.items() if key != "cancel_requested"}
+        path = self._generation_path(job["id"])
+        temp = path.with_suffix(".tmp-" + secrets.token_hex(4))
+        fd = os.open(str(temp), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as file:
+                json.dump(public, file, ensure_ascii=False, separators=(",", ":"))
+            os.replace(temp, path)
+        finally:
+            try:
+                temp.unlink(missing_ok=True)
+            except OSError:
+                pass
+
+    def _restore_generations(self):
+        files = sorted(self.generation_root.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        for path in files[:20]:
+            try:
+                if not re.fullmatch(r"[0-9a-f]{32}\\.json", path.name):
+                    continue
+                job = json.loads(path.read_text(encoding="utf-8"))
+                if job.get("id") != path.stem:
+                    continue
+                if job.get("state") in ("queued", "running"):
+                    job["state"] = "interrupted"
+                    job["error"] = "Companion restarted while inference was active. Partial text is recoverable, but generation must be started again explicitly."
+                    job["updated_at"] = time.time()
+                    self._checkpoint_generation(job)
+                self.generations[job["id"]] = job
+            except (OSError, ValueError, TypeError):
+                continue
+        # Only retain a bounded number of results, no arbitrary filesystem paths.
+        for old in files[20:]:
+            try:
+                old.unlink()
+            except OSError:
+                pass
+
+    def generation(self, job_id):
+        with self.lock:
+            job = self.generations.get(job_id)
+            if job is None:
+                try:
+                    job = json.loads(self._generation_path(job_id).read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    raise LookupError("Generation job not found.")
+                self.generations[job_id] = job
+            return {key: value for key, value in job.items() if key != "cancel_requested"}
+
+    def submit_generation(self, body):
+        if type(body) is not dict:
+            raise ValueError("Generation requires an object.")
+        model = body.get("model")
+        if type(model) is not str or model not in MODELS:
+            raise ValueError("Unapproved local model.")
+        messages = body.get("messages")
+        if not isinstance(messages, list) or not (1 <= len(messages) <= 16):
+            raise ValueError("Messages must be a bounded array.")
+        validated = []
+        for message in messages:
+            if not isinstance(message, dict) or message.get("role") not in ("system", "user", "assistant"):
+                raise ValueError("Unsupported message role.")
+            text = message.get("content")
+            if type(text) is not str or not text or len(text) > 18000:
+                raise ValueError("Invalid or oversized model message.")
+            validated.append({"role": message["role"], "content": text})
+        if sum(len(item["content"]) for item in validated) > 32000:
+            raise ValueError("Model prompt is too large for Companion.")
+        max_tokens = body.get("max_tokens", 4096)
+        if type(max_tokens) is not int or not (1 <= max_tokens <= 16384):
+            raise ValueError("max_tokens must be between 1 and 16384.")
+        temperature = body.get("temperature", 0.2)
+        if type(temperature) not in (int, float) or not (0 <= temperature <= 1.5):
+            raise ValueError("Invalid sampling temperature.")
+        client_key = body.get("client_key", "")
+        if not isinstance(client_key, str) or not re.fullmatch(r"[0-9a-f]{32}", client_key):
+            raise ValueError("A random 32-character idempotency key is required.")
+        with self.lock:
+            for job in self.generations.values():
+                if job.get("client_key") == client_key:
+                    return {"accepted": True, "job_id": job["id"], "reused": True}
+            if any(job["state"] in ("queued", "running") for job in self.generations.values()):
+                raise RuntimeError("Another Companion generation is active. Reconnect to it rather than starting a second job.")
+            if not self.server_responding():
+                raise RuntimeError("llama-server on 127.0.0.1:8080 is not responding.")
+            job_id = secrets.token_hex(16)
+            created = time.time()
+            job = {"id": job_id, "client_key": client_key, "state": "queued",
+                   "model": model, "created_at": created, "updated_at": created,
+                   "text": "", "characters": 0, "finish_reason": "", "usage": {},
+                   "error": "", "cancel_requested": False}
+            self.generations[job_id] = job
+            self._checkpoint_generation(job)
+            threading.Thread(target=self._run_generation,
+                             args=(job_id, model, validated, max_tokens, float(temperature)),
+                             daemon=True, name="civweave-generation-" + job_id[:8]).start()
+            return {"accepted": True, "job_id": job_id, "reused": False}
+
+    def _run_generation(self, job_id, model, messages, max_tokens, temperature):
+        payload = json.dumps({"model": model, "messages": messages,
+                              "max_tokens": max_tokens, "temperature": temperature,
+                              "stream": True, "stream_options": {"include_usage": True}},
+                             separators=(",", ":")).encode("utf-8")
+        request = urllib.request.Request(
+            "http://127.0.0.1:8080/v1/chat/completions", data=payload, method="POST",
+            headers={"Content-Type": "application/json", "Accept": "text/event-stream"})
+        with self.lock:
+            job = self.generations[job_id]
+            job["state"] = "running"
+            job["updated_at"] = time.time()
+            self._checkpoint_generation(job)
+        try:
+            last_save = time.monotonic()
+            event_parts = []
+            completed = False
+            with urllib.request.urlopen(request, timeout=1800) as response:
+                for line in response:
+                    with self.lock:
+                        if job.get("cancel_requested"):
+                            break
+                    line = line.decode("utf-8", errors="replace").strip()
+                    if line.startswith("data:"):
+                        event_parts.append(line[5:].strip())
+                        continue
+                    if line or not event_parts:
+                        continue
+                    data = "\\n".join(event_parts)
+                    event_parts = []
+                    if data == "[DONE]":
+                        completed = True
+                        break
+                    try:
+                        frame = json.loads(data)
+                    except ValueError:
+                        continue
+                    if frame.get("error"):
+                        raise RuntimeError(str(frame["error"])[:300])
+                    choices = frame.get("choices") or []
+                    choice = choices[0] if choices else {}
+                    delta = (choice.get("delta") or {}).get("content") or ""
+                    if not isinstance(delta, str):
+                        delta = ""
+                    reason = choice.get("finish_reason")
+                    with self.lock:
+                        if delta:
+                            if len(job["text"]) + len(delta) > 160000:
+                                raise RuntimeError("Output exceeded the 160K-character safety limit.")
+                            job["text"] += delta
+                            job["characters"] = len(job["text"])
+                        if reason:
+                            job["finish_reason"] = str(reason)[:30]
+                        if isinstance(frame.get("usage"), dict):
+                            job["usage"] = frame["usage"]
+                        job["updated_at"] = time.time()
+                        if delta and (time.monotonic() - last_save >= 2 or job["characters"] < 150):
+                            self._checkpoint_generation(job)
+                            last_save = time.monotonic()
+            with self.lock:
+                if job.get("cancel_requested"):
+                    job["state"] = "cancelled"
+                    job["error"] = "Cancelled explicitly by the paired user."
+                elif completed or job["finish_reason"]:
+                    job["state"] = "completed"
+                else:
+                    job["state"] = "interrupted"
+                    job["error"] = "The llama.cpp stream ended without completion."
+                job["updated_at"] = time.time()
+                self._checkpoint_generation(job)
+        except Exception as exc:
+            with self.lock:
+                job["state"] = "cancelled" if job.get("cancel_requested") else "failed"
+                job["error"] = str(exc)[:350]
+                job["updated_at"] = time.time()
+                self._checkpoint_generation(job)
+
+    def cancel_generation(self, job_id):
+        with self.lock:
+            job = self.generations.get(job_id)
+            if not job:
+                raise LookupError("Generation not found.")
+            if job["state"] in ("queued", "running"):
+                job["cancel_requested"] = True
+                self._checkpoint_generation(job)
+            return {"id": job_id, "cancel_requested": bool(job.get("cancel_requested"))}
+
     def candidate_model_paths(self, name):
         """Fixed, local model directories only; never accept a path from HTTP."""
         filename = MODELS[name]["file"]
