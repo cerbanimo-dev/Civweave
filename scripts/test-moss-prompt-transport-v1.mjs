@@ -35,17 +35,42 @@ test('the existing guarded design call transports source passages and synthesis 
   assert.equal(request.context.sourceMaterialInjected,true);
 });
 
-for(const config of [
-  {provider:'ollama',model:'qwen3.5:4b',timeoutMs:600000},
-  {provider:'ollama',model:'qwen3.5:4b',timeoutMs:15000},
-  {provider:'gemini',model:'qa-gemini',timeoutMs:600000},
-  {provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',timeoutMs:600000},
-])test(`Moss design retains ${config.provider} deadline and request-specific thinking policy (${config.timeoutMs}ms)`,async()=>{
+for(const {config,deadline} of [
+  {config:{provider:'ollama',model:'qwen3.5:4b',timeoutMs:600000},deadline:600000},
+  {config:{provider:'ollama',model:'qwen3.5:4b',timeoutMs:15000},deadline:15000},
+  {config:{provider:'gemini',model:'qa-gemini',timeoutMs:600000},deadline:600000},
+  {config:{provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',timeoutMs:600000},deadline:1200000},
+])test(`Moss design uses ${deadline}ms for ${config.provider} ${config.model} and preserves its thinking policy`,async()=>{
+  const selectedTimeout=config.timeoutMs;
   let request;const context=fixture(async value=>{request=value;return{status:'provider-error'}});
   await context.__design(context.CivweaveModelRuntime,config,data,3,[source]);
-  assert.equal(request.config.timeoutMs,config.timeoutMs);assert.equal(request.config.maxTokens,8192);
+  assert.equal(request.config.timeoutMs,deadline);assert.equal(request.config.maxTokens,8192);
+  assert.equal(config.timeoutMs,selectedTimeout,'The per-request floor must not change saved settings.');
   if(config.provider==='ollama')assert.equal(request.think,false);else assert.equal(Object.hasOwn(request,'think'),false);
   if(config.model==='qwen35-4b-native')assert.equal(request.config.stream,true,'The recent native SSE route remains streaming.');
+});
+
+test('the canonical runtime extends only the exact native Qwen design deadline, preserving Ollama, cloud, other models and other purposes',async()=>{
+  const timers=[],storage={getItem:()=>null,setItem(){},removeItem(){}};
+  const context=vm.createContext({console,URL,Date,Math,JSON,Object,Array,String,Number,Boolean,RegExp,Promise,Set,Map,AbortController,DOMException,localStorage:storage,sessionStorage:storage,setTimeout:(_callback,ms)=>{timers.push({ms,cleared:false});return timers.length-1},clearTimeout:id=>{timers[id].cleared=true}});
+  vm.runInContext(read('shared/civweave-model-runtime.js'),context);
+  const native={provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',timeoutMs:600000},design='living-school-research-grounded-curriculum-v218.1';
+  for(const {config,purpose=design,deadline=600000} of [
+    {config:native,deadline:1200000},
+    {config:{provider:'ollama',model:'qwen3.5:4b',endpoint:'http://127.0.0.1:11434/api/chat',timeoutMs:600000}},
+    {config:{provider:'gemini',model:'qa-gemini',timeoutMs:600000,externalConsent:true}},
+    {config:{...native,model:'another-local-model'}},
+    {config:{...native,endpoint:'https://cloud.example.test/v1',externalConsent:true}},
+    {config:native,purpose:'ordinary-chat'},
+    {config:native,purpose:'living-school-quiz-delta-completion-v258'},
+  ]){
+    const calls=[];
+    const result=await context.CivweaveModelRuntime.generate({config,purpose,executionProfile:'interactive',messages:[{role:'user',content:'Inspect the request deadline.'}],transport:async request=>{calls.push(request);return'Fixture response.'}});
+    assert.equal(result.status,'success');assert.equal(calls.length,1,'Deadline handling must not introduce a retry.');
+    assert.equal(calls[0].config.timeoutMs,deadline,`${config.provider}/${config.model}/${purpose}`);
+    assert.equal(timers.at(-1).ms,deadline,'The actual abort controller must receive the scoped deadline.');
+    assert.equal(timers.at(-1).cleared,true);assert.equal(config.timeoutMs,600000);
+  }
 });
 
 test('the formatter transports the design, requested learning contract, and source mappings alongside its complete schema',async()=>{

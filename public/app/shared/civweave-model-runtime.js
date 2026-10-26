@@ -50,7 +50,15 @@
       at: nowIso(),
       ...detail,
     };
-    context.events.push(event);
+    // The live event still reaches UI consumers unchanged. Keep only bounded
+    // metadata in the final request record; long streams must not retain a
+    // growing copy of the entire draft for every incoming token.
+    const recorded = phase === "partial"
+      ? {...event, text:safeString(event.text,160),accumulatedText:undefined,
+         characters:Number(event.characters||event.accumulatedText?.length)||0}
+      : event;
+    context.events.push(recorded);
+    if(context.events.length>160)context.events.splice(1,context.events.length-160);
     try { context.onEvent?.(event); } catch {}
     dispatch("civweave:model-event", event);
     return event;
@@ -764,7 +772,8 @@
       }))}catch{}
     };
     noteNative('native-runtime-ready',context.purpose);
-    emit(context, "connecting", { endpoint: redactUrl(url), structured, streamed: useStream, nativePhonePrimary: Boolean(lineup) });
+    emit(context, "connecting", { endpoint: redactUrl(url), structured, streamed: useStream, nativePhonePrimary: Boolean(lineup),
+      ...(nativeDirect?{promptCharacters:messages.reduce((sum,item)=>sum+String(item.content||'').length,0),deadlineMs:config.timeoutMs}: {}) });
     const normalized = normalizeChatMessages(messages);
     const hint = lineup ? await nativePhoneHelper(lineup, config, normalized, request, context, signal) : null;
     const bodyMessages = normalized.slice();
@@ -815,6 +824,8 @@
     if (!response.ok) throw providerHttpError("OpenAI-compatible provider", response.status, await readBoundedText(response).catch(() => ""));
     if(useStream){
       noteNative('native-stream-reading');
+      if(nativeDirect)emit(context,'awaiting-first-token',{backend:'native-server',httpStatus:response.status,
+        deadlineMs:config.timeoutMs,detail:'Server responded; waiting for generated text.'});
       const streamed=await parseOpenAIStream(response,context,nativeDirect);
       noteNative('native-stream-complete',`characters:${streamed.text.length},finish:${streamed.finishReason||'unknown'}`);
       return{...streamed,model:config.model,streamed:true};
@@ -925,6 +936,13 @@
         config.endpoint === "http://127.0.0.1:8080/v1" &&
         request.purpose === "civweave-weaveling-intention-json-v190")
       config.timeoutMs = 900000;
+    // The 32K on-device Qwen curriculum design pass can spend minutes in
+    // prompt evaluation before its first token. Respect the long design
+    // budget only for this exact request: the normal chat cap stays 10m.
+    if (config.provider === "openai-compatible" && config.model === "qwen35-4b-native" &&
+        config.endpoint === "http://127.0.0.1:8080/v1" &&
+        request.purpose === "living-school-research-grounded-curriculum-v218.1")
+      config.timeoutMs = Math.max(config.timeoutMs, 1200000);
     if (endpointLeavesDevice(config) && !config.externalConsent && request.requireExternalConsent !== false) {
       return failureResult("provider-error", runtimeError("REMOTE_CONSENT_REQUIRED", "External provider use requires explicit session consent."), { request, config, context: makeContext(request, config), elapsedMs: 0 });
     }

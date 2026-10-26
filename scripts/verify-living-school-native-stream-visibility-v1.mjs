@@ -12,7 +12,7 @@ assert.match(core,/function withNativeMossStream\(config/);
 assert.match(core,/config:withNativeMossStream\(/,'Curriculum design enables native SSE');
 assert.match(core,/smallConfig=withNativeMossStream\(/,'Module compilation enables native SSE');
 assert.match(runtime,/pendingText\+=delta/,'Native server emits raw text deltas');
-assert.match(index,/active-run-ui-v2\.js\?v=2\.1\.1-terminal-state/);
+assert.match(index,/active-run-ui-v2\.js\?v=2\.1\.2-terminal-prefill/);
 assert.ok(ui.includes("phase==='partial'"),'Run panel consumes the streaming partial event');
 
 const helper=core.slice(core.indexOf('function withNativeMossStream('),core.indexOf('function resultText('));
@@ -58,6 +58,12 @@ const base={requestId:'call-1',purpose:'living-school-research-grounded-curricul
 api.onModelEvent({detail:{...base,phase:'connecting',streamed:true}});
 assert.ok(railHtml.includes('lsc-run-stream-text'),'Visible stream section must be mounted on first event');
 assert.match(nodes['.lsc-run-stream-status'].textContent,/Connecting to model/);
+api.onModelEvent({detail:{...base,phase:'connecting',deadlineMs:1200000,promptCharacters:2900}});
+api.onModelEvent({detail:{...base,phase:'awaiting-first-token',httpStatus:200}});
+assert.match(nodes['.lsc-run-stream-status'].textContent,/Server connected · waiting for first token/);
+assert.match(nodes['.lsc-run-stream-status'].textContent,/limit 20:00/);
+assert.match(nodes['.lsc-run-stream-status'].textContent,/prompt 2,900 chars/);
+assert.match(nodes['.lsc-run-stream-text'].textContent,/Qwen may still be evaluating the prompt/);
 api.onModelEvent({detail:{...base,phase:'partial',text:'Tarot ',accumulatedText:'Tarot '}});
 assert.equal(nodes['.lsc-run-stream-text'].textContent,'Tarot ');
 assert.match(nodes['.lsc-run-stream-status'].textContent,/6 characters received/);

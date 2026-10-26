@@ -67,9 +67,9 @@ for(const token of [
   '/app/cerbanimo-commerce-distribution-v1.js',
   '/app/civweave-live-data.js',
   'live-data-preflight-v3.js?v=live-data-r1',
-  'marketplace-v2.js?v=live-market-v2',
-  'marketplace-v2-capabilities.js?v=capabilities-r1',
-  'cabinet-bridge.js?v=marketplace-v2-capabilities-r1',
+  'marketplace-v2.js?v=native-v209-owner-state',
+  'marketplace-v2-capabilities.js?v=native-v209-owner-state',
+  'cabinet-bridge.js?v=native-v209-owner-state',
   '>Sell<','>Orders<','>Wallet<span'
 ])assert(innerHtml.includes(token),`Active FellowFare marketplace shell is missing ${token}`);
 assert(!innerHtml.includes('src="app.js"'),'The retired FellowFare runtime is still active in the current cabinet.');
@@ -124,7 +124,7 @@ for(const token of [
   '/app/fellowfare-native-scroll-v208.js',
   '/app/fellowfare-native-host-v207.js'
 ])assert(outerHtml.includes(token),`FellowFare seed cannot discover ${token}`);
-assert(outerHtml.includes('/app/services/fellowfare/marketplace-v2.js?v=native-v208'),'FellowFare seed cannot discover its native marketplace runtime.');
+assert(outerHtml.includes('/app/services/fellowfare/marketplace-v2.js?v=native-v209-owner-state'),'FellowFare seed cannot discover its native marketplace runtime.');
 
 assert(critical.includes("const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility coordinator lost the current parent/mobile or memory-bridge revision.');
 assert(critical.includes("const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility cache identity changed unexpectedly.');
