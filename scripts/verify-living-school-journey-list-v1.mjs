@@ -31,7 +31,7 @@ assert.equal(view.focus,null,'Unapproved REVIEW plans must not silently populate
 const approved={...plan,state:'approved',approvedAt:'2026-10-24T22:02:00Z',updatedAt:'2026-10-24T22:02:00Z'};
 store(PLAN_KEY,approved);
 view=snapshot(original);
-assert.equal(view.rows[0].status,'Approved · curriculum not generated');
+assert.equal(view.rows[0].status,'Approved · select to generate');
 assert.equal(view.focus.title,title,'Approved Moss plan must take priority over stale garden pathContext');
 assert.equal(view.focus.capability,capability);
 assert.equal(view.retry.id,'plan:learning-plan-tarot');
